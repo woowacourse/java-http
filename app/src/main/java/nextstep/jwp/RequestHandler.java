@@ -1,14 +1,10 @@
 package nextstep.jwp;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import nextstep.jwp.controller.LoginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,16 +30,20 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-            HttpRequestExtractor requestExtractor = new HttpRequestExtractor(inputStream);
-            String requestURI = requestExtractor.extractURI();
-            String responseBody = readStaticFile(requestURI);
+            HttpRequest httpRequest = new HttpRequest(inputStream);
+            String requestURIPath = httpRequest.extractURIPath();
+            String responseBody = readStaticFile(requestURIPath);
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            if (requestURIPath.equals("/login")) {
+                LoginController loginController = new LoginController(httpRequest);
+                loginController.get();
+            }
+            String response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -54,10 +54,15 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private String readStaticFile(String requestURI) throws IOException {
-        String fileName = "static" + requestURI;
+    private String readStaticFile(String requestURIPath) throws IOException {
+        String fileName = "static" + requestURIPath;
 
         URL resource = getClass().getClassLoader().getResource(fileName);
+
+        if (Objects.isNull(resource)) {
+            fileName += ".html";
+            resource = getClass().getClassLoader().getResource(fileName);
+        }
         Path path = new File(resource.getFile()).toPath();
         return Files.readString(path);
     }

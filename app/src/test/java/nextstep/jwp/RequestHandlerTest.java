@@ -40,7 +40,7 @@ class RequestHandlerTest {
     }
 
     @Test
-    @DisplayName("GET /login.html로 요청을 할 경우, resources/static/login.html을 response로 응답한다.")
+    @DisplayName("GET /login으로 요청을 할 경우, resources/static/login.html을 response로 응답한다.")
     void login() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
@@ -67,7 +67,7 @@ class RequestHandlerTest {
     }
 
     @Test
-    @DisplayName("http://localhost:8080/login?account=gugu&password=password로 요청했을 때, 아이디와 비밀번호가 일치하면 회원을 조회한다.")
+    @DisplayName("GET /login?account=gugu&password=password로 요청할 경우, resources/static/login.html을 response로 응답한다.")
     void login_queryString() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",

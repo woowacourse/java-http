@@ -22,7 +22,7 @@ public class HttpRequestMapping implements RequestMapping {
         if (isRequestingStaticFiles(httpRequest)) {
             return searchViewAdapter(httpRequest);
         }
-        return new StaticViewAdapter(null, null);
+        throw new IllegalStateException("요청을 처리할 핸들러 탐색 불가");
     }
 
     private boolean isRequestingStaticFiles(HttpRequest httpRequest) {

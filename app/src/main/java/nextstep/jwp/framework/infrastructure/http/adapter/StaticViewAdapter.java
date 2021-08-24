@@ -47,7 +47,7 @@ public class StaticViewAdapter implements RequestAdapter {
             return writeResponse(resourcePath);
         } catch (InstantiationException | InvocationTargetException
             | NoSuchMethodException | IllegalAccessException e) {
-            log.error(e.getMessage());
+            log.error("Method Invoke or Bean Instantiation Error", e);
         }
         return null;
     }
@@ -61,8 +61,7 @@ public class StaticViewAdapter implements RequestAdapter {
             String responseBody = String.join("\r\n", Files.readAllLines(path));
             return String.format(RESPONSE_FORMAT, responseBody.getBytes().length, responseBody);
         } catch (IOException exception) {
-            exception.printStackTrace();
-            log.error("Exception IO");
+            log.error("Exception IO", exception);
         }
         return "";
     }

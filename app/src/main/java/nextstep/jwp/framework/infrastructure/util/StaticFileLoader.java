@@ -22,7 +22,7 @@ public class StaticFileLoader {
             File staticDirectoryRoot = new File(resource.getFile());
             return findStaticFilePaths(staticDirectoryRoot);
         } catch (RuntimeException runtimeException) {
-            log.error("Static File Load Error");
+            log.error("Static File Load Error", runtimeException);
             throw runtimeException;
         }
     }

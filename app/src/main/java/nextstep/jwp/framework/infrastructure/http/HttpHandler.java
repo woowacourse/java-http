@@ -46,7 +46,7 @@ public class HttpHandler implements NetworkHandler {
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } catch (RuntimeException runtimeException) {
-            log.info("Invalid Network InputStream", runtimeException);
+            log.info("Parsing Error", runtimeException);
         }
         return new ParseResult("");
     }
@@ -57,7 +57,6 @@ public class HttpHandler implements NetworkHandler {
         List<String> lines = new ArrayList<>();
         String line = bufferedReader.readLine();
         while (!"".equals(line)) {
-            System.out.println(line);
             lines.add(line);
             line = bufferedReader.readLine();
             if (Objects.isNull(line)) {

@@ -23,12 +23,15 @@ public class ApplicationContextLoader {
         try {
             return findBean(packageRootDirectory, packageRootName);
         } catch (ClassNotFoundException classNotFoundException) {
-            log.error("Bean File Load Error");
+            log.error("Bean File Load Error", classNotFoundException);
             throw new RuntimeException(classNotFoundException);
         }
     }
 
-    private static List<Class<?>> findBean(File directory, String packageName) throws ClassNotFoundException {
+    private static List<Class<?>> findBean(
+        File directory,
+        String packageName
+    ) throws ClassNotFoundException {
         List<Class<?>> classes = new ArrayList<>();
         if (!directory.exists()) {
             return classes;
@@ -40,7 +43,10 @@ public class ApplicationContextLoader {
         return classes;
     }
 
-    private static void examineFileAttribute(File file, List<Class<?>> classes, String packageName) throws ClassNotFoundException {
+    private static void examineFileAttribute(File file,
+        List<Class<?>> classes,
+        String packageName
+    ) throws ClassNotFoundException {
         if (file.isDirectory()) {
             classes.addAll(findBean(file, packageName + "." + file.getName()));
             return;

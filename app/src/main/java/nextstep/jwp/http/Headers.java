@@ -1,12 +1,14 @@
-package nextstep.jwp.http.request;
+package nextstep.jwp.http;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
-import static nextstep.jwp.http.request.HttpRequest.LINE_SEPARATOR;
+import static nextstep.jwp.http.Protocol.LINE_SEPARATOR;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Headers {
 
@@ -14,6 +16,10 @@ public class Headers {
 
     public Headers(String httpRequest) {
         this.headers = extractHeaders(httpRequest);
+    }
+
+    public Headers(Map<String, String> headers) {
+        this.headers = headers;
     }
 
     private Map<String, String> extractHeaders(String httpRequest) {
@@ -50,5 +56,11 @@ public class Headers {
 
     public Optional<String> getHeader(String header) {
         return Optional.ofNullable(headers.get(header));
+    }
+
+    public String asString() {
+        return headers.entrySet().stream()
+            .map(entry -> String.format("%s: %s", entry.getKey(), entry.getValue()))
+            .collect(joining(LINE_SEPARATOR));
     }
 }

@@ -1,17 +1,11 @@
 package nextstep.jwp.http.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.stream.Stream;
 import nextstep.jwp.fixture.Fixture;
+import nextstep.jwp.http.Body;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -22,7 +16,7 @@ class BodyTest {
     @ParameterizedTest
     @MethodSource("parametersForGetBody")
     void getBody(String httpRequest, String expected) {
-        Body body = new Body(httpRequest);
+        Body body = Body.fromHttpRequest(httpRequest);
 
         body.getBody()
             .ifPresentOrElse(

@@ -2,9 +2,9 @@ package nextstep.jwp.http.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Map.Entry;
 import java.util.stream.Stream;
 import nextstep.jwp.fixture.Fixture;
+import nextstep.jwp.http.Headers;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;

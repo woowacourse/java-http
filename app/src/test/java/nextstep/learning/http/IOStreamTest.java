@@ -179,17 +179,27 @@ class IOStreamTest {
          * <b>InputStreamReader</b>를 사용해서 바이트를 문자(char)로 읽어온다.
          * 필터인 <b>BufferedReader</b>를 사용하면 <b>readLine</b> 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
          */
+
+        /**
+         * BufferReader의 readLine() 를 쓸때는 inputStream 이 반드시 개행문자가 포함되어야 한다. 자바에서의 개행문자는 "\n" 이지만,
+         * 스트림에서의 개행문자는 "\r\n"이 개행문자이다.
+         */
+
         @Test
-        void BufferedReader를_사용하여_문자열을_읽어온다() {
+        void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
             final String emoji = String.join("\r\n",
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
             final StringBuilder actual = new StringBuilder();
-
+            String line;
+            while((line = bufferedReader.readLine()) !=null){
+                actual.append(line).append("\r\n");
+            }
             assertThat(actual).hasToString(emoji);
         }
     }

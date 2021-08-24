@@ -121,4 +121,24 @@ public class HttpRequestTest {
         // then
         assertThat(path).isEqualTo("/login");
     }
+
+    @Test
+    @DisplayName("HTTP Request로부터 HttpMethod를 파싱한다.")
+    void extractHttpMethod() throws IOException {
+        // given
+        String httpRequest = String.join("\r\n",
+            "GET /login HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "",
+            "");
+        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
+        HttpRequest extractor = new HttpRequest(inputStream);
+
+        // when
+        String method = extractor.extractHttpMethod();
+
+        // then
+        assertThat(method).isEqualTo("GET");
+    }
 }

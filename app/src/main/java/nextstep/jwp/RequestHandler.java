@@ -4,6 +4,8 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.FrontControllerServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +32,9 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = new HttpRequest(inputStream);
+            FrontControllerServlet frontControllerServlet = new FrontControllerServlet(httpRequest);
+            frontControllerServlet.process();
+
             String requestURIPath = httpRequest.extractURIPath();
             String responseBody = readStaticFile(requestURIPath);
 

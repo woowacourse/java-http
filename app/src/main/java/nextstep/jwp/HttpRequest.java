@@ -14,11 +14,13 @@ public class HttpRequest {
 
     private static final int FIRST_LINE_OF_HTTP_REQUEST = 0;
     private static final String BLANK_DELIMITER = " ";
+    private static final int FIRST_WORD_INDEX = 0;
     private static final int SECOND_WORD_INDEX = 1;
     private static final String PATH_AND_QUERY_STRING_DELIMITER = "?";
     private static final int START_INDEX = 0;
     private static final String QUERY_STRING_DELIMITER = "&";
     private static final String KEY_AND_VALUE_DELIMITER = "=";
+
     private List<String> requestLines = new ArrayList<>();
 
     public HttpRequest(InputStream inputStream) throws IOException {
@@ -57,5 +59,10 @@ public class HttpRequest {
             return uri.substring(START_INDEX, queryStringDelimiterIndex);
         }
         return uri;
+    }
+
+    public String extractHttpMethod() {
+        String firstLine = requestLines.get(FIRST_LINE_OF_HTTP_REQUEST);
+        return firstLine.split(BLANK_DELIMITER)[FIRST_WORD_INDEX];
     }
 }

@@ -12,19 +12,19 @@ public class FrontControllerServlet {
     public void process() {
         Controller controller = findControllerByHttpURIPath();
         if (request.extractHttpMethod().equals("GET")) {
-            controller.get();
+            controller.get(request);
         }
         if (request.extractHttpMethod().equals("POST")) {
-            controller.post();
+            controller.post(request);
         }
         if (request.extractHttpMethod().equals("PUT")) {
-            controller.put();
+            controller.put(request);
         }
         if (request.extractHttpMethod().equals("PATCH")) {
-            controller.patch();
+            controller.patch(request);
         }
         if (request.extractHttpMethod().equals("DELETE")) {
-            controller.delete();
+            controller.delete(request);
         }
     }
 

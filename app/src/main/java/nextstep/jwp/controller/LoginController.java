@@ -1,29 +1,31 @@
 package nextstep.jwp.controller;
 
+import nextstep.jwp.HttpRequest;
+
 public class LoginController implements Controller {
 
     @Override
-    public void get() {
+    public void get(HttpRequest request) {
 
     }
 
     @Override
-    public void post() {
+    public void post(HttpRequest request) {
 
     }
 
     @Override
-    public void put() {
+    public void put(HttpRequest request) {
 
     }
 
     @Override
-    public void patch() {
+    public void patch(HttpRequest request) {
 
     }
 
     @Override
-    public void delete() {
+    public void delete(HttpRequest request) {
 
     }
 }

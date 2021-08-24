@@ -60,6 +60,28 @@ public class HttpRequestTest {
     }
 
     @Test
+    @DisplayName("HTTP Request로부터 URI에서 Query String 부분이 아무 것도 안 들어있는 경우 빈 HashMap을 반환한다.")
+    void extractURIQueryParams_null() throws IOException {
+        // given
+        String uri = "/login";
+        String httpRequest = String.join("\r\n",
+            "GET " + uri + " HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "",
+            "");
+        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
+        HttpRequest extractor = new HttpRequest(inputStream);
+        Map<String, String> expected = new HashMap<>();
+
+        // when
+        Map<String, String> queryString = extractor.extractURIQueryParams();
+
+        // then
+        assertThat(queryString.size()).isEqualTo(0);
+    }
+
+    @Test
     @DisplayName("HTTP Request로부터 URI에서 Query String이 있더라도 path 부분만 파싱한다.")
     void extractURIPath() throws IOException {
         // given

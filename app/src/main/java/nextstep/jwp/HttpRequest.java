@@ -29,40 +29,29 @@ public class HttpRequest {
     }
 
     public String extractURI() {
-        if (requestLines.size() > 0) {
-            String firstLine = requestLines.get(FIRST_LINE_OF_HTTP_REQUEST);
-            String requestURI = firstLine.split(BLANK_DELIMITER)[SECOND_WORD_INDEX];
-            return requestURI;
-        }
-        return null;
+        String firstLine = requestLines.get(FIRST_LINE_OF_HTTP_REQUEST);
+        String requestURI = firstLine.split(BLANK_DELIMITER)[SECOND_WORD_INDEX];
+        return requestURI;
     }
 
     public Map<String, String> extractURIQueryParams() {
         String uri = extractURI();
         Map<String, String> queryParams = new HashMap<>();
-        if (Objects.isNull(uri)) {
-            return queryParams;
-        }
         int index = uri.indexOf(PATH_AND_QUERY_STRING_DELIMITER);
-        if (index != -1) {
-            String queryString = uri.substring(index + 1);
-            String[] splitQueryStrings = queryString.split(QUERY_STRING_DELIMITER);
+        String queryString = uri.substring(index + 1);
+        String[] splitQueryStrings = queryString.split(QUERY_STRING_DELIMITER);
 
-            for (String splitQueryString : splitQueryStrings) {
-                String[] splitParam = splitQueryString.split(KEY_AND_VALUE_DELIMITER);
-                String key = splitParam[0];
-                String value = splitParam[1];
-                queryParams.put(key, value);
-            }
+        for (String splitQueryString : splitQueryStrings) {
+            String[] splitParam = splitQueryString.split(KEY_AND_VALUE_DELIMITER);
+            String key = splitParam[0];
+            String value = splitParam[1];
+            queryParams.put(key, value);
         }
         return queryParams;
     }
 
     public String extractURIPath() {
         String uri = extractURI();
-        if (Objects.isNull(uri)) {
-            return null;
-        }
         int queryStringDelimiterIndex = uri.indexOf(PATH_AND_QUERY_STRING_DELIMITER);
         if (queryStringDelimiterIndex != -1) {
             return uri.substring(START_INDEX, queryStringDelimiterIndex);

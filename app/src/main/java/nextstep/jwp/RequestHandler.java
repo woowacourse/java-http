@@ -4,7 +4,6 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import nextstep.jwp.controller.LoginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,10 +33,6 @@ public class RequestHandler implements Runnable {
             String requestURIPath = httpRequest.extractURIPath();
             String responseBody = readStaticFile(requestURIPath);
 
-            if (requestURIPath.equals("/login")) {
-                LoginController loginController = new LoginController(httpRequest);
-                loginController.get();
-            }
             String response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",

@@ -13,19 +13,32 @@ public class HttpResponse implements Response {
     private final Headers headers;
     private final Body body;
 
+    public HttpResponse(ResponseLine responseline, Headers headers) {
+        this(responseline, headers, null);
+    }
+
     public HttpResponse(ResponseLine responseLine, Headers headers, Body body) {
         this.responseLine = responseLine;
         this.headers = headers;
         this.body = body;
+
+        setEssential();
+    }
+
+    private void setEssential() {
+        headers.setBodyHeader(body);
     }
 
     public String asString() {
-        String topOfHeader = String.join(LINE_SEPARATOR, List.of(
+        String topOfHeader = String.join(" " + LINE_SEPARATOR, List.of(
             responseLine.asString(),
-            headers.asString(),
-            body.asString())
-        );
+            headers.asString()
+        ));
 
-        return topOfHeader;
+        return topOfHeader + LINE_SEPARATOR.repeat(2) + body.asString();
+    }
+
+    public Body getBody() {
+        return body;
     }
 }

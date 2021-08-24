@@ -30,4 +30,9 @@ public class RequestLine {
     public HttpVersion getVersion() {
         return version;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s %s", httpMethod.name(), path.getPath(), version.asString());
+    }
 }

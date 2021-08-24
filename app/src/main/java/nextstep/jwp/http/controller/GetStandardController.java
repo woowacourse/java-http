@@ -1,7 +1,5 @@
 package nextstep.jwp.http.controller;
 
-import java.util.HashMap;
-import java.util.Map;
 import nextstep.jwp.http.Body;
 import nextstep.jwp.http.Headers;
 import nextstep.jwp.http.HttpStatus;
@@ -15,19 +13,12 @@ public class GetStandardController extends StandardController {
 
     @Override
     public HttpResponse doService(HttpRequest httpRequest) {
-        String host = httpRequest.getHeader("Host")
-            .orElseThrow(IllegalArgumentException::new);
-
-
         HttpPath path = httpRequest.getPath();
         path.toFile();
 
         ResponseLine responseLine = new ResponseLine(httpRequest.getVersion(), HttpStatus.OK);
 
-        Map<String, String> headerMap = new HashMap<>();
-        headerMap.put("Host", host);
-
-        Headers headers1 = new Headers(headerMap);
+        Headers headers1 = new Headers();
         Body body = Body.fromFile(path.toFile());
 
         return new HttpResponse(

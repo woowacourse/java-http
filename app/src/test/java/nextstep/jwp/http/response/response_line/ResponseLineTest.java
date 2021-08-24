@@ -13,6 +13,6 @@ class ResponseLineTest {
     void asString() {
         ResponseLine responseLine = new ResponseLine(HttpVersion.HTTP1_1, HttpStatus.OK);
 
-        assertThat(responseLine.asString()).isEqualTo("HTTP/1.1 200 Ok");
+        assertThat(responseLine.asString()).isEqualTo("HTTP/1.1 200 OK");
     }
 }

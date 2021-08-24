@@ -17,7 +17,11 @@ public class HttpRequest {
     public HttpRequest(String httpRequest) {
         this.requestLine = new RequestLine(httpRequest);
         this.headers = new Headers(httpRequest);
-        this.body = new Body(httpRequest);
+        this.body = Body.fromHttpRequest(httpRequest);
+    }
+
+    public String getRequestLine() {
+        return requestLine.toString();
     }
 
     public Optional<String> getHeader(String header) {

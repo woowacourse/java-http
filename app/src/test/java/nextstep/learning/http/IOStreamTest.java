@@ -87,8 +87,7 @@ class IOStreamTest {
 
         /**
          * 스트림 사용이 끝나면 항상 <b>close()</b> 메서드를 호출하여 스트림을 닫는다.<br> 장시간 스트림을 닫지 않으면 파일, 포트 등 다양한 리소스에서 누수(leak)가 발생한다.
-         * try-with-resources를 사용한다.
-         * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
+         * try-with-resources를 사용한다. java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
          */
 
         @Test
@@ -132,18 +131,15 @@ class IOStreamTest {
 
         /**
          * 스트림 사용이 끝나면 항상 <b>close()</b> 메서드를 호출하여 스트림을 닫는다.<br> 장시간 스트림을 닫지 않으면 파일, 포트 등 다양한 리소스에서 누수(leak)가 발생한다.
+         * try-with-resources를 사용한다. java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
          */
+
         @Test
         void InputStream은_사용하고_나서_close_처리를_해준다() throws IOException {
-            final InputStream inputStream = mock(InputStream.class);
-
-            /**
-             * todo
-             * try-with-resources를 사용한다.
-             * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
-             */
-
-            verify(inputStream, atLeastOnce()).close();
+            try (final InputStream inputStream = mock(InputStream.class)) {
+                inputStream.close();
+                verify(inputStream, atLeastOnce()).close();
+            }
         }
     }
 

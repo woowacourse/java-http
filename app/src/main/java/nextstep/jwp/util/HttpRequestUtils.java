@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.util;
 
 import com.google.common.collect.Maps;
 import org.thymeleaf.util.StringUtils;

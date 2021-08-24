@@ -1,6 +1,9 @@
 plugins {
     id 'application'
     id 'org.sonarqube' version '3.3'
+    id 'org.springframework.boot' version '2.5.2'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
 }
 
 sourceCompatibility = JavaVersion.VERSION_11
@@ -13,6 +16,13 @@ repositories {
 dependencies {
     implementation 'ch.qos.logback:logback-classic:1.2.3'
     implementation 'com.google.guava:guava:29.0-jre'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    // CORS
+    testImplementation 'org.apache.httpcomponents:httpclient'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
     testImplementation 'org.assertj:assertj-core:3.20.2'

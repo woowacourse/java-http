@@ -14,8 +14,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +59,24 @@ public class RequestHandler implements Runnable {
                 headers.put(key, values);
                 line = reader.readLine();
             }
+
+            int index = uri.indexOf("?");
+            String queryString = uri.substring(index + 1);
+            String[] strings = queryString.split("&");
+
+            Map<String, String> queryMap = new HashMap<>();
+
+            for (String string : strings) {
+                String[] token = string.split("=");
+                queryMap.put(token[0], token[1]);
+            }
+
+            User user = InMemoryUserRepository.findByAccount(queryMap.get("account")).orElseThrow(
+                    IllegalArgumentException::new);
+            if (!user.checkPassword(queryMap.get("password"))) {
+                throw new IllegalArgumentException("잘못된 패쓰워드");
+            }
+            System.out.println(user);
 
             final URL resource = getClass().getClassLoader().getResource("static" + uri);
             final Path path = new File(resource.getPath()).toPath();

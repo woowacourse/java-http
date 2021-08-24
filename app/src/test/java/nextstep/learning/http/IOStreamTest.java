@@ -1,6 +1,7 @@
 package nextstep.learning.http;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -176,15 +177,17 @@ class IOStreamTest {
          * 필터인 <b>BufferedReader</b>를 사용하면 <b>readLine</b> 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
          */
         @Test
-        void BufferedReader를_사용하여_문자열을_읽어온다() {
+        void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
             final String emoji = String.join("\r\n",
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            final StringBuilder actual = new StringBuilder();
+            final StringBuilder actual = new StringBuilder(bufferedReader.lines().collect(Collectors.joining("\r\n")));
+            actual.append("\r\n");
 
             assertThat(actual).hasToString(emoji);
         }

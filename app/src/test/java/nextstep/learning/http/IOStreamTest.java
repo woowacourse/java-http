@@ -47,10 +47,7 @@ class IOStreamTest {
             byte[] bytes = {110, 101, 120, 116, 115, 116, 101, 112};
             final OutputStream outputStream = new ByteArrayOutputStream(bytes.length);
 
-            /**
-             * todo
-             * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
-             */
+            outputStream.write(bytes);
 
             final String actual = outputStream.toString();
 

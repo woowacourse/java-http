@@ -35,10 +35,7 @@ public class WebServer {
     private void handle(ServerSocket serverSocket) throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()).isConnected()) {
-            new Thread(new RequestHandler(
-                connection,
-                StandardControllerFactory.create()
-            )).start();
+            new Thread(new RequestHandler(connection)).start();
         }
     }
 

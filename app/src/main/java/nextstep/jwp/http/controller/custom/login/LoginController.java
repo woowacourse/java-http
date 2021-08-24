@@ -37,7 +37,7 @@ public class LoginController implements Controller {
         final String password = getParam(path, "password");
 
         final User user = InMemoryUserRepository.findByAccount(account)
-            .orElseThrow(BadRequestException::new);
+            .orElseThrow(UnauthorizedException::new);
 
         if(!user.checkPassword(password)) {
             throw new UnauthorizedException();

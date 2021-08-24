@@ -44,7 +44,7 @@ class RequestHandlerTest {
 
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler =
-            new RequestHandler(socket, StandardControllerFactory.create());
+            new RequestHandler(socket);
 
         // when
         requestHandler.run();

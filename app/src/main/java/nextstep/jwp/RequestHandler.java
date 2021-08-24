@@ -32,17 +32,19 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = new HttpRequest(inputStream);
-            FrontControllerServlet frontControllerServlet = new FrontControllerServlet(httpRequest);
-            frontControllerServlet.process();
+            if (!httpRequest.isEmptyLine()) {
+                FrontControllerServlet frontControllerServlet = new FrontControllerServlet(httpRequest);
+                frontControllerServlet.process();
 
-            String requestURIPath = httpRequest.extractURIPath();
-            String responseBody = readStaticFile(requestURIPath);
+                String requestURIPath = httpRequest.extractURIPath();
+                String responseBody = readStaticFile(requestURIPath);
 
-            HttpResponse response = new HttpResponse.Builder()
-                .body(responseBody)
-                .build();
+                HttpResponse response = new HttpResponse.Builder()
+                    .body(responseBody)
+                    .build();
 
-            outputStream.write(response.getBytes());
+                outputStream.write(response.getBytes());
+            }
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
@@ -53,12 +55,15 @@ public class RequestHandler implements Runnable {
 
     private String readStaticFile(String requestURIPath) throws IOException {
         String fileName = "static" + requestURIPath;
-
         URL resource = getClass().getClassLoader().getResource(fileName);
-
         if (Objects.isNull(resource)) {
             fileName += ".html";
             resource = getClass().getClassLoader().getResource(fileName);
+            if (!Objects.isNull(resource)) {
+                Path path = new File(resource.getFile()).toPath();
+                return Files.readString(path);
+            }
+            return "";
         }
         Path path = new File(resource.getFile()).toPath();
         return Files.readString(path);

@@ -1,12 +1,25 @@
 package nextstep.jwp.controller;
 
+import java.util.Map;
+import java.util.Objects;
 import nextstep.jwp.HttpRequest;
+import nextstep.jwp.db.InMemoryUserRepository;
 
 public class LoginController implements Controller {
 
     @Override
     public void get(HttpRequest request) {
-
+        Map<String, String> queryParams = request.extractURIQueryParams();
+        String account = queryParams.get("account");
+        String password = queryParams.get("password");
+        if (!Objects.isNull(account) && !Objects.isNull(password)) {
+            InMemoryUserRepository.findByAccount(account)
+                .ifPresent((user) -> {
+                    if (user.checkPassword(password)) {
+                        System.out.println(user.toString());
+                    }
+                });
+        }
     }
 
     @Override

@@ -30,6 +30,10 @@ public class HttpRequest {
         }
     }
 
+    public boolean isEmptyLine() {
+        return requestLines.size() == 0;
+    }
+
     public String extractURI() {
         String firstLine = requestLines.get(FIRST_LINE_OF_HTTP_REQUEST);
         String requestURI = firstLine.split(BLANK_DELIMITER)[SECOND_WORD_INDEX];

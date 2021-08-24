@@ -13,18 +13,23 @@ public class FrontControllerServlet {
         Controller controller = findControllerByHttpURIPath();
         if (request.extractHttpMethod().equals("GET")) {
             controller.get(request);
+            return;
         }
         if (request.extractHttpMethod().equals("POST")) {
             controller.post(request);
+            return;
         }
         if (request.extractHttpMethod().equals("PUT")) {
             controller.put(request);
+            return;
         }
         if (request.extractHttpMethod().equals("PATCH")) {
             controller.patch(request);
+            return;
         }
         if (request.extractHttpMethod().equals("DELETE")) {
             controller.delete(request);
+            return;
         }
     }
 

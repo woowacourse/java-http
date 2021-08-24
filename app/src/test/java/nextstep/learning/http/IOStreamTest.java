@@ -66,11 +66,12 @@ class IOStreamTest {
         void BufferedOutputStream을_사용하면_버퍼링이_가능하다() throws IOException {
             final OutputStream outputStream = mock(BufferedOutputStream.class);
 
-            /**
-             * todo
-             * flush를 사용해서 테스트를 통과시킨다.
-             * ByteArrayOutputStream과 어떤 차이가 있을까?
-             */
+            // ByteArrayOutputStream과 어떤 차이가 있을까?
+            // BufferedOutputStream은 버퍼에 저장했다가 지정한 크기만큼 차면 그제서야 스트림으로 데이터를 전송한다.
+            // = new BufferedOutputStream(someStream, integerBufferSize) 처럼 직접 버퍼 크기를 지정할 수 있고, (기본 크기 8192)
+            // flush를 호출하여 버퍼를 바로 비울 수도 있다.
+
+            outputStream.flush();
 
             verify(outputStream, atLeastOnce()).flush();
             outputStream.close();

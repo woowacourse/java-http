@@ -33,12 +33,9 @@ public class RequestHandler implements Runnable {
             String requestURIPath = httpRequest.extractURIPath();
             String responseBody = readStaticFile(requestURIPath);
 
-            String response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+            HttpResponse response = new HttpResponse.Builder()
+                .body(responseBody)
+                .build();
 
             outputStream.write(response.getBytes());
             outputStream.flush();

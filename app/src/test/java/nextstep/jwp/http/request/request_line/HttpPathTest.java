@@ -28,4 +28,17 @@ class HttpPathTest {
         actual = actual.replace("\\", "/");
         assertThat(actual).endsWith(path);
     }
+
+    @DisplayName("URI에 getParameter가 있다면 파싱한다.")
+    @Test
+    void getParam() {
+        final String uri = "/nextstep.txt?test=1&test2=test";
+        HttpPath httpPath = new HttpPath(uri);
+
+        assertThat(httpPath.getParam("test").get()).isEqualTo("1");
+        assertThat(httpPath.getParam("test2").get()).isEqualTo("test");
+    }
+
+    void getPath() {
+    }
 }

@@ -1,5 +1,7 @@
 package nextstep.learning.http;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CountDownLatch;
@@ -12,13 +14,15 @@ class ThreadTest {
 
     @Test
     void testCounterWithConcurrency() throws InterruptedException {
-        int numberOfThreads = 10;
-        ExecutorService service = Executors.newFixedThreadPool(10);
+        int numberOfThreads = 1000;
+        ExecutorService service = Executors.newFixedThreadPool(1000);
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
         MyCounter counter = new MyCounter();
         for (int i = 0; i < numberOfThreads; i++) {
+            final int finalI = i;
             service.execute(() -> {
                 counter.increment();
+                System.out.println(String.format("%d 스레드 running", finalI));
                 latch.countDown();
             });
         }
@@ -28,13 +32,15 @@ class ThreadTest {
 
     @Test
     void testSummationWithConcurrency() throws InterruptedException {
-        int numberOfThreads = 2;
+        int numberOfThreads = 20;
         ExecutorService service = Executors.newFixedThreadPool(1);
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
         MyCounter counter = new MyCounter();
         for (int i = 0; i < numberOfThreads; i++) {
+            final int finalI = i;
             service.submit(() -> {
                 counter.increment();
+                System.out.println(String.format("%d 스레드 running", finalI));
                 latch.countDown();
             });
         }
@@ -46,7 +52,7 @@ class ThreadTest {
 
         private int count;
 
-        public void increment() {
+        public synchronized void increment() {
             int temp = count;
             count = temp + 1;
         }

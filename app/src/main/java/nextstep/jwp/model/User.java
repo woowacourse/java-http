@@ -31,4 +31,8 @@ public class User {
                 ", password='" + password + '\'' +
                 '}';
     }
+
+    public void hello() {
+        System.out.println("Hello, I'm User");
+    }
 }

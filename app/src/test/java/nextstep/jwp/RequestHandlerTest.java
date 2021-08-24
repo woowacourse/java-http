@@ -1,13 +1,13 @@
 package nextstep.jwp;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
 
@@ -30,6 +30,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @Disabled
     @Test
     void index() throws IOException {
         // given

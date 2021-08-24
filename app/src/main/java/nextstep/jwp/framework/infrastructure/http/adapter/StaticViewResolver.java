@@ -13,7 +13,7 @@ import nextstep.jwp.framework.infrastructure.util.StaticFileLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StaticViewAdapter implements RequestAdapter {
+public class StaticViewResolver implements RequestAdapter {
 
     private static final Logger log = LoggerFactory.getLogger(HttpHandler.class);
     private static final List<Path> STATIC_FILE_PATHS =
@@ -28,14 +28,10 @@ public class StaticViewAdapter implements RequestAdapter {
     private final Class<?> target;
     private final Method method;
 
-    public StaticViewAdapter(Class<?> target, Method method) {
+    public StaticViewResolver(Class<?> target, Method method) {
         method.setAccessible(true);
         this.target = target;
         this.method = method;
-    }
-
-    public static StaticViewAdapter notFound() {
-        return null;
     }
 
     @Override
@@ -48,8 +44,8 @@ public class StaticViewAdapter implements RequestAdapter {
         } catch (InstantiationException | InvocationTargetException
             | NoSuchMethodException | IllegalAccessException e) {
             log.error("Method Invoke or Bean Instantiation Error", e);
+            throw new IllegalStateException(e);
         }
-        return null;
     }
 
     private String writeResponse(String resourcePath) {
@@ -62,8 +58,8 @@ public class StaticViewAdapter implements RequestAdapter {
             return String.format(RESPONSE_FORMAT, responseBody.getBytes().length, responseBody);
         } catch (IOException exception) {
             log.error("Exception IO", exception);
+            throw new IllegalStateException(exception);
         }
-        return "";
     }
 
     private Path find404Path() {

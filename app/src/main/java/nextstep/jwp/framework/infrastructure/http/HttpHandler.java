@@ -39,7 +39,6 @@ public class HttpHandler implements NetworkHandler {
                 bufferedReader
             );
             HttpRequest httpRequest = new HttpRequest(httpRequestHeader, httpRequestBody);
-
             RequestAdapter requestAdapter = requestMapping.findAdapter(httpRequest);
             String response = requestAdapter.execute(httpRequest);
             return new ParseResult(response);

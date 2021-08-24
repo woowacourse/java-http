@@ -1,88 +1,68 @@
 package nextstep.jwp.framework.infrastructure.http.mapping;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import nextstep.jwp.framework.domain.annotation.Controller;
 import nextstep.jwp.framework.domain.annotation.GetMapping;
+import nextstep.jwp.framework.domain.annotation.MethodAnnotationMapper;
+import nextstep.jwp.framework.domain.annotation.PostMapping;
+import nextstep.jwp.framework.infrastructure.http.adapter.ErrorViewResolver;
 import nextstep.jwp.framework.infrastructure.http.adapter.RequestAdapter;
-import nextstep.jwp.framework.infrastructure.http.adapter.StaticViewAdapter;
+import nextstep.jwp.framework.infrastructure.http.adapter.StaticViewResolver;
 import nextstep.jwp.framework.infrastructure.http.method.HttpMethod;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
+import nextstep.jwp.framework.infrastructure.http.status.HttpStatus;
 import nextstep.jwp.framework.infrastructure.util.ApplicationContextLoader;
 
 public class HttpRequestMapping implements RequestMapping {
 
-    private static final List<Class<?>> BEAN_CLASSESS =
+    private static final List<Class<?>> BEAN_CLASSES =
         ApplicationContextLoader.loadBeans("nextstep");
 
     @Override
     public RequestAdapter findAdapter(HttpRequest httpRequest) {
-        if (isRequestingStaticFiles(httpRequest)) {
-            return searchViewAdapter(httpRequest);
+        if (isOnlyRequestingStaticFile(httpRequest)) {
+            return searchAdapter(httpRequest, httpRequest.getMethod());
         }
-        throw new IllegalStateException("요청을 처리할 핸들러 탐색 불가");
+        return searchAdapter(httpRequest, httpRequest.getMethod());
     }
 
-    private boolean isRequestingStaticFiles(HttpRequest httpRequest) {
+
+    private boolean isOnlyRequestingStaticFile(HttpRequest httpRequest) {
         return httpRequest.getMethod().equals(HttpMethod.GET);
     }
 
-    private StaticViewAdapter searchViewAdapter(HttpRequest httpRequest) {
+
+    private RequestAdapter searchAdapter(HttpRequest httpRequest, HttpMethod httpMethod) {
         String url = httpRequest.getUrl();
-        for (Class<?> bean : BEAN_CLASSESS) {
+        Class<? extends Annotation> mappingAnnotation =
+            MethodAnnotationMapper.findMappingClass(httpMethod);
+        for (Class<?> bean : BEAN_CLASSES) {
             if (!bean.isAnnotationPresent(Controller.class)) {
                 continue;
             }
             Optional<Method> target = Arrays.stream(bean.getDeclaredMethods())
-                .filter(method -> method.isAnnotationPresent(GetMapping.class))
-                .filter(method -> method.getAnnotation(GetMapping.class).value().equals(url))
+                .filter(method -> method.isAnnotationPresent(mappingAnnotation))
+                .filter(method -> isMappingUrlCorrect(url, method, mappingAnnotation))
                 .findAny();
             if (target.isPresent()) {
-                return new StaticViewAdapter(bean, target.orElseThrow(IllegalStateException::new));
+                return new StaticViewResolver(bean, target.orElseThrow(IllegalStateException::new));
             }
         }
-        return StaticViewAdapter.notFound();
+        return new ErrorViewResolver(HttpStatus.NOT_FOUND);
     }
 
-//
-//    private String executeGetMethod(HttpRequestStartLine httpRequestStartLine) throws IOException {
-//        String url = httpRequestStartLine.getUrl();
-//        if (url.equals("/") || url.equals("/index.html")) {
-//            Path path = staticFilePaths.stream()
-//                .filter(filePath -> filePath.toString().endsWith("/static/index.html"))
-//                .findAny()
-//                .orElseThrow(IllegalAccessError::new);
-//            String responseBody = String.join("\r\n", Files.readAllLines(path));
-//            String response = String.join("\r\n",
-//                "HTTP/1.1 200 OK ",
-//                "Content-Type: text/html;charset=utf-8 ",
-//                "Content-Length: " + responseBody.getBytes().length + " ",
-//                "",
-//                responseBody);
-//            return response;
-//        }
-//
-//        if (url.equals("/login")) {
-//            Path path = staticFilePaths.stream()
-//                .filter(filePath -> filePath.toString().endsWith("/static/login.html"))
-//                .findAny()
-//                .orElseThrow(IllegalAccessError::new);
-//            String responseBody = String.join("\r\n", Files.readAllLines(path));
-//            String response = String.join("\r\n",
-//                "HTTP/1.1 200 OK ",
-//                "Content-Type: text/html;charset=utf-8 ",
-//                "Content-Length: " + responseBody.getBytes().length + " ",
-//                "",
-//                responseBody);
-//            return response;
-//        }
-//
-//        return "";
-//    }
-//
-//    private String executePostMethod(HttpRequestStartLine httpRequestStartLine) {
-//        return null;
-//    }
+    private boolean isMappingUrlCorrect(
+        String url,
+        Method method,
+        Class<? extends Annotation> mappingAnnotation
+    ) {
+        if (mappingAnnotation.equals(GetMapping.class)) {
+            return method.getAnnotation(GetMapping.class).value().equals(url);
+        }
+        return method.getAnnotation(PostMapping.class).value().equals(url);
+    }
 }

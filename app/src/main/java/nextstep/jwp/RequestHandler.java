@@ -11,6 +11,7 @@ import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.http.HttpVersion;
 import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.controller.StandardController;
+import nextstep.jwp.http.exception.Exceptions;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.Response;
@@ -66,15 +67,7 @@ public class RequestHandler implements Runnable {
             StandardController standardController = findStandardController(httpRequest);
             return standardController.doService(httpRequest);
         } catch (Exception e) {
-            final Headers headers = new Headers();
-            final Body body = new Body("test", ContentType.TEXT_PLAIN.asString());
-            headers.setBodyHeader(body);
-
-            final HttpResponse httpResponse = new HttpResponse(
-                new ResponseLine(HttpVersion.HTTP1_1, HttpStatus.INTERNAL_SERVER_ERROR),
-                headers,
-                body
-            );
+            HttpResponse httpResponse = Exceptions.findResponseByException(e);
             outputStream.write(httpResponse.asString().getBytes());
 
             throw new IllegalArgumentException();
@@ -120,7 +113,7 @@ public class RequestHandler implements Runnable {
 
         String line;
         while(br.ready() && (line = br.readLine()) != null) {
-            sb.append(line + LINE_SEPARATOR);
+            sb.append(line).append(LINE_SEPARATOR);
         }
 
         return sb.toString();

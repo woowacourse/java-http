@@ -37,8 +37,4 @@ public class HttpResponse implements Response {
 
         return topOfHeader + LINE_SEPARATOR.repeat(2) + body.asString();
     }
-
-    public Body getBody() {
-        return body;
-    }
 }

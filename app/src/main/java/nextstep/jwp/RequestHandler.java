@@ -1,12 +1,15 @@
 package nextstep.jwp;
 
+import nextstep.jwp.http.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 
 public class RequestHandler implements Runnable {
@@ -24,9 +27,30 @@ public class RequestHandler implements Runnable {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
+             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final String responseBody = "Hello world!";
+            String line = reader.readLine();
+            final RequestLine requestLine = RequestLine.of(line);
+
+            while (!"".equals(line)) {
+                line = reader.readLine();
+                if (line == null) return;
+            }
+
+            final String requestUri = requestLine.getRequestUri();
+
+            final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
+            assert resource != null;
+            final Path path = new File(resource.getPath()).toPath();
+            final List<String> requestBody = Files.readAllLines(path);
+
+            final StringBuilder stringBuilder = new StringBuilder();
+            for (String s : requestBody) {
+                stringBuilder.append(s)
+                        .append("\r\n");
+            }
+            final String responseBody = stringBuilder.toString();
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

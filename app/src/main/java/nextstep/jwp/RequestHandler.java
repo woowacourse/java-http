@@ -21,9 +21,6 @@ import java.util.Objects;
 public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
-    private static final int FIRST_LINE_OF_HTTP_REQUEST = 0;
-    private static final String BLANK_DELIMITER = " ";
-    private static final int SECOND_WORD_INDEX = 1;
 
     private final Socket connection;
 
@@ -37,8 +34,8 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-            List<String> httpRequest = extractHttpRequest(inputStream);
-            String requestURI = extractRequestURI(httpRequest);
+            HttpRequestExtractor requestExtractor = new HttpRequestExtractor(inputStream);
+            String requestURI = requestExtractor.extractURI();
             String responseBody = readStaticFile(requestURI);
 
             final String response = String.join("\r\n",
@@ -55,21 +52,6 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
-    }
-
-    private List<String> extractHttpRequest(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        List<String> request = new ArrayList<>();
-        while (reader.ready()) {
-            request.add(reader.readLine());
-        }
-        return Collections.unmodifiableList(request);
-    }
-
-    private String extractRequestURI(List<String> httpRequest) {
-        String firstLine = httpRequest.get(FIRST_LINE_OF_HTTP_REQUEST);
-        String requestURI = firstLine.split(BLANK_DELIMITER)[SECOND_WORD_INDEX];
-        return requestURI;
     }
 
     private String readStaticFile(String requestURI) throws IOException {

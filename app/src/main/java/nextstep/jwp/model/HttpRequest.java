@@ -44,4 +44,16 @@ public class HttpRequest {
         }
         return headers;
     }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public Map<String, List<String>> getHeaders() {
+        return headers;
+    }
 }

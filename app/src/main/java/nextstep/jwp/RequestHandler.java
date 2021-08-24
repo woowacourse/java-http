@@ -1,16 +1,21 @@
 package nextstep.jwp;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import nextstep.jwp.model.HttpRequest;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,9 +24,6 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
-    private String httpMethod;
-    private String httpUri;
-    private Map<String, List<String>> httpRequestHeaders;
 
     public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
@@ -33,15 +35,31 @@ public class RequestHandler implements Runnable {
                 connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
+                final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                 final OutputStream outputStream = connection.getOutputStream()) {
 
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            String firstLine = reader.readLine();
+            if (firstLine == null) {
+                return;
+            }
+            String[] firstTokens = firstLine.split(" ");
+            String method = firstTokens[0];
+            String uri = firstTokens[1];
 
-            List<String> lines = reader.lines().collect(Collectors.toList());
+            Map<String, List<String>> headers = new HashMap<>();
 
-            HttpRequest httpRequest = HttpRequest.of(lines);
+            String line = reader.readLine();
+            while (!"".equals(line)) {
+                String[] splits = line.split(": ", 2);
+                String key = splits[0];
+                List<String> values = Stream.of(splits[1].split(",")).map(String::trim).collect(Collectors.toList());
+                headers.put(key, values);
+                line = reader.readLine();
+            }
 
-            final String responseBody = "Hello world!";
+            final URL resource = getClass().getClassLoader().getResource("static" + uri);
+            final Path path = new File(resource.getPath()).toPath();
+            final String responseBody = Files.readString(path);
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

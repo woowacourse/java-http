@@ -81,11 +81,9 @@ class IOStreamTest {
         void OutputStream은_사용하고_나서_close_처리를_해준다() throws IOException {
             final OutputStream outputStream = mock(OutputStream.class);
 
-            /**
-             * todo
-             * try-with-resources를 사용한다.
-             * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
-             */
+            try (outputStream) {
+
+            }
 
             verify(outputStream, atLeastOnce()).close();
         }

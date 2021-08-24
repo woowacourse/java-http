@@ -1,5 +1,6 @@
 package nextstep.learning.http;
 
+import java.net.URL;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,8 +26,8 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final String actual = "";
+        URL absolutePath = getClass().getClassLoader().getResource(fileName);
+        final String actual = absolutePath.getPath();
 
         assertThat(actual).endsWith(fileName);
     }

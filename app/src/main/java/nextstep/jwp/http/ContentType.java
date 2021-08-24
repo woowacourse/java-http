@@ -1,4 +1,4 @@
-package nextstep.jwp.http.content_type;
+package nextstep.jwp.http;
 
 import java.io.File;
 import java.util.Arrays;

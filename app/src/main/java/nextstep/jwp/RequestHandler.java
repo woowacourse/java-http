@@ -4,17 +4,12 @@ import static nextstep.jwp.http.Protocol.LINE_SEPARATOR;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.HttpRetryException;
-import java.rmi.server.ExportException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import nextstep.jwp.http.Body;
 import nextstep.jwp.http.Headers;
 import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.http.HttpVersion;
-import nextstep.jwp.http.Protocol;
-import nextstep.jwp.http.content_type.ContentType;
+import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.controller.StandardController;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;

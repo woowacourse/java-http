@@ -8,7 +8,7 @@ import nextstep.jwp.http.Body;
 import nextstep.jwp.http.Headers;
 import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.http.HttpVersion;
-import nextstep.jwp.http.content_type.ContentType;
+import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.response.response_line.ResponseLine;
 import org.junit.jupiter.api.Test;
 

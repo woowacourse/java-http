@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
-import nextstep.jwp.http.content_type.ContentType;
 
 public class Body {
 

@@ -19,7 +19,7 @@ import nextstep.jwp.http.response.Response;
 import nextstep.jwp.http.response.response_line.ResponseLine;
 import nextstep.jwp.model.User;
 
-public class LoginController implements Controller {
+public class GetLoginController implements Controller {
 
     private static final String LOGIN_PATH = "/login";
     private static final String LOGIN_PAGE_RESOURCE_PATH = "/login.html";

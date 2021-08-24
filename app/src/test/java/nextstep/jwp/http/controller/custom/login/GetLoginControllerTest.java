@@ -14,16 +14,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class LoginControllerTest {
+class GetLoginControllerTest {
 
     @DisplayName("로그인을 시도한다.")
     @ParameterizedTest
     @MethodSource("parametersForDoService")
     void doService(String uri, int code, String content) {
-        final LoginController loginController = new LoginController();
+        final GetLoginController getLoginController = new GetLoginController();
         final HttpRequest httpRequest = new HttpRequest(Fixture.getHttpRequest(uri));
 
-        final Response response = loginController.doService(httpRequest);
+        final Response response = getLoginController.doService(httpRequest);
         assertThat(response.asString()).contains(String.valueOf(code));
         assertThat(response.asString()).contains(String.valueOf(content));
     }
@@ -40,20 +40,20 @@ class LoginControllerTest {
     @DisplayName("로그인 실패시 예외.")
     @Test
     void doService_invalid_fail() {
-        final LoginController loginController = new LoginController();
+        final GetLoginController getLoginController = new GetLoginController();
         final HttpRequest httpRequest =
             new HttpRequest(Fixture.getHttpRequest("/login?account=gugu&password=123"));
 
-        assertThatThrownBy(() -> loginController.doService(httpRequest))
+        assertThatThrownBy(() -> getLoginController.doService(httpRequest))
             .isInstanceOf(UnauthorizedException.class);
     }
 
     @DisplayName("컨트롤러 실행 조건을 확인한다.")
     @Test
     void isSatisfiedBy() {
-        final LoginController loginController = new LoginController();
+        final GetLoginController getLoginController = new GetLoginController();
         final HttpRequest httpRequest = new HttpRequest(Fixture.getHttpRequest("/login"));
 
-        assertThat(loginController.isSatisfiedBy(httpRequest)).isTrue();
+        assertThat(getLoginController.isSatisfiedBy(httpRequest)).isTrue();
     }
 }

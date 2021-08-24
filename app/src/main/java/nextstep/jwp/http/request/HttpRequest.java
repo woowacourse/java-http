@@ -39,4 +39,8 @@ public class HttpRequest {
     public HttpVersion getVersion() {
         return requestLine.getVersion();
     }
+
+    public Body getBody() {
+        return body;
+    }
 }

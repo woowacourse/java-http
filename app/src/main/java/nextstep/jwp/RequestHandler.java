@@ -50,6 +50,9 @@ public class RequestHandler implements Runnable {
             }
 
             Response httpResponse = doService(inputData, outputStream);
+            if(Objects.isNull(httpResponse)) {
+                return;
+            }
 
             writeResponse(outputStream, httpResponse);
         } catch (Exception exception) {
@@ -92,7 +95,7 @@ public class RequestHandler implements Runnable {
             HttpResponse httpResponse = Exceptions.findResponseByException(e);
             outputStream.write(httpResponse.asString().getBytes());
 
-            throw new IllegalArgumentException();
+            return null;
         }
     }
 

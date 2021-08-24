@@ -20,6 +20,10 @@ public class Fixture {
         return httpRequestWithBody("POST", body);
     }
 
+    public static String postHttpRequest(String path, String body) {
+        return httpRequestWithBody("POST", path, body);
+    }
+
     public static String putHttpRequest(String body) {
         return httpRequestWithBody("PUT", body);
     }
@@ -30,6 +34,10 @@ public class Fixture {
 
     private static String httpRequestWithBody(String httpMethod, String body) {
         return httpRequest(httpMethod) + lineSeparator.repeat(2) + body;
+    }
+
+    private static String httpRequestWithBody(String httpMethod, String path, String body) {
+        return httpRequest(httpMethod, path) + lineSeparator.repeat(2) + body;
     }
 
     private static String httpRequest(String httpMethod) {

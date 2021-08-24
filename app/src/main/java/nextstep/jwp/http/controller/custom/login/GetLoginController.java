@@ -77,17 +77,6 @@ public class GetLoginController implements Controller {
             path.getParam("password").isPresent();
     }
 
-    private Response createResponse(HttpStatus httpStatus, String path) {
-        ResponseLine responseLine = new ResponseLine(HttpVersion.HTTP1_1, httpStatus);
-        Headers headers = new Headers();
-
-        File file = new HttpPath(LOGIN_PAGE_RESOURCE_PATH).toFile();
-        Body body = Body.fromFile(file);
-
-        headers.setBodyHeader(body);
-        return new HttpResponse(responseLine, headers, body);
-    }
-
     @Override
     public boolean isSatisfiedBy(HttpRequest httpRequest) {
         return httpRequest.getHttpMethod().equals(HttpMethod.GET) &&

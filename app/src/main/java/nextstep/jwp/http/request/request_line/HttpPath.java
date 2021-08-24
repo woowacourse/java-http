@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+import nextstep.jwp.http.common.ParameterExtractor;
 import nextstep.jwp.http.exception.NotFoundException;
 
 public class HttpPath {
@@ -37,13 +38,7 @@ public class HttpPath {
             return new HashMap<>();
         }
 
-        String rawParams = uri.substring(uri.indexOf("?") + 1);
-        String[] splitParams = rawParams.split("&");
-
-        return Arrays.stream(splitParams)
-            .filter(param -> param.contains("="))
-            .map(param -> param.split("="))
-            .collect(toMap(param -> param[0], param -> param[1]));
+        return ParameterExtractor.extract(uri);
     }
 
     public File toFile() {

@@ -1,4 +1,4 @@
-package nextstep.jwp.http.controller;
+package nextstep.jwp.http.controller.standard;
 
 import nextstep.jwp.http.Body;
 import nextstep.jwp.http.Headers;

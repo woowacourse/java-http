@@ -35,6 +35,6 @@ public class HttpResponse implements Response {
             headers.asString()
         ));
 
-        return topOfHeader + LINE_SEPARATOR.repeat(2) + body.asString();
+        return topOfHeader + (body == null ? "" : LINE_SEPARATOR.repeat(2) + body.asString());
     }
 }

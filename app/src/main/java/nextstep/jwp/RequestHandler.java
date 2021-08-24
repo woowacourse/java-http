@@ -5,17 +5,11 @@ import static nextstep.jwp.http.Protocol.LINE_SEPARATOR;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
-import nextstep.jwp.http.Body;
-import nextstep.jwp.http.Headers;
-import nextstep.jwp.http.HttpStatus;
-import nextstep.jwp.http.HttpVersion;
-import nextstep.jwp.http.ContentType;
-import nextstep.jwp.http.controller.StandardController;
+import nextstep.jwp.http.controller.standard.StandardController;
 import nextstep.jwp.http.exception.Exceptions;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.Response;
-import nextstep.jwp.http.response.response_line.ResponseLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

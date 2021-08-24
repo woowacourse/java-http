@@ -1,9 +1,9 @@
-package nextstep.jwp.http.controller;
+package nextstep.jwp.http.controller.standard;
 
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 
-public class PostStandardController extends StandardController {
+public class PutStandardController extends StandardController {
 
     @Override
     public HttpResponse doService(HttpRequest httpRequest) {

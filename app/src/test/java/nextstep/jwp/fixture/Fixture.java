@@ -12,30 +12,38 @@ public class Fixture {
         return httpRequest("GET");
     }
 
+    public static String getHttpRequest(String path) {
+        return httpRequest("GET", path);
+    }
+
     public static String postHttpRequest(String body) {
-        return httpRequest("POST", body);
+        return httpRequestWithBody("POST", body);
     }
 
     public static String putHttpRequest(String body) {
-        return httpRequest("PUT", body);
+        return httpRequestWithBody("PUT", body);
     }
 
     public static String deleteHttpRequest() {
         return httpRequest("DELETE");
     }
 
-    private static String httpRequest(String httpMethod, String body) {
+    private static String httpRequestWithBody(String httpMethod, String body) {
         return httpRequest(httpMethod) + lineSeparator.repeat(2) + body;
     }
 
     private static String httpRequest(String httpMethod) {
+        return httpRequest(httpMethod, getResourcePath());
+    }
+
+    private static String httpRequest(String httpMethod, String path) {
         Map<String, String> fixtureHeaders = getFixtureHeaders();
         String headers = fixtureHeaders.entrySet().stream()
             .map(entry -> String.format("%s: %s", entry.getKey(), entry.getValue()))
             .collect(Collectors.joining(lineSeparator));
 
         List<String> httpRequestPieces = List.of(
-            String.format("%%s %s HTTP/1.1", getResourcePath()),
+            String.format("%%s %s HTTP/1.1", path),
             headers
         );
 

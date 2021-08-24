@@ -1,6 +1,6 @@
 package nextstep.jwp;
 
-import nextstep.jwp.http.controller.StandardControllerFactory;
+import nextstep.jwp.http.controller.standard.StandardControllerFactory;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

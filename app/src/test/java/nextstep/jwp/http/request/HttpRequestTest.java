@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 import nextstep.jwp.fixture.Fixture;
+import nextstep.jwp.http.request.request_line.HttpMethod;
+import nextstep.jwp.http.request.request_line.HttpPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,13 +41,13 @@ class HttpRequestTest {
 
     @Test
     void getHttpMethod() {
-        String httpMethod = httpRequest.getHttpMethod();
-        assertThat(httpMethod).isEqualTo("GET");
+        HttpMethod httpMethod = httpRequest.getHttpMethod();
+        assertThat(httpMethod).isEqualTo(HttpMethod.GET);
     }
 
     @Test
     void getResourcePath() {
-        String resourcePath = httpRequest.getResourcePath();
-        assertThat(resourcePath).isEqualTo(Fixture.getResourcePath());
+        HttpPath resourcePath = httpRequest.getPath();
+        assertThat(resourcePath.getPath()).isEqualTo(Fixture.getResourcePath());
     }
 }

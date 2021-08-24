@@ -1,5 +1,7 @@
 package nextstep.jwp.http.request.request_line;
 
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import java.io.File;
@@ -7,8 +9,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public class HttpPath {
+    private final String prefix = "static/";
+
     private final String path;
     private final Map<String, String> parameters;
 
@@ -45,11 +50,9 @@ public class HttpPath {
     }
 
     private String rewritePath() {
-        String path = this.path;
-
-        if(path.startsWith("/")) {
-            path = path.substring(1);
-        }
+        String path = Stream.of(new String[]{prefix}, this.path.split("/"))
+            .flatMap(Arrays::stream)
+            .collect(joining("/"));
 
         return ClassLoader.getSystemResource(path).getPath();
     }

@@ -1,28 +1,33 @@
 package nextstep.jwp.http.request.request_line;
 
+import static nextstep.jwp.http.Protocol.LINE_SEPARATOR;
+
+import nextstep.jwp.http.HttpVersion;
+
 public class RequestLine {
 
-    private final String httpMethod;
-    private final String path;
-    private final String version;
+    private final HttpMethod httpMethod;
+    private final HttpPath path;
+    private final HttpVersion version;
 
-    public RequestLine(String requestLine) {
+    public RequestLine(String httpRequest) {
+        String requestLine = httpRequest.split(LINE_SEPARATOR)[0];
         String[] parameters = requestLine.split(" ");
 
-        this.httpMethod = parameters[0];
-        this.path = parameters[1];
-        this.version = parameters[2];
+        this.httpMethod = HttpMethod.from(parameters[0]);
+        this.path = new HttpPath(parameters[1]);
+        this.version = HttpVersion.from(parameters[2]);
     }
 
-    public String getHttpMethod() {
+    public HttpMethod getHttpMethod() {
         return httpMethod;
     }
 
-    public String getPath() {
+    public HttpPath getPath() {
         return path;
     }
 
-    public String getVersion() {
+    public HttpVersion getVersion() {
         return version;
     }
 }

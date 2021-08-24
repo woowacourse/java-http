@@ -5,4 +5,5 @@ import nextstep.jwp.http.response.Response;
 
 public interface Controller {
     Response doService(HttpRequest httpRequest);
+    boolean isSatisfiedBy(HttpRequest httpRequest);
 }

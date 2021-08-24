@@ -3,6 +3,9 @@ package nextstep.jwp.http.request;
 import java.util.Optional;
 import nextstep.jwp.http.Body;
 import nextstep.jwp.http.Headers;
+import nextstep.jwp.http.HttpVersion;
+import nextstep.jwp.http.request.request_line.HttpMethod;
+import nextstep.jwp.http.request.request_line.HttpPath;
 import nextstep.jwp.http.request.request_line.RequestLine;
 
 public class HttpRequest {
@@ -21,11 +24,15 @@ public class HttpRequest {
         return headers.getHeader(header);
     }
 
-    public String getHttpMethod() {
+    public HttpMethod getHttpMethod() {
         return requestLine.getHttpMethod();
     }
 
-    public String getResourcePath() {
+    public HttpPath getPath() {
         return requestLine.getPath();
+    }
+
+    public HttpVersion getVersion() {
+        return requestLine.getVersion();
     }
 }

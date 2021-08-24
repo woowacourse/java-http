@@ -1,8 +1,9 @@
 package nextstep.jwp.http.request.request_line;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
+import nextstep.jwp.fixture.Fixture;
+import nextstep.jwp.http.HttpVersion;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -12,27 +13,27 @@ class RequestLineTest {
 
     @BeforeEach
     void setUp() {
-        requestLine = new RequestLine("GET /test.txt HTTP/1.1");
+        requestLine = new RequestLine(Fixture.getHttpRequest());
     }
 
     @Test
     void getHttpMethod() {
-        String httpMethod = requestLine.getHttpMethod();
+        HttpMethod httpMethod = requestLine.getHttpMethod();
 
-        assertThat(httpMethod).isEqualTo("GET");
+        assertThat(httpMethod).isEqualTo(HttpMethod.GET);
     }
 
     @Test
     void getPath() {
-        String path = requestLine.getPath();
+        HttpPath path = requestLine.getPath();
 
-        assertThat(path).isEqualTo("/test.txt");
+        assertThat(path.getPath()).isEqualTo(Fixture.getResourcePath());
     }
 
     @Test
     void getVersion() {
-        String version = requestLine.getVersion();
+        HttpVersion version = requestLine.getVersion();
 
-        assertThat(version).isEqualTo("HTTP/1.1");
+        assertThat(version).isEqualTo(HttpVersion.HTTP1_1);
     }
 }

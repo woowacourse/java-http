@@ -9,7 +9,7 @@ public enum HttpMethod {
     PUT,
     DELETE;
 
-    public static HttpMethod findMethod(String httpMethod) {
+    public static HttpMethod from(String httpMethod) {
         return Arrays.stream(values())
             .filter(method -> Objects.equals(method.name(), httpMethod.toUpperCase()))
             .findAny()

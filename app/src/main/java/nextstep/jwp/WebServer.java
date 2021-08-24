@@ -1,5 +1,6 @@
 package nextstep.jwp;
 
+import nextstep.jwp.http.controller.StandardControllerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,10 @@ public class WebServer {
     private void handle(ServerSocket serverSocket) throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection)).start();
+            new Thread(new RequestHandler(
+                connection,
+                StandardControllerFactory.create()
+            )).start();
         }
     }
 

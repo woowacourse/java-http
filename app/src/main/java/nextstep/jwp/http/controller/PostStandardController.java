@@ -9,4 +9,9 @@ public class PostStandardController extends StandardController {
     public HttpResponse doService(HttpRequest httpRequest) {
         return null;
     }
+
+    @Override
+    public boolean isSatisfiedBy(HttpRequest httpRequest) {
+        return false;
+    }
 }

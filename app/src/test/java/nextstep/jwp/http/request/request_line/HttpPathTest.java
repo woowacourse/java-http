@@ -15,7 +15,7 @@ class HttpPathTest {
 
     @DisplayName("파일의 경로가 들어오면 File을 반환한다.")
     @ParameterizedTest
-    @CsvSource({"/nextstep.txt", "/simpleDirectory/simple.txt", "nextstep.txt"})
+    @CsvSource({"/401.html", "/css/styles.css", "js/scripts.js"})
     void toFile(String path) throws IOException {
         HttpPath httpPath = new HttpPath(path);
         File file = httpPath.toFile();

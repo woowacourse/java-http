@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -54,13 +54,11 @@ class IOStreamTest {
         @Test
         void OutputStream은_데이터를_바이트로_처리한다() throws IOException {
             byte[] bytes = {110, 101, 120, 116, 115, 116, 101, 112};
-            final OutputStream outputStream = new ByteArrayOutputStream(bytes.length);
 
-            outputStream.write(bytes);
-            final String actual = outputStream.toString();
-
-            assertThat(actual).isEqualTo("nextstep");
-            outputStream.close();
+            try (final OutputStream outputStream = new ByteArrayOutputStream(bytes.length)) {
+                outputStream.write(bytes);
+                assertThat(outputStream.toString()).isEqualTo("nextstep");
+            }
         }
 
         /**
@@ -71,19 +69,19 @@ class IOStreamTest {
          * <b>flush()</b> 메서드는 버퍼가 아직 가득 차지 않은 상황에서 강제로 버퍼의 내용을 전송한다.<br>
          * Stream은 동기(synchronous)로 동작하기 때문에 버퍼가 찰 때까지 기다리면 데드락(deadlock) 상태가 되기 때문에 flush로 해제한다.<br>
          */
+
+        /**
+         * ByteArrayOutputStream과 어떤 차이가 있을까? BufferedOutputStream은 버퍼에 저장했다가 지정한 크기만큼 차면 그제서야 스트림으로 데이터를 전송한다. = new
+         * BufferedOutputStream(someStream, integerBufferSize) 처럼 직접 버퍼 크기를 지정할 수 있고, (기본 크기 8192) flush를 호출하여 버퍼를 바로 비울
+         * 수도 있다.
+         */
+
         @Test
         void BufferedOutputStream을_사용하면_버퍼링이_가능하다() throws IOException {
-            final OutputStream outputStream = mock(BufferedOutputStream.class);
-
-            // ByteArrayOutputStream과 어떤 차이가 있을까?
-            // BufferedOutputStream은 버퍼에 저장했다가 지정한 크기만큼 차면 그제서야 스트림으로 데이터를 전송한다.
-            // = new BufferedOutputStream(someStream, integerBufferSize) 처럼 직접 버퍼 크기를 지정할 수 있고, (기본 크기 8192)
-            // flush를 호출하여 버퍼를 바로 비울 수도 있다.
-
-            outputStream.flush();
-
-            verify(outputStream, atLeastOnce()).flush();
-            outputStream.close();
+            try (final OutputStream outputStream = mock(BufferedOutputStream.class)) {
+                outputStream.flush();
+                verify(outputStream, atLeastOnce()).flush();
+            }
         }
 
         /**
@@ -117,17 +115,16 @@ class IOStreamTest {
         @Test
         void InputStream은_데이터를_바이트로_읽는다() throws IOException {
             byte[] bytes = {-16, -97, -92, -87};
-            final InputStream inputStream = new ByteArrayInputStream(bytes);
 
-            // inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
+            try (final InputStream inputStream = new ByteArrayInputStream(bytes);) {
+                final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            final Stream<String> stringLines = new BufferedReader(inputStreamReader).lines();
-            final String actual = stringLines.collect(Collectors.joining());
+                final String actual = bufferedReader.lines().collect(Collectors.joining());
 
-            assertThat(actual).isEqualTo("🤩");
-            assertThat(inputStream.read()).isEqualTo(-1);
-            inputStream.close();
+                assertThat(actual).isEqualTo("🤩");
+                assertThat(inputStream.read()).isEqualTo(-1);
+            }
         }
 
         /**
@@ -158,13 +155,14 @@ class IOStreamTest {
         @Test
         void 필터인_BufferedInputStream를_사용해보자() throws IOException {
             final String text = "필터에 연결해보자.";
-            final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
-            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
-            final byte[] actual = bufferedInputStream.readAllBytes();
+            try (final InputStream inputStream = new ByteArrayInputStream(text.getBytes())) {
+                final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
+                final byte[] actual = bufferedInputStream.readAllBytes();
 
-            assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
-            assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
+                assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
+                assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
+            }
         }
     }
 
@@ -181,8 +179,8 @@ class IOStreamTest {
          */
 
         /**
-         * BufferReader의 readLine() 를 쓸때는 inputStream 이 반드시 개행문자가 포함되어야 한다. 자바에서의 개행문자는 "\n" 이지만,
-         * 스트림에서의 개행문자는 "\r\n"이 개행문자이다.
+         * BufferReader의 readLine() 를 쓸때는 inputStream 이 반드시 개행문자가 포함되어야 한다. 자바에서의 개행문자는 "\n" 이지만, 스트림에서의 개행문자는 "\r\n"이
+         * 개행문자이다.
          */
 
         @Test
@@ -192,15 +190,21 @@ class IOStreamTest {
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
-            final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            final StringBuilder actual = new StringBuilder();
-            String line;
-            while((line = bufferedReader.readLine()) !=null){
-                actual.append(line).append("\r\n");
+            try (final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes())) {
+                final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+                final StringBuilder actual = new StringBuilder();
+
+                String tempLine;
+                while (!Objects.isNull(tempLine = bufferedReader.readLine())) {
+                    actual.append(tempLine);
+                    actual.append("\r\n");
+                }
+
+                assertThat(actual).hasToString(emoji);
             }
-            assertThat(actual).hasToString(emoji);
         }
     }
 }

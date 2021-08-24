@@ -1,5 +1,6 @@
 package nextstep.jwp;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -12,25 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RequestHandlerTest {
 
     @Test
-    void run() {
-        // given
-        final MockSocket socket = new MockSocket();
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
-
-        // then
-        String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @Test
+    @DisplayName("GET /index.html로 요청을 할 경우, resources/static/index.html을 response로 응답한다.")
     void index() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",

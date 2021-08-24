@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.framework.infrastructure.http.HttpHandler;
+import nextstep.jwp.framework.infrastructure.http.mapping.HttpRequestMapping;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +17,7 @@ class RequestHandlerTest {
     void run() {
         // given
         final MockSocket socket = new MockSocket();
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, new HttpHandler(new HttpRequestMapping()));
 
         // when
         requestHandler.run();
@@ -42,7 +44,7 @@ class RequestHandlerTest {
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, new HttpHandler(new HttpRequestMapping()));
 
         // when
         requestHandler.run();

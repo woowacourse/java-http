@@ -1,5 +1,7 @@
 package nextstep.jwp;
 
+import java.util.Objects;
+import nextstep.jwp.framework.domain.NetworkHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +17,11 @@ public class WebServer {
     private static final int DEFAULT_PORT = 8080;
 
     private final int port;
+    private final NetworkHandler networkHandler;
 
-    public WebServer(int port) {
+    public WebServer(int port, NetworkHandler networkHandler) {
         this.port = checkPort(port);
+        this.networkHandler = Objects.requireNonNull(networkHandler);
     }
 
     public void run() {
@@ -34,7 +38,7 @@ public class WebServer {
     private void handle(ServerSocket serverSocket) throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection)).start();
+            new Thread(new RequestHandler(connection, networkHandler)).start();
         }
     }
 

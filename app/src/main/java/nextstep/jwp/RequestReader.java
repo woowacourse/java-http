@@ -14,7 +14,13 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 
 public class RequestReader {
+
+    private final Map<String, String> statusCode = new HashMap<>();
+
     public RequestReader() {
+        statusCode.put("200", "OK");
+        statusCode.put("302", "Found");
+        statusCode.put("401", "Unauthorized");
     }
 
     public String readHeader(InputStream inputStream) throws IOException {
@@ -23,11 +29,11 @@ public class RequestReader {
         while (bufferedReader.ready()) {
             final String line = bufferedReader.readLine();
 
-            if(line == null){
+            if (line == null) {
                 return "";
             }
 
-            if("".equals(line)){
+            if ("".equals(line)) {
                 return request.toString();
             }
 
@@ -38,43 +44,67 @@ public class RequestReader {
         return request.toString();
     }
 
-    public String extractUri(String input){
+    public String extractUri(String input) {
         String[] values = input.split(" ");
-        if (values.length < 2){
+        if (values.length < 2) {
             return "";
         }
-        return extractQueryString(input.split(" ")[1]);
+        return input.split(" ")[1];
     }
 
-    private String extractQueryString(String uri){
-        if (!uri.contains("?")){
-            return uri;
-        }
+    public Boolean isQueryString(String uri) {
+        return uri.contains("?");
+    }
+
+    private Map<String, String> extractQueryString(String uri) {
         int index = uri.indexOf("?");
         String path = uri.substring(0, index);
         String queryString = uri.substring(index + 1);
         String[] queries = queryString.split("&");
         final Map<String, String> login = new HashMap<>();
-        for (String query : queries){
+        for (String query : queries) {
             String[] split = query.split("=");
             login.put(split[0], split[1]);
         }
-        Optional<User> account = InMemoryUserRepository.findByAccount(login.get("account"));
-        if (account.isPresent()){
-            return "/index.html";
-        }
-        return "/401.html";
+        return login;
+    }
+
+    private Boolean isAuthorized(Map<String, String> params) {
+        Optional<User> account = InMemoryUserRepository.findByAccount(params.get("account"));
+        return account.isPresent();
     }
 
     public String getResponse(String uri) throws IOException {
-        if ("/".equals(uri)){
-            return "Hello world!";
+        if ("/".equals(uri)) {
+            return response("200", "Hello world!");
         }
-        if (!uri.contains("html")){
+        if (isQueryString(uri)) {
+            Map<String, String> params = extractQueryString(uri);
+            if (isAuthorized(params)) {
+                return responseWithResource("302", "/index.html");
+            }
+            return responseWithResource("401", "/401.html");
+        }
+
+        if (!uri.contains("html")) {
             uri += ".html";
         }
 
+        return responseWithResource("200", uri);
+    }
+
+    private String responseWithResource(String status, String uri) throws IOException {
         final URL resource = getClass().getClassLoader().getResource("static" + uri);
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String string = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        return response(status, string);
+    }
+
+    private String response(String status, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + status + " " + statusCode.get(status) + " ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

@@ -30,14 +30,7 @@ public class RequestHandler implements Runnable {
             final RequestReader requestReader = new RequestReader();
             final String read = requestReader.readHeader(inputStream);
             final String uri = requestReader.extractUri(read);
-            final String responseBody = requestReader.getResponse(uri);
-
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final String response = requestReader.getResponse(uri);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

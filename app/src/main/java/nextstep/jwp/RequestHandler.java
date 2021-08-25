@@ -43,7 +43,6 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = new BufferedOutputStream(connection.getOutputStream())) {
 
             int statusCode = 200;
-
             String line = null;
             Map<String, String> httpRequestHeaders = new ConcurrentHashMap<>();
             boolean isFirstLine = true;
@@ -164,6 +163,7 @@ public class RequestHandler implements Runnable {
                 }
             }
 
+            String contentType = "text/html";
             String responseBody = null;
             if ("GET".equals(method)) {
                 final URL url = getClass().getClassLoader().getResource("static/" + fileName);
@@ -172,6 +172,18 @@ public class RequestHandler implements Runnable {
                     throw new IOException("fileName으로 찾은 url의 값이 null 입니다.");
                 }
 
+                String[] splitFileUrl = url.toString().split("\\.");
+                final String fileNameExtension = splitFileUrl[splitFileUrl.length - 1];
+                LOG.debug("파일 확장자 : {}", fileNameExtension);
+                if ("html".equals(fileNameExtension)) {
+                    contentType = "text/html";
+                }
+                if ("css".equals(fileNameExtension)) {
+                    contentType = "text/css";
+                }
+                if ("js".equals(fileNameExtension)) {
+                    contentType = "application/js";
+                }
                 final Path filePath = Paths.get(url.toURI());
                 final List<String> fileLines = Files.readAllLines(filePath);
                 responseBody = String.join(NEW_LINE, fileLines);
@@ -181,7 +193,7 @@ public class RequestHandler implements Runnable {
             if (statusCode == 200) {
                 response = String.join(NEW_LINE,
                         "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Type: " + contentType + ";charset=utf-8 ",
                         "Content-Length: " + responseBody.getBytes().length + " ",
                         "",
                         responseBody);

@@ -38,7 +38,7 @@ class RegisterRequestAdapterTest {
     @Test
     void it_returns_401_when_register_fail() {
         // given
-        HttpRequestHeader header = HttpRequestHeader.from(Arrays.asList("POST /login HTTP/1.1"));
+        HttpRequestHeader header = HttpRequestHeader.from(Arrays.asList("POST /register HTTP/1.1"));
         String body = "account=gugu&password=passwoadfadfrd";
         HttpRequest httpRequest = new HttpRequest(header, new HttpRequestBody(body));
         RequestAdapter adapter = new HttpRequestMapping().findAdapter(httpRequest);

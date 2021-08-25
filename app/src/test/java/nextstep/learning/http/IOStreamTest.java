@@ -25,6 +25,8 @@ import static org.mockito.Mockito.*;
 @DisplayName("Java I/O Stream 클래스 학습 테스트")
 class IOStreamTest {
 
+    private static final String NEW_LINE = System.getProperty("line.separator");
+
     /**
      * 자바의 기본 출력 클래스는 <b>java.io.OutputStream</b>이다.<br>
      * OutputStream의 <b>write(int b)</b> 메서드는 기반 메서드이다.<br><br>
@@ -188,7 +190,7 @@ class IOStreamTest {
          */
         @Test
         void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
-            final String emoji = String.join("\r\n",
+            final String emoji = String.join(NEW_LINE,
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
@@ -201,7 +203,7 @@ class IOStreamTest {
             String line = null;
             while ((line = bufferedReader.readLine()) != null) {
                 actual.append(line);
-                actual.append("\r\n");
+                actual.append(NEW_LINE);
             }
 
             assertThat(actual).hasToString(emoji);

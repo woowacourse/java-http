@@ -6,8 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.jwp.framework.infrastructure.http.HttpHandler;
-import nextstep.jwp.framework.infrastructure.http.mapping.HttpRequestMapping;
+import nextstep.jwp.framework.infrastructure.HttpHandler;
+import nextstep.jwp.framework.infrastructure.mapping.HttpRequestMapping;
+import nextstep.jwp.framework.webserver.RequestHandler;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 

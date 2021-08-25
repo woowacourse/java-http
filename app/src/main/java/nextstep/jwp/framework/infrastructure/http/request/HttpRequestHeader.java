@@ -1,6 +1,6 @@
 package nextstep.jwp.framework.infrastructure.http.request;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,6 +22,10 @@ public class HttpRequestHeader {
     private final Protocol protocol;
     private final Map<String, String> queryParameters;
     private final int contentLength;
+
+    public HttpRequestHeader(String url) {
+        this(HttpMethod.GET, url, Protocol.HTTP1, new HashMap<>(), 0);
+    }
 
     public HttpRequestHeader(
         HttpMethod httpMethod,
@@ -55,7 +59,7 @@ public class HttpRequestHeader {
     }
 
     private static Map<String, String> parseQueryParameters(String url) {
-        Map<String, String> queryParameters = new LinkedHashMap<>();
+        Map<String, String> queryParameters = new HashMap<>();
         int index = url.lastIndexOf(QUERY_STRING_START_CHARACTER);
         String queryString = url.substring(index + 1);
         if (queryString.isEmpty()) {
@@ -91,6 +95,10 @@ public class HttpRequestHeader {
             throw new IllegalStateException("Invalid Content Length");
         }
         return Integer.parseInt(split[1]);
+    }
+
+    public boolean isRequestingStaticFiles() {
+        return url.endsWith(".html") || url.endsWith(".css") || url.endsWith(".js");
     }
 
     public HttpMethod getMethod() {

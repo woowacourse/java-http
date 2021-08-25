@@ -24,7 +24,7 @@ public class ApplicationContextLoader {
             return findBean(packageRootDirectory, packageRootName);
         } catch (ClassNotFoundException classNotFoundException) {
             log.error("Bean File Load Error", classNotFoundException);
-            throw new RuntimeException(classNotFoundException);
+            throw new IllegalStateException(classNotFoundException);
         }
     }
 

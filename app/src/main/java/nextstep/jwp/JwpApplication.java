@@ -1,8 +1,9 @@
 package nextstep.jwp;
 
 import nextstep.jwp.framework.domain.NetworkHandler;
-import nextstep.jwp.framework.infrastructure.http.HttpHandler;
-import nextstep.jwp.framework.infrastructure.http.mapping.HttpRequestMapping;
+import nextstep.jwp.framework.infrastructure.HttpHandler;
+import nextstep.jwp.framework.infrastructure.mapping.HttpRequestMapping;
+import nextstep.jwp.framework.webserver.WebServer;
 
 public class JwpApplication {
 

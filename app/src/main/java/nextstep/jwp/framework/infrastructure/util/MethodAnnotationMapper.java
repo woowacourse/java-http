@@ -1,7 +1,9 @@
-package nextstep.jwp.framework.domain.annotation;
+package nextstep.jwp.framework.infrastructure.util;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
+import nextstep.jwp.framework.domain.annotation.GetMapping;
+import nextstep.jwp.framework.domain.annotation.PostMapping;
 import nextstep.jwp.framework.infrastructure.http.method.HttpMethod;
 
 public enum MethodAnnotationMapper {

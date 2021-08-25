@@ -8,16 +8,16 @@ public class PageController {
 
     @GetMapping("/")
     public String moveToIndexPage() {
-        return "static/index.html";
+        return "/index.html";
     }
 
     @GetMapping("/login")
     public String moveToLoginPage() {
-        return "static/login.html";
+        return "/login.html";
     }
 
     @GetMapping("/register")
     public String moveToRegisterPage() {
-        return "static/register.html";
+        return "/register.html";
     }
 }

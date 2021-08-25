@@ -1,4 +1,4 @@
-package nextstep.jwp.framework.infrastructure.http;
+package nextstep.jwp.framework.infrastructure;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,12 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import nextstep.jwp.framework.domain.NetworkHandler;
-import nextstep.jwp.framework.domain.ParseResult;
-import nextstep.jwp.framework.infrastructure.http.adapter.RequestAdapter;
-import nextstep.jwp.framework.infrastructure.http.mapping.RequestMapping;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequestBody;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequestHeader;
+import nextstep.jwp.framework.infrastructure.http.status.HttpStatus;
+import nextstep.jwp.framework.infrastructure.adapter.RequestAdapter;
+import nextstep.jwp.framework.infrastructure.mapping.RequestMapping;
+import nextstep.jwp.framework.infrastructure.resolver.StaticFileResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,7 @@ public class HttpHandler implements NetworkHandler {
     }
 
     @Override
-    public ParseResult parseRequest(InputStream inputStream) {
+    public String process(InputStream inputStream) {
         BufferedReader bufferedReader =
             new BufferedReader(new InputStreamReader(inputStream));
         try {
@@ -40,14 +41,15 @@ public class HttpHandler implements NetworkHandler {
             );
             HttpRequest httpRequest = new HttpRequest(httpRequestHeader, httpRequestBody);
             RequestAdapter requestAdapter = requestMapping.findAdapter(httpRequest);
-            String response = requestAdapter.execute(httpRequest);
-            return new ParseResult(response);
+            return requestAdapter.doService(httpRequest)
+                .getResponseBody();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
+            return renderInternalServerError();
         } catch (RuntimeException runtimeException) {
             log.info("Parsing Error", runtimeException);
+            return renderInternalServerError();
         }
-        return new ParseResult("");
     }
 
     private List<String> readRestHttpRequestHeaderLines(
@@ -81,5 +83,11 @@ public class HttpHandler implements NetworkHandler {
             log.error("Exception stream", exception);
         }
         return new HttpRequestBody(null);
+    }
+
+    private String renderInternalServerError() {
+        return StaticFileResolver.getInstance()
+            .renderDefaultViewByStatus(HttpStatus.INTERNAL_SEVER_ERROR)
+            .getResponseBody();
     }
 }

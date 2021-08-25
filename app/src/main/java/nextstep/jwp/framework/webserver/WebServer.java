@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.framework.webserver;
 
 import java.util.Objects;
 import nextstep.jwp.framework.domain.NetworkHandler;

@@ -4,10 +4,21 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * 입출력(I/O)은 하나의 시스템에서 다른 시스템으로 데이터를 이동 시킬 때 사용한다.<br>
@@ -16,7 +27,7 @@ import static org.mockito.Mockito.*;
  * <b>InputStream</b>은 데이터를 읽고, <b>OutputStream</b>은 데이터를 쓴다.<br>
  * <b>FilterStream</b>은 InputStream이나 OutputStream에 연결될 수 있다.<br>
  * FilterStream은 읽거나 쓰는 데이터를 수정할 때 사용한다. (e.g. 암호화, 압축, 포맷 변환)<br>
- *<br>
+ * <br>
  * <b>Stream</b>은 데이터를 <b>바이트</b>로 읽고 쓴다.<br>
  * 바이트가 아닌 <b>텍스트(문자)</b>를 읽고 쓰려면 <b>Reader와 Writer</b> 클래스를 연결한다.<br>
  * Reader, Writer는 다양한 문자 인코딩(e.g. UTF-8)을 처리할 수 있다.
@@ -44,14 +55,12 @@ class IOStreamTest {
          */
         @Test
         void OutputStream은_데이터를_바이트로_처리한다() throws IOException {
-            byte[] bytes = {110, 101, 120, 116, 115, 116, 101, 112};
-            final OutputStream outputStream = new ByteArrayOutputStream(bytes.length);
-
             /**
-             * todo
              * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
              */
-
+            final byte[] bytes = {110, 101, 120, 116, 115, 116, 101, 112};
+            final OutputStream outputStream = new ByteArrayOutputStream(bytes.length);
+            outputStream.write(bytes);
             final String actual = outputStream.toString();
 
             assertThat(actual).isEqualTo("nextstep");
@@ -68,14 +77,16 @@ class IOStreamTest {
          */
         @Test
         void BufferedOutputStream을_사용하면_버퍼링이_가능하다() throws IOException {
-            final OutputStream outputStream = mock(BufferedOutputStream.class);
 
             /**
-             * todo
              * flush를 사용해서 테스트를 통과시킨다.
-             * ByteArrayOutputStream과 어떤 차이가 있을까?
+             * Q. ByteArrayOutputStream과 어떤 차이가 있을까?
+             * A. BufferedOutputStream은 보조 스트림이고 ByteArrayOutputStream은 바이트 기반의 출력 스트림이다.
+             *    BufferedOutputStream은 단독으로 사용할 수는 없고, ByteArrayOutputStream 같은 기반 클래스를 데코레이팅하여 생성한다.
+             *    버퍼를 이용하여 여러 바이트를 한 번에 모아서 출력할 수 있기 때문에 성능상 이점이있다.
              */
-
+            final OutputStream outputStream = mock(BufferedOutputStream.class);
+            outputStream.flush();
             verify(outputStream, atLeastOnce()).flush();
             outputStream.close();
         }
@@ -86,15 +97,15 @@ class IOStreamTest {
          */
         @Test
         void OutputStream은_사용하고_나서_close_처리를_해준다() throws IOException {
-            final OutputStream outputStream = mock(OutputStream.class);
-
             /**
-             * todo
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
-
-            verify(outputStream, atLeastOnce()).close();
+            final OutputStream outputStream = mock(OutputStream.class);
+            try (outputStream) {
+            } finally {
+                verify(outputStream, atLeastOnce()).close();
+            }
         }
     }
 
@@ -116,14 +127,16 @@ class IOStreamTest {
          */
         @Test
         void InputStream은_데이터를_바이트로_읽는다() throws IOException {
-            byte[] bytes = {-16, -97, -92, -87};
-            final InputStream inputStream = new ByteArrayInputStream(bytes);
-
             /**
-             * todo
-             * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
+             * Q. inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
+             * A. OutputStream을 만들어야할 것 같았는데, byte[]를 반환하는 readBytes(), readAllBytes() 같은 메서드가 존재하여 사용했다.
+             *    얻어낸 byte[]를 인자로 String 생성자를 호출하여 문자열로 변환했다.
              */
-            final String actual = "";
+            final byte[] bytes = {-16, -97, -92, -87};
+            final InputStream inputStream = new ByteArrayInputStream(bytes);
+            final String actual = new String(
+                    inputStream.readAllBytes()
+            );
 
             assertThat(actual).isEqualTo("🤩");
             assertThat(inputStream.read()).isEqualTo(-1);
@@ -136,15 +149,15 @@ class IOStreamTest {
          */
         @Test
         void InputStream은_사용하고_나서_close_처리를_해준다() throws IOException {
-            final InputStream inputStream = mock(InputStream.class);
-
             /**
-             * todo
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
-
-            verify(inputStream, atLeastOnce()).close();
+            final InputStream inputStream = mock(InputStream.class);
+            try (inputStream) {
+            } finally {
+                verify(inputStream, atLeastOnce()).close();
+            }
         }
     }
 
@@ -159,15 +172,16 @@ class IOStreamTest {
         /**
          * <b>BufferedInputStream</b>은 데이터 처리 속도를 높이기 위해 데이터를 버퍼에 저장한다.<br>
          * InputStream 객체를 생성하고 필터 생성자에 전달하면 필터에 연결된다.<br>
-         * 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까?
+         * Q. 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까?
+         * A. BufferedInputStream.class
+         * private static int DEFAULT_BUFFER_SIZE = 8192;
          */
         @Test
-        void 필터인_BufferedInputStream를_사용해보자() {
+        void 필터인_BufferedInputStream를_사용해보자() throws IOException {
             final String text = "필터에 연결해보자.";
             final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
-            final InputStream bufferedInputStream = null;
-
-            final byte[] actual = new byte[0];
+            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
+            final byte[] actual = bufferedInputStream.readAllBytes();
 
             assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
             assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
@@ -188,17 +202,27 @@ class IOStreamTest {
          * 필터인 <b>BufferedReader</b>를 사용하면 <b>readLine</b> 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
          */
         @Test
-        void BufferedReader를_사용하여_문자열을_읽어온다() {
+        void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
             final String emoji = String.join("\r\n",
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+            final BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(inputStream)
+            );
 
             final StringBuilder actual = new StringBuilder();
 
-            assertThat(actual).hasToString(emoji);
+            try (bufferedReader) {
+                while (bufferedReader.ready()) {
+                    actual.append(bufferedReader.readLine())
+                            .append("\r\n");
+                }
+            } finally {
+                assertThat(actual).hasToString(emoji);
+            }
         }
     }
 }

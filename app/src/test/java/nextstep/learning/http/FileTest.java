@@ -38,8 +38,6 @@ class FileTest {
 
     private Path getFilePathFromResourceDirectory(String fileName) throws URISyntaxException {
         final URL url = getClass().getClassLoader().getResource(fileName);
-        assertThat(url).isNotNull();
-
         return Paths.get(url.toURI());
     }
 

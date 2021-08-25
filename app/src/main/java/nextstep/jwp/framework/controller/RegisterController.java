@@ -24,16 +24,7 @@ public class RegisterController extends AbstractController {
             (httpMethod.equals(HttpMethod.GET) || httpMethod.equals(HttpMethod.POST));
     }
 
-    @Override
-    public HttpResponse doService(HttpRequest httpRequest) {
-        HttpMethod httpMethod = httpRequest.getMethod();
-        if (httpMethod.equals(HttpMethod.GET)) {
-            return doGet(httpRequest);
-        }
-        return doPost(httpRequest);
-    }
-
-    private HttpResponse doGet(HttpRequest httpRequest) {
+    protected HttpResponse doGet(HttpRequest httpRequest) {
         String url = "/register.html";
         return new HttpResponse.Builder()
             .protocol(httpRequest.getProtocol())
@@ -43,7 +34,7 @@ public class RegisterController extends AbstractController {
             .build();
     }
 
-    private HttpResponse doPost(HttpRequest httpRequest) {
+    protected HttpResponse doPost(HttpRequest httpRequest) {
         Map<String, String> attributes = httpRequest.getContentAsAttributes();
         try {
             userService.register(

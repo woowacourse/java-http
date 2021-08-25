@@ -6,6 +6,13 @@ import nextstep.jwp.framework.infrastructure.http.content.ContentType;
 
 public class HttpResponse {
 
+    private static final String RESPONSE_FORMAT =
+        String.join("\r\n",
+            "%s %s %s ",
+            "Content-Type: %s;charset=utf-8 ",
+            "Content-Length: %d ", ""
+        );
+
     private Protocol protocol;
     private HttpStatus httpStatus;
     private ContentType contentType;
@@ -76,26 +83,17 @@ public class HttpResponse {
         }
     }
 
-    private static final String RESPONSE_FORMAT =
-        String.join("\r\n",
-            "%s %s %s ",
-            "Content-Type: %s;charset=utf-8 ",
-            "Content-Length: %d ", ""
-        );
-
-
     public String writeResponseMessage() {
-        String format = String.format(RESPONSE_FORMAT,
+        String header = String.format(RESPONSE_FORMAT,
             protocol.getName(),
             httpStatus.getCode(),
             httpStatus.getMessage(),
             contentType.getContentType(),
             contentLength
         );
-
         if (httpStatus.equals(HttpStatus.FOUND)) {
-            format += "Location: " + location + "\r\n";
+            header += "Location: " + location + "\r\n";
         }
-        return format + "\r\n" + responseBody;
+        return header + "\r\n" + responseBody;
     }
 }

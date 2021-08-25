@@ -13,7 +13,7 @@ public class TestUtil {
         String.join("\r\n",
             "HTTP/1.1 %s %s ",
             "Content-Type: text/%s;charset=utf-8 ",
-            "Content-Length: %d ", "", "%s"
+            "Content-Length: %d ", ""
         );
 
     private TestUtil() {
@@ -24,14 +24,17 @@ public class TestUtil {
             url = "/static" + url;
             Path path = Paths.get(TestUtil.class.getResource(url).toURI());
             String responseBody = String.join("\r\n", Files.readAllLines(path));
-            return String.format(
+            String header = String.format(
                 RESPONSE_FORMAT,
                 httpStatus.getCode(),
                 httpStatus.getMessage(),
                 extractExtension(path),
-                responseBody.getBytes().length,
-                responseBody
+                responseBody.getBytes().length
             );
+            if (httpStatus == HttpStatus.FOUND) {
+                header += "Location: /index.html"  + "\r\n";
+            }
+            return header + "\r\n" + responseBody;
         } catch (IOException | URISyntaxException exception) {
             throw new IllegalStateException(exception);
         }

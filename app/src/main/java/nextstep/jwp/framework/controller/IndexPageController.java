@@ -14,7 +14,7 @@ public class IndexPageController extends AbstractController {
     }
 
     @Override
-    public HttpResponse doService(HttpRequest httpRequest) {
+    protected HttpResponse doGet(HttpRequest httpRequest) {
         String url = "/index.html";
         return new HttpResponse.Builder()
             .protocol(httpRequest.getProtocol())
@@ -22,5 +22,10 @@ public class IndexPageController extends AbstractController {
             .contentType(ContentType.find(url))
             .responseBody(readFile(url))
             .build();
+    }
+
+    @Override
+    protected HttpResponse doPost(HttpRequest httpRequest) {
+        throw new UnsupportedOperationException();
     }
 }

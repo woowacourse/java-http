@@ -9,12 +9,14 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import nextstep.jwp.framework.controller.Controller;
+import nextstep.jwp.framework.controller.StaticResourceController;
+import nextstep.jwp.framework.infrastructure.exception.NotFoundException;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequestBody;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequestHeader;
 import nextstep.jwp.framework.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.framework.infrastructure.mapping.RequestMapping;
-import nextstep.jwp.framework.controller.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +39,18 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
             final OutputStream outputStream = connection.getOutputStream()) {
+            HttpResponse httpResponse = parseResponse(inputStream);
+            outputStream.write(httpResponse.writeResponseMessage().getBytes());
+            outputStream.flush();
+        } catch (IOException exception) {
+            log.error("Exception Socket");
+        } finally {
+            close();
+        }
+    }
+
+    private HttpResponse parseResponse(InputStream inputStream) {
+        try {
             BufferedReader bufferedReader =
                 new BufferedReader(new InputStreamReader(inputStream));
             List<String> httpRequestHeaders = readRestHttpRequestHeaderLines(bufferedReader);
@@ -47,13 +61,14 @@ public class RequestHandler implements Runnable {
             );
             HttpRequest httpRequest = new HttpRequest(httpRequestHeader, httpRequestBody);
             Controller controller = requestMapping.findController(httpRequest);
-            HttpResponse httpResponse = controller.doService(httpRequest);
-            outputStream.write(httpResponse.writeResponseMessage().getBytes());
-            outputStream.flush();
-        } catch (IOException exception) {
-            exception.printStackTrace();
-        } finally {
-            close();
+            return controller.doService(httpRequest);
+        } catch (NotFoundException e) {
+            HttpRequest errorRequest = HttpRequest.ofStaticFile("/404.html");
+            return new StaticResourceController().doService(errorRequest);
+        } catch (IOException | RuntimeException e) {
+            log.error("Exception stream or Parsing error", e);
+            HttpRequest errorRequest = HttpRequest.ofStaticFile("/500.html");
+            return new StaticResourceController().doService(errorRequest);
         }
     }
 

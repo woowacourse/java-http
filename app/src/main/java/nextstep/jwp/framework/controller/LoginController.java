@@ -25,15 +25,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    public HttpResponse doService(HttpRequest httpRequest) {
-        HttpMethod httpMethod = httpRequest.getMethod();
-        if (httpMethod.equals(HttpMethod.GET)) {
-            return doGet(httpRequest);
-        }
-        return doPost(httpRequest);
-    }
-
-    private HttpResponse doGet(HttpRequest httpRequest) {
+    protected HttpResponse doGet(HttpRequest httpRequest) {
         String url = "/login.html";
         return new HttpResponse.Builder()
             .protocol(httpRequest.getProtocol())
@@ -43,8 +35,8 @@ public class LoginController extends AbstractController {
             .build();
     }
 
-
-    private HttpResponse doPost(HttpRequest httpRequest) {
+    @Override
+    protected HttpResponse doPost(HttpRequest httpRequest) {
         Map<String, String> attributes = httpRequest.getContentAsAttributes();
         try {
             userService.login(attributes.get("account"), attributes.get("password"));

@@ -3,7 +3,7 @@ package nextstep.jwp.framework.infrastructure.protocol;
 import java.util.Arrays;
 
 public enum Protocol {
-    HTTP1("HTTP/1.1");
+    HTTP1_1("HTTP/1.1");
 
     private final String signature;
 
@@ -16,5 +16,9 @@ public enum Protocol {
             .filter(value -> value.signature.equals(signature))
             .findAny()
             .orElseThrow(() -> new IllegalStateException("Invalid Protocol Request"));
+    }
+
+    public String getName() {
+        return signature;
     }
 }

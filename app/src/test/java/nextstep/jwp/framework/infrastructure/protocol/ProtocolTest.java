@@ -26,7 +26,7 @@ class ProtocolTest {
                 Protocol protocol = Protocol.findProtocol("HTTP/1.1");
 
                 // then
-                assertThat(protocol).isEqualTo(Protocol.HTTP1);
+                assertThat(protocol).isEqualTo(Protocol.HTTP1_1);
             }
         }
 
@@ -34,7 +34,7 @@ class ProtocolTest {
         @Nested
         class Context_invalid_string_given {
 
-            @DisplayName("해당하는 프로토콜 버전을 찾지 못한.")
+            @DisplayName("해당하는 프로토콜 버전을 찾지 못한다.")
             @Test
             void it_throws_exception() {
                 // given, when, then

@@ -37,7 +37,7 @@ class HttpRequestHeaderTest {
                 // then
                 assertThat(header)
                     .extracting("httpMethod", "url", "protocol", "queryParameters", "contentLength")
-                    .containsExactly(HttpMethod.GET, "/api/post", Protocol.HTTP1, new HashMap<>(), 0);
+                    .containsExactly(HttpMethod.GET, "/api/post", Protocol.HTTP1_1, new HashMap<>(), 0);
             }
         }
 

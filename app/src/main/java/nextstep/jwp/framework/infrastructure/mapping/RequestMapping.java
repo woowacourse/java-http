@@ -1,9 +1,9 @@
 package nextstep.jwp.framework.infrastructure.mapping;
 
-import nextstep.jwp.framework.infrastructure.adapter.RequestAdapter;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
+import nextstep.jwp.framework.controller.Controller;
 
 public interface RequestMapping {
 
-    RequestAdapter findAdapter(HttpRequest httpRequest);
+    Controller findController(HttpRequest httpRequest);
 }

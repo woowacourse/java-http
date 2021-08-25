@@ -24,7 +24,7 @@ public class HttpRequestHeader {
     private final int contentLength;
 
     public HttpRequestHeader(String url) {
-        this(HttpMethod.GET, url, Protocol.HTTP1, new HashMap<>(), 0);
+        this(HttpMethod.GET, url, Protocol.HTTP1_1, new HashMap<>(), 0);
     }
 
     public HttpRequestHeader(
@@ -111,5 +111,9 @@ public class HttpRequestHeader {
 
     public int getContentLength() {
         return contentLength;
+    }
+
+    public Protocol getProtocol() {
+        return protocol;
     }
 }

@@ -2,6 +2,7 @@ package nextstep.jwp.framework.infrastructure.http.request;
 
 import java.util.Map;
 import nextstep.jwp.framework.infrastructure.http.method.HttpMethod;
+import nextstep.jwp.framework.infrastructure.protocol.Protocol;
 
 public class HttpRequest {
 
@@ -17,10 +18,6 @@ public class HttpRequest {
         return new HttpRequest(new HttpRequestHeader(resourcePath), new HttpRequestBody(null));
     }
 
-    public boolean isRequestingStaticFiles() {
-        return httpRequestHeader.isRequestingStaticFiles();
-    }
-
     public Map<String, String> getContentAsAttributes() {
         return httpRequestBody.getContentAsAttributes();
     }
@@ -31,5 +28,9 @@ public class HttpRequest {
 
     public String getUrl() {
         return httpRequestHeader.getUrl();
+    }
+
+    public Protocol getProtocol() {
+        return httpRequestHeader.getProtocol();
     }
 }

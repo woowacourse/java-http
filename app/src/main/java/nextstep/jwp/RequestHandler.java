@@ -1,13 +1,10 @@
 package nextstep.jwp;
 
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +29,8 @@ public class RequestHandler implements Runnable {
 
             final RequestReader requestReader = new RequestReader();
             final String read = requestReader.readHeader(inputStream);
-            final String uri = requestReader.parseUri(read);
-            final String responseBody = requestReader.getResponseBody(uri);
+            final String uri = requestReader.extractUri(read);
+            final String responseBody = requestReader.getResponse(uri);
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

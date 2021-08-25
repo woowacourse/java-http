@@ -3,13 +3,14 @@ package nextstep.jwp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -31,13 +32,21 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            byte[] bytes = new byte[800];
-            int totalByteCount = inputStream.read(bytes);
-            String httpRequestHeader = new String(bytes, 0, totalByteCount, StandardCharsets.UTF_8);
-            String[] splittedHeaders = httpRequestHeader.split("\n");
+            final BufferedReader bufferedReader =
+                    new BufferedReader(new InputStreamReader(inputStream));
+
+            final StringBuilder requestHeaderBuilder = new StringBuilder();
+            String line = bufferedReader.readLine();
+            while (!"".equals(line)) {
+                if (line == null) return;
+                requestHeaderBuilder.append(line).append("\n");
+                line = bufferedReader.readLine();
+            }
+
+            String[] httpRequestHeaders = requestHeaderBuilder.toString().split("\n");
 
             // requestURI
-            String requestURI = splittedHeaders[0];
+            String requestURI = httpRequestHeaders[0];
             String[] splittedRequestURI = requestURI.split(" ");
             String file = splittedRequestURI[1].substring(1);
             URL resource = getClass().getClassLoader().getResource("static/" + file);

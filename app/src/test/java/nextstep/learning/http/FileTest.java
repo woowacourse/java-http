@@ -31,13 +31,7 @@ class FileTest {
 
         // todo
         final URL url = getClass().getClassLoader().getResource(fileName);
-        String protocol = url.getProtocol();
-        final String other = url.getPath();
         final String actual = url.getFile();
-
-        System.out.println(protocol);
-        System.out.println(other);
-        System.out.println(actual);
 
         assertThat(actual).endsWith(fileName);
     }

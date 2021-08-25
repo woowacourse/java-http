@@ -11,16 +11,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.http.ResponseEntity;
+import nextstep.jwp.http.StatusCode;
 import nextstep.jwp.model.User;
 
 public class RequestReader {
 
-    private final Map<String, String> statusCode = new HashMap<>();
-
     public RequestReader() {
-        statusCode.put("200", "OK");
-        statusCode.put("302", "Found");
-        statusCode.put("401", "Unauthorized");
     }
 
     public String readHeader(InputStream inputStream) throws IOException {
@@ -42,6 +39,16 @@ public class RequestReader {
 
         }
         return request.toString();
+    }
+
+    // todo: method 추출
+    public String extractMethod(String input) {
+        String[] values = input.split(" ");
+        if (values.length < 1) {
+            return "";
+        }
+        return input.split(" ")[0];
+
     }
 
     public String extractUri(String input) {
@@ -76,35 +83,36 @@ public class RequestReader {
 
     public String getResponse(String uri) throws IOException {
         if ("/".equals(uri)) {
-            return response("200", "Hello world!");
+            return ResponseEntity
+                    .responseBody("Hello world!")
+                    .build();
         }
         if (isQueryString(uri)) {
             Map<String, String> params = extractQueryString(uri);
             if (isAuthorized(params)) {
-                return responseWithResource("302", "/index.html");
+                return ResponseEntity
+                        .statusCode(StatusCode.FOUND)
+                        .responseBody(findResource("/index.html"))
+                        .build();
             }
-            return responseWithResource("401", "/401.html");
+            return ResponseEntity
+                    .statusCode(StatusCode.UNAUTHORIZED)
+                    .responseBody(findResource("/401.html"))
+                    .build();
         }
 
         if (!uri.contains("html")) {
             uri += ".html";
         }
 
-        return responseWithResource("200", uri);
+        return ResponseEntity
+                .responseBody(findResource(uri))
+                .build();
     }
 
-    private String responseWithResource(String status, String uri) throws IOException {
+    private String findResource(String uri) throws IOException {
         final URL resource = getClass().getClassLoader().getResource("static" + uri);
-        String string = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        return response(status, string);
+        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
-    private String response(String status, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + status + " " + statusCode.get(status) + " ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
 }

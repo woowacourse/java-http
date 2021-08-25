@@ -50,7 +50,7 @@ public class StaticFileResolver {
             return String.format(
                 RESPONSE_FORMAT,
                 httpStatus.getCode(),
-                httpStatus.getNessage(),
+                httpStatus.getMessage(),
                 extractExtension(path),
                 responseBody.getBytes().length,
                 responseBody

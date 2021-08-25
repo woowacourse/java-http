@@ -25,15 +25,13 @@ class StaticFileLoaderTest {
             @Test
             void it_returns_static_file_paths() {
                 // given, when
-                List<Path> paths = StaticFileLoader.loadStaticFilePaths("static");
+                List<Path> paths = StaticFileLoader.loadStaticFilePaths("testatic");
                 String name = paths.stream()
                     .map(Path::toString)
-                    .collect(Collectors.toList())
-                    .get(0);
+                    .collect(Collectors.toList()).get(0);
 
                 assertThat(paths).hasSize(1);
-                assertThat(name).endsWith("test.txt")
-                    .hasSize(1);
+                assertThat(name).endsWith("test.txt");
             }
         }
 

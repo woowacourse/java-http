@@ -17,19 +17,19 @@ public class HttpRequest {
         return new HttpRequest(new HttpRequestHeader(resourcePath), new HttpRequestBody(null));
     }
 
-    public HttpMethod getMethod() {
-        return httpRequestHeader.getMethod();
-    }
-
-    public String getUrl() {
-        return httpRequestHeader.getUrl();
+    public boolean isRequestingStaticFiles() {
+        return httpRequestHeader.isRequestingStaticFiles();
     }
 
     public Map<String, String> getContentAsAttributes() {
         return httpRequestBody.getContentAsAttributes();
     }
 
-    public boolean isRequestingStaticFiles() {
-        return httpRequestHeader.isRequestingStaticFiles();
+    public HttpMethod getMethod() {
+        return httpRequestHeader.getMethod();
+    }
+
+    public String getUrl() {
+        return httpRequestHeader.getUrl();
     }
 }

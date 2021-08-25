@@ -14,6 +14,8 @@ public class RequestURI {
     private static final String QUERY_PARAMETER_KEY_VALUE_REGEX = "=";
     private static final String RESOURCE_PATH = "static/";
     private static final String PARSING = ".html";
+    private static final String UNAUTHORIZED_PAGE = "401.html";
+    private static final String NOTFOUND_PAGE = "404.html";
     private static final int QUERY_CONTAINS_COUNT = 2;
     private static final int HTTP_PAGE_INDEX = 1;
     private static final int QUERY_PARAMETER_INDEX = 1;
@@ -65,6 +67,10 @@ public class RequestURI {
         return getClass().getClassLoader().getResource(RESOURCE_PATH + url);
     }
 
+    public static URL notFound() {
+        return RequestURI.class.getClassLoader().getResource(RESOURCE_PATH + NOTFOUND_PAGE);
+    }
+
     public RequestURIWithQuery getRequestURIWithQuery() {
         return requestURIWithQuery;
     }
@@ -83,5 +89,9 @@ public class RequestURI {
 
     public URL getResource() {
         return resource;
+    }
+
+    public URL unauthorized() {
+        return RequestURI.class.getClassLoader().getResource(RESOURCE_PATH + UNAUTHORIZED_PAGE);
     }
 }

@@ -14,10 +14,12 @@ public class RequestHeader {
 
     private final String header;
     private final RequestURI requestURI;
+    private HttpStatus httpStatus;
 
     private RequestHeader(String header) {
         this.header = header;
         this.requestURI = new RequestURI(header);
+        this.httpStatus = HttpStatus.OK;
     }
 
     public static RequestHeader from(final InputStream inputStream) throws IOException {
@@ -37,7 +39,14 @@ public class RequestHeader {
     }
 
     public URL resource() {
+        if (HttpStatus.UNAUTHORIZED == httpStatus) {
+            return unauthorized();
+        }
         return requestURI.getResource();
+    }
+
+    public URL unauthorized() {
+        return requestURI.unauthorized();
     }
 
     public HttpMethod httpMethod() {
@@ -50,6 +59,22 @@ public class RequestHeader {
 
     public Map<String, String> queryParam() {
         return requestURI.queryParam();
+    }
+
+    public void changeHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+    }
+
+    public HttpStatus httpStatus() {
+        return httpStatus;
+    }
+
+    public int httpStatusValue() {
+        return httpStatus.value();
+    }
+
+    public String httpStatusReasonPhrase() {
+        return httpStatus().getReasonPhrase();
     }
 
     public String getHeader() {

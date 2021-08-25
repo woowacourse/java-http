@@ -6,15 +6,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 public class RequestHeader {
 
     public static final String DELIMITER = " ";
 
     private final String header;
+    private final RequestURI requestURI;
 
     private RequestHeader(String header) {
         this.header = header;
+        this.requestURI = new RequestURI(header);
     }
 
     public static RequestHeader from(final InputStream inputStream) throws IOException {
@@ -29,12 +32,24 @@ public class RequestHeader {
         return new RequestHeader(header.toString());
     }
 
-    public URL getURL() {
-        return RequestURI.findResourceURL(header);
+    public String url() {
+        return requestURI.getUrl();
     }
 
-    public HttpMethod getHttpMethod() {
+    public URL resource() {
+        return requestURI.getResource();
+    }
+
+    public HttpMethod httpMethod() {
         return HttpMethod.findRequest(header);
+    }
+
+    public String uri() {
+        return requestURI.uri();
+    }
+
+    public Map<String, String> queryParam() {
+        return requestURI.queryParam();
     }
 
     public String getHeader() {

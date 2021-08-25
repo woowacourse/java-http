@@ -17,15 +17,15 @@ public enum HttpMethod {
 
     private final String method;
 
-    HttpMethod(String method) {
+    HttpMethod(final String method) {
         this.method = method;
     }
 
-    public static HttpMethod findRequest(String line) {
+    public static HttpMethod findRequest(final String line) {
         return findByString(line.split(DELIMITER)[HTTP_REQUEST_INDEX]);
     }
 
-    public static HttpMethod findByString(String request) {
+    public static HttpMethod findByString(final String request) {
         return Arrays.stream(HttpMethod.values())
             .filter(httpMethod -> httpMethod.getMethod().equals(request))
             .findAny()

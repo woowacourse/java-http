@@ -1,11 +1,7 @@
 package nextstep.jwp;
 
+import nextstep.jwp.server.handler.RequestHandler;
 import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

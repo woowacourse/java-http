@@ -1,16 +1,14 @@
 package nextstep.jwp.fixture;
 
-import java.net.HttpRetryException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import nextstep.jwp.http.Body;
-import nextstep.jwp.http.Headers;
-import nextstep.jwp.http.HttpStatus;
-import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.request.request_line.HttpMethod;
-import nextstep.jwp.http.request.request_line.RequestLine;
+import nextstep.jwp.http.header.element.Body;
+import nextstep.jwp.http.header.element.Headers;
+import nextstep.jwp.http.header.request.HttpRequest;
+import nextstep.jwp.http.header.request.request_line.HttpMethod;
+import nextstep.jwp.http.header.request.request_line.RequestLine;
 
 public class Fixture {
     private static final String lineSeparator = "\r\n";

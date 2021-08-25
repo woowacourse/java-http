@@ -2,8 +2,8 @@ package nextstep.jwp.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
+import nextstep.jwp.http.header.element.HttpVersion;
 import org.junit.jupiter.api.Test;
 
 class HttpVersionTest {

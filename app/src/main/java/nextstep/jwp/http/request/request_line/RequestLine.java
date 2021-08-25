@@ -1,7 +1,5 @@
 package nextstep.jwp.http.request.request_line;
 
-import static nextstep.jwp.http.Protocol.LINE_SEPARATOR;
-
 import nextstep.jwp.http.HttpVersion;
 
 public class RequestLine {
@@ -10,8 +8,7 @@ public class RequestLine {
     private final HttpPath path;
     private final HttpVersion version;
 
-    public RequestLine(String httpRequest) {
-        String requestLine = httpRequest.split(LINE_SEPARATOR)[0];
+    public RequestLine(String requestLine) {
         String[] parameters = requestLine.split(" ");
 
         this.httpMethod = HttpMethod.from(parameters[0]);

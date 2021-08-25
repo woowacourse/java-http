@@ -17,10 +17,10 @@ class PostLoginControllerTest {
     @Test
     void doService() {
         final PostLoginController postLoginController = new PostLoginController();
-        final HttpRequest httpRequest = new HttpRequest(Fixture.postHttpRequest(
+        final HttpRequest httpRequest = Fixture.postHttpRequest(
             "/login",
             "account=gugu&password=password&email=hkkang%40woowahan.com"
-        ));
+        );
 
         final Response response = postLoginController.doService(httpRequest);
         assertThat(response.asString()).contains("302");
@@ -30,10 +30,10 @@ class PostLoginControllerTest {
     @Test
     void doService_invalidParams_fail() {
         final PostLoginController postLoginController = new PostLoginController();
-        final HttpRequest httpRequest = new HttpRequest(Fixture.postHttpRequest(
+        final HttpRequest httpRequest = Fixture.postHttpRequest(
             "/login",
             "account=gugu&email=hkkang%40woowahan.com"
-        ));
+        );
 
         assertThatThrownBy(() -> postLoginController.doService(httpRequest))
             .isInstanceOf(BadRequestException.class);
@@ -43,10 +43,10 @@ class PostLoginControllerTest {
     @Test
     void isSatisfiedBy() {
         final PostLoginController postLoginController = new PostLoginController();
-        final HttpRequest httpRequest = new HttpRequest(Fixture.postHttpRequest(
+        final HttpRequest httpRequest = Fixture.postHttpRequest(
             "/login",
             "account=gugu&password=password&email=hkkang%40woowahan.com"
-        ));
+        );
 
         assertThat(postLoginController.isSatisfiedBy(httpRequest)).isTrue();
     }

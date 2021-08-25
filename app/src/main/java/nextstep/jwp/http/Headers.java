@@ -7,7 +7,6 @@ import static nextstep.jwp.http.Protocol.LINE_SEPARATOR;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -27,24 +26,11 @@ public class Headers {
         this.headers = headers;
     }
 
-    private Map<String, String> extractHeaders(String httpRequest) {
-        String rawHeaders = extractRawHeaders(httpRequest);
-
-        return stringHeadersToMap(List.of(rawHeaders.split(LINE_SEPARATOR)));
+    private Map<String, String> extractHeaders(String rawHeaders) {
+        return rawHeadersToMap(List.of(rawHeaders.split(LINE_SEPARATOR)));
     }
 
-    private String extractRawHeaders(String httpRequest) {
-        int headerSignatureOffset = httpRequest.indexOf(LINE_SEPARATOR);
-        int bodySignatureOffset = httpRequest.indexOf(LINE_SEPARATOR.repeat(2));
-
-        if (bodySignatureOffset == -1) {
-            return httpRequest.substring(headerSignatureOffset);
-        }
-
-        return httpRequest.substring(headerSignatureOffset, bodySignatureOffset);
-    }
-
-    private Map<String, String> stringHeadersToMap(List<String> rawHeaders) {
+    private Map<String, String> rawHeadersToMap(List<String> rawHeaders) {
         return rawHeaders.stream()
             .filter(header -> !header.isBlank())
             .map(rawHeader -> rawHeader.split(" "))
@@ -63,13 +49,8 @@ public class Headers {
         return Optional.ofNullable(headers.get(header));
     }
 
-    public void setBodyHeader(Body body) {
-        if(Objects.isNull(body)) {
-            return;
-        }
-
-        headers.putIfAbsent("Content-Length", String.valueOf(body.length()));
-        headers.putIfAbsent("Content-Type", body.getContentType());
+    public void putHeader(String key, String value) {
+        this.headers.put(key, value);
     }
 
     public String asString() {

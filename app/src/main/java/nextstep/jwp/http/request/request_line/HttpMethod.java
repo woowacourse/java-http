@@ -2,6 +2,7 @@ package nextstep.jwp.http.request.request_line;
 
 import java.util.Arrays;
 import java.util.Objects;
+import nextstep.jwp.http.exception.InternalServerException;
 
 public enum HttpMethod {
     GET,
@@ -13,6 +14,6 @@ public enum HttpMethod {
         return Arrays.stream(values())
             .filter(method -> Objects.equals(method.name(), httpMethod.toUpperCase()))
             .findAny()
-            .orElseThrow(() -> new IllegalArgumentException("Cannot find httpMethod"));
+            .orElseThrow(InternalServerException::new);
     }
 }

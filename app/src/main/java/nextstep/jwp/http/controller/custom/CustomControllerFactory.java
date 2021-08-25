@@ -13,7 +13,8 @@ public class CustomControllerFactory {
             new PostLoginController(),
             new PostRegisterController(),
             new GetLoginController(),
-            new GetRegisterController()
+            new GetRegisterController(),
+            new WelcomePageController()
         );
     }
 }

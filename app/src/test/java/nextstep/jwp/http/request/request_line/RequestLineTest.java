@@ -9,11 +9,12 @@ import org.junit.jupiter.api.Test;
 
 class RequestLineTest {
 
+    public static final String PATH = "test.txt";
     private RequestLine requestLine;
 
     @BeforeEach
     void setUp() {
-        requestLine = new RequestLine(Fixture.getHttpRequest());
+        requestLine = new RequestLine(Fixture.createRequestLine(HttpMethod.GET, PATH));
     }
 
     @Test
@@ -27,7 +28,7 @@ class RequestLineTest {
     void getPath() {
         HttpPath path = requestLine.getPath();
 
-        assertThat(path.getUri()).isEqualTo(Fixture.getResourcePath());
+        assertThat(path.getUri()).isEqualTo(PATH);
     }
 
     @Test

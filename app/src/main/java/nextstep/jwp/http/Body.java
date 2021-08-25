@@ -1,57 +1,39 @@
 package nextstep.jwp.http;
 
-import static java.util.stream.Collectors.joining;
 import static nextstep.jwp.http.Protocol.LINE_SEPARATOR;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
 public class Body {
 
+    private static final Body EMPTY_BODY = new Body(null);
+
     private final String body;
-    private final String contentType;
 
-    public Body(String body, String contentType) {
+    public Body(String body) {
         this.body = body;
-        this.contentType = contentType;
     }
 
-    public static Body fromHttpRequest(String httpRequest) {
-        return new Body(extractBody(httpRequest), extractContentType(httpRequest));
-    }
-
-    private static String extractBody(String httpRequest) {
-        String bodySignature = LINE_SEPARATOR.repeat(2);
-
-        int offset = httpRequest.indexOf(bodySignature);
-        if (offset == -1) {
-            return null;
-        }
-
-        return httpRequest.substring(offset + bodySignature.length());
-    }
-
-    private static String extractContentType(String httpRequest) {
-        return Arrays.stream(httpRequest.split(LINE_SEPARATOR))
-            .filter(header -> header.contains("Content-Type"))
-            .map(header -> header.split(":")[1].trim())
-            .findAny()
-            .orElse(ContentType.TEXT_PLAIN.asString());
+    public static Body empty() {
+        return EMPTY_BODY;
     }
 
     public static Body fromFile(File file) {
         try {
-            String content = Files.readAllLines(file.toPath()).stream()
-                .collect(joining(LINE_SEPARATOR));
+            String content = String.join(LINE_SEPARATOR, Files.readAllLines(file.toPath()));
 
-            return new Body(content, ContentType.from(file));
+            return new Body(content);
         } catch (IOException e) {
             throw new IllegalArgumentException("파일을 읽는데 실패했습니다.", e);
         }
+    }
+
+    public boolean isEmpty() {
+        return Objects.isNull(body);
     }
 
     public Optional<String> getBody() {
@@ -60,7 +42,7 @@ public class Body {
 
     public String asString() {
         if(Objects.isNull(body)) {
-            return "" + LINE_SEPARATOR;
+            return "";
         }
 
         return body + LINE_SEPARATOR;
@@ -68,9 +50,5 @@ public class Body {
 
     public int length() {
         return body.getBytes().length;
-    }
-
-    public String getContentType() {
-        return contentType;
     }
 }

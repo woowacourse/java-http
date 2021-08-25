@@ -16,8 +16,7 @@ class HttpRequestTest {
 
     @BeforeEach
     void setUp() {
-        String httpRequest = Fixture.getHttpRequest();
-        this.httpRequest = new HttpRequest(httpRequest);
+        this.httpRequest = Fixture.getHttpRequest("/test");
     }
 
     @DisplayName("특정 httpHeader를 가져온다.")
@@ -46,8 +45,8 @@ class HttpRequestTest {
     }
 
     @Test
-    void getResourcePath() {
+    void getPath() {
         HttpPath resourcePath = httpRequest.getPath();
-        assertThat(resourcePath.getUri()).isEqualTo(Fixture.getResourcePath());
+        assertThat(resourcePath.getUri()).isEqualTo("/test");
     }
 }

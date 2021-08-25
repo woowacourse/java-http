@@ -10,15 +10,16 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Objects;
 import nextstep.jwp.http.Body;
+import nextstep.jwp.http.Headers;
 import nextstep.jwp.http.controller.Controller;
 import nextstep.jwp.http.controller.custom.CustomControllerFactory;
 import nextstep.jwp.http.controller.standard.StandardController;
 import nextstep.jwp.http.controller.standard.StandardControllerFactory;
-import nextstep.jwp.http.exception.BadRequestException;
 import nextstep.jwp.http.exception.Exceptions;
 import nextstep.jwp.http.exception.InternalServerException;
 import nextstep.jwp.http.exception.NotFoundException;
 import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.request.request_line.RequestLine;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.Response;
 import org.slf4j.Logger;
@@ -43,14 +44,18 @@ public class RequestHandler implements Runnable {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
             connection.getPort());
 
-        try (final BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            final OutputStream outputStream = connection.getOutputStream()
+        try (
+            var br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            var outputStream = connection.getOutputStream()
         ) {
-            String rawHeaders = extractRawHeaders(br);
-            HttpRequest httpRequest = new HttpRequest(rawHeaders);
+            RequestLine requestLine = new RequestLine(extractRawRequestLine(br));
+            Headers headers = new Headers(extractRawHeaders(br));
+            Body body = headers.getHeader("Content-Length")
+                .map(length -> extractRawBody(br, length))
+                .map(Body::new)
+                .orElseGet(Body::empty);
 
-            httpRequest.getHeader("Content-Length")
-                .ifPresent(length -> getAndSetBody(br, httpRequest, length));
+            HttpRequest httpRequest = new HttpRequest(requestLine, headers, body);
 
             Response httpResponse = doService(httpRequest, outputStream);
             if (Objects.isNull(httpResponse)) {
@@ -65,17 +70,33 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private void getAndSetBody(BufferedReader br, HttpRequest httpRequest, String length) {
+    private String extractRawRequestLine(BufferedReader br) throws IOException {
+        return br.readLine();
+    }
+
+    private String extractRawHeaders(BufferedReader br) throws IOException {
+        StringBuilder sb = new StringBuilder();
+
+        String line = null;
+        while (!"".equals(line)) {
+            line = br.readLine();
+            if (line == null) {
+                break;
+            }
+            sb.append(line).append(LINE_SEPARATOR);
+        }
+
+        return sb.toString();
+    }
+
+    private String extractRawBody(BufferedReader br, String length) {
         try {
             int contentLength = Integer.parseInt(length);
 
             char[] buffer = new char[contentLength];
             br.read(buffer, 0, contentLength);
 
-            final String contentType = httpRequest.getHeader("Content-Type")
-                .orElseThrow(BadRequestException::new);
-
-            httpRequest.setBody(new Body(new String(buffer), contentType));
+            return new String(buffer);
         } catch (IOException e) {
             throw new InternalServerException();
         }
@@ -86,14 +107,20 @@ public class RequestHandler implements Runnable {
     ) throws IOException {
         try {
             Controller controller = findController(httpRequest);
-
             return controller.doService(httpRequest);
         } catch (Exception e) {
-            HttpResponse httpResponse = Exceptions.findResponseByException(e);
-            outputStream.write(httpResponse.asString().getBytes());
-            outputStream.close();
+            responseExceptionPage(outputStream, e);
             return null;
         }
+    }
+
+    private void responseExceptionPage(OutputStream outputStream, Exception e) throws IOException {
+        Exceptions exceptions = Exceptions.findByException(e);
+        HttpResponse httpResponse =
+            HttpResponse.status(exceptions.getHttpStatus(), exceptions.getPath());
+
+        outputStream.write(httpResponse.asString().getBytes());
+        outputStream.close();
     }
 
     private void writeResponse(OutputStream outputStream, Response httpResponse)
@@ -115,21 +142,6 @@ public class RequestHandler implements Runnable {
             .filter(controller -> controller.isSatisfiedBy(httpRequest))
             .findAny()
             .orElseThrow(NotFoundException::new);
-    }
-
-    private String extractRawHeaders(BufferedReader br) throws IOException {
-        StringBuilder sb = new StringBuilder();
-
-        String line = null;
-        while (!"".equals(line)) {
-            line = br.readLine();
-            if (line == null) {
-                break;
-            }
-            sb.append(line).append(LINE_SEPARATOR);
-        }
-
-        return sb.toString();
     }
 
     private void close() {

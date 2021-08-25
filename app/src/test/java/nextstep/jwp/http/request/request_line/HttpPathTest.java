@@ -11,23 +11,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 class HttpPathTest {
-
-    @DisplayName("파일의 경로가 들어오면 File을 반환한다.")
-    @ParameterizedTest
-    @CsvSource({"/401.html", "/css/styles.css", "js/scripts.js"})
-    void toFile(String path) throws IOException {
-        HttpPath httpPath = new HttpPath(path);
-        File file = PathUtils.toFile(httpPath.getUri());
-
-        if(path.startsWith("/")) {
-            path = path.substring(1);
-        }
-
-        String actual = file.getAbsoluteFile().getPath();
-        actual = actual.replace("\\", "/");
-        assertThat(actual).endsWith(path);
-    }
-
     @DisplayName("URI에 getParameter가 있다면 파싱한다.")
     @Test
     void getParam() {
@@ -36,8 +19,5 @@ class HttpPathTest {
 
         assertThat(httpPath.getParam("test")).isEqualTo("1");
         assertThat(httpPath.getParam("test2")).isEqualTo("test");
-    }
-
-    void getPath() {
     }
 }

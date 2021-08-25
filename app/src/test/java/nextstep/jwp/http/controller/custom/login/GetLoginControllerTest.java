@@ -19,7 +19,7 @@ class GetLoginControllerTest {
     @MethodSource("parametersForDoService")
     void doService(String uri, int code, String content) {
         final GetLoginController getLoginController = new GetLoginController();
-        final HttpRequest httpRequest = new HttpRequest(Fixture.getHttpRequest(uri));
+        final HttpRequest httpRequest = Fixture.getHttpRequest(uri);
 
         final Response response = getLoginController.doService(httpRequest);
         assertThat(response.asString()).contains(String.valueOf(code));
@@ -38,7 +38,7 @@ class GetLoginControllerTest {
     @Test
     void isSatisfiedBy() {
         final GetLoginController getLoginController = new GetLoginController();
-        final HttpRequest httpRequest = new HttpRequest(Fixture.getHttpRequest("/login"));
+        final HttpRequest httpRequest = Fixture.getHttpRequest("/login");
 
         assertThat(getLoginController.isSatisfiedBy(httpRequest)).isTrue();
     }

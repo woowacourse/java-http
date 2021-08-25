@@ -17,10 +17,10 @@ class PostRegisterControllerTest {
     void doService() {
         final PostRegisterController postRegisterController = new PostRegisterController();
 
-        final HttpRequest httpRequest = new HttpRequest(Fixture.postHttpRequest(
+        final HttpRequest httpRequest = Fixture.postHttpRequest(
             "/register",
             "account=gugu&password=password&email=hkkang%40woowahan.com"
-        ));
+        );
 
         final Response response = postRegisterController.doService(httpRequest);
 
@@ -32,10 +32,10 @@ class PostRegisterControllerTest {
     void doService_badParams_fail() {
         final PostRegisterController postRegisterController = new PostRegisterController();
 
-        final HttpRequest httpRequest = new HttpRequest(Fixture.postHttpRequest(
+        final HttpRequest httpRequest = Fixture.postHttpRequest(
             "/register",
             "account=gugu&email=hkkang%40woowahan.com"
-        ));
+        );
 
         assertThatThrownBy(() -> postRegisterController.doService(httpRequest))
             .isInstanceOf(BadRequestException.class);
@@ -45,10 +45,10 @@ class PostRegisterControllerTest {
     @Test
     void isSatisfiedBy() {
         final PostRegisterController postRegisterController = new PostRegisterController();
-        final HttpRequest httpRequest = new HttpRequest(Fixture.postHttpRequest(
+        final HttpRequest httpRequest = Fixture.postHttpRequest(
             "/register",
             "account=gugu&password=password&email=hkkang%40woowahan.com"
-        ));
+        );
 
         assertThat(postRegisterController.isSatisfiedBy(httpRequest)).isTrue();
     }

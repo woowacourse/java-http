@@ -1,13 +1,11 @@
 package nextstep.jwp.http;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
 public enum ContentType {
     TEXT_PLAIN("text/plain", "txt"),
     TEXT_HTML("text/html", "html", "htm"),
-    TEXT_HTML_CHARSET_UTF_8("text/html;charset=utf-8", "html", "htm"),
     TEXT_CSS("text/css", "css"),
     APPLICATION_JS("application/js", "js");
 
@@ -19,8 +17,8 @@ public enum ContentType {
         this.supportExts = List.of(supportExts);
     }
 
-    public static String from(File file) {
-        String[] splitFileName = file.getName().split("\\.");
+    public static String from(String path) {
+        String[] splitFileName = path.split("\\.");
         String ext = splitFileName[splitFileName.length-1];
 
         return Arrays.stream(values())

@@ -1,9 +1,16 @@
 package nextstep.jwp.fixture;
 
+import java.net.HttpRetryException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import nextstep.jwp.http.Body;
+import nextstep.jwp.http.Headers;
+import nextstep.jwp.http.HttpStatus;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.request.request_line.HttpMethod;
+import nextstep.jwp.http.request.request_line.RequestLine;
 
 public class Fixture {
     private static final String lineSeparator = "\r\n";
@@ -12,23 +19,23 @@ public class Fixture {
         return httpRequest("GET");
     }
 
-    public static String getHttpRequest(String path) {
+    public static String rawGetHttpRequest(String path) {
         return httpRequest("GET", path);
     }
 
-    public static String postHttpRequest(String body) {
+    public static String rawPostHttpRequest(String body) {
         return httpRequestWithBody("POST", body);
     }
 
-    public static String postHttpRequest(String path, String body) {
+    public static String rawPostHttpRequest(String path, String body) {
         return httpRequestWithBody("POST", path, body);
     }
 
-    public static String putHttpRequest(String body) {
+    public static String rawPutHttpRequest(String body) {
         return httpRequestWithBody("PUT", body);
     }
 
-    public static String deleteHttpRequest() {
+    public static String rawDeleteHttpRequest() {
         return httpRequest("DELETE");
     }
 
@@ -71,4 +78,33 @@ public class Fixture {
     public static String getResourcePath() {
         return "/nextstep.txt";
     }
+
+    public static String createRequestLine(HttpMethod httpMethod, String path) {
+        return String.format("%s %s HTTP/1.1", httpMethod.name(), path);
+    }
+
+    public static HttpRequest getHttpRequest(String path) {
+        RequestLine requestLine = new RequestLine(createRequestLine(HttpMethod.GET, path));
+        Headers headers = new Headers();
+
+        headers.putHeader("Host", "localhost:8080");
+        headers.putHeader("Connection", "keep-alive");
+        headers.putHeader("Accept", "*/*");
+
+        return new HttpRequest(requestLine, headers, Body.empty());
+    }
+
+    public static HttpRequest postHttpRequest(String path, String rawBody) {
+        RequestLine requestLine = new RequestLine(createRequestLine(HttpMethod.POST, path));
+        Headers headers = new Headers();
+        Body body = new Body(rawBody);
+
+        headers.putHeader("Host", "localhost:8080");
+        headers.putHeader("Connection", "keep-alive");
+        headers.putHeader("Accept", "*/*");
+        headers.putHeader("Content-Length", String.valueOf(body.length()));
+
+        return new HttpRequest(requestLine, headers, body);
+    }
+
 }

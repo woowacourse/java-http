@@ -10,6 +10,7 @@ import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.http.HttpVersion;
 import nextstep.jwp.http.common.ParameterExtractor;
 import nextstep.jwp.http.controller.Controller;
+import nextstep.jwp.http.controller.custom.CustomController;
 import nextstep.jwp.http.exception.BadRequestException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.request_line.HttpMethod;
@@ -18,7 +19,7 @@ import nextstep.jwp.http.response.Response;
 import nextstep.jwp.http.response.response_line.ResponseLine;
 import nextstep.jwp.model.User;
 
-public class PostRegisterController implements Controller {
+public class PostRegisterController extends CustomController {
 
     public static final String REGISTER_PATH = "/register";
     private static final String INDEX_PAGE_PATH = "/index.html";
@@ -35,7 +36,7 @@ public class PostRegisterController implements Controller {
         User user = new User(null, account, password, email);
         InMemoryUserRepository.save(user);
 
-        return createLoginSuccessPage();
+        return HttpResponse.redirect(INDEX_PAGE_PATH);
     }
 
     private String getBody(HttpRequest httpRequest) {
@@ -51,19 +52,13 @@ public class PostRegisterController implements Controller {
         }
     }
 
-    private HttpResponse createLoginSuccessPage() {
-        ResponseLine responseLine = new ResponseLine(HttpVersion.HTTP1_1, HttpStatus.FOUND);
-
-        Map<String, String> rawHeaders = new HashMap<>();
-        rawHeaders.put("Location", INDEX_PAGE_PATH);
-
-        Headers headers = new Headers(rawHeaders);
-        return new HttpResponse(responseLine, headers);
+    @Override
+    protected HttpMethod httpMethod() {
+        return HttpMethod.POST;
     }
 
     @Override
-    public boolean isSatisfiedBy(HttpRequest httpRequest) {
-        return httpRequest.getHttpMethod().equals(HttpMethod.POST) &&
-            httpRequest.getPath().getUri().equals(REGISTER_PATH);
+    protected String path() {
+        return REGISTER_PATH;
     }
 }

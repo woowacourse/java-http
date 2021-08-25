@@ -50,9 +50,12 @@ public class RequestHandler implements Runnable {
             String[] splittedRequestURI = requestURI.split(" ");
             String file = splittedRequestURI[1].substring(1);
             URL resource = getClass().getClassLoader().getResource("static/" + file);
-            assert resource != null;
-            final Path path = new File(resource.getPath()).toPath();
-            String responseBody = Files.readString(path);
+
+            String responseBody = "";
+            if (Objects.nonNull(resource)) {
+                final Path path = new File(resource.getPath()).toPath();
+                responseBody = Files.readString(path);
+            }
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

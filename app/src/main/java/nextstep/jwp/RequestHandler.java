@@ -3,10 +3,15 @@ package nextstep.jwp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Objects;
 
 public class RequestHandler implements Runnable {
@@ -26,7 +31,19 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final String responseBody = "Hello world!";
+            byte[] bytes = new byte[800];
+            int totalByteCount = inputStream.read(bytes);
+            String httpRequestHeader = new String(bytes, 0, totalByteCount, StandardCharsets.UTF_8);
+            String[] splittedHeaders = httpRequestHeader.split("\n");
+
+            // requestURI
+            String requestURI = splittedHeaders[0];
+            String[] splittedRequestURI = requestURI.split(" ");
+            String file = splittedRequestURI[1].substring(1);
+            URL resource = getClass().getClassLoader().getResource("static/" + file);
+            assert resource != null;
+            final Path path = new File(resource.getPath()).toPath();
+            String responseBody = Files.readString(path);
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

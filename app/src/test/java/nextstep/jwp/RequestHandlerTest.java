@@ -2,11 +2,10 @@ package nextstep.jwp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
+import nextstep.common.TestUtil;
 import nextstep.jwp.framework.infrastructure.HttpHandler;
+import nextstep.jwp.framework.infrastructure.http.status.HttpStatus;
 import nextstep.jwp.framework.infrastructure.mapping.HttpRequestMapping;
 import nextstep.jwp.framework.webserver.RequestHandler;
 import org.junit.jupiter.api.Test;
@@ -23,13 +22,8 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+            .isEqualTo(TestUtil.writeResponse("/index.html", HttpStatus.OK));
     }
 
     @Test
@@ -49,12 +43,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+            .isEqualTo(TestUtil.writeResponse("/index.html", HttpStatus.OK));
     }
 }

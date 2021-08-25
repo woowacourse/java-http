@@ -39,7 +39,7 @@ public class RegisterRequestAdapter extends HttpPostRequestAdapter {
         } catch (InstantiationException | InvocationTargetException
             | NoSuchMethodException | IllegalAccessException e) {
             log.error("Method Invoke or Bean Instantiation Error", e);
-            return staticFileResolver.renderDefaultViewByStatus(HttpStatus.INTERNAL_SEVER_ERROR);
+            return staticFileResolver.renderDefaultViewByStatus(HttpStatus.UNAUTHORIZED);
         }
     }
 }

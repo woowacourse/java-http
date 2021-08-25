@@ -12,12 +12,11 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final Headers headers;
-    private final Body body;
+    private Body body;
 
     public HttpRequest(String httpRequest) {
         this.requestLine = new RequestLine(httpRequest);
         this.headers = new Headers(httpRequest);
-        this.body = Body.fromHttpRequest(httpRequest);
     }
 
     public String getRequestLine() {
@@ -42,5 +41,9 @@ public class HttpRequest {
 
     public Body getBody() {
         return body;
+    }
+
+    public void setBody(Body body) {
+        this.body = body;
     }
 }

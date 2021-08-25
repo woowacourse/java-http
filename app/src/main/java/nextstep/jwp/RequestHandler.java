@@ -3,24 +3,26 @@ package nextstep.jwp;
 import static nextstep.jwp.http.Protocol.LINE_SEPARATOR;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.util.List;
+import java.util.Objects;
+import nextstep.jwp.http.Body;
 import nextstep.jwp.http.controller.Controller;
 import nextstep.jwp.http.controller.custom.CustomControllerFactory;
 import nextstep.jwp.http.controller.standard.StandardController;
 import nextstep.jwp.http.controller.standard.StandardControllerFactory;
+import nextstep.jwp.http.exception.BadRequestException;
 import nextstep.jwp.http.exception.Exceptions;
+import nextstep.jwp.http.exception.InternalServerException;
+import nextstep.jwp.http.exception.NotFoundException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
-import java.util.Objects;
 
 public class RequestHandler implements Runnable {
 
@@ -38,19 +40,20 @@ public class RequestHandler implements Runnable {
 
     @Override
     public void run() {
-        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
-        final InputStream inputStream = getInputStream();
-        final OutputStream outputStream = getOutputStream();
+        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
+            connection.getPort());
 
-        try (inputStream; outputStream) {
-            String inputData = asString(inputStream);
-            if(inputData.isBlank()) {
-                System.out.println("cnd");
-                return;
-            }
+        try (final BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            final OutputStream outputStream = connection.getOutputStream()
+        ) {
+            String rawHeaders = extractRawHeaders(br);
+            HttpRequest httpRequest = new HttpRequest(rawHeaders);
 
-            Response httpResponse = doService(inputData, outputStream);
-            if(Objects.isNull(httpResponse)) {
+            httpRequest.getHeader("Content-Length")
+                .ifPresent(length -> getAndSetBody(br, httpRequest, length));
+
+            Response httpResponse = doService(httpRequest, outputStream);
+            if (Objects.isNull(httpResponse)) {
                 return;
             }
 
@@ -62,19 +65,34 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private InputStream getInputStream() {
+    private void getAndSetBody(BufferedReader br, HttpRequest httpRequest, String length) {
         try {
-            return connection.getInputStream();
+            int contentLength = Integer.parseInt(length);
+
+            char[] buffer = new char[contentLength];
+            br.read(buffer, 0, contentLength);
+
+            final String contentType = httpRequest.getHeader("Content-Type")
+                .orElseThrow(BadRequestException::new);
+
+            httpRequest.setBody(new Body(new String(buffer), contentType));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new InternalServerException();
         }
     }
 
-    private OutputStream getOutputStream() {
+    private Response doService(
+        HttpRequest httpRequest, OutputStream outputStream
+    ) throws IOException {
         try {
-            return connection.getOutputStream();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            Controller controller = findController(httpRequest);
+
+            return controller.doService(httpRequest);
+        } catch (Exception e) {
+            HttpResponse httpResponse = Exceptions.findResponseByException(e);
+            outputStream.write(httpResponse.asString().getBytes());
+            outputStream.close();
+            return null;
         }
     }
 
@@ -85,43 +103,29 @@ public class RequestHandler implements Runnable {
         outputStream.flush();
     }
 
-    private Response doService(String inputData, OutputStream outputStream) throws IOException {
-        try {
-            HttpRequest httpRequest = new HttpRequest(inputData);
-            Controller controller = findController(httpRequest);
-
-            return controller.doService(httpRequest);
-        } catch (Exception e) {
-            HttpResponse httpResponse = Exceptions.findResponseByException(e);
-            outputStream.write(httpResponse.asString().getBytes());
-
-            return null;
-        }
-    }
-
     private Controller findController(HttpRequest httpRequest) {
         return customControllers.stream()
             .filter(controller -> controller.isSatisfiedBy(httpRequest))
             .findAny()
-            .orElse(findStandardController(httpRequest));
+            .orElseGet(() -> findStandardController(httpRequest));
     }
 
     private StandardController findStandardController(HttpRequest httpRequest) {
         return standardControllers.stream()
             .filter(controller -> controller.isSatisfiedBy(httpRequest))
             .findAny()
-            .orElseThrow(() -> new IllegalArgumentException("컨트롤러를 찾을 수 없습니다."));
+            .orElseThrow(NotFoundException::new);
     }
 
-    private String asString(InputStream inputStream) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-
+    private String extractRawHeaders(BufferedReader br) throws IOException {
         StringBuilder sb = new StringBuilder();
 
-        while(!br.ready());
-
-        String line;
-        while(br.ready() && (line = br.readLine()) != null) {
+        String line = null;
+        while (!"".equals(line)) {
+            line = br.readLine();
+            if (line == null) {
+                break;
+            }
             sb.append(line).append(LINE_SEPARATOR);
         }
 

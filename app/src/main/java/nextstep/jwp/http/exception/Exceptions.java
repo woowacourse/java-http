@@ -33,6 +33,8 @@ public enum Exceptions {
             .findAny()
             .orElse(INTERNAL_SERVER_ERROR);
 
+        log.error(e.toString());
+
         return createResponse(exception);
     }
 

@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
+import nextstep.jwp.http.RequestHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,10 +28,8 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
                 final OutputStream outputStream = connection.getOutputStream()) {
 
-            final RequestReader requestReader = new RequestReader();
-            final String read = requestReader.readHeader(inputStream);
-            final String uri = requestReader.extractUri(read);
-            final String response = requestReader.getResponse(uri);
+            final HttpServlet httpServlet = new HttpServlet(inputStream);
+            final String response = httpServlet.getResponse();
 
             outputStream.write(response.getBytes());
             outputStream.flush();

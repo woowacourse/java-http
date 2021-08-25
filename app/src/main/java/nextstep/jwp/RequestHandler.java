@@ -185,8 +185,14 @@ public class RequestHandler implements Runnable {
                     contentType = "application/js";
                 }
                 final Path filePath = Paths.get(url.toURI());
-                final List<String> fileLines = Files.readAllLines(filePath);
-                responseBody = String.join(NEW_LINE, fileLines);
+                if (!"ico".equals(fileNameExtension)) {
+                    final List<String> fileLines = Files.readAllLines(filePath);
+                    responseBody = String.join(NEW_LINE, fileLines);
+                }
+                if ("ico".equals(fileNameExtension)) {
+                    contentType = "image/x-icon";
+                    responseBody = new File(filePath.toUri()).toString();
+                }
             }
 
             String response = null;

@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import nextstep.common.TestUtil;
-import nextstep.jwp.framework.infrastructure.config.FactoryConfiguration;
+import nextstep.jwp.framework.config.FactoryConfiguration;
 import nextstep.jwp.framework.infrastructure.http.status.HttpStatus;
 import nextstep.jwp.framework.webserver.RequestHandler;
 import org.junit.jupiter.api.Test;

@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Arrays;
 import nextstep.common.TestUtil;
 import nextstep.jwp.framework.infrastructure.adapter.RequestAdapter;
-import nextstep.jwp.framework.infrastructure.config.FactoryConfiguration;
+import nextstep.jwp.framework.config.FactoryConfiguration;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequestBody;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequestHeader;

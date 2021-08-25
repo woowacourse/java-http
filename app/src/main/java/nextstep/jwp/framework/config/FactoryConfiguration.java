@@ -1,4 +1,4 @@
-package nextstep.jwp.framework.infrastructure.config;
+package nextstep.jwp.framework.config;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;

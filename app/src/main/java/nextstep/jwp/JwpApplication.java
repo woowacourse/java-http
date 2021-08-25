@@ -1,7 +1,7 @@
 package nextstep.jwp;
 
 import nextstep.jwp.framework.domain.NetworkHandler;
-import nextstep.jwp.framework.infrastructure.config.FactoryConfiguration;
+import nextstep.jwp.framework.config.FactoryConfiguration;
 import nextstep.jwp.framework.webserver.WebServer;
 
 public class JwpApplication {

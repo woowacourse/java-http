@@ -9,7 +9,7 @@ import nextstep.jwp.framework.infrastructure.adapter.get.PageGetRequestAdapter;
 import nextstep.jwp.framework.infrastructure.adapter.get.StaticRequestAdapter;
 import nextstep.jwp.framework.infrastructure.adapter.post.LoginRequestAdapter;
 import nextstep.jwp.framework.infrastructure.adapter.post.RegisterRequestAdapter;
-import nextstep.jwp.framework.infrastructure.config.FactoryConfiguration;
+import nextstep.jwp.framework.config.FactoryConfiguration;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequestBody;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequestHeader;

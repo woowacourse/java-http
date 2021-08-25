@@ -1,5 +1,7 @@
 package nextstep.jwp.model;
 
+import nextstep.jwp.exception.UnAuthorizedException;
+
 public class User {
 
     private final long id;
@@ -14,12 +16,24 @@ public class User {
         this.email = email;
     }
 
+    public User(String account, String password) {
+        this(-1L, account, password, null);
+    }
+
     public boolean checkPassword(String password) {
         return this.password.equals(password);
     }
 
     public String getAccount() {
         return account;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     @Override
@@ -30,5 +44,11 @@ public class User {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 '}';
+    }
+
+    public void validatePassword(String requestPassword) {
+        if (!password.equals(requestPassword)) {
+            throw new UnAuthorizedException("비밀번호가 일치하지 않습니다.");
+        }
     }
 }

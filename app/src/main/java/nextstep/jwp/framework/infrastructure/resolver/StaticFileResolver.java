@@ -79,7 +79,7 @@ public class StaticFileResolver {
     }
 
     private HttpStatus adjustHttpStatus(Path path, HttpStatus httpStatus) {
-        if (path.toString().equals("/static/404.html")) {
+        if (path.toString().endsWith("/static/404.html")) {
             return HttpStatus.NOT_FOUND;
         }
         return httpStatus;

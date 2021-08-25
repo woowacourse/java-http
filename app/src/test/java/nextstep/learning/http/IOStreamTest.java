@@ -200,7 +200,7 @@ class IOStreamTest {
 
             String s;
             while((s = bufferedReader.readLine()) != null) {
-                actual.append(s + System.lineSeparator());
+                actual.append(s + "\r\n");
             }
 
             assertThat(actual).hasToString(emoji);

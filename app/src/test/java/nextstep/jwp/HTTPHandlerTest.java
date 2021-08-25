@@ -9,7 +9,7 @@ import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class RequestHandlerTest {
+class HTTPHandlerTest {
 
     @Test
     void run() {

@@ -136,41 +136,4 @@ class HttpRequestHeaderTest {
             }
         }
     }
-
-    @DisplayName("isRequestingStaticFiles 메서드는")
-    @Nested
-    class Describe_isRequestingStaticFiles {
-
-        @DisplayName("요청 URL이 .css, .js, .html 등으로 끝나면")
-        @Nested
-        class Context_static_file {
-
-            @DisplayName("true를 반환한다.")
-            @Test
-            void it_returns_true() {
-                // given
-                List<String> headers = Arrays.asList("GET /index.html HTTP/1.1");
-                HttpRequestHeader header = HttpRequestHeader.from(headers);
-
-                // when, then
-                assertThat(header.isRequestingStaticFiles()).isTrue();
-            }
-        }
-
-        @DisplayName("요청 URL이 .css, .js, .html 등으로 끝나지 않으면")
-        @Nested
-        class Context_not_static_file {
-
-            @DisplayName("false를 반환한다.")
-            @Test
-            void it_returns_true() {
-                // given
-                List<String> headers = Arrays.asList("GET /api HTTP/1.1");
-                HttpRequestHeader header = HttpRequestHeader.from(headers);
-
-                // when, then
-                assertThat(header.isRequestingStaticFiles()).isFalse();
-            }
-        }
-    }
 }

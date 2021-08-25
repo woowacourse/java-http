@@ -97,10 +97,6 @@ public class HttpRequestHeader {
         return Integer.parseInt(split[1]);
     }
 
-    public boolean isRequestingStaticFiles() {
-        return url.endsWith(".html") || url.endsWith(".css") || url.endsWith(".js");
-    }
-
     public HttpMethod getMethod() {
         return httpMethod;
     }

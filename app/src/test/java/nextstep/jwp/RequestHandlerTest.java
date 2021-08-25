@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import nextstep.jwp.framework.infrastructure.HttpHandler;
 import nextstep.jwp.framework.infrastructure.mapping.HttpRequestMapping;
 import nextstep.jwp.framework.webserver.RequestHandler;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
@@ -33,7 +32,6 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @Disabled
     @Test
     void index() throws IOException {
         // given

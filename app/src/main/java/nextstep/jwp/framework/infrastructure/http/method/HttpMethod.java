@@ -2,10 +2,7 @@ package nextstep.jwp.framework.infrastructure.http.method;
 
 public enum HttpMethod {
     GET("GET"),
-    POST("POST"),
-    PUT("PUT"),
-    DELETE("DELETE"),
-    OPTIONS("OPTIONS");
+    POST("POST");
 
     private final String signature;
 

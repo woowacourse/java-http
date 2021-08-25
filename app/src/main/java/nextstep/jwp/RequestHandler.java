@@ -10,13 +10,16 @@ import java.io.*;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class RequestHandler implements Runnable {
@@ -35,33 +38,104 @@ public class RequestHandler implements Runnable {
     public void run() {
         LOG.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
-        try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
+        try (final InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8);
+             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+             final OutputStream outputStream = new BufferedOutputStream(connection.getOutputStream())) {
 
             int statusCode = 200;
-            final List<String> header = getHeader(inputStream);
 
-            final String headerFirstLine = header.get(0);
-            final String requestUri = headerFirstLine.split(" ")[1];
+            String line = null;
+            Map<String, String> httpRequestHeaders = new ConcurrentHashMap<>();
+            boolean isFirstLine = true;
+            String startLine = null;
+            while (!"".equals(line)) {
+                line = bufferedReader.readLine();
+                if (line == null) {
+                    return;
+                }
+                if (isFirstLine) {
+                    startLine = line;
+                    isFirstLine = false;
+                    continue;
+                }
+                if (line.contains(":")) {
+                    final String key = line.split(":")[0];
+                    final String value = line.split(":")[1];
+                    httpRequestHeaders.put(key, value);
+                }
+            }
+
+            final String method = startLine.split(" ")[0];
+            LOG.debug("method : {}", method);
+
+            String requestBody = null;
+            if ("POST".equals(method) && httpRequestHeaders.containsKey("Content-Length")) {
+                String contentLengthValue = httpRequestHeaders.get("Content-Length");
+                contentLengthValue = contentLengthValue.trim();
+                int contentLength = Integer.parseInt(contentLengthValue);
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                requestBody = new String(buffer);
+                LOG.debug("requestBody : {}", requestBody);
+            }
+
+            final String requestUri = startLine.split(" ")[1];
+            LOG.debug("request URI : {}", requestUri);
             final int delimiterIndex = requestUri.indexOf("?");
             String uriPath = requestUri;
-            String queryString = null;
+            String queryParam = null;
             if (delimiterIndex != -1) {
                 LOG.debug("delimiterIndex : {}", delimiterIndex);
                 uriPath = requestUri.substring(0, delimiterIndex);
                 LOG.debug("uriPath : {}", uriPath);
-                queryString = requestUri.substring(delimiterIndex + 1);
-                LOG.debug("queryString : {}", queryString);
+                queryParam = requestUri.substring(delimiterIndex + 1);
+                LOG.debug("queryParam : {}", queryParam);
             }
-            String fileName = uriPath.substring(1);;
-            if ("/login".equals(uriPath)) {
+            String fileName = uriPath.substring(1);
+            if ("GET".equals(method) && "/register".equals(uriPath)) {
                 fileName = fileName + HTML_SUFFIX;
-                if (queryString != null) {
+            }
+            if ("POST".equals(method) && "/register".equals(uriPath)) {
+                LOG.debug("body : {}", requestBody);
+                if (!requestBody.isBlank()) {
+                    String account = null;
+                    String email = null;
+                    String password = null;
+                    final String[] splitQueryParam = requestBody.split("&");
+                    for (String singleQueryParam : splitQueryParam) {
+                        final String[] splitSingleQueryString = singleQueryParam.split("=");
+                        final String key = splitSingleQueryString[0];
+                        final String value = splitSingleQueryString[1];
+                        if ("account".equals(key)) {
+                            account = value;
+                        }
+                        if ("email".equals(key)) {
+                            email = URLDecoder.decode(value, StandardCharsets.UTF_8);
+                        }
+                        if ("password".equals(key)) {
+                            password = value;
+                        }
+                    }
+                    final User signinRequestUser = new User(account, password, email);
+                    LOG.debug("회원가입 요청 account : {}", signinRequestUser.getAccount());
+                    LOG.debug("회원가입 요청 email : {}", signinRequestUser.getEmail());
+                    LOG.debug("회원가입 요청 password : {}", signinRequestUser.getPassword());
+                    InMemoryUserRepository.save(signinRequestUser);
+                    fileName = "index.html";
+                    statusCode = 302;
+                }
+            }
+            if ("GET".equals(method) && "/login".equals(uriPath)) {
+                fileName = fileName + HTML_SUFFIX;
+            }
+            if ("POST".equals(method) && "/login".equals(uriPath)) {
+                LOG.debug("body : {}", requestBody);
+                if (!requestBody.isBlank()) {
                     String account = null;
                     String password = null;
-                    final String[] splitQueryString = queryString.split("&");
-                    for (String singleQueryString : splitQueryString) {
-                        final String[] splitSingleQueryString = singleQueryString.split("=");
+                    final String[] splitQueryParam = requestBody.split("&");
+                    for (String singleQueryParam : splitQueryParam) {
+                        final String[] splitSingleQueryString = singleQueryParam.split("=");
                         final String key = splitSingleQueryString[0];
                         final String value = splitSingleQueryString[1];
                         if ("account".equals(key)) {
@@ -90,15 +164,18 @@ public class RequestHandler implements Runnable {
                 }
             }
 
-            final URL url = getClass().getClassLoader().getResource("static/" + fileName);
-            if (url == null) {
-                LOG.error("fileName : {}", fileName);
-                throw new IOException("fileName으로 찾은 url의 값이 null 입니다.");
-            }
+            String responseBody = null;
+            if ("GET".equals(method)) {
+                final URL url = getClass().getClassLoader().getResource("static/" + fileName);
+                if (url == null) {
+                    LOG.error("fileName : {}", fileName);
+                    throw new IOException("fileName으로 찾은 url의 값이 null 입니다.");
+                }
 
-            final Path filePath = Paths.get(url.toURI());
-            final List<String> fileLines = Files.readAllLines(filePath);
-            final String responseBody = String.join(NEW_LINE, fileLines);
+                final Path filePath = Paths.get(url.toURI());
+                final List<String> fileLines = Files.readAllLines(filePath);
+                responseBody = String.join(NEW_LINE, fileLines);
+            }
 
             String response = null;
             if (statusCode == 200) {
@@ -112,11 +189,7 @@ public class RequestHandler implements Runnable {
             if (statusCode == 302) {
                 response = String.join(NEW_LINE,
                         "HTTP/1.1 302 Found ",
-                        "Location: http://localhost:8080/" + fileName,
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
+                        "Location: http://localhost:8080/" + fileName);
             }
 
             outputStream.write(response.getBytes());
@@ -125,40 +198,6 @@ public class RequestHandler implements Runnable {
             LOG.error("Exception stream", exception);
         } finally {
             close();
-        }
-    }
-
-    private List<String> getHeader(InputStream inputStream) throws IOException {
-        final StringBuilder stringBuilder = getStringBuilderOfInputStreamContent(inputStream);
-        final String[] splitStringBuilderContent = stringBuilder.toString().split(NEW_LINE);
-
-        return Arrays.stream(splitStringBuilderContent)
-                .collect(Collectors.toList());
-    }
-
-    private StringBuilder getStringBuilderOfInputStreamContent(InputStream inputStream) throws IOException {
-        final BufferedReader bufferedReader = getBufferedReader(inputStream);
-        final StringBuilder stringBuilder = new StringBuilder();
-
-        String line = null;
-        while (!"".equals(line)) {
-            line = bufferedReader.readLine();
-            validateLineIsNotNull(line);
-            stringBuilder.append(line);
-            stringBuilder.append(NEW_LINE);
-        }
-
-        return stringBuilder;
-    }
-
-    private BufferedReader getBufferedReader(InputStream inputStream) {
-        final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-        return new BufferedReader(inputStreamReader);
-    }
-
-    private void validateLineIsNotNull(String line) throws IOException {
-        if (line == null) {
-            throw new IOException("BufferedReader에서 readLine()으로 읽은 line의 값이 null입니다.");
         }
     }
 

@@ -27,7 +27,7 @@ class RequestLineTest {
     void getPath() {
         HttpPath path = requestLine.getPath();
 
-        assertThat(path.getPath()).isEqualTo(Fixture.getResourcePath());
+        assertThat(path.getUri()).isEqualTo(Fixture.getResourcePath());
     }
 
     @Test

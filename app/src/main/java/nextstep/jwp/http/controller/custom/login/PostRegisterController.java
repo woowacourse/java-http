@@ -64,6 +64,6 @@ public class PostRegisterController implements Controller {
     @Override
     public boolean isSatisfiedBy(HttpRequest httpRequest) {
         return httpRequest.getHttpMethod().equals(HttpMethod.POST) &&
-            httpRequest.getPath().getPath().equals(REGISTER_PATH);
+            httpRequest.getPath().getUri().equals(REGISTER_PATH);
     }
 }

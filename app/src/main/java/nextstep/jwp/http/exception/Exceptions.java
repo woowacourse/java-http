@@ -6,6 +6,7 @@ import nextstep.jwp.http.Body;
 import nextstep.jwp.http.Headers;
 import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.http.HttpVersion;
+import nextstep.jwp.http.common.PathUtils;
 import nextstep.jwp.http.request.request_line.HttpPath;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.response_line.ResponseLine;
@@ -49,6 +50,6 @@ public enum Exceptions {
 
     private static File getErrorPage(Exceptions e) {
         String resource = String.format("%d.html", e.httpcode.getCode());
-        return new HttpPath(resource).toFile();
+        return PathUtils.toFile(resource);
     }
 }

@@ -67,6 +67,6 @@ public class PostLoginController implements Controller {
     @Override
     public boolean isSatisfiedBy(HttpRequest httpRequest) {
         return httpRequest.getHttpMethod().equals(HttpMethod.POST) &&
-            httpRequest.getPath().getPath().equals(LOGIN_PATH);
+            httpRequest.getPath().getUri().equals(LOGIN_PATH);
     }
 }

@@ -1,27 +1,16 @@
 package nextstep.jwp.http.request.request_line;
 
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toMap;
-
-import java.io.File;
-import java.net.URL;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Stream;
 import nextstep.jwp.http.common.ParameterExtractor;
-import nextstep.jwp.http.exception.NotFoundException;
 
 public class HttpPath {
-    private final String prefix = "static";
 
-    private final String path;
+    private final String uri;
     private final Map<String, String> parameters;
 
     public HttpPath(String uri) {
-        this.path = extractPath(uri);
+        this.uri = extractPath(uri);
         this.parameters = extractParams(uri);
     }
 
@@ -41,30 +30,15 @@ public class HttpPath {
         return ParameterExtractor.extract(uri);
     }
 
-    public File toFile() {
-        String path = rewritePath();
-        return new File(path);
+    public boolean containsQueryParam(String key) {
+        return parameters.containsKey(key);
     }
 
-    private String rewritePath() {
-        String path = Stream.of(new String[]{prefix}, this.path.split("/"))
-            .flatMap(Arrays::stream)
-            .filter(piece -> !piece.isBlank())
-            .collect(joining("/"));
-
-        URL systemResource = ClassLoader.getSystemResource(path);
-        if(Objects.isNull(systemResource)) {
-             throw new NotFoundException();
-        }
-
-        return ClassLoader.getSystemResource(path).getPath();
+    public String getParam(String key) {
+        return parameters.get(key);
     }
 
-    public Optional<String> getParam(String key) {
-        return Optional.ofNullable(parameters.get(key));
-    }
-
-    public String getPath() {
-        return path;
+    public String getUri() {
+        return uri;
     }
 }

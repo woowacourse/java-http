@@ -48,6 +48,6 @@ class HttpRequestTest {
     @Test
     void getResourcePath() {
         HttpPath resourcePath = httpRequest.getPath();
-        assertThat(resourcePath.getPath()).isEqualTo(Fixture.getResourcePath());
+        assertThat(resourcePath.getUri()).isEqualTo(Fixture.getResourcePath());
     }
 }

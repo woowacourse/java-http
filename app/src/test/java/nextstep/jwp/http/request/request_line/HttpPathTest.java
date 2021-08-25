@@ -4,8 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
+import nextstep.jwp.http.common.PathUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,7 +17,7 @@ class HttpPathTest {
     @CsvSource({"/401.html", "/css/styles.css", "js/scripts.js"})
     void toFile(String path) throws IOException {
         HttpPath httpPath = new HttpPath(path);
-        File file = httpPath.toFile();
+        File file = PathUtils.toFile(httpPath.getUri());
 
         if(path.startsWith("/")) {
             path = path.substring(1);
@@ -35,8 +34,8 @@ class HttpPathTest {
         final String uri = "/nextstep.txt?test=1&test2=test";
         HttpPath httpPath = new HttpPath(uri);
 
-        assertThat(httpPath.getParam("test").get()).isEqualTo("1");
-        assertThat(httpPath.getParam("test2").get()).isEqualTo("test");
+        assertThat(httpPath.getParam("test")).isEqualTo("1");
+        assertThat(httpPath.getParam("test2")).isEqualTo("test");
     }
 
     void getPath() {

@@ -5,10 +5,10 @@ import nextstep.jwp.http.Body;
 import nextstep.jwp.http.Headers;
 import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.http.HttpVersion;
+import nextstep.jwp.http.common.PathUtils;
 import nextstep.jwp.http.controller.Controller;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.request_line.HttpMethod;
-import nextstep.jwp.http.request.request_line.HttpPath;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.Response;
 import nextstep.jwp.http.response.response_line.ResponseLine;
@@ -20,7 +20,7 @@ public class GetRegisterController implements Controller {
 
     @Override
     public Response doService(HttpRequest httpRequest) {
-        final File file = new HttpPath(REGISTER_RESOURCE_PATH).toFile();
+        final File file = PathUtils.toFile(REGISTER_RESOURCE_PATH);
 
         final ResponseLine responseLine = new ResponseLine(HttpVersion.HTTP1_1, HttpStatus.OK);
         final Headers headers = new Headers();
@@ -33,6 +33,6 @@ public class GetRegisterController implements Controller {
     @Override
     public boolean isSatisfiedBy(HttpRequest httpRequest) {
         return httpRequest.getHttpMethod().equals(HttpMethod.GET) &&
-            httpRequest.getPath().getPath().equals(REGISTER_PATH);
+            httpRequest.getPath().getUri().equals(REGISTER_PATH);
     }
 }

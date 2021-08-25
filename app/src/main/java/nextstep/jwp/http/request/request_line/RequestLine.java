@@ -33,6 +33,6 @@ public class RequestLine {
 
     @Override
     public String toString() {
-        return String.format("%s %s %s", httpMethod.name(), path.getPath(), version.asString());
+        return String.format("%s %s %s", httpMethod.name(), path.getUri(), version.asString());
     }
 }

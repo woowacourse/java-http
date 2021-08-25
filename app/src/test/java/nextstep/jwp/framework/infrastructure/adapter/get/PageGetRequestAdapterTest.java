@@ -1,17 +1,16 @@
 package nextstep.jwp.framework.infrastructure.adapter.get;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import nextstep.common.TestUtil;
 import nextstep.jwp.framework.infrastructure.adapter.RequestAdapter;
+import nextstep.jwp.framework.infrastructure.config.FactoryConfiguration;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequestBody;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequestHeader;
 import nextstep.jwp.framework.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.framework.infrastructure.http.status.HttpStatus;
-import nextstep.jwp.framework.infrastructure.mapping.HttpRequestMapping;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +28,7 @@ class PageGetRequestAdapterTest {
         // given
         HttpRequestHeader header = HttpRequestHeader.from(Arrays.asList("GET /login HTTP/1.1"));
         HttpRequest httpRequest = new HttpRequest(header, new HttpRequestBody(null));
-        RequestAdapter adapter = new HttpRequestMapping().findAdapter(httpRequest);
+        RequestAdapter adapter = FactoryConfiguration.requestMapping().findAdapter(httpRequest);
 
         // when
         HttpResponse httpResponse = adapter.doService(httpRequest);

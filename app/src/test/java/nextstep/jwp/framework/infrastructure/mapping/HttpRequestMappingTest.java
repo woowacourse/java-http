@@ -1,7 +1,6 @@
 package nextstep.jwp.framework.infrastructure.mapping;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import nextstep.jwp.framework.infrastructure.adapter.RequestAdapter;
@@ -10,6 +9,7 @@ import nextstep.jwp.framework.infrastructure.adapter.get.PageGetRequestAdapter;
 import nextstep.jwp.framework.infrastructure.adapter.get.StaticRequestAdapter;
 import nextstep.jwp.framework.infrastructure.adapter.post.LoginRequestAdapter;
 import nextstep.jwp.framework.infrastructure.adapter.post.RegisterRequestAdapter;
+import nextstep.jwp.framework.infrastructure.config.FactoryConfiguration;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequestBody;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequestHeader;
@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 @DisplayName("HttpRequestMapping 테스트")
 class HttpRequestMappingTest {
 
-    private final RequestMapping requestMapping = new HttpRequestMapping();
+    private final RequestMapping requestMapping = FactoryConfiguration.requestMapping();
 
     @DisplayName("findAdapter 메서드는")
     @Nested

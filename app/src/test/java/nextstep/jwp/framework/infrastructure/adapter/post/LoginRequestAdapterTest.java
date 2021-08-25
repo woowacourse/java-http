@@ -5,12 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Arrays;
 import nextstep.common.TestUtil;
 import nextstep.jwp.framework.infrastructure.adapter.RequestAdapter;
+import nextstep.jwp.framework.infrastructure.config.FactoryConfiguration;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequestBody;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequestHeader;
 import nextstep.jwp.framework.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.framework.infrastructure.http.status.HttpStatus;
-import nextstep.jwp.framework.infrastructure.mapping.HttpRequestMapping;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +24,7 @@ class LoginRequestAdapterTest {
         HttpRequestHeader header = HttpRequestHeader.from(Arrays.asList("POST /login HTTP/1.1"));
         String body = "account=gugu&password=password";
         HttpRequest httpRequest = new HttpRequest(header, new HttpRequestBody(body));
-        RequestAdapter adapter = new HttpRequestMapping().findAdapter(httpRequest);
+        RequestAdapter adapter = FactoryConfiguration.requestMapping().findAdapter(httpRequest);
 
         // when
         HttpResponse httpResponse = adapter.doService(httpRequest);
@@ -41,7 +41,7 @@ class LoginRequestAdapterTest {
         HttpRequestHeader header = HttpRequestHeader.from(Arrays.asList("POST /login HTTP/1.1"));
         String body = "account=gugadfafdu&password=passwoadfadfrd";
         HttpRequest httpRequest = new HttpRequest(header, new HttpRequestBody(body));
-        RequestAdapter adapter = new HttpRequestMapping().findAdapter(httpRequest);
+        RequestAdapter adapter = FactoryConfiguration.requestMapping().findAdapter(httpRequest);
 
         // when
         HttpResponse httpResponse = adapter.doService(httpRequest);

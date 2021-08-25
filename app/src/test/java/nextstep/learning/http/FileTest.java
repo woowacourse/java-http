@@ -27,7 +27,7 @@ class FileTest {
      * resource 디렉터리의 경로는 어떻게 알아낼 수 있을까?
      */
     @Test
-    void resource_디렉터리에_있는_파일의_경로를_찾는다() throws URISyntaxException {
+    void resource_디렉터리에_있는_파일의_경로를_찾는다() throws URISyntaxException, IOException {
         final String fileName = "nextstep.txt";
 
         final Path filePath = getFilePathFromResourceDirectory(fileName);
@@ -36,8 +36,11 @@ class FileTest {
         assertThat(actual).endsWith(fileName);
     }
 
-    private Path getFilePathFromResourceDirectory(String fileName) throws URISyntaxException {
+    private Path getFilePathFromResourceDirectory(String fileName) throws URISyntaxException, IOException {
         final URL url = getClass().getClassLoader().getResource(fileName);
+        if (url == null) {
+            throw new IOException("fileName으로 찾은 url의 값이 null 입니다.");
+        }
         return Paths.get(url.toURI());
     }
 

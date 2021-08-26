@@ -30,12 +30,4 @@ public class RequestLine {
     public boolean hasMethod(HttpMethod method) {
         return this.method == method;
     }
-
-    public boolean hasUri(String uri) {
-        return path.hasUri(uri);
-    }
-
-    public boolean isUriPatternMatchedTo(String pattern) {
-        return path.isUriPatternMatchedTo(pattern);
-    }
 }

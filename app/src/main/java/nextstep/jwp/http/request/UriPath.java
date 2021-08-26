@@ -46,12 +46,4 @@ public class UriPath {
     public String getUri() {
         return uri;
     }
-
-    public boolean hasUri(String uri) {
-        return this.uri.equals(uri);
-    }
-
-    public boolean isUriPatternMatchedTo(String pattern) {
-        return uri.matches(pattern);
-    }
 }

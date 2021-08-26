@@ -17,10 +17,6 @@ public class HttpRequest {
         return requestLine.hasMethod(method);
     }
 
-    public boolean hasUri(String uri) {
-        return requestLine.hasUri(uri);
-    }
-
     public RequestLine getRequestLine() {
         return requestLine;
     }
@@ -31,9 +27,5 @@ public class HttpRequest {
 
     public RequestBody getBody() {
         return body;
-    }
-
-    public boolean isUriPatternMatchedTo(String pattern) {
-        return requestLine.isUriPatternMatchedTo(pattern);
     }
 }

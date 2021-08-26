@@ -34,7 +34,7 @@ public class RequestHandler implements Runnable {
             HttpRequest httpRequest = new HttpRequest(inputStream);
             HttpResponse httpResponse = new HttpResponse();
             if (!httpRequest.isEmptyLine()) {
-                FrontControllerServlet frontControllerServlet = new FrontControllerServlet(httpRequest);
+                FrontControllerServlet frontControllerServlet = new FrontControllerServlet(httpRequest, httpResponse);
                 frontControllerServlet.process();
 
                 String requestURIPath = httpRequest.extractURIPath();

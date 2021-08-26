@@ -1,11 +1,12 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.HttpRequest;
+import nextstep.jwp.HttpResponse;
 
 public interface Controller {
-    void get(HttpRequest request);
-    void post(HttpRequest request);
-    void put(HttpRequest request);
-    void patch(HttpRequest request);
-    void delete(HttpRequest request);
+    void get(HttpRequest request, HttpResponse response);
+    void post(HttpRequest request, HttpResponse response);
+    void put(HttpRequest request, HttpResponse response);
+    void patch(HttpRequest request, HttpResponse response);
+    void delete(HttpRequest request, HttpResponse response);
 }

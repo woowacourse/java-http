@@ -1,5 +1,8 @@
 package nextstep.jwp;
 
+import exception.UserNotFoundException;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +16,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Objects;
 
 public class RequestHandler implements Runnable {
@@ -48,13 +52,44 @@ public class RequestHandler implements Runnable {
             // requestURI
             String requestURI = httpRequestHeaders[0];
             String[] splittedRequestURI = requestURI.split(" ");
-            String file = splittedRequestURI[1].substring(1);
-            URL resource = getClass().getClassLoader().getResource("static/" + file);
+            String uri = splittedRequestURI[1].substring(1);
+            int index = uri.indexOf("?");
+            String path = uri;
+            String queryString = "";
+            if (index > 0) {
+                path = uri.substring(0, index);
+                queryString = uri.substring(index + 1);
+            }
+
+            HashMap<String, String> queryStringMap = new HashMap<>();
+            if (!queryString.isBlank()) {
+                String[] queryStrings = queryString.split("&");
+                for (String query : queryStrings) {
+                    String[] values = query.split("=");
+                    queryStringMap.put(values[0], values[1]);
+                }
+            }
+
+            if (!queryStringMap.isEmpty()) {
+                User user = InMemoryUserRepository.findByAccount(queryStringMap.get("account"))
+                        .orElseThrow(UserNotFoundException::new);
+                if (user.checkPassword(queryStringMap.get("password"))) {
+                    path = "index.html";
+                }
+            }
 
             String responseBody = "";
-            if (Objects.nonNull(resource)) {
-                final Path path = new File(resource.getPath()).toPath();
-                responseBody = Files.readString(path);
+            if (path.isBlank()) {
+                responseBody = "Hello world!";
+            } else {
+                if (!path.contains(".")) {
+                    path += ".html";
+                }
+                URL resource = getClass().getClassLoader().getResource("static/" + path);
+                if (Objects.nonNull(resource)) {
+                    final Path filePath = new File(resource.getPath()).toPath();
+                    responseBody = Files.readString(filePath);
+                }
             }
 
             final String response = String.join("\r\n",

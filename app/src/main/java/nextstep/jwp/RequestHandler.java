@@ -1,10 +1,16 @@
 package nextstep.jwp;
 
+import nextstep.jwp.http.HttpResponseBuilder;
+import nextstep.jwp.http.message.request.HttpRequestMessage;
+import nextstep.jwp.http.message.response.HttpResponseMessage;
+import nextstep.jwp.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
@@ -26,16 +32,18 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final String responseBody = "Hello world!";
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            String message = StringUtils.convertToString(bufferedReader);
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage(message);
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            log.debug(String.format("%nRequestLog%n%s%n", httpRequestMessage));
 
-            outputStream.write(response.getBytes());
+            HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder(httpRequestMessage);
+            HttpResponseMessage httpResponseMessage = httpResponseBuilder.build();
+
+            log.debug(String.format("%nResponseLog%n%s%n", httpResponseMessage));
+
+            outputStream.write(httpResponseMessage.toBytes());
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);

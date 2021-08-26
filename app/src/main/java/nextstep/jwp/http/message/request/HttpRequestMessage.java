@@ -48,8 +48,6 @@ public class HttpRequestMessage implements HttpMessage {
 
     @Override
     public String toString() {
-        return "HttpRequestMessage{" +
-                "message='" + message + '\'' +
-                '}';
+        return message;
     }
 }

@@ -6,7 +6,6 @@ import nextstep.jwp.http.message.HttpMessage;
 import nextstep.jwp.http.message.MessageBody;
 
 import java.nio.ByteBuffer;
-import java.util.Objects;
 import java.util.Optional;
 
 public class HttpResponseMessage implements HttpMessage {
@@ -14,7 +13,11 @@ public class HttpResponseMessage implements HttpMessage {
     private static final String LINE_SEPARATOR = "\r\n";
 
     private final ResponseHeader responseHeader;
-    private final MessageBody responseBody;
+    private MessageBody responseBody;
+
+    public HttpResponseMessage() {
+        this(new ResponseHeader(), new MessageBody());
+    }
 
     public HttpResponseMessage(String httpVersion, HttpStatusCode httpStatusCode, HeaderFields headerFields) {
         this(httpVersion, httpStatusCode, headerFields, null);
@@ -41,11 +44,17 @@ public class HttpResponseMessage implements HttpMessage {
                 .array();
     }
 
-    private int contentLength() {
-        if (Objects.isNull(responseBody)) {
-            return 0;
-        }
-        return responseBody.contentLength();
+
+    public void putHeader(String key, String value) {
+        this.responseHeader.putHeader(key, value);
+    }
+
+    public void setStatusCode(HttpStatusCode httpStatusCode) {
+        responseHeader.setHttpStatusCode(httpStatusCode);
+    }
+
+    public void setMessageBody(MessageBody messageBody) {
+        this.responseBody = messageBody;
     }
 
     @Override
@@ -56,5 +65,10 @@ public class HttpResponseMessage implements HttpMessage {
     @Override
     public Optional<MessageBody> getBody() {
         return Optional.ofNullable(responseBody);
+    }
+
+    @Override
+    public String toString() {
+        return new String(toBytes());
     }
 }

@@ -25,10 +25,12 @@ class HttpRequestParserTest {
                 "HOST: localhost:8080",
                 "",
                 "");
-        final InputStream inputStream = new ByteArrayInputStream(requestHeaders.getBytes());
 
         //when
-        final HttpRequest actualRequest = httpRequestParser.parse(inputStream);
+        final HttpRequest actualRequest;
+        try (final InputStream inputStream = new ByteArrayInputStream(requestHeaders.getBytes())) {
+            actualRequest = httpRequestParser.parse(inputStream);
+        }
         final RequestLine actualRequestLine = actualRequest.getRequestLine();
 
         //then
@@ -45,10 +47,12 @@ class HttpRequestParserTest {
                 "HOST: localhost:8080",
                 "",
                 "");
-        final InputStream inputStream = new ByteArrayInputStream(requestHeaders.getBytes());
 
         //when
-        final HttpRequest actualRequest = httpRequestParser.parse(inputStream);
+        final HttpRequest actualRequest;
+        try (final InputStream inputStream = new ByteArrayInputStream(requestHeaders.getBytes())) {
+            actualRequest = httpRequestParser.parse(inputStream);
+        }
         final RequestLine actualRequestLine = actualRequest.getRequestLine();
 
         //then
@@ -69,10 +73,12 @@ class HttpRequestParserTest {
                 "Content-Length: " + contentLength,
                 "",
                 requestBody);
-        final InputStream inputStream = new ByteArrayInputStream(requestHeaders.getBytes());
 
         //when
-        final HttpRequest actualRequest = httpRequestParser.parse(inputStream);
+        final HttpRequest actualRequest;
+        try (final InputStream inputStream = new ByteArrayInputStream(requestHeaders.getBytes())) {
+            actualRequest = httpRequestParser.parse(inputStream);
+        }
         final RequestLine actualRequestLine = actualRequest.getRequestLine();
         final RequestHeaders actualHeaders = actualRequest.getHeaders();
         final RequestBody actualBody = actualRequest.getBody();

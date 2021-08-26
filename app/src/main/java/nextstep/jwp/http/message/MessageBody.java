@@ -10,8 +10,12 @@ public class MessageBody {
         this(bodyString.getBytes());
     }
 
-    private MessageBody(byte[] bytes) {
+    public MessageBody(byte[] bytes) {
         this.bytes = bytes;
+    }
+
+    public int contentLength() {
+        return bytes.length;
     }
 
     public byte[] getBytes() {

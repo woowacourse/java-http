@@ -2,6 +2,7 @@ package nextstep.jwp.http.header.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import nextstep.jwp.fixture.Fixture;
 import nextstep.jwp.http.header.request.request_line.HttpMethod;
@@ -28,14 +29,6 @@ class HttpRequestTest {
         String expected = Fixture.getFixtureHeaders().get("Host");
 
         assertThat(host).isEqualTo(expected);
-    }
-
-    @DisplayName("존재하지 않는 httpHeader는 가져오지 못한다.")
-    @Test
-    void getHeader_nonExists_fail() {
-        assertThatCode(() -> httpRequest.getHeader("Host2")
-            .orElseThrow(IllegalArgumentException::new))
-            .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

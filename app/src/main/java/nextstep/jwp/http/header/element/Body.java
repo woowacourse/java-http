@@ -24,7 +24,7 @@ public class Body {
 
     public static Body fromFile(File file) {
         try {
-            String content = String.join(LINE_SEPARATOR, Files.readAllLines(file.toPath()));
+            String content = String.join(LINE_SEPARATOR.value(), Files.readAllLines(file.toPath()));
 
             return new Body(content);
         } catch (IOException e) {
@@ -45,7 +45,7 @@ public class Body {
             return "";
         }
 
-        return body + LINE_SEPARATOR;
+        return body + LINE_SEPARATOR.value();
     }
 
     public int length() {

@@ -27,7 +27,7 @@ public class Headers {
     }
 
     private Map<String, String> extractHeaders(String rawHeaders) {
-        return rawHeadersToMap(List.of(rawHeaders.split(LINE_SEPARATOR)));
+        return rawHeadersToMap(List.of(rawHeaders.split(LINE_SEPARATOR.value())));
     }
 
     private Map<String, String> rawHeadersToMap(List<String> rawHeaders) {
@@ -56,6 +56,6 @@ public class Headers {
     public String asString() {
         return headers.entrySet().stream()
             .map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
-            .collect(joining(LINE_SEPARATOR));
+            .collect(joining(LINE_SEPARATOR.value()));
     }
 }

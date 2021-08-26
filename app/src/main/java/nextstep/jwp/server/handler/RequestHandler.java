@@ -79,7 +79,7 @@ public class RequestHandler implements Runnable {
             if (line == null) {
                 break;
             }
-            sb.append(line).append(LINE_SEPARATOR);
+            sb.append(line).append(LINE_SEPARATOR.value());
         }
 
         return sb.toString();

@@ -12,17 +12,16 @@ import java.util.stream.Stream;
 public class WebServer {
 
     private static final Logger logger = LoggerFactory.getLogger(WebServer.class);
-
     private static final int DEFAULT_PORT = 8080;
 
-    private final int port;
+    private final ServerSocket serverSocket;
 
-    public WebServer(int port) {
-        this.port = checkPort(port);
+    public WebServer(ServerSocket serverSocket) {
+        this.serverSocket = serverSocket;
     }
 
     public void run() {
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
+        try (serverSocket) {
             logger.info("Web Server started {} port.", serverSocket.getLocalPort());
             handle(serverSocket);
         } catch (IOException exception) {
@@ -40,16 +39,24 @@ public class WebServer {
     }
 
     public static int defaultPortIfNull(String[] args) {
-        return Stream.of(args)
-                .findFirst()
-                .map(Integer::parseInt)
-                .orElse(WebServer.DEFAULT_PORT);
+        int port = Stream.of(args)
+            .filter(WebServer::isNumeric)
+            .map(Integer::parseInt)
+            .findFirst()
+            .orElse(WebServer.DEFAULT_PORT);
+
+        return checkPort(port);
     }
 
-    private int checkPort(int port) {
+    private static int checkPort(int port) {
         if (port < 1 || 65535 < port) {
             return DEFAULT_PORT;
         }
         return port;
+    }
+
+    private static boolean isNumeric(String input) {
+        return input.chars()
+            .allMatch(Character::isDigit);
     }
 }

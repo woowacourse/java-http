@@ -45,7 +45,7 @@ class BodyTest {
 
         String actual = body.asString();
 
-        assertThat(actual).isEqualTo("test" + Protocol.LINE_SEPARATOR);
+        assertThat(actual).isEqualTo("test" + Protocol.LINE_SEPARATOR.value());
     }
 
     @Test

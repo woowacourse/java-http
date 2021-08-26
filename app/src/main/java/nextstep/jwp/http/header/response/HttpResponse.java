@@ -60,11 +60,11 @@ public class HttpResponse implements Response {
     }
 
     public String asString() {
-        String topOfHeader = String.join(" " + LINE_SEPARATOR, List.of(
+        String topOfHeader = String.join(" " + LINE_SEPARATOR.value(), List.of(
             responseLine.asString(),
             headers.asString()
         ));
 
-        return topOfHeader + (body == null ? "" : LINE_SEPARATOR.repeat(2) + body.asString());
+        return topOfHeader + (body == null ? "" : LINE_SEPARATOR.value().repeat(2) + body.asString());
     }
 }

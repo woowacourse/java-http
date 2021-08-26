@@ -32,8 +32,8 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = new HttpRequest(inputStream);
-            HttpResponse httpResponse;
             if (!httpRequest.isEmptyLine()) {
+                HttpResponse httpResponse;
                 StaticFileReader staticFileReader = new StaticFileReader();
                 String staticFile = staticFileReader.read(httpRequest);
                 if (!Objects.isNull(staticFile)) {

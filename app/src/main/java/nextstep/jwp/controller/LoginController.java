@@ -22,7 +22,9 @@ public class LoginController implements Controller {
             User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 아이디입니다."));
             if (user.checkPassword(password)) {
-                return new HttpResponse(HttpStatus.FOUND);
+                HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND);
+                httpResponse.putHeader("Location", "/index.html");
+                return httpResponse;
             }
             String htmlOf401 = staticFileReader.read("static/401.html");
             return new HttpResponse(HttpStatus.UNAUTHORIZED, htmlOf401);

@@ -101,7 +101,9 @@ class RequestHandlerTest {
 
         // then
         String expected = "HTTP/1.1 302";
+        String expected2 = "Location: /index.html";
         System.out.println(socket.output());
         assertThat(socket.output()).contains(expected);
+        assertThat(socket.output()).contains(expected2);
     }
 }

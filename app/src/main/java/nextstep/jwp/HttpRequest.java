@@ -71,4 +71,15 @@ public class HttpRequest {
         String firstLine = requestLines.get(FIRST_LINE_OF_HTTP_REQUEST);
         return firstLine.split(BLANK_DELIMITER)[FIRST_WORD_INDEX];
     }
+
+    public Map<String, String> extractFormData() {
+        String lastLine = requestLines.get(requestLines.size() - 1);
+        String[] splitFormData = lastLine.split("&");
+        Map<String, String> result = new HashMap<>();
+        for (String s : splitFormData) {
+            String[] split = s.split("=");
+            result.put(split[0], split[1]);
+        }
+        return result;
+    }
 }

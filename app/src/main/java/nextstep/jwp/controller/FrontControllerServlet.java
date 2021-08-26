@@ -15,6 +15,9 @@ public class FrontControllerServlet {
         if (request.extractHttpMethod().equals("GET")) {
             return controller.get(request);
         }
+        if (request.extractHttpMethod().equals("POST")) {
+            return controller.post(request);
+        }
         throw new RuntimeException();
     }
 

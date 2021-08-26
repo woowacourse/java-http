@@ -9,4 +9,9 @@ public class NoController implements Controller {
     public HttpResponse get(HttpRequest request) {
         return null;
     }
+
+    @Override
+    public HttpResponse post(HttpRequest request) {
+        return null;
+    }
 }

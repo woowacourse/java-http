@@ -2,6 +2,7 @@ package nextstep.jwp;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnAuthorizedException;
+import nextstep.jwp.http.request.*;
 import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,21 +11,16 @@ import java.io.*;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 public class RequestHandler implements Runnable {
 
     private static final Logger LOG = LoggerFactory.getLogger(RequestHandler.class);
+    private static final HttpRequestParser httpRequestParser = new HttpRequestParser();
     private static final String NEW_LINE = System.getProperty("line.separator");
     private static final String HTML_SUFFIX = ".html";
 
@@ -38,134 +34,57 @@ public class RequestHandler implements Runnable {
     public void run() {
         LOG.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
-        try (final InputStreamReader inputStreamReader = new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8);
-             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-             final OutputStream outputStream = new BufferedOutputStream(connection.getOutputStream())) {
+        try (final InputStream inputStream = connection.getInputStream();
+             final OutputStream outputStream = connection.getOutputStream()) {
+
+            final HttpRequest request = httpRequestParser.parse(inputStream);
+            final RequestLine requestLine = request.getRequestLine();
+            final RequestHeaders requestHeaders = request.getHeaders();
+            final RequestBody requestBody = request.getBody();
 
             int statusCode = 200;
-            String line = null;
-            Map<String, String> httpRequestHeaders = new ConcurrentHashMap<>();
-            boolean isFirstLine = true;
-            String startLine = null;
-            while (!"".equals(line)) {
-                line = bufferedReader.readLine();
-                if (line == null) {
-                    return;
-                }
-                if (isFirstLine) {
-                    startLine = line;
-                    isFirstLine = false;
-                    continue;
-                }
-                if (line.contains(":")) {
-                    final String key = line.split(":")[0];
-                    final String value = line.split(":")[1];
-                    httpRequestHeaders.put(key, value);
-                }
-            }
 
-            final String method = startLine.split(" ")[0];
-            LOG.debug("method : {}", method);
-
-            String requestBody = null;
-            if ("POST".equals(method) && httpRequestHeaders.containsKey("Content-Length")) {
-                String contentLengthValue = httpRequestHeaders.get("Content-Length");
-                contentLengthValue = contentLengthValue.trim();
-                int contentLength = Integer.parseInt(contentLengthValue);
-                char[] buffer = new char[contentLength];
-                bufferedReader.read(buffer, 0, contentLength);
-                requestBody = new String(buffer);
-                LOG.debug("requestBody : {}", requestBody);
-            }
-
-            final String requestUri = startLine.split(" ")[1];
-            LOG.debug("request URI : {}", requestUri);
-            final int delimiterIndex = requestUri.indexOf("?");
-            String uriPath = requestUri;
-            String queryParam = null;
-            if (delimiterIndex != -1) {
-                LOG.debug("delimiterIndex : {}", delimiterIndex);
-                uriPath = requestUri.substring(0, delimiterIndex);
-                LOG.debug("uriPath : {}", uriPath);
-                queryParam = requestUri.substring(delimiterIndex + 1);
-                LOG.debug("queryParam : {}", queryParam);
-            }
-            String fileName = uriPath.substring(1);
-            if ("GET".equals(method) && "/register".equals(uriPath)) {
+            String fileName = requestLine.getUriWithoutRootPath();
+            if (request.hasMethod(HttpMethod.GET) && request.hasUri("/register")) {
                 fileName = fileName + HTML_SUFFIX;
             }
-            if ("POST".equals(method) && "/register".equals(uriPath)) {
-                LOG.debug("body : {}", requestBody);
-                if (!requestBody.isBlank()) {
-                    String account = null;
-                    String email = null;
-                    String password = null;
-                    final String[] splitQueryParam = requestBody.split("&");
-                    for (String singleQueryParam : splitQueryParam) {
-                        final String[] splitSingleQueryString = singleQueryParam.split("=");
-                        final String key = splitSingleQueryString[0];
-                        final String value = splitSingleQueryString[1];
-                        if ("account".equals(key)) {
-                            account = value;
-                        }
-                        if ("email".equals(key)) {
-                            email = URLDecoder.decode(value, StandardCharsets.UTF_8);
-                        }
-                        if ("password".equals(key)) {
-                            password = value;
-                        }
-                    }
-                    final User signinRequestUser = new User(account, password, email);
-                    LOG.debug("회원가입 요청 account : {}", signinRequestUser.getAccount());
-                    LOG.debug("회원가입 요청 email : {}", signinRequestUser.getEmail());
-                    LOG.debug("회원가입 요청 password : {}", signinRequestUser.getPassword());
-                    InMemoryUserRepository.save(signinRequestUser);
+            if (request.hasMethod(HttpMethod.POST) && request.hasUri("/register")) {
+                final String account = requestBody.getParameter("account");
+                final String email = requestBody.getParameter("email");
+                final String password = requestBody.getParameter("password");
+                final User signupUser = new User(account, password, email);
+                LOG.debug("회원가입 요청 account : {}", signupUser.getAccount());
+                LOG.debug("회원가입 요청 email : {}", signupUser.getEmail());
+                LOG.debug("회원가입 요청 password : {}", signupUser.getPassword());
+                InMemoryUserRepository.save(signupUser);
+                fileName = "index.html";
+                statusCode = 302;
+            }
+            if (request.hasMethod(HttpMethod.GET) && request.hasUri("/login")) {
+                fileName = fileName + HTML_SUFFIX;
+            }
+            if (request.hasMethod(HttpMethod.POST) && request.hasUri("/login")) {
+                final String account = requestBody.getParameter("account");
+                final String password = requestBody.getParameter("password");
+                final User signinUser = new User(account, password);
+                LOG.debug("로그인 요청 account : {}", signinUser.getAccount());
+                LOG.debug("로그인 요청 password : {}", signinUser.getPassword());
+                try {
+                    final User foundUser = InMemoryUserRepository.findByAccount(signinUser.getAccount())
+                            .orElseThrow(() -> new UnAuthorizedException("존재하지 않는 account 입니다."));
+                    foundUser.validatePassword(signinUser.getPassword());
+                    LOG.debug("로그인 성공!!");
                     fileName = "index.html";
-                    statusCode = 302;
+                } catch (UnAuthorizedException e) {
+                    LOG.debug("로그인 실패");
+                    fileName = "401.html";
                 }
-            }
-            if ("GET".equals(method) && "/login".equals(uriPath)) {
-                fileName = fileName + HTML_SUFFIX;
-            }
-            if ("POST".equals(method) && "/login".equals(uriPath)) {
-                LOG.debug("body : {}", requestBody);
-                if (!requestBody.isBlank()) {
-                    String account = null;
-                    String password = null;
-                    final String[] splitQueryParam = requestBody.split("&");
-                    for (String singleQueryParam : splitQueryParam) {
-                        final String[] splitSingleQueryString = singleQueryParam.split("=");
-                        final String key = splitSingleQueryString[0];
-                        final String value = splitSingleQueryString[1];
-                        if ("account".equals(key)) {
-                            account = value;
-                        }
-                        if ("password".equals(key)) {
-                            password = value;
-                        }
-                    }
-                    final User loginRequestUser = new User(account, password);
-                    LOG.debug("로그인 요청 account : {}", loginRequestUser.getAccount());
-                    LOG.debug("로그인 요청 password : {}", loginRequestUser.getPassword());
-                    try {
-                        final User foundUser = InMemoryUserRepository.findByAccount(loginRequestUser.getAccount())
-                                .orElseThrow(() -> new UnAuthorizedException("존재하지 않는 account 입니다."));
-                        foundUser.validatePassword(loginRequestUser.getPassword());
-                        LOG.debug("로그인 성공!!");
-                        LOG.debug("account : {}", foundUser.getAccount());
-                        LOG.debug("email : {}", foundUser.getEmail());
-                        fileName = "index.html";
-                    } catch (UnAuthorizedException e) {
-                        LOG.debug("로그인 실패");
-                        fileName = "401.html";
-                    }
-                    statusCode = 302;
-                }
+                statusCode = 302;
             }
 
             String contentType = "text/html";
             String responseBody = null;
-            if ("GET".equals(method)) {
+            if (request.hasMethod(HttpMethod.GET)) {
                 final URL url = getClass().getClassLoader().getResource("static/" + fileName);
                 if (url == null) {
                     LOG.error("fileName : {}", fileName);
@@ -210,8 +129,9 @@ public class RequestHandler implements Runnable {
                         "Location: http://localhost:8080/" + fileName);
             }
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
+            bufferedOutputStream.write(response.getBytes());
+            bufferedOutputStream.flush();
         } catch (IOException | URISyntaxException exception) {
             LOG.error("Exception stream", exception);
         } finally {

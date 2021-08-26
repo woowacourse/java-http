@@ -2,42 +2,26 @@ package nextstep.jwp;
 
 public class HttpResponse {
 
-    private final int statusCode;
-    private final String statusMessage;
-    private final String body;
+    private int statusCode;
+    private String statusMessage;
+    private String body;
 
-    public static class Builder {
-        private int statusCode = 200;
-        private String statusMessage = "OK";
-        private String body = "";
-
-        public Builder() {
-        }
-
-        public Builder statusCode(int statusCode) {
-            this.statusCode = statusCode;
-            return this;
-        }
-
-        public Builder statusMessage(String statusMessage) {
-            this.statusMessage = statusMessage;
-            return this;
-        }
-
-        public Builder body(String body) {
-            this.body = body;
-            return this;
-        }
-
-        public HttpResponse build() {
-            return new HttpResponse(this);
-        }
+    public HttpResponse() {
+        this.statusCode = 200;
+        this.statusMessage = "OK";
+        this.body = "";
     }
 
-    private HttpResponse(Builder builder) {
-        this.statusCode = builder.statusCode;
-        this.statusMessage = builder.statusMessage;
-        this.body = builder.body;
+    public void statusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void statusMessage(String statusMessage) {
+        this.statusMessage = statusMessage;
+    }
+
+    public void body(String body) {
+        this.body = body;
     }
 
     @Override

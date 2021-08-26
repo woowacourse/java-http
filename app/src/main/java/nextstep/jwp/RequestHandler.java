@@ -32,18 +32,16 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = new HttpRequest(inputStream);
+            HttpResponse httpResponse = new HttpResponse();
             if (!httpRequest.isEmptyLine()) {
                 FrontControllerServlet frontControllerServlet = new FrontControllerServlet(httpRequest);
                 frontControllerServlet.process();
 
                 String requestURIPath = httpRequest.extractURIPath();
                 String responseBody = readStaticFile(requestURIPath);
+                httpResponse.body(responseBody);
 
-                HttpResponse response = new HttpResponse.Builder()
-                    .body(responseBody)
-                    .build();
-
-                outputStream.write(response.getBytes());
+                outputStream.write(httpResponse.getBytes());
             }
             outputStream.flush();
         } catch (IOException exception) {

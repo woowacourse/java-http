@@ -16,7 +16,7 @@ public class LoginController implements Controller {
             InMemoryUserRepository.findByAccount(account)
                 .ifPresent((user) -> {
                     if (user.checkPassword(password)) {
-                        System.out.println(user.toString());
+                        System.out.println(user);
                     }
                 });
         }

@@ -17,7 +17,7 @@ public class RequestBody {
 
     public RequestBody(String body) {
         validateNonNull(body);
-        LOG.debug("requestBody : {}", body);
+        LOG.debug("requestBody: {}", body);
         queryParams = new ConcurrentHashMap<>();
         body = URLDecoder.decode(body, StandardCharsets.UTF_8);
         parseBody(body);

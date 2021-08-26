@@ -32,4 +32,8 @@ public class HttpRequest {
     public RequestBody getBody() {
         return body;
     }
+
+    public boolean isUriPatternMatchedTo(String pattern) {
+        return requestLine.isUriPatternMatchedTo(pattern);
+    }
 }

@@ -16,7 +16,7 @@ public class UriPath {
     public UriPath(String path) {
         queryParams = new ConcurrentHashMap<>();
         final int delimiterIndex = path.indexOf("?");
-        String queryParams = null;
+        String queryParams;
         if (delimiterIndex != -1) {
             LOG.debug("delimiterIndex : {}", delimiterIndex);
             uri = path.substring(0, delimiterIndex);
@@ -43,11 +43,15 @@ public class UriPath {
         queryParams.put(key, value);
     }
 
-    public String getUriWithoutRootPath() {
-        return uri.substring(1);
+    public String getUri() {
+        return uri;
     }
 
     public boolean hasUri(String uri) {
         return this.uri.equals(uri);
+    }
+
+    public boolean isUriPatternMatchedTo(String pattern) {
+        return uri.matches(pattern);
     }
 }

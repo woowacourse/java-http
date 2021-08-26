@@ -23,8 +23,8 @@ public class RequestLine {
         LOG.debug("RequestLine => method: {}, protocolVersion: {}", method, protocolVersion);
     }
 
-    public String getUriWithoutRootPath() {
-        return path.getUriWithoutRootPath();
+    public String getUri() {
+        return path.getUri();
     }
 
     public boolean hasMethod(HttpMethod method) {
@@ -33,5 +33,9 @@ public class RequestLine {
 
     public boolean hasUri(String uri) {
         return path.hasUri(uri);
+    }
+
+    public boolean isUriPatternMatchedTo(String pattern) {
+        return path.isUriPatternMatchedTo(pattern);
     }
 }

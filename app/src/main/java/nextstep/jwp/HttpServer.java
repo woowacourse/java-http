@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
+import nextstep.jwp.http.RequestBody;
 import nextstep.jwp.http.RequestHeader;
 import nextstep.jwp.http.RequestLine;
 import nextstep.jwp.http.ResponseEntity;
@@ -17,6 +18,7 @@ public class HttpServer {
     private final ViewResolver resolver;
     private final RequestLine requestLine;
     private final RequestHeader headers;
+    private final RequestBody body;
 
     public HttpServer(InputStream inputStream) throws IOException {
         this.service = new HttpService();
@@ -24,6 +26,7 @@ public class HttpServer {
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         this.requestLine = new RequestLine(extractRequestLine(bufferedReader));
         this.headers = new RequestHeader(extractHeaders(bufferedReader));
+        this.body = new RequestBody(extractRequestBody(bufferedReader));
     }
 
     private String extractHeaders(BufferedReader bufferedReader) throws IOException {
@@ -47,16 +50,39 @@ public class HttpServer {
         return reader.readLine();
     }
 
+    public String extractRequestBody(BufferedReader reader) throws IOException {
+        if (headers.get("Content-Length").isPresent()) {
+            int contentLength = Integer.parseInt(headers.get("Content-Length").get());
+            char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+            return new String(buffer);
+        }
+        return null;
+    }
+
     public String getResponse() throws IOException {
         final String httpMethod = requestLine.getHttpMethod();
         final String uri = requestLine.getUri();
         if ("".equals(httpMethod)) {
-            throw new IllegalArgumentException("null null~");
+            throw new IllegalArgumentException("http 메소드가 없어요");
         }
         if ("GET".equals(httpMethod)) {
             return getMapping(uri);
         }
-        throw new IllegalArgumentException("wlekrj");
+        if ("POST".equals(httpMethod)) {
+            return postMapping(uri);
+        }
+
+        throw new IllegalArgumentException("모르는 메소드다!");
+    }
+
+    private String postMapping(String uri) throws IOException {
+        Map<String, String> params = body.getParams();
+        service.register(params);
+        return ResponseEntity
+                .statusCode(StatusCode.FOUND)
+                .responseBody(resolver.findResource("/index.html"))
+                .build();
     }
 
     private String getMapping(String uri) throws IOException {

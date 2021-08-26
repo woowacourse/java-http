@@ -11,4 +11,10 @@ public class HttpService {
         Optional<User> account = InMemoryUserRepository.findByAccount(params.get("account"));
         return account.isPresent();
     }
+
+    public void register(Map<String, String> params) {
+        final User user = new User(InMemoryUserRepository.size() + 1, params.get("account"), params.get("password"),
+                params.get("email"));
+        InMemoryUserRepository.save(user);
+    }
 }

@@ -1,33 +1,38 @@
 package nextstep.jwp.http.response;
 
 
+import nextstep.jwp.staticresource.StaticResource;
+
 import java.nio.charset.StandardCharsets;
 
 public class HttpResponse {
 
     private static final String NEW_LINE = System.getProperty("line.separator");
 
-    private final StatusLine statusLine;
     private final ResponseHeaders headers;
-    private final String body;
+    private StatusLine statusLine;
+    private String body;
 
-    public HttpResponse(int statusCode, ContentType contentType, String body) {
-        statusLine = new StatusLine(statusCode);
+    public HttpResponse() {
         headers = new ResponseHeaders();
-        this.body = body;
-        if (body != null && !body.isBlank()) {
-            putHeaders(contentType);
-        }
     }
 
-    public HttpResponse(int statusCode, String LocationHeader) {
-        this(statusCode, null, null);
-        headers.put("Location", LocationHeader);
+    public void assignStatusCode(int statusCode) {
+        statusLine = new StatusLine(statusCode);
+    }
+
+    public void addStaticResource(StaticResource staticResource) {
+        body = staticResource.getContent();
+        putHeaders(staticResource.getContentType());
     }
 
     private void putHeaders(ContentType contentType) {
         headers.put("Content-Type", contentType.getValue() + ";charset=utf-8");
         headers.put("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+    }
+
+    public void assignLocationHeader(String locationHeader) {
+        headers.put("Location", locationHeader);
     }
 
     public byte[] getBytes() {

@@ -1,6 +1,6 @@
 package nextstep.jwp.http.response;
 
-import nextstep.jwp.StaticResource;
+import nextstep.jwp.staticresource.StaticResource;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,14 +30,14 @@ public enum ContentType {
 
     public static StaticResource getStaticResource(String fileNameExtension, URL url) throws URISyntaxException, IOException {
         final Path filePath = Paths.get(url.toURI());
-        final ContentType contentType = getValueByFileNameExtension(fileNameExtension);
-        if (ICO.fileNameExtension.equals(fileNameExtension)) {
+        final ContentType contentType = getContentTypeByFileNameExtension(fileNameExtension);
+        if (ICO == contentType) {
             return getICOStaticResource(filePath, contentType);
         }
         return getStaticResourceExceptICO(filePath, contentType);
     }
 
-    private static ContentType getValueByFileNameExtension(String fileNameExtension) {
+    private static ContentType getContentTypeByFileNameExtension(String fileNameExtension) {
         return Arrays.stream(ContentType.values())
                 .filter(type -> type.hasSameFileNameExtension(fileNameExtension))
                 .findAny()

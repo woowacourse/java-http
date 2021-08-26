@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.staticresource;
 
 import nextstep.jwp.http.response.ContentType;
 

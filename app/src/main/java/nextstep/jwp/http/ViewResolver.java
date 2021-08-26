@@ -7,13 +7,9 @@ import java.nio.file.Files;
 
 public class ViewResolver {
 
-
     public String findResource(String uri) throws IOException {
-        if (!uri.contains("html")) {
+        if (!uri.contains(".")) {
             uri += ".html";
-        }
-        if(!uri.contains("/")){
-            uri = "/" + uri;
         }
 
         final URL resource = getClass().getClassLoader().getResource("static" + uri);

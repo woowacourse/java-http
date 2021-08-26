@@ -1,5 +1,17 @@
 package nextstep.jwp;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.http.HttpRequest;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,10 +35,30 @@ public class RequestHandler implements Runnable {
     public void run() {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
-        try (final InputStream inputStream = connection.getInputStream();
+        try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final String responseBody = "Hello world!";
+            // TODO : 요청 uri, 헤더 사용해서 컨트롤러 서치
+
+            // TODO : 컨트롤러에서 해당 메서드 호출 -> index.html 반환
+
+            // TODO : responseBody에 파일 내용 문자열로 넣기
+
+            List<String> request = Arrays.asList(bufferedReader.readLine().split(" "));
+            String httpMethod = request.get(0);
+            String uri = request.get(1);
+            String protocol = request.get(2);
+
+            List<String> headers = new ArrayList<>();
+
+            String header = bufferedReader.readLine();
+            while (!header.isEmpty()) {
+                headers.add(header);
+                header = bufferedReader.readLine();
+            }
+
+            URL resource = getClass().getClassLoader().getResource("static" + uri);
+            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

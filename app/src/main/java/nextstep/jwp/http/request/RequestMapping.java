@@ -18,9 +18,8 @@ public class RequestMapping {
         CONTROLLERS.put("/login", new LoginController());
     }
 
-    public Controller getController(HttpRequest request) {
-        RequestLine requestLine = request.getRequestLine();
-        return CONTROLLERS.getOrDefault(requestLine.getUri(), STATIC_RESOURCE_CONTROLLER);
+    public Controller getController(String uri) {
+        return CONTROLLERS.getOrDefault(uri, STATIC_RESOURCE_CONTROLLER);
     }
 }
 

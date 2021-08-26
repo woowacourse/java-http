@@ -32,7 +32,8 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             final HttpRequest request = HTTP_REQUEST_PARSER.parse(inputStream);
-            final Controller controller = REQUEST_MAPPING.getController(request);
+            final RequestLine requestLine = request.getRequestLine();
+            final Controller controller = REQUEST_MAPPING.getController(requestLine.getUri());
             final HttpResponse response = getResponse(request, controller);
 
             doResponse(outputStream, response);

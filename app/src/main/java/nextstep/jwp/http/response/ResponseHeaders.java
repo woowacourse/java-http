@@ -19,15 +19,6 @@ public class ResponseHeaders {
         headers.put(key, value);
     }
 
-    public int getContentLength() {
-        if (headers.containsKey("Content-Length")) {
-            String value = headers.get("Content-Length");
-            value = value.trim();
-            return Integer.parseInt(value);
-        }
-        return 0;
-    }
-
     @Override
     public String toString() {
         final List<String> parsedHeaders = getParsedHeaders();

@@ -3,11 +3,13 @@ package nextstep.jwp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
-import java.util.Objects;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.*;
 
 public class RequestHandler implements Runnable {
 
@@ -26,22 +28,48 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
+            String parsedUri = requestUri(inputStream);
+            URL resource = this.getClass().getClassLoader().getResource("static" + parsedUri);
+            File file = new File(resource.toURI());
+            String fileSource = String.join("\r\n", Files.readAllLines(file.toPath()));
+
             final String responseBody = "Hello world!";
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Length: " + fileSource.getBytes().length + " ",
                     "",
-                    responseBody);
+                    fileSource);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException exception) {
+        } catch (IOException | URISyntaxException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
         }
+    }
+
+    private String requestUri(InputStream inputStream) throws IOException {
+        Map<String, String> headers = headers(inputStream);
+        for (String value : headers.values()) {
+            return value.split(" ")[0];
+        }
+        throw new IOException();
+    }
+
+    private Map<String, String> headers(InputStream inputStream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        Map<String, String> headers = new LinkedHashMap<>();
+        String line = "";
+
+        while (!("".equals(line = reader.readLine()))) {
+            String[] keyAndValue = line.split(" ");
+            headers.put(keyAndValue[0], keyAndValue[1]);
+        }
+
+        return headers;
     }
 
     private void close() {

@@ -1,10 +1,11 @@
 package nextstep.jwp;
 
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,6 +14,11 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class RequestHandler implements Runnable {
@@ -33,18 +39,41 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final String firstLine = bufferedReader.readLine();
-            if (Objects.isNull(firstLine)) {
-                return;
+
+            final RequestLine requestLine = RequestLine.of(bufferedReader.readLine());
+
+            String requestedResource = requestLine.toResource();
+
+            List<String> request = new ArrayList<>();
+            while (bufferedReader.ready()) {
+                request.add(bufferedReader.readLine());
             }
-            log.debug(firstLine);
-            final String[] firstLineElements = firstLine.split(" ");
-            final String httpMethod = firstLineElements[0];
-            final String requestedResource = firstLineElements[1].substring(1);
+
+            String htmlExtension = ".html";
+            if (Objects.equals(requestedResource, "login")) {
+                requestedResource = requestedResource.concat(htmlExtension);
+            }
+            if (requestedResource.contains("?")) {
+                final String queryString = requestLine.toQueryString();
+                final Map<String, String> queryInfo = new HashMap<>();
+                final String[] queries = queryString.split("&");
+                for (String query : queries) {
+                    final int index = query.indexOf('=');
+                    final String key = query.substring(0, index);
+                    final String value = query.substring(index + 1);
+                    queryInfo.put(key, value);
+                }
+                final User user = InMemoryUserRepository.findByAccount(queryInfo.get("account"))
+                        .orElseThrow(RuntimeException::new);
+                if (user.checkPassword(queryInfo.get("password"))) {
+                    log.info("Login successful!");
+                } else {
+                    log.info("Login failed");
+                }
+            }
 
             final URL resource = getClass().getClassLoader().getResource("static/" + requestedResource);
-            final File file = new File(resource.getPath());
-            final Path path = file.toPath();
+            final Path path = Paths.get(resource.getPath());
             final byte[] bytes = Files.readAllBytes(path);
             final HttpResponse response = new HttpResponse(bytes);
 

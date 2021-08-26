@@ -1,0 +1,33 @@
+package nextstep.jwp.http.message;
+
+import java.util.Arrays;
+
+public class MessageBody {
+
+    private final byte[] bytes;
+
+    public MessageBody(String bodyString) {
+        this(bodyString.getBytes());
+    }
+
+    private MessageBody(byte[] bytes) {
+        this.bytes = bytes;
+    }
+
+    public byte[] getBytes() {
+        return bytes;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MessageBody that = (MessageBody) o;
+        return Arrays.equals(getBytes(), that.getBytes());
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(getBytes());
+    }
+}

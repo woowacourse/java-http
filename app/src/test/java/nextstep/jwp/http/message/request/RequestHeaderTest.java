@@ -5,7 +5,7 @@ import nextstep.jwp.http.message.HeaderFields;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
+import java.util.LinkedHashMap;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -19,10 +19,10 @@ class RequestHeaderTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ");
 
-        HeaderFields expectedHeaderFields = new HeaderFields(Map.of(
-                "Host", "localhost:8080",
-                "Connection", "keep-alive")
-        );
+        LinkedHashMap<String, String> linkedHashMap = new LinkedHashMap<>();
+        linkedHashMap.put("Host", "localhost:8080");
+        linkedHashMap.put("Connection", "keep-alive");
+        HeaderFields expectedHeaderFields = new HeaderFields(linkedHashMap);
 
         RequestHeader requestHeader = RequestHeader.from(headerString);
         assertThat(requestHeader.httpMethod()).isEqualTo(HttpMethod.GET);

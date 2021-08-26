@@ -6,20 +6,22 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class HeaderFields {
 
+    private static final String BLANK = " ";
     private static final String LINE_SEPARATOR = "\r\n";
     private static final String HEADER_FIELD_SEPARATOR = ": ";
 
     private final Map<String, String> fields;
 
-    public HeaderFields(Map<String, String> fields) {
+    public HeaderFields(LinkedHashMap<String, String> fields) {
         this.fields = fields;
     }
 
     public static HeaderFields from(String headerFieldLines) {
-        Map<String, String> headerFields = new LinkedHashMap<>();
+        LinkedHashMap<String, String> headerFields = new LinkedHashMap<>();
         List<String> lines = StringUtils.splitWithSeparator(headerFieldLines, LINE_SEPARATOR);
         for (String line : lines) {
             List<String> pieces = StringUtils.splitTwoPiecesWithSeparator(line, HEADER_FIELD_SEPARATOR);
@@ -28,6 +30,16 @@ public class HeaderFields {
             headerFields.put(key, value);
         }
         return new HeaderFields(headerFields);
+    }
+
+    public String asString() {
+        return fields.entrySet().stream()
+                .map(this::combineField)
+                .collect(Collectors.joining());
+    }
+
+    private String combineField(Map.Entry<String, String> field) {
+        return field.getKey() + HEADER_FIELD_SEPARATOR + field.getValue() + BLANK + LINE_SEPARATOR;
     }
 
     public Map<String, String> getFields() {

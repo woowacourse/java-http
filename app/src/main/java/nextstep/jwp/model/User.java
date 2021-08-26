@@ -1,14 +1,22 @@
 package nextstep.jwp.model;
 
+import java.util.Objects;
+
 public class User {
 
-    private final long id;
+    private long id;
     private final String account;
     private final String password;
     private final String email;
 
     public User(long id, String account, String password, String email) {
         this.id = id;
+        this.account = account;
+        this.password = password;
+        this.email = email;
+    }
+
+    public User(String account, String password, String email) {
         this.account = account;
         this.password = password;
         this.email = email;
@@ -30,5 +38,13 @@ public class User {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 '}';
+    }
+
+    public boolean isEmptyId() {
+        return Objects.isNull(id);
+    }
+
+    public void insertId(long id) {
+        this.id = id;
     }
 }

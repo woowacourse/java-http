@@ -102,7 +102,6 @@ class RequestHandlerTest {
         // then
         String expected = "HTTP/1.1 302";
         String expected2 = "Location: /index.html";
-        System.out.println(socket.output());
         assertThat(socket.output()).contains(expected);
         assertThat(socket.output()).contains(expected2);
     }
@@ -128,5 +127,32 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         String expected = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).contains(expected);
+    }
+
+    @Test
+    @DisplayName("POST /register로 요청을 할 경우, 회원가입을 완료하면 index.html로 리다이렉트한다.")
+    void register_formData() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+            "POST /register HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "Content-Length: 80",
+            "Content-Type: application/x-www-form-urlencoded",
+            "Accept: */*",
+            "",
+            "account=gugu&password=password&email=hkkang%40woowahan.com");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        String expected = "HTTP/1.1 302";
+        String expected2 = "Location: /index.html";
+        assertThat(socket.output()).contains(expected);
+        assertThat(socket.output()).contains(expected2);
     }
 }

@@ -25,6 +25,6 @@ class RegisterControllerTest {
         registerController.service(request, response);
 
         //then
-        assertThat(response.getBytes().length).isGreaterThan(0);
+        assertThat(response.getBytes()).isNotEmpty();
     }
 }

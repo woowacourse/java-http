@@ -17,11 +17,19 @@ import java.util.Objects;
 public class HtmlController implements Controller {
 
     private static final String DEFAULT_PATH = "./static";
+    private static final HtmlController instance = new HtmlController();
+
+    private HtmlController() {
+    }
+
+    public static HtmlController getInstance() {
+        return instance;
+    }
 
     @Override
     public void service(HttpRequestMessage httpRequestMessage, HttpResponseMessage httpResponseMessage) throws IOException {
         RequestHeader requestHeader = httpRequestMessage.getHeader();
-        String filePath = DEFAULT_PATH + requestHeader.uri();
+        String filePath = DEFAULT_PATH + requestHeader.requestUri();
         URL resource = getClass().getClassLoader().getResource(filePath);
         if (Objects.isNull(resource)) {
             throw new HttpUriNotFoundException(String.format("해당 파일을 찾을 수 없습니다.(%s)", filePath));
@@ -35,5 +43,10 @@ public class HtmlController implements Controller {
         httpResponseMessage.setStatusCode(HttpStatusCode.OK);
         httpResponseMessage.putHeader("Content-Type", "text/html;charset=utf-8");
         httpResponseMessage.putHeader("Content-Length", messageBody.contentLength());
+    }
+
+    @Override
+    public boolean canForward() {
+        return false;
     }
 }

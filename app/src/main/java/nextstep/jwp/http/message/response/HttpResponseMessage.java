@@ -6,7 +6,6 @@ import nextstep.jwp.http.message.HttpMessage;
 import nextstep.jwp.http.message.MessageBody;
 
 import java.nio.ByteBuffer;
-import java.util.Optional;
 
 public class HttpResponseMessage implements HttpMessage {
 
@@ -32,19 +31,6 @@ public class HttpResponseMessage implements HttpMessage {
         this.responseBody = responseBody;
     }
 
-    public byte[] toBytes() {
-        byte[] headerBytes = responseHeader.toBytes();
-        byte[] separatorBytes = LINE_SEPARATOR.getBytes();
-        byte[] bodyBytes = responseBody.getBytes();
-
-        return ByteBuffer.allocate(headerBytes.length + separatorBytes.length + bodyBytes.length)
-                .put(headerBytes)
-                .put(separatorBytes)
-                .put(bodyBytes)
-                .array();
-    }
-
-
     public void putHeader(String key, String value) {
         this.responseHeader.putHeader(key, value);
     }
@@ -58,13 +44,26 @@ public class HttpResponseMessage implements HttpMessage {
     }
 
     @Override
+    public byte[] toBytes() {
+        byte[] headerBytes = responseHeader.toBytes();
+        byte[] separatorBytes = LINE_SEPARATOR.getBytes();
+        byte[] bodyBytes = responseBody.getBytes();
+
+        return ByteBuffer.allocate(headerBytes.length + separatorBytes.length + bodyBytes.length)
+                .put(headerBytes)
+                .put(separatorBytes)
+                .put(bodyBytes)
+                .array();
+    }
+
+    @Override
     public ResponseHeader getHeader() {
         return responseHeader;
     }
 
     @Override
-    public Optional<MessageBody> getBody() {
-        return Optional.ofNullable(responseBody);
+    public MessageBody getBody() {
+        return this.responseBody;
     }
 
     @Override

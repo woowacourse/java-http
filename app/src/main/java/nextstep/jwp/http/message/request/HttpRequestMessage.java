@@ -4,50 +4,76 @@ import nextstep.jwp.http.message.HttpMessage;
 import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.utils.StringUtils;
 
+import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.Optional;
 
 public class HttpRequestMessage implements HttpMessage {
 
+
     private static final String MESSAGE_SEPARATOR = "\r\n\r\n";
+    private static final String LINE_SEPARATOR = "\r\n";
     private static final int HAS_BODY_COUNT = 2;
 
-    private final String message;
+    private final RequestHeader requestHeader;
+    private final MessageBody responseBody;
 
-    public HttpRequestMessage(String message) {
-        this.message = message;
+    public HttpRequestMessage(RequestHeader requestHeader, MessageBody responseBody) {
+        this.requestHeader = requestHeader;
+        this.responseBody = responseBody;
     }
 
-    @Override
-    public RequestHeader getHeader() {
-        String headerString = parseHeaderString();
-        return RequestHeader.from(headerString);
+    public HttpRequestMessage(String requestMessage) {
+        this(
+                RequestHeader.from(parseHeaderString(requestMessage)),
+                new MessageBody(parseBodyString(requestMessage))
+        );
     }
 
-    private String parseHeaderString() {
-        return StringUtils.splitWithSeparator(message, MESSAGE_SEPARATOR).get(0);
+    private static String parseHeaderString(String requestMessage) {
+        return StringUtils.splitWithSeparator(requestMessage, MESSAGE_SEPARATOR).get(0);
     }
 
-    @Override
-    public Optional<MessageBody> getBody() {
-        if (!hasBody()) {
-            return Optional.empty();
+    private static String parseBodyString(String requestMessage) {
+        if (!hasBody(requestMessage)) {
+            return "";
         }
-        String bodyString = parseBodyString();
-        return Optional.of(new MessageBody(bodyString));
+        return StringUtils.splitWithSeparator(requestMessage, MESSAGE_SEPARATOR).get(1);
     }
 
-    private boolean hasBody() {
-        List<String> headerBodies = StringUtils.splitWithSeparator(message, MESSAGE_SEPARATOR);
+    private static boolean hasBody(String requestMessage) {
+        List<String> headerBodies = StringUtils.splitWithSeparator(requestMessage, MESSAGE_SEPARATOR);
         return headerBodies.size() == HAS_BODY_COUNT;
     }
 
-    private String parseBodyString() {
-        return StringUtils.splitWithSeparator(message, MESSAGE_SEPARATOR).get(1);
+    public void changeRequestUri(String requestUri) {
+        requestHeader.changeRequestUri(requestUri);
+    }
+    
+    @Override
+    public RequestHeader getHeader() {
+        return this.requestHeader;
+    }
+
+    @Override
+    public MessageBody getBody() {
+        return this.responseBody;
+    }
+
+    @Override
+    public byte[] toBytes() {
+        byte[] headerBytes = requestHeader.toBytes();
+        byte[] separatorBytes = LINE_SEPARATOR.getBytes();
+        byte[] bodyBytes = responseBody.getBytes();
+
+        return ByteBuffer.allocate(headerBytes.length + separatorBytes.length + bodyBytes.length)
+                .put(headerBytes)
+                .put(separatorBytes)
+                .put(bodyBytes)
+                .array();
     }
 
     @Override
     public String toString() {
-        return message;
+        return new String(toBytes());
     }
 }

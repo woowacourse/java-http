@@ -3,7 +3,6 @@ package nextstep.jwp.http;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.http.mapper.ControllerMapper;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
-import nextstep.jwp.http.message.request.RequestHeader;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
 
 import java.io.IOException;
@@ -20,10 +19,17 @@ public class HttpResponseBuilder {
 
     public HttpResponseMessage build() throws IOException {
         HttpResponseMessage httpResponseMessage = new HttpResponseMessage();
-        RequestHeader requestHeader = httpRequestMessage.getHeader();
-        String requestUri = requestHeader.uri();
-        Controller controller = controllerMapper.matchController(requestUri);
+        Controller controller = findNonForwardController(httpResponseMessage);
         controller.service(httpRequestMessage, httpResponseMessage);
         return httpResponseMessage;
+    }
+
+    private Controller findNonForwardController(HttpResponseMessage httpResponseMessage) throws IOException {
+        Controller controller = controllerMapper.matchController(httpRequestMessage);
+        if (controller.canForward()) {
+            controller.service(httpRequestMessage, httpResponseMessage);
+            controller = findNonForwardController(httpResponseMessage);
+        }
+        return controller;
     }
 }

@@ -11,6 +11,7 @@ import java.util.Objects;
 
 public class RequestHeader implements MessageHeader {
 
+    private static final String BLANK = " ";
     private static final String LINE_SEPARATOR = "\r\n";
 
     private final RequestLine requestLine;
@@ -32,11 +33,31 @@ public class RequestHeader implements MessageHeader {
         return new RequestHeader(requestLine, headerFieldLines);
     }
 
+    public byte[] toBytes() {
+        return convertToString().getBytes();
+    }
+
+    public String convertToString() {
+        return requestLine() + headerFields.asString();
+    }
+
+    private String requestLine() {
+        return String.join(BLANK,
+                requestLine.httpMethod,
+                requestUri(),
+                httpVersion(),
+                LINE_SEPARATOR);
+    }
+
+    public void changeRequestUri(String requestUri) {
+        requestLine.requestUri = requestUri;
+    }
+
     public HttpMethod httpMethod() {
         return HttpMethod.valueOf(requestLine.httpMethod);
     }
 
-    public String uri() {
+    public String requestUri() {
         return requestLine.requestUri;
     }
 
@@ -67,7 +88,7 @@ public class RequestHeader implements MessageHeader {
         private static final int REQUEST_LINE_ITEM_COUNT = 3;
 
         private final String httpMethod;
-        private final String requestUri;
+        private String requestUri;
         private final String httpVersion;
 
         private RequestLine(String httpMethod, String requestUri, String httpVersion) {

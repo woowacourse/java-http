@@ -6,7 +6,7 @@ import nextstep.jwp.http.message.response.HttpResponseMessage;
 
 import java.io.IOException;
 
-public class AbstractController implements Controller {
+public abstract class AbstractController implements Controller {
 
     private static final String UNSUPPORTED_METHOD_ERROR_FORMAT = "%s는 %s을 지원하지 않습니다.";
 
@@ -21,6 +21,11 @@ public class AbstractController implements Controller {
                 doPost(httpRequestMessage, httpResponseMessage);
                 break;
         }
+    }
+
+    @Override
+    public boolean canForward() {
+        return false;
     }
 
     protected void doGet(HttpRequestMessage httpRequestMessage, HttpResponseMessage httpResponseMessage) throws IOException {

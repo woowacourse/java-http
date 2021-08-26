@@ -29,7 +29,7 @@ class HttpRequestMessageTest {
 
         // then
         assertThat(httpRequestMessage.getHeader()).isEqualTo(expectedRequestHeader);
-        assertThat(httpRequestMessage.getBody()).isEmpty();
+        assertThat(httpRequestMessage.getBody()).isEqualTo(new MessageBody());
     }
 
     @DisplayName("Header와 Body가 둘 다 존재하는 HttpRequestMessage 생성")
@@ -55,6 +55,6 @@ class HttpRequestMessageTest {
 
         // then
         assertThat(httpRequestMessage.getHeader()).isEqualTo(expectedRequestHeader);
-        assertThat(httpRequestMessage.getBody()).get().isEqualTo(expectedMessageBody);
+        assertThat(httpRequestMessage.getBody()).isEqualTo(expectedMessageBody);
     }
 }

@@ -40,7 +40,7 @@ class HttpResponseMessageTest {
 
         // then
         assertThat(httpResponseMessage.getHeader()).isEqualTo(expectedResponseHeader);
-        assertThat(httpResponseMessage.getBody()).get().isEqualTo(expectedMessageBody);
+        assertThat(httpResponseMessage.getBody()).isEqualTo(expectedMessageBody);
     }
 
     @DisplayName("HttpResponseMessage를 byte 배열로 만든다.")

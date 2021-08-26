@@ -26,7 +26,7 @@ class RequestHeaderTest {
 
         RequestHeader requestHeader = RequestHeader.from(headerString);
         assertThat(requestHeader.httpMethod()).isEqualTo(HttpMethod.GET);
-        assertThat(requestHeader.uri()).isEqualTo("/index.html");
+        assertThat(requestHeader.requestUri()).isEqualTo("/index.html");
         assertThat(requestHeader.httpVersion()).isEqualTo("HTTP/1.1");
         assertThat(requestHeader.getHeaderFields()).isEqualTo(expectedHeaderFields);
     }

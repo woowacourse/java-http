@@ -46,15 +46,9 @@ public class RequestHandler implements Runnable {
             final File file = new File(resource.getPath());
             final Path path = file.toPath();
             final byte[] bytes = Files.readAllBytes(path);
+            final HttpResponse response = new HttpResponse(bytes);
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + bytes.length + " ",
-                    "",
-                    "");
-
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toBytes());
             outputStream.flush();
             outputStream.write(bytes);
             outputStream.flush();

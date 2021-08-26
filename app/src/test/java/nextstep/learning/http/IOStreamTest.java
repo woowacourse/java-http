@@ -210,8 +210,13 @@ class IOStreamTest {
                     "");
             //when
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
-            final BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream, emoji.length());
-            final StringBuilder actual = new StringBuilder(new String(bufferedInputStream.readAllBytes()));
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            final StringBuilder actual = new StringBuilder();
+            while (bufferedReader.ready()) {
+                actual.append(bufferedReader.readLine())
+                        .append("\r\n");
+            }
+
             //then
             assertThat(actual).hasToString(emoji);
         }

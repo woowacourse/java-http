@@ -3,15 +3,19 @@ package nextstep.jwp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final String STATIC_PATH = "static";
+    public static final String DEFAULT_METHOD = "Hello world!";
 
     private final Socket connection;
 
@@ -25,23 +29,60 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            final String firstLine = bufferedReader.readLine();
+            final String extractedUri = extractUri(firstLine);
+            List<String> lines = readLines(bufferedReader);
 
-            final String responseBody = "Hello world!";
+            if ("/".equals(extractedUri)) {
+                final String response = http200Message(DEFAULT_METHOD);
+                writeResponse(outputStream, response);
+                return;
+            }
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final URL uri = getClass().getClassLoader().getResource(STATIC_PATH + extractedUri);
+            final String response = http200Message(Files.readString(new File(uri.getFile()).toPath()));
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            writeResponse(outputStream, response);
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
         }
+    }
+
+    private List<String> readLines(BufferedReader bufferedReader) throws IOException {
+        List<String> lines = new ArrayList<>();
+        while (bufferedReader.ready()) {
+            final String line = bufferedReader.readLine();
+            if (Objects.isNull(line)) {
+                break;
+            }
+            if ("".equals(line)) {
+                break;
+            }
+            lines.add(line);
+        }
+        return lines;
+    }
+
+    private String extractUri(String firstLine) {
+        final String[] splitFirstLine = firstLine.split(" ");
+        return splitFirstLine[1];
+    }
+
+    private void writeResponse(OutputStream outputStream, String response) throws IOException {
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private String http200Message(String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 
     private void close() {

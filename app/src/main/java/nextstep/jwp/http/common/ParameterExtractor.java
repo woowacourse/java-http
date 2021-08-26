@@ -6,6 +6,10 @@ import java.util.Arrays;
 import java.util.Map;
 
 public class ParameterExtractor {
+
+    private ParameterExtractor() {
+    }
+
     public static Map<String, String> extract(String rawParams) {
         if(rawParams.contains("?")) {
             rawParams = rawParams.substring(rawParams.indexOf("?") + 1);

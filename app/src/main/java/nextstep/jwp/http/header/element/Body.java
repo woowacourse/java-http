@@ -12,10 +12,10 @@ public class Body {
 
     private static final Body EMPTY_BODY = new Body(null);
 
-    private final String body;
+    private final String value;
 
     public Body(String body) {
-        this.body = body;
+        this.value = body;
     }
 
     public static Body empty() {
@@ -33,22 +33,22 @@ public class Body {
     }
 
     public boolean isEmpty() {
-        return Objects.isNull(body);
+        return Objects.isNull(value);
     }
 
-    public Optional<String> getBody() {
-        return Optional.ofNullable(body);
+    public Optional<String> getValue() {
+        return Optional.ofNullable(value);
     }
 
     public String asString() {
-        if(Objects.isNull(body)) {
+        if(Objects.isNull(value)) {
             return "";
         }
 
-        return body + LINE_SEPARATOR.value();
+        return value + LINE_SEPARATOR.value();
     }
 
     public int length() {
-        return body.getBytes().length;
+        return value.getBytes().length;
     }
 }

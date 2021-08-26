@@ -12,18 +12,18 @@ import java.util.function.Function;
 
 public class Headers {
 
-    private final Map<String, String> headers;
+    private final Map<String, String> values;
 
     public Headers(String httpRequest) {
-        this.headers = extractHeaders(httpRequest);
+        this.values = extractHeaders(httpRequest);
     }
 
     public Headers() {
         this(new HashMap<>());
     }
 
-    public Headers(Map<String, String> headers) {
-        this.headers = headers;
+    public Headers(Map<String, String> values) {
+        this.values = values;
     }
 
     private Map<String, String> extractHeaders(String rawHeaders) {
@@ -38,7 +38,7 @@ public class Headers {
     }
 
     private Function<String[], String> toHeaderName() {
-        return parameters -> parameters[0].replaceAll(":", "").trim();
+        return parameters -> parameters[0].replace(":", "").trim();
     }
 
     private Function<String[], String> toHeaderValue() {
@@ -46,15 +46,15 @@ public class Headers {
     }
 
     public Optional<String> getHeader(String header) {
-        return Optional.ofNullable(headers.get(header));
+        return Optional.ofNullable(values.get(header));
     }
 
     public void putHeader(String key, String value) {
-        this.headers.put(key, value);
+        this.values.put(key, value);
     }
 
     public String asString() {
-        return headers.entrySet().stream()
+        return values.entrySet().stream()
             .map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
             .collect(joining(LINE_SEPARATOR.value()));
     }

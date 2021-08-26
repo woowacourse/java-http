@@ -11,7 +11,10 @@ import nextstep.jwp.http.exception.NotFoundException;
 
 public class PathUtils {
 
-    private static final String prefix = "static";
+    private static final String PREFIX = "static";
+
+    private PathUtils() {
+    }
 
     public static File toFile(String path) {
         path = rewritePath(path);
@@ -19,7 +22,7 @@ public class PathUtils {
     }
 
     private static String rewritePath(String path) {
-        path = Stream.of(new String[]{prefix}, path.split("/"))
+        path = Stream.of(new String[]{PREFIX}, path.split("/"))
             .flatMap(Arrays::stream)
             .filter(piece -> !piece.isBlank())
             .collect(joining("/"));

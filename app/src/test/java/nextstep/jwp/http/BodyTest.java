@@ -33,7 +33,7 @@ class BodyTest {
     void getBody() {
         Body body = new Body("test");
 
-        String actual = body.getBody()
+        String actual = body.getValue()
             .orElseThrow(IllegalArgumentException::new);
 
         assertThat(actual).isEqualTo("test");

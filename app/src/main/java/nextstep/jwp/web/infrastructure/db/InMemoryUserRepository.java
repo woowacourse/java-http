@@ -18,6 +18,9 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
+    private InMemoryUserRepository() {
+    }
+
     public static void save(User user) {
         if (Objects.isNull(user.getId())) {
             user = new User(

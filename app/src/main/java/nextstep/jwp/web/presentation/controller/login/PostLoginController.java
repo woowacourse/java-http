@@ -39,7 +39,7 @@ public class PostLoginController extends CustomController {
     }
 
     private String getBody(HttpRequest httpRequest) {
-        return httpRequest.getBody().getBody()
+        return httpRequest.getBody().getValue()
             .orElseThrow(BadRequestException::new);
     }
 

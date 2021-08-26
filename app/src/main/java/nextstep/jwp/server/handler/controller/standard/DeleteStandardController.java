@@ -3,7 +3,7 @@ package nextstep.jwp.server.handler.controller.standard;
 import nextstep.jwp.http.header.request.HttpRequest;
 import nextstep.jwp.http.header.response.HttpResponse;
 
-public class DeleteStandardController extends StandardController {
+public class DeleteStandardController implements StandardController {
 
     @Override
     public HttpResponse doService(HttpRequest httpRequest) {

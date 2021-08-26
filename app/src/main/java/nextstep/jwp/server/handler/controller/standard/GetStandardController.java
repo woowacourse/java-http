@@ -6,7 +6,7 @@ import nextstep.jwp.http.header.request.request_line.HttpMethod;
 import nextstep.jwp.http.header.request.request_line.HttpPath;
 import nextstep.jwp.http.header.response.HttpResponse;
 
-public class GetStandardController extends StandardController {
+public class GetStandardController implements StandardController {
 
     @Override
     public HttpResponse doService(HttpRequest httpRequest) {

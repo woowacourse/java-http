@@ -16,6 +16,9 @@ public class InMemoryUserRepository {
         DATABASE.put(user.getAccount(), user);
     }
 
+    private InMemoryUserRepository() {
+    }
+
     public static void save(User user) {
         DATABASE.put(user.getAccount(), user);
     }

@@ -54,7 +54,8 @@ public class HttpRequestParser {
     private void parseHeader(Map<String, String> headers, String line) {
         if (line.contains(":")) {
             final String key = line.split(":")[0];
-            final String value = line.split(":")[1];
+            String value = line.split(":")[1];
+            value = value.trim();
             headers.put(key, value);
         }
     }

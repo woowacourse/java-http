@@ -16,14 +16,13 @@ public class UriPath {
     public UriPath(String path) {
         queryParams = new ConcurrentHashMap<>();
         final int delimiterIndex = path.indexOf("?");
-        String queryParams;
         if (delimiterIndex != -1) {
             LOG.debug("delimiterIndex : {}", delimiterIndex);
             uri = path.substring(0, delimiterIndex);
             LOG.debug("uri : {}", uri);
-            queryParams = path.substring(delimiterIndex + 1);
-            LOG.debug("queryParams : {}", queryParams);
-            parseQueryParams(queryParams);
+            final String queryParam = path.substring(delimiterIndex + 1);
+            LOG.debug("queryParams : {}", queryParam);
+            parseQueryParams(queryParam);
             return;
         }
         uri = path;

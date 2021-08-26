@@ -16,6 +16,10 @@ public class HeaderFields {
 
     private final Map<String, String> fields;
 
+    public HeaderFields() {
+        this.fields = new LinkedHashMap<>();
+    }
+
     public HeaderFields(LinkedHashMap<String, String> fields) {
         this.fields = fields;
     }
@@ -40,6 +44,10 @@ public class HeaderFields {
 
     private String combineField(Map.Entry<String, String> field) {
         return field.getKey() + HEADER_FIELD_SEPARATOR + field.getValue() + BLANK + LINE_SEPARATOR;
+    }
+
+    public void put(String key, String value) {
+        this.fields.put(key, value);
     }
 
     public Map<String, String> getFields() {

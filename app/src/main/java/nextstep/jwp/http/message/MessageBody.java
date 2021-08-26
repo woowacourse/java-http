@@ -6,16 +6,20 @@ public class MessageBody {
 
     private final byte[] bytes;
 
-    public MessageBody(String bodyString) {
-        this(bodyString.getBytes());
+    public MessageBody() {
+        this(new byte[]{});
     }
 
     public MessageBody(byte[] bytes) {
         this.bytes = bytes;
     }
 
-    public int contentLength() {
-        return bytes.length;
+    public MessageBody(String bodyString) {
+        this(bodyString.getBytes());
+    }
+
+    public String contentLength() {
+        return String.valueOf(bytes.length);
     }
 
     public byte[] getBytes() {

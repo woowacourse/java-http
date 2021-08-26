@@ -12,8 +12,12 @@ public class ResponseHeader implements MessageHeader {
     private static final String LINE_SEPARATOR = "\r\n";
 
     private final String httpVersion;
-    private final HttpStatusCode httpStatusCode;
+    private HttpStatusCode httpStatusCode;
     private final HeaderFields headerFields;
+
+    public ResponseHeader() {
+        this("HTTP/1.1", null, new HeaderFields());
+    }
 
     public ResponseHeader(String httpVersion, HttpStatusCode httpStatusCode, HeaderFields headerFields) {
         this.httpVersion = httpVersion;
@@ -37,6 +41,14 @@ public class ResponseHeader implements MessageHeader {
                 statusCode,
                 description,
                 LINE_SEPARATOR);
+    }
+
+    public void putHeader(String key, String value) {
+        headerFields.put(key, value);
+    }
+
+    public void setHttpStatusCode(HttpStatusCode httpStatusCode) {
+        this.httpStatusCode = httpStatusCode;
     }
 
     @Override

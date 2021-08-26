@@ -45,4 +45,11 @@ public class HttpRequestMessage implements HttpMessage {
     private String parseBodyString() {
         return StringUtils.splitWithSeparator(message, MESSAGE_SEPARATOR).get(1);
     }
+
+    @Override
+    public String toString() {
+        return "HttpRequestMessage{" +
+                "message='" + message + '\'' +
+                '}';
+    }
 }

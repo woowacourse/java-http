@@ -10,7 +10,7 @@ class HttpRequestMessageTest {
 
     @DisplayName("Header는 존재, Body는 없는 HttpRequestMessage 생성")
     @Test
-    void createWithBody() {
+    void createWithNoBody() {
         // given
         final String headerString = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
@@ -34,7 +34,7 @@ class HttpRequestMessageTest {
 
     @DisplayName("Header와 Body가 둘 다 존재하는 HttpRequestMessage 생성")
     @Test
-    void createWithNoBody() {
+    void createWithBody() {
         // given
         final String headerString = String.join("\r\n",
                 "POST /index.html HTTP/1.1 ",

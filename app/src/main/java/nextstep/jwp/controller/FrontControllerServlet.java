@@ -22,6 +22,9 @@ public class FrontControllerServlet {
         if (request.extractURIPath().equals("/login")) {
             return new LoginController();
         }
+        if (request.extractURIPath().equals("/register")) {
+            return new RegisterController();
+        }
         return new NoController();
     }
 }

@@ -41,7 +41,7 @@ class RequestHandlerTest {
     void login() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
-            "GET /login.html HTTP/1.1 ",
+            "GET /login HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
             "",
@@ -105,5 +105,28 @@ class RequestHandlerTest {
         System.out.println(socket.output());
         assertThat(socket.output()).contains(expected);
         assertThat(socket.output()).contains(expected2);
+    }
+
+    @Test
+    @DisplayName("GET /register로 요청을 할 경우, resources/static/register.html을 response로 응답한다.")
+    void register() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+            "GET /register HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "",
+            "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        String expected = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertThat(socket.output()).contains(expected);
     }
 }

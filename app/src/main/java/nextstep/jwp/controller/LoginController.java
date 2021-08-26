@@ -11,7 +11,6 @@ import nextstep.jwp.model.User;
 
 public class LoginController implements Controller {
 
-
     @Override
     public HttpResponse get(HttpRequest request) {
         StaticFileReader staticFileReader = new StaticFileReader();
@@ -31,5 +30,10 @@ public class LoginController implements Controller {
         }
         String htmlOfLogin = staticFileReader.read("static/login.html");
         return new HttpResponse(HttpStatus.OK, htmlOfLogin);
+    }
+
+    @Override
+    public HttpResponse post(HttpRequest request) {
+        return null;
     }
 }

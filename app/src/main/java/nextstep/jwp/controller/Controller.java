@@ -5,4 +5,5 @@ import nextstep.jwp.HttpResponse;
 
 public interface Controller {
     HttpResponse get(HttpRequest request);
+    HttpResponse post(HttpRequest request);
 }

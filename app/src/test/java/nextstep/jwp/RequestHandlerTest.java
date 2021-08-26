@@ -32,12 +32,8 @@ class RequestHandlerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertThat(socket.output()).isEqualTo(expected);
+        String expected = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertThat(socket.output()).contains(expected);
     }
 
     @Test
@@ -59,17 +55,36 @@ class RequestHandlerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-            "Content-Type: text/html;charset=utf-8 \r\n" +
-            "Content-Length: 3796 \r\n" +
-            "\r\n"+
-            new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertThat(socket.output()).isEqualTo(expected);
+        String expected = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertThat(socket.output()).contains(expected);
     }
 
     @Test
-    @DisplayName("GET /login?account=gugu&password=password로 요청할 경우, resources/static/login.html을 response로 응답한다.")
+    @DisplayName("GET /login?account=gugu&password=wrong로 요청했는데, 로그인에 실패하면 401.html로 리다이렉트한다.")
     void login_queryString() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+            "GET /login?account=gugu&password=wrong HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "",
+            "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        String expected = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertThat(socket.output()).contains(expected);
+    }
+
+    @Test
+    @DisplayName("GET /login?account=gugu&password=password로 요청해서, 로그인 성공하면 응답 헤더에 http status code를 302로 반환한다.")
+    void login_redirect() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
             "GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -85,12 +100,8 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-            "Content-Type: text/html;charset=utf-8 \r\n" +
-            "Content-Length: 3796 \r\n" +
-            "\r\n"+
-            new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertThat(socket.output()).isEqualTo(expected);
+        String expected = "HTTP/1.1 302";
+        System.out.println(socket.output());
+        assertThat(socket.output()).contains(expected);
     }
 }

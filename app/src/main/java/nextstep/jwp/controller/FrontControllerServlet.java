@@ -5,35 +5,17 @@ import nextstep.jwp.HttpResponse;
 
 public class FrontControllerServlet {
     private final HttpRequest request;
-    private final HttpResponse response;
 
-    public FrontControllerServlet(HttpRequest request, HttpResponse response) {
+    public FrontControllerServlet(HttpRequest request) {
         this.request = request;
-        this.response = response;
     }
 
-    public void process() {
+    public HttpResponse process() {
         Controller controller = findControllerByHttpURIPath();
         if (request.extractHttpMethod().equals("GET")) {
-            controller.get(request, response);
-            return;
+            return controller.get(request);
         }
-        if (request.extractHttpMethod().equals("POST")) {
-            controller.post(request, response);
-            return;
-        }
-        if (request.extractHttpMethod().equals("PUT")) {
-            controller.put(request, response);
-            return;
-        }
-        if (request.extractHttpMethod().equals("PATCH")) {
-            controller.patch(request, response);
-            return;
-        }
-        if (request.extractHttpMethod().equals("DELETE")) {
-            controller.delete(request, response);
-            return;
-        }
+        throw new RuntimeException();
     }
 
     private Controller findControllerByHttpURIPath() {

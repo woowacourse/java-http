@@ -32,15 +32,16 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = new HttpRequest(inputStream);
-            HttpResponse httpResponse = new HttpResponse();
+            HttpResponse httpResponse;
             if (!httpRequest.isEmptyLine()) {
-                FrontControllerServlet frontControllerServlet = new FrontControllerServlet(httpRequest, httpResponse);
-                frontControllerServlet.process();
-
-                String requestURIPath = httpRequest.extractURIPath();
-                String responseBody = readStaticFile(requestURIPath);
-                httpResponse.body(responseBody);
-
+                StaticFileReader staticFileReader = new StaticFileReader();
+                String staticFile = staticFileReader.read(httpRequest);
+                if (!Objects.isNull(staticFile)) {
+                    httpResponse = new HttpResponse(HttpStatus.OK, staticFile);
+                } else {
+                    FrontControllerServlet frontControllerServlet = new FrontControllerServlet(httpRequest);
+                    httpResponse = frontControllerServlet.process();
+                }
                 outputStream.write(httpResponse.getBytes());
             }
             outputStream.flush();
@@ -49,22 +50,6 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
-    }
-
-    private String readStaticFile(String requestURIPath) throws IOException {
-        String fileName = "static" + requestURIPath;
-        URL resource = getClass().getClassLoader().getResource(fileName);
-        if (Objects.isNull(resource)) {
-            fileName += ".html";
-            resource = getClass().getClassLoader().getResource(fileName);
-            if (!Objects.isNull(resource)) {
-                Path path = new File(resource.getFile()).toPath();
-                return Files.readString(path);
-            }
-            return "";
-        }
-        Path path = new File(resource.getFile()).toPath();
-        return Files.readString(path);
     }
 
     private void close() {

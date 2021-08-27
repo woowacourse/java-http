@@ -27,7 +27,7 @@ class RequestHandlerTest {
     }
 
     @Test
-    void mainPage() throws IOException {
+    void mainPage() {
         // given
         final String requestUri = "/";
         final String httpRequest = toHttpGetRequest(requestUri);
@@ -80,7 +80,7 @@ class RequestHandlerTest {
     }
 
     @Test
-    void loginRequest() throws IOException {
+    void loginRequest() {
         // given
         final String requestUri = "/login?account=gugu&password=password";
         final String httpRequest = toHttpGetRequest(requestUri);
@@ -101,7 +101,6 @@ class RequestHandlerTest {
         // given
         final String requestUri = "/login?account=gugu&password=passwor";
         final String httpRequest = toHttpGetRequest(requestUri);
-        final URL resource = getClass().getClassLoader().getResource("static/401.html");
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
@@ -119,7 +118,6 @@ class RequestHandlerTest {
         // given
         final String requestUri = "/login?account=gugu&password=passwor";
         final String httpRequest = toHttpGetRequest(requestUri);
-        final URL resource = getClass().getClassLoader().getResource("static/401.html");
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
@@ -152,7 +150,7 @@ class RequestHandlerTest {
     }
 
     @Test
-    void registerRequest() throws IOException {
+    void registerRequest() {
         // given
         final String requestUri = "/register";
         final String requestBody = "account=gumgum&password=password2&email=ggump%40woowahan.com";
@@ -161,7 +159,7 @@ class RequestHandlerTest {
         final RequestHandler requestHandler = new RequestHandler(socket);
 
         final String redirectUrl = "/index.html";
-        String expected = toHttp302Response("/index.html");
+        String expected = toHttp302Response(redirectUrl);
         // when
         requestHandler.run();
         final String actual = socket.output();

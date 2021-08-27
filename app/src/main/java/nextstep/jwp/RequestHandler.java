@@ -9,7 +9,10 @@ import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 public class RequestHandler implements Runnable {
 
@@ -39,7 +42,7 @@ public class RequestHandler implements Runnable {
 
             if ("/css/styles.css".equals(extractedUri)) {
                 final String response = httpCssMessage();
-                writeResponse(outputStream,response);
+                writeResponse(outputStream, response);
             }
 
             if ("/".equals(extractedUri)) {
@@ -51,7 +54,7 @@ public class RequestHandler implements Runnable {
             if (extractedUri.startsWith("/login")) {
                 if (extractedUri.contains("?")) {
                     try {
-                        String responseBody = loginRequest(extractedUri);
+                        loginRequest(extractedUri);
                         final String response = http302Response("/index.html");
                         writeResponse(outputStream, response);
                     } catch (RuntimeException exception) {
@@ -108,7 +111,7 @@ public class RequestHandler implements Runnable {
         final String path = extractedUri.substring(0, index);
         Map<String, String> params = extractQueryParam(extractedUri.substring(index + 1));
 
-        final Optional<User>  user = InMemoryUserRepository.findByAccount(params.get("account"));
+        final Optional<User> user = InMemoryUserRepository.findByAccount(params.get("account"));
         if (user.isPresent()) {
             final User foundUser = user.get();
             if (foundUser.checkPassword(params.get("password"))) {

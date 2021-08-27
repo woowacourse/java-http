@@ -51,7 +51,7 @@ public class RequestHandler implements Runnable {
             final HttpRequest httpRequest = HttpRequestParser.parse(inputStream);
             Object handler = getHandler(httpRequest);
             HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
-            View view = handlerAdapter.handle(handler);
+            View view = handlerAdapter.handle(httpRequest, handler);
 
             outputStream.write(view.getContent().getBytes());
             outputStream.flush();

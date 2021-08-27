@@ -2,10 +2,10 @@ package nextstep.jwp.http.response;
 
 public class StatusLine {
 
+    private static final String PROTOCOL_VERSION = "HTTP/1.1";
+
     private final int statusCode;
     private final StatusMessage statusMessage;
-
-    private static final String PROTOCOL_VERSION = "HTTP/1.1";
 
     public StatusLine(int statusCode) {
         this.statusCode = statusCode;

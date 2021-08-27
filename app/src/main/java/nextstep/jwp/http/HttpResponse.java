@@ -25,13 +25,6 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-//        return String.join(HTTP_LINE_SEPERATOR,
-//            makeStartLine(),
-//            "HTTP/1.1 " + status.getCode() + " " + status.getMessage(),
-//            "Content-Type: text/html;charset=utf-8 ",
-//            "Content-Length: " + body.getBytes().length + " ",
-//            "",
-//            body);
         return String.join(HTTP_LINE_SEPERATOR,
             makeStartLine(),
             makeHeaderLines(),

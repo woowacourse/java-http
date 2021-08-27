@@ -12,7 +12,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
 
-public class RequestHandler{
+public class RequestHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(RequestHandler.class);
 

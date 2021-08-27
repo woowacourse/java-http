@@ -43,6 +43,8 @@ public class RequestHandler implements Runnable {
                 final OutputStream outputStream = connection.getOutputStream()) {
 
             String firstLine = reader.readLine();
+            log.debug("first line = {}", firstLine);
+
             if (firstLine == null) {
                 return;
             }
@@ -70,7 +72,13 @@ public class RequestHandler implements Runnable {
             }
 
             if (uri.startsWith("/login")) {
-                response = controller.login(uri);
+                if ("GET".equals(method)) {
+                    response = controller.login();
+                }
+                else if("POST".equals(method)) {
+                    String requestBody = getRequestBody(reader, headers);
+                    response = controller.login(requestBody);
+                }
             }
 
             if (uri.startsWith("/register")) {

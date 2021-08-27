@@ -15,22 +15,12 @@ public class Controller {
         return view("/index.html");
     }
 
-    public String login(String uri) throws IOException {
+    public String login() throws IOException {
+        return view("/login.html");
+    }
 
-        int index = uri.indexOf("?");
-        if (index == -1) {
-            return view("/login.html");
-        }
-
-        String queryString = uri.substring(index + 1);
-        String[] strings = queryString.split("&");
-
-        Map<String, String> queryMap = new HashMap<>();
-
-        for (String string : strings) {
-            String[] token = string.split("=");
-            queryMap.put(token[0], token[1]);
-        }
+    public String login(String requestBody) {
+        Map<String, String> queryMap = bodyMapper(requestBody);
 
         User user = InMemoryUserRepository.findByAccount(queryMap.get("account")).orElseThrow(
                 IllegalArgumentException::new);
@@ -45,6 +35,15 @@ public class Controller {
     }
 
     public String register(String requestBody) throws IOException {
+        Map<String, String> queryMap = bodyMapper(requestBody);
+
+        User user = new User(2L, queryMap.get("account"), queryMap.get("password"), queryMap.get("email"));
+
+        InMemoryUserRepository.save(user);
+        return redirect("/index.html");
+    }
+
+    private Map<String, String> bodyMapper(String requestBody) {
         String[] strings = requestBody.split("&");
 
         Map<String, String> queryMap = new HashMap<>();
@@ -53,11 +52,7 @@ public class Controller {
             String[] token = string.split("=");
             queryMap.put(token[0], token[1]);
         }
-
-        User user = new User(2L, queryMap.get("account"), queryMap.get("password"), queryMap.get("email"));
-
-        InMemoryUserRepository.save(user);
-        return redirect("/index.html");
+        return queryMap;
     }
 
     private String view(String uri) throws IOException {
@@ -73,19 +68,19 @@ public class Controller {
                 responseBody);
     }
 
-    private String redirect(String redirectTo){
+    private String redirect(String redirectTo) {
         return String.join("\r\n",
                 "HTTP/1.1 301 Found ",
                 "Location: " + redirectTo);
     }
 
-    private String found(String redirectTo){
+    private String found(String redirectTo) {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Location: " + redirectTo);
     }
 
-    private String unauthorized(){
+    private String unauthorized() {
         return String.join("\r\n",
                 "HTTP/1.1 401 Unauthorized ");
     }

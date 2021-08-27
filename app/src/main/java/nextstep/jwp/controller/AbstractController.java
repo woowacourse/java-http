@@ -12,13 +12,11 @@ public abstract class AbstractController implements Controller {
     protected static final Logger LOG = LoggerFactory.getLogger(AbstractController.class);
     protected static final StaticResourceFinder STATIC_RESOURCE_FINDER = new StaticResourceFinder();
 
-    @Override
-    public void service(HttpRequest request, HttpResponse response) {
-        // http method 분기문
+    protected void doPost(HttpRequest request, HttpResponse response) {
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) { /* NOOP */ }
-    protected void doGet(HttpRequest request, HttpResponse response) { /* NOOP */ }
+    protected void doGet(HttpRequest request, HttpResponse response) {
+    }
 
     protected StaticResource getStaticResource(String filePath) {
         return STATIC_RESOURCE_FINDER.findStaticResource(filePath);

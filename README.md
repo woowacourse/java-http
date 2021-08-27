@@ -5,7 +5,7 @@
 - [ ] 무제한 길이의 URI를 처리할 수 있어야만 한다.
     - [ ] URI의 길이가 처리할 수 있는 것보다 긴 경우 414 (Request-URI Too Long)를 응답한다.
 - [ ] URL에 abs_path가 명시되어 있지 않으면 자원(5.1.2 절)을 위한 Request-URI로서 사용할 때 반드시 "/"가 주어져야 한다.
-    - [ ] 비어 있는 abs_path는 "/"인 abs_path와 동일하다.
+    - [x] 비어 있는 abs_path는 "/"인 abs_path와 동일하다.
 - [ ] 비어 있거나 명시되지 않은 포트는 기본 포트 80번으로 정의한다
 - [ ] 호스트 이름의 비교에는 반드시 대소문자를 구별하지 않는다.
 - [ ] scheme 이름의 비교는 반드시 대소문자를 구별하지 않는다.
@@ -43,3 +43,10 @@ GET /pub/WWW/TheProject.html HTTP/1.1 Host: www.w3.org
 1. Request-URI 가 absoluteURI이면 호스트는 Request-URI의 일부분이다. 요구의 어떠한 Host 헤더 필드 값도 반드시 무시해야 한다.
 2. Request-URI 가 absoluteURI가 아니면 요구는 Host 헤더 필드를 포함한다. 호스트는 Host 헤더 필드 값으로 결정된다.
 3. 규칙 1, 2에 의하여 지정된 호스트가 서버의 유효한 호스트가 아니면 응답은 반드시 400(Bad Request) 에러 메시지이어야 한다.
+
+<br>
+
+### 파일 내용을 먼저 읽어서 StaticResource 객체로 관리하는게 나을지?
+아니면 파일 경로만 기억하고 있다가 Response로 돌려줄 때 파일 내용을 읽는게 나을지?
+
+

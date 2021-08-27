@@ -1,5 +1,6 @@
 package nextstep.jwp;
 
+import nextstep.jwp.model.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +36,8 @@ public class RequestHandler implements Runnable {
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            final String httpRequestFirstLine = getRequest(bufferedReader).split("\n")[0];
-            final String responseBody = execute(httpRequestFirstLine);
+            final HttpRequest httpRequest = HttpRequest.of(bufferedReader);
+            final String responseBody = execute(httpRequest.getRequestLine());
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -60,17 +61,6 @@ public class RequestHandler implements Runnable {
         } catch (IOException exception) {
             log.error("Exception closing socket", exception);
         }
-    }
-
-    private String getRequest(BufferedReader bufferedReader) throws IOException {
-        final StringBuilder request = new StringBuilder();
-
-        String tempLine;
-        while (!Objects.isNull(tempLine = bufferedReader.readLine())) {
-            request.append(tempLine);
-            request.append("\n");
-        }
-        return request.toString();
     }
 
     private String execute(String httpRequestFirstLine) {

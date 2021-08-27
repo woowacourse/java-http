@@ -1,11 +1,16 @@
 package nextstep.jwp;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,12 +48,12 @@ class RequestHandlerTest {
         assertThat(actual).isEqualTo(expected);
     }
 
-    @Test
-    void index() throws IOException {
+    @ParameterizedTest
+    @ValueSource(strings = {"/index.html", "/login.html", "/register.html"})
+    void 정적_html_파일을_반환한다(String requestUri) throws IOException {
         // given
-        final String requestUri = "/index.html";
         final String httpRequest = toHttpGetRequest(requestUri);
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
@@ -61,90 +66,23 @@ class RequestHandlerTest {
         assertThat(actual).isEqualTo(expected);
     }
 
-    @Test
-    void loginForm() throws IOException {
-        // given
-        final String requestUri = "/login";
-        final String httpRequest = toHttpGetRequest(requestUri);
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        final String expectResponseBody = Files.readString(new File(resource.getFile()).toPath());
-        String expected = toHttp200TextHtmlResponse(expectResponseBody);
-        // when
-        requestHandler.run();
-        final String actual = socket.output();
-        // then
-        assertThat(actual).isEqualTo(expected);
+    static private Stream<Arguments> Post_요청에_대해_응답한다() {
+        return Stream.of(
+              Arguments.of("/login", "account=gugu&password=password", "/index.html"),
+              Arguments.of("/login", "account=gugu&password=passwor", "/401.html"),
+              Arguments.of("/login", "account=ggu&password=password", "/401.html")
+        );
     }
 
-    @Test
-    void loginRequest() {
+    @ParameterizedTest
+    @MethodSource
+    void Post_요청에_대해_응답한다(String requestUri, String requestBody, String redirectUrl) {
         // given
-        final String requestUri = "/login";
-        final String requestBody = "account=gugu&password=password";
         final String httpRequest = toHttpPostRequest(requestUri, requestBody);
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
-        final String redirectUrl = "/index.html";
         String expected = toHttp302Response(redirectUrl);
-        // when
-        requestHandler.run();
-        final String actual = socket.output();
-        // then
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
-    void 패스워드를_잘못_입력시_실패한다() throws IOException {
-        // given
-        final String requestUri = "/login";
-        final String requestBody = "account=gugu&password=passwor";
-        final String httpRequest = toHttpPostRequest(requestUri, requestBody);
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        final String redirectUrl = "/401.html";
-        String expected = toHttp302Response(redirectUrl);
-        // when
-        requestHandler.run();
-        final String actual = socket.output();
-        // then
-        assertThat(actual).isEqualTo(expected);
-    }
-
-    @Test
-    void 로그인시_요청한_아이디가_존재하지않으면_실패한다() throws IOException {
-        // given
-        final String requestUri = "/login";
-        final String requestBody = "account=ggu&password=passwor";
-        final String httpRequest = toHttpPostRequest(requestUri, requestBody);
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        final String redirectUrl = "/401.html";
-        String expected = toHttp302Response(redirectUrl);
-        // when
-        requestHandler.run();
-        final String actual = socket.output();
-        // then
-        assertThat(actual).isEqualTo(expected);
-    }
-
-
-    @Test
-    void registerForm() throws IOException {
-        // given
-        final String requestUri = "/register";
-        final String httpRequest = toHttpGetRequest(requestUri);
-        final URL resource = getClass().getClassLoader().getResource("static/register.html");
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        final String expectResponseBody = Files.readString(new File(resource.getFile()).toPath());
-        String expected = toHttp200TextHtmlResponse(expectResponseBody);
         // when
         requestHandler.run();
         final String actual = socket.output();

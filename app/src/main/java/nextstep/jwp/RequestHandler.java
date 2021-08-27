@@ -21,7 +21,7 @@ public class RequestHandler implements Runnable {
     private static final String STATIC_PATH = "static";
     private static final String HEADER_DELIMITER = ": ";
 
-    private static long user_id = 2;
+    private static long userId = 2;
 
     private final Socket connection;
 
@@ -138,7 +138,7 @@ public class RequestHandler implements Runnable {
 
     private void registerRequest(String requestBody) {
         Map<String, String> params = extractQueryParam(requestBody);
-        final User user = new User(user_id++, params.get("account"), params.get("password"), params.get("email"));
+        final User user = new User(userId++, params.get("account"), params.get("password"), params.get("email"));
         InMemoryUserRepository.save(user);
     }
 

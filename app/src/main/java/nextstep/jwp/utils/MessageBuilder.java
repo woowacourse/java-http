@@ -19,27 +19,11 @@ public class MessageBuilder {
 
     public static String build(Request request) throws IOException {
         String requestPath = request.getPath();
+        String requestMethod = request.getMethod();
 
-        if ("/".equals(requestPath)) {
-            final String responseBody = "Hello world!";
-
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-        }
-
-        if (!requestPath.contains(FILE_EXTENSION)) {
-            String uri = requestPath;
-            int index = uri.indexOf("?");
-            if (index == -1) {
-                requestPath += FILE_EXTENSION;
-
-                final URL resource = MessageBuilder.class.getClassLoader().getResource("static" + requestPath);
-                final Path path = new File(resource.getPath()).toPath();
-                final String responseBody = new String(Files.readAllBytes(path));
+        if ("GET".equals(requestMethod)) {
+            if ("/".equals(requestPath)) {
+                final String responseBody = "Hello world!";
 
                 return String.join("\r\n",
                         "HTTP/1.1 200 OK ",
@@ -49,36 +33,101 @@ public class MessageBuilder {
                         responseBody);
             }
 
-            String queryString = uri.substring(index + 1);
-            String[] queries = queryString.split("&");
-            String account = queries[0].split("=")[1];
-            String password = queries[1].split("=")[1];
-            Optional<User> dbUser = InMemoryUserRepository.findByAccount(account);
+            if (!requestPath.contains(FILE_EXTENSION)) {
+                String uri = requestPath;
+                int index = uri.indexOf("?");
+                if (index == -1) {
+                    requestPath += FILE_EXTENSION;
 
-            if (dbUser.isPresent() && dbUser.get().checkPassword(password)) {
+                    final URL resource = MessageBuilder.class.getClassLoader().getResource("static" + requestPath);
+                    final Path path = new File(resource.getPath()).toPath();
+                    final String responseBody = new String(Files.readAllBytes(path));
+
+                    return String.join("\r\n",
+                            "HTTP/1.1 200 OK ",
+                            "Content-Type: text/html;charset=utf-8 ",
+                            "Content-Length: " + responseBody.getBytes().length + " ",
+                            "",
+                            responseBody);
+                }
+
+                String queryString = uri.substring(index + 1);
+                String[] queries = queryString.split("&");
+                String account = queries[0].split("=")[1];
+                String password = queries[1].split("=")[1];
+                Optional<User> dbUser = InMemoryUserRepository.findByAccount(account);
+
+                if (dbUser.isPresent() && dbUser.get().checkPassword(password)) {
+                    return String.join("\r\n",
+                            "HTTP/1.1 302 FOUND ",
+                            "Location: /index.html ",
+                            "",
+                            "");
+                }
+
                 return String.join("\r\n",
                         "HTTP/1.1 302 FOUND ",
-                        "Location: /index.html ",
+                        "Location: /401.html ",
                         "",
                         "");
             }
 
+            final URL resource = MessageBuilder.class.getClassLoader().getResource("static" + requestPath);
+            final Path path = new File(resource.getPath()).toPath();
+            final String responseBody = new String(Files.readAllBytes(path));
+
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+
+        if (requestPath.contains("register")) {
+            String requestBody = request.getBody();
+            String[] queries = requestBody.split("&");
+            String account = queries[0].split("=")[1];
+            String email = queries[1].split("=")[1];
+            String password = queries[2].split("=")[1];
+
+            if (InMemoryUserRepository.existsByAccount(account)
+                    || InMemoryUserRepository.existsByEmail(email)) {
+                return String.join("\r\n",
+                        "HTTP/1.1 302 FOUND ",
+                        "Location: /401.html ",
+                        "",
+                        "");
+            }
+
+            User user = new User(account, password, email);
+            InMemoryUserRepository.save(user);
+
             return String.join("\r\n",
                     "HTTP/1.1 302 FOUND ",
-                    "Location: /401.html ",
+                    "Location: /index.html ",
                     "",
                     "");
         }
 
-        final URL resource = MessageBuilder.class.getClassLoader().getResource("static" + requestPath);
-        final Path path = new File(resource.getPath()).toPath();
-        final String responseBody = new String(Files.readAllBytes(path));
+        String requestBody = request.getBody();
+        String[] queries = requestBody.split("&");
+        String account = queries[0].split("=")[1];
+        String password = queries[1].split("=")[1];
+        Optional<User> dbUser = InMemoryUserRepository.findByAccount(account);
+
+        if (dbUser.isPresent() && dbUser.get().checkPassword(password)) {
+            return String.join("\r\n",
+                    "HTTP/1.1 302 FOUND ",
+                    "Location: /index.html ",
+                    "",
+                    "");
+        }
 
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                "HTTP/1.1 302 FOUND ",
+                "Location: /401.html ",
                 "",
-                responseBody);
+                "");
     }
 }

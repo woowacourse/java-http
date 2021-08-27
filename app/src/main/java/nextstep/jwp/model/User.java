@@ -2,13 +2,15 @@ package nextstep.jwp.model;
 
 public class User {
 
+    private static long count = 0;
+
     private final long id;
     private final String account;
     private final String password;
     private final String email;
 
-    public User(long id, String account, String password, String email) {
-        this.id = id;
+    public User(String account, String password, String email) {
+        this.id = ++count;
         this.account = account;
         this.password = password;
         this.email = email;
@@ -20,6 +22,10 @@ public class User {
 
     public String getAccount() {
         return account;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     @Override

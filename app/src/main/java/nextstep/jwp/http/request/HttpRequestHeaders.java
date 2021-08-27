@@ -28,6 +28,10 @@ public class HttpRequestHeaders {
         addValueIfKeyAbsent(key, values);
     }
 
+    public Map<String, HttpRequestHeaderValues> map() {
+        return headers;
+    }
+
     private void addValueIfKeyPresent(String key, List<String> values) {
         headers.computeIfPresent(key,
             (k, v) -> v.add(values)

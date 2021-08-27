@@ -19,9 +19,10 @@ public class HttpRequestHeaderValues {
     }
 
     public HttpRequestHeaderValues(List<String> values) {
-        validateBlankOrEmpty(values);
-        validateContainsComma(values);
-        this.values = values;
+        List<String> trimValues = trimValues(values);
+        validateBlankOrEmpty(trimValues);
+        validateContainsComma(trimValues);
+        this.values = trimValues;
     }
 
     private void validateBlankOrEmpty(List<String> values) {
@@ -46,9 +47,15 @@ public class HttpRequestHeaderValues {
 
     public HttpRequestHeaderValues add(List<String> values) {
         return new HttpRequestHeaderValues(
-            Stream.concat(this.values.stream(), values.stream())
+            Stream.concat(this.values.stream(), trimValues(values).stream())
                 .collect(toList())
         );
+    }
+
+    private List<String> trimValues(List<String> values) {
+        return values.stream()
+            .map(String::trim)
+            .collect(toList());
     }
 
     public List<String> list() {

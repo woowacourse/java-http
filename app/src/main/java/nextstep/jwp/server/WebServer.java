@@ -37,8 +37,8 @@ public class WebServer {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
             final RequestHandler requestHandler = applicationContext.getRequestHandler();
-            final Socket conn = connection;
-            new Thread(() -> requestHandler.run(conn)).start();
+            final Socket finalConnection = connection;
+            new Thread(() -> requestHandler.run(finalConnection)).start();
         }
     }
 

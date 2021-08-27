@@ -41,4 +41,8 @@ public class HttpRequest {
 
         return Body.empty();
     }
+
+    public String getUri() {
+        return requestLine.getUri();
+    }
 }

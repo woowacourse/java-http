@@ -12,4 +12,8 @@ public class StatusLine {
         this.httpVersion = httpVersion;
         this.httpStatus = httpStatus;
     }
+
+    public static StatusLine from(HttpStatus httpStatus) {
+        return new StatusLine(HttpVersion.HTTP_1_1, httpStatus);
+    }
 }

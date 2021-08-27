@@ -11,12 +11,12 @@ public class RequestLine {
     private static final int EXPECT_REQUEST_LINE_LENGTH = 3;
 
     private final Method method;
-    private final RequestURI requestURI;
+    private final RequestUri requestUri;
     private final HttpVersion httpVersion;
 
-    private RequestLine(Method method, RequestURI requestURI, HttpVersion httpVersion) {
+    private RequestLine(Method method, RequestUri requestUri, HttpVersion httpVersion) {
         this.method = method;
-        this.requestURI = requestURI;
+        this.requestUri = requestUri;
         this.httpVersion = httpVersion;
     }
 
@@ -24,7 +24,7 @@ public class RequestLine {
         String[] splitedLine = splitRequestLine(requestLine);
 
         Method method = Method.matchOf(splitedLine[METHOD_INDEX]);
-        RequestURI requestURI = new RequestURI(splitedLine[URI_INDEX]);
+        RequestUri requestURI = new RequestUri(splitedLine[URI_INDEX]);
         HttpVersion httpVersion = HttpVersion.matchOf(splitedLine[VERSION_INDEX]);
 
         return new RequestLine(method, requestURI, httpVersion);
@@ -38,5 +38,9 @@ public class RequestLine {
         }
 
         return splitedLine;
+    }
+
+    public String getUri() {
+        return requestUri.getValue();
     }
 }

@@ -4,10 +4,8 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnAuthorizedException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestBody;
-import nextstep.jwp.http.request.RequestLine;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.model.User;
-import nextstep.jwp.staticresource.StaticResource;
 
 import static nextstep.jwp.http.request.HttpMethod.GET;
 
@@ -24,11 +22,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        final RequestLine requestLine = request.getRequestLine();
-        final String filePath = requestLine.getUri();
-        final StaticResource staticResource = getStaticResource(filePath + ".html");
-        response.assignStatusCode(200);
-        response.addStaticResource(staticResource);
+        assignStaticResourceByUriToResponse(request, response, ".html");
     }
 
     @Override

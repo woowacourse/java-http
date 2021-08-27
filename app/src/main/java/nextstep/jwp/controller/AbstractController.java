@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.request.RequestLine;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.staticresource.StaticResource;
 import nextstep.jwp.staticresource.StaticResourceFinder;
@@ -18,8 +19,12 @@ public abstract class AbstractController implements Controller {
     protected void doGet(HttpRequest request, HttpResponse response) {
     }
 
-    protected StaticResource getStaticResource(String filePath) {
-        return STATIC_RESOURCE_FINDER.findStaticResource(filePath);
+    protected void assignStaticResourceByUriToResponse(HttpRequest request, HttpResponse response, String fileNameExtension) {
+        final RequestLine requestLine = request.getRequestLine();
+        final String uri = requestLine.getUri();
+        final StaticResource staticResource = STATIC_RESOURCE_FINDER.findStaticResource(uri + fileNameExtension);
+        response.assignStatusCode(200);
+        response.addStaticResource(staticResource);
     }
 }
 

@@ -53,7 +53,6 @@ public class RequestHandler implements Runnable {
                 }
             } else {
                 if ("/login".equals(path)) {
-                    String queryString = httpRequest.getQueryString();
                     if (httpRequest.getQueryString() == null) {
                         url = getClass().getClassLoader().getResource("static" + path + ".html");
                         filePath = new File(url.getFile()).toPath();
@@ -64,18 +63,8 @@ public class RequestHandler implements Runnable {
                         httpResponse.write(responseBody);
                         httpResponse.flush();
                     } else {
-                        String[] split = queryString.split("&");
-                        String account = null;
-                        String password = null;
-                        for (String data : split) {
-                            String[] splitData = data.split("=");
-                            if ("account".equals(splitData[0])) {
-                                account = splitData[1];
-                            }
-                            if ("password".equals(splitData[0])) {
-                                password = splitData[1];
-                            }
-                        }
+                        String account = httpRequest.getParameter("account");
+                        String password = httpRequest.getParameter("password");
                         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
                         if (optionalUser.isPresent()) {
                             User user = optionalUser.get();
@@ -90,6 +79,25 @@ public class RequestHandler implements Runnable {
                             httpResponse.setStatus(302);
                             httpResponse.sendRedirect("/401.html");
                         }
+                    }
+                } else if ("/register".equals(path)) {
+                    String method = httpRequest.getMethod();
+                    if ("GET".equals(method)) {
+                        url = getClass().getClassLoader().getResource("static" + path + ".html");
+                        filePath = new File(url.getFile()).toPath();
+                        responseBody = new String(Files.readAllBytes(filePath));
+                        httpResponse.setStatus(200);
+                        httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
+                        httpResponse.addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
+                        httpResponse.write(responseBody);
+                        httpResponse.flush();
+                    } else if ("POST".equals(method)) {
+                        String account = httpRequest.getParameter("account");
+                        String password = httpRequest.getParameter("password");
+                        String email = httpRequest.getParameter("email");
+                        InMemoryUserRepository.save(new User(2, account, password, email));
+                        httpResponse.setStatus(302);
+                        httpResponse.sendRedirect("/index.html");
                     }
                 }
             }

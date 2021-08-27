@@ -14,6 +14,11 @@ public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        response.forward("/login.html");
+    }
+
+    @Override
     public void doPost(HttpRequest request, HttpResponse response) {
         String account = request.getParams("account");
         Optional<User> user = InMemoryUserRepository.findByAccount(account);

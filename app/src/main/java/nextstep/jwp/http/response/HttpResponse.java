@@ -54,7 +54,6 @@ public class HttpResponse {
             this.setStatusLine(Status.OK);
             this.headers.setContentType(ContentType.findByUri(uri));
             this.headers.setContentLength(content.length());
-            System.out.println(content);
             this.body = new ResponseBody(content);
         } catch (Exception exception) {
             log.error("Exception set response body", exception);

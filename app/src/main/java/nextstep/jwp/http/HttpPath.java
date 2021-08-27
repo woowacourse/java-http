@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 public class HttpPath {
 
     private static final String HTML_SUFFIX = ".html";
+    private static final String CSS_SUFFIX = ".css";
+    private static final String JAVASCRIPT_SUFFIX = ".js";
     private static final String REDIRECT_PREFIX = "redirect:";
     private static final String QUERY_STRING_SEPARATOR = "?";
     private static final String QUERY_STRING_PIECE_SEPARATOR = "&";
@@ -23,6 +25,14 @@ public class HttpPath {
 
     public boolean isHtmlPath() {
         return removeQueryString().endsWith(HTML_SUFFIX);
+    }
+
+    public boolean isJavaScriptPath() {
+        return path.endsWith(JAVASCRIPT_SUFFIX);
+    }
+
+    public boolean isCssPath() {
+        return path.endsWith(CSS_SUFFIX);
     }
 
     public boolean isRedirectPath() {

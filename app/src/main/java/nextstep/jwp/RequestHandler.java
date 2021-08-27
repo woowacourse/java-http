@@ -41,7 +41,7 @@ public class RequestHandler implements Runnable {
             HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder(httpRequestMessage);
             HttpResponseMessage httpResponseMessage = httpResponseBuilder.build();
 
-            log.debug(String.format("%nResponseLog%n%s%n", httpResponseMessage));
+//            log.debug(String.format("%nResponseLog%n%s%n", httpResponseMessage));
 
             outputStream.write(httpResponseMessage.toBytes());
             outputStream.flush();

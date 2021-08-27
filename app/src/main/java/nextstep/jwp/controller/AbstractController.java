@@ -11,7 +11,7 @@ public abstract class AbstractController implements Controller {
     private static final String UNSUPPORTED_METHOD_ERROR_FORMAT = "%s는 %s을 지원하지 않습니다.";
 
     @Override
-    public void service(HttpRequestMessage httpRequestMessage, HttpResponseMessage httpResponseMessage) throws IOException {
+    public final void service(HttpRequestMessage httpRequestMessage, HttpResponseMessage httpResponseMessage) throws IOException {
         HttpMethod httpMethod = httpRequestMessage.getHeader().httpMethod();
         switch (httpMethod) {
             case GET:

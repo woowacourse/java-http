@@ -20,6 +20,20 @@ class HttpPathTest {
         assertThat(httpPath.isHtmlPath()).isTrue();
     }
 
+    @DisplayName("css 경로이면 참을 반환한다.")
+    @Test
+    void isCssPath() {
+        HttpPath httpPath = new HttpPath("/style.css");
+        assertThat(httpPath.isCssPath()).isTrue();
+    }
+
+    @DisplayName("javascript 경로이면 참을 반환한다.")
+    @Test
+    void isJavaScriptPath() {
+        HttpPath httpPath = new HttpPath("/scripts.js");
+        assertThat(httpPath.isJavaScriptPath()).isTrue();
+    }
+
     @DisplayName("redirect 경로이면 참을 반환한다.")
     @Test
     void isRedirectPath() {

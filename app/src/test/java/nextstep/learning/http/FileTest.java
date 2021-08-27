@@ -28,7 +28,7 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = getClass().getResource("/" + fileName).getPath();
+        final String actual = getClass().getClassLoader().getResource(fileName).getPath();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -42,7 +42,7 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = Path.of(getClass().getResource("/" + fileName).toURI());
+        final Path path = Path.of(getClass().getClassLoader().getResource(fileName).toURI());
 
         // todo
         final List<String> actual = Files.readAllLines(path);

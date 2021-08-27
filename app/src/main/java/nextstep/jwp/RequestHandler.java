@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.ControllerContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +40,10 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = new HttpRequest(bufferedReader);
+            Controller controller = ControllerContainer.findController(httpRequest);
 
-            URL resource = getClass().getClassLoader().getResource("static" + httpRequest.getUri());
+            String s = controller.doService(httpRequest);
+            URL resource = getClass().getClassLoader().getResource(controller.doService(httpRequest));
             final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
             final String response = String.join("\r\n",

@@ -4,7 +4,6 @@ import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.StaticResourceController;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.request.HttpRequestParser;
 import nextstep.jwp.http.request.RequestHandler;
 import nextstep.jwp.http.request.RequestMapping;
@@ -25,10 +24,8 @@ public class DependencyInjector {
     }
 
     private RequestMapping createAndInjectObjects() {
-        final InMemoryUserRepository inMemoryUserRepository = new InMemoryUserRepository();
-
-        final RegisterService registerService = new RegisterService(inMemoryUserRepository);
-        final LoginService loginService = new LoginService(inMemoryUserRepository);
+        final RegisterService registerService = new RegisterService();
+        final LoginService loginService = new LoginService();
 
         final StaticResourceFinder staticResourceFinder = new StaticResourceFinder();
 

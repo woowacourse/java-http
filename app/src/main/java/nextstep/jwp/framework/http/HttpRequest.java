@@ -5,9 +5,9 @@ public class HttpRequest {
     private final String uri;
     private final String version;
     private final HttpHeaders headers;
-    private final String requestBody;
+    private final StringBuilder requestBody;
 
-    public HttpRequest(HttpMethod method, String uri, String version, HttpHeaders headers, String requestBody) {
+    public HttpRequest(HttpMethod method, String uri, String version, HttpHeaders headers, StringBuilder requestBody) {
         this.method = method;
         this.uri = uri;
         this.version = version;
@@ -29,5 +29,9 @@ public class HttpRequest {
 
     public HttpHeaders getHeaders() {
         return headers;
+    }
+
+    public StringBuilder getRequestBody() {
+        return requestBody;
     }
 }

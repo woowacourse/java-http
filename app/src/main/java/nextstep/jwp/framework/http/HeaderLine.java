@@ -11,11 +11,11 @@ public class HeaderLine extends AbstractParsingLine {
     private static final int NAME_INDEX = 0;
     private static final int VALUES_INDEX = 1;
 
-    HeaderLine() {}
-
     public HeaderLine(HttpRequestBuilder httpRequestBuilder) {
         super(httpRequestBuilder);
     }
+
+    HeaderLine() {}
 
     @Override
     public boolean canParse() {

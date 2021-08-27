@@ -8,10 +8,11 @@ public class HttpRequestBuilder {
     private String uri;
     private String version;
     private final HttpHeaders headers;
-    private String requestBody;
+    private StringBuilder requestBody;
 
     public HttpRequestBuilder() {
         this.headers = new HttpHeaders();
+        this.requestBody = new StringBuilder();
     }
 
     public HttpRequestBuilder httpMethod(HttpMethod method) {
@@ -35,6 +36,14 @@ public class HttpRequestBuilder {
 
     public HttpRequestBuilder header(String name, List<String> values) {
         this.headers.addHeader(name, values);
+        return this;
+    }
+
+    public HttpRequestBuilder body(String line) {
+        this.requestBody.append(line)
+                        .append("\r")
+                        .append(System.lineSeparator());
+
         return this;
     }
 

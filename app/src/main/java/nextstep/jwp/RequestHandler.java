@@ -27,6 +27,7 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
+    private final Controller controller = new Controller();
 
     public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
@@ -60,35 +61,18 @@ public class RequestHandler implements Runnable {
                 line = reader.readLine();
             }
 
-            int index = uri.indexOf("?");
-            String queryString = uri.substring(index + 1);
-            String[] strings = queryString.split("&");
+            String response = "";
 
-            Map<String, String> queryMap = new HashMap<>();
-
-            for (String string : strings) {
-                String[] token = string.split("=");
-                queryMap.put(token[0], token[1]);
+            if (uri.equals("/index.html")) {
+                response = controller.index();
             }
 
-            User user = InMemoryUserRepository.findByAccount(queryMap.get("account")).orElseThrow(
-                    IllegalArgumentException::new);
-            if (!user.checkPassword(queryMap.get("password"))) {
-                throw new IllegalArgumentException("잘못된 패쓰워드");
+            if (uri.startsWith("/login")) {
+                log.debug("/login Request with uri {}", uri);
+                response = controller.login(uri);
             }
-            System.out.println(user);
 
-            final URL resource = getClass().getClassLoader().getResource("static" + uri);
-            final Path path = new File(resource.getPath()).toPath();
-            final String responseBody = Files.readString(path);
-
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
+            log.debug("outputStream => {}", response);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException exception) {

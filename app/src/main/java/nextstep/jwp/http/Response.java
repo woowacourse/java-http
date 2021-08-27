@@ -1,5 +1,7 @@
 package nextstep.jwp.http;
 
+import nextstep.jwp.http.exception.PathNotMatchedException;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -13,6 +15,9 @@ import static nextstep.jwp.Header.CONTENT_TYPE;
 
 public class Response {
 
+    private Response() {
+    }
+
     public static byte[] ok(String resourcePath) throws IOException {
         Map<String, String> headerMap = new HashMap<>();
         headerMap.put(CONTENT_TYPE, "text/html;charset=utf-8 ");
@@ -21,20 +26,26 @@ public class Response {
 
     public static byte[] ok(Map<String, String> header, String resourcePath) throws IOException {
         URL resource = Response.class.getClassLoader().getResource("static" + resourcePath);
-        byte[] body = new byte[0];
-        if (resource != null) {
-            final Path path = new File(resource.getPath()).toPath();
-            body = Files.readAllBytes(path);
+
+        if (resource == null) {
+            throw new PathNotMatchedException();
         }
 
+        final Path path = new File(resource.getPath()).toPath();
+        byte[] body = Files.readAllBytes(path);
         header.put(CONTENT_LENGTH, String.valueOf(body.length));
 
+        return generateOkResponse(header, body);
+    }
+
+    private static byte[] generateOkResponse(Map<String, String> header, byte[] body) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("HTTP/1.1 200 OK \r\n");
 
         for (Map.Entry<String, String> entry : header.entrySet()) {
             stringBuilder.append(entry.getKey() + ": " + entry.getValue() + " \r\n");
         }
+
         stringBuilder.append("\r\n");
         stringBuilder.append(new String(body) + "\r\n");
 

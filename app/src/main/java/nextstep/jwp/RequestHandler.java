@@ -2,6 +2,7 @@ package nextstep.jwp;
 
 import nextstep.jwp.http.Request;
 import nextstep.jwp.http.Response;
+import nextstep.jwp.http.exception.PathNotMatchedException;
 import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,7 @@ public class RequestHandler implements Runnable {
              OutputStream outputStream = connection.getOutputStream()) {
             Request request = Request.of(inputStream);
             byte[] response = new byte[0];
+
             if (request.checkMethod("GET")) {
                 response = get(request);
             }
@@ -57,14 +59,10 @@ public class RequestHandler implements Runnable {
     }
 
     private byte[] get(Request request) throws IOException {
-
-        if (request.hasHeaderValue(ACCEPT)) {
-            String accept = request.getHeaderValue(ACCEPT);
-            if (accept.contains(TEXT_CSS)) {
-                Map<String, String> responseHeader = new HashMap<>();
-                responseHeader.put(CONTENT_TYPE, TEXT_CSS);
-                return Response.ok(responseHeader, request.getPath());
-            }
+        if (checkCssRequest(request)) {
+            Map<String, String> responseHeader = new HashMap<>();
+            responseHeader.put(CONTENT_TYPE, TEXT_CSS);
+            return Response.ok(responseHeader, request.getPath());
         }
 
         if (request.isMatchedPath("/login")) {
@@ -78,27 +76,43 @@ public class RequestHandler implements Runnable {
         return Response.ok(request.getPath());
     }
 
-    private byte[] post(Request request) throws IOException {
+    private byte[] post(Request request) {
         if (request.isMatchedPath("/login")) {
-            try {
-                userService.login(request.getQueryValue("account"), request.getQueryValue("password"));
-                return Response.redirect302("/index.html");
-            } catch (RuntimeException e) {
-                return Response.redirect302("/401.html");
-            }
+            login(request);
         }
 
         if (request.isMatchedPath("/register")) {
-            try {
-                userService.save(request.getQueryValue("account"), request.getQueryValue("password"),
-                        request.getQueryValue("email"));
-                return Response.redirect302("/index.html");
-            } catch (RuntimeException e) {
-                return Response.redirect302("/401.html");
-            }
+            signUp(request);
         }
 
-        throw new RuntimeException();
+        throw new PathNotMatchedException();
+    }
+
+    private byte[] login(Request request) {
+        try {
+            userService.login(request.getQueryValue("account"), request.getQueryValue("password"));
+            return Response.redirect302("/index.html");
+        } catch (RuntimeException e) {
+            return Response.redirect302("/401.html");
+        }
+    }
+
+    private byte[] signUp(Request request) {
+        try {
+            userService.save(request.getQueryValue("account"), request.getQueryValue("password"),
+                    request.getQueryValue("email"));
+            return Response.redirect302("/index.html");
+        } catch (RuntimeException e) {
+            return Response.redirect302("/401.html");
+        }
+    }
+
+    private boolean checkCssRequest(Request request) {
+        if (request.hasHeaderValue(ACCEPT)) {
+            String accept = request.getHeaderValue(ACCEPT);
+            return accept.contains(TEXT_CSS);
+        }
+        return false;
     }
 
     private void close() {

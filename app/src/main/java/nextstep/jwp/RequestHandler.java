@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestLine;
+import nextstep.jwp.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,16 +39,9 @@ public class RequestHandler implements Runnable {
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
             final HttpRequest httpRequest = HttpRequest.of(bufferedReader);
-            final String responseBody = execute(httpRequest.getRequestLine());
+            final HttpResponse httpResponse = execute(httpRequest.getRequestLine());
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.responseAsBytes());
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
@@ -64,7 +58,7 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private String execute(RequestLine requestLine) {
+    private HttpResponse execute(RequestLine requestLine) {
         try {
             String method = requestLine.getMethod();
             String path = requestLine.getPath();
@@ -72,14 +66,16 @@ public class RequestHandler implements Runnable {
             if (method.equalsIgnoreCase("GET")) {
                 final URL resourceUrl = getClass().getResource("/static" + path);
                 final Path filePath = new File(resourceUrl.getFile()).toPath();
-                return String.join("\n", Files.readAllLines(filePath)) + "\n";
+                final String responseBody = String.join("\n", Files.readAllLines(filePath)) + "\n";
+                return HttpResponse.ok(responseBody);
             }
         } catch (IOException e) {
-            return "Hello world!";
+            return HttpResponse.ok("Hello world!");
         } catch (Exception e) {
-            e.printStackTrace();
             throw new IllegalArgumentException("적절한 HTTP 헤더 포맷이 아닙니다.");
         }
-        return null;
+
+        // TODO :: ERROR TYPE, HTTP STATUS 고민
+        return HttpResponse.internalServerError("");
     }
 }

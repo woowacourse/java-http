@@ -7,26 +7,29 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * GET /test.html HTTP/1.1        // Request Line Host: localhost:8000           // Request Headers Connection:
- * keep-alive Upgrade-Insecure-Request: 1 Content-Type: text/html Content-Length: 345
- * <p>
+ * GET /test.html HTTP/1.1        // Request Line
+ * Host: localhost:8000           // Request Headers Connection:
+ * keep-alive Upgrade-Insecure-Request: 1
+ * Content-Type: text/html
+ * Content-Length: 345
+ *
  * something1=123&something2=123   // Request Message Body
  */
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final List<String> requestHeaders;
-    private final String requestMessageBody;
+    private final List<String> headers;
+    private final String messageBody;
 
-    public HttpRequest(RequestLine requestLine, List<String> requestHeaders, String requestMessageBody) {
+    public HttpRequest(RequestLine requestLine, List<String> headers, String messageBody) {
         this.requestLine = requestLine;
-        this.requestHeaders = requestHeaders;
-        this.requestMessageBody = requestMessageBody;
+        this.headers = headers;
+        this.messageBody = messageBody;
     }
 
-    public HttpRequest(RequestLine requestLine, List<String> requestHeaders) {
-        this(requestLine, requestHeaders, "");
+    public HttpRequest(RequestLine requestLine, List<String> headers) {
+        this(requestLine, headers, "");
     }
 
     public static HttpRequest of(List<String> lines) {
@@ -56,11 +59,11 @@ public class HttpRequest {
         return requestLine;
     }
 
-    public List<String> getRequestHeaders() {
-        return requestHeaders;
+    public List<String> getHeaders() {
+        return headers;
     }
 
-    public String getRequestMessageBody() {
-        return requestMessageBody;
+    public String getMessageBody() {
+        return messageBody;
     }
 }

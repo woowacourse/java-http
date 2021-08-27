@@ -3,10 +3,16 @@ package nextstep.jwp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Objects;
 
 public class RequestHandler implements Runnable {
@@ -26,7 +32,11 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final String responseBody = "Hello world!";
+            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+            final String httpRequestFirstLine = getRequest(bufferedReader).split("\n")[0];
+            final String responseBody = execute(httpRequestFirstLine);
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -50,5 +60,36 @@ public class RequestHandler implements Runnable {
         } catch (IOException exception) {
             log.error("Exception closing socket", exception);
         }
+    }
+
+    private String getRequest(BufferedReader bufferedReader) throws IOException {
+        final StringBuilder request = new StringBuilder();
+
+        String tempLine;
+        while (!Objects.isNull(tempLine = bufferedReader.readLine())) {
+            request.append(tempLine);
+            request.append("\n");
+        }
+        return request.toString();
+    }
+
+    private String execute(String httpRequestFirstLine) {
+        try {
+            String method = httpRequestFirstLine.split(" ")[0];
+            String url = httpRequestFirstLine.split(" ")[1];
+            if (method.equalsIgnoreCase("GET")) {
+                final URL resourceUrl = getClass().getResource("/static" + url);
+                final String filePath = resourceUrl.getFile();
+
+                final Path path = new File(filePath).toPath();
+                return String.join("\n", Files.readAllLines(path)) + "\n";
+            }
+        } catch (IOException e) {
+            return "Hello world!";
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("적절한 HTTP 헤더 포맷이 아닙니다.");
+        }
+        return null;
     }
 }

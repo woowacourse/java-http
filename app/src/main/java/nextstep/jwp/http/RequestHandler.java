@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
+import nextstep.jwp.UserController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +19,7 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
-    private final Controller controller = new Controller();
+    private final UserController userController = new UserController();
 
     public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
@@ -42,17 +43,17 @@ public class RequestHandler implements Runnable {
 
             if (httpRequest.uri().startsWith("/login")) {
                 if ("GET".equals(httpRequest.method())) {
-                    response = controller.login();
+                    response = userController.login();
                 } else if ("POST".equals(httpRequest.method())) {
-                    response = controller.login(httpRequest.payload());
+                    response = userController.login(RequestParam.of(httpRequest.payload()));
                 }
             }
 
             if (httpRequest.uri().startsWith("/register")) {
                 if ("GET".equals(httpRequest.method())) {
-                    response = controller.register();
+                    response = userController.register();
                 } else if ("POST".equals(httpRequest.method())) {
-                    response = controller.register(httpRequest.payload());
+                    response = userController.register(RequestParam.of(httpRequest.payload()));
                 }
             }
 

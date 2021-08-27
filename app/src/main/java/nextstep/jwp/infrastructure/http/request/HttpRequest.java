@@ -50,7 +50,7 @@ public class HttpRequest {
         }
 
         final int messageBodyStartIndex = httpRequest.indexOf(LAST_HEADER) + 1;
-        return String.join(System.lineSeparator(), httpRequest.subList(messageBodyStartIndex, httpRequest.size()));
+        return String.join("\r\n", httpRequest.subList(messageBodyStartIndex, httpRequest.size()));
     }
 
     public HttpRequestLine getRequestLine() {

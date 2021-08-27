@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -47,8 +48,8 @@ public class HttpHeaders {
     @Override
     public String toString() {
         return elements.keySet().stream()
-            .map(key -> String.join(KEY_DELIMITER, key, String.join(VALUE_DELIMITER, elements.get(key))))
-            .collect(Collectors.joining(System.lineSeparator()));
+            .map(key -> String.format("%s%s%s ", key, KEY_DELIMITER, String.join(VALUE_DELIMITER, elements.get(key))))
+            .collect(Collectors.joining("\r\n"));
     }
 
     public static class Builder {
@@ -56,7 +57,7 @@ public class HttpHeaders {
         private final Map<String, List<String>> elements;
 
         public Builder() {
-            elements = new HashMap<>();
+            elements = new LinkedHashMap<>();
         }
 
         public Builder header(final String key, final String value) {

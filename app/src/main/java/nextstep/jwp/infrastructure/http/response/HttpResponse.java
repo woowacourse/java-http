@@ -15,9 +15,13 @@ public class HttpResponse {
         this.messageBody = messageBody;
     }
 
+    public HttpResponse(final HttpStatusLine statusLine) {
+        this(statusLine, new HttpHeaders.Builder().build(), "");
+    }
+
     @Override
     public String toString() {
-        return String.join(System.lineSeparator(),
+        return String.join("\r\n",
             statusLine.toString(),
             headers.toString(),
             "",

@@ -9,11 +9,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import nextstep.jwp.infrastructure.http.HttpHeaders;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
+import nextstep.jwp.infrastructure.http.resourcersolver.ResourceResolver;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
-import nextstep.jwp.infrastructure.http.response.HttpStatusCode;
-import nextstep.jwp.infrastructure.http.response.HttpStatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,9 +20,11 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
+    private final ResourceResolver resourceResolver;
 
     public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
+        this.resourceResolver = new ResourceResolver("static");
     }
 
     @Override
@@ -37,17 +37,7 @@ public class RequestHandler implements Runnable {
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final HttpRequest httpRequest = HttpRequest.of(splitFromInputStream(bufferedReader));
-
-            final String responseBody = "Hello world!";
-
-            final HttpResponse httpResponse = new HttpResponse(
-                new HttpStatusLine(httpRequest.getRequestLine().getHttpVersion(), HttpStatusCode.OK),
-                new HttpHeaders.Builder()
-                    .header("Content-Type", "text/html;charset=utf-8")
-                    .header("Content-Length", String.valueOf(responseBody.getBytes().length))
-                    .build(),
-                responseBody
-            );
+            final HttpResponse httpResponse = resourceResolver.readResource(httpRequest);
 
             outputStream.write(httpResponse.toString().getBytes());
             outputStream.flush();
@@ -71,8 +61,6 @@ public class RequestHandler implements Runnable {
 
             splitResult.add(line);
         }
-
-        log.debug(String.join(System.lineSeparator(), splitResult));
 
         return splitResult;
     }

@@ -19,6 +19,7 @@ public class RequestHandler implements Runnable {
     public static final String DEFAULT_METHOD = "Hello world!";
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
     private static final String STATIC_PATH = "static";
+    private static final String HEADER_DELIMITER = ": ";
 
     private static long user_id = 2;
 
@@ -40,14 +41,9 @@ public class RequestHandler implements Runnable {
             final String extractedUri = extractUri(firstLine);
             final String extractedMethod = extractHttpMethod(firstLine);
 
-            if ("/css/styles.css".equals(extractedUri)) {
-                final String response = httpCssMessage();
-                writeResponse(outputStream, response);
-            }
-
             if ("/".equals(extractedUri)) {
                 final String response = http200Message(DEFAULT_METHOD);
-                writeResponse(outputStream, response);
+                writeOutputStream(outputStream, response);
                 return;
             }
 
@@ -56,16 +52,13 @@ public class RequestHandler implements Runnable {
                     try {
                         final String requestBody = extractRequestBody(bufferedReader, httpRequestHeaders);
                         loginRequest(requestBody);
-                        final String response = http302Response("/index.html");
-                        writeResponse(outputStream, response);
+                        writeOutputStream(outputStream, http302Response("/index.html"));
                     } catch (RuntimeException exception) {
-                        writeResponse(outputStream, http302Response("/401.html"));
+                        writeOutputStream(outputStream, http302Response("/401.html"));
                     }
                     return;
                 }
-                final URL uri = getClass().getClassLoader().getResource(STATIC_PATH + extractedUri + ".html");
-                final String response = http200Message(Files.readString(new File(uri.getFile()).toPath()));
-                writeResponse(outputStream, response);
+                writeOutputStream(outputStream, httpHtmlResponse(STATIC_PATH, extractedUri));
                 return;
             }
 
@@ -73,52 +66,24 @@ public class RequestHandler implements Runnable {
                 if ("POST".equals(extractedMethod)) {
                     final String requestBody = extractRequestBody(bufferedReader, httpRequestHeaders);
                     registerRequest(requestBody);
-                    final String response = http302Response("/index.html");
-                    writeResponse(outputStream, response);
+                    writeOutputStream(outputStream, http302Response("/index.html"));
                     return;
                 }
-
-                final URL uri = getClass().getClassLoader().getResource(STATIC_PATH + extractedUri + ".html");
-                final String response = http200Message(Files.readString(new File(uri.getFile()).toPath()));
-                writeResponse(outputStream, response);
+                writeOutputStream(outputStream, httpHtmlResponse(STATIC_PATH, extractedUri));
                 return;
             }
 
-            final URL uri = getClass().getClassLoader().getResource(STATIC_PATH + extractedUri);
-            final String response = http200Message(Files.readString(new File(uri.getFile()).toPath()));
-            writeResponse(outputStream, response);
+            if ("/css/styles.css".equals(extractedUri)) {
+                final String response = httpCssMessage();
+                writeOutputStream(outputStream, response);
+            }
+
+            writeOutputStream(outputStream, httpHtmlResponse(STATIC_PATH, extractedUri));
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
         }
-    }
-
-    private String extractRequestBody(BufferedReader bufferedReader, Map<String, String> httpRequestHeaders) throws IOException {
-        final int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
-        final char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        return new String(buffer);
-    }
-
-    private void registerRequest(String requestBody) {
-        Map<String, String> params = extractQueryParam(requestBody);
-        final User user = new User(user_id++, params.get("account"), params.get("password"), params.get("email"));
-        InMemoryUserRepository.save(user);
-    }
-
-    private String loginRequest(String requestBody) {
-        Map<String, String> params = extractQueryParam(requestBody);
-
-        final Optional<User> user = InMemoryUserRepository.findByAccount(params.get("account"));
-        if (user.isPresent()) {
-            final User foundUser = user.get();
-            if (foundUser.checkPassword(params.get("password"))) {
-                return foundUser.toString();
-            }
-            throw new IllegalArgumentException("옳지 않은 비밀번호입니다.");
-        }
-        throw new IllegalArgumentException("찾을 수 없는 사용자입니다.");
     }
 
     private Map<String, String> httpRequestHeaders(BufferedReader bufferedReader) throws IOException {
@@ -131,15 +96,10 @@ public class RequestHandler implements Runnable {
             if ("".equals(line)) {
                 break;
             }
-            final String[] header = line.split(": ");
-            httpRequestHeaders.put(header[0], header[1].replace(" ", ""));
+            final String[] header = line.split(HEADER_DELIMITER);
+            httpRequestHeaders.put(header[0], header[1].strip());
         }
         return httpRequestHeaders;
-    }
-
-    private String extractHttpMethod(String firstLine) {
-        final String[] splitFirstLine = firstLine.split(" ");
-        return splitFirstLine[0];
     }
 
     private String extractUri(String firstLine) {
@@ -147,15 +107,44 @@ public class RequestHandler implements Runnable {
         return splitFirstLine[1];
     }
 
-    private void writeResponse(OutputStream outputStream, String response) throws IOException {
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+    private String extractHttpMethod(String firstLine) {
+        final String[] splitFirstLine = firstLine.split(" ");
+        return splitFirstLine[0];
     }
 
-    private Map<String, String> extractQueryParam(String queryString) {
-        Map<String, String> params = new HashMap<>();
+    private String extractRequestBody(BufferedReader bufferedReader, Map<String, String> httpRequestHeaders) throws IOException {
+        final int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
+        final char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return new String(buffer);
+    }
 
-        final String[] parameters = queryString.split("&");
+    private String loginRequest(String requestBody) {
+        Map<String, String> params = extractQueryParam(requestBody);
+        final User user = findUserByAccount(params);
+        if (user.checkPassword(params.get("password"))) {
+            return user.toString();
+        }
+        throw new IllegalArgumentException("옳지 않은 비밀번호입니다.");
+    }
+
+    private User findUserByAccount(Map<String, String> params) {
+        final Optional<User> user = InMemoryUserRepository.findByAccount(params.get("account"));
+        if (user.isPresent()) {
+            return user.get();
+        }
+        throw new IllegalArgumentException("찾을 수 없는 사용자입니다.");
+    }
+
+    private void registerRequest(String requestBody) {
+        Map<String, String> params = extractQueryParam(requestBody);
+        final User user = new User(user_id++, params.get("account"), params.get("password"), params.get("email"));
+        InMemoryUserRepository.save(user);
+    }
+
+    private Map<String, String> extractQueryParam(String queryParameterString) {
+        Map<String, String> params = new HashMap<>();
+        final String[] parameters = queryParameterString.split("&");
         for (String parameter : parameters) {
             final String[] splitParameter = parameter.split("=");
             params.put(splitParameter[0], splitParameter[1]);
@@ -163,10 +152,17 @@ public class RequestHandler implements Runnable {
         return params;
     }
 
-    private String http302Response(String redirectUrl) {
+    private void writeOutputStream(OutputStream outputStream, String response) throws IOException {
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private String httpCssMessage() {
         return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: http://localhost:8080" + redirectUrl);
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/css ",
+                "",
+                "");
     }
 
     private String http200Message(String responseBody) {
@@ -178,12 +174,18 @@ public class RequestHandler implements Runnable {
                 responseBody);
     }
 
-    private String httpCssMessage() {
+    private String http302Response(String redirectUrl) {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/css ",
-                "",
-                "");
+                "HTTP/1.1 302 Found ",
+                "Location: http://localhost:8080" + redirectUrl);
+    }
+
+    private String httpHtmlResponse(String resourcesPath, String targetUri) throws IOException {
+        if (!targetUri.contains(".") && !targetUri.contains(".html")) {
+            targetUri = targetUri.concat(".html");
+        }
+        final URL uri = getClass().getClassLoader().getResource(resourcesPath + targetUri);
+        return http200Message(Files.readString(new File(uri.getFile()).toPath()));
     }
 
     private void close() {

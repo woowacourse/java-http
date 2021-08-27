@@ -4,9 +4,15 @@ import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,14 +43,16 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws URISyntaxException, IOException {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final Path path = null;
+        URL resource = getClass().getClassLoader().getResource(fileName);
 
         // todo
-        final List<String> actual = Lists.emptyList();
+        final Path path = Paths.get(resource.toURI());
+
+        // todo
+        final List<String> actual = Files.readAllLines(path);
 
         assertThat(actual).containsOnly("nextstep");
     }

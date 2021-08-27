@@ -169,6 +169,22 @@ class RequestHandlerTest {
         assertThat(actual).isEqualTo(expected);
     }
 
+    @Test
+    void cssRequest() {
+        //given
+        final String requestUri = "/css/styles.css";
+        final String httpRequest = toHttpGetRequest(requestUri);
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        String expected = toHttpCssResponse();
+        //when
+        requestHandler.run();
+        final String actual = socket.output();
+        //then
+        assertThat(actual).startsWith(expected);
+    }
+
     private String toHttpGetRequest(String requestUri) {
         return String.join("\r\n",
                 "GET " + requestUri + " HTTP/1.1 ",
@@ -203,6 +219,14 @@ class RequestHandlerTest {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Location: http://localhost:8080" + redirectUrl);
+    }
+
+    private String toHttpCssResponse() {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/css ",
+                "",
+                "");
     }
 
     private String toHttp401Response(String responseBody) {

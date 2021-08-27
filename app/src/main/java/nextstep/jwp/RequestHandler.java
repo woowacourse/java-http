@@ -37,6 +37,11 @@ public class RequestHandler implements Runnable {
             final String extractedUri = extractUri(firstLine);
             final String extractedMethod = extractHttpMethod(firstLine);
 
+            if ("/css/styles.css".equals(extractedUri)) {
+                final String response = httpCssMessage();
+                writeResponse(outputStream,response);
+            }
+
             if ("/".equals(extractedUri)) {
                 final String response = http200Message(DEFAULT_METHOD);
                 writeResponse(outputStream, response);
@@ -169,6 +174,14 @@ public class RequestHandler implements Runnable {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private String httpCssMessage() {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/css ",
+                "",
+                "");
     }
 
     private void close() {

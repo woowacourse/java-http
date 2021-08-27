@@ -39,32 +39,40 @@ public class RequestHandler implements Runnable {
 
             while (!line.isBlank()) {
                 line = br.readLine();
-                log.debug("header : {}", line);
             }
 
-            log.debug("request: " + requestLine[1]);
+            String requestPath = requestLine[1];
 
-            final URL resource = getClass().getClassLoader().getResource("static/" + requestLine[1]);
-            byte[] body = new byte[0];
-            if (resource != null) {
-                final Path path = new File(resource.getPath()).toPath();
-                body = Files.readAllBytes(path);
+            if (requestPath.startsWith("/login")) {
+                int queryStartIndex = requestPath.indexOf("?");
+                if (queryStartIndex == -1) {
+                    outputStream.write(generateResponseBody("/login.html").getBytes());
+                }
             }
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + body.length + " ",
-                    "",
-                    new String(body));
-
-            outputStream.write(response.getBytes());
+            outputStream.write(generateResponseBody(requestPath).getBytes());
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
         }
+    }
+
+    private String generateResponseBody(String resourcePath) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static" + resourcePath);
+        byte[] body = new byte[0];
+        if (resource != null) {
+            final Path path = new File(resource.getPath()).toPath();
+            body = Files.readAllBytes(path);
+        }
+
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + body.length + " ",
+                "",
+                new String(body));
     }
 
     private void close() {

@@ -4,7 +4,6 @@ import nextstep.jwp.exception.BaseException;
 import nextstep.jwp.http.Request;
 import nextstep.jwp.http.Response;
 import nextstep.jwp.service.UserService;
-import nextstep.jwp.service.exception.UserPasswordInValidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

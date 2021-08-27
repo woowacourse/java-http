@@ -1,7 +1,7 @@
-package nextstep.jwp;
+package nextstep.jwp.http;
 
-import static nextstep.jwp.ResourceResolver.checkIfUriHasResourceExtension;
-import static nextstep.jwp.ResourceResolver.resolveResourceRequest;
+import static nextstep.jwp.http.ResourceResolver.checkIfUriHasResourceExtension;
+import static nextstep.jwp.http.ResourceResolver.resolveResourceRequest;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
-import nextstep.jwp.model.HttpRequest;
+import nextstep.jwp.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

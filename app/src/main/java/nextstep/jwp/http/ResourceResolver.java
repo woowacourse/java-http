@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.http;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,7 +6,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import nextstep.jwp.model.HttpRequest;
 
 public class ResourceResolver {
     private static final List<String> RESOURCE_SUFFIX = List.of(".html", ".js", ".css", ".csv");

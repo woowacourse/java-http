@@ -82,8 +82,9 @@ class RequestHandlerTest {
     @Test
     void loginRequest() {
         // given
-        final String requestUri = "/login?account=gugu&password=password";
-        final String httpRequest = toHttpGetRequest(requestUri);
+        final String requestUri = "/login";
+        final String requestBody = "account=gugu&password=password";
+        final String httpRequest = toHttpPostRequest(requestUri, requestBody);
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
@@ -99,8 +100,9 @@ class RequestHandlerTest {
     @Test
     void 패스워드를_잘못_입력시_실패한다() throws IOException {
         // given
-        final String requestUri = "/login?account=gugu&password=passwor";
-        final String httpRequest = toHttpGetRequest(requestUri);
+        final String requestUri = "/login";
+        final String requestBody = "account=gugu&password=passwor";
+        final String httpRequest = toHttpPostRequest(requestUri, requestBody);
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
@@ -116,8 +118,9 @@ class RequestHandlerTest {
     @Test
     void 로그인시_요청한_아이디가_존재하지않으면_실패한다() throws IOException {
         // given
-        final String requestUri = "/login?account=gugu&password=passwor";
-        final String httpRequest = toHttpGetRequest(requestUri);
+        final String requestUri = "/login";
+        final String requestBody = "account=ggu&password=passwor";
+        final String httpRequest = toHttpPostRequest(requestUri, requestBody);
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 

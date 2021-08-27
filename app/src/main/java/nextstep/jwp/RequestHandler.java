@@ -52,9 +52,10 @@ public class RequestHandler implements Runnable {
             }
 
             if (extractedUri.startsWith("/login")) {
-                if (extractedUri.contains("?")) {
+                if ("POST".equals(extractedMethod)) {
                     try {
-                        loginRequest(extractedUri);
+                        final String requestBody = extractRequestBody(bufferedReader, httpRequestHeaders);
+                        loginRequest(requestBody);
                         final String response = http302Response("/index.html");
                         writeResponse(outputStream, response);
                     } catch (RuntimeException exception) {
@@ -106,10 +107,8 @@ public class RequestHandler implements Runnable {
         InMemoryUserRepository.save(user);
     }
 
-    private String loginRequest(String extractedUri) {
-        int index = extractedUri.indexOf("?");
-        final String path = extractedUri.substring(0, index);
-        Map<String, String> params = extractQueryParam(extractedUri.substring(index + 1));
+    private String loginRequest(String requestBody) {
+        Map<String, String> params = extractQueryParam(requestBody);
 
         final Optional<User> user = InMemoryUserRepository.findByAccount(params.get("account"));
         if (user.isPresent()) {

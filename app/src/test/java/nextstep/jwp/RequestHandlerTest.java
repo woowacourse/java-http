@@ -1,5 +1,6 @@
 package nextstep.jwp;
 
+import nextstep.jwp.service.UserService;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -15,7 +16,7 @@ class RequestHandlerTest {
     void run() {
         // given
         final MockSocket socket = new MockSocket();
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, new UserService());
 
         // when
         requestHandler.run();
@@ -41,7 +42,7 @@ class RequestHandlerTest {
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, new UserService());
 
         // when
         requestHandler.run();

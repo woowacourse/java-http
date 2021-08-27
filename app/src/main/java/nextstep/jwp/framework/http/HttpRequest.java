@@ -1,30 +1,14 @@
 package nextstep.jwp.framework.http;
 
 public class HttpRequest {
-    private final HttpMethod method;
-    private final String uri;
-    private final String version;
+    private RequestLine requestLine;
     private final HttpHeaders headers;
     private final StringBuilder requestBody;
 
-    public HttpRequest(HttpMethod method, String uri, String version, HttpHeaders headers, StringBuilder requestBody) {
-        this.method = method;
-        this.uri = uri;
-        this.version = version;
+    public HttpRequest(RequestLine requestLine, HttpHeaders headers, StringBuilder requestBody) {
+        this.requestLine = requestLine;
         this.headers = headers;
         this.requestBody = requestBody;
-    }
-
-    public HttpMethod getMethod() {
-        return method;
-    }
-
-    public String getUri() {
-        return uri;
-    }
-
-    public String getVersion() {
-        return version;
     }
 
     public HttpHeaders getHeaders() {
@@ -33,5 +17,17 @@ public class HttpRequest {
 
     public StringBuilder getRequestBody() {
         return requestBody;
+    }
+
+    public HttpMethod getMethod() {
+        return requestLine.getMethod();
+    }
+
+    public String getUri() {
+        return requestLine.getUri();
+    }
+
+    public String getVersion() {
+        return requestLine.getVersion();
     }
 }

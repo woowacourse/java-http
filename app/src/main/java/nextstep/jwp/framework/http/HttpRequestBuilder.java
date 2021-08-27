@@ -4,9 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class HttpRequestBuilder {
-    private HttpMethod method;
-    private String uri;
-    private String version;
+    private RequestLine requestLine;
     private final HttpHeaders headers;
     private final StringBuilder requestBody;
 
@@ -15,18 +13,12 @@ public class HttpRequestBuilder {
         this.requestBody = new StringBuilder();
     }
 
-    public HttpRequestBuilder httpMethod(HttpMethod method) {
-        this.method = method;
-        return this;
+    public HttpRequestBuilder requestLine(HttpMethod method, String uri, String version) {
+        return requestLine(new RequestLine(method, uri, version));
     }
 
-    public HttpRequestBuilder uri(String uri) {
-        this.uri = uri;
-        return this;
-    }
-
-    public HttpRequestBuilder version(String version) {
-        this.version = version;
+    public HttpRequestBuilder requestLine(RequestLine requestLine) {
+        this.requestLine = requestLine;
         return this;
     }
 
@@ -48,6 +40,6 @@ public class HttpRequestBuilder {
     }
 
     public HttpRequest build() {
-        return new HttpRequest(method, uri, version, headers, requestBody);
+        return new HttpRequest(requestLine, headers, requestBody);
     }
 }

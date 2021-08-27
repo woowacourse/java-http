@@ -55,8 +55,6 @@ public class HeaderLineParserTest {
     }
 
     private static HttpRequestBuilder createBuilderWithStatusLine() {
-        return new HttpRequestBuilder().httpMethod(HttpMethod.GET)
-                                       .uri("/")
-                                       .version("HTTP/1.1");
+        return new HttpRequestBuilder().requestLine(HttpMethod.GET, "/", "HTTP/1.1");
     }
 }

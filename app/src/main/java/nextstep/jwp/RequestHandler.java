@@ -1,18 +1,19 @@
 package nextstep.jwp;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.HttpRequest;
 import nextstep.jwp.model.User;
-import nextstep.jwp.util.HttpRequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -34,27 +35,10 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-            String line = br.readLine();
-            log.debug("request line : {}", line);
-
-            if (line == null) {
-                return;
-            }
-
-            String url = line;
-            String uri = line.split(" ")[1];
-
-            Map<String, String> requestHeaders = new HashMap<>();
-            while (!Objects.equals(line, "")) {
-                line = br.readLine();
-                log.debug("header : {}", line);
-                if (!line.isBlank()) {
-                    requestHeaders.put(line.split(": ")[0], line.split(": ")[1]);
-                }
-            }
+            HttpRequest httpRequest = new HttpRequest(inputStream);
 
             String response = "";
+            String uri = httpRequest.getURL();
             if (uri.contains(".")) {
                 Path path = getPath(uri);
                 String responseBody = new String(Files.readAllBytes(path));
@@ -69,18 +53,15 @@ public class RequestHandler implements Runnable {
             }
 
             if (uri.startsWith("/register")) {
-                if ("GET".equals(url.split(" ")[0])) {
+                if ("GET".equals(httpRequest.getHttpMethod())) {
                     Path path = getPath("register.html");
                     String responseBody = new String(Files.readAllBytes(path));
                     response = responseHeaderOfStatusOK(responseBody);
                     writeBody(outputStream, response);
                     return;
                 }
-                int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                br.read(buffer, 0, contentLength);
-                String body = new String(buffer);
-                Map<String, String> maps = HttpRequestUtils.parseQueryString(body);
+
+                Map<String, String> maps = httpRequest.getParams();
                 int count = InMemoryUserRepository.countIds();
                 InMemoryUserRepository.save(new User(count + 1, maps.get("account"), maps.get("email"), maps.get("password")));
                 response = String.join("\r\n",
@@ -92,7 +73,7 @@ public class RequestHandler implements Runnable {
             }
 
             if (uri.startsWith("/login")) {
-                String contentLength = requestHeaders.get("Content-Length");
+                String contentLength = httpRequest.getHeaders().get("Content-Length");
                 if (Objects.isNull(contentLength) || Integer.parseInt(contentLength) <= 0) {
                     Path path = getPath("login.html");
                     String responseBody = new String(Files.readAllBytes(path));
@@ -101,11 +82,7 @@ public class RequestHandler implements Runnable {
                     return;
                 }
 
-                int length = Integer.parseInt(requestHeaders.get("Content-Length"));
-                char[] buffer = new char[length];
-                br.read(buffer, 0, length);
-                String body = new String(buffer);
-                Map<String, String> params = HttpRequestUtils.parseQueryString(body);
+                Map<String, String> params = httpRequest.getParams();
 
                 Optional<User> findUser = InMemoryUserRepository.findByAccount(params.get("account"))
                         .filter(user -> user.checkPassword(params.get("password")))

@@ -40,6 +40,26 @@ public class Controller {
         return found("/index.html");
     }
 
+    public String register() throws IOException {
+        return view("/register.html");
+    }
+
+    public String register(String requestBody) throws IOException {
+        String[] strings = requestBody.split("&");
+
+        Map<String, String> queryMap = new HashMap<>();
+
+        for (String string : strings) {
+            String[] token = string.split("=");
+            queryMap.put(token[0], token[1]);
+        }
+
+        User user = new User(2L, queryMap.get("account"), queryMap.get("password"), queryMap.get("email"));
+
+        InMemoryUserRepository.save(user);
+        return redirect("/index.html");
+    }
+
     private String view(String uri) throws IOException {
         final URL resource = getClass().getClassLoader().getResource("static" + uri);
         final Path path = new File(resource.getPath()).toPath();
@@ -51,6 +71,12 @@ public class Controller {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private String redirect(String redirectTo){
+        return String.join("\r\n",
+                "HTTP/1.1 301 Found ",
+                "Location: " + redirectTo);
     }
 
     private String found(String redirectTo){

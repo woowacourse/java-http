@@ -50,15 +50,17 @@ public class RequestHandler implements Runnable {
             String method = firstTokens[0];
             String uri = firstTokens[1];
 
-            Map<String, List<String>> headers = new HashMap<>();
+            Map<String, String> headers = new HashMap<>();
+
 
             String line = reader.readLine();
             while (!"".equals(line)) {
                 String[] splits = line.split(": ", 2);
                 String key = splits[0];
-                List<String> values = Stream.of(splits[1].split(",")).map(String::trim).collect(Collectors.toList());
-                headers.put(key, values);
+                String value = splits[1];
+                headers.put(key, value);
                 line = reader.readLine();
+                log.debug("Headers=> {}: {}", splits[0], splits[1]);
             }
 
             String response = "";
@@ -68,8 +70,17 @@ public class RequestHandler implements Runnable {
             }
 
             if (uri.startsWith("/login")) {
-                log.debug("/login Request with uri {}", uri);
                 response = controller.login(uri);
+            }
+
+            if (uri.startsWith("/register")) {
+                if ("GET".equals(method)) {
+                    response = controller.register();
+                }
+                else if("POST".equals(method)) {
+                    String requestBody = getRequestBody(reader, headers);
+                    response = controller.register(requestBody);
+                }
             }
 
             log.debug("outputStream => {}", response);
@@ -80,6 +91,15 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
+    }
+
+    private String getRequestBody(BufferedReader reader, Map<String, String> headers) throws IOException {
+        int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+
+        return requestBody;
     }
 
     private void close() {

@@ -14,12 +14,24 @@ public class User {
         this.email = email;
     }
 
+    public User(String account, String password, String email) {
+        this(0, account, password, email);
+    }
+
     public boolean checkPassword(String password) {
         return this.password.equals(password);
     }
 
     public String getAccount() {
         return account;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     @Override

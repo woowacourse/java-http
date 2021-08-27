@@ -61,11 +61,12 @@ public class RequestHandler implements Runnable {
 
     private void doGetAction(String requestPath, OutputStream outputStream) throws IOException {
         if (requestPath.startsWith("/login")) {
-            int queryStartIndex = requestPath.indexOf("?");
-            if (queryStartIndex == -1) {
-                outputStream.write(generateResponseBody("/login.html").getBytes());
-                return;
-            }
+            outputStream.write(generateResponseBody("/login.html").getBytes());
+            return;
+        }
+
+        if (requestPath.startsWith("/register")) {
+            outputStream.write(generateResponseBody("/register.html").getBytes());
             return;
         }
 
@@ -94,10 +95,20 @@ public class RequestHandler implements Runnable {
     }
 
     private void doPostAction(String requestPath, String body, OutputStream outputStream) throws IOException {
+        Map<String, String> queryMap = parseQuery(body);
         if (requestPath.startsWith("/login")) {
-            Map<String, String> queryMap = parseQuery(body);
             try {
                 userService.login(queryMap.get("account"), queryMap.get("password"));
+                outputStream.write(generateResponseBody302("/index.html").getBytes());
+            } catch (RuntimeException e) {
+                outputStream.write(generateResponseBody302("/401.html").getBytes());
+            }
+            return;
+        }
+
+        if (requestPath.startsWith("/register")) {
+            try {
+                userService.save(queryMap.get("account"), queryMap.get("password"), queryMap.get("email"));
                 outputStream.write(generateResponseBody302("/index.html").getBytes());
             } catch (RuntimeException e) {
                 outputStream.write(generateResponseBody302("/401.html").getBytes());
@@ -110,9 +121,7 @@ public class RequestHandler implements Runnable {
         Map<String, String> queryMap = new HashMap<>();
 
         String[] data = query.split("&");
-        log.debug("data : "  + query);
         for (String each : data) {
-            log.debug("each : " + each);
             String[] keyAndValue = each.split("=");
             queryMap.put(keyAndValue[0], keyAndValue[1]);
         }

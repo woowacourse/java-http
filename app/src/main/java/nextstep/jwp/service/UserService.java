@@ -15,4 +15,8 @@ public class UserService {
 
         return user;
     }
+
+    public void save(String account, String password, String email) {
+        InMemoryUserRepository.save(new User(account, password, email));
+    }
 }

@@ -1,7 +1,8 @@
 package nextstep.jwp.httpserver.domain;
 
 public enum StatusCode {
-    OK(200, "OK");
+    OK(200, "OK"),
+    CREATED(201, "Created");
 
     private final int code;
     private final String statusText;

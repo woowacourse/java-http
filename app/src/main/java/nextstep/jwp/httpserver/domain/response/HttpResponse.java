@@ -1,5 +1,7 @@
 package nextstep.jwp.httpserver.domain.response;
 
+import java.util.Map;
+
 import nextstep.jwp.httpserver.domain.Body;
 import nextstep.jwp.httpserver.domain.Headers;
 import nextstep.jwp.httpserver.domain.HttpVersion;
@@ -50,6 +52,11 @@ public class HttpResponse {
         final HttpVersion httpVersion = statusLine.getHttpVersion();
         final StatusCode statusCode = statusLine.getStatusCode();
         return httpVersion.getVersion() + " " + statusCode.getCode() + " " + statusCode.getStatusText() + " ";
+    }
+
+    public String getLocation() {
+        Map<String, String> headers = this.headers.getHeaders();
+        return headers.get("Location");
     }
 
     public StatusLine getStatusLine() {

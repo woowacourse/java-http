@@ -3,7 +3,12 @@ package nextstep.jwp.httpserver;
 import java.util.HashMap;
 import java.util.Map;
 
+import nextstep.jwp.dashboard.LoginController;
+import nextstep.jwp.dashboard.UserService;
+import nextstep.jwp.httpserver.adapter.LoginHandlerAdapter;
 import nextstep.jwp.httpserver.adapter.StaticViewHandlerAdapter;
+import nextstep.jwp.httpserver.controller.StaticViewController;
+import nextstep.jwp.httpserver.mapping.GetHandlerMapping;
 import nextstep.jwp.httpserver.mapping.StaticViewHandlerMapping;
 
 public class BeanFactory {
@@ -14,14 +19,24 @@ public class BeanFactory {
     }
 
     public static void init() {
+        final UserService userService = new UserService();
+        final LoginController loginController = new LoginController(userService);
+
         // handlerMapping
         beans.put("staticViewHandlerMapping", new StaticViewHandlerMapping());
+        beans.put("getHandlerMapping", new GetHandlerMapping());
 
         // handlerAdapter
         beans.put("staticViewHandlerAdapter", new StaticViewHandlerAdapter());
+        beans.put("loginHandlerAdapter", new LoginHandlerAdapter());
 
         // handler
-        //        beans.put("homeController", new HomeController());
+        beans.put("staticViewController", new StaticViewController());
+        beans.put("userService", userService);
+        beans.put("loginController", loginController);
+
+        // handleMap
+        handlerMap.put("/login", loginController);
     }
 
     public static <T> Map<String, T> findByClassType(Class<T> type) {
@@ -35,6 +50,10 @@ public class BeanFactory {
             }
         }
         return result;
+    }
+
+    public static Object getBean(String beanName) {
+        return beans.get(beanName);
     }
 
     public static Object getHandler(String requestUri) {

@@ -5,11 +5,10 @@
     - [x] 나머지 http request header 읽어오기
     - [x] http request의 첫 번째 라인에서 request uri를 추출하기
     - [x] 요청 url에 해당되는 파일을 resource 디렉토리에서 읽어오기
-- [ ] Query String 파싱
-    - [ ] http request의 첫 번째 라인에서 request uri를 추출하기
-    - [ ] login.html 파일에서 태그에 name을 추가하기
-    - [ ] 추출한 request uri에서 접근 경로와 이름=값으로 전달되는 데이터를 추출해서 User 객체 만들기
-    - [ ] InMemoryUserRepository를 사용해서 미리 가입되어 있는 회원을 조회해서 로그로 확인하기
+- [x] Query String 파싱
+    - [x] http request의 첫 번째 라인에서 request uri를 추출하기
+    - [x] 추출한 request uri에서 접근 경로와 이름=값으로 전달되는 데이터를 추출해서 User 객체 만들기
+    - [x] InMemoryUserRepository를 사용해서 미리 가입되어 있는 회원을 조회해서 로그로 확인하기
 - [ ] HTTP Status Code 302
     - [ ] 회원을 조회해서 로그인에 성공하면 /index.html로 리다이렉트
         - [ ] 응답 헤더에 http status code를 302로 반환

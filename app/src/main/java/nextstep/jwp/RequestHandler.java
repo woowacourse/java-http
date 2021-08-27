@@ -3,10 +3,12 @@ package nextstep.jwp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
 
 public class RequestHandler implements Runnable {
@@ -26,14 +28,35 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final String responseBody = "Hello world!";
+            final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+            String line = br.readLine();
+
+            if (line == null) {
+                return;
+            }
+
+            String[] requestLine = line.split(" ");
+
+            while (!line.isBlank()) {
+                line = br.readLine();
+                log.debug("header : {}", line);
+            }
+
+            log.debug("request: " + requestLine[1]);
+
+            final URL resource = getClass().getClassLoader().getResource("static/" + requestLine[1]);
+            byte[] body = new byte[0];
+            if (resource != null) {
+                final Path path = new File(resource.getPath()).toPath();
+                body = Files.readAllBytes(path);
+            }
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Length: " + body.length + " ",
                     "",
-                    responseBody);
+                    new String(body));
 
             outputStream.write(response.getBytes());
             outputStream.flush();

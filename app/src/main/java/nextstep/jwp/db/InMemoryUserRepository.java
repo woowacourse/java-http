@@ -13,11 +13,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InMemoryUserRepository {
 
     private static final Logger LOG = LoggerFactory.getLogger(InMemoryUserRepository.class);
-    private static final Map<String, User> database = new ConcurrentHashMap<>();
+    private static final Map<String, User> DATABASE = new ConcurrentHashMap<>();
 
     static {
         final User user = new User(1, "gugu", "password", "hkkang@woowahan.com");
-        database.put(user.getAccount(), user);
+        DATABASE.put(user.getAccount(), user);
     }
 
     private InMemoryUserRepository() {
@@ -25,7 +25,7 @@ public class InMemoryUserRepository {
 
     public static void save(User user) {
         validateNotDuplicate(user);
-        database.put(user.getAccount(), user);
+        DATABASE.put(user.getAccount(), user);
     }
 
     private static void validateNotDuplicate(User user) {
@@ -34,7 +34,7 @@ public class InMemoryUserRepository {
     }
 
     private static void validateAccountNotDuplicate(String account) {
-        if (database.containsKey(account)) {
+        if (DATABASE.containsKey(account)) {
             LOG.debug("회원 등록 실패 : account 중복 => account: {}", account);
             throw new DuplicateException("이미 존재하는 account 입니다.");
         }
@@ -48,11 +48,11 @@ public class InMemoryUserRepository {
     }
 
     private static boolean isEmailAlreadyExists(String email) {
-        return database.values().stream()
+        return DATABASE.values().stream()
                 .anyMatch(userInDB -> userInDB.hasSameEmail(email));
     }
 
     public static Optional<User> findByAccount(String account) {
-        return Optional.ofNullable(database.get(account));
+        return Optional.ofNullable(DATABASE.get(account));
     }
 }

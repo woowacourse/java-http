@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BodyLineTest {
 
@@ -17,7 +17,7 @@ public class BodyLineTest {
         final ParsingLine parsingLine = new BodyLine();
 
         // when
-        final ParsingLine nextLine = parsingLine.parse("Hello World!");
+        final ParsingLine nextLine = parsingLine.parseLine("Hello World!");
 
         //then
         final HttpRequest actual = new HttpRequestBuilder().body("Hello World!")
@@ -41,7 +41,7 @@ public class BodyLineTest {
         final ParsingLine parsingLine = new BodyLine();
 
         // when
-        final ParsingLine nextLine = parsingLine.parse(body);
+        final ParsingLine nextLine = parsingLine.parseLine(body);
 
         //then
         final HttpRequest actual = new HttpRequestBuilder().body("Hello World!")

@@ -16,12 +16,12 @@ public class BodyLine extends AbstractParsingLine {
     }
 
     @Override
-    public ParsingLine parse(String line) {
+    public ParsingLine parseLine(String line) {
         if (Objects.isNull(line) || line.isBlank()) {
-            return new EndLine();
+            return new EndLine(httpRequestBuilder);
         }
 
-        super.httpRequestBuilder.body(line);
+        httpRequestBuilder.body(line);
         return this;
     }
 }

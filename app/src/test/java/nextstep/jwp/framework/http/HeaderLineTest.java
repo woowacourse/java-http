@@ -15,7 +15,7 @@ public class HeaderLineTest {
         final ParsingLine parsingLine = new HeaderLine(createBuilderWithStatusLine());
 
         // when
-        final ParsingLine nextLine = parsingLine.parse("Content-Type: text/html;charset=utf-8\r\n");
+        final ParsingLine nextLine = parsingLine.parseLine("Content-Type: text/html;charset=utf-8");
 
         //then
         final HttpRequest actual = createBuilderWithStatusLine().header("Content-Type", "text/html;charset=utf-8")
@@ -34,7 +34,7 @@ public class HeaderLineTest {
         final ParsingLine parsingLine = new HeaderLine(createBuilderWithStatusLine());
 
         // when
-        final ParsingLine nextLine = parsingLine.parse(null);
+        final ParsingLine nextLine = parsingLine.parseLine(null);
 
         //then
         assertThat(nextLine).isExactlyInstanceOf(EndLine.class);
@@ -48,7 +48,7 @@ public class HeaderLineTest {
         final ParsingLine parsingLine = new HeaderLine();
 
         // when
-        final ParsingLine nextLine = parsingLine.parse(" ");
+        final ParsingLine nextLine = parsingLine.parseLine(" ");
 
         //then
         assertThat(nextLine).isExactlyInstanceOf(BodyLine.class);

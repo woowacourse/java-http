@@ -169,12 +169,14 @@ public class HttpRequestTest {
     @DisplayName("HTTP Request로부터 form-data를 파싱한다.")
     void extractFormData() throws IOException {
         // given
+        String formData = "account=gugu&password=password&email=hkkang%40woowahan.com";
         String httpRequest = String.join("\r\n",
             "POST /register HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
+            "Content-Length: " + formData.length(),
             "",
-            "account=gugu&password=password&email=hkkang%40woowahan.com");
+            formData);
         InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
         HttpRequest extractor = new HttpRequest(inputStream);
         Map<String, String> expected = new HashMap<>();

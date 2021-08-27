@@ -112,6 +112,7 @@ public class HttpRequest {
         String[] splitFormData = lastLine.split("&");
         Map<String, String> result = new HashMap<>();
         for (String s : splitFormData) {
+            System.out.println(splitFormData);
             String[] split = s.split("=");
             result.put(split[0], split[1]);
         }

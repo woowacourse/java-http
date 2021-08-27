@@ -12,23 +12,20 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
 
-public class RequestHandler implements Runnable {
+public class RequestHandler{
 
     private static final Logger LOG = LoggerFactory.getLogger(RequestHandler.class);
 
-    private final Socket connection;
     private final HttpRequestParser httpRequestParser;
     private final RequestMapping requestMapping;
 
 
-    public RequestHandler(Socket connection, HttpRequestParser httpRequestParser, RequestMapping requestMapping) {
-        this.connection = connection;
+    public RequestHandler(HttpRequestParser httpRequestParser, RequestMapping requestMapping) {
         this.httpRequestParser = httpRequestParser;
         this.requestMapping = requestMapping;
     }
 
-    @Override
-    public void run() {
+    public void run(Socket connection) {
         LOG.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
@@ -43,7 +40,7 @@ public class RequestHandler implements Runnable {
         } catch (IOException exception) {
             LOG.error("Exception stream", exception);
         } finally {
-            close();
+            close(connection);
         }
     }
 
@@ -63,7 +60,7 @@ public class RequestHandler implements Runnable {
         bufferedOutputStream.flush();
     }
 
-    private void close() {
+    private void close(Socket connection) {
         try {
             connection.close();
         } catch (IOException exception) {

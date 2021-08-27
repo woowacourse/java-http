@@ -7,8 +7,14 @@ import nextstep.jwp.model.User;
 
 public class LoginService {
 
+    private final InMemoryUserRepository inMemoryUserRepository;
+
+    public LoginService(InMemoryUserRepository inMemoryUserRepository) {
+        this.inMemoryUserRepository = inMemoryUserRepository;
+    }
+
     public void login(LoginRequest loginRequest) {
-        final User foundUser = InMemoryUserRepository.findByAccount(loginRequest.getAccount())
+        final User foundUser = inMemoryUserRepository.findByAccount(loginRequest.getAccount())
                 .orElseThrow(() -> new UnAuthorizedException("존재하지 않는 account 입니다."));
         foundUser.validatePassword(loginRequest.getPassword());
     }

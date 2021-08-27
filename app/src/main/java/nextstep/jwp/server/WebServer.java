@@ -1,5 +1,6 @@
 package nextstep.jwp.server;
 
+import nextstep.jwp.http.request.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,11 +15,11 @@ public class WebServer {
     private static final int DEFAULT_PORT = 8080;
 
     private final int port;
-    private final DependencyInjector dependencyInjector;
+    private final ApplicationContext applicationContext;
 
     public WebServer(int port) {
         this.port = checkPort(port);
-        dependencyInjector = new DependencyInjector();
+        applicationContext = new ApplicationContext();
     }
 
     public void run() {
@@ -35,7 +36,9 @@ public class WebServer {
     private void handle(ServerSocket serverSocket) throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(dependencyInjector.getNewRequestHandlerWithConnection(connection)).start();
+            final RequestHandler requestHandler = applicationContext.getRequestHandler();
+            final Socket conn = connection;
+            new Thread(() -> requestHandler.run(conn)).start();
         }
     }
 

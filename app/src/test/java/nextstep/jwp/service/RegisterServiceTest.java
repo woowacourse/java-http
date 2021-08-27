@@ -16,7 +16,8 @@ class RegisterServiceTest {
     private static final String EMAIL = "hkkang@woowahan.com";
     private static final String PASSWORD = "password";
 
-    private final RegisterService registerService = new RegisterService();
+    private final InMemoryUserRepository inMemoryUserRepository = new InMemoryUserRepository();
+    private final RegisterService registerService = new RegisterService(inMemoryUserRepository);
 
     @DisplayName("회원가입 테스트 - 성공")
     @Test
@@ -30,7 +31,7 @@ class RegisterServiceTest {
         registerService.register(newUser);
 
         //then
-        final User foundUser = InMemoryUserRepository.findByAccount(newAccount)
+        final User foundUser = inMemoryUserRepository.findByAccount(newAccount)
                 .orElseThrow(() -> new NotFoundException("해당 account의 User가 존재하지 않습니다."));
 
         assertThat(foundUser.getAccount()).isEqualTo(newAccount);

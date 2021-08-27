@@ -1,12 +1,12 @@
 package nextstep.jwp.service;
 
 import nextstep.jwp.controller.dto.request.LoginRequest;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnAuthorizedException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 
 @DisplayName("LoginService 테스트")
 class LoginServiceTest {
@@ -14,7 +14,8 @@ class LoginServiceTest {
     private static final String ACCOUNT = "gugu";
     private static final String PASSWORD = "password";
 
-    private final LoginService loginService = new LoginService();
+    private final InMemoryUserRepository inMemoryUserRepository = new InMemoryUserRepository();
+    private final LoginService loginService = new LoginService(inMemoryUserRepository);
 
     @DisplayName("로그인 테스트 - 성공")
     @Test

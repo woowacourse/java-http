@@ -5,7 +5,13 @@ import nextstep.jwp.model.User;
 
 public class RegisterService {
 
+    private final InMemoryUserRepository inMemoryUserRepository;
+
+    public RegisterService(InMemoryUserRepository inMemoryUserRepository) {
+        this.inMemoryUserRepository = inMemoryUserRepository;
+    }
+
     public void register(User user) {
-        InMemoryUserRepository.save(user);
+        inMemoryUserRepository.save(user);
     }
 }

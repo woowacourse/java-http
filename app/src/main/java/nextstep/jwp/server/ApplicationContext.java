@@ -4,6 +4,7 @@ import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.StaticResourceController;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.request.HttpRequestParser;
 import nextstep.jwp.http.request.RequestHandler;
 import nextstep.jwp.http.request.RequestMapping;
@@ -11,21 +12,24 @@ import nextstep.jwp.service.LoginService;
 import nextstep.jwp.service.RegisterService;
 import nextstep.jwp.staticresource.StaticResourceFinder;
 
-import java.net.Socket;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DependencyInjector {
+public class ApplicationContext {
 
-    public RequestHandler getNewRequestHandlerWithConnection(Socket connection) {
+    private final RequestHandler requestHandler;
+
+    public ApplicationContext() {
         final RequestMapping requestMapping = createAndInjectObjects();
         final HttpRequestParser httpRequestParser = new HttpRequestParser();
-        return new RequestHandler(connection, httpRequestParser, requestMapping);
+        requestHandler = new RequestHandler(httpRequestParser, requestMapping);
     }
 
     private RequestMapping createAndInjectObjects() {
-        final RegisterService registerService = new RegisterService();
-        final LoginService loginService = new LoginService();
+        final InMemoryUserRepository inMemoryUserRepository = new InMemoryUserRepository();
+
+        final RegisterService registerService = new RegisterService(inMemoryUserRepository);
+        final LoginService loginService = new LoginService(inMemoryUserRepository);
 
         final StaticResourceFinder staticResourceFinder = new StaticResourceFinder();
 
@@ -43,5 +47,9 @@ public class DependencyInjector {
         controllers.put("/register", registerController);
         controllers.put("/login", loginController);
         return controllers;
+    }
+
+    public RequestHandler getRequestHandler() {
+        return requestHandler;
     }
 }

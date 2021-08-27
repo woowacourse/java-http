@@ -14,14 +14,17 @@ import java.util.Objects;
 
 public class RequestHandler implements Runnable {
 
-    private static final HttpRequestParser HTTP_REQUEST_PARSER = new HttpRequestParser();
-    private static final RequestMapping REQUEST_MAPPING = new RequestMapping();
     private static final Logger LOG = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
+    private final HttpRequestParser httpRequestParser;
+    private final RequestMapping requestMapping;
 
-    public RequestHandler(Socket connection) {
-        this.connection = Objects.requireNonNull(connection);
+
+    public RequestHandler(Socket connection, HttpRequestParser httpRequestParser, RequestMapping requestMapping) {
+        this.connection = connection;
+        this.httpRequestParser = httpRequestParser;
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -31,9 +34,9 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final HttpRequest request = HTTP_REQUEST_PARSER.parse(inputStream);
+            final HttpRequest request = httpRequestParser.parse(inputStream);
             final RequestLine requestLine = request.getRequestLine();
-            final Controller controller = REQUEST_MAPPING.getController(requestLine.getUri());
+            final Controller controller = requestMapping.getController(requestLine.getUri());
             final HttpResponse response = getResponse(request, controller);
 
             doResponse(outputStream, response);

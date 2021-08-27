@@ -4,15 +4,36 @@ import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.StaticResourceController;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("RequestMapping 테스트")
 class RequestMappingTest {
 
-    private final RequestMapping requestMapping = new RequestMapping();
+    @Mock
+    private RegisterController registerController;
+    @Mock
+    private LoginController loginController;
+    @Mock
+    private StaticResourceController staticResourceController;
+
+    private RequestMapping requestMapping;
+
+    @BeforeEach
+    void setUp() {
+        final Map<String, Controller> controllers = new ConcurrentHashMap<>();
+        controllers.put("/register", registerController);
+        controllers.put("/login", loginController);
+
+        requestMapping = new RequestMapping(controllers, staticResourceController);
+    }
 
     @DisplayName("request uri가 /register일 때 RegisterController 반환 테스트")
     @Test

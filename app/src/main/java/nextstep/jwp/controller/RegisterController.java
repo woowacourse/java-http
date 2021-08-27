@@ -1,14 +1,22 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.controller.dto.request.RegisterRequest;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestBody;
 import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.model.User;
+import nextstep.jwp.service.RegisterService;
+import nextstep.jwp.staticresource.StaticResourceFinder;
 
 import static nextstep.jwp.http.request.HttpMethod.GET;
 
 public class RegisterController extends AbstractController {
+
+    private final RegisterService registerService;
+
+    public RegisterController(StaticResourceFinder staticResourceFinder, RegisterService registerService) {
+        super(staticResourceFinder);
+        this.registerService = registerService;
+    }
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {
@@ -26,16 +34,19 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
+        final RegisterRequest registerRequest = getRegisterRequest(request);
+        registerService.register(registerRequest.toUser());
+        assignRedirectToResponse(response, "http://localhost:8080/index.html");
+    }
+
+    private RegisterRequest getRegisterRequest(HttpRequest request) {
         final RequestBody requestBody = request.getBody();
         final String account = requestBody.getParameter("account");
         final String email = requestBody.getParameter("email");
         final String password = requestBody.getParameter("password");
-        final User signupUser = new User(account, password, email);
-        LOG.debug("회원가입 요청 account : {}", signupUser.getAccount());
-        LOG.debug("회원가입 요청 email : {}", signupUser.getEmail());
-        LOG.debug("회원가입 요청 password : {}", signupUser.getPassword());
-        InMemoryUserRepository.save(signupUser);
-        response.assignStatusCode(302);
-        response.assignLocationHeader("http://localhost:8080/index.html");
+        LOG.debug("회원가입 요청 account : {}", account);
+        LOG.debug("회원가입 요청 email : {}", email);
+        LOG.debug("회원가입 요청 password : {}", password);
+        return new RegisterRequest(account, email, password);
     }
 }

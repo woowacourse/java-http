@@ -14,9 +14,16 @@ public class LoginController implements Controller {
     @Override
     public HttpResponse get(HttpRequest request) {
         StaticFileReader staticFileReader = new StaticFileReader();
-        Map<String, String> queryParams = request.extractURIQueryParams();
-        String account = queryParams.get("account");
-        String password = queryParams.get("password");
+        String htmlOfLogin = staticFileReader.read("static/login.html");
+        return new HttpResponse(HttpStatus.OK, htmlOfLogin);
+    }
+
+    @Override
+    public HttpResponse post(HttpRequest request) {
+        StaticFileReader staticFileReader = new StaticFileReader();
+        Map<String, String> formData = request.extractFormData();
+        String account = formData.get("account");
+        String password = formData.get("password");
         if (!Objects.isNull(account) && !Objects.isNull(password)) {
             User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 아이디입니다."));
@@ -28,12 +35,6 @@ public class LoginController implements Controller {
             String htmlOf401 = staticFileReader.read("static/401.html");
             return new HttpResponse(HttpStatus.UNAUTHORIZED, htmlOf401);
         }
-        String htmlOfLogin = staticFileReader.read("static/login.html");
-        return new HttpResponse(HttpStatus.OK, htmlOfLogin);
-    }
-
-    @Override
-    public HttpResponse post(HttpRequest request) {
-        return null;
+        return new HttpResponse(HttpStatus.BAD_REQUEST);
     }
 }

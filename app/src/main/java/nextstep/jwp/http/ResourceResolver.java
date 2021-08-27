@@ -1,6 +1,7 @@
 package nextstep.jwp.http;
 
 import static nextstep.jwp.http.HttpResponse.ok;
+import static nextstep.jwp.http.ViewResolver.resolveView;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +31,7 @@ public class ResourceResolver {
 
             return ok(contentType, responseBody);
         } catch (NullPointerException e) {
-            throw new IllegalArgumentException("존재하지 않는 Resource 요청입니다");
+            return resolveView("404");
         }
     }
 }

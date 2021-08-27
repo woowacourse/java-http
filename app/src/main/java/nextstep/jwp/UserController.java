@@ -6,11 +6,8 @@ import static nextstep.jwp.http.HttpResponse.unauthorized;
 import static nextstep.jwp.http.ViewResolver.resolveView;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.RequestParam;
-import nextstep.jwp.model.User;
 
 public class UserController {
     private final UserService userService = new UserService();
@@ -22,7 +19,7 @@ public class UserController {
     public String login(RequestParam params) {
         try {
             userService.login(params.get("account"), params.get("password"));
-        } catch (IllegalArgumentException e) {
+        } catch (UnauthorizedException e) {
             return unauthorized();
         }
         return found("/index.html");

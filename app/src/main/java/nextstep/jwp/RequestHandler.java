@@ -16,6 +16,9 @@ public class RequestHandler implements Runnable {
     public static final String DEFAULT_METHOD = "Hello world!";
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
     private static final String STATIC_PATH = "static";
+
+    private static long user_id = 2;
+
     private final Socket connection;
 
     public RequestHandler(Socket connection) {
@@ -29,9 +32,10 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            List<String> lines = readLines(bufferedReader);
-            final String firstLine = lines.get(0);
+            final String firstLine = bufferedReader.readLine();
+            final Map<String, String> httpRequestHeaders = httpRequestHeaders(bufferedReader);
             final String extractedUri = extractUri(firstLine);
+            final String extractedMethod = extractHttpMethod(firstLine);
 
             if ("/".equals(extractedUri)) {
                 final String response = http200Message(DEFAULT_METHOD);
@@ -39,21 +43,35 @@ public class RequestHandler implements Runnable {
                 return;
             }
 
-            if ("/login".equals(extractedUri)) {
+            if (extractedUri.startsWith("/login")) {
+                if (extractedUri.contains("?")) {
+                    try {
+                        String responseBody = loginRequest(extractedUri);
+                        final String response = http302Response("/index.html");
+                        writeResponse(outputStream, response);
+                    } catch (RuntimeException exception) {
+                        writeResponse(outputStream, http302Response("/401.html"));
+                    }
+                    return;
+                }
                 final URL uri = getClass().getClassLoader().getResource(STATIC_PATH + extractedUri + ".html");
                 final String response = http200Message(Files.readString(new File(uri.getFile()).toPath()));
                 writeResponse(outputStream, response);
                 return;
             }
 
-            if (extractedUri.contains("?")) {
-                try {
-                    String user = toUserResponseBody(extractedUri);
+            if (extractedUri.startsWith("/register")) {
+                if ("POST".equals(extractedMethod)) {
+                    final String requestBody = extractRequestBody(bufferedReader, httpRequestHeaders);
+                    registerRequest(requestBody);
                     final String response = http302Response("/index.html");
                     writeResponse(outputStream, response);
-                } catch (RuntimeException exception) {
-                    writeResponse(outputStream, http302Response("/401.html"));
+                    return;
                 }
+
+                final URL uri = getClass().getClassLoader().getResource(STATIC_PATH + extractedUri + ".html");
+                final String response = http200Message(Files.readString(new File(uri.getFile()).toPath()));
+                writeResponse(outputStream, response);
                 return;
             }
 
@@ -67,12 +85,25 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private String toUserResponseBody(String extractedUri) {
+    private String extractRequestBody(BufferedReader bufferedReader, Map<String, String> httpRequestHeaders) throws IOException {
+        final int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
+        final char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return new String(buffer);
+    }
+
+    private void registerRequest(String requestBody) {
+        Map<String, String> params = extractQueryParam(requestBody);
+        final User user = new User(user_id++, params.get("account"), params.get("password"), params.get("email"));
+        InMemoryUserRepository.save(user);
+    }
+
+    private String loginRequest(String extractedUri) {
         int index = extractedUri.indexOf("?");
         final String path = extractedUri.substring(0, index);
         Map<String, String> params = extractQueryParam(extractedUri.substring(index + 1));
 
-        final Optional<User> user = InMemoryUserRepository.findByAccount(params.get("account"));
+        final Optional<User>  user = InMemoryUserRepository.findByAccount(params.get("account"));
         if (user.isPresent()) {
             final User foundUser = user.get();
             if (foundUser.checkPassword(params.get("password"))) {
@@ -83,8 +114,8 @@ public class RequestHandler implements Runnable {
         throw new IllegalArgumentException("찾을 수 없는 사용자입니다.");
     }
 
-    private List<String> readLines(BufferedReader bufferedReader) throws IOException {
-        List<String> lines = new ArrayList<>();
+    private Map<String, String> httpRequestHeaders(BufferedReader bufferedReader) throws IOException {
+        Map<String, String> httpRequestHeaders = new HashMap<>();
         while (bufferedReader.ready()) {
             final String line = bufferedReader.readLine();
             if (Objects.isNull(line)) {
@@ -93,9 +124,15 @@ public class RequestHandler implements Runnable {
             if ("".equals(line)) {
                 break;
             }
-            lines.add(line);
+            final String[] header = line.split(": ");
+            httpRequestHeaders.put(header[0], header[1].replace(" ", ""));
         }
-        return lines;
+        return httpRequestHeaders;
+    }
+
+    private String extractHttpMethod(String firstLine) {
+        final String[] splitFirstLine = firstLine.split(" ");
+        return splitFirstLine[0];
     }
 
     private String extractUri(String firstLine) {

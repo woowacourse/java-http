@@ -1,6 +1,5 @@
 package nextstep.jwp;
 
-import nextstep.jwp.model.User;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -115,6 +114,61 @@ class RequestHandlerTest {
         assertThat(actual).isEqualTo(expected);
     }
 
+    @Test
+    void 로그인시_요청한_아이디가_존재하지않으면_실패한다() throws IOException {
+        // given
+        final String requestUri = "/login?account=gugu&password=passwor";
+        final String httpRequest = toHttpGetRequest(requestUri);
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        final String redirectUrl = "/401.html";
+        String expected = toHttp302Response(redirectUrl);
+        // when
+        requestHandler.run();
+        final String actual = socket.output();
+        // then
+        assertThat(actual).isEqualTo(expected);
+    }
+
+
+    @Test
+    void registerForm() throws IOException {
+        // given
+        final String requestUri = "/register";
+        final String httpRequest = toHttpGetRequest(requestUri);
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        final String expectResponseBody = Files.readString(new File(resource.getFile()).toPath());
+        String expected = toHttp200TextHtmlResponse(expectResponseBody);
+        // when
+        requestHandler.run();
+        final String actual = socket.output();
+        // then
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void registerRequest() throws IOException {
+        // given
+        final String requestUri = "/register";
+        final String requestBody = "account=gumgum&password=password2&email=ggump%40woowahan.com";
+        final String httpRequest = toHttpPostRequest(requestUri, requestBody);
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        final String redirectUrl = "/index.html";
+        String expected = toHttp302Response("/index.html");
+        // when
+        requestHandler.run();
+        final String actual = socket.output();
+        // then
+        assertThat(actual).isEqualTo(expected);
+    }
+
     private String toHttpGetRequest(String requestUri) {
         return String.join("\r\n",
                 "GET " + requestUri + " HTTP/1.1 ",
@@ -124,11 +178,23 @@ class RequestHandlerTest {
                 "");
     }
 
+    private String toHttpPostRequest(String requestUri, String requestBody) {
+        return String.join("\r\n",
+                "POST " + requestUri + " HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + requestBody.getBytes().length + " ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
+                "",
+                requestBody);
+    }
+
     private String toHttp200TextHtmlResponse(String expectResponseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + expectResponseBody.getBytes().length + " " ,
+                "Content-Length: " + expectResponseBody.getBytes().length + " ",
                 "",
                 expectResponseBody);
     }

@@ -1,11 +1,10 @@
 package nextstep.learning.http;
 
+import java.io.*;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.io.*;
-import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -17,7 +16,7 @@ import static org.mockito.Mockito.*;
  * <b>InputStream</b>은 데이터를 읽고, <b>OutputStream</b>은 데이터를 쓴다.<br>
  * <b>FilterStream</b>은 InputStream이나 OutputStream에 연결될 수 있다.<br>
  * FilterStream은 읽거나 쓰는 데이터를 수정할 때 사용한다. (e.g. 암호화, 압축, 포맷 변환)<br>
- *<br>
+ * <br>
  * <b>Stream</b>은 데이터를 <b>바이트</b>로 읽고 쓴다.<br>
  * 바이트가 아닌 <b>텍스트(문자)</b>를 읽고 쓰려면 <b>Reader와 Writer</b> 클래스를 연결한다.<br>
  * Reader, Writer는 다양한 문자 인코딩(e.g. UTF-8)을 처리할 수 있다.
@@ -198,15 +197,22 @@ class IOStreamTest {
          * 필터인 <b>BufferedReader</b>를 사용하면 <b>readLine</b> 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
          */
         @Test
-        void BufferedReader를_사용하여_문자열을_읽어온다() {
+        void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
             final String emoji = String.join("\r\n",
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
             final StringBuilder actual = new StringBuilder();
+
+            while (bufferedReader.ready()) {
+                actual.append(bufferedReader.readLine())
+                      .append("\r\n");
+            }
+
 
             assertThat(actual).hasToString(emoji);
         }

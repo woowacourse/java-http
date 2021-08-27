@@ -4,6 +4,7 @@ import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -43,7 +44,7 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         final URL url = getClass().getClassLoader().getResource(fileName);
-        final Path path = Path.of(url.getPath());
+        final Path path = new File(url.getPath()).toPath();
         final List<String> actual = Files.readAllLines(path);
 
         assertThat(actual).containsOnly("nextstep");

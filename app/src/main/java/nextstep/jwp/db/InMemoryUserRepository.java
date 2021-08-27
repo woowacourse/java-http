@@ -20,6 +20,12 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
+    public static boolean existsByAccountAndPassword(final String account, final String password) {
+        final Optional<User> user = findByAccount(account);
+
+        return user.isPresent() && user.get().checkPassword(password);
+    }
+
     public static Optional<User> findByAccount(String account) {
         return Optional.ofNullable(database.get(account));
     }

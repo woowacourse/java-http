@@ -9,8 +9,9 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import nextstep.jwp.infrastructure.http.ControllerMapping;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
-import nextstep.jwp.infrastructure.http.resourcersolver.ResourceResolver;
+import nextstep.jwp.infrastructure.http.ResourceResolver;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,13 @@ public class RequestHandler implements Runnable {
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final HttpRequest httpRequest = HttpRequest.of(splitFromInputStream(bufferedReader));
-            final HttpResponse httpResponse = resourceResolver.readResource(httpRequest);
+
+            String resourceName = httpRequest.getRequestLine().getUri().getBaseUri();
+            if (ControllerMapping.contains(httpRequest)) {
+                resourceName = ControllerMapping.handle(httpRequest);
+            }
+
+            final HttpResponse httpResponse = resourceResolver.readResource(resourceName);
 
             outputStream.write(httpResponse.toString().getBytes());
             outputStream.flush();

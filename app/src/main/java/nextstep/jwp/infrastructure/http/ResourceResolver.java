@@ -1,4 +1,4 @@
-package nextstep.jwp.infrastructure.http.resourcersolver;
+package nextstep.jwp.infrastructure.http;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,9 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Objects;
-import nextstep.jwp.infrastructure.http.HttpHeaders;
 import nextstep.jwp.infrastructure.http.HttpHeaders.Builder;
-import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.infrastructure.http.response.HttpStatusCode;
 import nextstep.jwp.infrastructure.http.response.HttpStatusLine;
@@ -38,8 +36,7 @@ public class ResourceResolver {
         return new File(notFoundUrl.getFile()).toPath();
     }
 
-    public HttpResponse readResource(final HttpRequest request) {
-        final String resourceName = request.getRequestLine().getPath();
+    public HttpResponse readResource(final String resourceName) {
         final Path path = findPathOrElse(defaultPath + resourceName, notFoundResourcePath);
 
         try {
@@ -48,7 +45,8 @@ public class ResourceResolver {
             return new HttpResponse(
                 new HttpStatusLine(HttpStatusCode.OK),
                 new Builder()
-                    .header("Content-Type", String.join(";", Files.probeContentType(path), "charset=" + Charset.defaultCharset().displayName().toLowerCase(Locale.ROOT)))
+                    .header("Content-Type",
+                        String.join(";", Files.probeContentType(path), "charset=" + Charset.defaultCharset().displayName().toLowerCase(Locale.ROOT)))
                     .header("Content-Length", String.valueOf(responseBody.getBytes().length))
                     .build(),
                 responseBody

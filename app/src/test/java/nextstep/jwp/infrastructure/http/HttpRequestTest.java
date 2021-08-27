@@ -28,7 +28,7 @@ class HttpRequestTest {
         final HttpHeaders headers = request.getHeaders();
 
         assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.GET);
-        assertThat(requestLine.getPath()).isEqualTo("/index.html");
+        assertThat(requestLine.getUri()).isEqualTo("/index.html");
         assertThat(requestLine.getHttpVersion()).isEqualTo("HTTP/1.1");
         assertThat(headers.getValue("Host")).hasSameElementsAs(Collections.singletonList("localhost:8080"));
         assertThat(headers.getValue("Connection")).hasSameElementsAs(Collections.singletonList("keep-alive"));

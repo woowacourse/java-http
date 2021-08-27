@@ -2,23 +2,29 @@ package nextstep.jwp.infrastructure.http.request;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class HttpRequestLine {
 
     private static final String BLANK = " ";
     private static final int FIRST_LINE_ELEMENT_SIZE = 3;
+    private static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
 
     private final HttpMethod httpMethod;
-    private final String path;
+    private final URI uri;
     private final String httpVersion;
 
-    public HttpRequestLine(final HttpMethod httpMethod, final String path, final String httpVersion) {
+    public HttpRequestLine(final HttpMethod httpMethod, final String uri, final String httpVersion) {
         this.httpMethod = httpMethod;
-        this.path = path;
+        this.uri = URI.of(uri);
         this.httpVersion = httpVersion;
     }
 
-    public static HttpRequestLine of (String line) {
+    public HttpRequestLine(final HttpMethod httpMethod, final String uri) {
+        this(httpMethod, uri, DEFAULT_HTTP_VERSION);
+    }
+
+    public static HttpRequestLine of(String line) {
         final List<String> result = Arrays.asList(line.split(BLANK));
 
         if (result.size() != FIRST_LINE_ELEMENT_SIZE) {
@@ -32,11 +38,28 @@ public class HttpRequestLine {
         return httpMethod;
     }
 
-    public String getPath() {
-        return path;
+    public URI getUri() {
+        return uri;
     }
 
     public String getHttpVersion() {
         return httpVersion;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final HttpRequestLine that = (HttpRequestLine) o;
+        return httpMethod == that.httpMethod && Objects.equals(uri, that.uri);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(httpMethod, uri);
     }
 }

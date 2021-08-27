@@ -41,6 +41,7 @@ public class RequestHandler implements Runnable {
                 return;
             }
 
+            log.debug(line);
             String[] requestLine = line.split(" ");
 
             while (!line.isBlank()) {
@@ -57,9 +58,14 @@ public class RequestHandler implements Runnable {
                 }
 
                 Map<String, String> queryMap = parseQuery(requestPath.substring(queryStartIndex + 1));
-                User findUser = userService.login(queryMap.get("account"), queryMap.get("password"));
-                outputStream.write(generateResponseBodyWithData(findUser.toString()).getBytes());
-                outputStream.flush();
+                try {
+                    userService.login(queryMap.get("account"), queryMap.get("password"));
+                    outputStream.write(generateResponseBody302("/index.html").getBytes());
+                } catch (RuntimeException runtimeException) {
+                    outputStream.write(generateResponseBody302("/401.html").getBytes());
+                } finally {
+                    outputStream.flush();
+                }
                 return;
             }
 
@@ -99,6 +105,13 @@ public class RequestHandler implements Runnable {
                 "Content-Length: " + body.length + " ",
                 "",
                 new String(body));
+    }
+
+    private String generateResponseBody302(String locationUrl) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Redirect ",
+                "Location: " + locationUrl + " ",
+                "");
     }
 
     private String generateResponseBodyWithData(String body) throws IOException {

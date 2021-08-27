@@ -21,7 +21,7 @@ public class HttpRequest {
 
     public HttpRequest(InputStream inputStream) throws IOException {
         HttpRequestStreamReader reader = new HttpRequestStreamReader(inputStream);
-        requestLines = reader.read();
+        requestLines = reader.getRequestLines();
     }
 
     public boolean isEmptyLine() {

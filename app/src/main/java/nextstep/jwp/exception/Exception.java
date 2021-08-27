@@ -9,6 +9,7 @@ public enum Exception {
     INVALID_REQUEST_URI(400, "Invalid Request URI.", InvalidRequestUriException.class),
     INVALID_REQUEST_LINE(400, "Invalid Request Line.", InvalidRequestLineException.class),
     INVALID_REQUEST_HEADER(400, "Invalid Request Header.", InvalidRequestHeader.class),
+    INVALID_FILE_EXTENSION(400, "Invalid File Extension.", InvalidFileExtensionException.class),
     NOT_ALLOWED_HTTP_VERSION(400, "Not Allowed Http Version.", NotAllowedHttpVersionException.class),
 
     NOT_IMPLEMENTED(501, "Not Implemented Http Method.", NotImplementedException.class);

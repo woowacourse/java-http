@@ -1,5 +1,7 @@
 package nextstep.jwp.http;
 
+import static nextstep.jwp.http.HttpResponse.ok;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -26,12 +28,7 @@ public class ResourceResolver {
             String responseBody = Files.readString(path);
             String contentType = Files.probeContentType(path);
 
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            return ok(contentType, responseBody);
         } catch (NullPointerException e) {
             throw new IllegalArgumentException("존재하지 않는 Resource 요청입니다");
         }

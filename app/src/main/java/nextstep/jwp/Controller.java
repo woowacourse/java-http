@@ -1,5 +1,10 @@
 package nextstep.jwp;
 
+import static nextstep.jwp.http.HttpResponse.found;
+import static nextstep.jwp.http.HttpResponse.ok;
+import static nextstep.jwp.http.HttpResponse.redirect;
+import static nextstep.jwp.http.HttpResponse.unauthorized;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -57,28 +62,6 @@ public class Controller {
         final Path path = new File(resource.getPath()).toPath();
         String responseBody = Files.readString(path);
 
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private String redirect(String redirectTo) {
-        return String.join("\r\n",
-                "HTTP/1.1 301 Found ",
-                "Location: " + redirectTo);
-    }
-
-    private String found(String redirectTo) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + redirectTo);
-    }
-
-    private String unauthorized() {
-        return String.join("\r\n",
-                "HTTP/1.1 401 Unauthorized ");
+        return ok("text/html", responseBody);
     }
 }

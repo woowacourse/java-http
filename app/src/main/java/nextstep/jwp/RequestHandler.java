@@ -43,7 +43,7 @@ public class RequestHandler implements Runnable {
 
 
             if ("GET".equals(method)) {
-                doGetAction(requestPath, outputStream);
+                doGetAction(header, requestPath, outputStream);
             }
 
             if ("POST".equals(method)) {
@@ -59,18 +59,46 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private void doGetAction(String requestPath, OutputStream outputStream) throws IOException {
+    private void doGetAction(Map<String, String> header, String requestPath, OutputStream outputStream) throws IOException {
         if (requestPath.startsWith("/login")) {
-            outputStream.write(generateResponseBody("/login.html").getBytes());
+            if (header.get("Accept") != null) {
+                String accept = header.get("Accept");
+                if (accept.contains("text/css")) {
+                    Map<String, String> responseHeader = new HashMap<>();
+                    responseHeader.put("Content-Type", "text/css");
+                    outputStream.write(ok(responseHeader, "/login.html").getBytes());
+                    return;
+                }
+            }
+            outputStream.write(ok("/login.html").getBytes());
             return;
         }
 
         if (requestPath.startsWith("/register")) {
-            outputStream.write(generateResponseBody("/register.html").getBytes());
+            if (header.get("Accept") != null) {
+                String accept = header.get("Accept");
+                if (accept.contains("text/css")) {
+                    Map<String, String> responseHeader = new HashMap<>();
+                    responseHeader.put("Content-Type", "text/css");
+                    outputStream.write(ok(responseHeader, "/register.html").getBytes());
+                    return;
+                }
+            }
+            outputStream.write(ok("/register.html").getBytes());
             return;
         }
 
-        outputStream.write(generateResponseBody(requestPath).getBytes());
+        if (header.get("Accept") != null) {
+            String accept = header.get("Accept");
+            log.debug("accept :" + accept);
+            if (accept.contains("text/css")) {
+                Map<String, String> responseHeader = new HashMap<>();
+                responseHeader.put("Content-Type", "text/css");
+                outputStream.write(ok(responseHeader, requestPath).getBytes());
+                return;
+            }
+        }
+        outputStream.write(ok(requestPath).getBytes());
     }
 
     private Map<String, String> parseHeader(BufferedReader request) throws IOException {
@@ -129,7 +157,14 @@ public class RequestHandler implements Runnable {
         return queryMap;
     }
 
-    private String generateResponseBody(String resourcePath) throws IOException {
+
+    private String ok(String resourcePath) throws IOException {
+        Map<String, String> headerMap = new HashMap<>();
+        headerMap.put("Content-Type", "text/html;charset=utf-8 ");
+        return ok(headerMap, resourcePath);
+    }
+
+    private String ok(Map<String, String> header, String resourcePath) throws IOException {
         URL resource = getClass().getClassLoader().getResource("static" + resourcePath);
         byte[] body = new byte[0];
         if (resource != null) {
@@ -137,12 +172,19 @@ public class RequestHandler implements Runnable {
             body = Files.readAllBytes(path);
         }
 
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + body.length + " ",
-                "",
-                new String(body));
+        header.put("Content-Length", String.valueOf(body.length));
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("HTTP/1.1 200 OK \r\n");
+
+        for (String key : header.keySet()) {
+            stringBuilder.append(key + ": " + header.get(key) + " \r\n");
+        }
+        stringBuilder.append("\r\n");
+        stringBuilder.append(new String(body) + "\r\n");
+
+        log.debug(stringBuilder.toString());
+        return stringBuilder.toString();
     }
 
     private String generateResponseBody302(String locationUrl) {

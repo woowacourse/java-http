@@ -1,13 +1,14 @@
 package nextstep.jwp;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
+import nextstep.jwp.model.Request;
+import nextstep.jwp.model.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RequestHandler implements Runnable {
 
@@ -21,20 +22,13 @@ public class RequestHandler implements Runnable {
 
     @Override
     public void run() {
-        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
+        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
+                connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
-
-            final String responseBody = "Hello world!";
-
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
+                final OutputStream outputStream = connection.getOutputStream()) {
+            Request request = new Request(inputStream);
+            Response response = new Response(request);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException exception) {

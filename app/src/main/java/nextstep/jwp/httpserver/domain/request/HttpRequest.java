@@ -2,6 +2,7 @@ package nextstep.jwp.httpserver.domain.request;
 
 import nextstep.jwp.httpserver.domain.Body;
 import nextstep.jwp.httpserver.domain.Headers;
+import nextstep.jwp.httpserver.domain.HttpMethod;
 
 public class HttpRequest {
     private final StartLine startLine;
@@ -16,6 +17,10 @@ public class HttpRequest {
 
     public String getRequestUri() {
         return startLine.getRequestTarget();
+    }
+
+    public HttpMethod getHttpMethod() {
+        return startLine.getHttpMethod();
     }
 
     public StartLine getStartLine() {

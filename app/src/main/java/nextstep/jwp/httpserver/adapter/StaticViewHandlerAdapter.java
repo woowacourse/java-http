@@ -11,6 +11,7 @@ import java.util.List;
 import nextstep.jwp.httpserver.controller.StaticViewController;
 import nextstep.jwp.httpserver.domain.View;
 import nextstep.jwp.httpserver.domain.request.HttpRequest;
+import nextstep.jwp.httpserver.domain.response.HttpResponse;
 
 public class StaticViewHandlerAdapter implements HandlerAdapter {
 
@@ -22,21 +23,21 @@ public class StaticViewHandlerAdapter implements HandlerAdapter {
     @Override
     public View handle(HttpRequest httpRequest, Object handler) throws URISyntaxException, IOException {
         final StaticViewController staticViewController = (StaticViewController) handler;
-        final String defaultPath = staticViewController.handle();
+        final HttpResponse httpResponse = staticViewController.handle();
 
         final String requestUri = httpRequest.getRequestUri();
-        final String resourcePath = getResourcePath(defaultPath, requestUri);
+        final String resourcePath = getResourcePath(requestUri);
 
         final List<String> body = readFile(resourcePath);
 
-        final String response = getResponse(body);
+        final String response = getResponse(httpResponse, body);
         return new View(resourcePath, response);
     }
 
-    private String getResourcePath(String defaultPath, String requestUri) {
+    private String getResourcePath(String requestUri) {
         String resourcePath = "static" + requestUri;
 
-        if (requestUri.equals(defaultPath)) {
+        if (requestUri.equals("/")) {
             resourcePath = "static/index.html";
         }
         return resourcePath;
@@ -45,18 +46,17 @@ public class StaticViewHandlerAdapter implements HandlerAdapter {
     private List<String> readFile(String resourcePath) throws URISyntaxException, IOException {
         final URL url = Thread.currentThread().getContextClassLoader().getResource(resourcePath);
         final Path path = Paths.get(url.toURI());
-        final List<String> body = Files.readAllLines(path);
-        return body;
+        return Files.readAllLines(path);
     }
 
-    private String getResponse(List<String> body) {
+    private String getResponse(HttpResponse httpResponse, List<String> body) {
         final StringBuilder responseBody = new StringBuilder();
         for (String bodyLine : body) {
             responseBody.append(bodyLine).append("\r\n");
         }
 
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                httpResponse.statusLine(),
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + responseBody.toString().getBytes().length + " ",
                 "",

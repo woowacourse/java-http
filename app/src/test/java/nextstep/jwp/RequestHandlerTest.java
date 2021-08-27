@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 
 import org.junit.jupiter.api.Test;
 
+import nextstep.jwp.httpserver.BeanFactory;
 import nextstep.jwp.httpserver.RequestHandler;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,6 +45,7 @@ class RequestHandlerTest {
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
+        BeanFactory.init();
         final RequestHandler requestHandler = new RequestHandler(socket);
 
         // when

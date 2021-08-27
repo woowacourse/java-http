@@ -7,12 +7,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import nextstep.jwp.model.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,66 +38,43 @@ public class RequestHandler implements Runnable {
                 final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                 final OutputStream outputStream = connection.getOutputStream()) {
 
-            String firstLine = reader.readLine();
-            log.debug("first line = {}", firstLine);
-
-            if (firstLine == null) {
-                return;
-            }
-            String[] firstTokens = firstLine.split(" ");
-            String method = firstTokens[0];
-            String uri = firstTokens[1];
-
-            Map<String, String> headers = new HashMap<>();
-
-
-            String line = reader.readLine();
-            while (!"".equals(line)) {
-                String[] splits = line.split(": ", 2);
-                String key = splits[0];
-                String value = splits[1];
-                headers.put(key, value);
-                line = reader.readLine();
-                log.debug("Headers=> {}: {}", splits[0], splits[1]);
-            }
+            HttpRequest httpRequest = extractHttpRequest(reader);
 
             String response = "";
 
-            if (uri.equals("/index.html")) {
+            if (httpRequest.uri().equals("/index.html")) {
                 response = controller.index();
             }
 
-            if (uri.startsWith("/login")) {
-                if ("GET".equals(method)) {
+            if (httpRequest.uri().startsWith("/login")) {
+                if ("GET".equals(httpRequest.method())) {
                     response = controller.login();
-                }
-                else if("POST".equals(method)) {
-                    String requestBody = getRequestBody(reader, headers);
-                    response = controller.login(requestBody);
+                } else if ("POST".equals(httpRequest.method())) {
+                    response = controller.login(httpRequest.payload());
                 }
             }
 
-            if (uri.startsWith("/register")) {
-                if ("GET".equals(method)) {
+            if (httpRequest.uri().startsWith("/register")) {
+                if ("GET".equals(httpRequest.method())) {
                     response = controller.register();
-                }
-                else if("POST".equals(method)) {
-                    String requestBody = getRequestBody(reader, headers);
-                    response = controller.register(requestBody);
+                } else if ("POST".equals(httpRequest.method())) {
+                    response = controller.register(httpRequest.payload());
                 }
             }
 
-            if (uri.endsWith(".css") && "GET".equals(method)) {
-                response = controller.css(uri);
+            if (httpRequest.uri().endsWith(".css") && "GET".equals(httpRequest.method())) {
+                response = controller.css(httpRequest.uri());
             }
 
-            if (uri.endsWith(".js") && "GET".equals(method)) {
-                response = controller.js(uri);
+            if (httpRequest.uri().endsWith(".js") && "GET".equals(httpRequest.method())) {
+                response = controller.js(httpRequest.uri());
             }
 
             log.debug("outputStream => {}", response);
             outputStream.write(response.getBytes());
             outputStream.flush();
+        } catch (IllegalStateException exception) {
+            log.info("IllegalStateException {}", exception.getMessage());
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
@@ -103,13 +82,31 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private String getRequestBody(BufferedReader reader, Map<String, String> headers) throws IOException {
-        int contentLength = Integer.parseInt(headers.get("Content-Length"));
-        char[] buffer = new char[contentLength];
-        reader.read(buffer, 0, contentLength);
-        String requestBody = new String(buffer);
+    private HttpRequest extractHttpRequest(BufferedReader reader) throws IOException {
+        String firstLine = reader.readLine();
 
-        return requestBody;
+        String[] firstTokens = firstLine.split(" ");
+        String method = firstTokens[0];
+        String uri = firstTokens[1];
+
+        HttpRequest httpRequest = new HttpRequest(method, uri);
+
+        String line = reader.readLine();
+        while (!"".equals(line)) {
+            String[] splits = line.split(": ", 2);
+            String name = splits[0];
+            String value = splits[1];
+            httpRequest.addHeader(name, value);
+            line = reader.readLine();
+        }
+
+        if ("POST".equals(httpRequest.method()) || "PUT".equals(httpRequest.method())) {
+            int contentLength = Integer.parseInt(httpRequest.headers().get("Content-Length"));
+            char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+            httpRequest.setPayload(new String(buffer));
+        }
+        return httpRequest;
     }
 
     private void close() {

@@ -1,9 +1,8 @@
-package nextstep.jwp.model;
+package nextstep.jwp.http.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -16,30 +15,26 @@ import java.util.Objects;
 
 public class HttpRequest {
 
-    private final String requestLine;
+    private final RequestLine requestLine;
     private final List<String> requestHeaders;
     private final String requestMessageBody;
 
-    public HttpRequest(String requestLine, List<String> requestHeaders, String requestMessageBody) {
+    public HttpRequest(RequestLine requestLine, List<String> requestHeaders, String requestMessageBody) {
         this.requestLine = requestLine;
         this.requestHeaders = requestHeaders;
         this.requestMessageBody = requestMessageBody;
     }
 
-    public HttpRequest(String requestLine) {
-        this(requestLine, Collections.emptyList(), "");
-    }
-
-    public HttpRequest(String requestLine, List<String> requestHeaders) {
+    public HttpRequest(RequestLine requestLine, List<String> requestHeaders) {
         this(requestLine, requestHeaders, "");
     }
 
-    public static HttpRequest of(List<String> requestLines) {
-        String requestLine = requestLines.get(0);
+    public static HttpRequest of(List<String> lines) {
+        RequestLine requestLine = RequestLine.of(lines.get(0));
 
         List<String> requestHeaders = new ArrayList<>();
-        for (int i = 1; i < requestLines.size(); i++) {
-            String line = requestLines.get(i);
+        for (int i = 1; i < lines.size(); i++) {
+            String line = lines.get(i);
             requestHeaders.add(line);
         }
 
@@ -57,7 +52,7 @@ public class HttpRequest {
         return of(lines);
     }
 
-    public String getRequestLine() {
+    public RequestLine getRequestLine() {
         return requestLine;
     }
 

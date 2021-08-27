@@ -1,9 +1,5 @@
 package nextstep.jwp;
 
-import nextstep.jwp.model.HttpRequest;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +11,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.request.RequestLine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RequestHandler implements Runnable {
 
@@ -28,10 +28,11 @@ public class RequestHandler implements Runnable {
 
     @Override
     public void run() {
-        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
+        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
+                connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
+                final OutputStream outputStream = connection.getOutputStream()) {
 
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -63,16 +64,15 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private String execute(String httpRequestFirstLine) {
+    private String execute(RequestLine requestLine) {
         try {
-            String method = httpRequestFirstLine.split(" ")[0];
-            String url = httpRequestFirstLine.split(" ")[1];
-            if (method.equalsIgnoreCase("GET")) {
-                final URL resourceUrl = getClass().getResource("/static" + url);
-                final String filePath = resourceUrl.getFile();
+            String method = requestLine.getMethod();
+            String path = requestLine.getPath();
 
-                final Path path = new File(filePath).toPath();
-                return String.join("\n", Files.readAllLines(path)) + "\n";
+            if (method.equalsIgnoreCase("GET")) {
+                final URL resourceUrl = getClass().getResource("/static" + path);
+                final Path filePath = new File(resourceUrl.getFile()).toPath();
+                return String.join("\n", Files.readAllLines(filePath)) + "\n";
             }
         } catch (IOException e) {
             return "Hello world!";

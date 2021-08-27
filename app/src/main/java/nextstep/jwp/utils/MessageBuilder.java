@@ -12,7 +12,7 @@ import nextstep.jwp.model.User;
 
 public class MessageBuilder {
 
-    public static final String FILE_EXTENSION = ".html";
+    public static final String FILE_EXTENSION = ".";
 
     private MessageBuilder() {
     }
@@ -37,7 +37,7 @@ public class MessageBuilder {
                 String uri = requestPath;
                 int index = uri.indexOf("?");
                 if (index == -1) {
-                    requestPath += FILE_EXTENSION;
+                    requestPath += ".html";
 
                     final URL resource = MessageBuilder.class.getClassLoader().getResource("static" + requestPath);
                     final Path path = new File(resource.getPath()).toPath();
@@ -72,13 +72,14 @@ public class MessageBuilder {
                         "");
             }
 
+            final String fileType = requestPath.split("\\.")[1];
             final URL resource = MessageBuilder.class.getClassLoader().getResource("static" + requestPath);
             final Path path = new File(resource.getPath()).toPath();
             final String responseBody = new String(Files.readAllBytes(path));
 
             return String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: text/" + fileType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

@@ -295,4 +295,60 @@ class RequestHandlerTest {
                 "";
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void css() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/css,*/*;q=0.1",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/css;charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "\r\n" +
+                responseBody;
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void js() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /js/scripts.js HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: */*",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/js;charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "\r\n" +
+                responseBody;
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

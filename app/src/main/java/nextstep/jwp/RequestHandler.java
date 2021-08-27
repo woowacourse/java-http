@@ -34,23 +34,22 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = new HttpRequest(inputStream);
+            HttpResponse httpResponse = new HttpResponse(outputStream);
             String path = httpRequest.getPath();
             URL url = getClass().getClassLoader().getResource("static" + path);
             String response = null;
             Path filePath = null;
             String responseBody = null;
-
             if (url != null) {
                 File file = new File(url.getFile());
                 if (file.exists()) {
                     filePath = new File(url.getFile()).toPath();
                     responseBody = new String(Files.readAllBytes(filePath));
-                    response = String.join("\r\n",
-                            "HTTP/1.1 200 OK ",
-                            "Content-Type: text/html;charset=utf-8 ",
-                            "Content-Length: " + responseBody.getBytes().length + " ",
-                            "",
-                            responseBody);
+                    httpResponse.setStatus(200);
+                    httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
+                    httpResponse.addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
+                    httpResponse.write(responseBody);
+                    httpResponse.flush();
                 }
             } else {
                 if ("/login".equals(path)) {
@@ -59,12 +58,11 @@ public class RequestHandler implements Runnable {
                         url = getClass().getClassLoader().getResource("static" + path + ".html");
                         filePath = new File(url.getFile()).toPath();
                         responseBody = new String(Files.readAllBytes(filePath));
-                        response = String.join("\r\n",
-                                "HTTP/1.1 200 OK ",
-                                "Content-Type: text/html;charset=utf-8 ",
-                                "Content-Length: " + responseBody.getBytes().length + " ",
-                                "",
-                                responseBody);
+                        httpResponse.setStatus(200);
+                        httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
+                        httpResponse.addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
+                        httpResponse.write(responseBody);
+                        httpResponse.flush();
                     } else {
                         String[] split = queryString.split("&");
                         String account = null;
@@ -82,24 +80,19 @@ public class RequestHandler implements Runnable {
                         if (optionalUser.isPresent()) {
                             User user = optionalUser.get();
                             if (user.checkPassword(password)) {
-                                response = String.join("\r\n",
-                                        "HTTP/1.1 302 Found ",
-                                        "Location: http://localhost:8080/index.html");
+                                httpResponse.setStatus(302);
+                                httpResponse.sendRedirect("/index.html");
                             } else {
-                                response = String.join("\r\n",
-                                        "HTTP/1.1 302 Found ",
-                                        "Location: http://localhost:8080/401.html");
+                                httpResponse.setStatus(302);
+                                httpResponse.sendRedirect("/401.html");
                             }
                         } else {
-                            response = String.join("\r\n",
-                                    "HTTP/1.1 302 Found ",
-                                    "Location: http://localhost:8080/401.html");
+                            httpResponse.setStatus(302);
+                            httpResponse.sendRedirect("/401.html");
                         }
                     }
                 }
             }
-            outputStream.write(response.getBytes());
-            outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {

@@ -19,7 +19,12 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DependencyInjector {
 
     public RequestHandler getNewRequestHandlerWithConnection(Socket connection) {
+        final RequestMapping requestMapping = createAndInjectObjects();
+        final HttpRequestParser httpRequestParser = new HttpRequestParser();
+        return new RequestHandler(connection, httpRequestParser, requestMapping);
+    }
 
+    private RequestMapping createAndInjectObjects() {
         final InMemoryUserRepository inMemoryUserRepository = new InMemoryUserRepository();
 
         final RegisterService registerService = new RegisterService(inMemoryUserRepository);
@@ -31,13 +36,15 @@ public class DependencyInjector {
         final LoginController loginController = new LoginController(staticResourceFinder, loginService);
         final StaticResourceController staticResourceController = new StaticResourceController(staticResourceFinder);
 
+        final Map<String, Controller> controllers = getMappedControllers(registerController, loginController);
+
+        return new RequestMapping(controllers, staticResourceController);
+    }
+
+    private Map<String, Controller> getMappedControllers(RegisterController registerController, LoginController loginController) {
         final Map<String, Controller> controllers = new ConcurrentHashMap<>();
         controllers.put("/register", registerController);
         controllers.put("/login", loginController);
-
-        final RequestMapping requestMapping = new RequestMapping(controllers, staticResourceController);
-
-        final HttpRequestParser httpRequestParser = new HttpRequestParser();
-        return new RequestHandler(connection, httpRequestParser, requestMapping);
+        return controllers;
     }
 }

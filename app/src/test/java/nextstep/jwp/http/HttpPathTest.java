@@ -20,13 +20,28 @@ class HttpPathTest {
         assertThat(httpPath.isHtmlPath()).isTrue();
     }
 
-    @DisplayName("Query String을 제외한 경로를 추출한다.")
+    @DisplayName("redirect 경로이면 참을 반환한다.")
+    @Test
+    void isRedirectPath() {
+        HttpPath httpPath = new HttpPath("redirect:/login.html");
+        assertThat(httpPath.isHtmlPath()).isTrue();
+    }
+
+    @DisplayName("redirect: 접두사를 제거한 경로룰 반환한다.")
+    @Test
+    void removeRedirectPrefix() {
+        String expected = "/login.html";
+        HttpPath httpPath = new HttpPath("redirect:/login.html");
+        assertThat(httpPath.removeRedirectPrefix()).isEqualTo(expected);
+    }
+
+    @DisplayName("Query String을 제거한 경로를 반환한다.")
     @ParameterizedTest
     @ValueSource(strings = {"/login.html", "/login.html?user=bear&password=password"})
-    void extractUri(String path) {
+    void removeQueryString(String path) {
         String expected = "/login.html";
         HttpPath httpPath = new HttpPath(path);
-        assertThat(httpPath.extractUri()).isEqualTo(expected);
+        assertThat(httpPath.removeQueryString()).isEqualTo(expected);
     }
 
     @DisplayName("Query String을 가지고 있으면 참을 반환한다. (?의 여부로 판단)")

@@ -1,5 +1,6 @@
 package nextstep.jwp.http.message.request;
 
+import nextstep.jwp.http.HttpPath;
 import nextstep.jwp.http.message.HttpMessage;
 import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.utils.StringUtils;
@@ -48,7 +49,15 @@ public class HttpRequestMessage implements HttpMessage {
     public void changeRequestUri(String requestUri) {
         requestHeader.changeRequestUri(requestUri);
     }
-    
+
+    public String requestUri() {
+        return requestHeader.requestUri();
+    }
+
+    public HttpPath requestPath() {
+        return requestHeader.requestPath();
+    }
+
     @Override
     public RequestHeader getHeader() {
         return this.requestHeader;

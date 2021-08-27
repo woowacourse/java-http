@@ -2,6 +2,7 @@ package nextstep.jwp.http.message.request;
 
 import nextstep.jwp.exception.HttpMessageConvertFailureException;
 import nextstep.jwp.http.HttpMethod;
+import nextstep.jwp.http.HttpPath;
 import nextstep.jwp.http.message.HeaderFields;
 import nextstep.jwp.http.message.MessageHeader;
 import nextstep.jwp.utils.StringUtils;
@@ -59,6 +60,10 @@ public class RequestHeader implements MessageHeader {
 
     public String requestUri() {
         return requestLine.requestUri;
+    }
+
+    public HttpPath requestPath() {
+        return new HttpPath(requestUri());
     }
 
     public String httpVersion() {

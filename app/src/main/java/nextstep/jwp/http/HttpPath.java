@@ -3,14 +3,17 @@ package nextstep.jwp.http;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class HttpPath {
 
     private static final String HTML_SUFFIX = ".html";
+    private static final String REDIRECT_PREFIX = "redirect:";
     private static final String QUERY_STRING_SEPARATOR = "?";
     private static final String QUERY_STRING_PIECE_SEPARATOR = "&";
     private static final String QUERY_STRING_PARAM_SEPARATOR = "=";
+    private static final String EMPTY_STRING = "";
 
     private final String path;
 
@@ -19,10 +22,18 @@ public class HttpPath {
     }
 
     public boolean isHtmlPath() {
-        return extractUri().endsWith(HTML_SUFFIX);
+        return removeQueryString().endsWith(HTML_SUFFIX);
     }
 
-    public String extractUri() {
+    public boolean isRedirectPath() {
+        return path.startsWith(REDIRECT_PREFIX);
+    }
+
+    public String removeRedirectPrefix() {
+        return path.replace(REDIRECT_PREFIX, EMPTY_STRING);
+    }
+
+    public String removeQueryString() {
         if (!hasQueryString()) {
             return path;
         }
@@ -62,5 +73,22 @@ public class HttpPath {
         String key = queryStringPiece.substring(0, index);
         String value = queryStringPiece.substring(index + 1);
         return new AbstractMap.SimpleEntry<>(key, value);
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        HttpPath httpPath = (HttpPath) o;
+        return Objects.equals(getPath(), httpPath.getPath());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getPath());
     }
 }

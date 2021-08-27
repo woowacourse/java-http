@@ -4,19 +4,19 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import nextstep.jwp.http.request.body.Body;
-import nextstep.jwp.http.request.headers.Headers;
+import nextstep.jwp.http.common.Body;
+import nextstep.jwp.http.request.headers.RequestHeaders;
 import nextstep.jwp.http.request.requestline.RequestLine;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final Headers headers;
+    private final RequestHeaders requestHeaders;
     private final Body body;
 
-    private HttpRequest(RequestLine requestLine, Headers headers, Body body) {
+    private HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders, Body body) {
         this.requestLine = requestLine;
-        this.headers = headers;
+        this.requestHeaders = requestHeaders;
         this.body = body;
     }
 
@@ -24,15 +24,15 @@ public class HttpRequest {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         RequestLine requestLine = RequestLine.parse(bufferedReader.readLine());
-        Headers headers = Headers.parse(bufferedReader);
-        Body body = extractBody(bufferedReader, headers);
+        RequestHeaders requestHeaders = RequestHeaders.parse(bufferedReader);
+        Body body = extractBody(bufferedReader, requestHeaders);
 
-        return new HttpRequest(requestLine, headers, body);
+        return new HttpRequest(requestLine, requestHeaders, body);
     }
 
-    private static Body extractBody(BufferedReader bufferedReader, Headers headers) throws IOException {
-        if (headers.requestHasBody()) {
-            int contentLength = headers.getContentLength();
+    private static Body extractBody(BufferedReader bufferedReader, RequestHeaders requestHeaders) throws IOException {
+        if (requestHeaders.requestHasBody()) {
+            int contentLength = requestHeaders.getContentLength();
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
 

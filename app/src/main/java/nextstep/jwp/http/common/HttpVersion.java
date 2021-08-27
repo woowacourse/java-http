@@ -1,4 +1,4 @@
-package nextstep.jwp.http.request.requestline;
+package nextstep.jwp.http.common;
 
 import java.util.Arrays;
 import nextstep.jwp.exception.NotAllowedHttpVersionException;

@@ -1,4 +1,4 @@
-package nextstep.jwp.http.request.body;
+package nextstep.jwp.http.common;
 
 public class Body {
 

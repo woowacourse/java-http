@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.exception.InvalidRequestHeader;
 
-public class Headers {
+public class RequestHeaders {
 
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
@@ -16,11 +16,11 @@ public class Headers {
 
     private final Map<String, String> headers;
 
-    private Headers(Map<String, String> headers) {
+    private RequestHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
 
-    public static Headers parse(BufferedReader bufferedReader) throws IOException {
+    public static RequestHeaders parse(BufferedReader bufferedReader) throws IOException {
         Map<String, String> headers = new HashMap<>();
         String line = null;
 
@@ -34,7 +34,7 @@ public class Headers {
             headers.put(key, value);
         }
 
-        return new Headers(headers);
+        return new RequestHeaders(headers);
     }
 
     private static boolean isNotEmpty(String line) {

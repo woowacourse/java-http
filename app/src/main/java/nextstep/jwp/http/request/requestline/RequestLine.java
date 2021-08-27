@@ -1,6 +1,7 @@
 package nextstep.jwp.http.request.requestline;
 
 import nextstep.jwp.exception.InvalidRequestLineException;
+import nextstep.jwp.http.common.HttpVersion;
 
 public class RequestLine {
 

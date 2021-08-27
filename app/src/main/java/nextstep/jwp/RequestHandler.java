@@ -35,41 +35,22 @@ public class RequestHandler implements Runnable {
              OutputStream outputStream = connection.getOutputStream()) {
 
             BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-            String line = br.readLine();
+            Map<String, String> header = parseHeader(br);
+            String requestLine = header.get("Request-Line");
+            String[] parsedRequestLine = requestLine.split(" ");
+            String method = parsedRequestLine[0];
+            String requestPath = parsedRequestLine[1];
 
-            if (line == null) {
-                return;
+
+            if ("GET".equals(method)) {
+                doGetAction(requestPath, outputStream);
             }
 
-            log.debug(line);
-            String[] requestLine = line.split(" ");
-
-            while (!line.isBlank()) {
-                line = br.readLine();
+            if ("POST".equals(method)) {
+                String body = parseBody(br, Integer.parseInt(header.get("Content-Length")));
+                doPostAction(requestPath, body, outputStream);
             }
 
-            String requestPath = requestLine[1];
-
-            if (requestPath.startsWith("/login")) {
-                int queryStartIndex = requestPath.indexOf("?");
-                if (queryStartIndex == -1) {
-                    outputStream.write(generateResponseBody("/login.html").getBytes());
-                    return;
-                }
-
-                Map<String, String> queryMap = parseQuery(requestPath.substring(queryStartIndex + 1));
-                try {
-                    userService.login(queryMap.get("account"), queryMap.get("password"));
-                    outputStream.write(generateResponseBody302("/index.html").getBytes());
-                } catch (RuntimeException runtimeException) {
-                    outputStream.write(generateResponseBody302("/401.html").getBytes());
-                } finally {
-                    outputStream.flush();
-                }
-                return;
-            }
-
-            outputStream.write(generateResponseBody(requestPath).getBytes());
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
@@ -78,12 +59,60 @@ public class RequestHandler implements Runnable {
         }
     }
 
+    private void doGetAction(String requestPath, OutputStream outputStream) throws IOException {
+        if (requestPath.startsWith("/login")) {
+            int queryStartIndex = requestPath.indexOf("?");
+            if (queryStartIndex == -1) {
+                outputStream.write(generateResponseBody("/login.html").getBytes());
+                return;
+            }
+            return;
+        }
+
+        outputStream.write(generateResponseBody(requestPath).getBytes());
+    }
+
+    private Map<String, String> parseHeader(BufferedReader request) throws IOException {
+        HashMap<String, String> header = new HashMap<>();
+        String line = request.readLine();
+        header.put("Request-Line", line);
+        while (true) {
+            line = request.readLine();
+            if (line.isBlank()) {
+                break;
+            }
+            String[] keyAndValue = line.split(":");
+            header.put(keyAndValue[0], keyAndValue[1].trim());
+        }
+        return header;
+    }
+
+    private String parseBody(BufferedReader request, int contentLength) throws IOException {
+        char[] buffer = new char[contentLength];
+        request.read(buffer, 0, contentLength);
+        return new String(buffer);
+    }
+
+    private void doPostAction(String requestPath, String body, OutputStream outputStream) throws IOException {
+        if (requestPath.startsWith("/login")) {
+            Map<String, String> queryMap = parseQuery(body);
+            try {
+                userService.login(queryMap.get("account"), queryMap.get("password"));
+                outputStream.write(generateResponseBody302("/index.html").getBytes());
+            } catch (RuntimeException e) {
+                outputStream.write(generateResponseBody302("/401.html").getBytes());
+            }
+            return;
+        }
+    }
+
     private Map<String, String> parseQuery(String query) {
         Map<String, String> queryMap = new HashMap<>();
 
         String[] data = query.split("&");
-
+        log.debug("data : "  + query);
         for (String each : data) {
+            log.debug("each : " + each);
             String[] keyAndValue = each.split("=");
             queryMap.put(keyAndValue[0], keyAndValue[1]);
         }

@@ -15,7 +15,7 @@ public class StatusLineTest {
         ParsingLine parsingLine = new StatusLine();
 
         // when
-        final ParsingLine nextLine = parsingLine.parse("GET / HTTP/1.1");
+        final ParsingLine nextLine = parsingLine.parseLine("GET / HTTP/1.1");
 
         //then
         HttpRequest actual = new HttpRequestBuilder().httpMethod(HttpMethod.GET)

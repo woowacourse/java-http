@@ -26,6 +26,6 @@ public class HttpHeaders {
                                                            .map(String::trim)
                                                            .collect(Collectors.toList());
 
-        this.headers.addAll(HttpHeader.resolve(name), valuesWithoutWhitespace);
+        headers.addAll(HttpHeader.resolve(name), valuesWithoutWhitespace);
     }
 }

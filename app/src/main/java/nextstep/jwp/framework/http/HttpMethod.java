@@ -21,6 +21,6 @@ public enum HttpMethod {
             throw new IllegalArgumentException(method + "는 올바르지 않은 Http Method 입니다.");
         }
 
-        return  httpMethod;
+        return httpMethod;
     }
 }

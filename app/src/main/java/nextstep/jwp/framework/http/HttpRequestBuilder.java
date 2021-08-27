@@ -8,7 +8,7 @@ public class HttpRequestBuilder {
     private String uri;
     private String version;
     private final HttpHeaders headers;
-    private StringBuilder requestBody;
+    private final StringBuilder requestBody;
 
     public HttpRequestBuilder() {
         this.headers = new HttpHeaders();

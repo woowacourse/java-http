@@ -14,7 +14,7 @@ public class StatusLine extends AbstractParsingLine {
     }
 
     @Override
-    public ParsingLine parse(String line) {
+    public ParsingLine parseLine(String line) {
         final String[] statusTokens = line.split(" ");
 
         if (statusTokens.length != STATUS_LINE_TOKEN_COUNT) {
@@ -25,9 +25,9 @@ public class StatusLine extends AbstractParsingLine {
         final String uri = statusTokens[URI_INDEX];
         final String version = statusTokens[VERSION_INDEX];
 
-        final HttpRequestBuilder httpRequestBuilder = super.httpRequestBuilder.httpMethod(httpMethod)
-                                                                    .uri(uri)
-                                                                    .version(version);
+        super.httpRequestBuilder.httpMethod(httpMethod)
+                                .uri(uri)
+                                .version(version);
 
         return new HeaderLine(httpRequestBuilder);
     }

@@ -2,7 +2,7 @@ package nextstep.jwp.framework.http;
 
 public interface ParsingLine {
 
-    ParsingLine parse(String line);
+    ParsingLine parseLine(String line);
 
     HttpRequest buildRequest();
 

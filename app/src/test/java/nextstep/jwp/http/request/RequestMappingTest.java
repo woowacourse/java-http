@@ -7,22 +7,19 @@ import nextstep.jwp.controller.StaticResourceController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 @DisplayName("RequestMapping 테스트")
 class RequestMappingTest {
 
-    @Mock
-    private RegisterController registerController;
-    @Mock
-    private LoginController loginController;
-    @Mock
-    private StaticResourceController staticResourceController;
+    private final RegisterController registerController = mock(RegisterController.class);
+    private final LoginController loginController = mock(LoginController.class);
+    private final StaticResourceController staticResourceController = mock(StaticResourceController.class);
 
     private RequestMapping requestMapping;
 

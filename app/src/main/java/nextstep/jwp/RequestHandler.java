@@ -58,9 +58,14 @@ public class RequestHandler implements Runnable {
             if (uri.contains(".")) {
                 Path path = getPath(uri);
                 String responseBody = new String(Files.readAllBytes(path));
-                response = responseHeaderOfStatusOK(responseBody);
+                if (uri.endsWith(".css")) {
+                    response = responseCssHeaderOfStatusOK(responseBody);
+                } else if (uri.contains(".html")) {
+                    response = responseHeaderOfStatusOK(responseBody);
+                } else if (uri.contains(".js")) {
+                    response = responseJsHeaderOfStatusOK(responseBody);
+                }
                 writeBody(outputStream, response);
-                return;
             }
 
             if (uri.startsWith("/register")) {
@@ -138,6 +143,24 @@ public class RequestHandler implements Runnable {
     private void writeBody(OutputStream outputStream, String response) throws IOException {
         outputStream.write(response.getBytes());
         outputStream.flush();
+    }
+
+    private String responseJsHeaderOfStatusOK(String body) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: */*;charset=utf-8 ",
+                "Content-Length: " + body.getBytes().length + " ",
+                "",
+                body);
+    }
+
+    private String responseCssHeaderOfStatusOK(String body) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/css;charset=utf-8 ",
+                "Content-Length: " + body.getBytes().length + " ",
+                "",
+                body);
     }
 
     private String responseHeaderOfStatusOK(String body) {

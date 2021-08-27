@@ -58,4 +58,7 @@ log.debug("request line : {}", line);
   - [x] InMemoryUserRepository에서 save 메서드를 사용해서 가입 완료 처리한다.
   - [x] 이상 없으면 리다이렉트
 
-  
+### CSS 지원하기
+
+- [x] css 파일 정상 작동
+- [x] js 정상 작동

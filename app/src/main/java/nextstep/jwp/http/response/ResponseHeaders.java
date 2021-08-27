@@ -14,6 +14,10 @@ public class ResponseHeaders {
         headers.put("Content-Length", length + " ");
     }
 
+    public void setLocation(String url) {
+        headers.put("Location", url);
+    }
+
     @Override
     public String toString() {
         return concatHeaders();

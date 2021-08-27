@@ -1,5 +1,6 @@
 package nextstep.jwp.http.request;
 
+import com.google.common.base.Strings;
 import nextstep.jwp.exception.InvalidRequestHeadersException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,5 +33,13 @@ public class RequestHeaders {
 
     public Map<String, String> getHeaders() {
         return headers;
+    }
+
+    public int getContentLength() {
+        String contentLength = headers.get("Content-Length");
+        if (Strings.isNullOrEmpty(contentLength)) {
+            return 0;
+        }
+        return Integer.parseInt(contentLength);
     }
 }

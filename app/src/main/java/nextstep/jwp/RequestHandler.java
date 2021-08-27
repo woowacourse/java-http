@@ -1,11 +1,8 @@
 package nextstep.jwp;
 
 import nextstep.jwp.controller.*;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.http.response.Status;
-import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +11,6 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 public class RequestHandler implements Runnable {
 
@@ -44,20 +40,6 @@ public class RequestHandler implements Runnable {
             String uri = request.getUri();
             Controller controller = controllerMap.getOrDefault(uri, new DefaultController());
             controller.process(request, response);
-
-//            response.setStatusLine(Status.OK);
-//            response.setBodyByUri(uri);
-
-
-//            final String responseBody = "";
-//
-//            final String response = String.join("\r\n",
-//                    "HTTP/1.1 200 OK ",
-//                    "Content-Type: text/html;charset=utf-8 ",
-//                    "Content-Length: " + responseBody.getBytes().length + " ",
-//                    "",
-//                    responseBody);
-
 
             outputStream.write(response.toString().getBytes());
             outputStream.flush();

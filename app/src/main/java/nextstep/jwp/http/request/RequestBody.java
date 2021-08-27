@@ -14,22 +14,19 @@ public class RequestBody {
 
     private Map<String, String> params = new HashMap<>();
 
-    public RequestBody(BufferedReader reader) {
+    public RequestBody(BufferedReader reader, int contentLength) {
         try {
-            if (reader.ready()) {
-                String line = reader.readLine();
-                if (Strings.isNullOrEmpty(line)) {
-                    return;
-                }
-                addParams(line);
-            }
+            char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+            String content = new String(buffer);
+            addParams(content);
         } catch (Exception exception) {
             log.error("Exception buffered reader read body", exception);
         }
     }
 
-    private void addParams(String line) {
-        String[] tokens = line.split("&");
+    private void addParams(String content) {
+        String[] tokens = content.split("&");
         for (String token : tokens) {
             if (Strings.isNullOrEmpty(token)) {
                 continue;

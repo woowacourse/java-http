@@ -16,7 +16,7 @@ public class HttpRequest {
     public HttpRequest(BufferedReader reader) {
         this.requestLine = new RequestLine(reader);
         this.headers = new RequestHeaders(reader);
-        this.body = new RequestBody(reader);
+        this.body = new RequestBody(reader, headers.getContentLength());
     }
 
     public String getParameter(String key) {

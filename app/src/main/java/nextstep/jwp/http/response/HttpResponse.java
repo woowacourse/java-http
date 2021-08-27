@@ -16,10 +16,7 @@ public class HttpResponse {
 
     private StatusLine statusLine;
     private ResponseHeaders headers = new ResponseHeaders();
-    private ResponseBody body;
-
-    public HttpResponse() {
-    }
+    private ResponseBody body = new ResponseBody();
 
     public void setStatusLine(Status status) {
         this.statusLine = new StatusLine(status);
@@ -74,6 +71,11 @@ public class HttpResponse {
         } catch (Exception exception) {
             log.error("Exception set response body", exception);
         }
+    }
+
+    public void redirect(String redirectUrl) {
+        this.statusLine = new StatusLine(Status.FOUND);
+        this.headers.setLocation(redirectUrl);
     }
 
 

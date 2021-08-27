@@ -24,6 +24,9 @@ public class LoginController extends AbstractController {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(request.getParameter("password"))) {
             log.debug("User Login! account: {}", account);
+            response.redirect("/index.html");
+            return;
         }
+        response.redirect("/401.html");
     }
 }

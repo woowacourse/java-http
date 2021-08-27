@@ -5,6 +5,8 @@ import nextstep.jwp.controller.HelloController;
 import nextstep.jwp.controller.HtmlController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.NotFoundController;
+import nextstep.jwp.controller.RedirectController;
+import nextstep.jwp.http.HttpPath;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 
 import java.util.HashMap;
@@ -14,6 +16,7 @@ public class ControllerMapper {
 
     private static final Map<String, Controller> mappingInfos;
     private static final Controller htmlController = HtmlController.getInstance();
+    private static final Controller redirectController = new RedirectController();
     private static final Controller notFoundController = new NotFoundController();
 
     static {
@@ -26,14 +29,13 @@ public class ControllerMapper {
     }
 
     public Controller matchController(HttpRequestMessage httpRequestMessage) {
-        String requestUri = httpRequestMessage.getHeader().requestUri();
-        if (isHtmlPath(requestUri)) {
+        HttpPath httpPath = httpRequestMessage.requestPath();
+        if (httpPath.isRedirectPath()) {
+            return redirectController;
+        }
+        if (httpPath.isHtmlPath()) {
             return htmlController;
         }
-        return mappingInfos.getOrDefault(requestUri, notFoundController);
-    }
-
-    private boolean isHtmlPath(String uri) {
-        return uri.endsWith(".html");
+        return mappingInfos.getOrDefault(httpPath.removeQueryString(), notFoundController);
     }
 }

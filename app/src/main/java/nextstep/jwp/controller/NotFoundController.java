@@ -10,10 +10,4 @@ public class NotFoundController implements Controller {
     @Override
     public void service(HttpRequestMessage httpRequestMessage, HttpResponseMessage httpResponseMessage) throws IOException {
     }
-
-    @Override
-    public boolean canForward() {
-        return false;
-    }
-
 }

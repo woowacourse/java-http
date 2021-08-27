@@ -23,11 +23,6 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    @Override
-    public boolean canForward() {
-        return false;
-    }
-
     protected void doGet(HttpRequestMessage httpRequestMessage, HttpResponseMessage httpResponseMessage) throws IOException {
         throw new UnsupportedOperationException(
                 String.format(UNSUPPORTED_METHOD_ERROR_FORMAT, getClass().getName(), HttpMethod.GET)

@@ -14,7 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public class HtmlController implements Controller {
+public class HtmlController extends AbstractController {
 
     private static final String DEFAULT_PATH = "./static";
     private static final HtmlController instance = new HtmlController();
@@ -27,7 +27,7 @@ public class HtmlController implements Controller {
     }
 
     @Override
-    public void service(HttpRequestMessage httpRequestMessage, HttpResponseMessage httpResponseMessage) throws IOException {
+    protected void doGet(HttpRequestMessage httpRequestMessage, HttpResponseMessage httpResponseMessage) throws IOException {
         RequestHeader requestHeader = httpRequestMessage.getHeader();
         String filePath = DEFAULT_PATH + requestHeader.requestUri();
         URL resource = getClass().getClassLoader().getResource(filePath);
@@ -43,10 +43,5 @@ public class HtmlController implements Controller {
         httpResponseMessage.setStatusCode(HttpStatusCode.OK);
         httpResponseMessage.putHeader("Content-Type", "text/html;charset=utf-8");
         httpResponseMessage.putHeader("Content-Length", messageBody.contentLength());
-    }
-
-    @Override
-    public boolean canForward() {
-        return false;
     }
 }

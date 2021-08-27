@@ -19,16 +19,20 @@ public class HttpResponseBuilder {
 
     public HttpResponseMessage build() throws IOException {
         HttpResponseMessage httpResponseMessage = new HttpResponseMessage();
-        Controller controller = findNonForwardController(httpResponseMessage);
-        controller.service(httpRequestMessage, httpResponseMessage);
+        Controller finalController = findFinalController(httpResponseMessage);
+        finalController.service(httpRequestMessage, httpResponseMessage);
         return httpResponseMessage;
     }
 
-    private Controller findNonForwardController(HttpResponseMessage httpResponseMessage) throws IOException {
+    private Controller findFinalController(HttpResponseMessage httpResponseMessage) throws IOException {
+        HttpPath beforePath = httpRequestMessage.requestPath();
         Controller controller = controllerMapper.matchController(httpRequestMessage);
-        if (controller.canForward()) {
-            controller.service(httpRequestMessage, httpResponseMessage);
-            controller = findNonForwardController(httpResponseMessage);
+        controller.service(httpRequestMessage, httpResponseMessage);
+        HttpPath afterPath = httpRequestMessage.requestPath();
+
+        // TODO : 디버깅 꿀자리
+        if (!beforePath.equals(afterPath)) {
+            return findFinalController(httpResponseMessage);
         }
         return controller;
     }

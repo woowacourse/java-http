@@ -15,9 +15,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static nextstep.jwp.AcceptType.TEXT_CSS;
-import static nextstep.jwp.Header.ACCEPT;
-import static nextstep.jwp.Header.CONTENT_TYPE;
+import static nextstep.jwp.http.AcceptType.TEXT_CSS;
+import static nextstep.jwp.http.Header.ACCEPT;
+import static nextstep.jwp.http.Header.CONTENT_TYPE;
 
 public class RequestHandler implements Runnable {
 

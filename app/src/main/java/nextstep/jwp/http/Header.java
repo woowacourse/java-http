@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.http;
 
 public class Header {
     public static final String ACCEPT = "Accept";

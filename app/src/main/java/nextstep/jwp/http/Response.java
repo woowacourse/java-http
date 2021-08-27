@@ -8,8 +8,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-import static nextstep.jwp.Header.CONTENT_LENGTH;
-import static nextstep.jwp.Header.CONTENT_TYPE;
+import static nextstep.jwp.http.Header.CONTENT_LENGTH;
+import static nextstep.jwp.http.Header.CONTENT_TYPE;
 
 public class Response {
 

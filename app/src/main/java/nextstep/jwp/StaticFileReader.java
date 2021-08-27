@@ -6,6 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import nextstep.jwp.http.HttpRequest;
 
 public class StaticFileReader {
 
@@ -23,7 +24,7 @@ public class StaticFileReader {
         Path path = new File(resource.getFile()).toPath();
         try {
             return Files.readString(path);
-        } catch(IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException();
         }
     }

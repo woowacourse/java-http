@@ -1,13 +1,11 @@
 package nextstep.jwp.db;
 
 
-import java.util.concurrent.atomic.AtomicInteger;
-import nextstep.jwp.model.User;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import org.checkerframework.checker.units.qual.A;
+import java.util.concurrent.atomic.AtomicInteger;
+import nextstep.jwp.model.User;
 
 public class InMemoryUserRepository {
 

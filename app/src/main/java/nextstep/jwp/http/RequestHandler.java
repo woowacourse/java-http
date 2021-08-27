@@ -1,19 +1,14 @@
-package nextstep.jwp;
-
-import java.io.File;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.FrontControllerServlet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package nextstep.jwp.http;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
+import nextstep.jwp.StaticFileReader;
+import nextstep.jwp.controller.FrontControllerServlet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RequestHandler implements Runnable {
 
@@ -30,7 +25,7 @@ public class RequestHandler implements Runnable {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
+            final OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = new HttpRequest(inputStream);
             if (!httpRequest.isEmptyLine()) {
                 HttpResponse httpResponse;

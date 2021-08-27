@@ -2,11 +2,11 @@ package nextstep.jwp.controller;
 
 import java.util.Map;
 import java.util.Objects;
-import nextstep.jwp.HttpRequest;
-import nextstep.jwp.HttpResponse;
-import nextstep.jwp.HttpStatus;
 import nextstep.jwp.StaticFileReader;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.model.User;
 
 public class RegisterController implements Controller {

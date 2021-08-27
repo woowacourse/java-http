@@ -1,9 +1,10 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.HttpRequest;
-import nextstep.jwp.HttpResponse;
+import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpResponse;
 
 public class FrontControllerServlet {
+
     private final HttpRequest request;
 
     public FrontControllerServlet(HttpRequest request) {

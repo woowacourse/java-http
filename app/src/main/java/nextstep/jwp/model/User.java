@@ -24,16 +24,8 @@ public class User {
         this(-1L, account, password, email);
     }
 
-    public boolean checkPassword(String password) {
-        return this.password.equals(password);
-    }
-
     public String getAccount() {
         return account;
-    }
-
-    public String getPassword() {
-        return password;
     }
 
     public String getEmail() {
@@ -54,5 +46,9 @@ public class User {
         if (!password.equals(requestPassword)) {
             throw new UnAuthorizedException("비밀번호가 일치하지 않습니다.");
         }
+    }
+
+    public boolean hasSameEmail(String otherEmail) {
+        return email.equals(otherEmail);
     }
 }

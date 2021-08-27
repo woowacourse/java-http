@@ -20,10 +20,10 @@ public class LoginController extends AbstractController {
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
-        String account = request.getParams("account");
+        String account = request.getParameter("account");
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isPresent() && user.get().checkPassword(request.getParams("password"))) {
-            log.info("User Login! account: {}", account);
+        if (user.isPresent() && user.get().checkPassword(request.getParameter("password"))) {
+            log.debug("User Login! account: {}", account);
         }
     }
 }

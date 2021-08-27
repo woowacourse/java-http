@@ -16,10 +16,11 @@ public class HttpRequest {
     public HttpRequest(BufferedReader reader) {
         this.requestLine = new RequestLine(reader);
         this.headers = new RequestHeaders(reader);
+        this.body = new RequestBody(reader);
     }
 
-    public String getParams(String key) {
-        return requestLine.getQueryParams(key);
+    public String getParameter(String key) {
+        return body.getParam(key);
     }
 
     public String getUri() {

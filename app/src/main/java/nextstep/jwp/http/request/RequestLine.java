@@ -66,10 +66,6 @@ public class RequestLine {
         return path;
     }
 
-    public String getQueryParams(String key) {
-        return queryParams.get(key);
-    }
-
     public boolean isGet() {
         return HttpMethod.GET == method;
     }

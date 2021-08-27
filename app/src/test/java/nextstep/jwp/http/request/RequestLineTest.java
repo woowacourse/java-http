@@ -18,7 +18,7 @@ class RequestLineTest {
     void BufferedReader를_사용하여_line를_읽어_객체를_생성한다() {
         final String requestLineAsString = "GET /index.html HTTP/1.1";
         final HttpMethod expectedMethod = HttpMethod.GET;
-        final String expectedUri = "/index.html";
+        final String expectedPath = "/index.html";
 
         final InputStream inputStream = new ByteArrayInputStream(requestLineAsString.getBytes());
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -28,7 +28,7 @@ class RequestLineTest {
 
         assertAll(
                 () -> assertThat(actualLine.getMethod()).isEqualTo(expectedMethod),
-                () -> assertThat(actualLine.getUri()).isEqualTo(expectedUri)
+                () -> assertThat(actualLine.getPath()).isEqualTo(expectedPath)
         );
     }
 }

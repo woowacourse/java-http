@@ -1,5 +1,6 @@
 package nextstep.jwp;
 
+import nextstep.jwp.controller.*;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -19,9 +21,13 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
+    private final Map<String, Controller> controllerMap = new HashMap<>();
 
     public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
+        controllerMap.put("/", new IndexController());
+        controllerMap.put("/login", new LoginController());
+        controllerMap.put("/register", new RegisterController());
     }
 
     @Override
@@ -33,21 +39,15 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest request = new HttpRequest(reader);
-
-            String uri = request.getUri();
             HttpResponse response = new HttpResponse();
 
-//            if ("/index.html".equals(uri)) {
-            response.setStatusLine(Status.OK);
-            response.setBodyByUri(uri);
-//            }
-            if ("/login".equals(uri)) {
-                Map<String, String> params = request.getParams();
-                Optional<User> user = InMemoryUserRepository.findByAccount(params.get("account"));
-                if (user.isPresent() && user.get().checkPassword(params.get("password"))) {
+            String uri = request.getUri();
+            Controller controller = controllerMap.getOrDefault(uri, new DefaultController());
+            controller.process(request, response);
 
-                }
-            }
+//            response.setStatusLine(Status.OK);
+//            response.setBodyByUri(uri);
+
 
 //            final String responseBody = "";
 //

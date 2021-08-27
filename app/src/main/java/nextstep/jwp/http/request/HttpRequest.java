@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.util.Map;
 
 public class HttpRequest {
 
@@ -19,11 +18,23 @@ public class HttpRequest {
         this.headers = new RequestHeaders(reader);
     }
 
-    public Map<String, String> getParams() {
-        return requestLine.getParams();
+    public String getParams(String key) {
+        return requestLine.getQueryParams(key);
     }
 
     public String getUri() {
-        return requestLine.getUri();
+        return requestLine.getPath();
+    }
+
+    public HttpMethod getMethod(){
+        return requestLine.getMethod();
+    }
+
+    public boolean isGet() {
+        return this.requestLine.isGet();
+    }
+
+    public boolean isPost() {
+        return this.requestLine.isPost();
     }
 }

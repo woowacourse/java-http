@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -130,7 +131,7 @@ class IOStreamTest {
              * todo
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
-            final String actual = "";
+            final String actual = new String(inputStream.readAllBytes());
 
             assertThat(actual).isEqualTo("🤩");
             assertThat(inputStream.read()).isEqualTo(-1);

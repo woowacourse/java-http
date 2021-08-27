@@ -1,6 +1,5 @@
 package nextstep.jwp;
 
-import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +12,9 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import static nextstep.jwp.AcceptType.TEXT_CSS;
+import static nextstep.jwp.Header.*;
 
 public class RequestHandler implements Runnable {
 
@@ -47,7 +49,7 @@ public class RequestHandler implements Runnable {
             }
 
             if ("POST".equals(method)) {
-                String body = parseBody(br, Integer.parseInt(header.get("Content-Length")));
+                String body = parseBody(br, Integer.parseInt(header.get(CONTENT_LENGTH)));
                 doPostAction(requestPath, body, outputStream);
             }
 
@@ -61,11 +63,11 @@ public class RequestHandler implements Runnable {
 
     private void doGetAction(Map<String, String> header, String requestPath, OutputStream outputStream) throws IOException {
         if (requestPath.startsWith("/login")) {
-            if (header.get("Accept") != null) {
-                String accept = header.get("Accept");
+            if (header.get(ACCEPT) != null) {
+                String accept = header.get(ACCEPT);
                 if (accept.contains("text/css")) {
                     Map<String, String> responseHeader = new HashMap<>();
-                    responseHeader.put("Content-Type", "text/css");
+                    responseHeader.put(CONTENT_TYPE, TEXT_CSS);
                     outputStream.write(ok(responseHeader, "/login.html").getBytes());
                     return;
                 }
@@ -75,11 +77,11 @@ public class RequestHandler implements Runnable {
         }
 
         if (requestPath.startsWith("/register")) {
-            if (header.get("Accept") != null) {
-                String accept = header.get("Accept");
-                if (accept.contains("text/css")) {
+            if (header.get(ACCEPT) != null) {
+                String accept = header.get(ACCEPT);
+                if (accept.contains(TEXT_CSS)) {
                     Map<String, String> responseHeader = new HashMap<>();
-                    responseHeader.put("Content-Type", "text/css");
+                    responseHeader.put(CONTENT_TYPE, TEXT_CSS);
                     outputStream.write(ok(responseHeader, "/register.html").getBytes());
                     return;
                 }
@@ -88,12 +90,11 @@ public class RequestHandler implements Runnable {
             return;
         }
 
-        if (header.get("Accept") != null) {
-            String accept = header.get("Accept");
-            log.debug("accept :" + accept);
-            if (accept.contains("text/css")) {
+        if (header.get(ACCEPT) != null) {
+            String accept = header.get(ACCEPT);
+            if (accept.contains(TEXT_CSS)) {
                 Map<String, String> responseHeader = new HashMap<>();
-                responseHeader.put("Content-Type", "text/css");
+                responseHeader.put(CONTENT_TYPE, TEXT_CSS);
                 outputStream.write(ok(responseHeader, requestPath).getBytes());
                 return;
             }
@@ -124,6 +125,7 @@ public class RequestHandler implements Runnable {
 
     private void doPostAction(String requestPath, String body, OutputStream outputStream) throws IOException {
         Map<String, String> queryMap = parseQuery(body);
+
         if (requestPath.startsWith("/login")) {
             try {
                 userService.login(queryMap.get("account"), queryMap.get("password"));
@@ -131,7 +133,6 @@ public class RequestHandler implements Runnable {
             } catch (RuntimeException e) {
                 outputStream.write(generateResponseBody302("/401.html").getBytes());
             }
-            return;
         }
 
         if (requestPath.startsWith("/register")) {
@@ -141,7 +142,6 @@ public class RequestHandler implements Runnable {
             } catch (RuntimeException e) {
                 outputStream.write(generateResponseBody302("/401.html").getBytes());
             }
-            return;
         }
     }
 
@@ -160,7 +160,7 @@ public class RequestHandler implements Runnable {
 
     private String ok(String resourcePath) throws IOException {
         Map<String, String> headerMap = new HashMap<>();
-        headerMap.put("Content-Type", "text/html;charset=utf-8 ");
+        headerMap.put(CONTENT_TYPE, "text/html;charset=utf-8 ");
         return ok(headerMap, resourcePath);
     }
 
@@ -172,18 +172,17 @@ public class RequestHandler implements Runnable {
             body = Files.readAllBytes(path);
         }
 
-        header.put("Content-Length", String.valueOf(body.length));
+        header.put(CONTENT_LENGTH, String.valueOf(body.length));
 
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("HTTP/1.1 200 OK \r\n");
 
-        for (String key : header.keySet()) {
-            stringBuilder.append(key + ": " + header.get(key) + " \r\n");
+        for (Map.Entry<String, String> entry : header.entrySet()) {
+            stringBuilder.append(entry.getKey() + ": " + entry.getValue() + " \r\n");
         }
         stringBuilder.append("\r\n");
         stringBuilder.append(new String(body) + "\r\n");
 
-        log.debug(stringBuilder.toString());
         return stringBuilder.toString();
     }
 
@@ -192,15 +191,6 @@ public class RequestHandler implements Runnable {
                 "HTTP/1.1 302 Redirect ",
                 "Location: " + locationUrl + " ",
                 "");
-    }
-
-    private String generateResponseBodyWithData(String body) throws IOException {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + body.length() + " ",
-                "",
-                body);
     }
 
     private void close() {

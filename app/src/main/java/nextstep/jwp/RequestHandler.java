@@ -1,5 +1,10 @@
 package nextstep.jwp;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+import nextstep.jwp.infrastructure.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +31,8 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
+            final HttpRequest httpRequest = HttpRequest.of(splitFromInputStream(inputStream));
+
             final String responseBody = "Hello world!";
 
             final String response = String.join("\r\n",
@@ -41,6 +48,23 @@ public class RequestHandler implements Runnable {
             log.error("Exception stream", exception);
         } finally {
             close();
+        }
+    }
+
+    private List<String> splitFromInputStream(final InputStream inputStream) throws IOException {
+        try (final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+
+            final List<String> splitResult = new ArrayList<>();
+
+            while (bufferedReader.ready()) {
+                String line = bufferedReader.readLine();
+                if (Objects.isNull(line)) {
+                    break;
+                }
+            }
+
+            return splitResult;
         }
     }
 

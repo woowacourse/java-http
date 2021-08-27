@@ -9,32 +9,21 @@ import nextstep.jwp.model.User;
 import nextstep.jwp.service.RegisterService;
 import nextstep.jwp.staticresource.StaticResource;
 import nextstep.jwp.staticresource.StaticResourceFinder;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.mock;
 
 @DisplayName("RegisterController 테스트")
 class RegisterControllerTest {
 
-    @Mock
-    private StaticResourceFinder staticResourceFinder;
-    @Mock
-    private RegisterService registerService;
-    @InjectMocks
-    private RegisterController registerController;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
+    private final StaticResourceFinder staticResourceFinder = mock(StaticResourceFinder.class);
+    private final RegisterService registerService = mock(RegisterService.class);
+    private final RegisterController registerController = new RegisterController(staticResourceFinder, registerService);
 
     @DisplayName("회원가입 페이지 GET 요청 테스트")
     @Test

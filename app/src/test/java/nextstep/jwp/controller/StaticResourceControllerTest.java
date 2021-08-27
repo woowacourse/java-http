@@ -6,28 +6,18 @@ import nextstep.jwp.http.response.ContentType;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.staticresource.StaticResource;
 import nextstep.jwp.staticresource.StaticResourceFinder;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 @DisplayName("StaticResourceController 테스트")
 class StaticResourceControllerTest {
 
-    @Mock
-    private StaticResourceFinder staticResourceFinder;
-    @InjectMocks
-    private StaticResourceController staticResourceController;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
+    private final StaticResourceFinder staticResourceFinder = mock(StaticResourceFinder.class);
+    private final StaticResourceController staticResourceController = new StaticResourceController(staticResourceFinder);
 
     @DisplayName("정적 리소스 GET 요청 테스트")
     @Test

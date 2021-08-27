@@ -28,11 +28,11 @@ class HttpRequestTest {
         final HttpHeaders headers = request.getHeaders();
 
         assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.GET);
-        assertThat(requestLine.getUri()).isEqualTo("/index.html");
+        assertThat(requestLine.getUri().getBaseUri()).isEqualTo("/index.html");
         assertThat(requestLine.getHttpVersion()).isEqualTo("HTTP/1.1");
-        assertThat(headers.getValue("Host")).hasSameElementsAs(Collections.singletonList("localhost:8080"));
-        assertThat(headers.getValue("Connection")).hasSameElementsAs(Collections.singletonList("keep-alive"));
-        assertThat(headers.getValue("Accept")).hasSameElementsAs(Collections.singletonList("*/*"));
+        assertThat(headers.getValue("Host")).hasSize(1).hasSameElementsAs(Collections.singletonList("localhost:8080"));
+        assertThat(headers.getValue("Connection")).hasSize(1).hasSameElementsAs(Collections.singletonList("keep-alive"));
+        assertThat(headers.getValue("Accept")).hasSize(1).hasSameElementsAs(Collections.singletonList("*/*"));
         assertThat(request.getMessageBody()).isEqualTo("");
 
     }

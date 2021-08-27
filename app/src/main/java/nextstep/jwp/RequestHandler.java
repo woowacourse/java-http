@@ -1,9 +1,10 @@
 package nextstep.jwp;
 
+import nextstep.jwp.exception.BaseException;
 import nextstep.jwp.http.Request;
 import nextstep.jwp.http.Response;
-import nextstep.jwp.http.exception.PathNotMatchedException;
 import nextstep.jwp.service.UserService;
+import nextstep.jwp.service.exception.UserPasswordInValidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +36,6 @@ public class RequestHandler implements Runnable {
     @Override
     public void run() {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
-
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
             Request request = Request.of(inputStream);
@@ -78,21 +78,21 @@ public class RequestHandler implements Runnable {
 
     private byte[] post(Request request) {
         if (request.isMatchedPath("/login")) {
-            login(request);
+            return login(request);
         }
 
         if (request.isMatchedPath("/register")) {
-            signUp(request);
+            return signUp(request);
         }
 
-        throw new PathNotMatchedException();
+        return Response.notFound();
     }
 
     private byte[] login(Request request) {
         try {
             userService.login(request.getQueryValue("account"), request.getQueryValue("password"));
             return Response.redirect302("/index.html");
-        } catch (RuntimeException e) {
+        } catch (BaseException e) {
             return Response.redirect302("/401.html");
         }
     }
@@ -102,7 +102,7 @@ public class RequestHandler implements Runnable {
             userService.save(request.getQueryValue("account"), request.getQueryValue("password"),
                     request.getQueryValue("email"));
             return Response.redirect302("/index.html");
-        } catch (RuntimeException e) {
+        } catch (BaseException e) {
             return Response.redirect302("/401.html");
         }
     }

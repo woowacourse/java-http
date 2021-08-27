@@ -1,7 +1,5 @@
 package nextstep.jwp.http;
 
-import nextstep.jwp.http.exception.PathNotMatchedException;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -28,7 +26,7 @@ public class Response {
         URL resource = Response.class.getClassLoader().getResource("static" + resourcePath);
 
         if (resource == null) {
-            throw new PathNotMatchedException();
+            return Response.notFound();
         }
 
         final Path path = new File(resource.getPath()).toPath();
@@ -56,6 +54,12 @@ public class Response {
         return String.join("\r\n",
                 "HTTP/1.1 302 Redirect ",
                 "Location: " + locationUrl + " ",
+                "").getBytes();
+    }
+
+    public static byte[] notFound() {
+        return String.join("\r\n",
+                "HTTP/1.1 404 Not Found ",
                 "").getBytes();
     }
 }

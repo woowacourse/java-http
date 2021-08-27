@@ -1,10 +1,10 @@
 ## 기능 구현 목록
 
-- [ ] GET /index.html 응답하기
-    - [ ] 첫 번째 라인(Request URI) 읽어오기
-    - [ ] 나머지 http request header 읽어오기
-    - [ ] http request의 첫 번째 라인에서 request uri를 추출하기
-    - [ ] 요청 url에 해당되는 파일을 resource 디렉토리에서 읽어오기
+- [x] GET /index.html 응답하기
+    - [x] 첫 번째 라인(Request URI) 읽어오기
+    - [x] 나머지 http request header 읽어오기
+    - [x] http request의 첫 번째 라인에서 request uri를 추출하기
+    - [x] 요청 url에 해당되는 파일을 resource 디렉토리에서 읽어오기
 - [ ] Query String 파싱
     - [ ] http request의 첫 번째 라인에서 request uri를 추출하기
     - [ ] login.html 파일에서 태그에 name을 추가하기

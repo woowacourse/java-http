@@ -1,4 +1,4 @@
-package nextstep.jwp.infrastructure.http;
+package nextstep.jwp.infrastructure.http.request;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,7 +22,7 @@ public class HttpRequestLine {
         final List<String> result = Arrays.asList(line.split(BLANK));
 
         if (result.size() != FIRST_LINE_ELEMENT_SIZE) {
-            throw new IllegalArgumentException("Invalid HttpRequest Format");
+            throw new IllegalArgumentException(String.format("Invalid HttpRequest Format.(%s)", line));
         }
 
         return new HttpRequestLine(HttpMethod.valueOf(result.get(0)), result.get(1), result.get(2));

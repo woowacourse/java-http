@@ -1,7 +1,8 @@
-package nextstep.jwp.infrastructure.http;
+package nextstep.jwp.infrastructure.http.request;
 
 import java.util.ArrayList;
 import java.util.List;
+import nextstep.jwp.infrastructure.http.HttpHeaders;
 
 public class HttpRequest {
 
@@ -18,6 +19,10 @@ public class HttpRequest {
     }
 
     public static HttpRequest of(final List<String> httpRequest) {
+        if (httpRequest.size() == 0) {
+            throw new IllegalArgumentException("Invalid HttpRequest Format. HttpRequest is empty.");
+        }
+
         final HttpRequestLine requestLine = HttpRequestLine.of(httpRequest.get(0));
         final HttpHeaders httpHeaders = HttpHeaders.of(findHeadersFromRequest(httpRequest));
         final String httpMessageBody = findMessageBodyFromRequest(httpRequest);

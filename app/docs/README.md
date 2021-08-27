@@ -1,0 +1,25 @@
+## 기능 구현 목록
+
+- [ ] GET /index.html 응답하기
+    - [ ] 첫 번째 라인(Request URI) 읽어오기
+    - [ ] 나머지 http request header 읽어오기
+    - [ ] http request의 첫 번째 라인에서 request uri를 추출하기
+    - [ ] 요청 url에 해당되는 파일을 resource 디렉토리에서 읽어오기
+- [ ] Query String 파싱
+    - [ ] http request의 첫 번째 라인에서 request uri를 추출하기
+    - [ ] login.html 파일에서 태그에 name을 추가하기
+    - [ ] 추출한 request uri에서 접근 경로와 이름=값으로 전달되는 데이터를 추출해서 User 객체 만들기
+    - [ ] InMemoryUserRepository를 사용해서 미리 가입되어 있는 회원을 조회해서 로그로 확인하기
+- [ ] HTTP Status Code 302
+    - [ ] 회원을 조회해서 로그인에 성공하면 /index.html로 리다이렉트
+        - [ ] 응답 헤더에 http status code를 302로 반환
+    - [ ] 로그인 실패시 401.html로 리다이렉트
+- [ ] POST 방식으로 회원가입 기능 구현하기
+    - [ ] 회원 가입 버튼 누르면 POST 요청 보내기
+    - [ ] 회원 가입 진행
+        - [ ] while 문으로 http request header를 읽고 나서 request body를 읽어오기
+        - [ ] save 메서드를 사용해서 가입 완료 처리
+        - [ ] 회원가입 완료시 index.html로 리다이렉트하기
+    - [ ] 로그인 버튼 GET -> POST로 변경하기 
+- [ ] CSS 지원하기
+    - [ ] 응답 헤더의 Content-Type을 text/css로 전송

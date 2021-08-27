@@ -11,8 +11,9 @@ public class HttpRequest {
 
     public HttpRequest(String method, String uri) {
         this.method = method;
-        if (uri == null)
+        if (uri == null) {
             throw new IllegalStateException("uri is null");
+        }
         this.uri = uri;
     }
 

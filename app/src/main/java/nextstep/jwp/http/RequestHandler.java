@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
-import nextstep.jwp.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -64,6 +64,10 @@ public class RequestHandler implements Runnable {
             return Response.ok(responseHeader, request.getPath());
         }
 
+        if (request.getPath().equals("/")) {
+            return Response.ok("Hello world!".getBytes());
+        }
+
         if (request.isMatchedPath("/login")) {
             return Response.ok("/login.html");
         }

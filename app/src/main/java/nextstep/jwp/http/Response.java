@@ -6,6 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static nextstep.jwp.http.Header.CONTENT_LENGTH;
@@ -16,9 +17,10 @@ public class Response {
     private Response() {
     }
 
+
     public static byte[] ok(String resourcePath) throws IOException {
-        Map<String, String> headerMap = new HashMap<>();
-        headerMap.put(CONTENT_TYPE, "text/html;charset=utf-8 ");
+        Map<String, String> headerMap = new LinkedHashMap<>();
+        headerMap.put(CONTENT_TYPE, "text/html;charset=utf-8");
         return ok(headerMap, resourcePath);
     }
 
@@ -33,10 +35,17 @@ public class Response {
         byte[] body = Files.readAllBytes(path);
         header.put(CONTENT_LENGTH, String.valueOf(body.length));
 
-        return generateOkResponse(header, body);
+        return ok(header, body);
     }
 
-    private static byte[] generateOkResponse(Map<String, String> header, byte[] body) {
+    public static byte[] ok(byte[] body) {
+        Map<String, String> headerMap = new LinkedHashMap<>();
+        headerMap.put(CONTENT_TYPE, "text/html;charset=utf-8");
+        headerMap.put(CONTENT_LENGTH, String.valueOf(body.length));
+        return ok(headerMap, body);
+    }
+
+    public static byte[] ok(Map<String, String> header, byte[] body) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("HTTP/1.1 200 OK \r\n");
 
@@ -45,7 +54,7 @@ public class Response {
         }
 
         stringBuilder.append("\r\n");
-        stringBuilder.append(new String(body) + "\r\n");
+        stringBuilder.append(new String(body));
 
         return stringBuilder.toString().getBytes();
     }

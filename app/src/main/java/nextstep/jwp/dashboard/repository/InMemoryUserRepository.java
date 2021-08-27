@@ -1,9 +1,11 @@
-package nextstep.jwp.dashboard;
+package nextstep.jwp.dashboard.repository;
 
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+
+import nextstep.jwp.dashboard.domain.User;
 
 public class InMemoryUserRepository {
 

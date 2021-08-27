@@ -1,7 +1,6 @@
-package nextstep.jwp.dashboard;
+package nextstep.jwp.dashboard.domain;
 
 public class User {
-
     private final long id;
     private final String account;
     private final String password;

@@ -1,7 +1,9 @@
-package nextstep.jwp.dashboard;
+package nextstep.jwp.dashboard.controller;
 
 import java.util.Map;
 
+import nextstep.jwp.dashboard.controller.dto.UserDto;
+import nextstep.jwp.dashboard.service.UserService;
 import nextstep.jwp.httpserver.controller.Handler;
 import nextstep.jwp.httpserver.domain.StatusCode;
 import nextstep.jwp.httpserver.domain.response.HttpResponse;
@@ -12,7 +14,7 @@ public class LoginController implements Handler {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
-    private UserService userService;
+    private final UserService userService;
 
     public LoginController(UserService userService) {
         this.userService = userService;
@@ -25,8 +27,8 @@ public class LoginController implements Handler {
         UserDto userDto = userService.login(account, password);
         log.debug(userDto.toString());
         return new HttpResponse.Builder()
-                .statusCode(StatusCode.CREATED)
-                .header("Location", "/users/" + userDto.getId())
+                .statusCode(StatusCode.FOUND)
+                .header("Location", "/index.html")
                 .build();
     }
 }

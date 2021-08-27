@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import nextstep.jwp.httpserver.domain.StatusCode;
+import nextstep.jwp.httpserver.domain.View;
 import nextstep.jwp.httpserver.domain.response.HttpResponse;
 
 public abstract class AbstractHandlerAdapter implements HandlerAdapter {
@@ -16,6 +18,24 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter {
         final URL url = Thread.currentThread().getContextClassLoader().getResource("static" + resourcePath + ".html");
         final Path path = Paths.get(url.toURI());
         return Files.readAllLines(path);
+    }
+
+    protected View exceptionResponse(StatusCode code) throws URISyntaxException, IOException {
+        final List<String> body = readFile("/" + code.getCode());
+
+        final StringBuilder responseBody = new StringBuilder();
+        for (String bodyLine : body) {
+            responseBody.append(bodyLine).append("\r\n");
+        }
+
+        final StatusCode redirectCode = StatusCode.FOUND;
+
+        final String response = String.join("\r\n",
+                "HTTP/1.1 " + redirectCode.getCode() + " " + redirectCode.getStatusText() + " ",
+                "Location: /" + code.getCode() + ".html",
+                responseBody.toString());
+
+        return new View("/" + code.getCode(), response);
     }
 
     protected abstract String getResourcePath(String requestUri);

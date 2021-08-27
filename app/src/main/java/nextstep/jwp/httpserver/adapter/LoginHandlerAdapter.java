@@ -6,10 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import nextstep.jwp.dashboard.LoginController;
+import nextstep.jwp.dashboard.controller.LoginController;
+import nextstep.jwp.httpserver.domain.StatusCode;
 import nextstep.jwp.httpserver.domain.View;
 import nextstep.jwp.httpserver.domain.request.HttpRequest;
 import nextstep.jwp.httpserver.domain.response.HttpResponse;
+import nextstep.jwp.httpserver.exception.GlobalException;
 
 public class LoginHandlerAdapter extends AbstractHandlerAdapter {
 
@@ -25,12 +27,17 @@ public class LoginHandlerAdapter extends AbstractHandlerAdapter {
 
         final String path = getResourcePath(requestUri);
 
-        final HttpResponse httpResponse = loginController.handle(getQueryString(requestUri));
-
-        final List<String> body = readFile(path);
-        final String response = getResponse(httpResponse, body);
-        return new View(path, response);
+        try {
+            final HttpResponse httpResponse = loginController.handle(getQueryString(requestUri));
+            final List<String> body = readFile(path);
+            final String response = getResponse(httpResponse, body);
+            return new View(path, response);
+        } catch (GlobalException e) {
+            final StatusCode exceptionCode = e.getStatusCode();
+            return exceptionResponse(exceptionCode);
+        }
     }
+
 
     protected String getResourcePath(String requestUri) {
         if (requestUri.contains("?")) {

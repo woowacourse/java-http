@@ -9,10 +9,10 @@
     - [x] http request의 첫 번째 라인에서 request uri를 추출하기
     - [x] 추출한 request uri에서 접근 경로와 이름=값으로 전달되는 데이터를 추출해서 User 객체 만들기
     - [x] InMemoryUserRepository를 사용해서 미리 가입되어 있는 회원을 조회해서 로그로 확인하기
-- [ ] HTTP Status Code 302
-    - [ ] 회원을 조회해서 로그인에 성공하면 /index.html로 리다이렉트
-        - [ ] 응답 헤더에 http status code를 302로 반환
-    - [ ] 로그인 실패시 401.html로 리다이렉트
+- [x] HTTP Status Code 302
+    - [x] 회원을 조회해서 로그인에 성공하면 /index.html로 리다이렉트
+        - [x] 응답 헤더에 http status code를 302로 반환
+    - [x] 로그인 실패시 401.html로 리다이렉트
 - [ ] POST 방식으로 회원가입 기능 구현하기
     - [ ] 회원 가입 버튼 누르면 POST 요청 보내기
     - [ ] 회원 가입 진행

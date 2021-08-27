@@ -1,4 +1,6 @@
-package nextstep.jwp.dashboard;
+package nextstep.jwp.dashboard.controller.dto;
+
+import nextstep.jwp.dashboard.domain.User;
 
 public class UserDto {
     private final long id;

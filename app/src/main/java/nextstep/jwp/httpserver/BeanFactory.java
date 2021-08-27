@@ -3,8 +3,8 @@ package nextstep.jwp.httpserver;
 import java.util.HashMap;
 import java.util.Map;
 
-import nextstep.jwp.dashboard.LoginController;
-import nextstep.jwp.dashboard.UserService;
+import nextstep.jwp.dashboard.controller.LoginController;
+import nextstep.jwp.dashboard.service.UserService;
 import nextstep.jwp.httpserver.adapter.LoginHandlerAdapter;
 import nextstep.jwp.httpserver.adapter.StaticViewHandlerAdapter;
 import nextstep.jwp.httpserver.controller.StaticViewController;

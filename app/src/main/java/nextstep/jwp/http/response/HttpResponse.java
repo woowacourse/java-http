@@ -37,7 +37,7 @@ public class HttpResponse {
         return new HttpResponse(statusLine, headers, messageBody);
     }
 
-    public static HttpResponse internalServerError(String messageBody){
+    public static HttpResponse error(String messageBody){
         String statusLine = "HTTP/1.1 500 Internal Server Error ";
         List<String> headers = Arrays.asList(
                 "Content-Type: text/html;charset=utf-8 ",

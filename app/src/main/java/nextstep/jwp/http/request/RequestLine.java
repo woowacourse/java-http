@@ -16,7 +16,7 @@ public class RequestLine {
     private HttpMethod method;
     private String path;
     private Map<String, String> queryParams;
-    private String httpVersion;
+    private String protocol;
 
     public RequestLine(BufferedReader reader) {
         try {
@@ -37,7 +37,7 @@ public class RequestLine {
             } else {
                 path = uri;
             }
-            this.httpVersion = tokens[2];
+            this.protocol = tokens[2];
         } catch (Exception exception) {
             log.error("Exception buffered reader read request line", exception);
         }

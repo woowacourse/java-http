@@ -15,11 +15,14 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
+        log.debug("HTTP GET Login Request: {}", request.getUri());
         response.forward("/login.html");
     }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
+        log.debug("HTTP POST Login Request: {}", request.getUri());
+
         String account = request.getParameter("account");
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(request.getParameter("password"))) {
@@ -27,6 +30,7 @@ public class LoginController extends AbstractController {
             response.redirect("/index.html");
             return;
         }
+        log.debug("User Login Fail!");
         response.redirect("/401.html");
     }
 }

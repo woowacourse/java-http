@@ -27,10 +27,6 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public HttpMethod getMethod(){
-        return requestLine.getMethod();
-    }
-
     public boolean isGet() {
         return this.requestLine.isGet();
     }

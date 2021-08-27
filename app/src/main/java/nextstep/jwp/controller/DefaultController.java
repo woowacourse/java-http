@@ -11,11 +11,11 @@ public class DefaultController extends AbstractController {
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
+        log.debug("HTTP GET Resource Request: {}", request.getUri());
         serveResource(request, response);
     }
 
     protected void serveResource(HttpRequest request, HttpResponse response) {
-        String uri = request.getUri();
-        response.forward(uri);
+        response.forward(request.getUri());
     }
 }

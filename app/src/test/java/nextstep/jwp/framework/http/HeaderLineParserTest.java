@@ -54,7 +54,7 @@ public class HeaderLineParserTest {
         assertThat(nextLineParser).isExactlyInstanceOf(BodyLineParser.class);
     }
 
-    private static HttpRequestBuilder createBuilderWithStatusLine() {
-        return new HttpRequestBuilder().requestLine(HttpMethod.GET, "/", "HTTP/1.1");
+    private static HttpRequest.Builder createBuilderWithStatusLine() {
+        return new HttpRequest.Builder().requestLine(HttpMethod.GET, "/", "HTTP/1.1");
     }
 }

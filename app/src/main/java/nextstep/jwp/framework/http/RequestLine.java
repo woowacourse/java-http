@@ -22,4 +22,8 @@ public class RequestLine {
     public String getVersion() {
         return version;
     }
+
+    public boolean isSameUri(String uri) {
+        return this.uri.equals(uri);
+    }
 }

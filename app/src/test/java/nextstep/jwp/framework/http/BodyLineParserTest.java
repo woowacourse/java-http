@@ -20,8 +20,8 @@ public class BodyLineParserTest {
         final LineParser nextLineParser = lineParser.parseLine("Hello World!");
 
         //then
-        final HttpRequest actual = new HttpRequestBuilder().body("Hello World!")
-                                                           .build();
+        final HttpRequest actual = new HttpRequest.Builder().body("Hello World!")
+                                                            .build();
 
         final HttpRequest httpRequest = nextLineParser.buildRequest();
         assertThat(nextLineParser).isExactlyInstanceOf(BodyLineParser.class);
@@ -44,8 +44,8 @@ public class BodyLineParserTest {
         final LineParser nextLineParser = lineParser.parseLine(body);
 
         //then
-        final HttpRequest actual = new HttpRequestBuilder().body("Hello World!")
-                                                           .build();
+        final HttpRequest actual = new HttpRequest.Builder().body("Hello World!")
+                                                            .build();
 
         final HttpRequest httpRequest = nextLineParser.buildRequest();
         assertThat(nextLineParser).isExactlyInstanceOf(EndLineParser.class);

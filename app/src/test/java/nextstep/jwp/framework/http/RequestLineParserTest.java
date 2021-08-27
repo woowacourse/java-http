@@ -19,8 +19,8 @@ public class RequestLineParserTest {
         final LineParser nextLineParser = lineParser.parseLine("GET / HTTP/1.1");
 
         //then
-        HttpRequest actual = new HttpRequestBuilder().requestLine(requestLine)
-                                                     .build();
+        HttpRequest actual = new HttpRequest.Builder().requestLine(requestLine)
+                                                      .build();
 
         final HttpRequest httpRequest = nextLineParser.buildRequest();
         assertThat(nextLineParser).isExactlyInstanceOf(HeaderLineParser.class);

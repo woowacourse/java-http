@@ -4,8 +4,8 @@ import java.util.Objects;
 
 public class BodyLineParser extends AbstractLineParser {
 
-    public BodyLineParser(HttpRequestBuilder httpRequestBuilder) {
-        super(httpRequestBuilder);
+    public BodyLineParser(HttpRequest.Builder builder) {
+        super(builder);
     }
 
     BodyLineParser() {}
@@ -18,10 +18,10 @@ public class BodyLineParser extends AbstractLineParser {
     @Override
     public LineParser parseLine(String line) {
         if (Objects.isNull(line) || line.isBlank()) {
-            return new EndLineParser(httpRequestBuilder);
+            return new EndLineParser(builder);
         }
 
-        httpRequestBuilder.body(line);
+        builder.body(line);
         return this;
     }
 }

@@ -11,8 +11,8 @@ public class HeaderLineParser extends AbstractLineParser {
     private static final int NAME_INDEX = 0;
     private static final int VALUES_INDEX = 1;
 
-    public HeaderLineParser(HttpRequestBuilder httpRequestBuilder) {
-        super(httpRequestBuilder);
+    public HeaderLineParser(HttpRequest.Builder builder) {
+        super(builder);
     }
 
     HeaderLineParser() {}
@@ -25,17 +25,17 @@ public class HeaderLineParser extends AbstractLineParser {
     @Override
     public LineParser parseLine(String line) {
         if (Objects.isNull(line)) {
-            return new EndLineParser(httpRequestBuilder);
+            return new EndLineParser(builder);
         }
 
         if (line.isBlank()) {
-            return new BodyLineParser(httpRequestBuilder);
+            return new BodyLineParser(builder);
         }
 
         final List<String> header = separateNameAndValues(line);
         final String name = header.get(NAME_INDEX).trim();
         final List<String> values = separateValues(header.get(VALUES_INDEX));
-        httpRequestBuilder.header(name, values);
+        builder.header(name, values);
         return this;
     }
 

@@ -24,6 +24,6 @@ public class RequestLineParser extends AbstractLineParser {
         final HttpMethod httpMethod = HttpMethod.resolve(statusTokens[METHOD_INDEX]);
         final String uri = statusTokens[URI_INDEX];
         final String version = statusTokens[VERSION_INDEX];
-        return new HeaderLineParser(httpRequestBuilder.requestLine(httpMethod, uri, version));
+        return new HeaderLineParser(builder.requestLine(httpMethod, uri, version));
     }
 }

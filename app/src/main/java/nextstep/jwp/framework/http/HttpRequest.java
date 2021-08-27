@@ -1,7 +1,10 @@
 package nextstep.jwp.framework.http;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class HttpRequest {
-    private RequestLine requestLine;
+    private final RequestLine requestLine;
     private final HttpHeaders headers;
     private final StringBuilder requestBody;
 
@@ -29,5 +32,50 @@ public class HttpRequest {
 
     public String getVersion() {
         return requestLine.getVersion();
+    }
+
+    public boolean isSameUri(String uri) {
+        return requestLine.isSameUri(uri);
+    }
+
+    public static class Builder {
+        private RequestLine requestLine;
+        private final HttpHeaders headers;
+        private final StringBuilder requestBody;
+
+        public Builder() {
+            this.headers = new HttpHeaders();
+            this.requestBody = new StringBuilder();
+        }
+
+        public Builder requestLine(HttpMethod method, String uri, String version) {
+            return requestLine(new RequestLine(method, uri, version));
+        }
+
+        public Builder requestLine(RequestLine requestLine) {
+            this.requestLine = requestLine;
+            return this;
+        }
+
+        public Builder header(String name, String... values) {
+            return header(name, Arrays.asList(values));
+        }
+
+        public Builder header(String name, List<String> values) {
+            this.headers.addHeader(name, values);
+            return this;
+        }
+
+        public Builder body(String line) {
+            this.requestBody.append(line)
+                            .append("\r")
+                            .append(System.lineSeparator());
+
+            return this;
+        }
+
+        public HttpRequest build() {
+            return new HttpRequest(requestLine, headers, requestBody);
+        }
     }
 }

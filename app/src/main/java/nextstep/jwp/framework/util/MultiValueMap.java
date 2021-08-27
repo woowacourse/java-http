@@ -13,7 +13,7 @@ public class MultiValueMap<K, V> {
     }
 
     public MultiValueMap(Map<K, List<V>> multiValueMap) {
-        this.multiValueMap = multiValueMap;
+        this.multiValueMap = new HashMap<>(multiValueMap);
     }
 
     public void addAll(K key, List<V> values) {

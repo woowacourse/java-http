@@ -2,8 +2,8 @@ package nextstep.jwp.framework.http;
 
 public class EndLineParser extends AbstractLineParser {
 
-    public EndLineParser(HttpRequestBuilder httpRequestBuilder) {
-        super(httpRequestBuilder);
+    public EndLineParser(HttpRequest.Builder builder) {
+        super(builder);
     }
 
     @Override

@@ -2,13 +2,13 @@ package nextstep.jwp.framework.http;
 
 import java.util.Objects;
 
-public class BodyLine extends AbstractParsingLine {
+public class BodyLineParser extends AbstractLineParser {
 
-    public BodyLine(HttpRequestBuilder httpRequestBuilder) {
+    public BodyLineParser(HttpRequestBuilder httpRequestBuilder) {
         super(httpRequestBuilder);
     }
 
-    BodyLine() {}
+    BodyLineParser() {}
 
     @Override
     public boolean canParse() {
@@ -16,9 +16,9 @@ public class BodyLine extends AbstractParsingLine {
     }
 
     @Override
-    public ParsingLine parseLine(String line) {
+    public LineParser parseLine(String line) {
         if (Objects.isNull(line) || line.isBlank()) {
-            return new EndLine(httpRequestBuilder);
+            return new EndLineParser(httpRequestBuilder);
         }
 
         httpRequestBuilder.body(line);

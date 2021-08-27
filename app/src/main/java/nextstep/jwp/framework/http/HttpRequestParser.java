@@ -8,22 +8,22 @@ import java.io.InputStreamReader;
 public class HttpRequestParser {
 
     private final BufferedReader bufferedReader;
-    private ParsingLine parsingLine;
+    private LineParser lineParser;
 
     public HttpRequestParser(InputStream inputStream) {
-        this(new BufferedReader(new InputStreamReader(inputStream)), new StatusLine());
+        this(new BufferedReader(new InputStreamReader(inputStream)), new RequestLineParser());
     }
 
-    public HttpRequestParser(BufferedReader bufferedReader, ParsingLine parsingLine) {
+    public HttpRequestParser(BufferedReader bufferedReader, LineParser lineParser) {
         this.bufferedReader = bufferedReader;
-        this.parsingLine = parsingLine;
+        this.lineParser = lineParser;
     }
 
     public HttpRequest parseRequest() throws IOException {
-        while (parsingLine.canParse()) {
-            parsingLine = parsingLine.parseLine(bufferedReader.readLine());
+        while (lineParser.canParse()) {
+            lineParser = lineParser.parseLine(bufferedReader.readLine());
         }
 
-        return parsingLine.buildRequest();
+        return lineParser.buildRequest();
     }
 }

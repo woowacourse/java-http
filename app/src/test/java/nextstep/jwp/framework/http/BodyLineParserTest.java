@@ -7,24 +7,24 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class BodyLineTest {
+public class BodyLineParserTest {
 
     @Test
     @DisplayName("바디 줄 파싱 테스트")
     public void bodyLineParsingTest() {
 
         // given
-        final ParsingLine parsingLine = new BodyLine();
+        final LineParser lineParser = new BodyLineParser();
 
         // when
-        final ParsingLine nextLine = parsingLine.parseLine("Hello World!");
+        final LineParser nextLineParser = lineParser.parseLine("Hello World!");
 
         //then
         final HttpRequest actual = new HttpRequestBuilder().body("Hello World!")
                                                            .build();
 
-        final HttpRequest httpRequest = nextLine.buildRequest();
-        assertThat(nextLine).isExactlyInstanceOf(BodyLine.class);
+        final HttpRequest httpRequest = nextLineParser.buildRequest();
+        assertThat(nextLineParser).isExactlyInstanceOf(BodyLineParser.class);
         assertThat(httpRequest).usingRecursiveComparison().isEqualTo(actual);
     }
 
@@ -38,17 +38,17 @@ public class BodyLineTest {
             body = null;
         }
 
-        final ParsingLine parsingLine = new BodyLine();
+        final LineParser lineParser = new BodyLineParser();
 
         // when
-        final ParsingLine nextLine = parsingLine.parseLine(body);
+        final LineParser nextLineParser = lineParser.parseLine(body);
 
         //then
         final HttpRequest actual = new HttpRequestBuilder().body("Hello World!")
                                                            .build();
 
-        final HttpRequest httpRequest = nextLine.buildRequest();
-        assertThat(nextLine).isExactlyInstanceOf(EndLine.class);
+        final HttpRequest httpRequest = nextLineParser.buildRequest();
+        assertThat(nextLineParser).isExactlyInstanceOf(EndLineParser.class);
         assertThat(httpRequest).usingRecursiveComparison().isEqualTo(actual);
     }
 }

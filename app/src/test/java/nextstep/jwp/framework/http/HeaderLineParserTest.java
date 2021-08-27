@@ -5,24 +5,24 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class HeaderLineTest {
+public class HeaderLineParserTest {
 
     @Test
     @DisplayName("헤더 줄 파싱 테스트")
     public void headerLineParsingTest() {
 
         // given
-        final ParsingLine parsingLine = new HeaderLine(createBuilderWithStatusLine());
+        final LineParser lineParser = new HeaderLineParser(createBuilderWithStatusLine());
 
         // when
-        final ParsingLine nextLine = parsingLine.parseLine("Content-Type: text/html;charset=utf-8");
+        final LineParser nextLineParser = lineParser.parseLine("Content-Type: text/html;charset=utf-8");
 
         //then
         final HttpRequest actual = createBuilderWithStatusLine().header("Content-Type", "text/html;charset=utf-8")
                                                                 .build();
 
-        final HttpRequest httpRequest = nextLine.buildRequest();
-        assertThat(nextLine).isExactlyInstanceOf(HeaderLine.class);
+        final HttpRequest httpRequest = nextLineParser.buildRequest();
+        assertThat(nextLineParser).isExactlyInstanceOf(HeaderLineParser.class);
         assertThat(httpRequest).usingRecursiveComparison().isEqualTo(actual);
     }
 
@@ -31,13 +31,13 @@ public class HeaderLineTest {
     public void returnEndLineTest() {
 
         // given
-        final ParsingLine parsingLine = new HeaderLine(createBuilderWithStatusLine());
+        final LineParser lineParser = new HeaderLineParser(createBuilderWithStatusLine());
 
         // when
-        final ParsingLine nextLine = parsingLine.parseLine(null);
+        final LineParser nextLineParser = lineParser.parseLine(null);
 
         //then
-        assertThat(nextLine).isExactlyInstanceOf(EndLine.class);
+        assertThat(nextLineParser).isExactlyInstanceOf(EndLineParser.class);
     }
 
     @Test
@@ -45,13 +45,13 @@ public class HeaderLineTest {
     public void returnBodyLineTest() {
 
         // given
-        final ParsingLine parsingLine = new HeaderLine();
+        final LineParser lineParser = new HeaderLineParser();
 
         // when
-        final ParsingLine nextLine = parsingLine.parseLine(" ");
+        final LineParser nextLineParser = lineParser.parseLine(" ");
 
         //then
-        assertThat(nextLine).isExactlyInstanceOf(BodyLine.class);
+        assertThat(nextLineParser).isExactlyInstanceOf(BodyLineParser.class);
     }
 
     private static HttpRequestBuilder createBuilderWithStatusLine() {

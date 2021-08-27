@@ -5,17 +5,17 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StatusLineTest {
+public class RequestLineParserTest {
 
     @Test
     @DisplayName("상태 줄 파싱 테스트")
     public void statusLineParsingTest() {
 
         // given
-        ParsingLine parsingLine = new StatusLine();
+        LineParser lineParser = new RequestLineParser();
 
         // when
-        final ParsingLine nextLine = parsingLine.parseLine("GET / HTTP/1.1");
+        final LineParser nextLineParser = lineParser.parseLine("GET / HTTP/1.1");
 
         //then
         HttpRequest actual = new HttpRequestBuilder().httpMethod(HttpMethod.GET)
@@ -23,8 +23,8 @@ public class StatusLineTest {
                                                      .version("HTTP/1.1")
                                                      .build();
 
-        final HttpRequest httpRequest = nextLine.buildRequest();
-        assertThat(nextLine).isExactlyInstanceOf(HeaderLine.class);
+        final HttpRequest httpRequest = nextLineParser.buildRequest();
+        assertThat(nextLineParser).isExactlyInstanceOf(HeaderLineParser.class);
         assertThat(httpRequest).usingRecursiveComparison().isEqualTo(actual);
     }
 }

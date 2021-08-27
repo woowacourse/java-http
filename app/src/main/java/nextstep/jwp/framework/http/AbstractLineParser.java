@@ -1,14 +1,14 @@
 package nextstep.jwp.framework.http;
 
-public abstract class AbstractParsingLine implements ParsingLine {
+public abstract class AbstractLineParser implements LineParser {
 
     protected final HttpRequestBuilder httpRequestBuilder;
 
-    protected AbstractParsingLine() {
+    protected AbstractLineParser() {
         this.httpRequestBuilder = new HttpRequestBuilder();
     }
 
-    public AbstractParsingLine(HttpRequestBuilder httpRequestBuilder) {
+    public AbstractLineParser(HttpRequestBuilder httpRequestBuilder) {
         this.httpRequestBuilder = httpRequestBuilder;
     }
 

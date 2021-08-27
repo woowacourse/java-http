@@ -4,18 +4,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class HeaderLine extends AbstractParsingLine {
+public class HeaderLineParser extends AbstractLineParser {
 
     private static final String COLON = ":";
     private static final String COMMA = ",";
     private static final int NAME_INDEX = 0;
     private static final int VALUES_INDEX = 1;
 
-    public HeaderLine(HttpRequestBuilder httpRequestBuilder) {
+    public HeaderLineParser(HttpRequestBuilder httpRequestBuilder) {
         super(httpRequestBuilder);
     }
 
-    HeaderLine() {}
+    HeaderLineParser() {}
 
     @Override
     public boolean canParse() {
@@ -23,13 +23,13 @@ public class HeaderLine extends AbstractParsingLine {
     }
 
     @Override
-    public ParsingLine parseLine(String line) {
+    public LineParser parseLine(String line) {
         if (Objects.isNull(line)) {
-            return new EndLine(httpRequestBuilder);
+            return new EndLineParser(httpRequestBuilder);
         }
 
         if (line.isBlank()) {
-            return new BodyLine(httpRequestBuilder);
+            return new BodyLineParser(httpRequestBuilder);
         }
 
         final List<String> header = separateNameAndValues(line);

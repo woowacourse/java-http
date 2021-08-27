@@ -1,8 +1,8 @@
 package nextstep.jwp.framework.http;
 
-public interface ParsingLine {
+public interface LineParser {
 
-    ParsingLine parseLine(String line);
+    LineParser parseLine(String line);
 
     HttpRequest buildRequest();
 

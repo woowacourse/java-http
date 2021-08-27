@@ -1,10 +1,8 @@
 package nextstep.jwp.framework.http;
 
-public class EndLine extends AbstractParsingLine {
+public class EndLineParser extends AbstractLineParser {
 
-    public EndLine() {}
-
-    public EndLine(HttpRequestBuilder httpRequestBuilder) {
+    public EndLineParser(HttpRequestBuilder httpRequestBuilder) {
         super(httpRequestBuilder);
     }
 
@@ -14,7 +12,7 @@ public class EndLine extends AbstractParsingLine {
     }
 
     @Override
-    public ParsingLine parseLine(String line) {
+    public LineParser parseLine(String line) {
         throw new UnsupportedOperationException("파싱이 종료된 리퀘스트입니다.");
     }
 }

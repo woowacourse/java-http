@@ -39,30 +39,19 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            final HttpRequest httpRequest = HttpRequest.of(requestAsString(bufferedReader));
 
-            final RequestLine requestLine = RequestLine.of(bufferedReader.readLine());
+            String requestedResource = httpRequest.getRequestLine().toResource();
 
-            String requestedResource = requestLine.toResource();
 
-            List<String> request = new ArrayList<>();
-            while (bufferedReader.ready()) {
-                request.add(bufferedReader.readLine());
-            }
+            final String htmlExtension = ".html";
 
-            String htmlExtension = ".html";
             if (Objects.equals(requestedResource, "login")) {
                 requestedResource = requestedResource.concat(htmlExtension);
             }
+
             if (requestedResource.contains("?")) {
-                final String queryString = requestLine.toQueryString();
-                final Map<String, String> queryInfo = new HashMap<>();
-                final String[] queries = queryString.split("&");
-                for (String query : queries) {
-                    final int index = query.indexOf('=');
-                    final String key = query.substring(0, index);
-                    final String value = query.substring(index + 1);
-                    queryInfo.put(key, value);
-                }
+                final Map<String, String> queryInfo = extractQuery(httpRequest.getRequestLine().toQueryString());
                 final User user = InMemoryUserRepository.findByAccount(queryInfo.get("account"))
                         .orElseThrow(RuntimeException::new);
                 if (user.checkPassword(queryInfo.get("password"))) {
@@ -86,6 +75,30 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
+    }
+
+    private List<String> requestAsString(BufferedReader bufferedReader) throws IOException {
+        final List<String> request = new ArrayList<>();
+        while (bufferedReader.ready()) {
+            final String line = bufferedReader.readLine();
+            if (line == null) {
+                continue;
+            }
+            request.add(bufferedReader.readLine());
+        }
+        return request;
+    }
+
+    private Map<String, String> extractQuery(String queryString) {
+        final Map<String, String> queryInfo = new HashMap<>();
+        final String[] queries = queryString.split("&");
+        for (String query : queries) {
+            final int index = query.indexOf('=');
+            final String key = query.substring(0, index);
+            final String value = query.substring(index + 1);
+            queryInfo.put(key, value);
+        }
+        return queryInfo;
     }
 
     private void close() {

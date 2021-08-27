@@ -13,12 +13,6 @@ public enum Method {
     TRACE,
     CONNECT;
 
-//    private String name;
-//
-//    Method(String name) {
-//        this.name = name;
-//    }
-
     public static Method of(String name) {
         return Arrays.stream(values())
                 .filter(method -> name.equals(method.name()))

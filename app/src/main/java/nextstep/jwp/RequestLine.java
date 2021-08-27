@@ -6,11 +6,11 @@ public class RequestLine {
     private final String uri;
     private final String protocolVersion;
 
-    public RequestLine(String method, String uri, String protocolVersion) {
+    private RequestLine(String method, String uri, String protocolVersion) {
         this(Method.of(method), uri, protocolVersion);
     }
 
-    public RequestLine(Method method, String uri, String protocolVersion) {
+    private RequestLine(Method method, String uri, String protocolVersion) {
         this.method = method;
         this.uri = uri;
         this.protocolVersion = protocolVersion;

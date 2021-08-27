@@ -1,7 +1,7 @@
 # HTTP 서버 구현하기
 
 ## 구현해볼 것
-- [ ] HTTP 1.1 외의 버전 요청이 올 경우 ERROR RESPONSE 반환
+- [x] HTTP 1.1 외의 버전 요청이 올 경우 ERROR RESPONSE 반환
 - [ ] 무제한 길이의 URI를 처리할 수 있어야만 한다.
     - [ ] URI의 길이가 처리할 수 있는 것보다 긴 경우 414 (Request-URI Too Long)를 응답한다.
 - [ ] URL에 abs_path가 명시되어 있지 않으면 자원(5.1.2 절)을 위한 Request-URI로서 사용할 때 반드시 "/"가 주어져야 한다.
@@ -10,14 +10,14 @@
 - [ ] 호스트 이름의 비교에는 반드시 대소문자를 구별하지 않는다.
 - [ ] scheme 이름의 비교는 반드시 대소문자를 구별하지 않는다.
 - [ ] 서버는 Request-Line이 있어야 할 곳에 빈 라인을 수신하면 이를 무시해야 한다. 다른 말로 표현 한다면, 만약 서버가 규약 스트림을 읽는 도중 메시지 처음에 CRLF를 수신하게 되면 이를 무시해야 한다.
-
-- [ ] HTTP 메세지 필드 이름(내용)은 대소문자를 구분하지 않는다.
+- [x] HTTP 메세지 필드 이름(내용)은 대소문자를 구분하지 않는다.
 - [ ] General-Header 필드를 맨 처음 나오고 Request-Header이나 Response-Header 필드가 뒤를 따르고 마지막에 Entity-Header 필드가 나오는 것이 관행이다. 그러나 헤더 필드의 정렬 순서가 강제되진 않는다.
     - [ ] 순서가 아닌 헤더 이름에 의존해서 파싱을 진행한다.
 - [ ] HEAD 요구 method에 대한 모든 응답은 Entity-Header 필드가 포함한 것처럼 믿게 하여도 Message-Body 를 포함해서는 절대 안 된다. 모든 1xx (Informational), 204 (No Content) 및 304 (Not Modified) 응답은 Message-Body를 절대 포함해서는 안 된다. 
     - [ ] Entity-Header 필드의 존재 유무에 관계없이 헤더 필드 다음의 첫 빈 라인으로 항상 종료된다.
     - [ ] 다른 모든 응답은 비록 길이가 제로라 할지라도 Message-Body 를 포함한다.
-- [ ] 요구가 Message-Body를 포함하고 있고 Content-Length가 주어지지 않았으면 서버는 메시지의 길이를 결정할 수 없을 때는 400(Bad Request)을 응답으로 보내고, 계속하여 유효한 Content-Length 수신을 기다리고자 할 때는 411(Length Required) 메시지를 반송하여야 한다.
+    - [ ] Content-Length 또는 Transfer-Encoding 헤더 유무를 통해 Request Message-Body의 존재를 파악한다.
+- [x] 요구가 Message-Body를 포함하고 있고 Content-Length가 주어지지 않았으면 서버는 메시지의 길이를 결정할 수 없을 때는 400(Bad Request)을 응답으로 보내고, 계속하여 유효한 Content-Length 수신을 기다리고자 할 때는 411(Length Required) 메시지를 반송하여야 한다.
 
 <br>
 

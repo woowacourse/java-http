@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestLine;
+import nextstep.jwp.http.request.RequestUriPath;
 import nextstep.jwp.http.response.HttpResponse;
 
 public class Executor {
@@ -21,10 +22,10 @@ public class Executor {
     public HttpResponse service(RequestLine requestLine) {
         try {
             String method = requestLine.getMethod();
-            String path = requestLine.getPath();
+            RequestUriPath uriPath = requestLine.getUriPath();
 
             if (method.equalsIgnoreCase("GET")) {
-                final URL resourceUrl = getClass().getResource("/static" + path);
+                final URL resourceUrl = getClass().getResource("/static" + uriPath.getPath());
                 final Path filePath = new File(resourceUrl.getFile()).toPath();
                 final String responseBody = String.join("\n", Files.readAllLines(filePath)) + "\n";
                 return HttpResponse.ok(responseBody);

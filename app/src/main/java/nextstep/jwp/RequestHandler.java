@@ -1,18 +1,14 @@
 package nextstep.jwp;
 
+import static nextstep.jwp.ResourceResolver.checkIfUriHasResourceExtension;
+import static nextstep.jwp.ResourceResolver.resolveResourceRequest;
+
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URI;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import nextstep.jwp.model.HttpRequest;
 import org.slf4j.Logger;
@@ -39,11 +35,10 @@ public class RequestHandler implements Runnable {
                 final OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = extractHttpRequest(reader);
-
             String response = "";
 
-            if (httpRequest.uri().equals("/index.html")) {
-                response = controller.index();
+            if (checkIfUriHasResourceExtension(httpRequest.uri())) {
+                response = resolveResourceRequest(httpRequest);
             }
 
             if (httpRequest.uri().startsWith("/login")) {
@@ -60,14 +55,6 @@ public class RequestHandler implements Runnable {
                 } else if ("POST".equals(httpRequest.method())) {
                     response = controller.register(httpRequest.payload());
                 }
-            }
-
-            if (httpRequest.uri().endsWith(".css") && "GET".equals(httpRequest.method())) {
-                response = controller.css(httpRequest.uri());
-            }
-
-            if (httpRequest.uri().endsWith(".js") && "GET".equals(httpRequest.method())) {
-                response = controller.js(httpRequest.uri());
             }
 
             log.debug("outputStream => {}", response);

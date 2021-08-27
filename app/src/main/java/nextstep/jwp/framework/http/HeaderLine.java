@@ -23,24 +23,27 @@ public class HeaderLine extends AbstractParsingLine {
     }
 
     @Override
-    public ParsingLine parse(String line) {
+    public ParsingLine parseLine(String line) {
         if (Objects.isNull(line)) {
-            return new EndLine();
+            return new EndLine(httpRequestBuilder);
         }
 
         if (line.isBlank()) {
-            return new BodyLine();
+            return new BodyLine(httpRequestBuilder);
         }
 
-        final String[] header = separateNameAndValues(line);
-        final String name = header[NAME_INDEX].trim();
-        final List<String> values = separateValues(header[VALUES_INDEX]);
-        super.httpRequestBuilder.header(name, values);
+        final List<String> header = separateNameAndValues(line);
+        final String name = header.get(NAME_INDEX).trim();
+        final List<String> values = separateValues(header.get(VALUES_INDEX));
+        httpRequestBuilder.header(name, values);
         return this;
     }
 
-    private String[] separateNameAndValues(String line) {
-        return line.split(COLON);
+    private List<String> separateNameAndValues(String line) {
+        final int colonIndex = line.indexOf(COLON);
+        final String headerName = line.substring(0, colonIndex);
+        final String values = line.substring(colonIndex + 1);
+        return Arrays.asList(headerName, values);
     }
 
     private List<String> separateValues(String values) {

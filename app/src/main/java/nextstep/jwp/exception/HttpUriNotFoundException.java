@@ -1,6 +1,6 @@
 package nextstep.jwp.exception;
 
-public class HttpUriNotFoundException extends RuntimeException {
+public class HttpUriNotFoundException extends CustomResponseException {
     public HttpUriNotFoundException(String message) {
         super(message);
     }

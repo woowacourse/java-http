@@ -1,6 +1,7 @@
 package nextstep.jwp.http;
 
 import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.ControllerAdvice;
 import nextstep.jwp.http.mapper.ControllerMapper;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
@@ -19,8 +20,12 @@ public class HttpResponseBuilder {
 
     public HttpResponseMessage build() throws IOException {
         HttpResponseMessage httpResponseMessage = new HttpResponseMessage();
-        Controller finalController = findFinalController(httpResponseMessage);
-        finalController.service(httpRequestMessage, httpResponseMessage);
+        try {
+            Controller finalController = findFinalController(httpResponseMessage);
+            finalController.service(httpRequestMessage, httpResponseMessage);
+        } catch (RuntimeException e) {
+            ControllerAdvice.getInstance().run(httpResponseMessage, e);
+        }
         return httpResponseMessage;
     }
 

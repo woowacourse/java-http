@@ -1,6 +1,6 @@
 package nextstep.jwp.http.message.request;
 
-import nextstep.jwp.exception.HttpMessageConvertFailureException;
+import nextstep.jwp.http.exception.HttpMessageConvertFailureException;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpPath;
 import nextstep.jwp.http.message.HeaderFields;

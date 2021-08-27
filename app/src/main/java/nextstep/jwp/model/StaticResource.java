@@ -1,5 +1,8 @@
 package nextstep.jwp.model;
 
+import java.io.File;
+import java.io.IOException;
+
 public class StaticResource {
 
     private final Content content;
@@ -10,15 +13,15 @@ public class StaticResource {
         this.contentType = contentType;
     }
 
-    public static StaticResource from(String contentPath) {
-        Content content = new Content(contentPath);
-        ContentType contentType = ContentType.findByExtension(parseExtension(contentPath));
+    public static StaticResource from(File file) throws IOException {
+        Content content = Content.readFile(file);
+        ContentType contentType = ContentType.findByExtension(parseExtension(file.getPath()));
 
         return new StaticResource(content, contentType);
     }
 
     public static String parseExtension(String contentPath) {
-        String[] splitedPath = contentPath.split(".");
+        String[] splitedPath = contentPath.split("\\.");
 
         return splitedPath[splitedPath.length - 1];
     }

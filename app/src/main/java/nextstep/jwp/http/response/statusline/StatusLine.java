@@ -16,4 +16,10 @@ public class StatusLine {
     public static StatusLine from(HttpStatus httpStatus) {
         return new StatusLine(HttpVersion.HTTP_1_1, httpStatus);
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s %s ",
+            httpVersion.getValue(), httpStatus.getCodeString(), httpStatus.getReasonPhrase());
+    }
 }

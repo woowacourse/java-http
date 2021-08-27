@@ -1,5 +1,11 @@
-package nextstep.jwp;
+package nextstep.jwp.server;
 
+import java.io.BufferedOutputStream;
+import nextstep.jwp.controller.Controllers;
+import nextstep.jwp.controller.StaticResourceController;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.service.StaticResourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,9 +20,11 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
+    private final Controllers controllers;
 
-    public RequestHandler(Socket connection) {
+    public RequestHandler(Socket connection, Controllers controllers) {
         this.connection = Objects.requireNonNull(connection);
+        this.controllers = controllers;
     }
 
     @Override
@@ -26,22 +34,21 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final String responseBody = "Hello world!";
+            HttpRequest httpRequest = HttpRequest.parse(inputStream);
+            HttpResponse httpResponse = controllers.doService(httpRequest);
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            flushBytes(outputStream, httpResponse);
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
         }
+    }
+
+    private void flushBytes(OutputStream outputStream, HttpResponse httpResponse) throws IOException {
+        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
+        bufferedOutputStream.write(httpResponse.toBytes());
+        bufferedOutputStream.flush();
     }
 
     private void close() {

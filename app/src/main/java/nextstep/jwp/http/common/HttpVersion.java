@@ -19,4 +19,8 @@ public enum HttpVersion {
             .findAny()
             .orElseThrow(NotAllowedHttpVersionException::new);
     }
+
+    public String getValue() {
+        return value;
+    }
 }

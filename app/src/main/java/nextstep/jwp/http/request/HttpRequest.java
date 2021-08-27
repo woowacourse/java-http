@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import nextstep.jwp.http.common.Body;
 import nextstep.jwp.http.request.headers.RequestHeaders;
+import nextstep.jwp.http.request.requestline.Method;
 import nextstep.jwp.http.request.requestline.RequestLine;
 
 public class HttpRequest {
@@ -44,5 +45,9 @@ public class HttpRequest {
 
     public String getUri() {
         return requestLine.getUri();
+    }
+
+    public boolean hasMethod(Method method) {
+        return requestLine.isSameMethod(method);
     }
 }

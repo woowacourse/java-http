@@ -71,4 +71,12 @@ public enum HttpStatus {
         this.code = code;
         this.reasonPhrase = reasonPhrase;
     }
+
+    public String getCodeString() {
+        return String.valueOf(code);
+    }
+
+    public String getReasonPhrase() {
+        return reasonPhrase;
+    }
 }

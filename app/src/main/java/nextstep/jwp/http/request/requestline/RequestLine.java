@@ -43,4 +43,8 @@ public class RequestLine {
     public String getUri() {
         return requestUri.getValue();
     }
+
+    public boolean isSameMethod(Method method) {
+        return method.equals(this.method);
+    }
 }

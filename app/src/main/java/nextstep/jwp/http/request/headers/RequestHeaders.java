@@ -22,16 +22,16 @@ public class RequestHeaders {
 
     public static RequestHeaders parse(BufferedReader bufferedReader) throws IOException {
         Map<String, String> headers = new HashMap<>();
-        String line = null;
+        String line = bufferedReader.readLine();
 
         while (isNotEmpty(line)) {
-            line = bufferedReader.readLine();
             String[] splitedLine = splitLine(line);
 
             String key = splitedLine[KEY_INDEX].toLowerCase();
             String value = splitedLine[VALUE_INDEX].toLowerCase();
 
             headers.put(key, value);
+            line = bufferedReader.readLine();
         }
 
         return new RequestHeaders(headers);

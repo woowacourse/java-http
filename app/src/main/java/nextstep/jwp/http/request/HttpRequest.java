@@ -58,12 +58,4 @@ public class HttpRequest {
     public RequestLine getRequestLine() {
         return requestLine;
     }
-
-    public List<String> getHeaders() {
-        return headers;
-    }
-
-    public String getMessageBody() {
-        return messageBody;
-    }
 }

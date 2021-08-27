@@ -11,14 +11,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,6 +83,14 @@ public class RequestHandler implements Runnable {
                     String requestBody = getRequestBody(reader, headers);
                     response = controller.register(requestBody);
                 }
+            }
+
+            if (uri.endsWith(".css") && "GET".equals(method)) {
+                response = controller.css(uri);
+            }
+
+            if (uri.endsWith(".js") && "GET".equals(method)) {
+                response = controller.js(uri);
             }
 
             log.debug("outputStream => {}", response);

@@ -43,6 +43,32 @@ public class Controller {
         return redirect("/index.html");
     }
 
+    public String css(String uri) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static" + uri);
+        final Path path = new File(resource.getPath()).toPath();
+        String responseBody = Files.readString(path);
+
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/css;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    public String js(String uri) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static" + uri);
+        final Path path = new File(resource.getPath()).toPath();
+        String responseBody = Files.readString(path);
+
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: Application/javascript;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
     private Map<String, String> bodyMapper(String requestBody) {
         String[] strings = requestBody.split("&");
 

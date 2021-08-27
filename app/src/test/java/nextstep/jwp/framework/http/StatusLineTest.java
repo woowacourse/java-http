@@ -15,7 +15,7 @@ public class StatusLineTest {
         ParsingLine parsingLine = new StatusLine();
 
         // when
-        parsingLine.parse("GET / HTTP/1.1");
+        final ParsingLine nextLine = parsingLine.parse("GET / HTTP/1.1");
 
         //then
         HttpRequest actual = new HttpRequestBuilder().httpMethod(HttpMethod.GET)
@@ -23,7 +23,8 @@ public class StatusLineTest {
                                                      .version("HTTP/1.1")
                                                      .build();
 
-        final HttpRequest httpRequest = parsingLine.buildRequest();
+        final HttpRequest httpRequest = nextLine.buildRequest();
+        assertThat(nextLine).isExactlyInstanceOf(HeaderLine.class);
         assertThat(httpRequest).usingRecursiveComparison().isEqualTo(actual);
     }
 }

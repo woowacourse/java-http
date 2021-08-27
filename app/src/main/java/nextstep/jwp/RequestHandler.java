@@ -1,5 +1,7 @@
 package nextstep.jwp;
 
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,16 +9,13 @@ import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class RequestHandler implements Runnable {
 
+    public static final String DEFAULT_METHOD = "Hello world!";
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
     private static final String STATIC_PATH = "static";
-    public static final String DEFAULT_METHOD = "Hello world!";
-
     private final Socket connection;
 
     public RequestHandler(Socket connection) {
@@ -30,9 +29,9 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final String firstLine = bufferedReader.readLine();
-            final String extractedUri = extractUri(firstLine);
             List<String> lines = readLines(bufferedReader);
+            final String firstLine = lines.get(0);
+            final String extractedUri = extractUri(firstLine);
 
             if ("/".equals(extractedUri)) {
                 final String response = http200Message(DEFAULT_METHOD);
@@ -40,15 +39,48 @@ public class RequestHandler implements Runnable {
                 return;
             }
 
+            if ("/login".equals(extractedUri)) {
+                final URL uri = getClass().getClassLoader().getResource(STATIC_PATH + extractedUri + ".html");
+                final String response = http200Message(Files.readString(new File(uri.getFile()).toPath()));
+                writeResponse(outputStream, response);
+                return;
+            }
+
+            if (extractedUri.contains("?")) {
+                try {
+                    String user = toUserResponseBody(extractedUri);
+                    final String response = http302Response("/index.html");
+                    writeResponse(outputStream, response);
+                } catch (RuntimeException exception) {
+                    writeResponse(outputStream, http302Response("/401.html"));
+                }
+                return;
+            }
+
             final URL uri = getClass().getClassLoader().getResource(STATIC_PATH + extractedUri);
             final String response = http200Message(Files.readString(new File(uri.getFile()).toPath()));
-
             writeResponse(outputStream, response);
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
         }
+    }
+
+    private String toUserResponseBody(String extractedUri) {
+        int index = extractedUri.indexOf("?");
+        final String path = extractedUri.substring(0, index);
+        Map<String, String> params = extractQueryParam(extractedUri.substring(index + 1));
+
+        final Optional<User> user = InMemoryUserRepository.findByAccount(params.get("account"));
+        if (user.isPresent()) {
+            final User foundUser = user.get();
+            if (foundUser.checkPassword(params.get("password"))) {
+                return foundUser.toString();
+            }
+            throw new IllegalArgumentException("옳지 않은 비밀번호입니다.");
+        }
+        throw new IllegalArgumentException("찾을 수 없는 사용자입니다.");
     }
 
     private List<String> readLines(BufferedReader bufferedReader) throws IOException {
@@ -74,6 +106,23 @@ public class RequestHandler implements Runnable {
     private void writeResponse(OutputStream outputStream, String response) throws IOException {
         outputStream.write(response.getBytes());
         outputStream.flush();
+    }
+
+    private Map<String, String> extractQueryParam(String queryString) {
+        Map<String, String> params = new HashMap<>();
+
+        final String[] parameters = queryString.split("&");
+        for (String parameter : parameters) {
+            final String[] splitParameter = parameter.split("=");
+            params.put(splitParameter[0], splitParameter[1]);
+        }
+        return params;
+    }
+
+    private String http302Response(String redirectUrl) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: http://localhost:8080" + redirectUrl);
     }
 
     private String http200Message(String responseBody) {

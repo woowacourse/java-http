@@ -57,7 +57,13 @@ public class RequestHandler implements Runnable {
             contents = "Hello world!";
         }
         if (parsedRequest[0].equals("GET") && !parsedRequest[1].equals("/")) {
-            final URL resource = getClass().getClassLoader().getResource("static" + parsedRequest[1]);
+            URL resource = getClass().getClassLoader().getResource("static" + parsedRequest[1]);
+            if (resource == null) {
+                resource = getClass().getClassLoader().getResource("static" + parsedRequest[1] + ".html");
+            }
+            if (resource == null) {
+                return contents;
+            }
             contents = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         }
         return contents;

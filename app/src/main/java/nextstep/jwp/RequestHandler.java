@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -41,15 +42,20 @@ public class RequestHandler implements Runnable {
                 return;
             }
 
+            String url = line;
             String uri = line.split(" ")[1];
 
+            Map<String, String> requestHeaders = new HashMap<>();
             while (!Objects.equals(line, "")) {
                 line = br.readLine();
                 log.debug("header : {}", line);
+                if (!line.isBlank()) {
+                    requestHeaders.put(line.split(": ")[0], line.split(": ")[1]);
+                }
             }
 
             String response = "";
-            if (uri.contains(".")) { // 뭔가 정적 파일인 경우
+            if (uri.contains(".")) {
                 Path path = getPath(uri);
                 String responseBody = new String(Files.readAllBytes(path));
                 response = responseHeaderOfStatusOK(responseBody);
@@ -57,9 +63,32 @@ public class RequestHandler implements Runnable {
                 return;
             }
 
+            if (uri.startsWith("/register")) {
+                if ("GET".equals(url.split(" ")[0])) {
+                    Path path = getPath("register.html");
+                    String responseBody = new String(Files.readAllBytes(path));
+                    response = responseHeaderOfStatusOK(responseBody);
+                    writeBody(outputStream, response);
+                    return;
+                }
+                int contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                br.read(buffer, 0, contentLength);
+                String body = new String(buffer);
+                Map<String, String> maps = HttpRequestUtils.parseQueryString(body);
+                int count = InMemoryUserRepository.countIds();
+                InMemoryUserRepository.save(new User(count + 1, maps.get("account"), maps.get("email"), maps.get("password")));
+                response = String.join("\r\n",
+                        "HTTP/1.1 302 Found ",
+                        "Location: /index.html",
+                        "");
+                writeBody(outputStream, response);
+                return;
+            }
+
             if (uri.startsWith("/login")) {
-                int index = uri.indexOf("?");
-                if (index == -1) {
+                String contentLength = requestHeaders.get("Content-Length");
+                if (Objects.isNull(contentLength) || Integer.parseInt(contentLength) <= 0) {
                     Path path = getPath("login.html");
                     String responseBody = new String(Files.readAllBytes(path));
                     response = responseHeaderOfStatusOK(responseBody);
@@ -67,8 +96,12 @@ public class RequestHandler implements Runnable {
                     return;
                 }
 
-                String queryString = uri.substring(index + 1);
-                Map<String, String> params = HttpRequestUtils.parseQueryString(queryString);
+                int length = Integer.parseInt(requestHeaders.get("Content-Length"));
+                char[] buffer = new char[length];
+                br.read(buffer, 0, length);
+                String body = new String(buffer);
+                Map<String, String> params = HttpRequestUtils.parseQueryString(body);
+
                 Optional<User> findUser = InMemoryUserRepository.findByAccount(params.get("account"))
                         .filter(user -> user.checkPassword(params.get("password")))
                         .stream().findAny();
@@ -86,6 +119,7 @@ public class RequestHandler implements Runnable {
                         "Location: /index.html",
                         "");
                 writeBody(outputStream, response);
+                return;
             }
         } catch (IOException exception) {
             log.error("Exception stream", exception);

@@ -50,12 +50,12 @@ log.debug("request line : {}", line);
 
 ### POST 방식으로 회원가입
 
-  - [ ] while 문으로 http request header를 읽고 나서 request body를 읽어온다.
+  - [x] while 문으로 http request header를 읽고 나서 request body를 읽어온다.
     - request header의 Content-Length가 request body의 length다.
   
-  - [ ] POST로 전달하면 GET과 다르게 http request body에 데이터가 담긴다.
-  - [ ] login.html도 form 태그를 수정한다.
-  - [ ] InMemoryUserRepository에서 save 메서드를 사용해서 가입 완료 처리한다.
-  - [ ] 이상 없으면 리다이렉트
+  - [x] POST로 전달하면 GET과 다르게 http request body에 데이터가 담긴다.
+  - [x] login.html도 form 태그를 수정한다.
+  - [x] InMemoryUserRepository에서 save 메서드를 사용해서 가입 완료 처리한다.
+  - [x] 이상 없으면 리다이렉트
 
   

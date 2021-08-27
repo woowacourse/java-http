@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,7 +24,7 @@ public class Request {
     }
 
     public static Request of(InputStream inputStream) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+        BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         String requestLine = br.readLine();
         String[] parsedRequestLine = requestLine.split(" ");
         String method = parsedRequestLine[0];

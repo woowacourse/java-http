@@ -33,12 +33,12 @@ public class Headers {
     private Map<String, String> rawHeadersToMap(List<String> rawHeaders) {
         return rawHeaders.stream()
             .filter(header -> !header.isBlank())
-            .map(rawHeader -> rawHeader.split(" "))
+            .map(rawHeader -> rawHeader.split(":"))
             .collect(toMap(toHeaderName(), toHeaderValue()));
     }
 
     private Function<String[], String> toHeaderName() {
-        return parameters -> parameters[0].replace(":", "").trim();
+        return parameters -> parameters[0].trim();
     }
 
     private Function<String[], String> toHeaderValue() {

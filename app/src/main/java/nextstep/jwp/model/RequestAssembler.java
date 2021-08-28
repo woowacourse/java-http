@@ -13,13 +13,7 @@ public class RequestAssembler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestAssembler.class);
 
-    private final InputStream inputStream;
-
-    public RequestAssembler(InputStream inputStream) {
-        this.inputStream = inputStream;
-    }
-
-    public Request assemble() throws IOException {
+    public Request assemble(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line = reader.readLine();
         LOGGER.debug(line);

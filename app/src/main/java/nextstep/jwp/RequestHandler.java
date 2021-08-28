@@ -28,8 +28,8 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
                 final OutputStream outputStream = connection.getOutputStream()) {
-            RequestAssembler requestAssembler = new RequestAssembler(inputStream);
-            Request request = requestAssembler.assemble();
+            RequestAssembler requestAssembler = new RequestAssembler();
+            Request request = requestAssembler.assemble(inputStream);
             Response response = new Response(request);
             outputStream.write(response.getBytes());
             outputStream.flush();

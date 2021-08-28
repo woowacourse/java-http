@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.network.exception;
 
 public class InvalidHttpMethodException extends RuntimeException {
 

@@ -1,4 +1,6 @@
-package nextstep.jwp;
+package nextstep.jwp.network;
+
+import nextstep.jwp.network.exception.InvalidHttpMethodException;
 
 import java.util.Arrays;
 

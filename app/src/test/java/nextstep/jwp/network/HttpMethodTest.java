@@ -1,5 +1,6 @@
-package nextstep.jwp;
+package nextstep.jwp.network;
 
+import nextstep.jwp.network.exception.InvalidHttpMethodException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

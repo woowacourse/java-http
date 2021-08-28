@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.network;
 
 import java.util.List;
 import java.util.stream.Collectors;

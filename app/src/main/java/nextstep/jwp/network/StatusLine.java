@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.network;
 
 public class StatusLine {
 

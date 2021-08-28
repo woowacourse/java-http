@@ -1,6 +1,6 @@
 package nextstep.jwp;
 
-import nextstep.jwp.core.handler.FrontHandler;
+import nextstep.jwp.core.mvc.FrontHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

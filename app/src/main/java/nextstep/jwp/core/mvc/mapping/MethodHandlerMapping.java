@@ -1,12 +1,12 @@
-package nextstep.jwp.core.handler.mapping;
+package nextstep.jwp.core.mvc.mapping;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.core.ApplicationContext;
 import nextstep.jwp.core.annotation.Controller;
-import nextstep.jwp.core.handler.Handler;
-import nextstep.jwp.core.handler.MethodHandler;
+import nextstep.jwp.core.mvc.Handler;
+import nextstep.jwp.core.mvc.MethodHandler;
 import nextstep.jwp.webserver.request.HttpRequest;
 
 public class MethodHandlerMapping implements HandlerMapping {

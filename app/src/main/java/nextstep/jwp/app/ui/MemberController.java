@@ -4,7 +4,7 @@ import nextstep.jwp.app.db.MemberRepository;
 import nextstep.jwp.app.model.Member;
 import nextstep.jwp.core.annotation.Autowired;
 import nextstep.jwp.core.annotation.Controller;
-import nextstep.jwp.core.handler.mapping.RequestMapping;
+import nextstep.jwp.core.mvc.mapping.RequestMapping;
 import nextstep.jwp.webserver.request.HttpMethod;
 import nextstep.jwp.webserver.request.HttpRequest;
 import nextstep.jwp.webserver.response.HttpResponse;

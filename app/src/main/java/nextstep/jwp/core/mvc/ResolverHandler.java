@@ -1,4 +1,4 @@
-package nextstep.jwp.core.handler;
+package nextstep.jwp.core.mvc;
 
 import nextstep.jwp.webserver.request.HttpRequest;
 import nextstep.jwp.webserver.response.HttpResponse;

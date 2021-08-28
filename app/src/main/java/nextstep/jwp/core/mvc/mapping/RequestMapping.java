@@ -1,4 +1,4 @@
-package nextstep.jwp.core.handler.mapping;
+package nextstep.jwp.core.mvc.mapping;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

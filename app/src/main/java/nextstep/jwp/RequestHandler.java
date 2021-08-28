@@ -1,6 +1,6 @@
 package nextstep.jwp;
 
-import nextstep.jwp.core.handler.FrontHandler;
+import nextstep.jwp.core.mvc.FrontHandler;
 import nextstep.jwp.webserver.request.DefaultHttpRequest;
 import nextstep.jwp.webserver.request.HttpRequest;
 import nextstep.jwp.webserver.response.DefaultHttpResponse;

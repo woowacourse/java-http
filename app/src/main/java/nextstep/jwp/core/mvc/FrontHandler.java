@@ -1,9 +1,9 @@
-package nextstep.jwp.core.handler;
+package nextstep.jwp.core.mvc;
 
 import nextstep.jwp.core.ApplicationContext;
 import nextstep.jwp.core.DefaultApplicationContext;
-import nextstep.jwp.core.handler.mapping.HandlerMapping;
-import nextstep.jwp.core.handler.mapping.MethodHandlerMapping;
+import nextstep.jwp.core.mvc.mapping.HandlerMapping;
+import nextstep.jwp.core.mvc.mapping.MethodHandlerMapping;
 import nextstep.jwp.webserver.exception.PageNotFoundException;
 import nextstep.jwp.webserver.request.HttpRequest;
 import nextstep.jwp.webserver.response.ContentType;

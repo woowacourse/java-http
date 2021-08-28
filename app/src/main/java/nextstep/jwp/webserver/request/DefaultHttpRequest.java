@@ -9,6 +9,7 @@ public class DefaultHttpRequest implements HttpRequest {
 
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String FORM_DATA = "application/x-www-form-urlencoded";
+    private static final String UTF_8 = "UTF-8";
 
     private RequestLine requestLine;
     private RequestHeader requestHeader;
@@ -18,7 +19,7 @@ public class DefaultHttpRequest implements HttpRequest {
 
         try {
             final BufferedReader br =
-                    new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+                    new BufferedReader(new InputStreamReader(inputStream, UTF_8));
             this.requestLine = new RequestLine(br.readLine());
             this.requestHeader = parseHeader(br);
             this.requestParams = parseParams(br);
@@ -39,17 +40,22 @@ public class DefaultHttpRequest implements HttpRequest {
     private RequestParams parseParams(BufferedReader br) throws IOException {
         RequestParams requestParams = new RequestParams();
         requestParams.addParams(requestLine.queryString());
+        char[] body = readBody(br);
+
+        if (isFormData(requestHeader.get(CONTENT_TYPE))) {
+            requestParams.addParams(String.copyValueOf(body));
+            return requestParams;
+        }
+
+        requestParams.addBody(String.copyValueOf(body));
+        return requestParams;
+    }
+
+    private char[] readBody(BufferedReader br) throws IOException {
         int contentLength = requestHeader.contentLength();
         char[] body = new char[contentLength];
         br.read(body, 0, contentLength);
-        if(isFormData(requestHeader.get(CONTENT_TYPE))) {
-            requestParams.addParams(String.copyValueOf(body));
-        } else {
-            requestParams.addBody(String.copyValueOf(body));
-        }
-
-
-        return requestParams;
+        return body;
     }
 
     private boolean isFormData(String contentType) {

@@ -1,6 +1,6 @@
 package nextstep.jwp;
 
-import nextstep.jwp.core.handler.FrontHandler;
+import nextstep.jwp.core.mvc.FrontHandler;
 import nextstep.mockweb.request.MockRequest;
 import org.junit.jupiter.api.Test;
 

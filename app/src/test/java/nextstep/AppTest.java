@@ -3,24 +3,26 @@ package nextstep;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.core.mvc.FrontHandler;
 import nextstep.jwp.webserver.response.StatusCode;
 import nextstep.mockweb.request.MockRequest;
 import nextstep.mockweb.result.MockResult;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 public class AppTest {
 
-
-    @Test
-    @DisplayName("index 페이지")
-    public void indexPage() throws Exception {
-        // given
-        String page = "index.html";
-
+    @DisplayName("페이지 테스트")
+    @ParameterizedTest
+    @CsvSource(value = {"index.html:/", "login.html:/login", "register.html:/register",
+            "401.html:/unauthorized"},
+            delimiter = ':')
+    public void pageTest(String page, String api) throws Exception {
         // when
-        final MockResult result = MockRequest.get("/").result();
+        final MockResult result = MockRequest.get(api).result();
 
         // then
         페이지_비교(result.body(), page);
@@ -28,32 +30,14 @@ public class AppTest {
     }
 
     @Test
-    @DisplayName("로그인 페이지")
-    public void loginPage() throws Exception{
-        //given
-        String page = "login.html";
+    @DisplayName("로그인 테스트")
+    public void loginTest() throws Exception{
+        final MockResult result = MockRequest.get("/login?account=nabom&password=nabom")
+                .result();
 
-        // when
-        final MockResult result = MockRequest.get("/login").result();
-
-        // then
-        페이지_비교(result.body(), page);
-        Assertions.assertThat(result.statusCode()).isEqualTo(StatusCode.OK);
+        Assertions.assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
     }
 
-    @Test
-    @DisplayName("회원가입 페이지")
-    public void registerPage() throws Exception{
-        //given
-        String page = "register.html";
-
-        // when
-        final MockResult result = MockRequest.get("/register").result();
-
-        // then
-        페이지_비교(result.body(), page);
-        Assertions.assertThat(result.statusCode()).isEqualTo(StatusCode.OK);
-    }
 
     private void 페이지_비교(String body, String path) {
         Assertions.assertThat(body).containsIgnoringWhitespaces(getPage(path));

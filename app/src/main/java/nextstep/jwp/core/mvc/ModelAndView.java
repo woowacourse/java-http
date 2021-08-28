@@ -1,4 +1,4 @@
-package nextstep.jwp.core.handler;
+package nextstep.jwp.core.mvc;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

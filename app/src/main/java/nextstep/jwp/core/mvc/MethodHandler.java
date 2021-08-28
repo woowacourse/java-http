@@ -1,8 +1,8 @@
-package nextstep.jwp.core.handler;
+package nextstep.jwp.core.mvc;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import nextstep.jwp.core.handler.mapping.RequestMapping;
+import nextstep.jwp.core.mvc.mapping.RequestMapping;
 import nextstep.jwp.webserver.request.HttpMethod;
 import nextstep.jwp.webserver.request.HttpRequest;
 import nextstep.jwp.webserver.response.HttpResponse;

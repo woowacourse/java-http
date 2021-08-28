@@ -16,7 +16,9 @@ public class MemberRepository {
 
     public MemberRepository() {
         final Member member = new Member(++memberId, "gugu", "password", "hkkang@woowahan.com");
+        final Member nabom = new Member(++memberId, "nabom", "nabom", "nabom@woowahan.com");
         database.put(member.getAccount(), member);
+        database.put(nabom.getAccount(), nabom);
     }
 
     public void save(Member member) {

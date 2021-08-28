@@ -19,7 +19,6 @@ public class HttpRequest {
         this.messageBody = messageBody;
     }
 
-
     public static HttpRequest of(List<String> requestAsString) {
         final RequestLine requestLine = RequestLine.of(requestAsString.get(0));
         int separatorLine = IntStream.range(1, requestAsString.size())
@@ -35,7 +34,7 @@ public class HttpRequest {
         return new HttpRequest(requestLine, headers, messageBody);
     }
 
-    public RequestLine getRequestLine() {
-        return requestLine;
+    public URI toURI() {
+        return requestLine.getURI();
     }
 }

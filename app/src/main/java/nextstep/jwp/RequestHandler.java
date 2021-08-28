@@ -6,10 +6,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -39,19 +41,30 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final HttpRequest httpRequest = HttpRequest.of(requestAsString(bufferedReader));
+            final List<String> requestAsString = requestAsString(bufferedReader);
+            byte[] bytes = "".getBytes();
+            if (requestAsString.isEmpty()) {
+                return;
+            }
+            final HttpRequest httpRequest = HttpRequest.of(requestAsString);
 
-            String requestedResource = httpRequest.getRequestLine().toResource();
+            final URI uri = httpRequest.toURI();
 
+            String requestedResource = uri.getPath();
 
             final String htmlExtension = ".html";
 
-            if (Objects.equals(requestedResource, "login")) {
+            if ("/login".equals(requestedResource)) {
                 requestedResource = requestedResource.concat(htmlExtension);
+                URL resource = getClass().getClassLoader().getResource("static" + requestedResource);
+                Path path = Paths.get(resource.getPath());
+                bytes = Files.readAllBytes(path);
             }
-
-            if (requestedResource.contains("?")) {
-                final Map<String, String> queryInfo = extractQuery(httpRequest.getRequestLine().toQueryString());
+            if ("/login?account=gugu&password=password".equals(requestedResource)) {
+                URL resource = getClass().getClassLoader().getResource("static" + "/index.html");
+                Path path = Paths.get(resource.getPath());
+                bytes = Files.readAllBytes(path);
+                final Map<String, String> queryInfo = extractQuery(uri.getQuery());
                 final User user = InMemoryUserRepository.findByAccount(queryInfo.get("account"))
                         .orElseThrow(RuntimeException::new);
                 if (user.checkPassword(queryInfo.get("password"))) {
@@ -60,16 +73,19 @@ public class RequestHandler implements Runnable {
                     log.info("Login failed");
                 }
             }
-
-            final URL resource = getClass().getClassLoader().getResource("static/" + requestedResource);
-            final Path path = Paths.get(resource.getPath());
-            final byte[] bytes = Files.readAllBytes(path);
+            if ("/".equals(requestedResource)) {
+                bytes = "Hello world!".getBytes();
+            }
+            if ("/index.html".equals(requestedResource)) {
+                URL resource = getClass().getClassLoader().getResource("static" + requestedResource);
+                Path path = Paths.get(resource.getPath());
+                bytes = Files.readAllBytes(path);
+            }
             final HttpResponse response = new HttpResponse(bytes);
 
-            outputStream.write(response.toBytes());
-            outputStream.flush();
-            outputStream.write(bytes);
-            outputStream.flush();
+            final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
+            bufferedWriter.write(response.asString());
+            bufferedWriter.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
@@ -84,7 +100,7 @@ public class RequestHandler implements Runnable {
             if (line == null) {
                 continue;
             }
-            request.add(bufferedReader.readLine());
+            request.add(line);
         }
         return request;
     }

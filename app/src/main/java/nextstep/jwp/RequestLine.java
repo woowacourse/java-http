@@ -2,16 +2,16 @@ package nextstep.jwp;
 
 public class RequestLine {
 
-    private final Method method;
-    private final String uri;
+    private final HttpMethod httpMethod;
+    private final URI uri;
     private final String protocolVersion;
 
-    private RequestLine(String method, String uri, String protocolVersion) {
-        this(Method.of(method), uri, protocolVersion);
+    private RequestLine(String method, URI uri, String protocolVersion) {
+        this(HttpMethod.of(method), uri, protocolVersion);
     }
 
-    private RequestLine(Method method, String uri, String protocolVersion) {
-        this.method = method;
+    private RequestLine(HttpMethod httpMethod, URI uri, String protocolVersion) {
+        this.httpMethod = httpMethod;
         this.uri = uri;
         this.protocolVersion = protocolVersion;
     }
@@ -19,23 +19,13 @@ public class RequestLine {
     public static RequestLine of(String line) {
         final String[] firstLineElements = line.split(" ");
         final String httpMethod = firstLineElements[0];
-        final String uri = firstLineElements[1];
+        final URI uri = new URI(firstLineElements[1]);
         final String protocolVersion = firstLineElements[2];
 
         return new RequestLine(httpMethod, uri, protocolVersion);
     }
 
-    public String toPath() {
-        final int index = uri.indexOf("?");
-        return uri.substring(0, index);
-    }
-
-    public String toQueryString() {
-        final int index = uri.indexOf("?");
-        return uri.substring(index + 1);
-    }
-
-    public String toResource() {
-        return uri.substring(1);
+    public URI getURI() {
+        return uri;
     }
 }

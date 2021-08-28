@@ -1,29 +1,30 @@
 package nextstep.jwp;
 
-import java.nio.charset.StandardCharsets;
-
 public class HttpResponse {
 
     private final StatusLine statusLine;
     private final String contentType;
     private final String contentLength;
-    private final byte[] body;
+    private final String body;
 
-    public HttpResponse(byte[] body) {
+    public HttpResponse(byte[] bytes) {
+        this(new String(bytes));
+    }
+
+    public HttpResponse(String body) {
         this.statusLine = new StatusLine();
         this.contentType = "Content-Type: text/html;charset=utf-8 ";
-        this.contentLength = "Content-Length: " + body.length + " ";
+        this.contentLength = "Content-Length: " + body.getBytes().length + " ";
         this.body = body;
     }
 
-    public byte[] toBytes() {
-        final String response = String.join("\r\n",
+    public String asString() {
+        return String.join("\r\n",
                 statusLine.asString(),
                 contentType,
                 contentLength,
                 "",
-                "");
-        return response.getBytes(StandardCharsets.UTF_8);
+                body);
     }
 }
 

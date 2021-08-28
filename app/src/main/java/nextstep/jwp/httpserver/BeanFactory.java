@@ -5,6 +5,7 @@ import java.util.Map;
 
 import nextstep.jwp.dashboard.controller.LoginController;
 import nextstep.jwp.dashboard.controller.RegisterController;
+import nextstep.jwp.dashboard.repository.InMemoryUserRepository;
 import nextstep.jwp.dashboard.service.UserService;
 import nextstep.jwp.httpserver.adapter.ControllerHandlerAdapter;
 import nextstep.jwp.httpserver.adapter.StaticResourceHandlerAdapter;
@@ -20,15 +21,17 @@ public class BeanFactory {
     }
 
     public static void init() {
-        customBeanRegister();
+        customBeanRegisterAndInject();
         basicBeanRegister();
     }
 
-    private static void customBeanRegister() {
-        final UserService userService = new UserService();
+    private static void customBeanRegisterAndInject() {
+        final InMemoryUserRepository inMemoryUserRepository = new InMemoryUserRepository();
+        final UserService userService = new UserService(inMemoryUserRepository);
         final LoginController loginController = new LoginController(userService);
         final RegisterController registerController = new RegisterController(userService);
 
+        beans.put("inMemoryUserRepository", inMemoryUserRepository);
         beans.put("userService", userService);
         beans.put("loginController", loginController);
         beans.put("registerController", registerController);

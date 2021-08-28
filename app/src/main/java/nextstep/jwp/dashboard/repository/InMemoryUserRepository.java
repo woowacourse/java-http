@@ -15,11 +15,11 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
-    public static void save(User user) {
+    public void save(User user) {
         database.put(user.getAccount(), user);
     }
 
-    public static Optional<User> findByAccount(String account) {
+    public Optional<User> findByAccount(String account) {
         return Optional.ofNullable(database.get(account));
     }
 }

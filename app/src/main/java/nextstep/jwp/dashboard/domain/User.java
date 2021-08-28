@@ -1,5 +1,7 @@
 package nextstep.jwp.dashboard.domain;
 
+import nextstep.jwp.httpserver.exception.AuthorizationException;
+
 public class User {
     private Long id;
     private String account;
@@ -17,8 +19,10 @@ public class User {
         this.email = email;
     }
 
-    public boolean checkPassword(String password) {
-        return this.password.equals(password);
+    public void checkPassword(String password) {
+        if (!this.password.equals(password)) {
+            throw new AuthorizationException("아이디나 비밀번호가 올바르지 않습니다.");
+        }
     }
 
     public long getId() {

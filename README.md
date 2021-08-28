@@ -3,8 +3,8 @@
 ### 🛠 구현할 기능 목록
 - [x] 학습 테스트 작성 및 공부
 
-- [ ] GET /index.html 응답하기
-    - [ ] "http://localhost:8080/index.html"에 접속 시 index.html 페이지 보여줌
+- [x] GET /index.html 응답하기
+    - [x] "http://localhost:8080/index.html"에 접속 시 index.html 페이지 보여줌
 
 - [ ] GET /login 응답하기
     - [ ] "http://localhost:8080/login"에 접속 시 login.html 페이지 보여줌

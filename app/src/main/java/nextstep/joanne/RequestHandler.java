@@ -1,6 +1,5 @@
 package nextstep.joanne;
 
-import exception.UserNotFoundException;
 import nextstep.joanne.db.InMemoryUserRepository;
 import nextstep.joanne.model.User;
 import org.slf4j.Logger;
@@ -163,7 +162,7 @@ public class RequestHandler implements Runnable {
     private String makeHttpResponse(String httpStatus, String contentType, String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 " + httpStatus + " ",
-                "Content-Type: "+ contentType +";charset=utf-8 ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

@@ -1,7 +1,7 @@
 package nextstep.jwp.controller;
 
 
-import nextstep.jwp.application.LoginService;
+import nextstep.jwp.application.UserService;
 import nextstep.jwp.model.http.HttpRequest;
 import nextstep.jwp.model.http.HttpResponse;
 
@@ -9,15 +9,15 @@ import java.io.IOException;
 
 public class LoginController extends AbstractController {
 
-    private final LoginService loginService;
+    private final UserService userService;
 
     public LoginController() {
-        this.loginService = new LoginService();
+        this.userService = new UserService();
     }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
-        if (loginService.isExistUser(request)) {
+        if (userService.isExistUser(request)) {
             response.redirect("/index.html");
             return;
         }

@@ -9,10 +9,7 @@ public class StandardControllerFactory {
 
     public static List<StandardController> create() {
         return List.of(
-            new GetStandardController(),
-            new DeleteStandardController(),
-            new PostStandardController(),
-            new PutStandardController()
+            new GetStandardController()
         );
     }
 }

@@ -28,10 +28,10 @@ public class LoginController extends AbstractController {
                     .orElseThrow(() -> new UserNotFoundException(queryInfo.get("account")));
             if (user.checkPassword(queryInfo.get("password"))) {
                 log.info("Login successful!");
-                return new HttpResponse(HttpStatus.FOUND, readFile(getResource()));
+                return new HttpResponse(HttpStatus.FOUND, readIndex());
             } else {
                 log.info("Login failed");
-                return new HttpResponse(HttpStatus.UNAUTHORIZED, readFile(getResource()));
+                return new HttpResponse(HttpStatus.UNAUTHORIZED, readFile("/401"));
             }
         }
     }

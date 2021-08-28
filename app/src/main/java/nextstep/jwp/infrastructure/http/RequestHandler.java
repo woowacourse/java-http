@@ -111,19 +111,6 @@ public class RequestHandler implements Runnable {
         return View.buildByResource(request.getRequestLine().getUri().getBaseUri());
     }
 
-    private List<String> splitFromInputStream(final BufferedReader bufferedReader) throws IOException {
-        final List<String> splitResult = new ArrayList<>();
-        String line;
-
-        while (Objects.nonNull(line = bufferedReader.readLine()) && bufferedReader.ready()) {
-            splitResult.add(line);
-            log.debug(line);
-        }
-
-        log.debug(String.valueOf(splitResult.size()));
-        return splitResult;
-    }
-
     private void close() {
         try {
             connection.close();

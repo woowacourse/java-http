@@ -53,7 +53,8 @@ public class RequestHandler implements Runnable {
                 }
             } else {
                 if ("/login".equals(path)) {
-                    if (httpRequest.getQueryString() == null) {
+                    String method = httpRequest.getMethod();
+                    if ("GET".equals(method)) {
                         url = getClass().getClassLoader().getResource("static" + path + ".html");
                         filePath = new File(url.getFile()).toPath();
                         responseBody = new String(Files.readAllBytes(filePath));
@@ -62,7 +63,7 @@ public class RequestHandler implements Runnable {
                         httpResponse.addHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
                         httpResponse.write(responseBody);
                         httpResponse.flush();
-                    } else {
+                    } else if ("POST".equals(method)) {
                         String account = httpRequest.getParameter("account");
                         String password = httpRequest.getParameter("password");
                         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);

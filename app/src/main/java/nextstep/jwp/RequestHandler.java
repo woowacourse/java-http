@@ -1,9 +1,16 @@
 package nextstep.jwp;
 
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.IndexController;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.NoneMatchingControllerException;
 import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpRequestHeader;
+import nextstep.jwp.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.beans.beancontext.BeanContext;
 import java.io.*;
 import java.net.Socket;
 import java.net.URISyntaxException;
@@ -18,8 +25,15 @@ import java.util.Objects;
 public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final List<Controller> controllers = new ArrayList<>();
 
     private final Socket connection;
+    private BufferedReader inputStreamReader;
+
+    static {
+        controllers.add(new IndexController());
+        controllers.add(new LoginController());
+    }
 
     public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
@@ -32,50 +46,14 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final List<String> requestHeaders = new ArrayList<>();
-            BufferedReader inputStreamReader = new BufferedReader(new InputStreamReader(inputStream));
-            String line = inputStreamReader.readLine();
-            while (!"".equals(line)) {
-                requestHeaders.add(line);
-                line = inputStreamReader.readLine();
-                if (line == null) {
-                    break;
-                }
-            }
+            final HttpRequest httpRequest = parseRequest(inputStream);
 
-            new HttpRequest()
+            final Controller controller = findController(httpRequest);
+            final HttpResponse httpResponse = controller.doService(httpRequest);
+            final String responseMessage = httpResponse.toResponseMessage();
 
-            if (requestHeaders.isEmpty()) {
-                throw new IllegalStateException();
-            }
-
-            final String targetResourceUrl = requestHeaders.get(0).split(" ")[1];
-
-            if (targetResourceUrl.startsWith("/login")) {
-
-            }
-
-            URL resource = Thread.currentThread()
-                    .getContextClassLoader()
-                    .getResource("static" + targetResourceUrl);
-            String responseBody;
-            try {
-                Path path = Paths.get(resource.toURI());
-                responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            } catch (IOException | URISyntaxException exception) {
-                throw new ResourceNotFoundException();
-            }
-
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(responseMessage.getBytes());
             outputStream.flush();
-            inputStreamReader.close();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
@@ -83,8 +61,39 @@ public class RequestHandler implements Runnable {
         }
     }
 
+    private HttpRequest parseRequest(final InputStream inputStream) throws IOException {
+        final List<String> requestHeaders = parseRequestHeaders(inputStream);
+        final HttpRequestHeader httpRequestHeader = new HttpRequestHeader(requestHeaders);
+        //TODO: request body parsing 추가
+
+        return new HttpRequest(httpRequestHeader);
+    }
+
+    private List<String> parseRequestHeaders(final InputStream inputStream) throws IOException {
+        final List<String> requestHeaders = new ArrayList<>();
+        inputStreamReader = new BufferedReader(new InputStreamReader(inputStream));
+        String line = inputStreamReader.readLine();
+        while (!"".equals(line)) {
+            requestHeaders.add(line);
+            line = inputStreamReader.readLine();
+            if (line == null) {
+                break;
+            }
+        }
+
+        return requestHeaders;
+    }
+
+    private Controller findController(final HttpRequest httpRequest) {
+        return controllers.stream()
+                .filter(contoller -> contoller.canHandle(httpRequest))
+                .findFirst()
+                .orElseThrow(NoneMatchingControllerException::new);
+    }
+
     private void close() {
         try {
+            inputStreamReader.close();
             connection.close();
         } catch (IOException exception) {
             log.error("Exception closing socket", exception);

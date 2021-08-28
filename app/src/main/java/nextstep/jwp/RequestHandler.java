@@ -47,7 +47,7 @@ public class RequestHandler implements Runnable {
                 return;
             }
 
-            if (extractedUri.startsWith("/login")) {
+            if ("/login".equals(extractedUri)) {
                 if ("POST".equals(extractedMethod)) {
                     try {
                         final String requestBody = extractRequestBody(bufferedReader, httpRequestHeaders);
@@ -62,7 +62,7 @@ public class RequestHandler implements Runnable {
                 return;
             }
 
-            if (extractedUri.startsWith("/register")) {
+            if ("/register".equals(extractedUri)) {
                 if ("POST".equals(extractedMethod)) {
                     final String requestBody = extractRequestBody(bufferedReader, httpRequestHeaders);
                     registerRequest(requestBody);
@@ -74,8 +74,8 @@ public class RequestHandler implements Runnable {
             }
 
             if ("/css/styles.css".equals(extractedUri)) {
-                final String response = httpCssMessage();
-                writeOutputStream(outputStream, response);
+                writeOutputStream(outputStream, httpCssResponse(STATIC_PATH, extractedUri));
+                return;
             }
 
             writeOutputStream(outputStream, httpHtmlResponse(STATIC_PATH, extractedUri));
@@ -120,7 +120,7 @@ public class RequestHandler implements Runnable {
     }
 
     private String loginRequest(String requestBody) {
-        Map<String, String> params = extractQueryParam(requestBody);
+        final Map<String, String> params = extractQueryParam(requestBody);
         final User user = findUserByAccount(params);
         if (user.checkPassword(params.get("password"))) {
             return user.toString();
@@ -137,13 +137,13 @@ public class RequestHandler implements Runnable {
     }
 
     private void registerRequest(String requestBody) {
-        Map<String, String> params = extractQueryParam(requestBody);
+        final Map<String, String> params = extractQueryParam(requestBody);
         final User user = new User(userId++, params.get("account"), params.get("password"), params.get("email"));
         InMemoryUserRepository.save(user);
     }
 
     private Map<String, String> extractQueryParam(String queryParameterString) {
-        Map<String, String> params = new HashMap<>();
+        final Map<String, String> params = new HashMap<>();
         final String[] parameters = queryParameterString.split("&");
         for (String parameter : parameters) {
             final String[] splitParameter = parameter.split("=");
@@ -157,18 +157,19 @@ public class RequestHandler implements Runnable {
         outputStream.flush();
     }
 
-    private String httpCssMessage() {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/css ",
-                "",
-                "");
-    }
-
     private String http200Message(String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private String httpCssMessage(String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/css ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
@@ -180,12 +181,26 @@ public class RequestHandler implements Runnable {
                 "Location: http://localhost:8080" + redirectUrl);
     }
 
-    private String httpHtmlResponse(String resourcesPath, String targetUri) throws IOException {
+    private String httpHtmlResponse(String resourcesPath, String targetUri) {
         if (!targetUri.contains(".") && !targetUri.contains(".html")) {
             targetUri = targetUri.concat(".html");
         }
-        final URL uri = getClass().getClassLoader().getResource(resourcesPath + targetUri);
-        return http200Message(Files.readString(new File(uri.getFile()).toPath()));
+        return http200Message(responseBodyByURLPath(resourcesPath, targetUri));
+    }
+
+    private String httpCssResponse(String resourcesPath, String targetUri) {
+        return httpCssMessage(responseBodyByURLPath(resourcesPath, targetUri));
+    }
+
+    private String responseBodyByURLPath(String resourcesPath, String targetUri) {
+        try {
+            final URL url = getClass().getClassLoader().getResource(resourcesPath + targetUri);
+            return Files.readString(new File(url.getFile()).toPath());
+        } catch (IOException exception) {
+            LOG.info("리소스를 가져오려는 url이 존재하지 않습니다. 입력값: {}", resourcesPath + targetUri);
+            throw new IllegalStateException(String.format("리소스를 가져오려는 url이 존재하지 않습니다. 입력값: %s",
+                    resourcesPath + targetUri));
+        }
     }
 
     private void close() {

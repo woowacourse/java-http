@@ -26,6 +26,10 @@ public class MessageBody {
         return bytes;
     }
 
+    public String asString() {
+        return new String(bytes);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

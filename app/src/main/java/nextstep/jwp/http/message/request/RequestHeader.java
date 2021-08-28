@@ -1,8 +1,8 @@
 package nextstep.jwp.http.message.request;
 
-import nextstep.jwp.http.exception.HttpMessageConvertFailureException;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpPath;
+import nextstep.jwp.http.exception.HttpMessageConvertFailureException;
 import nextstep.jwp.http.message.HeaderFields;
 import nextstep.jwp.http.message.MessageHeader;
 import nextstep.jwp.utils.StringUtils;
@@ -52,6 +52,11 @@ public class RequestHeader implements MessageHeader {
 
     public void changeRequestUri(String requestUri) {
         requestLine.requestUri = requestUri;
+    }
+
+    public int takeMessageBodyLength() {
+        String contentLength = headerFields.take("Content-Length").orElse("0");
+        return Integer.parseInt(contentLength);
     }
 
     public HttpMethod httpMethod() {

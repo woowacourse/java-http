@@ -2,6 +2,8 @@ package nextstep.jwp.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,12 +22,7 @@ public class StringUtils {
                 .collect(Collectors.toList());
     }
 
-    public static String convertToString(BufferedReader bufferedReader) throws IOException {
-        StringBuilder stringBuilder = new StringBuilder();
-        while (bufferedReader.ready()) {
-            stringBuilder.append(bufferedReader.readLine())
-                    .append("\r\n");
-        }
-        return stringBuilder.toString();
+    public static String decode(String s) {
+        return URLDecoder.decode(s, Charset.defaultCharset());
     }
 }

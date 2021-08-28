@@ -1,9 +1,11 @@
 package nextstep.jwp;
 
 import nextstep.jwp.http.HttpResponseBuilder;
+import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
+import nextstep.jwp.http.message.request.RequestHeader;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
-import nextstep.jwp.utils.StringUtils;
+import nextstep.jwp.utils.HttpParseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,23 +35,28 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String message = StringUtils.convertToString(bufferedReader);
-            HttpRequestMessage httpRequestMessage = new HttpRequestMessage(message);
+            HttpRequestMessage httpRequestMessage = makeHttpRequestMessage(bufferedReader);
 
-            log.debug(String.format("%nRequestLog%n%s%n", httpRequestMessage));
+            log.debug(httpRequestMessage.getHeader().requestUri());
 
             HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder(httpRequestMessage);
             HttpResponseMessage httpResponseMessage = httpResponseBuilder.build();
-
-//            log.debug(String.format("%nResponseLog%n%s%n", httpResponseMessage));
-
             outputStream.write(httpResponseMessage.toBytes());
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
+        } catch (Exception e) {
+            log.error("Exception", e.getMessage());
         } finally {
             close();
         }
+    }
+
+    private HttpRequestMessage makeHttpRequestMessage(BufferedReader bufferedReader) throws IOException {
+        RequestHeader requestHeader = HttpParseUtils.extractHeaderMessage(bufferedReader);
+        int messageBodyLength = requestHeader.takeMessageBodyLength();
+        MessageBody messageBody = HttpParseUtils.extractBodyMessage(bufferedReader, messageBodyLength);
+        return new HttpRequestMessage(requestHeader, messageBody);
     }
 
     private void close() {

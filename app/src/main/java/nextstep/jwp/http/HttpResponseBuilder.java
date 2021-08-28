@@ -35,7 +35,6 @@ public class HttpResponseBuilder {
         controller.service(httpRequestMessage, httpResponseMessage);
         HttpPath afterPath = httpRequestMessage.requestPath();
 
-        // TODO : 디버깅 꿀자리
         if (!beforePath.equals(afterPath)) {
             return findFinalController(httpResponseMessage);
         }

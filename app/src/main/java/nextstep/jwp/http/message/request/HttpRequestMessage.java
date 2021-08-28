@@ -31,19 +31,19 @@ public class HttpRequestMessage implements HttpMessage {
     }
 
     private static String parseHeaderString(String requestMessage) {
-        return StringUtils.splitWithSeparator(requestMessage, MESSAGE_SEPARATOR).get(0);
+        return StringUtils.splitTwoPiecesWithSeparator(requestMessage, MESSAGE_SEPARATOR).get(0);
     }
 
     private static String parseBodyString(String requestMessage) {
         if (!hasBody(requestMessage)) {
             return "";
         }
-        return StringUtils.splitWithSeparator(requestMessage, MESSAGE_SEPARATOR).get(1);
+        return StringUtils.splitTwoPiecesWithSeparator(requestMessage, MESSAGE_SEPARATOR).get(1);
     }
 
     private static boolean hasBody(String requestMessage) {
         List<String> headerBodies = StringUtils.splitWithSeparator(requestMessage, MESSAGE_SEPARATOR);
-        return headerBodies.size() == HAS_BODY_COUNT;
+        return headerBodies.size() >= HAS_BODY_COUNT;
     }
 
     public void changeRequestUri(String requestUri) {

@@ -28,19 +28,4 @@ class StringUtilsTest {
         List<String> pieces = StringUtils.splitTwoPiecesWithSeparator(s, "\r\n");
         assertThat(pieces).containsExactly("aaaa", "b\r\ncc\r\n");
     }
-
-    @DisplayName("BufferedReader를 문자열로 변환한다.")
-    @Test
-    void convertToString() throws IOException {
-        String s = "middle\r\n" +
-                "bear\r\n" +
-                "small\r\n" +
-                "bear\r\n";
-
-        byte[] bytes = s.getBytes();
-        InputStreamReader inputStreamReader = new InputStreamReader(new ByteArrayInputStream(bytes));
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-        assertThat(StringUtils.convertToString(bufferedReader)).isEqualTo(s);
-    }
 }

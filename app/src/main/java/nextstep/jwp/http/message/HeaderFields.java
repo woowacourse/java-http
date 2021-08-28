@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class HeaderFields {
@@ -48,6 +49,10 @@ public class HeaderFields {
 
     public void put(String key, String value) {
         this.fields.put(key, value);
+    }
+
+    public Optional<String> take(String key) {
+        return Optional.ofNullable(fields.get(key));
     }
 
     public Map<String, String> getFields() {

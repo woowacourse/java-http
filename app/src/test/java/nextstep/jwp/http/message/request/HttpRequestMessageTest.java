@@ -89,14 +89,16 @@ class HttpRequestMessageTest {
                 "",
                 makePostRequestBody());
     }
+
     private String makePostRequestHeader() {
         return String.join("\r\n",
                 "POST /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
-                "Connection: keep-alive ");
+                "Connection: keep-alive ",
+                "Content-Length: 12 ");
     }
 
     private String makePostRequestBody() {
-        return "hello world";
+        return "hello world!";
     }
 }

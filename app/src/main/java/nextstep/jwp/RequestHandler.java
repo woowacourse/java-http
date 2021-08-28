@@ -42,6 +42,10 @@ public class RequestHandler implements Runnable {
                 System.out.println(line);
             }
 
+            if ("/login".equals(requestUri)) {
+                requestUri += ".html";
+            }
+
             final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
             final Path path = new File(resource.getPath()).toPath();
             final List<String> lines = Files.readAllLines(path);

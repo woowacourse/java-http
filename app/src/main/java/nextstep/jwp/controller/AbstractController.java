@@ -1,7 +1,7 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.HttpMethod;
-import nextstep.jwp.HttpRequest;
+import nextstep.jwp.http.HttpRequest;
 
 public abstract class AbstractController implements Controller{
 

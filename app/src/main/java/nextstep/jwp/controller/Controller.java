@@ -1,7 +1,6 @@
 package nextstep.jwp.controller;
 
-import javax.naming.ldap.Control;
-import nextstep.jwp.HttpRequest;
+import nextstep.jwp.http.HttpRequest;
 
 public interface Controller {
 

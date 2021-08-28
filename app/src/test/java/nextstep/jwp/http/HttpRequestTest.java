@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,10 +16,9 @@ class HttpRequestTest {
         HttpRequest httpRequest = TestUtil.createRequest(firstLine);
 
         assertThat(httpRequest.getHttpMethod().name()).isEqualTo("GET");
-        assertThat(httpRequest.getUri()).isEqualTo("/login?account=gugu&password=password");
         assertThat(httpRequest.getPath()).isEqualTo("/login");
-        assertThat(httpRequest.getQueryStrings()).hasSize(2);
-        assertThat(httpRequest.getProtocol()).isEqualTo("HTTP/1.1");
-        assertThat(httpRequest.getHttpHeaders()).hasSize(3);
+        assertThat(httpRequest.getQueryStrings().getAllQueryStrings()).hasSize(2);
+        assertThat(httpRequest.getProtocol().getValue()).isEqualTo("HTTP/1.1");
+        assertThat(httpRequest.getHttpHeader().getAllHeaders()).hasSize(3);
     }
 }

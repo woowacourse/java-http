@@ -5,19 +5,14 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.ControllerContainer;
+import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.util.RequestBinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
@@ -39,7 +34,7 @@ public class RequestHandler implements Runnable {
         try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            HttpRequest httpRequest = new HttpRequest(bufferedReader);
+            HttpRequest httpRequest = RequestBinder.createRequestByMessage(bufferedReader);
             Controller controller = ControllerContainer.findController(httpRequest);
 
             String s = controller.doService(httpRequest);

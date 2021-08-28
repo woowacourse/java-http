@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import java.util.Arrays;
 import java.util.List;
-import nextstep.jwp.HttpRequest;
+import nextstep.jwp.http.HttpRequest;
 
 public class ControllerContainer {
 

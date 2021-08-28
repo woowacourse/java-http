@@ -1,7 +1,7 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.HttpMethod;
-import nextstep.jwp.HttpRequest;
+import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.util.FilePathFinder;
 
 public class IndexPageController extends AbstractController {

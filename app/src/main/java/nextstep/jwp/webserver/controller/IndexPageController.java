@@ -11,7 +11,7 @@ import nextstep.jwp.framework.util.Resources;
 public class IndexPageController extends AbstractController {
 
     public IndexPageController() {
-        super("/index", EnumSet.of(HttpMethod.GET));
+        super("/index.html", EnumSet.of(HttpMethod.GET));
     }
 
     @Override

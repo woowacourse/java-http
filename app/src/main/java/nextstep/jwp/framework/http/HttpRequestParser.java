@@ -26,7 +26,6 @@ public class HttpRequestParser {
         while (lineParser.canParse()) {
             lineParser = lineParser.parseLine(bufferedReader.readLine());
         }
-
         return lineParser.buildRequest();
     }
 }

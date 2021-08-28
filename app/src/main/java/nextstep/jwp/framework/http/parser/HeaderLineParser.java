@@ -3,6 +3,7 @@ package nextstep.jwp.framework.http.parser;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import nextstep.jwp.framework.http.HttpRequest;
 
@@ -49,6 +50,8 @@ public class HeaderLineParser extends AbstractLineParser {
     }
 
     private List<String> separateValues(String values) {
-        return Arrays.asList(values.split(COMMA));
+        return Arrays.stream(values.split(COMMA))
+                     .map(String::trim)
+                     .collect(Collectors.toList());
     }
 }

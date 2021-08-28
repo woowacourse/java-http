@@ -23,7 +23,7 @@ public class HeaderLineParserTest {
         final LineParser nextLineParser = lineParser.parseLine("Content-Type: text/html;charset=utf-8");
 
         //then
-        final HttpRequest actual = createBuilderWithStatusLine().header("Content-Type", " text/html;charset=utf-8")
+        final HttpRequest actual = createBuilderWithStatusLine().header("Content-Type", "text/html;charset=utf-8")
                                                                 .build();
 
         final HttpRequest httpRequest = nextLineParser.buildRequest();

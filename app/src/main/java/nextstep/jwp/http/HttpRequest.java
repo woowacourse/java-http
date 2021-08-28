@@ -2,12 +2,12 @@ package nextstep.jwp.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final HttpHeaders headers = new HttpHeaders(new HashMap<>());
+    private final HttpHeaders headers = new HttpHeaders(new LinkedHashMap<>());
 
     public HttpRequest(final BufferedReader bufferedReader) throws IOException {
         requestLine = new RequestLine(bufferedReader.readLine());
@@ -17,7 +17,7 @@ public class HttpRequest {
     private void addHeaders(final BufferedReader bufferedReader) throws IOException {
         String header = bufferedReader.readLine();
         while (header != null && !header.isBlank()) {
-            headers.add(header);
+            headers.put(header);
             header = bufferedReader.readLine();
         }
     }

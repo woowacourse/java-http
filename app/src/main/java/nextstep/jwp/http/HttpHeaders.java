@@ -15,7 +15,7 @@ public class HttpHeaders {
         this.headers = headers;
     }
 
-    public void add(final String header) {
+    public void put(final String header) {
         LOGGER.debug("header : {}", header);
 
         int index = header.indexOf(DELIMITER);
@@ -31,5 +31,13 @@ public class HttpHeaders {
             throw new IllegalArgumentException(String.format("없는 key의 헤더를 찾으려고 했습니다. key = {%s}", key));
         }
         return key + ": " + headers.get(key);
+    }
+
+    public String getAllHeaders() {
+        StringBuilder headerSet = new StringBuilder();
+        for (String key : headers.keySet()) {
+            headerSet.append(key).append(": ").append(headers.get(key)).append("\r\n");
+        }
+        return headerSet.toString();
     }
 }

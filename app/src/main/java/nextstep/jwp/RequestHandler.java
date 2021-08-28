@@ -21,8 +21,6 @@ public class RequestHandler implements Runnable {
     private static final String STATIC_PATH = "static";
     private static final String HEADER_DELIMITER = ": ";
 
-    private static long userId = 2;
-
     private final Socket connection;
 
     public RequestHandler(Socket connection) {
@@ -127,6 +125,7 @@ public class RequestHandler implements Runnable {
         if (user.checkPassword(params.get("password"))) {
             return user.toString();
         }
+        LOG.info("옳지 않은 비밀번호입니다.");
         throw new IllegalArgumentException("옳지 않은 비밀번호입니다.");
     }
 
@@ -135,12 +134,13 @@ public class RequestHandler implements Runnable {
         if (user.isPresent()) {
             return user.get();
         }
+        LOG.info("찾을 수 없는 사용자입니다.");
         throw new IllegalArgumentException("찾을 수 없는 사용자입니다.");
     }
 
     private void registerRequest(String requestBody) {
         final Map<String, String> params = extractQueryParam(requestBody);
-        final User user = new User(userId++, params.get("account"), params.get("password"), params.get("email"));
+        final User user = new User(params.get("account"), params.get("password"), params.get("email"));
         InMemoryUserRepository.save(user);
     }
 

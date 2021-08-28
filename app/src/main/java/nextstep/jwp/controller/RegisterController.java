@@ -1,10 +1,11 @@
 package nextstep.jwp.controller;
 
+import static nextstep.jwp.http.request.Method.GET;
+
 import java.io.IOException;
 import nextstep.jwp.controller.request.RegisterRequest;
 import nextstep.jwp.http.common.HttpStatus;
 import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.request.Method;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.model.StaticResource;
 import nextstep.jwp.service.RegisterService;
@@ -31,7 +32,7 @@ public class RegisterController implements Controller {
         RegisterRequest registerRequest = getRegisterRequest(httpRequest);
         registerService.registerUser(registerRequest);
 
-        return HttpResponse.redirect(HttpStatus.PERMANENT_REDIRECT, "/index.html");
+        return HttpResponse.redirect(HttpStatus.MOVED_PERMANENTLY, "/index.html");
     }
 
     private RegisterRequest getRegisterRequest(HttpRequest httpRequest) {
@@ -44,7 +45,7 @@ public class RegisterController implements Controller {
 
     @Override
     public HttpResponse doService(HttpRequest httpRequest) throws IOException {
-        if (httpRequest.hasMethod(Method.GET)) {
+        if (httpRequest.hasMethod(GET)) {
             return doGet(httpRequest);
         }
 

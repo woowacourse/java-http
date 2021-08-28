@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -42,6 +43,9 @@ public class RequestHandler implements Runnable {
             while (bufferedReader.ready()) {
                 request.add(bufferedReader.readLine());
             }
+            if (request.size() == 0 ){
+                return;
+            }
             String requestURI = request.get(0).split(" ")[1];
             String path;
             URL resource = null;
@@ -66,6 +70,23 @@ public class RequestHandler implements Runnable {
                 }
                 User user = InMemoryUserRepository.findByAccount(values.get(0)).orElseThrow();
                 log.debug("account : {}, checkPassword : {}", user.getAccount(), user.checkPassword(values.get(1)));
+
+                if (user.checkPassword(values.get(1))) {
+                    final String response = String.join("\r\n",
+                        "HTTP/1.1 302 Found ",
+                        "Location: /index.html"
+                    );
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                } else {
+                    final String response = String.join("\r\n",
+                        "HTTP/1.1 302 Found ",
+                        "Location: /401.html"
+                    );
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                }
+                return;
             }
 
 

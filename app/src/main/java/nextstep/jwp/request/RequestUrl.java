@@ -1,5 +1,7 @@
 package nextstep.jwp.request;
 
+import java.util.Objects;
+
 public class RequestUrl {
 
     private static final String QUERY_STRING_SEPARATOR = "?";
@@ -20,5 +22,19 @@ public class RequestUrl {
             return new RequestUrl(requestUrl, queryParam);
         }
         return new RequestUrl(parsedRequestUrl, null);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RequestUrl that = (RequestUrl) o;
+        return Objects.equals(requestUrl, that.requestUrl) &&
+                Objects.equals(queryParam, that.queryParam);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(requestUrl, queryParam);
     }
 }

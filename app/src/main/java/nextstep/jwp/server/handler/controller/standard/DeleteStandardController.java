@@ -1,7 +1,7 @@
 package nextstep.jwp.server.handler.controller.standard;
 
-import nextstep.jwp.http.header.request.HttpRequest;
-import nextstep.jwp.http.header.response.HttpResponse;
+import nextstep.jwp.http.message.request.HttpRequest;
+import nextstep.jwp.http.message.response.HttpResponse;
 
 public class DeleteStandardController implements StandardController {
 

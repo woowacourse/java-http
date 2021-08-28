@@ -1,6 +1,6 @@
-package nextstep.jwp.http.header.request.request_line;
+package nextstep.jwp.http.message.request.request_line;
 
-import nextstep.jwp.http.header.element.HttpVersion;
+import nextstep.jwp.http.message.element.HttpVersion;
 
 public class RequestLine {
 

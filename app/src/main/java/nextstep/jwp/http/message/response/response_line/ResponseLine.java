@@ -1,7 +1,7 @@
-package nextstep.jwp.http.header.response.response_line;
+package nextstep.jwp.http.message.response.response_line;
 
-import nextstep.jwp.http.header.element.HttpStatus;
-import nextstep.jwp.http.header.element.HttpVersion;
+import nextstep.jwp.http.message.element.HttpStatus;
+import nextstep.jwp.http.message.element.HttpVersion;
 
 public class ResponseLine {
     private final HttpVersion version;

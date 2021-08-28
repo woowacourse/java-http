@@ -1,10 +1,10 @@
-package nextstep.jwp.http.header.response;
+package nextstep.jwp.http.message.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.http.header.element.HttpStatus;
+import nextstep.jwp.http.message.element.HttpStatus;
 import org.junit.jupiter.api.Test;
 
 class HttpResponseTest {

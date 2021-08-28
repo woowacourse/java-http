@@ -1,9 +1,9 @@
-package nextstep.jwp.http.header.response.response_line;
+package nextstep.jwp.http.message.response.response_line;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import nextstep.jwp.http.header.element.HttpStatus;
-import nextstep.jwp.http.header.element.HttpVersion;
+import nextstep.jwp.http.message.element.HttpStatus;
+import nextstep.jwp.http.message.element.HttpVersion;
 import org.junit.jupiter.api.Test;
 
 class ResponseLineTest {

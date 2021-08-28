@@ -1,7 +1,7 @@
 package nextstep.jwp.http.exception;
 
 import java.util.Arrays;
-import nextstep.jwp.http.header.element.HttpStatus;
+import nextstep.jwp.http.message.element.HttpStatus;
 
 public enum Exceptions {
     NOT_FOUND(HttpStatus.NOT_FOUND, NotFoundException.class),

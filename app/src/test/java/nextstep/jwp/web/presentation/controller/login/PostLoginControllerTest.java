@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import nextstep.jwp.fixture.Fixture;
 import nextstep.jwp.http.exception.UnauthorizedException;
-import nextstep.jwp.http.header.request.HttpRequest;
-import nextstep.jwp.http.header.response.Response;
+import nextstep.jwp.http.message.request.HttpRequest;
+import nextstep.jwp.http.message.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

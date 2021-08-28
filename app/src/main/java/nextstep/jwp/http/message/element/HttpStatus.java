@@ -1,4 +1,4 @@
-package nextstep.jwp.http.header.element;
+package nextstep.jwp.http.message.element;
 
 public enum HttpStatus {
     OK(200, "OK"),

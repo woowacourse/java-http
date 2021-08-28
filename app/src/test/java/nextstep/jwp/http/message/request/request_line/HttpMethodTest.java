@@ -1,4 +1,4 @@
-package nextstep.jwp.http.header.request.request_line;
+package nextstep.jwp.http.message.request.request_line;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

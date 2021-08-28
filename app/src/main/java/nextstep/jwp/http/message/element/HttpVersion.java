@@ -1,4 +1,4 @@
-package nextstep.jwp.http.header.element;
+package nextstep.jwp.http.message.element;
 
 import java.util.Arrays;
 import java.util.Objects;

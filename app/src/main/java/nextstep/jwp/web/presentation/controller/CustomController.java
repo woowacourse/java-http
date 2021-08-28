@@ -1,8 +1,8 @@
 package nextstep.jwp.web.presentation.controller;
 
 import nextstep.jwp.server.handler.controller.Controller;
-import nextstep.jwp.http.header.request.HttpRequest;
-import nextstep.jwp.http.header.request.request_line.HttpMethod;
+import nextstep.jwp.http.message.request.HttpRequest;
+import nextstep.jwp.http.message.request.request_line.HttpMethod;
 
 public abstract class CustomController implements Controller {
 

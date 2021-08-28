@@ -1,7 +1,7 @@
 package nextstep.jwp.server.handler.controller;
 
 import nextstep.jwp.http.exception.NotFoundException;
-import nextstep.jwp.http.header.request.HttpRequest;
+import nextstep.jwp.http.message.request.HttpRequest;
 import nextstep.jwp.server.handler.controller.standard.StandardController;
 
 import java.util.List;

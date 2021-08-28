@@ -1,16 +1,16 @@
-package nextstep.jwp.http.header.response;
+package nextstep.jwp.http.message.response;
 
 import static nextstep.jwp.http.Protocol.LINE_SEPARATOR;
 
 import java.io.File;
 import java.util.List;
-import nextstep.jwp.http.header.element.Body;
-import nextstep.jwp.http.header.element.ContentType;
-import nextstep.jwp.http.header.element.Headers;
-import nextstep.jwp.http.header.element.HttpStatus;
-import nextstep.jwp.http.header.element.HttpVersion;
+import nextstep.jwp.http.message.element.Body;
+import nextstep.jwp.http.message.element.ContentType;
+import nextstep.jwp.http.message.element.Headers;
+import nextstep.jwp.http.message.element.HttpStatus;
+import nextstep.jwp.http.message.element.HttpVersion;
 import nextstep.jwp.http.common.PathUtils;
-import nextstep.jwp.http.header.response.response_line.ResponseLine;
+import nextstep.jwp.http.message.response.response_line.ResponseLine;
 
 public class HttpResponse implements Response {
 

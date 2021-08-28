@@ -1,12 +1,12 @@
-package nextstep.jwp.http.header.request;
+package nextstep.jwp.http.message.request;
 
 import java.util.Optional;
-import nextstep.jwp.http.header.element.Body;
-import nextstep.jwp.http.header.element.Headers;
-import nextstep.jwp.http.header.element.HttpVersion;
-import nextstep.jwp.http.header.request.request_line.HttpMethod;
-import nextstep.jwp.http.header.request.request_line.HttpPath;
-import nextstep.jwp.http.header.request.request_line.RequestLine;
+import nextstep.jwp.http.message.element.Body;
+import nextstep.jwp.http.message.element.Headers;
+import nextstep.jwp.http.message.element.HttpVersion;
+import nextstep.jwp.http.message.request.request_line.HttpMethod;
+import nextstep.jwp.http.message.request.request_line.HttpPath;
+import nextstep.jwp.http.message.request.request_line.RequestLine;
 
 public class HttpRequest {
 

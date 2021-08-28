@@ -1,12 +1,11 @@
-package nextstep.jwp.http.header.request;
+package nextstep.jwp.http.message.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import nextstep.jwp.fixture.Fixture;
-import nextstep.jwp.http.header.request.request_line.HttpMethod;
-import nextstep.jwp.http.header.request.request_line.HttpPath;
+import nextstep.jwp.http.message.request.request_line.HttpMethod;
+import nextstep.jwp.http.message.request.request_line.HttpPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

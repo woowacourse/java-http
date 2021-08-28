@@ -1,4 +1,4 @@
-package nextstep.jwp.http.header.request.request_line;
+package nextstep.jwp.http.message.request.request_line;
 
 import java.util.HashMap;
 import java.util.Map;

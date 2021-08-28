@@ -1,4 +1,4 @@
-package nextstep.jwp.http.header.response;
+package nextstep.jwp.http.message.response;
 
 public interface Response {
     String asString();

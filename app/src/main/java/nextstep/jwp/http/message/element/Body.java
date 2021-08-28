@@ -1,4 +1,4 @@
-package nextstep.jwp.http.header.element;
+package nextstep.jwp.http.message.element;
 
 import static nextstep.jwp.http.Protocol.LINE_SEPARATOR;
 

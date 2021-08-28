@@ -3,7 +3,7 @@ package nextstep.jwp.server.handler.controller.standard;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import nextstep.jwp.fixture.Fixture;
-import nextstep.jwp.http.header.response.HttpResponse;
+import nextstep.jwp.http.message.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -1,5 +1,15 @@
 package nextstep.jwp;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +35,17 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            List<String> request = new ArrayList<>();
+            while (bufferedReader.ready()) {
+                request.add(bufferedReader.readLine());
+            }
+            String requestURI = "static" + request.get(0).split(" ")[1];
 
-            final String responseBody = "Hello world!";
+            URL resource = getClass().getClassLoader().getResource(requestURI);
+
+            final Path path = new File(resource.getFile()).toPath();
+            final String responseBody = Files.readString(path);
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

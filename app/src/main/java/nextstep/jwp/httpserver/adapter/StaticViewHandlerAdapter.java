@@ -20,7 +20,7 @@ public class StaticViewHandlerAdapter extends AbstractHandlerAdapter {
     @Override
     public View handle(HttpRequest httpRequest, Object handler) throws URISyntaxException, IOException {
         final StaticViewController staticViewController = (StaticViewController) handler;
-        final HttpResponse httpResponse = staticViewController.handle(new HashMap<>());
+        final HttpResponse httpResponse = staticViewController.service(httpRequest, new HashMap<>());
 
         final String requestUri = httpRequest.getRequestUri();
         final String resourcePath = getResourcePath(requestUri);
@@ -31,6 +31,7 @@ public class StaticViewHandlerAdapter extends AbstractHandlerAdapter {
         return new View(resourcePath, response);
     }
 
+    @Override
     protected String getResourcePath(String requestUri) {
         if (requestUri.equals("/")) {
             return "/index";
@@ -39,6 +40,7 @@ public class StaticViewHandlerAdapter extends AbstractHandlerAdapter {
         return requestUri.substring(0, index);
     }
 
+    @Override
     protected String getResponse(HttpResponse httpResponse, List<String> body) {
         final StringBuilder responseBody = new StringBuilder();
         for (String bodyLine : body) {

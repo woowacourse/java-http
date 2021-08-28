@@ -4,13 +4,14 @@ import java.util.Map;
 
 import nextstep.jwp.dashboard.controller.dto.UserDto;
 import nextstep.jwp.dashboard.service.UserService;
-import nextstep.jwp.httpserver.controller.Handler;
+import nextstep.jwp.httpserver.controller.AbstractController;
 import nextstep.jwp.httpserver.domain.StatusCode;
+import nextstep.jwp.httpserver.domain.request.HttpRequest;
 import nextstep.jwp.httpserver.domain.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController implements Handler {
+public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
@@ -21,7 +22,14 @@ public class LoginController implements Handler {
     }
 
     @Override
-    public HttpResponse handle(Map<String, String> param) {
+    protected HttpResponse doGet(HttpRequest httpRequest, Map<String, String> param) {
+        return new HttpResponse.Builder()
+                .statusCode(StatusCode.OK)
+                .build();
+    }
+
+    @Override
+    protected HttpResponse doPost(HttpRequest httpRequest, Map<String, String> param) {
         String account = param.get("account");
         String password = param.get("password");
         UserDto userDto = userService.login(account, password);

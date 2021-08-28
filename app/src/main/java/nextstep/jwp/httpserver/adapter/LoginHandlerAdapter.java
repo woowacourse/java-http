@@ -28,7 +28,7 @@ public class LoginHandlerAdapter extends AbstractHandlerAdapter {
         final String path = getResourcePath(requestUri);
 
         try {
-            final HttpResponse httpResponse = loginController.handle(getQueryString(requestUri));
+            final HttpResponse httpResponse = loginController.service(httpRequest, getQueryString(requestUri));
             final List<String> body = readFile(path);
             final String response = getResponse(httpResponse, body);
             return new View(path, response);
@@ -38,7 +38,7 @@ public class LoginHandlerAdapter extends AbstractHandlerAdapter {
         }
     }
 
-
+    @Override
     protected String getResourcePath(String requestUri) {
         if (requestUri.contains("?")) {
             final int index = requestUri.indexOf("?");
@@ -67,6 +67,7 @@ public class LoginHandlerAdapter extends AbstractHandlerAdapter {
         }
     }
 
+    @Override
     protected String getResponse(HttpResponse httpResponse, List<String> body) {
         final StringBuilder responseBody = new StringBuilder();
         for (String bodyLine : body) {

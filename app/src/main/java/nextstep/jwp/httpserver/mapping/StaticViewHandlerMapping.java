@@ -1,7 +1,7 @@
 package nextstep.jwp.httpserver.mapping;
 
 import nextstep.jwp.httpserver.BeanFactory;
-import nextstep.jwp.httpserver.controller.Handler;
+import nextstep.jwp.httpserver.controller.Controller;
 import nextstep.jwp.httpserver.domain.request.HttpRequest;
 
 public class StaticViewHandlerMapping implements HandlerMapping {
@@ -13,7 +13,7 @@ public class StaticViewHandlerMapping implements HandlerMapping {
     }
 
     @Override
-    public Handler find(HttpRequest httpRequest) {
-        return (Handler) BeanFactory.getBean("staticViewController");
+    public Controller find(HttpRequest httpRequest) {
+        return (Controller) BeanFactory.getBean("staticViewController");
     }
 }

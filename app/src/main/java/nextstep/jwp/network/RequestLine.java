@@ -25,6 +25,10 @@ public class RequestLine {
         return new RequestLine(httpMethod, uri, protocolVersion);
     }
 
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
+    }
+
     public URI getURI() {
         return uri;
     }

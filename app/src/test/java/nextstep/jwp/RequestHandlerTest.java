@@ -61,7 +61,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("/login 요청에 login.html 파일을 포함하여 응답한다 - 성공")
+    @DisplayName("GET /login 요청에 login.html 파일을 포함하여 응답한다 - 성공")
     @Test
     void login() throws IOException {
         // given
@@ -138,6 +138,34 @@ class RequestHandlerTest {
 
         // then
         final String expected = "HTTP/1.1 401 UNAUTHORIZED \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + resourceAsString.getBytes().length + " \r\n" +
+                "\r\n" +
+                resourceAsString;
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("GET /register 요청에 register.html 파일을 포함하여 응답한다 - 성공")
+    @Test
+    void register() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        final String resourceAsString = new String(Files.readAllBytes(Paths.get(resource.getPath())));
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + resourceAsString.getBytes().length + " \r\n" +
                 "\r\n" +

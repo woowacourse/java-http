@@ -1,6 +1,7 @@
 plugins {
     id 'application'
     id 'org.sonarqube' version '3.3'
+    id 'jacoco'
 }
 
 sourceCompatibility = JavaVersion.VERSION_11
@@ -36,3 +37,10 @@ sonarqube {
         property "sonar.host.url", "https://sonarcloud.io"
     }
 }
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}
+test.finalizedBy jacocoTestReport

@@ -1,6 +1,8 @@
 package nextstep.jwp.framework.http;
 
 import java.net.URL;
+import java.util.Map;
+import java.util.Objects;
 
 public class HttpPath {
 
@@ -8,27 +10,41 @@ public class HttpPath {
     private static final String PATH_DELIMITER = "/";
     private static final String RESOURCE_PATH = "static/";
     private static final String PARSING = ".html";
-    private static final String NOT_FOUND_PAGE = "404.html";
     private static final int FILE_NAME_INDEX = 0;
     private static final int PATH_INDEX = 0;
     private static final int FILE_ROOT_INDEX = 1;
     private static final int ROOT_FILE_PATH_COUNT = 1;
     private static final int QUERY_CONTAINS_COUNT = 2;
     private static final int QUERY_PARAMETER_INDEX = 1;
+    private static final String DEFAULT_PAGE = "index.html";
+    private static final String UNAUTHORIZED_PAGE = "401.html";
+    private static final String NOT_FOUND_PAGE = "404.html";
 
     private final String path;
     private final QueryParams queryParams;
 
-    public HttpPath(String path) {
+    public HttpPath(final String path) {
         this.path = createPath(path);
         this.queryParams = createQueryParams(path);
+    }
+
+    public static URL index() {
+        return HttpPath.class.getClassLoader().getResource(RESOURCE_PATH + DEFAULT_PAGE);
+    }
+
+    public static URL unAuthorized() {
+        return HttpPath.class.getClassLoader().getResource(RESOURCE_PATH + UNAUTHORIZED_PAGE);
     }
 
     public static URL notFound() {
         return HttpPath.class.getClassLoader().getResource(RESOURCE_PATH + NOT_FOUND_PAGE);
     }
 
-    private String createPath(String path) {
+    public URL findResourceURL() {
+        return getClass().getClassLoader().getResource(RESOURCE_PATH + path);
+    }
+
+    private String createPath(final String path) {
         String resourcePath = path.substring(FILE_ROOT_INDEX).split(QUERY_DELIMITER)[FILE_NAME_INDEX];
 
         if (resourcePath.split(PATH_DELIMITER).length == ROOT_FILE_PATH_COUNT) {
@@ -38,7 +54,7 @@ public class HttpPath {
         return resourcePath;
     }
 
-    private QueryParams createQueryParams(String path) {
+    private QueryParams createQueryParams(final String path) {
         final String[] splitQuery = path.substring(FILE_ROOT_INDEX).split(QUERY_DELIMITER);
 
         if (splitQuery.length == QUERY_CONTAINS_COUNT) {
@@ -48,7 +64,15 @@ public class HttpPath {
         return new QueryParams();
     }
 
-    public URL findResourceURL() {
-        return getClass().getClassLoader().getResource(RESOURCE_PATH + path);
+    public boolean hasNotQueryParams() {
+        return queryParams.count() == 0;
+    }
+
+    public Map<String, String> queryParams() {
+        return queryParams.getQueryParams();
+    }
+
+    public boolean isNotExistFile() {
+        return Objects.isNull(getClass().getClassLoader().getResource(RESOURCE_PATH + path));
     }
 }

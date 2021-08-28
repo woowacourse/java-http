@@ -6,7 +6,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Objects;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.DBNotFoundException;
 
 public class HttpResponse {
 
@@ -17,32 +20,26 @@ public class HttpResponse {
     private final HttpHeaders headers;
     private final URL resourceURL;
 
-    public HttpResponse(final HttpRequestLine httpRequestLine, final HttpStatus status, final HttpHeaders headers) {
+    public HttpResponse(final HttpRequestLine httpRequestLine, final HttpHeaders headers) {
         this.protocolVersion = httpRequestLine.getProtocolVersion();
-        this.status = status;
+        this.status = login(httpRequestLine.getPath());
         this.headers = headers;
-        this.resourceURL = httpRequestLine.getURL();
+        this.resourceURL = httpRequestLine.url(status);
     }
 
-//    public String getResponse() throws IOException {
-//        try {
-//
-//
-//            return createResponse(httpStatus, content);
-//        } catch (ArrayIndexOutOfBoundsException e) {
-//            final Path path = new File(HttpPath.notFound().getPath()).toPath();
-//            final String content = Files.readString(path);
-//
-//            return createResponse(HttpStatus.NOT_FOUND, content);
-//        }
-//    }
+    private HttpStatus login(HttpPath path) {
+        if (path.hasNotQueryParams()) {
+            return HttpStatus.OK;
+        }
 
-    private String createResponse(HttpStatus httpStatus, String content) {
-        final String requestLine = protocolVersion.getProtocolVersion() + " " + httpStatus.value() + " " + httpStatus.getReasonPhrase() + " ";
-        return String.join("\r\n",
-            requestLine,
-            headers.getHeaders(), // + content.getBytes().length + " ",
-            content);
+        try {
+            final Map<String, String> queryParams = path.queryParams();
+            final String account = queryParams.get("account");
+            InMemoryUserRepository.findByAccount(account).orElseThrow(DBNotFoundException::new);
+            return HttpStatus.FOUND;
+        } catch (DBNotFoundException ignored) {
+            return HttpStatus.UNAUTHORIZED;
+        }
     }
 
     public byte[] getBytes() throws IOException {

@@ -31,7 +31,7 @@ public class HttpRequest {
 
         while (bufferedReader.ready()) {
             lines.append(bufferedReader.readLine())
-                .append("\r\n");
+                .append(LINE_DELIMITER);
         }
 
         return lines.toString();
@@ -59,8 +59,8 @@ public class HttpRequest {
         return new HttpHeaders(headerLines.toString());
     }
 
-    public HttpResponse toHttpResponse(final HttpStatus httpStatus) {
-        return new HttpResponse(requestLine, httpStatus, headers);
+    public HttpResponse toHttpResponse() {
+        return new HttpResponse(requestLine, headers);
     }
 
     public boolean isPost() {

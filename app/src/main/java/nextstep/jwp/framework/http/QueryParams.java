@@ -1,5 +1,6 @@
 package nextstep.jwp.framework.http;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,5 +31,13 @@ public class QueryParams {
         }
 
         return queryParams;
+    }
+
+    public int count() {
+        return queryParams.size();
+    }
+
+    public Map<String, String> getQueryParams() {
+        return Collections.unmodifiableMap(queryParams);
     }
 }

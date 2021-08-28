@@ -8,13 +8,25 @@ public class HttpRequestLine {
     private final HttpPath path;
     private final ProtocolVersion protocolVersion;
 
-    public HttpRequestLine(HttpMethod method, HttpPath path, ProtocolVersion protocolVersion) {
+    public HttpRequestLine(final HttpMethod method, final HttpPath path, final ProtocolVersion protocolVersion) {
         this.method = method;
         this.path = path;
         this.protocolVersion = protocolVersion;
     }
 
-    public URL getURL() {
+    public URL url(final HttpStatus httpStatus) {
+        if (path.isNotExistFile()) {
+            return HttpPath.notFound();
+        }
+
+        if (httpStatus == HttpStatus.FOUND) {
+            return HttpPath.index();
+        }
+
+        if (httpStatus == HttpStatus.UNAUTHORIZED) {
+            return HttpPath.unAuthorized();
+        }
+
         return path.findResourceURL();
     }
 

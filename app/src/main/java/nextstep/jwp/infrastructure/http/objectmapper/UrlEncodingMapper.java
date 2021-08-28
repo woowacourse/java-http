@@ -8,13 +8,16 @@ import java.util.stream.Collectors;
 
 public class UrlEncodingMapper implements DataMapper {
 
+    private static final String PARAMETER_DELIMITER = "&";
+    private static final String KEY_AND_VALUE_DELIMITER = "=";
+
     @Override
     public Map<String, String> parse(final String data) {
         final Map<String, String> result = new HashMap<>();
-        final String[] parameters = data.split("&");
+        final String[] parameters = data.split(PARAMETER_DELIMITER);
 
         for (final String parameter : parameters) {
-            List<String> keyAndValue = Arrays.stream(parameter.split("="))
+            List<String> keyAndValue = Arrays.stream(parameter.split(KEY_AND_VALUE_DELIMITER))
                 .collect(Collectors.toList());
 
             if (keyAndValue.size() != 2) {

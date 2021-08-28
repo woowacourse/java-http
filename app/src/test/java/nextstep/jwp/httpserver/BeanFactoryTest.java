@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import nextstep.jwp.httpserver.mapping.HandlerMapping;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("BeanFactory 테스트")
 class BeanFactoryTest {

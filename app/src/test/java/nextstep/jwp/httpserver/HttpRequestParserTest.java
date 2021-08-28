@@ -12,7 +12,7 @@ import nextstep.jwp.httpserver.domain.HttpVersion;
 import nextstep.jwp.httpserver.domain.request.HttpRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("HttpRequestParser 테스트")
 class HttpRequestParserTest {

@@ -7,7 +7,8 @@ import nextstep.jwp.httpserver.domain.HttpMethod;
 import nextstep.jwp.httpserver.domain.HttpVersion;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("StartLine 단위 테스트")
 class StartLineTest {

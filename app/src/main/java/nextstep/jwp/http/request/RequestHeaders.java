@@ -19,6 +19,10 @@ public class RequestHeaders {
         if (Strings.isNullOrEmpty(contentLength)) {
             return 0;
         }
-        return Integer.parseInt(contentLength);
+        return Integer.parseInt(contentLength.trim());
+    }
+
+    public String getHeader(String key) {
+        return headers.get(key).trim();
     }
 }

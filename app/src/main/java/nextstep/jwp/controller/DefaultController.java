@@ -15,7 +15,7 @@ public class DefaultController extends AbstractController {
         serveResource(request, response);
     }
 
-    protected void serveResource(HttpRequest request, HttpResponse response) {
+    private void serveResource(HttpRequest request, HttpResponse response) {
         response.forward(request.getPath());
     }
 }

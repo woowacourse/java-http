@@ -1,5 +1,6 @@
 package nextstep.jwp.http.response;
 
+import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,6 +96,9 @@ public class HttpResponse {
 
     @Override
     public String toString() {
+        if (Strings.isNullOrEmpty(body.toString())) {
+            return String.join("\r\n", statusLine.toString(), headers.toString());
+        }
         return String.join("\r\n", statusLine.toString(), headers.toString(), body.toString());
     }
 }

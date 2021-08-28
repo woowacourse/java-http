@@ -11,7 +11,7 @@ public class StatusLine {
     public StatusLine(Status status) {
         this.protocol = "HTTP/1.1";
         this.statusCode = status.getCode();
-        this.statusMessage = status.name();
+        this.statusMessage = status.getMessage();
     }
 
     @Override

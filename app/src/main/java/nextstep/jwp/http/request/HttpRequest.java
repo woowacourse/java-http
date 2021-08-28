@@ -49,6 +49,10 @@ public class HttpRequest {
         return body.getParam(key);
     }
 
+    public String getHeader(String key) {
+        return headers.getHeader(key);
+    }
+
     public String getPath() {
         return requestLine.getPath();
     }

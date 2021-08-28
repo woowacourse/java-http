@@ -1,16 +1,21 @@
 package nextstep.jwp.http.response;
 
 public enum Status {
-    OK("200"),
-    FOUND("302"),
-    BAD_REQUEST("400"),
-    NOT_FOUND("404"),
-    UNAUTHORIZED("401");
+    OK("OK", "200"),
+    FOUND("Found", "302"),
+    NOT_FOUND("Not Found", "404"),
+    UNAUTHORIZED("Unauthorized", "401");
 
+    private final String message;
     private final String code;
 
-    Status(String code) {
+    Status(String message, String code) {
+        this.message = message;
         this.code = code;
+    }
+
+    public String getMessage() {
+        return message;
     }
 
     public String getCode() {

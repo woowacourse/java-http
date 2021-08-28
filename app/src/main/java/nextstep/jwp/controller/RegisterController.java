@@ -25,6 +25,6 @@ public class RegisterController extends AbstractController {
                 request.getParameter("email"));
         InMemoryUserRepository.save(user);
         log.debug("User Signup Success! account: {}", user);
-        response.redirect("/index.html");
+        response.redirect("http://" + request.getHeader("Host") + "/index.html");
     }
 }

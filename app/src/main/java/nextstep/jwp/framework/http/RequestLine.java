@@ -3,9 +3,9 @@ package nextstep.jwp.framework.http;
 public class RequestLine {
     private final HttpMethod method;
     private final String uri;
-    private final String version;
+    private final HttpVersion version;
 
-    public RequestLine(HttpMethod method, String uri, String version) {
+    public RequestLine(HttpMethod method, String uri, HttpVersion version) {
         this.method = method;
         this.uri = uri;
         this.version = version;
@@ -20,7 +20,7 @@ public class RequestLine {
     }
 
     public String getVersion() {
-        return version;
+        return version.name();
     }
 
     public boolean isSameUri(String uri) {

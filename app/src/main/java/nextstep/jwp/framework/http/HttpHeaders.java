@@ -17,15 +17,16 @@ public class HttpHeaders {
         this.headers = headers;
     }
 
-    public void addHeader(String name, String... values) {
-        addHeader(name, Arrays.asList(values));
+    public HttpHeaders addHeader(String name, String... values) {
+        return addHeader(name, Arrays.asList(values));
     }
 
-    public void addHeader(String name, List<String> values) {
+    public HttpHeaders addHeader(String name, List<String> values) {
         final List<String> valuesWithoutWhitespace = values.stream()
                                                            .map(String::trim)
                                                            .collect(Collectors.toList());
 
         headers.addAll(HttpHeader.resolve(name), valuesWithoutWhitespace);
+        return this;
     }
 }

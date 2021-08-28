@@ -55,6 +55,6 @@ public class HeaderLineParserTest {
     }
 
     private static HttpRequest.Builder createBuilderWithStatusLine() {
-        return new HttpRequest.Builder().requestLine(HttpMethod.GET, "/", "HTTP/1.1");
+        return new HttpRequest.Builder().requestLine(HttpMethod.GET, "/", HttpVersion.HTTP_1_1);
     }
 }

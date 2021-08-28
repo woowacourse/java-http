@@ -13,7 +13,7 @@ public class RequestLineParserTest {
 
         // given
         LineParser lineParser = new RequestLineParser();
-        final RequestLine requestLine = new RequestLine(HttpMethod.GET, "/", "HTTP/1.1");
+        final RequestLine requestLine = new RequestLine(HttpMethod.GET, "/", HttpVersion.HTTP_1_1);
 
         // when
         final LineParser nextLineParser = lineParser.parseLine("GET / HTTP/1.1");

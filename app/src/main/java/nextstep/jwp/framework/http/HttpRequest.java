@@ -6,9 +6,9 @@ import java.util.List;
 public class HttpRequest {
     private final RequestLine requestLine;
     private final HttpHeaders headers;
-    private final StringBuilder requestBody;
+    private final String requestBody;
 
-    public HttpRequest(RequestLine requestLine, HttpHeaders headers, StringBuilder requestBody) {
+    public HttpRequest(RequestLine requestLine, HttpHeaders headers, String requestBody) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.requestBody = requestBody;
@@ -18,7 +18,7 @@ public class HttpRequest {
         return headers;
     }
 
-    public StringBuilder getRequestBody() {
+    public String getRequestBody() {
         return requestBody;
     }
 
@@ -48,7 +48,7 @@ public class HttpRequest {
             this.requestBody = new StringBuilder();
         }
 
-        public Builder requestLine(HttpMethod method, String uri, String version) {
+        public Builder requestLine(HttpMethod method, String uri, HttpVersion version) {
             return requestLine(new RequestLine(method, uri, version));
         }
 
@@ -75,7 +75,7 @@ public class HttpRequest {
         }
 
         public HttpRequest build() {
-            return new HttpRequest(requestLine, headers, requestBody);
+            return new HttpRequest(requestLine, headers, requestBody.toString());
         }
     }
 }

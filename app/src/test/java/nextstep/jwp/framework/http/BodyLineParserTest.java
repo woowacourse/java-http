@@ -44,9 +44,7 @@ public class BodyLineParserTest {
         final LineParser nextLineParser = lineParser.parseLine(body);
 
         //then
-        final HttpRequest actual = new HttpRequest.Builder().body("Hello World!")
-                                                            .build();
-
+        final HttpRequest actual = new HttpRequest.Builder().build();
         final HttpRequest httpRequest = nextLineParser.buildRequest();
         assertThat(nextLineParser).isExactlyInstanceOf(EndLineParser.class);
         assertThat(httpRequest).usingRecursiveComparison().isEqualTo(actual);

@@ -43,4 +43,8 @@ public enum HttpHeader {
     public static String resolve(String headerName) {
         return HEADER_MAP.getOrDefault(headerName.toUpperCase(), headerName);
     }
+
+    public String getHeaderName() {
+        return headerName;
+    }
 }

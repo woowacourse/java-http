@@ -19,7 +19,7 @@ class HttpResponseTest {
         final byte[] bytes = "Hello World!".getBytes();
 
         // when // then
-        assertThatCode(() -> new HttpResponse(HttpStatus.OK, bytes))
+        assertThatCode(() -> HttpResponse.ofByteArray(HttpStatus.OK, bytes))
                 .doesNotThrowAnyException();
     }
 
@@ -29,7 +29,7 @@ class HttpResponseTest {
         final String string = "Hello World!";
 
         // when // then
-        assertThatCode(() -> new HttpResponse(HttpStatus.OK, string))
+        assertThatCode(() -> HttpResponse.ofString(HttpStatus.OK, ContentType.HTML, string))
                 .doesNotThrowAnyException();
     }
 
@@ -41,7 +41,7 @@ class HttpResponseTest {
         final String resourceAsString = new String(Files.readAllBytes(Paths.get(resource.getPath())));
 
         // when
-        final HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, resourceAsString);
+        final HttpResponse httpResponse = HttpResponse.ofString(HttpStatus.OK, ContentType.HTML, resourceAsString);
         final String actual = httpResponse.asString();
 
         // then

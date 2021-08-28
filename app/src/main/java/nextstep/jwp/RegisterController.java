@@ -20,7 +20,8 @@ public class RegisterController extends AbstractController {
 
     @Override
     public HttpResponse doGet(HttpRequest httpRequest) {
-        return new HttpResponse(HttpStatus.OK, readFile(getResource()));
+        log.info("GET /register");
+        return HttpResponse.ofByteArray(HttpStatus.OK, readFile(getResource() + ".html"));
     }
 
     @Override
@@ -37,6 +38,6 @@ public class RegisterController extends AbstractController {
         }
         InMemoryUserRepository.save(user);
         log.info(String.format("New User Registered. user id : %d, account : %s", user.getId(), user.getAccount()));
-        return new HttpResponse(HttpStatus.OK, readIndex());
+        return HttpResponse.ofByteArray(HttpStatus.OK, readIndex());
     }
 }

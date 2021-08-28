@@ -203,4 +203,32 @@ class RequestHandlerTest {
                 resourceAsString;
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @DisplayName("GET /css/styles.css 요청에 styles.css 파일을 포함하여 응답한다 - 성공")
+    @Test
+    void getCSS() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        final String resourceAsString = new String(Files.readAllBytes(Paths.get(resource.getPath())));
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/css \r\n" +
+                "Content-Length: " + resourceAsString.getBytes().length + " \r\n" +
+                "\r\n" +
+                resourceAsString;
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

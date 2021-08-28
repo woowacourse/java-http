@@ -8,4 +8,4 @@
 - [x] Query String 파싱
 - [x] HTTP Status Code 302
 - [x] POST 방식으로 회원가입
-- [ ] CSS 지원하기
+- [x] CSS 지원하기

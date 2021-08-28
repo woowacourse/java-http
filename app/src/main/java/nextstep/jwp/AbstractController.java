@@ -45,9 +45,9 @@ public abstract class AbstractController implements Controller {
         throw new UnsupportedOperationException();
     }
 
-    protected byte[] readFile(String resoureName) {
+    protected byte[] readFile(String fileName) {
         try {
-            final URL url = getClass().getClassLoader().getResource("static" + resoureName + ".html");
+            final URL url = getClass().getClassLoader().getResource("static" + fileName);
             final Path path = Paths.get(url.getPath());
             return Files.readAllBytes(path);
         } catch (IOException e) {
@@ -57,7 +57,7 @@ public abstract class AbstractController implements Controller {
     }
 
     protected byte[] readIndex() {
-        return readFile("/index");
+        return readFile("/index.html");
     }
 
     protected Map<String, String> extractQuery(String queryString) {

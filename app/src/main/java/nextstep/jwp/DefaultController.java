@@ -1,10 +1,15 @@
 package nextstep.jwp;
 
+import nextstep.jwp.network.ContentType;
 import nextstep.jwp.network.HttpRequest;
 import nextstep.jwp.network.HttpResponse;
 import nextstep.jwp.network.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultController extends AbstractController {
+
+    private static final Logger log = LoggerFactory.getLogger(DefaultController.class);
 
     public DefaultController(String resource) {
         super(resource);
@@ -12,12 +17,23 @@ public class DefaultController extends AbstractController {
 
     @Override
     public HttpResponse doGet(HttpRequest httpRequest) {
-        if ("/index.html".equals(httpRequest.getURI().getPath())) {
-            final byte[] bytes = readIndex();
-            return new HttpResponse(HttpStatus.OK, bytes);
+        final String path = httpRequest.getURI().getPath();
+        if ("/".equals(path)) {
+            log.info("HELLO WORLD!");
+            return HttpResponse.ofByteArray(HttpStatus.OK, "Hello world!".getBytes());
         }
-
+        if ("/index.html".equals(path)) {
+            log.info("GET /index.html");
+            final byte[] bytes = readIndex();
+            return HttpResponse.ofByteArray(HttpStatus.OK, bytes);
+        }
+        if ("/css/styles.css".equals(path)) {
+            log.info("GET /css/styles.css");
+            final byte[] bytes = readFile(httpRequest.getURI().getPath());
+            return HttpResponse.ofByteArray(HttpStatus.OK, ContentType.CSS, bytes);
+        }
+        log.info(path);
         byte[] bytes = "Hello world!".getBytes();
-        return new HttpResponse(HttpStatus.OK, bytes);
+        return HttpResponse.ofByteArray(HttpStatus.OK, bytes);
     }
 }

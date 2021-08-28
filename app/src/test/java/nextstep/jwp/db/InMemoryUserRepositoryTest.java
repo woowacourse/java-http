@@ -19,11 +19,11 @@ class InMemoryUserRepositoryTest {
         final User user2 = new User("인비2", "1234", "인비2@email.com");
 
         //when
-        inMemoryUserRepository.save(user1);
-        inMemoryUserRepository.save(user2);
+        final User savedUser1 = inMemoryUserRepository.save(user1);
+        final User savedUser2 = inMemoryUserRepository.save(user2);
 
         //then
-        assertThat(user1.getId()).isEqualTo(2L);
-        assertThat(user2.getId()).isEqualTo(3L);
+        assertThat(savedUser1.getId()).isEqualTo(2L);
+        assertThat(savedUser2.getId()).isEqualTo(3L);
     }
 }

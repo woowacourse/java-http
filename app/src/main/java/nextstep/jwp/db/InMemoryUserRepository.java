@@ -22,9 +22,10 @@ public class InMemoryUserRepository {
         save(user);
     }
 
-    public void save(User user) {
-        user.assignId(index++);
-        database.put(user.getAccount(), user);
+    public User save(User user) {
+        final User userWithId = new User(index++, user.getAccount(), user.getPassword(), user.getEmail());
+        database.put(userWithId.getAccount(), userWithId);
+        return userWithId;
     }
 
     public Optional<User> findByAccount(String account) {

@@ -1,14 +1,13 @@
 package nextstep.jwp.model;
 
-import nextstep.jwp.exception.IllegalOperationException;
 import nextstep.jwp.exception.UnAuthorizedException;
 
 public class User {
 
+    private final Long id;
     private final String account;
     private final String password;
     private final String email;
-    private Long id;
 
     public User(Long id, String account, String password, String email) {
         this.id = id;
@@ -25,13 +24,6 @@ public class User {
         if (!password.equals(requestPassword)) {
             throw new UnAuthorizedException("비밀번호가 일치하지 않습니다.");
         }
-    }
-
-    public void assignId(Long id) {
-        if (this.id != null) {
-            throw new IllegalOperationException("id가 이미 할당된 경우에는 재할당 할 수 없습니다.");
-        }
-        this.id = id;
     }
 
     public boolean hasSameEmail(String otherEmail) {

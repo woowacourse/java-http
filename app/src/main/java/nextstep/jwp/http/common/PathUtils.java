@@ -4,9 +4,8 @@ import static java.util.stream.Collectors.joining;
 
 import java.io.File;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.stream.Stream;
+
 import nextstep.jwp.http.exception.NotFoundException;
 
 public class PathUtils {
@@ -22,10 +21,7 @@ public class PathUtils {
     }
 
     private static String rewritePath(String path) {
-        path = Stream.of(new String[]{PREFIX}, path.split("/"))
-            .flatMap(Arrays::stream)
-            .filter(piece -> !piece.isBlank())
-            .collect(joining("/"));
+        path = setPrefix(path);
 
         URL systemResource = ClassLoader.getSystemResource(path);
         if(Objects.isNull(systemResource)) {
@@ -33,5 +29,12 @@ public class PathUtils {
         }
 
         return ClassLoader.getSystemResource(path).getPath();
+    }
+
+    private static String setPrefix(String path) {
+        if(path.startsWith("/")) {
+            return PREFIX + path;
+        }
+        return PREFIX + "/" + path;
     }
 }

@@ -5,7 +5,6 @@ import nextstep.jwp.http.request.RequestBody;
 import nextstep.jwp.http.request.RequestLine;
 import nextstep.jwp.http.response.ContentType;
 import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.model.User;
 import nextstep.jwp.service.RegisterService;
 import nextstep.jwp.staticresource.StaticResource;
 import nextstep.jwp.staticresource.StaticResourceFinder;
@@ -52,7 +51,7 @@ class RegisterControllerTest {
         final HttpRequest request = new HttpRequest(requestLine, null, requestBody);
         final HttpResponse response = new HttpResponse();
 
-        willDoNothing().given(registerService).register(any(User.class));
+        willDoNothing().given(registerService).register(any(String.class), any(String.class), any(String.class));
 
         //when
         registerController.service(request, response);

@@ -1,6 +1,5 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.controller.dto.request.LoginRequest;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestBody;
 import nextstep.jwp.http.request.RequestLine;
@@ -52,7 +51,7 @@ class LoginControllerTest {
         final HttpRequest request = new HttpRequest(requestLine, null, requestBody);
         final HttpResponse response = new HttpResponse();
 
-        willDoNothing().given(loginService).login(any(LoginRequest.class));
+        willDoNothing().given(loginService).login(any(String.class), any(String.class));
 
         //when
         loginController.service(request, response);

@@ -16,7 +16,8 @@ public class RegisterService {
         this.inMemoryUserRepository = inMemoryUserRepository;
     }
 
-    public void register(User user) {
+    public void register(String account, String password, String email) {
+        final User user = new User(account, password, email);
         validateNotDuplicate(user);
         inMemoryUserRepository.save(user);
     }

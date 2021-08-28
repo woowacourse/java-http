@@ -25,10 +25,9 @@ class RegisterServiceTest {
         //given
         final String newAccount = "a" + ACCOUNT;
         final String newEmail = "a" + EMAIL;
-        final User newUser = new User(newAccount, PASSWORD, newEmail);
 
         //when
-        registerService.register(newUser);
+        registerService.register(newAccount, PASSWORD, newEmail);
 
         //then
         final User foundUser = inMemoryUserRepository.findByAccount(newAccount)
@@ -45,11 +44,10 @@ class RegisterServiceTest {
     void registerFailureWhenAccountAlreadyExists() {
         //given
         final String newEmail = "a" + EMAIL;
-        final User newUser = new User(ACCOUNT, PASSWORD, newEmail);
 
         //when
         //then
-        assertThatThrownBy(() -> registerService.register(newUser))
+        assertThatThrownBy(() -> registerService.register(ACCOUNT, PASSWORD, newEmail))
                 .isInstanceOf(DuplicateException.class);
     }
 
@@ -58,11 +56,10 @@ class RegisterServiceTest {
     void registerFailureWhenEmailAlreadyExists() {
         //given
         final String newAccount = "a" + ACCOUNT;
-        final User newUser = new User(newAccount, PASSWORD, EMAIL);
 
         //when
         //then
-        assertThatThrownBy(() -> registerService.register(newUser))
+        assertThatThrownBy(() -> registerService.register(newAccount, PASSWORD, EMAIL))
                 .isInstanceOf(DuplicateException.class);
     }
 }

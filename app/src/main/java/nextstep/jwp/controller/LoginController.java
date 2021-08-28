@@ -1,6 +1,5 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.controller.dto.request.LoginRequest;
 import nextstep.jwp.exception.UnAuthorizedException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestBody;
@@ -35,23 +34,18 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        final LoginRequest loginRequest = getLoginRequest(request);
+        final RequestBody requestBody = request.getBody();
+        final String account = requestBody.getParameter("account");
+        final String password = requestBody.getParameter("password");
+        LOG.debug("로그인 요청 account : {}", account);
+        LOG.debug("로그인 요청 password : {}", password);
         try {
-            loginService.login(loginRequest);
+            loginService.login(account, password);
             LOG.debug("로그인 성공!!");
             assignRedirectToResponse(response, "http://localhost:8080/index.html");
         } catch (UnAuthorizedException e) {
             LOG.debug("로그인 실패");
             assignRedirectToResponse(response, "http://localhost:8080/401.html");
         }
-    }
-
-    private LoginRequest getLoginRequest(HttpRequest request) {
-        final RequestBody requestBody = request.getBody();
-        final String account = requestBody.getParameter("account");
-        final String password = requestBody.getParameter("password");
-        LOG.debug("로그인 요청 account : {}", account);
-        LOG.debug("로그인 요청 password : {}", password);
-        return new LoginRequest(account, password);
     }
 }

@@ -1,12 +1,12 @@
 package nextstep.jwp.service;
 
-import nextstep.jwp.controller.dto.request.LoginRequest;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnAuthorizedException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DisplayName("LoginService 테스트")
 class LoginServiceTest {
@@ -21,11 +21,9 @@ class LoginServiceTest {
     @Test
     void login() {
         //given
-        final LoginRequest loginRequest = new LoginRequest(ACCOUNT, PASSWORD);
-
         //when
         //then
-        assertThatCode(() -> loginService.login(loginRequest))
+        assertThatCode(() -> loginService.login(ACCOUNT, PASSWORD))
                 .doesNotThrowAnyException();
     }
 
@@ -33,11 +31,9 @@ class LoginServiceTest {
     @Test
     void loginFailureWhenAccountNotExists() {
         //given
-        final LoginRequest loginRequest = new LoginRequest(ACCOUNT + "a", PASSWORD);
-
         //when
         //then
-        assertThatThrownBy(() -> loginService.login(loginRequest))
+        assertThatThrownBy(() -> loginService.login(ACCOUNT + "a", PASSWORD))
                 .isInstanceOf(UnAuthorizedException.class);
     }
 
@@ -45,11 +41,9 @@ class LoginServiceTest {
     @Test
     void loginFailureWhenPasswordInvalid() {
         //given
-        final LoginRequest loginRequest = new LoginRequest(ACCOUNT, PASSWORD + "a");
-
         //when
         //then
-        assertThatThrownBy(() -> loginService.login(loginRequest))
+        assertThatThrownBy(() -> loginService.login(ACCOUNT, PASSWORD + "a"))
                 .isInstanceOf(UnAuthorizedException.class);
     }
 }

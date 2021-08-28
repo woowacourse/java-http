@@ -1,6 +1,5 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.controller.dto.request.RegisterRequest;
 import nextstep.jwp.exception.DuplicateException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestBody;
@@ -39,17 +38,6 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        final RegisterRequest registerRequest = getRegisterRequest(request);
-        try {
-            registerService.register(registerRequest.toUser());
-        } catch (DuplicateException e) {
-            LOG.debug("중복으로 인한 회원가입 실패");
-        } finally {
-            assignRedirectToResponse(response, "http://localhost:8080/index.html");
-        }
-    }
-
-    private RegisterRequest getRegisterRequest(HttpRequest request) {
         final RequestBody requestBody = request.getBody();
         final String account = requestBody.getParameter("account");
         final String email = requestBody.getParameter("email");
@@ -57,6 +45,12 @@ public class RegisterController extends AbstractController {
         LOG.debug("회원가입 요청 account : {}", account);
         LOG.debug("회원가입 요청 email : {}", email);
         LOG.debug("회원가입 요청 password : {}", password);
-        return new RegisterRequest(account, password, email);
+        try {
+            registerService.register(account, password, email);
+        } catch (DuplicateException e) {
+            LOG.debug("중복으로 인한 회원가입 실패");
+        } finally {
+            assignRedirectToResponse(response, "http://localhost:8080/index.html");
+        }
     }
 }

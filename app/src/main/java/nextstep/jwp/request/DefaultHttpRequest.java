@@ -1,12 +1,14 @@
-package nextstep.jwp.request.basic;
+package nextstep.jwp.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import nextstep.jwp.request.HttpRequest;
 
 public class DefaultHttpRequest implements HttpRequest {
+
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String FORM_DATA = "application/x-www-form-urlencoded";
 
     private RequestLine requestLine;
     private RequestHeader requestHeader;
@@ -36,12 +38,22 @@ public class DefaultHttpRequest implements HttpRequest {
 
     private RequestParams parseParams(BufferedReader br) throws IOException {
         RequestParams requestParams = new RequestParams();
+        requestParams.addParams(requestLine.queryString());
         int contentLength = requestHeader.contentLength();
         char[] body = new char[contentLength];
         br.read(body, 0, contentLength);
-        requestParams.addBody(String.copyValueOf(body));
-        requestParams.addQueryString(requestLine.queryString());
+        if(isFormData(requestHeader.get(CONTENT_TYPE))) {
+            requestParams.addParams(String.copyValueOf(body));
+        } else {
+            requestParams.addBody(String.copyValueOf(body));
+        }
+
+
         return requestParams;
+    }
+
+    private boolean isFormData(String contentType) {
+        return FORM_DATA.equals(contentType);
     }
 
     @Override

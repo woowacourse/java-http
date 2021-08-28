@@ -9,4 +9,8 @@ public interface HttpResponse {
     void addBody(String content);
 
     String totalResponse();
+
+    void addPage(String path);
+
+    void addRedirectUrl(String url);
 }

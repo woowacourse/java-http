@@ -2,11 +2,8 @@ package nextstep.jwp.core.handler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.List;
-import nextstep.jwp.core.handler.argumentresolver.ArgumentResolver;
 import nextstep.jwp.core.handler.mapping.RequestMapping;
-import nextstep.jwp.request.basic.HttpMethod;
+import nextstep.jwp.request.HttpMethod;
 import nextstep.jwp.request.HttpRequest;
 import nextstep.jwp.response.HttpResponse;
 

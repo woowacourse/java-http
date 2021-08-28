@@ -1,6 +1,6 @@
 package nextstep.mockweb.request;
 
-import nextstep.jwp.request.basic.HttpMethod;
+import nextstep.jwp.request.HttpMethod;
 import nextstep.mockweb.option.MockOption;
 
 public class MockRequest {

@@ -1,4 +1,4 @@
-package nextstep.jwp.request.basic;
+package nextstep.jwp.request;
 
 public class RequestLine {
 

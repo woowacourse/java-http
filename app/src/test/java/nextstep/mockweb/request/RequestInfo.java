@@ -1,7 +1,7 @@
 package nextstep.mockweb.request;
 
 import java.util.Map;
-import nextstep.jwp.request.basic.HttpMethod;
+import nextstep.jwp.request.HttpMethod;
 
 public class RequestInfo {
 

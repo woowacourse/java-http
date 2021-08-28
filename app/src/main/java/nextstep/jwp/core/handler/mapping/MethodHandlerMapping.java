@@ -8,7 +8,6 @@ import nextstep.jwp.core.annotation.Controller;
 import nextstep.jwp.core.handler.Handler;
 import nextstep.jwp.core.handler.MethodHandler;
 import nextstep.jwp.request.HttpRequest;
-import nextstep.jwp.request.basic.HttpMethod;
 
 public class MethodHandlerMapping implements HandlerMapping {
 

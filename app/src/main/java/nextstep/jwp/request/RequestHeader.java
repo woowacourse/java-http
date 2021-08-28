@@ -1,4 +1,4 @@
-package nextstep.jwp.request.basic;
+package nextstep.jwp.request;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,5 +25,9 @@ public class RequestHeader {
             return Integer.parseInt(contentLength);
         }
         return 0;
+    }
+
+    public String get(String key) {
+        return headers.get(key);
     }
 }

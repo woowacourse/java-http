@@ -1,7 +1,7 @@
 package nextstep.jwp;
 
 import nextstep.jwp.core.handler.FrontHandler;
-import nextstep.jwp.request.basic.DefaultHttpRequest;
+import nextstep.jwp.request.DefaultHttpRequest;
 import nextstep.jwp.request.HttpRequest;
 import nextstep.jwp.response.DefaultHttpResponse;
 import nextstep.jwp.response.HttpResponse;

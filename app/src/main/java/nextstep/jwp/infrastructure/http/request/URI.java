@@ -60,8 +60,8 @@ public class URI {
         return baseUri;
     }
 
-    public boolean hasKeys(final String... keys) {
-        return Arrays.stream(keys).allMatch(query::containsKey);
+    public boolean hasKeys(final List<String> keys) {
+        return keys.stream().allMatch(query::containsKey);
     }
 
     public String getValue(final String key) {

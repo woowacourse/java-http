@@ -1,6 +1,11 @@
 package nextstep.jwp.framework.http;
 
+import java.util.Objects;
+
 public class HttpResponse {
+
+    private static final String EMPTY = "";
+
     private final StatusLine statusLine;
     private final HttpHeaders httpHeaders;
     private final int contentLength;
@@ -10,7 +15,7 @@ public class HttpResponse {
         this.statusLine = statusLine;
         this.httpHeaders = httpHeaders;
         this.contentLength = contentLength;
-        this.responseBody = responseBody;
+        this.responseBody = Objects.requireNonNullElse(responseBody, EMPTY);
     }
 
     public static Builder ok() {

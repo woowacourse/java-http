@@ -49,4 +49,16 @@ public class HttpResponse {
     public HttpResponseBody responseBody() {
         return responseBody;
     }
+
+    public String protocolName() {
+        return protocol.getProtocolName();
+    }
+
+    public int statusCode() {
+        return status.getCode();
+    }
+
+    public String statusName() {
+        return status.getMessage();
+    }
 }

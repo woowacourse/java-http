@@ -2,7 +2,6 @@ package nextstep.jwp.view;
 
 import java.io.IOException;
 import nextstep.jwp.http.HttpProtocol;
-import nextstep.jwp.http.response.HtmlView;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.resource.FilePath;
 import nextstep.jwp.resource.FileReader;

@@ -1,14 +1,19 @@
-package nextstep.jwp.http.response;
+package nextstep.jwp.view;
+
+import static java.util.stream.Collectors.joining;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.stream.Collectors;
-import nextstep.jwp.view.View;
+import nextstep.jwp.http.response.HttpResponse;
 
 public class HtmlView implements View {
 
     private static final String DELIMITER = "\r\n";
     private static final String COLON_AND_BLANK = ": ";
+    private static final String FORMAT = "%s %s %s %n" +
+                                         "%s%n" +
+                                         "%n" +
+                                         "%s";
 
     private final HttpResponse httpResponse;
 
@@ -28,17 +33,16 @@ public class HtmlView implements View {
     private String toResponseFormat() {
         final String headers = formatHeaderString();
 
-        return String.join(DELIMITER,
-            String.format("%s %s %s", httpResponse.protocol().getProtocolName(),
-                httpResponse.status().getCode(), httpResponse.status().getMessage()),
+        return String.format(FORMAT,
+            httpResponse.protocolName(), httpResponse.statusCode(), httpResponse.statusName(),
             headers,
-            "",
-            httpResponse.responseBody().getBody());
+            httpResponse.responseBody().getBody()
+        );
     }
 
     private String formatHeaderString() {
         return httpResponse.headers().map().entrySet().stream()
             .map(set -> set.getKey() + COLON_AND_BLANK + set.getValue().toValuesString())
-            .collect(Collectors.joining(DELIMITER));
+            .collect(joining(DELIMITER));
     }
 }

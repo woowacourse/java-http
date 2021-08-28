@@ -58,6 +58,10 @@ public class HttpRequestHeaderValues {
             .collect(toList());
     }
 
+    public boolean isEmpty() {
+        return list().isEmpty();
+    }
+
     public List<String> list() {
         return values;
     }

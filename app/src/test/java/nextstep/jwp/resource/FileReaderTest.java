@@ -1,4 +1,4 @@
-package nextstep.jwp.infra;
+package nextstep.jwp.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

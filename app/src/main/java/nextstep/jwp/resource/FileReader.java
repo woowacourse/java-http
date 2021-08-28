@@ -1,4 +1,4 @@
-package nextstep.jwp.infra;
+package nextstep.jwp.resource;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,4 +15,5 @@ public class FileReader {
         byte[] byteData = Files.readAllBytes(filePath.path());
         return new String(byteData);
     }
+
 }

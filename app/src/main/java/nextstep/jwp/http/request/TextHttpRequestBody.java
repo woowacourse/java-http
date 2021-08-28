@@ -1,6 +1,7 @@
 package nextstep.jwp.http.request;
 
-public class TextHttpRequestBody implements HttpRequestBody{
+public class TextHttpRequestBody implements HttpRequestBody {
+
     private String body;
 
     public TextHttpRequestBody(String body) {

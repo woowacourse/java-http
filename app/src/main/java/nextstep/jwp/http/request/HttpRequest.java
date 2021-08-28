@@ -7,18 +7,18 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import nextstep.jwp.http.HttpMethod;
+import nextstep.jwp.http.HttpHeaders;
 import nextstep.jwp.http.HttpProtocol;
 
 public class HttpRequest {
 
-    private final HttpRequestHeaders headers;
+    private final HttpHeaders headers;
     private final HttpMethod method;
     private final HttpProtocol protocol;
     private final String filepath;
     private final HttpRequestBody body;
 
-    public HttpRequest(HttpRequestHeaders headers,
+    public HttpRequest(HttpHeaders headers,
                        HttpMethod method,
                        HttpProtocol httpProtocol,
                        String filepath,
@@ -44,7 +44,11 @@ public class HttpRequest {
         return this.filepath;
     }
 
-    public HttpRequestHeaders headers() {
+    public HttpProtocol protocol() {
+        return protocol;
+    }
+
+    public HttpHeaders headers() {
         return this.headers;
     }
 
@@ -76,7 +80,7 @@ public class HttpRequest {
         private static final int COMMA_LENGTH = 1;
         private static final int HTTP_PROTOCOL_INDEX = 2;
 
-        private HttpRequestHeaders headers = new HttpRequestHeaders();
+        private HttpHeaders headers = new HttpHeaders();
         private HttpMethod method = null;
         private HttpProtocol httpProtocol = null;
         private String filepath = "";

@@ -32,7 +32,8 @@ class HttpRequestHeaderValuesTest {
     void createTest() {
         //given
         //when
-        HttpRequestHeaderValues httpRequestHeaderValues = new HttpRequestHeaderValues(VALUE1, VALUE2, VALUE3);
+        HttpRequestHeaderValues httpRequestHeaderValues = new HttpRequestHeaderValues(VALUE1,
+            VALUE2, VALUE3);
         //then
         assertThat(httpRequestHeaderValues).isNotNull();
     }
@@ -42,7 +43,8 @@ class HttpRequestHeaderValuesTest {
     void toValuesStringTest() {
         //given
         //when
-        HttpRequestHeaderValues httpRequestHeaderValues = new HttpRequestHeaderValues(VALUE1, VALUE2, VALUE3);
+        HttpRequestHeaderValues httpRequestHeaderValues = new HttpRequestHeaderValues(VALUE1,
+            VALUE2, VALUE3);
         String valuesString = httpRequestHeaderValues.toValuesString();
         //then
         String expectedResult = VALUE1 + "," + VALUE2 + "," + VALUE3;

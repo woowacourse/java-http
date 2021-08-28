@@ -3,8 +3,7 @@ package nextstep.jwp.http;
 import java.util.Arrays;
 
 public enum HttpProtocol {
-    HTTP1_1("HTTP/1.1"),
-    HTTP2_0("HTTP/2.0");
+    HTTP1_1("HTTP/1.1");
 
     private final String protocolName;
 
@@ -16,7 +15,8 @@ public enum HttpProtocol {
         return Arrays.stream(values())
             .filter(it -> it.protocolName.equalsIgnoreCase(protocol))
             .findAny()
-            .orElseThrow(() -> new RuntimeException(String.format("해당 이름의 프로토콜은 없습니다. -> %s", protocol)));
+            .orElseThrow(
+                () -> new RuntimeException(String.format("해당 이름의 프로토콜은 없습니다. -> %s", protocol)));
     }
 
     public String getProtocolName() {

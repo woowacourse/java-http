@@ -1,4 +1,4 @@
-package nextstep.jwp.infra;
+package nextstep.jwp.resource;
 
 import java.io.File;
 import java.net.URL;
@@ -7,7 +7,8 @@ import java.util.Objects;
 
 public class FilePath {
 
-    private static final String PREFIX = "static/";
+    public static final String PREFIX = "static/";
+
     private static final String SLASH = "/";
     private static final int SLASH_SUBSTRING_INDEX = 1;
 

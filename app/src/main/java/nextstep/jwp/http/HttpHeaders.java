@@ -1,19 +1,20 @@
-package nextstep.jwp.http.request;
+package nextstep.jwp.http;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import nextstep.jwp.http.request.HttpRequestHeaderValues;
 
-public class HttpRequestHeaders {
+public class HttpHeaders {
 
     private final Map<String, HttpRequestHeaderValues> headers;
 
-    public HttpRequestHeaders() {
-        this(new HashMap<>());
+    public HttpHeaders() {
+        this(new LinkedHashMap<>());
     }
 
-    public HttpRequestHeaders(
+    public HttpHeaders(
         Map<String, HttpRequestHeaderValues> headers
     ) {
         this.headers = headers;
@@ -48,6 +49,6 @@ public class HttpRequestHeaders {
     }
 
     public HttpRequestHeaderValues get(String key) {
-        return headers.get(key);
+        return headers.getOrDefault(key, new HttpRequestHeaderValues());
     }
 }

@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Resources {
 
@@ -20,17 +21,25 @@ public class Resources {
     }
 
     public static URL findUrlOf(String resourceName) {
+        return findByResourceName(resourceName).orElseThrow(() -> new IllegalArgumentException(resourceName + " 파일을 찾을 수 없습니다."));
+    }
+
+    private static Optional<URL> findByResourceName(String resourceName) {
         ClassLoader classLoader = Objects.requireNonNullElseGet(
                 Thread.currentThread().getContextClassLoader(),
                 Resources.class::getClassLoader);
+
         return PREFIXES.stream()
                        .map(prefix -> classLoader.getResource(prefix + resourceName))
                        .filter(Objects::nonNull)
-                       .findAny()
-                       .orElseThrow(() -> new IllegalArgumentException(resourceName + " 파일을 찾을 수 없습니다."));
+                       .findAny();
     }
 
     public static String readString(String resourceName) throws IOException {
         return Files.readString(findPathOf(resourceName));
+    }
+
+    public static boolean exists(String resourceName) {
+        return findByResourceName(resourceName).isPresent();
     }
 }

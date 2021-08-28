@@ -44,7 +44,7 @@ public class HttpRequestParser {
 
     private static Body extractRequestBody(StartLine startLine, Headers headers, BufferedReader bufferedReader) throws IOException {
         final Map<String, String> param = new HashMap<>();
-        int contentLength = Integer.parseInt(headers.getContentLength());
+        int contentLength = Integer.parseInt(headers.contentLength());
 
         if (startLine.isPost() && contentLength > 0) {
             getParameter(bufferedReader, param, contentLength);

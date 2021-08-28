@@ -31,9 +31,8 @@ public class HttpResponse {
             return this;
         }
 
-        // TODO body 필요한 경우
-        public <T> Builder body(T body) {
-            this.body = (Body) body;
+        public Builder body(Map<String, String> body) {
+            this.body = new Body(body);
             return this;
         }
 

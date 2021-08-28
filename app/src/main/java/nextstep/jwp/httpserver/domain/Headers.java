@@ -18,7 +18,7 @@ public class Headers {
         headers.put(headerName, content);
     }
 
-    public String getContentLength() {
+    public String contentLength() {
         if (!headers.containsKey("Content-Length")) {
             return "0";
         }

@@ -2,6 +2,7 @@ package nextstep.jwp.framework.http;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class HttpRequest {
     private final RequestLine requestLine;
@@ -26,16 +27,20 @@ public class HttpRequest {
         return requestLine.getMethod();
     }
 
-    public String getUri() {
-        return requestLine.getUri();
+    public String getPath() {
+        return requestLine.getPath();
     }
 
     public String getVersion() {
         return requestLine.getVersion();
     }
 
+    public Map<String, String> getQueries() {
+        return requestLine.getQueries();
+    }
+
     public boolean isSameUri(String uri) {
-        return requestLine.isSameUri(uri);
+        return requestLine.isSamePath(uri);
     }
 
     public static class Builder {
@@ -49,6 +54,10 @@ public class HttpRequest {
         }
 
         public Builder requestLine(HttpMethod method, String uri, HttpVersion version) {
+            return requestLine(new RequestLine(method, uri, version));
+        }
+
+        public Builder requestLine(HttpMethod method, URI uri, HttpVersion version) {
             return requestLine(new RequestLine(method, uri, version));
         }
 

@@ -16,8 +16,8 @@ import java.util.Optional;
 
 public class RequestHandler implements Runnable {
 
-    public static final String DEFAULT_METHOD = "Hello world!";
-    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RequestHandler.class);
+    private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
     private static final String STATIC_PATH = "static";
     private static final String HEADER_DELIMITER = ": ";
 
@@ -31,7 +31,7 @@ public class RequestHandler implements Runnable {
 
     @Override
     public void run() {
-        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
+        LOG.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
@@ -42,7 +42,7 @@ public class RequestHandler implements Runnable {
             final String extractedMethod = extractHttpMethod(firstLine);
 
             if ("/".equals(extractedUri)) {
-                final String response = http200Message(DEFAULT_METHOD);
+                final String response = http200Message(DEFAULT_RESPONSE_BODY);
                 writeOutputStream(outputStream, response);
                 return;
             }
@@ -80,7 +80,7 @@ public class RequestHandler implements Runnable {
 
             writeOutputStream(outputStream, httpHtmlResponse(STATIC_PATH, extractedUri));
         } catch (IOException exception) {
-            log.error("Exception stream", exception);
+            LOG.error("Exception stream", exception);
         } finally {
             close();
         }
@@ -192,7 +192,7 @@ public class RequestHandler implements Runnable {
         try {
             connection.close();
         } catch (IOException exception) {
-            log.error("Exception closing socket", exception);
+            LOG.error("Exception closing socket", exception);
         }
     }
 }

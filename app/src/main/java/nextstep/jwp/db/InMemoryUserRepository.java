@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
-    private static final Logger log = LoggerFactory.getLogger(InMemoryUserRepository.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InMemoryUserRepository.class);
 
     static {
         final User user = new User(1, "gugu", "password", "hkkang@woowahan.com");
@@ -20,12 +20,12 @@ public class InMemoryUserRepository {
 
     public static void save(User user) {
         database.put(user.getAccount(), user);
-        log.info("유저 저장됨: {}", user);
+        LOG.info("유저 저장됨: {}", user);
     }
 
     public static Optional<User> findByAccount(String account) {
         final User user = database.get(account);
-        log.info("유저 조회 성공: {}", user);
+        LOG.info("유저 조회 성공: {}", user);
         return Optional.ofNullable(user);
     }
 }

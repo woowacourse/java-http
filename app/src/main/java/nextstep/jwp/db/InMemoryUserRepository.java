@@ -17,7 +17,18 @@ public class InMemoryUserRepository {
     }
 
     public static void save(User user) {
-        database.put(user.getAccount(), user);
+        database.put(
+                user.getAccount(),
+                new User(autoIncrement(), user.getAccount(), user.getPassword(), user.getEmail())
+        );
+    }
+
+    private synchronized static long autoIncrement() {
+        long maxId = database.values().stream()
+                .mapToLong(User::getId)
+                .max()
+                .orElse(0L);
+        return maxId + 1;
     }
 
     public static Optional<User> findByAccount(String account) {

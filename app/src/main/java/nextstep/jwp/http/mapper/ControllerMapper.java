@@ -4,6 +4,7 @@ import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.HelloController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RedirectController;
+import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.staticpath.CssController;
 import nextstep.jwp.controller.staticpath.HtmlController;
 import nextstep.jwp.controller.staticpath.JavaScriptController;
@@ -26,6 +27,7 @@ public class ControllerMapper {
         mappingInfos = new HashMap<>();
         mappingInfos.put("/", new HelloController());
         mappingInfos.put("/login", new LoginController());
+        mappingInfos.put("/register", new RegisterController());
     }
 
     public ControllerMapper() {

@@ -18,10 +18,18 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    public static HttpResponse of(HttpStatus httpStatus, StaticResource staticResource) {
+    public static HttpResponse withBody(HttpStatus httpStatus, StaticResource staticResource) {
         StatusLine statusLine = StatusLine.from(httpStatus);
-        ResponseHeaders responseHeaders = ResponseHeaders.from(staticResource);
+        ResponseHeaders responseHeaders = ResponseHeaders.ofBody(staticResource);
         ResponseBody responseBody = new ResponseBody(staticResource.getContent());
+
+        return new HttpResponse(statusLine, responseHeaders, responseBody);
+    }
+
+    public static HttpResponse redirect(HttpStatus httpStatus, String location) {
+        StatusLine statusLine = StatusLine.from(httpStatus);
+        ResponseHeaders responseHeaders = ResponseHeaders.ofRedirect(location);
+        ResponseBody responseBody = ResponseBody.empty();
 
         return new HttpResponse(statusLine, responseHeaders, responseBody);
     }

@@ -12,15 +12,23 @@ public class ResponseHeaders {
 
     private final Map<String, String> headers;
 
-    public ResponseHeaders(Map<String, String> headers) {
+    private ResponseHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
 
-    public static ResponseHeaders from(StaticResource staticResource) {
-        HashMap<String, String> headers = new HashMap<>();
+    public static ResponseHeaders ofBody(StaticResource staticResource) {
+        Map<String, String> headers = new HashMap<>();
 
         headers.put("Content-Type", staticResource.getContentType());
         headers.put("Content-Length", staticResource.getContentLength());
+
+        return new ResponseHeaders(headers);
+    }
+
+    public static ResponseHeaders ofRedirect(String location) {
+        Map<String, String> headers = new HashMap<>();
+
+        headers.put("Location", location);
 
         return new ResponseHeaders(headers);
     }

@@ -4,12 +4,17 @@ import java.util.Objects;
 
 public class ResponseBody {
 
+    private static final ResponseBody EMPTY = new ResponseBody(null);
     private static final String NEW_LINE = System.getProperty("line.separator");
 
     private final String value;
 
     public ResponseBody(String value) {
         this.value = value;
+    }
+
+    public static ResponseBody empty() {
+        return EMPTY;
     }
 
     public boolean isEmpty() {

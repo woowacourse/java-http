@@ -8,13 +8,14 @@
   - [ ] `/login?account=gugu&password=password`로 접근해서 로그인 성공하면 응답 헤더에 http status code를 302로 반환한다. 
   - [ ] 로그인에 실패하면 401.html로 리다이렉트한다.
 - [x] http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)를 보여준다. 
-  - [ ] 회원가입 페이지를 보여줄 때는 GET을 사용한다. 
-  - [ ] 회원가입을 버튼을 누르면 HTTP method를 GET이 아닌 POST를 사용한다. 
-  - [ ] 회원가입을 완료하면 index.html로 리다이렉트한다. 
+  - [x] 회원가입 페이지를 보여줄 때는 GET을 사용한다. 
+  - [x] 회원가입을 버튼을 누르면 HTTP method를 GET이 아닌 POST를 사용한다. 
+  - [x] 회원가입을 완료하면 index.html로 리다이렉트한다. 
   - [ ] 로그인도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경하자.
 - [x] CSS 지원하기
   - ~~Accept 헤더를 읽어서 지원하는 것으로 리팩토링하기~~
 - [ ] 각 동작 로그 남기기
+- [ ] ResponseBody를 포함하지 않는 경우 추가
 
 <br>
 

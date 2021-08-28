@@ -28,7 +28,7 @@ public class RequestHeaders {
             String[] splitedLine = splitLine(line);
 
             String key = splitedLine[KEY_INDEX].toLowerCase();
-            String value = splitedLine[VALUE_INDEX].toLowerCase();
+            String value = splitedLine[VALUE_INDEX].trim().toLowerCase();
 
             headers.put(key, value);
             line = bufferedReader.readLine();

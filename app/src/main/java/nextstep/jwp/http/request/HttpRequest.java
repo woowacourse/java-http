@@ -33,7 +33,7 @@ public class HttpRequest {
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
 
-            return new RequestBody(String.valueOf(buffer));
+            return RequestBody.parse(String.valueOf(buffer));
         }
 
         return RequestBody.empty();

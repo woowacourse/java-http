@@ -18,7 +18,7 @@ public class StaticResourceController implements Controller {
     private HttpResponse doGet(HttpRequest httpRequest) throws IOException {
         StaticResource staticResource = staticResourceService.findByPath(httpRequest.getUri());
 
-        return HttpResponse.of(HttpStatus.OK, staticResource);
+        return HttpResponse.withBody(HttpStatus.OK, staticResource);
     }
 
     @Override

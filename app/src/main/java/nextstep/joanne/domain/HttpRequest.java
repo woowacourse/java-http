@@ -63,14 +63,20 @@ public class HttpRequest {
     }
 
     public String contentType() {
-        if (requestHeaders.containsKey("Accept") && requestHeaders.get("Accept").contains("css")) {
+        if (requestHeaders.containsKey("Accept") && requestHeaders.get("Accept").contains("css") ||
+                uriContains("css")) {
             return "text/css";
+        }
+
+        if (requestHeaders.containsKey("Accept") && requestHeaders.get("Accept").contains("js") ||
+                uriContains("js")) {
+            return "application/javascript";
         }
         return "text/html";
     }
 
-    public boolean uriEquals(String uri) {
-        return this.uri.equalsWith(uri);
+    public boolean uriContains(String uri) {
+        return this.uri.contains(uri);
     }
 
     public String getFromRequestBody(String key) {

@@ -18,7 +18,7 @@ public class Handler {
 
     public HttpResponse handle() throws IOException {
 
-        if (httpRequest.uriEquals("/register")) {
+        if (httpRequest.uriContains("/register")) {
             if (httpRequest.isGet()) {
                 return HttpRequestResponseConverter.convertToHttpResponse(
                         HttpStatus.OK,
@@ -37,7 +37,7 @@ public class Handler {
             }
         }
 
-        if (httpRequest.uriEquals("/login")) {
+        if (httpRequest.uriContains("/login")) {
             if (httpRequest.isGet()) {
                 return HttpRequestResponseConverter.convertToHttpResponse(
                         HttpStatus.OK,

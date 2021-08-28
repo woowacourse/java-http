@@ -39,8 +39,8 @@ public class URI {
         return queryString;
     }
 
-    public boolean equalsWith(String other) {
-        return Objects.equals(uri, other);
+    public boolean contains(String other) {
+        return uri.contains(other);
     }
 
     public String resourceUri() {

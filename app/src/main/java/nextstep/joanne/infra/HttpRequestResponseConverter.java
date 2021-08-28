@@ -21,7 +21,6 @@ public class HttpRequestResponseConverter {
     public static HttpRequest convertToHttpRequest(final BufferedReader bufferedReader) throws IOException {
         final StringBuilder requestHeaders = new StringBuilder();
 
-        // Blank line 전까지 읽어들인다.
         String line = bufferedReader.readLine();
         while (!"".equals(line)) {
             if (line == null) break;

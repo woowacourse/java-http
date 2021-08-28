@@ -33,6 +33,6 @@ public class InMemoryUserRepository {
     public static long nextId() {
         return new ArrayList<>(database.values())
                 .get(database.size() - 1)
-                .getId();
+                .getId() + 1;
     }
 }

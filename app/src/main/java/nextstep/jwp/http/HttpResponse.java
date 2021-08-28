@@ -23,6 +23,18 @@ public class HttpResponse {
         headers.put(key, value);
     }
 
+    public byte[] getBytes() {
+        return toString().getBytes();
+    }
+
+    public HttpStatus getStatus() {
+        return status;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
     @Override
     public String toString() {
         return String.join(HTTP_LINE_SEPERATOR,
@@ -44,9 +56,5 @@ public class HttpResponse {
             sb.append(HTTP_LINE_SEPERATOR);
         });
         return sb.toString();
-    }
-
-    public byte[] getBytes() {
-        return toString().getBytes();
     }
 }

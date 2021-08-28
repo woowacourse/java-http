@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import java.util.Map;
 import java.util.Objects;
-import nextstep.jwp.StaticFileReader;
+import nextstep.jwp.http.StaticFileReader;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;

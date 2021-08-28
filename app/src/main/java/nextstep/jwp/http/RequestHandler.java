@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
-import nextstep.jwp.StaticFileReader;
 import nextstep.jwp.controller.FrontControllerServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,15 +33,7 @@ public class RequestHandler implements Runnable {
             );
 
             if (!httpRequest.isEmptyLine()) {
-                HttpResponse httpResponse;
-                StaticFileReader staticFileReader = new StaticFileReader();
-                String staticFile = staticFileReader.read(httpRequest);
-                if (!Objects.isNull(staticFile)) {
-                    httpResponse = new HttpResponse(HttpStatus.OK, staticFile);
-                } else {
-                    FrontControllerServlet frontControllerServlet = new FrontControllerServlet(httpRequest);
-                    httpResponse = frontControllerServlet.process();
-                }
+                HttpResponse httpResponse = getHttpResponse(httpRequest);
                 outputStream.write(httpResponse.getBytes());
             }
             outputStream.flush();
@@ -51,6 +42,15 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
+    }
+
+    private HttpResponse getHttpResponse(HttpRequest httpRequest) {
+        ViewResolver viewResolver = new ViewResolver(httpRequest);
+        if (viewResolver.isExisting()) {
+            return viewResolver.resolve();
+        }
+        FrontControllerServlet frontControllerServlet = new FrontControllerServlet(httpRequest);
+        return frontControllerServlet.process();
     }
 
     private void close() {

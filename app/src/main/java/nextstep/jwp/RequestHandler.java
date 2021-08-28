@@ -47,6 +47,15 @@ public class RequestHandler implements Runnable {
                 return;
             }
 
+            if (extractedUri.endsWith(".html")) {
+                writeOutputStream(outputStream, httpHtmlResponse(STATIC_PATH, extractedUri));
+            }
+
+            if (extractedUri.endsWith(".css") || extractedUri.endsWith(".js")) {
+                writeOutputStream(outputStream, httpCssResponse(STATIC_PATH, extractedUri));
+                return;
+            }
+
             if ("/login".equals(extractedUri)) {
                 if ("POST".equals(extractedMethod)) {
                     try {
@@ -73,12 +82,7 @@ public class RequestHandler implements Runnable {
                 return;
             }
 
-            if ("/css/styles.css".equals(extractedUri)) {
-                writeOutputStream(outputStream, httpCssResponse(STATIC_PATH, extractedUri));
-                return;
-            }
-
-            writeOutputStream(outputStream, httpHtmlResponse(STATIC_PATH, extractedUri));
+            writeOutputStream(outputStream, http302Response("/404.html"));
         } catch (IOException exception) {
             LOG.error("Exception stream", exception);
         } finally {
@@ -90,10 +94,7 @@ public class RequestHandler implements Runnable {
         Map<String, String> httpRequestHeaders = new HashMap<>();
         while (bufferedReader.ready()) {
             final String line = bufferedReader.readLine();
-            if (Objects.isNull(line)) {
-                break;
-            }
-            if ("".equals(line)) {
+            if (Objects.isNull(line) || line.isEmpty()) {
                 break;
             }
             final String[] header = line.split(HEADER_DELIMITER);
@@ -182,7 +183,7 @@ public class RequestHandler implements Runnable {
     }
 
     private String httpHtmlResponse(String resourcesPath, String targetUri) {
-        if (!targetUri.contains(".") && !targetUri.contains(".html")) {
+        if (!targetUri.contains(".html")) {
             targetUri = targetUri.concat(".html");
         }
         return http200Message(responseBodyByURLPath(resourcesPath, targetUri));

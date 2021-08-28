@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -14,6 +13,7 @@ import java.util.*;
 public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final String DEFAULT_PATH = "static";
 
     private final Socket connection;
 
@@ -28,11 +28,13 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            String parsedUri = requestUri(inputStream);
+            RequestHeader header = header(inputStream);
+            String parsedUri = header.uri();
+
             if ("/".equals(parsedUri)) {
                 parsedUri = "/index.html";
             }
-            URL resource = this.getClass().getClassLoader().getResource("static" + parsedUri);
+            URL resource = this.getClass().getClassLoader().getResource(DEFAULT_PATH + parsedUri);
             File file = new File(resource.toURI());
             String fileSource = new String(Files.readAllBytes(file.toPath()));
 
@@ -52,16 +54,9 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private String requestUri(InputStream inputStream) throws IOException {
-        Map<String, String> headers = headers(inputStream);
-        for (String value : headers.values()) {
-            return value.split(" ")[0];
-        }
-        throw new IOException();
-    }
-
-    private Map<String, String> headers(InputStream inputStream) throws IOException {
+    private RequestHeader header(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        String[] requestInfo = reader.readLine().split(" ");
         Map<String, String> headers = new LinkedHashMap<>();
         String line = "";
 
@@ -70,7 +65,7 @@ public class RequestHandler implements Runnable {
             headers.put(keyAndValue[0], keyAndValue[1]);
         }
 
-        return headers;
+        return new RequestHeader(requestInfo[0], requestInfo[1], requestInfo[2], headers);
     }
 
     private void close() {

@@ -20,7 +20,8 @@ public class InMemoryUserRepository {
     }
 
     public static void save(User user) {
-        database.put(user.getAccount(), user);
+        User newUser = new User(database.size() + 1, user.getAccount(), user.getPassword(), user.getEmail());
+        database.put(newUser.getAccount(), newUser);
     }
 
     public static Optional<User> findByAccount(String account) {
@@ -29,5 +30,9 @@ public class InMemoryUserRepository {
 
     public static int countIds() {
         return database.size();
+    }
+
+    public static boolean existUserByAccountAndPassword(String account, String password) {
+        return database.get(account).checkPassword(password);
     }
 }

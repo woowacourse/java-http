@@ -11,7 +11,7 @@ import java.io.InputStreamReader;
 public class RequestParser {
 
     private static final Logger log = LoggerFactory.getLogger(RequestParser.class);
-    private static final String HTTP_METHOD_REQUEST_URL_SEPARATOR = " /";
+    private static final String REQUEST_SEPARATOR = " ";
 
     final BufferedReader bufferedReader;
 
@@ -22,21 +22,7 @@ public class RequestParser {
     public ClientRequest extractClientRequest() throws IOException {
         final String request = bufferedReader.readLine();
         log.info("client request = {}", request);
-        final HttpMethod httpMethod = extractHttpMethod(request);
-        final RequestUrl requestUrl = extractRequestUrl(request);
-        return new ClientRequest(httpMethod, requestUrl);
-    }
-
-    private HttpMethod extractHttpMethod(String request) {
-        final String parsedHttpMethod = request.substring(0, request.indexOf(HTTP_METHOD_REQUEST_URL_SEPARATOR));
-        return HttpMethod.of(parsedHttpMethod);
-    }
-
-    private RequestUrl extractRequestUrl(String request) {
-        final int spaceAndSlashIndex = request.indexOf(HTTP_METHOD_REQUEST_URL_SEPARATOR);
-        final int urlHttpVersionSeparator = request.lastIndexOf(" ");
-
-        final String parsedRequestUrl = request.substring(spaceAndSlashIndex + 2, urlHttpVersionSeparator);
-        return RequestUrl.of(parsedRequestUrl);
+        final String[] requestInfos = request.split(REQUEST_SEPARATOR);
+        return new ClientRequest(HttpMethod.of(requestInfos[0]), RequestUrl.of(requestInfos[1]));
     }
 }

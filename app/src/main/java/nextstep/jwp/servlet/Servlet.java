@@ -1,5 +1,7 @@
 package nextstep.jwp.servlet;
 
+import nextstep.jwp.request.RequestParser;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +18,8 @@ public abstract class Servlet {
 
     public static Servlet of(InputStream inputStream, OutputStream outputStream) throws IOException {
         final RequestParser requestParser = new RequestParser(inputStream);
-        return requestParser.parse().chooseServlet(outputStream);
+        return null;
+//        return requestParser.parse().chooseServlet(outputStream);
     }
 
     public void setOutputStream(OutputStream outputStream) {

@@ -5,12 +5,18 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,5 +61,28 @@ class FileTest {
 
         // todo
         assertThat(actual).containsOnly("nextstep");
+    }
+
+    @DisplayName("resources/static 디렉토리의 모든 파일을 읽어올 수 있다")
+    @Test
+    void readResourcesStatic() throws IOException, URISyntaxException {
+        final ClassLoader classLoader = getClass().getClassLoader();
+        final URL url = classLoader.getResource("static");
+        final String path = URLDecoder.decode(url.toString(), StandardCharsets.UTF_8);
+
+        final List<File> collect = Files.walk(Paths.get(new URI(path)))
+                .filter(Files::isRegularFile)
+                .map(filePath -> filePath.toFile())
+                .collect(Collectors.toList());
+
+        for (File file : collect) {
+            final String absolutePath = file.getAbsolutePath();
+            final int aStatic = absolutePath.lastIndexOf("static");
+            System.out.println(absolutePath.substring(aStatic + "static".length()).replaceAll("\\\\", "/"));
+
+            System.out.println("file.getCanonicalPath() = " + file.getCanonicalPath());
+            System.out.println("file.getPath() = " + file.getPath());
+            System.out.println("file.getName() = " + file.getName());
+        }
     }
 }

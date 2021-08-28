@@ -1,6 +1,6 @@
 package nextstep.jwp;
 
-import nextstep.jwp.servlet.Servlet;
+import nextstep.jwp.manager.RequestManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +15,11 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
+    private final RequestManager requestManager;
 
-    public RequestHandler(Socket connection) {
+    public RequestHandler(Socket connection, RequestManager requestManager) {
         this.connection = Objects.requireNonNull(connection);
+        this.requestManager = requestManager;
     }
 
     @Override
@@ -27,8 +29,7 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final Servlet servlet = Servlet.of(inputStream, outputStream);
-            servlet.response();
+            requestManager.handle(inputStream, outputStream);
 
         } catch (IOException exception) {
             log.error("Exception stream", exception);

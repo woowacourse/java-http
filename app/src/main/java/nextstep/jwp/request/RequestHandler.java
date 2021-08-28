@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.util.Objects;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.response.ResponseBody;
@@ -43,12 +44,64 @@ public class RequestHandler implements Runnable {
             RequestUrl requestUrl = new RequestUrl(getClass().getClassLoader(), fileName);
             RequestFile requestFile = requestUrl.toRequestFile();
 
-            if (requestUri.isQueryMark()) {
+            if (requestUri.isLogin()) {
                 UserInfo userInfo = requestUri.getUserInfo();
                 User user = new User(userInfo.getAccount(), userInfo.getPassword());
-                InMemoryUserRepository.save(user);
+                Optional<User> findUser = InMemoryUserRepository.findByAccount(user.getAccount());
+
+                if (findUser.isEmpty()) {
+                    RequestUrl redirectUrl = new RequestUrl(
+                        getClass().getClassLoader(),
+                        new FileName("static/401.html")
+                    );
+                    RequestFile redirectFile = redirectUrl.toRequestFile();
+
+                    ResponseBody responseBody = new ResponseBody(
+                        Files.readAllBytes(redirectFile.toPath())
+                    );
+                    String response = String.join("\r\n",
+                        "HTTP/1.1 401 Unauthorized ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getLength() + " ",
+                        "Location: http://localhost:8080/401.html ",
+                        "",
+                        responseBody.getBody());
+
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                }
+                if (findUser.isPresent()) {
+                    RequestUrl redirectUrl = new RequestUrl(
+                        getClass().getClassLoader(),
+                        new FileName("static/index.html")
+                    );
+                    RequestFile redirectFile = redirectUrl.toRequestFile();
+
+                    ResponseBody responseBody = new ResponseBody(
+                        Files.readAllBytes(redirectFile.toPath())
+                    );
+                    String response = String.join("\r\n",
+                        "HTTP/1.1 302 Found ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getLength() + " ",
+                        "Location: http://localhost:8080/index.html ",
+                        "",
+                        responseBody.getBody());
+
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                }
+
+                return;
             }
 
+//            if (requestUri.isQueryMark()) {
+//                UserInfo userInfo = requestUri.getUserInfo();
+//                User user = new User(userInfo.getAccount(), userInfo.getPassword());
+//                InMemoryUserRepository.save(user);
+//            }
+
+            // Request Header 읽는 로직
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(firstLine)
                 .append("\r\n");

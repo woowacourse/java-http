@@ -46,8 +46,7 @@ public class InMemoryUserRepository {
         return id == (int) Math.pow(2, 63) - 1;
     }
 
-    public static User findByAccount(String account) {
-        return Optional.ofNullable(DATABASE.get(account))
-            .orElseThrow(UserNotFoundException::new);
+    public static Optional<User> findByAccount(String account) {
+        return Optional.ofNullable(DATABASE.get(account));
     }
 }

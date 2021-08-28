@@ -22,3 +22,13 @@
 - [x] login.html 파일에서 태그에 name 추가
 - [x] Request URI에서 접근 경로와 `이름=값`으로 전달되는 데이터를 추출해서 User 객체 생성
 - [x] InMemoryUserRepository를 사용해서 미리 가입되어 있는 회원을 조회하고 로그 확인
+
+<br/>
+
+## HTTP Status Code 302
+
+- 회원을 조회해서 로그인에 성공
+    - [x] /index.html로 리다이렉트
+    - [x] 응답 헤더에 Http Status Code를 302로 반환
+- 회원을 조회해서 로그인에 실패
+    - [x] /401.html로 리다이렉트

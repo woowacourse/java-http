@@ -22,6 +22,10 @@ public class RequestUri {
         return new RequestPath(uri.substring(1)).toFileName();
     }
 
+    public boolean isLogin() {
+        return uri.startsWith("/login") && isQueryMark();
+    }
+
     public boolean isQueryMark() {
         return uri.contains(QUERY_MARK);
     }

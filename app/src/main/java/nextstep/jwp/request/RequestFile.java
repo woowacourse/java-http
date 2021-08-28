@@ -12,6 +12,10 @@ public class RequestFile {
         this(new File(url.getPath()));
     }
 
+    public RequestFile(String path) {
+        this(new File(path));
+    }
+
     public RequestFile(File file) {
         this.file = file;
     }

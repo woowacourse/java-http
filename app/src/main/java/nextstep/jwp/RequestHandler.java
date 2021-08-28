@@ -1,9 +1,12 @@
 package nextstep.jwp;
 
+import nextstep.jwp.servlet.Servlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
 
@@ -24,12 +27,9 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final RequestParser requestParser = new RequestParser(inputStream);
-            final ClientRequest clientRequest = requestParser.parse();
-            final String response = clientRequest.generateResponse();
+            final Servlet servlet = Servlet.of(inputStream, outputStream);
+            servlet.response();
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {

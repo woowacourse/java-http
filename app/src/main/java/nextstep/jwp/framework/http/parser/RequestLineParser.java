@@ -33,8 +33,6 @@ public class RequestLineParser extends AbstractLineParser {
         final String uri = statusTokens[URI_INDEX];
         final HttpVersion version = HttpVersion.resolve(statusTokens[VERSION_INDEX]);
 
-        LOGGER.debug("requestLine : [HttpMethod = {}, URI = {}, ProtocolVersion = {}]", httpMethod, uri, version);
-
         return new HeaderLineParser(builder.requestLine(httpMethod, new URI(uri), version));
     }
 }

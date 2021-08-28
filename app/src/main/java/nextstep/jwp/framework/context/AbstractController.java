@@ -18,6 +18,6 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public boolean canHandle(HttpRequest httpRequest) {
-        return httpRequest.isSameUri(mappingUri) && handlingMethod.contains(httpRequest.getMethod());
+        return httpRequest.isSamePath(mappingUri) && handlingMethod.contains(httpRequest.getMethod());
     }
 }

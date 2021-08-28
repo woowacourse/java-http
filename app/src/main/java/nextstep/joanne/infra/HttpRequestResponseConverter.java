@@ -74,7 +74,7 @@ public class HttpRequestResponseConverter {
         }
         URL resource = HttpRequestResponseConverter.class.getClassLoader().getResource("static" + uri);
         if (Objects.isNull(resource)) {
-            throw new IOException("resource가 존재하지 않습니다.");
+            throw new IOException(String.format("%s의 resource가 존재하지 않습니다.", uri));
         }
         final Path filePath = new File(resource.getPath()).toPath();
         return new HttpResponse(httpStatus, makeBody(httpStatus, contentType, Files.readString(filePath)));

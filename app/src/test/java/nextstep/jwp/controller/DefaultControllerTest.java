@@ -54,7 +54,7 @@ class DefaultControllerTest extends ControllerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
-        String expected = "HTTP/1.1 404 NOT_FOUND \r\n" +
+        String expected = "HTTP/1.1 404 Not Found \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 2426 \r\n" +
                 "\r\n" +

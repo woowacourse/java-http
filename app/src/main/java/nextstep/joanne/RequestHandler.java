@@ -48,52 +48,88 @@ public class RequestHandler implements Runnable {
                 line = bufferedReader.readLine();
             }
 
-            String[] httpRequestHeaders = requestHeaderBuilder.toString().split("\n");
+            String[] requestHeaders = requestHeaderBuilder.toString().split("\n");
+            HashMap<String, String> httpRequestHeaders = new HashMap<>();
 
-            // requestURI
-            String requestURI = httpRequestHeaders[0];
+            String requestURI = requestHeaders[0];
             String[] splittedRequestURI = requestURI.split(" ");
-            String uri = splittedRequestURI[1].substring(1);
-            int index = uri.indexOf("?");
+            String method = splittedRequestURI[0];
+            String uri = splittedRequestURI[1];
+            String protocol = splittedRequestURI[2];
+
+            for (int i = 1; i < requestHeaders.length; i++) {
+                String[] headers = requestHeaders[i].split(":");
+                httpRequestHeaders.put(headers[0], headers[1].trim());
+            }
+
+            log.info(requestURI);
+
             String path = uri;
             String queryString = "";
             String httpStatus = "200 OK";
-            if (index > 0) {
-                path = uri.substring(0, index);
-                queryString = uri.substring(index + 1);
-            }
 
-            HashMap<String, String> queryStringMap = new HashMap<>();
-            if (!queryString.isBlank()) {
-                String[] queryStrings = queryString.split("&");
-                for (String query : queryStrings) {
-                    String[] values = query.split("=");
-                    queryStringMap.put(values[0], values[1]);
+            String requestBody = "";
+            if (isPost(method)) {
+                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                requestBody = new String(buffer);
+
+                HashMap<String, String> requestBodyMap = new HashMap<>();
+                if (!requestBody.isBlank()) {
+                    String[] requestBodyStrings = requestBody.split("&");
+                    for (String body : requestBodyStrings) {
+                        String[] values = body.split("=");
+                        requestBodyMap.put(values[0], values[1]);
+                    }
+                }
+
+                if (uri.contains("register") && InMemoryUserRepository.findByAccount(requestBodyMap.get("account")).isEmpty()) {
+                    User user = new User(requestBodyMap.get("account"), requestBodyMap.get("password"), requestBodyMap.get("email"));
+                    InMemoryUserRepository.save(user);
+                    path = "/index.html";
+                }
+
+                if (uri.contains("login") && !requestBodyMap.isEmpty()) {
+                    Optional<User> user = InMemoryUserRepository.findByAccount(requestBodyMap.get("account"));
+
+                    if (user.isPresent() && user.get().checkPassword(requestBodyMap.get("password"))) {
+                        log.info("login success, account: {}", user.get().getAccount());
+                        path = "/index.html";
+                        httpStatus = "302 Found";
+                    } else {
+                        log.info("login failed, account: {}, password: {}", requestBodyMap.get("account"), requestBodyMap.get("password"));
+                        path = "/401.html";
+                        httpStatus = "401 Unauthorized";
+                    }
                 }
             }
 
-            if (!queryStringMap.isEmpty()) {
-                Optional<User> user = InMemoryUserRepository.findByAccount(queryStringMap.get("account"));
+            if (isGet(method)) {
+                int index = uri.indexOf("?");
+                if (index > 0) {
+                    path = uri.substring(0, index);
+                    queryString = uri.substring(index + 1);
+                }
 
-                if (user.isPresent() && user.get().checkPassword(queryStringMap.get("password"))) {
-                    log.info("login success, account: {}", user.get().getAccount());
-                    path = "index.html";
-                    httpStatus = "302 Found";
-                } else {
-                    log.info("login failed, account: {}, password: {}", queryStringMap.get("account"), queryStringMap.get("password"));
-                    path = "401.html";
-                    httpStatus = "401 Unauthorized";
+                HashMap<String, String> queryStringMap = new HashMap<>();
+                if (!queryString.isBlank()) {
+                    String[] queryStrings = queryString.split("&");
+                    for (String query : queryStrings) {
+                        String[] values = query.split("=");
+                        queryStringMap.put(values[0], values[1]);
+                    }
                 }
             }
 
             String responseBody = "";
-            if (path.isBlank()) {
+            if (Objects.equals(path, "/")) {
                 responseBody = "Hello world!";
             } else {
                 if (!path.contains(".")) {
                     path += ".html";
                 }
-                URL resource = getClass().getClassLoader().getResource("static/" + path);
+                URL resource = getClass().getClassLoader().getResource("static" + path);
                 if (Objects.nonNull(resource)) {
                     final Path filePath = new File(resource.getPath()).toPath();
                     responseBody = Files.readString(filePath);
@@ -109,6 +145,14 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
+    }
+
+    private boolean isGet(String method) {
+        return "GET".equals(method);
+    }
+
+    private boolean isPost(String method) {
+        return "POST".equals(method);
     }
 
     private String makeHttpResponse(String httpStatus, String responseBody) {

@@ -106,7 +106,7 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3796 \r\n" +
+                "Content-Length: 3797 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
         assertThat(socket.output()).isEqualTo(expected);
@@ -188,6 +188,38 @@ class RequestHandlerTest {
         String expected = "HTTP/1.1 401 Unauthorized \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 2426 \r\n" +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    // TODO 테스트 수정 필요할 듯
+    @Test
+    void register() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 80",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Accept: */*",
+                "",
+                "account=joanne&password=password&email=hkkang%40woowahan.com",
+                "",
+                "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 5564 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
         assertThat(socket.output()).isEqualTo(expected);

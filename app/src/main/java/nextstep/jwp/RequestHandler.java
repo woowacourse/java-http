@@ -3,11 +3,14 @@ package nextstep.jwp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class RequestHandler implements Runnable {
 
@@ -26,7 +29,21 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final String responseBody = "Hello world!";
+            String request = new String(inputStream.readAllBytes());
+            String[] requestSplit = request.split("\n\n");
+            String header = requestSplit[0];
+
+            List<String> lines = header.lines().collect(Collectors.toList());
+
+            // 리퀘스트 라인(헤더 첫줄)
+            String requestLine = lines.get(0);
+            String uriPath = requestLine.split(" ")[1];
+            String uri = uriPath.split("\\?")[0];
+
+            String responseBody = "Hello world!";
+            if (!uri.equals("/")) {
+                responseBody = readFile(uri);
+            }
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -42,6 +59,18 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
+    }
+
+    private String readFile(String uriPath) throws IOException {
+        String[] paths = uriPath.split("/");
+        String fileName = paths[paths.length - 1];
+        URL resource = getClass().getClassLoader().getResource("static/" + fileName);
+
+        if (resource == null) {
+            throw new FileNotFoundException();
+        }
+        Path path = new File(resource.getPath()).toPath();
+        return Files.readString(path);
     }
 
     private void close() {

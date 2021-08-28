@@ -2,8 +2,12 @@ package nextstep.jwp.framework.http.parser;
 
 import nextstep.jwp.framework.http.HttpMethod;
 import nextstep.jwp.framework.http.HttpVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RequestLineParser extends AbstractLineParser {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestLineParser.class);
 
     private static final int STATUS_LINE_TOKEN_COUNT = 3;
 
@@ -27,6 +31,9 @@ public class RequestLineParser extends AbstractLineParser {
         final HttpMethod httpMethod = HttpMethod.resolve(statusTokens[METHOD_INDEX]);
         final String uri = statusTokens[URI_INDEX];
         final HttpVersion version = HttpVersion.resolve(statusTokens[VERSION_INDEX]);
+
+        LOGGER.debug("requestLine : [HttpMethod = {}, URI = {}, ProtocolVersion = {}]", httpMethod, uri, version);
+
         return new HeaderLineParser(builder.requestLine(httpMethod, uri, version));
     }
 }

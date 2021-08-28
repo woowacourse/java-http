@@ -1,5 +1,10 @@
 package nextstep.learning.http;
 
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,11 +27,12 @@ class FileTest {
      * resource 디렉터리의 경로는 어떻게 알아낼 수 있을까?
      */
     @Test
-    void resource_디렉터리에_있는_파일의_경로를_찾는다() {
+    void resource_디렉터리에_있는_파일의_경로를_찾는다() throws URISyntaxException {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = "";
+        String path = getClass().getClassLoader().getResource(fileName).getPath();
+        final String actual = new File(path).getName();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -36,15 +42,11 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws Exception {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final Path path = null;
-
-        // todo
-        final List<String> actual = Lists.emptyList();
-
+        final URL url = getClass().getClassLoader().getResource(fileName);
+        final List<String> actual = Files.readAllLines(Paths.get(url.toURI()));
         assertThat(actual).containsOnly("nextstep");
     }
 }

@@ -1,5 +1,10 @@
 package nextstep.jwp;
 
+import nextstep.jwp.core.handler.FrontHandler;
+import nextstep.jwp.request.basic.DefaultHttpRequest;
+import nextstep.jwp.request.HttpRequest;
+import nextstep.jwp.response.DefaultHttpResponse;
+import nextstep.jwp.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,15 +30,25 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
+            HttpRequest httpRequest = new DefaultHttpRequest(inputStream);
+            HttpResponse httpResponse = new DefaultHttpResponse();
 
-            final String responseBody = "Hello world!";
+            final String response = new FrontHandler("nextstep")
+                    .getResponse(httpRequest, httpResponse).totalResponse();
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+
+//            final FrontHandler frontHandler =
+//                    applicationContext.getBean("FrontHandler", FrontHandler.class);
+//
+//            String response = frontHandler.doRequest(httpRequest, httpResponse);
+
+//            final String responseBody = "Hello world!";
+//            final String response = String.join("\r\n",
+//                    "HTTP/1.1 200 OK ",
+//                    "Content-Type: text/html;charset=utf-8 ",
+//                    "Content-Length: " + responseBody.getBytes().length + " ",
+//                    "",
+//                    responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

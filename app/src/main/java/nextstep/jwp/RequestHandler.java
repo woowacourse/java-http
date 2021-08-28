@@ -10,8 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import nextstep.jwp.infrastructure.http.ControllerMapping;
+import nextstep.jwp.infrastructure.http.View;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
-import nextstep.jwp.infrastructure.http.ResourceResolver;
+import nextstep.jwp.infrastructure.http.ViewResolver;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,11 +22,11 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
-    private final ResourceResolver resourceResolver;
+    private final ViewResolver viewResolver;
 
     public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
-        this.resourceResolver = new ResourceResolver("static");
+        this.viewResolver = new ViewResolver("static");
     }
 
     @Override
@@ -39,12 +40,12 @@ public class RequestHandler implements Runnable {
 
             final HttpRequest httpRequest = HttpRequest.of(splitFromInputStream(bufferedReader));
 
-            String resourceName = httpRequest.getRequestLine().getUri().getBaseUri();
+            View view = new View(httpRequest.getRequestLine().getUri().getBaseUri());
             if (ControllerMapping.contains(httpRequest)) {
-                resourceName = ControllerMapping.handle(httpRequest);
+                view = ControllerMapping.handle(httpRequest);
             }
 
-            final HttpResponse httpResponse = resourceResolver.readResource(resourceName);
+            final HttpResponse httpResponse = viewResolver.resolve(view);
 
             outputStream.write(httpResponse.toString().getBytes());
             outputStream.flush();

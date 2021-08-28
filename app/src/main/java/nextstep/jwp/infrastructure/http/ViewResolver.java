@@ -8,12 +8,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import nextstep.jwp.infrastructure.http.HttpHeaders.Builder;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.infrastructure.http.response.HttpStatusCode;
 import nextstep.jwp.infrastructure.http.response.HttpStatusLine;
 
-public class ResourceResolver {
+public class ViewResolver {
 
     private static final String NOT_FOUND_FILE_NAME = "/404.html";
 
@@ -21,7 +22,7 @@ public class ResourceResolver {
     private final String defaultPath;
     private final Path notFoundResourcePath;
 
-    public ResourceResolver(final String defaultPath) {
+    public ViewResolver(final String defaultPath) {
         this.classLoader = getClass().getClassLoader();
         this.defaultPath = defaultPath;
         this.notFoundResourcePath = findNotFoundResourcePath(classLoader, defaultPath);
@@ -36,14 +37,19 @@ public class ResourceResolver {
         return new File(notFoundUrl.getFile()).toPath();
     }
 
-    public HttpResponse readResource(final String resourceName) {
-        final Path path = findPathOrElse(defaultPath + resourceName, notFoundResourcePath);
+    public HttpResponse resolve(final View view) {
+        final Optional<URL> resourceUrl = Optional.ofNullable(classLoader.getResource(defaultPath + view.getResourceName()));
+
+        final Path path = resourceUrl.map(url -> new File(url.getFile()).toPath())
+            .orElse(notFoundResourcePath);
+        final HttpStatusCode statusCode = resourceUrl.map(url -> view.getStatusCode())
+            .orElse(HttpStatusCode.NOT_FOUND);
 
         try {
             final String responseBody = Files.readString(path);
 
             return new HttpResponse(
-                new HttpStatusLine(HttpStatusCode.OK),
+                new HttpStatusLine(statusCode),
                 new Builder()
                     .header("Content-Type",
                         String.join(";", Files.probeContentType(path), "charset=" + Charset.defaultCharset().displayName().toLowerCase(Locale.ROOT)))
@@ -52,16 +58,7 @@ public class ResourceResolver {
                 responseBody
             );
         } catch (IOException ioException) {
-            throw new IllegalStateException(String.format("Cannot read this file(%s).", resourceName));
+            throw new IllegalStateException(String.format("Cannot read this file(%s).", view));
         }
-    }
-
-    private Path findPathOrElse(final String resourcePath, final Path defaultPath) {
-        final URL resourceUrl = classLoader.getResource(resourcePath);
-
-        if (Objects.isNull(resourceUrl)) {
-            return defaultPath;
-        }
-        return new File(resourceUrl.getFile()).toPath();
     }
 }

@@ -9,10 +9,11 @@ import nextstep.jwp.infrastructure.http.request.HttpMethod;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
 import nextstep.jwp.infrastructure.http.request.URI;
+import nextstep.jwp.infrastructure.http.response.HttpStatusCode;
 
 public enum ControllerMapping {
     hello(new HttpRequestLine(HttpMethod.GET, "/"),
-        (request) -> "/hello.html"),
+        (request) -> new View("/hello.html")),
 
     login(new HttpRequestLine(HttpMethod.GET, "/login"),
         (request) -> {
@@ -28,27 +29,27 @@ public enum ControllerMapping {
                 }
             }
 
-            return "/login.html";
+            return new View("/login.html");
         });
 
-    private static final Map<HttpRequestLine, Function<HttpRequest, String>> CONTROLLERS = Arrays.stream(values())
+    private static final Map<HttpRequestLine, Function<HttpRequest, View>> CONTROLLERS = Arrays.stream(values())
         .collect(Collectors.toMap(ControllerMapping::getHttpRequestLine, ControllerMapping::getController));
 
     private final HttpRequestLine httpRequestLine;
 
-    private final Function<HttpRequest, String> controller;
+    private final Function<HttpRequest, View> controller;
 
     ControllerMapping(final HttpRequestLine httpRequestLine,
-                      final Function<HttpRequest, String> controller) {
+                      final Function<HttpRequest, View> controller) {
         this.httpRequestLine = httpRequestLine;
         this.controller = controller;
     }
 
-    public static String handle(final HttpRequest request) {
+    public static View handle(final HttpRequest request) {
         HttpRequestLine requestLine = request.getRequestLine();
         final HttpRequestLine requestLineWithoutQuery = new HttpRequestLine(requestLine.getHttpMethod(), requestLine.getUri().getBaseUri());
         if (!contains(request)) {
-            return "/404.html";
+            return new View("/404.html", HttpStatusCode.NOT_FOUND);
         }
 
         return CONTROLLERS.get(requestLineWithoutQuery).apply(request);
@@ -60,7 +61,7 @@ public enum ControllerMapping {
         return CONTROLLERS.containsKey(requestLineWithoutQuery);
     }
 
-    private Function<HttpRequest, String> getController() {
+    private Function<HttpRequest, View> getController() {
         return controller;
     }
 

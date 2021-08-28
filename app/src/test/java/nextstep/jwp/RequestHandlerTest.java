@@ -1,5 +1,6 @@
 package nextstep.jwp;
 
+import nextstep.jwp.core.handler.FrontHandler;
 import nextstep.mockweb.request.MockRequest;
 import org.junit.jupiter.api.Test;
 
@@ -40,7 +41,8 @@ class RequestHandlerTest {
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final FrontHandler frontHandler = new FrontHandler("nextstep");
+        final RequestHandler requestHandler = new RequestHandler(socket, frontHandler);
 
         // when
         requestHandler.run();

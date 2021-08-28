@@ -1,4 +1,4 @@
-package nextstep.jwp.request;
+package nextstep.jwp.webserver.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -64,5 +64,10 @@ public class DefaultHttpRequest implements HttpRequest {
     @Override
     public String httpUrl() {
         return requestLine.httpUrl();
+    }
+
+    @Override
+    public String getAttribute(String key) {
+        return requestParams.getParam(key);
     }
 }

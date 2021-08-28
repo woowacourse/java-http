@@ -12,7 +12,11 @@ public class ModelAndView {
     private String currentUrl;
     private String viewName;
     private ModelAttribute modelAttribute;
+    private String redirectUrl;
 
+    public ModelAndView(String redirectUrl) {
+        this.redirectUrl = redirectUrl;
+    }
 
     public ModelAndView(String viewName, String httpUrl) {
         this.viewName = viewName;
@@ -28,5 +32,17 @@ public class ModelAndView {
             e.printStackTrace();
         }
         return "";
+    }
+
+    public void setRedirectUrl(String redirectUrl) {
+        this.redirectUrl = redirectUrl;
+    }
+
+    public boolean isRedirect() {
+        return redirectUrl != null;
+    }
+
+    public String getRedirectUrl() {
+        return redirectUrl;
     }
 }

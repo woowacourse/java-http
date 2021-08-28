@@ -1,7 +1,7 @@
-package nextstep.jwp.response;
+package nextstep.jwp.webserver.response;
 
 import java.util.Arrays;
-import nextstep.jwp.exception.PageNotFoundException;
+import nextstep.jwp.webserver.exception.PageNotFoundException;
 
 public enum ContentType {
     CSS(".css", "text/css"),

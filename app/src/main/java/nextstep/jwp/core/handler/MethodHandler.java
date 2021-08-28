@@ -3,11 +3,13 @@ package nextstep.jwp.core.handler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import nextstep.jwp.core.handler.mapping.RequestMapping;
-import nextstep.jwp.request.HttpMethod;
-import nextstep.jwp.request.HttpRequest;
-import nextstep.jwp.response.HttpResponse;
+import nextstep.jwp.webserver.request.HttpMethod;
+import nextstep.jwp.webserver.request.HttpRequest;
+import nextstep.jwp.webserver.response.HttpResponse;
 
 public class MethodHandler extends ResolverHandler {
+
+    private static final String REDIRECT_FORM = "redirect:";
 
     private final Method method;
     private final Object target;
@@ -42,7 +44,13 @@ public class MethodHandler extends ResolverHandler {
 
         try {
             final String viewName = (String) method.invoke(target, httpRequest, httpResponse);
-//            TODO : ViewResolver 로 뷰 관련 다루기(일단은 ModelAndView에서)
+
+//          TODO : ViewResolver 로 뷰 관련 다루기(일단은 ModelAndView에서)
+            if(viewName.startsWith(REDIRECT_FORM)) {
+                final String redirectUrl = viewName.substring(REDIRECT_FORM.length());
+                httpResponse.addRedirectUrl(redirectUrl);
+                return new ModelAndView(redirectUrl);
+            }
             return new ModelAndView(viewName, httpRequest.httpUrl());
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();

@@ -1,6 +1,5 @@
 package nextstep.jwp.app.ui;
 
-import java.util.Optional;
 import nextstep.jwp.app.db.MemberRepository;
 import nextstep.jwp.app.model.Member;
 import nextstep.jwp.core.annotation.Autowired;
@@ -11,30 +10,29 @@ import nextstep.jwp.webserver.request.HttpRequest;
 import nextstep.jwp.webserver.response.HttpResponse;
 
 @Controller
-public class LoginController {
+public class MemberController {
 
     private MemberRepository memberRepository;
 
     @Autowired
-    public LoginController(MemberRepository memberRepository) {
+    public MemberController(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
 
-    @RequestMapping(method = HttpMethod.GET, path = "/login")
-    public String loginPage(HttpRequest httpRequest, HttpResponse httpResponse) {
-        final String account = httpRequest.getAttribute("account");
-        final String password = httpRequest.getAttribute("password");
-        if(account == null || password == null) return "login.html";
-
-        final Optional<Member> member = memberRepository.findByAccount(account);
-        if(member.isEmpty() || member.get().invalidPassword(password)) {
-            return "redirect:/unauthorized";
-        }
-        return "redirect:/";
+    @RequestMapping(method = HttpMethod.GET, path = "/register")
+    public String registerPage(HttpRequest httpRequest, HttpResponse httpResponse) {
+        return "register.html";
     }
 
-    @RequestMapping(method = HttpMethod.GET, path = "/unauthorized")
-    public String unauthorizedPage(HttpRequest httpRequest, HttpResponse httpResponse) {
-        return "401.html";
+    @RequestMapping(method = HttpMethod.POST, path = "/register")
+    public String register(HttpRequest httpRequest, HttpResponse httpResponse) {
+        final String account = httpRequest.getAttribute("account");
+        final String password = httpRequest.getAttribute("password");
+        final String email = httpRequest.getAttribute("email");
+        if(memberRepository.findByAccount(account).isPresent()) {
+            return "redirect:/register";
+        }
+        memberRepository.save(new Member(account, password, email));
+        return "redirect:/";
     }
 }

@@ -4,11 +4,11 @@ import nextstep.jwp.core.ApplicationContext;
 import nextstep.jwp.core.DefaultApplicationContext;
 import nextstep.jwp.core.handler.mapping.HandlerMapping;
 import nextstep.jwp.core.handler.mapping.MethodHandlerMapping;
-import nextstep.jwp.exception.PageNotFoundException;
-import nextstep.jwp.request.HttpRequest;
-import nextstep.jwp.response.ContentType;
-import nextstep.jwp.response.HttpResponse;
-import nextstep.jwp.response.StatusCode;
+import nextstep.jwp.webserver.exception.PageNotFoundException;
+import nextstep.jwp.webserver.request.HttpRequest;
+import nextstep.jwp.webserver.response.ContentType;
+import nextstep.jwp.webserver.response.HttpResponse;
+import nextstep.jwp.webserver.response.StatusCode;
 
 public class FrontHandler {
 
@@ -32,6 +32,9 @@ public class FrontHandler {
         } catch (PageNotFoundException e) {
             httpResponse.addStatus(StatusCode.NOT_FOUND);
             httpResponse.addPage("static/404.html");
+        } catch (Exception e) {
+            httpResponse.addStatus(StatusCode.SERVER_ERROR);
+            httpResponse.addPage("static/500.html");
         }
         return httpResponse;
     }

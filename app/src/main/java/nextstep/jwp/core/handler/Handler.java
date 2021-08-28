@@ -1,8 +1,8 @@
 package nextstep.jwp.core.handler;
 
-import nextstep.jwp.request.HttpMethod;
-import nextstep.jwp.request.HttpRequest;
-import nextstep.jwp.response.HttpResponse;
+import nextstep.jwp.webserver.request.HttpMethod;
+import nextstep.jwp.webserver.request.HttpRequest;
+import nextstep.jwp.webserver.response.HttpResponse;
 
 public interface Handler {
 

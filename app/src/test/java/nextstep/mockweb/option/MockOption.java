@@ -2,6 +2,9 @@ package nextstep.mockweb.option;
 
 import nextstep.jwp.MockSocket;
 import nextstep.jwp.RequestHandler;
+import nextstep.jwp.core.ApplicationContext;
+import nextstep.jwp.core.DefaultApplicationContext;
+import nextstep.jwp.core.handler.FrontHandler;
 import nextstep.mockweb.result.MockResult;
 import nextstep.mockweb.request.RequestInfo;
 
@@ -33,7 +36,7 @@ public class MockOption {
     private String doRequest(RequestInfo requestInfo, OptionInfo optionInfo) {
         final MockSocket mockSocket = new MockSocket(requestInfo.asRequest());
         optionInfo.executeBeforeOption(requestInfo);
-        new RequestHandler(mockSocket).run();
+        new RequestHandler(mockSocket, new FrontHandler("nextstep")).run();
         final String result = mockSocket.output();
         optionInfo.executeAfterOption(result);
         return result;

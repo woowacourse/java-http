@@ -1,6 +1,8 @@
 package nextstep.mockweb.request;
 
-import nextstep.jwp.request.HttpMethod;
+import nextstep.jwp.core.ApplicationContext;
+import nextstep.jwp.core.DefaultApplicationContext;
+import nextstep.jwp.webserver.request.HttpMethod;
 import nextstep.mockweb.option.MockOption;
 
 public class MockRequest {

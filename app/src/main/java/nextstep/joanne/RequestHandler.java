@@ -1,8 +1,8 @@
-package nextstep.jwp;
+package nextstep.joanne;
 
 import exception.UserNotFoundException;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
+import nextstep.joanne.db.InMemoryUserRepository;
+import nextstep.joanne.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.Optional;
 
 public class RequestHandler implements Runnable {
 
@@ -56,6 +57,7 @@ public class RequestHandler implements Runnable {
             int index = uri.indexOf("?");
             String path = uri;
             String queryString = "";
+            String httpStatus = "200 OK";
             if (index > 0) {
                 path = uri.substring(0, index);
                 queryString = uri.substring(index + 1);
@@ -71,10 +73,16 @@ public class RequestHandler implements Runnable {
             }
 
             if (!queryStringMap.isEmpty()) {
-                User user = InMemoryUserRepository.findByAccount(queryStringMap.get("account"))
-                        .orElseThrow(UserNotFoundException::new);
-                if (user.checkPassword(queryStringMap.get("password"))) {
+                Optional<User> user = InMemoryUserRepository.findByAccount(queryStringMap.get("account"));
+
+                if (user.isPresent() && user.get().checkPassword(queryStringMap.get("password"))) {
+                    log.info("login success, account: {}", user.get().getAccount());
                     path = "index.html";
+                    httpStatus = "302 Found";
+                } else {
+                    log.info("login failed, account: {}, password: {}", queryStringMap.get("account"), queryStringMap.get("password"));
+                    path = "401.html";
+                    httpStatus = "401 Unauthorized";
                 }
             }
 
@@ -92,12 +100,7 @@ public class RequestHandler implements Runnable {
                 }
             }
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final String response = makeHttpResponse(httpStatus, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -106,6 +109,15 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
+    }
+
+    private String makeHttpResponse(String httpStatus, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + httpStatus + " ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 
     private void close() {

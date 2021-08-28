@@ -1,6 +1,6 @@
-package nextstep.jwp;
+package nextstep.joanne;
 
-public class JwpApplication {
+public class JoanneApplication {
 
     public static void main(String[] args) {
         int port = WebServer.defaultPortIfNull(args);

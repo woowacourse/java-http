@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package nextstep.joanne.model;
 
 public class User {
 

@@ -3,16 +3,15 @@ package nextstep.jwp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Objects;
 
 public class RequestHandler implements Runnable {
-
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
-
     private final Socket connection;
 
     public RequestHandler(Socket connection) {
@@ -26,14 +25,33 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final String responseBody = "Hello world!";
+            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            final StringBuilder header = new StringBuilder();
+
+            String line = bufferedReader.readLine();
+
+            if (line == null) {
+                return;
+            }
+            final String[] request = line.split(" ");
+            final String fileName = request[1];
+
+            while (!"".equals(line)) {
+                line = bufferedReader.readLine();
+                header.append(line);
+                header.append("\r\n");
+            }
+
+            byte[] body = new byte[0];
+            body = Files.readAllBytes(getResources(fileName).toPath());
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Length: " + body.length + " ",
                     "",
-                    responseBody);
+                    new String(body));
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -42,6 +60,14 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
+    }
+
+    private File getResources(String fileName) {
+        final URL resource = getClass().getClassLoader().getResource("static" + fileName);
+        if (resource != null) {
+            return new File(resource.getPath());
+        }
+        return getResources("/404.html");
     }
 
     private void close() {

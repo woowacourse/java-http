@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
@@ -18,12 +19,15 @@ public class Controllers {
     }
 
     public static Controllers loadContext() {
-        List<Controller> restControllers = new ArrayList<>();
-
         StaticResourceService staticResourceService = new StaticResourceService();
-        StaticResourceController staticResourceController = new StaticResourceController(staticResourceService);
 
-        return new Controllers(restControllers, staticResourceController);
+        Controller staticResourceController = new StaticResourceController(staticResourceService);
+
+        Controller loginController = new LoginController(staticResourceService);
+
+        List<Controller> controllers = Arrays.asList(loginController);
+
+        return new Controllers(controllers, staticResourceController);
     }
 
     public HttpResponse doService(HttpRequest httpRequest) throws IOException {

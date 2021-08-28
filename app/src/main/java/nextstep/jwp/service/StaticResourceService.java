@@ -15,4 +15,8 @@ public class StaticResourceService {
 
         return StaticResource.from(file);
     }
+
+    public StaticResource findByPathWithExtension(String path, String extension) throws IOException {
+        return findByPath(path + extension);
+    }
 }

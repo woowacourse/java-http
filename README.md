@@ -1,7 +1,7 @@
 # HTTP 서버 구현하기
 
 - [x] 서버를 실행시켜서 브라우저로 서버(`http://localhost:8080/index.html`)에 접속하면 index.html 페이지를 보여준다.
-- [ ] `http://localhost:8080/login`으로 접속하면 로그인 페이지(login.html)를 보여준다.
+- [x] `http://localhost:8080/login`으로 접속하면 로그인 페이지(login.html)를 보여준다.
   - [ ] Query String을 추가해서 로그인 페이지에 접속했을 때 아이디, 비밀번호가 일치하면 회원을 조회한다.  
     `http://localhost:8080/login?account=gugu&password=password`
 - [ ] 회원을 조회해서 로그인에 성공하면 /index.html로 리다이렉트한다. 

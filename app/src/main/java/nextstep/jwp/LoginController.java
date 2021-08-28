@@ -20,10 +20,10 @@ public class LoginController extends AbstractController {
 
     @Override
     public HttpResponse doGet(HttpRequest httpRequest) {
-        if (!httpRequest.toURI().hasQuery()) {
+        if (!httpRequest.getURI().hasQuery()) {
             return new HttpResponse(HttpStatus.OK, readFile(getResource()));
         } else {
-            final Map<String, String> queryInfo = extractQuery(httpRequest.toURI().getQuery());
+            final Map<String, String> queryInfo = extractQuery(httpRequest.getURI().getQuery());
             final User user = InMemoryUserRepository.findByAccount(queryInfo.get("account"))
                     .orElseThrow(() -> new UserNotFoundException(queryInfo.get("account")));
             if (user.checkPassword(queryInfo.get("password"))) {

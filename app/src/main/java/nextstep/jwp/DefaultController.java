@@ -12,7 +12,7 @@ public class DefaultController extends AbstractController {
 
     @Override
     public HttpResponse doGet(HttpRequest httpRequest) {
-        if ("/index.html".equals(httpRequest.toURI().getPath())) {
+        if ("/index.html".equals(httpRequest.getURI().getPath())) {
             final byte[] bytes = readIndex();
             return new HttpResponse(HttpStatus.OK, bytes);
         }

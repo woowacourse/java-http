@@ -1,15 +1,10 @@
 package nextstep.jwp.network;
 
+import java.util.Objects;
+
 public class URI {
 
     private final String value;
-
-    // https://www.naver.com/sports/soccer?name=messi
-    // schema
-    // authority
-    // path
-    // query
-    // fragment
 
     public URI(String value) {
         this.value = value;
@@ -30,5 +25,18 @@ public class URI {
     public String getQuery() {
         final int queryStart = value.indexOf("?");
         return value.substring(queryStart + 1);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        URI uri = (URI) o;
+        return Objects.equals(value, uri.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
     }
 }

@@ -2,17 +2,10 @@ package nextstep.jwp.network;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class HttpRequest {
-
-    private static final String CRLF = "\r\n";
 
     private final RequestLine requestLine;
     private final Map<String, String> headers;
@@ -41,8 +34,8 @@ public class HttpRequest {
         final Map<String, String> headers = new HashMap<>();
         String line = bufferedReader.readLine();
         while(!"".equals(line)) {
-            final String[] keyValue = line.split(": ");
-            headers.put(keyValue[0], keyValue[1]);
+            final String[] keyValue = line.split(":");
+            headers.put(keyValue[0].trim(), keyValue[1].trim());
             line = bufferedReader.readLine();
             if (line == null) {
                 break;
@@ -65,11 +58,17 @@ public class HttpRequest {
         return requestLine.getHttpMethod();
     }
 
-    public URI toURI() {
+    public URI getURI() {
         return requestLine.getURI();
     }
 
-    public String findHeaderValue(String key) {
-        return headers.getOrDefault(key, "");
+    public Map<String, String> getBody() {
+        final Map<String, String> bodyAsMap = new HashMap<>();
+        final String[] params = body.split("&");
+        for (String param : params) {
+            final String[] keyAndValue = param.split("=");
+            bodyAsMap.put(keyAndValue[0], keyAndValue[1]);
+        }
+        return bodyAsMap;
     }
 }

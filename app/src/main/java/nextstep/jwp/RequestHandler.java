@@ -36,7 +36,7 @@ public class RequestHandler implements Runnable {
             final HttpRequest httpRequest = HttpRequest.of(bufferedReader);
 
             final ControllerMapping controllerMapping = new ControllerMapping(ControllerFactory.create());
-            final Controller foundController = controllerMapping.findByResource(httpRequest.toURI().getPath());
+            final Controller foundController = controllerMapping.findByResource(httpRequest.getURI().getPath());
             final HttpResponse httpResponse = foundController.execute(httpRequest);
 
             final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));

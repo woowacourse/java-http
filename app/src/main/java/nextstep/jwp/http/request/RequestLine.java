@@ -1,7 +1,6 @@
 package nextstep.jwp.http.request;
 
 import com.google.common.base.Strings;
-import nextstep.jwp.exception.InvalidHttpRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,18 +29,18 @@ public class RequestLine {
                 path = uri;
             }
             this.protocol = tokens[2];
-        } catch (InvalidHttpRequestException exception) {
+        } catch (IllegalStateException exception) {
             log.error("Exception invalid http request", exception);
         }
     }
 
-    private String[] splitByBlank(String line) throws InvalidHttpRequestException {
+    private String[] splitByBlank(String line) throws IllegalStateException {
         if (line == null) {
-            throw new InvalidHttpRequestException("HTTP Request Line이 null일 수 없습니다.");
+            throw new IllegalStateException("HTTP Request Line이 null일 수 없습니다.");
         }
         String[] tokens = line.split(" ");
         if (tokens.length != 3) {
-            throw new InvalidHttpRequestException("RequestLine의 형식이 올바르지 않습니다.");
+            throw new IllegalStateException("RequestLine의 형식이 올바르지 않습니다.");
         }
         return tokens;
     }

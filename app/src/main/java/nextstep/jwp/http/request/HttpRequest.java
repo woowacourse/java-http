@@ -1,6 +1,5 @@
 package nextstep.jwp.http.request;
 
-import nextstep.jwp.exception.InvalidHttpRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,19 +19,19 @@ public class HttpRequest {
             this.requestLine = new RequestLine(reader.readLine());
             this.headers = readHeaders(reader);
             this.body = readBody(reader, headers.getContentLength());
-        } catch (InvalidHttpRequestException exception) {
+        } catch (IllegalStateException exception) {
             log.error("Exception invalid http request", exception);
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         }
     }
 
-    private RequestHeaders readHeaders(BufferedReader reader) throws IOException, InvalidHttpRequestException {
+    private RequestHeaders readHeaders(BufferedReader reader) throws IOException, IllegalStateException {
         RequestHeaders requestHeaders = new RequestHeaders();
         while (reader.ready()) {
             String line = reader.readLine();
             if (line == null) {
-                throw new InvalidHttpRequestException("HTTP Header Line이 null일 수 없습니다.");
+                throw new IllegalStateException("HTTP Header Line이 null일 수 없습니다.");
             }
             if ("".equals(line)) break;
             requestHeaders.put(line);

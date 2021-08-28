@@ -97,7 +97,7 @@ public class HttpRequest {
         private void parse(InputStream inputStream) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            try (bufferedReader) {
+            try {
                 parseStatusLine(bufferedReader.readLine());
                 while (bufferedReader.ready()) {
                     parseHeader(bufferedReader.readLine());

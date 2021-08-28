@@ -14,7 +14,7 @@ public class RegisterController implements Controller {
     @Override
     public HttpResponse get(HttpRequest request) {
         StaticFileReader staticFileReader = new StaticFileReader();
-        String htmlOfRegister = staticFileReader.read("static/register.html");
+        String htmlOfRegister = staticFileReader.read("register.html");
         return new HttpResponse(HttpStatus.OK, htmlOfRegister);
     }
 

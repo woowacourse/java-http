@@ -14,7 +14,7 @@ public class LoginController implements Controller {
     @Override
     public HttpResponse get(HttpRequest request) {
         StaticFileReader staticFileReader = new StaticFileReader();
-        String htmlOfLogin = staticFileReader.read("static/login.html");
+        String htmlOfLogin = staticFileReader.read("login.html");
         return new HttpResponse(HttpStatus.OK, htmlOfLogin);
     }
 
@@ -32,7 +32,7 @@ public class LoginController implements Controller {
                 httpResponse.putHeader("Location", "/index.html");
                 return httpResponse;
             }
-            String htmlOf401 = staticFileReader.read("static/401.html");
+            String htmlOf401 = staticFileReader.read("401.html");
             return new HttpResponse(HttpStatus.UNAUTHORIZED, htmlOf401);
         }
         return new HttpResponse(HttpStatus.BAD_REQUEST);

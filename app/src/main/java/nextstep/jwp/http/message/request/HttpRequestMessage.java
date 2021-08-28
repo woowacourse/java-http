@@ -7,9 +7,9 @@ import nextstep.jwp.utils.StringUtils;
 
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Objects;
 
 public class HttpRequestMessage implements HttpMessage {
-
 
     private static final String MESSAGE_SEPARATOR = "\r\n\r\n";
     private static final String LINE_SEPARATOR = "\r\n";
@@ -79,6 +79,19 @@ public class HttpRequestMessage implements HttpMessage {
                 .put(separatorBytes)
                 .put(bodyBytes)
                 .array();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        HttpRequestMessage that = (HttpRequestMessage) o;
+        return Objects.equals(requestHeader, that.requestHeader) && Objects.equals(responseBody, that.responseBody);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(requestHeader, responseBody);
     }
 
     @Override

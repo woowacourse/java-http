@@ -15,6 +15,10 @@ public class HttpResponse {
         this.messageBody = messageBody;
     }
 
+    public HttpResponse(final HttpStatusLine statusLine, final HttpHeaders headers) {
+        this(statusLine, headers, "");
+    }
+
     @Override
     public String toString() {
         return String.join("\r\n",

@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
-import nextstep.jwp.infrastructure.http.HttpHeaders.Builder;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.infrastructure.http.response.HttpStatusCode;
 import nextstep.jwp.infrastructure.http.response.HttpStatusLine;
@@ -38,6 +37,13 @@ public class ViewResolver {
     }
 
     public HttpResponse resolve(final View view) {
+        if (view.needsResource()) {
+            return resolveByResource(view);
+        }
+        return view.getResponse();
+    }
+
+    private HttpResponse resolveByResource(final View view) {
         final Optional<URL> resourceUrl = Optional.ofNullable(classLoader.getResource(defaultPath + view.getResourceName()));
 
         final Path path = resourceUrl.map(url -> new File(url.getFile()).toPath())
@@ -50,7 +56,7 @@ public class ViewResolver {
 
             return new HttpResponse(
                 new HttpStatusLine(statusCode),
-                new Builder()
+                new HttpHeaders.Builder()
                     .header("Content-Type",
                         String.join(";", Files.probeContentType(path), "charset=" + Charset.defaultCharset().displayName().toLowerCase(Locale.ROOT)))
                     .header("Content-Length", String.valueOf(responseBody.getBytes().length))

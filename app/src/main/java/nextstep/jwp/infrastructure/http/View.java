@@ -1,19 +1,35 @@
 package nextstep.jwp.infrastructure.http;
 
+import java.util.Objects;
+import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.infrastructure.http.response.HttpStatusCode;
 
 public class View {
 
-    private final String resourceName;
     private final HttpStatusCode statusCode;
+    private final String resourceName;
+    private final HttpResponse response;
 
-    public View(final String resourceName, final HttpStatusCode statusCode) {
-        this.resourceName = resourceName;
+    private View(final HttpStatusCode statusCode, final String resourceName, final HttpResponse response) {
         this.statusCode = statusCode;
+        this.resourceName = resourceName;
+        this.response = response;
     }
 
-    public View(final String resourceName) {
-        this(resourceName, HttpStatusCode.OK);
+    public static View buildByResource(final String resourceName) {
+        return buildByResource(HttpStatusCode.OK, resourceName);
+    }
+
+    public static View buildByResource(final HttpStatusCode statusCode, final String resourceName) {
+        return new View(statusCode, resourceName, null);
+    }
+
+    public static View buildByHttpResponse(final HttpResponse response) {
+        return new View(null, null, response);
+    }
+
+    public boolean needsResource() {
+        return Objects.nonNull(resourceName);
     }
 
     public String getResourceName() {
@@ -22,5 +38,9 @@ public class View {
 
     public HttpStatusCode getStatusCode() {
         return statusCode;
+    }
+
+    public HttpResponse getResponse() {
+        return response;
     }
 }

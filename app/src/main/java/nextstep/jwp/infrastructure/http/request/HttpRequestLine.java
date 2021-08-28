@@ -9,6 +9,9 @@ public class HttpRequestLine {
     private static final String BLANK = " ";
     private static final int FIRST_LINE_ELEMENT_SIZE = 3;
     private static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
+    private static final int METHOD_INDEX = 0;
+    private static final int URI_INDEX = 1;
+    private static final int VERSION_INDEX = 2;
 
     private final HttpMethod httpMethod;
     private final URI uri;
@@ -31,7 +34,7 @@ public class HttpRequestLine {
             throw new IllegalArgumentException(String.format("Invalid HttpRequest Format.(%s)", line));
         }
 
-        return new HttpRequestLine(HttpMethod.valueOf(result.get(0)), result.get(1), result.get(2));
+        return new HttpRequestLine(HttpMethod.valueOf(result.get(METHOD_INDEX)), result.get(URI_INDEX), result.get(VERSION_INDEX));
     }
 
     public HttpMethod getHttpMethod() {

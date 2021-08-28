@@ -13,6 +13,9 @@ public class HttpHeaders {
 
     private static final String KEY_DELIMITER = ": ";
     private static final String VALUE_DELIMITER = ", ";
+    private static final int SPLIT_HEADER_SIZE = 2;
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
     private final Map<String, List<String>> elements;
 
     public HttpHeaders(final Map<String, List<String>> elements) {
@@ -25,7 +28,7 @@ public class HttpHeaders {
         for (String header : headers) {
             final List<String> splitHeader = Arrays.asList(header.split(KEY_DELIMITER));
             validateHeaderFormat(splitHeader);
-            values.put(splitHeader.get(0), splitHeaderValues(splitHeader.get(1)));
+            values.put(splitHeader.get(KEY_INDEX), splitHeaderValues(splitHeader.get(VALUE_INDEX)));
         }
 
         return new HttpHeaders(values);
@@ -36,7 +39,7 @@ public class HttpHeaders {
     }
 
     private static void validateHeaderFormat(final List<String> splitHeader) {
-        if (splitHeader.size() != 2) {
+        if (splitHeader.size() != SPLIT_HEADER_SIZE) {
             throw new IllegalArgumentException(String.format("잘못된 Headers 형식 입니다.(%s)", String.join("", splitHeader)));
         }
     }

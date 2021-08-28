@@ -9,11 +9,13 @@ import nextstep.jwp.infrastructure.http.request.HttpMethod;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
 import nextstep.jwp.infrastructure.http.request.URI;
+import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.infrastructure.http.response.HttpStatusCode;
+import nextstep.jwp.infrastructure.http.response.HttpStatusLine;
 
 public enum ControllerMapping {
     hello(new HttpRequestLine(HttpMethod.GET, "/"),
-        (request) -> new View("/hello.html")),
+        (request) -> View.buildByResource("/hello.html")),
 
     login(new HttpRequestLine(HttpMethod.GET, "/login"),
         (request) -> {
@@ -22,14 +24,21 @@ public enum ControllerMapping {
             if (uri.hasKeys("account", "password")) {
                 String account = uri.getValue("account");
                 String password = uri.getValue("password");
+                String location = "/401.html";
                 if (InMemoryUserRepository.existsByAccountAndPassword(account, password)) {
-                    System.out.printf("Successful login (%s)%n", account);
-                } else {
-                    System.out.printf("Fail To login (%s)%n", account);
+                    location = "/index.html";
                 }
+                return View.buildByHttpResponse(
+                    new HttpResponse(
+                        new HttpStatusLine(HttpStatusCode.FOUND),
+                        new HttpHeaders.Builder()
+                            .header("Location", location)
+                            .build()
+                    )
+                );
             }
 
-            return new View("/login.html");
+            return View.buildByResource("/login.html");
         });
 
     private static final Map<HttpRequestLine, Function<HttpRequest, View>> CONTROLLERS = Arrays.stream(values())
@@ -46,10 +55,10 @@ public enum ControllerMapping {
     }
 
     public static View handle(final HttpRequest request) {
-        HttpRequestLine requestLine = request.getRequestLine();
+        final HttpRequestLine requestLine = request.getRequestLine();
         final HttpRequestLine requestLineWithoutQuery = new HttpRequestLine(requestLine.getHttpMethod(), requestLine.getUri().getBaseUri());
         if (!contains(request)) {
-            return new View("/404.html", HttpStatusCode.NOT_FOUND);
+            return View.buildByResource(HttpStatusCode.NOT_FOUND, "/404.html");
         }
 
         return CONTROLLERS.get(requestLineWithoutQuery).apply(request);

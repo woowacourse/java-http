@@ -11,8 +11,8 @@ import java.util.List;
 import java.util.Objects;
 import nextstep.jwp.infrastructure.http.ControllerMapping;
 import nextstep.jwp.infrastructure.http.View;
-import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.ViewResolver;
+import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +24,7 @@ public class RequestHandler implements Runnable {
     private final Socket connection;
     private final ViewResolver viewResolver;
 
-    public RequestHandler(Socket connection) {
+    public RequestHandler(final Socket connection) {
         this.connection = Objects.requireNonNull(connection);
         this.viewResolver = new ViewResolver("static");
     }
@@ -38,13 +38,8 @@ public class RequestHandler implements Runnable {
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            final HttpRequest httpRequest = HttpRequest.of(splitFromInputStream(bufferedReader));
-
-            View view = new View(httpRequest.getRequestLine().getUri().getBaseUri());
-            if (ControllerMapping.contains(httpRequest)) {
-                view = ControllerMapping.handle(httpRequest);
-            }
-
+            final HttpRequest request = HttpRequest.of(splitFromInputStream(bufferedReader));
+            final View view = findViewByRequest(request);
             final HttpResponse httpResponse = viewResolver.resolve(view);
 
             outputStream.write(httpResponse.toString().getBytes());
@@ -58,11 +53,18 @@ public class RequestHandler implements Runnable {
         }
     }
 
+    private View findViewByRequest(final HttpRequest request) {
+        if (ControllerMapping.contains(request)) {
+            return ControllerMapping.handle(request);
+        }
+        return View.buildByResource(request.getRequestLine().getUri().getBaseUri());
+    }
+
     private List<String> splitFromInputStream(final BufferedReader bufferedReader) throws IOException {
         final List<String> splitResult = new ArrayList<>();
 
         while (bufferedReader.ready()) {
-            String line = bufferedReader.readLine();
+            final String line = bufferedReader.readLine();
             if (Objects.isNull(line)) {
                 break;
             }

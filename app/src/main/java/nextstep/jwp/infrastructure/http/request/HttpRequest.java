@@ -7,6 +7,7 @@ import nextstep.jwp.infrastructure.http.HttpHeaders;
 public class HttpRequest {
 
     private static final String LAST_HEADER = "";
+    private static final int HEADER_START_INDEX = 1;
 
     private final HttpRequestLine requestLine;
     private final HttpHeaders headers;
@@ -33,11 +34,10 @@ public class HttpRequest {
     private static List<String> findHeadersFromRequest(final List<String> httpRequest) {
         final List<String> headers = new ArrayList<>();
 
-        for (String line : httpRequest.subList(1, httpRequest.size())) {
+        for (final String line : httpRequest.subList(HEADER_START_INDEX, httpRequest.size())) {
             if (LAST_HEADER.equals(line)) {
                 break;
             }
-
             headers.add(line);
         }
 

@@ -8,6 +8,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.util.Objects;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import nextstep.jwp.response.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +42,12 @@ public class RequestHandler implements Runnable {
             FileName fileName = requestUri.toFileName();
             RequestUrl requestUrl = new RequestUrl(getClass().getClassLoader(), fileName);
             RequestFile requestFile = requestUrl.toRequestFile();
+
+            if (requestUri.isQueryMark()) {
+                UserInfo userInfo = requestUri.getUserInfo();
+                User user = new User(userInfo.getAccount(), userInfo.getPassword());
+                InMemoryUserRepository.save(user);
+            }
 
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(firstLine)

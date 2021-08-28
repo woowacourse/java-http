@@ -1,5 +1,6 @@
 package nextstep.jwp.http.request;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +31,7 @@ public class RequestUriPath {
     }
 
     private static boolean hasParams(String path){
-        return path.split("/?").length > 1;
+        return path.indexOf("?") > 0;
     }
 
     private static Map<String, String> params(String paramsLine) {
@@ -44,5 +45,9 @@ public class RequestUriPath {
 
     public String getPath() {
         return path;
+    }
+
+    public Map<String, String> getParams() {
+        return params;
     }
 }

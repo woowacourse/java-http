@@ -35,9 +35,13 @@ public class HttpRequest {
     }
 
     public static HttpRequest of(List<String> lines) {
-        RequestLine requestLine = RequestLine.of(lines.get(0));
-        List<String> headers = lines.subList(1, lines.size());
-        return new HttpRequest(requestLine, headers);
+        if (!lines.isEmpty()) {
+            RequestLine requestLine = RequestLine.of(lines.get(0));
+            List<String> headers = lines.subList(1, lines.size());
+            return new HttpRequest(requestLine, headers);
+        }
+        // TODO :: 확인
+        return null;
     }
 
     public static HttpRequest of(BufferedReader bufferedReader) throws IOException {

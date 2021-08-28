@@ -1,13 +1,8 @@
 package nextstep.jwp.infrastructure.http.request;
 
-import java.util.ArrayList;
-import java.util.List;
 import nextstep.jwp.infrastructure.http.HttpHeaders;
 
 public class HttpRequest {
-
-    private static final String LAST_HEADER = "";
-    private static final int HEADER_START_INDEX = 1;
 
     private final HttpRequestLine requestLine;
     private final HttpHeaders headers;
@@ -17,40 +12,6 @@ public class HttpRequest {
         this.requestLine = requestLine;
         this.headers = headers;
         this.messageBody = messageBody;
-    }
-
-    public static HttpRequest of(final List<String> httpRequest) {
-        if (httpRequest.size() == 0) {
-            throw new IllegalArgumentException("Invalid HttpRequest Format. HttpRequest is empty.");
-        }
-
-        final HttpRequestLine requestLine = HttpRequestLine.of(httpRequest.get(0));
-        final HttpHeaders httpHeaders = HttpHeaders.of(findHeadersFromRequest(httpRequest));
-        final String httpMessageBody = findMessageBodyFromRequest(httpRequest);
-
-        return new HttpRequest(requestLine, httpHeaders, httpMessageBody);
-    }
-
-    private static List<String> findHeadersFromRequest(final List<String> httpRequest) {
-        final List<String> headers = new ArrayList<>();
-
-        for (final String line : httpRequest.subList(HEADER_START_INDEX, httpRequest.size())) {
-            if (LAST_HEADER.equals(line)) {
-                break;
-            }
-            headers.add(line);
-        }
-
-        return headers;
-    }
-
-    private static String findMessageBodyFromRequest(final List<String> httpRequest) {
-        if (!httpRequest.contains(LAST_HEADER)) {
-            return "";
-        }
-
-        final int messageBodyStartIndex = httpRequest.indexOf(LAST_HEADER) + 1;
-        return String.join("\r\n", httpRequest.subList(messageBodyStartIndex, httpRequest.size()));
     }
 
     public HttpRequestLine getRequestLine() {

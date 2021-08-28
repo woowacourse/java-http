@@ -13,7 +13,9 @@ import java.util.Objects;
 import nextstep.jwp.infrastructure.http.controller.GetRegisterController;
 import nextstep.jwp.infrastructure.http.controller.HelloController;
 import nextstep.jwp.infrastructure.http.controller.LoginController;
+import nextstep.jwp.infrastructure.http.controller.PostRegisterController;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
+import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,7 @@ import org.slf4j.LoggerFactory;
 public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final String CONTENT_LENGTH = "Content-Length";
 
     private final Socket connection;
     private final ControllerMapping controllerMapping;
@@ -32,7 +35,8 @@ public class RequestHandler implements Runnable {
             Arrays.asList(
                 new HelloController(),
                 new LoginController(),
-                new GetRegisterController()
+                new GetRegisterController(),
+                new PostRegisterController()
             )
         );
         this.viewResolver = new ViewResolver("static");
@@ -47,7 +51,7 @@ public class RequestHandler implements Runnable {
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            final HttpRequest request = HttpRequest.of(splitFromInputStream(bufferedReader));
+            final HttpRequest request = requestFromReader(bufferedReader);
             final View view = findViewByRequest(request);
             final HttpResponse httpResponse = viewResolver.resolve(view);
 
@@ -60,6 +64,44 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
+    }
+
+    private HttpRequest requestFromReader(final BufferedReader bufferedReader) throws IOException {
+        final HttpRequestLine requestLine = requestLineFromReader(bufferedReader);
+        final HttpHeaders headers = headerFromReader(bufferedReader);
+        final String body = bodyFromReader(bufferedReader, headers);
+
+        return new HttpRequest(requestLine, headers, body);
+    }
+
+    private HttpRequestLine requestLineFromReader(final BufferedReader bufferedReader) throws IOException {
+        return HttpRequestLine.of(bufferedReader.readLine());
+    }
+
+    private HttpHeaders headerFromReader(final BufferedReader bufferedReader) throws IOException {
+        final List<String> lines = new ArrayList<>();
+        String line;
+
+        while(Objects.nonNull(line = bufferedReader.readLine())) {
+            if ("".equals(line)) {
+                break;
+            }
+            lines.add(line);
+        }
+
+        return HttpHeaders.of(lines);
+    }
+
+    private String bodyFromReader(final BufferedReader bufferedReader, final HttpHeaders headers) throws IOException {
+        if (!headers.hasKey(CONTENT_LENGTH)) {
+            return "";
+        }
+
+        int contentLength = Integer.parseInt(headers.getValue(CONTENT_LENGTH).get(0));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+
+        return new String(buffer);
     }
 
     private View findViewByRequest(final HttpRequest request) {
@@ -75,6 +117,7 @@ public class RequestHandler implements Runnable {
 
         while (Objects.nonNull(line = bufferedReader.readLine()) && bufferedReader.ready()) {
             splitResult.add(line);
+            log.debug(line);
         }
 
         log.debug(String.valueOf(splitResult.size()));

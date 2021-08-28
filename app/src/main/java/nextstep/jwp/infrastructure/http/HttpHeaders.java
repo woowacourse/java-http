@@ -45,6 +45,10 @@ public class HttpHeaders {
         }
     }
 
+    public boolean hasKey(final String key) {
+        return elements.containsKey(key);
+    }
+
     public List<String> getValue(final String key) {
         return elements.get(key);
     }

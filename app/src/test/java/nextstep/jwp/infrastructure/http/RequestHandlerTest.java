@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.MockSocket;
-import nextstep.jwp.infrastructure.http.RequestHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -68,11 +67,11 @@ class RequestHandlerTest {
 
         assertResponse(
             String.join("\r\n",
-            "GET /login HTTP/1.1 ",
-            "Host: localhost:8080 ",
-            "Connection: keep-alive ",
-            "",
-            ""),
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                ""),
             "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 3796 \r\n" +
@@ -86,11 +85,11 @@ class RequestHandlerTest {
     void successfulLogin() throws IOException {
         assertResponse(
             String.join("\r\n",
-            "GET /login?account=gugu&password=password HTTP/1.1 ",
-            "Host: localhost:8080 ",
-            "Connection: keep-alive ",
-            "",
-            ""),
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                ""),
             "HTTP/1.1 302 FOUND \r\n"
                 + "Location: /index.html \r\n"
                 + "\r\n"
@@ -112,7 +111,7 @@ class RequestHandlerTest {
                 + "\r\n"
         );
     }
-    
+
     @DisplayName("존재하지 않는 요청일 경우 404.html")
     @Test
     void notFoundPage() throws IOException {
@@ -130,6 +129,57 @@ class RequestHandlerTest {
                 + "Content-Length: 2426 \r\n"
                 + "\r\n"
                 + new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+        );
+    }
+
+    @DisplayName("회원 등록 페이지")
+    @Test
+    void getRegister() throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+
+        assertResponse(
+            String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                ""),
+            "HTTP/1.1 200 OK \r\n"
+                + "Content-Type: text/html;charset=utf-8 \r\n"
+                + "Content-Length: 4319 \r\n"
+                + "\r\n"
+                + new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
+        );
+    }
+
+    @DisplayName("회원 등록")
+    @Test
+    void postRegister() {
+        assertResponse(
+            String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 80",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Accept: */*",
+                "",
+                "account=root&password=rootpassword&email=junroot0909@gmail.com"),
+            "HTTP/1.1 302 FOUND \r\n"
+                + "Location: /index.html \r\n"
+                + "\r\n"
+        );
+
+        assertResponse(
+            String.join("\r\n",
+                "GET /login?account=root&password=rootpassword HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                ""),
+            "HTTP/1.1 302 FOUND \r\n"
+                + "Location: /index.html \r\n"
+                + "\r\n"
         );
     }
 

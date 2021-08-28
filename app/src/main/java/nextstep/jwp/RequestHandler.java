@@ -36,8 +36,10 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
                 final OutputStream outputStream = connection.getOutputStream()) {
 
-            final String[] parsedRequest = getParsedRequest(inputStream);
-            final String uri = parsedRequest[1];
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            Map<String, String> parsedRequestHeaders = getParsedRequestHeaders(inputStream, bufferedReader);
+            final String httpMethod = parsedRequestHeaders.get("httpMethod");
+            final String uri = parsedRequestHeaders.get("uri");
             String responseBody = "Hello world!";
 
             if (uri.equals("/")) {
@@ -62,6 +64,24 @@ public class RequestHandler implements Runnable {
                     responseBody = getStaticFileContents("/index.html");
                     replyOkResponse(responseBody, outputStream);
                 }
+            } else if (httpMethod.equals("GET") && (uri.equals("/register") || uri.equals("/register.html"))) {
+                responseBody = getStaticFileContents("/register.html");
+                replyOkResponse(responseBody, outputStream);
+            } else if (httpMethod.equals("POST") && uri.equals("/register")) {
+                int contentLength = Integer.parseInt(parsedRequestHeaders.get("Content-Length").strip());
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                String requestBody = new String(buffer);
+                Map<String, String> registerData = extractRegisterDataFromRequestBody(requestBody);
+
+                InMemoryUserRepository.save(new User(InMemoryUserRepository.autoIncrementId,
+                        registerData.get("account"),
+                        registerData.get("password"),
+                        registerData.get("email")));
+                InMemoryUserRepository.autoIncrementId += 1;
+
+                responseBody = getStaticFileContents("/index.html");
+                replyOkResponse(responseBody, outputStream);
             }
 
         } catch (IOException exception) {
@@ -69,6 +89,16 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
+    }
+
+    private Map<String, String> extractRegisterDataFromRequestBody(String requestBody) {
+        Map<String, String> extractData = new HashMap<>();
+        String[] splitRequestBody = requestBody.split("=|&");
+
+        for (int i = 0; i < splitRequestBody.length; i += 2) {
+            extractData.put(splitRequestBody[i], splitRequestBody[i + 1]);
+        }
+        return extractData;
     }
 
     private void reply302Response(String responseBody, OutputStream outputStream) throws IOException {
@@ -116,17 +146,29 @@ public class RequestHandler implements Runnable {
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
-    private String[] getParsedRequest(InputStream inputStream) throws IOException {
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+    private Map<String, String> getParsedRequestHeaders(InputStream inputStream, BufferedReader bufferedReader)
+            throws IOException {
 
-        final StringBuilder stringBuilder = new StringBuilder();
+        final Map<String, String> parsedRequests = new HashMap<>();
+
+        if (bufferedReader.ready()) {
+            String headers = bufferedReader.readLine();
+            String[] splitHeader = headers.split(" ");
+            parsedRequests.put("httpMethod", splitHeader[0]);
+            parsedRequests.put("uri", splitHeader[1]);
+            parsedRequests.put("httpVersion", splitHeader[2]);
+        }
 
         while (bufferedReader.ready()) {
-            stringBuilder.append(bufferedReader.readLine()).append("\r\n");
+            String headers = bufferedReader.readLine();
+            String[] splitHeader = headers.split(": ");
+            if (splitHeader[0].equals("")) {
+                break;
+            }
+            parsedRequests.put(splitHeader[0], splitHeader[1]);
         }
-        String request = stringBuilder.toString();
-        String[] parsedRequest = request.split(" ");
-        return parsedRequest;
+
+        return parsedRequests;
     }
 
     private void close() {

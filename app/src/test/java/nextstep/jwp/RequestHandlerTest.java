@@ -85,39 +85,39 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("로그인시 쿼리 스트링이 존재하면 유저 객체로 추출")
-    @Test
-    void queryParsing() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /index?account=gugu&password=password HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5670 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
     @DisplayName("로그인시 쿼리 스트링값이 존재해도 정적 페이지는 이에 영향을 받지 않고 출력")
     @Test
     void loginHasQueryString() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /index?account=gugu&password=password HTTP/1.1 ",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 3862 \r\n" +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("로그인 성공시 index.html로 리다이렉트")
+    @Test
+    void loginSuccess() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -138,4 +138,5 @@ class RequestHandlerTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).isEqualTo(expected);
     }
+
 }

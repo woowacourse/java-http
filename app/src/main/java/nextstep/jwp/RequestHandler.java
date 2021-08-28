@@ -38,6 +38,15 @@ public class RequestHandler implements Runnable {
             String responseBody = responseBody = getStaticFileContents(parsedRequest);
             Map<String, String> requestUserData = extractQueryFromLoginUri(parsedRequest);
 
+            final String uri = parsedRequest[1];
+            if (uri.equals("/index") || uri.equals("/index.html")) {
+                responseBody = getStaticFileContents(parsedRequest);
+            } else if (uri.equals("/login.html") || uri.equals("/login")) {
+                responseBody = getStaticFileContents(parsedRequest);
+            } else if (uri.matches("/login.*account.*password.*")) {
+                responseBody = getStaticFileContents(parsedRequest);
+            }
+
             if (!requestUserData.isEmpty()) {
                 log.debug(InMemoryUserRepository.findByAccount(requestUserData.get("account")).toString());
             }

@@ -2,6 +2,10 @@ package nextstep.jwp;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import nextstep.jwp.network.HttpRequest;
+import nextstep.jwp.network.HttpResponse;
+import nextstep.jwp.network.HttpStatus;
+import nextstep.jwp.network.URI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,64 +46,22 @@ public class RequestHandler implements Runnable {
 
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             final List<String> requestAsString = requestAsString(bufferedReader);
-            byte[] bytes = "".getBytes();
             if (requestAsString.isEmpty()) {
                 return;
             }
 
             final HttpRequest httpRequest = HttpRequest.of(requestAsString);
-            HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, bytes);
+            HttpResponse httpResponse;
 
             final URI uri = httpRequest.toURI();
 
-            String requestedResource = uri.getPath();
+            final Map<String, Controller> controllers = new HashMap<>();
+            final Controller loginController = new LoginController("/login");
+            controllers.put(loginController.getResource(), loginController);
+            final ControllerMapping controllerMapping = new ControllerMapping(controllers);
 
-            final String htmlExtension = ".html";
-
-            if ("/login".equals(requestedResource)) {
-                if (!httpRequest.toURI().hasQuery()) {
-                    requestedResource = requestedResource.concat(htmlExtension);
-                    URL resource = getClass().getClassLoader().getResource("static" + requestedResource);
-                    Path path = Paths.get(resource.getPath());
-                    bytes = Files.readAllBytes(path);
-
-                    httpResponse = new HttpResponse(HttpStatus.OK, bytes);
-                } else {
-                    final Map<String, String> queryInfo = extractQuery(uri.getQuery());
-                    final User user = InMemoryUserRepository.findByAccount(queryInfo.get("account"))
-                            .orElseThrow(() -> new UserNotFoundException(queryInfo.get("account")));
-                    if (user.checkPassword(queryInfo.get("password"))) {
-                        log.info("Login successful!");
-
-                        URL resource = getClass().getClassLoader().getResource("static" + "/index.html");
-                        Path path = Paths.get(resource.getPath());
-                        bytes = Files.readAllBytes(path);
-
-                        httpResponse = new HttpResponse(HttpStatus.FOUND, bytes);
-                    } else {
-                        log.info("Login failed");
-
-                        URL resource = getClass().getClassLoader().getResource("static" + "/401.html");
-                        Path path = Paths.get(resource.getPath());
-                        bytes = Files.readAllBytes(path);
-
-                        httpResponse = new HttpResponse(HttpStatus.UNAUTHORIZED, bytes);
-                    }
-
-                }
-            }
-            if ("/".equals(requestedResource)) {
-                bytes = "Hello world!".getBytes();
-
-                httpResponse = new HttpResponse(HttpStatus.OK, bytes);
-            }
-            if ("/index.html".equals(requestedResource)) {
-                URL resource = getClass().getClassLoader().getResource("static" + requestedResource);
-                Path path = Paths.get(resource.getPath());
-                bytes = Files.readAllBytes(path);
-
-                httpResponse = new HttpResponse(HttpStatus.OK, bytes);
-            }
+            final Controller foundController = controllerMapping.findByResource(uri.getPath());
+            httpResponse = foundController.doGet(httpRequest);
 
             final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
             bufferedWriter.write(httpResponse.asString());
@@ -121,18 +83,6 @@ public class RequestHandler implements Runnable {
             request.add(line);
         }
         return request;
-    }
-
-    private Map<String, String> extractQuery(String queryString) {
-        final Map<String, String> queryInfo = new HashMap<>();
-        final String[] queries = queryString.split("&");
-        for (String query : queries) {
-            final int index = query.indexOf('=');
-            final String key = query.substring(0, index);
-            final String value = query.substring(index + 1);
-            queryInfo.put(key, value);
-        }
-        return queryInfo;
     }
 
     private void close() {

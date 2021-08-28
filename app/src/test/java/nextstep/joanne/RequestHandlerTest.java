@@ -1,5 +1,6 @@
 package nextstep.joanne;
 
+import nextstep.joanne.handler.RequestHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -113,13 +114,16 @@ class RequestHandlerTest {
     }
 
     @Test
-    @DisplayName("login시 queryString과 함께 입력하면, 성공 시 log에 유저 정보를 나타내고 index.html로 리다이렉트한다.")
+    @DisplayName("login 성공 시 log에 유저 정보를 나타내고 index.html로 리다이렉트한다.")
     void loginWithQueryString() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 30",
+                "",
+                "account=gugu&password=password",
                 "",
                 "");
 
@@ -140,13 +144,16 @@ class RequestHandlerTest {
     }
 
     @Test
-    @DisplayName("login시 queryString과 함께 입력하면, 실패 시 log에 account, password를 나타내고 401.html로 리다이렉트한다.")
+    @DisplayName("login 실패 시 log에 account, password를 나타내고 401.html로 리다이렉트한다.")
     void loginWithQueryStringWhenWrongAccount() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gigi&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 30",
+                "",
+                "account=merong&password=merong",
                 "",
                 "");
 
@@ -166,34 +173,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @Test
-    @DisplayName("login시 queryString과 함께 입력하면, 실패 시 log에 account, password를 나타내고 401.html로 리다이렉트한다.")
-    void loginWithQueryStringWhenWrongPassword() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=merong HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/401.html");
-        String expected = "HTTP/1.1 401 Unauthorized \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 2426 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    // TODO 테스트 수정 필요할 듯
+    @DisplayName("회원가입 성공 시 index로 리다이렉트한다.")
     @Test
     void register() throws IOException {
         // given
@@ -201,7 +181,7 @@ class RequestHandlerTest {
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-Length: 80",
+                "Content-Length: 82",
                 "Content-Type: application/x-www-form-urlencoded",
                 "Accept: */*",
                 "",
@@ -217,7 +197,7 @@ class RequestHandlerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
+        String expected = "HTTP/1.1 302 Found \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n" +

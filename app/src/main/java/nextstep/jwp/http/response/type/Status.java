@@ -1,4 +1,4 @@
-package nextstep.jwp.http.response;
+package nextstep.jwp.http.response.type;
 
 public enum Status {
     OK("OK", "200"),

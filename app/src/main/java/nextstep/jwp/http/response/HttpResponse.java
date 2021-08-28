@@ -1,6 +1,8 @@
 package nextstep.jwp.http.response;
 
 import com.google.common.base.Strings;
+import nextstep.jwp.http.response.type.ContentType;
+import nextstep.jwp.http.response.type.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

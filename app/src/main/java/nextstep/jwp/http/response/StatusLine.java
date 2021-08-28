@@ -1,5 +1,7 @@
 package nextstep.jwp.http.response;
 
+import nextstep.jwp.http.response.type.Status;
+
 public class StatusLine {
     private String protocol;
     private String statusCode;

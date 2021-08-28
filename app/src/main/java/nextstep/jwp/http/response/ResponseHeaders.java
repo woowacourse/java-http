@@ -1,5 +1,7 @@
 package nextstep.jwp.http.response;
 
+import nextstep.jwp.http.response.type.ContentType;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 

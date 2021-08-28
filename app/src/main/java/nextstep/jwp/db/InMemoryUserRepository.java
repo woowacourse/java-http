@@ -9,7 +9,7 @@ import nextstep.jwp.model.User;
 public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
-    private static Long NEXT_ID = 2L;
+    private static Long nextId = 2L;
 
     static {
         final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
@@ -21,7 +21,7 @@ public class InMemoryUserRepository {
             throw new IllegalArgumentException("This user already exists");
         }
 
-        database.put(user.getAccount(), new User(NEXT_ID++, user));
+        database.put(user.getAccount(), new User(nextId++, user));
     }
 
     public static boolean existsByAccountAndPassword(final String account, final String password) {

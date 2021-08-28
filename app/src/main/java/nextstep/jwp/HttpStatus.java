@@ -17,6 +17,6 @@ public enum HttpStatus {
                 .filter(httpStatus -> httpStatus.code == code)
                 .map(httpStatus -> code + " " + httpStatus.name())
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("없는 상태코드 입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 상태코드 입니다."));
     }
 }

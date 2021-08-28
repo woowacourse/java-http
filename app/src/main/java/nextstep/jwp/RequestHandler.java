@@ -26,11 +26,8 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-            HttpRequest httpRequest = new HttpRequest(inputStream);
-            HttpResponse httpResponse = new HttpResponse(outputStream);
-            RequestMapping requestMapping = new RequestMapping();
-            Controller controller = requestMapping.getController(httpRequest);
-            controller.doProcess(httpRequest, httpResponse);
+            HttpServlet httpServlet = new HttpServlet(inputStream, outputStream);
+            httpServlet.doProcess();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {

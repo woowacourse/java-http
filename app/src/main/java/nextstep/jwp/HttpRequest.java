@@ -12,24 +12,22 @@ import java.util.Map;
 
 public class HttpRequest {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+
     private final BufferedReader bufferedReader;
-    private String requestLine;
-    private String[] splitRequestLine;
-    private Map<String, String> headers;
-    private Map<String, String> parameters;
+    private RequestLine requestLine;
+    private HttpHeaders headers;
+    private Parameters parameters;
 
     public HttpRequest(InputStream inputStream) throws IOException {
-        this.bufferedReader = new BufferedReader(new InputStreamReader(inputStream));;
+        this.bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         init();
     }
 
     private void init() throws IOException {
         String line = bufferedReader.readLine();
         log.debug("line : {}", line);
-        this.requestLine = line;
-        this.splitRequestLine = requestLine.split(" ");
-        this.headers = new HashMap<>();
-        this.parameters = new HashMap<>();
+        this.requestLine = new RequestLine(line);
+        Map<String, String> headers = new HashMap<>();
         while (!"".equals(line)) {
             line = bufferedReader.readLine();
             if (line == null) return;
@@ -39,56 +37,32 @@ public class HttpRequest {
                 headers.put(splitHeader[0], splitHeader[1]);
             }
         }
-        parseParameters();
-    }
-
-    private void parseParameters() throws IOException {
-        parseQueryString(getQueryString());
-        parseQueryString(getRequestBody());
-    }
-
-    private void parseQueryString(String queryString) {
-        if (queryString != null && !"".equals(queryString)) {
-            String[] split = queryString.split("&");
-            for (String data : split) {
-                String[] splitData = data.split("=");
-                parameters.put(splitData[0], splitData[1]);
-            }
-        }
+        this.headers = new HttpHeaders(headers);
+        this.parameters = new Parameters(getQueryString(), getRequestBody());
     }
 
     public String getRequestLine() {
-        return requestLine;
+        return requestLine.getRequestLine();
     }
 
     public String getMethod() {
-        return splitRequestLine[0];
+        return requestLine.getMethod();
     }
 
     public String getRequestURI() {
-        return splitRequestLine[1];
+        return requestLine.getRequestURI();
     }
 
     public String getQueryString() {
-        String requestURI = getRequestURI();
-        int index = requestURI.indexOf("?");
-        if (index != -1) {
-            return requestURI.substring(index + 1);
-        }
-        return null;
+        return requestLine.getQueryString();
     }
 
     public String getPath() {
-        String requestURI = getRequestURI();
-        int index = requestURI.indexOf("?");
-        if (index != -1) {
-            return requestURI.substring(0, index);
-        }
-        return requestURI;
+        return requestLine.getPath();
     }
 
     public Map<String, String> getHeaders() {
-        return headers;
+        return headers.getHeaders();
     }
 
     public String getRequestBody() throws IOException {

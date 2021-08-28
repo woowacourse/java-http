@@ -4,22 +4,21 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class HttpResponse {
 
     private final OutputStream outputStream;
-    private Map<String, String> headers;
     private String responseLine;
     private String response;
+    private HttpHeaders headers;
 
     public HttpResponse(OutputStream outputStream) {
         this.outputStream = outputStream;
-        this.headers = new LinkedHashMap<>();
+        this.headers = new HttpHeaders(new LinkedHashMap<>());
     }
 
     public void setStatus(int code) {
-        this.responseLine = "HTTP/1.1 " + HttpStatus.convert(code) + " ";
+        responseLine = "HTTP/1.1 " + HttpStatus.convert(code) + " ";
     }
 
     public void addHeader(String name, String value) {
@@ -31,12 +30,9 @@ public class HttpResponse {
             response += message;
             return;
         }
-        String headers = this.headers.entrySet().stream()
-                .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
-                .collect(Collectors.joining("\r\n"));
         response = String.join("\r\n",
                 responseLine,
-                headers,
+                headers.convertToLines(),
                 "",
                 message);
     }
@@ -55,10 +51,15 @@ public class HttpResponse {
     }
 
     public Map<String, String> getHeaders() {
-        return headers;
+        return headers.getHeaders();
     }
 
     public void sendRedirect(String url) throws IOException {
+        sendRedirect(url, 302);
+    }
+
+    public void sendRedirect(String url, int code) throws IOException {
+        setStatus(code);
         response = String.join("\r\n",
                 responseLine,
                 "Location: " + url);

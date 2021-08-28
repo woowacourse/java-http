@@ -17,7 +17,7 @@ public class IndexPageController extends AbstractController {
 
     @Override
     public HttpResponse handle(HttpRequest httpRequest) throws IOException {
-        final String response = Resources.readString("static/index.html");
+        final String response = Resources.readString("/index.html");
 
         return HttpResponse.ok()
                            .body(response)

@@ -5,9 +5,14 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class Resources {
+
+    private static final List<String> PREFIXES = Arrays.asList("", "static");
+
     private Resources() {}
 
     public static Path findPathOf(String resourceName) {
@@ -18,9 +23,11 @@ public class Resources {
         ClassLoader classLoader = Objects.requireNonNullElseGet(
                 Thread.currentThread().getContextClassLoader(),
                 Resources.class::getClassLoader);
-
-        URL url = classLoader.getResource(resourceName);
-        return Objects.requireNonNull(url, resourceName + " 파일을 찾을 수 없습니다.");
+        return PREFIXES.stream()
+                       .map(prefix -> classLoader.getResource(prefix + resourceName))
+                       .filter(Objects::nonNull)
+                       .findAny()
+                       .orElseThrow(() -> new IllegalArgumentException(resourceName + " 파일을 찾을 수 없습니다."));
     }
 
     public static String readString(String resourceName) throws IOException {

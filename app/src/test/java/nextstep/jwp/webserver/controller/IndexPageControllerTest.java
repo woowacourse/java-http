@@ -16,13 +16,6 @@ public class IndexPageControllerTest {
     @DisplayName("인덱스 페이지에 접근했을 때 HTTP 응답 테스트")
     public void handleTest() throws IOException {
 
-        //expected
-        final String response = Resources.readString("static/index.html");
-        final HttpResponse expected = HttpResponse.ok()
-                                                  .body(response)
-                                                  .contentLength(response.getBytes().length)
-                                                  .build();
-
         // given
         final RequestLine requestLine = new RequestLine(HttpMethod.GET, "/index.html", HttpVersion.HTTP_1_1);
         final HttpRequest httpRequest = new HttpRequest.Builder().requestLine(requestLine).build();
@@ -32,6 +25,12 @@ public class IndexPageControllerTest {
         final HttpResponse httpResponse = indexPageController.handle(httpRequest);
 
         //then
+        final String response = Resources.readString("/index.html");
+        final HttpResponse expected = HttpResponse.ok()
+                                                  .body(response)
+                                                  .contentLength(response.getBytes().length)
+                                                  .build();
+
         assertThat(httpResponse).usingRecursiveComparison().isEqualTo(expected);
     }
 

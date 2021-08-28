@@ -6,6 +6,7 @@ import java.util.List;
 import nextstep.jwp.framework.http.HttpRequest;
 import nextstep.jwp.webserver.controller.ErrorController;
 import nextstep.jwp.webserver.controller.IndexPageController;
+import nextstep.jwp.webserver.controller.LoginPageController;
 import nextstep.jwp.webserver.controller.WelcomePageController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ public class ControllerMapping {
         CONTROLLERS.add(new WelcomePageController());
         CONTROLLERS.add(new IndexPageController());
         CONTROLLERS.add(new ErrorController());
+        CONTROLLERS.add(new LoginPageController());
     }
 
     public static Controller findController(HttpRequest httpRequest) {

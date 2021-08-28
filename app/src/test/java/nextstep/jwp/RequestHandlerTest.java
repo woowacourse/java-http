@@ -51,7 +51,7 @@ class RequestHandlerTest {
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 5564 ",
                 "",
-                Resources.readString("static/index.html"));
+                Resources.readString("/index.html"));
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -77,7 +77,7 @@ class RequestHandlerTest {
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 2426 ",
                 "",
-                Resources.readString("static/404.html"));
+                Resources.readString("/404.html"));
         assertThat(socket.output()).isEqualTo(expected);
     }
 }

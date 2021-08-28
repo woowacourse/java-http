@@ -17,7 +17,7 @@ public class ErrorControllerTest {
     void handleTest() throws IOException {
 
         //expected
-        final String response = Resources.readString("static/404.html");
+        final String response = Resources.readString("/404.html");
         final HttpResponse expected = HttpResponse.ok()
                                                   .body(response)
                                                   .contentLength(response.getBytes().length)

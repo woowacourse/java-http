@@ -19,7 +19,7 @@ public class ErrorController extends AbstractController {
 
     @Override
     public HttpResponse handle(HttpRequest httpRequest) throws IOException {
-        final String response = Resources.readString("static/404.html");
+        final String response = Resources.readString("/404.html");
 
         return HttpResponse.ok()
                            .body(response)

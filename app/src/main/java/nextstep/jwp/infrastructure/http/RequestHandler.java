@@ -82,7 +82,7 @@ public class RequestHandler implements Runnable {
         final List<String> lines = new ArrayList<>();
         String line;
 
-        while(Objects.nonNull(line = bufferedReader.readLine())) {
+        while (Objects.nonNull(line = bufferedReader.readLine())) {
             if ("".equals(line)) {
                 break;
             }

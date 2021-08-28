@@ -1,7 +1,6 @@
 package nextstep.jwp.infrastructure.http.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import org.junit.jupiter.api.DisplayName;

@@ -14,7 +14,7 @@ import nextstep.jwp.infrastructure.http.response.HttpStatusCode;
 import nextstep.jwp.infrastructure.http.response.HttpStatusLine;
 import nextstep.jwp.model.User;
 
-public class PostRegisterController implements Controller{
+public class PostRegisterController implements Controller {
 
     private static final DataMapper DATA_MAPPER = new UrlEncodingMapper();
     private static final String ACCOUNT = "account";

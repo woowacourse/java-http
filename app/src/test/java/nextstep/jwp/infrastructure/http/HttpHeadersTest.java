@@ -27,8 +27,8 @@ class HttpHeadersTest {
     @Test
     void of() {
         HttpHeaders headers = HttpHeaders.of(Arrays.asList(
-           "Content-Type: text/html;charset=utf-8",
-           "Content-Length: 13"
+            "Content-Type: text/html;charset=utf-8",
+            "Content-Length: 13"
         ));
 
         assertThat(headers.getValue("Content-Type")).isEqualTo(Collections.singletonList("text/html;charset=utf-8"));

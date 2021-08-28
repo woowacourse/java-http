@@ -19,7 +19,7 @@ public class User {
     }
 
     public User(long id, User user) {
-        this (id, user.account, user.password, user.email);
+        this(id, user.account, user.password, user.email);
     }
 
     public boolean checkPassword(String password) {

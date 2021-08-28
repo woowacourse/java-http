@@ -1,14 +1,12 @@
 package nextstep.jwp.http;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class HttpRequest {
 
-    private static final int FIRST_LINE_OF_HTTP_REQUEST = 0;
     private static final String BLANK_DELIMITER = " ";
     private static final int FIRST_WORD_INDEX = 0;
     private static final int SECOND_WORD_INDEX = 1;
@@ -17,20 +15,22 @@ public class HttpRequest {
     private static final String QUERY_STRING_DELIMITER = "&";
     private static final String KEY_AND_VALUE_DELIMITER = "=";
 
-    private List<String> requestLines;
+    private final String statusLine;
+    private List<String> headerLines;
+    private final String bodyLine;
 
-    public HttpRequest(InputStream inputStream) throws IOException {
-        HttpRequestStreamReader reader = new HttpRequestStreamReader(inputStream);
-        requestLines = reader.getRequestLines();
+    public HttpRequest(String statusLine, List<String> headerLines, String bodyLine) {
+        this.statusLine = statusLine;
+        this.headerLines = headerLines;
+        this.bodyLine = bodyLine;
     }
 
     public boolean isEmptyLine() {
-        return requestLines.size() == 0;
+        return Objects.isNull(statusLine) && headerLines.size() == 0 && Objects.isNull(bodyLine);
     }
 
     public String extractURI() {
-        String firstLine = requestLines.get(FIRST_LINE_OF_HTTP_REQUEST);
-        String requestURI = firstLine.split(BLANK_DELIMITER)[SECOND_WORD_INDEX];
+        String requestURI = statusLine.split(BLANK_DELIMITER)[SECOND_WORD_INDEX];
         return requestURI;
     }
 
@@ -62,17 +62,15 @@ public class HttpRequest {
     }
 
     public String extractHttpMethod() {
-        String firstLine = requestLines.get(FIRST_LINE_OF_HTTP_REQUEST);
-        return firstLine.split(BLANK_DELIMITER)[FIRST_WORD_INDEX];
+        return statusLine.split(BLANK_DELIMITER)[FIRST_WORD_INDEX];
     }
 
     public Map<String, String> extractFormData() {
-        String lastLine = requestLines.get(requestLines.size() - 1);
-        String[] splitFormData = lastLine.split("&");
+        String[] splitFormData = bodyLine.split(QUERY_STRING_DELIMITER);
         Map<String, String> result = new HashMap<>();
         for (String s : splitFormData) {
             System.out.println(splitFormData);
-            String[] split = s.split("=");
+            String[] split = s.split(KEY_AND_VALUE_DELIMITER);
             result.put(split[0], split[1]);
         }
         return result;

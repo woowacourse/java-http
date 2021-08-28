@@ -2,9 +2,7 @@ package nextstep.jwp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.http.HttpRequest;
@@ -13,70 +11,58 @@ import org.junit.jupiter.api.Test;
 
 public class HttpRequestTest {
     @Test
-    @DisplayName("HTTP Request로부터 URI를 파싱한다.")
-    void extractURI() throws IOException {
+    @DisplayName("isEmptyLine()을 통해 해당 HttpRequest가 빈 값인지 확인한다.")
+    void isEmptyLine() {
+        HttpRequest httpRequest = new HttpRequest(null, new ArrayList<>(), null);
+        assertThat(httpRequest.isEmptyLine()).isTrue();
+    }
+
+    @Test
+    @DisplayName("extractURI()를 통해 HTTP Request로부터 URI를 파싱한다.")
+    void extractURI() {
         // given
-        String uri = "/login?account=gugu&password=password";
-        String httpRequest = String.join("\r\n",
-            "GET " + uri + " HTTP/1.1 ",
-            "Host: localhost:8080 ",
-            "Connection: keep-alive ",
-            "",
-            "");
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest extractor = new HttpRequest(inputStream);
+        String expected = "/login?account=gugu&password=password";
+        String statusLine = "GET " + expected + " HTTP/1.1 ";
+        HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);
 
         // when
-        String actual = extractor.extractURI();
+        String actual = httpRequest.extractURI();
 
         // then
-        assertThat(extractor.extractURI()).isEqualTo(uri);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
     @DisplayName("HTTP Request로부터 URI에서 Query String 부분만 파싱한다.")
-    void extractURIQueryParams() throws IOException {
+    void extractURIQueryParams() {
         // given
-        String uri = "/login?account=gugu&password=password";
-        String httpRequest = String.join("\r\n",
-            "GET " + uri + " HTTP/1.1 ",
-            "Host: localhost:8080 ",
-            "Connection: keep-alive ",
-            "",
-            "");
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest extractor = new HttpRequest(inputStream);
+        String statusLine = "GET /login?account=gugu&password=password HTTP/1.1 ";
+        HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);
         Map<String, String> expected = new HashMap<>();
         expected.put("account", "gugu");
         expected.put("password", "password");
 
         // when
-        Map<String, String> queryString = extractor.extractURIQueryParams();
+        Map<String, String> actual = httpRequest.extractURIQueryParams();
 
         // then
-        assertThat(queryString.size()).isEqualTo(2);
-        queryString.forEach((key, value) -> {
-            assertThat(queryString.get(key)).isEqualTo(expected.get(key));
+        assertThat(actual.size()).isEqualTo(2);
+        actual.forEach((key, value) -> {
+            assertThat(actual.get(key)).isEqualTo(expected.get(key));
         });
     }
 
     @Test
     @DisplayName("HTTP Request로부터 URI에서 Query String 부분이 아무 것도 안 들어있는 경우 빈 HashMap을 반환한다.")
-    void extractURIQueryParams_null() throws IOException {
+    void extractURIQueryParams_null() {
         // given
-        String uri = "/login";
-        String httpRequest = String.join("\r\n",
-            "GET " + uri + " HTTP/1.1 ",
-            "Host: localhost:8080 ",
-            "Connection: keep-alive ",
-            "",
-            "");
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest extractor = new HttpRequest(inputStream);
+        String statusLine = "GET /login HTTP/1.1 ";
+        HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);
+
         Map<String, String> expected = new HashMap<>();
 
         // when
-        Map<String, String> queryString = extractor.extractURIQueryParams();
+        Map<String, String> queryString = httpRequest.extractURIQueryParams();
 
         // then
         assertThat(queryString.size()).isEqualTo(0);
@@ -84,62 +70,28 @@ public class HttpRequestTest {
 
     @Test
     @DisplayName("HTTP Request로부터 URI에서 Query String이 있더라도 path 부분만 파싱한다.")
-    void extractURIPath() throws IOException {
+    void extractURIPath() {
         // given
-        String uri = "/login?account=gugu&password=password";
-        String httpRequest = String.join("\r\n",
-            "GET " + uri + " HTTP/1.1 ",
-            "Host: localhost:8080 ",
-            "Connection: keep-alive ",
-            "",
-            "");
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest extractor = new HttpRequest(inputStream);
+        String statusLine = "GET /login HTTP/1.1 ";
+        HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);
 
         // when
-        String path = extractor.extractURIPath();
+        String path = httpRequest.extractURIPath();
 
         // then
         assertThat(path).isEqualTo("/login");
     }
 
-    @Test
-    @DisplayName("HTTP Request로부터 URI에서 Query String이 있더라도, path 부분만 파싱한다.")
-    void extractURIPath_notContainsDelimeter() throws IOException {
-        // given
-        String uri = "/login";
-        String httpRequest = String.join("\r\n",
-            "GET " + uri + " HTTP/1.1 ",
-            "Host: localhost:8080 ",
-            "Connection: keep-alive ",
-            "",
-            "");
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest extractor = new HttpRequest(inputStream);
-
-        // when
-        String path = extractor.extractURIPath();
-
-        // then
-        assertThat(path).isEqualTo("/login");
-    }
 
     @Test
     @DisplayName("HTTP Request로부터 URI에서 Query String이 없고 ?만 있더라도, path 부분만 파싱한다.")
-    void extractURIPath_containsOnlyDelimiter() throws IOException {
+    void extractURIPath_containsOnlyDelimiter() {
         // given
-        String uri = "/login?";
-        String httpRequest = String.join("\r\n",
-            "GET " + uri + " HTTP/1.1 ",
-            "Host: localhost:8080 ",
-            "Connection: keep-alive ",
-            "",
-            "");
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest extractor = new HttpRequest(inputStream);
+        String statusLine = "GET /login? HTTP/1.1 ";
+        HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);
 
         // when
-        String path = extractor.extractURIPath();
+        String path = httpRequest.extractURIPath();
 
         // then
         assertThat(path).isEqualTo("/login");
@@ -147,19 +99,13 @@ public class HttpRequestTest {
 
     @Test
     @DisplayName("HTTP Request로부터 HttpMethod를 파싱한다.")
-    void extractHttpMethod() throws IOException {
+    void extractHttpMethod() {
         // given
-        String httpRequest = String.join("\r\n",
-            "GET /login HTTP/1.1 ",
-            "Host: localhost:8080 ",
-            "Connection: keep-alive ",
-            "",
-            "");
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest extractor = new HttpRequest(inputStream);
+        String statusLine = "GET /login HTTP/1.1 ";
+        HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);
 
         // when
-        String method = extractor.extractHttpMethod();
+        String method = httpRequest.extractHttpMethod();
 
         // then
         assertThat(method).isEqualTo("GET");
@@ -167,25 +113,17 @@ public class HttpRequestTest {
 
     @Test
     @DisplayName("HTTP Request로부터 form-data를 파싱한다.")
-    void extractFormData() throws IOException {
+    void extractFormData() {
         // given
-        String formData = "account=gugu&password=password&email=hkkang%40woowahan.com";
-        String httpRequest = String.join("\r\n",
-            "POST /register HTTP/1.1 ",
-            "Host: localhost:8080 ",
-            "Connection: keep-alive ",
-            "Content-Length: " + formData.length(),
-            "",
-            formData);
-        InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
-        HttpRequest extractor = new HttpRequest(inputStream);
+        String bodyLine = "account=gugu&password=password&email=hkkang%40woowahan.com";
+        HttpRequest httpRequest = new HttpRequest(null, new ArrayList<>(), bodyLine);
         Map<String, String> expected = new HashMap<>();
         expected.put("account", "gugu");
         expected.put("password", "password");
         expected.put("email", "hkkang%40woowahan.com");
 
         // when
-        Map<String, String> actual = extractor.extractFormData();
+        Map<String, String> actual = httpRequest.extractFormData();
 
         // then
         actual.forEach((key, value) -> {

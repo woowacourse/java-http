@@ -1,7 +1,6 @@
 package nextstep.jwp.controller.staticpath;
 
 import nextstep.jwp.controller.AbstractController;
-import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 import nextstep.jwp.http.message.request.RequestHeader;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
@@ -21,11 +20,11 @@ public abstract class StaticResourceController extends AbstractController {
     @Override
     protected final void doGet(HttpRequestMessage httpRequestMessage, HttpResponseMessage httpResponseMessage) throws IOException {
         RequestHeader requestHeader = httpRequestMessage.getHeader();
-        byte[] bytesAsFile = toByteByUri(requestHeader.requestUri());
+        byte[] bytesAsFile = readFileByUri(requestHeader.requestUri());
         manageResponse(httpResponseMessage, bytesAsFile);
     }
 
-    private byte[] toByteByUri(String requestUri) throws IOException {
+    private byte[] readFileByUri(String requestUri) throws IOException {
         String filePath = DEFAULT_PATH + requestUri;
         URL resource = getClass().getClassLoader().getResource(filePath);
         if (Objects.isNull(resource)) {

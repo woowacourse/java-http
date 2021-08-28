@@ -38,15 +38,11 @@ public class ControllerAdvice {
     }
 
     private static Consumer<HttpResponseMessage> makeErrorResponseConsumer(HttpStatusCode httpStatusCode) {
-        return httpResponseMessage -> {
-            httpResponseMessage.setStatusCode(httpStatusCode);
-        };
+        return httpResponseMessage -> httpResponseMessage.setStatusCode(httpStatusCode);
     }
 
     private static Consumer<HttpResponseMessage> makeInternalServerErrorConsumer() {
-        return httpResponseMessage -> {
-            httpResponseMessage.setStatusCode(HttpStatusCode.INTERNAL_SERVER_ERROR);
-        };
+        return httpResponseMessage -> httpResponseMessage.setStatusCode(HttpStatusCode.INTERNAL_SERVER_ERROR);
     }
 
     public void run(HttpResponseMessage httpResponseMessage, RuntimeException e) {

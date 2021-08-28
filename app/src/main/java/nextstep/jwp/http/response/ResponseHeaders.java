@@ -1,4 +1,4 @@
-package nextstep.jwp.http.response.headers;
+package nextstep.jwp.http.response;
 
 import java.util.HashMap;
 import java.util.Map;

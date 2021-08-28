@@ -1,11 +1,7 @@
 package nextstep.jwp.http.response;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import nextstep.jwp.http.common.Body;
 import nextstep.jwp.http.common.HttpStatus;
-import nextstep.jwp.http.response.headers.ResponseHeaders;
-import nextstep.jwp.http.response.statusline.StatusLine;
 import nextstep.jwp.model.StaticResource;
 
 public class HttpResponse {
@@ -14,28 +10,28 @@ public class HttpResponse {
 
     private final StatusLine statusLine;
     private final ResponseHeaders responseHeaders;
-    private final Body body;
+    private final ResponseBody responseBody;
 
-    public HttpResponse(StatusLine statusLine, ResponseHeaders responseHeaders, Body body) {
+    public HttpResponse(StatusLine statusLine, ResponseHeaders responseHeaders, ResponseBody responseBody) {
         this.statusLine = statusLine;
         this.responseHeaders = responseHeaders;
-        this.body = body;
+        this.responseBody = responseBody;
     }
 
     public static HttpResponse of(HttpStatus httpStatus, StaticResource staticResource) {
         StatusLine statusLine = StatusLine.from(httpStatus);
         ResponseHeaders responseHeaders = ResponseHeaders.from(staticResource);
-        Body body = new Body(staticResource.getContent());
+        ResponseBody responseBody = new ResponseBody(staticResource.getContent());
 
-        return new HttpResponse(statusLine, responseHeaders, body);
+        return new HttpResponse(statusLine, responseHeaders, responseBody);
     }
 
     public byte[] toBytes() {
-        if (body.isEmpty()) {
+        if (responseBody.isEmpty()) {
             return joinToBytes(NEW_LINE, statusLine.toString(), responseHeaders.toString());
         }
 
-        return joinToBytes(NEW_LINE, statusLine.toString(), responseHeaders.toString(), body.toString());
+        return joinToBytes(NEW_LINE, statusLine.toString(), responseHeaders.toString(), responseBody.toString());
     }
 
     private byte[] joinToBytes(String... strings) {

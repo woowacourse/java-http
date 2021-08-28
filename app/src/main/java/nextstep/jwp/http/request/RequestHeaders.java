@@ -1,4 +1,4 @@
-package nextstep.jwp.http.request.headers;
+package nextstep.jwp.http.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;

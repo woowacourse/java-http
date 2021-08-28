@@ -1,4 +1,4 @@
-package nextstep.jwp.http.request.requestline;
+package nextstep.jwp.http.request;
 
 import java.util.Objects;
 import nextstep.jwp.exception.InvalidRequestUriException;

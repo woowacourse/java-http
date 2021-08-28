@@ -1,20 +1,15 @@
-package nextstep.jwp.http.common;
+package nextstep.jwp.http.response;
 
 import java.util.Objects;
 
-public class Body {
+public class ResponseBody {
 
-    private static final Body EMPTY = new Body(null);
     private static final String NEW_LINE = System.getProperty("line.separator");
 
     private final String value;
 
-    public Body(String value) {
+    public ResponseBody(String value) {
         this.value = value;
-    }
-
-    public static Body empty() {
-        return EMPTY;
     }
 
     public boolean isEmpty() {

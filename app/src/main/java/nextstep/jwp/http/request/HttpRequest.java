@@ -4,21 +4,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import nextstep.jwp.http.common.Body;
-import nextstep.jwp.http.request.headers.RequestHeaders;
-import nextstep.jwp.http.request.requestline.Method;
-import nextstep.jwp.http.request.requestline.RequestLine;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
-    private final Body body;
+    private final RequestBody requestBody;
 
-    private HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders, Body body) {
+    public HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders, RequestBody requestBody) {
         this.requestLine = requestLine;
         this.requestHeaders = requestHeaders;
-        this.body = body;
+        this.requestBody = requestBody;
     }
 
     public static HttpRequest parse(InputStream inputStream) throws IOException {
@@ -26,21 +22,25 @@ public class HttpRequest {
 
         RequestLine requestLine = RequestLine.parse(bufferedReader.readLine());
         RequestHeaders requestHeaders = RequestHeaders.parse(bufferedReader);
-        Body body = extractBody(bufferedReader, requestHeaders);
+        RequestBody requestBody = extractBody(bufferedReader, requestHeaders);
 
-        return new HttpRequest(requestLine, requestHeaders, body);
+        return new HttpRequest(requestLine, requestHeaders, requestBody);
     }
 
-    private static Body extractBody(BufferedReader bufferedReader, RequestHeaders requestHeaders) throws IOException {
+    private static RequestBody extractBody(BufferedReader bufferedReader, RequestHeaders requestHeaders) throws IOException {
         if (requestHeaders.requestHasBody()) {
             int contentLength = requestHeaders.getContentLength();
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
 
-            return new Body(String.valueOf(buffer));
+            return new RequestBody(String.valueOf(buffer));
         }
 
-        return Body.empty();
+        return RequestBody.empty();
+    }
+
+    public String getBodyParameter(String parameter) {
+        return requestBody.getParameter(parameter);
     }
 
     public String getUri() {

@@ -1,4 +1,4 @@
-package nextstep.jwp.http.response.statusline;
+package nextstep.jwp.http.response;
 
 import nextstep.jwp.http.common.HttpStatus;
 import nextstep.jwp.http.common.HttpVersion;

@@ -7,8 +7,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import nextstep.jwp.infrastructure.http.controller.GetRegisterController;
+import nextstep.jwp.infrastructure.http.controller.HelloController;
+import nextstep.jwp.infrastructure.http.controller.LoginController;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import org.slf4j.Logger;
@@ -24,7 +28,13 @@ public class RequestHandler implements Runnable {
 
     public RequestHandler(final Socket connection) {
         this.connection = Objects.requireNonNull(connection);
-        this.controllerMapping = new ControllerMapping();
+        this.controllerMapping = new ControllerMapping(
+            Arrays.asList(
+                new HelloController(),
+                new LoginController(),
+                new GetRegisterController()
+            )
+        );
         this.viewResolver = new ViewResolver("static");
     }
 

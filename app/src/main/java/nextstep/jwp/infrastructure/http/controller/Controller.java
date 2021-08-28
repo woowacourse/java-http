@@ -7,5 +7,6 @@ import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
 public interface Controller {
 
     HttpRequestLine requestLine();
+
     View handle(final HttpRequest request);
 }

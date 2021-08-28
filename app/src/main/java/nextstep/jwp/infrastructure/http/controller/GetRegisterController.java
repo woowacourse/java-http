@@ -5,15 +5,15 @@ import nextstep.jwp.infrastructure.http.request.HttpMethod;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
 
-public class HelloController implements Controller {
+public class GetRegisterController implements Controller {
 
     @Override
     public HttpRequestLine requestLine() {
-        return new HttpRequestLine(HttpMethod.GET, "/");
+        return new HttpRequestLine(HttpMethod.GET, "/register");
     }
 
     @Override
     public View handle(final HttpRequest request) {
-        return View.buildByResource("/hello.html");
+        return View.buildByResource("/register.html");
     }
 }

@@ -1,12 +1,9 @@
 package nextstep.jwp.infrastructure.http;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import nextstep.jwp.infrastructure.http.controller.Controller;
-import nextstep.jwp.infrastructure.http.controller.HelloController;
-import nextstep.jwp.infrastructure.http.controller.LoginController;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
 import nextstep.jwp.infrastructure.http.response.HttpStatusCode;
@@ -15,8 +12,7 @@ public class ControllerMapping {
 
     private final Map<HttpRequestLine, Controller> controllers;
 
-    public ControllerMapping() {
-        List<Controller> controllers = Arrays.asList(new HelloController(), new LoginController());
+    public ControllerMapping(final List<Controller> controllers) {
         this.controllers = controllers.stream()
             .collect(Collectors.toMap(Controller::requestLine, controller -> controller));
     }

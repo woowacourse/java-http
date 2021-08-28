@@ -7,12 +7,15 @@ public class RequestHeader {
     private final String URI;
     private final String HTTP_VERSION;
     private final Map<String, String> HEADERS;
+    private final Map<String, String> PARAMS;
 
-    public RequestHeader(String method, String uri, String httpVersion, Map<String, String> headers) {
+    public RequestHeader(String method, String uri, String httpVersion,
+                         Map<String, String> headers, Map<String, String> params) {
         METHOD = method;
         URI = uri;
         HTTP_VERSION = httpVersion;
         HEADERS = headers;
+        PARAMS = params;
     }
 
     public String method() {
@@ -29,5 +32,9 @@ public class RequestHeader {
 
     public Map<String, String> headers() {
         return HEADERS;
+    }
+
+    public Map<String, String> params() {
+        return PARAMS;
     }
 }

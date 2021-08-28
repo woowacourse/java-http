@@ -1,9 +1,11 @@
 package nextstep.jwp.http.request;
 
+import nextstep.jwp.exception.InvalidHttpRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 
 public class HttpRequest {
 
@@ -14,9 +16,34 @@ public class HttpRequest {
     private RequestBody body;
 
     public HttpRequest(BufferedReader reader) {
-        this.requestLine = new RequestLine(reader);
-        this.headers = new RequestHeaders(reader);
-        this.body = new RequestBody(reader, headers.getContentLength());
+        try {
+            this.requestLine = new RequestLine(reader.readLine());
+            this.headers = readHeaders(reader);
+            this.body = readBody(reader, headers.getContentLength());
+        } catch (InvalidHttpRequestException exception) {
+            log.error("Exception invalid http request", exception);
+        } catch (IOException exception) {
+            log.error("Exception stream", exception);
+        }
+    }
+
+    private RequestHeaders readHeaders(BufferedReader reader) throws IOException, InvalidHttpRequestException {
+        RequestHeaders requestHeaders = new RequestHeaders();
+        while (reader.ready()) {
+            String line = reader.readLine();
+            if (line == null) {
+                throw new InvalidHttpRequestException("HTTP Header Line이 null일 수 없습니다.");
+            }
+            if ("".equals(line)) break;
+            requestHeaders.put(line);
+        }
+        return requestHeaders;
+    }
+
+    private RequestBody readBody(BufferedReader reader, int contentLength) throws IOException {
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        return new RequestBody(new String(buffer));
     }
 
     public String getParameter(String key) {

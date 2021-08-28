@@ -1,11 +1,10 @@
 package nextstep.jwp.http.request;
 
 import com.google.common.base.Strings;
-import nextstep.jwp.exception.InvalidRequestLineException;
+import nextstep.jwp.exception.InvalidHttpRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,16 +17,9 @@ public class RequestLine {
     private Map<String, String> queryParams;
     private String protocol;
 
-    public RequestLine(BufferedReader reader) {
+    public RequestLine(String line) {
         try {
-            String line = reader.readLine();
-            if (line == null) {
-                throw new InvalidRequestLineException("line이 null일 수 없습니다.");
-            }
-            String[] tokens = line.split(" ");
-            if (tokens.length != 3) {
-                throw new InvalidRequestLineException("RequestLine의 형식이 올바르지 않습니다.");
-            }
+            String[] tokens = splitByBlank(line);
             this.method = HttpMethod.of(tokens[0]);
             String uri = tokens[1];
             if (uri.contains("?")) {
@@ -38,9 +30,20 @@ public class RequestLine {
                 path = uri;
             }
             this.protocol = tokens[2];
-        } catch (Exception exception) {
-            log.error("Exception buffered reader read request line", exception);
+        } catch (InvalidHttpRequestException exception) {
+            log.error("Exception invalid http request", exception);
         }
+    }
+
+    private String[] splitByBlank(String line) throws InvalidHttpRequestException {
+        if (line == null) {
+            throw new InvalidHttpRequestException("HTTP Request Line이 null일 수 없습니다.");
+        }
+        String[] tokens = line.split(" ");
+        if (tokens.length != 3) {
+            throw new InvalidHttpRequestException("RequestLine의 형식이 올바르지 않습니다.");
+        }
+        return tokens;
     }
 
     private Map<String, String> extractQueryParams(String queryString) {
@@ -64,6 +67,14 @@ public class RequestLine {
 
     public String getPath() {
         return path;
+    }
+
+    public Map<String, String> getQueryParams() {
+        return queryParams;
+    }
+
+    public String getProtocol() {
+        return protocol;
     }
 
     public boolean isGet() {

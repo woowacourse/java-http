@@ -31,11 +31,6 @@ public class HttpResponse {
         this.body = new ResponseBody(content);
     }
 
-    public void setBodyByUri(String uri) {
-        this.body = new ResponseBody(uri);
-        setHeaders(uri);
-    }
-
     public void forward(String uri) {
         try {
             URL resource = getClass().getClassLoader().getResource("static" + uri);
@@ -57,7 +52,7 @@ public class HttpResponse {
         }
     }
 
-    private void response404() {
+    public void response404() {
         try {
             URL resource = getClass().getClassLoader().getResource("static" + NOT_FOUND_URI);
             assert resource != null;

@@ -1,11 +1,11 @@
 package nextstep.jwp.framework.http.formatter;
 
-import nextstep.jwp.framework.http.HttpResponse;
+import nextstep.jwp.framework.http.HttpMessage;
 
 public class EndLineFormatter extends AbstractLineFormatter {
 
-    public EndLineFormatter(HttpResponse httpResponse) {
-        super(httpResponse);
+    public EndLineFormatter(HttpMessage httpMessage) {
+        super(httpMessage);
     }
 
     @Override

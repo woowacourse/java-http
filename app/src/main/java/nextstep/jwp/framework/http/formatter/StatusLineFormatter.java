@@ -7,8 +7,11 @@ public class StatusLineFormatter extends AbstractLineFormatter {
 
     public static final String STATUS_LINE_FORMAT = "%s %s %s\r\n";
 
+    private final HttpResponse httpResponse;
+
     public StatusLineFormatter(HttpResponse httpResponse) {
         super(httpResponse);
+        this.httpResponse = httpResponse;
     }
 
     @Override

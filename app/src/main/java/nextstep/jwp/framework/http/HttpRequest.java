@@ -4,23 +4,21 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-public class HttpRequest {
+import nextstep.jwp.framework.http.formatter.LineFormatter;
+import nextstep.jwp.framework.http.formatter.RequestLineFormatter;
+
+public class HttpRequest implements HttpMessage {
+
+    private static final String EMPTY = "";
+
     private final RequestLine requestLine;
-    private final HttpHeaders headers;
+    private final HttpHeaders httpHeaders;
     private final String requestBody;
 
-    public HttpRequest(RequestLine requestLine, HttpHeaders headers, String requestBody) {
+    public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders, String requestBody) {
         this.requestLine = requestLine;
-        this.headers = headers;
+        this.httpHeaders = httpHeaders;
         this.requestBody = requestBody;
-    }
-
-    public HttpHeaders getHeaders() {
-        return headers;
-    }
-
-    public String getRequestBody() {
-        return requestBody;
     }
 
     public HttpMethod getMethod() {
@@ -39,17 +37,49 @@ public class HttpRequest {
         return requestLine.getQueries();
     }
 
-    public boolean isSameUri(String uri) {
+    public String getValueFromQuery(String key) {
+        return getQueries().get(key);
+    }
+
+    public RequestLine getRequestLine() {
+        return requestLine;
+    }
+
+    public boolean isSamePath(String uri) {
         return requestLine.isSamePath(uri);
+    }
+
+    public String readAfterExceptBody() {
+        final HttpRequest httpRequest = new HttpRequest.Builder().copy(this)
+                                                                 .overwrite(EMPTY)
+                                                                 .build();
+
+        LineFormatter lineFormatter = new RequestLineFormatter(httpRequest);
+        StringBuilder stringBuilder = new StringBuilder();
+        while (lineFormatter.canRead()) {
+            stringBuilder.append(lineFormatter.transform());
+            lineFormatter = lineFormatter.convertNextFormatter();
+        }
+        return stringBuilder.toString();
+    }
+
+    @Override
+    public HttpHeaders getHttpHeaders() {
+        return httpHeaders;
+    }
+
+    @Override
+    public String getBody() {
+        return requestBody;
     }
 
     public static class Builder {
         private RequestLine requestLine;
-        private final HttpHeaders headers;
-        private final StringBuilder requestBody;
+        private HttpHeaders httpHeaders;
+        private StringBuilder requestBody;
 
         public Builder() {
-            this.headers = new HttpHeaders();
+            this.httpHeaders = new HttpHeaders();
             this.requestBody = new StringBuilder();
         }
 
@@ -71,7 +101,12 @@ public class HttpRequest {
         }
 
         public Builder header(String name, List<String> values) {
-            this.headers.addHeader(name, values);
+            this.httpHeaders.addHeader(name, values);
+            return this;
+        }
+
+        public Builder httpHeaders(HttpHeaders httpHeaders) {
+            this.httpHeaders = httpHeaders;
             return this;
         }
 
@@ -82,8 +117,20 @@ public class HttpRequest {
             return this;
         }
 
+        public Builder overwrite(String requestBody) {
+            this.requestBody = new StringBuilder().append(requestBody);
+            return this;
+        }
+
+        public Builder copy(HttpRequest httpRequest) {
+            requestLine(httpRequest.requestLine);
+            httpHeaders(httpRequest.httpHeaders);
+            overwrite(httpRequest.requestBody);
+            return this;
+        }
+
         public HttpRequest build() {
-            return new HttpRequest(requestLine, headers, requestBody.toString());
+            return new HttpRequest(requestLine, httpHeaders, requestBody.toString());
         }
     }
 }

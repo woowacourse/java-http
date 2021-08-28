@@ -28,7 +28,7 @@ public class RequestLine {
     }
 
     public String getVersion() {
-        return version.name();
+        return version.getVersion();
     }
 
     public boolean isSamePath(String path) {

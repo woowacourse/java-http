@@ -2,7 +2,7 @@ package nextstep.jwp.framework.http.formatter;
 
 import nextstep.jwp.framework.http.HttpHeader;
 import nextstep.jwp.framework.http.HttpHeaders;
-import nextstep.jwp.framework.http.HttpResponse;
+import nextstep.jwp.framework.http.HttpMessage;
 
 public class HeaderLineFormatter extends AbstractLineFormatter {
 
@@ -11,13 +11,13 @@ public class HeaderLineFormatter extends AbstractLineFormatter {
 
     private boolean passedEmptyLine = false;
 
-    public HeaderLineFormatter(HttpResponse httpResponse) {
-        super(httpResponse);
+    public HeaderLineFormatter(HttpMessage httpMessage) {
+        super(httpMessage);
     }
 
     @Override
     public String transform() {
-        final HttpHeaders httpHeaders = httpResponse.getHttpHeaders();
+        final HttpHeaders httpHeaders = httpMessage.getHttpHeaders();
         final HttpHeader httpHeader = httpHeaders.poll();
         if (httpHeader == null) {
             passedEmptyLine = true;
@@ -30,7 +30,7 @@ public class HeaderLineFormatter extends AbstractLineFormatter {
     @Override
     public LineFormatter convertNextFormatter() {
         if (passedEmptyLine) {
-            return new BodyLineFormatter(httpResponse);
+            return new BodyLineFormatter(httpMessage);
         }
         return this;
     }

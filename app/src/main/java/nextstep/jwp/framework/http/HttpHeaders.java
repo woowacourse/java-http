@@ -7,12 +7,16 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class HttpHeaders {
     private final ConcurrentLinkedQueue<HttpHeader> headers;
 
+    public HttpHeaders(HttpHeaders httpHeaders) {
+        this(httpHeaders.headers);
+    }
+
     public HttpHeaders() {
         this(new ConcurrentLinkedQueue<>());
     }
 
     public HttpHeaders(ConcurrentLinkedQueue<HttpHeader> headers) {
-        this.headers = headers;
+        this.headers = new ConcurrentLinkedQueue<>(headers);
     }
 
     public HttpHeaders addHeader(String name, String... values) {

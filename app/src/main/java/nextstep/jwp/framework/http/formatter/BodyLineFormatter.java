@@ -1,20 +1,20 @@
 package nextstep.jwp.framework.http.formatter;
 
-import nextstep.jwp.framework.http.HttpResponse;
+import nextstep.jwp.framework.http.HttpMessage;
 
 public class BodyLineFormatter extends AbstractLineFormatter {
 
-    public BodyLineFormatter(HttpResponse httpResponse) {
-        super(httpResponse);
+    public BodyLineFormatter(HttpMessage httpMessage) {
+        super(httpMessage);
     }
 
     @Override
     public String transform() {
-        return httpResponse.getResponseBody();
+        return httpMessage.getBody();
     }
 
     @Override
     public LineFormatter convertNextFormatter() {
-        return new EndLineFormatter(httpResponse);
+        return new EndLineFormatter(httpMessage);
     }
 }

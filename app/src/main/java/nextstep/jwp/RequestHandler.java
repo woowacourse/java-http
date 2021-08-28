@@ -1,12 +1,18 @@
 package nextstep.jwp;
 
+import nextstep.jwp.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class RequestHandler implements Runnable {
@@ -26,7 +32,39 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final String responseBody = "Hello world!";
+            final List<String> requestHeaders = new ArrayList<>();
+            BufferedReader inputStreamReader = new BufferedReader(new InputStreamReader(inputStream));
+            String line = inputStreamReader.readLine();
+            while (!"".equals(line)) {
+                requestHeaders.add(line);
+                line = inputStreamReader.readLine();
+                if (line == null) {
+                    break;
+                }
+            }
+
+            new HttpRequest()
+
+            if (requestHeaders.isEmpty()) {
+                throw new IllegalStateException();
+            }
+
+            final String targetResourceUrl = requestHeaders.get(0).split(" ")[1];
+
+            if (targetResourceUrl.startsWith("/login")) {
+
+            }
+
+            URL resource = Thread.currentThread()
+                    .getContextClassLoader()
+                    .getResource("static" + targetResourceUrl);
+            String responseBody;
+            try {
+                Path path = Paths.get(resource.toURI());
+                responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            } catch (IOException | URISyntaxException exception) {
+                throw new ResourceNotFoundException();
+            }
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -37,6 +75,7 @@ public class RequestHandler implements Runnable {
 
             outputStream.write(response.getBytes());
             outputStream.flush();
+            inputStreamReader.close();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {

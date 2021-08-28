@@ -20,12 +20,17 @@ public class HttpPath {
     private static final String UNAUTHORIZED_PAGE = "401.html";
     private static final String NOT_FOUND_PAGE = "404.html";
 
-    private final String path;
-    private final QueryParams queryParams;
+    private String path;
+    private QueryParams queryParams;
 
     public HttpPath(final String path) {
-        this.path = createPath(path);
-        this.queryParams = createQueryParams(path);
+        try {
+            this.path = createPath(path);
+            this.queryParams = createQueryParams(path);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            this.path = NOT_FOUND_PAGE;
+            this.queryParams = new QueryParams();
+        }
     }
 
     public static URL index() {

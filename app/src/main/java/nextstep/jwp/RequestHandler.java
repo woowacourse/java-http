@@ -3,10 +3,13 @@ package nextstep.jwp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class RequestHandler implements Runnable {
@@ -25,18 +28,30 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-
-            final String responseBody = "Hello world!";
-
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            String responseBody;
+            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            String firstLine = bufferedReader.readLine();
+            if (firstLine != null) {
+                List<String> requestHeader = Arrays.asList(firstLine.split(" "));
+                if (requestHeader.get(0).equals("GET")) {
+                    String fileName = requestHeader.get(1);
+                    final URL url = getClass().getClassLoader().getResource("static" + fileName);
+                    if (url != null) {
+                        final Path path = new File(url.getPath()).toPath();
+                        responseBody = Files.readString(path);
+                        final String response = String.join("\r\n",
+                                "HTTP/1.1 200 OK ",
+                                "Content-Type: text/html;charset=utf-8 ",
+                                "Content-Length: " + responseBody.getBytes().length + " ",
+                                "",
+                                responseBody);
+                        outputStream.write(response.getBytes());
+                        outputStream.flush();
+                    }
+                }
+            }
+            log.info(firstLine);
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {

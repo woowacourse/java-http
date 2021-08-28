@@ -123,17 +123,11 @@ class IOStreamTest {
         void InputStream은_데이터를_바이트로_읽는다() throws IOException {
             byte[] bytes = {-16, -97, -92, -87};
             final InputStream inputStream = new ByteArrayInputStream(bytes);
-//            final OutputStream outputStream = new ByteArrayOutputStream(bytes.length);
-//            final byte[] temp = new byte[4];
 
             /**
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
 
-//            while (inputStream.read(temp) != -1) {
-//                outputStream.write(temp);
-//            }
-//            final String actual = outputStream.toString();
             final String actual = new String(inputStream.readAllBytes());
 
             assertThat(actual).isEqualTo("🤩");

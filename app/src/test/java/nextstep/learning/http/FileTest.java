@@ -29,9 +29,6 @@ class FileTest {
         final String fileName = "nextstep.txt";
         final File file = new File(fileName);
 
-//        final URL resource = getClass().getClassLoader().getResource(fileName);
-//        final String actual = resource.getFile();
-
         final String actual = file.getAbsolutePath();
 
         assertThat(actual).endsWith(fileName);

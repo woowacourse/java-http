@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class RequestBody {
 
-    private Map<String, String> params = new HashMap<>();
+    private final Map<String, String> params = new HashMap<>();
 
     public RequestBody(String content) {
         addParams(content);

@@ -27,11 +27,14 @@ public class RegisterController extends AbstractController {
     public HttpResponse doPost(HttpRequest httpRequest) {
         final Map<String, String> payload = httpRequest.getBody();
         final User user = new User(
-                1L,
+                InMemoryUserRepository.nextId(),
                 payload.get("account"),
                 payload.get("password"),
                 payload.get("email")
         );
+        if (InMemoryUserRepository.existsByAccount(user.getAccount())) {
+            throw new DuplicateUserException(user.getAccount());
+        }
         InMemoryUserRepository.save(user);
         log.info(String.format("New User Registered. user id : %d, account : %s", user.getId(), user.getAccount()));
         return new HttpResponse(HttpStatus.OK, readIndex());

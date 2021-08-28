@@ -186,7 +186,7 @@ class RequestHandlerTest {
                 "Content-Type: application/x-www-form-urlencoded",
                 "Accept: */*",
                 "",
-                "account=gugu&password=password&email=hkkang%40woowahan.com");
+                "account=pobi&password=password&email=pobi%40woowahan.com");
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         final String resourceAsString = new String(Files.readAllBytes(Paths.get(resource.getPath())));
 

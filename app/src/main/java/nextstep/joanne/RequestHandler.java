@@ -67,6 +67,11 @@ public class RequestHandler implements Runnable {
             String path = uri;
             String queryString = "";
             String httpStatus = "200 OK";
+            String contentType = "text/html";
+
+            if (httpRequestHeaders.get("Accept").contains("css")) {
+                contentType = "text/css";
+            }
 
             String requestBody = "";
             if (isPost(method)) {
@@ -136,7 +141,7 @@ public class RequestHandler implements Runnable {
                 }
             }
 
-            final String response = makeHttpResponse(httpStatus, responseBody);
+            final String response = makeHttpResponse(httpStatus, contentType, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -155,10 +160,10 @@ public class RequestHandler implements Runnable {
         return "POST".equals(method);
     }
 
-    private String makeHttpResponse(String httpStatus, String responseBody) {
+    private String makeHttpResponse(String httpStatus, String contentType, String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 " + httpStatus + " ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: "+ contentType +";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

@@ -6,22 +6,22 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.stream.Stream;
 import nextstep.jwp.http.RequestHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class RequestHandlerTest {
 
-    @Test
-    @DisplayName("GET /index.html로 요청을 할 경우, resources/static/index.html을 response로 응답한다.")
-    void index() throws IOException {
+    @ParameterizedTest
+    @DisplayName("GET /xxx.html 또는 /xxx 형태로 요청할 경우, resources/static/xxx.html을 response로 응답한다.")
+    @MethodSource("generateData")
+    void renderHtmlFile(String request, String path) throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
-            "GET /index.html HTTP/1.1 ",
-            "Host: localhost:8080 ",
-            "Connection: keep-alive ",
-            "",
-            "");
+        final String httpRequest = request;
 
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
@@ -30,55 +30,41 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final URL resource = getClass().getClassLoader().getResource(path);
         String expected = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).contains(expected);
     }
 
-    @Test
-    @DisplayName("GET /login으로 요청을 할 경우, resources/static/login.html을 response로 응답한다.")
-    void login() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-            "GET /login HTTP/1.1 ",
-            "Host: localhost:8080 ",
-            "Connection: keep-alive ",
-            "",
-            "");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        String expected = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertThat(socket.output()).contains(expected);
-    }
-
-    @Test
-    @DisplayName("GET /register로 요청을 할 경우, resources/static/register.html을 response로 응답한다.")
-    void register() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-            "GET /register HTTP/1.1 ",
-            "Host: localhost:8080 ",
-            "Connection: keep-alive ",
-            "",
-            "");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/register.html");
-        String expected = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertThat(socket.output()).contains(expected);
+    static Stream<Arguments> generateData() {
+        return Stream.of(
+            Arguments.of(
+                String.join("\r\n",
+                    "GET /index.html HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "",
+                    ""),
+                "static/index.html"
+            ),
+            Arguments.of(
+                String.join("\r\n",
+                    "GET /login HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "",
+                    ""),
+                "static/login.html"
+            ),
+            Arguments.of(
+                String.join("\r\n",
+                    "GET /register HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "",
+                    ""),
+                "static/register.html"
+            )
+        );
     }
 
     @Test

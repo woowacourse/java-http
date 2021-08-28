@@ -62,12 +62,11 @@ public class RequestHandler implements Runnable {
         }
     }
 
-
     private Object getHandler(HttpRequest httpRequest) {
         return handlerMappings.stream()
-                              .filter(m -> m.isHandle(httpRequest))
+                              .filter(m -> m.canUse(httpRequest))
                               .findFirst()
-                              .map(m -> m.find(httpRequest))
+                              .map(m -> m.getHandler(httpRequest))
                               .orElseThrow(() -> new IllegalArgumentException("처리할 수 없는 요청입니다."));
     }
 

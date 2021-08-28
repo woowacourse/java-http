@@ -1,7 +1,7 @@
-package nextstep.jwp.db;
+package nextstep.project.db;
 
 
-import nextstep.jwp.model.User;
+import nextstep.project.model.User;
 
 import java.util.Map;
 import java.util.Optional;

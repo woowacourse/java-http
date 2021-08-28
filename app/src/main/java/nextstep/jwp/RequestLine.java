@@ -9,14 +9,6 @@ public class RequestLine {
         this.splitRequestLine = requestLine.split(" ");
     }
 
-    public String getRequestLine() {
-        return requestLine;
-    }
-
-    public String[] getSplitRequestLine() {
-        return splitRequestLine;
-    }
-
     public String getMethod() {
         return splitRequestLine[0];
     }

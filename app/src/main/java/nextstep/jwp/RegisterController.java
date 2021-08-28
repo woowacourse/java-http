@@ -18,7 +18,7 @@ public class RegisterController extends AbstractController {
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        response.sendRedirect(request.getPath() + ".html");
+        response.forward(request.getPath() + ".html");
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws IOException {

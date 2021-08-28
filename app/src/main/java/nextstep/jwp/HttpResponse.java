@@ -66,4 +66,14 @@ public class HttpResponse {
         outputStream.write(response.getBytes());
         outputStream.flush();
     }
+
+    public void forward(String url) throws IOException {
+        ResourceFile resourceFile = new ResourceFile(url);
+        String content = resourceFile.getContent();
+        setStatus(200);
+        addHeader("Content-Type", resourceFile.getContentType());
+        addHeader("Content-Length", String.valueOf(content.getBytes().length));
+        write(content);
+        flush();
+    }
 }

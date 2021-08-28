@@ -41,16 +41,8 @@ public class HttpRequest {
         this.parameters = new Parameters(getQueryString(), getRequestBody());
     }
 
-    public String getRequestLine() {
-        return requestLine.getRequestLine();
-    }
-
     public String getMethod() {
         return requestLine.getMethod();
-    }
-
-    public String getRequestURI() {
-        return requestLine.getRequestURI();
     }
 
     public String getQueryString() {

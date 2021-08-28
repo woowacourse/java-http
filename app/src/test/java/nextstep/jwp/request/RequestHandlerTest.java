@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.MockSocket;
 import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {

@@ -16,6 +16,10 @@ public class View {
         return new View(content);
     }
 
+    public static View empty() {
+        return new View("");
+    }
+
     public HttpResponse render(Model model) {
         HttpStatus httpStatus = model.getHttpStatus();
 

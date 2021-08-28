@@ -12,12 +12,18 @@ public class ViewResolver {
         try {
             System.out.println("==== RESOLVE RESOURCE ====");
             System.out.println(viewName);
-            final URL resourceUrl = getClass().getResource("/static/" + viewName);
+
+            if(viewName.isEmpty()){
+                return View.empty();
+            }
+
+            if(viewName.equals("/")){
+                return View.of("Hello world!");
+            }
+
+            final URL resourceUrl = getClass().getResource("/static" + viewName);
             final Path filePath = new File(resourceUrl.getFile()).toPath();
             return View.of(String.join("\n", Files.readAllLines(filePath)) + "\n");
-        } catch (IOException e) {
-            e.printStackTrace();
-            return View.of("Hello world!");
         } catch (Exception e) {
             e.printStackTrace();
             throw new IllegalArgumentException("view not found");

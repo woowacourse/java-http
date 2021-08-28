@@ -6,9 +6,9 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
 public class HttpResponse {
 
@@ -34,25 +34,11 @@ public class HttpResponse {
 
             setStatusLine(Status.OK);
             this.headers.setContentType(ContentType.findByUri(uri));
-            this.headers.setContentLength(content.length());
+            this.headers.setContentLength(content.getBytes(StandardCharsets.UTF_8).length);
             this.body = new ResponseBody(content);
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         }
-    }
-
-    private URL findResource(String uri) {
-        return getClass().getClassLoader().getResource("static" + uri);
-    }
-
-    private String readContent(URL resource) throws IOException {
-        if (resource == null) {
-            log.debug("Resource is not found!");
-            return null;
-        }
-        final Path resourcePath = new File(resource.getPath()).toPath();
-        final List<String> requestBody = Files.readAllLines(resourcePath);
-        return String.join("\r\n", requestBody) + "\r\n";
     }
 
     public void responseNotFound() {
@@ -68,6 +54,26 @@ public class HttpResponse {
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         }
+    }
+
+    public void responseMessage(String message) {
+        this.headers.setContentType(ContentType.HTML);
+        this.headers.setContentLength(message.length());
+        this.body = new ResponseBody(message);
+    }
+
+    private URL findResource(String uri) {
+        return getClass().getClassLoader().getResource("static" + uri);
+    }
+
+    private String readContent(URL resource) throws IOException {
+        if (resource == null) {
+            log.debug("Resource is not found!");
+            return null;
+        }
+        final Path resourcePath = new File(resource.getPath()).toPath();
+        byte[] bytes = Files.readAllBytes(resourcePath);
+        return new String(bytes);
     }
 
     public void redirect(String redirectUrl) {
@@ -89,6 +95,6 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-        return String.join("\r\n", statusLine.toString(), headers.toString(), "", body.toString());
+        return String.join("\r\n", statusLine.toString(), headers.toString(), body.toString());
     }
 }

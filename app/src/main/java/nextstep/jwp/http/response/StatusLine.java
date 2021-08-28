@@ -16,6 +16,6 @@ public class StatusLine {
 
     @Override
     public String toString() {
-        return String.join(" ", protocol, statusCode, statusMessage, "");
+        return String.join(" ", protocol, statusCode, statusMessage) + " ";
     }
 }

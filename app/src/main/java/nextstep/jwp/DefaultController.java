@@ -4,12 +4,6 @@ import nextstep.jwp.network.HttpRequest;
 import nextstep.jwp.network.HttpResponse;
 import nextstep.jwp.network.HttpStatus;
 
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 public class DefaultController extends AbstractController {
 
     public DefaultController(String resource) {
@@ -17,12 +11,9 @@ public class DefaultController extends AbstractController {
     }
 
     @Override
-    public HttpResponse doGet(HttpRequest httpRequest) throws IOException {
+    public HttpResponse doGet(HttpRequest httpRequest) {
         if ("/index.html".equals(httpRequest.toURI().getPath())) {
-            URL resource = getClass().getClassLoader().getResource("static" + httpRequest.toURI().getPath());
-            Path path = Paths.get(resource.getPath());
-            byte[] bytes = Files.readAllBytes(path);
-
+            final byte[] bytes = readIndex();
             return new HttpResponse(HttpStatus.OK, bytes);
         }
 

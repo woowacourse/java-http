@@ -8,11 +8,6 @@ import nextstep.jwp.network.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 
 public class LoginController extends AbstractController {
@@ -24,33 +19,19 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    public HttpResponse doGet(HttpRequest httpRequest) throws IOException {
+    public HttpResponse doGet(HttpRequest httpRequest) {
         if (!httpRequest.toURI().hasQuery()) {
-            URL resource = getClass().getClassLoader().getResource("static" + getResource() + ".html");
-            Path path = Paths.get(resource.getPath());
-            byte[] bytes = Files.readAllBytes(path);
-
-            return new HttpResponse(HttpStatus.OK, bytes);
+            return new HttpResponse(HttpStatus.OK, readFile(getResource()));
         } else {
             final Map<String, String> queryInfo = extractQuery(httpRequest.toURI().getQuery());
             final User user = InMemoryUserRepository.findByAccount(queryInfo.get("account"))
                     .orElseThrow(() -> new UserNotFoundException(queryInfo.get("account")));
             if (user.checkPassword(queryInfo.get("password"))) {
                 log.info("Login successful!");
-
-                URL resource = getClass().getClassLoader().getResource("static" + "/index.html");
-                Path path = Paths.get(resource.getPath());
-                byte[] bytes = Files.readAllBytes(path);
-
-                return new HttpResponse(HttpStatus.FOUND, bytes);
+                return new HttpResponse(HttpStatus.FOUND, readFile(getResource()));
             } else {
                 log.info("Login failed");
-
-                URL resource = getClass().getClassLoader().getResource("static" + "/401.html");
-                Path path = Paths.get(resource.getPath());
-                byte[] bytes = Files.readAllBytes(path);
-
-                return new HttpResponse(HttpStatus.UNAUTHORIZED, bytes);
+                return new HttpResponse(HttpStatus.UNAUTHORIZED, readFile(getResource()));
             }
         }
     }

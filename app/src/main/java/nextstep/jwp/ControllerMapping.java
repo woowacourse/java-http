@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class ControllerMapping {
 
-    final private Map<String, Controller> controllers;
+    private final Map<String, Controller> controllers;
 
     public ControllerMapping(Map<String, Controller> controllers) {
         this.controllers = controllers;

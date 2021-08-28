@@ -24,16 +24,16 @@ public class RegisterHandler extends AbstractHandler {
         String password = queries.get(PASSWORD);
         if (InMemoryUserRepository.existsByAccount(account)
                 || InMemoryUserRepository.existsByEmail(email)) {
-            return redirectMessage("/401.html");
+            return redirectMessage(FILE_401_HTML);
         }
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        return redirectMessage("/index.html");
+        return redirectMessage(FILE_INDEX_HTML);
     }
 
     private String getMessage(Request request) throws IOException {
         RequestPath requestPath = request.getRequestPath();
-        final String responseBody = fileByPath(requestPath.path() + ".html");
+        final String responseBody = fileByPath(requestPath.path() + HTML_EXTENSION);
         return staticFileMessage(HTML, responseBody);
     }
 }

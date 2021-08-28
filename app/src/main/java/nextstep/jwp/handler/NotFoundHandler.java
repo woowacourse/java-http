@@ -7,8 +7,7 @@ public class NotFoundHandler extends AbstractHandler {
 
     @Override
     public String message(Request request) throws IOException {
-        String requestPath = "/401.html";
-        final String responseBody = fileByPath(requestPath);
+        final String responseBody = fileByPath(FILE_401_HTML);
         return staticFileMessage(HTML, responseBody);
     }
 }

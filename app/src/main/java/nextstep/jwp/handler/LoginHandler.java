@@ -24,9 +24,9 @@ public class LoginHandler extends AbstractHandler {
         String password = queries.get(PASSWORD);
         Optional<User> dbUser = InMemoryUserRepository.findByAccount(account);
         if (dbUser.isPresent() && dbUser.get().checkPassword(password)) {
-            return redirectMessage("/index.html");
+            return redirectMessage(FILE_INDEX_HTML);
         }
-        return redirectMessage("/401.html");
+        return redirectMessage(FILE_401_HTML);
     }
 
     private String getMessage(Request request) throws IOException {
@@ -37,11 +37,11 @@ public class LoginHandler extends AbstractHandler {
             String password = queries.get(PASSWORD);
             Optional<User> dbUser = InMemoryUserRepository.findByAccount(account);
             if (dbUser.isPresent() && dbUser.get().checkPassword(password)) {
-                return redirectMessage("/index.html");
+                return redirectMessage(FILE_INDEX_HTML);
             }
-            return redirectMessage("/401.html");
+            return redirectMessage(FILE_401_HTML);
         }
-        final String responseBody = fileByPath(requestPath.path() + ".html");
+        final String responseBody = fileByPath(requestPath.path() + HTML_EXTENSION);
         return staticFileMessage(HTML, responseBody);
     }
 }

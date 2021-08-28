@@ -15,6 +15,9 @@ public abstract class AbstractHandler implements Handler {
     protected static final String ACCOUNT = "account";
     protected static final String EMAIL = "email";
     protected static final String PASSWORD = "password";
+    protected static final String FILE_401_HTML = "/401.html";
+    protected static final String FILE_INDEX_HTML = "/index.html";
+    protected static final String HTML_EXTENSION = ".html";
 
     protected String staticFileMessage(String fileType, String responseBody) {
         return String.join("\r\n",

@@ -5,6 +5,9 @@ public class StatusLine {
     private String statusCode;
     private String statusMessage;
 
+    public StatusLine() {
+    }
+
     public StatusLine(Status status) {
         this.protocol = "HTTP/1.1";
         this.statusCode = status.getCode();

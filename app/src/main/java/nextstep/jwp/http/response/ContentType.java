@@ -6,6 +6,7 @@ public enum ContentType {
     HTML("html", "text/html;charset=utf-8"),
     CSS("css", "text/css"),
     JS("js", "application/javascript"),
+    SVG("svg", "image/svg+xml"),
     ICO("ICO", "image/x-icon");
 
     private final String extension;

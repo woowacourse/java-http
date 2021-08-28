@@ -1,7 +1,7 @@
 package nextstep.jwp.controller;
 
 
-import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.application.LoginService;
 import nextstep.jwp.model.http.HttpRequest;
 import nextstep.jwp.model.http.HttpResponse;
 
@@ -9,11 +9,15 @@ import java.io.IOException;
 
 public class LoginController extends AbstractController {
 
+    private final LoginService loginService;
+
+    public LoginController() {
+        this.loginService = new LoginService();
+    }
+
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
-        if (InMemoryUserRepository.existUserByAccountAndPassword(
-                request.getParameter("account"),
-                request.getParameter("password"))) {
+        if (loginService.isExistUser(request)) {
             response.redirect("/index.html");
             return;
         }

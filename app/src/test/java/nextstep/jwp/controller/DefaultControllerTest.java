@@ -1,7 +1,5 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.MockSocket;
-import nextstep.jwp.RequestHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

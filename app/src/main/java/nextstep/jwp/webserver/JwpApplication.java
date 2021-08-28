@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.webserver;
 
 public class JwpApplication {
 

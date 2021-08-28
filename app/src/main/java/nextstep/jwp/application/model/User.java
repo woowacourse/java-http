@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package nextstep.jwp.application.model;
 
 public class User {
 

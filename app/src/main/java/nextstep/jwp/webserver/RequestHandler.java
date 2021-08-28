@@ -1,16 +1,17 @@
-package nextstep.jwp;
+package nextstep.jwp.webserver;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class RequestHandler implements Runnable {
 
@@ -29,21 +30,10 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            String request = new String(inputStream.readAllBytes());
-            String[] requestSplit = request.split("\n\n");
-            String header = requestSplit[0];
+            HttpRequest httpRequest = new HttpRequest(new String(inputStream.readAllBytes()));
 
-            List<String> lines = header.lines().collect(Collectors.toList());
-
-            // 리퀘스트 라인(헤더 첫줄)
-            String requestLine = lines.get(0);
-            String uriPath = requestLine.split(" ")[1];
-            String uri = uriPath.split("\\?")[0];
-
-            String responseBody = "Hello world!";
-            if (!uri.equals("/")) {
-                responseBody = readFile(uri);
-            }
+            Controller controller = Router.get(httpRequest.getUri());
+            String responseBody = handle(controller, httpRequest);
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -61,16 +51,28 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private String readFile(String uriPath) throws IOException {
+    private String handle(Controller controller, HttpRequest httpRequest) {
+        if (controller == null) {
+            return respondStaticFile(httpRequest.getUri());
+        }
+        return controller.handle(httpRequest);
+    }
+
+    private String respondStaticFile(String uriPath) {
         String[] paths = uriPath.split("/");
         String fileName = paths[paths.length - 1];
         URL resource = getClass().getClassLoader().getResource("static/" + fileName);
 
         if (resource == null) {
-            throw new FileNotFoundException();
+            throw new RuntimeException(); // 파일없음
         }
         Path path = new File(resource.getPath()).toPath();
-        return Files.readString(path);
+
+        try {
+            return Files.readString(path);
+        } catch (IOException e) {
+            return "파일 read 중 에러 발생";
+        }
     }
 
     private void close() {

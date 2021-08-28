@@ -4,17 +4,15 @@ public class StatusLine {
 
     private static final String PROTOCOL_VERSION = "HTTP/1.1";
 
-    private final int statusCode;
-    private final StatusMessage statusMessage;
+    private final ResponseStatus responseStatus;
 
-    public StatusLine(int statusCode) {
-        this.statusCode = statusCode;
-        this.statusMessage = StatusMessage.findByStatusCode(statusCode);
+    public StatusLine(ResponseStatus responseStatus) {
+        this.responseStatus = responseStatus;
     }
 
     @Override
     public String toString() {
         return String.join(" ",
-                PROTOCOL_VERSION, String.valueOf(statusCode), statusMessage.getValue()) + " ";
+                PROTOCOL_VERSION, responseStatus.getCodeAsString(), responseStatus.getMessage()) + " ";
     }
 }

@@ -3,6 +3,7 @@ package nextstep.jwp.controller;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestLine;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.ResponseStatus;
 import nextstep.jwp.staticresource.StaticResource;
 import nextstep.jwp.staticresource.StaticResourceFinder;
 import org.slf4j.Logger;
@@ -27,12 +28,12 @@ public abstract class AbstractController implements Controller {
         final RequestLine requestLine = request.getRequestLine();
         final String uri = requestLine.getUri();
         final StaticResource staticResource = staticResourceFinder.findStaticResource(uri + fileNameExtension);
-        response.assignStatusCode(200);
+        response.assignStatus(ResponseStatus.OK);
         response.addStaticResource(staticResource);
     }
 
     protected void assignRedirectToResponse(HttpResponse response, String locationHeader) {
-        response.assignStatusCode(302);
+        response.assignStatus(ResponseStatus.FOUND);
         response.assignLocationHeader(locationHeader);
     }
 }

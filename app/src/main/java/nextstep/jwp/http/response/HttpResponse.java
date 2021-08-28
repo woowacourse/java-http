@@ -17,8 +17,8 @@ public class HttpResponse {
         headers = new ResponseHeaders();
     }
 
-    public void assignStatusCode(int statusCode) {
-        statusLine = new StatusLine(statusCode);
+    public void assignStatus(ResponseStatus responseStatus) {
+        statusLine = new StatusLine(responseStatus);
     }
 
     public void addStaticResource(StaticResource staticResource) {

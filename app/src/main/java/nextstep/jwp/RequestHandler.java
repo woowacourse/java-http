@@ -9,6 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,12 +42,35 @@ public class RequestHandler implements Runnable {
             while (bufferedReader.ready()) {
                 request.add(bufferedReader.readLine());
             }
-            String requestURI = "static" + request.get(0).split(" ")[1];
+            String requestURI = request.get(0).split(" ")[1];
+            String path;
+            URL resource = null;
+            if (requestURI.contains(".")) {
+                path = "static" + requestURI;
+                resource = getClass().getClassLoader().getResource(path);
+            }
+            if (!requestURI.contains(".") && !requestURI.contains("?")) {
+                path = "static" + requestURI + ".html";
+                resource = getClass().getClassLoader().getResource(path);
+            }
 
-            URL resource = getClass().getClassLoader().getResource(requestURI);
+            if (requestURI.contains("?")) {
+                int index = requestURI.indexOf("?");
+                path = requestURI.substring(0, index);
+                String queryString = requestURI.substring(index + 1);
 
-            final Path path = new File(resource.getFile()).toPath();
-            final String responseBody = Files.readString(path);
+                String[] queries = queryString.split("&");
+                List<String> values = new ArrayList<>();
+                for (String query : queries) {
+                    values.add(query.split("=")[1]);
+                }
+                User user = InMemoryUserRepository.findByAccount(values.get(0)).orElseThrow();
+                log.debug("account : {}, checkPassword : {}", user.getAccount(), user.checkPassword(values.get(1)));
+            }
+
+
+            final Path filePath = new File(resource.getFile()).toPath();
+            final String responseBody = Files.readString(filePath);
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

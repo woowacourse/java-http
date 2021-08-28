@@ -60,16 +60,12 @@ public class RequestLine {
         return params;
     }
 
-    public HttpMethod getMethod() {
-        return method;
-    }
-
     public String getPath() {
         return path;
     }
 
-    public Map<String, String> getQueryParams() {
-        return queryParams;
+    public String getQueryParams(String key) {
+        return queryParams.get(key);
     }
 
     public String getProtocol() {

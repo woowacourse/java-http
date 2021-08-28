@@ -14,10 +14,6 @@ public class RequestHeaders {
         this.headers.put(tokens[0], tokens[1]);
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-
     public int getContentLength() {
         String contentLength = headers.get("Content-Length");
         if (Strings.isNullOrEmpty(contentLength)) {

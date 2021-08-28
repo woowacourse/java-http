@@ -2,18 +2,16 @@ package nextstep.jwp.framework.http;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import nextstep.jwp.framework.util.MultiValueMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class HttpHeaders {
-    private final MultiValueMap<String, String> headers;
+    private final ConcurrentLinkedQueue<HttpHeader> headers;
 
     public HttpHeaders() {
-        this(new MultiValueMap<>());
+        this(new ConcurrentLinkedQueue<>());
     }
 
-    public HttpHeaders(MultiValueMap<String, String> headers) {
+    public HttpHeaders(ConcurrentLinkedQueue<HttpHeader> headers) {
         this.headers = headers;
     }
 
@@ -22,11 +20,15 @@ public class HttpHeaders {
     }
 
     public HttpHeaders addHeader(String name, List<String> values) {
-        final List<String> valuesWithoutWhitespace = values.stream()
-                                                           .map(String::trim)
-                                                           .collect(Collectors.toList());
-
-        headers.addAll(HttpHeader.resolve(name), valuesWithoutWhitespace);
+        headers.add(new HttpHeader(name, values));
         return this;
+    }
+
+    public HttpHeader poll() {
+        return headers.poll();
+    }
+
+    public boolean isEmpty() {
+        return headers.isEmpty();
     }
 }

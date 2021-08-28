@@ -1,50 +1,47 @@
 package nextstep.jwp.framework.http;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-public enum HttpHeader {
+public class HttpHeader {
 
     // General Header
-    CONNECTION("Connection"),
-    DATE("Date"),
+    public static final String CONNECTION = "Connection";
+    public static final String DATE = "Date";
 
     // Request Header
-    AUTHORIZATION("Authorization"),
-    COOKIE("Cookie"),
-    USER_AGENT("User-Agent"),
-    HOST("Host"),
-    REFERER("Referer"),
-    ORIGIN("Origin"),
+    public static final String AUTHORIZATION = "Authorization";
+    public static final String COOKIE = "Cookie";
+    public static final String USER_AGENT = "User-Agent";
+    public static final String HOST = "Host";
+    public static final String REFERER = "Referer";
+    public static final String ORIGIN = "Origin";
 
     // Entity Header,
-    CONTENT_LENGTH("Content-Length"),
-    CONTENT_TYPE("Content-Type"),
+    public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String CONTENT_TYPE = "Content-Type";
 
     // Response Header,
-    LOCATION("Location"),
-    SERVER("Server"),
-    SET_COOKIE("Set-Cookie");
-
-    private static final Map<String, String> HEADER_MAP = new HashMap<>();
-
-    static {
-        for (HttpHeader httpHeader : values()) {
-            HEADER_MAP.put(httpHeader.name(), httpHeader.headerName);
-        }
-    }
+    public static final String LOCATION = "Location";
+    public static final String SERVER = "Server";
+    public static final String SET_COOKIE = "Set-Cookie";
 
     private final String headerName;
+    private final List<String> values;
 
-    HttpHeader(String headerName) {
-        this.headerName = headerName;
+    public HttpHeader(String headerName, String... values) {
+        this(headerName, Arrays.asList(values));
     }
 
-    public static String resolve(String headerName) {
-        return HEADER_MAP.getOrDefault(headerName.toUpperCase(), headerName);
+    public HttpHeader(String headerName, List<String> values) {
+        this.headerName = headerName;
+        this.values = values;
     }
 
     public String getHeaderName() {
         return headerName;
+    }
+
+    public String getJoinedValue() {
+        return String.join(", ", values);
     }
 }

@@ -29,4 +29,8 @@ public enum HttpVersion {
         }
         return httpVersion;
     }
+
+    public String getVersion() {
+        return version;
+    }
 }

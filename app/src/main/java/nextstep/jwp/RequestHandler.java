@@ -1,13 +1,16 @@
 package nextstep.jwp;
 
+import java.io.*;
+import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
-import java.util.Objects;
 
 public class RequestHandler implements Runnable {
 
@@ -26,14 +29,34 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final String responseBody = "Hello world!";
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+            String firstLine = bufferedReader.readLine();
+            String requestUri = firstLine.split(" ")[1];
+
+            while (bufferedReader.ready()) {
+                String line = bufferedReader.readLine();
+                if (line == null) {
+                    return;
+                }
+                System.out.println(line);
+            }
+
+            final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
+            final Path path = new File(resource.getPath()).toPath();
+            final List<String> lines = Files.readAllLines(path);
+
+            String result = lines.stream()
+                                 .map(String::valueOf)
+                                 .collect(Collectors.joining());
+
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "Content-Length: " + result.getBytes().length + " ",
                     "",
-                    responseBody);
+                    result);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

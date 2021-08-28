@@ -15,7 +15,7 @@ public class LoginController implements Controller {
         this.staticResourceService = staticResourceService;
     }
 
-    public HttpResponse doGet(HttpRequest httpRequest) throws IOException {
+    private HttpResponse doGet(HttpRequest httpRequest) throws IOException {
         StaticResource staticResource = staticResourceService.findByPathWithExtension(
             httpRequest.getUri(), ".html");
 

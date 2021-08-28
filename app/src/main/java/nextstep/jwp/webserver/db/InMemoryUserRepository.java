@@ -1,10 +1,10 @@
-package nextstep.jwp.db;
+package nextstep.jwp.webserver.db;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import nextstep.jwp.model.User;
+import nextstep.jwp.webserver.model.User;
 
 public class InMemoryUserRepository {
 

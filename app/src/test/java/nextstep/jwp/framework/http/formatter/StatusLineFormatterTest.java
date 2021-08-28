@@ -8,7 +8,7 @@ import nextstep.jwp.framework.http.HttpStatus;
 import nextstep.jwp.framework.http.HttpVersion;
 import nextstep.jwp.framework.http.StatusLine;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class StatusLineFormatterTest {
 

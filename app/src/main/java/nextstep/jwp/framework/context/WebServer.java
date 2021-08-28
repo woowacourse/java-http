@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.framework.context;
 
 import java.io.IOException;
 import java.net.ServerSocket;

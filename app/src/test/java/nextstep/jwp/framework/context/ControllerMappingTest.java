@@ -7,7 +7,6 @@ import nextstep.jwp.framework.http.HttpMethod;
 import nextstep.jwp.framework.http.HttpRequest;
 import nextstep.jwp.framework.http.HttpVersion;
 import nextstep.jwp.framework.http.RequestLine;
-import nextstep.jwp.webserver.controller.Controller;
 import nextstep.jwp.webserver.controller.ErrorController;
 import nextstep.jwp.webserver.controller.WelcomePageController;
 

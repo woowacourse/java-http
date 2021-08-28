@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import nextstep.jwp.framework.http.HttpRequest;
-import nextstep.jwp.webserver.controller.Controller;
 import nextstep.jwp.webserver.controller.ErrorController;
 import nextstep.jwp.webserver.controller.IndexPageController;
 import nextstep.jwp.webserver.controller.WelcomePageController;

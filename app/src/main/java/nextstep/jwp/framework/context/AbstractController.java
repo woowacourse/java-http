@@ -1,4 +1,4 @@
-package nextstep.jwp.webserver.controller;
+package nextstep.jwp.framework.context;
 
 import java.util.EnumSet;
 

@@ -72,9 +72,13 @@ public class RequestHandler implements Runnable {
 
             if ("/register".equals(extractedUri)) {
                 if ("POST".equals(extractedMethod)) {
-                    final String requestBody = extractRequestBody(bufferedReader, httpRequestHeaders);
-                    registerRequest(requestBody);
-                    writeOutputStream(outputStream, http302Response("/index.html"));
+                    try {
+                        final String requestBody = extractRequestBody(bufferedReader, httpRequestHeaders);
+                        registerRequest(requestBody);
+                        writeOutputStream(outputStream, http302Response("/index.html"));
+                    } catch (RuntimeException exception) {
+                        writeOutputStream(outputStream, http302Response("/401.html"));
+                    }
                     return;
                 }
                 writeOutputStream(outputStream, httpHtmlResponse(STATIC_PATH, extractedUri));

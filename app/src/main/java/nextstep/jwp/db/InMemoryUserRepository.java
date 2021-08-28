@@ -25,9 +25,18 @@ public class InMemoryUserRepository {
     }
 
     public static void save(User user) {
+        validateExist(user);
+
         User persistUser = createNewObject(user);
         DATABASE.put(persistUser.getAccount(), persistUser);
         LOG.info("유저 저장됨: {}", persistUser);
+    }
+
+    private static void validateExist(User user) {
+        if (DATABASE.containsKey(user.getAccount())) {
+            LOG.info("이미 존재하는 사용자입니다. 입력 값: {}", user.getAccount());
+            throw new IllegalStateException(String.format("이미 존재하는 사용자입니다. 입력 값: %s", user.getAccount()));
+        }
     }
 
     public static Optional<User> findByAccount(String account) {

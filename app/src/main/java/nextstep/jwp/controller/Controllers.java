@@ -24,8 +24,8 @@ public class Controllers {
         Controller staticResourceController = new StaticResourceController(staticResourceService);
 
         Controller loginController = new LoginController(staticResourceService);
-
-        List<Controller> controllers = Arrays.asList(loginController);
+        Controller registerController = new RegisterController(staticResourceService);
+        List<Controller> controllers = Arrays.asList(loginController, registerController);
 
         return new Controllers(controllers, staticResourceController);
     }

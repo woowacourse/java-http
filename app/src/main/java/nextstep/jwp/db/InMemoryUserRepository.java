@@ -20,16 +20,12 @@ public class InMemoryUserRepository {
     }
 
     public static void save(User user) {
-        User newUser = new User(database.size() + 1, user.getAccount(), user.getPassword(), user.getEmail());
-        database.put(newUser.getAccount(), newUser);
+        User saveUser = new User((long) database.size() + 1, user.getAccount(), user.getPassword(), user.getEmail());
+        database.put(saveUser.getAccount(), saveUser);
     }
 
     public static Optional<User> findByAccount(String account) {
         return Optional.ofNullable(database.get(account));
-    }
-
-    public static int countIds() {
-        return database.size();
     }
 
     public static boolean existUserByAccountAndPassword(String account, String password) {

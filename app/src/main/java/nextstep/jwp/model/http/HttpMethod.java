@@ -1,6 +1,6 @@
 package nextstep.jwp.model.http;
 
-public enum HTTPMethod {
+public enum HttpMethod {
     GET,
     POST;
 

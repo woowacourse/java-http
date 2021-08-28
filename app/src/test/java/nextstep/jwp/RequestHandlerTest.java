@@ -1,14 +1,11 @@
 package nextstep.jwp;
 
+import nextstep.jwp.util.FileUtils;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 
-import static nextstep.jwp.model.http.HTTPMethod.GET;
+import static nextstep.jwp.model.http.HttpMethod.GET;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestHandlerTest {
@@ -50,8 +47,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String body = FileUtils.getAllResponseBodies("/index.html");
         String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5352 \r\n" +

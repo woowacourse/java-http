@@ -23,7 +23,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        response.forwardWithBody("/login.html");
+        response.forward("/login.html");
     }
 }
 

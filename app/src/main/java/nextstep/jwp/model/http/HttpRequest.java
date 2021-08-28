@@ -13,11 +13,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static nextstep.jwp.model.http.HttpHeaderType.CONTENT_LENGTH;
+
 public class HttpRequest {
     private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
     private final RequestLine requestLine;
-    private final HttpRequestHeaders headers;
+    private final HttpHeaders headers;
     private Map<String, String> params = new HashMap<>();
 
     public HttpRequest(InputStream inputStream) throws IOException {
@@ -26,7 +28,7 @@ public class HttpRequest {
 
         requestLine = new RequestLine(line);
 
-        headers = new HttpRequestHeaders();
+        headers = new HttpHeaders();
         while (!Objects.equals(line, "")) {
             line = br.readLine();
             if (Objects.nonNull(line) && !line.isBlank()) {
@@ -37,7 +39,7 @@ public class HttpRequest {
         }
 
         if (getMethod().isPost()) {
-            String contentLength = headers.get("Content-Length");
+            String contentLength = headers.getHeader(CONTENT_LENGTH);
             if (Objects.isNull(contentLength)) {
                 return;
             }
@@ -52,23 +54,19 @@ public class HttpRequest {
         params = requestLine.getParams();
     }
 
-    public Map<String, String> getParams() {
-        return params;
-    }
-
     public String getPath() {
         return requestLine.getPath();
     }
 
-    public HTTPMethod getMethod() {
+    public HttpMethod getMethod() {
         return requestLine.getMethod();
     }
 
     public String getParameter(String param) {
-        return getParams().get(param);
+        return params.get(param);
     }
 
-    public HttpRequestHeaders getHeaders() {
-        return headers;
+    public Map<String, String> getHeaders() {
+        return headers.getHeaders();
     }
 }

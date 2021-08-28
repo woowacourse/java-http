@@ -4,6 +4,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.model.http.HttpRequest;
 import nextstep.jwp.model.http.HttpResponse;
+import nextstep.jwp.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        response.forwardWithBody("/register.html");
+        response.forwardBody(FileUtils.getAllResponseBodies("/register.html"));
     }
 
     @Override

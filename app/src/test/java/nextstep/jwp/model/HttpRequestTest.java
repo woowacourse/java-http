@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import static nextstep.jwp.model.http.HTTPMethod.GET;
+import static nextstep.jwp.model.http.HttpMethod.GET;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpRequestTest {
@@ -18,6 +18,7 @@ class HttpRequestTest {
 
         assertThat(httpRequest.getMethod()).isEqualTo(GET);
         assertThat(httpRequest.getPath()).isEqualTo("/index.html");
+        assertThat(httpRequest.getHeaders().size()).isNotNegative();
     }
 
     @Test
@@ -26,6 +27,7 @@ class HttpRequestTest {
 
         assertThat(request.getMethod()).isEqualTo(GET);
         assertThat(request.getPath()).isEqualTo("/login");
+        assertThat(request.getHeaders().size()).isNotNegative();
     }
 
     @Test
@@ -34,6 +36,7 @@ class HttpRequestTest {
 
         assertThat(request.getMethod()).isEqualTo(GET);
         assertThat(request.getPath()).isEqualTo("/css/styles.css");
+        assertThat(request.getHeaders().size()).isNotNegative();
     }
 
     private HttpRequest readRequest(String url) throws IOException {

@@ -1,0 +1,27 @@
+package nextstep.jwp.model.http;
+
+import java.util.Arrays;
+
+public enum HttpHeaderType {
+    PROTOCOL("HTTP/1.1"),
+    LOCATION("Location"),
+    CONTENT_TYPE(MediaType.NAME),
+    CONTENT_LENGTH("Content-Length");
+
+    private final String value;
+
+    HttpHeaderType(String value) {
+        this.value = value;
+    }
+
+    public String value() {
+        return value;
+    }
+
+    public static HttpHeaderType of(String value) {
+        return Arrays.stream(values())
+                .filter(headerType -> headerType.value.equals(value))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("해당 헤더 타입이 존재하지 않습니다."));
+    }
+}

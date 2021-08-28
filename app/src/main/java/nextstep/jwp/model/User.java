@@ -5,10 +5,10 @@ import nextstep.jwp.exception.UnAuthorizedException;
 
 public class User {
 
-    private Long id;
     private final String account;
     private final String password;
     private final String email;
+    private Long id;
 
     public User(Long id, String account, String password, String email) {
         this.id = id;

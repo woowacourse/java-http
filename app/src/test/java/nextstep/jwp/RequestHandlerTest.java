@@ -161,6 +161,7 @@ class RequestHandlerTest {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/css ",
+                "Content-Length: 211991 ",
                 "",
                 "");
     }

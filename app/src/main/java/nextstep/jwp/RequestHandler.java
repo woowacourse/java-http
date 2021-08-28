@@ -49,6 +49,7 @@ public class RequestHandler implements Runnable {
 
             if (extractedUri.endsWith(".html")) {
                 writeOutputStream(outputStream, httpHtmlResponse(STATIC_PATH, extractedUri));
+                return;
             }
 
             if (extractedUri.endsWith(".css") || extractedUri.endsWith(".js")) {
@@ -158,6 +159,28 @@ public class RequestHandler implements Runnable {
         outputStream.flush();
     }
 
+    private String httpHtmlResponse(String resourcesPath, String targetUri) {
+        if (!targetUri.contains(".html")) {
+            targetUri = targetUri.concat(".html");
+        }
+        return http200Message(responseBodyByURLPath(resourcesPath, targetUri));
+    }
+
+    private String httpCssResponse(String resourcesPath, String targetUri) {
+        return httpCssMessage(responseBodyByURLPath(resourcesPath, targetUri));
+    }
+
+    private String responseBodyByURLPath(String resourcesPath, String targetUri) {
+        try {
+            final URL url = getClass().getClassLoader().getResource(resourcesPath + targetUri);
+            return Files.readString(new File(url.getFile()).toPath());
+        } catch (IOException exception) {
+            LOG.info("리소스를 가져오려는 url이 존재하지 않습니다. 입력값: {}", resourcesPath + targetUri);
+            throw new IllegalStateException(String.format("리소스를 가져오려는 url이 존재하지 않습니다. 입력값: %s",
+                    resourcesPath + targetUri));
+        }
+    }
+
     private String http200Message(String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -180,28 +203,6 @@ public class RequestHandler implements Runnable {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Location: http://localhost:8080" + redirectUrl);
-    }
-
-    private String httpHtmlResponse(String resourcesPath, String targetUri) {
-        if (!targetUri.contains(".html")) {
-            targetUri = targetUri.concat(".html");
-        }
-        return http200Message(responseBodyByURLPath(resourcesPath, targetUri));
-    }
-
-    private String httpCssResponse(String resourcesPath, String targetUri) {
-        return httpCssMessage(responseBodyByURLPath(resourcesPath, targetUri));
-    }
-
-    private String responseBodyByURLPath(String resourcesPath, String targetUri) {
-        try {
-            final URL url = getClass().getClassLoader().getResource(resourcesPath + targetUri);
-            return Files.readString(new File(url.getFile()).toPath());
-        } catch (IOException exception) {
-            LOG.info("리소스를 가져오려는 url이 존재하지 않습니다. 입력값: {}", resourcesPath + targetUri);
-            throw new IllegalStateException(String.format("리소스를 가져오려는 url이 존재하지 않습니다. 입력값: %s",
-                    resourcesPath + targetUri));
-        }
     }
 
     private void close() {

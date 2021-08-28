@@ -22,8 +22,7 @@ class RequestHandlerTest {
         final MockSocket socket = new MockSocket();
         final RequestHandler requestHandler = new RequestHandler(socket);
 
-        final String expectResponseBody = "Hello world!";
-        String expected = toHttp200TextHtmlResponse(expectResponseBody);
+        String expected = toHttp200TextHtmlResponse("Hello world!");
         // when
         requestHandler.run();
         final String actual = socket.output();
@@ -39,8 +38,7 @@ class RequestHandlerTest {
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
-        final String expectResponseBody = "Hello world!";
-        String expected = toHttp200TextHtmlResponse(expectResponseBody);
+        String expected = toHttp200TextHtmlResponse("Hello world!");
         // when
         requestHandler.run();
         final String actual = socket.output();
@@ -68,9 +66,9 @@ class RequestHandlerTest {
 
     static private Stream<Arguments> Post_요청에_대해_응답한다() {
         return Stream.of(
-              Arguments.of("/login", "account=gugu&password=password", "/index.html"),
-              Arguments.of("/login", "account=gugu&password=passwor", "/401.html"),
-              Arguments.of("/login", "account=ggu&password=password", "/401.html")
+                Arguments.of("/login", "account=gugu&password=password", "/index.html"),
+                Arguments.of("/login", "account=gugu&password=passwor", "/401.html"),
+                Arguments.of("/login", "account=ggu&password=password", "/401.html")
         );
     }
 
@@ -99,8 +97,7 @@ class RequestHandlerTest {
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
-        final String redirectUrl = "/index.html";
-        String expected = toHttp302Response(redirectUrl);
+        String expected = toHttp302Response( "/index.html");
         // when
         requestHandler.run();
         final String actual = socket.output();
@@ -166,14 +163,5 @@ class RequestHandlerTest {
                 "Content-Type: text/css ",
                 "",
                 "");
-    }
-
-    private String toHttp401Response(String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 401 Unauthorized ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
     }
 }

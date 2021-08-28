@@ -80,4 +80,8 @@ public class HttpPath {
     public boolean isNotExistFile() {
         return Objects.isNull(getClass().getClassLoader().getResource(RESOURCE_PATH + path));
     }
+
+    public String getPath() {
+        return path;
+    }
 }

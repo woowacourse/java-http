@@ -19,7 +19,7 @@ public class HttpRequestLine {
             return HttpPath.notFound();
         }
 
-        if (httpStatus == HttpStatus.FOUND) {
+        if (httpStatus == HttpStatus.FOUND || httpStatus == HttpStatus.CREATED) {
             return HttpPath.index();
         }
 

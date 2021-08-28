@@ -1,11 +1,13 @@
 package nextstep.jwp;
 
+import java.util.Objects;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestLine;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.mapper.ControllerMapper;
 import nextstep.jwp.mapper.HandlerMapper;
 import nextstep.jwp.mapper.ResourceMapper;
+import nextstep.jwp.handler.ModelAndView;
 import nextstep.jwp.view.View;
 import nextstep.jwp.view.ViewResolver;
 
@@ -21,14 +23,17 @@ public class Executor {
 
     public HttpResponse service(RequestLine requestLine) {
         // TODO :: HandlerMapper로 한번에 처리
-        View view = controllerMapper.mapping(requestLine);
-        if(view.isEmpty()){
-            view = resourceMapper.mapping(requestLine);
+        ModelAndView modelAndView = controllerMapper.mapping(requestLine);
+
+        if(Objects.isNull(modelAndView)){
+            modelAndView = resourceMapper.mapping(requestLine);
         }
 
-        if(view.isEmpty()){
+        if(Objects.isNull(modelAndView)){
             throw new IllegalArgumentException("Bad request");
         }
-        return HttpResponse.ok(viewResolver.resolve(view));
+
+        View view = viewResolver.resolve(modelAndView.getViewName());
+        return view.render(modelAndView.getModel());
     }
 }

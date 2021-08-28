@@ -31,10 +31,21 @@ public class HttpResponse {
         String statusLine = "HTTP/1.1 200 OK ";
         List<String> headers = Arrays.asList(
                 "Content-Type: text/html;charset=utf-8 ",
+                "Location: /index.html ",
                 "Content-Length: " + messageBody.getBytes().length + " ",
                 ""
         );
         return new HttpResponse(statusLine, headers, messageBody);
+    }
+
+    public static HttpResponse redirect(String path){
+        String statusLine = "HTTP/1.1 302 Found ";
+        List<String> headers = Arrays.asList(
+                "Content-Type: text/html;charset=utf-8 ",
+                "Location: "+path+" ",
+                ""
+        );
+        return new HttpResponse(statusLine, headers, "");
     }
 
     public static HttpResponse error(String messageBody){
@@ -47,9 +58,19 @@ public class HttpResponse {
         return new HttpResponse(statusLine, headers, messageBody);
     }
 
+    public static HttpResponse unauthorized(String messageBody){
+        String statusLine = "HTTP/1.1 401 Unauthorized ";
+        List<String> headers = Arrays.asList(
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + messageBody.getBytes().length + " ",
+                ""
+        );
+        return new HttpResponse(statusLine, headers, messageBody);
+    }
+
     public byte[] responseAsBytes(){
         return String.join("\r\n",
-                this.statusLine,
+                statusLine,
                 String.join("\r\n", headers),
                 messageBody).getBytes();
     }

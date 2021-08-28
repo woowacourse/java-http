@@ -2,6 +2,8 @@ package nextstep.jwp.http.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -44,7 +46,10 @@ public class HttpRequest {
         return null;
     }
 
-    public static HttpRequest of(BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest of(InputStream inputStream) throws IOException {
+        final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+        final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
         final List<String> lines = new ArrayList<>();
 
         String tempLine;

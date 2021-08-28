@@ -1,13 +1,10 @@
 package nextstep.jwp;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
-
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import org.slf4j.Logger;
@@ -33,10 +30,8 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
                 final OutputStream outputStream = connection.getOutputStream()) {
 
-            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-            final HttpResponse httpResponse = executor.service(HttpRequest.of(bufferedReader));
+            final HttpRequest httpRequest = HttpRequest.of(inputStream);
+            final HttpResponse httpResponse = executor.service(httpRequest);
 
             outputStream.write(httpResponse.responseAsBytes());
             outputStream.flush();

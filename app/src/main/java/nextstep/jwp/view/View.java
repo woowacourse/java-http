@@ -1,33 +1,36 @@
 package nextstep.jwp.view;
 
+import nextstep.jwp.handler.Model;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpStatus;
+
 public class View {
 
-    private final String path;
-    private final boolean empty;
+    private final String content;
 
-    private View() {
-        path = "";
-        empty = true;
+    public View(String content) {
+        this.content = content;
     }
 
-    public View(String path) {
-        this.path = path;
-        this.empty = false;
+    public static View of(String content) {
+        return new View(content);
     }
 
-    public static View of(String path){
-        return new View(path);
-    }
+    public HttpResponse render(Model model) {
+        HttpStatus httpStatus = model.getHttpStatus();
 
-    public static View empty() {
-        return new View();
-    }
+        if (httpStatus.isOK()) {
+            return HttpResponse.ok(content);
+        }
 
-    public String getPath() {
-        return path;
-    }
+        if (httpStatus.isFound()) {
+            return HttpResponse.redirect(model.getLocation());
+        }
 
-    public boolean isEmpty() {
-        return empty;
+        if (httpStatus.isUnauthorized()) {
+            return HttpResponse.unauthorized(content);
+        }
+
+        throw new IllegalArgumentException();
     }
 }

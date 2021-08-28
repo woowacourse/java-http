@@ -101,9 +101,9 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
         final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        final String expected = "HTTP/1.1 200 OK \r\n" +
+        final String expected = "HTTP/1.1 302 Found \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: "+body.getBytes().length+" \r\n" +
                 "\r\n"+

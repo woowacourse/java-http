@@ -5,9 +5,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractHandler implements Handler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHandler.class);
     protected static final String GET = "GET";
     protected static final String HTML = "html";
     protected static final String CSS = "css";
@@ -37,8 +40,13 @@ public abstract class AbstractHandler implements Handler {
     }
 
     protected String fileByPath(String requestPath) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static" + requestPath);
-        final Path path = new File(resource.getPath()).toPath();
-        return new String(Files.readAllBytes(path));
+        try {
+            final URL resource = getClass().getClassLoader().getResource("static" + requestPath);
+            final Path path = new File(resource.getPath()).toPath();
+            return new String(Files.readAllBytes(path));
+        } catch (NullPointerException exception) {
+            LOGGER.error("File not found error", exception);
+            throw new IOException();
+        }
     }
 }

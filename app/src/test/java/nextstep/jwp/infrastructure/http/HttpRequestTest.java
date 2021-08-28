@@ -17,23 +17,28 @@ class HttpRequestTest {
     @Test
     void of() {
         final List<String> httpRequest = Arrays.asList(
-            "GET /index.html HTTP/1.1",
+            "POST /register HTTP/1.1",
             "Host: localhost:8080",
             "Connection: keep-alive",
-            "Accept: */*"
+            "Content-Length: 80",
+            "Content-Type: application/x-www-form-urlencoded",
+            "Accept: */*",
+            "",
+            "account=gugu&password=password&email=hkkang%40woowahan.com"
         );
 
         final HttpRequest request = HttpRequest.of(httpRequest);
         final HttpRequestLine requestLine = request.getRequestLine();
         final HttpHeaders headers = request.getHeaders();
 
-        assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.GET);
-        assertThat(requestLine.getUri().getBaseUri()).isEqualTo("/index.html");
+        assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.POST);
+        assertThat(requestLine.getUri().getBaseUri()).isEqualTo("/register");
         assertThat(requestLine.getHttpVersion()).isEqualTo("HTTP/1.1");
         assertThat(headers.getValue("Host")).hasSize(1).hasSameElementsAs(Collections.singletonList("localhost:8080"));
         assertThat(headers.getValue("Connection")).hasSize(1).hasSameElementsAs(Collections.singletonList("keep-alive"));
+        assertThat(headers.getValue("Content-Length")).hasSize(1).hasSameElementsAs(Collections.singletonList("80"));
+        assertThat(headers.getValue("Content-Type")).hasSize(1).hasSameElementsAs(Collections.singletonList("application/x-www-form-urlencoded"));
         assertThat(headers.getValue("Accept")).hasSize(1).hasSameElementsAs(Collections.singletonList("*/*"));
-        assertThat(request.getMessageBody()).isEqualTo("");
-
+        assertThat(request.getMessageBody()).isEqualTo("account=gugu&password=password&email=hkkang%40woowahan.com");
     }
 }

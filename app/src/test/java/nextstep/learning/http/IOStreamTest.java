@@ -54,9 +54,6 @@ class IOStreamTest {
             byte[] bytes = {110, 101, 120, 116, 115, 116, 101, 112};
             final OutputStream outputStream = new ByteArrayOutputStream(bytes.length);
 
-            ServerSocket serverSocket = new ServerSocket(9000);
-            Socket socket = serverSocket.accept();
-
             outputStream.write(bytes, 0, bytes.length);
 
             final String actual = outputStream.toString();

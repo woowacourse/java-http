@@ -7,15 +7,16 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class HttpHeaders {
 
     private static final String KEY_DELIMITER = ": ";
     private static final String VALUE_DELIMITER = ", ";
-    private static final int SPLIT_HEADER_SIZE = 2;
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final int SPLIT_HEADER_SIZE = 2;
     private final Map<String, List<String>> elements;
 
     public HttpHeaders(final Map<String, List<String>> elements) {
@@ -53,6 +54,23 @@ public class HttpHeaders {
         return elements.keySet().stream()
             .map(key -> String.format("%s%s%s ", key, KEY_DELIMITER, String.join(VALUE_DELIMITER, elements.get(key))))
             .collect(Collectors.joining("\r\n"));
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final HttpHeaders headers = (HttpHeaders) o;
+        return Objects.equals(elements, headers.elements);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(elements);
     }
 
     public static class Builder {

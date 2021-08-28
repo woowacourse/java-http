@@ -1,10 +1,10 @@
 package nextstep.jwp.model;
 
+import nextstep.jwp.MockSocket;
+import nextstep.jwp.RequestHandler;
 import nextstep.jwp.model.http.HttpRequest;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 
 import static nextstep.jwp.model.http.HttpMethod.GET;
@@ -14,17 +14,36 @@ class HttpRequestTest {
 
     @Test
     void request_GET_INDEXT() throws IOException {
-        HttpRequest httpRequest = readRequest("./src/test/resources/index.txt");
+        String value = String.join("\r\n",
+                GET + " /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
 
-        assertThat(httpRequest.getMethod()).isEqualTo(GET);
-        assertThat(httpRequest.getPath()).isEqualTo("/index.html");
-        assertThat(httpRequest.getHeaders().size()).isNotNegative();
+        MockSocket socket = new MockSocket(value);
+        RequestHandler requestHandler = new RequestHandler(socket);
+        requestHandler.run();
+
+        HttpRequest request = new HttpRequest(socket.getInputStream());
+        assertThat(request.getMethod()).isEqualTo(GET);
+        assertThat(request.getPath()).isEqualTo("/index.html");
+        assertThat(request.getHeaders().size()).isNotNegative();
     }
 
     @Test
     void request_GET_LOGIN() throws IOException {
-        HttpRequest request = readRequest("./src/test/resources/login.txt");
+        String value = String.join("\r\n",
+                GET + " /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        final MockSocket socket = new MockSocket(value);
+        final RequestHandler requestHandler = new RequestHandler(socket);
 
+        requestHandler.run();
+        HttpRequest request = new HttpRequest(socket.getInputStream());
         assertThat(request.getMethod()).isEqualTo(GET);
         assertThat(request.getPath()).isEqualTo("/login");
         assertThat(request.getHeaders().size()).isNotNegative();
@@ -32,16 +51,21 @@ class HttpRequestTest {
 
     @Test
     void request_CSS() throws IOException {
-        HttpRequest request = readRequest("./src/test/resources/css.txt");
+        String value = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/css ",
+                "",
+                "Hello world!");
+        final MockSocket socket = new MockSocket(value);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        requestHandler.run();
+        HttpRequest request = new HttpRequest(socket.getInputStream());
+        socket.close();
 
         assertThat(request.getMethod()).isEqualTo(GET);
         assertThat(request.getPath()).isEqualTo("/css/styles.css");
         assertThat(request.getHeaders().size()).isNotNegative();
-    }
-
-    private HttpRequest readRequest(String url) throws IOException {
-        File file = new File(url);
-        FileInputStream inputStream = new FileInputStream(file);
-        return new HttpRequest(inputStream);
     }
 }

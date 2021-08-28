@@ -3,7 +3,6 @@ package nextstep.jwp.model.http;
 import java.util.Arrays;
 
 public enum HttpHeaderType {
-    PROTOCOL("HTTP/1.1"),
     LOCATION("Location"),
     CONTENT_TYPE(MediaType.NAME),
     CONTENT_LENGTH("Content-Length");

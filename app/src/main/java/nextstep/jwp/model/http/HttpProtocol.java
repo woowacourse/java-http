@@ -14,6 +14,6 @@ public enum HttpProtocol {
     }
 
     public String getProtocol() {
-        return httpStatus + " " + message;
+        return NAME + " " + httpStatus + " " + message;
     }
 }

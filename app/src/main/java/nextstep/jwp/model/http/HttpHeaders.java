@@ -26,7 +26,7 @@ public class HttpHeaders {
 
     public String getAllHeaders() {
         StringJoiner stringJoiner = new StringJoiner("\r\n");
-        stringJoiner.add(HttpProtocol.NAME + " " + protocol.getProtocol() + " ");
+        stringJoiner.add(protocol.getProtocol() + " ");
         addAllHeaders(stringJoiner);
         return stringJoiner.toString();
     }

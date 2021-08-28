@@ -1,4 +1,4 @@
-package nextstep.jwp.framework;
+package nextstep.jwp.framework.http;
 
 public enum HttpStatus {
 

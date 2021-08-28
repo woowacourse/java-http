@@ -1,5 +1,6 @@
 package nextstep.jwp;
 
+import nextstep.jwp.framework.RequestHandler;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

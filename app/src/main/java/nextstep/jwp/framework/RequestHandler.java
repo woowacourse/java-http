@@ -1,11 +1,13 @@
-package nextstep.jwp;
+package nextstep.jwp.framework;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
-import nextstep.jwp.framework.WebHandler;
+import nextstep.jwp.framework.http.HttpRequest;
+import nextstep.jwp.framework.http.HttpResponse;
+import nextstep.jwp.framework.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,15 +27,20 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-            String response = WebHandler.run(inputStream);
+            final HttpRequest httpRequest = new HttpRequest(inputStream);
+            final HttpResponse httpResponse = httpRequest.toHttpResponse(HttpStatus.OK);
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            doOutputStream(outputStream, httpResponse);
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
         }
+    }
+
+    private void doOutputStream(final OutputStream outputStream, final HttpResponse response) throws IOException {
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 
     private void close() {

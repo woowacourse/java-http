@@ -1,6 +1,6 @@
-package nextstep.jwp.framework;
+package nextstep.jwp.framework.http;
 
-import static nextstep.jwp.framework.RequestHeader.DELIMITER;
+import static nextstep.jwp.framework.http.HttpRequest.DELIMITER;
 
 import java.util.Arrays;
 
@@ -34,5 +34,13 @@ public enum HttpMethod {
 
     public String getMethod() {
         return method;
+    }
+
+    public boolean isPost() {
+        return this.method.equals(POST.method);
+    }
+
+    public boolean isGet() {
+        return this.method.equals(GET.method);
     }
 }

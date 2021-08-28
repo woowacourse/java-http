@@ -37,7 +37,7 @@ public class RequestHandler implements Runnable {
             HttpRequest request = new HttpRequest(reader);
             HttpResponse response = new HttpResponse();
 
-            String uri = request.getUri();
+            String uri = request.getPath();
             Controller controller = controllerMap.getOrDefault(uri, new DefaultController());
             controller.process(request, response);
 

@@ -11,7 +11,7 @@ public class IndexController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        log.debug("HTTP GET Index Request: {}", request.getUri());
+        log.debug("HTTP GET Index Request: {}", request.getPath());
         response.forward("/index.html");
     }
 }

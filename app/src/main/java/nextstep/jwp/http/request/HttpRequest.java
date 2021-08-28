@@ -49,7 +49,7 @@ public class HttpRequest {
         return body.getParam(key);
     }
 
-    public String getUri() {
+    public String getPath() {
         return requestLine.getPath();
     }
 

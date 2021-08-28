@@ -13,13 +13,13 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        log.debug("HTTP GET Register Request: {}", request.getUri());
+        log.debug("HTTP GET Register Request: {}", request.getPath());
         response.forward("/register.html");
     }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        log.debug("HTTP POST Register Request: {}", request.getUri());
+        log.debug("HTTP POST Register Request: {}", request.getPath());
         User user = new User(request.getParameter("account"),
                 request.getParameter("password"),
                 request.getParameter("email"));

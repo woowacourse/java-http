@@ -2,12 +2,8 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class AbstractController implements Controller {
-
-    private static final Logger log = LoggerFactory.getLogger(AbstractController.class);
+public abstract class AbstractController implements Controller {
 
     @Override
     public void process(HttpRequest request, HttpResponse response) {

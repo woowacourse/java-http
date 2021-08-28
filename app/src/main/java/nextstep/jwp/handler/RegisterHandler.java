@@ -10,14 +10,14 @@ import nextstep.jwp.model.User;
 public class RegisterHandler extends AbstractHandler {
 
     @Override
-    public String message(Request request) throws IOException {
-        if (GET.equals(request.getRequestMethod())) {
-            return getMessage(request);
-        }
-        return postMessage(request);
+    public String getMessage(Request request) throws IOException {
+        RequestPath requestPath = request.getRequestPath();
+        final String responseBody = fileByPath(requestPath.path() + HTML_EXTENSION);
+        return staticFileMessage(HTML, responseBody);
     }
 
-    private String postMessage(Request request) {
+    @Override
+    public String postMessage(Request request) {
         Map<String, String> queries = request.getRequestBody().queries();
         String account = queries.get(ACCOUNT);
         String email = queries.get(EMAIL);
@@ -29,11 +29,5 @@ public class RegisterHandler extends AbstractHandler {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         return redirectMessage(FILE_INDEX_HTML);
-    }
-
-    private String getMessage(Request request) throws IOException {
-        RequestPath requestPath = request.getRequestPath();
-        final String responseBody = fileByPath(requestPath.path() + HTML_EXTENSION);
-        return staticFileMessage(HTML, responseBody);
     }
 }

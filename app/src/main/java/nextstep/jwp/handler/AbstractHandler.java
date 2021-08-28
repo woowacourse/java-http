@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import nextstep.jwp.model.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +22,19 @@ public abstract class AbstractHandler implements Handler {
     protected static final String FILE_401_HTML = "/401.html";
     protected static final String FILE_INDEX_HTML = "/index.html";
     protected static final String HTML_EXTENSION = ".html";
+
+    @Override
+    public String message(Request request) throws IOException {
+        if (GET.equals(request.getRequestMethod())) {
+            return getMessage(request);
+        }
+        return postMessage(request);
+    }
+
+    @Override
+    public String postMessage(Request request) {
+        throw new IllegalStateException();
+    }
 
     protected String staticFileMessage(String fileType, String responseBody) {
         return String.join("\r\n",

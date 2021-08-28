@@ -23,9 +23,14 @@ public class HttpRequestParser {
     }
 
     public HttpRequest parseRequest() throws IOException {
-        while (lineParser.canParse()) {
+        if (!bufferedReader.ready()) {
+            throw new IllegalArgumentException("Request 가 비어있습니다.");
+        }
+
+        while (lineParser.canParse() && bufferedReader.ready()) {
             lineParser = lineParser.parseLine(bufferedReader.readLine());
         }
+
         return lineParser.buildRequest();
     }
 }

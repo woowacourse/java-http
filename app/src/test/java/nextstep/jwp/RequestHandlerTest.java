@@ -1,5 +1,6 @@
 package nextstep.jwp;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -11,6 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestHandlerTest {
 
+    @DisplayName("GET / 요청 시 'Hello world!' 메시지를 응답한다.")
     @Test
     void run() {
         // given
@@ -30,6 +32,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("GET /index.html 요청 시 index.html를 응답한다.")
     @Test
     void index() throws IOException {
         // given

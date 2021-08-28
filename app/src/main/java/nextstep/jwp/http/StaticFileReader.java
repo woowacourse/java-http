@@ -33,7 +33,7 @@ public class StaticFileReader {
         try {
             return Files.readString(path);
         } catch (IOException e) {
-            throw new RuntimeException();
+            throw new CustomException("IOException");
         }
     }
 }

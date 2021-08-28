@@ -3,6 +3,7 @@ package nextstep.jwp.http;
 import java.util.Objects;
 
 public class ViewResolver {
+
     private boolean isExisting;
     private String staticFile;
 

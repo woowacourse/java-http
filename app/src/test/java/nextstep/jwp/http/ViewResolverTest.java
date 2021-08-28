@@ -7,9 +7,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class ViewResolverTest {
+
     @Test
     @DisplayName("HttpRequest로 요청한 값이 Static 폴더에 존재할 경우 true를 반환한다.")
-    public void isExisting() {
+    void isExisting() {
         // given
         String statusLine = "GET /login.html HTTP/1.1 ";
         HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);
@@ -24,7 +25,7 @@ class ViewResolverTest {
 
     @Test
     @DisplayName("HttpRequest로 요청한 값이 Static 폴더에 존재하지 않을 경우 true를 반환한다.")
-    public void isExisting_false() {
+    void isExisting_false() {
         // given
         String statusLine = "GET /aaaaa.html HTTP/1.1 ";
         HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);
@@ -39,7 +40,7 @@ class ViewResolverTest {
 
     @Test
     @DisplayName("HttpRequest로 요청한 값이 Static 폴더에 존재할 경우 200으로 응답한다.")
-    public void resolve_200() {
+    void resolve_200() {
         // given
         String statusLine = "GET /login.html HTTP/1.1 ";
         HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);
@@ -54,7 +55,7 @@ class ViewResolverTest {
 
     @Test
     @DisplayName("HttpRequest로 요청한 값이 Static 폴더에 존재하지 않을 경우 404로 응답한다.")
-    public void resolve_404() {
+    void resolve_404() {
         // given
         String statusLine = "GET /aaaa.html HTTP/1.1 ";
         HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);

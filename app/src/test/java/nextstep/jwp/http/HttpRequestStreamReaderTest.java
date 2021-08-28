@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestStreamReaderTest {
+
     @Test
     @DisplayName("getRequestLines()를 통해 inputStream을 바탕으로 Request를 읽어낸다.")
     void getRequestLines() throws IOException {
@@ -92,9 +93,9 @@ class HttpRequestStreamReaderTest {
         List<String> actual = reader.getHeaderLines();
 
         // then
-        assertThat(actual).hasSize(2);
-        assertThat(actual).contains(header1);
-        assertThat(actual).contains(header2);
+        assertThat(actual).hasSize(2)
+            .contains(header1)
+            .contains(header2);
     }
 
     @Test

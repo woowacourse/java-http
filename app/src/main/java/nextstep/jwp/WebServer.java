@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.stream.Stream;
+import nextstep.jwp.http.CustomException;
 import nextstep.jwp.http.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ public class WebServer {
             handle(serverSocket);
         } catch (IOException exception) {
             logger.error("Exception accepting connection", exception);
-        } catch (RuntimeException exception) {
+        } catch (CustomException exception) {
             logger.error("Unexpected error", exception);
         }
     }

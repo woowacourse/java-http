@@ -17,6 +17,9 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
+    private InMemoryUserRepository() {
+    }
+
     public static void save(User user) {
         if (user.isEmptyId()) {
             user.insertId(getNextCountValue());

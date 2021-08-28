@@ -19,12 +19,12 @@ public class HttpRequestStreamReader {
     private List<String> headerLines = new ArrayList<>();
     private String bodyLine;
 
-    public HttpRequestStreamReader(InputStream inputStream) throws IOException {
+    public HttpRequestStreamReader(InputStream inputStream) {
         try {
             this.inputStream = inputStream;
             read();
         } catch (IOException e) {
-            throw new RuntimeException("IOException");
+            throw new CustomException("IOException");
         }
     }
 
@@ -71,7 +71,7 @@ public class HttpRequestStreamReader {
         String[] split = contentLengthHeader.orElseGet(() -> "Content-Length: 0")
             .split(": ");
         if (split.length != 2) {
-            new RuntimeException("Header에 포함된 Content-Length의 값의 형태가 적절하지 않습니다.");
+            throw new CustomException("Header에 포함된 Content-Length의 값의 형태가 적절하지 않습니다.");
         }
         return Integer.parseInt(split[1]);
     }

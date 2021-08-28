@@ -9,7 +9,8 @@ import nextstep.jwp.http.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class HttpRequestTest {
+class HttpRequestTest {
+
     @Test
     @DisplayName("isEmptyLine()을 통해 해당 HttpRequest가 빈 값인지 확인한다.")
     void isEmptyLine() {
@@ -46,9 +47,9 @@ public class HttpRequestTest {
         Map<String, String> actual = httpRequest.extractURIQueryParams();
 
         // then
-        assertThat(actual.size()).isEqualTo(2);
-        actual.forEach((key, value) -> {
-            assertThat(actual.get(key)).isEqualTo(expected.get(key));
+        assertThat(actual).hasSize(2);
+        expected.forEach((key, value) -> {
+            assertThat(actual).containsEntry(key, value);
         });
     }
 
@@ -65,7 +66,7 @@ public class HttpRequestTest {
         Map<String, String> queryString = httpRequest.extractURIQueryParams();
 
         // then
-        assertThat(queryString.size()).isEqualTo(0);
+        assertThat(queryString).isEmpty();
     }
 
     @Test
@@ -126,8 +127,8 @@ public class HttpRequestTest {
         Map<String, String> actual = httpRequest.extractFormData();
 
         // then
-        actual.forEach((key, value) -> {
-            assertThat(expected.get(key)).isEqualTo(expected.get(key));
+        expected.forEach((key, value) -> {
+            assertThat(actual).containsEntry(key, value);
         });
     }
 }

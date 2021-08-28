@@ -16,8 +16,8 @@ public class HttpRequest {
     private static final String KEY_AND_VALUE_DELIMITER = "=";
 
     private final String statusLine;
-    private List<String> headerLines;
     private final String bodyLine;
+    private List<String> headerLines;
 
     public HttpRequest(String statusLine, List<String> headerLines, String bodyLine) {
         this.statusLine = statusLine;
@@ -26,12 +26,11 @@ public class HttpRequest {
     }
 
     public boolean isEmptyLine() {
-        return Objects.isNull(statusLine) && headerLines.size() == 0 && Objects.isNull(bodyLine);
+        return Objects.isNull(statusLine) && headerLines.isEmpty() && Objects.isNull(bodyLine);
     }
 
     public String extractURI() {
-        String requestURI = statusLine.split(BLANK_DELIMITER)[SECOND_WORD_INDEX];
-        return requestURI;
+        return statusLine.split(BLANK_DELIMITER)[SECOND_WORD_INDEX];
     }
 
     public Map<String, String> extractURIQueryParams() {
@@ -69,7 +68,6 @@ public class HttpRequest {
         String[] splitFormData = bodyLine.split(QUERY_STRING_DELIMITER);
         Map<String, String> result = new HashMap<>();
         for (String s : splitFormData) {
-            System.out.println(splitFormData);
             String[] split = s.split(KEY_AND_VALUE_DELIMITER);
             result.put(split[0], split[1]);
         }

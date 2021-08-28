@@ -68,8 +68,7 @@ public class HttpRequest {
 
         public Builder body(String line) {
             this.requestBody.append(line)
-                            .append("\r")
-                            .append(System.lineSeparator());
+                            .append("\r\n");
 
             return this;
         }

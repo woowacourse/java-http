@@ -3,13 +3,18 @@ package nextstep.jwp.framework.http;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import nextstep.jwp.framework.http.parser.BodyLineParser;
+import nextstep.jwp.framework.http.parser.EndLineParser;
+import nextstep.jwp.framework.http.parser.HeaderLineParser;
+import nextstep.jwp.framework.http.parser.LineParser;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class HeaderLineParserTest {
 
     @Test
     @DisplayName("헤더 줄 파싱 테스트")
-    public void headerLineParsingTest() {
+    void headerLineParsingTest() {
 
         // given
         final LineParser lineParser = new HeaderLineParser(createBuilderWithStatusLine());
@@ -18,7 +23,7 @@ public class HeaderLineParserTest {
         final LineParser nextLineParser = lineParser.parseLine("Content-Type: text/html;charset=utf-8");
 
         //then
-        final HttpRequest actual = createBuilderWithStatusLine().header("Content-Type", "text/html;charset=utf-8")
+        final HttpRequest actual = createBuilderWithStatusLine().header("Content-Type", " text/html;charset=utf-8")
                                                                 .build();
 
         final HttpRequest httpRequest = nextLineParser.buildRequest();
@@ -28,7 +33,7 @@ public class HeaderLineParserTest {
 
     @Test
     @DisplayName("입력 라인이 null 일 경우 EndLine 객체 반환")
-    public void returnEndLineTest() {
+    void returnEndLineTest() {
 
         // given
         final LineParser lineParser = new HeaderLineParser(createBuilderWithStatusLine());
@@ -42,7 +47,7 @@ public class HeaderLineParserTest {
 
     @Test
     @DisplayName("입력 라인이 공백 일 경우 BodyLine 객체 반환")
-    public void returnBodyLineTest() {
+    void returnBodyLineTest() {
 
         // given
         final LineParser lineParser = new HeaderLineParser();

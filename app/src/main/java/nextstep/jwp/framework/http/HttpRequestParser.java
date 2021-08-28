@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import nextstep.jwp.framework.http.parser.LineParser;
+import nextstep.jwp.framework.http.parser.RequestLineParser;
+
 public class HttpRequestParser {
 
     private final BufferedReader bufferedReader;

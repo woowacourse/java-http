@@ -1,8 +1,10 @@
-package nextstep.jwp.framework.http;
+package nextstep.jwp.framework.http.parser;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+
+import nextstep.jwp.framework.http.HttpRequest;
 
 public class HeaderLineParser extends AbstractLineParser {
 
@@ -15,7 +17,7 @@ public class HeaderLineParser extends AbstractLineParser {
         super(builder);
     }
 
-    HeaderLineParser() {}
+    public HeaderLineParser() {}
 
     @Override
     public boolean canParse() {

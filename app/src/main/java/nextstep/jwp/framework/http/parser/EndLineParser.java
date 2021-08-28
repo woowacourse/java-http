@@ -1,4 +1,6 @@
-package nextstep.jwp.framework.http;
+package nextstep.jwp.framework.http.parser;
+
+import nextstep.jwp.framework.http.HttpRequest;
 
 public class EndLineParser extends AbstractLineParser {
 

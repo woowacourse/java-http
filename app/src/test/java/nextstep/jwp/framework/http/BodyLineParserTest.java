@@ -5,13 +5,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import nextstep.jwp.framework.http.parser.BodyLineParser;
+import nextstep.jwp.framework.http.parser.EndLineParser;
+import nextstep.jwp.framework.http.parser.LineParser;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class BodyLineParserTest {
 
     @Test
     @DisplayName("바디 줄 파싱 테스트")
-    public void bodyLineParsingTest() {
+    void bodyLineParsingTest() {
 
         // given
         final LineParser lineParser = new BodyLineParser();
@@ -31,7 +35,7 @@ public class BodyLineParserTest {
     @ParameterizedTest
     @ValueSource(strings = {"null", "", " "})
     @DisplayName("입력 라인이 null 혹은 공백일 경우 EndLine 객체 반환")
-    public void returnEndLineTest(String body) {
+    void returnEndLineTest(String body) {
 
         // given
         if ("null".equals(body)) {

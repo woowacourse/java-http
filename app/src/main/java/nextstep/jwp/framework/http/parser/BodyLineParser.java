@@ -1,6 +1,8 @@
-package nextstep.jwp.framework.http;
+package nextstep.jwp.framework.http.parser;
 
 import java.util.Objects;
+
+import nextstep.jwp.framework.http.HttpRequest;
 
 public class BodyLineParser extends AbstractLineParser {
 
@@ -8,7 +10,7 @@ public class BodyLineParser extends AbstractLineParser {
         super(builder);
     }
 
-    BodyLineParser() {}
+    public BodyLineParser() {}
 
     @Override
     public boolean canParse() {

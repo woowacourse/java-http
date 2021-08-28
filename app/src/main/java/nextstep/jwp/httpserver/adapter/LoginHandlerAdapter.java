@@ -2,9 +2,7 @@ package nextstep.jwp.httpserver.adapter;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import nextstep.jwp.dashboard.controller.LoginController;
 import nextstep.jwp.httpserver.domain.StatusCode;
@@ -28,7 +26,7 @@ public class LoginHandlerAdapter extends AbstractHandlerAdapter {
         final String path = getResourcePath(requestUri);
 
         try {
-            final HttpResponse httpResponse = loginController.service(httpRequest, getQueryString(requestUri));
+            final HttpResponse httpResponse = loginController.service(httpRequest, httpRequest.getBodyToMap());
             final List<String> body = readFile(path);
             final String response = getResponse(httpResponse, body);
             return new View(path, response);
@@ -38,33 +36,12 @@ public class LoginHandlerAdapter extends AbstractHandlerAdapter {
         }
     }
 
-    @Override
     protected String getResourcePath(String requestUri) {
         if (requestUri.contains("?")) {
             final int index = requestUri.indexOf("?");
             return requestUri.substring(0, index);
         }
         return requestUri;
-    }
-
-    private Map<String, String> getQueryString(String requestUri) {
-        final Map<String, String> param = new HashMap<>();
-        if (requestUri.contains("?")) {
-            extractParameter(requestUri, param);
-        }
-        return param;
-    }
-
-    private void extractParameter(String requestUri, Map<String, String> param) {
-        final int index = requestUri.indexOf("?");
-        String queryString = requestUri.substring(index + 1);
-
-        String[] parameters = queryString.split("&");
-
-        for (String parameter : parameters) {
-            String[] keyValue = parameter.split("=");
-            param.put(keyValue[0], keyValue[1]);
-        }
     }
 
     @Override

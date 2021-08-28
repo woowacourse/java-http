@@ -18,6 +18,13 @@ public class Headers {
         headers.put(headerName, content);
     }
 
+    public String getContentLength() {
+        if (!headers.containsKey("Content-Length")) {
+            return "0";
+        }
+        return headers.get("Content-Length");
+    }
+
     public Map<String, String> getHeaders() {
         return headers;
     }

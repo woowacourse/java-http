@@ -1,12 +1,16 @@
 package nextstep.jwp.dashboard.domain;
 
 public class User {
-    private final long id;
-    private final String account;
-    private final String password;
-    private final String email;
+    private Long id;
+    private String account;
+    private String password;
+    private String email;
 
-    public User(long id, String account, String password, String email) {
+    public User(String account, String password, String email) {
+        this(null, account, password, email);
+    }
+
+    public User(Long id, String account, String password, String email) {
         this.id = id;
         this.account = account;
         this.password = password;

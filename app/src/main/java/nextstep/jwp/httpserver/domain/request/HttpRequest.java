@@ -1,5 +1,7 @@
 package nextstep.jwp.httpserver.domain.request;
 
+import java.util.Map;
+
 import nextstep.jwp.httpserver.domain.Body;
 import nextstep.jwp.httpserver.domain.Headers;
 import nextstep.jwp.httpserver.domain.HttpMethod;
@@ -23,6 +25,10 @@ public class HttpRequest {
         return startLine.getHttpMethod();
     }
 
+    public Map<String, String> getBodyToMap() {
+        return body.getBody();
+    }
+
     public StartLine getStartLine() {
         return startLine;
     }
@@ -31,7 +37,7 @@ public class HttpRequest {
         return headers;
     }
 
-    public Body getRequestBody() {
+    public Body getBody() {
         return body;
     }
 }

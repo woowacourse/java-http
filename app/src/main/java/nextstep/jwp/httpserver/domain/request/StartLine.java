@@ -21,6 +21,10 @@ public class StartLine {
         return new StartLine(HttpMethod.valueOf(piece[0]), piece[1], HttpVersion.version(piece[2]));
     }
 
+    public boolean isPost() {
+        return HttpMethod.POST == httpMethod;
+    }
+
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }

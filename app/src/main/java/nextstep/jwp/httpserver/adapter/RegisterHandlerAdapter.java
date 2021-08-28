@@ -2,41 +2,36 @@ package nextstep.jwp.httpserver.adapter;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.List;
 
-import nextstep.jwp.httpserver.controller.StaticViewController;
+import nextstep.jwp.dashboard.controller.RegisterController;
+import nextstep.jwp.httpserver.domain.StatusCode;
 import nextstep.jwp.httpserver.domain.View;
 import nextstep.jwp.httpserver.domain.request.HttpRequest;
 import nextstep.jwp.httpserver.domain.response.HttpResponse;
+import nextstep.jwp.httpserver.exception.GlobalException;
 
-public class StaticViewHandlerAdapter extends AbstractHandlerAdapter {
+public class RegisterHandlerAdapter extends AbstractHandlerAdapter {
 
     @Override
     public boolean supports(Object handler) {
-        return (handler instanceof StaticViewController);
+        return (handler instanceof RegisterController);
     }
 
     @Override
     public View handle(HttpRequest httpRequest, Object handler) throws URISyntaxException, IOException {
-        final StaticViewController staticViewController = (StaticViewController) handler;
-        final HttpResponse httpResponse = staticViewController.service(httpRequest, new HashMap<>());
-
+        final RegisterController registerController = (RegisterController) handler;
         final String requestUri = httpRequest.getRequestUri();
-        final String resourcePath = getResourcePath(requestUri);
 
-        final List<String> body = readFile(resourcePath);
-
-        final String response = getResponse(httpResponse, body);
-        return new View(resourcePath, response);
-    }
-
-    protected String getResourcePath(String requestUri) {
-        if (requestUri.equals("/")) {
-            return "/index";
+        try {
+            final HttpResponse httpResponse = registerController.service(httpRequest, httpRequest.getBodyToMap());
+            final List<String> body = readFile(requestUri);
+            final String response = getResponse(httpResponse, body);
+            return new View(requestUri, response);
+        } catch (GlobalException e) {
+            final StatusCode exceptionCode = e.getStatusCode();
+            return exceptionResponse(exceptionCode);
         }
-        final int index = requestUri.indexOf(".html");
-        return requestUri.substring(0, index);
     }
 
     @Override
@@ -48,6 +43,7 @@ public class StaticViewHandlerAdapter extends AbstractHandlerAdapter {
 
         return String.join("\r\n",
                 httpResponse.statusLine(),
+                "Location: " + httpResponse.getLocation() + " ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + responseBody.toString().getBytes().length + " ",
                 "",

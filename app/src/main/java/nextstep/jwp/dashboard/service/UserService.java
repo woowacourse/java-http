@@ -4,6 +4,7 @@ import nextstep.jwp.dashboard.controller.dto.UserDto;
 import nextstep.jwp.dashboard.domain.User;
 import nextstep.jwp.dashboard.repository.InMemoryUserRepository;
 import nextstep.jwp.httpserver.exception.AuthorizationException;
+import nextstep.jwp.httpserver.exception.DuplicatedException;
 import nextstep.jwp.httpserver.exception.NotFoundException;
 
 public class UserService {
@@ -17,5 +18,16 @@ public class UserService {
         }
 
         return new UserDto(user);
+    }
+
+    public void join(String account, String password, String email) {
+        InMemoryUserRepository.findByAccount(account)
+                              .ifPresent(user -> {
+                                  throw new DuplicatedException("이미 가입된 유저입니다.");
+                              });
+
+        final User user = new User(account, password, email);
+
+        InMemoryUserRepository.save(user);
     }
 }

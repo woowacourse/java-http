@@ -3,7 +3,7 @@ package nextstep.jwp.dashboard.controller.dto;
 import nextstep.jwp.dashboard.domain.User;
 
 public class UserDto {
-    private final long id;
+    private final Long id;
     private final String account;
     private final String password;
     private final String email;
@@ -12,7 +12,7 @@ public class UserDto {
         this(user.getId(), user.getAccount(), user.getPassword(), user.getEmail());
     }
 
-    public UserDto(long id, String account, String password, String email) {
+    public UserDto(Long id, String account, String password, String email) {
         this.id = id;
         this.account = account;
         this.password = password;

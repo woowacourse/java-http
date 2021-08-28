@@ -21,8 +21,7 @@ public class HttpRequestParser {
 
         final StartLine startLine = StartLine.from(bufferedReader.readLine());
         final Headers headers = extractAllHeaders(bufferedReader);
-        // TODO POST 시 채우기
-        final Body body = new Body();
+        final Body body = extractRequestBody(startLine, headers, bufferedReader);
 
         return new HttpRequest(startLine, headers, body);
     }
@@ -41,5 +40,28 @@ public class HttpRequestParser {
         }
 
         return new Headers(headers);
+    }
+
+    private static Body extractRequestBody(StartLine startLine, Headers headers, BufferedReader bufferedReader) throws IOException {
+        final Map<String, String> param = new HashMap<>();
+        int contentLength = Integer.parseInt(headers.getContentLength());
+
+        if (startLine.isPost() && contentLength > 0) {
+            getParameter(bufferedReader, param, contentLength);
+        }
+
+        return new Body(param);
+    }
+
+    private static void getParameter(BufferedReader bufferedReader, Map<String, String> param, int contentLength) throws IOException {
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+
+        String[] parameters = requestBody.split("&");
+        for (String parameter : parameters) {
+            String[] keyValue = parameter.split("=");
+            param.put(keyValue[0], keyValue[1]);
+        }
     }
 }

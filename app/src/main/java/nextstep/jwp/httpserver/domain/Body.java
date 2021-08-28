@@ -1,16 +1,20 @@
 package nextstep.jwp.httpserver.domain;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Body {
-    private String body;
+    private final Map<String, String> body;
 
     public Body() {
+        body = new HashMap<>();
     }
 
-    public Body(String body) {
+    public Body(Map<String, String> body) {
         this.body = body;
     }
 
-    public String getBody() {
+    public Map<String, String> getBody() {
         return body;
     }
 }

@@ -38,7 +38,5 @@ public abstract class AbstractHandlerAdapter implements HandlerAdapter {
         return new View("/" + code.getCode(), response);
     }
 
-    protected abstract String getResourcePath(String requestUri);
-
     protected abstract String getResponse(HttpResponse httpResponse, List<String> body);
 }

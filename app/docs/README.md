@@ -13,12 +13,12 @@
     - [x] 회원을 조회해서 로그인에 성공하면 /index.html로 리다이렉트
         - [x] 응답 헤더에 http status code를 302로 반환
     - [x] 로그인 실패시 401.html로 리다이렉트
-- [ ] POST 방식으로 회원가입 기능 구현하기
-    - [ ] 회원 가입 버튼 누르면 POST 요청 보내기
-    - [ ] 회원 가입 진행
-        - [ ] while 문으로 http request header를 읽고 나서 request body를 읽어오기
-        - [ ] save 메서드를 사용해서 가입 완료 처리
-        - [ ] 회원가입 완료시 index.html로 리다이렉트하기
-    - [ ] 로그인 버튼 GET -> POST로 변경하기 
+- [x] POST 방식으로 회원가입 기능 구현하기
+    - [x] 회원 가입 버튼 누르면 POST 요청 보내기
+    - [x] 회원 가입 진행
+        - [x] while 문으로 http request header를 읽고 나서 request body를 읽어오기
+        - [x] save 메서드를 사용해서 가입 완료 처리
+        - [x] 회원가입 완료시 index.html로 리다이렉트하기
+    - [x] 로그인 버튼 GET -> POST로 변경하기 
 - [ ] CSS 지원하기
     - [ ] 응답 헤더의 Content-Type을 text/css로 전송

@@ -16,11 +16,14 @@ class RequestHandlerTest {
     @Test
     void run() {
         // given
-        final MockSocket socket = new MockSocket();
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final String httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1",
+                "Host: localhost:8080",
+                "",
+                "");
 
         // when
-        requestHandler.run();
+        String output = runRequestHandler(httpRequest);
 
         // then
         String expected = String.join("\r\n",
@@ -29,7 +32,7 @@ class RequestHandlerTest {
                 "Content-Length: 12 ",
                 "",
                 "Hello world!");
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(output).isEqualTo(expected);
     }
 
     @Test
@@ -42,11 +45,8 @@ class RequestHandlerTest {
                 "",
                 "");
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
         // when
-        requestHandler.run();
+        String output = runRequestHandler(httpRequest);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
@@ -56,7 +56,7 @@ class RequestHandlerTest {
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
                 responseBody;
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(output).isEqualTo(expected);
     }
 
     @Test
@@ -69,11 +69,8 @@ class RequestHandlerTest {
                 "",
                 "");
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
         // when
-        requestHandler.run();
+        String output = runRequestHandler(httpRequest);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
@@ -83,11 +80,11 @@ class RequestHandlerTest {
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
                 responseBody;
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(output).isEqualTo(expected);
     }
 
     @Test
-    void loginWithCorrectQueryString() throws IOException {
+    void loginWithCorrectQueryString() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -96,22 +93,19 @@ class RequestHandlerTest {
                 "",
                 "");
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
         // when
-        requestHandler.run();
+        String output = runRequestHandler(httpRequest);
 
         // then
         String expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Location: /index.html \r\n" +
                 "\r\n" +
                 "";
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(output).isEqualTo(expected);
     }
 
     @Test
-    void loginWithIncorrectQueryString() throws IOException {
+    void loginWithIncorrectQueryString() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=notpassword HTTP/1.1 ",
@@ -120,22 +114,19 @@ class RequestHandlerTest {
                 "",
                 "");
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
         // when
-        requestHandler.run();
+        String output = runRequestHandler(httpRequest);
 
         // then
         String expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Location: /401.html \r\n" +
                 "\r\n" +
                 "";
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(output).isEqualTo(expected);
     }
 
     @Test
-    void loginWithCorrectRequestBody() throws IOException {
+    void loginWithCorrectRequestBody() {
         // given
         final String requestBody = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
@@ -146,22 +137,19 @@ class RequestHandlerTest {
                 "",
                 requestBody);
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
         // when
-        requestHandler.run();
+        String output = runRequestHandler(httpRequest);
 
         // then
         String expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Location: /index.html \r\n" +
                 "\r\n" +
                 "";
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(output).isEqualTo(expected);
     }
 
     @Test
-    void loginWithIncorrectRequestBody() throws IOException {
+    void loginWithIncorrectRequestBody() {
         // given
         final String requestBody = "account=gugu&password=notpassword";
         final String httpRequest = String.join("\r\n",
@@ -172,18 +160,15 @@ class RequestHandlerTest {
                 "",
                 requestBody);
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
         // when
-        requestHandler.run();
+        String output = runRequestHandler(httpRequest);
 
         // then
         String expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Location: /401.html \r\n" +
                 "\r\n" +
                 "";
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(output).isEqualTo(expected);
     }
 
     @Test
@@ -196,11 +181,8 @@ class RequestHandlerTest {
                 "",
                 "");
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
         // when
-        requestHandler.run();
+        String output = runRequestHandler(httpRequest);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
@@ -210,11 +192,11 @@ class RequestHandlerTest {
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
                 responseBody;
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(output).isEqualTo(expected);
     }
 
     @Test
-    void registerWithCorrectInfo() throws IOException {
+    void registerWithCorrectInfo() {
         // given
         final String requestBody = "account=test&email=test@email.com&password=test";
         final String httpRequest = String.join("\r\n",
@@ -225,27 +207,24 @@ class RequestHandlerTest {
                 "",
                 requestBody);
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
         // when
-        requestHandler.run();
+        String output = runRequestHandler(httpRequest);
 
         // then
         String expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Location: /index.html \r\n" +
                 "\r\n" +
                 "";
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(output).isEqualTo(expected);
 
         Optional<User> user = InMemoryUserRepository.findByAccount("test");
-        assertThat(user.isPresent()).isTrue();
+        assertThat(user).isPresent();
         assertThat(user.get().checkPassword("test")).isTrue();
         assertThat(user.get().getEmail()).isEqualTo("test@email.com");
     }
 
     @Test
-    void registerWithDuplicateAccount() throws IOException {
+    void registerWithDuplicateAccount() {
         // given
         final String requestBody = "account=gugu&email=test2@email.com&password=test";
         final String httpRequest = String.join("\r\n",
@@ -256,22 +235,19 @@ class RequestHandlerTest {
                 "",
                 requestBody);
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
         // when
-        requestHandler.run();
+        String output = runRequestHandler(httpRequest);
 
         // then
         String expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Location: /401.html \r\n" +
                 "\r\n" +
                 "";
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(output).isEqualTo(expected);
     }
 
     @Test
-    void registerWithDuplicateEmail() throws IOException {
+    void registerWithDuplicateEmail() {
         // given
         final String requestBody = "account=test3&email=hkkang@woowahan.com&password=test";
         final String httpRequest = String.join("\r\n",
@@ -282,18 +258,15 @@ class RequestHandlerTest {
                 "",
                 requestBody);
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
         // when
-        requestHandler.run();
+        String output = runRequestHandler(httpRequest);
 
         // then
         String expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Location: /401.html \r\n" +
                 "\r\n" +
                 "";
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(output).isEqualTo(expected);
     }
 
     @Test
@@ -307,11 +280,8 @@ class RequestHandlerTest {
                 "",
                 "");
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
         // when
-        requestHandler.run();
+        String output = runRequestHandler(httpRequest);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
@@ -321,7 +291,7 @@ class RequestHandlerTest {
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
                 responseBody;
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(output).isEqualTo(expected);
     }
 
     @Test
@@ -335,11 +305,8 @@ class RequestHandlerTest {
                 "",
                 "");
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
         // when
-        requestHandler.run();
+        String output = runRequestHandler(httpRequest);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
@@ -349,6 +316,13 @@ class RequestHandlerTest {
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
                 responseBody;
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(output).isEqualTo(expected);
+    }
+
+    private String runRequestHandler(String httpRequest) {
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+        requestHandler.run();
+        return socket.output();
     }
 }

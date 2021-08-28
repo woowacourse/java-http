@@ -26,9 +26,17 @@ public class StaticResourceHandlerAdapter implements HandlerAdapter {
         final StaticResourceController staticResourceController = (StaticResourceController) handler;
         final HttpResponse httpResponse = staticResourceController.service(httpRequest, new HashMap<>());
         final String requestUri = httpRequest.getRequestUri();
-        final List<String> body = readFile(requestUri);
-        final String response = getResponse(requestUri, httpResponse, body);
-        return new View(requestUri, response);
+        final String path = getResourcePath(requestUri);
+        final List<String> body = readFile(path);
+        final String response = getResponse(path, httpResponse, body);
+        return new View(path, response);
+    }
+
+    private String getResourcePath(String requestUri) {
+        if (requestUri.equals("/")) {
+            return "/index.html";
+        }
+        return requestUri;
     }
 
     private List<String> readFile(String requestUri) throws URISyntaxException, IOException {

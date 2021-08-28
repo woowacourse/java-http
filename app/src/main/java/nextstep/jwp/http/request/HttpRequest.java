@@ -49,7 +49,7 @@ public class HttpRequest {
 
         String tempLine;
         System.out.println("======LOG======");
-        while (!Objects.isNull(tempLine = bufferedReader.readLine())) {
+        while (!(tempLine = bufferedReader.readLine()).equals("")) {
             System.out.println(tempLine);
             lines.add(tempLine);
         }

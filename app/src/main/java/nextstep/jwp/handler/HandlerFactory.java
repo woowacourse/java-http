@@ -31,6 +31,6 @@ public class HandlerFactory {
         if (path.contains(JS_EXTENSION)) {
             return new JSHandler();
         }
-        return new NotFoundHandler();
+        return new UnauthorizedHandler();
     }
 }

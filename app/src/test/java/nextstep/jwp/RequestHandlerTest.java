@@ -121,6 +121,25 @@ class RequestHandlerTest {
         assertThat(actual).startsWith(expected);
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"/assets/chart-area.js", "/assets/chart-bar.js", "/assets/chart-pie.js"})
+    void jsRequest(String requestUri) throws IOException {
+        //given
+        final String httpRequest = toHttpGetRequest(requestUri);
+        final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        final String expectResponseBody = Files.readString(new File(resource.getFile()).toPath());
+        String expected = toHttpJSResponse(expectResponseBody);
+        //when
+        requestHandler.run();
+        final String actual = socket.output();
+        //then
+        assertThat(actual).startsWith(expected);
+    }
+
+
     private String toHttpGetRequest(String requestUri) {
         return String.join("\r\n",
                 "GET " + requestUri + " HTTP/1.1 ",
@@ -164,5 +183,14 @@ class RequestHandlerTest {
                 "Content-Length: 211991 ",
                 "",
                 "");
+    }
+
+    private String toHttpJSResponse(String expectResponseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: application/javascript; charset=UTF-8 ",
+                "Content-Length: " + expectResponseBody.getBytes().length + " ",
+                "",
+                expectResponseBody);
     }
 }

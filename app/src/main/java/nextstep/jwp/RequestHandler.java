@@ -50,8 +50,18 @@ public class RequestHandler implements Runnable {
                 return;
             }
 
-            if (extractedUri.endsWith(".css") || extractedUri.endsWith(".js")) {
+            if (extractedUri.endsWith(".css")) {
                 writeOutputStream(outputStream, httpCssResponse(STATIC_PATH, extractedUri));
+                return;
+            }
+
+            if (extractedUri.endsWith(".js")) {
+                writeOutputStream(outputStream, httpJSResponse(STATIC_PATH, extractedUri));
+                return;
+            }
+
+            if (extractedUri.startsWith("/assets/img")) {
+                writeOutputStream(outputStream, httpImageResponse(STATIC_PATH, extractedUri));
                 return;
             }
 
@@ -84,7 +94,7 @@ public class RequestHandler implements Runnable {
                 writeOutputStream(outputStream, httpHtmlResponse(STATIC_PATH, extractedUri));
                 return;
             }
-
+            
             writeOutputStream(outputStream, http302Response("/404.html"));
         } catch (IOException exception) {
             LOG.error("Exception stream", exception);
@@ -174,6 +184,14 @@ public class RequestHandler implements Runnable {
         return httpCssMessage(responseBodyByURLPath(resourcesPath, targetUri));
     }
 
+    private String httpJSResponse(String resourcesPath, String targetUri) {
+        return httpJSMessage(responseBodyByURLPath(resourcesPath, targetUri));
+    }
+
+    private String httpImageResponse(String resourcesPath, String targetUri) {
+        return httpImageMessage(responseBodyByURLPath(resourcesPath, targetUri));
+    }
+
     private String responseBodyByURLPath(String resourcesPath, String targetUri) {
         try {
             final URL url = getClass().getClassLoader().getResource(resourcesPath + targetUri);
@@ -207,6 +225,25 @@ public class RequestHandler implements Runnable {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Location: http://localhost:8080" + redirectUrl);
+    }
+
+    private String httpJSMessage(String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: application/javascript; charset=UTF-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private String httpImageMessage(String responseBody) {
+        System.out.println("responseBody = " + responseBody);
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: image/svg+xml ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 
     private void close() {

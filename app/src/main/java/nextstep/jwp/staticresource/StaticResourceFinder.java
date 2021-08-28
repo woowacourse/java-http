@@ -14,12 +14,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import static nextstep.jwp.common.LineSeparator.NEW_LINE;
 import static nextstep.jwp.http.response.ContentType.ICO;
 
 public class StaticResourceFinder {
 
     private static final Logger LOG = LoggerFactory.getLogger(StaticResourceFinder.class);
-    private static final String NEW_LINE = System.getProperty("line.separator");
 
     public StaticResource findStaticResource(String resourcePath) {
         final URL url = getClass().getClassLoader().getResource("static" + resourcePath);

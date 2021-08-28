@@ -5,9 +5,9 @@ import nextstep.jwp.staticresource.StaticResource;
 
 import java.nio.charset.StandardCharsets;
 
-public class HttpResponse {
+import static nextstep.jwp.common.LineSeparator.NEW_LINE;
 
-    private static final String NEW_LINE = System.getProperty("line.separator");
+public class HttpResponse {
 
     private final ResponseHeaders headers;
     private StatusLine statusLine;

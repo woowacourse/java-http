@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ResponseHeaders {
+import static nextstep.jwp.common.LineSeparator.NEW_LINE;
 
-    private static final String NEW_LINE = System.getProperty("line.separator");
+public class ResponseHeaders {
 
     private final Map<String, String> headers;
 

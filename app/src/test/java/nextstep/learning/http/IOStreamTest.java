@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
+import static nextstep.jwp.common.LineSeparator.NEW_LINE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -24,8 +25,6 @@ import static org.mockito.Mockito.*;
  */
 @DisplayName("Java I/O Stream 클래스 학습 테스트")
 class IOStreamTest {
-
-    private static final String NEW_LINE = System.getProperty("line.separator");
 
     /**
      * 자바의 기본 출력 클래스는 <b>java.io.OutputStream</b>이다.<br>

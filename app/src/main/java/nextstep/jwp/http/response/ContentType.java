@@ -8,8 +8,6 @@ public enum ContentType {
     JS("js", "application/js"),
     ICO("ico", "image/x-icon");
 
-    private static final String NEW_LINE = System.getProperty("line.separator");
-
     private final String fileNameExtension;
     private final String value;
 

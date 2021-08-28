@@ -7,12 +7,11 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
+import static nextstep.jwp.common.LineSeparator.NEW_LINE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("HttpRequestParser 테스트")
 class HttpRequestParserTest {
-
-    private static final String NEW_LINE = System.getProperty("line.separator");
 
     private final HttpRequestParser httpRequestParser = new HttpRequestParser();
 

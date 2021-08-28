@@ -12,7 +12,7 @@ public class FileReaderTest {
     @Test
     void fileReadTest() throws IOException {
         //given
-        FilePath filePath = new FilePath("nextstep.txt", "");
+        FilePath filePath = new FilePath("nextstep", "txt", "");
         //when
         FileReader fileReader = new FileReader(filePath);
         fileReader.readAllFile();

@@ -10,9 +10,10 @@ public class HtmlView implements View {
 
     private static final String DELIMITER = "\r\n";
     private static final String COLON_AND_BLANK = ": ";
-    private static final String FORMAT = "%s %s %s %n" +
-                                         "%s%n" +
-                                         "%n" +
+    private static final String BLANK = " ";
+    private static final String FORMAT = "%s %s %s \r\n" +
+                                         "%s\r\n" +
+                                         "\r\n" +
                                          "%s";
 
     private final HttpResponse httpResponse;
@@ -23,7 +24,6 @@ public class HtmlView implements View {
 
     @Override
     public void write(OutputStream outputStream) throws IOException {
-
         final String response = toResponseFormat();
 
         outputStream.write(response.getBytes());
@@ -42,7 +42,7 @@ public class HtmlView implements View {
 
     private String formatHeaderString() {
         return httpResponse.headers().map().entrySet().stream()
-            .map(set -> set.getKey() + COLON_AND_BLANK + set.getValue().toValuesString())
+            .map(set -> set.getKey() + COLON_AND_BLANK + set.getValue().toValuesString() + BLANK)
             .collect(joining(DELIMITER));
     }
 }

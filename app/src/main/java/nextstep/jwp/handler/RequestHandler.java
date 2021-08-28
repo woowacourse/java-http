@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.List;
 import java.util.Objects;
+import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.view.HtmlViewResolver;
 import nextstep.jwp.view.View;
@@ -39,9 +40,9 @@ public class RequestHandler implements Runnable {
             final OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = HttpRequest.of(inputStream);
-            View view = findView(httpRequest.filepath());
+            log.debug(httpRequest.toString());
+            View view = findView(httpRequest);
             view.write(outputStream);
-
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
@@ -49,13 +50,27 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private View findView(String filepath) throws IOException {
+    private View findView(HttpRequest httpRequest) throws IOException {
+        String filePath = httpRequest.url();
+        List<String> acceptType = httpRequest.header("Accept").list();
+        if (acceptType.isEmpty()) {
+            acceptType = List.of("*/*");
+        }
+        return findProperMimeTypeView(filePath, acceptType);
+    }
+
+    private View findProperMimeTypeView(String filePath, List<String> acceptTypes)
+        throws IOException {
         for (ViewResolver viewResolver : viewResolvers) {
-            if (viewResolver.isSuitable(filepath)) {
-                return viewResolver.getView(filepath);
+            if (viewResolver.isSuitable(acceptTypes) &&
+                viewResolver.isExist(filePath)
+            ) {
+                return viewResolver.getView(filePath);
             }
         }
-        throw new RuntimeException(String.format("해당 형식에 알맞은 view를 찾을 수 없습니다. -> %s", filepath));
+        throw new NotFoundException(
+            String.format("해당 타입의 파일이 없습니다. 요청받은 accept -> %s, filepath -> %s", acceptTypes,
+                filePath));
     }
 
     private void close() {

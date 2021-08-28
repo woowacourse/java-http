@@ -11,21 +11,23 @@ public class FilePath {
 
     private static final String SLASH = "/";
     private static final int SLASH_SUBSTRING_INDEX = 1;
+    private static final String DOT = ".";
 
     private final String filePath;
     private final String prefix;
+    private final String suffix;
 
-    public FilePath(String filePath) {
-        this(filePath, PREFIX);
+    public FilePath(String filePath, String suffix) {
+        this(filePath, suffix, PREFIX);
     }
 
-    public FilePath(String filePath, String prefix) {
+    public FilePath(String filePath, String suffix, String prefix) {
         if (filePath.startsWith(SLASH)) {
             filePath = filePath.substring(SLASH_SUBSTRING_INDEX);
         }
-
         this.prefix = prefix;
         this.filePath = filePath;
+        this.suffix = suffix;
     }
 
     public Path path() {
@@ -38,6 +40,14 @@ public class FilePath {
         return new File(resource.getPath()).toPath();
     }
 
+    public boolean isExist() {
+        URL resource = getClass()
+            .getClassLoader()
+            .getResource(relativePath());
+
+        return !Objects.isNull(resource);
+    }
+
     private void validateResourcePath(URL resource) {
         if (Objects.isNull(resource)) {
             throw new RuntimeException("해당 file은 존재하지 않습니다.");
@@ -46,9 +56,8 @@ public class FilePath {
 
     private String relativePath() {
         if (filePath.startsWith(prefix)) {
-            return filePath;
+            return filePath + DOT + suffix;
         }
-
-        return prefix + filePath;
+        return prefix + filePath + DOT + suffix;
     }
 }

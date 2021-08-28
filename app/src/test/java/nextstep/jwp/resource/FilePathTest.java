@@ -1,5 +1,7 @@
 package nextstep.jwp.resource;
 
+import static nextstep.jwp.resource.FileType.HTML;
+import static nextstep.jwp.resource.FileType.PLAIN_TEXT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -12,7 +14,7 @@ class FilePathTest {
     @Test
     void whenFilePathIsNull() {
         //given
-        FilePath filePath = new FilePath("noExist.txt", "");
+        FilePath filePath = new FilePath("noExist.txt", HTML.getText(), "");
         //when
         //then
         assertThatThrownBy(filePath::path)
@@ -23,7 +25,7 @@ class FilePathTest {
     @Test
     void filePathCreateTest() {
         //given
-        FilePath filePath = new FilePath("nextstep.txt", "");
+        FilePath filePath = new FilePath("nextstep", PLAIN_TEXT.getText(), "");
         //when
         //then
         assertThat(filePath.path()).isNotNull();

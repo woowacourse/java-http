@@ -15,18 +15,18 @@ public class HttpRequest {
     private final HttpHeaders headers;
     private final HttpMethod method;
     private final HttpProtocol protocol;
-    private final String filepath;
+    private final String url;
     private final HttpRequestBody body;
 
     public HttpRequest(HttpHeaders headers,
                        HttpMethod method,
                        HttpProtocol httpProtocol,
-                       String filepath,
+                       String url,
                        HttpRequestBody body) {
         this.headers = headers;
         this.method = method;
         this.protocol = httpProtocol;
-        this.filepath = filepath;
+        this.url = url;
         this.body = body;
     }
 
@@ -40,8 +40,8 @@ public class HttpRequest {
         return this.method;
     }
 
-    public String filepath() {
-        return this.filepath;
+    public String url() {
+        return this.url;
     }
 
     public HttpProtocol protocol() {
@@ -65,7 +65,7 @@ public class HttpRequest {
         final List<String> headers = this.headers.map().entrySet().stream()
             .map(set -> set.getKey() + ": " + set.getValue().toValuesString())
             .collect(Collectors.toList());
-        return method + " " + filepath + " " + protocol.getProtocolName() + "\r\n" +
+        return method + " " + url + " " + protocol.getProtocolName() + "\r\n" +
             String.join("\r\n", headers) +
             "\r\n" +
             body.getBody();
@@ -83,7 +83,7 @@ public class HttpRequest {
         private HttpHeaders headers = new HttpHeaders();
         private HttpMethod method = null;
         private HttpProtocol httpProtocol = null;
-        private String filepath = "";
+        private String url = "";
         private HttpRequestBody body = new TextHttpRequestBody("\r\n");
 
         public InputStreamHttpRequestConverter(InputStream inputStream) {
@@ -91,7 +91,7 @@ public class HttpRequest {
         }
 
         public HttpRequest toRequest() {
-            return new HttpRequest(headers, method, httpProtocol, filepath, body);
+            return new HttpRequest(headers, method, httpProtocol, url, body);
         }
 
         private void parse(InputStream inputStream) {
@@ -111,7 +111,7 @@ public class HttpRequest {
             List<String> parsedStartHeader = Arrays.asList(line.split(" "));
 
             this.method = HttpMethod.of(parsedStartHeader.get(METHOD_INDEX));
-            this.filepath = parsedStartHeader.get(FILEPATH_INDEX);
+            this.url = parsedStartHeader.get(FILEPATH_INDEX);
             this.httpProtocol = HttpProtocol.findByName(parsedStartHeader.get(HTTP_PROTOCOL_INDEX));
         }
 

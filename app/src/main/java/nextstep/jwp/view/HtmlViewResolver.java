@@ -1,7 +1,11 @@
 package nextstep.jwp.view;
 
+import static nextstep.jwp.resource.FileType.HTML;
+
 import java.io.IOException;
+import java.util.List;
 import nextstep.jwp.http.HttpProtocol;
+import nextstep.jwp.http.MimeType;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.resource.FilePath;
 import nextstep.jwp.resource.FileReader;
@@ -9,49 +13,41 @@ import nextstep.jwp.resource.FileType;
 
 public class HtmlViewResolver implements ViewResolver {
 
-    private static final String DOT = ".";
-    private static final String BLANK = "";
-    private static final int NOT_FOUND = -1;
-    private static final int NOT_FOUND_INDEX = NOT_FOUND;
-
     @Override
-    public boolean isSuitable(String fileName) {
-        String extensionPrefix = subtractExtensionPrefix(fileName);
-        if (extensionPrefix.isEmpty()) {
-            return false;
-        }
-        return FileType.HTML == FileType.findByName(extensionPrefix);
+    public boolean isExist(String url) {
+        return new FilePath(url, HTML.getText()).isExist();
+    }
+
+    public boolean isExist(String url, String prefix) {
+        return new FilePath(url, HTML.getText(), prefix).isExist();
     }
 
     @Override
-    public View getView(String filePath) throws IOException {
-        final FileReader fileReader = new FileReader(new FilePath(filePath));
-
-        return createHtmlView(filePath, fileReader);
+    public boolean isSuitable(List<String> acceptTypes) {
+        return FileType.findByMimeType(MimeType.findByName(acceptTypes)).contains(HTML);
     }
 
-    public View getView(String filePath, String prefix) throws IOException {
-        final FileReader fileReader = new FileReader(new FilePath(filePath, prefix));
+    @Override
+    public View getView(String url) throws IOException {
+        final FileReader fileReader = new FileReader(new FilePath(url, HTML.getText()));
 
-        return createHtmlView(filePath, fileReader);
+        return createHtmlView(fileReader);
     }
 
-    private View createHtmlView(String filePath, FileReader fileReader) throws IOException {
+    public View getView(String url, String prefix) throws IOException {
+        final FileReader fileReader = new FileReader(new FilePath(url, HTML.getText(), prefix));
+
+        return createHtmlView(fileReader);
+    }
+
+    private View createHtmlView(FileReader fileReader) throws IOException {
         HttpResponse httpResponse = HttpResponse
             .ok(
                 HttpProtocol.HTTP1_1,
-                FileType.findByName(subtractExtensionPrefix(filePath)),
+                HTML,
                 fileReader.readAllFile()
             );
 
         return new HtmlView(httpResponse);
-    }
-
-    private String subtractExtensionPrefix(String fileName) {
-        int dotIndex = fileName.lastIndexOf(DOT);
-        if (dotIndex == NOT_FOUND_INDEX) {
-            return BLANK;
-        }
-        return fileName.substring(dotIndex + 1);
     }
 }

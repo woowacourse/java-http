@@ -26,7 +26,7 @@ class HttpRequestTest {
         HttpRequest request = HttpRequest.of(byteArrayInputStream);
         //then
         System.out.println(request);
-        assertThat(request.filepath()).isEqualTo(expectedFilePath);
+        assertThat(request.url()).isEqualTo(expectedFilePath);
         assertThat(request.method()).isEqualTo(expectedMethod);
         expectedHeaders.forEach((headerKey, headerValues) ->
             assertThat(

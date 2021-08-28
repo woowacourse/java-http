@@ -27,7 +27,8 @@ public class HttpResponse {
         httpHeaders.add("Content-Length", String.valueOf(responseBody.getBytes().length));
 
         return new HttpResponse(protocol, status, httpHeaders,
-            new TextHttpResponseBody(responseBody));
+            new TextHttpResponseBody(responseBody)
+        );
     }
 
     public static HttpResponse ok(HttpProtocol protocol, FileType fileType, String responseBody) {

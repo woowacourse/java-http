@@ -15,8 +15,8 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public boolean hasNoQueryParameters() {
-        return header.hasNoQueryParameters();
+    public boolean isGet() {
+        return "GET".equals(getHttpMethod());
     }
 
     public String getHttpMethod() {
@@ -33,5 +33,9 @@ public class HttpRequest {
 
     public String getProtocol() {
         return header.getProtocol();
+    }
+
+    public Map<String, String> getPayload() {
+        return body.getPayload();
     }
 }

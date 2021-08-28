@@ -1,23 +1,16 @@
 package nextstep.jwp;
 
-import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.IndexController;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.NoneMatchingControllerException;
+import nextstep.jwp.controller.*;
 import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpRequestBody;
 import nextstep.jwp.http.HttpRequestHeader;
 import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.beans.beancontext.BeanContext;
 import java.io.*;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -31,8 +24,10 @@ public class RequestHandler implements Runnable {
     private BufferedReader inputStreamReader;
 
     static {
+        final UserService userService = new UserService();
         controllers.add(new IndexController());
-        controllers.add(new LoginController());
+        controllers.add(new LoginController(userService));
+        controllers.add(new RegisterController(userService));
     }
 
     public RequestHandler(Socket connection) {
@@ -64,9 +59,11 @@ public class RequestHandler implements Runnable {
     private HttpRequest parseRequest(final InputStream inputStream) throws IOException {
         final List<String> requestHeaders = parseRequestHeaders(inputStream);
         final HttpRequestHeader httpRequestHeader = new HttpRequestHeader(requestHeaders);
-        //TODO: request body parsing 추가
 
-        return new HttpRequest(httpRequestHeader);
+        final String requestBody = parseRequestBody(httpRequestHeader, inputStream);
+        final HttpRequestBody httpRequestBody = new HttpRequestBody(requestBody);
+
+        return new HttpRequest(httpRequestHeader, httpRequestBody);
     }
 
     private List<String> parseRequestHeaders(final InputStream inputStream) throws IOException {
@@ -84,11 +81,19 @@ public class RequestHandler implements Runnable {
         return requestHeaders;
     }
 
+    private String parseRequestBody(final HttpRequestHeader httpRequestHeader, final InputStream inputStream) throws IOException {
+        inputStreamReader = new BufferedReader(new InputStreamReader(inputStream));
+        int contentLength = httpRequestHeader.getContentLength();
+        char[] buffer = new char[contentLength];
+        inputStreamReader.read(buffer, 0, contentLength);
+        return new String(buffer);
+    }
+
     private Controller findController(final HttpRequest httpRequest) {
         return controllers.stream()
                 .filter(contoller -> contoller.canHandle(httpRequest))
                 .findFirst()
-                .orElseThrow(NoneMatchingControllerException::new);
+                .orElseThrow(NoMatchingControllerException::new);
     }
 
     private void close() {

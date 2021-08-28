@@ -1,15 +1,15 @@
 package nextstep.jwp.http;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class HttpRequestHeader {
+    public static final String CONTENT_LENGTH_HEADER = "Content-Length: ";
+
     private final String httpMethod;
     private final String protocol;
     private final String path;
     private final Map<String, String> queryParameters;
+    private final int contentLength;
 
     public HttpRequestHeader(final List<String> requestHeaders) {
         if (requestHeaders.isEmpty()) {
@@ -20,13 +20,28 @@ public class HttpRequestHeader {
         final String httpMethod = requestHeaderFirstLine[0];
         final String protocol = requestHeaderFirstLine[2];
         final String uri = requestHeaderFirstLine[1];
-
         final Map<String, String> queryParameters = parseQueryParameters(uri);
+        final int contentLength = parseContentLength(requestHeaders);
 
         this.httpMethod = httpMethod;
         this.protocol = protocol;
         this.path = trimPath(uri);;
         this.queryParameters = queryParameters;
+        this.contentLength = contentLength;
+    }
+
+    private int parseContentLength(final List<String> requestHeaders) {
+        final String contentLengthHeader = requestHeaders.stream()
+                .filter(header -> header.startsWith(CONTENT_LENGTH_HEADER))
+                .findFirst()
+                .orElseGet(() -> null);
+
+        if (contentLengthHeader == null) {
+            return 0;
+        }
+
+        final String contentLengthValue = contentLengthHeader.substring(CONTENT_LENGTH_HEADER.length());
+        return Integer.parseInt(contentLengthValue);
     }
 
     private String trimPath(final String uri) {
@@ -77,5 +92,9 @@ public class HttpRequestHeader {
 
     public Map<String, String> getQueryParameters() {
         return queryParameters;
+    }
+
+    public int getContentLength() {
+        return contentLength;
     }
 }

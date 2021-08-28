@@ -29,11 +29,12 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             String parsedUri = requestUri(inputStream);
+            if ("/".equals(parsedUri)) {
+                parsedUri = "/index.html";
+            }
             URL resource = this.getClass().getClassLoader().getResource("static" + parsedUri);
             File file = new File(resource.toURI());
-            String fileSource = String.join("\r\n", Files.readAllLines(file.toPath()));
-
-            final String responseBody = "Hello world!";
+            String fileSource = new String(Files.readAllBytes(file.toPath()));
 
             final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

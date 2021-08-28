@@ -3,9 +3,10 @@ package nextstep.jwp;
 public class StatusLine {
 
     private final String protocolVersion = "HTTP/1.1";
-    private final HttpStatus httpStatus = HttpStatus.OK;
+    private final HttpStatus httpStatus;
 
-    public StatusLine() {
+    public StatusLine(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
     }
 
     public String asString() {

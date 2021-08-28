@@ -16,6 +16,10 @@ public class URI {
     }
 
     public String getPath() {
+        if (hasQuery()) {
+            final int queryStart = value.indexOf("?");
+            return value.substring(0, queryStart);
+        }
         return value;
     }
 

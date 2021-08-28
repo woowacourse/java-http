@@ -3,9 +3,8 @@ package nextstep.jwp;
 public enum HttpStatus {
 
     OK(200),
-    MULTIPLE_CHOICES(300),
-    BAD_REQUEST(400),
-    INTERNAL_SERVER_ERROR(500);
+    FOUND(302),
+    UNAUTHORIZED(401);
 
     private final int code;
 

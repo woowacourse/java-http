@@ -46,7 +46,9 @@ public class RequestHandler implements Runnable {
             if (requestAsString.isEmpty()) {
                 return;
             }
+
             final HttpRequest httpRequest = HttpRequest.of(requestAsString);
+            HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, bytes);
 
             final URI uri = httpRequest.toURI();
 
@@ -55,36 +57,52 @@ public class RequestHandler implements Runnable {
             final String htmlExtension = ".html";
 
             if ("/login".equals(requestedResource)) {
-                requestedResource = requestedResource.concat(htmlExtension);
-                URL resource = getClass().getClassLoader().getResource("static" + requestedResource);
-                Path path = Paths.get(resource.getPath());
-                bytes = Files.readAllBytes(path);
-            }
-            if ("/login?account=gugu&password=password".equals(requestedResource)) {
-                URL resource = getClass().getClassLoader().getResource("static" + "/index.html");
-                Path path = Paths.get(resource.getPath());
-                bytes = Files.readAllBytes(path);
-                final Map<String, String> queryInfo = extractQuery(uri.getQuery());
-                final User user = InMemoryUserRepository.findByAccount(queryInfo.get("account"))
-                        .orElseThrow(RuntimeException::new);
-                if (user.checkPassword(queryInfo.get("password"))) {
-                    log.info("Login successful!");
+                if (!httpRequest.toURI().hasQuery()) {
+                    requestedResource = requestedResource.concat(htmlExtension);
+                    URL resource = getClass().getClassLoader().getResource("static" + requestedResource);
+                    Path path = Paths.get(resource.getPath());
+                    bytes = Files.readAllBytes(path);
+
+                    httpResponse = new HttpResponse(HttpStatus.OK, bytes);
                 } else {
-                    log.info("Login failed");
+                    final Map<String, String> queryInfo = extractQuery(uri.getQuery());
+                    final User user = InMemoryUserRepository.findByAccount(queryInfo.get("account"))
+                            .orElseThrow(() -> new UserNotFoundException(queryInfo.get("account")));
+                    if (user.checkPassword(queryInfo.get("password"))) {
+                        log.info("Login successful!");
+
+                        URL resource = getClass().getClassLoader().getResource("static" + "/index.html");
+                        Path path = Paths.get(resource.getPath());
+                        bytes = Files.readAllBytes(path);
+
+                        httpResponse = new HttpResponse(HttpStatus.FOUND, bytes);
+                    } else {
+                        log.info("Login failed");
+
+                        URL resource = getClass().getClassLoader().getResource("static" + "/401.html");
+                        Path path = Paths.get(resource.getPath());
+                        bytes = Files.readAllBytes(path);
+
+                        httpResponse = new HttpResponse(HttpStatus.UNAUTHORIZED, bytes);
+                    }
+
                 }
             }
             if ("/".equals(requestedResource)) {
                 bytes = "Hello world!".getBytes();
+
+                httpResponse = new HttpResponse(HttpStatus.OK, bytes);
             }
             if ("/index.html".equals(requestedResource)) {
                 URL resource = getClass().getClassLoader().getResource("static" + requestedResource);
                 Path path = Paths.get(resource.getPath());
                 bytes = Files.readAllBytes(path);
+
+                httpResponse = new HttpResponse(HttpStatus.OK, bytes);
             }
-            final HttpResponse response = new HttpResponse(bytes);
 
             final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
-            bufferedWriter.write(response.asString());
+            bufferedWriter.write(httpResponse.asString());
             bufferedWriter.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);

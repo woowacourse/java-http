@@ -10,7 +10,7 @@ public enum ContentTypeResponse {
     SVG("Content-Type: image/svg+xml"),
     OTHER("");
 
-    private String contentTypeHeader;
+    private final String contentTypeHeader;
 
     ContentTypeResponse(String contentTypeHeader) {
         this.contentTypeHeader = contentTypeHeader;

@@ -65,7 +65,7 @@ public class StaticResourceManager {
             final String absolutePath = staticFile.getAbsolutePath();
             final int staticFileNameIndex = absolutePath.indexOf(STATIC_FILE_PATH);
             final String staticFileName = absolutePath.substring(staticFileNameIndex + STATIC_FILE_PATH.length());
-            final String requestUrl = staticFileName.replaceAll("\\\\+","/");
+            final String requestUrl = staticFileName.replaceAll("\\\\+", "/");
             staticResources.put(ClientRequest.of(HttpMethod.GET, requestUrl), staticFile);
         }
     }

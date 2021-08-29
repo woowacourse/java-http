@@ -3,7 +3,7 @@ package nextstep.jwp.request;
 import java.util.Map;
 
 public class RequestHttpHeader {
-    private Map<String, String> requestHttpHeaderMap;
+    private final Map<String, String> requestHttpHeaderMap;
 
     private RequestHttpHeader(Map<String, String> requestHttpHeaderMap) {
         this.requestHttpHeaderMap = requestHttpHeaderMap;

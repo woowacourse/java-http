@@ -5,12 +5,11 @@ import java.util.Map;
 
 public class QueryParameterExtractor {
 
-    private QueryParameterExtractor() {
-    }
-
     private static final String QUERY_PARAM_SEPARATOR = "&";
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final String NEWLINE = "\r\n";
+    private QueryParameterExtractor() {
+    }
 
     public static Map<String, String> extract(String request) {
         final Map<String, String> requestQueryString = new HashMap<>();

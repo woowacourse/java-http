@@ -1,7 +1,5 @@
 package nextstep.jwp.controller;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
@@ -11,50 +9,60 @@ import nextstep.jwp.exception.HttpException;
 import nextstep.jwp.http.RequestBody;
 import nextstep.jwp.http.RequestLine;
 import nextstep.jwp.http.ResponseEntity;
-import nextstep.jwp.service.HttpService;
 
 public class FrontController {
     private final RequestLine requestLine;
-    private final HttpService service;
     private final RequestBody body;
 
     public FrontController(RequestBody body, RequestLine requestLine) {
         this.requestLine = requestLine;
         this.body = body;
-        this.service = new HttpService();
     }
 
-    public String response() throws IOException, InvocationTargetException, IllegalAccessException {
+    public String response() throws Exception {
         final String httpMethod = requestLine.getHttpMethod();
         final String uri = requestLine.getUri();
         Controller controller = new Controller();
         if (HttpMethod.GET.equals(httpMethod)) {
-            Set<String> getMappings = Arrays.stream(Controller.class.getDeclaredMethods())
-                    .filter(method -> method.isAnnotationPresent(GetMapping.class))
-                    .map(method -> method.getAnnotation(GetMapping.class).path())
-                    .collect(Collectors.toSet());
-            if (!getMappings.contains(uri)) {
-                return ResponseEntity
-                        .responseResource(uri)
-                        .build();
-            }
-            for (Method method : Controller.class.getDeclaredMethods()) {
-                if (matchGetMapping(method, uri)) {
-                    method.setAccessible(true);
-                    return (String) method.invoke(controller, uri);
-                }
-            }
+            return getMapping(uri, controller);
         }
         if (HttpMethod.POST.equals(httpMethod)) {
-            for (Method method : Controller.class.getDeclaredMethods()) {
-                if (matchPostMapping(method, uri)) {
-                    method.setAccessible(true);
-                    return (String) method.invoke(controller, uri, body);
-                }
-            }
+            return postMapping(uri, controller);
         }
 
         throw new HttpException("설정되어 있지 않은 http 메소드입니다.");
+    }
+
+    private String postMapping(String uri, Controller controller) throws Exception {
+        for (Method method : Controller.class.getDeclaredMethods()) {
+            if (matchPostMapping(method, uri)) {
+                return (String) method.invoke(controller, uri, body);
+            }
+        }
+        throw new HttpException("잘못된 http post 요청입니다.");
+    }
+
+    private String getMapping(String uri, Controller controller) throws Exception {
+        for (Method method : Controller.class.getDeclaredMethods()) {
+            if (matchGetMapping(method, uri)) {
+                return (String) method.invoke(controller, uri);
+            }
+        }
+
+        Set<String> declaredGetMappings = collectDeclaredGetMappings();
+        if (!declaredGetMappings.contains(uri)) {
+            return ResponseEntity
+                    .responseResource(uri)
+                    .build();
+        }
+        throw new HttpException("잘못된 http get 요청입니다.");
+    }
+
+    private Set<String> collectDeclaredGetMappings() {
+        return Arrays.stream(Controller.class.getDeclaredMethods())
+                .filter(method -> method.isAnnotationPresent(GetMapping.class))
+                .map(method -> method.getAnnotation(GetMapping.class).path())
+                .collect(Collectors.toSet());
     }
 
     private boolean matchGetMapping(Method method, String uri) {

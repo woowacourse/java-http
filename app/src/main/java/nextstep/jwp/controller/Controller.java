@@ -43,13 +43,6 @@ public class Controller {
                 .build();
     }
 
-    @GetMapping
-    public String origin(String uri) throws IOException {
-        return ResponseEntity
-                .responseResource(uri)
-                .build();
-    }
-
     @PostMapping(path = "/register")
     public String register(String uri, RequestBody body) throws IOException {
         Map<String, String> params = body.getParams();

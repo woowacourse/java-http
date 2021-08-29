@@ -4,13 +4,16 @@ import nextstep.jwp.model.httpmessage.common.CommonHttpHeader;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class RequestHeader extends CommonHttpHeader {
     private final Map<RequestHeaderType, String> headers = new LinkedHashMap<>();
 
     public void add(String type, String value) {
-        if (RequestHeaderType.contains(type)) {
-            headers.put(RequestHeaderType.of(type), value);
+        Optional<RequestHeaderType> requestHeaderType = RequestHeaderType.of(type);
+        if (requestHeaderType.isPresent()) {
+            headers.put(requestHeaderType.get(), value);
+            return;
         }
 
         if (commonHeaderContains(type)) {
@@ -20,8 +23,9 @@ public class RequestHeader extends CommonHttpHeader {
 
     @Override
     public String getHeader(String type) {
-        if (RequestHeaderType.contains(type)) {
-            return headers.get(RequestHeaderType.of(type));
+        Optional<RequestHeaderType> requestHeaderType = RequestHeaderType.of(type);
+        if (requestHeaderType.isPresent()) {
+            return headers.get(requestHeaderType.get());
         }
 
         if (commonHeaderContains(type)) {

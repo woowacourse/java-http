@@ -1,6 +1,10 @@
 package nextstep.jwp.model.httpmessage.request;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Arrays;
+import java.util.Optional;
 
 public enum RequestHeaderType {
     HOST("Host"),
@@ -8,22 +12,17 @@ public enum RequestHeaderType {
     ACCEPT("Accept"),
     COOKIE("Cookie");
 
+    private static final Logger LOG = LoggerFactory.getLogger(RequestHeaderType.class);
     private final String value;
 
     RequestHeaderType(String value) {
         this.value = value;
     }
 
-    public static boolean contains(String name) {
-        return Arrays.stream(values())
-                .anyMatch(type -> type.value.equals(name));
-    }
-
-    public static RequestHeaderType of(String value) {
+    public static Optional<RequestHeaderType> of(String value) {
         return Arrays.stream(values())
                 .filter(type -> type.value.equals(value))
-                .findAny()
-                .get(); // 모든 헤더를 저장하지 않아 일단 임시로 get()
+                .findAny();
     }
 
     public String value() {

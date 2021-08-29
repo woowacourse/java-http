@@ -23,7 +23,7 @@
   - [x] User 테스트 코드
   - [ ] Content, ContentType, StaticResource 테스트 코드
   - [ ] Service 테스트 코드
-  - [ ] InMemoryUserRepository 테스트 코드
+  - [x] InMemoryUserRepository 테스트 코드
 
 <br>
 

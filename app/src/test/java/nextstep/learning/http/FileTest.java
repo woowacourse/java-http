@@ -1,25 +1,17 @@
 package nextstep.learning.http;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import org.assertj.core.util.Lists;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.nio.file.Path;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.InstanceOfAssertFactories.spliterator;
 
 /**
  * 웹서버는 사용자가 요청한 html 파일을 제공 할 수 있어야 한다.<br>
@@ -49,21 +41,19 @@ class FileTest {
     }
 
     /**
-     * 읽어온 파일의 내용을 I/O Stream을 사용해서 사용자에게 전달 해야 한다.
-     * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
+     * 읽어온 파일의 내용을 I/O Stream을 사용해서 사용자에게 전달 해야 한다. File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() throws IOException { //TODO jar에서도 테스트 통과하는지 확인
+    void 파일의_내용을_읽는다() throws IOException { //TODO jar 에서도 테스트 통과하는지 확인
         final String fileName = "nextstep.txt";
 
         InputStream in = getClass().getResourceAsStream("/" + fileName);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
 
-        String content;
         final List<String> actual = new ArrayList<>();
 
-        while((content = bufferedReader.readLine()) != null) {
-            actual.add(content);
+        while (bufferedReader.ready()) {
+            actual.add(bufferedReader.readLine());
         }
 
         assertThat(actual).containsOnly("nextstep");

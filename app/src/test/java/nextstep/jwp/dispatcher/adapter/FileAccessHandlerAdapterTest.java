@@ -70,7 +70,7 @@ class FileAccessHandlerAdapterTest {
         assertThat(response.getStatusAsString()).isEqualTo("200");
         assertThat(response.getHeaders().getHeaderByName("Content-Type"))
             .get()
-            .isEqualTo("text/css");
+            .isEqualTo("text/css ");
     }
 
     @DisplayName("요청한 파일이 존재하지 않을 경우, 예외가 던져진다.")

@@ -41,7 +41,7 @@ public class UserController extends HttpHandler {
         } catch (RuntimeException e) {
             renderPage(
                 "./static/401.html",
-                HttpStatus.OK,
+                HttpStatus.UNAUTHORIZED,
                 httpResponse
             );
         }

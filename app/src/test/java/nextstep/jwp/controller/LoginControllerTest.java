@@ -60,11 +60,36 @@ class LoginControllerTest extends ControllerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("POST /login 요청 실패시 401.html로 리다이렉트한다.")
+    @DisplayName("POST /login 요청 실패시 401.html로 리다이렉트한다. - 존재하지 않는 계정")
     @Test
     void doPostFail() {
         // given
         String requestBody = "account=amazzi&password=password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + requestBody.getBytes().length + " ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
+                "",
+                requestBody);
+
+        // when
+        sendRequest(httpRequest);
+
+        // then
+        String expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: http://localhost:8080/401.html \r\n" ;
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("POST /login 요청 실패시 401.html로 리다이렉트한다. - 틀린 비밀번호")
+    @Test
+    void doPostFailWrong() {
+        // given
+        String requestBody = "account=amazzi&password=wrongpassword";
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",

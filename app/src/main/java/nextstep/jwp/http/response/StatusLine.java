@@ -5,9 +5,9 @@ import nextstep.jwp.http.response.type.StatusCode;
 import java.nio.charset.StandardCharsets;
 
 public class StatusLine {
-    private String protocol;
-    private String statusCode;
-    private String statusMessage;
+    private final String protocol;
+    private final String statusCode;
+    private final String statusMessage;
 
     public StatusLine(StatusCode statusCode) {
         this.protocol = "HTTP/1.1";

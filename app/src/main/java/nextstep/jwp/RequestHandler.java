@@ -45,14 +45,14 @@ public class RequestHandler implements Runnable {
                 return;
             }
 
-            if (uri.equals("/index") || uri.equals("/index.html") || uri.equals("/")) {
+            if (httpMethod.equals("GET") && (uri.equals("/index") || uri.equals("/index.html") || uri.equals("/"))) {
                 responseBody = getStaticFileContents("/index.html");
                 response = replyOkResponse(responseBody, outputStream);
-            } else if (uri.equals("/login.html") || uri.equals("/login")) {
+            } else if (httpMethod.equals("GET") && (uri.equals("/login.html") || uri.equals("/login"))) {
                 responseBody = getStaticFileContents("/login.html");
                 response = replyOkResponse(responseBody, outputStream);
-            } else if (uri.matches("/login.*account.*password.*")) {
-                Optional<User> user = userService.findUser(uri);
+            } else if (httpMethod.equals("GET") && (uri.matches("/login.*account.*password.*"))) {
+                Optional<User> user = userService.findUserFromUri(uri);
                 log.debug(user.toString());
                 if (user.isEmpty()) {
                     responseBody = getStaticFileContents("/401.html");
@@ -61,14 +61,22 @@ public class RequestHandler implements Runnable {
                     responseBody = getStaticFileContents("/index.html");
                     response = replyOkResponse(responseBody, outputStream);
                 }
+            } else if (httpMethod.equals("POST") && (uri.equals("/login.html") || uri.equals("/login"))) {
+                String requestBody = extractRequestBody(bufferedReader, parsedRequestHeaders);
+                Optional<User> user = userService.findUserFromBody(requestBody);
+                if (user.isEmpty()) {
+                    responseBody = getStaticFileContents("/401.html");
+                    response = reply302Response(responseBody, outputStream);
+                } else {
+                    responseBody = getStaticFileContents("/index.html");
+                    response = replyOkResponse(responseBody, outputStream);
+                }
+
             } else if (httpMethod.equals("GET") && (uri.equals("/register") || uri.equals("/register.html"))) {
                 responseBody = getStaticFileContents("/register.html");
                 response = replyOkResponse(responseBody, outputStream);
             } else if (httpMethod.equals("POST") && uri.equals("/register")) {
-                int contentLength = Integer.parseInt(parsedRequestHeaders.get("Content-Length").strip());
-                char[] buffer = new char[contentLength];
-                bufferedReader.read(buffer, 0, contentLength);
-                String requestBody = new String(buffer);
+                String requestBody = extractRequestBody(bufferedReader, parsedRequestHeaders);
                 userService.saveUser(requestBody);
 
                 responseBody = getStaticFileContents("/index.html");
@@ -85,6 +93,15 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
+    }
+
+    private String extractRequestBody(BufferedReader bufferedReader, Map<String, String> parsedRequestHeaders)
+            throws IOException {
+        int contentLength = Integer.parseInt(parsedRequestHeaders.get("Content-Length").strip());
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+        return requestBody;
     }
 
     private String reply302Response(String responseBody, OutputStream outputStream) throws IOException {

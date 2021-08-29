@@ -13,7 +13,7 @@ public class UserService {
     }
 
 
-    public Optional<User> findUser(String uri) {
+    public Optional<User> findUserFromUri(String uri) {
         Map<String, String> requestUserData = extractQueryFromLoginUri(uri);
         String account = requestUserData.getOrDefault("account", null);
         String password = requestUserData.getOrDefault("password", null);
@@ -23,8 +23,19 @@ public class UserService {
         return user;
     }
 
+    public Optional<User> findUserFromBody(String requestBody) {
+        Map<String, String> loginData = extractUserDataFromRequestBody(requestBody);
+        String account = loginData.getOrDefault("account", null);
+        String password = loginData.getOrDefault("password", null);
+
+        Optional<User> user = InMemoryUserRepository.findByAccountAndPassword(account, password);
+
+        return user;
+    }
+
+
     public void saveUser(String requestBody) {
-        Map<String, String> registerData = extractRegisterDataFromRequestBody(requestBody);
+        Map<String, String> registerData = extractUserDataFromRequestBody(requestBody);
 
         InMemoryUserRepository.save(new User(InMemoryUserRepository.autoIncrementId,
                 registerData.get("account"),
@@ -51,7 +62,7 @@ public class UserService {
         return extractedQuery;
     }
 
-    private Map<String, String> extractRegisterDataFromRequestBody(String requestBody) {
+    private Map<String, String> extractUserDataFromRequestBody(String requestBody) {
         Map<String, String> extractData = new HashMap<>();
         String[] splitRequestBody = requestBody.split("=|&");
 

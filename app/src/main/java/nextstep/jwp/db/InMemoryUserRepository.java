@@ -26,7 +26,7 @@ public class InMemoryUserRepository {
 
     public static Optional<User> findByAccountAndPassword(String account, String password) {
         Optional<User> user = Optional.ofNullable(database.get(account));
-        if (user != null && user.get().checkPassword(password)) {
+        if (user.isPresent() && user.get().checkPassword(password)) {
             return user;
         }
         return Optional.empty();

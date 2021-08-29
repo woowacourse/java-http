@@ -35,7 +35,7 @@ class RequestHandlerTest {
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + 5670 + " \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
                 responseBody;
         assertThat(socket.output()).isEqualTo(expected);
@@ -69,7 +69,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("로그인 성공시 index.html로 리다이렉트")
+    @DisplayName("GET 로그인 성공시 index.html로 리다이렉트")
     @Test
     void loginSuccess() throws IOException {
         // given
@@ -235,6 +235,37 @@ class RequestHandlerTest {
                 "\r\n" +
                 responseBody;
 
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("POST 로그인 성공시 index.html로 리다이렉트된다.")
+    @Test
+    void postLoginSuccess() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */*",
+                "",
+                "account=gugu&password=password&email=hkkang%40woowahan.com");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "\r\n" +
+                responseBody;
         assertThat(socket.output()).isEqualTo(expected);
     }
 }

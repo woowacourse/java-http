@@ -1,8 +1,5 @@
 package nextstep.jwp.controller;
 
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import nextstep.jwp.http.HttpHeader;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
@@ -10,10 +7,10 @@ import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.ResponseStatus;
 import nextstep.jwp.util.FileUtil;
 
-public class IndexPageController extends AbstractController {
+public class LoginController extends AbstractController{
 
     private static final HttpMethod HTTP_METHOD = HttpMethod.GET;
-    private static final String URI_PATH = "/index.html";
+    private static final String URI_PATH = "/login";
 
     @Override
     HttpMethod httpMethod() {

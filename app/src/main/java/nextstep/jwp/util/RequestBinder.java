@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import nextstep.jwp.HttpMethod;
+import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpHeader;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.Protocol;

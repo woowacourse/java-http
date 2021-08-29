@@ -1,15 +1,10 @@
 package nextstep;
 
 import com.google.common.base.Splitter;
-import com.sun.net.httpserver.Headers;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.HttpMethod;
+import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpHeader;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.Protocol;

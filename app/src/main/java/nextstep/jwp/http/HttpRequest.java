@@ -1,7 +1,5 @@
 package nextstep.jwp.http;
 
-import nextstep.jwp.HttpMethod;
-
 public class HttpRequest {
 
     private HttpMethod httpMethod;

@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.ControllerContainer;
 import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.util.RequestBinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,18 +38,18 @@ public class RequestHandler implements Runnable {
             HttpRequest httpRequest = RequestBinder.createRequestByMessage(bufferedReader);
             Controller controller = ControllerContainer.findController(httpRequest);
 
-            String s = controller.doService(httpRequest);
-            URL resource = getClass().getClassLoader().getResource(controller.doService(httpRequest));
-            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            HttpResponse httpResponse = controller.doService(httpRequest);
+//            URL resource = getClass().getClassLoader().getResource(controller.doService(httpRequest));
+//            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+//
+//            final String response = String.join("\r\n",
+//                    "HTTP/1.1 200 OK ",
+//                    "Content-Type: text/html;charset=utf-8 ",
+//                    "Content-Length: " + responseBody.getBytes().length + " ",
+//                    "",
+//                    responseBody);
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.toResponseMessage().getBytes());
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);

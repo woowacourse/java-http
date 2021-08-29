@@ -1,9 +1,6 @@
 package nextstep.jwp;
 
-import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.DefaultController;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +9,7 @@ public class RequestMapping {
     private static final Map<String, Controller> controllers = new HashMap<>();
 
     static {
-        controllers.put("/", new DefaultController());
+        controllers.put("/", new MainController());
         controllers.put("/login", new LoginController());
         controllers.put("/register", new RegisterController());
     }
@@ -21,6 +18,6 @@ public class RequestMapping {
     }
 
     public static Controller getController(String requestUrl) {
-        return controllers.get(requestUrl);
+        return controllers.getOrDefault(requestUrl, new DefaultController());
     }
 }

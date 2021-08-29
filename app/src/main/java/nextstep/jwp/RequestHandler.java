@@ -33,10 +33,6 @@ public class RequestHandler implements Runnable {
             HttpResponse httpResponse = new HttpResponse(outputStream);
 
             Controller controller = RequestMapping.getController(httpRequest.getPath());
-            if (controller == null) {
-                httpResponse.forward(httpRequest.getPath());
-                return;
-            }
 
             controller.service(httpRequest, httpResponse);
         } catch (IOException exception) {

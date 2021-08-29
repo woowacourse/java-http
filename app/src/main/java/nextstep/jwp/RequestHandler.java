@@ -39,12 +39,8 @@ public class RequestHandler implements Runnable {
             HttpResponse httpResponse = new HttpResponse(outputStream);
 
             if (!httpRequest.isQueryParamsEmpty()) {
-                Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getQueryParam("account"));
-                if (user.isPresent()) {
-                    LOG.debug("user Info : {}", user.get().getAccount());
-                } else {
-                    LOG.error("없는 사용자입니다");
-                }
+                User user = getUser(httpRequest);
+                passwordCheck(httpRequest, user);
             }
 
             httpResponse.transfer(httpRequest.getUrl());
@@ -54,6 +50,26 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
+    }
+
+    private void passwordCheck(final HttpRequest httpRequest, final User user) {
+        if (user.checkPassword(httpRequest.getQueryParam("password"))) {
+            LOG.debug("password Collect! : {}", user.getAccount());
+            return;
+        }
+        LOG.error("password InCollect!!");
+        throw new IllegalArgumentException("password InCollect");
+    }
+
+    private User getUser(final HttpRequest httpRequest) {
+        String requestUserAccount = httpRequest.getQueryParam("account");
+        Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getQueryParam("account"));
+        if (user.isPresent()) {
+            LOG.debug("user Account : {}", user.get().getAccount());
+            return user.get();
+        }
+        LOG.debug("user Not Exist!! : {}", requestUserAccount);
+        throw new IllegalArgumentException("유저가 존재하지 않습니다");
     }
 
     private void close() {

@@ -13,7 +13,7 @@ public class StatusLine {
     }
 
     public StatusLine(StatusCode statusCode) {
-        this.protocol = "HTTP 1.1";
+        this.protocol = "HTTP/1.1";
         this.statusCode = statusCode.getCode();
         this.message = statusCode.getMessage();
     }

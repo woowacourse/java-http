@@ -1,12 +1,13 @@
 package nextstep.jwp.http.response;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
 public class ResponseHeader {
 
-    private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> headers = new LinkedHashMap<>();
 
     public void setContentType(ContentType contentType) {
         this.headers.put("Content-Type", contentType.getValue());

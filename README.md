@@ -13,9 +13,17 @@
   - [x] 회원가입을 완료하면 index.html로 리다이렉트한다. 
   - [x] 로그인도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경하자.
 - [x] CSS 지원하기
-- [ ] 각 동작 로그 남기기
+- [x] 각 동작 로그 남기기
 - [x] 404.html 연결
 - [x] favicon.ico 연결
+- [ ] 테스트 코드 작성
+  - [ ] 컨트롤러 테스트 코드
+  - [ ] HTTP Request 테스트 코드
+  - [ ] HTTP Response 테스트 코드
+  - [ ] User 테스트 코드
+  - [ ] Content, ContentType, StaticResource 테스트 코드
+  - [ ] Service 테스트 코드
+  - [ ] InMemoryUserRepository 테스트 코드
 
 <br>
 

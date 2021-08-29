@@ -17,7 +17,7 @@ public class ResourceRequestProcessor implements RequestProcessor {
 
     @Override
     public String processResponse(CustomHttpRequest request, OutputStream outputStream) {
-        String uri = request.getUri();
+        String uri = request.getPath();
         String fileSource = fileSourceFromUri(uri);
         if (fileSource == null) {
             return CustomHttpResponse.notFound(DEFAULT_URI);

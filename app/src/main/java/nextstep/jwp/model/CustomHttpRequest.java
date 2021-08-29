@@ -8,15 +8,15 @@ import java.util.Map;
 
 public class CustomHttpRequest {
     private final String method;
-    private final String uri;
+    private final String path;
     private final String httpVersion;
     private final Map<String, String> headers;
     private final Map<String, String> params;
 
-    public CustomHttpRequest(String method, String uri, String httpVersion,
+    public CustomHttpRequest(String method, String path, String httpVersion,
                              Map<String, String> headers, Map<String, String> params) {
         this.method = method;
-        this.uri = uri;
+        this.path = path;
         this.httpVersion = httpVersion;
         this.headers = headers;
         this.params = params;
@@ -40,7 +40,7 @@ public class CustomHttpRequest {
 
         if (method.equals("GET")) {
             path = dividePathFromUri(uri);
-            if (!path.equals(uri)) {
+            if (uri.contains("?")) {
                 parseParams(params, uri.substring(path.length() + 1));
             }
         }
@@ -54,14 +54,22 @@ public class CustomHttpRequest {
             parseParams(params, requestBody);
         }
 
-        return new CustomHttpRequest(method, uri, httpVersion, headers, params);
+        return new CustomHttpRequest(method, path, httpVersion, headers, params);
     }
 
     private static String dividePathFromUri(String uri) {
         if (!uri.contains("?")) {
+            uri = appendSuffixIfNotAppended(uri);
             return uri;
         }
         return uri.substring(0, uri.indexOf('?'));
+    }
+
+    private static String appendSuffixIfNotAppended(String uri) {
+        if (uri.contains(".")) {
+            return uri;
+        }
+        return uri + ".html";
     }
 
     private static void parseParams(Map<String, String> params, String rawParams) {
@@ -79,8 +87,8 @@ public class CustomHttpRequest {
         return method;
     }
 
-    public String getUri() {
-        return uri;
+    public String getPath() {
+        return path;
     }
 
     public String getHttpVersion() {

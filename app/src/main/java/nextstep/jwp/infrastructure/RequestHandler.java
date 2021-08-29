@@ -29,7 +29,7 @@ public class RequestHandler implements Runnable {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             CustomHttpRequest request = CustomHttpRequest.from(reader);
 
-            String response = mappingProcessor(request.getUri())
+            String response = mappingProcessor(request.getPath())
                     .processResponse(request, outputStream);
 
             outputStream.write(response.getBytes());

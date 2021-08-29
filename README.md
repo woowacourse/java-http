@@ -20,7 +20,7 @@
   - [ ] 컨트롤러 테스트 코드
   - [ ] HTTP Request 테스트 코드
   - [ ] HTTP Response 테스트 코드
-  - [ ] User 테스트 코드
+  - [x] User 테스트 코드
   - [ ] Content, ContentType, StaticResource 테스트 코드
   - [ ] Service 테스트 코드
   - [ ] InMemoryUserRepository 테스트 코드

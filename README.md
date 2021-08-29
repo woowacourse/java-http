@@ -16,11 +16,12 @@
 - [x] 404.html 연결
 - [x] favicon.ico 연결
 - [ ] 테스트 코드 작성
-  - [ ] 컨트롤러 테스트 코드
+  - [ ] RequestHandler 테스트 코드 수정
+  - [x] 컨트롤러 테스트 코드 
     - [x] LoginController 테스트 코드
     - [x] RegisterController 테스트 코드
     - [x] StaticResourceController 테스트 코드
-    - [ ] Controllers 테스트 코드
+    - [x] Controllers 테스트 코드
   - [x] HTTP Request 테스트 코드
     - [x] RequestLine 테스트 코드
       - [x] Method 테스트 코드

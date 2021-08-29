@@ -38,17 +38,17 @@ public class DefaultController extends AbstractController {
             return HttpResponse.ofByteArray(HttpStatus.OK, ContentType.JAVASCRIPT, bytes);
         }
         if ("/assets/chart-pie.js".equals(path)) {
-            log.info("GET /assets/chart-pie/js");
+            log.info("GET /assets/chart-pie.js");
             final byte[] bytes = readFile(path);
             return HttpResponse.ofByteArray(HttpStatus.OK, ContentType.JAVASCRIPT, bytes);
         }
-        if ("/assets/chart-area".equals(path)) {
-            log.info("GET /assets/chart-area");
+        if ("/assets/chart-area.js".equals(path)) {
+            log.info("GET /assets/chart-area.js");
             final byte[] bytes = readFile(path);
             return HttpResponse.ofByteArray(HttpStatus.OK, ContentType.JAVASCRIPT, bytes);
         }
-        if ("/assets/chart-bar".equals(path)) {
-            log.info("GET /assets/chart-bar");
+        if ("/assets/chart-bar.js".equals(path)) {
+            log.info("GET /assets/chart-bar.js");
             final byte[] bytes = readFile(path);
             return HttpResponse.ofByteArray(HttpStatus.OK, ContentType.JAVASCRIPT, bytes);
         }

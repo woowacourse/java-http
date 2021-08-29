@@ -18,10 +18,14 @@ public class RequestUrl {
         if (parsedRequestUrl.contains(QUERY_STRING_SEPARATOR)) {
             final int queryParamSeparator = parsedRequestUrl.lastIndexOf("?");
             final String requestUrl = parsedRequestUrl.substring(0, queryParamSeparator);
-            QueryParam queryParam = QueryParam.of(parsedRequestUrl.substring(queryParamSeparator + 1));
+            final QueryParam queryParam = QueryParam.of(parsedRequestUrl.substring(queryParamSeparator + 1));
             return new RequestUrl(requestUrl, queryParam);
         }
         return new RequestUrl(parsedRequestUrl, null);
+    }
+
+    public QueryParam getQueryParam() {
+        return queryParam;
     }
 
     @Override
@@ -29,12 +33,11 @@ public class RequestUrl {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RequestUrl that = (RequestUrl) o;
-        return Objects.equals(requestUrl, that.requestUrl) &&
-                Objects.equals(queryParam, that.queryParam);
+        return Objects.equals(requestUrl, that.requestUrl);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(requestUrl, queryParam);
+        return Objects.hash(requestUrl);
     }
 }

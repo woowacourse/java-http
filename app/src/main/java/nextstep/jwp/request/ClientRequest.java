@@ -15,6 +15,10 @@ public class ClientRequest {
         return new ClientRequest(HttpMethod.of(method), RequestUrl.of(url));
     }
 
+    public QueryParam getQueryParam() {
+        return requestUrl.getQueryParam();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

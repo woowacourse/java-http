@@ -18,8 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static nextstep.jwp.response.HttpStatusCode.NOT_FOUND;
-import static nextstep.jwp.response.HttpStatusCode.OK;
+import static nextstep.jwp.response.HttpStatusCode.*;
 
 public class StaticResourceManager {
 
@@ -65,5 +64,27 @@ public class StaticResourceManager {
 
     public void handleNotFound(OutputStream outputStream) throws IOException {
         ServerResponse.response(this.notFound, NOT_FOUND, outputStream);
+    }
+
+    public void handleDynamicResult(String result, OutputStream outputStream) throws IOException {
+        if (result.contains("redirect: ")) {
+            handleRedirect(result, outputStream);
+        }
+        handlePath(result, outputStream);
+    }
+
+    private void handleRedirect(String result, OutputStream outputStream) throws IOException {
+        result = result.replace("redirect :", "");
+        final ClientRequest resultRequest = ClientRequest.of("GET", result);
+        if (canHandle(resultRequest)) {
+            ServerResponse.response(staticResources.get(resultRequest), FOUND, outputStream);
+        }
+    }
+
+    private void handlePath(String result, OutputStream outputStream) throws IOException {
+        final ClientRequest resultRequest = ClientRequest.of("GET", result);
+        if (canHandle(resultRequest)) {
+            ServerResponse.response(staticResources.get(resultRequest), OK, outputStream);
+        }
     }
 }

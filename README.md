@@ -36,9 +36,9 @@
     - [x] Map\<ClientRequest, File>로 캐싱해서 가지고 있으면 좋을 듯
     - [x] 알맞은 ClientRequest 라면 File을 바로 반환할 것
 
-- [ ] 클라이언트의 요청이 동적 처리를 요청하는지 검사
-    - [ ] 서버 처음 시작하기 전에 Bean으로 등록한 객체들을 싱글톤으로 띄워둘 것
-        - [ ] 해당 Bean에서 `@Get(path)`, `@Post(path)` 등을 검사하여 Map\<ClientRequest, Controller> 로 저장해두면 좋을 듯
+- [x] 클라이언트의 요청이 동적 처리를 요청하는지 검사
+    - [x] 서버 처음 시작하기 전에 Bean으로 등록한 객체들을 싱글톤으로 띄워둘 것
+        - [x] 해당 Bean에서 `@GetMapping(path)`, `@PostMappig(path)` 등을 검사하여 Map\<ClientRequest, Map<Object, Method>> 로 저장해두기
         - [ ] Controller DI도 적용해줄 것
 
 - [x] 정적/동적 모두 매핑될 정보가 없으면 404.html 반환할 것

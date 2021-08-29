@@ -24,7 +24,7 @@ public class RequestLine {
         String[] splitedLine = splitRequestLine(requestLine);
 
         Method method = Method.matchOf(splitedLine[METHOD_INDEX]);
-        RequestUri requestURI = new RequestUri(splitedLine[URI_INDEX]);
+        RequestUri requestURI = RequestUri.parse(splitedLine[URI_INDEX]);
         HttpVersion httpVersion = HttpVersion.matchOf(splitedLine[VERSION_INDEX]);
 
         return new RequestLine(method, requestURI, httpVersion);
@@ -40,11 +40,19 @@ public class RequestLine {
         return splitedLine;
     }
 
+    public String getUriParameter(String parameter) {
+        return requestUri.getQueryParameter(parameter);
+    }
+
     public String getUri() {
         return requestUri.getValue();
     }
 
     public boolean isSameMethod(Method method) {
         return method.equals(this.method);
+    }
+
+    public boolean hasQueryParam() {
+        return requestUri.hasQueryParam();
     }
 }

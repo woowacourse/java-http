@@ -2,11 +2,11 @@
 
 - [x] 서버를 실행시켜서 브라우저로 서버(`http://localhost:8080/index.html`)에 접속하면 index.html 페이지를 보여준다.
 - [x] `http://localhost:8080/login`으로 접속하면 로그인 페이지(login.html)를 보여준다.
-  - [ ] Query String을 추가해서 로그인 페이지에 접속했을 때 아이디, 비밀번호가 일치하면 회원을 조회한다.  
+  - [x] Query String을 추가해서 로그인 페이지에 접속했을 때 아이디, 비밀번호가 일치하면 회원을 조회한다.  
     `http://localhost:8080/login?account=gugu&password=password`
-- [ ] 회원을 조회해서 로그인에 성공하면 /index.html로 리다이렉트한다. 
-  - [ ] `/login?account=gugu&password=password`로 접근해서 로그인 성공하면 응답 헤더에 http status code를 302로 반환한다. 
-  - [ ] 로그인에 실패하면 401.html로 리다이렉트한다.
+- [x] 회원을 조회해서 로그인에 성공하면 /index.html로 리다이렉트한다. 
+  - [x] `/login?account=gugu&password=password`로 접근해서 로그인 성공하면 응답 헤더에 http status code를 302로 반환한다. 
+  - [x] 로그인에 실패하면 401.html로 리다이렉트한다.
 - [x] http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)를 보여준다. 
   - [x] 회원가입 페이지를 보여줄 때는 GET을 사용한다. 
   - [x] 회원가입을 버튼을 누르면 HTTP method를 GET이 아닌 POST를 사용한다. 

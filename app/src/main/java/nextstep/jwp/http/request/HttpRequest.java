@@ -39,6 +39,10 @@ public class HttpRequest {
         return RequestBody.empty();
     }
 
+    public String getUriParameter(String parameter) {
+        return requestLine.getUriParameter(parameter);
+    }
+
     public String getBodyParameter(String parameter) {
         return requestBody.getParameter(parameter);
     }
@@ -49,5 +53,9 @@ public class HttpRequest {
 
     public boolean hasMethod(Method method) {
         return requestLine.isSameMethod(method);
+    }
+
+    public boolean hasQueryParam() {
+        return requestLine.hasQueryParam();
     }
 }

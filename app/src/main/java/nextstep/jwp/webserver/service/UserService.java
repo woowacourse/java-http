@@ -16,4 +16,8 @@ public class UserService {
 
         return user.get().checkPassword(password);
     }
+
+    public void register(User user) {
+        InMemoryUserRepository.save(user);
+    }
 }

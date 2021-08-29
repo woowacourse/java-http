@@ -2,12 +2,16 @@ package nextstep.jwp.webserver.model;
 
 public class User {
 
-    private final long id;
+    private Long id;
     private final String account;
     private final String password;
     private final String email;
 
-    public User(long id, String account, String password, String email) {
+    public User(String account, String email, String password) {
+        this(null, account, email, password);
+    }
+
+    public User(Long id, String account, String password, String email) {
         this.id = id;
         this.account = account;
         this.password = password;
@@ -20,6 +24,10 @@ public class User {
 
     public String getAccount() {
         return account;
+    }
+
+    public void assignId(long id) {
+        this.id = id;
     }
 
     @Override

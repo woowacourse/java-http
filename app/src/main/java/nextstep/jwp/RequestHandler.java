@@ -36,11 +36,19 @@ public class RequestHandler implements Runnable {
             if (line == null) {
                 return;
             }
+
             final String[] request = line.split(" ");
+            while (!"".equals(line)) {
+                line = bufferedReader.readLine();
+                header.append(line);
+                header.append("\r\n");
+            }
+
             final String uri = request[1];
             String fileName = uri;
             String queryString = null;
-
+            String status = "200 OK";
+            String location = null;
             if (uri.startsWith("/login")) {
                 int index = uri.indexOf("?");
                 if (index == -1) {
@@ -54,25 +62,21 @@ public class RequestHandler implements Runnable {
                     String password = getDataFromQueryString(queryString.substring(andIndex));
 
                     User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
-                    user.checkPassword(password);
+                    if (user.checkPassword(password)) {
+                        fileName = "/index.html";
+                        status = "302";
+                        location = "/index.html";
+                    } else {
+                        fileName = "/401.html";
+                        status = "302";
+                        location = "/401.html";
+                    }
                 }
-            }
-
-            while (!"".equals(line)) {
-                line = bufferedReader.readLine();
-                header.append(line);
-                header.append("\r\n");
             }
 
             byte[] body = new byte[0];
             body = Files.readAllBytes(getResources(fileName).toPath());
-
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + body.length + " ",
-                    "",
-                    new String(body));
+            final String response = makeResponse(status, location, body);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -82,6 +86,17 @@ public class RequestHandler implements Runnable {
             close();
         }
     }
+
+    private String makeResponse(String status, String location, byte[] body) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + status,
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + body.length + " ",
+                "Location: " + location,
+                "",
+                new String(body));
+    }
+
     private String getDataFromQueryString(String data) {
         return data.substring(data.indexOf("=") + 1);
     }

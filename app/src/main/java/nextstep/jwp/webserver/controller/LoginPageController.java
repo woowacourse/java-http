@@ -3,7 +3,10 @@ package nextstep.jwp.webserver.controller;
 import java.util.EnumSet;
 
 import nextstep.jwp.framework.context.AbstractController;
-import nextstep.jwp.framework.http.*;
+import nextstep.jwp.framework.http.HttpMethod;
+import nextstep.jwp.framework.http.HttpRequest;
+import nextstep.jwp.framework.http.HttpResponse;
+import nextstep.jwp.framework.http.Query;
 import nextstep.jwp.framework.http.template.ResourceResponseTemplate;
 import nextstep.jwp.framework.http.template.StringResponseTemplate;
 import nextstep.jwp.webserver.service.UserService;

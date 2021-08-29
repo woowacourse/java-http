@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import nextstep.jwp.framework.http.*;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class HeaderParserTest {
 

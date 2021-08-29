@@ -34,6 +34,8 @@ public class RequestHandler implements Runnable {
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             close();
         }

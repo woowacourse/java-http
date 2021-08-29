@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import nextstep.jwp.constants.Headers;
 import nextstep.jwp.constants.Http;
 import nextstep.jwp.controller.FrontController;
@@ -54,8 +55,8 @@ public class HttpServer {
         return null;
     }
 
-    public String getResponse() throws IOException {
-        final FrontController frontController = new FrontController(this.body, this.headers, this.requestLine);
+    public String getResponse() throws Exception {
+        final FrontController frontController = new FrontController(this.body, this.requestLine);
 
         return frontController.response();
     }

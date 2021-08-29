@@ -1,7 +1,7 @@
 package nextstep.jwp.db;
 
 
-import nextstep.jwp.model.User;
+import nextstep.jwp.model.user.domain.User;
 
 import java.util.Map;
 import java.util.Optional;

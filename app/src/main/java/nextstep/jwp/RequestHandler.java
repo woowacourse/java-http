@@ -1,11 +1,12 @@
 package nextstep.jwp;
 
+import nextstep.jwp.model.handler.CustomHandler;
+import nextstep.jwp.model.handler.HandlerMapper;
+import nextstep.jwp.model.JwpHttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.Objects;
 
@@ -24,18 +25,11 @@ public class RequestHandler implements Runnable {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
-
-            final String responseBody = "Hello world!";
-
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+             final OutputStream outputStream = connection.getOutputStream();
+             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            JwpHttpRequest request = JwpHttpRequest.of(reader);
+            CustomHandler handler = HandlerMapper.from(request.getUri()); // todo: 추상화하기!
+            handler.handle(request, outputStream);
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);

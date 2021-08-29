@@ -5,6 +5,7 @@ import nextstep.jwp.http.message.element.Headers;
 import nextstep.jwp.http.message.element.session.HttpSession;
 import nextstep.jwp.http.message.element.session.HttpSessions;
 import nextstep.jwp.http.message.element.cookie.Cookie;
+import nextstep.jwp.http.message.element.session.Session;
 import nextstep.jwp.http.message.request.request_line.HttpMethod;
 import nextstep.jwp.http.message.request.request_line.HttpPath;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,8 +62,8 @@ class HttpRequestTest {
     void getSession_noValue() {
         assertThat(httpRequest.getSession()).isNotNull();
 
-        HttpSession session1 = httpRequest.getSession();
-        HttpSession session2 = httpRequest.getSession();
+        Session session1 = httpRequest.getSession();
+        Session session2 = httpRequest.getSession();
         assertThat(session1).isSameAs(session2);
     }
 
@@ -79,8 +80,8 @@ class HttpRequestTest {
 
         assertThat(httpRequest.getSession()).isNotNull();
 
-        HttpSession session1 = httpRequest.getSession();
-        HttpSession session2 = httpRequest.getSession();
+        Session session1 = httpRequest.getSession();
+        Session session2 = httpRequest.getSession();
         assertThat(session1).isSameAs(session2);
     }
 }

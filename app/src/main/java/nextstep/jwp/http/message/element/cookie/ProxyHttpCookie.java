@@ -9,11 +9,12 @@ public class ProxyHttpCookie implements Cookie {
     public Map<String, String> changedCookie;
 
     public ProxyHttpCookie() {
-        this.changedCookie = new HashMap<>();
+        this(null);
     }
 
     public ProxyHttpCookie(Cookie cookie) {
         this.cookie = cookie;
+        this.changedCookie = new HashMap<>();
     }
 
     public boolean isChanged() {

@@ -6,12 +6,12 @@ import java.util.Optional;
 
 public class HttpSessions {
 
-    public static final Map<String, HttpSession> SESSIONS = new HashMap<>();
+    public static final Map<String, Session> SESSIONS = new HashMap<>();
 
     private HttpSessions() {
     }
 
-    public static Optional<HttpSession> get(String uuid) {
+    public static Optional<Session> get(String uuid) {
         return Optional.ofNullable(SESSIONS.get(uuid));
     }
 
@@ -19,7 +19,7 @@ public class HttpSessions {
         SESSIONS.remove(uuid);
     }
 
-    public static void put(HttpSession httpSession) {
+    public static void put(Session httpSession) {
         SESSIONS.put(httpSession.getSessionId(), httpSession);
     }
 }

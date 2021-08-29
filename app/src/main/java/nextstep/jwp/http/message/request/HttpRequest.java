@@ -1,11 +1,15 @@
 package nextstep.jwp.http.message.request;
 
-import nextstep.jwp.http.message.element.*;
+import nextstep.jwp.http.message.element.Body;
+import nextstep.jwp.http.message.element.Headers;
+import nextstep.jwp.http.message.element.HttpVersion;
 import nextstep.jwp.http.message.element.cookie.Cookie;
 import nextstep.jwp.http.message.element.cookie.HttpCookie;
 import nextstep.jwp.http.message.element.cookie.ProxyHttpCookie;
 import nextstep.jwp.http.message.element.session.HttpSession;
 import nextstep.jwp.http.message.element.session.HttpSessions;
+import nextstep.jwp.http.message.element.session.ProxyHttpSession;
+import nextstep.jwp.http.message.element.session.Session;
 import nextstep.jwp.http.message.request.request_line.HttpMethod;
 import nextstep.jwp.http.message.request.request_line.HttpPath;
 import nextstep.jwp.http.message.request.request_line.RequestLine;
@@ -18,7 +22,7 @@ public class HttpRequest {
     private final Headers headers;
     private final Body body;
 
-    private HttpSession httpSession;
+    private Session httpSession;
     private Cookie cookie;
 
     public HttpRequest(RequestLine requestLine, Headers headers, Body body) {
@@ -50,24 +54,33 @@ public class HttpRequest {
     public Cookie getCookie() {
         return Optional.ofNullable(cookie)
                 .orElseGet(() -> {
-                            ProxyHttpCookie cookie = getHeader("Cookie")
-                                    .map(HttpCookie::new)
-                                    .map(ProxyHttpCookie::new)
-                                    .orElseGet(ProxyHttpCookie::new);
-
+                            ProxyHttpCookie cookie = createProxyCookie();
                             this.cookie = cookie;
                             return cookie;
                         }
                 );
     }
 
-    public HttpSession getSession() {
+    private ProxyHttpCookie createProxyCookie() {
+        return getHeader("Cookie")
+                .map(HttpCookie::new)
+                .map(ProxyHttpCookie::new)
+                .orElseGet(ProxyHttpCookie::new);
+    }
+
+    public Session getSession() {
         return Optional.ofNullable(httpSession)
                 .orElseGet(() -> {
-                    HttpSession session = new HttpSession();
-                    HttpSessions.put(session);
+                    Session session = createProxySession();
                     this.httpSession = session;
                     return session;
                 });
+    }
+
+    private Session createProxySession() {
+        return getCookie().get("JSESSIONID")
+                .flatMap(HttpSessions::get)
+                .map(ProxyHttpSession::new)
+                .orElseGet(ProxyHttpSession::new);
     }
 }

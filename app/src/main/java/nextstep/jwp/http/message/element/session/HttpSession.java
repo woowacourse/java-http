@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public class HttpSession {
+public class HttpSession implements Session {
 
     private final String sessionId;
     private final Map<String, Object> values;
@@ -23,18 +23,22 @@ public class HttpSession {
         this.values = values;
     }
 
+    @Override
     public Optional<Object> getAttribute(String key) {
         return Optional.ofNullable(values.get(key));
     }
 
+    @Override
     public void setAttribute(String key, Object value) {
         values.put(key, value);
     }
 
+    @Override
     public void removeAttribute(String key) {
         values.remove(key);
     }
 
+    @Override
     public String getSessionId() {
         return sessionId;
     }

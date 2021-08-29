@@ -31,8 +31,8 @@ public class LoginPageControllerTest {
     public void redirectIndexPageTest() {
 
         // given
-        final RequestLine requestLine = new RequestLine(HttpMethod.POST, "/login?account=gugu&password=password", HttpVersion.HTTP_1_1);
-        final HttpRequest httpRequest = new HttpRequest.Builder().requestLine(requestLine).build();
+        final RequestLine requestLine = new RequestLine(HttpMethod.POST, "/login", HttpVersion.HTTP_1_1);
+        final HttpRequest httpRequest = new HttpRequest.Builder().requestLine(requestLine).body("account=gugu&password=password").build();
         final LoginPageController loginPageController = new LoginPageController();
 
         // when
@@ -44,12 +44,29 @@ public class LoginPageControllerTest {
     }
 
     @Test
-    @DisplayName("로그인 페이지에 저장되지 않은 ID와 PASSWORD로 요청했을 때 401 페이지를 응답 테스트")
-    public void redirectUnauthorizedPageTest() {
+    @DisplayName("저장되지 않은 ID로 요청했을 때 401 페이지를 응답 테스트")
+    public void redirectUnauthorizedPageIfIdIsNotSavedTest() {
 
         // given
-        final RequestLine requestLine = new RequestLine(HttpMethod.POST, "/login?account=seed&password=password", HttpVersion.HTTP_1_1);
-        final HttpRequest httpRequest = new HttpRequest.Builder().requestLine(requestLine).build();
+        final RequestLine requestLine = new RequestLine(HttpMethod.POST, "/login", HttpVersion.HTTP_1_1);
+        final HttpRequest httpRequest = new HttpRequest.Builder().requestLine(requestLine).body("account=seed&password=password").build();
+        final LoginPageController loginPageController = new LoginPageController();
+
+        // when
+        final HttpResponse httpResponse = loginPageController.handle(httpRequest);
+
+        //then
+        final HttpResponse expected = new ResourceResponseTemplate().unauthorized("/401.html");
+        assertThat(httpResponse).usingRecursiveComparison().isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("틀린 비밀번호로 요청했을 때 401 페이지를 응답 테스트")
+    public void redirectUnauthorizedPageIfPasswordMismatchTest() {
+
+        // given
+        final RequestLine requestLine = new RequestLine(HttpMethod.POST, "/login", HttpVersion.HTTP_1_1);
+        final HttpRequest httpRequest = new HttpRequest.Builder().requestLine(requestLine).body("account=gugu&password=wrong").build();
         final LoginPageController loginPageController = new LoginPageController();
 
         // when

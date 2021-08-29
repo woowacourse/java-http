@@ -26,8 +26,9 @@ public class LoginPageController extends AbstractController {
 
     @Override
     public HttpResponse doPost(HttpRequest httpRequest) {
-        final String account = httpRequest.getValueFromQuery("account");
-        final String password = httpRequest.getValueFromQuery("password");
+        final Query query = new Query(httpRequest.getBody());
+        final String account = query.get("account");
+        final String password = query.get("password");
 
         LOGGER.debug("로그인 요청 - [account : {}, password : {}]", account, password);
 

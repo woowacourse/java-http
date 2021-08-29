@@ -23,6 +23,10 @@ public class Query {
         return query;
     }
 
+    public String get(String key) {
+        return query.get(key);
+    }
+
     private static class Parser {
         public static final int KEY_INDEX = 0;
         public static final int VALUE_INDEX = 1;
@@ -35,10 +39,10 @@ public class Query {
                     break;
                 }
 
-                final String key = queryToken[KEY_INDEX];
-                final String value = queryToken[VALUE_INDEX];
+                final String key = queryToken[KEY_INDEX].trim();
+                final String value = queryToken[VALUE_INDEX].trim();
 
-                if (hasLength(key, value)) {
+                if (anyBlank(key, value)) {
                     throw new IllegalArgumentException("쿼리의 키 혹은 밸류가 빈 값입니다.");
                 }
 
@@ -55,7 +59,7 @@ public class Query {
             return queryToken.length == 1;
         }
 
-        private static boolean hasLength(String key, String value) {
+        private static boolean anyBlank(String key, String value) {
             return key.isBlank() || value.isBlank();
         }
     }

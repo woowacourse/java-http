@@ -17,4 +17,12 @@ class RequestLineTest {
         assertThat(requestLine.getHttpVersion()).isEqualTo("HTTP/1.1");
         assertThat(requestLine.getUrl()).isEqualTo("/index.html");
     }
+
+    @DisplayName("QueryString이 있는 url을 받으면, 파싱해서 보관한다.")
+    @Test
+    void QueryStringTest() throws IOException {
+        RequestLine requestLine = new RequestLine("GET /login?account=aaa&password=bbb HTTP/1.1");
+        assertThat(requestLine.getQueryParam("account")).isEqualTo("aaa");
+        assertThat(requestLine.getQueryParam("password")).isEqualTo("bbb");
+    }
 }

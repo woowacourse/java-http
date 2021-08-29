@@ -48,7 +48,9 @@ public class HttpResponse {
             headers.put("Content-Type: text/css");
         } else if (url.endsWith(".js")) {
             headers.put("Content-Type: application/javascript");
-        } else {
+        } else if (url.endsWith("ico")) {
+            headers.put("Content-Type: image/x-icon");
+        } else{
             headers.put("Content-Type: text/html;charset=utf-8");
         }
     }

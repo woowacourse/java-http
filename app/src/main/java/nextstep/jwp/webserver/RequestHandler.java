@@ -27,12 +27,6 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             String requestString = readInputStream(inputStream);
-
-            // todo 지우기
-            if ("".equals(requestString)) {
-                throw new RuntimeException("requestString 비었음");
-            }
-
             HttpRequest httpRequest = new HttpRequest(requestString);
 
             Controller controller = getController(httpRequest);

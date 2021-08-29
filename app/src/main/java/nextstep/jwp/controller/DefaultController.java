@@ -5,6 +5,7 @@ import nextstep.jwp.model.http.HttpRequest;
 import nextstep.jwp.model.http.HttpResponse;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import static nextstep.jwp.model.http.HttpHeaderType.CONTENT_LENGTH;
 import static nextstep.jwp.model.http.HttpHeaderType.CONTENT_TYPE;

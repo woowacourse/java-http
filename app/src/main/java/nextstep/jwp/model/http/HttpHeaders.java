@@ -1,5 +1,7 @@
 package nextstep.jwp.model.http;
 
+import static nextstep.jwp.model.http.HttpHeaderType.*;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -41,5 +43,13 @@ public class HttpHeaders {
 
     public Map<String, String> getHeaders() {
         return headers;
+    }
+
+    public String getProtocol(HttpProtocol protocol) {
+        return protocol.getProtocol();
+    }
+
+    public void setContentLength(int length) {
+        headers.put(CONTENT_LENGTH.value(), String.valueOf(length));
     }
 }

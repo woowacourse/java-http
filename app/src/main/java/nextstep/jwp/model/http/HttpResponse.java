@@ -9,7 +9,8 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
 
-import static nextstep.jwp.model.http.HttpHeaderType.*;
+import static nextstep.jwp.model.http.HttpHeaderType.CONTENT_TYPE;
+import static nextstep.jwp.model.http.HttpHeaderType.LOCATION;
 import static nextstep.jwp.model.http.HttpProtocol.OK;
 import static nextstep.jwp.model.http.HttpProtocol.REDIRECT;
 import static nextstep.jwp.model.http.MediaType.HTML;
@@ -30,12 +31,17 @@ public class HttpResponse {
     public void forward(String url) throws IOException {
         String body = FileUtils.getAllResponseBodies(url);
         LOG.debug("Response header : url : {}", url);
+
         headers.addProtocol(OK);
+        LOG.debug("Response header : protocol : {}", headers.getProtocol(OK));
+
         MediaType.of(url).ifPresent(type -> headers.add(CONTENT_TYPE, type.value()));
-        headers.add(CONTENT_LENGTH, String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+
+        headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
+        LOG.debug("Response header : content length : {}", body.getBytes(StandardCharsets.UTF_8).length);
+
         writeBody(outputStream, processAllHeaders(body));
     }
-
 
     public void forwardBody(String body) throws IOException {
         headers.addProtocol(OK);

@@ -10,11 +10,13 @@ public class QueryParser {
 
     private static final int QUERY_KEY_INDEX = 0;
     private static final int QUERY_VALUE_INDEX = 1;
+    private static final int NO_VALUE_SIZE = 1;
     private static final int NOT_FOUND_INDEX = -1;
 
     private static final String QUERY_SEPARATOR = "=";
     private static final String QUERY_STARTER = "?";
     private static final String QUERY_AMPERSAND = "&";
+    public static final String EMPTY = "";
 
     private final QueryParams queryParams;
 
@@ -32,7 +34,8 @@ public class QueryParser {
                 .map(it -> Arrays.asList(it.split(QUERY_SEPARATOR)))
                 .collect(toMap(
                     it -> it.get(QUERY_KEY_INDEX),
-                    it -> it.get(QUERY_VALUE_INDEX), (o1, o2) -> o1, LinkedHashMap::new))
+                    it -> it.size() == NO_VALUE_SIZE ? EMPTY : it.get(QUERY_VALUE_INDEX),
+                    (o1, o2) -> o1, LinkedHashMap::new))
         );
     }
 

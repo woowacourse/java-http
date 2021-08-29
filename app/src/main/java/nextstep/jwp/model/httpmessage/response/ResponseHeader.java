@@ -10,13 +10,16 @@ import java.util.StringJoiner;
 
 public class ResponseHeader extends CommonHttpHeader {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ResponseLine.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ResponseHeader.class);
 
     private final Map<ResponseHeaderType, String> headers = new LinkedHashMap<>();
 
     public void add(ResponseHeaderType type, String value) {
-        headers.put(type, value);
-        LOG.debug("Response header : {}: {}", type.value(), value);
+        try {
+            headers.put(type, value);
+        } finally {
+            LOG.debug("Response header : {}: {}", type.value(), value);
+        }
     }
 
     @Override

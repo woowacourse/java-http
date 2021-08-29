@@ -23,6 +23,7 @@ public class RequestHeader extends CommonHttpHeader {
         throw new IllegalStateException("해당 요청 헤더 타입이 존재하지 않습니다. (입력 : " + type + ")");
     }
 
+    @Override
     public String getHeader(String type) {
         if (RequestHeaderType.contains(type)) {
             return headers.get(RequestHeaderType.of(type));
@@ -33,17 +34,5 @@ public class RequestHeader extends CommonHttpHeader {
         }
 
         throw new IllegalStateException("해당 요청 헤더 타입이 존재하지 않습니다. (입력 : " + type + ")");
-    }
-
-    private void addAllHeaders(StringJoiner stringJoiner) {
-        for (Map.Entry<RequestHeaderType, String> entry : headers.entrySet()) {
-            String httpHeader = entry.getKey().value();
-            String headerValue = entry.getValue();
-            stringJoiner.add(httpHeader + ": " + headerValue + " ");
-        }
-    }
-
-    public boolean containsKey(RequestHeaderType type) {
-        return headers.containsKey(type);
     }
 }

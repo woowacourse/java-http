@@ -36,35 +36,34 @@ public class RequestHandler implements Runnable {
                 final OutputStream outputStream = connection.getOutputStream()) {
             UserService userService = new UserService();
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            Map<String, String> parsedRequestHeaders = getParsedRequestHeaders(inputStream, bufferedReader);
+            Map<String, String> parsedRequestHeaders = getParsedRequestHeaders(bufferedReader);
             final String httpMethod = parsedRequestHeaders.get("httpMethod");
             final String uri = parsedRequestHeaders.get("uri");
-            String responseBody = "Hello world!";
-
+            String responseBody = "";
+            String response = "";
             if (parsedRequestHeaders.isEmpty()) {
                 return;
             }
-            if (uri.equals("/")) {
-                replyOkResponse(responseBody, outputStream);
-            } else if (uri.equals("/index") || uri.equals("/index.html")) {
+
+            if (uri.equals("/index") || uri.equals("/index.html") || uri.equals("/")) {
                 responseBody = getStaticFileContents("/index.html");
-                replyOkResponse(responseBody, outputStream);
+                response = replyOkResponse(responseBody, outputStream);
             } else if (uri.equals("/login.html") || uri.equals("/login")) {
                 responseBody = getStaticFileContents("/login.html");
-                replyOkResponse(responseBody, outputStream);
+                response = replyOkResponse(responseBody, outputStream);
             } else if (uri.matches("/login.*account.*password.*")) {
                 Optional<User> user = userService.findUser(uri);
                 log.debug(user.toString());
                 if (user.isEmpty()) {
                     responseBody = getStaticFileContents("/401.html");
-                    reply302Response(responseBody, outputStream);
+                    response = reply302Response(responseBody, outputStream);
                 } else {
                     responseBody = getStaticFileContents("/index.html");
-                    replyOkResponse(responseBody, outputStream);
+                    response = replyOkResponse(responseBody, outputStream);
                 }
             } else if (httpMethod.equals("GET") && (uri.equals("/register") || uri.equals("/register.html"))) {
                 responseBody = getStaticFileContents("/register.html");
-                replyOkResponse(responseBody, outputStream);
+                response = replyOkResponse(responseBody, outputStream);
             } else if (httpMethod.equals("POST") && uri.equals("/register")) {
                 int contentLength = Integer.parseInt(parsedRequestHeaders.get("Content-Length").strip());
                 char[] buffer = new char[contentLength];
@@ -73,11 +72,13 @@ public class RequestHandler implements Runnable {
                 userService.saveUser(requestBody);
 
                 responseBody = getStaticFileContents("/index.html");
-                replyOkResponse(responseBody, outputStream);
+                response = replyOkResponse(responseBody, outputStream);
             } else if (httpMethod.equals("GET") && uri.equals("/css/styles.css")) {
                 responseBody = getStaticFileContents("/css/styles.css");
-                replyOkCssResponse(responseBody, outputStream);
+                response = replyOkCssResponse(responseBody, outputStream);
             }
+            outputStream.write(response.getBytes());
+            outputStream.flush();
 
         } catch (IOException exception) {
             log.error("Exception stream", exception);
@@ -86,7 +87,7 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private void reply302Response(String responseBody, OutputStream outputStream) throws IOException {
+    private String reply302Response(String responseBody, OutputStream outputStream) throws IOException {
         final String response = String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Content-Type: text/html;charset=utf-8 ",
@@ -94,11 +95,10 @@ public class RequestHandler implements Runnable {
                 "",
                 responseBody);
         log.debug("302 Content-Length: " + responseBody.getBytes().length);
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        return response;
     }
 
-    private void replyOkResponse(String responseBody, OutputStream outputStream) throws IOException {
+    private String replyOkResponse(String responseBody, OutputStream outputStream) throws IOException {
         final String response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
@@ -106,11 +106,10 @@ public class RequestHandler implements Runnable {
                 "",
                 responseBody);
         log.debug("OK Content-Length: " + responseBody.getBytes().length);
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        return response;
     }
 
-    private void replyOkCssResponse(String responseBody, OutputStream outputStream) throws IOException {
+    private String replyOkCssResponse(String responseBody, OutputStream outputStream) throws IOException {
         final String response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/css;charset=utf-8 ",
@@ -118,19 +117,15 @@ public class RequestHandler implements Runnable {
                 "",
                 responseBody);
         log.debug("CSS OK Content-Length: " + responseBody.getBytes().length);
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        return response;
     }
-
-
-
 
     private String getStaticFileContents(String path) throws IOException {
         URL resource = getClass().getClassLoader().getResource("static" + path);
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
-    private Map<String, String> getParsedRequestHeaders(InputStream inputStream, BufferedReader bufferedReader)
+    private Map<String, String> getParsedRequestHeaders(BufferedReader bufferedReader)
             throws IOException {
 
         final Map<String, String> parsedRequests = new HashMap<>();

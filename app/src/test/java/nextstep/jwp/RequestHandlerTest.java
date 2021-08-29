@@ -12,27 +12,6 @@ import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
 
-    @DisplayName("실행")
-    @Test
-    void run() {
-        // given
-        final MockSocket socket = new MockSocket();
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
-
-        // then
-        String responseBody = "Hello world!";
-        String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
     @DisplayName("index.html 불러오기")
     @Test
     void index() throws IOException {

@@ -75,7 +75,7 @@ class RequestHandlerTest {
     @Test
     void loginWithAccountAndPassword() {
         // given
-        final String httpRequest= request("GET", "/login?account=gugu&password=password");
+        final String httpRequest= request("POST", "/login?account=gugu&password=password");
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 

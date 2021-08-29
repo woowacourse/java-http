@@ -4,7 +4,7 @@ import java.util.Objects;
 
 /**
  *  GET /index.html HTTP/1.1
- *  GET /login?something1=123&something2=123  HTTP/1.1
+ *  GET /login?something1=123&something2=123 HTTP/1.1
  */
 
 public class RequestLine {
@@ -13,7 +13,7 @@ public class RequestLine {
     private final RequestUriPath uriPath;
     private final String protocolVersion;
 
-    public RequestLine(String method, RequestUriPath path, String protocolVersion) {
+    private RequestLine(String method, RequestUriPath path, String protocolVersion) {
         this.method = method;
         this.uriPath = path;
         this.protocolVersion = protocolVersion;
@@ -24,14 +24,18 @@ public class RequestLine {
         return new RequestLine(params[0], RequestUriPath.of(params[1]), params[2]);
     }
 
-    public String getMethod() {
+    public String method() {
         return method;
     }
 
-    public RequestUriPath getUriPath() {
-        return uriPath;
+    public SourcePath sourcePath(){
+        return uriPath.getSourcePath();
     }
-    
+
+    public QueryParams queryParams(){
+        return uriPath.getQueryParams();
+    }
+
     public boolean isFrom(String method, String path){
         return this.method.equalsIgnoreCase(method) && this.uriPath.isPath(path);
     }

@@ -31,14 +31,15 @@ public class View {
     }
 
     public HttpResponse render(Model model) {
-        HttpStatus httpStatus = model.getHttpStatus();
+        HttpStatus httpStatus = model.httpStatus();
 
         if (httpStatus.isOK()) {
             return HttpResponse.ok(content);
         }
 
         if (httpStatus.isFound()) {
-            return HttpResponse.redirect(model.getLocation());
+            String location = (String)model.get("Location");
+            return HttpResponse.redirect(location);
         }
 
         if (httpStatus.isUnauthorized()) {

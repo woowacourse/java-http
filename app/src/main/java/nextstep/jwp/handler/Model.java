@@ -2,28 +2,30 @@ package nextstep.jwp.handler;
 
 import nextstep.jwp.http.response.HttpStatus;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Model {
-    private final HttpStatus httpStatus;
-    private final String location;
 
-    public static Model of(HttpStatus httpStatus){
-        return new Model(httpStatus, "");
+    private Map<String, Object> attributes;
+
+    public Model() {
+        this.attributes = new HashMap<>();
     }
 
-    public static Model of(HttpStatus httpStatus, String location){
-        return new Model(httpStatus, location);
+    public Model(Map<String, Object> attributes) {
+        this.attributes = attributes;
     }
 
-    private Model(HttpStatus httpStatus, String location) {
-        this.httpStatus = httpStatus;
-        this.location = location;
+    public void addAttribute(String key, Object value) {
+        attributes.put(key, value);
     }
 
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
+    public Object get(String key) {
+        return attributes.get(key);
     }
 
-    public String getLocation() {
-        return location;
+    public HttpStatus httpStatus() {
+        return (HttpStatus) attributes.get("HttpStatus");
     }
 }

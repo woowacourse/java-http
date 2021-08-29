@@ -2,8 +2,8 @@ package nextstep.jwp.resource;
 
 import static java.util.stream.Collectors.toList;
 import static nextstep.jwp.web.http.MimeType.ALL;
-import static nextstep.jwp.web.http.MimeType.TEST_HTML;
 import static nextstep.jwp.web.http.MimeType.TEXT_CSS;
+import static nextstep.jwp.web.http.MimeType.TEXT_HTML;
 import static nextstep.jwp.web.http.MimeType.TEXT_JS;
 import static nextstep.jwp.web.http.MimeType.TEXT_PLAIN;
 
@@ -13,7 +13,7 @@ import nextstep.jwp.web.http.MimeType;
 
 public enum FileType {
     PLAIN_TEXT("txt", List.of(TEXT_PLAIN, ALL)),
-    HTML("html", List.of(TEST_HTML, ALL)),
+    HTML("html", List.of(TEXT_HTML, ALL)),
     CSS("css", List.of(TEXT_CSS, ALL)),
     JS("js", List.of(TEXT_JS, ALL)),
     ICO("ico", List.of(ALL)),

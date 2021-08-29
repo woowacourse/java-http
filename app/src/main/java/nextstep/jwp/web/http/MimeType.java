@@ -4,11 +4,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum MimeType {
-    TEXT_ALL("text/*"),
+    TEXT_HTML("text/html"),
+    JSON("application/json"),
     TEXT_PLAIN("text/plain"),
     TEXT_CSS("text/css"),
     TEXT_JS("text/js"),
-    TEST_HTML("text/html"),
+    TEXT_ALL("text/*"),
     ALL("*/*");
 
     private final String mimeType;
@@ -17,9 +18,9 @@ public enum MimeType {
         this.mimeType = mimeType;
     }
 
-    public static MimeType findByName(List<String> mimeType) {
+    public static MimeType findByName(List<String> mimeTypes) {
         return Arrays.stream(values())
-            .filter(m -> mimeType.contains(m.mimeType))
+            .filter(m -> mimeTypes.contains(m.mimeType))
             .findAny()
             .orElse(ALL);
     }

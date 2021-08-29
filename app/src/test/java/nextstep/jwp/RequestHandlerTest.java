@@ -161,6 +161,12 @@ class RequestHandlerTest {
                 requestBody);
     }
 
+    private String toHttp302Response(String redirectUrl) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: http://localhost:8080" + redirectUrl);
+    }
+
     private String toHttp200TextHtmlResponse(String expectResponseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -168,12 +174,6 @@ class RequestHandlerTest {
                 "Content-Length: " + expectResponseBody.getBytes().length + " ",
                 "",
                 expectResponseBody);
-    }
-
-    private String toHttp302Response(String redirectUrl) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: http://localhost:8080" + redirectUrl);
     }
 
     private String toHttpCssResponse() {

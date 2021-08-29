@@ -53,10 +53,6 @@ public class HttpRequest {
         return buffer;
     }
 
-    private Map<String, String> getQueryParams() {
-        return requestLine.getParams();
-    }
-
     public String getQueryParam(String param) {
         return requestLine.getParameter(param);
     }

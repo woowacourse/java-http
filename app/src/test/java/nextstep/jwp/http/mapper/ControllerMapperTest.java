@@ -7,7 +7,9 @@ import nextstep.jwp.http.controller.stationary.HtmlController;
 import nextstep.jwp.http.controller.stationary.JavaScriptController;
 import nextstep.jwp.http.controller.stationary.RedirectController;
 import nextstep.jwp.http.exception.HttpUriNotFoundException;
+import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
+import nextstep.jwp.http.message.request.RequestHeader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -99,12 +101,11 @@ class ControllerMapperTest {
     }
 
     private HttpRequestMessage makeGetRequestMessage(String requestUri) {
-        String requestMessage = String.join("\r\n",
+        String headerMessage = String.join("\r\n",
                 String.format("GET %s HTTP/1.1 ", requestUri),
                 "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-        return new HttpRequestMessage(requestMessage);
+                "Connection: keep-alive ");
+
+        return new HttpRequestMessage(RequestHeader.from(headerMessage), new MessageBody());
     }
 }

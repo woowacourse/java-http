@@ -12,21 +12,18 @@ class HttpRequestMessageTest {
     @Test
     void createWithNoBody() {
         // given
-        final String headerString = String.join("\r\n",
+        String headerString = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ");
 
-        final String requestMessage = String.join("\r\n",
-                headerString,
-                "",
-                "");
+        String bodyString = "";
 
         RequestHeader expectedRequestHeader = RequestHeader.from(headerString);
         MessageBody expectedMessageBody = new MessageBody();
 
         // when
-        HttpRequestMessage httpRequestMessage = new HttpRequestMessage(requestMessage);
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage(headerString, bodyString);
 
         // then
         assertThat(httpRequestMessage.getHeader()).isEqualTo(expectedRequestHeader);
@@ -37,7 +34,6 @@ class HttpRequestMessageTest {
     @Test
     void createWithBody() {
         // given
-        String requestMessage = makePostRequestMessage();
         String headerString = makePostRequestHeader();
         String bodyString = makePostRequestBody();
 
@@ -45,7 +41,7 @@ class HttpRequestMessageTest {
         MessageBody expectedMessageBody = new MessageBody(bodyString);
 
         // when
-        HttpRequestMessage httpRequestMessage = new HttpRequestMessage(requestMessage);
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage(headerString, bodyString);
 
         // then
         assertThat(httpRequestMessage.getHeader()).isEqualTo(expectedRequestHeader);
@@ -58,12 +54,11 @@ class HttpRequestMessageTest {
         // given
         String headerString = makePostRequestHeader();
         String bodyString = makePostRequestBody();
-        HttpRequestMessage expect = new HttpRequestMessage(RequestHeader.from(headerString), new MessageBody(bodyString));
+        HttpRequestMessage expect = new HttpRequestMessage(headerString, bodyString);
 
-        String requestMessage = makePostRequestMessage();
 
         // when
-        HttpRequestMessage httpRequestMessage = new HttpRequestMessage(requestMessage);
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage(headerString, bodyString);
 
         // then
         assertThat(httpRequestMessage).isEqualTo(expect);
@@ -73,21 +68,15 @@ class HttpRequestMessageTest {
     @Test
     void changeRequestUri() {
         // given
-        String requestMessage = makePostRequestMessage();
-        HttpRequestMessage httpRequestMessage = new HttpRequestMessage(requestMessage);
+        String headerString = makePostRequestHeader();
+        String bodyString = makePostRequestBody();
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage(headerString, bodyString);
 
         // when
         httpRequestMessage.changeRequestUri("/hello");
 
         // then
         assertThat(httpRequestMessage.requestUri()).isEqualTo("/hello");
-    }
-
-    private String makePostRequestMessage() {
-        return String.join("\r\n",
-                makePostRequestHeader(),
-                "",
-                makePostRequestBody());
     }
 
     private String makePostRequestHeader() {

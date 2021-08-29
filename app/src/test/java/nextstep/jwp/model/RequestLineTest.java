@@ -1,10 +1,10 @@
 package nextstep.jwp.model;
 
-import nextstep.jwp.model.httpMessage.request.RequestLine;
+import nextstep.jwp.model.httpmessage.request.RequestLine;
 import org.junit.jupiter.api.Test;
 
-import static nextstep.jwp.model.httpMessage.request.HttpMethod.GET;
-import static nextstep.jwp.model.httpMessage.request.HttpMethod.POST;
+import static nextstep.jwp.model.httpmessage.request.HttpMethod.GET;
+import static nextstep.jwp.model.httpmessage.request.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestLineTest {

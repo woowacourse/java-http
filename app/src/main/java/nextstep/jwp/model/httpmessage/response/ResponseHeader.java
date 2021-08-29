@@ -1,6 +1,6 @@
-package nextstep.jwp.model.httpMessage.response;
+package nextstep.jwp.model.httpmessage.response;
 
-import nextstep.jwp.model.httpMessage.common.CommonHttpHeader;
+import nextstep.jwp.model.httpmessage.common.CommonHttpHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

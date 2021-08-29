@@ -1,4 +1,4 @@
-package nextstep.jwp.model.httpMessage.response;
+package nextstep.jwp.model.httpmessage.response;
 
 public enum ResponseHeaderType {
 

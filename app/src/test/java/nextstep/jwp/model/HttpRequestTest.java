@@ -2,14 +2,14 @@ package nextstep.jwp.model;
 
 import nextstep.jwp.MockSocket;
 import nextstep.jwp.RequestHandler;
-import nextstep.jwp.model.httpMessage.request.HttpRequest;
+import nextstep.jwp.model.httpmessage.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static nextstep.jwp.model.httpMessage.request.HttpMethod.GET;
-import static nextstep.jwp.model.httpMessage.request.HttpMethod.POST;
+import static nextstep.jwp.model.httpmessage.request.HttpMethod.GET;
+import static nextstep.jwp.model.httpmessage.request.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpRequestTest {

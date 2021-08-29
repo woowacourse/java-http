@@ -1,4 +1,4 @@
-package nextstep.jwp.model.httpMessage.common;
+package nextstep.jwp.model.httpmessage.common;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static nextstep.jwp.model.httpMessage.common.HttpHeaderType.CONTENT_LENGTH;
-import static nextstep.jwp.model.httpMessage.common.HttpHeaderType.CONTENT_TYPE;
+import static nextstep.jwp.model.httpmessage.common.HttpHeaderType.CONTENT_LENGTH;
+import static nextstep.jwp.model.httpmessage.common.HttpHeaderType.CONTENT_TYPE;
 
 public abstract class CommonHttpHeader implements HttpHeader {
 

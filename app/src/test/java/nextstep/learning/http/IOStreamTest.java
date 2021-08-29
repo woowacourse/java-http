@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
 import static org.mockito.Mockito.*;
 
 /**
@@ -210,7 +209,7 @@ class IOStreamTest {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             final StringBuilder actual = new StringBuilder();
-            while(bufferedReader.ready()) {
+            while (bufferedReader.ready()) {
                 actual.append(bufferedReader.readLine())
                         .append("\r\n");
             }

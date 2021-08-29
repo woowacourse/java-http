@@ -1,7 +1,7 @@
-package nextstep.jwp.model.httpMessage.response;
+package nextstep.jwp.model.httpmessage.response;
 
-import nextstep.jwp.model.httpMessage.common.ContentType;
-import nextstep.jwp.model.httpMessage.common.HttpHeaderType;
+import nextstep.jwp.model.httpmessage.common.ContentType;
+import nextstep.jwp.model.httpmessage.common.HttpHeaderType;
 import nextstep.jwp.util.FileUtils;
 
 import java.io.IOException;
@@ -9,12 +9,12 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
 
-import static nextstep.jwp.model.httpMessage.common.CommonHttpHeader.DELIMITER;
-import static nextstep.jwp.model.httpMessage.common.ContentType.HTML;
-import static nextstep.jwp.model.httpMessage.common.HttpHeaderType.CONTENT_TYPE;
-import static nextstep.jwp.model.httpMessage.response.HttpStatus.OK;
-import static nextstep.jwp.model.httpMessage.response.HttpStatus.REDIRECT;
-import static nextstep.jwp.model.httpMessage.response.ResponseHeaderType.LOCATION;
+import static nextstep.jwp.model.httpmessage.common.CommonHttpHeader.DELIMITER;
+import static nextstep.jwp.model.httpmessage.common.ContentType.HTML;
+import static nextstep.jwp.model.httpmessage.common.HttpHeaderType.CONTENT_TYPE;
+import static nextstep.jwp.model.httpmessage.response.HttpStatus.OK;
+import static nextstep.jwp.model.httpmessage.response.HttpStatus.REDIRECT;
+import static nextstep.jwp.model.httpmessage.response.ResponseHeaderType.LOCATION;
 
 public class HttpResponse {
 

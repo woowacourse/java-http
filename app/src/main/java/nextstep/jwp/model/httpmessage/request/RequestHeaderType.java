@@ -1,4 +1,4 @@
-package nextstep.jwp.model.httpMessage.request;
+package nextstep.jwp.model.httpmessage.request;
 
 import java.util.Arrays;
 

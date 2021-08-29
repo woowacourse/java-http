@@ -1,6 +1,6 @@
-package nextstep.jwp.model.httpMessage.request;
+package nextstep.jwp.model.httpmessage.request;
 
-import nextstep.jwp.model.httpMessage.common.CommonHttpHeader;
+import nextstep.jwp.model.httpmessage.common.CommonHttpHeader;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

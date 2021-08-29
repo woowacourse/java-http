@@ -1,10 +1,10 @@
 package nextstep.jwp;
 
+import nextstep.jwp.ui.response.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,10 +16,11 @@ public class HttpResponseTest {
 
     @BeforeEach
     void setUp() {
-        httpResponse = new HttpResponse(new ByteArrayOutputStream());
+        httpResponse = new HttpResponse();
     }
 
     @Test
+    @DisplayName("등록한 상태코드대로 ResponseLine이 나온다.")
     void setStatus() {
         // give, when
         httpResponse.setStatus(200);
@@ -29,6 +30,7 @@ public class HttpResponseTest {
     }
 
     @Test
+    @DisplayName("Header를 추가한다.")
     void addHeader() {
         // given, when
         httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
@@ -42,7 +44,8 @@ public class HttpResponseTest {
     }
 
     @Test
-    void write() throws IOException {
+    @DisplayName("등록한 상태코드, Header, Body대로 Response가 나온다.")
+    void write() {
         // given, when
         httpResponse.setStatus(200);
         httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");

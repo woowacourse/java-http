@@ -10,6 +10,7 @@ public class RequestMapping {
 
     static {
         controllers.put("/", new MainController());
+        controllers.put("/index.html", new DefaultController());
         controllers.put("/login", new LoginController());
         controllers.put("/register", new RegisterController());
     }
@@ -18,6 +19,6 @@ public class RequestMapping {
     }
 
     public static Controller getController(String requestUrl) {
-        return controllers.getOrDefault(requestUrl, new DefaultController());
+        return controllers.get(requestUrl);
     }
 }

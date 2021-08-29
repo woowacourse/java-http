@@ -2,7 +2,8 @@ package nextstep.jwp.model.httpmessage.response;
 
 public enum HttpStatus {
     OK("200", "OK"),
-    REDIRECT("302", "Redirect");
+    REDIRECT("302", "Redirect"),
+    NOT_FOUND("404", "Not Found");
 
     private final String status;
     private final String message;

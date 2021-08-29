@@ -8,6 +8,7 @@ public enum ContentType {
     HTML("text/html;charset=utf-8", ".html"),
     JS("application/javascript", ".js"),
     ICON("image/x-icon", ".ico"),
+    SVG("image/svg+xml", ".svg"),
     FORM("application/x-www-form-urlencoded", "");
 
     public static final String NAME = "Content-Type";

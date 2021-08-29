@@ -12,8 +12,7 @@ import java.util.StringJoiner;
 import static nextstep.jwp.model.httpmessage.common.CommonHttpHeader.DELIMITER;
 import static nextstep.jwp.model.httpmessage.common.ContentType.HTML;
 import static nextstep.jwp.model.httpmessage.common.HttpHeaderType.CONTENT_TYPE;
-import static nextstep.jwp.model.httpmessage.response.HttpStatus.OK;
-import static nextstep.jwp.model.httpmessage.response.HttpStatus.REDIRECT;
+import static nextstep.jwp.model.httpmessage.response.HttpStatus.*;
 import static nextstep.jwp.model.httpmessage.response.ResponseHeaderType.LOCATION;
 
 public class HttpResponse {
@@ -65,11 +64,15 @@ public class HttpResponse {
         outputStream.flush();
     }
 
-    public void setStatus(HttpStatus httpStatus) {
-        responseLine = new ResponseLine(httpStatus);
-    }
-
     public void addHeader(HttpHeaderType type, String value) {
         headers.add(type, value);
+    }
+
+    public void sendError(String url) throws IOException {
+        responseLine = new ResponseLine(NOT_FOUND);
+        headers.setContentType(HTML.value());
+        String body = FileUtils.readFileOfUrl(url);
+        headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
+        writeBody(outputStream, processResponseLineAndHeader(body));
     }
 }

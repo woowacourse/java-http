@@ -18,4 +18,9 @@ public class FileUtils {
         Path path = new File(file).toPath();
         return new String(Files.readAllBytes(path));
     }
+
+    public static boolean existFile(String url) {
+        URL resource = FileUtils.class.getClassLoader().getResource("static" + url);
+        return resource != null;
+    }
 }

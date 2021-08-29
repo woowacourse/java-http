@@ -3,6 +3,7 @@ package nextstep.jwp;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.model.httpmessage.request.HttpRequest;
 import nextstep.jwp.model.httpmessage.response.HttpResponse;
+import nextstep.jwp.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +34,15 @@ public class RequestHandler implements Runnable {
             HttpResponse httpResponse = new HttpResponse(outputStream);
 
             Controller controller = RequestMapping.getController(httpRequest.getPath());
+            if (FileUtils.existFile(httpRequest.getPath())) {
+                httpResponse.forward(httpRequest.getPath());
+                return;
+            }
+
+            if (controller == null) {
+                httpResponse.sendError("/404.html");
+                return;
+            }
 
             controller.service(httpRequest, httpResponse);
         } catch (IOException exception) {

@@ -2,15 +2,14 @@ package nextstep.jwp.controller;
 
 import java.util.Arrays;
 import java.util.List;
+import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.request.HttpMethod;
 import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
 
-public class PageRenderController extends AbstractController {
+public class StaticFileController extends AbstractController {
 
     private static final HttpMethod HTTP_METHOD = HttpMethod.GET;
-    private static final List<String> URI_PATHS = Arrays.asList("/index.html", "/register", "/login",
-        "/401.html", "/404.html", "/500.html");
+    private static final List<String> URI_PATHS = Arrays.asList("/assets", "/js", "/css");
 
     @Override
     boolean isMatchingHttpMethod(HttpRequest httpRequest) {
@@ -20,11 +19,11 @@ public class PageRenderController extends AbstractController {
     @Override
     boolean isMatchingUriPath(HttpRequest httpRequest) {
         return URI_PATHS.stream()
-            .anyMatch(it -> it.equals(httpRequest.getPath()));
+            .anyMatch(it -> httpRequest.getPath().startsWith(it));
     }
 
     @Override
     public HttpResponse doService(HttpRequest httpRequest) {
-        return super.renderPage(httpRequest.getPath());
+        return super.applyStaticFile(httpRequest.getPath());
     }
 }

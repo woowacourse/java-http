@@ -9,7 +9,8 @@ public class ControllerContainer {
     private static final List<Controller> controllers = Arrays.asList(
         new LoginController(),
         new PageRenderController(),
-        new RegisterController()
+        new RegisterController(),
+        new StaticFileController()
     );
 
     public static Controller findController(HttpRequest httpRequest) {

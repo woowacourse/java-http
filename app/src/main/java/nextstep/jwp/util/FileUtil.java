@@ -10,16 +10,28 @@ public class FileUtil {
     private static final String FILE_FORMAT = ".html";
     private static final String PATH_PREFIX = "static";
 
-    public static String readFileByUriPath(String uriPath) {
+    public static String readHTMLFileByUriPath(String uriPath) {
+        return readFile(findHTMLFilePath(uriPath));
+    }
+
+    public static String readStaticFileByUriPath(String uriPath) {
+        return readFile(findStaticFilePath(uriPath));
+    }
+
+    private static String readFile(String uriPath) {
         try {
-            URL resource = FileUtil.class.getClassLoader().getResource(findPath(uriPath));
+            URL resource = FileUtil.class.getClassLoader().getResource(uriPath);
             return new String(Files.readAllBytes(Paths.get(resource.getFile())));
         } catch (IOException e) {
             throw new IllegalArgumentException();
         }
     }
 
-    private static String findPath(String uriPath) {
+    private static String findStaticFilePath(String uriPath) {
+        return String.format(PATH_PREFIX + "%s", uriPath);
+    }
+
+    private static String findHTMLFilePath(String uriPath) {
         if (uriPath.endsWith(FILE_FORMAT)) {
             return String.format(PATH_PREFIX + "%s", uriPath);
         }

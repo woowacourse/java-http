@@ -15,11 +15,6 @@ import nextstep.jwp.http.request.URI;
 public class TestUtil {
 
     public static HttpRequest createRequest(String startLine, Map<String, String> requestBody) {
-        String requestMessage = startLine + System.lineSeparator() +
-            "Host: localhost:8080" + System.lineSeparator() +
-            "Connection: keep-alive" + System.lineSeparator() +
-            "Accept: */*";
-
         String[] elements = startLine.split(" ");
 
         HttpMethod httpMethod = HttpMethod.of(elements[0]);

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.ControllerContainer;
+import nextstep.jwp.controller.PageRenderController;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.util.RequestBinder;
@@ -31,13 +32,11 @@ public class RequestHandler implements Runnable {
 
         try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              final OutputStream outputStream = connection.getOutputStream()) {
+
             HttpRequest httpRequest = RequestBinder.createRequestByMessage(bufferedReader);
-            log.debug("New Request! {}", httpRequest.getPath());
             Controller controller = ControllerContainer.findController(httpRequest);
-            log.debug("Request Controller : {}", controller.getClass().getName());
 
             HttpResponse httpResponse = controller.doService(httpRequest);
-
             outputStream.write(httpResponse.toResponseMessage().getBytes());
             outputStream.flush();
         } catch (IOException exception) {

@@ -5,11 +5,12 @@ import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.request.HttpMethod;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.QueryStrings;
+import nextstep.jwp.http.request.RequestBody;
 import nextstep.jwp.model.User;
 
-public class LoginController extends AbstractController{
+public class LoginController extends AbstractController {
 
-    private static final HttpMethod HTTP_METHOD = HttpMethod.GET;
+    private static final HttpMethod HTTP_METHOD = HttpMethod.POST;
     private static final String URI_PATH = "/login";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
@@ -28,24 +29,17 @@ public class LoginController extends AbstractController{
 
     @Override
     public HttpResponse doService(HttpRequest httpRequest) {
-        if (httpRequest.hasQueryStrings()) {
-            return findUserAndRedirect(httpRequest);
-        }
-        return super.renderPage(httpRequest.getPath());
-    }
-
-    private HttpResponse findUserAndRedirect(HttpRequest httpRequest) {
         try {
-            validateUserInput(httpRequest.getQueryStrings());
+            validateUserInput(httpRequest.getRequestBody());
             return super.redirect(SUCCESS_REDIRECT_URL);
         } catch (IllegalArgumentException e) {
             return super.redirect(FAIL_REDIRECT_URL);
         }
     }
 
-    private void validateUserInput(QueryStrings queryStrings) {
-        String account = queryStrings.getValue(ACCOUNT);
-        String password = queryStrings.getValue(PASSWORD);
+    private void validateUserInput(RequestBody requestBody) {
+        String account = requestBody.getValue(ACCOUNT);
+        String password = requestBody.getValue(PASSWORD);
 
         User user = InMemoryUserRepository.findByAccount(account)
             .orElseThrow(IllegalArgumentException::new);

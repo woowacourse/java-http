@@ -17,7 +17,19 @@ public abstract class AbstractController implements Controller {
 
     protected HttpResponse renderPage(String uriPath) {
         try {
-            String responseBody = FileUtil.readFileByUriPath(uriPath);
+            String responseBody = FileUtil.readHTMLFileByUriPath(uriPath);
+            return HttpResponse.status(ResponseStatus.OK,
+                HttpHeader.getHTMLResponseHeader(responseBody),
+                responseBody);
+        } catch (IllegalArgumentException e) {
+            // TODO: 에러 파일 출력
+            return null;
+        }
+    }
+
+    protected HttpResponse applyStaticFile(String uriPath) {
+        try {
+            String responseBody = FileUtil.readStaticFileByUriPath(uriPath);
             return HttpResponse.status(ResponseStatus.OK,
                 HttpHeader.getHTMLResponseHeader(responseBody),
                 responseBody);

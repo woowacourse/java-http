@@ -1,4 +1,4 @@
-package nextstep.jwp.model.http;
+package nextstep.jwp.model.httpMessage;
 
 import nextstep.jwp.util.HttpRequestUtils;
 import org.slf4j.Logger;
@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static nextstep.jwp.model.http.HttpHeaderType.CONTENT_LENGTH;
+import static nextstep.jwp.model.httpMessage.HttpHeaderType.CONTENT_LENGTH;
 
 public class HttpRequest {
     private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);

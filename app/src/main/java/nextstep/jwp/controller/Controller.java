@@ -1,7 +1,7 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.model.http.HttpRequest;
-import nextstep.jwp.model.http.HttpResponse;
+import nextstep.jwp.model.httpMessage.HttpRequest;
+import nextstep.jwp.model.httpMessage.HttpResponse;
 
 import java.io.IOException;
 

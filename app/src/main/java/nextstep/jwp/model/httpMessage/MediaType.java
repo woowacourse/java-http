@@ -1,4 +1,4 @@
-package nextstep.jwp.model.http;
+package nextstep.jwp.model.httpMessage;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -18,13 +18,13 @@ public enum MediaType {
         this.suffix = suffix;
     }
 
-    public String value() {
-        return value;
-    }
-
     public static Optional<MediaType> of(String url) {
         return Arrays.stream(values())
                 .filter(type -> url.endsWith(type.suffix))
                 .findAny();
+    }
+
+    public String value() {
+        return value;
     }
 }

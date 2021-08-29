@@ -1,4 +1,4 @@
-package nextstep.jwp.model.http;
+package nextstep.jwp.model.httpMessage;
 
 import java.util.Arrays;
 
@@ -13,14 +13,14 @@ public enum HttpHeaderType {
         this.value = value;
     }
 
-    public String value() {
-        return value;
-    }
-
     public static HttpHeaderType of(String value) {
         return Arrays.stream(values())
                 .filter(headerType -> headerType.value.equals(value))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("해당 헤더 타입이 존재하지 않습니다."));
+    }
+
+    public String value() {
+        return value;
     }
 }

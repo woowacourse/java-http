@@ -2,12 +2,12 @@ package nextstep.jwp.model;
 
 import nextstep.jwp.MockSocket;
 import nextstep.jwp.RequestHandler;
-import nextstep.jwp.model.http.HttpRequest;
+import nextstep.jwp.model.httpMessage.HttpRequest;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static nextstep.jwp.model.http.HttpMethod.GET;
+import static nextstep.jwp.model.httpMessage.HttpMethod.GET;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpRequestTest {

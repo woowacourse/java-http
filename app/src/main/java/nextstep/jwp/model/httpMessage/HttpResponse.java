@@ -1,4 +1,4 @@
-package nextstep.jwp.model.http;
+package nextstep.jwp.model.httpMessage;
 
 import nextstep.jwp.util.FileUtils;
 import org.slf4j.Logger;
@@ -9,11 +9,11 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
 
-import static nextstep.jwp.model.http.HttpHeaderType.CONTENT_TYPE;
-import static nextstep.jwp.model.http.HttpHeaderType.LOCATION;
-import static nextstep.jwp.model.http.HttpProtocol.OK;
-import static nextstep.jwp.model.http.HttpProtocol.REDIRECT;
-import static nextstep.jwp.model.http.MediaType.HTML;
+import static nextstep.jwp.model.httpMessage.HttpHeaderType.CONTENT_TYPE;
+import static nextstep.jwp.model.httpMessage.HttpHeaderType.LOCATION;
+import static nextstep.jwp.model.httpMessage.HttpProtocol.OK;
+import static nextstep.jwp.model.httpMessage.HttpProtocol.REDIRECT;
+import static nextstep.jwp.model.httpMessage.MediaType.HTML;
 
 public class HttpResponse {
 

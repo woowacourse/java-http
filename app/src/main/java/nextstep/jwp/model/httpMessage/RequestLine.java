@@ -1,4 +1,4 @@
-package nextstep.jwp.model.http;
+package nextstep.jwp.model.httpMessage;
 
 import nextstep.jwp.util.HttpRequestUtils;
 import org.slf4j.Logger;

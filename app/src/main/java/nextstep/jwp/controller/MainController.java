@@ -1,14 +1,14 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.model.http.HttpProtocol;
-import nextstep.jwp.model.http.HttpRequest;
-import nextstep.jwp.model.http.HttpResponse;
+import nextstep.jwp.model.httpMessage.HttpProtocol;
+import nextstep.jwp.model.httpMessage.HttpRequest;
+import nextstep.jwp.model.httpMessage.HttpResponse;
 
 import java.io.IOException;
 
-import static nextstep.jwp.model.http.HttpHeaderType.CONTENT_LENGTH;
-import static nextstep.jwp.model.http.HttpHeaderType.CONTENT_TYPE;
-import static nextstep.jwp.model.http.MediaType.HTML;
+import static nextstep.jwp.model.httpMessage.HttpHeaderType.CONTENT_LENGTH;
+import static nextstep.jwp.model.httpMessage.HttpHeaderType.CONTENT_TYPE;
+import static nextstep.jwp.model.httpMessage.MediaType.HTML;
 
 public class MainController extends AbstractController {
 

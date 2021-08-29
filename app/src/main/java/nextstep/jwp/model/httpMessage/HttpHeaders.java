@@ -1,10 +1,10 @@
-package nextstep.jwp.model.http;
-
-import static nextstep.jwp.model.http.HttpHeaderType.*;
+package nextstep.jwp.model.httpMessage;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringJoiner;
+
+import static nextstep.jwp.model.httpMessage.HttpHeaderType.CONTENT_LENGTH;
 
 public class HttpHeaders {
     private final Map<String, String> headers = new LinkedHashMap<>();

@@ -10,7 +10,7 @@ public abstract class AbstractHttpParser implements HttpParser {
     protected final BufferedReader reader;
     protected final HttpRequest.Builder builder;
 
-    public AbstractHttpParser(BufferedReader reader, HttpRequest.Builder builder) {
+    protected AbstractHttpParser(BufferedReader reader, HttpRequest.Builder builder) {
         this.builder = builder;
         this.reader = reader;
     }

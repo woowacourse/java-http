@@ -7,13 +7,13 @@ import nextstep.jwp.framework.http.template.StringResponseTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StringResponseTemplateTest {
+class StringResponseTemplateTest {
 
     private static final String RESPONSE = "HELLO WORLD!";
 
     @Test
     @DisplayName("OK 상태코드와 리소스 반환 테스트")
-    public void okTest() {
+    void okTest() {
 
         // when
         final HttpResponse response = new StringResponseTemplate().ok(RESPONSE);
@@ -29,7 +29,7 @@ public class StringResponseTemplateTest {
 
     @Test
     @DisplayName("Found 상태코드와 리소스 패스 반환 테스트")
-    public void foundTest() {
+    void foundTest() {
 
         // when
         final HttpResponse response = new StringResponseTemplate().found(RESPONSE);

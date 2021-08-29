@@ -9,11 +9,11 @@ import nextstep.jwp.framework.http.template.StringResponseTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class RegisterPageControllerTest {
+class RegisterPageControllerTest {
 
     @Test
     @DisplayName("GET 회원가입 페이지 응답 테스트")
-    public void accessRegisterPageTest() {
+    void accessRegisterPageTest() {
 
         // given
         final RequestLine requestLine = new RequestLine(HttpMethod.GET, "/register", HttpVersion.HTTP_1_1);
@@ -30,7 +30,7 @@ public class RegisterPageControllerTest {
 
     @Test
     @DisplayName("회원가입이 성공 후 index 페이지 응답 테스트")
-    public void redirectIndexAfterSaveUser() {
+    void redirectIndexAfterSaveUser() {
 
         // given
         final RequestLine requestLine = new RequestLine(HttpMethod.POST, "/register", HttpVersion.HTTP_1_1);

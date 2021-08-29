@@ -12,7 +12,7 @@ import nextstep.jwp.framework.http.HttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class HeaderFormatterTest {
+class HeaderFormatterTest {
 
     @DisplayName("HttpHeader 를 HTTP 형식의 String 으로 변환 테스트")
     @ParameterizedTest

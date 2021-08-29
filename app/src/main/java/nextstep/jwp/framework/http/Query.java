@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class Query {
 
-    private final Map<String, String> query;
+    private final Map<String, String> queries;
 
     public Query() {
         this(new HashMap<>());
@@ -15,16 +15,16 @@ public class Query {
         this(Parser.parse(queries));
     }
 
-    public Query(Map<String, String> query) {
-        this.query = query;
+    public Query(Map<String, String> queries) {
+        this.queries = queries;
     }
 
     public Map<String, String> getQueries() {
-        return query;
+        return queries;
     }
 
     public String get(String key) {
-        return query.get(key);
+        return queries.get(key);
     }
 
     private static class Parser {

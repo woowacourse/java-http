@@ -8,7 +8,7 @@ import nextstep.jwp.framework.http.template.StringResponseTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class WelcomePageControllerTest {
+class WelcomePageControllerTest {
 
     @Test
     @DisplayName("메인 페이지에 접근했을 때 HTTP 응답 테스트")

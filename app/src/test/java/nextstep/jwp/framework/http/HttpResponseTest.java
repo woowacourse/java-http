@@ -7,7 +7,7 @@ import nextstep.jwp.framework.util.ResourceUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class HttpResponseTest {
+class HttpResponseTest {
 
     @DisplayName("HttpResponse 를 문자열로 변환 테스트")
     @Test

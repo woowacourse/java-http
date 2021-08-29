@@ -8,7 +8,7 @@ import nextstep.jwp.framework.http.template.ResourceResponseTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ErrorControllerTest {
+class ErrorControllerTest {
 
     @Test
     @DisplayName("에러 페이지에 접근했을 때 HTTP 응답 테스트")

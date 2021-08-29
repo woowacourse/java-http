@@ -12,7 +12,7 @@ import nextstep.jwp.webserver.controller.WelcomePageController;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ControllerMappingTest {
+class ControllerMappingTest {
 
     @DisplayName("요청 URI와 일치하는 컨트롤러가 존재할 경우 해당 컨트롤러 반환 테스트")
     @Test

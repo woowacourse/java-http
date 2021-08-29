@@ -12,8 +12,4 @@ public interface Controller {
     HttpResponse doGet(HttpRequest httpRequest);
 
     HttpResponse doPost(HttpRequest httpRequest);
-
-    HttpResponse doPut(HttpRequest httpRequest);
-
-    HttpResponse doDelete(HttpRequest httpRequest);
 }

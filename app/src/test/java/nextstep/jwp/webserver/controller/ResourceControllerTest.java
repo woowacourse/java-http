@@ -8,7 +8,7 @@ import nextstep.jwp.framework.http.template.ResourceResponseTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ResourceControllerTest {
+class ResourceControllerTest {
 
     private static final String RESOURCE = "nextstep.txt";
 
@@ -46,7 +46,7 @@ public class ResourceControllerTest {
 
     @Test
     @DisplayName("정적 파일 반환 테스트")
-    public void doGetTest() {
+    void doGetTest() {
 
         // given
         final RequestLine requestLine = new RequestLine(HttpMethod.GET, RESOURCE, HttpVersion.HTTP_1_1);

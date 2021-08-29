@@ -8,7 +8,7 @@ public abstract class AbstractHttpFormatter implements HttpFormatter {
 
     protected final HttpMessage httpMessage;
 
-    public AbstractHttpFormatter(HttpMessage httpMessage) {
+    protected AbstractHttpFormatter(HttpMessage httpMessage) {
         this.httpMessage = Objects.requireNonNull(httpMessage);
     }
 

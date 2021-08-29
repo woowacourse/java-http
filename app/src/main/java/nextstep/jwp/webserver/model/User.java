@@ -7,8 +7,8 @@ public class User {
     private final String password;
     private final String email;
 
-    public User(String account, String email, String password) {
-        this(null, account, email, password);
+    public User(String account, String password, String email) {
+        this(null, account, password, email);
     }
 
     public User(Long id, String account, String password, String email) {

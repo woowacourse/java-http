@@ -8,7 +8,7 @@ import nextstep.jwp.framework.http.template.ResourceResponseTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class IndexPageControllerTest {
+class IndexPageControllerTest {
 
     @Test
     @DisplayName("인덱스 페이지에 접근했을 때 HTTP 응답 테스트")

@@ -23,6 +23,8 @@ public class ControllerMapping {
         CONTROLLERS.add(new RegisterPageController());
     }
 
+    private ControllerMapping() {}
+
     public static Controller findController(HttpRequest httpRequest) {
         final Controller foundController = CONTROLLERS.stream()
                                                       .filter(controller -> controller.canHandle(httpRequest))

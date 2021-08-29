@@ -16,7 +16,7 @@ import org.assertj.core.api.ThrowableAssert;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
-public class RequestLineParserTest {
+class RequestLineParserTest {
 
     @Test
     @DisplayName("리퀘스트 라인 파싱 테스트")

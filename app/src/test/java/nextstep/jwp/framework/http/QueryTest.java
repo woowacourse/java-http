@@ -14,12 +14,12 @@ import org.assertj.core.api.ThrowableAssert;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
-public class QueryTest {
+class QueryTest {
 
     @ParameterizedTest
     @MethodSource
     @DisplayName("쿼리 파싱 테스트")
-    public void queryParsingTest(String queryString, Map<String, String> expectedQuery) {
+    void queryParsingTest(String queryString, Map<String, String> expectedQuery) {
 
         // when
         final Query query = new Query(queryString);
@@ -38,7 +38,7 @@ public class QueryTest {
     @ParameterizedTest
     @ValueSource(strings = {"=password", " =password", " = "})
     @DisplayName("키 혹은 밸류가 없을 경우 예외 발생")
-    public void failParsingIfKeyOrValueIsNull(String queryString) {
+    void failParsingIfKeyOrValueIsNull(String queryString) {
 
         // when
         ThrowableAssert.ThrowingCallable callable = () -> new Query(queryString);

@@ -11,12 +11,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class URITest {
+class URITest {
 
     @ParameterizedTest
     @MethodSource
     @DisplayName("URI 파싱 테스트")
-    public void uriParsingTest(String givenUri, URI expected) {
+    void uriParsingTest(String givenUri, URI expected) {
 
         // when
         final URI uri = new URI(givenUri);
@@ -41,7 +41,7 @@ public class URITest {
     @ParameterizedTest
     @ValueSource(strings = {"/login", "/login?"})
     @DisplayName("쿼리가 없을 경우 URI를 Path로 사용")
-    public void failParsingIfKeyOrValueIsNull(String givenUri) {
+    void failParsingIfKeyOrValueIsNull(String givenUri) {
 
         // when
         final URI uri = new URI(givenUri);

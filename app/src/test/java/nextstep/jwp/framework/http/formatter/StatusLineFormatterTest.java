@@ -10,7 +10,7 @@ import nextstep.jwp.framework.http.StatusLine;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StatusLineFormatterTest {
+class StatusLineFormatterTest {
 
     @DisplayName("StatusLine을 HTTP 형식의 String 으로 변환 테스트")
     @Test

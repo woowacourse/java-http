@@ -11,7 +11,7 @@ import nextstep.jwp.framework.http.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class HeaderParserTest {
+class HeaderParserTest {
 
     @Test
     @DisplayName("헤더 1개 파싱 테스트")

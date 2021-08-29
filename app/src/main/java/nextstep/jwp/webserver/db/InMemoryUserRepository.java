@@ -21,6 +21,8 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
+    private InMemoryUserRepository() {}
+
     public static void save(User user) {
         user.assignId(++lastInsertId);
         database.put(user.getAccount(), user);

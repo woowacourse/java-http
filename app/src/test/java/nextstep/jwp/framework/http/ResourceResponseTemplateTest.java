@@ -8,11 +8,11 @@ import nextstep.jwp.framework.util.ResourceUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ResourceResponseTemplateTest {
+class ResourceResponseTemplateTest {
 
     @Test
     @DisplayName("OK 상태코드와 리소스 반환 테스트")
-    public void okTest() {
+    void okTest() {
 
         final String resource = "/nextstep.txt";
 
@@ -30,7 +30,7 @@ public class ResourceResponseTemplateTest {
 
     @Test
     @DisplayName("Unauthorized 상태코드와 리소스 반환 테스트")
-    public void unauthorizedTest() {
+    void unauthorizedTest() {
 
         final String resource = "style.css";
 

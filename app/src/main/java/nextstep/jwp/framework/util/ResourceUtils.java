@@ -10,7 +10,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ResourceUtils {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceUtils.class);
 
     private static final List<String> PREFIXES = Arrays.asList("", "static/");
 
@@ -53,9 +58,9 @@ public class ResourceUtils {
         try {
             resource = Files.readString(findPathOf(resourceName));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("파일 읽기 작업 중 오류가 발생했습니다.", e);
 
-            throw new IllegalStateException("파일 읽기 작업 중 오류가 발생했습니다.");
+            throw new IllegalStateException();
         }
         return resource;
     }

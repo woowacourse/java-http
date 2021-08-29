@@ -1,7 +1,6 @@
 package nextstep.jwp.framework.http.template;
 
-import java.util.Arrays;
-
+import nextstep.jwp.framework.http.ContentType;
 import nextstep.jwp.framework.http.HttpHeaders;
 import nextstep.jwp.framework.http.HttpResponse;
 import nextstep.jwp.framework.http.HttpStatus;
@@ -26,35 +25,5 @@ public class ResourceResponseTemplate extends AbstractResponseTemplate {
         httpHeaders.addHeader(HttpHeaders.CONTENT_TYPE, ContentType.resolve(path));
         final String returnValue = ResourceUtils.readString(path);
         return super.template(httpStatus, httpHeaders, returnValue);
-    }
-
-    enum ContentType {
-        PLAIN("text/plain"), HTML("text/html"), CSS("text/css");
-
-        public static final String UTF_8 = ";charset=utf-8";
-
-        private final String name;
-
-        ContentType(String name) {
-            this.name = name;
-        }
-
-        public String getType() {
-            return name;
-        }
-
-        public boolean isSameExtension(String extension) {
-            return this.name().toLowerCase().equals(extension);
-        }
-
-        private static String resolve(String path) {
-            final String extension = ResourceUtils.getFileExtension(path);
-
-            return Arrays.stream(values())
-                         .filter(contentType -> contentType.isSameExtension(extension))
-                         .findAny()
-                         .orElse(PLAIN)
-                         .getType() + UTF_8;
-        }
     }
 }

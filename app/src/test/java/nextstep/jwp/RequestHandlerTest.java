@@ -46,7 +46,7 @@ class RequestHandlerTest {
 
         // then
         String expected = String.join("\r\n", "HTTP/1.1 200 OK",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/html; charset=utf-8 ",
                 "Content-Length: 5564 ",
                 "",
                 ResourceUtils.readString("/index.html"));
@@ -72,7 +72,7 @@ class RequestHandlerTest {
 
         // then
         String expected = String.join("\r\n", "HTTP/1.1 200 OK",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/html; charset=utf-8 ",
                 "Content-Length: 2426 ",
                 "",
                 ResourceUtils.readString("/404.html"));

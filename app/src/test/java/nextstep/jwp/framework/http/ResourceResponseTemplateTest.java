@@ -21,7 +21,7 @@ public class ResourceResponseTemplateTest {
 
         //then
         final HttpResponse expected = HttpResponse.status(HttpStatus.OK)
-                                                  .contentType("text/plain;charset=utf-8")
+                                                  .contentType(ContentType.PLAIN.getTypeWithUtf8())
                                                   .body(ResourceUtils.readString(resource))
                                                   .build();
 
@@ -39,7 +39,7 @@ public class ResourceResponseTemplateTest {
 
         //then
         final HttpResponse expected = HttpResponse.status(HttpStatus.UNAUTHORIZED)
-                                                  .contentType("text/css;charset=utf-8")
+                                                  .contentType(ContentType.CSS.getTypeWithUtf8())
                                                   .body(ResourceUtils.readString(resource))
                                                   .build();
 

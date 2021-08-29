@@ -172,9 +172,9 @@ class RequestHandlerTest {
     @DisplayName("POST /register 요청 시 index.html 반환")
     void register() {
         // given
-        String body = "account=gugu&password=password&email=hkkang%40woowahan.com";
+        String body = "account=air&password=1234&email=air.junseo%40gmail.com";
         final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
+                "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: " + body.getBytes().length,
@@ -195,13 +195,13 @@ class RequestHandlerTest {
                 "HTTP/1.1 302 Found ",
                 "Location: /index.html ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 3863 "
+                "Content-Length: 4391 "
         );
     }
 
     @Test
-    @DisplayName("css 정적 리소스 관리")
-    void staticResource() {
+    @DisplayName("css 정적 리소스 관리 - css/style.css")
+    void cssResource() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /css/styles.css HTTP/1.1 ",
@@ -222,6 +222,32 @@ class RequestHandlerTest {
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/css;charset=utf-8 ",
                 "Content-Length: 223257"
+        );
+    }
+
+    @Test
+    @DisplayName("js 정적 리소스 관리 - js/scripts.js")
+    void jsResource() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /js/scripts.js HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/js,*/*;q=0.1",
+                "Connection: keep-alive ",
+                "");
+
+        BeanFactory.init();
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/js;charset=utf-8 ",
+                "Content-Length: 1002"
         );
     }
 }

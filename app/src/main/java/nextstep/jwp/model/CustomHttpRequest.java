@@ -30,7 +30,7 @@ public class CustomHttpRequest {
         String method = requestInfo[0];
         String uri = requestInfo[1];
         String httpVersion = requestInfo[2];
-        String path = "";
+        String path = uri;
 
         String line = "";
         while (!("".equals(line = reader.readLine()))) {

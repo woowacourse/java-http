@@ -1,9 +1,6 @@
 package nextstep.jwp.http.request;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * /login?something1=123&something2=123
@@ -13,7 +10,7 @@ public class RequestUriPath {
     private final String path;
     private final Map<String, String> params;
 
-    public RequestUriPath(String path, Map<String, String> params) {
+    private RequestUriPath(String path, Map<String, String> params) {
         this.path = path;
         this.params = params;
     }
@@ -23,10 +20,8 @@ public class RequestUriPath {
             int index = uriPath.indexOf("?");
             String path = uriPath.substring(0, index);
             String queryString = uriPath.substring(index + 1);
-
             return new RequestUriPath(path, params(queryString));
         }
-
         return new RequestUriPath(uriPath, Collections.emptyMap());
     }
 
@@ -49,5 +44,18 @@ public class RequestUriPath {
 
     public Map<String, String> getParams() {
         return params;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RequestUriPath that = (RequestUriPath) o;
+        return Objects.equals(path, that.path) && Objects.equals(params, that.params);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path, params);
     }
 }

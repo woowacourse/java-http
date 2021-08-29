@@ -1,5 +1,7 @@
 package nextstep.jwp.http.request;
 
+import java.util.Objects;
+
 /**
  *  GET /index.html HTTP/1.1
  *  GET /login?something1=123&something2=123  HTTP/1.1
@@ -32,5 +34,18 @@ public class RequestLine {
 
     public String getProtocolVersion() {
         return protocolVersion;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RequestLine that = (RequestLine) o;
+        return Objects.equals(method, that.method) && Objects.equals(uriPath, that.uriPath) && Objects.equals(protocolVersion, that.protocolVersion);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(method, uriPath, protocolVersion);
     }
 }

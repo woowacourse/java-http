@@ -1,15 +1,23 @@
 package nextstep.learning.http;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.io.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 /**
  * 입출력(I/O)은 하나의 시스템에서 다른 시스템으로 데이터를 이동 시킬 때 사용한다.<br> 자바는 <b>스트림(Stream)</b>으로부터 I/O를 사용한다.<br>
@@ -214,7 +222,7 @@ class IOStreamTest {
 
             final StringBuilder actual = new StringBuilder();
 
-            while(bufferedReader.ready()) {
+            while (bufferedReader.ready()) {
                 actual.append(bufferedReader.readLine())
                         .append("\r\n");
             }

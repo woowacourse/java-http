@@ -40,10 +40,16 @@ public class URI {
     }
 
     public boolean equalsWith(String other) {
+        if (Objects.nonNull(resourceUri)) {
+            return Objects.equals(resourceUri, other);
+        }
         return Objects.equals(pathUri, other);
     }
 
     public boolean contains(String uri) {
+        if (Objects.nonNull(resourceUri)) {
+            return resourceUri.contains(uri);
+        }
         return pathUri.contains(uri);
     }
 

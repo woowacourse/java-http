@@ -17,7 +17,7 @@ public class DefaultController extends AbstractController {
 
     @Override
     public HttpResponse doGet(HttpRequest httpRequest) {
-        final String path = httpRequest.getURI().getPath();
+        final String path = httpRequest.getPath();
         if ("/".equals(path)) {
             log.info("HELLO WORLD!");
             return HttpResponse.ofByteArray(HttpStatus.OK, "Hello world!".getBytes());
@@ -29,9 +29,35 @@ public class DefaultController extends AbstractController {
         }
         if ("/css/styles.css".equals(path)) {
             log.info("GET /css/styles.css");
-            final byte[] bytes = readFile(httpRequest.getURI().getPath());
+            final byte[] bytes = readFile(path);
             return HttpResponse.ofByteArray(HttpStatus.OK, ContentType.CSS, bytes);
         }
+        if ("/js/scripts.js".equals(path)) {
+            log.info("GET /js/scripts.js");
+            final byte[] bytes = readFile(path);
+            return HttpResponse.ofByteArray(HttpStatus.OK, ContentType.JAVASCRIPT, bytes);
+        }
+        if ("/assets/chart-pie.js".equals(path)) {
+            log.info("GET /assets/chart-pie/js");
+            final byte[] bytes = readFile(path);
+            return HttpResponse.ofByteArray(HttpStatus.OK, ContentType.JAVASCRIPT, bytes);
+        }
+        if ("/assets/chart-area".equals(path)) {
+            log.info("GET /assets/chart-area");
+            final byte[] bytes = readFile(path);
+            return HttpResponse.ofByteArray(HttpStatus.OK, ContentType.JAVASCRIPT, bytes);
+        }
+        if ("/assets/chart-bar".equals(path)) {
+            log.info("GET /assets/chart-bar");
+            final byte[] bytes = readFile(path);
+            return HttpResponse.ofByteArray(HttpStatus.OK, ContentType.JAVASCRIPT, bytes);
+        }
+        if ("/favicon.ico".equals(path)) {
+            log.info("GET /favicon.ico");
+            final byte[] bytes = readFile(path);
+            return HttpResponse.ofByteArray(HttpStatus.OK, ContentType.IMAGE, bytes);
+        }
+
         log.info(path);
         byte[] bytes = "Hello world!".getBytes();
         return HttpResponse.ofByteArray(HttpStatus.OK, bytes);

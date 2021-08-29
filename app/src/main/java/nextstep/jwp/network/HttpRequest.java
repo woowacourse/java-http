@@ -71,4 +71,8 @@ public class HttpRequest {
         }
         return bodyAsMap;
     }
+
+    public String getPath() {
+        return getURI().getPath();
+    }
 }

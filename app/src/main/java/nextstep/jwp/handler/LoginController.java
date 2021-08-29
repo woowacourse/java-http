@@ -1,19 +1,23 @@
 package nextstep.jwp.handler;
 
-import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.handler.dto.LoginRequest;
+import nextstep.jwp.handler.service.LoginService;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.QueryParams;
 import nextstep.jwp.http.request.RequestLine;
-import nextstep.jwp.model.User;
 
 public class LoginController implements Controller {
+
+    private LoginService loginService;
+
+    public LoginController(LoginService loginService) {
+        this.loginService = loginService;
+    }
 
     @Override
     public boolean mapping(RequestLine requestLine) {
         return requestLine.isFrom("get", "/login") || requestLine.isFrom("post", "/login");
     }
-
-    // TODO :: service controller 분리
 
     @Override
     public ModelAndView service(HttpRequest httpRequest) {
@@ -32,21 +36,13 @@ public class LoginController implements Controller {
     }
 
     private ModelAndView login(String requestBody) {
-        System.out.println(requestBody);
-        QueryParams params = QueryParams.of(requestBody);
-        if (isValidUser(params.get("account"), params.get("password"))) {
-            return ModelAndView.redirect("index.html");
-        }
-        return ModelAndView.unauthorized();
-    }
-
-    private boolean isValidUser(String account, String password) {
         try {
-            User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
-            return user.checkPassword(password);
+            QueryParams params = QueryParams.of(requestBody);
+            LoginRequest loginRequest = new LoginRequest(params.get("account"), params.get("password"));
+            loginService.login(loginRequest);
+            return ModelAndView.redirect("/index.html");
         } catch (Exception e) {
-            return false;
+            return ModelAndView.unauthorized();
         }
     }
 }

@@ -5,6 +5,7 @@ import nextstep.jwp.handler.Controller;
 import nextstep.jwp.handler.LoginController;
 import nextstep.jwp.handler.ModelAndView;
 import nextstep.jwp.handler.RegisterController;
+import nextstep.jwp.handler.service.LoginService;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestLine;
 
@@ -17,7 +18,7 @@ public class ControllerMapper implements HandlerMapper {
 
     public ControllerMapper() {
         controllers = Arrays.asList(
-                new LoginController(),
+                new LoginController(new LoginService()),
                 new RegisterController()
         );
     }

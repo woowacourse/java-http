@@ -38,7 +38,7 @@ public class ResponseEntity {
         }
 
         public String build() {
-            return String.join(Http.EMPTY_LINE,
+            return String.join(Http.NEW_LINE,
                     "HTTP/1.1 " + this.statusCode.getStatusCode() + " " + this.statusCode.getStatus() + " ",
                     "Content-Type: text/" + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",

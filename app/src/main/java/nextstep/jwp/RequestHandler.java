@@ -34,12 +34,12 @@ public class RequestHandler implements Runnable {
             HttpResponse httpResponse = new HttpResponse(outputStream);
 
             Controller controller = RequestMapping.getController(httpRequest.getPath());
-            if (FileUtils.existFile(httpRequest.getPath())) {
-                httpResponse.forward(httpRequest.getPath());
-                return;
-            }
-
             if (controller == null) {
+                if (FileUtils.existFile(httpRequest.getPath())) {
+                    httpResponse.forward(httpRequest.getPath());
+                    return;
+                }
+
                 httpResponse.sendError("/404.html");
                 return;
             }

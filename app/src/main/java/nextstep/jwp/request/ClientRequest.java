@@ -25,11 +25,11 @@ public class ClientRequest {
 
     public static ClientRequest from(String requestInfo, Map<String, String> requestHttpHeader, String requestBody) {
         final String[] requestInfos = requestInfo.split(REQUEST_SEPARATOR);
-        final HttpMethod httpMethod = HttpMethod.of(requestInfos[0]);
-        final RequestUrl requestUrl = RequestUrl.of(requestInfos[1]);
-        final RequestHttpHeader httpHeader = RequestHttpHeader.of(requestHttpHeader);
-        final RequestBody body = RequestBody.of(requestBody);
-        return new ClientRequest(httpMethod, requestUrl, httpHeader, body);
+        return new ClientRequest(
+                HttpMethod.of(requestInfos[0]),
+                RequestUrl.of(requestInfos[1]),
+                RequestHttpHeader.of(requestHttpHeader),
+                RequestBody.of(requestBody));
     }
 
     public RequestHttpHeader getRequestHttpHeader() {

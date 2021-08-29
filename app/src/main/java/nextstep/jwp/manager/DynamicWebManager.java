@@ -96,7 +96,7 @@ public class DynamicWebManager {
             final Object result = method.invoke(controller, methodParameters.toArray(new String[0]));
             return String.valueOf(result);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalArgumentException("알맞지 않은 요청 양식입니다.");
+            throw new IllegalArgumentException("해당 컨트롤러 메서드에서 오류가 발생했습니다.");
         }
     }
 

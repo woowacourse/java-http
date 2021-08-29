@@ -8,6 +8,7 @@ public class QueryParameterExtractor {
     private static final String QUERY_PARAM_SEPARATOR = "&";
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final String NEWLINE = "\r\n";
+
     private QueryParameterExtractor() {
     }
 

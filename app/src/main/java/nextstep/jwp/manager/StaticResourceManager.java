@@ -29,15 +29,18 @@ public class StaticResourceManager {
 
     private static final String STATIC_FILE_PATH = "static";
     private static final String NOT_FOUND_FILE_PATH = "static/404.html";
+    private static final String INTERNAL_SERVER_ERROR_FILE_PATH = "static/500.html";
     private static final String REDIRECT_INDICATOR = "redirect: ";
 
     private final Map<ClientRequest, File> staticResources = new HashMap<>();
     private final File notFoundFile;
+    private final File internalServerErrorFile;
 
     public StaticResourceManager() {
         log.info("-------loading static resources-------");
         final ClassLoader classLoader = getClass().getClassLoader();
         this.notFoundFile = new File(Objects.requireNonNull(classLoader.getResource(NOT_FOUND_FILE_PATH)).getFile());
+        this.internalServerErrorFile = new File(Objects.requireNonNull(classLoader.getResource(INTERNAL_SERVER_ERROR_FILE_PATH)).getFile());
 
         try {
             loadStaticResources(classLoader);
@@ -82,9 +85,14 @@ public class StaticResourceManager {
         ServerResponse.response(this.notFoundFile, NOT_FOUND, outputStream);
     }
 
+    public void handleInternalServerError(OutputStream outputStream) throws IOException {
+        ServerResponse.response(this.internalServerErrorFile, INTERNAL_SERVER_ERROR, outputStream);
+    }
+
     public void handleDynamicResult(String result, OutputStream outputStream) throws IOException {
         if (result.contains(REDIRECT_INDICATOR)) {
             handleRedirect(result, outputStream);
+            return;
         }
         handlePath(result, outputStream);
     }
@@ -94,13 +102,17 @@ public class StaticResourceManager {
         final ClientRequest resultRequest = ClientRequest.of(HttpMethod.GET, result);
         if (canHandle(resultRequest)) {
             ServerResponse.response(staticResources.get(resultRequest), FOUND, outputStream);
+            return;
         }
+        throw new IllegalArgumentException("컨트롤러에서 반환한 값에 해당하는 리다이렉트 정적 자원이 없습니다.");
     }
 
     private void handlePath(String result, OutputStream outputStream) throws IOException {
         final ClientRequest resultRequest = ClientRequest.of(HttpMethod.GET, result);
         if (canHandle(resultRequest)) {
             ServerResponse.response(staticResources.get(resultRequest), OK, outputStream);
+            return;
         }
+        throw new IllegalArgumentException("컨트롤러에서 반환한 값에 해당하는 정적 자원이 없습니다.");
     }
 }

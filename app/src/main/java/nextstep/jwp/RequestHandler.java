@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.HelloController;
 import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
@@ -28,7 +29,7 @@ public class RequestHandler implements Runnable {
 
     public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
-        controllerMap.put("/", new HomeController());
+        controllerMap.put("/", new HelloController());
         controllerMap.put("/login", new LoginController());
         controllerMap.put("/register", new RegisterController());
     }

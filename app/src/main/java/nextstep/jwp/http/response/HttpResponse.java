@@ -85,4 +85,11 @@ public class HttpResponse {
     public byte[] getBytes() {
         return toString().getBytes();
     }
+
+    public void message(String message) {
+        setStatusLine(StatusCode.OK);
+        responseHeader.setContentType(ContentType.HTML);
+        responseHeader.setContentLength(message.length());
+        responseBody = new ResponseBody(message);
+    }
 }

@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
-import nextstep.jwp.http.ResourceNotFoundException;
+import nextstep.jwp.exception.ResourceNotFoundException;
 
 import java.io.File;
 import java.io.IOException;

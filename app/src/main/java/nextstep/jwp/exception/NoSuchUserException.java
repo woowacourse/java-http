@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package nextstep.jwp.exception;
 
 public class NoSuchUserException extends RuntimeException {
 

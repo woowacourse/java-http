@@ -1,5 +1,7 @@
 package nextstep.jwp.http;
 
+import nextstep.jwp.exception.NoSuchContentTypeException;
+
 import java.util.Arrays;
 import java.util.function.Predicate;
 
@@ -22,7 +24,7 @@ public enum ContentType {
         return Arrays.stream(values())
                 .filter(contentType -> contentType.expression.test(path))
                 .findFirst()
-                .orElseThrow(NoSuchContentException::new);
+                .orElseThrow(NoSuchContentTypeException::new);
     }
 
     public String getMimeType() {

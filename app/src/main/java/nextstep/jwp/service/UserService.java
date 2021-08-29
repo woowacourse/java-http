@@ -1,8 +1,9 @@
 package nextstep.jwp.service;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.AuthorizationException;
-import nextstep.jwp.model.NoSuchUserException;
+import nextstep.jwp.exception.AuthorizationException;
+import nextstep.jwp.exception.DuplicateAccountException;
+import nextstep.jwp.exception.NoSuchUserException;
 import nextstep.jwp.model.User;
 
 import java.util.Map;

@@ -1,4 +1,4 @@
-package nextstep.jwp.service;
+package nextstep.jwp.exception;
 
 public class DuplicateAccountException extends RuntimeException {
 }

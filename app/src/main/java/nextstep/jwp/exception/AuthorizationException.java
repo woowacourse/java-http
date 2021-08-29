@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package nextstep.jwp.exception;
 
 public class AuthorizationException extends RuntimeException {
 }

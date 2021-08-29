@@ -45,7 +45,7 @@ public class RegisterController implements Handler {
             registerService.register(RegisterRequest.fromQueryParams(queryParams));
             return ResponseEntity.redirect("index.html");
         } catch (UserException userException) {
-            return ResponseEntity.userException();
+            return ResponseEntity.badRequest();
         }
     }
 }

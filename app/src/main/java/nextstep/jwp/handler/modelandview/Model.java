@@ -27,4 +27,8 @@ public class Model {
     public boolean contains(String key) {
         return attributes.containsKey(key);
     }
+
+    public String location() {
+        return (String) attributes.get("Location");
+    }
 }

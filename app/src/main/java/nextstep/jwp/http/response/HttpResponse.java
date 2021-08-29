@@ -13,27 +13,39 @@ public class HttpResponse {
     private ResponseHeaders responseHeaders;
     private String messageBody;
 
-    public HttpResponse() {
+    public HttpResponse(String statusLine, ResponseHeaders responseHeaders, String messageBody) {
+        this.statusLine = statusLine;
+        this.responseHeaders = responseHeaders;
+        this.messageBody = messageBody;
     }
 
-    public void setResult(Model model, View view) {
+    public HttpResponse(String statusLine, ResponseHeaders responseHeaders) {
+        this(statusLine, responseHeaders, "");
+    }
+
+    public static HttpResponse of(Model model, View view) {
         HttpStatus httpStatus = model.httpStatus();
+        if (httpStatus.isFound()) {
+            return redirect(model);
+        }
+
         String statusLine = String.format(HTTP_REQUEST_LINE_FORMAT, httpStatus.code(), httpStatus.name());
 
         ResponseHeaders headers = new ResponseHeaders();
+        headers.addAttribute("Content-Type", view.contentType());
+        headers.addAttribute("Content-Length", view.contentLength());
 
-        if (!view.isEmpty()) {
-            headers.addAttribute("Content-Type", view.contentType());
-            headers.addAttribute("Content-Length", view.contentLength());
-        }
+        return new HttpResponse(statusLine, headers, view.content());
+    }
 
-        if (model.contains("Location")) {
-            headers.addAttribute("Location", (String) model.getAttribute("Location"));
-        }
+    public static HttpResponse redirect(Model model) {
+        HttpStatus httpStatus = HttpStatus.FOUND;
+        String statusLine = String.format(HTTP_REQUEST_LINE_FORMAT, httpStatus.code(), httpStatus.name());
 
-        this.statusLine = statusLine;
-        this.responseHeaders = headers;
-        this.messageBody = view.content();
+        ResponseHeaders headers = new ResponseHeaders();
+        headers.addAttribute("Location", model.location());
+
+        return new HttpResponse(statusLine, headers);
     }
 
     public byte[] responseAsBytes() {

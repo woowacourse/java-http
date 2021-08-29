@@ -24,14 +24,14 @@ public class Dispatcher {
         this.viewResolver = viewResolver;
     }
 
-    public void dispatch(HttpRequest httpRequest, HttpResponse httpResponse) {
+    public HttpResponse dispatch(HttpRequest httpRequest) {
         ResponseEntity response = service(httpRequest);
 
         ModelAndView modelAndView = response.modelAndView();
         Model model = modelAndView.getModel();
         View view = viewResolver.resolve(modelAndView.getViewName());
 
-        httpResponse.setResult(model, view);
+        return HttpResponse.of(model, view);
     }
 
     public ResponseEntity service(HttpRequest httpRequest) {

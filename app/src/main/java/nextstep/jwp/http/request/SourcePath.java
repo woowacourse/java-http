@@ -4,10 +4,10 @@ import java.util.Objects;
 
 public class SourcePath {
 
-    private final String sourcePath;
+    private final String path;
 
-    public SourcePath(String sourcePath) {
-        this.sourcePath = sourcePath;
+    public SourcePath(String path) {
+        this.path = path;
     }
 
     public static SourcePath of(String uriPath) {
@@ -19,7 +19,7 @@ public class SourcePath {
     }
 
     public boolean isPath(String path) {
-        return sourcePath.equalsIgnoreCase(path);
+        return this.path.equalsIgnoreCase(path);
     }
 
     @Override
@@ -31,15 +31,15 @@ public class SourcePath {
             return false;
         }
         SourcePath that = (SourcePath) o;
-        return sourcePath.equalsIgnoreCase(that.sourcePath);
+        return path.equalsIgnoreCase(that.path);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sourcePath);
+        return Objects.hash(path);
     }
 
     public String getValue() {
-        return sourcePath;
+        return path;
     }
 }

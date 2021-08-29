@@ -31,9 +31,7 @@ public class RequestHandler implements Runnable {
                 final OutputStream outputStream = connection.getOutputStream()) {
 
             final HttpRequest httpRequest = HttpRequest.of(inputStream);
-            final HttpResponse httpResponse = new HttpResponse();
-
-            dispatcher.dispatch(httpRequest, httpResponse);
+            final HttpResponse httpResponse = dispatcher.dispatch(httpRequest);
 
             outputStream.write(httpResponse.responseAsBytes());
             outputStream.flush();

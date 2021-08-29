@@ -33,13 +33,6 @@ public class ResponseEntity {
         return new ResponseEntity(modelAndView);
     }
 
-    public static ResponseEntity userException() {
-        Model model = new Model();
-        model.addAttribute("HttpStatus", HttpStatus.BAD_REQUEST);
-        ModelAndView modelAndView = new ModelAndView(model, "/404.html");
-        return new ResponseEntity(modelAndView);
-    }
-
     public static ResponseEntity unhandledException() {
         Model model = new Model();
         model.addAttribute("HttpStatus", HttpStatus.ERROR);

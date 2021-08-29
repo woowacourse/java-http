@@ -22,7 +22,6 @@ public class ViewResolver {
             final URL resourceUrl = getClass().getResource(RESOURCE_BASE_PATH + viewName);
             return View.asFile(new File(resourceUrl.getFile()));
         } catch (Exception e) {
-            e.printStackTrace();
             throw new IllegalArgumentException("view not found");
         }
     }

@@ -48,8 +48,8 @@ $RECYCLE.BIN/
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
-### Example user template template
-### Example user template
+### Example member template template
+### Example member template
 
 # IntelliJ project files
 .idea
@@ -108,8 +108,8 @@ Network Trash Folder
 Temporary Items
 .apdisk
 
-### Example user template template
-### Example user template
+### Example member template template
+### Example member template
 
 # IntelliJ project files
 .idea

@@ -1,5 +1,6 @@
 package nextstep.jwp;
 
+import nextstep.jwp.core.mvc.FrontHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,9 +22,10 @@ public class WebServer {
     }
 
     public void run() {
+        FrontHandler frontHandler = new FrontHandler("nextstep");
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             logger.info("Web Server started {} port.", serverSocket.getLocalPort());
-            handle(serverSocket);
+            handle(serverSocket, frontHandler);
         } catch (IOException exception) {
             logger.error("Exception accepting connection", exception);
         } catch (RuntimeException exception) {
@@ -31,10 +33,11 @@ public class WebServer {
         }
     }
 
-    private void handle(ServerSocket serverSocket) throws IOException {
+    private void handle(ServerSocket serverSocket,
+            FrontHandler frontHandler) throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection)).start();
+            new Thread(new RequestHandler(connection, frontHandler)).start();
         }
     }
 

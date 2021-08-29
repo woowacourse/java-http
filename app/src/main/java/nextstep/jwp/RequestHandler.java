@@ -1,5 +1,10 @@
 package nextstep.jwp;
 
+import nextstep.jwp.core.mvc.FrontHandler;
+import nextstep.jwp.webserver.request.DefaultHttpRequest;
+import nextstep.jwp.webserver.request.HttpRequest;
+import nextstep.jwp.webserver.response.DefaultHttpResponse;
+import nextstep.jwp.webserver.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,9 +19,11 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
+    private final FrontHandler frontHandler;
 
-    public RequestHandler(Socket connection) {
+    public RequestHandler(Socket connection, FrontHandler frontHandler) {
         this.connection = Objects.requireNonNull(connection);
+        this.frontHandler = frontHandler;
     }
 
     @Override
@@ -25,15 +32,10 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
+            HttpRequest httpRequest = new DefaultHttpRequest(inputStream);
+            HttpResponse httpResponse = new DefaultHttpResponse();
 
-            final String responseBody = "Hello world!";
-
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final String response = frontHandler.getResponse(httpRequest, httpResponse).totalResponse();
 
             outputStream.write(response.getBytes());
             outputStream.flush();

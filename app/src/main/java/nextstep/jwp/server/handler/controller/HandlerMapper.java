@@ -2,18 +2,18 @@ package nextstep.jwp.server.handler.controller;
 
 import nextstep.jwp.http.exception.NotFoundException;
 import nextstep.jwp.http.message.request.HttpRequest;
-import nextstep.jwp.server.handler.controller.standard.StandardController;
+import nextstep.jwp.server.handler.controller.static_files.StaticFilesController;
 
 import java.util.List;
 
-public class Controllers {
+public class HandlerMapper {
 
     private final List<Controller> customControllers;
-    private final List<StandardController> standardControllers;
+    private final List<StaticFilesController> staticFilesControllers;
 
-    public Controllers(List<Controller> customControllers, List<StandardController> standardControllers) {
+    public HandlerMapper(List<Controller> customControllers, List<StaticFilesController> staticFilesControllers) {
         this.customControllers = customControllers;
-        this.standardControllers = standardControllers;
+        this.staticFilesControllers = staticFilesControllers;
     }
 
     public Controller findController(HttpRequest httpRequest) {
@@ -23,8 +23,8 @@ public class Controllers {
                 .orElseGet(() -> findStandardController(httpRequest));
     }
 
-    private StandardController findStandardController(HttpRequest httpRequest) {
-        return standardControllers.stream()
+    private StaticFilesController findStandardController(HttpRequest httpRequest) {
+        return staticFilesControllers.stream()
                 .filter(controller -> controller.isSatisfiedBy(httpRequest))
                 .findAny()
                 .orElseThrow(NotFoundException::new);

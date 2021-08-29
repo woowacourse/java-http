@@ -1,12 +1,7 @@
 package nextstep.jwp.http.message.request;
 
-import nextstep.jwp.http.message.element.Cookie;
 import nextstep.jwp.http.message.element.Headers;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

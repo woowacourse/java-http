@@ -1,12 +1,14 @@
 package nextstep.jwp.http.message.request;
 
-import java.util.Optional;
-import java.util.function.Supplier;
-
 import nextstep.jwp.http.message.element.*;
+import nextstep.jwp.http.message.element.cookie.Cookie;
+import nextstep.jwp.http.message.element.cookie.CookieImpl;
+import nextstep.jwp.http.message.element.cookie.ProxyCookie;
 import nextstep.jwp.http.message.request.request_line.HttpMethod;
 import nextstep.jwp.http.message.request.request_line.HttpPath;
 import nextstep.jwp.http.message.request.request_line.RequestLine;
+
+import java.util.Optional;
 
 public class HttpRequest {
 
@@ -44,9 +46,17 @@ public class HttpRequest {
     }
 
     public Cookie getCookie() {
-        return getHeader("Cookie")
-                .map(Cookie::new)
-                .orElseGet(Cookie::new);
+        return Optional.ofNullable(cookie)
+                .orElseGet(() -> {
+                            ProxyCookie cookie = getHeader("Cookie")
+                                    .map(CookieImpl::new)
+                                    .map(ProxyCookie::new)
+                                    .orElseGet(ProxyCookie::new);
+
+                            this.cookie = cookie;
+                            return cookie;
+                        }
+                );
     }
 
     public HttpSession getSession() {
@@ -57,7 +67,5 @@ public class HttpRequest {
                     this.httpSession = session;
                     return session;
                 });
-
-
     }
 }

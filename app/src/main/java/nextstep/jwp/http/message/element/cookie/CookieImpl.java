@@ -1,18 +1,16 @@
-package nextstep.jwp.http.message.element;
+package nextstep.jwp.http.message.element.cookie;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 
-public class Cookie {
+public class CookieImpl implements Cookie{
 
     private final
     Map<String, String> values;
 
-    public Cookie(String values) {
+    public CookieImpl(String values) {
         this.values = extractCookies(values);
     }
 
@@ -23,11 +21,11 @@ public class Cookie {
                 .collect(toMap(v -> v[0].trim(), v -> v[1].trim()));
     }
 
-    public Cookie() {
+    public CookieImpl() {
         this(new HashMap<>());
     }
 
-    public Cookie(Map<String, String> values) {
+    public CookieImpl(Map<String, String> values) {
         this.values = values;
     }
 
@@ -35,7 +33,21 @@ public class Cookie {
         return Optional.ofNullable(values.get(key));
     }
 
+    public List<String> getKeys() {
+        return new ArrayList<>(values.keySet());
+    }
+
+    public void put(String key, String value) {
+        this.values.put(key, value);
+    }
+
     public int size() {
         return values.size();
+    }
+
+    public String asString() {
+        return values.entrySet().stream()
+                .map(e -> String.format("%s=%s", e.getKey(), e.getValue()))
+                .collect(joining(";"));
     }
 }

@@ -1,16 +1,15 @@
 package nextstep.jwp.http.message.response;
 
-import static nextstep.jwp.http.Protocol.LINE_SEPARATOR;
+import nextstep.jwp.http.common.PathUtils;
+import nextstep.jwp.http.message.element.*;
+import nextstep.jwp.http.message.element.cookie.Cookie;
+import nextstep.jwp.http.message.element.cookie.ProxyCookie;
+import nextstep.jwp.http.message.response.response_line.ResponseLine;
 
 import java.io.File;
 import java.util.List;
-import nextstep.jwp.http.message.element.Body;
-import nextstep.jwp.http.message.element.ContentType;
-import nextstep.jwp.http.message.element.Headers;
-import nextstep.jwp.http.message.element.HttpStatus;
-import nextstep.jwp.http.message.element.HttpVersion;
-import nextstep.jwp.http.common.PathUtils;
-import nextstep.jwp.http.message.response.response_line.ResponseLine;
+
+import static nextstep.jwp.http.Protocol.LINE_SEPARATOR;
 
 public class HttpResponse implements Response {
 
@@ -59,10 +58,12 @@ public class HttpResponse implements Response {
         return new HttpResponse(responseLine, headers, body);
     }
 
-    public void putHeader(String key, String value) {
-        this.headers.putHeader(key, value);
+    @Override
+    public void setCookies(ProxyCookie cookie) {
+        headers.putHeader("Set-Cookie", cookie.asStringOfChanged());
     }
 
+    @Override
     public String asString() {
         String topOfHeader = String.join(" " + LINE_SEPARATOR.value(), List.of(
             responseLine.asString(),

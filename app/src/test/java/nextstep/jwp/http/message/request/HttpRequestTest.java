@@ -1,17 +1,17 @@
 package nextstep.jwp.http.message.request;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import nextstep.jwp.fixture.Fixture;
 import nextstep.jwp.http.message.element.Headers;
 import nextstep.jwp.http.message.element.HttpSession;
 import nextstep.jwp.http.message.element.HttpSessions;
+import nextstep.jwp.http.message.element.cookie.Cookie;
 import nextstep.jwp.http.message.request.request_line.HttpMethod;
 import nextstep.jwp.http.message.request.request_line.HttpPath;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpRequestTest {
 
@@ -45,9 +45,15 @@ class HttpRequestTest {
         assertThat(resourcePath.getUri()).isEqualTo("/test");
     }
 
+    @DisplayName("언제나 같은 쿠키를 반환한다.")
     @Test
     void getCookie() {
         assertThat(httpRequest.getCookie()).isNotNull();
+
+        Cookie cookie1 = httpRequest.getCookie();
+        Cookie cookie2 = httpRequest.getCookie();
+
+        assertThat(cookie1).isSameAs(cookie2);
     }
 
     @DisplayName("세션이 존재하지 않더라도 언제나 같은 세션을 반환한다.")

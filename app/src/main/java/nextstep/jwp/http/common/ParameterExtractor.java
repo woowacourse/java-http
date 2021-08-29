@@ -1,9 +1,9 @@
 package nextstep.jwp.http.common;
 
-import static java.util.stream.Collectors.toMap;
-
 import java.util.Arrays;
 import java.util.Map;
+
+import static java.util.stream.Collectors.toMap;
 
 public class ParameterExtractor {
 

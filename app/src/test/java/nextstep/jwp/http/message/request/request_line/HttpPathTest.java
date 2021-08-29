@@ -1,9 +1,9 @@
 package nextstep.jwp.http.message.request.request_line;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpPathTest {
     @DisplayName("URI에 getParameter가 있다면 파싱한다.")

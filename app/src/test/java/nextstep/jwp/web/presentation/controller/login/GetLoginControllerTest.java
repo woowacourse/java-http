@@ -1,8 +1,5 @@
 package nextstep.jwp.web.presentation.controller.login;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.stream.Stream;
 import nextstep.jwp.fixture.Fixture;
 import nextstep.jwp.http.message.request.HttpRequest;
 import nextstep.jwp.http.message.response.Response;
@@ -11,6 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class GetLoginControllerTest {
 

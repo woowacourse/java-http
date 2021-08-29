@@ -1,12 +1,10 @@
 package nextstep.jwp.http.common;
 
-import static java.util.stream.Collectors.joining;
+import nextstep.jwp.http.exception.NotFoundException;
 
 import java.io.File;
 import java.net.URL;
 import java.util.Objects;
-
-import nextstep.jwp.http.exception.NotFoundException;
 
 public class PathUtils {
 

@@ -1,6 +1,19 @@
 package nextstep.jwp.server.handler;
 
-import static nextstep.jwp.http.Protocol.LINE_SEPARATOR;
+import nextstep.jwp.http.exception.Exceptions;
+import nextstep.jwp.http.exception.InternalServerException;
+import nextstep.jwp.http.message.element.Body;
+import nextstep.jwp.http.message.element.Headers;
+import nextstep.jwp.http.message.request.HttpRequest;
+import nextstep.jwp.http.message.request.request_line.RequestLine;
+import nextstep.jwp.http.message.response.HttpResponse;
+import nextstep.jwp.http.message.response.Response;
+import nextstep.jwp.server.handler.controller.Controller;
+import nextstep.jwp.server.handler.controller.HandlerMapper;
+import nextstep.jwp.server.handler.controller.static_files.StaticFilesControllerFactory;
+import nextstep.jwp.web.presentation.controller.factory.CustomControllerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,30 +21,18 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
-import nextstep.jwp.http.message.element.Body;
-import nextstep.jwp.http.message.element.Headers;
-import nextstep.jwp.server.handler.controller.Controller;
-import nextstep.jwp.server.handler.controller.Controllers;
-import nextstep.jwp.web.presentation.controller.factory.CustomControllerFactory;
-import nextstep.jwp.server.handler.controller.standard.StandardControllerFactory;
-import nextstep.jwp.http.exception.Exceptions;
-import nextstep.jwp.http.exception.InternalServerException;
-import nextstep.jwp.http.message.request.HttpRequest;
-import nextstep.jwp.http.message.request.request_line.RequestLine;
-import nextstep.jwp.http.message.response.HttpResponse;
-import nextstep.jwp.http.message.response.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static nextstep.jwp.http.Protocol.LINE_SEPARATOR;
 
 public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
-    private final Controllers controllers;
+    private final HandlerMapper handlerMapper;
     private final Socket connection;
 
     public RequestHandler(Socket connection) {
-        this.controllers = new Controllers(CustomControllerFactory.create(), StandardControllerFactory.create());
+        this.handlerMapper = new HandlerMapper(CustomControllerFactory.create(), StaticFilesControllerFactory.create());
         this.connection = Objects.requireNonNull(connection);
     }
 
@@ -100,7 +101,7 @@ public class RequestHandler implements Runnable {
 
     private Response doService(HttpRequest httpRequest) {
         try {
-            Controller controller = controllers.findController(httpRequest);
+            Controller controller = handlerMapper.findController(httpRequest);
             return controller.doService(httpRequest);
 
         } catch (Exception e) {

@@ -1,8 +1,9 @@
 package nextstep.jwp.http.message.request.request_line;
 
+import nextstep.jwp.http.exception.InternalServerException;
+
 import java.util.Arrays;
 import java.util.Objects;
-import nextstep.jwp.http.exception.InternalServerException;
 
 public enum HttpMethod {
     GET,

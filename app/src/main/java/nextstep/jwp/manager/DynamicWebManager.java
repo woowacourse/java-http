@@ -7,6 +7,8 @@ import nextstep.jwp.manager.annotation.RequestParameter;
 import nextstep.jwp.request.ClientRequest;
 import nextstep.jwp.request.HttpMethod;
 import org.reflections.Reflections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -17,6 +19,8 @@ import java.util.stream.Collectors;
 
 public class DynamicWebManager {
 
+    private static final Logger log = LoggerFactory.getLogger(DynamicWebManager.class);
+
     private final Set<Object> controllers = new HashSet<>();
     private final Map<ClientRequest, Map<Object, Method>> dynamicWebHandler = new HashMap<>();
 
@@ -26,11 +30,13 @@ public class DynamicWebManager {
     }
 
     private void initializeControllers() {
+        log.info("*******loading annotated controllers*******");
         Reflections reflections = new Reflections("nextstep.jwp.application");
         final Set<Class<?>> annotatedControllers = reflections.getTypesAnnotatedWith(Controller.class);
         for (Class<?> controller : annotatedControllers) {
             registerController(controller);
         }
+        log.info("*******annotated contollers loaded*******");
     }
 
     private void registerController(Class<?> bean) {
@@ -44,6 +50,7 @@ public class DynamicWebManager {
     }
 
     private void loadControllerHandler() {
+        log.info("*******loading controller handlers*******");
         for (Object controller : controllers) {
             final Class<?> controllerClass = controller.getClass();
             final Method[] methods = controllerClass.getMethods();
@@ -51,6 +58,7 @@ public class DynamicWebManager {
                 registerHandler(controller, method);
             }
         }
+        log.info("*******controller handlers loaded*******");
     }
 
     private void registerHandler(Object controller, Method method) {

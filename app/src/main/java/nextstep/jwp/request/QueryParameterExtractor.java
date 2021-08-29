@@ -5,6 +5,9 @@ import java.util.Map;
 
 public class QueryParameterExtractor {
 
+    private QueryParameterExtractor() {
+    }
+
     private static final String QUERY_PARAM_SEPARATOR = "&";
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final String NEWLINE = "\r\n";
@@ -19,6 +22,6 @@ public class QueryParameterExtractor {
     }
 
     private static String removeNewLine(String input) {
-        return input.replaceAll(NEWLINE, "");
+        return input.replace(NEWLINE, "");
     }
 }

@@ -31,7 +31,7 @@ class ReflectionsLibraryTest {
                 .map(Class::getSimpleName)
                 .collect(Collectors.toList());
 
-        assertThat(beanClasses).contains("UserService", "UserRepository", "UserController");
+        assertThat(beanClasses).contains("UserController");
     }
 
     @DisplayName("UserController를 생성하고, 그 안에 GetMapping,PostMapping 어노테이션이 붙은 메서드를 추출할 수 있다.")

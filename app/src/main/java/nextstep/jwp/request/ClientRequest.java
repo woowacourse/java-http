@@ -28,16 +28,12 @@ public class ClientRequest {
         final HttpMethod httpMethod = HttpMethod.of(requestInfos[0]);
         final RequestUrl requestUrl = RequestUrl.of(requestInfos[1]);
         final RequestHttpHeader httpHeader = RequestHttpHeader.of(requestHttpHeader);
-        if ("".equals(requestBody)) {
-            return new ClientRequest(httpMethod, requestUrl, httpHeader, null);
-        }
-
         final RequestBody body = RequestBody.of(requestBody);
         return new ClientRequest(httpMethod, requestUrl, httpHeader, body);
     }
 
-    public QueryParameter getQueryParam() {
-        return requestUrl.getQueryParam();
+    public RequestHttpHeader getRequestHttpHeader() {
+        return requestHttpHeader;
     }
 
     public String searchRequestBody(String key) {

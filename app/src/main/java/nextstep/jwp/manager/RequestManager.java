@@ -25,8 +25,8 @@ public class RequestManager {
         }
 
         if (dynamicWebManager.canHandle(clientRequest)) {
-            final String result = dynamicWebManager.handle(clientRequest);
-            staticResourceManager.handleDynamicResult(result, outputStream);
+            final String dynamicWebProcessResult = dynamicWebManager.handle(clientRequest);
+            staticResourceManager.handleDynamicResult(dynamicWebProcessResult, outputStream);
             return;
         }
 

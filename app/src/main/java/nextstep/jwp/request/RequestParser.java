@@ -11,9 +11,10 @@ public class RequestParser {
 
     private static final Logger log = LoggerFactory.getLogger(RequestParser.class);
     private static final String NEWLINE = "\r\n";
-    private static final String HEADER_BODY_SEPARATOR = "\r\n\r\n";
+    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String HTTP_HEADER_KEY_VALUE_SEPARATOR = ":";
 
-    private BufferedReader bufferedReader;
+    private final BufferedReader bufferedReader;
 
     public RequestParser(InputStream inputStream) {
         this.bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -22,9 +23,8 @@ public class RequestParser {
     public ClientRequest extractClientRequest() throws IOException {
         final StringBuilder header = new StringBuilder();
         String line;
-        while (true) {
-            line = bufferedReader.readLine();
-            if (line == null || line.length() == 0) {
+        while ((line = bufferedReader.readLine()) != null) {
+            if (line.length() == 0) {
                 break;
             }
             header.append(line).append("\r\n");
@@ -33,49 +33,41 @@ public class RequestParser {
     }
 
     public ClientRequest parseClientRequest(String header) throws IOException {
-        log.info("Client Header \r\n{}", header);
         final String requestInfo = parseRequestInfo(header);
+        log.info("### Client Request Info = {}", requestInfo);
+
         final Map<String, String> requestHttpHeader = parseRequestHttpHeader(header);
 
-        if (requestHttpHeader.containsKey("Content-Length")) {
-            final int contentLength = Integer.parseInt(requestHttpHeader.get("Content-Length").trim());
-            char[] buffer = new char[contentLength];
-            bufferedReader.read(buffer, 0, contentLength);
-            final String requestBody = new String(buffer);
-            return ClientRequest.from(requestInfo, requestHttpHeader, requestBody);
-        }
-        return ClientRequest.from(requestInfo, requestHttpHeader, "");
+        final String requestBody = parseRequestBody(requestHttpHeader);
+
+        return ClientRequest.from(requestInfo, requestHttpHeader, requestBody);
     }
 
     private String parseRequestInfo(String request) {
-        final int firstLineIndex = request.indexOf(NEWLINE);
-        return request.substring(0, firstLineIndex);
+        final int firstLineSeparatorIndex = request.indexOf(NEWLINE);
+        return request.substring(0, firstLineSeparatorIndex);
     }
 
     private Map<String, String> parseRequestHttpHeader(String request) {
-        final int firstLineIndex = request.indexOf(NEWLINE);
-        final int headerBodyIndex = request.indexOf(HEADER_BODY_SEPARATOR);
-        if (headerBodyIndex == -1) {
-            return parseHttpHeaders(request.substring(firstLineIndex + NEWLINE.length()));
+        final int firstLineSeparatorIndex = request.indexOf(NEWLINE);
+        final String requestHeaders = request.substring(firstLineSeparatorIndex + NEWLINE.length());
+
+        final Map<String, String> httpHeaders = new HashMap<>();
+        final String[] headers = requestHeaders.split(NEWLINE);
+        for (String header : headers) {
+            final String[] headerKeyAndValue = header.split(HTTP_HEADER_KEY_VALUE_SEPARATOR);
+            httpHeaders.put(headerKeyAndValue[0], headerKeyAndValue[1]);
         }
-        return parseHttpHeaders(request.substring(firstLineIndex + NEWLINE.length(), headerBodyIndex));
+        return httpHeaders;
     }
 
-    private Map<String, String> parseHttpHeaders(String headerRequest) {
-        final Map<String, String> httpHeader = new HashMap<>();
-        final String[] headers = headerRequest.split(NEWLINE);
-        for (String header : headers) {
-            final String[] headerKeyAndValue = header.split(":");
-            httpHeader.put(headerKeyAndValue[0], headerKeyAndValue[1]);
+    private String parseRequestBody(Map<String, String> requestHttpHeader) throws IOException {
+        if (requestHttpHeader.containsKey(CONTENT_LENGTH_HEADER)) {
+            final int contentLength = Integer.parseInt(requestHttpHeader.get(CONTENT_LENGTH_HEADER).trim());
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            return new String(buffer);
         }
-        return httpHeader;
+        return null;
     }
-//
-//    private String parseRequestBody(String request) {
-//        final int headerBodyIndex = request.indexOf(HEADER_BODY_SEPARATOR);
-//        if (headerBodyIndex == -1) {
-//            return "";
-//        }
-//        return request.substring(headerBodyIndex + HEADER_BODY_SEPARATOR.length());
-//    }
 }

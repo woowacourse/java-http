@@ -44,4 +44,13 @@ class StringTest {
 
         assertThat(expected).isEqualTo(actual);
     }
+
+    @DisplayName("정규표현식으로 '\\' 를 '/' 로 변경할 수 있다.")
+    @Test
+    void convertDoubleBackSlash() {
+        String toBeChanged = "G:\\foo:\\bar";
+        String changed = toBeChanged.replaceAll("\\\\+","/");
+
+        assertThat(changed).isEqualTo("G:/foo:/bar");
+    }
 }

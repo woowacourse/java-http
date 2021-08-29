@@ -21,17 +21,17 @@ public class HttpRequestHeader {
         }
 
         final String[] requestHeaderFirstLine = requestHeaders.get(0).split(SPACE);
-        final String httpMethod = requestHeaderFirstLine[0];
-        final String protocol = requestHeaderFirstLine[2];
-        final String uri = requestHeaderFirstLine[1];
-        final Map<String, String> queryParameters = parseQueryParameters(uri);
-        final int contentLength = parseContentLength(requestHeaders);
+        final String requestHttpMethod = requestHeaderFirstLine[0];
+        final String requestProtocol = requestHeaderFirstLine[2];
+        final String requestUri = requestHeaderFirstLine[1];
+        final Map<String, String> requestQueryParameters = parseQueryParameters(requestUri);
+        final int requestContentLength = parseContentLength(requestHeaders);
 
-        this.httpMethod = httpMethod;
-        this.protocol = protocol;
-        this.path = trimPath(uri, httpMethod);
-        this.queryParameters = queryParameters;
-        this.contentLength = contentLength;
+        this.httpMethod = requestHttpMethod;
+        this.protocol = requestProtocol;
+        this.path = trimPath(requestUri, requestHttpMethod);
+        this.queryParameters = requestQueryParameters;
+        this.contentLength = requestContentLength;
     }
 
     private int parseContentLength(final List<String> requestHeaders) {
@@ -81,9 +81,7 @@ public class HttpRequestHeader {
     private void addQueryParameters(final Map<String, String> newQueryParameters, final String queryString) {
         Arrays.stream(queryString.split(QUERY_STRING_DELIMITER))
                 .map(query -> query.split(QUERY_KEY_VALUE_DELIMITER))
-                .forEach(queryPair -> {
-                    newQueryParameters.put(queryPair[KEY_INDEX], queryPair[VALUE_INDEX]);
-                });
+                .forEach(queryPair -> newQueryParameters.put(queryPair[KEY_INDEX], queryPair[VALUE_INDEX]));
     }
 
     public boolean hasNoQueryParameters() {

@@ -55,7 +55,7 @@ public class RequestHandler implements Runnable {
     private HttpRequest parseRequest(final InputStream inputStream) throws IOException {
         inputStreamReader = new BufferedReader(new InputStreamReader(inputStream));
 
-        final List<String> requestHeaders = parseRequestHeaders(inputStream);
+        final List<String> requestHeaders = parseRequestHeaders();
         final HttpRequestHeader httpRequestHeader = new HttpRequestHeader(requestHeaders);
 
         final String requestBody = parseRequestBody(httpRequestHeader);
@@ -64,7 +64,7 @@ public class RequestHandler implements Runnable {
         return new HttpRequest(httpRequestHeader, httpRequestBody);
     }
 
-    private List<String> parseRequestHeaders(final InputStream inputStream) throws IOException {
+    private List<String> parseRequestHeaders() throws IOException {
         final List<String> requestHeaders = new ArrayList<>();
         String line = inputStreamReader.readLine();
         while (!"".equals(line)) {

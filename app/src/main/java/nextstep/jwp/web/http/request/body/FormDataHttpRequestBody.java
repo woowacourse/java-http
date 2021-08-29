@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import nextstep.jwp.web.http.util.QueryParser;
 
-public class FormDataHttpRequestBody implements HttpRequestBody {
+public class FormDataHttpRequestBody implements HttpRequestBody<String> {
 
     private final HashMap<String, String> formData;
     private final String body;
@@ -16,7 +16,7 @@ public class FormDataHttpRequestBody implements HttpRequestBody {
     }
 
     @Override
-    public Object getAttribute(String key) {
+    public String getAttribute(String key) {
         return formData.get(key);
     }
 

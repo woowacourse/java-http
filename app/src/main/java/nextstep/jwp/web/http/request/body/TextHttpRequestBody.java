@@ -1,6 +1,6 @@
 package nextstep.jwp.web.http.request.body;
 
-public class TextHttpRequestBody implements HttpRequestBody {
+public class TextHttpRequestBody implements HttpRequestBody<String> {
 
     private final String body;
 
@@ -9,8 +9,8 @@ public class TextHttpRequestBody implements HttpRequestBody {
     }
 
     @Override
-    public Object getAttribute(String key) {
-        return new UnsupportedOperationException("텍스트 데이터입니다. getBody()를 활용하세요.");
+    public String getAttribute(String key) {
+        throw new UnsupportedOperationException("텍스트 데이터입니다. getBody()를 활용하세요.");
     }
 
     @Override

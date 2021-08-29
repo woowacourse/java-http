@@ -1,7 +1,9 @@
 package nextstep.jwp.web.http.request.body;
 
-public interface HttpRequestBody {
+import java.util.Set;
 
-    Object getAttribute(String key);
+public interface HttpRequestBody<T> {
+
+    T getAttribute(String key);
     String getBody();
 }

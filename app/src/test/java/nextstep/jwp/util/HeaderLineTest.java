@@ -21,7 +21,7 @@ class HeaderLineTest {
         final HeaderLine headerLine = HeaderLine.readFromInputStream(inputStream);
 
         //given
-        final String requestedURL = headerLine.getRequestURL();
+        final String requestedURL = headerLine.getRequestURLWithoutQuery();
 
         //then
         assertThat(requestedURL).hasToString(answer);

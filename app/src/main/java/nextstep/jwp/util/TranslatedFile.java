@@ -15,10 +15,13 @@ public class TranslatedFile {
     }
 
     public String staticValue() throws IOException {
-        final String filePath = "static" + requestedURI;
+        String uri = requestedURI;
+        if (!uri.contains(".html")) {
+            uri = uri + ".html";
+        }
+        final String filePath = "static" + uri;
         final URL resource = getClass().getClassLoader().getResource(filePath);
         final Path path = new File(resource.getPath()).toPath();
-        final String responseBody = Files.readString(path);
-        return responseBody;
+        return Files.readString(path);
     }
 }

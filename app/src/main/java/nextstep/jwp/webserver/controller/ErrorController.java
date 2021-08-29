@@ -1,13 +1,12 @@
 package nextstep.jwp.webserver.controller;
 
-import java.io.IOException;
 import java.util.EnumSet;
 
 import nextstep.jwp.framework.context.AbstractController;
 import nextstep.jwp.framework.http.HttpMethod;
 import nextstep.jwp.framework.http.HttpRequest;
 import nextstep.jwp.framework.http.HttpResponse;
-import nextstep.jwp.framework.util.Resources;
+import nextstep.jwp.framework.http.ResourceResponseTemplate;
 
 public class ErrorController extends AbstractController {
 
@@ -18,12 +17,7 @@ public class ErrorController extends AbstractController {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) throws IOException {
-        final String response = Resources.readString("/404.html");
-
-        return HttpResponse.ok()
-                           .body(response)
-                           .contentLength(response.getBytes().length)
-                           .build();
+    public HttpResponse handle(HttpRequest httpRequest) {
+        return new ResourceResponseTemplate().ok("/404.html");
     }
 }

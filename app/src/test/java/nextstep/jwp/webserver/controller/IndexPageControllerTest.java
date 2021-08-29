@@ -1,12 +1,9 @@
 package nextstep.jwp.webserver.controller;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import nextstep.jwp.framework.http.*;
-import nextstep.jwp.framework.util.Resources;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,7 +11,7 @@ public class IndexPageControllerTest {
 
     @Test
     @DisplayName("인덱스 페이지에 접근했을 때 HTTP 응답 테스트")
-    public void handleTest() throws IOException {
+    void handleTest() {
 
         // given
         final RequestLine requestLine = new RequestLine(HttpMethod.GET, "/index.html", HttpVersion.HTTP_1_1);
@@ -25,12 +22,7 @@ public class IndexPageControllerTest {
         final HttpResponse httpResponse = indexPageController.handle(httpRequest);
 
         //then
-        final String response = Resources.readString("/index.html");
-        final HttpResponse expected = HttpResponse.ok()
-                                                  .body(response)
-                                                  .contentLength(response.getBytes().length)
-                                                  .build();
-
+        final HttpResponse expected = new ResourceResponseTemplate().ok("/index.html");
         assertThat(httpResponse).usingRecursiveComparison().isEqualTo(expected);
     }
 

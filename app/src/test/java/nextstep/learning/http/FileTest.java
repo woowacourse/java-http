@@ -7,7 +7,7 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import nextstep.jwp.framework.util.Resources;
+import nextstep.jwp.framework.util.ResourceUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,7 +30,7 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // when
-        final String actual = Resources.findPathOf(fileName).toString();
+        final String actual = ResourceUtils.findPathOf(fileName).toString();
 
         // then
         assertThat(actual).endsWith(fileName);
@@ -47,7 +47,7 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // when
-        final List<String> actual = Files.readAllLines(Resources.findPathOf(fileName));
+        final List<String> actual = Files.readAllLines(ResourceUtils.findPathOf(fileName));
 
         // then
         assertThat(actual).containsOnly("nextstep");

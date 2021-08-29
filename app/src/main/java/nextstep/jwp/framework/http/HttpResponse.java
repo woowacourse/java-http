@@ -21,20 +21,8 @@ public class HttpResponse implements HttpMessage {
         this.responseBody = Objects.requireNonNullElse(responseBody, EMPTY);
     }
 
-    public static Builder ok() {
-        final StatusLine statusLine = new StatusLine(HttpVersion.HTTP_1_1, HttpStatus.OK);
-        return new Builder(statusLine).header(HttpHeader.CONTENT_TYPE, "text/html;charset=utf-8");
-    }
-
-    public static Builder notFound() {
-        final StatusLine statusLine = new StatusLine(HttpVersion.HTTP_1_1, HttpStatus.NOT_FOUND);
-        return new Builder(statusLine).header(HttpHeader.CONTENT_TYPE, "text/html;charset=utf-8");
-    }
-
-    public static Builder found(String location) {
-        final StatusLine statusLine = new StatusLine(HttpVersion.HTTP_1_1, HttpStatus.FOUND);
-        return new Builder(statusLine).header(HttpHeader.CONTENT_TYPE, "text/html;charset=utf-8")
-                                      .header(HttpHeader.LOCATION, location);
+    public static Builder status(HttpStatus httpStatus) {
+        return new Builder(new StatusLine(HttpVersion.HTTP_1_1, httpStatus));
     }
 
     public StatusLine getStatusLine() {
@@ -69,7 +57,7 @@ public class HttpResponse implements HttpMessage {
 
     public String readAfterExceptBody() {
         final HttpResponse emptyBodyResponse = new Builder().copy(this)
-                                                            .body(EMPTY)
+                                                            .overwrite(EMPTY)
                                                             .build();
 
         return readAsString(emptyBodyResponse);
@@ -102,6 +90,11 @@ public class HttpResponse implements HttpMessage {
             return this;
         }
 
+        public Builder header(HttpHeader httpHeader) {
+            this.httpHeaders.addHeader(httpHeader);
+            return this;
+        }
+
         public Builder contentLength(int contentLength) {
             this.httpHeaders.addHeader(HttpHeader.CONTENT_LENGTH, Integer.toString(contentLength));
             this.contentLength = contentLength;
@@ -110,14 +103,19 @@ public class HttpResponse implements HttpMessage {
 
         public Builder body(String responseBody) {
             this.responseBody = responseBody;
+            contentLength(responseBody.getBytes().length);
+            return this;
+        }
+
+        private Builder overwrite(String responseBody) {
+            this.responseBody = responseBody;
             return this;
         }
 
         public Builder copy(HttpResponse httpResponse) {
             statusLine(new StatusLine(httpResponse.statusLine));
             httpHeaders(new HttpHeaders(httpResponse.httpHeaders));
-            contentLength(httpResponse.contentLength);
-            body(httpResponse.responseBody);
+            overwrite(httpResponse.responseBody);
             return this;
         }
 

@@ -28,6 +28,11 @@ public class HttpHeaders {
         return this;
     }
 
+    public HttpHeaders addHeader(HttpHeader httpHeader) {
+        headers.add(httpHeader);
+        return this;
+    }
+
     public HttpHeader poll() {
         return headers.poll();
     }

@@ -6,6 +6,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
 public class WebServer {
@@ -29,7 +32,7 @@ public class WebServer {
 
     public void run() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            log.info("Web Server started {} port.", serverSocket.getLocalPort());
+            log.info("Web Server started at {} port.", serverSocket.getLocalPort());
             handle(serverSocket);
         } catch (IOException exception) {
             log.error("Exception accepting connection", exception);
@@ -39,9 +42,10 @@ public class WebServer {
     }
 
     private void handle(ServerSocket serverSocket) throws IOException {
+        final ExecutorService executorService = Executors.newFixedThreadPool(50);
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection)).start();
+            executorService.submit(new RequestHandler(connection));
         }
     }
 

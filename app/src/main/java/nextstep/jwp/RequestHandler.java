@@ -2,16 +2,8 @@ package nextstep.jwp;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +32,6 @@ public class RequestHandler implements Runnable {
 
             final StringBuilder stringBuilder = new StringBuilder();
 
-
             String line = null;
             do {
                 line = bufferedReader.readLine();
@@ -53,79 +44,14 @@ public class RequestHandler implements Runnable {
 
 
             if ("POST".equals(requestHttpMethod)) {
-                HttpHeaders httpHeaders = new HttpHeaders(stringBuilder.toString());
-                int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                bufferedReader.read(buffer, 0, contentLength);
-                String requestBody = new String(buffer);
-
-                if ("/register".equals(requestUri)) {
-                    String[] splitBody = requestBody.split("&");
-                    String account = splitBody[0].split("=")[1];
-                    String password = splitBody[1].split("=")[1];
-                    String email = splitBody[2].split("=")[1];
-
-                    User user = new User(2, account, password, email);
-                    InMemoryUserRepository.save(user);
-
-                    String response = createResponse("/index.html", "302 Found", "text/html");
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
-                }
-
-                if ("/login".equals(requestUri)) {
-                    String[] splitBody = requestBody.split("&");
-                    String account = splitBody[0].split("=")[1];
-                    String password = splitBody[1].split("=")[1];
-
-                    Optional<User> user = InMemoryUserRepository.findByAccount(account);
-                    log.debug(user.toString());
-
-                    if (user.isEmpty()) {
-                        String failureResponse = createResponse("/401.html", "302 Found", "text/html");
-                        outputStream.write(failureResponse.getBytes());
-                        outputStream.flush();
-                        return;
-                    }
-
-                    if (!user.get().checkPassword(password)) {
-                        String failureResponse = createResponse("/401.html", "302 Found", "text/html");
-                        outputStream.write(failureResponse.getBytes());
-                        outputStream.flush();
-                        return;
-                    }
-
-                    String successResponse = createResponse("/index.html", "302 Found", "text/html");
-                    outputStream.write(successResponse.getBytes());
-                    outputStream.flush();
-                    return;
-                }
+                String requestBody = readRequestBody(bufferedReader, stringBuilder);
+                String response = PostRequestUri.createResponse(requestUri, requestBody);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
             }
 
             if ("GET".equals(requestHttpMethod)) {
-
-                if ("/register".equals(requestUri)) {
-                    String response = createResponse("/register.html", "302 Found", "text/html");
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
-                    return;
-                }
-
-                if ("/login".equals(requestUri)) {
-                    requestUri += ".html";
-                    String response = createResponse(requestUri, "200 OK", "text/html");
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
-                    return;
-                }
-
-                if ("/css/styles.css".equals(requestUri)) {
-                    String response = createResponse(requestUri, "200 OK", "text/css");
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
-                }
-
-                String response = createResponse("/index.html", "200 OK", "text/html");
+                String response = GetRequestUri.createResponse(requestUri);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
             }
@@ -136,22 +62,12 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private String createResponse(String fileName, String statusCode, String contentType) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static" + fileName);
-        final Path path = new File(resource.getPath()).toPath();
-        final List<String> lines = Files.readAllLines(path);
-
-        String result = lines.stream()
-                             .map(String::valueOf)
-                             .collect(Collectors.joining());
-
-        final String response = String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + result.getBytes().length + " ",
-                "",
-                result);
-        return response;
+    private String readRequestBody(BufferedReader bufferedReader, StringBuilder stringBuilder) throws IOException {
+        HttpHeaders httpHeaders = new HttpHeaders(stringBuilder.toString());
+        int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 
     private void close() {

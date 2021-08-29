@@ -29,35 +29,38 @@ public class HttpResponse {
 
     public HttpResponse(final HttpRequestLine httpRequestLine, final HttpHeaders headers, final HttpBody body) {
         this.protocolVersion = httpRequestLine.getProtocolVersion();
-        this.status = operate(httpRequestLine.getPath(), HttpStatus.OK, body);
         this.headers = headers;
         this.body = body;
+        this.status = operate(httpRequestLine.getPath(), HttpStatus.OK);
         this.resourceURL = httpRequestLine.url(status);
     }
 
-    private HttpStatus operate(final HttpPath path, HttpStatus status, final HttpBody body) {
-        status = login(path, status);
+    private HttpStatus operate(final HttpPath path, HttpStatus status) {
+        status = login(path, status, body);
         return register(path, status, body);
     }
 
-    private HttpStatus login(final HttpPath path, HttpStatus status) {
-        if (!path.getPath().equals("login.html") || path.hasNotQueryParams()) {
+    private HttpStatus login(final HttpPath path, HttpStatus status, final HttpBody body) {
+        if (!path.getPath().equals("login.html") || body.hasNotBody()) {
             return status;
         }
 
         try {
-            checkAccount(path.queryParams());
+            checkAccount();
             return HttpStatus.FOUND;
         } catch (DBNotFoundException | PasswordNotMatchException ignore) {
             return HttpStatus.UNAUTHORIZED;
         }
     }
 
-    private void checkAccount(final Map<String, String> queryParams) {
+    private void checkAccount() {
+        final Map<String, String> queryParams = body.getBody();
         final String account = queryParams.get("account");
+        final String password = queryParams.get("password");
         final User user = InMemoryUserRepository.findByAccount(account).orElseThrow(DBNotFoundException::new);
 
-        if (user.checkPassword(queryParams.get("password"))) {
+        logger.debug(account + "님이 접속했습니다.");
+        if (user.checkPassword(password)) {
             return;
         }
         throw new PasswordNotMatchException();
@@ -69,18 +72,21 @@ public class HttpResponse {
         }
 
         try {
-            final Map<String, String> queryParams = body.getBody();
-            final String account = queryParams.get("account");
-            final String password = queryParams.get("password");
-            final String email = queryParams.get("email");
-
-            InMemoryUserRepository.save(new User(generateRandomId(), account, password, email));
-            logger.info(account + "님의 새로운 계정이 생성 되었습니다.");
-
+            createAccount();
             return HttpStatus.CREATED;
         } catch (DBNotFoundException ignored) {
             return HttpStatus.UNAUTHORIZED;
         }
+    }
+
+    private void createAccount() {
+        final Map<String, String> queryParams = body.getBody();
+        final String account = queryParams.get("account");
+        final String password = queryParams.get("password");
+        final String email = queryParams.get("email");
+
+        InMemoryUserRepository.save(new User(generateRandomId(), account, password, email));
+        logger.debug(account + "님의 새로운 계정이 생성 되었습니다.");
     }
 
     private int generateRandomId() {

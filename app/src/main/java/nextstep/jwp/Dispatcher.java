@@ -1,5 +1,6 @@
 package nextstep.jwp;
 
+import nextstep.jwp.exception.BadRequestException;
 import nextstep.jwp.handler.Handler;
 import nextstep.jwp.handler.modelandview.Model;
 import nextstep.jwp.handler.modelandview.ModelAndView;
@@ -16,23 +17,21 @@ public class Dispatcher {
     private final ViewResolver viewResolver = new ViewResolver();
 
     public HttpResponse execute(HttpRequest httpRequest) {
-
-        // TODO :: Exception handler
-        Handler handler = handlerMappers.findHandler(httpRequest.requestLine());
-        ModelAndView modelAndView = handler.service(httpRequest);
-
+        ModelAndView modelAndView = service(httpRequest);
         Model model = modelAndView.getModel();
         View view = viewResolver.resolve(modelAndView.getViewName());
 
         return HttpResponse.of(model, view);
     }
 
-//    public ModelAndView service(Object handleObject){
-//        try {
-//            Handler handler = handlerMappers.findHandler(handleObject);
-//            return handler.service(handleObject);
-//        } catch (Exception e){
-//            return service(e);
-//        }
-//    }
+    public ModelAndView service(HttpRequest httpRequest) {
+        try {
+            Handler handler = handlerMappers.findHandler(httpRequest.requestLine());
+            return handler.service(httpRequest);
+        } catch (BadRequestException badRequestException) {
+            return ModelAndView.badRequest();
+        } catch (Exception exception) {
+            return ModelAndView.error();
+        }
+    }
 }

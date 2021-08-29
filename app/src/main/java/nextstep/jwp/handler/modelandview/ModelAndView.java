@@ -40,6 +40,12 @@ public class ModelAndView {
         return new ModelAndView(model, "/500.html");
     }
 
+    public static ModelAndView badRequest() {
+        Model model = new Model();
+        model.addAttribute("HttpStatus", HttpStatus.BAD_REQUEST);
+        return new ModelAndView(model, "/404.html");
+    }
+
     public String getViewName() {
         return viewName;
     }

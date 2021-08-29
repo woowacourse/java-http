@@ -18,7 +18,7 @@ public class InMemoryUserRepository {
     static {
         final User user = new User(id.incrementAndGet(), new Account("gugu"), "password",
             "hkkang@woowahan.com");
-        database.put(user.id(), user);
+        save(user);
     }
 
     public static void save(User user) {

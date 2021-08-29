@@ -17,7 +17,7 @@
 - [x] favicon.ico 연결
 - [ ] 테스트 코드 작성
   - [ ] 컨트롤러 테스트 코드
-    - [ ] LoginController 테스트 코드
+    - [x] LoginController 테스트 코드
     - [ ] RegisterController 테스트 코드
     - [ ] StaticResourceController 테스트 코드
     - [ ] Controllers 테스트 코드

@@ -6,8 +6,12 @@ import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.service.LoginService;
 import nextstep.jwp.service.StaticResourceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoginController extends RestController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
 
     private final LoginService loginService;
 
@@ -21,10 +25,14 @@ public class LoginController extends RestController {
         String account = httpRequest.getBodyParameter("account");
         String password = httpRequest.getBodyParameter("password");
 
+        LOGGER.debug("Login Request => account: {}, password: {}", account, password);
+
         try {
             loginService.login(account, password);
+            LOGGER.debug("Login Success.");
             return HttpResponse.redirect(HttpStatus.FOUND, "/index.html");
         } catch (UnauthorizedException e) {
+            LOGGER.debug("Login Failed.");
             return HttpResponse.redirect(HttpStatus.FOUND, "/401.html");
         }
     }

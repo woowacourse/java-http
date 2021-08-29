@@ -2,7 +2,6 @@ package nextstep.jwp.ui;
 
 import nextstep.jwp.ui.request.HttpRequest;
 import nextstep.jwp.ui.response.HttpResponse;
-import nextstep.jwp.ui.request.RequestHandler;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;

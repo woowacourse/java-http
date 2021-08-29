@@ -1,7 +1,6 @@
-package nextstep.jwp.ui.request;
+package nextstep.jwp.ui;
 
-import nextstep.jwp.ui.Controller;
-import nextstep.jwp.ui.RequestMapping;
+import nextstep.jwp.ui.request.HttpRequest;
 import nextstep.jwp.ui.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

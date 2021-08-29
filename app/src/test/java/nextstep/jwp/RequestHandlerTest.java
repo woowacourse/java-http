@@ -1,6 +1,6 @@
 package nextstep.jwp;
 
-import nextstep.jwp.ui.request.RequestHandler;
+import nextstep.jwp.ui.RequestHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

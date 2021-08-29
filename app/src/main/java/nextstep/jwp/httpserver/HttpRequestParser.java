@@ -15,6 +15,8 @@ import nextstep.jwp.httpserver.domain.request.StartLine;
 public class HttpRequestParser {
     private static final String LAST_HEADER_SYMBOL = "";
     private static final String HEADER_DIVIDER = ":";
+    private static final String PARAMETER_DIVIDER = "&";
+    private static final String KEY_VALUE_DIVIDER = "=";
 
     public static HttpRequest parse(InputStream inputStream) throws IOException {
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -58,9 +60,9 @@ public class HttpRequestParser {
         bufferedReader.read(buffer, 0, contentLength);
         String requestBody = new String(buffer);
 
-        String[] parameters = requestBody.split("&");
+        String[] parameters = requestBody.split(PARAMETER_DIVIDER);
         for (String parameter : parameters) {
-            String[] keyValue = parameter.split("=");
+            String[] keyValue = parameter.split(KEY_VALUE_DIVIDER);
             param.put(keyValue[0], keyValue[1]);
         }
     }

@@ -24,9 +24,11 @@ public class StaticResourceHandlerAdapter implements HandlerAdapter {
     @Override
     public View handle(HttpRequest httpRequest, Object handler) throws URISyntaxException, IOException {
         final StaticResourceController staticResourceController = (StaticResourceController) handler;
-        final HttpResponse httpResponse = staticResourceController.service(httpRequest, new HashMap<>());
+
         final String requestUri = httpRequest.getRequestUri();
         final String path = getResourcePath(requestUri);
+
+        final HttpResponse httpResponse = staticResourceController.service(httpRequest, new HashMap<>());
         final List<String> body = readFile(path);
         final String response = getResponse(path, httpResponse, body);
         return new View(path, response);

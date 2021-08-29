@@ -2,7 +2,7 @@ package nextstep.jwp.framework.http;
 
 import java.util.Objects;
 
-import nextstep.jwp.framework.http.formatter.LineFormatter;
+import nextstep.jwp.framework.http.formatter.HttpFormatter;
 import nextstep.jwp.framework.http.formatter.StatusLineFormatter;
 
 public class HttpResponse implements HttpMessage {
@@ -11,13 +11,11 @@ public class HttpResponse implements HttpMessage {
 
     private final StatusLine statusLine;
     private final HttpHeaders httpHeaders;
-    private final int contentLength;
     private final String responseBody;
 
-    public HttpResponse(StatusLine statusLine, HttpHeaders httpHeaders, int contentLength, String responseBody) {
+    public HttpResponse(StatusLine statusLine, HttpHeaders httpHeaders, String responseBody) {
         this.statusLine = statusLine;
         this.httpHeaders = httpHeaders;
-        this.contentLength = contentLength;
         this.responseBody = Objects.requireNonNullElse(responseBody, EMPTY);
     }
 
@@ -33,10 +31,6 @@ public class HttpResponse implements HttpMessage {
         return httpHeaders;
     }
 
-    public long getContentLength() {
-        return contentLength;
-    }
-
     public String getBody() {
         return responseBody;
     }
@@ -46,11 +40,11 @@ public class HttpResponse implements HttpMessage {
     }
 
     public String readAsString(HttpResponse httpResponse) {
-        LineFormatter lineFormatter = new StatusLineFormatter(httpResponse);
+        HttpFormatter httpFormatter = new StatusLineFormatter(httpResponse);
         StringBuilder stringBuilder = new StringBuilder();
-        while (lineFormatter.canRead()) {
-            stringBuilder.append(lineFormatter.transform());
-            lineFormatter = lineFormatter.convertNextFormatter();
+        while (httpFormatter.canRead()) {
+            stringBuilder.append(httpFormatter.transform());
+            httpFormatter = httpFormatter.convertNextFormatter();
         }
         return stringBuilder.toString();
     }
@@ -66,7 +60,6 @@ public class HttpResponse implements HttpMessage {
     public static class Builder {
         private StatusLine statusLine;
         private HttpHeaders httpHeaders = new HttpHeaders();
-        private int contentLength;
         private String responseBody;
 
         public Builder() {}
@@ -85,19 +78,13 @@ public class HttpResponse implements HttpMessage {
             return this;
         }
 
-        public Builder header(String headerName, String... values) {
-            this.httpHeaders.addHeader(headerName, values);
-            return this;
-        }
-
-        public Builder header(HttpHeader httpHeader) {
-            this.httpHeaders.addHeader(httpHeader);
+        public Builder header(String headerName, String value) {
+            this.httpHeaders.addHeader(headerName, value);
             return this;
         }
 
         public Builder contentLength(int contentLength) {
-            this.httpHeaders.addHeader(HttpHeader.CONTENT_LENGTH, Integer.toString(contentLength));
-            this.contentLength = contentLength;
+            this.httpHeaders.addHeader(HttpHeaders.CONTENT_LENGTH, Integer.toString(contentLength));
             return this;
         }
 
@@ -120,7 +107,7 @@ public class HttpResponse implements HttpMessage {
         }
 
         public HttpResponse build() {
-            return new HttpResponse(statusLine, httpHeaders, contentLength, responseBody);
+            return new HttpResponse(statusLine, httpHeaders, responseBody);
         }
     }
 }

@@ -6,5 +6,5 @@
     - [x] 해당 경로에 있는 html파일을 반환한다
 - [x] query String을 파싱하기
     - [x] query string을 파싱해 객체에 정보를 전달한다
-- [ ] 302 status 반환하기
-- [ ] POST 방식으로 회원가입하기
+- [x] 302 status 반환하기
+- [x] POST 방식으로 회원가입하기

@@ -7,17 +7,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.List;
-import java.util.Objects;
-import nextstep.jwp.application.controller.LoginController;
-import nextstep.jwp.application.controller.RegisterController;
-import nextstep.jwp.web.exception.NotFoundException;
-import nextstep.jwp.web.http.request.HttpMethod;
 import nextstep.jwp.web.http.request.HttpRequest;
 import nextstep.jwp.web.http.response.HttpResponse;
-import nextstep.jwp.web.http.response.body.HttpResponseBody;
-import nextstep.jwp.web.resolver.DataResolver;
-import nextstep.jwp.web.resolver.HtmlResolver;
-import nextstep.jwp.web.resolver.StaticResourceResolver;
+import nextstep.jwp.web.mvc.controller.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,16 +18,21 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
-    private final List<DataResolver> dataResolvers;
+    private final RequestMapping requestMapping;
+    private final List<WebHandler> webHandlers;
 
     public RequestHandler(Socket connection) {
-        this(connection, List.of(new StaticResourceResolver(), new HtmlResolver()));
+        this(connection,
+            new RequestMapping(),
+            List.of(new WebStatusHandler())
+        );
     }
 
-    public RequestHandler(Socket connection,
-                          List<DataResolver> dataResolvers) {
-        this.connection = Objects.requireNonNull(connection);
-        this.dataResolvers = dataResolvers;
+    public RequestHandler(Socket connection, RequestMapping requestMapping,
+                          List<WebHandler> webHandlers) {
+        this.connection = connection;
+        this.requestMapping = requestMapping;
+        this.webHandlers = webHandlers;
     }
 
     @Override
@@ -48,30 +45,16 @@ public class RequestHandler implements Runnable {
 
             HttpRequest httpRequest = HttpRequest.of(inputStream);
             log.debug(httpRequest.toString());
-            String url = httpRequest.url();
 
             HttpResponse httpResponse =
                 new HttpResponse
                     .Builder(httpRequest.protocol(), OK)
                     .build();
 
-            if (url.equals("/login") && httpRequest.method() == HttpMethod.POST) {
-                LoginController loginController = new LoginController();
-                loginController.doPost(httpRequest, httpResponse);
-            }
+            doService(httpRequest, httpResponse);
+            doHandle(httpRequest, httpResponse);
 
-            if (url.equals("/register") && httpRequest.method() == HttpMethod.POST) {
-                RegisterController registerController = new RegisterController();
-                registerController.doPost(httpRequest, httpResponse);
-            }
-
-            if (httpResponse.status() == OK) {
-                HttpResponseBody responseBody = resolveData(url,
-                    httpRequest.header("Accept").list());
-                httpResponse.replaceResponseBody(responseBody);
-            }
-            log.debug("\r\n");
-            log.debug(httpResponse.toResponseFormat());
+//            log.debug(httpResponse.toResponseFormat());
             outputStream.write(httpResponse.toResponseFormat().getBytes());
             outputStream.flush();
         } catch (IOException exception) {
@@ -81,26 +64,22 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private HttpResponseBody resolveData(String filePath, List<String> acceptType)
-        throws IOException {
-        if (acceptType.isEmpty()) {
-            acceptType = List.of("*/*");
+    private void doService(HttpRequest request, HttpResponse response) {
+        if (!request.isJsonOrHtml()) {
+            return;
         }
-        return findProperMimeTypeData(filePath, acceptType);
+
+        Controller controller = requestMapping.getController(request.methodUrl());
+        try {
+            controller.service(request, response);
+        } catch (Exception e) {
+            log.error("In Service Error", e);
+            requestMapping.errorController().service(request, response);
+        }
     }
 
-    private HttpResponseBody findProperMimeTypeData(String filePath, List<String> acceptTypes)
-        throws IOException {
-        for (DataResolver dataResolver : dataResolvers) {
-            if (dataResolver.isSuitable(acceptTypes) &&
-                dataResolver.isExist(filePath)
-            ) {
-                return dataResolver.resolve(filePath);
-            }
-        }
-        throw new NotFoundException(
-            String.format("해당 타입의 파일이 없습니다. 요청받은 accept -> %s, filepath -> %s", acceptTypes,
-                filePath));
+    private void doHandle(HttpRequest request, HttpResponse response) {
+        webHandlers.forEach(webHandler -> webHandler.doHandle(request, response));
     }
 
     private void close() {

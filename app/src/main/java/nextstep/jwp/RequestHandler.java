@@ -9,7 +9,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import nextstep.jwp.controller.GetController;
+import nextstep.jwp.controller.PostController;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.checkerframework.checker.units.qual.A;
@@ -46,62 +49,20 @@ public class RequestHandler implements Runnable {
             if (request.size() == 0 ){
                 return;
             }
-            String requestURI = request.get(0).split(" ")[1];
-            String path;
-            URL resource = null;
-            if (requestURI.contains(".")) {
-                path = "static" + requestURI;
-                resource = getClass().getClassLoader().getResource(path);
-            }
-            if (!requestURI.contains(".") && !requestURI.contains("?")) {
-                path = "static" + requestURI + ".html";
-                resource = getClass().getClassLoader().getResource(path);
+            HttpRequestHeader httpRequestHeader = new HttpRequestHeader(request);
+
+            String httpMethod = httpRequestHeader.getHttpMethod();
+            String requestURI = httpRequestHeader.getRequestURI();
+
+            if ("GET".equals(httpMethod)) {
+                GetController.run(requestURI, outputStream, getClass().getClassLoader());
             }
 
-            if (requestURI.contains("?")) {
-                int index = requestURI.indexOf("?");
-                path = requestURI.substring(0, index);
-                String queryString = requestURI.substring(index + 1);
-
-                String[] queries = queryString.split("&");
-                List<String> values = new ArrayList<>();
-                for (String query : queries) {
-                    values.add(query.split("=")[1]);
-                }
-                User user = InMemoryUserRepository.findByAccount(values.get(0)).orElseThrow();
-                log.debug("account : {}, checkPassword : {}", user.getAccount(), user.checkPassword(values.get(1)));
-
-                if (user.checkPassword(values.get(1))) {
-                    final String response = String.join("\r\n",
-                        "HTTP/1.1 302 Found ",
-                        "Location: /index.html"
-                    );
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
-                } else {
-                    final String response = String.join("\r\n",
-                        "HTTP/1.1 302 Found ",
-                        "Location: /401.html"
-                    );
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
-                }
-                return;
+            if ("POST".equals(httpMethod)) {
+                PostController.run(requestURI, outputStream, getClass().getClassLoader(), httpRequestHeader);
             }
 
 
-            final Path filePath = new File(resource.getFile()).toPath();
-            final String responseBody = Files.readString(filePath);
-
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {

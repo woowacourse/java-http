@@ -12,6 +12,7 @@ public enum Exception {
     INVALID_FILE_EXTENSION(400, "Invalid File Extension.", InvalidFileExtensionException.class),
     NOT_ALLOWED_HTTP_VERSION(400, "Not Allowed Http Version.", NotAllowedHttpVersionException.class),
     UNAUTHORIZED(401, "Unauthorized.", UnauthorizedException.class),
+    DUPLICATE_ACCOUNT(409, "Duplicate Account.", DuplicateAccountException.class),
 
     NOT_IMPLEMENTED(501, "Not Implemented Http Method.", NotImplementedException.class);
 

@@ -2,6 +2,8 @@ package nextstep.jwp.service;
 
 import nextstep.jwp.controller.request.RegisterRequest;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.DuplicateAccountException;
+import nextstep.jwp.model.User;
 
 public class RegisterService {
 
@@ -12,6 +14,15 @@ public class RegisterService {
     }
 
     public void registerUser(RegisterRequest registerRequest) {
-        userRepository.save(registerRequest.toEntity());
+        User user = registerRequest.toEntity();
+        validateDuplicateAccount(user);
+
+        userRepository.save(user);
+    }
+
+    private void validateDuplicateAccount(User user) {
+        if (userRepository.findByAccount(user.getAccount()).isPresent()) {
+            throw new DuplicateAccountException();
+        }
     }
 }

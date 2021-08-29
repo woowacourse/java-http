@@ -1,5 +1,7 @@
 package nextstep.jwp.http.request;
 
+import nextstep.jwp.http.HttpVersion;
+
 public class RequestLine {
 
     private static final int METHOD_INDEX = 0;

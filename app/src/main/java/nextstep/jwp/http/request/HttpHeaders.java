@@ -17,7 +17,7 @@ public class HttpHeaders {
 
     public static HttpHeaders parse(BufferedReader bufferedReader) throws IOException {
         Map<String, String> headers = new HashMap<>();
-        String line = null;
+        String line = bufferedReader.readLine();
 
         while(isNotEmpty(line)) {
             line = bufferedReader.readLine();

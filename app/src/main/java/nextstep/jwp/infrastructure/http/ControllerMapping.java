@@ -50,7 +50,7 @@ public class ControllerMapping {
                 try {
                     return (Controller) constructor.newInstance();
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                    return null;
+                    throw new IllegalArgumentException(String.format("Cannot invoke constructor. (%s)", constructor.getName()));
                 }
             })
             .collect(Collectors.toSet());

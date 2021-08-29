@@ -6,7 +6,7 @@ import nextstep.jwp.http.request.RequestUriPath;
 import nextstep.jwp.http.response.HttpStatus;
 import nextstep.jwp.model.User;
 
-public class LoginController implements IController {
+public class LoginController implements Controller {
 
     @Override
     public boolean mapping(String method, RequestUriPath uriPath) {

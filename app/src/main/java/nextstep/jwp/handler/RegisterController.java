@@ -3,7 +3,7 @@ package nextstep.jwp.handler;
 import nextstep.jwp.http.request.RequestUriPath;
 import nextstep.jwp.http.response.HttpStatus;
 
-public class RegisterController implements IController {
+public class RegisterController implements Controller {
 
     @Override
     public boolean mapping(String method, RequestUriPath uriPath) {

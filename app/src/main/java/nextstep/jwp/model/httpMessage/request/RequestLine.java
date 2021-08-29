@@ -1,6 +1,5 @@
 package nextstep.jwp.model.httpMessage.request;
 
-import nextstep.jwp.model.httpMessage.HttpMethod;
 import nextstep.jwp.util.HttpRequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

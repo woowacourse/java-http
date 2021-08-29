@@ -1,14 +1,14 @@
-package nextstep.jwp.model.httpMessage;
+package nextstep.jwp.model.httpMessage.common;
 
 public interface HttpHeader {
 
-    void setContentType(String contentType);
-
     String getContentType();
 
-    void setContentLength(int contentLength);
+    void setContentType(String contentType);
 
     int getContentLength();
+
+    void setContentLength(int contentLength);
 
     void addHeader(String type, String value);
 

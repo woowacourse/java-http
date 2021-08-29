@@ -1,4 +1,4 @@
-package nextstep.jwp.model.httpMessage;
+package nextstep.jwp.model.httpMessage.request;
 
 public enum HttpMethod {
     GET,

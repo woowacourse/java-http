@@ -1,14 +1,13 @@
-package nextstep.jwp.model.httpMessage;
+package nextstep.jwp.model.httpMessage.common;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static nextstep.jwp.model.httpMessage.HttpHeaderType.CONTENT_LENGTH;
-import static nextstep.jwp.model.httpMessage.HttpHeaderType.CONTENT_TYPE;
+import static nextstep.jwp.model.httpMessage.common.HttpHeaderType.CONTENT_LENGTH;
+import static nextstep.jwp.model.httpMessage.common.HttpHeaderType.CONTENT_TYPE;
 
 public abstract class CommonHttpHeader implements HttpHeader {
 
@@ -45,23 +44,23 @@ public abstract class CommonHttpHeader implements HttpHeader {
     }
 
     @Override
+    public String getContentType() {
+        return commonHeaders.get(CONTENT_TYPE);
+    }
+
+    @Override
     public void setContentType(String contentType) {
         commonHeaders.put(CONTENT_TYPE, contentType);
     }
 
     @Override
-    public String getContentType() {
-        return commonHeaders.get(CONTENT_TYPE);
+    public int getContentLength() {
+        return Integer.parseInt(commonHeaders.get(CONTENT_LENGTH));
     }
 
     @Override
     public void setContentLength(int contentLength) {
         commonHeaders.put(CONTENT_LENGTH, String.valueOf(contentLength));
         LOG.debug("Response header : content length: {}", contentLength);
-    }
-
-    @Override
-    public int getContentLength() {
-        return Integer.parseInt(commonHeaders.get(CONTENT_LENGTH));
     }
 }

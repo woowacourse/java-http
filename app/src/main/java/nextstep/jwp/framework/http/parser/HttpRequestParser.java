@@ -1,12 +1,11 @@
-package nextstep.jwp.framework.http;
+package nextstep.jwp.framework.http.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import nextstep.jwp.framework.http.parser.HttpParser;
-import nextstep.jwp.framework.http.parser.RequestLineParser;
+import nextstep.jwp.framework.http.HttpRequest;
 
 public class HttpRequestParser {
 

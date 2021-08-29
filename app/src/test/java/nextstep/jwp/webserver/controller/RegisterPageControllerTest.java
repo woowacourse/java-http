@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import nextstep.jwp.framework.http.*;
+import nextstep.jwp.framework.http.template.ResourceResponseTemplate;
 
 import static org.assertj.core.api.Assertions.*;
 

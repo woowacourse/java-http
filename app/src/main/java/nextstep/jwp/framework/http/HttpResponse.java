@@ -88,9 +88,21 @@ public class HttpResponse implements HttpMessage {
             return this;
         }
 
+        public Builder contentType(String contentType) {
+            this.httpHeaders.addHeader(HttpHeaders.CONTENT_TYPE, contentType);
+            return this;
+        }
+
+        public Builder location(String location) {
+            this.httpHeaders.addHeader(HttpHeaders.LOCATION, location);
+            return this;
+        }
+
         public Builder body(String responseBody) {
             this.responseBody = responseBody;
-            contentLength(responseBody.getBytes().length);
+            if (!responseBody.isBlank()) {
+                contentLength(responseBody.getBytes().length);
+            }
             return this;
         }
 

@@ -4,6 +4,7 @@ import java.util.EnumSet;
 
 import nextstep.jwp.framework.context.AbstractController;
 import nextstep.jwp.framework.http.*;
+import nextstep.jwp.framework.http.template.StringResponseTemplate;
 
 public class WelcomePageController extends AbstractController {
 

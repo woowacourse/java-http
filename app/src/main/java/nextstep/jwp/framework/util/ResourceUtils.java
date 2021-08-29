@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public class ResourceUtils {
 
-    private static final List<String> PREFIXES = Arrays.asList("", "static");
+    private static final List<String> PREFIXES = Arrays.asList("", "static/");
 
     private ResourceUtils() {}
 
@@ -25,14 +25,23 @@ public class ResourceUtils {
     }
 
     private static Optional<URL> findByResourceName(String resourceName) {
+        final String name = cutPrefix(resourceName);
+
         ClassLoader classLoader = Objects.requireNonNullElseGet(
                 Thread.currentThread().getContextClassLoader(),
                 ResourceUtils.class::getClassLoader);
 
         return PREFIXES.stream()
-                       .map(prefix -> classLoader.getResource(prefix + resourceName))
+                       .map(prefix -> classLoader.getResource(prefix + name))
                        .filter(Objects::nonNull)
                        .findAny();
+    }
+
+    private static String cutPrefix(String resourceName) {
+        if (resourceName.startsWith("/")) {
+            resourceName = resourceName.substring(1);
+        }
+        return resourceName;
     }
 
     public static boolean exists(String resourceName) {

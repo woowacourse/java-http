@@ -1,10 +1,13 @@
-package nextstep.jwp.framework.http;
+package nextstep.jwp.framework.http.template;
 
 import java.util.Arrays;
 
+import nextstep.jwp.framework.http.HttpHeaders;
+import nextstep.jwp.framework.http.HttpResponse;
+import nextstep.jwp.framework.http.HttpStatus;
 import nextstep.jwp.framework.util.ResourceUtils;
 
-public class ResourceResponseTemplate implements ResponseTemplate {
+public class ResourceResponseTemplate extends AbstractResponseTemplate {
 
     public HttpResponse ok(String path) {
         return template(HttpStatus.OK, path);
@@ -14,31 +17,15 @@ public class ResourceResponseTemplate implements ResponseTemplate {
         return template(HttpStatus.UNAUTHORIZED, path);
     }
 
-    public HttpResponse movedPermanently(String path) {
-        return template(HttpStatus.MOVED_PERMANENTLY, path, new HttpHeader(HttpHeader.LOCATION, path));
+    private HttpResponse template(HttpStatus httpStatus, String path) {
+        return template(httpStatus, new HttpHeaders(), path);
     }
 
-    public HttpResponse found(String path) {
-        return template(HttpStatus.FOUND, path, new HttpHeader(HttpHeader.LOCATION, path));
-    }
-
-    public HttpResponse seeOther(String path) {
-        return template(HttpStatus.SEE_OTHER, path, new HttpHeader(HttpHeader.LOCATION, path));
-    }
-
-    public HttpResponse temporaryRedirect(String path) {
-        return template(HttpStatus.TEMPORARY_REDIRECT, path, new HttpHeader(HttpHeader.LOCATION, path));
-    }
-
-    private HttpResponse template(HttpStatus httpStatus, String path, HttpHeader... headers) {
-        final HttpHeaders httpHeaders =
-                new HttpHeaders().addHeader(HttpHeader.CONTENT_TYPE, ContentType.resolve(path));
-        for (HttpHeader header : headers) {
-            httpHeaders.addHeader(header);
-        }
-
+    @Override
+    public HttpResponse template(HttpStatus httpStatus, HttpHeaders httpHeaders, String path) {
+        httpHeaders.addHeader(HttpHeaders.CONTENT_TYPE, ContentType.resolve(path));
         final String returnValue = ResourceUtils.readString(path);
-        return template(httpStatus, httpHeaders, returnValue);
+        return super.template(httpStatus, httpHeaders, returnValue);
     }
 
     enum ContentType {

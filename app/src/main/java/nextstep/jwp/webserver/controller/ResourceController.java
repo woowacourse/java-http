@@ -8,7 +8,7 @@ import nextstep.jwp.framework.context.AbstractController;
 import nextstep.jwp.framework.http.HttpMethod;
 import nextstep.jwp.framework.http.HttpRequest;
 import nextstep.jwp.framework.http.HttpResponse;
-import nextstep.jwp.framework.http.ResourceResponseTemplate;
+import nextstep.jwp.framework.http.template.ResourceResponseTemplate;
 import nextstep.jwp.framework.util.ResourceUtils;
 
 public class ResourceController extends AbstractController {

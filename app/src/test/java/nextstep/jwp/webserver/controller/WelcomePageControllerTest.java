@@ -1,11 +1,10 @@
 package nextstep.jwp.webserver.controller;
 
-import java.io.IOException;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import nextstep.jwp.framework.http.*;
+import nextstep.jwp.framework.http.template.StringResponseTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

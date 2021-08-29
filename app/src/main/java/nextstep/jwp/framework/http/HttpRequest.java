@@ -6,6 +6,7 @@ import java.util.Map;
 
 import nextstep.jwp.framework.http.formatter.HttpFormatter;
 import nextstep.jwp.framework.http.formatter.RequestLineFormatter;
+import nextstep.jwp.framework.http.parser.HttpRequestParser;
 
 public class HttpRequest implements HttpMessage {
 

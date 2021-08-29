@@ -4,6 +4,8 @@ import java.util.EnumSet;
 
 import nextstep.jwp.framework.context.AbstractController;
 import nextstep.jwp.framework.http.*;
+import nextstep.jwp.framework.http.template.ResourceResponseTemplate;
+import nextstep.jwp.framework.http.template.StringResponseTemplate;
 import nextstep.jwp.webserver.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

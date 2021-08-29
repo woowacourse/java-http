@@ -1,5 +1,8 @@
 package nextstep.jwp;
 
+import nextstep.jwp.context.ApplicationContextImpl;
+import nextstep.jwp.dispatcher.adapter.HandlerAdapterFactory;
+import nextstep.jwp.dispatcher.mapping.HandlerMappingFactory;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -15,7 +18,12 @@ class RequestHandlerTest {
     void run() {
         // given
         final MockSocket socket = new MockSocket();
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(
+            socket,
+            new ApplicationContextImpl(),
+            HandlerMappingFactory.createAllHandlerMapping(),
+            HandlerAdapterFactory.createAllHandlerAdapter()
+        );
 
         // when
         requestHandler.run();
@@ -41,7 +49,12 @@ class RequestHandlerTest {
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(
+            socket,
+            new ApplicationContextImpl(),
+            HandlerMappingFactory.createAllHandlerMapping(),
+            HandlerAdapterFactory.createAllHandlerAdapter()
+        );
 
         // when
         requestHandler.run();

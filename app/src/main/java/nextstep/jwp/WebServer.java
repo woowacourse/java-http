@@ -1,5 +1,12 @@
 package nextstep.jwp;
 
+import java.util.List;
+import nextstep.jwp.context.ApplicationContext;
+import nextstep.jwp.context.ApplicationContextImpl;
+import nextstep.jwp.dispatcher.adapter.HandlerAdapter;
+import nextstep.jwp.dispatcher.adapter.HandlerAdapterFactory;
+import nextstep.jwp.dispatcher.mapping.HandlerMapping;
+import nextstep.jwp.dispatcher.mapping.HandlerMappingFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,8 +23,22 @@ public class WebServer {
 
     private final int port;
 
+    private ApplicationContext applicationContext;
+
+    private List<HandlerMapping> handlerMappings;
+
+    private List<HandlerAdapter> handlerAdapters;
+
     public WebServer(int port) {
         this.port = checkPort(port);
+        this.initApplicationContext();
+        this.handlerMappings = HandlerMappingFactory.createAllHandlerMapping();
+        this.handlerAdapters = HandlerAdapterFactory.createAllHandlerAdapter();
+    }
+
+    private void initApplicationContext() {
+        applicationContext = new ApplicationContextImpl();
+
     }
 
     public void run() {
@@ -34,7 +55,12 @@ public class WebServer {
     private void handle(ServerSocket serverSocket) throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection)).start();
+            new Thread(new RequestHandler(
+                connection,
+                applicationContext,
+                handlerMappings,
+                handlerAdapters
+            )).start();
         }
     }
 

@@ -1,6 +1,7 @@
 package nextstep.jwp.http;
 
 import java.util.Optional;
+import nextstep.jwp.context.ApplicationContext;
 import nextstep.jwp.http.message.HttpHeaders;
 import nextstep.jwp.http.message.HttpMethod;
 
@@ -19,4 +20,8 @@ public interface HttpRequest {
     String getBody();
 
     String asString();
+
+    ApplicationContext getApplicationContext();
+
+    void setApplicationContext(ApplicationContext applicationContext);
 }

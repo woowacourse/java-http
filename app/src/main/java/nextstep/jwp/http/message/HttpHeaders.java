@@ -12,6 +12,11 @@ public class HttpHeaders {
     private final Map<String, String> headers;
     private final String value;
 
+    public HttpHeaders() {
+        headers = new HashMap<>();
+        value = "";
+    }
+
     public HttpHeaders(Map<String, String> headers, String value) {
         this.headers = headers;
         this.value = value;
@@ -43,6 +48,10 @@ public class HttpHeaders {
         return Collections.unmodifiableMap(headers);
     }
 
+    public void addHeader(String name, String value) {
+        headers.put(name, value);
+    }
+
     public boolean isExists(String name) {
         return headers.containsKey(name);
     }
@@ -58,6 +67,20 @@ public class HttpHeaders {
     }
 
     public String asString() {
+        if ("".equals(value)) {
+            return getHeadersAsString();
+        }
         return value;
+    }
+
+    private String getHeadersAsString() {
+        StringBuilder headersAsString = new StringBuilder();
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            String header = entry.getKey() + ": " + entry.getValue();
+            headersAsString
+                .append(header)
+                .append("\r\n");
+        }
+        return headersAsString.toString();
     }
 }

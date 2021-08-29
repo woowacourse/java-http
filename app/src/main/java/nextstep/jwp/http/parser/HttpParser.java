@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Optional;
+import nextstep.jwp.context.ApplicationContext;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.message.HttpHeaders;
 import nextstep.jwp.http.message.HttpMethod;
@@ -57,6 +58,7 @@ public class HttpParser {
         private HttpHeaders headers;
         private HttpRequestLine requestLine;
         private String body;
+        private ApplicationContext applicationContext;
 
         public HttpRequestImpl(HttpHeaders headers, HttpRequestLine requestLine, String body) {
             this.headers = headers;
@@ -94,6 +96,16 @@ public class HttpParser {
         @Override
         public String getBody() {
             return body;
+        }
+
+        @Override
+        public ApplicationContext getApplicationContext() {
+            return applicationContext;
+        }
+
+        @Override
+        public void setApplicationContext(ApplicationContext applicationContext) {
+            this.applicationContext = applicationContext;
         }
 
         @Override

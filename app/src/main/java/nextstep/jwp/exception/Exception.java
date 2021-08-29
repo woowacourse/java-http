@@ -13,6 +13,7 @@ public enum Exception {
     INVALID_FILE_EXTENSION(400, "Invalid File Extension.", InvalidFileExtensionException.class),
     NOT_ALLOWED_HTTP_VERSION(400, "Not Allowed Http Version.", NotAllowedHttpVersionException.class),
     EMPTY_QUERY_PARAMETERS(400, "Empty Query Parameters.", EmptyQueryParametersException.class),
+    HTTP_REQUEST_NOT_HAVE_BODY(400, "Http Request Not Have Body.", HttpRequestNotHaveBodyException.class),
     UNAUTHORIZED(401, "Unauthorized.", UnauthorizedException.class),
     QUERY_PARAMETER_NOT_FOUND(404, "Query Parameter Not Found.", QueryParameterNotFoundException.class),
     DUPLICATE_ACCOUNT(409, "Duplicate Account.", DuplicateAccountException.class),

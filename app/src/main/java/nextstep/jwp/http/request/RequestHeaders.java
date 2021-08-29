@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.exception.HttpRequestNotHaveBodyException;
 import nextstep.jwp.exception.InvalidRequestHeader;
 
 public class RequestHeaders {
@@ -55,7 +56,15 @@ public class RequestHeaders {
         return headers.containsKey(CONTENT_LENGTH) || headers.containsKey(TRANSFER_ENCODING);
     }
 
+    private boolean requestNotHaveBody() {
+        return !headers.containsKey(CONTENT_LENGTH) || headers.containsKey(TRANSFER_ENCODING);
+    }
+
     public int getContentLength() {
+        if (requestNotHaveBody()) {
+            throw new HttpRequestNotHaveBodyException();
+        }
+
         return Integer.parseInt(headers.get(CONTENT_LENGTH));
     }
 }

@@ -22,11 +22,11 @@
     - [ ] StaticResourceController 테스트 코드
     - [ ] Controllers 테스트 코드
   - [ ] HTTP Request 테스트 코드
-    - [ ] RequestLine 테스트 코드
+    - [x] RequestLine 테스트 코드
       - [x] Method 테스트 코드
       - [x] RequestUri 테스트 코드
       - [x] HttpVersion 테스트 코드
-    - [ ] RequestHeaders 테스트 코드
+    - [x] RequestHeaders 테스트 코드
     - [ ] RequestBody 테스트 코드
   - [ ] HTTP Response 테스트 코드
     - [ ] StatusLine 테스트 코드

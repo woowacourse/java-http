@@ -1,16 +1,15 @@
 package nextstep.jwp.db;
 
 
-import nextstep.jwp.model.User;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import nextstep.jwp.model.User;
 
 public class InMemoryUserRepository {
 
-    private static long userId = 1;
     private static final Map<String, User> database = new ConcurrentHashMap<>();
+    private static long userId = 1;
 
     static {
         final User user = new User(userId++, "gugu", "password", "hkkang@woowahan.com");

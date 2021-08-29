@@ -11,6 +11,7 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RequestHandlerTest {
 
@@ -79,6 +80,52 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
 
         assertThat(socket.output()).isEqualTo(getExpected(4319, resource));
+    }
+
+    @DisplayName("POST /login 요청시 로그인")
+    @Test
+    void postLogin() {
+        //given
+        String body = "account=asdf&password=password ";
+        final MockSocket socket = postMockSocket("/login", body);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // then
+        assertThatThrownBy(requestHandler::run).isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("존재하지 않는 유저입니다. 회원가입을 해주세요");
+
+    }
+
+    @DisplayName("POST /register 요청시 회원가입")
+    @Test
+    void postRegister() {
+        //given
+        String body = "account=younge&password=password&email=abc%40abc.com ";
+        final MockSocket socket = postMockSocket("/register", body);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        User newUser = InMemoryUserRepository.findByAccount("younge").orElseThrow();
+
+        assertThat("younge").isEqualTo(newUser.getAccount());
+    }
+
+    private MockSocket postMockSocket(String requestUri, String body) {
+        final String httpRequest = String.join("\r\n",
+            "POST "+ requestUri +" HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "Content-Length: " + body.length() +" ",
+            "Content-Type: application/x-www-form-urlencoded ",
+            "Accept: */* ",
+            "",
+            body
+        );
+
+        return new MockSocket(httpRequest);
     }
 
     private MockSocket getMockSocket(String url) {

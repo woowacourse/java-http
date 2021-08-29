@@ -11,7 +11,10 @@ public class HttpRequest {
 
     private static final int METHOD_INDEX = 0;
     private static final int URI_INDEX = 1;
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
     private static final String DELIMITER = " ";
+    private static final String EMPTY_LINE = "";
 
     private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
@@ -24,7 +27,7 @@ public class HttpRequest {
         try {
             String firstLine = bufferedReader.readLine();
             String[] lines = firstLine.split(DELIMITER);
-            this.httpMethod = new HttpMethod(lines[METHOD_INDEX]);
+            this.httpMethod = HttpMethod.of(lines[METHOD_INDEX]);
             this.requestURI = new RequestURI(lines[URI_INDEX]);
             this.httpHeader = readHeaders(bufferedReader);
             this.requestBody = readRequestBody(bufferedReader, httpHeader.getContentLength());
@@ -51,11 +54,11 @@ public class HttpRequest {
         Map<String, String> map = new HashMap<>();
         while (bufferedReader.ready()) {
             String line = bufferedReader.readLine();
-            if ("".equals(line)) {
+            if (EMPTY_LINE.equals(line)) {
                 break;
             }
             String[] params = line.split(": ");
-            map.put(params[0], params[1]);
+            map.put(params[KEY_INDEX], params[VALUE_INDEX].strip());
         }
         return new HttpHeader(map);
     }
@@ -66,6 +69,10 @@ public class HttpRequest {
 
     public RequestURI getRequestURI() {
         return this.requestURI;
+    }
+
+    public HttpHeader getHttpHeader() {
+        return this.httpHeader;
     }
 
     public boolean isGet() {

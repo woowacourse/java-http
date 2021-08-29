@@ -2,6 +2,7 @@ package nextstep.jwp.infrastructure.processor;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.CustomHttpRequest;
+import nextstep.jwp.model.CustomHttpResponse;
 import nextstep.jwp.model.User;
 
 import java.io.OutputStream;
@@ -9,6 +10,9 @@ import java.util.Map;
 import java.util.Optional;
 
 public class LoginRequestProcessor implements RequestProcessor {
+
+    private static final String LOGIN_SUCCESS_URI = "index.html";
+    private static final String LOGIN_FAILURE_URI = "401.html";
 
     @Override
     public String processResponse(CustomHttpRequest request, OutputStream outputStream) {
@@ -18,16 +22,8 @@ public class LoginRequestProcessor implements RequestProcessor {
         Optional<User> byAccount = InMemoryUserRepository.findByAccount(account);
 
         if (byAccount.isPresent() && byAccount.get().checkPassword(password)) {
-            return String.join("\r\n",
-                    "HTTP/1.1 302 FOUND ",
-                    "Location: http://localhost:8080/index.html ",
-                    "",
-                    "");
+            return CustomHttpResponse.found(LOGIN_SUCCESS_URI);
         }
-        return String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
-                "Location: http://localhost:8080/401.html ",
-                "",
-                "");
+        return CustomHttpResponse.found(LOGIN_FAILURE_URI);
     }
 }

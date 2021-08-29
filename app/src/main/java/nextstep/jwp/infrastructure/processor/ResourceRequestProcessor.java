@@ -2,6 +2,7 @@ package nextstep.jwp.infrastructure.processor;
 
 import nextstep.jwp.model.ContentType;
 import nextstep.jwp.model.CustomHttpRequest;
+import nextstep.jwp.model.CustomHttpResponse;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,25 +13,17 @@ import java.nio.file.Files;
 public class ResourceRequestProcessor implements RequestProcessor {
 
     private static final String DEFAULT_PATH = "static";
+    private static final String DEFAULT_URI = "login.html";
 
     @Override
     public String processResponse(CustomHttpRequest request, OutputStream outputStream) {
         String uri = request.getUri();
         String fileSource = fileSourceFromUri(uri);
         if (fileSource == null) {
-            return String.join("\r\n",
-                    "HTTP/1.1 404 NOT FOUND ",
-                    "Location: http://localhost:8080/login.html ",
-                    "",
-                    "");
+            return CustomHttpResponse.notFound(DEFAULT_URI);
         }
 
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + ContentType.contentTypeFromUri(uri) + ";charset=utf-8 ",
-                "Content-Length: " + fileSource.getBytes().length + " ",
-                "",
-                fileSource);
+        return CustomHttpResponse.ok(ContentType.contentTypeFromUri(uri), fileSource);
     }
 
     private String fileSourceFromUri(String uri) {

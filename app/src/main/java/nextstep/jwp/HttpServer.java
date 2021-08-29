@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
+import nextstep.jwp.exception.HttpException;
 import nextstep.jwp.http.RequestBody;
 import nextstep.jwp.http.RequestHeader;
 import nextstep.jwp.http.RequestLine;
@@ -64,7 +65,7 @@ public class HttpServer {
         final String httpMethod = requestLine.getHttpMethod();
         final String uri = requestLine.getUri();
         if ("".equals(httpMethod)) {
-            throw new IllegalArgumentException("http 메소드가 없어요");
+            throw new HttpException("http 메소드가 없어요");
         }
         if ("GET".equals(httpMethod)) {
             return getMapping(uri);
@@ -73,16 +74,19 @@ public class HttpServer {
             return postMapping(uri);
         }
 
-        throw new IllegalArgumentException("모르는 메소드다!");
+        throw new HttpException("설정되어 있지 않은 http 메소드입니다.");
     }
 
     private String postMapping(String uri) throws IOException {
-        Map<String, String> params = body.getParams();
-        service.register(params);
-        return ResponseEntity
-                .statusCode(StatusCode.FOUND)
-                .responseBody(resolver.findResource("/index.html"))
-                .build();
+        if ("/register".equals(uri)) {
+            Map<String, String> params = body.getParams();
+            service.register(params);
+            return ResponseEntity
+                    .statusCode(StatusCode.FOUND)
+                    .responseBody(resolver.findResource("/index.html"))
+                    .build();
+        }
+        throw new HttpException("올바르지 않은 post 요청입니다.");
     }
 
     private String getMapping(String uri) throws IOException {

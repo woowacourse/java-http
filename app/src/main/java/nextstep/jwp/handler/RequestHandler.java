@@ -10,11 +10,12 @@ import java.util.List;
 import java.util.Objects;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.exception.NotFoundException;
+import nextstep.jwp.http.request.HttpMethod;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpResponseBody;
-import nextstep.jwp.resolver.HtmlResolver;
 import nextstep.jwp.resolver.DataResolver;
+import nextstep.jwp.resolver.HtmlResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,13 +53,16 @@ public class RequestHandler implements Runnable {
                     .Builder(httpRequest.protocol(), OK)
                     .build();
 
-            if (url.equals("login")) {
+            if (url.equals("/login") && httpRequest.method() == HttpMethod.POST) {
                 LoginController loginController = new LoginController();
-                loginController.login(httpRequest, httpResponse);
+                loginController.doPost(httpRequest, httpResponse);
             }
 
-            HttpResponseBody responseBody = resolveData(url, httpRequest.header("Accept").list());
-            httpResponse.replaceResponseBody(responseBody);
+            if (httpResponse.status() == OK) {
+                HttpResponseBody responseBody = resolveData(url,
+                    httpRequest.header("Accept").list());
+                httpResponse.replaceResponseBody(responseBody);
+            }
 
             outputStream.write(httpResponse.toResponseFormat().getBytes());
             outputStream.flush();
@@ -69,7 +73,8 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private HttpResponseBody resolveData(String filePath, List<String> acceptType) throws IOException {
+    private HttpResponseBody resolveData(String filePath, List<String> acceptType)
+        throws IOException {
         if (acceptType.isEmpty()) {
             acceptType = List.of("*/*");
         }

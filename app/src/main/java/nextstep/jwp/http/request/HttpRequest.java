@@ -1,17 +1,16 @@
 package nextstep.jwp.http.request;
 
-import static java.util.stream.Collectors.toMap;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import nextstep.jwp.http.HttpHeaders;
 import nextstep.jwp.http.HttpProtocol;
+import nextstep.jwp.http.QueryParser;
 
 public class HttpRequest {
 
@@ -86,6 +85,9 @@ public class HttpRequest {
         private static final int HEADER_KEY_INDEX = 0;
         private static final int COMMA_LENGTH = 1;
         private static final int HTTP_PROTOCOL_INDEX = 2;
+        private static final int NOT_FOUND_INDEX = -1;
+
+        private static final String QUERY_STARTER = "?";
         private static final String BLANK = " ";
 
         private HttpHeaders headers = new HttpHeaders();
@@ -105,25 +107,53 @@ public class HttpRequest {
 
         private void parse(InputStream inputStream) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
+            StringBuilder headers = new StringBuilder();
             try {
-                parseStatusLine(bufferedReader.readLine());
-                while (bufferedReader.ready()) {
-                    parseHeader(bufferedReader.readLine());
+                String line = bufferedReader.readLine();
+                parseStatusLine(line);
+                while (!"".equals(line)) {
+                    line = bufferedReader.readLine();
+                    if (Objects.isNull(line)) {
+                        break;
+                    }
+                    headers.append(line).append("\r\n");
+                }
+
+                parseHeaders(headers.toString());
+
+                //todo : content-length refactor
+                String contentLengthStr = this.headers.get("Content-Length").toValuesString();
+                if (!"".equals(contentLengthStr)) {
+                    int contentLength = Integer.parseInt(this.headers.get("Content-Length").toValuesString());
+                    char[] buffer = new char[contentLength];
+                    bufferedReader.read(buffer, 0, contentLength);
+                    parseBody(new String(buffer));
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
+        private void parseHeaders(String headers) {
+            List<String> lines = Arrays.asList(headers.split("\r\n"));
+            lines.forEach(this::parseHeader);
+        }
+
         private void parseStatusLine(String line) {
             List<String> parsedStatusLine = Arrays.asList(line.split(BLANK));
-
-            this.method = HttpMethod.of(parsedStatusLine.get(METHOD_INDEX));
-            QueryParser queryParser = new QueryParser(parsedStatusLine.get(FILEPATH_INDEX));
-            this.queryParams = queryParser.queryParams();
-            this.url = queryParser.parsedUrl();
             this.httpProtocol = HttpProtocol.findByName(parsedStatusLine.get(HTTP_PROTOCOL_INDEX));
+            this.method = HttpMethod.of(parsedStatusLine.get(METHOD_INDEX));
+
+            String url = parsedStatusLine.get(FILEPATH_INDEX);
+            int index = url.indexOf(QUERY_STARTER);
+
+            if (index != NOT_FOUND_INDEX) {
+                this.url = url.substring(0, index);
+                this.queryParams = new QueryParser(url.substring(index + 1)).queryParams();
+            }
+
+            this.url = url;
+            this.queryParams = new QueryParams();
         }
 
         private void parseHeader(String line) {
@@ -143,48 +173,9 @@ public class HttpRequest {
             List<String> values = Arrays.asList(rawHeaderValue.split(","));
             headers.add(headerKey, values);
         }
-    }
 
-    static class QueryParser {
-
-        private static final int NOT_FOUND_INDEX = -1;
-        private static final int QUERY_KEY_INDEX = 0;
-        private static final int QUERY_VALUE_INDEX = 1;
-
-        private static final String QUERY_SEPARATOR = "=";
-        private static final String QUERY_STARTER = "?";
-        private static final String QUERY_AMPERSAND = "&";
-
-        private final String parsedUrl;
-        private final QueryParams queryParams;
-
-        public QueryParser(String url) {
-            int index = url.indexOf(QUERY_STARTER);
-            if (index != NOT_FOUND_INDEX) {
-                this.parsedUrl = url.substring(0, index);
-                this.queryParams = parseQueryParams(url.substring(index + 1));
-                return;
-            }
-            this.parsedUrl = url;
-            this.queryParams = new QueryParams();
-        }
-
-        private QueryParams parseQueryParams(String queryParams) {
-            return new QueryParams(
-                Arrays.stream(queryParams.split(QUERY_AMPERSAND))
-                    .map(it -> Arrays.asList(it.split(QUERY_SEPARATOR)))
-                    .collect(toMap(
-                        it -> it.get(QUERY_KEY_INDEX),
-                        it -> it.get(QUERY_VALUE_INDEX), (o1, o2) -> o1, LinkedHashMap::new))
-            );
-        }
-
-        public QueryParams queryParams() {
-            return queryParams;
-        }
-
-        public String parsedUrl() {
-            return parsedUrl;
+        private void parseBody(String body) {
+            this.body = new FormDataHttpRequestBody(body);
         }
     }
 }

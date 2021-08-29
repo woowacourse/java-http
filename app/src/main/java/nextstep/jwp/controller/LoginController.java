@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpStatus;
@@ -18,8 +19,12 @@ public class LoginController extends Controller {
     public boolean canHandle(final HttpRequest httpRequest) {
         final String httpMethod = httpRequest.getHttpMethod();
         final String path = httpRequest.getPath();
+        return "POST".equals(httpMethod) && "/login".equals(path);
+    }
 
-        return ("POST".equals(httpMethod) || "GET".equals(httpMethod)) && path.startsWith("/login");
+    @Override
+    public HttpResponse doGet(HttpRequest httpRequest) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -36,7 +41,7 @@ public class LoginController extends Controller {
             return new HttpResponse(
                     httpRequest.getProtocol(),
                     HttpStatus.FOUND,
-                    "text/html",
+                    ContentType.findByUrl(redirectUrl),
                     responseBody.getBytes().length,
                     responseBody);
         } catch (Exception exception) {
@@ -46,7 +51,7 @@ public class LoginController extends Controller {
             return new HttpResponse(
                     httpRequest.getProtocol(),
                     HttpStatus.UNAUTHORIZED,
-                    "text/html",
+                    ContentType.findByUrl(unauthorizedUrl),
                     responseBody.getBytes().length,
                     responseBody);
         }

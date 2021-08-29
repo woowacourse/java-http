@@ -20,9 +20,9 @@ public class RequestHandler implements Runnable {
 
     static {
         final UserService userService = new UserService();
-        controllers.add(new IndexController());
         controllers.add(new LoginController(userService));
         controllers.add(new RegisterController(userService));
+        controllers.add(new StaticResourceController());
     }
 
     public RequestHandler(Socket connection) {

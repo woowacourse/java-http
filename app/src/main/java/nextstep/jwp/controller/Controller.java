@@ -19,18 +19,6 @@ public abstract class Controller {
         return doPost(httpRequest);
     }
 
-    protected HttpResponse doGet(final HttpRequest httpRequest) {
-        final String path = httpRequest.getPath();
-        final String responseBody = readFile(path);
-
-        return new HttpResponse(
-                httpRequest.getProtocol(),
-                HttpStatus.OK,
-                "text/html",
-                responseBody.getBytes().length,
-                responseBody);
-    }
-
     protected String readFile(final String path) {
         URL url = Thread.currentThread()
                 .getContextClassLoader()
@@ -44,6 +32,8 @@ public abstract class Controller {
     }
 
     public abstract boolean canHandle(final HttpRequest httpRequest);
+
+    public abstract HttpResponse doGet(final HttpRequest httpRequest);
 
     public abstract HttpResponse doPost(final HttpRequest httpRequest);
 }

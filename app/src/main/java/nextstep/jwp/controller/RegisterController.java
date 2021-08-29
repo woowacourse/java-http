@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpStatus;
@@ -16,7 +17,12 @@ public class RegisterController extends Controller {
     public boolean canHandle(final HttpRequest httpRequest) {
         final String httpMethod = httpRequest.getHttpMethod();
         final String path = httpRequest.getPath();
-        return ("POST".equals(httpMethod) || "GET".equals(httpMethod)) && "/register.html".equals(path);
+        return "POST".equals(httpMethod) && "/register".equals(path);
+    }
+
+    @Override
+    public HttpResponse doGet(HttpRequest httpRequest) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -29,7 +35,7 @@ public class RegisterController extends Controller {
         return new HttpResponse(
                 httpRequest.getProtocol(),
                 HttpStatus.SEE_OTHER,
-                "text/html",
+                ContentType.findByUrl(redirectUrl),
                 responseBody.getBytes().length,
                 responseBody);
     }

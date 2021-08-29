@@ -25,7 +25,7 @@ public class HttpRequestHeader {
 
         this.httpMethod = httpMethod;
         this.protocol = protocol;
-        this.path = trimPath(uri);;
+        this.path = trimPath(uri, httpMethod);;
         this.queryParameters = queryParameters;
         this.contentLength = contentLength;
     }
@@ -44,16 +44,6 @@ public class HttpRequestHeader {
         return Integer.parseInt(contentLengthValue);
     }
 
-    private String trimPath(final String uri) {
-        if ("/".equals(uri)) {
-            return "/index.html";
-        }
-        if (!uri.endsWith("html")) {
-            return uri + ".html";
-        }
-        return uri;
-    }
-
     private Map<String, String> parseQueryParameters(final String uri) {
         final Map<String, String> newQueryParameters = new HashMap<>();
 
@@ -64,6 +54,24 @@ public class HttpRequestHeader {
         }
 
         return newQueryParameters;
+    }
+
+    private String trimPath(final String path, final String httpMethod) {
+        if ("/".equals(path)) {
+            return "/index.html";
+        }
+
+        ContentType contentType = ContentType.findByUrl(path);
+        if (!contentType.equals(ContentType.NONE) || "POST".equals(httpMethod)) {
+            return path;
+        }
+
+        final int index = path.indexOf("?");
+        if (index != -1) {
+            return path.substring(0, index + 1);
+        }
+
+        return path + ".html";
     }
 
     private void addQueryParameters(final Map<String, String> newQueryParameters, final String queryString) {

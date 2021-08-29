@@ -33,19 +33,21 @@ public class HttpResponse {
             return;
         }
 
-        setContentType(url);
-
         String responseBody;
-
-        if (url.equals("/")) {
-            responseBody = DEFAULT_MESSAGE;
-        } else if (url.equals("/login") || url.equals("/register")) {
-            responseBody = getBodyByUrl(DEFAULT_RESOURCE_PATH + url + ".html");
-        } else {
-            responseBody = getBodyByUrl(DEFAULT_RESOURCE_PATH + url);
+        setContentType(url);
+        try {
+            if (url.equals("/")) {
+                responseBody = DEFAULT_MESSAGE;
+            } else if (url.equals("/login") || url.equals("/register")) {
+                responseBody = getBodyByUrl(DEFAULT_RESOURCE_PATH + url + ".html");
+            } else {
+                responseBody = getBodyByUrl(DEFAULT_RESOURCE_PATH + url);
+            }
+        } catch (final NullPointerException nullPointerException) {
+            redirectWithStatusCode("/404.html", "404");
+            LOGGER.debug("잘못된 url로 접근했습니다. wrong url : {}", url);
+            return;
         }
-
-        headers.put("Content-Length: " + responseBody.getBytes().length);
         response200(responseBody);
     }
 
@@ -58,6 +60,8 @@ public class HttpResponse {
             headers.put("Content-Type: application/javascript");
         } else if (url.endsWith("ico")) {
             headers.put("Content-Type: image/x-icon");
+        } else if (url.endsWith("svg")) {
+            headers.put("Content-Type: image/svg+xml");
         } else {
             headers.put("Content-Type: text/html;charset=utf-8");
         }
@@ -70,6 +74,7 @@ public class HttpResponse {
     }
 
     private void response200(final String responseBody) throws IOException {
+        headers.put("Content-Length: " + responseBody.getBytes().length);
         String okResponse = "HTTP/1.1 200 OK\r\n";
         outputStream.write(okResponse.getBytes(StandardCharsets.UTF_8));
         responseHeaderBody(responseBody);
@@ -89,6 +94,7 @@ public class HttpResponse {
         outputStream.write(httpStatusCodes.getStatusCodeHeader().getBytes(StandardCharsets.UTF_8));
         String responseBody = getBodyByUrl(DEFAULT_RESOURCE_PATH + redirectUrl);
         responseHeaderBody(responseBody);
+        send();
     }
 
     private void responseHeaderBody(final String responseBody) throws IOException {

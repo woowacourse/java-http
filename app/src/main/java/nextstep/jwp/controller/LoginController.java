@@ -33,21 +33,18 @@ public class LoginController extends Controller {
             userService.login(account, password);
 
             final String redirectUrl = "/index.html";
-            final String responseBody = readFile(redirectUrl);
-
             return new HttpResponse(
                     httpRequest.getProtocol(),
                     HttpStatus.FOUND,
-                    ContentType.findByUrl(redirectUrl),
-                    responseBody.getBytes().length,
-                    responseBody);
+                    redirectUrl
+            );
         } catch (Exception exception) {
             final String unauthorizedUrl = "/401.html";
             final String responseBody = readFile(unauthorizedUrl);
 
             return new HttpResponse(
                     httpRequest.getProtocol(),
-                    HttpStatus.UNAUTHORIZED,
+                    HttpStatus.findHttpStatusByUrl(unauthorizedUrl),
                     ContentType.findByUrl(unauthorizedUrl),
                     responseBody.getBytes().length,
                     responseBody);

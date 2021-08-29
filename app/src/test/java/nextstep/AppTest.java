@@ -30,14 +30,26 @@ public class AppTest {
     }
 
     @Test
-    @DisplayName("로그인 테스트")
-    public void loginTest() throws Exception{
-        final MockResult result = MockRequest.get("/login?account=nabom&password=nabom")
-                .result();
+    @DisplayName("로그인 성공 테스트")
+    public void login_success() throws Exception{
+        final MockResult result =
+                MockRequest.get("/login?account=nabom&password=nabom")
+                        .result();
 
         Assertions.assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
+        Assertions.assertThat(result.headerValue("Location")).isEqualTo("/");
     }
 
+    @Test
+    @DisplayName("로그인 실패 테스트")
+    public void login_fail() throws Exception{
+        final MockResult result =
+                MockRequest.get("/login?account=nabom&password=nabom12")
+                        .result();
+
+        Assertions.assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
+        Assertions.assertThat(result.headerValue("Location")).isEqualTo("/unauthorized");
+    }
 
     private void 페이지_비교(String body, String path) {
         Assertions.assertThat(body).containsIgnoringWhitespaces(getPage(path));

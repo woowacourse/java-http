@@ -1,11 +1,11 @@
 package nextstep.joanne.handler;
 
+import nextstep.joanne.converter.HttpRequestResponseConverter;
 import nextstep.joanne.db.InMemoryUserRepository;
 import nextstep.joanne.http.HttpMethod;
+import nextstep.joanne.http.HttpStatus;
 import nextstep.joanne.http.request.HttpRequest;
 import nextstep.joanne.http.response.HttpResponse;
-import nextstep.joanne.http.HttpStatus;
-import nextstep.joanne.converter.HttpRequestResponseConverter;
 import nextstep.joanne.model.User;
 
 import java.io.IOException;
@@ -19,54 +19,72 @@ public class Handler {
 
     public HttpResponse handle() throws IOException {
 
-        if (httpRequest.uriContains("/register")) {
-            if (httpRequest.isEqualsMethod(HttpMethod.GET)) {
-                return HttpRequestResponseConverter.convertToHttpResponse(
-                        HttpStatus.OK,
-                        httpRequest.resourceUri(),
-                        httpRequest.contentType()
-                );
-            }
+        if (httpRequest.uriEquals("/")) {
+            return mainPage();
+        }
 
-            if (httpRequest.isEqualsMethod(HttpMethod.POST)) {
-                registerRequest();
+        if (httpRequest.uriContains("/register")) {
+            return doRegister();
+        }
+
+        if (httpRequest.uriContains("/login")) {
+            return doLogin();
+        }
+
+        return null;
+    }
+
+    private HttpResponse doLogin() throws IOException {
+        if (httpRequest.isEqualsMethod(HttpMethod.GET)) {
+            return HttpRequestResponseConverter.convertToHttpResponse(
+                    HttpStatus.OK,
+                    httpRequest.resourceUri(),
+                    httpRequest.contentType()
+            );
+        }
+
+        if (httpRequest.isEqualsMethod(HttpMethod.POST)) {
+            try {
+                loginRequest(httpRequest.getFromRequestBody("account"),
+                        httpRequest.getFromRequestBody("password"));
                 return HttpRequestResponseConverter.convertToHttpResponse(
                         HttpStatus.FOUND,
                         "/index.html",
                         httpRequest.contentType()
                 );
-            }
-        }
 
-        if (httpRequest.uriContains("/login")) {
-            if (httpRequest.isEqualsMethod(HttpMethod.GET)) {
+            } catch (IllegalArgumentException e) {
                 return HttpRequestResponseConverter.convertToHttpResponse(
-                        HttpStatus.OK,
-                        httpRequest.resourceUri(),
+                        HttpStatus.UNAUTHORIZED,
+                        "/401.html",
                         httpRequest.contentType()
                 );
             }
+        }
+        return null;
+    }
 
-            if (httpRequest.isEqualsMethod(HttpMethod.POST)) {
-                try {
-                    loginRequest(httpRequest.getFromRequestBody("account"),
-                            httpRequest.getFromRequestBody("password"));
-                    return HttpRequestResponseConverter.convertToHttpResponse(
-                            HttpStatus.FOUND,
-                            "/index.html",
-                            httpRequest.contentType()
-                    );
-
-                } catch (IllegalArgumentException e) {
-                    return HttpRequestResponseConverter.convertToHttpResponse(
-                            HttpStatus.UNAUTHORIZED,
-                            "/401.html",
-                            httpRequest.contentType()
-                    );
-                }
-            }
+    private HttpResponse doRegister() throws IOException {
+        if (httpRequest.isEqualsMethod(HttpMethod.GET)) {
+            return HttpRequestResponseConverter.convertToHttpResponse(
+                    HttpStatus.OK,
+                    httpRequest.resourceUri(),
+                    httpRequest.contentType()
+            );
         }
 
+        if (httpRequest.isEqualsMethod(HttpMethod.POST)) {
+            registerRequest();
+            return HttpRequestResponseConverter.convertToHttpResponse(
+                    HttpStatus.FOUND,
+                    "/index.html",
+                    httpRequest.contentType()
+            );
+        }
+        return null;
+    }
+
+    private HttpResponse mainPage() throws IOException {
         return HttpRequestResponseConverter.convertToHttpResponse(
                 HttpStatus.OK,
                 httpRequest.resourceUri(),

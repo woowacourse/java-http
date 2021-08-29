@@ -65,13 +65,17 @@ public class HttpRequest {
     }
 
     public String contentType() {
-        if (requestHeaders.containsResource("css") || uriContains("css")) {
+        if (requestHeaders.containsResource("css") || uriEquals("css")) {
             return "text/css";
         }
-        if (requestHeaders.containsResource("js") || uriContains("js")) {
+        if (requestHeaders.containsResource("js") || uriEquals("js")) {
             return "application/javascript";
         }
         return "text/html";
+    }
+
+    public boolean uriEquals(String uri) {
+        return this.uri.equalsWith(uri);
     }
 
     public boolean uriContains(String uri) {

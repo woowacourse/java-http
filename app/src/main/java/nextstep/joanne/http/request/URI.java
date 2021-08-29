@@ -5,16 +5,16 @@ import java.util.Map;
 import java.util.Objects;
 
 public class URI {
-    private final String uri;
+    private final String pathUri;
     private String resourceUri;
     private HashMap<String, String> queryString;
 
-    public URI(String uri) {
-        this.uri = uri;
-        this.queryString = (HashMap<String, String>) queryString(uri);
+    public URI(String pathUri) {
+        this.pathUri = pathUri;
+        this.queryString = (HashMap<String, String>) queryString(pathUri);
 
         if (Objects.isNull(queryString)) {
-            resourceUri = uri;
+            resourceUri = pathUri;
         }
     }
 
@@ -39,8 +39,12 @@ public class URI {
         return queryString;
     }
 
-    public boolean contains(String other) {
-        return uri.contains(other);
+    public boolean equalsWith(String other) {
+        return Objects.equals(pathUri, other);
+    }
+
+    public boolean contains(String uri) {
+        return pathUri.contains(uri);
     }
 
     public String resourceUri() {
@@ -50,4 +54,5 @@ public class URI {
     public Map<String, String> queryString() {
         return queryString;
     }
+
 }

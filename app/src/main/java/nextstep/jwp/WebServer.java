@@ -23,7 +23,8 @@ public class WebServer {
     public void run() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             logger.info("Web Server started {} port.", serverSocket.getLocalPort());
-            handle(serverSocket);
+            Assembler assembler = new Assembler();
+            handle(serverSocket, assembler);
         } catch (IOException exception) {
             logger.error("Exception accepting connection", exception);
         } catch (RuntimeException exception) {
@@ -31,10 +32,10 @@ public class WebServer {
         }
     }
 
-    private void handle(ServerSocket serverSocket) throws IOException {
+    private void handle(ServerSocket serverSocket, Assembler assembler) throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection)).start();
+            new Thread(new RequestHandler(connection, assembler)).start();
         }
     }
 

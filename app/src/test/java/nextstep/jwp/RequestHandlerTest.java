@@ -15,7 +15,7 @@ class RequestHandlerTest {
     void run() {
         // given
         final MockSocket socket = new MockSocket();
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, new Assembler());
 
         // when
         requestHandler.run();
@@ -35,7 +35,7 @@ class RequestHandlerTest {
         // given
         final String httpRequest = get("/bad/request.html");
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, new Assembler());
 
         // when
         requestHandler.run();
@@ -51,7 +51,7 @@ class RequestHandlerTest {
         // given
         final String httpRequest = get("/index.html");
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, new Assembler());
 
         // when
         requestHandler.run();
@@ -67,7 +67,7 @@ class RequestHandlerTest {
         // given
         final String httpRequest = get("/login");
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, new Assembler());
 
         // when
         requestHandler.run();
@@ -85,7 +85,7 @@ class RequestHandlerTest {
         final String httpRequest = post("/login", requestBody);
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, new Assembler());
 
         // when
         requestHandler.run();
@@ -105,7 +105,7 @@ class RequestHandlerTest {
         final String httpRequest = post("/login", requestBody);
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, new Assembler());
 
         // when
         requestHandler.run();
@@ -122,7 +122,7 @@ class RequestHandlerTest {
         // given
         final String httpRequest = get("/register");
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, new Assembler());
 
         // when
         requestHandler.run();
@@ -140,7 +140,7 @@ class RequestHandlerTest {
         final String httpRequest = post("/register", requestBody);
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, new Assembler());
 
         // when
         requestHandler.run();
@@ -154,7 +154,7 @@ class RequestHandlerTest {
     }
 
     private static void assertResponse(String output, HttpStatus httpStatus, String body) {
-        String expected = "HTTP/1.1 "+ httpStatus.code() + " "+ httpStatus.name()+" \r\n" +
+        String expected = "HTTP/1.1 " + httpStatus.code() + " " + httpStatus.name() + " \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + body.getBytes().length + " \r\n" +
                 "\r\n" +
@@ -175,7 +175,7 @@ class RequestHandlerTest {
 
     private static String post(String url, String requestBody) {
         return String.join("\r\n",
-                "POST "+url+" HTTP/1.1 ",
+                "POST " + url + " HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: " + requestBody.length(),

@@ -4,20 +4,19 @@ import java.util.Arrays;
 import java.util.List;
 import nextstep.jwp.exception.BadRequestException;
 import nextstep.jwp.handler.Handler;
-import nextstep.jwp.handler.LoginController;
-import nextstep.jwp.handler.RegisterController;
-import nextstep.jwp.handler.ResourceHandler;
-import nextstep.jwp.handler.service.LoginService;
-import nextstep.jwp.handler.service.RegisterService;
 import nextstep.jwp.http.request.RequestLine;
 
 public class HandlerMapperImpl implements HandlerMapper {
 
-    private final List<Handler> handlers = Arrays.asList(
-            new LoginController(new LoginService()),
-            new RegisterController(new RegisterService()),
-            new ResourceHandler()
-    );
+    private final List<Handler> handlers;
+
+    public HandlerMapperImpl(List<Handler> handlers) {
+        this.handlers = handlers;
+    }
+
+    public HandlerMapperImpl(Handler... handlers) {
+        this(Arrays.asList(handlers));
+    }
 
     @Override
     public Handler findHandler(RequestLine requestLine) {

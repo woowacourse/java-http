@@ -3,21 +3,25 @@ package nextstep.jwp;
 import nextstep.jwp.adaptor.HandlerAdaptor;
 import nextstep.jwp.exception.BadRequestException;
 import nextstep.jwp.handler.Handler;
-import nextstep.jwp.adaptor.HandlerAdaptorImpl;
 import nextstep.jwp.handler.modelandview.Model;
 import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.mapper.HandlerMapper;
-import nextstep.jwp.mapper.HandlerMapperImpl;
 import nextstep.jwp.view.View;
 import nextstep.jwp.view.ViewResolver;
 
 public class Dispatcher {
 
-    private final HandlerMapper handlerMapper = new HandlerMapperImpl();
-    private final HandlerAdaptor handlerAdaptor = new HandlerAdaptorImpl();
-    private final ViewResolver viewResolver = new ViewResolver();
+    private final HandlerMapper handlerMapper;
+    private final HandlerAdaptor handlerAdaptor;
+    private final ViewResolver viewResolver;
+
+    public Dispatcher(HandlerMapper handlerMapper, HandlerAdaptor handlerAdaptor, ViewResolver viewResolver) {
+        this.handlerMapper = handlerMapper;
+        this.handlerAdaptor = handlerAdaptor;
+        this.viewResolver = viewResolver;
+    }
 
     public HttpResponse execute(HttpRequest httpRequest) {
         ModelAndView modelAndView = service(httpRequest);

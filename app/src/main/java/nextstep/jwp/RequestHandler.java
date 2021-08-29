@@ -5,8 +5,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
+import nextstep.jwp.adaptor.HandlerAdaptorImpl;
+import nextstep.jwp.handler.LoginController;
+import nextstep.jwp.handler.RegisterController;
+import nextstep.jwp.handler.ResourceHandler;
+import nextstep.jwp.handler.service.LoginService;
+import nextstep.jwp.handler.service.RegisterService;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.mapper.HandlerMapperImpl;
+import nextstep.jwp.view.ViewResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,9 +25,9 @@ public class RequestHandler implements Runnable {
     private final Socket connection;
     private final Dispatcher dispatcher;
 
-    public RequestHandler(Socket connection) {
+    public RequestHandler(Socket connection, Assembler assembler) {
         this.connection = Objects.requireNonNull(connection);
-        this.dispatcher = new Dispatcher();
+        this.dispatcher = assembler.dispatcher();
     }
 
     @Override

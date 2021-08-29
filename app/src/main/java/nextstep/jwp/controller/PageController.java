@@ -1,5 +1,7 @@
 package nextstep.jwp.controller;
 
+import nextstep.jwp.model.HttpStatus;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -7,47 +9,81 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.Optional;
+import java.util.function.BiFunction;
 
 public class PageController {
-    private final Map<String, Function<String, Map<Integer, String>>> mappedFunction;
+    private final Map<String, BiFunction<HttpStatus, String, Map<HttpStatus, String>>> mappedFunction;
 
     public PageController() {
         this.mappedFunction = new HashMap<>();
         this.mappedFunction.put("index", this::index);
         this.mappedFunction.put("index.html", this::index);
         this.mappedFunction.put("login", this::login);
+        this.mappedFunction.put("401", this::unauthorized);
     }
 
-    public Map<Integer, String> index(final String indexRequest) {
+    public Map<HttpStatus, String> mapResponse(final Optional<HttpStatus> status, final String request) {
+        return this.mappedFunction.keySet().stream()
+                .filter(request::contains)
+                .map(s -> this.mappedFunction.get(s).apply(status.orElse(HttpStatus.OK), request))
+                .findAny()
+                .orElse(Map.of(HttpStatus.NOT_FOUND, "해당 페이지가 존재하지 않습니다."));
+    }
+
+    public Map<HttpStatus, String> index(final HttpStatus status, final String indexRequest) {
         if (!"".equals(indexRequest) && !indexRequest.contains("index")) {
             throw new IllegalArgumentException("옳지 않은 페이지명입니다.");
         }
-        return makeResponse("static/index.html");
+        if (status != HttpStatus.OK) {
+            return makeResponse(status, "static/index.html");
+        }
+        return makeResponse(HttpStatus.OK, "static/index.html");
     }
 
-    public Map<Integer, String> login(final String requestPage) {
+    public Map<HttpStatus, String> login(final HttpStatus status, final String requestPage) {
         if (!requestPage.contains("login")) {
             throw new IllegalArgumentException("옳지 않은 페이지명입니다.");
         }
-        return makeResponse("static/login.html");
+        if (status != HttpStatus.OK) {
+            return makeResponse(status, "static/login.html");
+        }
+        return makeResponse(HttpStatus.OK, "static/login.html");
     }
 
-    private Map<Integer, String> makeResponse(String request) {
+    public Map<HttpStatus, String> unauthorized(final HttpStatus status, final String requestPage) {
+        if (!requestPage.contains("401")) {
+            throw new IllegalArgumentException("옳지 않은 페이지명입니다.");
+        }
+        if (status != HttpStatus.OK) {
+            return makeResponse(status, "static/401.html");
+        }
+        return makeResponse(HttpStatus.OK, "static/401.html");
+    }
+
+    private Map<HttpStatus, String> makeResponse(final HttpStatus status, final String request) {
         try {
-            final URL url = getClass().getClassLoader().getResource(request);
-            final Path path = new File(url.getPath()).toPath();
-            return Map.of(200, Files.readString(path));
-        } catch (IOException e) {
-            return Map.of(404, "해당 페이지가 존재하지 않습니다.");
+            final String fileResponse = getFileResponse(request);
+            return Map.of(status, fileResponse);
+        } catch (RuntimeException e) {
+            return Map.of(status, "해당 페이지가 존재하지 않습니다.");
         }
     }
 
-    public Map<Integer, String> mapResponse(final String request) {
-        return this.mappedFunction.keySet().stream()
-                .filter(request::contains)
-                .map(s -> this.mappedFunction.get(s).apply(request))
-                .findAny()
-                .orElse(Map.of(404, "해당 페이지가 존재하지 않습니다."));
+    public String getFileResponse(final String request) {
+        try {
+            final Path path = new File(getPath(request)).toPath();
+            return Files.readString(path);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("옳지 않은 url입니다.");
+        }
+    }
+
+    private String getPath(final String request) {
+        final URL url = getClass().getClassLoader().getResource(request);
+        if (url == null) {
+            throw new IllegalArgumentException("파일을 찾을 수 없습니다.");
+        }
+        return url.getPath();
     }
 }

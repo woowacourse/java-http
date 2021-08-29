@@ -2,6 +2,7 @@ package nextstep.jwp;
 
 import nextstep.jwp.controller.JwpController;
 import nextstep.jwp.controller.PageController;
+import nextstep.jwp.model.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,22 +65,27 @@ public class RequestHandler implements Runnable {
     }
 
     private String getParam(final String request) {
-        log.info("로그인한 유저 : " + jwpController.mapResponse(request));
-        Map.Entry<Integer, String> responseEntry = new ArrayList<>(pageController.mapResponse(request).entrySet()).get(0);
-        return makeResponse(responseEntry);
+        try {
+            Map.Entry<HttpStatus, String> responseEntry = new ArrayList<>(jwpController.mapResponse(request).entrySet()).get(0);
+            return makeResponse(responseEntry.getKey(), responseEntry.getValue());
+        } catch (IllegalArgumentException e) {
+            return makeResponse(HttpStatus.NOT_FOUND,e.getMessage());
+        }
     }
 
     private String getPage(final String request) {
-        Map.Entry<Integer, String> responseEntry = new ArrayList<>(pageController.mapResponse(request).entrySet()).get(0);
-        return makeResponse(responseEntry);
+        try{
+            Map.Entry<HttpStatus, String> responseEntry = new ArrayList<>(pageController.mapResponse(Optional.empty(), request).entrySet()).get(0);
+            return makeResponse(responseEntry.getKey(), responseEntry.getValue());
+        } catch (IllegalArgumentException e) {
+            return makeResponse(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+
     }
 
-    private String makeResponse(final Map.Entry<Integer, String> responseEntry) {
-        Integer statusCode = responseEntry.getKey();
-        String responseBody = responseEntry.getValue();
-
+    private String makeResponse(final HttpStatus status, final String responseBody) {
         return String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " OK ",
+                "HTTP/1.1 " + status.toString(),
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

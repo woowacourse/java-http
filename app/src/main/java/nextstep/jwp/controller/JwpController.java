@@ -1,34 +1,42 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.HttpStatus;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 public class JwpController {
-    private final Map<String, Function<String, String>> mappedFunction;
+    private static final Logger log = LoggerFactory.getLogger(JwpController.class);
+
+    private final Map<String, Function<String, Map<HttpStatus, String>>> mappedFunction;
+    private final PageController pageController = new PageController();
 
     public JwpController() {
         this.mappedFunction = new HashMap<>();
         this.mappedFunction.put("login", this::login);
     }
 
-    private String login(final String queryString) {
-        List<String> params = Arrays.asList(queryString.split("&"));
-        User user = UserService.findUser(params);
-        return user.toString();
+    private Map<HttpStatus, String> login(final String queryString) {
+        try {
+            List<String> params = Arrays.asList(queryString.split("&"));
+            User user = UserService.findUser(params);
+            log.info("로그인한 유저 : " + user.toString());
+            return pageController.mapResponse(Optional.of(HttpStatus.FOUND), "index");
+        } catch (IllegalArgumentException e) {
+            log.error(e.getMessage());
+            return pageController.mapResponse(Optional.of(HttpStatus.BAD_REQUEST), "401");
+        }
     }
 
-    public String mapResponse(final String request) {
+    public Map<HttpStatus, String> mapResponse(final String request) {
         return this.mappedFunction.keySet().stream()
                 .filter(request::contains)
                 .map(s -> this.mappedFunction.get(s).apply(request))
                 .findAny()
-                .orElse("해당 페이지가 존재하지 않습니다.");
+                .orElse(Map.of(HttpStatus.NOT_FOUND, "해당 페이지가 존재하지 않습니다."));
     }
 }

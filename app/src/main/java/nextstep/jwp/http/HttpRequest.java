@@ -1,5 +1,6 @@
 package nextstep.jwp.http;
 
+import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.context.ApplicationContext;
 import nextstep.jwp.http.message.HttpHeaders;
@@ -10,6 +11,8 @@ public interface HttpRequest {
     HttpMethod getMethod();
 
     Optional<String> getQueryString();
+
+    Map<String, String> getQueryStringAsMap();
 
     String getRequestURI();
 

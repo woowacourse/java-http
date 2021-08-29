@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.context.ApplicationContext;
 import nextstep.jwp.http.HttpRequest;
@@ -74,6 +76,23 @@ public class HttpParser {
         @Override
         public Optional<String> getQueryString() {
             return requestLine.getQueryString();
+        }
+
+        @Override
+        public Map<String, String> getQueryStringAsMap() {
+            Map<String, String> queryString = new HashMap<>();
+            getQueryString()
+                .ifPresent(query -> {
+                    String[] splittedQuery = query.split("&");
+                    for (String q : splittedQuery) {
+                        String[] keyValue = q.split("=");
+                        if (2 == keyValue.length) {
+                            queryString.put(keyValue[0], keyValue[1]);
+                        }
+                    }
+                });
+
+            return queryString;
         }
 
         @Override

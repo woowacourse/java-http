@@ -2,18 +2,17 @@ package nextstep.jwp.webserver;
 
 public class HttpResponse {
 
-    private StatusCode statusCode;
-    private HttpHeaders headers;
-    private String body;
+    private StatusCode statusCode = StatusCode._200_OK;
+    private HttpHeaders headers = new HttpHeaders();
+    private String body = "";
+
+    public HttpResponse() {
+    }
 
     public HttpResponse(StatusCode statusCode, HttpHeaders headers, String body) {
         this.statusCode = statusCode;
         this.headers = headers;
         this.body = body;
-    }
-
-    public HttpResponse(String body) {
-        this(StatusCode._200_OK, HttpHeaders.EMPTY_HEADERS, body);
     }
 
     public static HttpResponse ok(String body) {
@@ -45,5 +44,17 @@ public class HttpResponse {
         }
 
         return response.getBytes();
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public void setStatusCode(StatusCode statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void setHeaders(HttpHeaders headers) {
+        this.headers = headers;
     }
 }

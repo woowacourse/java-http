@@ -1,5 +1,6 @@
 package nextstep.jwp.webserver;
 
+import nextstep.jwp.application.controller.StaticFileController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,14 +29,18 @@ public class RequestHandler implements Runnable {
 
             String requestString = readInputStream(inputStream);
             HttpRequest httpRequest = new HttpRequest(requestString);
+            HttpResponse httpResponse = new HttpResponse();
 
             Controller controller = getController(httpRequest);
-            HttpResponse response = controller.handle(httpRequest);
+            controller.service(httpRequest, httpResponse);
 
-            outputStream.write(response.toBytes());
+            outputStream.write(httpResponse.toBytes());
             outputStream.flush();
-        } catch (IOException exception) {
-            log.error("Exception stream", exception);
+        } catch (IOException ioException) {
+            log.error("Exception stream", ioException);
+        } catch (Exception exception) {
+            // 예외 핸들링
+            log.error("Exception", exception);
         } finally {
             close();
         }

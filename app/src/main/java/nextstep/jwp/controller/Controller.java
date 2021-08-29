@@ -1,8 +1,8 @@
 package nextstep.jwp.controller;
 
-import java.io.IOException;
-import nextstep.jwp.util.HeaderLine;
+import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpResponse;
 
 public interface Controller {
-    String process(HeaderLine headerLine) throws IOException;
+    void service(HttpRequest request, HttpResponse response) throws Exception;
 }

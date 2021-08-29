@@ -1,14 +1,14 @@
 package nextstep.jwp.controller;
 
-import java.io.IOException;
-import nextstep.jwp.response.HttpResponse;
-import nextstep.jwp.util.HeaderLine;
+import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.response.GeneralResponse;
 
-public class ExtraController implements Controller {
+public class ExtraController extends AbstractController {
 
     @Override
-    public String process(HeaderLine headerLine) throws IOException {
-        HttpResponse httpResponse = new HttpResponse(headerLine);
-        return httpResponse.getResponse();
+    public void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        GeneralResponse generalResponse = new GeneralResponse(request);
+        response.setResponse(generalResponse.getResponse());
     }
 }

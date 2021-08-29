@@ -6,13 +6,16 @@ import nextstep.jwp.controller.ExtraController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.StaticController;
+import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.service.LoginService;
+import nextstep.jwp.service.RegisterService;
 
 public enum Controllers {
-    LOGIN("/login", new LoginController()),
-    REGISTER("/register", new RegisterController()),
+    LOGIN("/login", new LoginController((LoginService) Services.LOGIN.service())),
+    REGISTER("/register", new RegisterController((RegisterService) Services.REGISTER.service())),
     STATIC("/static", new StaticController());
 
-    private static final Controller extraController = new ExtraController();
+    private static final Controller EXTRA_CONTROLLER = new ExtraController();
 
     private final String uri;
     private final Controller controller;
@@ -22,16 +25,16 @@ public enum Controllers {
         this.controller = controller;
     }
 
-    public static Controller mathController(HeaderLine headerLine) {
-        final String urlWithoutQuery = headerLine.getRequestURLWithoutQuery();
-        if (StaticResources.matchFromHeader(headerLine)) {
+    public static Controller matchController(HttpRequest httpRequest) {
+        final String urlWithoutQuery = httpRequest.getRequestURLWithoutQuery();
+        if (StaticResources.matchFromHeader(httpRequest)) {
             return STATIC.controller;
         }
         return Arrays.stream(Controllers.values())
             .filter(element -> element.isSameURIs(urlWithoutQuery))
             .findAny()
             .map(element -> element.controller)
-            .orElse(extraController);
+            .orElse(EXTRA_CONTROLLER);
     }
 
     private boolean isSameURIs(String targetURI) {

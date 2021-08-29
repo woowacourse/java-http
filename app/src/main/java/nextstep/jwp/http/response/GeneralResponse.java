@@ -1,19 +1,19 @@
-package nextstep.jwp.response;
+package nextstep.jwp.http.response;
 
 import java.io.IOException;
-import nextstep.jwp.util.HeaderLine;
+import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.util.TranslatedFile;
 
-public class HttpResponse {
+public class GeneralResponse {
 
-    private HeaderLine headerLine;
+    private HttpRequest httpRequest;
 
-    public HttpResponse(HeaderLine headerLine) {
-        this.headerLine = headerLine;
+    public GeneralResponse(HttpRequest httpRequest) {
+        this.httpRequest = httpRequest;
     }
 
     public String getResponse() throws IOException {
-        return buildResponse(headerLine.getRequestURLWithoutQuery());
+        return buildResponse(httpRequest.getRequestURLWithoutQuery());
     }
 
     private String buildResponse(String path) throws IOException {

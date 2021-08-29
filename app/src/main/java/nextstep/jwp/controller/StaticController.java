@@ -1,16 +1,16 @@
 package nextstep.jwp.controller;
 
-import java.io.IOException;
-import nextstep.jwp.response.StaticResponse;
-import nextstep.jwp.util.HeaderLine;
+import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.response.StaticResponse;
 
-public class StaticController implements Controller {
+public class StaticController extends AbstractController {
 
     @Override
-    public String process(HeaderLine headerLine) throws IOException {
-        final String resourceType = headerLine.resourceType();
-        final String path = headerLine.getRequestURLWithoutQuery();
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        final String resourceType = request.resourceType();
+        final String path = request.getRequestURLWithoutQuery();
         final StaticResponse staticResponse = new StaticResponse(resourceType, path);
-        return staticResponse.response();
+        response.setResponse(staticResponse.response());
     }
 }

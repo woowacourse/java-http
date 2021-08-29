@@ -5,9 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import nextstep.jwp.http.HttpRequest;
 import org.junit.jupiter.api.Test;
 
-class HeaderLineTest {
+class HttpRequestTest {
 
     @Test
     void readFirstLine() throws IOException {
@@ -18,10 +19,10 @@ class HeaderLineTest {
             + "Accept: */*";
         final String answer = "/index.html";
         final InputStream inputStream = new ByteArrayInputStream(target.getBytes());
-        final HeaderLine headerLine = HeaderLine.readFromInputStream(inputStream);
+        final HttpRequest httpRequest = HttpRequest.readFromInputStream(inputStream);
 
         //given
-        final String requestedURL = headerLine.getRequestURLWithoutQuery();
+        final String requestedURL = httpRequest.getRequestURLWithoutQuery();
 
         //then
         assertThat(requestedURL).hasToString(answer);

@@ -3,7 +3,7 @@ package nextstep.jwp.service;
 import java.io.IOException;
 import java.util.Map;
 import nextstep.jwp.domain.SignUp;
-import nextstep.jwp.util.HeaderLine;
+import nextstep.jwp.http.HttpRequest;
 
 public class RegisterService implements Service {
 
@@ -11,8 +11,8 @@ public class RegisterService implements Service {
 
     }
 
-    public boolean isSuccess(HeaderLine headerLine) throws IOException {
-        final Map<String, String> body = headerLine.body();
+    public boolean isSuccess(HttpRequest httpRequest) throws IOException {
+        final Map<String, String> body = httpRequest.body();
         SignUp signUp = new SignUp(body);
         if (signUp.isAble()) {
             signUp.process();

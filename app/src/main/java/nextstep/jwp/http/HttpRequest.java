@@ -1,4 +1,4 @@
-package nextstep.jwp.util;
+package nextstep.jwp.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,23 +9,23 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class HeaderLine {
+public class HttpRequest {
 
     private final static int NONE_QUERY = -1;
 
     private List<String> headerLines;
 
-    public HeaderLine(List<String> headerLines) {
+    public HttpRequest(List<String> headerLines) {
         this.headerLines = headerLines;
     }
 
-    public static HeaderLine readFromInputStream(InputStream inputStream) throws IOException {
+    public static HttpRequest readFromInputStream(InputStream inputStream) throws IOException {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         final List<String> headerLine = new LinkedList<>();
         while (reader.ready()) {
             headerLine.add(reader.readLine());
         }
-        return new HeaderLine(headerLine);
+        return new HttpRequest(headerLine);
     }
 
     public String method() {

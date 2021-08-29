@@ -1,6 +1,7 @@
 package nextstep.jwp.util;
 
 import java.util.Arrays;
+import nextstep.jwp.http.HttpRequest;
 
 public enum StaticResources {
     JS("js"),
@@ -14,11 +15,11 @@ public enum StaticResources {
         this.resource = resource;
     }
 
-    public static boolean matchFromHeader(HeaderLine headerLine) {
-        if (!headerLine.isResource()) {
+    public static boolean matchFromHeader(HttpRequest httpRequest) {
+        if (!httpRequest.isResource()) {
             return false;
         }
-        String fileFormat = headerLine.resourceType();
+        String fileFormat = httpRequest.resourceType();
 
         return matchType(fileFormat);
     }

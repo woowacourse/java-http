@@ -6,16 +6,14 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import nextstep.jwp.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HttpResponse {
 
     private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
-
-    private StatusLine statusLine = new StatusLine();
     private final ResponseHeader responseHeader;
+    private StatusLine statusLine;
     private ResponseBody responseBody;
 
     public HttpResponse() {
@@ -38,8 +36,11 @@ public class HttpResponse {
         } catch (IOException e) {
             log.error("stream exception");
         }
+    }
 
-
+    public void redirect(String redirectUrl) {
+        setStatusLine(StatusCode.FOUND);
+        this.responseHeader.setLocation(redirectUrl);
     }
 
     private String getContent(URL resource) throws IOException {
@@ -55,7 +56,7 @@ public class HttpResponse {
             URL resource = getClass().getClassLoader().getResource("/404.html");
             String content = getContent(resource);
 
-            this.setStatusLine(StatusCode.NOT_FOUNT);
+            this.setStatusLine(StatusCode.NOT_FOUND);
             this.responseHeader.setContentType(ContentType.HTML);
             this.responseBody = new ResponseBody(content);
         } catch (IOException e) {
@@ -64,13 +65,19 @@ public class HttpResponse {
 
     }
 
-    public void redirect(String redirectUrl) {
-        setStatusLine(StatusCode.FOUND);
-        this.responseHeader.setLocation(redirectUrl);
+    public void message(String message) {
+        setStatusLine(StatusCode.OK);
+        responseHeader.setContentType(ContentType.HTML);
+        responseHeader.setContentLength(message.length());
+        responseBody = new ResponseBody(message);
     }
 
     public void setStatusLine(StatusCode statusCode) {
         this.statusLine = new StatusLine(statusCode);
+    }
+
+    public byte[] getBytes() {
+        return toString().getBytes();
     }
 
     @Override
@@ -80,16 +87,5 @@ public class HttpResponse {
         }
         return String.join("\r\n", statusLine.toString(), responseHeader.toString(),
             responseBody.toString());
-    }
-
-    public byte[] getBytes() {
-        return toString().getBytes();
-    }
-
-    public void message(String message) {
-        setStatusLine(StatusCode.OK);
-        responseHeader.setContentType(ContentType.HTML);
-        responseHeader.setContentLength(message.length());
-        responseBody = new ResponseBody(message);
     }
 }

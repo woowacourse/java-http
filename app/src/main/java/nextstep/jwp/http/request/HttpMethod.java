@@ -8,10 +8,6 @@ public class HttpMethod {
         this.method = method;
     }
 
-    public String getMethod() {
-        return method;
-    }
-
     public boolean isGet() {
         return "GET".equals(method);
     }

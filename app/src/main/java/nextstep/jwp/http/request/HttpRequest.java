@@ -9,6 +9,10 @@ import org.slf4j.LoggerFactory;
 
 public class HttpRequest {
 
+    private static final int METHOD_INDEX = 0;
+    private static final int URI_INDEX = 1;
+    private static final String DELIMITER = " ";
+
     private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
     private HttpMethod httpMethod;
@@ -19,9 +23,9 @@ public class HttpRequest {
     public HttpRequest(BufferedReader bufferedReader) throws IOException {
         try {
             String firstLine = bufferedReader.readLine();
-            String[] lines = firstLine.split(" ");
-            this.httpMethod = new HttpMethod(lines[0]);
-            this.requestURI = new RequestURI(lines[1]);
+            String[] lines = firstLine.split(DELIMITER);
+            this.httpMethod = new HttpMethod(lines[METHOD_INDEX]);
+            this.requestURI = new RequestURI(lines[URI_INDEX]);
             this.httpHeader = readHeaders(bufferedReader);
             this.requestBody = readRequestBody(bufferedReader, httpHeader.getContentLength());
         } catch (IOException e) {

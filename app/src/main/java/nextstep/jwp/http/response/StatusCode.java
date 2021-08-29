@@ -1,10 +1,10 @@
-package nextstep.jwp;
+package nextstep.jwp.http.response;
 
 public enum StatusCode {
 
     OK("OK", "200"),
     FOUND("Found", "302"),
-    NOT_FOUNT("Not Found", "404");
+    NOT_FOUND("Not Found", "404");
 
     private final String message;
     private final String code;

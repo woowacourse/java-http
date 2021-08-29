@@ -10,10 +10,6 @@ public class HttpHeader {
         this.headers = headers;
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-
     public int getContentLength() {
         if (!headers.containsKey("Content-Length")) {
             return 0;

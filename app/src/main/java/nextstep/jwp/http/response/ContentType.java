@@ -6,7 +6,7 @@ import java.util.Arrays;
 public enum ContentType {
 
     HTML("html", "text/html;charset=utf-8"),
-    ICO("ICO", "image/x-icon"),
+    ICO("ico", "image/x-icon"),
     CSS("css", "text/css"),
     JS("js", "application/javascript"),
     SVG("svg", "image/svg+xml");

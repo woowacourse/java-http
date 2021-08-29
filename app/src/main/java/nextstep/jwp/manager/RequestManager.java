@@ -17,8 +17,7 @@ public class RequestManager {
     }
 
     public void handle(InputStream inputStream, OutputStream outputStream) throws IOException {
-        final RequestParser requestParser = new RequestParser(inputStream);
-        final ClientRequest clientRequest = requestParser.extractClientRequest();
+        final ClientRequest clientRequest = new RequestParser(inputStream).extractClientRequest();
 
         if (staticResourceManager.canHandle(clientRequest)) {
             staticResourceManager.handle(clientRequest, outputStream);

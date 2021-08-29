@@ -1,28 +1,28 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.MockSocket;
-import nextstep.jwp.RequestHandler;
+import nextstep.jwp.FrontController;
 
 abstract class ControllerTest {
 
     protected MockSocket socket;
-    protected RequestHandler requestHandler;
+    protected FrontController frontController;
 
     protected void sendRequest() {
         // given
         socket = new MockSocket();
-        requestHandler = new RequestHandler(socket);
+        frontController = new FrontController(socket);
 
         // when
-        requestHandler.run();
+        frontController.run();
     }
 
     protected void sendRequest(String httpRequest) {
         // given
         socket = new MockSocket(httpRequest);
-        requestHandler = new RequestHandler(socket);
+        frontController = new FrontController(socket);
 
         // when
-        requestHandler.run();
+        frontController.run();
     }
 }

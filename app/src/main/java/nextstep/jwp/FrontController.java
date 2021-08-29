@@ -13,14 +13,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class RequestHandler implements Runnable {
+public class FrontController implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(FrontController.class);
 
     private final Socket connection;
     private final Map<String, Controller> controllerMap = new HashMap<>();
 
-    public RequestHandler(Socket connection) {
+    public FrontController(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
         controllerMap.put("/", new IndexController());
         controllerMap.put("/login", new LoginController(new UserService()));

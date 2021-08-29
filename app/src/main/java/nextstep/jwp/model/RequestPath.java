@@ -38,4 +38,22 @@ public class RequestPath {
     public boolean hasQueryString() {
         return path.contains("?");
     }
+
+    public boolean isPath(PathType pathType) {
+        return path.equals(pathType.value());
+    }
+
+    public boolean containsPath(PathType pathType) {
+        return path.contains(pathType.value());
+    }
+
+    public boolean containsExtension() {
+        return path.contains(".");
+    }
+
+    public FileType fileType() {
+        int index = path.indexOf('.');
+        String fileType = path.substring(index + 1);
+        return FileType.valueOf(fileType.toUpperCase());
+    }
 }

@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import nextstep.jwp.web.http.HttpHeaders;
 import nextstep.jwp.web.http.HttpProtocol;
+import nextstep.jwp.web.http.MimeType;
 import nextstep.jwp.web.http.request.body.FormDataHttpRequestBody;
 import nextstep.jwp.web.http.request.body.HttpRequestBody;
 import nextstep.jwp.web.http.request.body.TextHttpRequestBody;
@@ -18,20 +19,16 @@ import nextstep.jwp.web.http.util.QueryParser;
 public class HttpRequest {
 
     private final HttpHeaders headers;
-    private final HttpMethod method;
     private final HttpProtocol protocol;
-    private final String url;
-    private final QueryParams queryParams;
+    private final MethodUrl methodUrl;
     private final HttpRequestBody body;
 
-    public HttpRequest(HttpHeaders headers, HttpMethod method, HttpProtocol protocol,
-                       String url, QueryParams queryParams,
-                       HttpRequestBody body) {
+    private HttpRequest(HttpHeaders headers, HttpProtocol protocol,
+                        MethodUrl methodUrl,
+                        HttpRequestBody body) {
         this.headers = headers;
-        this.method = method;
         this.protocol = protocol;
-        this.url = url;
-        this.queryParams = queryParams;
+        this.methodUrl = methodUrl;
         this.body = body;
     }
 
@@ -41,24 +38,24 @@ public class HttpRequest {
         return inputStreamHttpRequestConverter.toRequest();
     }
 
-    public HttpMethod method() {
-        return this.method;
+    public boolean isJsonOrHtml() {
+        return mimeType() == MimeType.TEXT_HTML || mimeType() == MimeType.JSON;
     }
 
-    public String url() {
-        return this.url;
+    public MimeType mimeType() {
+        return this.headers.mimeType();
+    }
+
+    public MethodUrl methodUrl() {
+        return methodUrl;
     }
 
     public QueryParams queryParam() {
-        return queryParams;
+        return methodUrl.queryParams();
     }
 
     public HttpProtocol protocol() {
         return protocol;
-    }
-
-    public HttpHeaders headers() {
-        return this.headers;
     }
 
     public HttpRequestHeaderValues header(String key) {
@@ -69,12 +66,16 @@ public class HttpRequest {
         return this.body;
     }
 
+    public HttpRequest changeMethodUrl(MethodUrl methodUrl) {
+        return new HttpRequest(headers, protocol, methodUrl, body);
+    }
+
     @Override
     public String toString() {
         final List<String> headers = this.headers.map().entrySet().stream()
             .map(set -> set.getKey() + ": " + set.getValue().toValuesString())
             .collect(Collectors.toList());
-        return method + " " + url + " " + protocol.getProtocolName() + "\r\n" +
+        return methodUrl + " " + protocol.getProtocolName() + "\r\n" +
             String.join("\r\n", headers) +
             "\r\n" +
             body.getBody();
@@ -90,23 +91,23 @@ public class HttpRequest {
         private static final int HTTP_PROTOCOL_INDEX = 2;
         private static final int NOT_FOUND_INDEX = -1;
         private static final int START = 0;
+        private static final String CRLF = "\r\n";
         private static final String QUERY_STARTER = "?";
         private static final String BLANK = " ";
         private static final String COLON = ":";
+        private static final String COMMA = ",";
 
         private HttpHeaders headers = new HttpHeaders();
-        private HttpMethod method = null;
         private HttpProtocol httpProtocol = null;
-        private String url = "";
-        private QueryParams queryParams = null;
-        private HttpRequestBody body = new TextHttpRequestBody("\r\n");
+        private MethodUrl methodUrl = null;
+        private HttpRequestBody body = new TextHttpRequestBody(CRLF);
 
         public InputStreamHttpRequestConverter(InputStream inputStream) {
             parse(inputStream);
         }
 
         public HttpRequest toRequest() {
-            return new HttpRequest(headers, method, httpProtocol, url, queryParams, body);
+            return new HttpRequest(headers, httpProtocol, methodUrl, body);
         }
 
         private void parse(InputStream inputStream) {
@@ -130,34 +131,34 @@ public class HttpRequest {
             List<String> parsedStatusLine = Arrays.asList(bufferedReader.readLine().split(BLANK));
 
             this.httpProtocol = HttpProtocol.findByName(parsedStatusLine.get(HTTP_PROTOCOL_INDEX));
-            this.method = HttpMethod.findByName(parsedStatusLine.get(METHOD_INDEX));
 
+            HttpMethod method = HttpMethod.findByName(parsedStatusLine.get(METHOD_INDEX));
             String url = parsedStatusLine.get(FILEPATH_INDEX);
             int index = url.indexOf(QUERY_STARTER);
+            this.methodUrl = getMethodUrl(method, url, index);
+        }
 
+        private MethodUrl getMethodUrl(HttpMethod method, String url, int index) {
             if (index != NOT_FOUND_INDEX) {
-                this.url = url.substring(START, index);
-                this.queryParams = new QueryParser(url.substring(index + 1)).queryParams();
-                return;
+                QueryParams queryParams = new QueryParser(url.substring(index + 1)).queryParams();
+                return new MethodUrl(method, url.substring(START, index), queryParams);
             }
-
-            this.url = url;
-            this.queryParams = new QueryParams();
+            return new MethodUrl(method, url, QueryParams.empty());
         }
 
         private void parseHeaders(BufferedReader bufferedReader) throws IOException {
             StringBuilder headersBuilder = new StringBuilder();
-            String line = null;
-            while (!BLANK.equals(line)) {
+            String line = BLANK;
+            while (!"".equals(line)) {
                 line = bufferedReader.readLine();
                 if (Objects.isNull(line)) {
                     break;
                 }
-                headersBuilder.append(line).append("\r\n");
+                headersBuilder.append(line).append(CRLF);
             }
 
             List<String> headerLines = Arrays.asList(
-                headersBuilder.toString().split("\r\n")
+                headersBuilder.toString().split(CRLF)
             );
 
             headerLines.forEach(this::parseHeader);
@@ -173,7 +174,7 @@ public class HttpRequest {
             String headerKey = parsedHeader.get(HEADER_KEY_INDEX);
             String rawHeaderValue = line.substring(headerKey.length() + COMMA_LENGTH);
 
-            List<String> values = Arrays.asList(rawHeaderValue.split(","));
+            List<String> values = Arrays.asList(rawHeaderValue.split(COMMA));
             headers.add(headerKey, values);
         }
 

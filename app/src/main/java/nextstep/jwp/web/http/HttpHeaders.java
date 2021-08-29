@@ -8,6 +8,8 @@ import nextstep.jwp.web.http.request.HttpRequestHeaderValues;
 
 public class HttpHeaders {
 
+    private static final String CONTENT_LENGTH = "Content-Length";
+
     private final Map<String, HttpRequestHeaderValues> headers;
 
     public HttpHeaders() {
@@ -38,12 +40,17 @@ public class HttpHeaders {
     }
 
     public int contentLength() {
-        String contentLength = get("Content-Length").toValuesString();
+        String contentLength = get(CONTENT_LENGTH).toValuesString();
         try {
             return Integer.parseInt(contentLength);
         } catch (NumberFormatException e) {
             return 0;
         }
+    }
+
+    public MimeType mimeType() {
+        List<String> accepts = get("Accept").list();
+        return MimeType.findByName(accepts);
     }
 
     public Map<String, HttpRequestHeaderValues> map() {

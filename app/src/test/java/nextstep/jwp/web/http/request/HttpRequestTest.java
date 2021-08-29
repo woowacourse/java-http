@@ -26,8 +26,8 @@ class HttpRequestTest {
         //when
         HttpRequest request = HttpRequest.of(byteArrayInputStream);
         //then
-        assertThat(request.url()).isEqualTo(expectedFilePath);
-        assertThat(request.method()).isEqualTo(expectedMethod);
+        assertThat(request.methodUrl().url()).isEqualTo(expectedFilePath);
+        assertThat(request.methodUrl().method()).isEqualTo(expectedMethod);
         assertThat(request.queryParam().map()).containsExactlyInAnyOrderEntriesOf(
             queryParams
         );

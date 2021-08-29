@@ -1,17 +1,15 @@
 package nextstep.jwp;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebServer {
 
-    private static final Logger logger = LoggerFactory.getLogger(WebServer.class);
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebServer.class);
     private static final int DEFAULT_PORT = 8080;
 
     private final int port;
@@ -22,12 +20,12 @@ public class WebServer {
 
     public void run() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            logger.info("Web Server started {} port.", serverSocket.getLocalPort());
+            LOGGER.info("Web Server started {} port.", serverSocket.getLocalPort());
             handle(serverSocket);
         } catch (IOException exception) {
-            logger.error("Exception accepting connection", exception);
+            LOGGER.error("Exception accepting connection", exception);
         } catch (RuntimeException exception) {
-            logger.error("Unexpected error", exception);
+            LOGGER.error("Unexpected error", exception);
         }
     }
 

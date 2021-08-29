@@ -18,15 +18,6 @@ public class DefaultController extends AbstractController {
     @Override
     public HttpResponse doGet(HttpRequest httpRequest) {
         final String path = httpRequest.getPath();
-        if ("/".equals(path)) {
-            log.info("HELLO WORLD!");
-            return HttpResponse.ofByteArray(HttpStatus.OK, "Hello world!".getBytes());
-        }
-        if ("/index.html".equals(path)) {
-            log.info("GET /index.html");
-            final byte[] bytes = readIndex();
-            return HttpResponse.ofByteArray(HttpStatus.OK, bytes);
-        }
         if ("/css/styles.css".equals(path)) {
             log.info("GET /css/styles.css");
             final byte[] bytes = readFile(path);
@@ -58,8 +49,8 @@ public class DefaultController extends AbstractController {
             return HttpResponse.ofByteArray(HttpStatus.OK, ContentType.IMAGE, bytes);
         }
 
-        log.info(path);
-        byte[] bytes = "Hello world!".getBytes();
+        log.info("GET /index.html");
+        final byte[] bytes = readIndex();
         return HttpResponse.ofByteArray(HttpStatus.OK, bytes);
     }
 }

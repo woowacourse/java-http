@@ -18,8 +18,12 @@ class RequestHandlerTest {
 
     @DisplayName("path가 없는 요청에 응답한다 - 성공")
     @Test
-    void run() {
+    void run() throws IOException {
         // given
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final String resourceAsString = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(resource).getPath())));
+
+
         final MockSocket socket = new MockSocket();
         final RequestHandler requestHandler = new RequestHandler(socket);
 
@@ -27,12 +31,11 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
+        final String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + resourceAsString.getBytes().length + " \r\n" +
+                "\r\n" +
+                resourceAsString;
         assertThat(socket.output()).isEqualTo(expected);
     }
 

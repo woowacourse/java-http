@@ -2,6 +2,8 @@ package nextstep.jwp.http.response;
 
 import nextstep.jwp.http.response.type.StatusCode;
 
+import java.nio.charset.StandardCharsets;
+
 public class StatusLine {
     private String protocol;
     private String statusCode;
@@ -16,8 +18,8 @@ public class StatusLine {
         this.statusMessage = statusCode.getMessage();
     }
 
-    @Override
-    public String toString() {
-        return String.join(" ", protocol, statusCode, statusMessage) + " ";
+    public byte[] getByte() {
+        String line = String.join(" ", protocol, statusCode, statusMessage, "\r\n");
+        return line.getBytes(StandardCharsets.UTF_8);
     }
 }

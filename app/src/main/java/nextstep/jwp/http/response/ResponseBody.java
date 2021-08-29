@@ -1,5 +1,7 @@
 package nextstep.jwp.http.response;
 
+import java.nio.charset.StandardCharsets;
+
 public class ResponseBody {
 
     private final String content;
@@ -8,8 +10,7 @@ public class ResponseBody {
         this.content = content;
     }
 
-    @Override
-    public String toString() {
-        return content;
+    public byte[] getByte() {
+        return content.getBytes(StandardCharsets.UTF_8);
     }
 }

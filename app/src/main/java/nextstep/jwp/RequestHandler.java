@@ -42,8 +42,7 @@ public class RequestHandler implements Runnable {
             Controller controller = controllerMap.getOrDefault(uri, new DefaultController());
             controller.process(request, response);
 
-            outputStream.write(response.toString().getBytes());
-            outputStream.flush();
+            response.write(outputStream);
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {

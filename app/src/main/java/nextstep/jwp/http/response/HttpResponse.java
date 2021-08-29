@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -43,7 +44,7 @@ public class HttpResponse {
             this.headers.setContentLength(content.getBytes(StandardCharsets.UTF_8).length);
             this.body = new ResponseBody(content);
         } catch (IOException exception) {
-            log.error("Exception stream", exception);
+            log.error("Exception input stream", exception);
         }
     }
 
@@ -58,7 +59,7 @@ public class HttpResponse {
             this.headers.setContentLength(content.length());
             this.body = new ResponseBody(content);
         } catch (IOException exception) {
-            log.error("Exception stream", exception);
+            log.error("Exception input stream", exception);
         }
     }
 
@@ -99,11 +100,29 @@ public class HttpResponse {
         return body;
     }
 
-    @Override
-    public String toString() {
-        if (body == null) {
-            return String.join("\r\n", statusLine.toString(), headers.toString());
+    public void write(OutputStream outputStream) {
+        try {
+            if (body == null) {
+                writeWithoutBody(outputStream);
+            } else {
+                writeWithBody(outputStream);
+            }
+        } catch (IOException exception) {
+            log.error("Exception output stream", exception);
         }
-        return String.join("\r\n", statusLine.toString(), headers.toString(), body.toString());
+    }
+
+    private void writeWithBody(OutputStream outputStream) throws IOException {
+        outputStream.write(statusLine.getByte());
+        outputStream.write(headers.getByte());
+        outputStream.write("\r\n".getBytes(StandardCharsets.UTF_8));
+        outputStream.write(body.getByte());
+        outputStream.flush();
+    }
+
+    private void writeWithoutBody(OutputStream outputStream) throws IOException {
+        outputStream.write(statusLine.getByte());
+        outputStream.write(headers.getByte());
+        outputStream.flush();
     }
 }

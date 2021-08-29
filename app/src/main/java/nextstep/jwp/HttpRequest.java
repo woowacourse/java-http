@@ -7,14 +7,18 @@ public class HttpRequest {
     private final String httpMethod;
     private final String uri;
     private final String httpVersion;
+    private final Map<String, String> headers;
     private final Map<String, String> parameters;
+    private final String body;
 
     public HttpRequest(String httpMethod, String uri, String httpVersion,
-        Map<String, String> parameter) {
+        Map<String, String> headers, Map<String, String> parameters, String body) {
         this.httpMethod = httpMethod;
         this.uri = uri;
         this.httpVersion = httpVersion;
-        this.parameters = parameter;
+        this.headers = headers;
+        this.parameters = parameters;
+        this.body = body;
     }
 
     public String getHttpMethod() {
@@ -31,5 +35,17 @@ public class HttpRequest {
 
     public String getParameterValues(String key){
         return parameters.get(key);
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public Map<String, String> getParameters() {
+        return parameters;
+    }
+
+    public String getBody() {
+        return body;
     }
 }

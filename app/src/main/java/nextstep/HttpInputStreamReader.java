@@ -13,7 +13,7 @@ import nextstep.jwp.HttpRequest;
 
 public class HttpInputStreamReader {
 
-    private BufferedReader bufferedReader;
+    private final BufferedReader bufferedReader;
 
     public HttpInputStreamReader(InputStream inputStream) {
         InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -21,37 +21,42 @@ public class HttpInputStreamReader {
     }
 
     public HttpRequest readHttpRequest() throws IOException {
-        List<String> httpRequestData = new LinkedList<>();
+        Map<String, String> httpRequestHeaders = new HashMap<>();
 
-        while (bufferedReader.ready()) {
-            httpRequestData.add(bufferedReader.readLine());
-        }
-
-        return parseHttpRequest(httpRequestData);
-    }
-
-    private HttpRequest parseHttpRequest(List<String> httpRequestData) {
-        if(httpRequestData.isEmpty())
-            return null;
-        String startLine = httpRequestData.get(0);
+        String startLine = bufferedReader.readLine();
         String[] splitStartLine = startLine.split(" ");
 
         String httpMethod = splitStartLine[0];
         String uri = splitStartLine[1];
         String httpVersion = splitStartLine[2];
 
-        return new HttpRequest(httpMethod, uri, httpVersion, parseParameters(uri));
+        while (bufferedReader.ready()) {
+            String line = bufferedReader.readLine();
+            if(line.length() == 0)
+                break;
+
+            String[] splitHeaderLine = line.split(": ");
+            httpRequestHeaders.put(splitHeaderLine[0], splitHeaderLine[1]);
+        }
+
+        if(!httpRequestHeaders.containsKey("Content-Length"))
+            return new HttpRequest(httpMethod, uri, httpVersion, httpRequestHeaders, parseParameters(uri), "");
+
+        int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+
+        return new HttpRequest(httpMethod, uri, httpVersion, httpRequestHeaders, parseParameters(uri), requestBody);
     }
 
-    private Map<String, String> parseParameters(String uri){
+    private Map<String, String> parseParameters(String uri) {
         int index = uri.indexOf("?");
-        if(index == -1){
+        if (index == -1) {
             return new HashMap<>();
         }
         String queryString = uri.substring(index + 1);
-
         List<String> split = Arrays.asList(queryString.split("&"));
-
         Map<String, String> params = new HashMap<>();
 
         split.stream().forEach(it -> {

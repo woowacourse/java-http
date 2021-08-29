@@ -13,7 +13,10 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() {
-        String response = String.join("\r\n", header) + body;
+        String response = String.join("\r\n", header);
+        if (body != null) {
+            response += body;
+        }
         return response.getBytes();
     }
 

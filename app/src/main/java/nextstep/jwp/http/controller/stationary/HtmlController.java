@@ -1,7 +1,7 @@
 package nextstep.jwp.http.controller.stationary;
 
-import nextstep.jwp.http.exception.HttpUriNotFoundException;
 import nextstep.jwp.http.common.HttpStatusCode;
+import nextstep.jwp.http.exception.HttpUriNotFoundException;
 import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
 

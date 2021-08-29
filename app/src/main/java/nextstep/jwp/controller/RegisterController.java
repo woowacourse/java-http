@@ -5,8 +5,8 @@ import nextstep.jwp.http.controller.AbstractController;
 import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
-import nextstep.jwp.model.User;
 import nextstep.jwp.http.utils.HttpParseUtils;
+import nextstep.jwp.model.User;
 
 import java.util.Map;
 

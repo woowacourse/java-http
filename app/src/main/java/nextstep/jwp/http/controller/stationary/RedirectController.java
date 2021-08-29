@@ -1,4 +1,4 @@
-package nextstep.jwp.http.controller;
+package nextstep.jwp.http.controller.stationary;
 
 import nextstep.jwp.http.common.HttpStatusCode;
 import nextstep.jwp.http.controller.Controller;

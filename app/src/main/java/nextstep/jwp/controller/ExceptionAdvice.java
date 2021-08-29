@@ -1,18 +1,18 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.exception.HttpUriNotFoundException;
-import nextstep.jwp.http.exception.StaticFileNotFoundException;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.common.HttpStatusCode;
+import nextstep.jwp.http.exception.HttpUriNotFoundException;
+import nextstep.jwp.http.exception.StaticFileNotFoundException;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class ControllerAdvice {
+public class ExceptionAdvice {
 
-    private static final ControllerAdvice instance = new ControllerAdvice();
+    private static final ExceptionAdvice instance = new ExceptionAdvice();
 
     private static final Map<Class<? extends RuntimeException>, Consumer<HttpResponseMessage>> errorHandlerInfos;
 
@@ -23,10 +23,10 @@ public class ControllerAdvice {
         errorHandlerInfos.put(StaticFileNotFoundException.class, makeErrorResponseConsumer(HttpStatusCode.NOT_FOUND));
     }
 
-    private ControllerAdvice() {
+    private ExceptionAdvice() {
     }
 
-    public static ControllerAdvice getInstance() {
+    public static ExceptionAdvice getInstance() {
         return instance;
     }
 

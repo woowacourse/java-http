@@ -1,11 +1,11 @@
 package nextstep.jwp.http.mapper;
 
-import nextstep.jwp.http.controller.Controller;
 import nextstep.jwp.controller.HelloController;
-import nextstep.jwp.http.controller.RedirectController;
+import nextstep.jwp.http.controller.Controller;
 import nextstep.jwp.http.controller.stationary.CssController;
 import nextstep.jwp.http.controller.stationary.HtmlController;
 import nextstep.jwp.http.controller.stationary.JavaScriptController;
+import nextstep.jwp.http.controller.stationary.RedirectController;
 import nextstep.jwp.http.exception.HttpUriNotFoundException;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +21,7 @@ class ControllerMapperTest {
     void matchRedirectController() {
         // given
         HttpRequestMessage redirectMessage = makeGetRequestMessage("redirect:/");
-        ControllerMapper controllerMapper = new ControllerMapper();
+        ControllerMapper controllerMapper = ControllerMapper.getInstance();
 
         // when
         Controller controller = controllerMapper.matchController(redirectMessage);
@@ -35,7 +35,7 @@ class ControllerMapperTest {
     void matchHtmlController() {
         // given
         HttpRequestMessage redirectMessage = makeGetRequestMessage("/index.html");
-        ControllerMapper controllerMapper = new ControllerMapper();
+        ControllerMapper controllerMapper = ControllerMapper.getInstance();
 
         // when
         Controller controller = controllerMapper.matchController(redirectMessage);
@@ -49,7 +49,7 @@ class ControllerMapperTest {
     void matchCssController() {
         // given
         HttpRequestMessage redirectMessage = makeGetRequestMessage("/css/style.css");
-        ControllerMapper controllerMapper = new ControllerMapper();
+        ControllerMapper controllerMapper = ControllerMapper.getInstance();
 
         // when
         Controller controller = controllerMapper.matchController(redirectMessage);
@@ -63,7 +63,7 @@ class ControllerMapperTest {
     void matchJavaScriptController() {
         // given
         HttpRequestMessage redirectMessage = makeGetRequestMessage("/js/script.js");
-        ControllerMapper controllerMapper = new ControllerMapper();
+        ControllerMapper controllerMapper = ControllerMapper.getInstance();
 
         // when
         Controller controller = controllerMapper.matchController(redirectMessage);
@@ -77,7 +77,7 @@ class ControllerMapperTest {
     void matchControllerFromNonMapping() {
         // given
         HttpRequestMessage redirectMessage = makeGetRequestMessage("/nonmappingqasdzxc");
-        ControllerMapper controllerMapper = new ControllerMapper();
+        ControllerMapper controllerMapper = ControllerMapper.getInstance();
 
         // when, then
         assertThatThrownBy(() -> controllerMapper.matchController(redirectMessage))
@@ -89,7 +89,7 @@ class ControllerMapperTest {
     void matchController() {
         // given
         HttpRequestMessage redirectMessage = makeGetRequestMessage("/");
-        ControllerMapper controllerMapper = new ControllerMapper();
+        ControllerMapper controllerMapper = ControllerMapper.getInstance();
 
         // when
         Controller controller = controllerMapper.matchController(redirectMessage);

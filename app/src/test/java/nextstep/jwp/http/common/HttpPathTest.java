@@ -1,6 +1,5 @@
 package nextstep.jwp.http.common;
 
-import nextstep.jwp.http.common.HttpPath;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

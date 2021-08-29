@@ -6,8 +6,8 @@ import nextstep.jwp.http.controller.AbstractController;
 import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
-import nextstep.jwp.model.User;
 import nextstep.jwp.http.utils.HttpParseUtils;
+import nextstep.jwp.model.User;
 
 import java.util.Map;
 import java.util.Objects;
@@ -30,14 +30,13 @@ public class LoginController extends AbstractController {
         httpRequestMessage.changeRequestUri("redirect:/index.html");
     }
 
-    private User login(String account, String password) {
+    private void login(String account, String password) {
         validateRequiredValue(account, password);
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new UnauthorizedException(String.format("해당 아이디가 없습니다.(%s)", account)));
         if (!user.checkPassword(password)) {
             throw new UnauthorizedException("로그인에 싪패했습니다.");
         }
-        return user;
     }
 
     void validateRequiredValue(String account, String password) {

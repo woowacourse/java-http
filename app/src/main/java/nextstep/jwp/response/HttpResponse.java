@@ -1,6 +1,8 @@
-package nextstep.jwp.util;
+package nextstep.jwp.response;
 
 import java.io.IOException;
+import nextstep.jwp.util.HeaderLine;
+import nextstep.jwp.util.TranslatedFile;
 
 public class HttpResponse {
 
@@ -18,13 +20,12 @@ public class HttpResponse {
         final TranslatedFile translatedFile = new TranslatedFile(path);
         final String responseBody = translatedFile.staticValue();
 
-        final String response = String.join("\r\n",
+        return String.join("\r\n",
             "HTTP/1.1 200 OK ",
             "Content-Type: text/html;charset=utf-8 ",
             "Content-Length: " + responseBody.getBytes().length + " ",
             "",
             responseBody);
-        return response;
     }
 
 }

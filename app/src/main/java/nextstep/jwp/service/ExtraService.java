@@ -2,7 +2,7 @@ package nextstep.jwp.service;
 
 import java.io.IOException;
 import nextstep.jwp.util.HeaderLine;
-import nextstep.jwp.util.HttpResponse;
+import nextstep.jwp.response.HttpResponse;
 
 public class ExtraService implements Service {
 

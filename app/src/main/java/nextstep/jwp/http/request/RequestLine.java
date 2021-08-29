@@ -32,10 +32,6 @@ public class RequestLine {
         return uriPath.getSourcePath();
     }
 
-    public QueryParams queryParams(){
-        return uriPath.getQueryParams();
-    }
-
     public boolean isFrom(String method, String path){
         return this.method.equalsIgnoreCase(method) && this.uriPath.isPath(path);
     }

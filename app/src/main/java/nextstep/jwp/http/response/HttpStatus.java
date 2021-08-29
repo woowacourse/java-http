@@ -5,21 +5,13 @@ public enum HttpStatus {
     FOUND(302),
     UNAUTHORIZED(401);
 
-    private int status;
+    private final int code;
 
-    HttpStatus(int status) {
-        this.status = status;
+    HttpStatus(int code) {
+        this.code = code;
     }
 
-    public boolean isOK(){
-        return this.status == 200;
-    }
-
-    public boolean isFound(){
-        return this.status == 302;
-    }
-
-    public boolean isUnauthorized(){
-        return this.status == 401;
+    public int code(){
+        return code;
     }
 }

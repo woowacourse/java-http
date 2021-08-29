@@ -31,6 +31,7 @@ public class RegisterController implements Controller {
         return ModelAndView.ok("/register.html");
     }
 
+    // TODO :: DTO로 묶기
     private ModelAndView register(String requestBody) {
         QueryParams queryParams = QueryParams.of(requestBody);
 

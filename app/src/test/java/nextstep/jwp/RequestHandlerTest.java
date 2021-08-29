@@ -23,7 +23,7 @@ class RequestHandlerTest {
         // then
         String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/plain;charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
                 "Hello world!");
@@ -75,7 +75,18 @@ class RequestHandlerTest {
     @Test
     void loginWithAccountAndPassword() {
         // given
-        final String httpRequest= request("POST", "/login?account=gugu&password=password");
+        final String requestBody = "account=gugu&password=password";
+        final String httpRequest= String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: "+ requestBody.length(),
+                "Content-Type: application/x-www-form-urlencoded",
+                "Accept: */*",
+                "",
+                requestBody,
+                "");
+
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
@@ -83,8 +94,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final String expected = "HTTP/1.1 302 Found \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+        final String expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Location: index.html \r\n" +
                 "\r\n";
 
@@ -135,8 +145,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final String expected = "HTTP/1.1 302 Found \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+        final String expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Location: index.html \r\n" +
                 "\r\n";
 

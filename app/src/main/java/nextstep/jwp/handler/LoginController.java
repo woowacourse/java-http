@@ -22,7 +22,7 @@ public class LoginController implements Controller {
             return printLoginPage();
         }
         if (requestLine.isFrom("post", "/login")) {
-            return login(requestLine.queryParams());
+            return login(httpRequest.getRequestBody());
         }
         throw new IllegalArgumentException("핸들러가 처리할 수 있는 요청이 아닙니다.");
     }
@@ -31,7 +31,9 @@ public class LoginController implements Controller {
         return ModelAndView.ok("/login.html");
     }
 
-    private ModelAndView login(QueryParams params) {
+    private ModelAndView login(String requestBody) {
+        System.out.println(requestBody);
+        QueryParams params = QueryParams.of(requestBody);
         if (isValidUser(params.get("account"), params.get("password"))) {
             return ModelAndView.redirect("index.html");
         }

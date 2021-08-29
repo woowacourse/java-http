@@ -1,51 +1,56 @@
 package nextstep.jwp.view;
 
-import nextstep.jwp.handler.Model;
-import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.http.response.HttpStatus;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import nextstep.jwp.http.response.ContentType;
 
 public class View {
 
     private final String content;
+    private final ContentType contentType;
+
+    public View(String content, ContentType contentType) {
+        this.content = content;
+        this.contentType = contentType;
+    }
 
     public View(String content) {
-        this.content = content;
+        this(content, ContentType.empty());
     }
 
     public static View asString(String content) {
-        return new View(content);
+        return new View(content, ContentType.PLAIN_UTF8);
     }
 
     public static View asFile(File file) throws IOException {
-        List<String> lines = Files.readAllLines(file.toPath());
-        return new View(String.join("\n", lines) + "\n");
+        String fileName = file.getName();
+        String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+
+        String content = String.join("\n", Files.readAllLines(file.toPath())) + "\n";
+        ContentType contentType = ContentType.parseFromExtension(extension);
+
+        return new View(content, contentType);
     }
 
     public static View empty() {
         return new View("");
     }
 
-    public HttpResponse render(Model model) {
-        HttpStatus httpStatus = model.httpStatus();
+    public boolean isEmpty() {
+        return content.isEmpty();
+    }
 
-        if (httpStatus.isOK()) {
-            return HttpResponse.ok(content);
-        }
+    public String contentType() {
+        return contentType.value();
+    }
 
-        if (httpStatus.isFound()) {
-            String location = (String)model.get("Location");
-            return HttpResponse.redirect(location);
-        }
+    public int contentLength(){
+        return content.getBytes().length;
+    }
 
-        if (httpStatus.isUnauthorized()) {
-            return HttpResponse.unauthorized(content);
-        }
-
-        throw new IllegalArgumentException();
+    public String content() {
+        return content;
     }
 }

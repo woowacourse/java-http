@@ -13,10 +13,6 @@ public class Model {
         this.attributes = new HashMap<>();
     }
 
-    public Model(Map<String, Object> attributes) {
-        this.attributes = attributes;
-    }
-
     public void addAttribute(String key, Object value) {
         attributes.put(key, value);
     }
@@ -27,5 +23,9 @@ public class Model {
 
     public HttpStatus httpStatus() {
         return (HttpStatus) attributes.get("HttpStatus");
+    }
+
+    public boolean contains(String key){
+        return attributes.containsKey(key);
     }
 }

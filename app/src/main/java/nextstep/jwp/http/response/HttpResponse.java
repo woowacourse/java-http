@@ -1,7 +1,7 @@
 package nextstep.jwp.http.response;
 
-import java.util.Arrays;
-import java.util.List;
+import nextstep.jwp.handler.Model;
+import nextstep.jwp.view.View;
 
 /**
  * Http/1.1 200 OK                       // Status Line Date: Thu, 20 May 2005 21:12:24 GMT   // General Headers
@@ -17,60 +17,47 @@ import java.util.List;
 
 public class HttpResponse {
 
+    private static final String HTTP_REQUEST_LINE_FORMAT = "HTTP/1.1 %s %s ";
+    private static final String HEADER_FORMAT = "%s: %s ";
+    private static final String SEPARATE_LINE = "";
+
     private final String statusLine;
-    private final List<String> headers;
+    private final ResponseHeaders responseHeaders;
     private final String messageBody;
 
-    public HttpResponse(String statusLine, List<String> headers, String messageBody) {
+    public HttpResponse(String statusLine, ResponseHeaders responseHeaders, String messageBody) {
         this.statusLine = statusLine;
-        this.headers = headers;
+        this.responseHeaders = responseHeaders;
         this.messageBody = messageBody;
     }
 
-    public static HttpResponse ok(String messageBody) {
-        String statusLine = "HTTP/1.1 200 OK ";
-        List<String> headers = Arrays.asList(
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + messageBody.getBytes().length + " ",
-                ""
-        );
-        return new HttpResponse(statusLine, headers, messageBody);
+    public static HttpResponse of(Model model, View view) {
+        HttpStatus httpStatus = model.httpStatus();
+        String statusLine = String.format(HTTP_REQUEST_LINE_FORMAT, httpStatus.code(), httpStatus.name());
+
+        ResponseHeaders headers = new ResponseHeaders();
+
+        if (!view.isEmpty()) {
+            headers.addAttribute("Content-Type", view.contentType());
+            headers.addAttribute("Content-Length", view.contentLength());
+        }
+
+        if (model.contains("Location")) {
+            headers.addAttribute("Location", (String) model.get("Location"));
+        }
+
+        return new HttpResponse(statusLine, headers, view.content());
     }
 
-    public static HttpResponse redirect(String path){
-        String statusLine = "HTTP/1.1 302 Found ";
-        List<String> headers = Arrays.asList(
-                "Content-Type: text/html;charset=utf-8 ",
-                "Location: "+path+" ",
-                ""
-        );
-        return new HttpResponse(statusLine, headers, "");
+    public byte[] responseAsBytes() {
+        return responseAsString().getBytes();
     }
 
-    public static HttpResponse error(String messageBody){
-        String statusLine = "HTTP/1.1 500 Internal Server Error ";
-        List<String> headers = Arrays.asList(
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + messageBody.getBytes().length + " ",
-                ""
-        );
-        return new HttpResponse(statusLine, headers, messageBody);
-    }
-
-    public static HttpResponse unauthorized(String messageBody){
-        String statusLine = "HTTP/1.1 401 Unauthorized ";
-        List<String> headers = Arrays.asList(
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + messageBody.getBytes().length + " ",
-                ""
-        );
-        return new HttpResponse(statusLine, headers, messageBody);
-    }
-
-    public byte[] responseAsBytes(){
+    public String responseAsString() {
         return String.join("\r\n",
                 statusLine,
-                String.join("\r\n", headers),
-                messageBody).getBytes();
+                String.join("\r\n", responseHeaders.asLines(HEADER_FORMAT)),
+                SEPARATE_LINE,
+                messageBody);
     }
 }

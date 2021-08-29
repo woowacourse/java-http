@@ -33,10 +33,6 @@ public class RequestUriPath {
         return sourcePath;
     }
 
-    public QueryParams getQueryParams() {
-        return queryParams;
-    }
-
     public boolean isPath(String path) {
         return sourcePath.isPath(path);
     }

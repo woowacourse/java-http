@@ -101,7 +101,6 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
         String expected = "HTTP/1.1 302 Found\r\n" +
             "Location: /index.html\r\n" +
             "\r\n";
@@ -113,7 +112,7 @@ class RequestHandlerTest {
     void loginFailTest1() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-            "GET /login?account=fortune&password=password HTTP/1.1",
+            "GET /login?account=mungto&password=password HTTP/1.1",
             "Host: localhost:8080",
             "Connection: keep-alive",
             "",
@@ -180,6 +179,36 @@ class RequestHandlerTest {
         String expected = "HTTP/1.1 200 OK\r\n" +
             "Content-Type: text/html;charset=utf-8\r\n" +
             "Content-Length: 4319\r\n" +
+            "\r\n" +
+            new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("회원 가입에 성공하면, index.html을 받는다.")
+    @Test
+    void registerPostSuccessTest() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+            "POST /register HTTP/1.1",
+            "Host: localhost:8080",
+            "Content-Length: 58",
+            "Content-Type: application/x-www-form-urlencoded",
+            "Accept: */*",
+            " ",
+            "account=fortune&password=password&email=hahaha%40woowahan.com"
+        );
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String expected = "HTTP/1.1 200 OK\r\n" +
+            "Content-Type: text/html;charset=utf-8\r\n" +
+            "Content-Length: 5564\r\n" +
             "\r\n" +
             new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).isEqualTo(expected);

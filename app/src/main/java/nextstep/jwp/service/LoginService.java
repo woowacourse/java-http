@@ -19,7 +19,7 @@ public class LoginService {
 
     private void userLogin(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         if (isValidateUser(httpRequest)) {
-            httpResponse.redirect301Transfer("/index.html");
+            httpResponse.redirect302Transfer("/index.html");
         } else {
             httpResponse.redirect401Transfer("/401.html");
         }

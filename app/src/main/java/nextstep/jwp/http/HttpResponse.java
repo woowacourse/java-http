@@ -47,7 +47,7 @@ public class HttpResponse {
         response200(responseBody);
     }
 
-    public void redirect301Transfer(final String redirectUrl) throws IOException {
+    public void redirect302Transfer(final String redirectUrl) throws IOException {
         String foundResponse = "HTTP/1.1 302 Found\r\n";
         outputStream.write(foundResponse.getBytes(StandardCharsets.UTF_8));
         headers.put("Location: " + redirectUrl);

@@ -8,5 +8,5 @@ public interface Controller {
 
     void get(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException;
 
-    void post(final HttpRequest httpRequest, final HttpResponse httpResponse);
+    void post(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException;
 }

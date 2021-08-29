@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import nextstep.jwp.http.Params.QueryParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +15,8 @@ public class RequestLine {
     private final HttpMethod httpMethod;
     private String url;
     private final String httpVersion;
-    private final Map<String, String> queryParams = new HashMap<>();
+
+    private final QueryParams queryParams = new QueryParams(new HashMap<>());
 
     public RequestLine(final String requestLine) throws IOException {
         if (requestLine == null) {

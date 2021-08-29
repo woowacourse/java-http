@@ -2,7 +2,7 @@ package nextstep.jwp.service;
 
 import java.io.IOException;
 import java.util.Map;
-import nextstep.jwp.model.Login;
+import nextstep.jwp.domain.Login;
 import nextstep.jwp.response.HttpResponse;
 import nextstep.jwp.response.LoginResponse;
 import nextstep.jwp.util.HeaderLine;

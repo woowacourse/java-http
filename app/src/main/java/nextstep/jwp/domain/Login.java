@@ -1,8 +1,9 @@
-package nextstep.jwp.model;
+package nextstep.jwp.domain;
 
 import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 
 public class Login {
 
@@ -13,8 +14,8 @@ public class Login {
     }
 
     public boolean isSuccess() {
-        String account = query.get("account");
-        Optional<User> wrappedUser = InMemoryUserRepository.findByAccount(account);
+        final String account = query.get("account");
+        final Optional<User> wrappedUser = InMemoryUserRepository.findByAccount(account);
         return wrappedUser.isPresent();
     }
 }

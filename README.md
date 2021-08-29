@@ -7,6 +7,6 @@
 - [x] GET /index.html 응답하기
 - [x] Query String 파싱
 - [x] HTTP Status Code 302
-- [] POST 방식으로 회원 가입
+- [x] POST 방식으로 회원 가입
 - [] POST 방식으로 로그인
 - [] CSS 지원하기 

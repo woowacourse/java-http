@@ -11,6 +11,8 @@ import java.util.Map;
 
 public class HeaderLine {
 
+    private final static int NONE_QUERY = -1;
+
     private List<String> headerLines;
 
     public HeaderLine(List<String> headerLines) {
@@ -31,12 +33,22 @@ public class HeaderLine {
         return firstLine.contains("?");
     }
 
+    public String method() {
+        final String firstLine = headerLines.get(0);
+        final String[] splitFirstLine = firstLine.split(" ");
+        return splitFirstLine[0];
+    }
+
     public String getRequestURLWithoutQuery() {
         final String firstLine = headerLines.get(0);
         final String[] splitFirstLine = firstLine.split(" ");
         final String rawURI = splitFirstLine[1];
         final int index = rawURI.indexOf("?");
-        return rawURI.substring(0,index);
+
+        if (index == NONE_QUERY) {
+            return rawURI;
+        }
+        return rawURI.substring(0, index);
     }
 
     public String getRequestURL() {
@@ -57,5 +69,17 @@ public class HeaderLine {
             queries.put(queryComposition[0], queryComposition[1]);
         }
         return queries;
+    }
+
+    public Map<String, String> body() {
+        final String rawBody = headerLines.get(headerLines.size() - 1);
+        final String[] splitBody = rawBody.split("&");
+        final Map<String, String> bodyQuery = new HashMap<>();
+        for (String singleBody : splitBody) {
+            System.out.println(singleBody);
+            final String[] unitBody = singleBody.split("=");
+            bodyQuery.put(unitBody[0], unitBody[1]);
+        }
+        return bodyQuery;
     }
 }

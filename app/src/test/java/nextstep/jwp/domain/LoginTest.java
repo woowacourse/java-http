@@ -1,10 +1,10 @@
-package nextstep.jwp.model;
+package nextstep.jwp.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.domain.Login;
 import org.junit.jupiter.api.Test;
 
 class LoginTest {

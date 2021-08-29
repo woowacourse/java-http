@@ -8,14 +8,17 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.Optional;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RequestHandler implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
 
@@ -25,7 +28,7 @@ public class RequestHandler implements Runnable {
 
     @Override
     public void run() {
-        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
+        LOG.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
             final OutputStream outputStream = connection.getOutputStream()) {
@@ -34,9 +37,20 @@ public class RequestHandler implements Runnable {
             );
 
             HttpResponse httpResponse = new HttpResponse(outputStream);
+
+            if (!httpRequest.isQueryParamsEmpty()) {
+                Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getQueryParam("account"));
+                if (user.isPresent()) {
+                    LOG.debug("user Info : {}", user.get().getAccount());
+                } else {
+                    LOG.error("없는 사용자입니다");
+                }
+            }
+
             httpResponse.transfer(httpRequest.getUrl());
+
         } catch (IOException exception) {
-            log.error("Exception stream", exception);
+            LOG.error("Exception stream", exception);
         } finally {
             close();
         }
@@ -46,7 +60,7 @@ public class RequestHandler implements Runnable {
         try {
             connection.close();
         } catch (IOException exception) {
-            log.error("Exception closing socket", exception);
+            LOG.error("Exception closing socket", exception);
         }
     }
 }

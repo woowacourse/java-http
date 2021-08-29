@@ -67,4 +67,8 @@ public class RequestLine {
     public String getHttpVersion() {
         return httpVersion;
     }
+
+    public boolean isQueryParamsEmpty() {
+        return queryParams.isEmpty();
+    }
 }

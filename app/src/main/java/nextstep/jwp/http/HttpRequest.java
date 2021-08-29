@@ -30,6 +30,14 @@ public class HttpRequest {
         return requestLine.getUrl();
     }
 
+    public String getQueryParam(final String key) {
+        return requestLine.getQueryParam(key);
+    }
+
+    public boolean isQueryParamsEmpty(){
+        return requestLine.isQueryParamsEmpty();
+    }
+
     public String getHttpVersion() {
         return requestLine.getHttpVersion();
     }

@@ -27,6 +27,12 @@ public class HttpResponse {
 
     public void transfer(final String url) throws IOException {
         LOGGER.debug("url : {}", url);
+
+        // favicon 오류 보기싫어서 일단 예외처리
+        if (url.endsWith("ico")) {
+            return;
+        }
+
         setContentType(url);
 
         String responseBody;
@@ -50,7 +56,7 @@ public class HttpResponse {
             headers.put("Content-Type: application/javascript");
         } else if (url.endsWith("ico")) {
             headers.put("Content-Type: image/x-icon");
-        } else{
+        } else {
             headers.put("Content-Type: text/html;charset=utf-8");
         }
     }

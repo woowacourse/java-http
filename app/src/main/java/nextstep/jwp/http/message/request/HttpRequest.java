@@ -2,6 +2,7 @@ package nextstep.jwp.http.message.request;
 
 import java.util.Optional;
 import nextstep.jwp.http.message.element.Body;
+import nextstep.jwp.http.message.element.Cookie;
 import nextstep.jwp.http.message.element.Headers;
 import nextstep.jwp.http.message.element.HttpVersion;
 import nextstep.jwp.http.message.request.request_line.HttpMethod;
@@ -38,5 +39,9 @@ public class HttpRequest {
 
     public Body getBody() {
         return body;
+    }
+
+    public Cookie getCookie() {
+        return headers.getCookie();
     }
 }

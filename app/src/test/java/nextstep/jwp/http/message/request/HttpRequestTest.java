@@ -41,4 +41,9 @@ class HttpRequestTest {
         HttpPath resourcePath = httpRequest.getPath();
         assertThat(resourcePath.getUri()).isEqualTo("/test");
     }
+
+    @Test
+    void getCookie() {
+        assertThat(httpRequest.getCookie()).isNotNull();
+    }
 }

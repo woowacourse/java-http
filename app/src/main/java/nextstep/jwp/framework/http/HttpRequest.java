@@ -1,10 +1,10 @@
 package nextstep.jwp.framework.http;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
-import nextstep.jwp.framework.http.formatter.LineFormatter;
+import nextstep.jwp.framework.http.formatter.HttpFormatter;
 import nextstep.jwp.framework.http.formatter.RequestLineFormatter;
 
 public class HttpRequest implements HttpMessage {
@@ -19,6 +19,10 @@ public class HttpRequest implements HttpMessage {
         this.requestLine = requestLine;
         this.httpHeaders = httpHeaders;
         this.requestBody = requestBody;
+    }
+
+    public static HttpRequest from(InputStream inputStream) throws IOException {
+        return new HttpRequestParser(inputStream).parseRequest();
     }
 
     public HttpMethod getMethod() {
@@ -54,11 +58,11 @@ public class HttpRequest implements HttpMessage {
                                                                  .overwrite(EMPTY)
                                                                  .build();
 
-        LineFormatter lineFormatter = new RequestLineFormatter(httpRequest);
+        HttpFormatter httpFormatter = new RequestLineFormatter(httpRequest);
         StringBuilder stringBuilder = new StringBuilder();
-        while (lineFormatter.canRead()) {
-            stringBuilder.append(lineFormatter.transform());
-            lineFormatter = lineFormatter.convertNextFormatter();
+        while (httpFormatter.canRead()) {
+            stringBuilder.append(httpFormatter.transform());
+            httpFormatter = httpFormatter.convertNextFormatter();
         }
         return stringBuilder.toString();
     }
@@ -96,12 +100,8 @@ public class HttpRequest implements HttpMessage {
             return this;
         }
 
-        public Builder header(String name, String... values) {
-            return header(name, Arrays.asList(values));
-        }
-
-        public Builder header(String name, List<String> values) {
-            this.httpHeaders.addHeader(name, values);
+        public Builder header(String name, String value) {
+            this.httpHeaders.addHeader(name, value);
             return this;
         }
 
@@ -124,13 +124,21 @@ public class HttpRequest implements HttpMessage {
 
         public Builder copy(HttpRequest httpRequest) {
             requestLine(httpRequest.requestLine);
-            httpHeaders(httpRequest.httpHeaders);
+            httpHeaders(new HttpHeaders(httpRequest.httpHeaders));
             overwrite(httpRequest.requestBody);
             return this;
         }
 
         public HttpRequest build() {
             return new HttpRequest(requestLine, httpHeaders, requestBody.toString());
+        }
+
+        public boolean hasHeader(String headerName) {
+            return this.httpHeaders.contains(headerName);
+        }
+
+        public String getHeaderValue(String headerName) {
+            return this.httpHeaders.get(headerName);
         }
     }
 }

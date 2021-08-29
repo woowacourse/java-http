@@ -5,32 +5,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import nextstep.jwp.framework.http.parser.LineParser;
+import nextstep.jwp.framework.http.parser.HttpParser;
 import nextstep.jwp.framework.http.parser.RequestLineParser;
 
 public class HttpRequestParser {
 
-    private final BufferedReader bufferedReader;
-    private LineParser lineParser;
+    private final BufferedReader reader;
 
     public HttpRequestParser(InputStream inputStream) {
-        this(new BufferedReader(new InputStreamReader(inputStream)), new RequestLineParser());
-    }
-
-    public HttpRequestParser(BufferedReader bufferedReader, LineParser lineParser) {
-        this.bufferedReader = bufferedReader;
-        this.lineParser = lineParser;
+        this.reader = new BufferedReader(new InputStreamReader(inputStream));
     }
 
     public HttpRequest parseRequest() throws IOException {
-        if (!bufferedReader.ready()) {
-            throw new IllegalArgumentException("Request 가 비어있습니다.");
+        HttpParser httpParser = new RequestLineParser(reader);
+        while (httpParser.isParsing()) {
+            httpParser = httpParser.parse();
         }
 
-        while (lineParser.canParse() && bufferedReader.ready()) {
-            lineParser = lineParser.parseLine(bufferedReader.readLine());
-        }
-
-        return lineParser.buildRequest();
+        return httpParser.buildRequest();
     }
 }

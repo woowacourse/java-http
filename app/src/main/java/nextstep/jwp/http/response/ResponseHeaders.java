@@ -4,6 +4,7 @@ import nextstep.jwp.http.response.type.ContentType;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
 public class ResponseHeaders {
     private Map<String, String> headers = new LinkedHashMap<>();
@@ -26,15 +27,12 @@ public class ResponseHeaders {
     }
 
     private String concatHeaders() {
-        StringBuilder builder = new StringBuilder();
+        StringJoiner joiner = new StringJoiner(" \r\n", "", " \r\n");
         for (Map.Entry<String, String> entry : headers.entrySet()) {
             String key = entry.getKey();
             String value = headers.get(key);
-            builder.append(key)
-                    .append(": ")
-                    .append(value)
-                    .append(" \r\n");
+            joiner.add(key + ": " + value);
         }
-        return builder.toString();
+        return joiner.toString();
     }
 }

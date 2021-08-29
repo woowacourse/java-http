@@ -52,4 +52,12 @@ public class HttpHeaders {
     public void setContentLength(int length) {
         headers.put(CONTENT_LENGTH.value(), String.valueOf(length));
     }
+
+    public int getContentLength() {
+        return Integer.parseInt(headers.get(CONTENT_LENGTH.value()));
+    }
+
+    public boolean containsKey(HttpHeaderType type) {
+        return headers.containsKey(type.value());
+    }
 }

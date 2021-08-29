@@ -17,7 +17,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        response.forwardBody(FileUtils.getAllResponseBodies("/register.html"));
+        response.forwardBody(FileUtils.readFileOfUrl("/register.html"));
     }
 
     @Override

@@ -29,7 +29,7 @@ public class HttpResponse {
     }
 
     public void forward(String url) throws IOException {
-        String body = FileUtils.getAllResponseBodies(url);
+        String body = FileUtils.readFileOfUrl(url);
         LOG.debug("Response header : url : {}", url);
 
         headers.addProtocol(OK);

@@ -4,9 +4,9 @@ import nextstep.jwp.handler.Model;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpStatus;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
 public class View {
@@ -17,13 +17,13 @@ public class View {
         this.content = content;
     }
 
-    public static View of(String content) throws IOException {
+    public static View asString(String content) {
         return new View(content);
     }
 
-    public static View of(Path filePath) throws IOException {
-        List<String> fileContents = Files.readAllLines(filePath);
-        return new View(String.join("\n", fileContents + "\n"));
+    public static View asFile(File file) throws IOException {
+        List<String> lines = Files.readAllLines(file.toPath());
+        return new View(String.join("\n", lines) + "\n");
     }
 
     public static View empty() {

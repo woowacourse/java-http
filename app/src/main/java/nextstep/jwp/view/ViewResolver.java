@@ -1,10 +1,7 @@
 package nextstep.jwp.view;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class ViewResolver {
 
@@ -18,13 +15,12 @@ public class ViewResolver {
             }
 
             if(viewName.equals("/")){
-                return View.of("Hello world!");
+                return View.asString("Hello world!");
             }
 
             // TODO :: Config 분리
             final URL resourceUrl = getClass().getResource("/static" + viewName);
-            final Path filePath = new File(resourceUrl.getFile()).toPath();
-            return View.of(filePath);
+            return View.asFile(new File(resourceUrl.getFile()));
         } catch (Exception e) {
             e.printStackTrace();
             throw new IllegalArgumentException("view not found");

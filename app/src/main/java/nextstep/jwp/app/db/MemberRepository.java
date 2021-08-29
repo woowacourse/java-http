@@ -11,7 +11,7 @@ import nextstep.jwp.core.annotation.Component;
 @Component
 public class MemberRepository {
 
-    private static long memberId = 0;
+    private long memberId = 0;
     private final Map<String, Member> database = new ConcurrentHashMap<>();
 
     public MemberRepository() {

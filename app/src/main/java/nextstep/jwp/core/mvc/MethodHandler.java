@@ -1,10 +1,13 @@
 package nextstep.jwp.core.mvc;
 
+import static nextstep.jwp.webserver.response.ContentType.*;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import nextstep.jwp.core.mvc.mapping.RequestMapping;
 import nextstep.jwp.webserver.request.HttpMethod;
 import nextstep.jwp.webserver.request.HttpRequest;
+import nextstep.jwp.webserver.response.ContentType;
 import nextstep.jwp.webserver.response.HttpResponse;
 
 public class MethodHandler extends ResolverHandler {
@@ -51,6 +54,7 @@ public class MethodHandler extends ResolverHandler {
                 httpResponse.addRedirectUrl(redirectUrl);
                 return new ModelAndView(redirectUrl);
             }
+            httpResponse.addHeader("Content-Type", HTML.contentType());
             return new ModelAndView(viewName, httpRequest.httpUrl());
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();

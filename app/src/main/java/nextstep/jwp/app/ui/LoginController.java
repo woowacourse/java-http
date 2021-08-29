@@ -22,6 +22,11 @@ public class LoginController {
 
     @RequestMapping(method = HttpMethod.GET, path = "/login")
     public String loginPage(HttpRequest httpRequest, HttpResponse httpResponse) {
+        return "login.html";
+    }
+
+    @RequestMapping(method = HttpMethod.POST, path = "/login")
+    public String login(HttpRequest httpRequest, HttpResponse httpResponse) {
         final String account = httpRequest.getAttribute("account");
         final String password = httpRequest.getAttribute("password");
         if(account == null || password == null) return "login.html";

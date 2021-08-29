@@ -1,4 +1,4 @@
-package nextstep.jwp.core.mvc.mapping;
+package nextstep.jwp.core.exception;
 
 public class NotFoundHandlerException extends RuntimeException{
 

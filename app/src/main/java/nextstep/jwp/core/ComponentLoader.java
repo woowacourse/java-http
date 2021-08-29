@@ -51,7 +51,7 @@ public class ComponentLoader {
                     return new BeanDefinition(tClass, target, tClass.getName());
                 }
             }
-            final T target = tClass.getConstructor(null).newInstance();
+            final T target = tClass.getConstructor((Class<?>[]) null).newInstance();
             return new BeanDefinition(tClass, target, tClass.getName());
         } catch (Exception e) {
             e.printStackTrace();

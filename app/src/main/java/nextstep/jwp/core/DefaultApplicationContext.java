@@ -5,7 +5,7 @@ import java.util.List;
 
 public class DefaultApplicationContext implements ApplicationContext {
 
-    private BeanContainer beanContainer;
+    private final BeanContainer beanContainer;
 
     public DefaultApplicationContext(String basePackage) {
         this.beanContainer = new BeanContainer();

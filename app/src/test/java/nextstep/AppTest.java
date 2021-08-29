@@ -1,9 +1,13 @@
 package nextstep;
 
+import static nextstep.jwp.webserver.response.ContentType.*;
+import static org.assertj.core.api.Assertions.*;
+
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.core.mvc.FrontHandler;
+import nextstep.jwp.webserver.response.ContentType;
 import nextstep.jwp.webserver.response.StatusCode;
 import nextstep.mockweb.request.MockRequest;
 import nextstep.mockweb.result.MockResult;
@@ -26,7 +30,8 @@ public class AppTest {
 
         // then
         페이지_비교(result.body(), page);
-        Assertions.assertThat(result.statusCode()).isEqualTo(StatusCode.OK);
+        assertThat(result.statusCode()).isEqualTo(StatusCode.OK);
+        assertThat(result.headerValue("Content-Type")).isEqualTo(HTML.contentType());
     }
 
     @Test
@@ -36,8 +41,8 @@ public class AppTest {
                 MockRequest.get("/login?account=nabom&password=nabom")
                         .result();
 
-        Assertions.assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
-        Assertions.assertThat(result.headerValue("Location")).isEqualTo("/");
+        assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
+        assertThat(result.headerValue("Location")).isEqualTo("/");
     }
 
     @Test
@@ -47,8 +52,8 @@ public class AppTest {
                 MockRequest.get("/login?account=nabom&password=nabom12")
                         .result();
 
-        Assertions.assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
-        Assertions.assertThat(result.headerValue("Location")).isEqualTo("/unauthorized");
+        assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
+        assertThat(result.headerValue("Location")).isEqualTo("/unauthorized");
     }
 
     private void 페이지_비교(String body, String path) {

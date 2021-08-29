@@ -31,7 +31,6 @@ public class MockResult {
             if(lineCount == HEADER_ORDER) {
                 if (response[i].equals("")) {
                     lineCount++;
-                    i++;
                 } else {
                     responseHeader.addHeader(response[i]);
                 }

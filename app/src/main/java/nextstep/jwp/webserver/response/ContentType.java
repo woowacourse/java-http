@@ -24,4 +24,12 @@ public enum ContentType {
                 .orElseThrow(PageNotFoundException::new)
                 .contentType;
     }
+
+    public String contentType() {
+        return contentType;
+    }
+
+    public String extensionType() {
+        return extensionType;
+    }
 }

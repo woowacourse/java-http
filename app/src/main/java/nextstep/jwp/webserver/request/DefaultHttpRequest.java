@@ -29,26 +29,26 @@ public class DefaultHttpRequest implements HttpRequest {
     }
 
     private RequestHeader parseHeader(BufferedReader br) throws IOException {
-        final RequestHeader requestHeader = new RequestHeader();
+        final RequestHeader newHeader = new RequestHeader();
         String line;
         while (!(line = br.readLine()).equals("")) {
-            requestHeader.add(line);
+            newHeader.add(line);
         }
-        return requestHeader;
+        return newHeader;
     }
 
     private RequestParams parseParams(BufferedReader br) throws IOException {
-        RequestParams requestParams = new RequestParams();
-        requestParams.addParams(requestLine.queryString());
+        RequestParams newParams = new RequestParams();
+        newParams.addParams(requestLine.queryString());
         char[] body = readBody(br);
 
         if (isFormData(requestHeader.get(CONTENT_TYPE))) {
-            requestParams.addParams(String.copyValueOf(body));
-            return requestParams;
+            newParams.addParams(String.copyValueOf(body));
+            return newParams;
         }
 
-        requestParams.addBody(String.copyValueOf(body));
-        return requestParams;
+        newParams.addBody(String.copyValueOf(body));
+        return newParams;
     }
 
     private char[] readBody(BufferedReader br) throws IOException {

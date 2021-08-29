@@ -130,7 +130,7 @@ public class HttpRequest {
             List<String> parsedStatusLine = Arrays.asList(bufferedReader.readLine().split(BLANK));
 
             this.httpProtocol = HttpProtocol.findByName(parsedStatusLine.get(HTTP_PROTOCOL_INDEX));
-            this.method = HttpMethod.of(parsedStatusLine.get(METHOD_INDEX));
+            this.method = HttpMethod.findByName(parsedStatusLine.get(METHOD_INDEX));
 
             String url = parsedStatusLine.get(FILEPATH_INDEX);
             int index = url.indexOf(QUERY_STARTER);
@@ -138,6 +138,7 @@ public class HttpRequest {
             if (index != NOT_FOUND_INDEX) {
                 this.url = url.substring(START, index);
                 this.queryParams = new QueryParser(url.substring(index + 1)).queryParams();
+                return;
             }
 
             this.url = url;

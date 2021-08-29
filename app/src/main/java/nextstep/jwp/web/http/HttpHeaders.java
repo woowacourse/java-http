@@ -38,7 +38,7 @@ public class HttpHeaders {
     }
 
     public int contentLength() {
-        String contentLength = this.headers.get("Content-Length").toValuesString();
+        String contentLength = get("Content-Length").toValuesString();
         try {
             return Integer.parseInt(contentLength);
         } catch (NumberFormatException e) {

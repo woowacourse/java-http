@@ -60,7 +60,7 @@ public class RequestHandler implements Runnable {
                 loginController.doPost(httpRequest, httpResponse);
             }
 
-            if (url.equals("/registerz") && httpRequest.method() == HttpMethod.POST) {
+            if (url.equals("/register") && httpRequest.method() == HttpMethod.POST) {
                 RegisterController registerController = new RegisterController();
                 registerController.doPost(httpRequest, httpResponse);
             }

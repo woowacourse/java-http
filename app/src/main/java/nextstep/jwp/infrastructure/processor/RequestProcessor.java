@@ -6,5 +6,5 @@ import java.io.OutputStream;
 
 public interface RequestProcessor {
 
-    public String processResponse(CustomHttpRequest request, OutputStream outputStream);
+    String processResponse(CustomHttpRequest request, OutputStream outputStream);
 }

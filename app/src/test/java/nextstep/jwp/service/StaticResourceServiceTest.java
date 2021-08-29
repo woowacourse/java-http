@@ -1,11 +1,13 @@
 package nextstep.jwp.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.exception.StaticResourceNotFoundException;
 import nextstep.jwp.model.StaticResource;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -34,19 +36,15 @@ class StaticResourceServiceTest {
             assertThat(resource.getContent()).isEqualTo(expectContent);
         }
 
-        @DisplayName("실패하면 404.html 파일을 반환한다.")
+        @DisplayName("실패하면 예외를 발생시킨다.")
         @Test
-        void ifFailReturnNotFoundPage() throws IOException {
+        void ifFailReturnNotFoundException() {
             // given
-            String path = "/noneFilePath";
+            String path = "/noneFilePath.html";
 
-            String notFoundPageContent = readNotFoundPageContent();
-
-            // when
-            StaticResource resource = staticResourceService.findByPath(path);
-
-            // then
-            assertThat(resource.getContent()).isEqualTo(notFoundPageContent);
+            // when, then
+            assertThatThrownBy(() -> staticResourceService.findByPath(path))
+                .isExactlyInstanceOf(StaticResourceNotFoundException.class);
         }
 
         private String readFileContent(String path) throws IOException {
@@ -54,10 +52,6 @@ class StaticResourceServiceTest {
             File file = new File(url.getFile());
 
             return new String(Files.readAllBytes(file.toPath()));
-        }
-
-        private String readNotFoundPageContent() throws IOException {
-            return readFileContent("/404.html");
         }
     }
 }

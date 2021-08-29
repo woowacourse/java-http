@@ -69,7 +69,7 @@ public class RequestHandler implements Runnable {
                 if ("POST".equals(extractedMethod)) {
                     try {
                         final String requestBody = extractRequestBody(bufferedReader, httpRequestHeaders);
-                        loginRequest(extractRequestBody(bufferedReader, httpRequestHeaders));
+                        loginRequest(requestBody);
                         writeOutputStream(outputStream, http302Response("/index.html"));
                     } catch (RuntimeException exception) {
                         writeOutputStream(outputStream, http302Response("/401.html"));

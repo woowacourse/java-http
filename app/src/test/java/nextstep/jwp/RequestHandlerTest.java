@@ -91,6 +91,28 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @Test
+    void register() throws IOException {
+        // given
+        final String httpRequest= request("GET", "/register");
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: "+body.getBytes().length+" \r\n" +
+                "\r\n"+
+                body;
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
     private static String request(String method, String url){
         return String.join("\r\n",
                 method+" "+url+" HTTP/1.1 ",

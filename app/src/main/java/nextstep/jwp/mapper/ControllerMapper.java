@@ -6,6 +6,7 @@ import nextstep.jwp.exception.IncorrectMapperException;
 import nextstep.jwp.handler.IController;
 import nextstep.jwp.handler.LoginController;
 import nextstep.jwp.handler.ModelAndView;
+import nextstep.jwp.handler.RegisterController;
 import nextstep.jwp.http.request.RequestLine;
 import nextstep.jwp.http.request.RequestUriPath;
 
@@ -14,7 +15,10 @@ public class ControllerMapper implements HandlerMapper {
     private final List<IController> controllers;
 
     public ControllerMapper() {
-        controllers = Arrays.asList(new LoginController());
+        controllers = Arrays.asList(
+                new LoginController(),
+                new RegisterController()
+        );
     }
 
     @Override

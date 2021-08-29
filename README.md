@@ -15,8 +15,8 @@
 - [x] CSS 지원하기
 - [x] 404.html 연결
 - [x] favicon.ico 연결
-- [ ] 테스트 코드 작성
-  - [ ] RequestHandler 테스트 코드 수정
+- [x] 테스트 코드 작성
+  - [x] RequestHandler 테스트 코드 수정
   - [x] 컨트롤러 테스트 코드 
     - [x] LoginController 테스트 코드
     - [x] RegisterController 테스트 코드

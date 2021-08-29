@@ -27,15 +27,19 @@ public class RequestUri {
 
     public static RequestUri parse(String uri) {
         if (uri.contains("?")) {
-            String[] splitedUri = uri.split("\\?");
-
-            String parsedUri = splitedUri[URI_INDEX];
-            Map<String, String> queryParameters = getParsedQueryParameters(splitedUri[QUERY_INDEX]);
-
-            return new RequestUri(parsedUri, queryParameters);
+            return parseRequestUriWithQueryParam(uri);
         }
 
-        return new RequestUri(uri, EMPTY_PARAMETERS);
+        return parseUriWithOutQueryParam(uri);
+    }
+
+    private static RequestUri parseRequestUriWithQueryParam(String uri) {
+        String[] splitedUri = uri.split("\\?");
+
+        String parsedUri = splitedUri[URI_INDEX];
+        Map<String, String> queryParameters = getParsedQueryParameters(splitedUri[QUERY_INDEX]);
+
+        return new RequestUri(parsedUri, queryParameters);
     }
 
     private static Map<String, String> getParsedQueryParameters(String uri) {
@@ -51,6 +55,14 @@ public class RequestUri {
         }
 
         return querys;
+    }
+
+    private static RequestUri parseUriWithOutQueryParam(String uri) {
+        if (uri.equals("/")) {
+            return new RequestUri("/index.html", EMPTY_PARAMETERS);
+        }
+
+        return new RequestUri(uri, EMPTY_PARAMETERS);
     }
 
     private void validateNull(String value) {

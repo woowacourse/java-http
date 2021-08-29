@@ -29,6 +29,14 @@ class RequestUriTest {
             assertThatThrownBy(() -> requestUri.getQueryParameter("query"))
                 .isExactlyInstanceOf(EmptyQueryParametersException.class);
         }
+
+        @DisplayName("루트 디렉토리(/)가 요청될 경우 /index.html로 치환한다.")
+        @Test
+        void transferRootDirectory() {
+            RequestUri requestUri = RequestUri.parse("/");
+
+            assertThat(requestUri.getValue()).isEqualTo("/index.html");
+        }
     }
 
     @DisplayName("QueryParam을 포함한 URI 이면")

@@ -11,17 +11,20 @@ import java.util.Optional;
 public class UserService {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
+    public static final String ACCOUNT = "account";
+    public static final String PASSWORD = "password";
+    public static final String EMAIL = "email";
 
     public boolean isExistUser(HttpRequest request) {
         return InMemoryUserRepository.existUserByAccountAndPassword(
-                request.getParameter("account"),
-                request.getParameter("password"));
+                request.getParameter(ACCOUNT),
+                request.getParameter(PASSWORD));
     }
 
     public void saveUser(HttpRequest request) {
-        User newUser = new User(request.getParameter("account"),
-                request.getParameter("password"),
-                request.getParameter("email"));
+        User newUser = new User(request.getParameter(ACCOUNT),
+                request.getParameter(PASSWORD),
+                request.getParameter(EMAIL));
         InMemoryUserRepository.save(newUser);
 
         Optional<User> savedUser = findByAccount(request);
@@ -29,6 +32,6 @@ public class UserService {
     }
 
     public Optional<User> findByAccount(HttpRequest request) {
-        return InMemoryUserRepository.findByAccount(request.getParameter("account"));
+        return InMemoryUserRepository.findByAccount(request.getParameter(ACCOUNT));
     }
 }

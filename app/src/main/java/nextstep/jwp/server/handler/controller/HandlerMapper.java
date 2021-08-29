@@ -17,10 +17,12 @@ public class HandlerMapper {
     }
 
     public Controller findController(HttpRequest httpRequest) {
-        return customControllers.stream()
-                .filter(controller -> controller.isSatisfiedBy(httpRequest))
+        Controller controller = customControllers.stream()
+                .filter(customController -> customController.isSatisfiedBy(httpRequest))
                 .findAny()
                 .orElseGet(() -> findStandardController(httpRequest));
+
+        return new StandardController(controller);
     }
 
     private StaticFilesController findStandardController(HttpRequest httpRequest) {

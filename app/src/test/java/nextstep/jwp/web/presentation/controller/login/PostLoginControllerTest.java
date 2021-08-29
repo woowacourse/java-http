@@ -23,8 +23,7 @@ class PostLoginControllerTest {
 
         final Response response = postLoginController.doService(httpRequest);
         assertThat(response.asString()).contains(
-                "302",
-                "JSESSIONID"
+                "302"
         );
     }
 

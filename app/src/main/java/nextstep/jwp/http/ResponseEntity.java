@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.constants.Http;
 
 public class ResponseEntity {
 
@@ -14,7 +15,7 @@ public class ResponseEntity {
     public static class Builder {
         private StatusCode statusCode = StatusCode.OK;
         private String responseBody = "";
-        private String contentType = "html";
+        private String contentType = Http.DEFAULT_CONTENT_TYPE;
 
         private Builder(){
         }
@@ -37,7 +38,7 @@ public class ResponseEntity {
         }
 
         public String build() {
-            return String.join("\r\n",
+            return String.join(Http.EMPTY_LINE,
                     "HTTP/1.1 " + this.statusCode.getStatusCode() + " " + this.statusCode.getStatus() + " ",
                     "Content-Type: text/" + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
@@ -46,19 +47,19 @@ public class ResponseEntity {
         }
 
         private String extractContentType(String uri) {
-            String[] splitByExtension = uri.split("\\.");
+            String[] splitByExtension = uri.split(Http.FILE_EXTENSION_SEPARATOR);
              return splitByExtension[splitByExtension.length - 1];
         }
 
         private String checkFileExtension(String uri) {
-            if (!uri.contains(".")) {
-                uri += ".html";
+            if (!uri.contains(Http.DOT)) {
+                uri += Http.FILE_EXTENSION_HTML;
             }
             return uri;
         }
 
         private String findResource(String uri) throws IOException {
-            final URL resource = getClass().getClassLoader().getResource("static" + uri);
+            final URL resource = getClass().getClassLoader().getResource(Http.DIRECTORY_STATIC + uri);
             return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         }
 

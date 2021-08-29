@@ -2,36 +2,36 @@ package nextstep.jwp.http;
 
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.constants.Http;
+import nextstep.jwp.constants.Query;
+import nextstep.jwp.exception.HttpException;
 
 public class RequestLine {
+    public static final int REQUEST_LINE_SIZE = 3;
+    public static final int METHOD = 0;
+    public static final int URI = 1;
+
     private final String httpMethod;
     private final String uri;
     private final Map<String, String> params;
 
     public RequestLine(String requestLine) {
-        this.httpMethod = extractMethod(requestLine);
-        this.uri = extractUri(requestLine);
+        String[] requests = splitRequestLine(requestLine);
+        this.httpMethod = requests[METHOD];
+        this.uri = requests[URI];
         this.params = new HashMap<>();
     }
 
-    private String extractMethod(String input) {
-        String[] values = input.split(" ");
-        if (values.length < 1) {
-            return "";
+    private String[] splitRequestLine(String requestLine) {
+        String[] requests = requestLine.split(Http.SEPARATOR);
+        if (requests.length < REQUEST_LINE_SIZE) {
+            throw new HttpException("올바르지 않은 http 요청이 들어왔습니다.");
         }
-        return input.split(" ")[0];
-    }
-
-    private String extractUri(String input) {
-        String[] values = input.split(" ");
-        if (values.length < 2) {
-            return "";
-        }
-        return input.split(" ")[1];
+        return requests;
     }
 
     public Boolean isQueryString() {
-        if (uri.contains("?")) {
+        if (uri.contains(Query.QUESTION)) {
             extractQueryString(uri);
             return true;
         }
@@ -39,13 +39,13 @@ public class RequestLine {
     }
 
     private Map<String, String> extractQueryString(String uri) {
-        int index = uri.indexOf("?");
+        int index = uri.indexOf(Query.QUESTION);
         String path = uri.substring(0, index);
         String queryString = uri.substring(index + 1);
-        String[] queries = queryString.split("&");
+        String[] queries = queryString.split(Query.SEPARATOR);
         for (String query : queries) {
-            String[] split = query.split("=");
-            this.params.put(split[0], split[1]);
+            String[] split = query.split(Query.EQUAL);
+            this.params.put(split[Query.KEY], split[Query.VALUE]);
         }
         return this.params;
     }

@@ -15,11 +15,8 @@ public class ResponseHeader extends CommonHttpHeader {
     private final Map<ResponseHeaderType, String> headers = new LinkedHashMap<>();
 
     public void add(ResponseHeaderType type, String value) {
-        try {
-            headers.put(type, value);
-        } finally {
-            LOG.debug("Response header : {}: {}", type.value(), value);
-        }
+        headers.put(type, value);
+        LOG.debug("Response header : {}: {}", type.value(), value);
     }
 
     @Override

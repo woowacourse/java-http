@@ -12,12 +12,12 @@ class ResponseLineTest {
     @Test
     void ok() {
         ResponseLine responseLine = new ResponseLine(OK);
-        assertThat(responseLine.toString()).isEqualTo("HTTP/1.1 200 OK ");
+        assertThat(responseLine.toString()).hasToString("HTTP/1.1 200 OK ");
     }
 
     @Test
     void redirect() {
         ResponseLine responseLine = new ResponseLine(REDIRECT);
-        assertThat(responseLine.toString()).isEqualTo("HTTP/1.1 302 Redirect ");
+        assertThat(responseLine.toString()).hasToString("HTTP/1.1 302 Redirect ");
     }
 }

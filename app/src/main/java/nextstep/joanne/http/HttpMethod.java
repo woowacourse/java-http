@@ -14,7 +14,7 @@ public enum HttpMethod {
         this.method = method;
     }
 
-    public boolean sameWith(String other) {
-        return Objects.equals(method, other);
+    public boolean sameWith(HttpMethod other) {
+        return Objects.equals(this, other);
     }
 }

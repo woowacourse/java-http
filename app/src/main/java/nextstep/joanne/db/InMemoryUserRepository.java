@@ -8,7 +8,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryUserRepository {
-    private static long userId;
+    private static long userId = 0;
     private static final Map<String, User> database = new ConcurrentHashMap<>();
 
     private InMemoryUserRepository() {

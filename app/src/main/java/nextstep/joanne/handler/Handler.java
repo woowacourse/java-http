@@ -1,6 +1,7 @@
 package nextstep.joanne.handler;
 
 import nextstep.joanne.db.InMemoryUserRepository;
+import nextstep.joanne.http.HttpMethod;
 import nextstep.joanne.http.request.HttpRequest;
 import nextstep.joanne.http.response.HttpResponse;
 import nextstep.joanne.http.HttpStatus;
@@ -19,7 +20,7 @@ public class Handler {
     public HttpResponse handle() throws IOException {
 
         if (httpRequest.uriContains("/register")) {
-            if (httpRequest.isGet()) {
+            if (httpRequest.isEqualsMethod(HttpMethod.GET)) {
                 return HttpRequestResponseConverter.convertToHttpResponse(
                         HttpStatus.OK,
                         httpRequest.resourceUri(),
@@ -27,7 +28,7 @@ public class Handler {
                 );
             }
 
-            if (httpRequest.isPost()) {
+            if (httpRequest.isEqualsMethod(HttpMethod.POST)) {
                 registerRequest();
                 return HttpRequestResponseConverter.convertToHttpResponse(
                         HttpStatus.FOUND,
@@ -38,7 +39,7 @@ public class Handler {
         }
 
         if (httpRequest.uriContains("/login")) {
-            if (httpRequest.isGet()) {
+            if (httpRequest.isEqualsMethod(HttpMethod.GET)) {
                 return HttpRequestResponseConverter.convertToHttpResponse(
                         HttpStatus.OK,
                         httpRequest.resourceUri(),
@@ -46,7 +47,7 @@ public class Handler {
                 );
             }
 
-            if (httpRequest.isPost()) {
+            if (httpRequest.isEqualsMethod(HttpMethod.POST)) {
                 try {
                     loginRequest(httpRequest.getFromRequestBody("account"),
                             httpRequest.getFromRequestBody("password"));

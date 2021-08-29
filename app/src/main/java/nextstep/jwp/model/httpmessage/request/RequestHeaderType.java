@@ -6,8 +6,7 @@ public enum RequestHeaderType {
     HOST("Host"),
     CONNECTION("Connection"),
     ACCEPT("Accept"),
-    COOKIE("Cookie"),
-    AUTHORIZATION("Authorization");
+    COOKIE("Cookie");
 
     private final String value;
 
@@ -24,7 +23,7 @@ public enum RequestHeaderType {
         return Arrays.stream(values())
                 .filter(type -> type.value.equals(value))
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("Not found request Header type (input : " + value + ")"));
+                .get(); // 모든 헤더를 저장하지 않아 일단 임시로 get()
     }
 
     public String value() {

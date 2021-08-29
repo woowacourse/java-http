@@ -4,7 +4,6 @@ import nextstep.jwp.model.httpmessage.common.CommonHttpHeader;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.StringJoiner;
 
 public class RequestHeader extends CommonHttpHeader {
     private final Map<RequestHeaderType, String> headers = new LinkedHashMap<>();
@@ -12,15 +11,11 @@ public class RequestHeader extends CommonHttpHeader {
     public void add(String type, String value) {
         if (RequestHeaderType.contains(type)) {
             headers.put(RequestHeaderType.of(type), value);
-            return;
         }
 
         if (commonHeaderContains(type)) {
             super.addHeader(type, value);
-            return;
         }
-
-        throw new IllegalStateException("해당 요청 헤더 타입이 존재하지 않습니다. (입력 : " + type + ")");
     }
 
     @Override

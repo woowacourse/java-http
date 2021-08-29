@@ -1,11 +1,11 @@
-package nextstep.jwp.model.httpmessage.response;
+package nextstep.jwp.model;
 
+import nextstep.jwp.model.httpmessage.response.ResponseLine;
 import org.junit.jupiter.api.Test;
 
 import static nextstep.jwp.model.httpmessage.response.HttpStatus.OK;
 import static nextstep.jwp.model.httpmessage.response.HttpStatus.REDIRECT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class ResponseLineTest {
 

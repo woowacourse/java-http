@@ -1,11 +1,10 @@
-package nextstep.jwp;
+package nextstep.jwp.http;
 
-import nextstep.jwp.http.HttpResponseBuilder;
 import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 import nextstep.jwp.http.message.request.RequestHeader;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
-import nextstep.jwp.utils.HttpParseUtils;
+import nextstep.jwp.http.utils.HttpParseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

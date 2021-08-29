@@ -1,7 +1,8 @@
 package nextstep.jwp.http;
 
-import nextstep.jwp.controller.Controller;
+import nextstep.jwp.http.controller.Controller;
 import nextstep.jwp.controller.ControllerAdvice;
+import nextstep.jwp.http.common.HttpPath;
 import nextstep.jwp.http.mapper.ControllerMapper;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 import nextstep.jwp.http.message.response.HttpResponseMessage;

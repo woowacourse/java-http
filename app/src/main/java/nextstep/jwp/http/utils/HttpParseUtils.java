@@ -1,7 +1,8 @@
-package nextstep.jwp.utils;
+package nextstep.jwp.http.utils;
 
 import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.http.message.request.RequestHeader;
+import nextstep.jwp.utils.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;

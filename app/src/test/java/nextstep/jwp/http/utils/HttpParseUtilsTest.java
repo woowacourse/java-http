@@ -1,7 +1,8 @@
-package nextstep.jwp.utils;
+package nextstep.jwp.http.utils;
 
 import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.http.message.request.RequestHeader;
+import nextstep.jwp.http.utils.HttpParseUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

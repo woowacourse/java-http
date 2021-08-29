@@ -1,11 +1,12 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.http.controller.AbstractController;
 import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
 import nextstep.jwp.model.User;
-import nextstep.jwp.utils.HttpParseUtils;
+import nextstep.jwp.http.utils.HttpParseUtils;
 
 import java.util.Map;
 

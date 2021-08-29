@@ -1,6 +1,6 @@
 package nextstep.jwp.http.message.request;
 
-import nextstep.jwp.http.HttpPath;
+import nextstep.jwp.http.common.HttpPath;
 import nextstep.jwp.http.message.HttpMessage;
 import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.utils.StringUtils;

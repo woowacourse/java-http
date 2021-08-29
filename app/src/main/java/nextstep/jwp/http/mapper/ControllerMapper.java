@@ -1,15 +1,15 @@
 package nextstep.jwp.http.mapper;
 
-import nextstep.jwp.controller.Controller;
+import nextstep.jwp.http.controller.Controller;
 import nextstep.jwp.controller.HelloController;
 import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.RedirectController;
+import nextstep.jwp.http.controller.RedirectController;
 import nextstep.jwp.controller.RegisterController;
-import nextstep.jwp.controller.staticpath.CssController;
-import nextstep.jwp.controller.staticpath.HtmlController;
-import nextstep.jwp.controller.staticpath.JavaScriptController;
-import nextstep.jwp.exception.HttpUriNotFoundException;
-import nextstep.jwp.http.HttpPath;
+import nextstep.jwp.http.controller.stationary.CssController;
+import nextstep.jwp.http.controller.stationary.HtmlController;
+import nextstep.jwp.http.controller.stationary.JavaScriptController;
+import nextstep.jwp.http.exception.HttpUriNotFoundException;
+import nextstep.jwp.http.common.HttpPath;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 
 import java.util.HashMap;

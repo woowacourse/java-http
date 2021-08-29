@@ -1,5 +1,7 @@
-package nextstep.jwp;
+package nextstep.jwp.http;
 
+import nextstep.jwp.MockSocket;
+import nextstep.jwp.http.RequestHandler;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

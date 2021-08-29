@@ -1,6 +1,6 @@
 package nextstep.jwp.http.message.request;
 
-import nextstep.jwp.http.HttpMethod;
+import nextstep.jwp.http.common.HttpMethod;
 import nextstep.jwp.http.message.HeaderFields;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,13 +1,13 @@
-package nextstep.jwp.controller.staticpath;
+package nextstep.jwp.http.controller.stationary;
 
-import nextstep.jwp.exception.StaticFileNotFoundException;
-import nextstep.jwp.http.HttpStatusCode;
+import nextstep.jwp.http.exception.StaticFileNotFoundException;
+import nextstep.jwp.http.common.HttpStatusCode;
 import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
 
 import java.util.function.Supplier;
 
-public class JavaScriptController extends StaticResourceController {
+public class JavaScriptController extends StationaryController {
 
     @Override
     protected Supplier<? extends RuntimeException> supplyExceptionHandler(String filePath) {

@@ -1,12 +1,12 @@
 package nextstep.jwp.http.mapper;
 
-import nextstep.jwp.controller.Controller;
+import nextstep.jwp.http.controller.Controller;
 import nextstep.jwp.controller.HelloController;
-import nextstep.jwp.controller.RedirectController;
-import nextstep.jwp.controller.staticpath.CssController;
-import nextstep.jwp.controller.staticpath.HtmlController;
-import nextstep.jwp.controller.staticpath.JavaScriptController;
-import nextstep.jwp.exception.HttpUriNotFoundException;
+import nextstep.jwp.http.controller.RedirectController;
+import nextstep.jwp.http.controller.stationary.CssController;
+import nextstep.jwp.http.controller.stationary.HtmlController;
+import nextstep.jwp.http.controller.stationary.JavaScriptController;
+import nextstep.jwp.http.exception.HttpUriNotFoundException;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,7 +1,7 @@
 package nextstep.jwp.http.message.request;
 
-import nextstep.jwp.http.HttpMethod;
-import nextstep.jwp.http.HttpPath;
+import nextstep.jwp.http.common.HttpMethod;
+import nextstep.jwp.http.common.HttpPath;
 import nextstep.jwp.http.exception.HttpMessageConvertFailureException;
 import nextstep.jwp.http.message.HeaderFields;
 import nextstep.jwp.http.message.MessageHeader;

@@ -1,6 +1,6 @@
 package nextstep.jwp.http.message.response;
 
-import nextstep.jwp.http.HttpStatusCode;
+import nextstep.jwp.http.common.HttpStatusCode;
 import nextstep.jwp.http.message.HeaderFields;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

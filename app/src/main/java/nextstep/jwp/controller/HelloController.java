@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.HttpStatusCode;
+import nextstep.jwp.http.common.HttpStatusCode;
+import nextstep.jwp.http.controller.AbstractController;
 import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 import nextstep.jwp.http.message.response.HttpResponseMessage;

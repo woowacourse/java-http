@@ -1,9 +1,9 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.exception.HttpUriNotFoundException;
-import nextstep.jwp.exception.StaticFileNotFoundException;
+import nextstep.jwp.http.exception.HttpUriNotFoundException;
+import nextstep.jwp.http.exception.StaticFileNotFoundException;
 import nextstep.jwp.exception.UnauthorizedException;
-import nextstep.jwp.http.HttpStatusCode;
+import nextstep.jwp.http.common.HttpStatusCode;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
 
 import java.util.HashMap;

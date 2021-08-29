@@ -1,6 +1,6 @@
-package nextstep.jwp.controller.staticpath;
+package nextstep.jwp.http.controller.stationary;
 
-import nextstep.jwp.controller.AbstractController;
+import nextstep.jwp.http.controller.AbstractController;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 import nextstep.jwp.http.message.request.RequestHeader;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
@@ -13,7 +13,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public abstract class StaticResourceController extends AbstractController {
+public abstract class StationaryController extends AbstractController {
 
     private static final String DEFAULT_PATH = "./static";
 

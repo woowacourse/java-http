@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.common;
 
 import java.util.AbstractMap;
 import java.util.Arrays;

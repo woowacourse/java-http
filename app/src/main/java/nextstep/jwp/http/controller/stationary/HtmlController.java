@@ -1,17 +1,17 @@
-package nextstep.jwp.controller.staticpath;
+package nextstep.jwp.http.controller.stationary;
 
-import nextstep.jwp.exception.StaticFileNotFoundException;
-import nextstep.jwp.http.HttpStatusCode;
+import nextstep.jwp.http.exception.HttpUriNotFoundException;
+import nextstep.jwp.http.common.HttpStatusCode;
 import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
 
 import java.util.function.Supplier;
 
-public class CssController extends StaticResourceController {
+public class HtmlController extends StationaryController {
 
     @Override
     protected Supplier<? extends RuntimeException> supplyExceptionHandler(String filePath) {
-        return () -> new StaticFileNotFoundException(String.format("해당 파일을 찾을 수 없습니다.(%s)", filePath));
+        return () -> new HttpUriNotFoundException(String.format("해당 파일을 찾을 수 없습니다.(%s)", filePath));
     }
 
     @Override
@@ -20,7 +20,7 @@ public class CssController extends StaticResourceController {
         httpResponseMessage.setMessageBody(messageBody);
 
         httpResponseMessage.setStatusCode(HttpStatusCode.OK);
-        httpResponseMessage.putHeader("Content-Type", "text/css");
+        httpResponseMessage.putHeader("Content-Type", "text/html;charset=utf-8");
         httpResponseMessage.putHeader("Content-Length", messageBody.contentLength());
     }
 }

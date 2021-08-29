@@ -5,7 +5,9 @@ import java.net.URL;
 import nextstep.jwp.exception.IncorrectMapperException;
 import nextstep.jwp.handler.Model;
 import nextstep.jwp.handler.ModelAndView;
+import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestLine;
+import nextstep.jwp.http.request.SourcePath;
 import nextstep.jwp.http.response.HttpStatus;
 
 public class ResourceMapper implements HandlerMapper {
@@ -15,22 +17,24 @@ public class ResourceMapper implements HandlerMapper {
     @Override
     public boolean mapping(RequestLine requestLine) {
         String method = requestLine.getMethod();
-        String filePath = requestLine.getUriPath().getPath();
-        return (method.equalsIgnoreCase("GET") && isExistResource(filePath));
+        SourcePath sourcePath = requestLine.getUriPath().getSourcePath();
+        return (method.equalsIgnoreCase("GET") && isExistResource(sourcePath));
     }
 
     @Override
-    public ModelAndView service(RequestLine requestLine) {
+    public ModelAndView service(HttpRequest httpRequest) {
+        RequestLine requestLine = httpRequest.getRequestLine();
         String method = requestLine.getMethod();
-        String filePath = requestLine.getUriPath().getPath();
+        SourcePath sourcePath = requestLine.getUriPath().getSourcePath();
 
-        if (method.equalsIgnoreCase("GET") && isExistResource(filePath)) {
-            return new ModelAndView(Model.of(HttpStatus.OK), filePath);
+        if (method.equalsIgnoreCase("GET") && isExistResource(sourcePath)) {
+            return new ModelAndView(Model.of(HttpStatus.OK), sourcePath.getValue());
         }
         throw new IncorrectMapperException();
     }
 
-    private boolean isExistResource(String fileName) {
+    private boolean isExistResource(SourcePath sourcePath) {
+        final String fileName = sourcePath.getValue();
         final URL resourceUrl = getClass().getResource(RESOURCE_BASE_PATH + fileName);
         return new File(resourceUrl.getFile()).exists();
     }

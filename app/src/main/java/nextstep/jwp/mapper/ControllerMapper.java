@@ -7,6 +7,7 @@ import nextstep.jwp.handler.Controller;
 import nextstep.jwp.handler.LoginController;
 import nextstep.jwp.handler.ModelAndView;
 import nextstep.jwp.handler.RegisterController;
+import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestLine;
 import nextstep.jwp.http.request.RequestUriPath;
 
@@ -22,25 +23,22 @@ public class ControllerMapper implements HandlerMapper {
     }
 
     @Override
-    public boolean mapping(RequestLine request) {
+    public boolean mapping(RequestLine requestLine) {
         return controllers.stream()
-                .anyMatch(controller -> controller.mapping(request.getMethod(), request.getUriPath()));
+                .anyMatch(controller -> controller.mapping(requestLine));
     }
 
     // TODO :: Mapper와 Servicer를 분리하는 것은?
 
     @Override
-    public ModelAndView service(RequestLine request) {
-        String method = request.getMethod();
-        RequestUriPath uriPath = request.getUriPath();
-
-        Controller controller = search(method, uriPath);
-        return controller.service(method, uriPath);
+    public ModelAndView service(HttpRequest request) {
+        Controller controller = search(request.getRequestLine());
+        return controller.service(request);
     }
 
-    private Controller search(String method, RequestUriPath uriPath){
+    private Controller search(RequestLine requestLine){
         return controllers.stream()
-                .filter(controller -> controller.mapping(method, uriPath))
+                .filter(controller -> controller.mapping(requestLine))
                 .findFirst()
                 .orElseThrow(IncorrectMapperException::new);
     }

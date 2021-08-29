@@ -1,7 +1,9 @@
 package nextstep.jwp.handler;
 
-import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.request.QueryParams;
+import nextstep.jwp.http.request.RequestLine;
 import nextstep.jwp.http.request.RequestUriPath;
 import nextstep.jwp.http.response.HttpStatus;
 import nextstep.jwp.model.User;
@@ -9,22 +11,27 @@ import nextstep.jwp.model.User;
 public class LoginController implements Controller {
 
     @Override
-    public boolean mapping(String method, RequestUriPath uriPath) {
-        if (uriPath.getPath().equalsIgnoreCase("/login") && method.equalsIgnoreCase("get")) {
-            return true;
-        }
-        return false;
+    public boolean mapping(RequestLine requestLine) {
+        String method = requestLine.getMethod();
+        RequestUriPath uriPath = requestLine.getUriPath();
+        return method.equalsIgnoreCase("get") && uriPath.isPath("/login");
     }
 
+    // TODO :: service controller 분리
+
     @Override
-    public ModelAndView service(String method, RequestUriPath uriPath) {
-        if (uriPath.getPath().equalsIgnoreCase("/login") && method.equalsIgnoreCase("get")) {
-            return login(uriPath.getParams());
+    public ModelAndView service(HttpRequest httpRequest) {
+        RequestLine requestLine = httpRequest.getRequestLine();
+        String method = requestLine.getMethod();
+        RequestUriPath uriPath = requestLine.getUriPath();
+
+        if (method.equalsIgnoreCase("get") && uriPath.isPath("/login")) {
+            return login(uriPath.getQueryParams());
         }
         throw new IllegalArgumentException("핸들러가 처리할 수 있는 요청이 아닙니다.");
     }
 
-    public ModelAndView login(Map<String, String> params) {
+    private ModelAndView login(QueryParams params) {
         if (params.isEmpty()) {
             return new ModelAndView(Model.of(HttpStatus.OK), "/login.html");
         }

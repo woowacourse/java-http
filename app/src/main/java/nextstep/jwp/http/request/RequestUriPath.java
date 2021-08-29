@@ -1,49 +1,44 @@
 package nextstep.jwp.http.request;
 
-import java.util.*;
+import java.util.Objects;
 
 /**
  * /login?something1=123&something2=123
  */
 
 public class RequestUriPath {
-    private final String path;
-    private final Map<String, String> params;
+    private final SourcePath sourcePath;
+    private final QueryParams queryParams;
 
-    private RequestUriPath(String path, Map<String, String> params) {
-        this.path = path;
-        this.params = params;
+    private RequestUriPath(SourcePath sourcePath, QueryParams queryParams) {
+        this.sourcePath = sourcePath;
+        this.queryParams = queryParams;
     }
 
     public static RequestUriPath of(String uriPath) {
-        if (hasParams(uriPath)) {
-            int index = uriPath.indexOf("?");
-            String path = uriPath.substring(0, index);
-            String queryString = uriPath.substring(index + 1);
-            return new RequestUriPath(path, params(queryString));
+        SourcePath sourcePath = SourcePath.of(uriPath);
+        String queryString = queryString(uriPath);
+        return new RequestUriPath(sourcePath, QueryParams.of(queryString));
+    }
+
+    private static String queryString(String uri) {
+        int index = uri.indexOf("?");
+        if (index > 0) {
+            return uri.substring(index + 1);
         }
-        return new RequestUriPath(uriPath, Collections.emptyMap());
+        return "";
     }
 
-    private static boolean hasParams(String path){
-        return path.indexOf("?") > 0;
+    public SourcePath getSourcePath() {
+        return sourcePath;
     }
 
-    private static Map<String, String> params(String paramsLine) {
-        Map<String, String> params = new HashMap<>();
-        for (String pair : paramsLine.split("&")) {
-            String[] keyValue = pair.split("=");
-            params.put(keyValue[0], keyValue[1]);
-        }
-        return params;
+    public QueryParams getQueryParams() {
+        return queryParams;
     }
 
-    public String getPath() {
-        return path;
-    }
-
-    public Map<String, String> getParams() {
-        return params;
+    public boolean isPath(String path) {
+        return sourcePath.isPath(path);
     }
 
     @Override
@@ -51,11 +46,11 @@ public class RequestUriPath {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RequestUriPath that = (RequestUriPath) o;
-        return Objects.equals(path, that.path) && Objects.equals(params, that.params);
+        return Objects.equals(sourcePath, that.sourcePath) && Objects.equals(queryParams, that.queryParams);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(path, params);
+        return Objects.hash(sourcePath, queryParams);
     }
 }

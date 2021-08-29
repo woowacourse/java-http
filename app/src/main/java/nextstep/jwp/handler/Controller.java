@@ -1,9 +1,10 @@
 package nextstep.jwp.handler;
 
-import nextstep.jwp.http.request.RequestUriPath;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.request.RequestLine;
 
 public interface Controller {
-    boolean mapping(String method, RequestUriPath uriPath);
+    boolean mapping(RequestLine requestLine);
 
-    ModelAndView service(String method, RequestUriPath uriPath);
+    ModelAndView service(HttpRequest httpRequest);
 }

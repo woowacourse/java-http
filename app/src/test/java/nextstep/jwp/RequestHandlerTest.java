@@ -116,15 +116,16 @@ class RequestHandlerTest {
     @Test
     void registerPost() {
         // given
+        final String requestBody = "account=gugu&password=password&email=hkkang%40woowahan.com";
         final String httpRequest= String.join("\r\n",
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-Length: 80",
+                "Content-Length: "+ requestBody.length(),
                 "Content-Type: application/x-www-form-urlencoded",
                 "Accept: */*",
                 "",
-                "account=gugu&password=password&email=hkkang%40woowahan.com",
+                requestBody,
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);

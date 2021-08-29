@@ -14,11 +14,7 @@ public class Executor {
     private final ViewResolver viewResolver = new ViewResolver();
 
     public HttpResponse service(HttpRequest httpRequest) {
-        return service(httpRequest.getRequestLine());
-    }
-
-    public HttpResponse service(RequestLine requestLine) {
-        ModelAndView modelAndView = handlerMappers.handle(requestLine);
+        ModelAndView modelAndView = handlerMappers.handle(httpRequest);
         View view = viewResolver.resolve(modelAndView.getViewName());
         return view.render(modelAndView.getModel());
     }

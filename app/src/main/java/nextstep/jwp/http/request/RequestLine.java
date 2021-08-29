@@ -74,10 +74,10 @@ public class RequestLine {
     }
 
     public boolean isGet() {
-        return HttpMethod.GET == method;
+        return method.isGet();
     }
 
     public boolean isPost() {
-        return HttpMethod.POST == method;
+        return method.isPost();
     }
 }

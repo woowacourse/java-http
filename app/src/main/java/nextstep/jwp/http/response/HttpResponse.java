@@ -95,7 +95,7 @@ public class HttpResponse {
         private HttpProtocol protocol;
         private HttpStatus status;
         private final HttpHeaders headers = new HttpHeaders();
-        private HttpResponseBody responseBody = new TextHttpResponseBody("");
+        private HttpResponseBody responseBody = new TextHttpResponseBody("", FileType.HTML);
 
         public Builder(HttpProtocol protocol, HttpStatus status) {
             this.protocol = protocol;

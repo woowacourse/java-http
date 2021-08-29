@@ -17,6 +17,7 @@ import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpResponseBody;
 import nextstep.jwp.resolver.DataResolver;
 import nextstep.jwp.resolver.HtmlResolver;
+import nextstep.jwp.resolver.StaticResourceResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +29,7 @@ public class RequestHandler implements Runnable {
     private final List<DataResolver> dataResolvers;
 
     public RequestHandler(Socket connection) {
-        this(connection, List.of(new HtmlResolver()));
+        this(connection, List.of(new StaticResourceResolver(), new HtmlResolver()));
     }
 
     public RequestHandler(Socket connection,
@@ -59,7 +60,7 @@ public class RequestHandler implements Runnable {
                 loginController.doPost(httpRequest, httpResponse);
             }
 
-            if (url.equals("/register") && httpRequest.method() == HttpMethod.POST) {
+            if (url.equals("/registerz") && httpRequest.method() == HttpMethod.POST) {
                 RegisterController registerController = new RegisterController();
                 registerController.doPost(httpRequest, httpResponse);
             }
@@ -69,7 +70,8 @@ public class RequestHandler implements Runnable {
                     httpRequest.header("Accept").list());
                 httpResponse.replaceResponseBody(responseBody);
             }
-
+            log.debug("\r\n");
+            log.debug(httpResponse.toResponseFormat());
             outputStream.write(httpResponse.toResponseFormat().getBytes());
             outputStream.flush();
         } catch (IOException exception) {

@@ -27,7 +27,12 @@ public class FilePath {
         }
         this.prefix = prefix;
         this.filePath = filePath;
-        this.suffix = suffix;
+
+        if (!"".equals(suffix)) {
+            suffix = DOT + suffix;
+        }
+
+        this.suffix =  suffix;
     }
 
     public Path path() {
@@ -56,8 +61,8 @@ public class FilePath {
 
     private String relativePath() {
         if (filePath.startsWith(prefix)) {
-            return filePath + DOT + suffix;
+            return filePath + suffix;
         }
-        return prefix + filePath + DOT + suffix;
+        return prefix + filePath + suffix;
     }
 }

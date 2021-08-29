@@ -5,7 +5,11 @@ import nextstep.jwp.resource.FileType;
 
 public enum ContentType {
     HTML("text/html;charset=utf-8", FileType.HTML),
-    PLAIN_TEXT("text/plain;charset=utf-8", FileType.PLAIN_TEXT);
+    PLAIN_TEXT("text/plain;charset=utf-8", FileType.PLAIN_TEXT),
+    JS("text/js", FileType.JS),
+    CSS("text/css", FileType.CSS),
+    ALL("*/*", null);
+
 
     private String text;
     private FileType fileType;
@@ -19,7 +23,7 @@ public enum ContentType {
         return Arrays.stream(values())
             .filter(contentType -> contentType.fileType.equals(fileType))
             .findAny()
-            .orElseThrow(() -> new RuntimeException("해당하는 Content-Type이 없습니다."));
+            .orElse(ALL);
     }
 
     public String getText() {

@@ -5,9 +5,11 @@ import nextstep.jwp.resource.FileType;
 public class TextHttpResponseBody implements HttpResponseBody {
 
     private final String body;
+    private final FileType fileType;
 
-    public TextHttpResponseBody(String body) {
+    public TextHttpResponseBody(String body, FileType fileType) {
         this.body = body;
+        this.fileType = fileType;
     }
 
     @Override
@@ -17,6 +19,6 @@ public class TextHttpResponseBody implements HttpResponseBody {
 
     @Override
     public FileType fileType(){
-        return FileType.HTML;
+        return fileType;
     }
 }

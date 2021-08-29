@@ -7,6 +7,7 @@ public enum MimeType {
     TEXT_ALL("text/*"),
     TEXT_PLAIN("text/plain"),
     TEXT_CSS("text/css"),
+    TEXT_JS("text/js"),
     TEST_HTML("text/html"),
     ALL("*/*");
 

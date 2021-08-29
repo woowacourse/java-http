@@ -6,7 +6,7 @@ import nextstep.jwp.http.response.HttpResponseBody;
 
 public interface DataResolver {
 
-    boolean isExist(String fileName);
+    boolean isExist(String url);
 
     boolean isSuitable(List<String> acceptTypes);
 

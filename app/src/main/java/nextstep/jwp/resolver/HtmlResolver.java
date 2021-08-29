@@ -4,9 +4,7 @@ import static nextstep.jwp.resource.FileType.HTML;
 
 import java.io.IOException;
 import java.util.List;
-import nextstep.jwp.http.HttpProtocol;
 import nextstep.jwp.http.MimeType;
-import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpResponseBody;
 import nextstep.jwp.http.response.TextHttpResponseBody;
 import nextstep.jwp.resource.FilePath;
@@ -33,13 +31,13 @@ public class HtmlResolver implements DataResolver {
     public HttpResponseBody resolve(String url) throws IOException {
         final FileReader fileReader = new FileReader(new FilePath(url, HTML.getText()));
 
-        return new TextHttpResponseBody(fileReader.readAllFile());
+        return new TextHttpResponseBody(fileReader.readAllFile(), HTML);
     }
 
     public HttpResponseBody resolve(String url, String prefix) throws IOException {
         final FileReader fileReader = new FileReader(new FilePath(url, HTML.getText(), prefix));
 
-        return new TextHttpResponseBody(fileReader.readAllFile());
+        return new TextHttpResponseBody(fileReader.readAllFile(), HTML);
     }
 
 }

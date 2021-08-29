@@ -4,7 +4,6 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 
 import java.io.IOException;
-import java.util.Optional;
 
 public class LoginController extends AbstractController {
 
@@ -33,7 +32,7 @@ public class LoginController extends AbstractController {
                 return;
             }
             response.sendRedirect("/index.html");
-        } catch (Exception e) {
+        } catch (IOException e) {
             response.sendRedirect("/401.html");
         }
     }

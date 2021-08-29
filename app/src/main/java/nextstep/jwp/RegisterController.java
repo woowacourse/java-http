@@ -29,7 +29,7 @@ public class RegisterController extends AbstractController {
             response.sendRedirect("/500.html");
             return;
         }
-        InMemoryUserRepository.save(new User(2, account, password, email));
+        InMemoryUserRepository.save(new User(null, account, password, email));
         response.sendRedirect("/index.html");
     }
 }

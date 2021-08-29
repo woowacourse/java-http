@@ -56,7 +56,7 @@ public class HttpRequest {
         return headers.getHeaders();
     }
 
-    public String getRequestBody() throws IOException {
+    private String getRequestBody() throws IOException {
         String length = getHeaders().get("Content-Length");
         if (length == null) {
             return null;

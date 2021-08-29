@@ -34,7 +34,7 @@ public class ResourceController extends AbstractController {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
+    public HttpResponse doGet(HttpRequest httpRequest) {
         return new ResourceResponseTemplate().ok(httpRequest.getPath());
     }
 }

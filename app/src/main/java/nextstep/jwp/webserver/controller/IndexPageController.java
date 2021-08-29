@@ -15,7 +15,7 @@ public class IndexPageController extends AbstractController {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
+    public HttpResponse doGet(HttpRequest httpRequest) {
         return new ResourceResponseTemplate().ok("/index.html");
     }
 }

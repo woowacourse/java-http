@@ -20,13 +20,15 @@ public class LoginPageController extends AbstractController {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
-        if (httpRequest.getQueries().isEmpty()) {
-            return new ResourceResponseTemplate().ok("/login.html");
-        }
+    public HttpResponse doGet(HttpRequest httpRequest) {
+        return new ResourceResponseTemplate().ok("/login.html");
+    }
 
+    @Override
+    public HttpResponse doPost(HttpRequest httpRequest) {
         final String account = httpRequest.getValueFromQuery("account");
         final String password = httpRequest.getValueFromQuery("password");
+
         LOGGER.debug("로그인 요청 - [account : {}, password : {}]", account, password);
 
         if (!userService.login(account, password)) {

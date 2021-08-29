@@ -17,7 +17,12 @@ public class RegisterPageController extends AbstractController {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest httpRequest) {
+    public HttpResponse doGet(HttpRequest httpRequest) {
         return new StringResponseTemplate().ok(RESPONSE);
+    }
+
+    @Override
+    public HttpResponse doPost(HttpRequest httpRequest) {
+        return super.doPost(httpRequest);
     }
 }

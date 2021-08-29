@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public enum HttpMethod {
-    GET, POST;
+    GET, POST, PUT, DELETE;
 
     private static final Map<String, HttpMethod> METHOD_MAP = new HashMap<>();
 

@@ -31,7 +31,7 @@ public class LoginPageControllerTest {
     public void redirectIndexPageTest() {
 
         // given
-        final RequestLine requestLine = new RequestLine(HttpMethod.GET, "/login?account=gugu&password=password", HttpVersion.HTTP_1_1);
+        final RequestLine requestLine = new RequestLine(HttpMethod.POST, "/login?account=gugu&password=password", HttpVersion.HTTP_1_1);
         final HttpRequest httpRequest = new HttpRequest.Builder().requestLine(requestLine).build();
         final LoginPageController loginPageController = new LoginPageController();
 
@@ -48,7 +48,7 @@ public class LoginPageControllerTest {
     public void redirectUnauthorizedPageTest() {
 
         // given
-        final RequestLine requestLine = new RequestLine(HttpMethod.GET, "/login?account=seed&password=password", HttpVersion.HTTP_1_1);
+        final RequestLine requestLine = new RequestLine(HttpMethod.POST, "/login?account=seed&password=password", HttpVersion.HTTP_1_1);
         final HttpRequest httpRequest = new HttpRequest.Builder().requestLine(requestLine).build();
         final LoginPageController loginPageController = new LoginPageController();
 

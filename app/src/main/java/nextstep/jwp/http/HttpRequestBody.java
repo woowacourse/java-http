@@ -11,6 +11,7 @@ public class HttpRequestBody {
         if (payload.isEmpty()) {
             return;
         }
+
         Arrays.stream(payload.split("&"))
                 .map(element -> element.split("="))
                 .forEach(elementPair -> this.payload.put(elementPair[0], elementPair[1]));

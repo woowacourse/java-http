@@ -19,14 +19,13 @@ public class LoginController extends Controller {
         final String httpMethod = httpRequest.getHttpMethod();
         final String path = httpRequest.getPath();
 
-        return "GET".equals(httpMethod) && path.startsWith("/login");
+        return ("POST".equals(httpMethod) || "GET".equals(httpMethod)) && path.startsWith("/login");
     }
 
-    // TODO: login.html form 설정 post로 바꾸기
     @Override
     public HttpResponse doPost(final HttpRequest httpRequest) {
         try {
-            final Map<String, String> queryParameters = httpRequest.getQueryParameters();
+            final Map<String, String> queryParameters = httpRequest.getPayload();
             final String account = queryParameters.get("account");
             final String password = queryParameters.get("password");
             userService.login(account, password);

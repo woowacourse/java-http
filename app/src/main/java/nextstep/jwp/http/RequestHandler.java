@@ -1,10 +1,6 @@
-package nextstep.jwp;
+package nextstep.jwp.http;
 
 import nextstep.jwp.controller.*;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpRequestBody;
-import nextstep.jwp.http.HttpRequestHeader;
-import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +12,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class RequestHandler implements Runnable {
-
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
     private static final List<Controller> controllers = new ArrayList<>();
 
@@ -57,10 +52,12 @@ public class RequestHandler implements Runnable {
     }
 
     private HttpRequest parseRequest(final InputStream inputStream) throws IOException {
+        inputStreamReader = new BufferedReader(new InputStreamReader(inputStream));
+
         final List<String> requestHeaders = parseRequestHeaders(inputStream);
         final HttpRequestHeader httpRequestHeader = new HttpRequestHeader(requestHeaders);
 
-        final String requestBody = parseRequestBody(httpRequestHeader, inputStream);
+        final String requestBody = parseRequestBody(httpRequestHeader);
         final HttpRequestBody httpRequestBody = new HttpRequestBody(requestBody);
 
         return new HttpRequest(httpRequestHeader, httpRequestBody);
@@ -68,7 +65,6 @@ public class RequestHandler implements Runnable {
 
     private List<String> parseRequestHeaders(final InputStream inputStream) throws IOException {
         final List<String> requestHeaders = new ArrayList<>();
-        inputStreamReader = new BufferedReader(new InputStreamReader(inputStream));
         String line = inputStreamReader.readLine();
         while (!"".equals(line)) {
             requestHeaders.add(line);
@@ -81,8 +77,7 @@ public class RequestHandler implements Runnable {
         return requestHeaders;
     }
 
-    private String parseRequestBody(final HttpRequestHeader httpRequestHeader, final InputStream inputStream) throws IOException {
-        inputStreamReader = new BufferedReader(new InputStreamReader(inputStream));
+    private String parseRequestBody(final HttpRequestHeader httpRequestHeader) throws IOException {
         int contentLength = httpRequestHeader.getContentLength();
         char[] buffer = new char[contentLength];
         inputStreamReader.read(buffer, 0, contentLength);

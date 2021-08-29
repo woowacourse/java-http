@@ -25,12 +25,21 @@ public class HttpHeaders {
         headers.put(headerKey.trim(), headerValue.trim());
     }
 
+    public String getHeaderDataByKey(final String key) {
+        isValidateKey(key);
+        return headers.get(key);
+    }
+
     public String getHeaderByKey(final String key) {
+        isValidateKey(key);
+        return key + ": " + headers.get(key);
+    }
+
+    private void isValidateKey(final String key) {
         if (!headers.containsKey(key)) {
             LOGGER.error("없는 key의 헤더를 찾으려고 했습니다. key = {}", key);
             throw new IllegalArgumentException(String.format("없는 key의 헤더를 찾으려고 했습니다. key = {%s}", key));
         }
-        return key + ": " + headers.get(key);
     }
 
     public String getAllHeaders() {

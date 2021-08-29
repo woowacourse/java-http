@@ -29,5 +29,28 @@ class HttpRequestTest {
         inputStream.close();
 
         assertThat(httpRequest.getHttpMethod()).isEqualTo(HttpMethod.GET);
+        assertThat(httpRequest.getHttpVersion()).isEqualTo("HTTP/1.1");
+    }
+
+    @DisplayName("body가 있는 HTTP Request가 오면, 파싱해서 보관한다.")
+    @Test
+    void httpBodyRequestTest() throws IOException {
+        final String text = String.join("\r\n",
+            "POST /register HTTP/1.1",
+            "Host: localhost:8080",
+            "Content-Length: 58",
+            "Content-Type: application/x-www-form-urlencoded",
+            "Accept: */*",
+            " ",
+            "account=gugu&password=password&email=hkkang%40woowahan.com"
+        );
+
+        final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+        HttpRequest httpRequest = new HttpRequest(bufferedReader);
+        inputStream.close();
+
+        assertThat(httpRequest.getBody()).isEqualTo("account=gugu&password=password&email=hkkang%40woowahan.com");
     }
 }

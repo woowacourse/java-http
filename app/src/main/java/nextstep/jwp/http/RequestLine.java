@@ -71,4 +71,8 @@ public class RequestLine {
     public boolean isQueryParamsEmpty() {
         return queryParams.isEmpty();
     }
+
+    public boolean isPost() {
+        return httpMethod.equals(HttpMethod.POST);
+    }
 }

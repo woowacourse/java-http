@@ -15,7 +15,7 @@ public class RegisterResponse {
 
     public String successResponse() throws IOException {
         final TranslatedFile translatedFile = new TranslatedFile(REGISTER);
-        final String responseBody = translatedFile.staticValue();
+        final String responseBody = translatedFile.staticValue("html");
         return String.join("\r\n",
             "HTTP/1.1 200 OK ",
             "Content-Type: text/html;charset=utf-8 ",
@@ -26,7 +26,7 @@ public class RegisterResponse {
 
     public String createAccountResponse() throws IOException {
         final TranslatedFile translatedFile = new TranslatedFile(SUCCESS);
-        final String responseBody = translatedFile.staticValue();
+        final String responseBody = translatedFile.staticValue("html");
         return String.join("\r\n",
             "HTTP/1.1 302 OK ",
             "Content-Type: text/html;charset=utf-8 ",
@@ -37,7 +37,7 @@ public class RegisterResponse {
 
     public String failedResponse() throws IOException {
         final TranslatedFile translatedFile = new TranslatedFile(FAIL);
-        final String responseBody = translatedFile.staticValue();
+        final String responseBody = translatedFile.staticValue("html");
 
         return String.join("\r\n",
             "HTTP/1.1 401 OK ",

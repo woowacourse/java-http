@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
 import nextstep.jwp.controller.Controller;
+import nextstep.jwp.util.Controllers;
 import nextstep.jwp.util.HeaderLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,8 @@ public class RequestHandler implements Runnable {
             final OutputStream outputStream = connection.getOutputStream()) {
 
             final HeaderLine headerLine = HeaderLine.readFromInputStream(inputStream);
-            final String responseBody = Controller.process(headerLine);
+            final Controller controller = Controllers.mathController(headerLine);
+            final String responseBody = controller.process(headerLine);
             final String response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
@@ -52,9 +54,5 @@ public class RequestHandler implements Runnable {
         } catch (IOException exception) {
             log.error("Exception closing socket", exception);
         }
-    }
-
-    private void loginProcess(HeaderLine headerLine) {
-
     }
 }

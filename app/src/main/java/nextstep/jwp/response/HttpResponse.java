@@ -18,7 +18,7 @@ public class HttpResponse {
 
     private String buildResponse(String path) throws IOException {
         final TranslatedFile translatedFile = new TranslatedFile(path);
-        final String responseBody = translatedFile.staticValue();
+        final String responseBody = translatedFile.staticValue("html");
 
         return String.join("\r\n",
             "HTTP/1.1 200 OK ",

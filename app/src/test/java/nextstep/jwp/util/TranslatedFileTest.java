@@ -15,7 +15,7 @@ class TranslatedFileTest {
         String answer = "nextstep";
 
         //when
-        String result = translatedFile.staticValue();
+        String result = translatedFile.staticValue("txt");
 
         //then
         assertThat(result).isEqualTo(answer);

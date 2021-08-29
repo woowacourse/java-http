@@ -1,14 +1,11 @@
-package nextstep.jwp.service;
+package nextstep.jwp.controller;
 
 import java.io.IOException;
-import nextstep.jwp.util.HeaderLine;
 import nextstep.jwp.response.HttpResponse;
+import nextstep.jwp.util.HeaderLine;
 
-public class ExtraService implements Service {
+public class ExtraController implements Controller {
 
-    public ExtraService() {
-
-    }
     @Override
     public String process(HeaderLine headerLine) throws IOException {
         HttpResponse httpResponse = new HttpResponse(headerLine);

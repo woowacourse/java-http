@@ -8,18 +8,23 @@ import java.nio.file.Path;
 
 public class TranslatedFile {
 
-    private String requestedURI;
+    private String requestedURL;
 
-    public TranslatedFile(String requestedURI) {
-        this.requestedURI = requestedURI;
+    public TranslatedFile(String requestedURL) {
+        this.requestedURL = requestedURL;
     }
 
-    public String staticValue() throws IOException {
-        String uri = requestedURI;
-        if (!uri.contains(".html")) {
-            uri = uri + ".html";
+    public String staticValue(String type) throws IOException {
+        String url = requestedURL;
+        if (type.equals("html") && !url.contains("html")) {
+            url = url + ".html";
+            return loadFile(url);
         }
-        final String filePath = "static" + uri;
+        return loadFile(url);
+    }
+
+    private String loadFile(String url) throws IOException {
+        final String filePath = "static" + url;
         final URL resource = getClass().getClassLoader().getResource(filePath);
         final Path path = new File(resource.getPath()).toPath();
         return Files.readString(path);

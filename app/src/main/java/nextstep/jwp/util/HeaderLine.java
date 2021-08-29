@@ -28,11 +28,6 @@ public class HeaderLine {
         return new HeaderLine(headerLine);
     }
 
-    public boolean isOnQuery() {
-        final String firstLine = headerLines.get(0);
-        return firstLine.contains("?");
-    }
-
     public String method() {
         final String firstLine = headerLines.get(0);
         final String[] splitFirstLine = firstLine.split(" ");
@@ -42,13 +37,13 @@ public class HeaderLine {
     public String getRequestURLWithoutQuery() {
         final String firstLine = headerLines.get(0);
         final String[] splitFirstLine = firstLine.split(" ");
-        final String rawURI = splitFirstLine[1];
-        final int index = rawURI.indexOf("?");
+        final String rawURL = splitFirstLine[1];
+        final int index = rawURL.indexOf("?");
 
         if (index == NONE_QUERY) {
-            return rawURI;
+            return rawURL;
         }
-        return rawURI.substring(0, index);
+        return rawURL.substring(0, index);
     }
 
     public String getRequestURL() {
@@ -66,5 +61,21 @@ public class HeaderLine {
             bodyQuery.put(unitBody[0], unitBody[1]);
         }
         return bodyQuery;
+    }
+
+    public boolean isResource() {
+        final String firstLine = headerLines.get(0);
+        final String[] splitFirstLine = firstLine.split(" ");
+        final String rawURL = splitFirstLine[1];
+        String[] splitURL = rawURL.split("\\.");
+        return splitURL.length != 1;
+    }
+
+    public String resourceType() {
+        final String firstLine = headerLines.get(0);
+        final String[] splitFirstLine = firstLine.split(" ");
+        final String rawURL = splitFirstLine[1];
+        String[] splitURL = rawURL.split("\\.");
+        return splitURL[splitURL.length - 1];
     }
 }

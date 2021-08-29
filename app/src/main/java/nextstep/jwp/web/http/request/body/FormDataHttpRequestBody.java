@@ -7,6 +7,8 @@ import nextstep.jwp.web.http.util.QueryParser;
 
 public class FormDataHttpRequestBody implements HttpRequestBody<String> {
 
+    private static final String EMPTY = "";
+
     private final HashMap<String, String> formData;
     private final String body;
 
@@ -17,7 +19,7 @@ public class FormDataHttpRequestBody implements HttpRequestBody<String> {
 
     @Override
     public String getAttribute(String key) {
-        return formData.get(key);
+        return formData.getOrDefault(key, EMPTY);
     }
 
     @Override

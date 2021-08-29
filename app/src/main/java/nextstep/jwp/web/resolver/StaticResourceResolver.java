@@ -4,7 +4,6 @@ import static nextstep.jwp.resource.FileType.CSS;
 import static nextstep.jwp.resource.FileType.JS;
 import static nextstep.jwp.resource.FileType.SVG;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import nextstep.jwp.resource.FilePath;
@@ -21,7 +20,7 @@ public class StaticResourceResolver implements DataResolver {
     private static final int EXIST_EXTENSION_SIZE = 2;
 
     @Override
-    public boolean isExist(String url) {
+    public boolean isResourceExist(String url) {
         List<String> list = Arrays.asList(url.split(DOT_PATTERN));
         if (list.size() < EXIST_EXTENSION_SIZE) {
             return false;
@@ -30,8 +29,8 @@ public class StaticResourceResolver implements DataResolver {
     }
 
     @Override
-    public boolean isSuitable(List<String> acceptTypes) {
-        List<FileType> fileTypes = FileType.findByMimeType(MimeType.findByName(acceptTypes));
+    public boolean isSuitable(MimeType mimeType) {
+        List<FileType> fileTypes = FileType.findByMimeType(mimeType);
 
         return fileTypes.contains(CSS) ||
             fileTypes.contains(JS) ||
@@ -39,7 +38,7 @@ public class StaticResourceResolver implements DataResolver {
     }
 
     @Override
-    public HttpResponseBody resolve(String url) throws IOException {
+    public HttpResponseBody resolve(String url){
         List<String> list = Arrays.asList(url.split(DOT_PATTERN));
         FileType type = FileType.findByName(list.get(list.size() - 1));
         final FileReader fileReader = new FileReader(new FilePath(url, BLANK));

@@ -38,7 +38,7 @@ public class HttpResponse {
         String responseBody;
         if (url.equals("/")) {
             responseBody = DEFAULT_MESSAGE;
-        } else if (url.equals("/login")) {
+        } else if (url.equals("/login") || url.equals("/register")) {
             responseBody = getBodyByUrl(DEFAULT_RESOURCE_PATH + url + ".html");
         } else {
             responseBody = getBodyByUrl(DEFAULT_RESOURCE_PATH + url);

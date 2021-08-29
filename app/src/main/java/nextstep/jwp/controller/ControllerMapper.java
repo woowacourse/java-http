@@ -9,6 +9,7 @@ public class ControllerMapper {
 
     static {
         controllers.put("/login", new LoginController());
+        controllers.put("/register", new RegisterController());
     }
 
     private ControllerMapper() {

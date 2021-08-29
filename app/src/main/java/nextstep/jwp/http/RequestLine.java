@@ -14,7 +14,6 @@ public class RequestLine {
     private final String url;
     private final String httpVersion;
 
-    // GET /index.html HTTP/1.1
     public RequestLine(final String requestLine) throws IOException {
         if (requestLine == null) {
             throw new IOException("requestLine이 비어있습니다.");

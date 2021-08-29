@@ -8,11 +8,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Objects;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpResponse {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpResponse.class);
+
     private static final String DEFAULT_MESSAGE = "Hello world!";
-    private static final String DEFAULT_RESOURCE_PATH = "static/";
+    private static final String DEFAULT_RESOURCE_PATH = "static";
 
     private final OutputStream outputStream;
     private final HttpHeaders headers = new HttpHeaders(new LinkedHashMap<>());
@@ -22,11 +26,14 @@ public class HttpResponse {
     }
 
     public void transfer(final String url) throws IOException {
+        LOGGER.debug("url : {}", url);
         setContentType(url);
 
         String responseBody;
         if (url.equals("/")) {
             responseBody = DEFAULT_MESSAGE;
+        } else if (url.equals("/login")) {
+            responseBody = getBodyByUrl(DEFAULT_RESOURCE_PATH + url + ".html");
         } else {
             responseBody = getBodyByUrl(DEFAULT_RESOURCE_PATH + url);
         }

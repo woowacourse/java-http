@@ -30,7 +30,7 @@
     - [x] RequestBody 테스트 코드
   - [ ] HTTP Response 테스트 코드
     - [x] StatusLine 테스트 코드
-    - [ ] ResponseHeaders 테스트 코드
+    - [x] ResponseHeaders 테스트 코드
     - [x] ResponseBody 테스트 코드
   - [x] User 테스트 코드
   - [x] Content, ContentType, StaticResource 테스트 코드
@@ -89,4 +89,6 @@ GET /pub/WWW/TheProject.html HTTP/1.1 Host: www.w3.org
 ### 파일 내용을 먼저 읽어서 StaticResource 객체로 관리하는게 나을지?
 아니면 파일 경로만 기억하고 있다가 Response로 돌려줄 때 파일 내용을 읽는게 나을지?
 
+### 테스트 코드가 resources/static 에 의존하고 있다.
+IO 테스트 위해선 어쩔 수 없을지?
 

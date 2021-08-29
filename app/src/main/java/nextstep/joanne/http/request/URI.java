@@ -1,4 +1,4 @@
-package nextstep.joanne.domain;
+package nextstep.joanne.http.request;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package nextstep.joanne.domain;
+package nextstep.joanne.http;
 
 import java.util.Objects;
 

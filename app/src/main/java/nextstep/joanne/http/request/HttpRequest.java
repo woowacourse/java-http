@@ -1,15 +1,17 @@
-package nextstep.joanne.domain;
+package nextstep.joanne.http.request;
+
+import nextstep.joanne.http.HttpMethod;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class HttpRequest {
-    private HttpMethod method;
-    private URI uri;
-    private Optional<String> versionOfProtocol;
-    private HashMap<String, String> requestHeaders;
-    private HashMap<String, String> requestMessageBody;
+    private final HttpMethod method;
+    private final URI uri;
+    private final Optional<String> versionOfProtocol;
+    private final HashMap<String, String> requestHeaders;
+    private final HashMap<String, String> requestMessageBody;
 
     private HttpRequest(Builder builder) {
         this.method = builder.method;

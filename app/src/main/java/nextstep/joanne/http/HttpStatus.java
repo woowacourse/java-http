@@ -1,4 +1,4 @@
-package nextstep.joanne.domain;
+package nextstep.joanne.http;
 
 public enum HttpStatus {
     OK(200, "OK"),

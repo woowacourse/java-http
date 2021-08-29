@@ -1,8 +1,8 @@
-package nextstep.joanne.infra;
+package nextstep.joanne.converter;
 
-import nextstep.joanne.domain.HttpRequest;
-import nextstep.joanne.domain.HttpResponse;
-import nextstep.joanne.domain.HttpStatus;
+import nextstep.joanne.http.request.HttpRequest;
+import nextstep.joanne.http.response.HttpResponse;
+import nextstep.joanne.http.HttpStatus;
 
 import java.io.BufferedReader;
 import java.io.File;

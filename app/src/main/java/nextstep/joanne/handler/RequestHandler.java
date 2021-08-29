@@ -1,8 +1,8 @@
 package nextstep.joanne.handler;
 
-import nextstep.joanne.domain.HttpRequest;
-import nextstep.joanne.domain.HttpResponse;
-import nextstep.joanne.infra.HttpRequestResponseConverter;
+import nextstep.joanne.http.request.HttpRequest;
+import nextstep.joanne.http.response.HttpResponse;
+import nextstep.joanne.converter.HttpRequestResponseConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,10 +1,10 @@
 package nextstep.joanne.handler;
 
 import nextstep.joanne.db.InMemoryUserRepository;
-import nextstep.joanne.domain.HttpRequest;
-import nextstep.joanne.domain.HttpResponse;
-import nextstep.joanne.domain.HttpStatus;
-import nextstep.joanne.infra.HttpRequestResponseConverter;
+import nextstep.joanne.http.request.HttpRequest;
+import nextstep.joanne.http.response.HttpResponse;
+import nextstep.joanne.http.HttpStatus;
+import nextstep.joanne.converter.HttpRequestResponseConverter;
 import nextstep.joanne.model.User;
 
 import java.io.IOException;

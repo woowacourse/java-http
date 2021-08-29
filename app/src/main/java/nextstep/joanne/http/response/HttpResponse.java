@@ -1,4 +1,6 @@
-package nextstep.joanne.domain;
+package nextstep.joanne.http.response;
+
+import nextstep.joanne.http.HttpStatus;
 
 public class HttpResponse {
     private HttpStatus httpStatus;

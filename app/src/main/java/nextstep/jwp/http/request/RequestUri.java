@@ -3,7 +3,9 @@ package nextstep.jwp.http.request;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import nextstep.jwp.exception.EmptyQueryParametersException;
 import nextstep.jwp.exception.InvalidRequestUriException;
+import nextstep.jwp.exception.QueryParameterNotFoundException;
 
 public class RequestUri {
 
@@ -62,7 +64,22 @@ public class RequestUri {
     }
 
     public String getQueryParameter(String parameter) {
+        validateEmpty();
+        validateExistQuery(parameter);
+
         return queryParameters.get(parameter);
+    }
+
+    private void validateEmpty() {
+        if (queryParameters.isEmpty()) {
+            throw new EmptyQueryParametersException();
+        }
+    }
+
+    private void validateExistQuery(String parameter) {
+        if (!queryParameters.containsKey(parameter)) {
+            throw new QueryParameterNotFoundException();
+        }
     }
 
     public String getValue() {

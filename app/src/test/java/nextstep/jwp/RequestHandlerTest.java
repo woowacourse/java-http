@@ -97,7 +97,7 @@ class RequestHandlerTest {
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
-        String expected = toHttp302Response( "/index.html");
+        String expected = toHttp302Response("/index.html");
         // when
         requestHandler.run();
         final String actual = socket.output();

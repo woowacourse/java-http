@@ -50,4 +50,8 @@ public class WebServer {
         }
         return port;
     }
+
+    public int getPort() {
+        return port;
+    }
 }

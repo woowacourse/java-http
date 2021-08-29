@@ -21,12 +21,12 @@ public class LoginController implements Controller {
 
     @Override
     public ModelAndView service(HttpRequest httpRequest) {
-        RequestLine requestLine = httpRequest.getRequestLine();
+        RequestLine requestLine = httpRequest.requestLine();
         if (requestLine.isFrom("get", "/login")) {
             return printLoginPage();
         }
         if (requestLine.isFrom("post", "/login")) {
-            return login(httpRequest.getRequestBody());
+            return login(httpRequest.requestBody());
         }
         throw new IllegalArgumentException("핸들러가 처리할 수 있는 요청이 아닙니다.");
     }
@@ -38,10 +38,12 @@ public class LoginController implements Controller {
     private ModelAndView login(String requestBody) {
         try {
             QueryParams params = QueryParams.of(requestBody);
-            LoginRequest loginRequest = new LoginRequest(params.get("account"), params.get("password"));
+            LoginRequest loginRequest = LoginRequest.fromQueryParams(params);
+
             loginService.login(loginRequest);
             return ModelAndView.redirect("/index.html");
         } catch (Exception e) {
+            // TODO :: Exception 분리
             return ModelAndView.unauthorized();
         }
     }

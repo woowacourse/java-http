@@ -34,6 +34,12 @@ public class ModelAndView {
         return new ModelAndView(model, "/401.html");
     }
 
+    public static ModelAndView error() {
+        Model model = new Model();
+        model.addAttribute("HttpStatus", HttpStatus.ERROR);
+        return new ModelAndView(model, "/500.html");
+    }
+
     public String getViewName() {
         return viewName;
     }

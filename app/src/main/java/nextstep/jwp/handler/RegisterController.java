@@ -1,12 +1,18 @@
 package nextstep.jwp.handler;
 
-import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.handler.dto.RegisterRequest;
+import nextstep.jwp.handler.service.RegisterService;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.QueryParams;
 import nextstep.jwp.http.request.RequestLine;
-import nextstep.jwp.model.User;
 
 public class RegisterController implements Controller {
+
+    private final RegisterService registerService;
+
+    public RegisterController(RegisterService registerService) {
+        this.registerService = registerService;
+    }
 
     @Override
     public boolean mapping(RequestLine requestLine) {
@@ -14,15 +20,14 @@ public class RegisterController implements Controller {
                 || requestLine.isFrom("post", "/register");
     }
 
-    // TODO :: Service와 Controller 분리
     @Override
     public ModelAndView service(HttpRequest httpRequest) {
-        RequestLine requestLine = httpRequest.getRequestLine();
+        RequestLine requestLine = httpRequest.requestLine();
         if (requestLine.isFrom("get", "/register")) {
             return printRegisterPage();
         }
         if (requestLine.isFrom("post", "/register")) {
-            return register(httpRequest.getRequestBody());
+            return register(httpRequest.requestBody());
         }
         throw new IllegalArgumentException("핸들러가 처리할 수 있는 요청이 아닙니다.");
     }
@@ -31,23 +36,15 @@ public class RegisterController implements Controller {
         return ModelAndView.ok("/register.html");
     }
 
-    // TODO :: DTO로 묶기
     private ModelAndView register(String requestBody) {
-        QueryParams queryParams = QueryParams.of(requestBody);
+        try{
+            QueryParams queryParams = QueryParams.of(requestBody);
+            RegisterRequest registerRequest = RegisterRequest.fromQueryParams(queryParams);
 
-        String account = queryParams.get("account");
-        String password = queryParams.get("password");
-        String email = queryParams.get("email");
-
-        User requestUser = new User(2, account, password, email);
-        checkIsDuplicated(requestUser);
-
-        InMemoryUserRepository.save(requestUser);
-        return ModelAndView.redirect("index.html");
-    }
-
-    private void checkIsDuplicated(User requestUser) {
-        InMemoryUserRepository.findByAccount(requestUser.getAccount())
-                .ifPresent((user) -> new IllegalArgumentException("이미 존재하는 유저입니다."));
+            registerService.register(registerRequest);
+            return ModelAndView.redirect("index.html");
+        } catch (Exception e){
+            return ModelAndView.error();
+        }
     }
 }

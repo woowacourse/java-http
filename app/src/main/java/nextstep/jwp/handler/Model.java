@@ -17,7 +17,7 @@ public class Model {
         attributes.put(key, value);
     }
 
-    public Object get(String key) {
+    public Object getAttribute(String key) {
         return attributes.get(key);
     }
 

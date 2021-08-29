@@ -3,11 +3,11 @@
 <br>
 
 ## 요구사항
-- [ ] `GET /index.html` 응딥하기
-- [ ] Query String 파싱
-- [ ] Http Status Code 302
-- [ ] Post 방식으로 회원가입
-- [ ] CSS 지원하기
+- [x] `GET /index.html` 응딥하기
+- [x] Query String 파싱
+- [x] Http Status Code 302
+- [x] Post 방식으로 회원가입
+- [x] CSS 지원하기
 
 <br>
 

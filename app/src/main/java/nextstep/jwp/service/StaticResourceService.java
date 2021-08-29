@@ -10,10 +10,17 @@ public class StaticResourceService {
     private static final String PREFIX = "static";
 
     public StaticResource findByPath(String path) throws IOException {
-        URL url = ClassLoader.getSystemResource(PREFIX + path);
-        File file = new File(url.getFile());
+        try {
+            URL url = ClassLoader.getSystemResource(PREFIX + path);
+            File file = new File(url.getFile());
 
-        return StaticResource.from(file);
+            return StaticResource.from(file);
+        } catch (NullPointerException e) {
+            URL url = ClassLoader.getSystemResource(PREFIX + "/404.html");
+            File file = new File(url.getFile());
+
+            return StaticResource.from(file);
+        }
     }
 
     public StaticResource findByPathWithExtension(String path, String extension) throws IOException {

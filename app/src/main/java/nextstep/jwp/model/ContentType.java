@@ -4,11 +4,11 @@ import java.util.Arrays;
 import nextstep.jwp.exception.InvalidFileExtensionException;
 
 public enum ContentType {
-    HTML("html", "text/html"),
+    HTML("html", "text/html; charset=UTF-8"),
     CSS("css", "text/css"),
-    JS("js", "application/js");
-
-    private static final String CHARSET_UTF_8 = ";charset=utf-8";
+    JS("js", "application/js"),
+    ICO("ico", "image/vnd.microsoft.icon"),
+    SVG("svg", "image/svg+xml");
 
     private final String extension;
     private final String type;
@@ -26,6 +26,6 @@ public enum ContentType {
     }
 
     public String getType() {
-        return type + CHARSET_UTF_8;
+        return type;
     }
 }

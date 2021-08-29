@@ -7,16 +7,15 @@ import java.nio.file.Files;
 
 public class Content {
 
-    private static final String NEW_LINE = System.getProperty("line.separator");
-
     private final String value;
 
-    public Content(String value) {
+    private Content(String value) {
         this.value = value;
     }
 
     public static Content readFile(File file) throws IOException {
-        return new Content(String.join(NEW_LINE, Files.readAllLines(file.toPath())));
+        String contentValue = new String(Files.readAllBytes(file.toPath()));
+        return new Content(contentValue);
     }
 
     public String getValue() {

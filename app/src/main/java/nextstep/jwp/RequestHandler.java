@@ -74,6 +74,10 @@ public class RequestHandler implements Runnable {
                 }
             }
 
+            if (uri.startsWith("/register")) {
+                fileName = "/register.html";
+            }
+
             byte[] body = new byte[0];
             body = Files.readAllBytes(getResources(fileName).toPath());
             final String response = makeResponse(status, location, body);

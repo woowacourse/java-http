@@ -30,23 +30,26 @@ public class RequestHandler implements Runnable {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
+             final OutputStream outputStream = connection.getOutputStream();
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));) {
 
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-            String firstLine = bufferedReader.readLine();
-            String requestUri = firstLine.split(" ")[1];
+            String requestLine = bufferedReader.readLine();
+            String requestUri = requestLine.split(" ")[1];
 
             while (bufferedReader.ready()) {
                 String line = bufferedReader.readLine();
                 if (line == null) {
                     return;
                 }
-                System.out.println(line);
+                log.debug(line);
             }
 
             if ("/login".equals(requestUri)) {
                 requestUri += ".html";
+                String response = createResponse(requestUri, "200 OK");
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
             }
 
             if (requestUri.contains("/login?")) {
@@ -58,39 +61,53 @@ public class RequestHandler implements Runnable {
                 String account = queryString.substring(0, index2).split("=")[1];
                 String password = queryString.substring(index2 + 1).split("=")[1];
 
-                User user = InMemoryUserRepository.findByAccount(account).orElseThrow(IllegalArgumentException::new);
+                Optional<User> user = InMemoryUserRepository.findByAccount(account);
+                log.debug(user.toString());
 
-                if (!user.checkPassword(password)) {
-                    throw new IllegalArgumentException("올바르지 않은 비밀번호입니다.");
+                if (user.isEmpty()) {
+                    String failureResponse = createResponse("/401.html", "302 Found");
+                    outputStream.write(failureResponse.getBytes());
+                    outputStream.flush();
+                    return;
                 }
 
-                log.debug(user.toString());
+                if (!user.get().checkPassword(password)) {
+                    String failureResponse = createResponse("/401.html", "302 Found");
+                    outputStream.write(failureResponse.getBytes());
+                    outputStream.flush();
+                    return;
+                }
+
+                String successResponse = createResponse("/index.html", "302 Found");
+                outputStream.write(successResponse.getBytes());
+                outputStream.flush();
                 return;
             }
 
-            final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
-            final Path path = new File(resource.getPath()).toPath();
-            final List<String> lines = Files.readAllLines(path);
-
-            String result = lines.stream()
-                                 .map(String::valueOf)
-                                 .collect(Collectors.joining());
-
-
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + result.getBytes().length + " ",
-                    "",
-                    result);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
         }
+    }
+
+    private String createResponse(String requestUri, String statusCode) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
+        final Path path = new File(resource.getPath()).toPath();
+        final List<String> lines = Files.readAllLines(path);
+
+        String result = lines.stream()
+                             .map(String::valueOf)
+                             .collect(Collectors.joining());
+
+
+        final String response = String.join("\r\n",
+                "HTTP/1.1 " + statusCode + " ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + result.getBytes().length + " ",
+                "",
+                result);
+        return response;
     }
 
     private void close() {

@@ -12,7 +12,7 @@ public class FileUtils {
     private FileUtils() {
     }
 
-    public static String getAllResponseBodies(String url) throws IOException {
+    public static String readFileOfUrl(String url) throws IOException {
         URL resource = FileUtils.class.getClassLoader().getResource("static/" + url);
         String file = Objects.requireNonNull(resource).getFile();
         Path path = new File(file).toPath();

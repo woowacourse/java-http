@@ -1,5 +1,5 @@
 package nextstep.jwp.exception;
 
-public class InvalidRequestLineException extends RuntimeException {
+public class InvalidRequestLineException extends InvalidHttpRequestException {
 
 }

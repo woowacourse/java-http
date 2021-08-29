@@ -1,5 +1,5 @@
 package nextstep.jwp.exception;
 
-public class NotAllowedHttpVersionException extends RuntimeException {
+public class NotAllowedHttpVersionException extends InvalidHttpRequestException {
 
 }

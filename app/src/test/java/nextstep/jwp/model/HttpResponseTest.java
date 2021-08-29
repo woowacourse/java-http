@@ -21,7 +21,7 @@ class HttpResponseTest {
         BufferedReader reader = new BufferedReader(new FileReader(HTTP_FORWARD_TXT));
         assertThat(reader.readLine()).isEqualTo("HTTP/1.1 200 OK ");
         assertThat(reader.readLine()).isEqualTo("Content-Type: text/html;charset=utf-8 ");
-        assertThat(reader.readLine()).isEqualTo("Content-Length: 5670 ");
+        assertThat(reader.readLine()).isEqualTo("Content-Length: 5564 ");
     }
 
     @Test

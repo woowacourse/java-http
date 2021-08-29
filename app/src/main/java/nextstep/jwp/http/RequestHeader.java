@@ -15,7 +15,7 @@ public class RequestHeader {
         final Pattern pattern = Pattern.compile("(?<=" + key + ": ).+");
         Matcher matcher = pattern.matcher(headers);
         if (matcher.find()) {
-            return Optional.of(matcher.group());
+            return Optional.of(matcher.group().trim());
         }
         return Optional.empty();
     }

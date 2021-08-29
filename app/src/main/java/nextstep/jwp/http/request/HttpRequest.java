@@ -11,7 +11,7 @@ public class HttpRequest {
     private final RequestHeaders requestHeaders;
     private final RequestBody requestBody;
 
-    public HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders, RequestBody requestBody) {
+    private HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders, RequestBody requestBody) {
         this.requestLine = requestLine;
         this.requestHeaders = requestHeaders;
         this.requestBody = requestBody;
@@ -39,23 +39,23 @@ public class HttpRequest {
         return RequestBody.empty();
     }
 
-    public String getUriParameter(String parameter) {
-        return requestLine.getUriParameter(parameter);
-    }
-
-    public String getBodyParameter(String parameter) {
-        return requestBody.getParameter(parameter);
-    }
-
-    public String getUri() {
-        return requestLine.getUri();
-    }
-
     public boolean hasMethod(Method method) {
         return requestLine.isSameMethod(method);
     }
 
     public boolean hasQueryParam() {
         return requestLine.hasQueryParam();
+    }
+
+    public String getUri() {
+        return requestLine.getUri();
+    }
+
+    public String getUriParameter(String parameter) {
+        return requestLine.getUriParameter(parameter);
+    }
+
+    public String getBodyParameter(String parameter) {
+        return requestBody.getParameter(parameter);
     }
 }

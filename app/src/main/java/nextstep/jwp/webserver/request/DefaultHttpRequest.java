@@ -17,6 +17,12 @@ public class DefaultHttpRequest implements HttpRequest {
     private RequestHeader requestHeader;
     private RequestParams requestParams;
 
+    public DefaultHttpRequest(HttpMethod httpMethod, String url) {
+        this.requestLine = new RequestLine(httpMethod, url);
+        this.requestHeader = new RequestHeader();
+        this.requestParams = new RequestParams();
+    }
+
     public DefaultHttpRequest(InputStream inputStream) {
 
         try {

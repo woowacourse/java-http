@@ -14,6 +14,11 @@ public class RequestLine {
     private String url;
     private String queryString;
 
+    public RequestLine(HttpMethod httpMethod, String url) {
+        this.httpMethod = httpMethod;
+        this.url = url;
+    }
+
     public RequestLine(String line) {
         validateLine(line);
         String[] values = line.split(SPACE);

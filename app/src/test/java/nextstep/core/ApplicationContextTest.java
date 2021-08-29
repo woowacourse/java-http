@@ -9,7 +9,6 @@ import nextstep.jwp.core.annotation.Controller;
 import nextstep.jwp.core.mvc.Handler;
 import nextstep.jwp.core.mvc.ModelAndView;
 import nextstep.jwp.core.mvc.mapping.MethodHandlerMapping;
-import nextstep.jwp.webserver.request.DefaultHttpRequest;
 import nextstep.jwp.webserver.request.HttpMethod;
 import nextstep.jwp.webserver.request.HttpRequest;
 import org.assertj.core.api.Assertions;
@@ -53,6 +52,16 @@ public class ApplicationContextTest {
         Assertions.assertThat(handler).isNotNull();
         Assertions.assertThat(handler.matchUrl("/", HttpMethod.GET)).isTrue();
     }
+
+//    @Test
+//    @DisplayName("핸들러 매핑 실패")
+//    public void handlerMapping_fail() throws Exception{
+//        //given
+//        final FrontHandler frontHandler = new FrontHandler("nextstep");
+//        Assertions.assertThatThrownBy(() -> {
+//            frontHandler.getResponse(new DefaultHttpRequest(HttpMethod.GET, "/abcabc"), new DefaultHttpResponse());
+//        }).isInstanceOf(NotFoundHandlerException.class);
+//    }
 
     @Test
     @DisplayName("modelAndView 테스트")

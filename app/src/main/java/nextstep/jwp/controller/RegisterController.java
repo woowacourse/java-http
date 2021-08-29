@@ -8,16 +8,19 @@ import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpStatus;
 import nextstep.jwp.model.User;
 
-public class LoginController {
+public class RegisterController {
 
     public void doPost(HttpRequest request, HttpResponse response) {
         HttpRequestBody body = request.body();
 
         String account = (String) body.getAttribute("account");
-        Optional<User> byAccount = InMemoryUserRepository.findByAccount(account);
-        if (byAccount.isPresent()) {
-            response.setStatus(HttpStatus.FOUND);
-            response.headers().add("Location", "/index");
-        }
+        String email = (String) body.getAttribute("email");
+        String password = (String) body.getAttribute("password");
+
+        User user = new User(account, email, password);
+        InMemoryUserRepository.save(user);
+
+        response.setStatus(HttpStatus.FOUND);
+        response.headers().add("Location", "/login");
     }
 }

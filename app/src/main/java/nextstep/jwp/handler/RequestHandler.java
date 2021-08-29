@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Objects;
 import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.http.request.HttpMethod;
 import nextstep.jwp.http.request.HttpRequest;
@@ -56,6 +57,11 @@ public class RequestHandler implements Runnable {
             if (url.equals("/login") && httpRequest.method() == HttpMethod.POST) {
                 LoginController loginController = new LoginController();
                 loginController.doPost(httpRequest, httpResponse);
+            }
+
+            if (url.equals("/register") && httpRequest.method() == HttpMethod.POST) {
+                RegisterController registerController = new RegisterController();
+                registerController.doPost(httpRequest, httpResponse);
             }
 
             if (httpResponse.status() == OK) {

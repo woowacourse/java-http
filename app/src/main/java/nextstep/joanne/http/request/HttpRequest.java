@@ -65,10 +65,10 @@ public class HttpRequest {
     }
 
     public String contentType() {
-        if (requestHeaders.containsResource("css") || uriEquals("css")) {
+        if (requestHeaders.containsResource("css") || uriContains("css")) {
             return "text/css";
         }
-        if (requestHeaders.containsResource("js") || uriEquals("js")) {
+        if (requestHeaders.containsResource("js") || uriContains("js")) {
             return "application/javascript";
         }
         return "text/html";

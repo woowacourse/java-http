@@ -1,8 +1,8 @@
 package nextstep.joanne.converter;
 
+import nextstep.joanne.http.HttpStatus;
 import nextstep.joanne.http.request.HttpRequest;
 import nextstep.joanne.http.response.HttpResponse;
-import nextstep.joanne.http.HttpStatus;
 
 import java.io.BufferedReader;
 import java.io.File;

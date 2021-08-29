@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class InMemoryUserRepositoryTest {
@@ -28,9 +29,19 @@ class InMemoryUserRepositoryTest {
     @Test
     @DisplayName("등록된 유저의 다음 순서 Id를 가져온다.")
     void nextId() {
-        User user = new User("joanne", "password", "seominjeong.dev@gmail.com");
-        InMemoryUserRepository.save(user);
+        // given
+        User first = new User("joanne", "password", "seominjeong.dev@gmail.com");
+        InMemoryUserRepository.save(first);
+        long 멍토_앞사람 = InMemoryUserRepository.findByAccount("joanne").get().getId();
 
-        assertThat(InMemoryUserRepository.findByAccount("joanne").get().getId()).isEqualTo(2);
+        // when
+        User second = new User("멍토", "password", "멍토@gmail.com");
+        InMemoryUserRepository.save(second);
+
+        assertAll(
+                () -> assertThat(InMemoryUserRepository.findByAccount("멍토")).isPresent(),
+                () -> assertThat(InMemoryUserRepository.findByAccount("멍토").get().getId()).isEqualTo(멍토_앞사람 + 1)
+        );
+
     }
 }

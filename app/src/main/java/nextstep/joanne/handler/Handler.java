@@ -19,19 +19,43 @@ public class Handler {
 
     public HttpResponse handle() throws IOException {
 
-        if (httpRequest.uriEquals("/")) {
-            return mainPage();
+        try {
+            if (httpRequest.uriContains("index")) {
+                return mainPage();
+            }
+
+            if (httpRequest.uriContains("register")) {
+                return doRegister();
+            }
+
+            if (httpRequest.uriContains("login")) {
+                return doLogin();
+            }
+        } catch (IOException e) {
+            return errorPage();
         }
 
-        if (httpRequest.uriContains("/register")) {
-            return doRegister();
-        }
+        return staticResource();
+    }
 
-        if (httpRequest.uriContains("/login")) {
-            return doLogin();
+    private HttpResponse staticResource() throws IOException {
+        try {
+            return HttpRequestResponseConverter.convertToHttpResponse(
+                    HttpStatus.OK,
+                    httpRequest.resourceUri(),
+                    httpRequest.contentType()
+            );
+        } catch (IOException e) {
+            return notFound();
         }
+    }
 
-        return null;
+    private HttpResponse errorPage() throws IOException {
+        return HttpRequestResponseConverter.convertToHttpResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                "/500.html",
+                httpRequest.contentType()
+        );
     }
 
     private HttpResponse doLogin() throws IOException {
@@ -62,6 +86,14 @@ public class Handler {
             }
         }
         return null;
+    }
+
+    private HttpResponse notFound() throws IOException {
+        return HttpRequestResponseConverter.convertToHttpResponse(
+                HttpStatus.NOT_FOUND,
+                "/404.html",
+                httpRequest.contentType()
+        );
     }
 
     private HttpResponse doRegister() throws IOException {

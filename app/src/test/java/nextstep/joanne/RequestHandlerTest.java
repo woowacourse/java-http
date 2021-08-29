@@ -185,4 +185,32 @@ class RequestHandlerTest {
                 Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath())));
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @DisplayName("html을 찾지 못한 경우 404 페이지를 응답한다.")
+    @Test
+    void notFound() throws IOException {
+        // given
+        final String httpRequest = makeGetRequest("/joanne.html");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        String expected = to404NotFoundWithHtml(new String(
+                Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath())));
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private String to404NotFoundWithHtml(String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 404 Not Found ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
 }

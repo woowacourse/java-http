@@ -2,7 +2,6 @@ package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.util.Map;
-import nextstep.jwp.HttpServer;
 import nextstep.jwp.http.RequestBody;
 import nextstep.jwp.http.ResponseEntity;
 import nextstep.jwp.http.StatusCode;
@@ -20,6 +19,27 @@ public class Controller {
     public String basic(String uri) {
         return ResponseEntity
                 .responseBody("Hello world!")
+                .build();
+    }
+
+    @GetMapping(path = "/login")
+    public String login(String uri) throws IOException {
+        return ResponseEntity
+                .responseResource(uri)
+                .build();
+    }
+
+    @GetMapping(path = "/register")
+    public String register(String uri) throws IOException {
+        return ResponseEntity
+                .responseResource(uri)
+                .build();
+    }
+
+    @GetMapping(path = "/index")
+    public String index(String uri) throws IOException {
+        return ResponseEntity
+                .responseResource(uri)
                 .build();
     }
 

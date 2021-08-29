@@ -17,10 +17,10 @@ public class ResponseEntity {
         private String responseBody = "";
         private String contentType = Http.DEFAULT_CONTENT_TYPE;
 
-        private Builder(){
+        private Builder() {
         }
 
-        public Builder statusCode(StatusCode statusCode){
+        public Builder statusCode(StatusCode statusCode) {
             this.statusCode = statusCode;
             return this;
         }
@@ -48,7 +48,7 @@ public class ResponseEntity {
 
         private String extractContentType(String uri) {
             String[] splitByExtension = uri.split(Http.FILE_EXTENSION_SEPARATOR);
-             return splitByExtension[splitByExtension.length - 1];
+            return splitByExtension[splitByExtension.length - 1];
         }
 
         private String checkFileExtension(String uri) {
@@ -65,17 +65,17 @@ public class ResponseEntity {
 
     }
 
-    private ResponseEntity(Builder builder){
+    private ResponseEntity(Builder builder) {
         this.statusCode = builder.statusCode;
         this.responseBody = builder.responseBody;
         this.contentType = builder.contentType;
     }
 
-    public static Builder statusCode(StatusCode statusCode){
+    public static Builder statusCode(StatusCode statusCode) {
         return new Builder().statusCode(statusCode);
     }
 
-    public static Builder responseBody(String responseBody){
+    public static Builder responseBody(String responseBody) {
         return new Builder().responseBody(responseBody);
     }
 

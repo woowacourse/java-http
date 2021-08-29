@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -176,6 +177,7 @@ class RequestHandlerTest {
         }
     }
 
+    @Disabled
     @Nested
     @DisplayName("쿼리스트링으로 로그인을 하면")
     class Login {

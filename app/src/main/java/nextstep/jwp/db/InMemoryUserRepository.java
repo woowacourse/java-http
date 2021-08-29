@@ -1,11 +1,10 @@
 package nextstep.jwp.db;
 
 
-import nextstep.jwp.model.User;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import nextstep.jwp.model.User;
 
 public class InMemoryUserRepository {
 
@@ -24,7 +23,7 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    public static int size(){
+    public static int size() {
         return database.size();
     }
 }

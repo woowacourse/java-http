@@ -15,7 +15,8 @@ public class RegisterService {
     }
 
     private void checkIsDuplicatedAccount(String account) {
-        InMemoryUserRepository.findByAccount(account)
-                .ifPresent((user)-> { throw new UserException("이미 존재하는 유저입니다.");});
+        InMemoryUserRepository.findByAccount(account).ifPresent((user) -> {
+            throw new UserException();
+        });
     }
 }

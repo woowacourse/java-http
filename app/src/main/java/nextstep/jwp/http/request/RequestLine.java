@@ -23,7 +23,7 @@ public class RequestLine {
         return method;
     }
 
-    public SourcePath sourcePath(){
+    public SourcePath sourcePath() {
         return uriPath.getSourcePath();
     }
 

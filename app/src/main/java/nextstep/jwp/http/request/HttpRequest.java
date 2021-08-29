@@ -30,7 +30,7 @@ public class HttpRequest {
         RequestLine requestLine = readRequestLine(bufferedReader);
         RequestHeaders headers = readHeaders(bufferedReader);
 
-        if(headers.hasContent()){
+        if (headers.hasContent()) {
             return new HttpRequest(requestLine, headers, readBody(bufferedReader, headers.contentLength()));
         }
         return new HttpRequest(requestLine, headers);

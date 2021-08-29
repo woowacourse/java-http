@@ -14,10 +14,10 @@ public class ContentType {
     }
 
     public static ContentType parseFromExtension(String extension) {
-        if(extension.equals("css")){
+        if (extension.equals("css")) {
             return CSS_UTF8;
         }
-        if(extension.equals("html")){
+        if (extension.equals("html")) {
             return HTML_UTF8;
         }
         return PLAIN_UTF8;
@@ -27,7 +27,7 @@ public class ContentType {
         return TEXT_DEFAULT_TYPE;
     }
 
-    public String value(){
+    public String value() {
         return contentType;
     }
 }

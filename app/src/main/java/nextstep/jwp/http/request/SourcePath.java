@@ -12,7 +12,7 @@ public class SourcePath {
 
     public static SourcePath of(String uriPath) {
         int index = uriPath.indexOf("?");
-        if(index > 0){
+        if (index > 0) {
             return new SourcePath(uriPath.substring(0, index));
         }
         return new SourcePath(uriPath);
@@ -24,8 +24,12 @@ public class SourcePath {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         SourcePath that = (SourcePath) o;
         return sourcePath.equalsIgnoreCase(that.sourcePath);
     }

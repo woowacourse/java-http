@@ -11,7 +11,7 @@ public class LoginRequest {
         this.password = password;
     }
 
-    public static LoginRequest fromQueryParams(QueryParams params){
+    public static LoginRequest fromQueryParams(QueryParams params) {
         return new LoginRequest(params.get("account"), params.get("password"));
     }
 

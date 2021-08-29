@@ -12,12 +12,12 @@ public class RequestHeaders {
         this.headers = headers;
     }
 
-    public static RequestHeaders of(List<String> lines){
-        Map<String, String> headers =  new HashMap<>();
+    public static RequestHeaders of(List<String> lines) {
+        Map<String, String> headers = new HashMap<>();
 
-        for(String line : lines){
+        for (String line : lines) {
             String[] pair = line.split(": ");
-            if(pair.length != 2){
+            if (pair.length != 2) {
                 break;
             }
             headers.put(pair[0], pair[1]);
@@ -25,16 +25,12 @@ public class RequestHeaders {
         return new RequestHeaders(headers);
     }
 
-    public String get(String key){
-        return headers.get(key);
-    }
-
     public boolean hasContent() {
         String contentLength = headers.get("Content-Length");
         return !Objects.isNull(contentLength);
     }
 
-    public int contentLength(){
+    public int contentLength() {
         return Integer.parseInt(headers.get("Content-Length"));
     }
 }

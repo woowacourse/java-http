@@ -29,14 +29,14 @@ public class RequestUriPath {
         return sourcePath;
     }
 
-    public boolean isPath(String path) {
-        return sourcePath.isPath(path);
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         RequestUriPath that = (RequestUriPath) o;
         return Objects.equals(sourcePath, that.sourcePath) && Objects.equals(queryParams, that.queryParams);
     }

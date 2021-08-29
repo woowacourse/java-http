@@ -13,7 +13,7 @@ public enum HttpStatus {
         this.code = code;
     }
 
-    public int code(){
+    public int code() {
         return code;
     }
 }

@@ -8,7 +8,7 @@ public class HandlerAdaptorImpl implements HandlerAdaptor {
     public ResponseEntity handle(Handler handler, HttpRequest httpRequest) {
         try {
             return handler.service(httpRequest);
-        } catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.unhandledException();
         }
     }

@@ -1,9 +1,8 @@
 package nextstep.jwp.handler.modelandview;
 
-import nextstep.jwp.http.response.HttpStatus;
-
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.http.response.HttpStatus;
 
 public class Model {
 
@@ -25,7 +24,7 @@ public class Model {
         return (HttpStatus) attributes.get("HttpStatus");
     }
 
-    public boolean contains(String key){
+    public boolean contains(String key) {
         return attributes.containsKey(key);
     }
 }

@@ -11,14 +11,14 @@ public class ResponseEntity {
         this.modelAndView = modelAndView;
     }
 
-    public static ResponseEntity ok(String viewPath){
+    public static ResponseEntity ok(String viewPath) {
         Model model = new Model();
         model.addAttribute("HttpStatus", HttpStatus.OK);
         ModelAndView modelAndView = new ModelAndView(model, viewPath);
         return new ResponseEntity(modelAndView);
     }
 
-    public static ResponseEntity redirect(String location){
+    public static ResponseEntity redirect(String location) {
         Model model = new Model();
         model.addAttribute("HttpStatus", HttpStatus.FOUND);
         model.addAttribute("Location", location);
@@ -47,7 +47,7 @@ public class ResponseEntity {
         return new ResponseEntity(modelAndView);
     }
 
-    public static ResponseEntity badRequest(){
+    public static ResponseEntity badRequest() {
         Model model = new Model();
         model.addAttribute("HttpStatus", HttpStatus.BAD_REQUEST);
         ModelAndView modelAndView = new ModelAndView(model, "/404.html");

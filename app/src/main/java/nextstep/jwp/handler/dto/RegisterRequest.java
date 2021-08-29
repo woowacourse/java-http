@@ -14,11 +14,11 @@ public class RegisterRequest {
         this.email = email;
     }
 
-    public static RegisterRequest fromQueryParams(QueryParams params){
+    public static RegisterRequest fromQueryParams(QueryParams params) {
         return new RegisterRequest(params.get("account"), params.get("password"), params.get("email"));
     }
-    
-    public User toEntity(){
+
+    public User toEntity() {
         return new User(account, password, email);
     }
 }

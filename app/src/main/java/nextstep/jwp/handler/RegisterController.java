@@ -41,10 +41,10 @@ public class RegisterController implements Handler {
     }
 
     private ResponseEntity register(QueryParams queryParams) {
-        try{
+        try {
             registerService.register(RegisterRequest.fromQueryParams(queryParams));
             return ResponseEntity.redirect("index.html");
-        } catch (UserException userException){
+        } catch (UserException userException) {
             return ResponseEntity.userException();
         }
     }

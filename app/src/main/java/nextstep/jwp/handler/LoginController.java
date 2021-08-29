@@ -38,10 +38,10 @@ public class LoginController implements Handler {
     }
 
     private ResponseEntity login(QueryParams params) {
-        try{
+        try {
             loginService.login(LoginRequest.fromQueryParams(params));
             return ResponseEntity.redirect("index.html");
-        } catch (UnauthorizedException exception){
+        } catch (UnauthorizedException exception) {
             return ResponseEntity.unauthorized();
         }
     }

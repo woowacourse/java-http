@@ -11,11 +11,11 @@ public class ViewResolver {
 
     public View resolve(String viewName) {
         try {
-            if(viewName.isEmpty()){
+            if (viewName.isEmpty()) {
                 return View.empty();
             }
 
-            if(viewName.equals("/")){
+            if (viewName.equals("/")) {
                 return View.asString(ROOT_RESPONSE);
             }
 

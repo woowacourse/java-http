@@ -6,7 +6,7 @@ import java.util.Optional;
 
 public class HttpSessions {
 
-    public static final Map<String, Session> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new HashMap<>();
 
     private HttpSessions() {
     }

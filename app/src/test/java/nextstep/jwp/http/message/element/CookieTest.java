@@ -8,10 +8,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CookieTest {
 
-    @Test
-    void get() {
-    }
-
     @DisplayName("쿠키가 존재하면 쿠키를 추출한다.")
     @Test
     void get_exist() {

@@ -6,7 +6,6 @@ import nextstep.jwp.http.message.element.HttpVersion;
 import nextstep.jwp.http.message.element.cookie.Cookie;
 import nextstep.jwp.http.message.element.cookie.HttpCookie;
 import nextstep.jwp.http.message.element.cookie.ProxyHttpCookie;
-import nextstep.jwp.http.message.element.session.HttpSession;
 import nextstep.jwp.http.message.element.session.HttpSessions;
 import nextstep.jwp.http.message.element.session.ProxyHttpSession;
 import nextstep.jwp.http.message.element.session.Session;
@@ -54,8 +53,7 @@ public class HttpRequest {
     public Cookie getCookie() {
         return Optional.ofNullable(cookie)
                 .orElseGet(() -> {
-                            ProxyHttpCookie cookie = createProxyCookie();
-                            this.cookie = cookie;
+                            this.cookie = createProxyCookie();
                             return cookie;
                         }
                 );

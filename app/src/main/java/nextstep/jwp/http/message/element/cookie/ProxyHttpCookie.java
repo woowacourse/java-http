@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 public class ProxyHttpCookie implements Cookie {
 
     private Cookie cookie;
-    public Map<String, String> changedCookie;
+    private final Map<String, String> changedCookie;
 
     public ProxyHttpCookie() {
         this(null);

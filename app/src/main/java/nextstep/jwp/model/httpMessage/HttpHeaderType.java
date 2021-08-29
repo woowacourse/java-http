@@ -13,6 +13,11 @@ public enum HttpHeaderType {
         this.value = value;
     }
 
+    public static boolean contains(String name) {
+        return Arrays.stream(values())
+                .anyMatch(type -> type.value.equals(name));
+    }
+
     public static HttpHeaderType of(String value) {
         return Arrays.stream(values())
                 .filter(headerType -> headerType.value.equals(value))

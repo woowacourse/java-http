@@ -12,7 +12,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
 
-import static nextstep.jwp.model.httpMessage.AbstractHttpHeader.DELIMITER;
+import static nextstep.jwp.model.httpMessage.CommonHttpHeader.DELIMITER;
 import static nextstep.jwp.model.httpMessage.HttpHeaderType.CONTENT_TYPE;
 import static nextstep.jwp.model.httpMessage.HttpHeaderType.LOCATION;
 import static nextstep.jwp.model.httpMessage.HttpStatus.OK;
@@ -32,35 +32,24 @@ public class HttpResponse {
     }
 
     public void forward(String url) throws IOException {
-        String body = FileUtils.readFileOfUrl(url);
-
-//        headers.addProtocol(OK);
         responseLine = new ResponseLine(OK);
-
         ContentType.of(url).ifPresent(type -> headers.add(CONTENT_TYPE, type.value()));
-
+        String body = FileUtils.readFileOfUrl(url);
         headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
-        LOG.debug("Response header : content length : {}", body.getBytes(StandardCharsets.UTF_8).length);
-
         writeBody(outputStream, processAllHeaders(body));
     }
 
     public void forwardBody(String body) throws IOException {
-//        headers.addProtocol(OK);
         responseLine = new ResponseLine(OK);
-
         headers.add(CONTENT_TYPE, HTML.value());
-
+        headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
         String response = processAllHeaders(body);
         writeBody(outputStream, response);
     }
 
     public void redirect(String path) throws IOException {
-//        headers.addProtocol(REDIRECT);
         responseLine = new ResponseLine(REDIRECT);
-
         headers.add(LOCATION, path);
-
         String response = processAllHeaders();
         writeBody(outputStream, response);
     }

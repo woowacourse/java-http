@@ -1,18 +1,23 @@
 package nextstep.jwp.model.httpMessage.response;
 
-import nextstep.jwp.model.httpMessage.AbstractHttpHeader;
+import nextstep.jwp.model.httpMessage.CommonHttpHeader;
 import nextstep.jwp.model.httpMessage.HttpHeaderType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringJoiner;
 
-public class ResponseHeader extends AbstractHttpHeader {
+public class ResponseHeader extends CommonHttpHeader {
 
-    private Map<String, String> headers = new LinkedHashMap<>();
+    private static final Logger LOG = LoggerFactory.getLogger(ResponseLine.class);
+
+    private final Map<String, String> headers = new LinkedHashMap<>();
 
     public void add(HttpHeaderType type, String value) {
         headers.put(type.value(), value);
+        LOG.debug("Response header : {}: {}", type.value(), value);
     }
 
     public Map<String, String> getHeaders() {

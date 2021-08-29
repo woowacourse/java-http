@@ -2,9 +2,15 @@ package nextstep.jwp.model.httpMessage;
 
 public interface HttpHeader {
 
-    ContentType getContentType();
+    void setContentType(String contentType);
+
+    String getContentType();
+
+    void setContentLength(int contentLength);
 
     int getContentLength();
 
-    String getCookie();
+    void addHeader(String type, String value);
+
+    String getHeader(String type);
 }

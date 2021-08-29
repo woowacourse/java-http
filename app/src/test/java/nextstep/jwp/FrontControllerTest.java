@@ -1,4 +1,4 @@
-package nextstep.jwp.maybedeleted;
+package nextstep.jwp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -61,34 +61,5 @@ class FrontControllerTest {
             new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @DisplayName("User 객체가 저장되었는지 확인한다.")
-    @Test
-    void queryString_SaveUser_Success() {
-        // given
-        final String httpRequest = String.join("\r\n",
-            "GET /login.html?account=gugu&password=password HTTP/1.1 ",
-            "Host: localhost:8080 ",
-            "Connection: keep-alive ",
-            "",
-            "");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final FrontController frontController = new FrontController(socket);
-
-        User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
-
-        // when
-        frontController.run();
-
-        User findUser = InMemoryUserRepository.findByAccount("gugu")
-            .orElseThrow(UserNotFoundException::new);
-
-        // then
-        assertThat(findUser)
-            .usingRecursiveComparison()
-            .ignoringFields("id", "email")
-            .isEqualTo(user);
     }
 }

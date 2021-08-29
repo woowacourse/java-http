@@ -1,6 +1,6 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.exception.http.InvalidHttpRequestException;
+import nextstep.jwp.exception.http.request.InvalidHttpRequestException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.view.View;

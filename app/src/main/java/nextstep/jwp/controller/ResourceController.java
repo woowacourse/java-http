@@ -9,13 +9,13 @@ import nextstep.jwp.view.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HomeController extends AbstractController {
+public class ResourceController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(HomeController.class);
+    private static final Logger log = LoggerFactory.getLogger(ResourceController.class);
 
     @Override
     protected View doGet(HttpRequest request, HttpResponse response) {
-        log.debug("Home - HTTP GET Request");
+        log.debug("Resource - HTTP GET Request");
 
         response.forward(OK, request.getUri());
         return new View(request.getPath());
@@ -23,7 +23,7 @@ public class HomeController extends AbstractController {
 
     @Override
     protected View doPost(HttpRequest request, HttpResponse response) {
-        log.debug("Home - HTTP POST Request");
+        log.debug("Resource - HTTP POST Request");
 
         throw new InvalidPostRequestException();
     }

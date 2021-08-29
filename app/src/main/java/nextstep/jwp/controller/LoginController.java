@@ -23,9 +23,7 @@ public class LoginController extends AbstractController {
     protected View doGet(HttpRequest request, HttpResponse response) {
         log.debug("Login - HTTP GET Request");
 
-        response.setLine(OK);
-        response.setContentType("text/html;charset=utf-8");
-
+        response.forward(OK, request.getUri());
         return new View(request.getPath());
     }
 
@@ -37,14 +35,10 @@ public class LoginController extends AbstractController {
         Optional<User> user = InMemoryUserRepository.findByAccount(query.get(ACCOUNT.getInfo()));
 
         if (user.isPresent()) {
-            response.setLine(FOUND);
-            response.setContentType("text/html;charset=utf-8");
-
+            response.forward(FOUND, request.getUri());
             return new View("/index");
         }
-        response.setLine(UNAUTHORIZED);
-        response.setContentType("text/html;charset=utf-8");
-
+        response.forward(UNAUTHORIZED, request.getUri());
         return new View("/401");
     }
 }

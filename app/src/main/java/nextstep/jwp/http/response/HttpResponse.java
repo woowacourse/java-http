@@ -1,9 +1,14 @@
 package nextstep.jwp.http.response;
 
+import static nextstep.jwp.http.response.ContentType.HTML;
+import static nextstep.jwp.http.response.ContentType.from;
+
 import java.io.OutputStream;
-import nextstep.jwp.exception.http.InvalidHttpResponseException;
+import nextstep.jwp.exception.http.response.InvalidHttpResponseException;
 
 public class HttpResponse {
+
+    private static final String EXTENSION_MARK = ".";
 
     private final ResponseHeader header;
     private ResponseBody body;
@@ -16,12 +21,21 @@ public class HttpResponse {
         this.header = header;
     }
 
-    public void setContentType(String contentType) {
-        header.setContentType(contentType);
+    public void forward(HttpStatus httpStatus, String uri) {
+        setLine(httpStatus);
+        setContentType(uri);
     }
 
-    public void setLine(HttpStatus httpStatus) {
+    private void setLine(HttpStatus httpStatus) {
         header.setLine(httpStatus);
+    }
+
+    private void setContentType(String uri) {
+        if (uri.contains(EXTENSION_MARK)) {
+            header.setContentType(from(uri).getValue());
+            return;
+        }
+        header.setContentType(HTML.getValue());
     }
 
     public void setBody(ResponseBody body) {
@@ -38,13 +52,6 @@ public class HttpResponse {
         }
     }
 
-    /**
-     * HTTP/1.1 200 OK
-     * "Content-Type: text/html;charset=utf-8 ",
-     * "Content-Length: " + responseBody.getLength() + " ",
-     * "",
-     * responseBody.getBody());
-     */
     public String getResponse() {
         StringBuilder response = new StringBuilder();
 

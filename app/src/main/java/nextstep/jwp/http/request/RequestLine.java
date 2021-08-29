@@ -3,32 +3,36 @@ package nextstep.jwp.http.request;
 public class RequestLine {
 
     private final HttpMethod method;
-    private final RequestUri uri;
-    private final RequestProtocol protocol;
+    private final RequestUri requestUri;
+    private final RequestProtocol requestProtocol;
 
     public RequestLine(String[] line) {
         this(HttpMethod.from(line[0]), new RequestUri(line[1]), new RequestProtocol(line[2]));
     }
 
-    public RequestLine(HttpMethod method, RequestUri uri, RequestProtocol protocol) {
+    public RequestLine(HttpMethod method, RequestUri requestUri, RequestProtocol requestProtocol) {
         this.method = method;
-        this.uri = uri;
-        this.protocol = protocol;
+        this.requestUri = requestUri;
+        this.requestProtocol = requestProtocol;
     }
 
     public String getPath() {
-        return uri.getPath();
+        return requestUri.getPath();
+    }
+
+    public String getUri() {
+        return requestUri.getUri();
     }
 
     public HttpMethod getMethod() {
         return method;
     }
 
-    public RequestUri getUri() {
-        return uri;
+    public RequestUri getRequestUri() {
+        return requestUri;
     }
 
-    public RequestProtocol getProtocol() {
-        return protocol;
+    public RequestProtocol getRequestProtocol() {
+        return requestProtocol;
     }
 }

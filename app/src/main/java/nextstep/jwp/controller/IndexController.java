@@ -17,9 +17,7 @@ public class IndexController extends AbstractController{
     protected View doGet(HttpRequest request, HttpResponse response) {
         log.debug("Index - HTTP GET Request");
 
-        response.setLine(OK);
-        response.setContentType("text/html;charset=utf-8");
-
+        response.forward(OK, request.getUri());
         return new View(request.getPath());
     }
 

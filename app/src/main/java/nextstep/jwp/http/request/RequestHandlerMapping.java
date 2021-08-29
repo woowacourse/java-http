@@ -7,8 +7,11 @@ import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.IndexController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.ResourceController;
 
 public class RequestHandlerMapping {
+
+    private static final String EXTENSION_MARK = ".";
 
     private final Map<String, Controller> handlerMapping;
 
@@ -25,6 +28,9 @@ public class RequestHandlerMapping {
     }
 
     public Controller getHandler(String path) {
+        if (path.contains(EXTENSION_MARK)) {
+            return new ResourceController();
+        }
         return handlerMapping.get(path);
     }
 }

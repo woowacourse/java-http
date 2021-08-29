@@ -13,6 +13,9 @@ public class View {
     }
 
     public String getFilePath() {
+        if (name.contains(".")) {
+            return DEFAULT_DIRECTORY + name;
+        }
         if (name.equals("/")) {
             return DEFAULT_DIRECTORY + DEFAULT_PATH + HTML_EXTENSION;
         }

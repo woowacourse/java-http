@@ -3,7 +3,7 @@ package nextstep.jwp.http.request;
 import java.io.BufferedReader;
 import java.util.Map;
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.exception.http.InvalidHttpRequestException;
+import nextstep.jwp.exception.http.request.InvalidHttpRequestException;
 
 public class HttpRequest {
 
@@ -84,6 +84,10 @@ public class HttpRequest {
 
     private HttpMethod getMethod() {
         return line.getMethod();
+    }
+
+    public String getUri() {
+        return line.getUri();
     }
 
     public String getPath() {

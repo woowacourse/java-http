@@ -2,7 +2,7 @@ package nextstep.jwp.http.request;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
-import nextstep.jwp.exception.http.HttpMethodNotFoundException;
+import nextstep.jwp.exception.http.request.HttpMethodNotFoundException;
 
 public enum HttpMethod {
 

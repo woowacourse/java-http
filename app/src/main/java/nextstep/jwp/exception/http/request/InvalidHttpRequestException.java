@@ -1,4 +1,4 @@
-package nextstep.jwp.exception.http;
+package nextstep.jwp.exception.http.request;
 
 import nextstep.jwp.exception.ApplicationException;
 

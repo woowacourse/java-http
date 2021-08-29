@@ -25,8 +25,7 @@ public class RegisterController extends AbstractController {
     protected View doGet(HttpRequest request, HttpResponse response) {
         log.debug("Register - HTTP GET Request");
 
-        response.setLine(OK);
-        response.setContentType("text/html;charset=utf-8");
+        response.forward(OK, request.getUri());
 
         return new View(request.getPath());
     }
@@ -47,9 +46,7 @@ public class RegisterController extends AbstractController {
             );
             InMemoryUserRepository.save(user);
 
-            response.setLine(CREATED);
-            response.setContentType("text/html;charset=utf-8");
-
+            response.forward(CREATED, request.getUri());
             return new View("/index");
         }
         throw new DuplicateRegisterException();

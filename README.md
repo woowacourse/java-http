@@ -54,3 +54,16 @@ account=gugu&password=password&email=hkkang%40woowahan.com
 ```
 - [x] 로그인도 버튼 클릭할 때 GET 방식이 아닌, POST 방식으로 전송하도록 변경
     - [x] login.html도 form 태그 수정
+
+<br/>
+
+## CSS 지원하기
+
+- [x] 클라이언트에서 요청하면 CSS 파일도 제공하도록 수정
+    - CSS의 경우 요청 헤더의 확장자 || Accept를 활용하여, 응답 헤더의 Content-Type을 text/css로 전송
+```http request
+GET /css/styles.css HTTP/1.1
+Host: localhost:8080
+Accept: text/css,*/*;q=0.1
+Connection: keep-alive
+```

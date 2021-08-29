@@ -13,7 +13,7 @@ public class WelcomePageControllerTest {
 
     @Test
     @DisplayName("메인 페이지에 접근했을 때 HTTP 응답 테스트")
-    void handleTest() throws IOException {
+    void doGetTest() {
 
         // given
         final RequestLine requestLine = new RequestLine(HttpMethod.GET, "/", HttpVersion.HTTP_1_1);

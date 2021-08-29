@@ -6,11 +6,9 @@ import nextstep.jwp.framework.context.AbstractController;
 import nextstep.jwp.framework.http.HttpMethod;
 import nextstep.jwp.framework.http.HttpRequest;
 import nextstep.jwp.framework.http.HttpResponse;
-import nextstep.jwp.framework.http.StringResponseTemplate;
+import nextstep.jwp.framework.http.ResourceResponseTemplate;
 
 public class RegisterPageController extends AbstractController {
-
-    private static final String RESPONSE = "Hello world!";
 
     public RegisterPageController() {
         super("/", EnumSet.of(HttpMethod.GET));
@@ -18,7 +16,7 @@ public class RegisterPageController extends AbstractController {
 
     @Override
     public HttpResponse doGet(HttpRequest httpRequest) {
-        return new StringResponseTemplate().ok(RESPONSE);
+        return new ResourceResponseTemplate().ok("/register.html");
     }
 
     @Override

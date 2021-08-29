@@ -15,7 +15,7 @@ public class LoginPageController extends AbstractController {
     private final UserService userService;
 
     public LoginPageController() {
-        super("/login", EnumSet.of(HttpMethod.GET));
+        super("/login", EnumSet.of(HttpMethod.GET, HttpMethod.POST));
         this.userService = new UserService();
     }
 
@@ -33,9 +33,11 @@ public class LoginPageController extends AbstractController {
         LOGGER.debug("로그인 요청 - [account : {}, password : {}]", account, password);
 
         if (!userService.login(account, password)) {
+            LOGGER.debug("로그인 실패!!");
             return new ResourceResponseTemplate().unauthorized("/401.html");
         }
 
+        LOGGER.debug("로그인 성공!!");
         return new StringResponseTemplate().found("/index.html");
     }
 }

@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class LoginPageControllerTest {
 
     @Test
-    @DisplayName("로그인 페이지에 쿼리 없이 요청했을 때 로그인 페이지를 응답 테스트")
+    @DisplayName("GET 로그인 페이지 응답 테스트")
     public void accessLoginPageTest() {
 
         // given
@@ -27,7 +27,7 @@ public class LoginPageControllerTest {
     }
 
     @Test
-    @DisplayName("로그인 페이지에 저장된 ID와 PASSWORD로 요청했을 때 인덱스 페이지를 응답 테스트")
+    @DisplayName("올바른 ID와 PASSWORD로 로그인 요청했을 때, 리다이렉트 테스트")
     public void redirectIndexPageTest() {
 
         // given

@@ -11,7 +11,7 @@ public class ErrorControllerTest {
 
     @Test
     @DisplayName("에러 페이지에 접근했을 때 HTTP 응답 테스트")
-    void handleTest() {
+    void doGetTest() {
 
         // given
         final RequestLine requestLine = new RequestLine(HttpMethod.GET, "/error", HttpVersion.HTTP_1_1);

@@ -5,8 +5,12 @@ import java.util.EnumSet;
 import nextstep.jwp.framework.http.HttpMethod;
 import nextstep.jwp.framework.http.HttpRequest;
 import nextstep.jwp.framework.http.HttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class AbstractController implements Controller {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractController.class);
 
     protected final String mappingUri;
 
@@ -46,21 +50,33 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public HttpResponse doGet(HttpRequest httpRequest) {
+
+        LOGGER.error("{} {} 는 지원하지 않는 HTTP 메소드입니다.", httpRequest.getMethod(), httpRequest.getPath());
+
         throw new UnsupportedOperationException();
     }
 
     @Override
     public HttpResponse doPost(HttpRequest httpRequest) {
+
+        LOGGER.error("{} {} 는 지원하지 않는 HTTP 메소드입니다.", httpRequest.getMethod(), httpRequest.getPath());
+
         throw new UnsupportedOperationException();
     }
 
     @Override
     public HttpResponse doPut(HttpRequest httpRequest) {
+
+        LOGGER.error("{} {} 는 지원하지 않는 HTTP 메소드입니다.", httpRequest.getMethod(), httpRequest.getPath());
+
         throw new UnsupportedOperationException();
     }
 
     @Override
     public HttpResponse doDelete(HttpRequest httpRequest) {
+
+        LOGGER.error("{} {} 는 지원하지 않는 HTTP 메소드입니다.", httpRequest.getMethod(), httpRequest.getPath());
+
         throw new UnsupportedOperationException();
     }
 }

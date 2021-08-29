@@ -3,7 +3,9 @@ package nextstep.jwp.infrastructure.http;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -39,10 +41,11 @@ public class ControllerMapping {
     }
 
     private Set<Controller> findAllControllers(final String controllerPackage) {
-        final Set<Class> classes = findAllClassesUsingClassLoader(controllerPackage);
+        final Set<Class<?>> classes = findAllClassesUsingClassLoader(controllerPackage);
         return classes.stream()
             .filter(clazz -> clazz.getDeclaredConstructors().length != 0)
-            .map(clazz -> clazz.getDeclaredConstructors()[0])
+            .filter(this::hasNoArgumentConstructor)
+            .map(this::findNoArgumentConstructor)
             .map(constructor -> {
                 try {
                     return (Controller) constructor.newInstance();
@@ -50,11 +53,23 @@ public class ControllerMapping {
                     return null;
                 }
             })
-            .filter(Objects::nonNull)
             .collect(Collectors.toSet());
     }
 
-    private Set<Class> findAllClassesUsingClassLoader(String packageName) {
+    private boolean hasNoArgumentConstructor(final Class<?> clazz) {
+        return Arrays.stream(clazz.getDeclaredConstructors())
+            .anyMatch(constructor -> constructor.getParameterTypes().length == 0);
+    }
+
+
+    private Constructor<?> findNoArgumentConstructor(final Class<?> clazz) {
+        return Arrays.stream(clazz.getDeclaredConstructors())
+            .filter(constructor -> constructor.getParameterTypes().length == 0)
+            .findAny()
+            .orElseThrow(() -> new IllegalArgumentException("Cannot find no-argument constructor."));
+    }
+
+    private Set<Class<?>> findAllClassesUsingClassLoader(String packageName) {
         final InputStream stream = ClassLoader.getSystemClassLoader()
             .getResourceAsStream(packageName.replaceAll("[.]", "/"));
         final BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(stream)));
@@ -64,7 +79,7 @@ public class ControllerMapping {
             .collect(Collectors.toSet());
     }
 
-    private Class getClass(String className, String packageName) {
+    private Class<?> getClass(String className, String packageName) {
         final String classPath = packageName + "."
             + className.substring(0, className.lastIndexOf('.'));
         try {

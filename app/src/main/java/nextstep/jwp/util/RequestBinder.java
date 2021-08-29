@@ -51,7 +51,7 @@ public class RequestBinder {
     private static URI initializeUri(String uri) {
         String[] elements = uri.split(URI_AND_QUERY_STRING_DELIMITER, 2);
 
-        QueryStrings queryStrings = null;
+        QueryStrings queryStrings = new QueryStrings();
         if (elements.length == 2) {
             queryStrings = new QueryStrings(Splitter.on(QUERY_STRING_DELIMITER)
                 .withKeyValueSeparator(KEY_VALUE_DELIMITER)

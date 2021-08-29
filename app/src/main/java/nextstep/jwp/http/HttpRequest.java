@@ -36,4 +36,8 @@ public class HttpRequest {
     public HttpHeader getHttpHeader() {
         return this.httpHeader;
     }
+
+    public boolean hasQueryStrings() {
+        return !getQueryStrings().isEmpty();
+    }
 }

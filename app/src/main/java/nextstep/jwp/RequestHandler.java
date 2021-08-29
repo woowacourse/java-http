@@ -34,20 +34,12 @@ public class RequestHandler implements Runnable {
 
         try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              final OutputStream outputStream = connection.getOutputStream()) {
-
             HttpRequest httpRequest = RequestBinder.createRequestByMessage(bufferedReader);
+            log.debug("New Request! {}", httpRequest.getPath());
             Controller controller = ControllerContainer.findController(httpRequest);
+            log.debug("Request Controller : {}", controller.getClass().getName());
 
             HttpResponse httpResponse = controller.doService(httpRequest);
-//            URL resource = getClass().getClassLoader().getResource(controller.doService(httpRequest));
-//            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-//
-//            final String response = String.join("\r\n",
-//                    "HTTP/1.1 200 OK ",
-//                    "Content-Type: text/html;charset=utf-8 ",
-//                    "Content-Length: " + responseBody.getBytes().length + " ",
-//                    "",
-//                    responseBody);
 
             outputStream.write(httpResponse.toResponseMessage().getBytes());
             outputStream.flush();

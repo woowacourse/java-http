@@ -1,20 +1,31 @@
 package nextstep.jwp.controller;
 
-import java.util.HashMap;
-import java.util.Map;
 import nextstep.jwp.http.HttpHeader;
-import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.ResponseStatus;
+import nextstep.jwp.util.FileUtil;
 
 public abstract class AbstractController implements Controller{
 
     @Override
     public boolean isMatchingController(HttpRequest httpRequest) {
-        return httpRequest.getHttpMethod() == httpMethod() &&
-            httpRequest.getPath().equals(uriPath());
+        return isMatchingHttpMethod(httpRequest) && isMatchingUriPath(httpRequest);
     }
 
-    abstract HttpMethod httpMethod();
+    protected HttpResponse renderPage(String uriPath) {
+        try {
+            String responseBody = FileUtil.readFileByUriPath(uriPath);
+            return HttpResponse.status(ResponseStatus.OK,
+                HttpHeader.getHTMLResponseHeader(responseBody),
+                responseBody);
+        } catch (IllegalArgumentException e) {
+            // TODO: 에러 파일 출력
+            return null;
+        }
+    }
 
-    abstract String uriPath();
+    abstract boolean isMatchingHttpMethod(HttpRequest httpRequest);
+
+    abstract boolean isMatchingUriPath(HttpRequest httpRequest);
 }

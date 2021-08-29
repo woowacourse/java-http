@@ -16,6 +16,6 @@ class ControllerContainerTest {
         String firstLine = "GET /index.html HTTP/1.1";
         HttpRequest httpRequest = TestUtil.createRequest(firstLine);
 
-        assertThat(ControllerContainer.findController(httpRequest)).isInstanceOf(IndexPageController.class);
+        assertThat(ControllerContainer.findController(httpRequest)).isInstanceOf(PageRenderController.class);
     }
 }

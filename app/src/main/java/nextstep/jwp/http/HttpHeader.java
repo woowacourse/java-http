@@ -25,4 +25,8 @@ public class HttpHeader {
     public Map<String, String> getAllHeaders() {
         return Collections.unmodifiableMap(this.httpHeaders);
     }
+
+    public String getValueByKey(String key) {
+        return this.httpHeaders.get(key);
+    }
 }

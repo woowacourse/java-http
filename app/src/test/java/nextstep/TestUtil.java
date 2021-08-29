@@ -26,7 +26,7 @@ public class TestUtil {
         Protocol protocol = new Protocol(elements[2]);
 
         String[] uriValues = elements[1].split("\\?", 2);
-        QueryStrings queryStrings = null;
+        QueryStrings queryStrings = new QueryStrings();
         if (uriValues.length == 2) {
             queryStrings =  new QueryStrings(
                 Splitter.on("&")

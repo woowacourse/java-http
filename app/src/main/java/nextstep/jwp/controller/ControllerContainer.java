@@ -7,8 +7,8 @@ import nextstep.jwp.http.HttpRequest;
 public class ControllerContainer {
 
     private static final List<Controller> controllers = Arrays.asList(
-        new IndexPageController(),
-        new LoginController()
+        new LoginController(),
+        new PageRenderController()
     );
 
     public static Controller findController(HttpRequest httpRequest) {

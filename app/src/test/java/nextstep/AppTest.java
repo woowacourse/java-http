@@ -1,19 +1,16 @@
 package nextstep;
 
-import static nextstep.jwp.webserver.response.ContentType.*;
-import static org.assertj.core.api.Assertions.*;
+import static nextstep.jwp.webserver.response.ContentType.HTML;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.jwp.core.mvc.FrontHandler;
-import nextstep.jwp.webserver.response.ContentType;
 import nextstep.jwp.webserver.response.StatusCode;
 import nextstep.mockweb.request.MockRequest;
 import nextstep.mockweb.result.MockResult;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -32,28 +29,6 @@ public class AppTest {
         페이지_비교(result.body(), page);
         assertThat(result.statusCode()).isEqualTo(StatusCode.OK);
         assertThat(result.headerValue("Content-Type")).isEqualTo(HTML.contentType());
-    }
-
-    @Test
-    @DisplayName("로그인 성공 테스트")
-    public void login_success() throws Exception{
-        final MockResult result =
-                MockRequest.get("/login?account=nabom&password=nabom")
-                        .result();
-
-        assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
-        assertThat(result.headerValue("Location")).isEqualTo("/");
-    }
-
-    @Test
-    @DisplayName("로그인 실패 테스트")
-    public void login_fail() throws Exception{
-        final MockResult result =
-                MockRequest.get("/login?account=nabom&password=nabom12")
-                        .result();
-
-        assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
-        assertThat(result.headerValue("Location")).isEqualTo("/unauthorized");
     }
 
     private void 페이지_비교(String body, String path) {

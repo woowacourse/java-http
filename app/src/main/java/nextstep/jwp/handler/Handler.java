@@ -1,13 +1,13 @@
 package nextstep.jwp.handler;
 
 import java.io.IOException;
-import nextstep.jwp.model.Request;
+import nextstep.jwp.model.Response;
 
 public interface Handler {
 
-    String message(Request request) throws IOException;
+    Response message() throws IOException;
 
-    String getMessage(Request request) throws IOException;
+    Response getMessage() throws IOException;
 
-    String postMessage(Request request);
+    Response postMessage();
 }

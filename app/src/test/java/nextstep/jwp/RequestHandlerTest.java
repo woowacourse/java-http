@@ -312,7 +312,7 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/js;charset=utf-8 \r\n" +
+                "Content-Type: application/js;charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
                 responseBody;

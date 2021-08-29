@@ -5,9 +5,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
+import nextstep.jwp.handler.Handler;
+import nextstep.jwp.handler.HandlerFactory;
 import nextstep.jwp.model.Request;
-import nextstep.jwp.model.RequestAssembler;
 import nextstep.jwp.model.Response;
+import nextstep.jwp.utils.RequestAssembler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,9 +30,9 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
                 final OutputStream outputStream = connection.getOutputStream()) {
-            RequestAssembler requestAssembler = new RequestAssembler();
-            Request request = requestAssembler.assemble(inputStream);
-            Response response = new Response(request);
+            Request request = RequestAssembler.assemble(inputStream);
+            Handler handler = HandlerFactory.handler(request);
+            Response response = handler.message();
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException exception) {

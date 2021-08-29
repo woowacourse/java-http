@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +34,7 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
                 final OutputStream outputStream = connection.getOutputStream()) {
-
+            UserService userService = new UserService();
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             Map<String, String> parsedRequestHeaders = getParsedRequestHeaders(inputStream, bufferedReader);
             final String httpMethod = parsedRequestHeaders.get("httpMethod");
@@ -54,12 +53,8 @@ public class RequestHandler implements Runnable {
                 responseBody = getStaticFileContents("/login.html");
                 replyOkResponse(responseBody, outputStream);
             } else if (uri.matches("/login.*account.*password.*")) {
-                Map<String, String> requestUserData = extractQueryFromLoginUri(uri);
-                String account = requestUserData.getOrDefault("account", null);
-                String password = requestUserData.getOrDefault("password", null);
-                log.debug(InMemoryUserRepository.findByAccount(requestUserData.get("account")).toString());
-                Optional<User> user = InMemoryUserRepository.findByAccountAndPassword(account, password);
-
+                Optional<User> user = userService.findUser(uri);
+                log.debug(user.toString());
                 if (user.isEmpty()) {
                     responseBody = getStaticFileContents("/401.html");
                     reply302Response(responseBody, outputStream);
@@ -75,13 +70,7 @@ public class RequestHandler implements Runnable {
                 char[] buffer = new char[contentLength];
                 bufferedReader.read(buffer, 0, contentLength);
                 String requestBody = new String(buffer);
-                Map<String, String> registerData = extractRegisterDataFromRequestBody(requestBody);
-
-                InMemoryUserRepository.save(new User(InMemoryUserRepository.autoIncrementId,
-                        registerData.get("account"),
-                        registerData.get("password"),
-                        registerData.get("email")));
-                InMemoryUserRepository.autoIncrementId += 1;
+                userService.saveUser(requestBody);
 
                 responseBody = getStaticFileContents("/index.html");
                 replyOkResponse(responseBody, outputStream);
@@ -133,33 +122,8 @@ public class RequestHandler implements Runnable {
         outputStream.flush();
     }
 
-    private Map<String, String> extractQueryFromLoginUri(String uri) {
-        Map<String, String> extractedQuery = new HashMap<>();
 
-        int index = uri.indexOf("?");
-        if (index == -1) {
-            return extractedQuery;
-        }
-        String queryString = uri.substring(index + 1);
 
-        String[] splitQuery = queryString.split("[&=]");
-
-        for (int i = 0; i < splitQuery.length; i += 2) {
-            extractedQuery.put(splitQuery[i], splitQuery[i + 1]);
-        }
-
-        return extractedQuery;
-    }
-
-    private Map<String, String> extractRegisterDataFromRequestBody(String requestBody) {
-        Map<String, String> extractData = new HashMap<>();
-        String[] splitRequestBody = requestBody.split("=|&");
-
-        for (int i = 0; i < splitRequestBody.length; i += 2) {
-            extractData.put(splitRequestBody[i], splitRequestBody[i + 1]);
-        }
-        return extractData;
-    }
 
     private String getStaticFileContents(String path) throws IOException {
         URL resource = getClass().getClassLoader().getResource("static" + path);

@@ -56,7 +56,7 @@ class RequestHandlerTest {
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "Content-Length: " + 5670 + " \r\n" +
                 "\r\n" +
                 responseBody;
         assertThat(socket.output()).isEqualTo(expected);

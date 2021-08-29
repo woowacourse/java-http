@@ -157,7 +157,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("register로 접속하면 register.html을 보여준다.")
+    @DisplayName("register로 접속하면, 200코드를 받고 register.html을 보여준다.")
     @Test
     void registerPageTest() throws IOException {
         // given
@@ -184,7 +184,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("회원 가입에 성공하면, index.html을 받는다.")
+    @DisplayName("회원 가입에 성공하면, 200코드를 받고 index.html를 보여준다.")
     @Test
     void registerPostSuccessTest() throws IOException {
         // given
@@ -213,4 +213,33 @@ class RequestHandlerTest {
             new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @DisplayName("회원가입에 실패하면, 409코드를 받고 register.html을 보여준다.")
+    @Test
+    void registerFailPageTest() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+            "POST /register HTTP/1.1",
+            "Host: localhost:8080",
+            "Content-Length: 58",
+            "Content-Type: application/x-www-form-urlencoded",
+            "Accept: */*",
+            " ",
+            "account=gugu&password=password&email=hahaha%40woowahan.com"
+        );
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        String expected = "HTTP/1.1 409 Conflict\r\n" +
+            "\r\n" +
+            new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
 }

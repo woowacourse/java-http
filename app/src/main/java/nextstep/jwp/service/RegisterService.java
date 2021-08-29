@@ -14,7 +14,7 @@ public class RegisterService {
     public void registerUser(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         BodyParams bodyParams = parseBodyData(httpRequest, new HashMap<>());
         if (InMemoryUserRepository.isExistAccount(bodyParams.get("account"))) {
-            httpResponse.redirect302Transfer("/register.html");
+            httpResponse.redirectWithStatusCode("/register.html", "409");
             return;
         }
         User user = new User(bodyParams.get("account"), bodyParams.get("password"), bodyParams.get("email"));

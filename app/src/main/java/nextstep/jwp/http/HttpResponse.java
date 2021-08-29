@@ -36,6 +36,7 @@ public class HttpResponse {
         setContentType(url);
 
         String responseBody;
+
         if (url.equals("/")) {
             responseBody = DEFAULT_MESSAGE;
         } else if (url.equals("/login") || url.equals("/register")) {
@@ -43,23 +44,9 @@ public class HttpResponse {
         } else {
             responseBody = getBodyByUrl(DEFAULT_RESOURCE_PATH + url);
         }
+
         headers.put("Content-Length: " + responseBody.getBytes().length);
         response200(responseBody);
-    }
-
-    public void redirect302Transfer(final String redirectUrl) throws IOException {
-        String foundResponse = "HTTP/1.1 302 Found\r\n";
-        outputStream.write(foundResponse.getBytes(StandardCharsets.UTF_8));
-        headers.put("Location: " + redirectUrl);
-        responseHeader();
-        send();
-    }
-
-    public void redirect401Transfer(final String redirectUrl) throws IOException {
-        String foundResponse = "HTTP/1.1 401 Unauthorized\r\n";
-        outputStream.write(foundResponse.getBytes(StandardCharsets.UTF_8));
-        String responseBody = getBodyByUrl(DEFAULT_RESOURCE_PATH + redirectUrl);
-        responseHeaderBody(responseBody);
     }
 
     private void setContentType(final String url) {
@@ -87,6 +74,21 @@ public class HttpResponse {
         outputStream.write(okResponse.getBytes(StandardCharsets.UTF_8));
         responseHeaderBody(responseBody);
         send();
+    }
+
+    public void redirect302Transfer(final String redirectUrl) throws IOException {
+        String foundResponse = "HTTP/1.1 302 Found\r\n";
+        outputStream.write(foundResponse.getBytes(StandardCharsets.UTF_8));
+        headers.put("Location: " + redirectUrl);
+        responseHeader();
+        send();
+    }
+
+    public void redirectWithStatusCode(final String redirectUrl, final String statusCode) throws IOException {
+        HttpStatusCodes httpStatusCodes = HttpStatusCodes.valueOf("_" + statusCode);
+        outputStream.write(httpStatusCodes.getStatusCodeHeader().getBytes(StandardCharsets.UTF_8));
+        String responseBody = getBodyByUrl(DEFAULT_RESOURCE_PATH + redirectUrl);
+        responseHeaderBody(responseBody);
     }
 
     private void responseHeaderBody(final String responseBody) throws IOException {

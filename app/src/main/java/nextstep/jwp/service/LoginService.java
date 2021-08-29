@@ -21,7 +21,7 @@ public class LoginService {
         if (isValidateUser(httpRequest)) {
             httpResponse.redirect302Transfer("/index.html");
         } else {
-            httpResponse.redirect401Transfer("/401.html");
+            httpResponse.redirectWithStatusCode("/401.html", "401");
         }
     }
 

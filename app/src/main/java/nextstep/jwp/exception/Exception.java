@@ -11,7 +11,7 @@ public enum Exception {
     INVALID_REQUEST_HEADER(400, "Invalid Request Header.", InvalidRequestHeader.class),
     INVALID_FILE_EXTENSION(400, "Invalid File Extension.", InvalidFileExtensionException.class),
     NOT_ALLOWED_HTTP_VERSION(400, "Not Allowed Http Version.", NotAllowedHttpVersionException.class),
-    USER_NOT_FOUND(404, "User Not Found.", UserNotFoundException.class),
+    UNAUTHORIZED(401, "Unauthorized.", UnauthorizedException.class),
 
     NOT_IMPLEMENTED(501, "Not Implemented Http Method.", NotImplementedException.class);
 

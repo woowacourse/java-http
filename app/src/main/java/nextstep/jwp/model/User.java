@@ -1,5 +1,7 @@
 package nextstep.jwp.model;
 
+import nextstep.jwp.exception.UnauthorizedException;
+
 public class User {
 
     private final Long id;
@@ -22,8 +24,10 @@ public class User {
         return new User(id, user.account, user.password, user.email);
     }
 
-    public boolean checkPassword(String password) {
-        return this.password.equals(password);
+    public void checkPassword(String password) {
+        if (!this.password.equals(password)) {
+            throw new UnauthorizedException();
+        }
     }
 
     public String getAccount() {

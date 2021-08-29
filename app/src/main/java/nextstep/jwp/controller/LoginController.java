@@ -1,6 +1,9 @@
 package nextstep.jwp.controller;
 
+import static nextstep.jwp.http.request.Method.GET;
+
 import java.io.IOException;
+import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.common.HttpStatus;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
@@ -25,23 +28,25 @@ public class LoginController implements Controller {
         return HttpResponse.withBody(HttpStatus.OK, staticResource);
     }
 
-    private HttpResponse doGetWithQueryParam(HttpRequest httpRequest) {
-        String account = httpRequest.getUriParameter("account");
-        String password = httpRequest.getUriParameter("password");
+    private HttpResponse doPost(HttpRequest httpRequest) {
+        String account = httpRequest.getBodyParameter("account");
+        String password = httpRequest.getBodyParameter("password");
 
-        if (loginService.login(account, password)) {
+        try {
+            loginService.login(account, password);
             return HttpResponse.redirect(HttpStatus.FOUND, "/index.html");
+        } catch (UnauthorizedException e) {
+            return HttpResponse.redirect(HttpStatus.FOUND, "/401.html");
         }
-        return HttpResponse.redirect(HttpStatus.FOUND, "/401.html");
     }
 
     @Override
     public HttpResponse doService(HttpRequest httpRequest) throws IOException {
-        if (httpRequest.hasQueryParam()) {
-            return doGetWithQueryParam(httpRequest);
+        if (httpRequest.hasMethod(GET)) {
+            return doGet(httpRequest);
         }
 
-        return doGet(httpRequest);
+        return doPost(httpRequest);
     }
 
     @Override

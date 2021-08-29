@@ -28,7 +28,7 @@
       - [x] HttpVersion 테스트 코드
     - [x] RequestHeaders 테스트 코드
     - [x] RequestBody 테스트 코드
-  - [ ] HTTP Response 테스트 코드
+  - [x] HTTP Response 테스트 코드
     - [x] StatusLine 테스트 코드
     - [x] ResponseHeaders 테스트 코드
     - [x] ResponseBody 테스트 코드

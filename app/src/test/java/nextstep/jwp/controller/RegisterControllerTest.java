@@ -40,7 +40,7 @@ class RegisterControllerTest extends ControllerTest {
     @Test
     void doPost() {
         // given
-        String requestBody = "account=gugu&password=password&email=hkkang%40woowahan.com";
+        String requestBody = "account=amazzi&password=password&email=hkkang%40woowahan.com";
         final String httpRequest = String.join("\r\n",
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",

@@ -43,6 +43,58 @@ public class AppTest {
         assertThat(result.statusCode()).isEqualTo(StatusCode.NOT_FOUND);
     }
 
+    @Test
+    @DisplayName("로그인 성공")
+    public void login_success() throws Exception{
+        final MockResult result = MockRequest.post("/login")
+                .addFormData("account", "nabom")
+                .addFormData("password", "nabom")
+                .logAll()
+                .result();
+
+        assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
+        assertThat(result.headerValue("Location")).isEqualTo("/");
+    }
+
+    @Test
+    @DisplayName("회원가입 성공")
+    public void register_success() throws Exception{
+        final MockResult result = MockRequest.post("/register")
+                .addFormData("account", "newMember")
+                .addFormData("password", "newMember")
+                .addFormData("email", "newMember")
+                .result();
+
+        assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
+        assertThat(result.headerValue("Location")).isEqualTo("/");
+    }
+
+    @Test
+    @DisplayName("회원가입 실패 (중복된 회원)")
+    public void register_fail() throws Exception{
+        final MockResult result = MockRequest.post("/register")
+                .addFormData("account", "nabom")
+                .addFormData("password", "newMember")
+                .addFormData("email", "newMember")
+                .result();
+
+        assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
+        assertThat(result.headerValue("Location")).isEqualTo("/register");
+    }
+
+    @Test
+    @DisplayName("로그인 실패")
+    public void login_fail() throws Exception{
+        final MockResult result = MockRequest.post("/login", null)
+                .addFormData("account", "nabom")
+                .addFormData("password", "nanana")
+                .logAll()
+                .result();
+
+        assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
+        assertThat(result.headerValue("Location")).isEqualTo("/unauthorized");
+    }
+
     private void 페이지_비교(String body, String path) {
         Assertions.assertThat(body).containsIgnoringWhitespaces(getPage(path));
     }

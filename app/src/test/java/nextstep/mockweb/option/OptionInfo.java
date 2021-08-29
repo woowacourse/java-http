@@ -9,12 +9,9 @@ import nextstep.mockweb.request.RequestInfo;
 public class OptionInfo {
 
     private List<OptionTemplate> optionTemplates;
-    private HeaderOptionTemplate headerOptionTemplate;
 
     public OptionInfo() {
         this.optionTemplates = new ArrayList<>();
-        headerOptionTemplate = new HeaderOptionTemplate();
-        optionTemplates.add(headerOptionTemplate);
     }
 
     public void executeBeforeOption(RequestInfo requestInfo) {
@@ -35,9 +32,5 @@ public class OptionInfo {
 
     public void logAll() {
         addOptionTemplate(new LogOptionTemplate());
-    }
-
-    public void addHeader(String key, String value) {
-        headerOptionTemplate.addHeader(key, value);
     }
 }

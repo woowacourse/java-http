@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class HeaderInfo {
 
-    private static final String HTTP_FORM = "%s: %s\r\n";
+    private static final String HTTP_FORM = "%s: %s\n";
     private Map<String, String> headers;
 
     public HeaderInfo() {

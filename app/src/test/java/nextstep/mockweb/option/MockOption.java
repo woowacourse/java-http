@@ -8,6 +8,9 @@ import nextstep.mockweb.request.RequestInfo;
 
 public class MockOption {
 
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String FORM_DATA = "application/x-www-form-urlencoded";
+
     private final RequestInfo requestInfo;
     private final OptionInfo optionInfo;
     private final FrontHandler frontHandler;
@@ -28,8 +31,14 @@ public class MockOption {
         return this;
     }
 
+    public MockOption addFormData(String key, String value) {
+        requestInfo.addFormData(key, value);
+        addHeader(CONTENT_TYPE, FORM_DATA);
+        return this;
+    }
+
     public MockOption addHeader(String key, String value) {
-        optionInfo.addHeader(key, value);
+        requestInfo.addHeader(key, value);
         return this;
     }
 

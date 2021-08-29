@@ -12,5 +12,13 @@ public class MockRequest {
 
     public static MockOption get(String url){
         return new MockOption(new RequestInfo(HttpMethod.GET, url, null), frontHandler);
-    };
+    }
+
+    public static MockOption post(String url, Object body) {
+        return new MockOption(new RequestInfo(HttpMethod.POST, url, body), frontHandler);
+    }
+
+    public static MockOption post(String url) {
+        return new MockOption(new RequestInfo(HttpMethod.POST, url, null), frontHandler);
+    }
 }

@@ -1,7 +1,12 @@
 package nextstep.jwp.infrastructure.http;
 
-import java.util.List;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import nextstep.jwp.infrastructure.http.controller.Controller;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
@@ -12,8 +17,8 @@ public class ControllerMapping {
 
     private final Map<HttpRequestLine, Controller> controllers;
 
-    public ControllerMapping(final List<Controller> controllers) {
-        this.controllers = controllers.stream()
+    public ControllerMapping(final String controllerPackage) {
+        this.controllers = findAllControllers(controllerPackage).stream()
             .collect(Collectors.toMap(Controller::requestLine, controller -> controller));
     }
 
@@ -31,5 +36,41 @@ public class ControllerMapping {
         final HttpRequestLine requestLine = request.getRequestLine();
         final HttpRequestLine requestLineWithoutQuery = new HttpRequestLine(requestLine.getHttpMethod(), requestLine.getUri().getBaseUri());
         return controllers.containsKey(requestLineWithoutQuery);
+    }
+
+    private Set<Controller> findAllControllers(final String controllerPackage) {
+        final Set<Class> classes = findAllClassesUsingClassLoader(controllerPackage);
+        return classes.stream()
+            .filter(clazz -> clazz.getDeclaredConstructors().length != 0)
+            .map(clazz -> clazz.getDeclaredConstructors()[0])
+            .map(constructor -> {
+                try {
+                    return (Controller) constructor.newInstance();
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                    return null;
+                }
+            })
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+    }
+
+    private Set<Class> findAllClassesUsingClassLoader(String packageName) {
+        final InputStream stream = ClassLoader.getSystemClassLoader()
+            .getResourceAsStream(packageName.replaceAll("[.]", "/"));
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(stream)));
+        return reader.lines()
+            .filter(line -> line.endsWith(".class"))
+            .map(line -> getClass(line, packageName))
+            .collect(Collectors.toSet());
+    }
+
+    private Class getClass(String className, String packageName) {
+        final String classPath = packageName + "."
+            + className.substring(0, className.lastIndexOf('.'));
+        try {
+            return Class.forName(classPath);
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException(String.format("Cannot find class. (%s)", classPath));
+        }
     }
 }

@@ -17,11 +17,8 @@ class RequestHandlerTest {
     void run() throws IOException {
         // given
         final MockSocket socket = new MockSocket();
-        final RequestHandler requestHandler = new RequestHandler(socket);
 
         // when
-        requestHandler.run();
-
         final URL resource = getClass().getClassLoader().getResource("static/hello.html");
 
         // then
@@ -185,7 +182,7 @@ class RequestHandlerTest {
 
     private void assertResponse(final String httpRequest, final String httpResponse) {
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, new ControllerMapping("nextstep.jwp.infrastructure.http.controller"));
 
         requestHandler.run();
 

@@ -7,13 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import nextstep.jwp.infrastructure.http.controller.GetRegisterController;
-import nextstep.jwp.infrastructure.http.controller.HelloController;
-import nextstep.jwp.infrastructure.http.controller.LoginController;
-import nextstep.jwp.infrastructure.http.controller.PostRegisterController;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
@@ -29,16 +24,9 @@ public class RequestHandler implements Runnable {
     private final ControllerMapping controllerMapping;
     private final ViewResolver viewResolver;
 
-    public RequestHandler(final Socket connection) {
+    public RequestHandler(final Socket connection, final ControllerMapping controllerMapping) {
         this.connection = Objects.requireNonNull(connection);
-        this.controllerMapping = new ControllerMapping(
-            Arrays.asList(
-                new HelloController(),
-                new LoginController(),
-                new GetRegisterController(),
-                new PostRegisterController()
-            )
-        );
+        this.controllerMapping = controllerMapping;
         this.viewResolver = new ViewResolver("static");
     }
 

@@ -13,7 +13,7 @@ public class HttpRequest {
 
     private final static int NONE_QUERY = -1;
 
-    private List<String> headerLines;
+    private final List<String> headerLines;
 
     public HttpRequest(List<String> headerLines) {
         this.headerLines = headerLines;

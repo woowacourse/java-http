@@ -9,7 +9,7 @@ import nextstep.jwp.service.LoginService;
 
 public class LoginController extends AbstractController {
 
-    private LoginService loginService;
+    private final LoginService loginService;
 
     public LoginController(LoginService loginService) {
         this.loginService = loginService;

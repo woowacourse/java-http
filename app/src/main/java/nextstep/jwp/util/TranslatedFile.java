@@ -8,7 +8,7 @@ import java.nio.file.Path;
 
 public class TranslatedFile {
 
-    private String requestedURL;
+    private final String requestedURL;
 
     public TranslatedFile(String requestedURL) {
         this.requestedURL = requestedURL;

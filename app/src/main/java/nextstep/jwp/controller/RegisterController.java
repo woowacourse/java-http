@@ -8,7 +8,7 @@ import nextstep.jwp.service.RegisterService;
 
 public class RegisterController extends AbstractController {
 
-    private RegisterService registerService;
+    private final RegisterService registerService;
 
     public RegisterController(RegisterService registerService) {
         this.registerService = registerService;

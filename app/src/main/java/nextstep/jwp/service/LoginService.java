@@ -3,8 +3,8 @@ package nextstep.jwp.service;
 import java.io.IOException;
 import java.util.Map;
 import nextstep.jwp.domain.Login;
-import nextstep.jwp.http.response.GeneralResponse;
 import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.response.GeneralResponse;
 
 public class LoginService implements Service {
 

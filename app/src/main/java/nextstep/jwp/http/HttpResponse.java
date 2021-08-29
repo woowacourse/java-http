@@ -1,6 +1,7 @@
 package nextstep.jwp.http;
 
 public class HttpResponse {
+
     private String response;
 
     public HttpResponse(String response) {

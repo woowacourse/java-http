@@ -5,8 +5,8 @@ import nextstep.jwp.util.TranslatedFile;
 
 public class StaticResponse {
 
-    private String resourceType;
-    private String path;
+    private final String resourceType;
+    private final String path;
 
     public StaticResponse(String resourceType, String path) {
         this.resourceType = resourceType;

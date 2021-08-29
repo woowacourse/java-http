@@ -6,7 +6,7 @@ import nextstep.jwp.util.TranslatedFile;
 
 public class GeneralResponse {
 
-    private HttpRequest httpRequest;
+    private final HttpRequest httpRequest;
 
     public GeneralResponse(HttpRequest httpRequest) {
         this.httpRequest = httpRequest;

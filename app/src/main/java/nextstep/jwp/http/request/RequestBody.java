@@ -2,6 +2,8 @@ package nextstep.jwp.http.request;
 
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.exception.EmptyQueryParametersException;
+import nextstep.jwp.exception.QueryParameterNotFoundException;
 
 public class RequestBody {
 
@@ -30,11 +32,26 @@ public class RequestBody {
         return new RequestBody(parameters);
     }
 
+    public static RequestBody empty() {
+        return EMPTY;
+    }
+
     public String getParameter(String parameter) {
+        validateEmpty();
+        validateExistQuery(parameter);
+
         return parameters.get(parameter);
     }
 
-    public static RequestBody empty() {
-        return EMPTY;
+    private void validateEmpty() {
+        if (parameters.isEmpty()) {
+            throw new EmptyQueryParametersException();
+        }
+    }
+
+    private void validateExistQuery(String parameter) {
+        if (!parameters.containsKey(parameter)) {
+            throw new QueryParameterNotFoundException();
+        }
     }
 }

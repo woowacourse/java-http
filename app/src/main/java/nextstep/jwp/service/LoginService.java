@@ -15,15 +15,15 @@ public class LoginService implements Service {
 
     @Override
     public String process(HeaderLine headerLine) throws IOException {
-        if (!headerLine.isOnQuery()) {
-            return withoutQuery(headerLine);
+        if (headerLine.method().equals("GET")) {
+            return loginWindow(headerLine);
         }
-        final Map<String, String> queryOnURIS = headerLine.queryOnURI();
+        final Map<String, String> queryOnURIS = headerLine.body();
         final Login login = new Login(queryOnURIS);
         return LoginResult(login);
     }
 
-    private String withoutQuery(HeaderLine headerLine) throws IOException {
+    private String loginWindow(HeaderLine headerLine) throws IOException {
         final HttpResponse httpResponse = new HttpResponse(headerLine);
         return httpResponse.getResponse();
     }

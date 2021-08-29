@@ -57,26 +57,11 @@ public class HeaderLine {
         return splitFirstLine[1];
     }
 
-    public Map<String, String> queryOnURI() {
-        final String uri = getRequestURL();
-        final int index = uri.indexOf("?");
-        final String queryString = uri.substring(index + 1);
-        final Map<String, String> queries = new HashMap<>();
-        final String[] queryUnits = queryString.split("&");
-
-        for (String queryUnit : queryUnits) {
-            final String[] queryComposition = queryUnit.split("=");
-            queries.put(queryComposition[0], queryComposition[1]);
-        }
-        return queries;
-    }
-
     public Map<String, String> body() {
         final String rawBody = headerLines.get(headerLines.size() - 1);
         final String[] splitBody = rawBody.split("&");
         final Map<String, String> bodyQuery = new HashMap<>();
         for (String singleBody : splitBody) {
-            System.out.println(singleBody);
             final String[] unitBody = singleBody.split("=");
             bodyQuery.put(unitBody[0], unitBody[1]);
         }

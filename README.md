@@ -8,5 +8,5 @@
 - [x] Query String 파싱
 - [x] HTTP Status Code 302
 - [x] POST 방식으로 회원 가입
-- [] POST 방식으로 로그인
+- [x] POST 방식으로 로그인
 - [] CSS 지원하기 

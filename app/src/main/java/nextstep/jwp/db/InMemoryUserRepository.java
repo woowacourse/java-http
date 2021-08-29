@@ -20,9 +20,10 @@ public class InMemoryUserRepository {
     private InMemoryUserRepository() {
     }
 
-    public static void save(User user) {
+    public static User save(User user) {
         User newToSave = user.createNewToSave(seq++);
         database.put(user.getAccount(), newToSave);
+        return newToSave;
     }
 
     public static Optional<User> findByAccount(String account) {

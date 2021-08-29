@@ -3,6 +3,7 @@ package nextstep.jwp;
 import nextstep.jwp.controller.*;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,8 +23,8 @@ public class RequestHandler implements Runnable {
     public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
         controllerMap.put("/", new IndexController());
-        controllerMap.put("/login", new LoginController());
-        controllerMap.put("/register", new RegisterController());
+        controllerMap.put("/login", new LoginController(new UserService()));
+        controllerMap.put("/register", new RegisterController(new UserService()));
     }
 
     @Override

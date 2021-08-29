@@ -1,17 +1,20 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.model.User;
+import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Optional;
 
 public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+
+    private final UserService userService;
+
+    public LoginController(UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
@@ -22,15 +25,11 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         log.debug("HTTP POST Login Request: {}", request.getPath());
-
-        String account = request.getParameter("account");
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isPresent() && user.get().checkPassword(request.getParameter("password"))) {
-            log.debug("User Login Success! account: {}", user);
+        try {
+            userService.login(request);
             response.redirect("http://" + request.getHeader("Host") + "/index.html");
-            return;
+        } catch (IllegalArgumentException exception) {
+            response.redirect("http://" + request.getHeader("Host") + "/401.html");
         }
-        log.debug("User Login Fail!");
-        response.redirect("http://" + request.getHeader("Host") +"/401.html");
     }
 }

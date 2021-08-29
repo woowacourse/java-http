@@ -7,25 +7,25 @@ public class RequestUrl {
     private static final String QUERY_STRING_SEPARATOR = "?";
 
     private final String requestUrl;
-    private final QueryParam queryParam;
+    private final QueryParameter queryParameter;
 
-    public RequestUrl(String requestUrl, QueryParam queryParam) {
+    public RequestUrl(String requestUrl, QueryParameter queryParameter) {
         this.requestUrl = requestUrl;
-        this.queryParam = queryParam;
+        this.queryParameter = queryParameter;
     }
 
     public static RequestUrl of(String parsedRequestUrl) {
         if (parsedRequestUrl.contains(QUERY_STRING_SEPARATOR)) {
             final int queryParamSeparator = parsedRequestUrl.lastIndexOf("?");
             final String requestUrl = parsedRequestUrl.substring(0, queryParamSeparator);
-            final QueryParam queryParam = QueryParam.of(parsedRequestUrl.substring(queryParamSeparator + 1));
-            return new RequestUrl(requestUrl, queryParam);
+            final QueryParameter queryParameter = QueryParameter.of(parsedRequestUrl.substring(queryParamSeparator + 1));
+            return new RequestUrl(requestUrl, queryParameter);
         }
         return new RequestUrl(parsedRequestUrl, null);
     }
 
-    public QueryParam getQueryParam() {
-        return queryParam;
+    public QueryParameter getQueryParam() {
+        return queryParameter;
     }
 
     @Override

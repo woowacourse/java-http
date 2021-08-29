@@ -4,7 +4,7 @@ import nextstep.jwp.application.service.UserService;
 import nextstep.jwp.manager.annotation.Controller;
 import nextstep.jwp.manager.annotation.GetMapping;
 import nextstep.jwp.manager.annotation.PostMapping;
-import nextstep.jwp.request.QueryParam;
+import nextstep.jwp.manager.annotation.RequestParameter;
 
 @Controller
 public class UserController {
@@ -16,15 +16,13 @@ public class UserController {
     }
 
     @GetMapping("/login")
-    public String showLoginPage(QueryParam queryParam) {
+    public String showLoginPage() {
         return "/login.html";
     }
 
     @PostMapping("/login")
-    public String loginUser(QueryParam queryParam) {
-        final String account = queryParam.searchValue("account");
-        final String password = queryParam.searchValue("password");
-
+    public String loginUser(@RequestParameter(value = "account") String account,
+                            @RequestParameter(value = "password") String password) {
         final boolean isUser = userService.loginUser(account, password);
         if (isUser) {
             return "redirect: /index.html";
@@ -33,16 +31,14 @@ public class UserController {
     }
 
     @GetMapping("/register")
-    public String showRegisterPage(QueryParam queryParam) {
+    public String showRegisterPage() {
         return "/register.html";
     }
 
     @PostMapping("/register")
-    public String registerUser(QueryParam queryParam) {
-        final String account = queryParam.searchValue("account");
-        final String password = queryParam.searchValue("password");
-        final String email = queryParam.searchValue("email");
-
+    public String registerUser(@RequestParameter(value = "account") String account,
+                               @RequestParameter(value = "password") String password,
+                               @RequestParameter(value = "email") String email) {
         userService.register(account, password, email);
         return "redirect: /index.html";
     }

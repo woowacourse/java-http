@@ -6,24 +6,24 @@
 - [x] GET /index.html 응답하기
     - [x] "http://localhost:8080/index.html"에 접속 시 index.html 페이지 보여줌
 
-- [ ] GET /login 응답하기
+- [x] GET /login 응답하기
     - [x] "http://localhost:8080/login"에 접속 시 login.html 페이지 보여줌
-    - [ ] "http://localhost:8080/login?account=gugu&password=password"에 접속 시 회원 조회
-        - [ ] 쿼리스트링에서 account, password 추출하기
-        - [ ] InMemoryUserRepository를 통해 가입되어 있는 회원인지 확인
-            - [ ] 로그도 함께 남길 것
+    - [x] "http://localhost:8080/login?account=gugu&password=password"에 접속 시 회원 조회
+        - [x] 쿼리스트링에서 account, password 추출하기
+        - [x] InMemoryUserRepository를 통해 가입되어 있는 회원인지 확인
+            - [x] 로그도 함께 남길 것
 
-- [ ] 로그인 성공/실패 리다이렉트
-    - [ ] 로그인 성공 시 /index.html로 리다이렉트
-        - [ ] 응답 헤더에 http status code 302로 반환
-    - [ ] 로그인 실패 시 401.html로 리다이렉트
-        - [ ] GET /401.html 만들기
+- [x] 로그인 성공/실패 리다이렉트
+    - [x] 로그인 성공 시 /index.html로 리다이렉트
+        - [x] 응답 헤더에 http status code 302로 반환
+    - [x] 로그인 실패 시 401.html로 리다이렉트
+        - [x] GET /401.html 만들기
 
-- [ ] POST /register 회원 가입
-    - [ ] "http://localhost:8080/register" 접속 시 register.html 보여줌
-    - [ ] 회원 가입 버튼 누르면 POST를 사용하여 요청
-    - [ ] 회원 가입 완료시 index.html로 리다이렉트
-    - [ ] 로그인 버튼 누르면 POST 방식을 사용하도록 변경
+- [x] POST /register 회원 가입
+    - [x] "http://localhost:8080/register" 접속 시 register.html 보여줌
+    - [x] 회원 가입 버튼 누르면 POST를 사용하여 요청
+    - [x] 회원 가입 완료시 index.html로 리다이렉트
+    - [x] 로그인 버튼 누르면 POST 방식을 사용하도록 변경
 
 - [x] GET /css/cover.css 응답하기
 
@@ -39,6 +39,5 @@
 - [x] 클라이언트의 요청이 동적 처리를 요청하는지 검사
     - [x] 서버 처음 시작하기 전에 Bean으로 등록한 객체들을 싱글톤으로 띄워둘 것
         - [x] 해당 Bean에서 `@GetMapping(path)`, `@PostMappig(path)` 등을 검사하여 Map\<ClientRequest, Map<Object, Method>> 로 저장해두기
-        - [ ] Controller DI도 적용해줄 것
 
 - [x] 정적/동적 모두 매핑될 정보가 없으면 404.html 반환할 것

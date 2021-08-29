@@ -1,6 +1,7 @@
 package nextstep.jwp.manager;
 
 import nextstep.jwp.request.ClientRequest;
+import nextstep.jwp.request.HttpMethod;
 import nextstep.jwp.response.ServerResponse;
 
 import java.io.File;
@@ -22,15 +23,15 @@ import static nextstep.jwp.response.HttpStatusCode.*;
 
 public class StaticResourceManager {
 
-    private static final String STATIC = "static";
+    private static final String STATIC_FILE_PATH = "static";
+    private static final String NOT_FOUND_FILE_PATH = "static/404.html";
 
     private final Map<ClientRequest, File> staticResources = new HashMap<>();
-
-    private File notFound;
+    private File notFoundFile;
 
     public StaticResourceManager() {
         final ClassLoader classLoader = getClass().getClassLoader();
-        this.notFound = new File(Objects.requireNonNull(classLoader.getResource(STATIC + "/404.html")).getFile());
+        this.notFoundFile = new File(Objects.requireNonNull(classLoader.getResource(NOT_FOUND_FILE_PATH)).getFile());
 
         try {
             setStaticResources(classLoader);
@@ -40,7 +41,7 @@ public class StaticResourceManager {
     }
 
     private void setStaticResources(ClassLoader classLoader) throws IOException, URISyntaxException {
-        final URL url = classLoader.getResource(STATIC);
+        final URL url = classLoader.getResource(STATIC_FILE_PATH);
         final List<File> staticFiles = Files.walk(Paths.get(new URI(url.toString())))
                 .filter(Files::isRegularFile)
                 .map(Path::toFile)
@@ -48,9 +49,9 @@ public class StaticResourceManager {
 
         for (File staticFile : staticFiles) {
             final String absolutePath = staticFile.getAbsolutePath();
-            final int staticIndex = absolutePath.indexOf(STATIC);
-            final String requestUrl = absolutePath.substring(staticIndex + STATIC.length()).replaceAll("\\\\", "/");
-            staticResources.put(ClientRequest.of("GET", requestUrl), staticFile);
+            final int staticIndex = absolutePath.indexOf(STATIC_FILE_PATH);
+            final String requestUrl = absolutePath.substring(staticIndex + STATIC_FILE_PATH.length()).replaceAll("\\\\", "/");
+            staticResources.put(ClientRequest.of(HttpMethod.GET, requestUrl), staticFile);
         }
     }
 
@@ -63,7 +64,7 @@ public class StaticResourceManager {
     }
 
     public void handleNotFound(OutputStream outputStream) throws IOException {
-        ServerResponse.response(this.notFound, NOT_FOUND, outputStream);
+        ServerResponse.response(this.notFoundFile, NOT_FOUND, outputStream);
     }
 
     public void handleDynamicResult(String result, OutputStream outputStream) throws IOException {
@@ -74,15 +75,15 @@ public class StaticResourceManager {
     }
 
     private void handleRedirect(String result, OutputStream outputStream) throws IOException {
-        result = result.replace("redirect :", "");
-        final ClientRequest resultRequest = ClientRequest.of("GET", result);
+        result = result.replace("redirect: ", "");
+        final ClientRequest resultRequest = ClientRequest.of(HttpMethod.GET, result);
         if (canHandle(resultRequest)) {
             ServerResponse.response(staticResources.get(resultRequest), FOUND, outputStream);
         }
     }
 
     private void handlePath(String result, OutputStream outputStream) throws IOException {
-        final ClientRequest resultRequest = ClientRequest.of("GET", result);
+        final ClientRequest resultRequest = ClientRequest.of(HttpMethod.GET, result);
         if (canHandle(resultRequest)) {
             ServerResponse.response(staticResources.get(resultRequest), OK, outputStream);
         }

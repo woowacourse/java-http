@@ -1,27 +1,22 @@
 package nextstep.jwp.request;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
 
-public class HttpMethod {
+public enum HttpMethod {
 
-    private static final Map<String, HttpMethod> supportingHttpMethods = new HashMap<>();
-
-    static {
-        supportingHttpMethods.put("GET", new HttpMethod("GET"));
-        supportingHttpMethods.put("POST", new HttpMethod("POST"));
-    }
+    GET("GET"),
+    POST("POST");
 
     private final String httpMethod;
 
-    private HttpMethod(String httpMethod) {
+    HttpMethod(String httpMethod) {
         this.httpMethod = httpMethod;
     }
 
-    public static HttpMethod of(String httpMethod) {
-        if (supportingHttpMethods.containsKey(httpMethod)) {
-            return supportingHttpMethods.get(httpMethod);
-        }
-        throw new IllegalArgumentException("지원하지 않는 HTTP Method 입니다.");
+    public static HttpMethod of(String input) {
+        return Arrays.stream(values())
+                .filter(method -> method.httpMethod.equalsIgnoreCase(input))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 HTTP Method 입니다."));
     }
 }

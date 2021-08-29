@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 
 public class FileUtil {
 
-    private static final String FILE_FORMAT = ".html";
+    private static final String HTML_FILE_FORMAT = ".html";
     private static final String PATH_PREFIX = "static";
 
     public static String readHTMLFileByUriPath(String uriPath) {
@@ -32,9 +32,9 @@ public class FileUtil {
     }
 
     private static String findHTMLFilePath(String uriPath) {
-        if (uriPath.endsWith(FILE_FORMAT)) {
+        if (uriPath.endsWith(HTML_FILE_FORMAT)) {
             return String.format(PATH_PREFIX + "%s", uriPath);
         }
-        return String.format(PATH_PREFIX + "%s" + FILE_FORMAT, uriPath);
+        return String.format(PATH_PREFIX + "%s" + HTML_FILE_FORMAT, uriPath);
     }
 }

@@ -24,6 +24,9 @@ public class StaticFileController extends AbstractController {
 
     @Override
     public HttpResponse doService(HttpRequest httpRequest) {
+        if (httpRequest.getPath().endsWith(".css")) {
+            return super.applyCSSFile(httpRequest.getPath());
+        }
         return super.applyStaticFile(httpRequest.getPath());
     }
 }

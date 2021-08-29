@@ -27,21 +27,4 @@ public class QueryStrings {
     public String getValue(String key) {
         return this.queryStrings.get(key);
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        QueryStrings that = (QueryStrings) o;
-        return Objects.equals(queryStrings, that.queryStrings);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(queryStrings);
-    }
 }

@@ -39,6 +39,18 @@ public abstract class AbstractController implements Controller {
         }
     }
 
+    protected HttpResponse applyCSSFile(String uriPath) {
+        try {
+            String responseBody = FileUtil.readStaticFileByUriPath(uriPath);
+            return HttpResponse.status(ResponseStatus.OK,
+                HttpHeader.getCSSResponseHeader(responseBody),
+                responseBody);
+        } catch (IllegalArgumentException e) {
+            // TODO: 에러 파일 출력
+            return null;
+        }
+    }
+
     protected HttpResponse redirect(String redirectUrl) {
         Map<String, String> headers = new HashMap<>();
         headers.put("Location", redirectUrl);

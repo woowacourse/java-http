@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import nextstep.jwp.web.http.HttpHeaders;
 import nextstep.jwp.web.http.HttpProtocol;
-import nextstep.jwp.web.http.QueryParser;
+import nextstep.jwp.web.http.util.QueryParser;
 import nextstep.jwp.web.http.request.body.FormDataHttpRequestBody;
 import nextstep.jwp.web.http.request.body.HttpRequestBody;
 import nextstep.jwp.web.http.request.body.TextHttpRequestBody;
@@ -89,9 +89,10 @@ public class HttpRequest {
         private static final int COMMA_LENGTH = 1;
         private static final int HTTP_PROTOCOL_INDEX = 2;
         private static final int NOT_FOUND_INDEX = -1;
-
+        private static final int START = 0;
         private static final String QUERY_STARTER = "?";
         private static final String BLANK = " ";
+        private static final String COLON = ":";
 
         private HttpHeaders headers = new HttpHeaders();
         private HttpMethod method = null;
@@ -110,24 +111,11 @@ public class HttpRequest {
 
         private void parse(InputStream inputStream) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            StringBuilder headers = new StringBuilder();
             try {
-                String line = bufferedReader.readLine();
-                parseStatusLine(line);
-                while (!"".equals(line)) {
-                    line = bufferedReader.readLine();
-                    if (Objects.isNull(line)) {
-                        break;
-                    }
-                    headers.append(line).append("\r\n");
-                }
-
-                parseHeaders(headers.toString());
-
-                //todo : content-length refactor
-                String contentLengthStr = this.headers.get("Content-Length").toValuesString();
-                if (!"".equals(contentLengthStr)) {
-                    int contentLength = Integer.parseInt(this.headers.get("Content-Length").toValuesString());
+                parseStatusLine(bufferedReader);
+                parseHeaders(bufferedReader);
+                int contentLength = this.headers.contentLength();
+                if (contentLength != 0) {
                     char[] buffer = new char[contentLength];
                     bufferedReader.read(buffer, 0, contentLength);
                     parseBody(new String(buffer));
@@ -137,13 +125,10 @@ public class HttpRequest {
             }
         }
 
-        private void parseHeaders(String headers) {
-            List<String> lines = Arrays.asList(headers.split("\r\n"));
-            lines.forEach(this::parseHeader);
-        }
+        private void parseStatusLine(BufferedReader bufferedReader)
+            throws IOException {
+            List<String> parsedStatusLine = Arrays.asList(bufferedReader.readLine().split(BLANK));
 
-        private void parseStatusLine(String line) {
-            List<String> parsedStatusLine = Arrays.asList(line.split(BLANK));
             this.httpProtocol = HttpProtocol.findByName(parsedStatusLine.get(HTTP_PROTOCOL_INDEX));
             this.method = HttpMethod.of(parsedStatusLine.get(METHOD_INDEX));
 
@@ -151,7 +136,7 @@ public class HttpRequest {
             int index = url.indexOf(QUERY_STARTER);
 
             if (index != NOT_FOUND_INDEX) {
-                this.url = url.substring(0, index);
+                this.url = url.substring(START, index);
                 this.queryParams = new QueryParser(url.substring(index + 1)).queryParams();
             }
 
@@ -159,12 +144,26 @@ public class HttpRequest {
             this.queryParams = new QueryParams();
         }
 
-        private void parseHeader(String line) {
-            if (line.isBlank()) {
-                return;
+        private void parseHeaders(BufferedReader bufferedReader) throws IOException {
+            StringBuilder headersBuilder = new StringBuilder();
+            String line = null;
+            while (!BLANK.equals(line)) {
+                line = bufferedReader.readLine();
+                if (Objects.isNull(line)) {
+                    break;
+                }
+                headersBuilder.append(line).append("\r\n");
             }
 
-            List<String> parsedHeader = Arrays.asList(line.split(":"));
+            List<String> headerLines = Arrays.asList(
+                headersBuilder.toString().split("\r\n")
+            );
+
+            headerLines.forEach(this::parseHeader);
+        }
+
+        private void parseHeader(String line) {
+            List<String> parsedHeader = Arrays.asList(line.split(COLON));
 
             if (parsedHeader.size() < KEY_AND_VALUE_MINIMUM_SIZE) {
                 throw new RuntimeException("request 헤더의 양식이 맞지 않습니다.");

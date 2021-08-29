@@ -37,6 +37,15 @@ public class HttpHeaders {
         headers.put(key, new HttpRequestHeaderValues(value));
     }
 
+    public int contentLength() {
+        String contentLength = this.headers.get("Content-Length").toValuesString();
+        try {
+            return Integer.parseInt(contentLength);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
     public Map<String, HttpRequestHeaderValues> map() {
         return headers;
     }

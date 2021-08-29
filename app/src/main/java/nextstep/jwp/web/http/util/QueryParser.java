@@ -1,4 +1,4 @@
-package nextstep.jwp.web.http;
+package nextstep.jwp.web.http.util;
 
 import static java.util.stream.Collectors.toMap;
 

@@ -3,7 +3,7 @@ package nextstep.jwp.web.http.request.body;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import nextstep.jwp.web.http.QueryParser;
+import nextstep.jwp.web.http.util.QueryParser;
 
 public class FormDataHttpRequestBody implements HttpRequestBody {
 

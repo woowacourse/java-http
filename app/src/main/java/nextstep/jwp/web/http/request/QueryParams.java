@@ -1,7 +1,6 @@
 package nextstep.jwp.web.http.request;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class QueryParams {

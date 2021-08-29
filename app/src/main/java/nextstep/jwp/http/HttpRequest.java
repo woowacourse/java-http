@@ -23,7 +23,8 @@ public class HttpRequest {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         final List<String> headerLine = new LinkedList<>();
         while (reader.ready()) {
-            headerLine.add(reader.readLine());
+            final String oneLine = reader.readLine();
+            headerLine.add(oneLine);
         }
         return new HttpRequest(headerLine);
     }

@@ -9,18 +9,35 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryUserRepository {
 
-    private static final Map<String, User> database = new ConcurrentHashMap<>();
+    private final Map<String, User> database;
+    private Long index = 1L;
 
-    static {
-        final User user = new User(1, "gugu", "password", "hkkang@woowahan.com");
-        database.put(user.getAccount(), user);
+    public InMemoryUserRepository() {
+        database = new ConcurrentHashMap<>();
+        saveInitUserData();
     }
 
-    public static void save(User user) {
-        database.put(user.getAccount(), user);
+    private void saveInitUserData() {
+        final User user = new User("gugu", "password", "hkkang@woowahan.com");
+        save(user);
     }
 
-    public static Optional<User> findByAccount(String account) {
+    public User save(User user) {
+        final User userWithId = new User(index++, user.getAccount(), user.getPassword(), user.getEmail());
+        database.put(userWithId.getAccount(), userWithId);
+        return userWithId;
+    }
+
+    public Optional<User> findByAccount(String account) {
         return Optional.ofNullable(database.get(account));
+    }
+
+    public boolean existsByAccount(String account) {
+        return database.containsKey(account);
+    }
+
+    public boolean existsByEmail(String email) {
+        return database.values().stream()
+                .anyMatch(userInDB -> userInDB.hasSameEmail(email));
     }
 }

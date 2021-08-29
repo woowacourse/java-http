@@ -1,15 +1,15 @@
-package nextstep.jwp.mapper;
+package nextstep.jwp.handler;
 
-import nextstep.jwp.exception.IncorrectMapperException;
-import nextstep.jwp.handler.ModelAndView;
+import java.io.File;
+import java.net.URL;
+import java.util.Objects;
+import nextstep.jwp.exception.IncorrectHandlerException;
+import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestLine;
 import nextstep.jwp.http.request.SourcePath;
 
-import java.io.File;
-import java.net.URL;
-
-public class ResourceMapper implements HandlerMapper {
+public class ResourceHandler implements Handler {
 
     // TODO :: Config 분리
     private static final String RESOURCE_BASE_PATH = "/static";
@@ -23,19 +23,20 @@ public class ResourceMapper implements HandlerMapper {
 
     @Override
     public ModelAndView service(HttpRequest httpRequest) {
-        RequestLine requestLine = httpRequest.requestLine();
-        String method = requestLine.method();
-        SourcePath sourcePath = requestLine.sourcePath();
-
-        if (method.equalsIgnoreCase("GET") && isExistResource(sourcePath)) {
+        try{
+            RequestLine requestLine = httpRequest.requestLine();
+            SourcePath sourcePath = requestLine.sourcePath();
             return ModelAndView.ok(sourcePath.getValue());
+        } catch (Exception e){
+            throw new IncorrectHandlerException();
         }
-        throw new IncorrectMapperException();
     }
 
     private boolean isExistResource(SourcePath sourcePath) {
-        final String fileName = sourcePath.getValue();
-        final URL resourceUrl = getClass().getResource(RESOURCE_BASE_PATH + fileName);
+        final URL resourceUrl = getClass().getResource(RESOURCE_BASE_PATH + sourcePath.getValue());
+        if(Objects.isNull(resourceUrl)){
+          return false;
+        }
         return new File(resourceUrl.getFile()).exists();
     }
 }

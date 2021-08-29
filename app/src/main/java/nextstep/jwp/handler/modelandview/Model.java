@@ -1,4 +1,4 @@
-package nextstep.jwp.handler;
+package nextstep.jwp.handler.modelandview;
 
 import nextstep.jwp.http.response.HttpStatus;
 

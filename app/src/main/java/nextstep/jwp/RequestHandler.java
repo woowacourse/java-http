@@ -15,11 +15,11 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
-    private final Executor executor;
+    private final Dispatcher dispatcher;
 
     public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
-        this.executor = new Executor();
+        this.dispatcher = new Dispatcher();
     }
 
     @Override
@@ -31,7 +31,7 @@ public class RequestHandler implements Runnable {
                 final OutputStream outputStream = connection.getOutputStream()) {
 
             final HttpRequest httpRequest = HttpRequest.of(inputStream);
-            final HttpResponse httpResponse = executor.service(httpRequest);
+            final HttpResponse httpResponse = dispatcher.execute(httpRequest);
 
             outputStream.write(httpResponse.responseAsBytes());
             outputStream.flush();

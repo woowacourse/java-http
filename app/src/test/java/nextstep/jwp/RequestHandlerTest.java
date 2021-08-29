@@ -31,6 +31,28 @@ class RequestHandlerTest {
     }
 
     @Test
+    void badRequest() throws IOException {
+        // given
+        final String httpRequest= request("GET", "/bad/request.html");
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String expected = "HTTP/1.1 404 BAD_REQUEST \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: "+body.getBytes().length+" \r\n" +
+                "\r\n"+
+                body;
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
     void index() throws IOException {
         // given
         final String httpRequest= request("GET", "/index.html");
@@ -126,7 +148,7 @@ class RequestHandlerTest {
     @Test
     void registerPost() {
         // given
-        final String requestBody = "account=gugu&password=password&email=hkkang%40woowahan.com";
+        final String requestBody = "account=corgi&password=password&email=hkkang%40woowahan.com";
         final String httpRequest= String.join("\r\n",
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",

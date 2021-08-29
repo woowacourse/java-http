@@ -1,12 +1,14 @@
 package nextstep.jwp.handler;
 
+import nextstep.jwp.exception.IncorrectHandlerException;
 import nextstep.jwp.handler.dto.RegisterRequest;
+import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.handler.service.RegisterService;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.QueryParams;
 import nextstep.jwp.http.request.RequestLine;
 
-public class RegisterController implements Controller {
+public class RegisterController implements Handler {
 
     private final RegisterService registerService;
 
@@ -16,8 +18,7 @@ public class RegisterController implements Controller {
 
     @Override
     public boolean mapping(RequestLine requestLine) {
-        return requestLine.isFrom("get", "/register")
-                || requestLine.isFrom("post", "/register");
+        return requestLine.isFrom("get", "/register") || requestLine.isFrom("post", "/register");
     }
 
     @Override
@@ -29,7 +30,7 @@ public class RegisterController implements Controller {
         if (requestLine.isFrom("post", "/register")) {
             return register(httpRequest.requestBody());
         }
-        throw new IllegalArgumentException("핸들러가 처리할 수 있는 요청이 아닙니다.");
+        throw new IncorrectHandlerException();
     }
 
     private ModelAndView printRegisterPage() {
@@ -39,11 +40,10 @@ public class RegisterController implements Controller {
     private ModelAndView register(String requestBody) {
         try{
             QueryParams queryParams = QueryParams.of(requestBody);
-            RegisterRequest registerRequest = RegisterRequest.fromQueryParams(queryParams);
-
-            registerService.register(registerRequest);
+            registerService.register(RegisterRequest.fromQueryParams(queryParams));
             return ModelAndView.redirect("index.html");
         } catch (Exception e){
+            e.printStackTrace();
             return ModelAndView.error();
         }
     }

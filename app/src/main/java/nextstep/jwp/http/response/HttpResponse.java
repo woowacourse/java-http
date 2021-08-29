@@ -1,6 +1,6 @@
 package nextstep.jwp.http.response;
 
-import nextstep.jwp.handler.Model;
+import nextstep.jwp.handler.modelandview.Model;
 import nextstep.jwp.view.View;
 
 /**

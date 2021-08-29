@@ -12,7 +12,7 @@ public class LoginRequest {
     }
 
     public static LoginRequest fromQueryParams(QueryParams params){
-        return new LoginRequest(params.get(params.get("account")), params.get("password"));
+        return new LoginRequest(params.get("account"), params.get("password"));
     }
 
     public String getAccount() {

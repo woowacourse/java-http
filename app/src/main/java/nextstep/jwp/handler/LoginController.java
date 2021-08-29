@@ -1,12 +1,13 @@
 package nextstep.jwp.handler;
 
 import nextstep.jwp.handler.dto.LoginRequest;
+import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.handler.service.LoginService;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.QueryParams;
 import nextstep.jwp.http.request.RequestLine;
 
-public class LoginController implements Controller {
+public class LoginController implements Handler {
 
     private LoginService loginService;
 
@@ -38,10 +39,8 @@ public class LoginController implements Controller {
     private ModelAndView login(String requestBody) {
         try {
             QueryParams params = QueryParams.of(requestBody);
-            LoginRequest loginRequest = LoginRequest.fromQueryParams(params);
-
-            loginService.login(loginRequest);
-            return ModelAndView.redirect("/index.html");
+            loginService.login(LoginRequest.fromQueryParams(params));
+            return ModelAndView.redirect("index.html");
         } catch (Exception e) {
             // TODO :: Exception 분리
             return ModelAndView.unauthorized();

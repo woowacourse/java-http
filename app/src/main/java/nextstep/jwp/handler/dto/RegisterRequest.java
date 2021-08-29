@@ -15,7 +15,7 @@ public class RegisterRequest {
     }
 
     public static RegisterRequest fromQueryParams(QueryParams params){
-        return new RegisterRequest(params.get(params.get("account")), params.get("password"), params.get("email"));
+        return new RegisterRequest(params.get("account"), params.get("password"), params.get("email"));
     }
     
     public User toEntity(){

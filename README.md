@@ -20,7 +20,7 @@
   - [ ] HTTP Request 테스트 코드
   - [ ] HTTP Response 테스트 코드
   - [x] User 테스트 코드
-  - [ ] Content, ContentType, StaticResource 테스트 코드
+  - [x] Content, ContentType, StaticResource 테스트 코드
   - [x] Service 테스트 코드
   - [x] InMemoryUserRepository 테스트 코드
 - [ ] 각 동작 로그 남기기

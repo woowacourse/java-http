@@ -20,7 +20,7 @@ public class StaticResource {
         return new StaticResource(content, contentType);
     }
 
-    public static String parseExtension(String contentPath) {
+    private static String parseExtension(String contentPath) {
         String[] splitedPath = contentPath.split("\\.");
 
         return splitedPath[splitedPath.length - 1];
@@ -30,11 +30,11 @@ public class StaticResource {
         return content.getValue();
     }
 
-    public String getContentType() {
-        return contentType.getType();
-    }
-
     public String getContentLength() {
         return String.valueOf(content.getLength());
+    }
+
+    public String getContentType() {
+        return contentType.getType();
     }
 }

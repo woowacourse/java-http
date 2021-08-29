@@ -42,6 +42,9 @@ public class RequestHandler implements Runnable {
             final String uri = parsedRequestHeaders.get("uri");
             String responseBody = "Hello world!";
 
+            if (parsedRequestHeaders.isEmpty()) {
+                return;
+            }
             if (uri.equals("/")) {
                 replyOkResponse(responseBody, outputStream);
             } else if (uri.equals("/index") || uri.equals("/index.html")) {
@@ -82,6 +85,9 @@ public class RequestHandler implements Runnable {
 
                 responseBody = getStaticFileContents("/index.html");
                 replyOkResponse(responseBody, outputStream);
+            } else if (httpMethod.equals("GET") && uri.equals("/css/styles.css")) {
+                responseBody = getStaticFileContents("/css/styles.css");
+                replyOkCssResponse(responseBody, outputStream);
             }
 
         } catch (IOException exception) {
@@ -91,16 +97,6 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private Map<String, String> extractRegisterDataFromRequestBody(String requestBody) {
-        Map<String, String> extractData = new HashMap<>();
-        String[] splitRequestBody = requestBody.split("=|&");
-
-        for (int i = 0; i < splitRequestBody.length; i += 2) {
-            extractData.put(splitRequestBody[i], splitRequestBody[i + 1]);
-        }
-        return extractData;
-    }
-
     private void reply302Response(String responseBody, OutputStream outputStream) throws IOException {
         final String response = String.join("\r\n",
                 "HTTP/1.1 302 Found ",
@@ -108,6 +104,7 @@ public class RequestHandler implements Runnable {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+        log.debug("302 Content-Length: " + responseBody.getBytes().length);
         outputStream.write(response.getBytes());
         outputStream.flush();
     }
@@ -119,6 +116,19 @@ public class RequestHandler implements Runnable {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+        log.debug("OK Content-Length: " + responseBody.getBytes().length);
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void replyOkCssResponse(String responseBody, OutputStream outputStream) throws IOException {
+        final String response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/css;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        log.debug("CSS OK Content-Length: " + responseBody.getBytes().length);
         outputStream.write(response.getBytes());
         outputStream.flush();
     }
@@ -139,6 +149,16 @@ public class RequestHandler implements Runnable {
         }
 
         return extractedQuery;
+    }
+
+    private Map<String, String> extractRegisterDataFromRequestBody(String requestBody) {
+        Map<String, String> extractData = new HashMap<>();
+        String[] splitRequestBody = requestBody.split("=|&");
+
+        for (int i = 0; i < splitRequestBody.length; i += 2) {
+            extractData.put(splitRequestBody[i], splitRequestBody[i + 1]);
+        }
+        return extractData;
     }
 
     private String getStaticFileContents(String path) throws IOException {

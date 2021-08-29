@@ -20,5 +20,5 @@
         - [x] save 메서드를 사용해서 가입 완료 처리
         - [x] 회원가입 완료시 index.html로 리다이렉트하기
     - [x] 로그인 버튼 GET -> POST로 변경하기 
-- [ ] CSS 지원하기
-    - [ ] 응답 헤더의 Content-Type을 text/css로 전송
+- [x] CSS 지원하기
+    - [x] 응답 헤더의 Content-Type을 text/css로 전송

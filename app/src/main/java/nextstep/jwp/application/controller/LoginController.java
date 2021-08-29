@@ -17,10 +17,13 @@ public class LoginController extends AbstractController {
         HttpRequestBody<String> body = (FormDataHttpRequestBody) request.body();
 
         String account = body.getAttribute("account");
-        Optional<User> byAccount = InMemoryUserRepository.findByAccount(account);
-        if (byAccount.isPresent()) {
-            response.setStatus(HttpStatus.FOUND);
-            response.headers().add("Location", "/index");
+        Optional<User> foundAccount = InMemoryUserRepository.findByAccount(account);
+        if (foundAccount.isPresent()) {
+            boolean pass = foundAccount.get().checkPassword(body.getAttribute("password"));
+            if (pass) {
+                response.setStatus(HttpStatus.FOUND);
+                response.headers().add("Location", "/index");
+            }
         }
     }
 }

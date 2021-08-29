@@ -8,7 +8,7 @@ public class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
-        HttpMethod method = HttpMethod.findByName(request.method().name());
+        HttpMethod method = HttpMethod.findByName(request.methodUrl().method().name());
         switch (method){
             case GET:
                 doGet(request, response); break;

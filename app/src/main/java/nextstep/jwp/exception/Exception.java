@@ -18,6 +18,7 @@ public enum Exception {
     QUERY_PARAMETER_NOT_FOUND(404, "Query Parameter Not Found.", QueryParameterNotFoundException.class),
     DUPLICATE_ACCOUNT(409, "Duplicate Account.", DuplicateAccountException.class),
 
+    NO_RESPONSE_BODY(500, "No Response Body.", NoResponseBodyException.class),
     NOT_IMPLEMENTED(501, "Not Implemented Http Method.", NotImplementedException.class);
 
     private final int statusCode;

@@ -1,6 +1,7 @@
 package nextstep.jwp.http.response;
 
 import java.util.Objects;
+import nextstep.jwp.exception.NoResponseBodyException;
 
 public class ResponseBody {
 
@@ -23,6 +24,10 @@ public class ResponseBody {
 
     @Override
     public String toString() {
+        if (isEmpty()) {
+            throw new NoResponseBodyException();
+        }
+
         return NEW_LINE + value;
     }
 }

@@ -12,7 +12,6 @@ public class View {
         this.name = name;
     }
 
-    // e.g. static/login.html
     public String getFilePath() {
         if (name.equals("/")) {
             return DEFAULT_DIRECTORY + DEFAULT_PATH + HTML_EXTENSION;

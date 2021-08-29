@@ -10,8 +10,8 @@ public class User {
     private User() {
     }
 
-    public User(String account, String password) {
-        this(null, account, password, null);
+    public User(String account, String password, String email) {
+        this(null, account, password, email);
     }
 
     public User(Long id, String account, String password, String email) {

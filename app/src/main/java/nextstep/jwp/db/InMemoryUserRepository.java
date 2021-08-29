@@ -12,7 +12,7 @@ public class InMemoryUserRepository {
 
     private static final Map<String, User> DATABASE = new ConcurrentHashMap<>();
 
-    private static Long id = 0L;
+    private static Long id = 1L;
 
     static {
         final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");

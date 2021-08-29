@@ -32,3 +32,25 @@
     - [x] 응답 헤더에 Http Status Code를 302로 반환
 - 회원을 조회해서 로그인에 실패
     - [x] /401.html로 리다이렉트
+
+<br/>
+
+## POST 방식으로 회원가입
+
+- [x] http://localhost:8080/register 접속하면 register.html 조회
+    - 회원가입 페이지 조회 -> GET 방식
+    - 회원가입 버튼 클릭 -> POST 방식
+        - [x] InMemoryUserRepository에서 save()를 사용해서 회원가입 완료 처리
+        - [x] 회원가입을 완료하면 index.html 리다이렉트
+```http request
+POST /register HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+Content-Length: 80
+Content-Type: application/x-www-form-urlencoded
+Accept: */*
+
+account=gugu&password=password&email=hkkang%40woowahan.com
+```
+- [x] 로그인도 버튼 클릭할 때 GET 방식이 아닌, POST 방식으로 전송하도록 변경
+    - [x] login.html도 form 태그 수정

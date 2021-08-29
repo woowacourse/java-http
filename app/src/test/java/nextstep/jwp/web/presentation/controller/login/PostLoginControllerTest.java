@@ -22,7 +22,10 @@ class PostLoginControllerTest {
         );
 
         final Response response = postLoginController.doService(httpRequest);
-        assertThat(response.asString()).contains("302");
+        assertThat(response.asString()).contains(
+                "302",
+                "JSESSIONID"
+        );
     }
 
     @DisplayName("로그인에 실패한다.")

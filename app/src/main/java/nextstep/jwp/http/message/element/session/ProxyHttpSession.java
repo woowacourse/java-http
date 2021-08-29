@@ -43,6 +43,12 @@ public class ProxyHttpSession implements Session {
         return httpSession.getSessionId();
     }
 
+    @Override
+    public boolean containsKey(String key) {
+        createSessionIfNotExist();
+        return httpSession.containsKey(key);
+    }
+
     private void createSessionIfNotExist() {
         if (Objects.isNull(this.httpSession)) {
             this.httpSession = new HttpSession();

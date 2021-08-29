@@ -7,4 +7,5 @@ public interface Session {
     void setAttribute(String key, Object value);
     void removeAttribute(String key);
     String getSessionId();
+    boolean containsKey(String key);
 }

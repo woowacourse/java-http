@@ -3,6 +3,7 @@ package nextstep.jwp.web.presentation.controller.login;
 import nextstep.jwp.http.common.ParameterExtractor;
 import nextstep.jwp.http.exception.BadRequestException;
 import nextstep.jwp.http.exception.UnauthorizedException;
+import nextstep.jwp.http.message.element.session.Session;
 import nextstep.jwp.http.message.request.HttpRequest;
 import nextstep.jwp.http.message.request.request_line.HttpMethod;
 import nextstep.jwp.http.message.response.HttpResponse;
@@ -35,6 +36,9 @@ public class PostLoginController extends CustomController {
         if (!user.checkPassword(password)) {
             throw new UnauthorizedException();
         }
+
+        Session session = httpRequest.getSession();
+        session.setAttribute("isLogged", true);
 
         return HttpResponse.redirect(INDEX_PAGE_PATH);
     }

@@ -42,4 +42,9 @@ public class HttpSession implements Session {
     public String getSessionId() {
         return sessionId;
     }
+
+    @Override
+    public boolean containsKey(String key) {
+        return values.containsKey(key);
+    }
 }

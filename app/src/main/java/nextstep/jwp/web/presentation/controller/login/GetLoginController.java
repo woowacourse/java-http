@@ -11,9 +11,13 @@ public class GetLoginController extends CustomController {
 
     private static final String LOGIN_PATH = "/login";
     private static final String LOGIN_PAGE_RESOURCE_PATH = "/login.html";
-    
+    public static final String INDEX_HTML = "/index.html";
+
     @Override
     public Response doService(HttpRequest httpRequest) {
+        if(httpRequest.getSession().containsKey("isLogged")) {
+            return HttpResponse.redirect(INDEX_HTML);
+        }
         return HttpResponse.status(HttpStatus.OK, LOGIN_PAGE_RESOURCE_PATH);
     }
 

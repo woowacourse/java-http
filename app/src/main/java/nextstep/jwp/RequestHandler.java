@@ -59,7 +59,6 @@ public class RequestHandler implements Runnable {
                 bufferedReader.read(buffer, 0, contentLength);
                 String requestBody = new String(buffer);
 
-
                 if ("/register".equals(requestUri)) {
                     String[] splitBody = requestBody.split("&");
                     String account = splitBody[0].split("=")[1];
@@ -69,7 +68,7 @@ public class RequestHandler implements Runnable {
                     User user = new User(2, account, password, email);
                     InMemoryUserRepository.save(user);
 
-                    String response = createViewResponse("/index.html", "302 Found");
+                    String response = createResponse("/index.html", "302 Found", "text/html");
                     outputStream.write(response.getBytes());
                     outputStream.flush();
                 }
@@ -83,20 +82,20 @@ public class RequestHandler implements Runnable {
                     log.debug(user.toString());
 
                     if (user.isEmpty()) {
-                        String failureResponse = createViewResponse("/401.html", "302 Found");
+                        String failureResponse = createResponse("/401.html", "302 Found", "text/html");
                         outputStream.write(failureResponse.getBytes());
                         outputStream.flush();
                         return;
                     }
 
                     if (!user.get().checkPassword(password)) {
-                        String failureResponse = createViewResponse("/401.html", "302 Found");
+                        String failureResponse = createResponse("/401.html", "302 Found", "text/html");
                         outputStream.write(failureResponse.getBytes());
                         outputStream.flush();
                         return;
                     }
 
-                    String successResponse = createViewResponse("/index.html", "302 Found");
+                    String successResponse = createResponse("/index.html", "302 Found", "text/html");
                     outputStream.write(successResponse.getBytes());
                     outputStream.flush();
                     return;
@@ -106,7 +105,7 @@ public class RequestHandler implements Runnable {
             if ("GET".equals(requestHttpMethod)) {
 
                 if ("/register".equals(requestUri)) {
-                    String response = createViewResponse("/register.html", "302 Found");
+                    String response = createResponse("/register.html", "302 Found", "text/html");
                     outputStream.write(response.getBytes());
                     outputStream.flush();
                     return;
@@ -114,13 +113,19 @@ public class RequestHandler implements Runnable {
 
                 if ("/login".equals(requestUri)) {
                     requestUri += ".html";
-                    String response = createViewResponse(requestUri, "200 OK");
+                    String response = createResponse(requestUri, "200 OK", "text/html");
                     outputStream.write(response.getBytes());
                     outputStream.flush();
                     return;
                 }
 
-                String response = createViewResponse("/index.html", "200 OK");
+                if ("/css/styles.css".equals(requestUri)) {
+                    String response = createResponse(requestUri, "200 OK", "text/css");
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                }
+
+                String response = createResponse("/index.html", "200 OK", "text/html");
                 outputStream.write(response.getBytes());
                 outputStream.flush();
             }
@@ -131,8 +136,8 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private String createViewResponse(String viewName, String statusCode) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static" + viewName);
+    private String createResponse(String fileName, String statusCode, String contentType) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static" + fileName);
         final Path path = new File(resource.getPath()).toPath();
         final List<String> lines = Files.readAllLines(path);
 
@@ -142,7 +147,7 @@ public class RequestHandler implements Runnable {
 
         final String response = String.join("\r\n",
                 "HTTP/1.1 " + statusCode + " ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + result.getBytes().length + " ",
                 "",
                 result);

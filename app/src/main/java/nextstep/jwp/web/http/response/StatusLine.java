@@ -4,9 +4,9 @@ public class StatusLine {
 
     public static final String DEFAULT_PROTOCOL_VERSION = "HTTP/1.1";
 
-    private String protocolVersion;
+    private final String protocolVersion;
 
-    private StatusCode statusCode;
+    private final StatusCode statusCode;
 
     public StatusLine() {
         this.protocolVersion = "";

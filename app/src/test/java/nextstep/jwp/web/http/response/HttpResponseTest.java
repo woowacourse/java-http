@@ -126,8 +126,8 @@ class HttpResponseTest {
             String actual = response.asString();
 
             // then
-            assertThat(actual).contains(expected);
-            assertThat(actual).contains("대시보드");
+            assertThat(actual).contains(expected)
+                .contains("대시보드");
         }
 
         private String readIndexHtml() throws IOException {

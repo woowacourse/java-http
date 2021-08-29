@@ -4,7 +4,7 @@ import nextstep.jwp.web.http.Headers;
 
 public class HttpResponse {
 
-    private Headers headers;
+    private final Headers headers;
     private StatusLine statusLine;
     private ResponseBody body;
 

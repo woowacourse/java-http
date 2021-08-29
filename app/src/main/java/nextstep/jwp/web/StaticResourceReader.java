@@ -11,17 +11,23 @@ public class StaticResourceReader {
 
     private static final Logger log = LoggerFactory.getLogger(StaticResourceReader.class);
 
-    public StaticResourceReader() {
+    private String resource;
+
+    private StaticResourceReader() {
     }
 
-    public String content(String targetResource) throws IOException {
-        log.debug("Target Resource >> {}", targetResource);
+    public StaticResourceReader(String resource) {
+        this.resource = resource;
+    }
 
-        InputStream resource =
-            getClass().getResourceAsStream("/static" + targetResource);
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource));
+    public String content() throws IOException {
+        log.debug("Target Resource >> {}", resource);
 
+        InputStream resourceAsStream =
+            getClass().getResourceAsStream("/static" + resource);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resourceAsStream));
         StringBuilder sb = new StringBuilder();
+
         while (bufferedReader.ready()) {
             sb.append(bufferedReader.readLine());
             sb.append("\n");

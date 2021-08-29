@@ -20,6 +20,13 @@ public class WebServer {
         this.port = checkPort(port);
     }
 
+    public static int defaultPortIfNull(String[] args) {
+        return Stream.of(args)
+            .findFirst()
+            .map(Integer::parseInt)
+            .orElse(WebServer.DEFAULT_PORT);
+    }
+
     public void run() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             logger.info("Web Server started {} port.", serverSocket.getLocalPort());
@@ -36,13 +43,6 @@ public class WebServer {
         while ((connection = serverSocket.accept()) != null) {
             new Thread(new RequestHandler(connection)).start();
         }
-    }
-
-    public static int defaultPortIfNull(String[] args) {
-        return Stream.of(args)
-                .findFirst()
-                .map(Integer::parseInt)
-                .orElse(WebServer.DEFAULT_PORT);
     }
 
     private int checkPort(int port) {

@@ -19,7 +19,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         String responseBody =
-            new StaticResourceReader().content(request.getUrl() + ".html");
+            new StaticResourceReader(request.getUrl() + ".html").content();
 
         response.setStatusCode(StatusCode.OK);
         response.addHeader("Content-Type", ContentType.HTML.getValue());

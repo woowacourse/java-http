@@ -59,7 +59,7 @@ class HttpRequestTest {
 
     @DisplayName("Request Body에 attribute가 있는 경우 해당 값을 가져온다 - 로그인")
     @Test
-    public void getAttribute_postLogin() throws IOException {
+    void getAttribute_postLogin() throws IOException {
         InputStream inputStream =
             new ByteArrayInputStream(HttpRequestFactory.postRegisterUser().getBytes());
 
@@ -71,7 +71,7 @@ class HttpRequestTest {
 
     @DisplayName("Request Body에 attribute가 있는 경우 해당 값을 가져온다 - 회원가입")
     @Test
-    public void getAttribute_postRegister() throws IOException {
+    void getAttribute_postRegister() throws IOException {
         InputStream inputStream =
             new ByteArrayInputStream(HttpRequestFactory.postRegisterUser().getBytes());
 

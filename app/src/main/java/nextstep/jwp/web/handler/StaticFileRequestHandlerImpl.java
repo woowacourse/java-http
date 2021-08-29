@@ -17,7 +17,7 @@ public class StaticFileRequestHandlerImpl implements StaticFileRequestHandler {
         );
 
         String responseBody =
-            new StaticResourceReader().content(targetResource);
+            new StaticResourceReader(targetResource).content();
 
         response.setStatusCode(StatusCode.OK);
         response.addHeader("Content-Type", contentType.getValue());

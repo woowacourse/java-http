@@ -20,7 +20,7 @@ class StaticResourceReaderTest {
         String expected = readFile(targetResource);
 
         // when
-        String actual = new StaticResourceReader().content(targetResource);
+        String actual = new StaticResourceReader(targetResource).content();
 
         // then
         assertThat(actual).isEqualTo(expected);
@@ -34,7 +34,7 @@ class StaticResourceReaderTest {
         String expected = readFile(targetResource);
 
         // when
-        String actual = new StaticResourceReader().content(targetResource);
+        String actual = new StaticResourceReader(targetResource).content();
 
         // then
         assertThat(actual).isEqualTo(expected);

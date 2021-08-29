@@ -96,7 +96,7 @@ class HeadersTest {
         int actualContentLength = headers.getContentLength();
 
         // then
-        assertThat(actualContentLength).isEqualTo(0);
+        assertThat(actualContentLength).isZero();
     }
 
     @DisplayName("저장하고 있는 headers에 대해서 알맞은 형식으로 출력한다. - 성공")

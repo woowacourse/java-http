@@ -39,6 +39,10 @@ public class HttpRequest {
         return new RequestBody(new String(buffer));
     }
 
+    public RequestBody getRequestBody() {
+        return requestBody;
+    }
+
     private HttpHeader readHeaders(BufferedReader bufferedReader) throws IOException {
         Map<String, String> map = new HashMap<>();
         while (bufferedReader.ready()) {

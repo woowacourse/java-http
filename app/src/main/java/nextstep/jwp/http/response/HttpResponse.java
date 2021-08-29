@@ -64,6 +64,11 @@ public class HttpResponse {
 
     }
 
+    public void redirect(String redirectUrl) {
+        setStatusLine(StatusCode.FOUND);
+        this.responseHeader.setLocation(redirectUrl);
+    }
+
     public void setStatusLine(StatusCode statusCode) {
         this.statusLine = new StatusLine(statusCode);
     }

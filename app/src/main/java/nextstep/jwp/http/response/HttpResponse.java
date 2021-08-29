@@ -31,7 +31,6 @@ public class HttpResponse {
         String statusLine = "HTTP/1.1 200 OK ";
         List<String> headers = Arrays.asList(
                 "Content-Type: text/html;charset=utf-8 ",
-                "Location: /index.html ",
                 "Content-Length: " + messageBody.getBytes().length + " ",
                 ""
         );

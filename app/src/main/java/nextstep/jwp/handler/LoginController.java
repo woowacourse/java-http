@@ -2,39 +2,45 @@ package nextstep.jwp.handler;
 
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.http.request.RequestLine;
 import nextstep.jwp.http.request.RequestUriPath;
 import nextstep.jwp.http.response.HttpStatus;
 import nextstep.jwp.model.User;
 
-public class LoginController {
+public class LoginController implements IController {
 
-    public ModelAndView mapping(RequestLine requestLine) {
-        RequestUriPath uriPath = requestLine.getUriPath();
-        String method = requestLine.getMethod();
+    @Override
+    public boolean mapping(String method, RequestUriPath uriPath) {
+        if (uriPath.getPath().equalsIgnoreCase("/login") && method.equalsIgnoreCase("get")) {
+            return true;
+        }
+        return false;
+    }
 
+    @Override
+    public ModelAndView service(String method, RequestUriPath uriPath) {
         if (uriPath.getPath().equalsIgnoreCase("/login") && method.equalsIgnoreCase("get")) {
             return login(uriPath.getParams());
         }
-        return null;
+        throw new IllegalArgumentException("핸들러가 처리할 수 있는 요청이 아닙니다.");
     }
 
     public ModelAndView login(Map<String, String> params) {
         if (params.isEmpty()) {
-            return new ModelAndView(Model.of(HttpStatus.OK), "login.html");
+            return new ModelAndView(Model.of(HttpStatus.OK), "/login.html");
         }
-
-        String account = params.get("account");
-        String password = params.get("password");
-
-        // TODO :: 없는 사용자 예외 처리
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(IllegalArgumentException::new);
-
-        if (user.checkPassword(password)) {
+        if (isValidUser(params.get("account"), params.get("password"))) {
             return new ModelAndView(Model.of(HttpStatus.FOUND, "index.html"));
         }
+        return new ModelAndView(Model.of(HttpStatus.UNAUTHORIZED), "/401.html");
+    }
 
-        return new ModelAndView(Model.of(HttpStatus.UNAUTHORIZED), "401.html");
+    private boolean isValidUser(String account, String password) {
+        try {
+            User user = InMemoryUserRepository.findByAccount(account)
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+            return user.checkPassword(password);
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

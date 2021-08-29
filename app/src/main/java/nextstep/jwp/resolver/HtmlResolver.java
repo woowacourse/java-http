@@ -1,4 +1,4 @@
-package nextstep.jwp.view;
+package nextstep.jwp.resolver;
 
 import static nextstep.jwp.resource.FileType.HTML;
 
@@ -7,11 +7,13 @@ import java.util.List;
 import nextstep.jwp.http.HttpProtocol;
 import nextstep.jwp.http.MimeType;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpResponseBody;
+import nextstep.jwp.http.response.TextHttpResponseBody;
 import nextstep.jwp.resource.FilePath;
 import nextstep.jwp.resource.FileReader;
 import nextstep.jwp.resource.FileType;
 
-public class HtmlViewResolver implements ViewResolver {
+public class HtmlResolver implements DataResolver {
 
     @Override
     public boolean isExist(String url) {
@@ -28,26 +30,16 @@ public class HtmlViewResolver implements ViewResolver {
     }
 
     @Override
-    public View getView(String url) throws IOException {
+    public HttpResponseBody resolve(String url) throws IOException {
         final FileReader fileReader = new FileReader(new FilePath(url, HTML.getText()));
 
-        return createHtmlView(fileReader);
+        return new TextHttpResponseBody(fileReader.readAllFile());
     }
 
-    public View getView(String url, String prefix) throws IOException {
+    public HttpResponseBody resolve(String url, String prefix) throws IOException {
         final FileReader fileReader = new FileReader(new FilePath(url, HTML.getText(), prefix));
 
-        return createHtmlView(fileReader);
+        return new TextHttpResponseBody(fileReader.readAllFile());
     }
 
-    private View createHtmlView(FileReader fileReader) throws IOException {
-        HttpResponse httpResponse = HttpResponse
-            .ok(
-                HttpProtocol.HTTP1_1,
-                HTML,
-                fileReader.readAllFile()
-            );
-
-        return new HtmlView(httpResponse);
-    }
 }

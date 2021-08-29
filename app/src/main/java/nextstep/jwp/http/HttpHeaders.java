@@ -29,6 +29,14 @@ public class HttpHeaders {
         addValueIfKeyAbsent(key, values);
     }
 
+    public void addAll(HttpHeaders headers) {
+        headers.addAll(headers);
+    }
+
+    public void set(String key, String... value) {
+        headers.put(key, new HttpRequestHeaderValues(value));
+    }
+
     public Map<String, HttpRequestHeaderValues> map() {
         return headers;
     }

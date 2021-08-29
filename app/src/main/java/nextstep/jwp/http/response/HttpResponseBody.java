@@ -1,6 +1,9 @@
 package nextstep.jwp.http.response;
 
+import nextstep.jwp.resource.FileType;
+
 public interface HttpResponseBody {
 
-    String getBody();
+    String body();
+    FileType fileType();
 }

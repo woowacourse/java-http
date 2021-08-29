@@ -1,16 +1,20 @@
 package nextstep.jwp.handler;
 
+import static nextstep.jwp.http.response.HttpStatus.OK;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.List;
 import java.util.Objects;
+import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.view.HtmlViewResolver;
-import nextstep.jwp.view.View;
-import nextstep.jwp.view.ViewResolver;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpResponseBody;
+import nextstep.jwp.resolver.HtmlResolver;
+import nextstep.jwp.resolver.DataResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,16 +23,16 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
-    private final List<ViewResolver> viewResolvers;
+    private final List<DataResolver> dataResolvers;
 
     public RequestHandler(Socket connection) {
-        this(connection, List.of(new HtmlViewResolver()));
+        this(connection, List.of(new HtmlResolver()));
     }
 
     public RequestHandler(Socket connection,
-                          List<ViewResolver> viewResolvers) {
+                          List<DataResolver> dataResolvers) {
         this.connection = Objects.requireNonNull(connection);
-        this.viewResolvers = viewResolvers;
+        this.dataResolvers = dataResolvers;
     }
 
     @Override
@@ -41,8 +45,23 @@ public class RequestHandler implements Runnable {
 
             HttpRequest httpRequest = HttpRequest.of(inputStream);
             log.debug(httpRequest.toString());
-            View view = findView(httpRequest);
-            view.write(outputStream);
+            String url = httpRequest.url();
+
+            HttpResponse httpResponse =
+                new HttpResponse
+                    .Builder(httpRequest.protocol(), OK)
+                    .build();
+
+            if (url.equals("login")) {
+                LoginController loginController = new LoginController();
+                loginController.login(httpRequest, httpResponse);
+            }
+
+            HttpResponseBody responseBody = resolveData(url, httpRequest.header("Accept").list());
+            httpResponse.replaceResponseBody(responseBody);
+
+            outputStream.write(httpResponse.toResponseFormat().getBytes());
+            outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
@@ -50,22 +69,20 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private View findView(HttpRequest httpRequest) throws IOException {
-        String filePath = httpRequest.url();
-        List<String> acceptType = httpRequest.header("Accept").list();
+    private HttpResponseBody resolveData(String filePath, List<String> acceptType) throws IOException {
         if (acceptType.isEmpty()) {
             acceptType = List.of("*/*");
         }
-        return findProperMimeTypeView(filePath, acceptType);
+        return findProperMimeTypeData(filePath, acceptType);
     }
 
-    private View findProperMimeTypeView(String filePath, List<String> acceptTypes)
+    private HttpResponseBody findProperMimeTypeData(String filePath, List<String> acceptTypes)
         throws IOException {
-        for (ViewResolver viewResolver : viewResolvers) {
-            if (viewResolver.isSuitable(acceptTypes) &&
-                viewResolver.isExist(filePath)
+        for (DataResolver dataResolver : dataResolvers) {
+            if (dataResolver.isSuitable(acceptTypes) &&
+                dataResolver.isExist(filePath)
             ) {
-                return viewResolver.getView(filePath);
+                return dataResolver.resolve(filePath);
             }
         }
         throw new NotFoundException(

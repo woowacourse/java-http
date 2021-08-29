@@ -21,9 +21,10 @@ public class ViewResolver {
                 return View.of("Hello world!");
             }
 
+            // TODO :: Config 분리
             final URL resourceUrl = getClass().getResource("/static" + viewName);
             final Path filePath = new File(resourceUrl.getFile()).toPath();
-            return View.of(String.join("\n", Files.readAllLines(filePath)) + "\n");
+            return View.of(filePath);
         } catch (Exception e) {
             e.printStackTrace();
             throw new IllegalArgumentException("view not found");

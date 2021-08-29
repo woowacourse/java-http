@@ -12,6 +12,7 @@ public class WebServer {
 
     private static final Logger logger = LoggerFactory.getLogger(WebServer.class);
 
+    // TODO :: WebConfig 분리
     private static final int DEFAULT_PORT = 8080;
 
     private final int port;

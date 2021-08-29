@@ -1,7 +1,5 @@
 package nextstep.jwp.mapper;
 
-import java.util.Arrays;
-import java.util.List;
 import nextstep.jwp.exception.IncorrectMapperException;
 import nextstep.jwp.handler.Controller;
 import nextstep.jwp.handler.LoginController;
@@ -9,7 +7,9 @@ import nextstep.jwp.handler.ModelAndView;
 import nextstep.jwp.handler.RegisterController;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestLine;
-import nextstep.jwp.http.request.RequestUriPath;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class ControllerMapper implements HandlerMapper {
 
@@ -36,7 +36,7 @@ public class ControllerMapper implements HandlerMapper {
         return controller.service(request);
     }
 
-    private Controller search(RequestLine requestLine){
+    private Controller search(RequestLine requestLine) {
         return controllers.stream()
                 .filter(controller -> controller.mapping(requestLine))
                 .findFirst()

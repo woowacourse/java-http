@@ -14,13 +14,10 @@ public class RegisterController implements Controller {
 
     @Override
     public boolean mapping(RequestLine requestLine) {
-        String method = requestLine.getMethod();
-        RequestUriPath uriPath = requestLine.getUriPath();
-
-        if (method.equalsIgnoreCase("get") && uriPath.isPath("/register")) {
+        if (requestLine.isFrom("get", "/register")) {
             return true;
         }
-        if (method.equalsIgnoreCase("post") && uriPath.isPath("/register")) {
+        if (requestLine.isFrom("post", "/register")) {
             return true;
         }
         return false;
@@ -30,13 +27,10 @@ public class RegisterController implements Controller {
     @Override
     public ModelAndView service(HttpRequest httpRequest) {
         RequestLine requestLine = httpRequest.getRequestLine();
-        String method = requestLine.getMethod();
-        RequestUriPath uriPath = requestLine.getUriPath();
-
-        if (method.equalsIgnoreCase("get") && uriPath.isPath("/register")) {
+        if (requestLine.isFrom("get", "/register")) {
            return printRegisterPage();
         }
-        if (method.equalsIgnoreCase("post") && uriPath.isPath("/register")) {
+        if (requestLine.isFrom("post", "/register")) {
             return register(httpRequest.getRequestBody());
         }
         throw new IllegalArgumentException("핸들러가 처리할 수 있는 요청이 아닙니다.");

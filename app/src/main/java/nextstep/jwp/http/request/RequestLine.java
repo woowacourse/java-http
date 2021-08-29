@@ -31,9 +31,9 @@ public class RequestLine {
     public RequestUriPath getUriPath() {
         return uriPath;
     }
-
-    public String getProtocolVersion() {
-        return protocolVersion;
+    
+    public boolean isFrom(String method, String path){
+        return this.method.equalsIgnoreCase(method) && this.uriPath.isPath(path);
     }
 
     @Override

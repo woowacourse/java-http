@@ -1,12 +1,12 @@
 package nextstep.jwp.mapper;
 
-import java.util.Arrays;
-import java.util.List;
 import nextstep.jwp.exception.BadRequestException;
 import nextstep.jwp.handler.ModelAndView;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestLine;
-import nextstep.jwp.http.request.RequestUriPath;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class HandlerMappers {
     private final List<HandlerMapper> handlerMappers;

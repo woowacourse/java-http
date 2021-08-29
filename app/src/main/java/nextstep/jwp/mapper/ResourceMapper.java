@@ -12,6 +12,7 @@ import nextstep.jwp.http.response.HttpStatus;
 
 public class ResourceMapper implements HandlerMapper {
 
+    // TODO :: Config 분리
     private static final String RESOURCE_BASE_PATH = "/static";
 
     @Override

@@ -7,7 +7,7 @@ public class Model {
     private final String location;
 
     public static Model of(HttpStatus httpStatus){
-        return new Model(httpStatus);
+        return new Model(httpStatus, "");
     }
 
     public static Model of(HttpStatus httpStatus, String location){
@@ -17,10 +17,6 @@ public class Model {
     private Model(HttpStatus httpStatus, String location) {
         this.httpStatus = httpStatus;
         this.location = location;
-    }
-
-    private Model(HttpStatus httpStatus) {
-        this(httpStatus, "");
     }
 
     public HttpStatus getHttpStatus() {

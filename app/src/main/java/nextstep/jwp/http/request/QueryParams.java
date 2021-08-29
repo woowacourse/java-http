@@ -21,7 +21,7 @@ public class QueryParams {
             Map<String, String> params = parse(queryString);
             return new QueryParams(params);
         } catch (Exception e) {
-            throw new IllegalArgumentException("올바른 QueryString이 아닙니다.");
+            throw new IllegalArgumentException("올바른 QueryString 형식이 아닙니다.");
         }
     }
 

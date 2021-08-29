@@ -12,9 +12,7 @@ public class LoginController implements Controller {
 
     @Override
     public boolean mapping(RequestLine requestLine) {
-        String method = requestLine.getMethod();
-        RequestUriPath uriPath = requestLine.getUriPath();
-        return method.equalsIgnoreCase("get") && uriPath.isPath("/login");
+        return requestLine.isFrom("get", "/login");
     }
 
     // TODO :: service controller 분리
@@ -22,11 +20,8 @@ public class LoginController implements Controller {
     @Override
     public ModelAndView service(HttpRequest httpRequest) {
         RequestLine requestLine = httpRequest.getRequestLine();
-        String method = requestLine.getMethod();
-        RequestUriPath uriPath = requestLine.getUriPath();
-
-        if (method.equalsIgnoreCase("get") && uriPath.isPath("/login")) {
-            return login(uriPath.getQueryParams());
+        if (requestLine.isFrom("get", "/login")){
+            return login(requestLine.getUriPath().getQueryParams());
         }
         throw new IllegalArgumentException("핸들러가 처리할 수 있는 요청이 아닙니다.");
     }

@@ -6,6 +6,8 @@ import java.io.StringReader;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import nextstep.jwp.framework.http.HttpMethod;
 import nextstep.jwp.framework.http.HttpRequest;
@@ -44,6 +46,21 @@ class RequestLineParserTest {
 
         // given
         String givenLine = "GET / HTTP/1.1 Token";
+        HttpParser httpParser = new RequestLineParser(new BufferedReader(new StringReader(givenLine)));
+
+        // when
+        ThrowableAssert.ThrowingCallable callable = httpParser::parse;
+
+        //then
+        assertThatIllegalArgumentException().isThrownBy(callable);
+    }
+
+    @DisplayName("리퀘스트 라인이 없을 경우 예외 발생 테스트")
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", "  "})
+    void emptyRequestLineTest(String givenLine) {
+
+        // given
         HttpParser httpParser = new RequestLineParser(new BufferedReader(new StringReader(givenLine)));
 
         // when

@@ -32,6 +32,10 @@ public class User {
         return account;
     }
 
+    public void setId(long id) {
+        this.id = id;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -40,9 +44,5 @@ public class User {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 '}';
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 }

@@ -28,6 +28,9 @@ class InMemoryUserRepositoryTest {
     @Test
     @DisplayName("등록된 유저의 다음 순서 Id를 가져온다.")
     void nextId() {
-        assertThat(InMemoryUserRepository.nextId()).isEqualTo(2);
+        User user = new User("joanne", "password", "seominjeong.dev@gmail.com");
+        InMemoryUserRepository.save(user);
+
+        assertThat(InMemoryUserRepository.findByAccount("joanne").get().getId()).isEqualTo(2);
     }
 }

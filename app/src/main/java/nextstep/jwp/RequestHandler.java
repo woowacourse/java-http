@@ -9,7 +9,8 @@ import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public class RequestHandler implements Runnable {
@@ -29,7 +30,7 @@ public class RequestHandler implements Runnable {
 
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            final StringBuilder header = new StringBuilder();
+            final Map<String, String> httpRequestHeaders = new HashMap<>();
 
             String line = bufferedReader.readLine();
 
@@ -38,28 +39,39 @@ public class RequestHandler implements Runnable {
             }
 
             final String[] request = line.split(" ");
-            while (!"".equals(line)) {
+            while (bufferedReader.ready()) {
                 line = bufferedReader.readLine();
-                header.append(line);
-                header.append("\r\n");
+                if ("".equals(line)) {
+                    break;
+                }
+                String[] headers = line.split(": ");
+                httpRequestHeaders.put(headers[0], headers[1]);
             }
 
+            final String method = request[0];
             final String uri = request[1];
             String fileName = uri;
-            String queryString = null;
+            String requestBody = null;
             String status = "200 OK";
             String location = null;
-            if (uri.startsWith("/login")) {
-                int index = uri.indexOf("?");
-                if (index == -1) {
-                    fileName = "/login.html";
-                } else {
-                    fileName = uri.substring(0, index) + ".html";
-                    queryString = uri.substring(index + 1);
 
-                    int andIndex = queryString.indexOf("&");
-                    String account = getDataFromQueryString(queryString.substring(0, andIndex));
-                    String password = getDataFromQueryString(queryString.substring(andIndex));
+            if ("POST".equals(method)) {
+                String rawLength = httpRequestHeaders.get("Content-Length");
+                if (!Objects.isNull(rawLength)) {
+                    int length = Integer.parseInt(rawLength);
+                    char[] buffer = new char[length];
+                    bufferedReader.read(buffer, 0, length);
+                    requestBody = new String(buffer);
+                }
+            }
+
+            if (uri.startsWith("/login")) {
+                fileName = "/login.html";
+
+                if (!Objects.isNull(requestBody)) {
+                    String[] rawData = requestBody.split("&");
+                    String account = getDataFromQueryString(rawData[0]);
+                    String password = getDataFromQueryString(rawData[1]);
 
                     User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
                     if (user.checkPassword(password)) {
@@ -76,6 +88,17 @@ public class RequestHandler implements Runnable {
 
             if (uri.startsWith("/register")) {
                 fileName = "/register.html";
+
+                if (!Objects.isNull(requestBody)) {
+                    String[] rawData = requestBody.split("&");
+                    String account = getDataFromQueryString(rawData[0]);
+                    String email = getDataFromQueryString(rawData[1]);
+                    String password = getDataFromQueryString(rawData[2]);
+                    InMemoryUserRepository.save(new User(2L, account, password, email));
+                    fileName = "/login.html";
+                    status = "302";
+                    location = "/login.html";
+                }
             }
 
             byte[] body = new byte[0];

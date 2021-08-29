@@ -2,9 +2,9 @@ package nextstep.jwp.framework.http.formatter;
 
 import nextstep.jwp.framework.http.HttpMessage;
 
-public class BodyLineFormatter extends AbstractLineFormatter {
+public class BodyFormatter extends AbstractHttpFormatter {
 
-    public BodyLineFormatter(HttpMessage httpMessage) {
+    public BodyFormatter(HttpMessage httpMessage) {
         super(httpMessage);
     }
 
@@ -14,7 +14,7 @@ public class BodyLineFormatter extends AbstractLineFormatter {
     }
 
     @Override
-    public LineFormatter convertNextFormatter() {
+    public HttpFormatter convertNextFormatter() {
         return new EndLineFormatter(httpMessage);
     }
 }

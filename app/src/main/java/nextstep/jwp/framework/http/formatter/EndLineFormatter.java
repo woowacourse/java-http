@@ -2,7 +2,7 @@ package nextstep.jwp.framework.http.formatter;
 
 import nextstep.jwp.framework.http.HttpMessage;
 
-public class EndLineFormatter extends AbstractLineFormatter {
+public class EndLineFormatter extends AbstractHttpFormatter {
 
     public EndLineFormatter(HttpMessage httpMessage) {
         super(httpMessage);
@@ -19,7 +19,7 @@ public class EndLineFormatter extends AbstractLineFormatter {
     }
 
     @Override
-    public LineFormatter convertNextFormatter() {
+    public HttpFormatter convertNextFormatter() {
         throw new UnsupportedOperationException("이미 종료된 HTTP 응답 변환 작업입니다.");
     }
 }

@@ -1,10 +1,10 @@
 package nextstep.jwp.framework.http.formatter;
 
-public interface LineFormatter {
+public interface HttpFormatter {
 
     boolean canRead();
 
     String transform();
 
-    LineFormatter convertNextFormatter();
+    HttpFormatter convertNextFormatter();
 }

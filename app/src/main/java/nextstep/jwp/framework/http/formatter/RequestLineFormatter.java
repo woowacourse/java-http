@@ -3,7 +3,7 @@ package nextstep.jwp.framework.http.formatter;
 import nextstep.jwp.framework.http.HttpRequest;
 import nextstep.jwp.framework.http.RequestLine;
 
-public class RequestLineFormatter extends AbstractLineFormatter {
+public class RequestLineFormatter extends AbstractHttpFormatter {
 
     public static final String REQUEST_LINE_FORMAT = "%s %s %s\r\n";
 
@@ -24,7 +24,7 @@ public class RequestLineFormatter extends AbstractLineFormatter {
     }
 
     @Override
-    public LineFormatter convertNextFormatter() {
-        return new HeaderLineFormatter(httpRequest);
+    public HttpFormatter convertNextFormatter() {
+        return new HeaderFormatter(httpRequest);
     }
 }

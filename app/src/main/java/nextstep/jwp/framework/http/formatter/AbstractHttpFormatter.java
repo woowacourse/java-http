@@ -4,11 +4,11 @@ import java.util.Objects;
 
 import nextstep.jwp.framework.http.HttpMessage;
 
-public abstract class AbstractLineFormatter implements LineFormatter {
+public abstract class AbstractHttpFormatter implements HttpFormatter {
 
     protected final HttpMessage httpMessage;
 
-    public AbstractLineFormatter(HttpMessage httpMessage) {
+    public AbstractHttpFormatter(HttpMessage httpMessage) {
         this.httpMessage = Objects.requireNonNull(httpMessage);
     }
 

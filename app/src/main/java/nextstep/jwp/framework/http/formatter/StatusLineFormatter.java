@@ -3,7 +3,7 @@ package nextstep.jwp.framework.http.formatter;
 import nextstep.jwp.framework.http.HttpResponse;
 import nextstep.jwp.framework.http.StatusLine;
 
-public class StatusLineFormatter extends AbstractLineFormatter {
+public class StatusLineFormatter extends AbstractHttpFormatter {
 
     public static final String STATUS_LINE_FORMAT = "%s %s %s\r\n";
 
@@ -24,7 +24,7 @@ public class StatusLineFormatter extends AbstractLineFormatter {
     }
 
     @Override
-    public LineFormatter convertNextFormatter() {
-        return new HeaderLineFormatter(httpResponse);
+    public HttpFormatter convertNextFormatter() {
+        return new HeaderFormatter(httpResponse);
     }
 }

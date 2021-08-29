@@ -76,13 +76,12 @@ class LoginControllerTest {
                     + "Content-Type: text/html; charset=UTF-8 \n"
                     + "\n"
                     + "login is good";
-                byte[] expectBytes = expectString.getBytes(StandardCharsets.UTF_8);
 
                 // when
                 HttpResponse httpResponse = loginController.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectBytes);
+                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
             }
 
             @DisplayName("요청한 파일이 없으면 '404.html' response를 반환 받는다.")
@@ -96,18 +95,17 @@ class LoginControllerTest {
                 }
 
                 String expectString = "\n\n"
-                    + "HTTP/1.1 200 OK \n"
+                    + "HTTP/1.1 404 Not Found \n"
                     + "Content-Length: 9 \n"
                     + "Content-Type: text/html; charset=UTF-8 \n"
                     + "\n"
                     + "NOT FOUND";
-                byte[] expectBytes = expectString.getBytes(StandardCharsets.UTF_8);
 
                 // when
                 HttpResponse httpResponse = loginController.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectBytes);
+                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
             }
         }
 
@@ -148,13 +146,11 @@ class LoginControllerTest {
                     + "HTTP/1.1 302 Found \n"
                     + "Location: /index.html ";
 
-                byte[] expectBytes = expectString.getBytes(StandardCharsets.UTF_8);
-
                 // when
                 HttpResponse httpResponse = loginController.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectBytes);
+                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
             }
 
             @DisplayName("로그인 실패시 '/401.html' redirect response를 반환 받는다.")
@@ -165,13 +161,11 @@ class LoginControllerTest {
                     + "HTTP/1.1 302 Found \n"
                     + "Location: /401.html ";
 
-                byte[] expectBytes = expectString.getBytes(StandardCharsets.UTF_8);
-
                 // when
                 HttpResponse httpResponse = loginController.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectBytes);
+                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
             }
         }
     }

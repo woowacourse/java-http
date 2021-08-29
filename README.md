@@ -19,7 +19,7 @@
   - [ ] 컨트롤러 테스트 코드
     - [x] LoginController 테스트 코드
     - [x] RegisterController 테스트 코드
-    - [ ] StaticResourceController 테스트 코드
+    - [x] StaticResourceController 테스트 코드
     - [ ] Controllers 테스트 코드
   - [x] HTTP Request 테스트 코드
     - [x] RequestLine 테스트 코드

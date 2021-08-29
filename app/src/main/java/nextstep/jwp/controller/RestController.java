@@ -20,10 +20,16 @@ public abstract class RestController implements Controller {
     protected abstract HttpResponse doPost(HttpRequest httpRequest);
 
     private HttpResponse doGet(HttpRequest httpRequest) throws IOException {
-        StaticResource staticResource = staticResourceService.findByPathWithExtension(
-            httpRequest.getUri(), ".html");
+        try {
+            StaticResource staticResource = staticResourceService.findByPathWithExtension(
+                httpRequest.getUri(), ".html");
 
-        return HttpResponse.withBody(HttpStatus.OK, staticResource);
+            return HttpResponse.withBody(HttpStatus.OK, staticResource);
+        } catch (NullPointerException e) {
+            StaticResource staticResource = staticResourceService.findByPath("/404.html");
+
+            return HttpResponse.withBody(HttpStatus.NOT_FOUND, staticResource);
+        }
     }
 
     public HttpResponse doService(HttpRequest httpRequest) throws IOException {

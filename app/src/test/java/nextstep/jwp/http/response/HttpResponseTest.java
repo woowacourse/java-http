@@ -35,14 +35,11 @@ class HttpResponseTest {
                 + "\n"
                 + "hello world!";
 
-            byte[] expectBytes = expectString.getBytes(StandardCharsets.UTF_8);
-
             // when
             httpResponse = HttpResponse.withBody(HttpStatus.OK, staticResource);
-            byte[] bytes = httpResponse.toBytes();
 
             // then
-            assertThat(bytes).isEqualTo(expectBytes);
+            assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
         }
     }
 
@@ -60,14 +57,11 @@ class HttpResponseTest {
                 + "HTTP/1.1 301 Moved Permanently \n"
                 + "Location: /index.html ";
 
-            byte[] expectBytes = expectString.getBytes(StandardCharsets.UTF_8);
-
             // when
             httpResponse = HttpResponse.redirect(HttpStatus.MOVED_PERMANENTLY, location);
-            byte[] bytes = httpResponse.toBytes();
 
             // then
-            assertThat(bytes).isEqualTo(expectBytes);
+            assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
         }
     }
 }

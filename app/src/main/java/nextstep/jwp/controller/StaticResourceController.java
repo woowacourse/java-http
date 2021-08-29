@@ -16,9 +16,15 @@ public class StaticResourceController implements Controller {
     }
 
     private HttpResponse doGet(HttpRequest httpRequest) throws IOException {
-        StaticResource staticResource = staticResourceService.findByPath(httpRequest.getUri());
+        try {
+            StaticResource staticResource = staticResourceService.findByPath(httpRequest.getUri());
 
-        return HttpResponse.withBody(HttpStatus.OK, staticResource);
+            return HttpResponse.withBody(HttpStatus.OK, staticResource);
+        } catch (NullPointerException exception) {
+            StaticResource staticResource = staticResourceService.findByPath("/404.html");
+
+            return HttpResponse.withBody(HttpStatus.NOT_FOUND, staticResource);
+        }
     }
 
     @Override

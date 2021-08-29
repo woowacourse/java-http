@@ -14,7 +14,7 @@ public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
-    public static final String MESSAGE_LOG_FORMAT = "\n\n{}\n{}";
+    public static final String MESSAGE_LOG_FORMAT = "\n\nHTTP REQUEST\n{}\nHTTP RESPONSE\n{}";
 
     private final Socket connection;
 
@@ -30,13 +30,10 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             final HttpRequest httpRequest = new HttpRequestParser(inputStream).parseRequest();
-
-            log.info(MESSAGE_LOG_FORMAT, "HTTP REQUEST", httpRequest.readAfterExceptBody());
-
             final Controller controller = ControllerMapping.findController(httpRequest);
             final HttpResponse httpResponse = controller.handle(httpRequest);
 
-            log.info(MESSAGE_LOG_FORMAT, "HTTP RESPONSE", httpResponse.readAfterExceptBody());
+            log.info(MESSAGE_LOG_FORMAT, httpRequest.readAfterExceptBody(), httpResponse.readAfterExceptBody());
 
             final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
             writer.write(httpResponse.readAsString());

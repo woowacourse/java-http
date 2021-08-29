@@ -71,9 +71,8 @@ public class HttpRequest {
     public Session getSession() {
         return Optional.ofNullable(httpSession)
                 .orElseGet(() -> {
-                    Session session = createProxySession();
-                    this.httpSession = session;
-                    return session;
+                    this.httpSession = createProxySession();
+                    return this.httpSession;
                 });
     }
 

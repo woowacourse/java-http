@@ -45,7 +45,9 @@ public class ProxyHttpSession implements Session {
 
     @Override
     public boolean containsKey(String key) {
-        createSessionIfNotExist();
+        if(Objects.isNull(this.httpSession)) {
+            return false;
+        }
         return httpSession.containsKey(key);
     }
 

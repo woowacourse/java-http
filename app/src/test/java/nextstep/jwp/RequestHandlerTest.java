@@ -1,5 +1,7 @@
 package nextstep.jwp;
 
+import nextstep.jwp.http.message.element.session.HttpSession;
+import nextstep.jwp.http.message.element.session.HttpSessions;
 import nextstep.jwp.server.handler.RequestHandler;
 import org.junit.jupiter.api.Test;
 
@@ -75,6 +77,59 @@ RequestHandlerTest {
         // then
         assertThat(socket.output()).contains(
                 "302"
+        );
+    }
+
+    @Test
+    void post_sessionCreate() {
+        String body = "account=gugu&password=password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                body);
+
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler =
+                new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        assertThat(socket.output()).contains(
+                "JSESSIONID"
+        );
+    }
+
+    @Test
+    void post_loggedIn() {
+        HttpSession httpSession = new HttpSession();
+        HttpSessions.put(httpSession);
+
+        String body = "account=gugu&password=password";
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + body.getBytes(StandardCharsets.UTF_8).length,
+                "",
+                body);
+
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler =
+                new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        assertThat(socket.output()).contains(
+                "JSESSIONID"
         );
     }
 }

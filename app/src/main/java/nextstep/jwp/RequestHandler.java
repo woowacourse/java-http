@@ -53,13 +53,14 @@ public class RequestHandler implements Runnable {
 
 
             if ("POST".equals(requestHttpMethod)) {
-                if ("/register".equals(requestUri)) {
-                    HttpHeaders httpHeaders = new HttpHeaders(stringBuilder.toString());
-                    int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
-                    char[] buffer = new char[contentLength];
-                    bufferedReader.read(buffer, 0, contentLength);
-                    String requestBody = new String(buffer);
+                HttpHeaders httpHeaders = new HttpHeaders(stringBuilder.toString());
+                int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
+                char[] buffer = new char[contentLength];
+                bufferedReader.read(buffer, 0, contentLength);
+                String requestBody = new String(buffer);
 
+
+                if ("/register".equals(requestUri)) {
                     String[] splitBody = requestBody.split("&");
                     String account = splitBody[0].split("=")[1];
                     String password = splitBody[1].split("=")[1];
@@ -72,33 +73,11 @@ public class RequestHandler implements Runnable {
                     outputStream.write(response.getBytes());
                     outputStream.flush();
                 }
-            }
-
-            if ("GET".equals(requestHttpMethod)) {
-
-                if ("/register".equals(requestUri)) {
-                    String response = createViewResponse("/register.html", "302 Found");
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
-                    return;
-                }
 
                 if ("/login".equals(requestUri)) {
-                    requestUri += ".html";
-                    String response = createViewResponse(requestUri, "200 OK");
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
-                    return;
-                }
-
-                if (requestUri.contains("/login?")) {
-                    int index = requestUri.indexOf("?");
-                    String path = requestUri.substring(0, index);
-                    String queryString = requestUri.substring(index + 1);
-
-                    int index2 = queryString.indexOf("&");
-                    String account = queryString.substring(0, index2).split("=")[1];
-                    String password = queryString.substring(index2 + 1).split("=")[1];
+                    String[] splitBody = requestBody.split("&");
+                    String account = splitBody[0].split("=")[1];
+                    String password = splitBody[1].split("=")[1];
 
                     Optional<User> user = InMemoryUserRepository.findByAccount(account);
                     log.debug(user.toString());
@@ -119,6 +98,24 @@ public class RequestHandler implements Runnable {
 
                     String successResponse = createViewResponse("/index.html", "302 Found");
                     outputStream.write(successResponse.getBytes());
+                    outputStream.flush();
+                    return;
+                }
+            }
+
+            if ("GET".equals(requestHttpMethod)) {
+
+                if ("/register".equals(requestUri)) {
+                    String response = createViewResponse("/register.html", "302 Found");
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                    return;
+                }
+
+                if ("/login".equals(requestUri)) {
+                    requestUri += ".html";
+                    String response = createViewResponse(requestUri, "200 OK");
+                    outputStream.write(response.getBytes());
                     outputStream.flush();
                     return;
                 }

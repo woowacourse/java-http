@@ -1,9 +1,6 @@
 package nextstep.jwp.infrastructure;
 
-import nextstep.jwp.infrastructure.processor.DefaultRequestProcessor;
-import nextstep.jwp.infrastructure.processor.LoginRequestProcessor;
-import nextstep.jwp.infrastructure.processor.RequestProcessor;
-import nextstep.jwp.infrastructure.processor.ResourceRequestProcessor;
+import nextstep.jwp.infrastructure.processor.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +14,7 @@ public class RequestMapper {
         MAPPER.put("/", new DefaultRequestProcessor());
         MAPPER.put("resource", new ResourceRequestProcessor());
         MAPPER.put("/login", new LoginRequestProcessor());
+        MAPPER.put("/register", new RegisterRequestProcessor());
     }
 
     public static RequestProcessor mappingProcessor(String path) {

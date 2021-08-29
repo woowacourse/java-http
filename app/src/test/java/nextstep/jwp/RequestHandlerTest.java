@@ -167,7 +167,7 @@ class RequestHandlerTest {
             // then
             final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
             String expected = "HTTP/1.1 200 OK \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
+                    "Content-Type: text/css;charset=utf-8 \r\n" +
                     "Content-Length: 211991 \r\n" +
                     "\r\n" +
                     new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -199,7 +199,7 @@ class RequestHandlerTest {
 
             // then
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            String expected = "HTTP/1.1 200 OK \r\n" +
+            String expected = "HTTP/1.1 302 Found \r\n" +
                     "Content-Type: text/html;charset=utf-8 \r\n" +
                     "Content-Length: 5564 \r\n" +
                     "\r\n" +
@@ -226,7 +226,7 @@ class RequestHandlerTest {
 
             // then
             final URL resource = getClass().getClassLoader().getResource("static/401.html");
-            String expected = "HTTP/1.1 200 OK \r\n" +
+            String expected = "HTTP/1.1 401 Unauthorized \r\n" +
                     "Content-Type: text/html;charset=utf-8 \r\n" +
                     "Content-Length: 2426 \r\n" +
                     "\r\n" +
@@ -234,7 +234,7 @@ class RequestHandlerTest {
             assertThat(socket.output()).isEqualTo(expected);
         }
     }
-    
+
     @Nested
     @DisplayName("등록을 하면")
     class Register {
@@ -261,7 +261,7 @@ class RequestHandlerTest {
 
             // then
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            String expected = "HTTP/1.1 200 OK \r\n" +
+            String expected = "HTTP/1.1 302 Found \r\n" +
                     "Content-Type: text/html;charset=utf-8 \r\n" +
                     "Content-Length: 5564 \r\n" +
                     "\r\n" +

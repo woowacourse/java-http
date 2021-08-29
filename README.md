@@ -21,7 +21,7 @@
     - [ ] RegisterController 테스트 코드
     - [ ] StaticResourceController 테스트 코드
     - [ ] Controllers 테스트 코드
-  - [ ] HTTP Request 테스트 코드
+  - [x] HTTP Request 테스트 코드
     - [x] RequestLine 테스트 코드
       - [x] Method 테스트 코드
       - [x] RequestUri 테스트 코드

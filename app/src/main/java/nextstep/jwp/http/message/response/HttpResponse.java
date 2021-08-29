@@ -2,8 +2,7 @@ package nextstep.jwp.http.message.response;
 
 import nextstep.jwp.http.common.PathUtils;
 import nextstep.jwp.http.message.element.*;
-import nextstep.jwp.http.message.element.cookie.Cookie;
-import nextstep.jwp.http.message.element.cookie.ProxyCookie;
+import nextstep.jwp.http.message.element.cookie.ProxyHttpCookie;
 import nextstep.jwp.http.message.response.response_line.ResponseLine;
 
 import java.io.File;
@@ -59,7 +58,7 @@ public class HttpResponse implements Response {
     }
 
     @Override
-    public void setCookies(ProxyCookie cookie) {
+    public void setCookies(ProxyHttpCookie cookie) {
         headers.putHeader("Set-Cookie", cookie.asStringOfChanged());
     }
 

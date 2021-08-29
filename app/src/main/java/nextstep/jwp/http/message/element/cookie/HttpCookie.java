@@ -5,12 +5,12 @@ import java.util.*;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
 
-public class CookieImpl implements Cookie{
+public class HttpCookie implements Cookie{
 
     private final
     Map<String, String> values;
 
-    public CookieImpl(String values) {
+    public HttpCookie(String values) {
         this.values = extractCookies(values);
     }
 
@@ -21,11 +21,11 @@ public class CookieImpl implements Cookie{
                 .collect(toMap(v -> v[0].trim(), v -> v[1].trim()));
     }
 
-    public CookieImpl() {
+    public HttpCookie() {
         this(new HashMap<>());
     }
 
-    public CookieImpl(Map<String, String> values) {
+    public HttpCookie(Map<String, String> values) {
         this.values = values;
     }
 

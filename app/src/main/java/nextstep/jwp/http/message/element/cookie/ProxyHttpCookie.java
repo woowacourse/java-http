@@ -3,16 +3,16 @@ package nextstep.jwp.http.message.element.cookie;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ProxyCookie implements Cookie {
+public class ProxyHttpCookie implements Cookie {
 
     private Cookie cookie;
     public Map<String, String> changedCookie;
 
-    public ProxyCookie() {
+    public ProxyHttpCookie() {
         this.changedCookie = new HashMap<>();
     }
 
-    public ProxyCookie(Cookie cookie) {
+    public ProxyHttpCookie(Cookie cookie) {
         this.cookie = cookie;
     }
 
@@ -59,7 +59,7 @@ public class ProxyCookie implements Cookie {
 
     private void createCookieIfNotExist() {
         if (Objects.isNull(this.cookie)) {
-            this.cookie = new CookieImpl();
+            this.cookie = new HttpCookie();
         }
     }
 }

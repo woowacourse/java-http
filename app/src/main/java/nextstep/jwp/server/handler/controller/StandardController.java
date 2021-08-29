@@ -1,6 +1,6 @@
 package nextstep.jwp.server.handler.controller;
 
-import nextstep.jwp.http.message.element.cookie.ProxyCookie;
+import nextstep.jwp.http.message.element.cookie.ProxyHttpCookie;
 import nextstep.jwp.http.message.request.HttpRequest;
 import nextstep.jwp.http.message.response.Response;
 
@@ -14,11 +14,11 @@ public class StandardController implements Controller{
 
     @Override
     public Response doService(HttpRequest httpRequest) {
-        ProxyCookie proxyCookie = (ProxyCookie) httpRequest.getCookie();
+        ProxyHttpCookie proxyHttpCookie = (ProxyHttpCookie) httpRequest.getCookie();
         Response response = controller.doService(httpRequest);
 
-        if(proxyCookie.isChanged()) {
-            response.setCookies(proxyCookie);
+        if(proxyHttpCookie.isChanged()) {
+            response.setCookies(proxyHttpCookie);
         }
 
         return response;

@@ -1,4 +1,4 @@
-package nextstep.jwp.http.message.element;
+package nextstep.jwp.http.message.element.session;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -2,8 +2,8 @@ package nextstep.jwp.http.message.request;
 
 import nextstep.jwp.fixture.Fixture;
 import nextstep.jwp.http.message.element.Headers;
-import nextstep.jwp.http.message.element.HttpSession;
-import nextstep.jwp.http.message.element.HttpSessions;
+import nextstep.jwp.http.message.element.session.HttpSession;
+import nextstep.jwp.http.message.element.session.HttpSessions;
 import nextstep.jwp.http.message.element.cookie.Cookie;
 import nextstep.jwp.http.message.request.request_line.HttpMethod;
 import nextstep.jwp.http.message.request.request_line.HttpPath;

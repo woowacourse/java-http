@@ -2,8 +2,10 @@ package nextstep.jwp.http.message.request;
 
 import nextstep.jwp.http.message.element.*;
 import nextstep.jwp.http.message.element.cookie.Cookie;
-import nextstep.jwp.http.message.element.cookie.CookieImpl;
-import nextstep.jwp.http.message.element.cookie.ProxyCookie;
+import nextstep.jwp.http.message.element.cookie.HttpCookie;
+import nextstep.jwp.http.message.element.cookie.ProxyHttpCookie;
+import nextstep.jwp.http.message.element.session.HttpSession;
+import nextstep.jwp.http.message.element.session.HttpSessions;
 import nextstep.jwp.http.message.request.request_line.HttpMethod;
 import nextstep.jwp.http.message.request.request_line.HttpPath;
 import nextstep.jwp.http.message.request.request_line.RequestLine;
@@ -48,10 +50,10 @@ public class HttpRequest {
     public Cookie getCookie() {
         return Optional.ofNullable(cookie)
                 .orElseGet(() -> {
-                            ProxyCookie cookie = getHeader("Cookie")
-                                    .map(CookieImpl::new)
-                                    .map(ProxyCookie::new)
-                                    .orElseGet(ProxyCookie::new);
+                            ProxyHttpCookie cookie = getHeader("Cookie")
+                                    .map(HttpCookie::new)
+                                    .map(ProxyHttpCookie::new)
+                                    .orElseGet(ProxyHttpCookie::new);
 
                             this.cookie = cookie;
                             return cookie;

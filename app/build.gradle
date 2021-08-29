@@ -38,6 +38,7 @@ sonarqube {
         property "sonar.projectKey", "woowacourse_be-jwp-http-server"
         property "sonar.organization", "woowacourse"
         property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.coverage.jacoco.xmlReportPaths", "jacoco/jacoco.xml"
     }
 }
 
@@ -48,6 +49,6 @@ jacoco {
 jacocoTestReport {
     reports {
         xml.enabled true
-        xml.destination(new File("$buildDir/jacoco.xml"))
+        xml.destination(new File("jacoco/jacoco.xml"))
     }
 }

@@ -59,7 +59,7 @@ public class HttpPath {
         return resourcePath;
     }
 
-    private QueryParams createQueryParams(final String path) {
+    public static QueryParams createQueryParams(final String path) {
         final String[] splitQuery = path.substring(FILE_ROOT_INDEX).split(QUERY_DELIMITER);
 
         if (splitQuery.length == QUERY_CONTAINS_COUNT) {

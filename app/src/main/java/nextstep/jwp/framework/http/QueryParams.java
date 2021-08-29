@@ -1,5 +1,9 @@
 package nextstep.jwp.framework.http;
 
+import static nextstep.jwp.framework.http.HttpHeaders.HEADER_DELIMITER;
+import static nextstep.jwp.framework.http.HttpHeaders.SPACE;
+import static nextstep.jwp.framework.http.HttpRequest.LINE_DELIMITER;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,5 +43,19 @@ public class QueryParams {
 
     public Map<String, String> getQueryParams() {
         return Collections.unmodifiableMap(queryParams);
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+
+        for (final String key : queryParams.keySet()) {
+            builder.append(key)
+                .append(HEADER_DELIMITER + SPACE)
+                .append(queryParams.get(key))
+                .append(LINE_DELIMITER);
+        }
+
+        return builder.toString();
     }
 }

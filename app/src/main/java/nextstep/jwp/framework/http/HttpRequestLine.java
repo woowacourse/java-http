@@ -46,4 +46,7 @@ public class HttpRequestLine {
         return method.isPost();
     }
 
+    public boolean isNotPost() {
+        return !method.isPost();
+    }
 }

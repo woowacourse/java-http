@@ -6,35 +6,61 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import java.util.StringJoiner;
 
 public class HttpRequest {
 
     public static final String DELIMITER = " ";
     public static final String LINE_DELIMITER = "\r\n";
-    public static final int HTTP_REQUEST_LINE_INDEX = 0;
-    public static final int HTTP_METHOD_INDEX = 0;
-    public static final int HTTP_PATH_INDEX = 1;
-    public static final int HTTP_VERSION_OF_THE_PROTOCOL_INDEX = 2;
+    public static final String BODY_DELIMITER = LINE_DELIMITER + LINE_DELIMITER;
+    private static final int HTTP_REQUEST_LINE_INDEX = 0;
+    private static final int HTTP_METHOD_INDEX = 0;
+    private static final int HTTP_BODY_NOT_EXIST_LENGTH = 1;
+    private static final int HTTP_HEADER_INDEX = 0;
+    private static final int HTTP_BODY_INDEX = 1;
+    private static final int HTTP_PATH_INDEX = 1;
+    private static final int HTTP_VERSION_OF_THE_PROTOCOL_INDEX = 2;
 
     private final HttpRequestLine requestLine;
     private final HttpHeaders headers;
+    private final HttpBody body;
 
     public HttpRequest(final InputStream inputStream) throws IOException {
-        final String lines = readInputStream(inputStream);
+        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        String lines = readInputStream(bufferedReader);
+
         this.requestLine = createRequestLine(lines);
         this.headers = createHeader(lines);
+        this.body = createBody(bufferedReader);
     }
 
-    private String readInputStream(final InputStream inputStream) throws IOException {
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        final StringBuilder lines = new StringBuilder();
+    private String readInputStream(final BufferedReader bufferedReader) throws IOException {
+        final StringJoiner lines = new StringJoiner(LINE_DELIMITER);
+        String line = null;
 
-        while (bufferedReader.ready()) {
-            lines.append(bufferedReader.readLine())
-                .append(LINE_DELIMITER);
+        while (!Objects.equals(line, "")) {
+            line = bufferedReader.readLine();
+            validate(line);
+            lines.add(line);
         }
 
         return lines.toString();
+    }
+
+    private String readBody(final BufferedReader bufferedReader) throws IOException {
+        int contentLength = headers.contentLength();
+        char[] buffer = new char[contentLength];
+
+        bufferedReader.read(buffer, 0, contentLength);
+
+        return new String(buffer);
+    }
+
+    private void validate(String line) throws IOException {
+        if (line == null) {
+            throw new IOException();
+        }
     }
 
     private HttpRequestLine createRequestLine(final String lines) throws IOException {
@@ -48,19 +74,26 @@ public class HttpRequest {
     }
 
     private HttpHeaders createHeader(final String lines) throws IOException {
-        final String[] headers = lines.split(LINE_DELIMITER);
-        final StringBuilder headerLines = new StringBuilder();
+        final String[] headers = lines.split(BODY_DELIMITER)[HTTP_HEADER_INDEX].split(LINE_DELIMITER);
+        final StringJoiner headerLines = new StringJoiner(LINE_DELIMITER);
 
         for (int i = 1; i < headers.length; i++) {
-            headerLines.append(headers[i])
-                .append(LINE_DELIMITER);
+            headerLines.add(headers[i]);
         }
 
         return new HttpHeaders(headerLines.toString());
     }
 
+    private HttpBody createBody(final BufferedReader reader) throws IOException {
+        if (requestLine.isNotPost()) {
+            return new HttpBody();
+        }
+
+        return new HttpBody(readBody(reader));
+    }
+
     public HttpResponse toHttpResponse() {
-        return new HttpResponse(requestLine, headers);
+        return new HttpResponse(requestLine, headers, body);
     }
 
     public boolean isPost() {

@@ -24,18 +24,20 @@ public class HttpResponse {
     private final ProtocolVersion protocolVersion;
     private final HttpStatus status;
     private final HttpHeaders headers;
+    private final HttpBody body;
     private final URL resourceURL;
 
-    public HttpResponse(final HttpRequestLine httpRequestLine, final HttpHeaders headers) {
+    public HttpResponse(final HttpRequestLine httpRequestLine, final HttpHeaders headers, final HttpBody body) {
         this.protocolVersion = httpRequestLine.getProtocolVersion();
-        this.status = operate(httpRequestLine.getPath(), HttpStatus.OK);
+        this.status = operate(httpRequestLine.getPath(), HttpStatus.OK, body);
         this.headers = headers;
+        this.body = body;
         this.resourceURL = httpRequestLine.url(status);
     }
 
-    private HttpStatus operate(final HttpPath path, HttpStatus status) {
+    private HttpStatus operate(final HttpPath path, HttpStatus status, final HttpBody body) {
         status = login(path, status);
-        return register(path, status);
+        return register(path, status, body);
     }
 
     private HttpStatus login(final HttpPath path, HttpStatus status) {
@@ -61,13 +63,13 @@ public class HttpResponse {
         throw new PasswordNotMatchException();
     }
 
-    private HttpStatus register(final HttpPath path, HttpStatus status) {
-        if (!path.getPath().equals("register.html") || path.hasNotQueryParams()) {
+    private HttpStatus register(final HttpPath path, HttpStatus status, final HttpBody body) {
+        if (!path.getPath().equals("register.html") || body.hasNotBody()) {
             return status;
         }
 
         try {
-            final Map<String, String> queryParams = path.queryParams();
+            final Map<String, String> queryParams = body.getBody();
             final String account = queryParams.get("account");
             final String password = queryParams.get("password");
             final String email = queryParams.get("email");
@@ -96,7 +98,7 @@ public class HttpResponse {
     private byte[] getResponseAsBytesWithEmptyBody() {
         return String.join(NEW_LINE,
             statusLine(),
-            headers.getHeaders())
+            headers.toString())
             .getBytes(StandardCharsets.UTF_8);
     }
 

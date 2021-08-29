@@ -3,6 +3,7 @@ package nextstep.jwp.handler;
 import java.io.File;
 import java.net.URL;
 import java.util.Objects;
+import nextstep.jwp.ServerConfig;
 import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestLine;
@@ -10,8 +11,7 @@ import nextstep.jwp.http.request.SourcePath;
 
 public class ResourceHandler implements Handler {
 
-    // TODO :: Config 분리
-    private static final String RESOURCE_BASE_PATH = "/static";
+    private static final String RESOURCE_BASE_PATH = ServerConfig.RESOURCE_BASE_PATH;
 
     @Override
     public boolean mapping(RequestLine requestLine) {

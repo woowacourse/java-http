@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 import static nextstep.jwp.model.httpMessage.HttpHeaderType.CONTENT_LENGTH;
+import static nextstep.jwp.model.httpMessage.HttpHeaderType.CONTENT_TYPE;
 
 public class HttpHeaders {
     private final Map<String, String> headers = new LinkedHashMap<>();
@@ -22,8 +23,8 @@ public class HttpHeaders {
         this.protocol = protocol;
     }
 
-    public String getHeader(HttpHeaderType name) {
-        return headers.get(name.value());
+    public String getHeader(String name) {
+        return headers.get(name);
     }
 
     public String getAllHeaders() {
@@ -41,10 +42,6 @@ public class HttpHeaders {
         }
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-
     public String getProtocol(HttpProtocol protocol) {
         return protocol.getProtocol();
     }
@@ -59,5 +56,11 @@ public class HttpHeaders {
 
     public boolean containsKey(HttpHeaderType type) {
         return headers.containsKey(type.value());
+    }
+
+    public String getContentType() {
+        ContentType contentType = ContentType.getType(headers.get(CONTENT_TYPE.value()))
+                .orElseThrow(() -> new IllegalArgumentException("Content Type header를 찾을 수 없습니다."));
+        return contentType.value();
     }
 }

@@ -1,5 +1,6 @@
-package nextstep.jwp.model.httpMessage;
+package nextstep.jwp.model.httpMessage.request;
 
+import nextstep.jwp.model.httpMessage.HttpMethod;
 import nextstep.jwp.util.HttpRequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +16,7 @@ public class RequestLine {
     private Map<String, String> params = new HashMap<>();
 
     public RequestLine(String requestLine) {
-        log.debug("request line : {}", requestLine);
+        log.debug("Request line : {}", requestLine);
         String[] tokens = requestLine.split(" ");
         if (tokens.length != 3) {
             throw new IllegalArgumentException("request Line 형식이 올바르지 않습니다.");

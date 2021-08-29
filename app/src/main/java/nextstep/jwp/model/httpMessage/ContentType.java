@@ -3,24 +3,31 @@ package nextstep.jwp.model.httpMessage;
 import java.util.Arrays;
 import java.util.Optional;
 
-public enum MediaType {
-    CSS("text/css;charset=utf-8", ".css"),
+public enum ContentType {
+    CSS("text/css", ".css"),
     HTML("text/html;charset=utf-8", ".html"),
-    JS("application/javascript;charset=utf-8", ".js"),
-    ICON("image/x-icon;charset=utf-8", ".ico");
+    JS("application/javascript", ".js"),
+    ICON("image/x-icon", ".ico"),
+    FORM("application/x-www-form-urlencoded", "");
 
     protected static final String NAME = "Content-Type";
     private final String value;
     private final String suffix;
 
-    MediaType(String value, String suffix) {
+    ContentType(String value, String suffix) {
         this.value = value;
         this.suffix = suffix;
     }
 
-    public static Optional<MediaType> of(String url) {
+    public static Optional<ContentType> of(String url) {
         return Arrays.stream(values())
                 .filter(type -> url.endsWith(type.suffix))
+                .findAny();
+    }
+
+    public static Optional<ContentType> getType(String value) {
+        return Arrays.stream(values())
+                .filter(type -> type.value.equals(value))
                 .findAny();
     }
 

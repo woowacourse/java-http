@@ -1,7 +1,7 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.application.UserService;
-import nextstep.jwp.model.httpMessage.HttpRequest;
+import nextstep.jwp.model.httpMessage.request.HttpRequest;
 import nextstep.jwp.model.httpMessage.HttpResponse;
 import nextstep.jwp.util.FileUtils;
 

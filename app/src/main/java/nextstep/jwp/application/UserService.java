@@ -2,7 +2,7 @@ package nextstep.jwp.application;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import nextstep.jwp.model.httpMessage.HttpRequest;
+import nextstep.jwp.model.httpMessage.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

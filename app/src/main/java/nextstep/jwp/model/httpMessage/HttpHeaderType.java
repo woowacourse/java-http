@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public enum HttpHeaderType {
     LOCATION("Location"),
-    CONTENT_TYPE(MediaType.NAME),
+    CONTENT_TYPE(ContentType.NAME),
     CONTENT_LENGTH("Content-Length");
 
     private final String value;

@@ -13,7 +13,7 @@ import static nextstep.jwp.model.httpMessage.HttpHeaderType.CONTENT_TYPE;
 import static nextstep.jwp.model.httpMessage.HttpHeaderType.LOCATION;
 import static nextstep.jwp.model.httpMessage.HttpProtocol.OK;
 import static nextstep.jwp.model.httpMessage.HttpProtocol.REDIRECT;
-import static nextstep.jwp.model.httpMessage.MediaType.HTML;
+import static nextstep.jwp.model.httpMessage.ContentType.HTML;
 
 public class HttpResponse {
 
@@ -35,7 +35,7 @@ public class HttpResponse {
         headers.addProtocol(OK);
         LOG.debug("Response header : protocol : {}", headers.getProtocol(OK));
 
-        MediaType.of(url).ifPresent(type -> headers.add(CONTENT_TYPE, type.value()));
+        ContentType.of(url).ifPresent(type -> headers.add(CONTENT_TYPE, type.value()));
 
         headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
         LOG.debug("Response header : content length : {}", body.getBytes(StandardCharsets.UTF_8).length);

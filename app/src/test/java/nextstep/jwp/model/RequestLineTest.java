@@ -1,6 +1,6 @@
 package nextstep.jwp.model;
 
-import nextstep.jwp.model.httpMessage.RequestLine;
+import nextstep.jwp.model.httpMessage.request.RequestLine;
 import org.junit.jupiter.api.Test;
 
 import static nextstep.jwp.model.httpMessage.HttpMethod.GET;

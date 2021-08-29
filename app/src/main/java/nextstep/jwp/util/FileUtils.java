@@ -13,7 +13,7 @@ public class FileUtils {
     }
 
     public static String readFileOfUrl(String url) throws IOException {
-        URL resource = FileUtils.class.getClassLoader().getResource("static/" + url);
+        URL resource = FileUtils.class.getClassLoader().getResource("static" + url);
         String file = Objects.requireNonNull(resource).getFile();
         Path path = new File(file).toPath();
         return new String(Files.readAllBytes(path));

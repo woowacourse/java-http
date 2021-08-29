@@ -27,13 +27,18 @@ public class RegisterController extends Controller {
         userService.save(httpRequest.getPayload());
 
         final String redirectUrl = "/index.html";
-        final String responseBody = readFile(redirectUrl);
-
         return new HttpResponse(
                 httpRequest.getProtocol(),
                 HttpStatus.SEE_OTHER,
-                ContentType.findByUrl(redirectUrl),
-                responseBody.getBytes().length,
-                responseBody);
+                redirectUrl
+        );
+//        final String responseBody = readFile(redirectUrl);
+//
+//        return new HttpResponse(
+//                httpRequest.getProtocol(),
+//                HttpStatus.SEE_OTHER,
+//                ContentType.findByUrl(redirectUrl),
+//                responseBody.getBytes().length,
+//                responseBody);
     }
 }

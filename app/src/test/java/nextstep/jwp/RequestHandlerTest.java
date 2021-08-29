@@ -204,8 +204,8 @@ class RequestHandlerTest {
     }
 
     @Test
-    @DisplayName("비어있는 request가 날라가면 400이 반환된다.")
-    void noMessage() {
+    @DisplayName("잘못된 요청을 보내면 400이 반환된다.")
+    void badRequest() {
         final String httpRequest= "";
 
         final MockSocket socket = new MockSocket(httpRequest);
@@ -215,9 +215,59 @@ class RequestHandlerTest {
         requestHandler.run();
 
         String expected = String.join(NEW_LINE, "HTTP/1.1 400 Bad Request ",
-            "Content-Type: application/javascript;charset=utf-8 ",
             "",
             "{\"message\": \"잘못된 request message 입니다.\"}");
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("요청처리를 하지 않은 요청을 하면 404가 반환된다.")
+    void notFound() throws IOException {
+        final String httpRequest= String.join(NEW_LINE,
+            "GET /goError HTTP/1.1",
+            "Host: http://localhost:8080",
+            "Connection: keep-alive",
+            "",
+            "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        requestHandler.run();
+
+        String responseBody = getResponseBody("static/404.html");
+
+        String expected = String.join(NEW_LINE,
+            "HTTP/1.1 404 Not Found",
+            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Length: " + responseBody.getBytes().length + " ",
+            "",
+            responseBody);
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("존재하는 유저로 회원가입 요청을 하면 409가 반환된다.")
+    void conflict() {
+        final String httpRequest= String.join(NEW_LINE,
+            "POST /register HTTP/1.1",
+            "Host: http://localhost:8080",
+            "Connection: keep-alive",
+            "Content-Length: 58",
+            "",
+            "account=gugu&password=password&email=hkkang%40woowahan.com");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        String expected = String.join(NEW_LINE,
+            "HTTP/1.1 409 Conflict ",
+            "",
+            "{\"message\": \"이미 존재하는 아이디 입니다.\"}"
+        );
         assertThat(socket.output()).isEqualTo(expected);
     }
 

@@ -13,6 +13,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.BadRequestMessageException;
+import nextstep.jwp.exception.NotFoundException;
+import nextstep.jwp.exception.UnauthorizedException;
+import nextstep.jwp.exception.UsernameConflictException;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.Request;
 import nextstep.jwp.http.Response;
@@ -22,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 public class RequestHandler implements Runnable {
 
+    private static final String CONTENT_LENGTH = "Content-Length";
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
@@ -40,24 +45,38 @@ public class RequestHandler implements Runnable {
             final BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(inputStream))) {
 
-            final Request request = createdRequest(bufferedReader);
-
-            if (Objects.isNull(request)) {
-                return;
-            }
-
-            Response response = response(request);
+            Response response = messageConvert(bufferedReader);
 
             outputStream.write(Objects.requireNonNull(response).getBytes());
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
-        } finally {
+        }
+        finally {
             close();
         }
     }
 
-    private Request createdRequest(BufferedReader bufferedReader) throws IOException {
+    private Response messageConvert(BufferedReader bufferedReader) throws IOException {
+        try {
+            final Request request = createdRequest(bufferedReader);
+            return response(request);
+        } catch (BadRequestMessageException exception) {
+            log.error("잘못된 요청이 들어옴");
+            return Response.create400BadRequest(exception.getMessage());
+        } catch (NotFoundException exception) {
+            log.error(exception.getMessage());
+            return Response.create404NotFound(getResponseBody("static/404.html"));
+        } catch (UsernameConflictException exception) {
+            return Response.create409Conflict(exception.getMessage());
+        }
+        catch (Exception exception) {
+            log.error("알수없는 에러가 발생");
+            return Response.create500InternalServerError(getResponseBody("static/500.html"));
+        }
+    }
+
+    private Request createdRequest(BufferedReader bufferedReader) {
         try {
             String line = bufferedReader.readLine();
 
@@ -77,7 +96,7 @@ public class RequestHandler implements Runnable {
                 .build();
         } catch (Exception e) {
             log.debug("Request Error : {}", e.getMessage());
-            return null;
+            throw new BadRequestMessageException();
         }
     }
 
@@ -87,9 +106,6 @@ public class RequestHandler implements Runnable {
         String line = bufferedReader.readLine();
         while (!"".equals(line) && !Objects.isNull(line)) {
             int index = line.indexOf(":");
-            if (index == -1) {
-                continue;
-            }
             String key = line.substring(0, index);
             String value = line.substring(index + 2);
             header.put(key, value);
@@ -103,8 +119,8 @@ public class RequestHandler implements Runnable {
 
         Map<String, String> requestBody = new HashMap<>();
 
-        if (httpMethod.isBody() && header.containsKey("Content-Length")) {
-            int contentLength = Integer.parseInt(header.get("Content-Length"));
+        if (httpMethod.isBody() && header.containsKey(CONTENT_LENGTH)) {
+            int contentLength = Integer.parseInt(header.get(CONTENT_LENGTH));
             char[] buffer = new char[contentLength];
             int read = bufferedReader.read(buffer, 0, contentLength);
             if (read == -1) {
@@ -127,7 +143,7 @@ public class RequestHandler implements Runnable {
         if (request.isEqualsHttpMethod(HttpMethod.POST)) {
             return doPost(request);
         }
-        return null;
+        throw new NotFoundException(request);
     }
 
     private Response doGet(Request request) throws IOException {
@@ -141,18 +157,19 @@ public class RequestHandler implements Runnable {
             String responseBody = getResponseBody("static" + uri);
             return Response.create200OK(request, responseBody);
         }
-        return null;
+        throw new NotFoundException(request);
     }
 
     private Response doPost(Request request) {
         if (request.isUriMatch("/login")) {
             User user = InMemoryUserRepository
                 .findByAccount(request.getRequestBody("account"))
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(UnauthorizedException::new);
             if (user.checkPassword(request.getRequestBody("password"))) {
                 log.debug("{} login success", user.getAccount());
                 return Response.create302Found(request, "/index.html");
             }
+            throw new UnauthorizedException();
         }
         if (request.isUriMatch("/register")) {
             String account = request.getRequestBody("account");
@@ -163,7 +180,7 @@ public class RequestHandler implements Runnable {
             log.debug("{} user create success", user.getAccount());
             return Response.create302Found(request, "/index.html");
         }
-        return null;
+        throw new NotFoundException(request);
     }
 
     private String getResponseBody(String uri) throws IOException {

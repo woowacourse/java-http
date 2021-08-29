@@ -46,6 +46,14 @@ public class Request {
         return uri.getResourceUri();
     }
 
+    public HttpMethod getMethod() {
+        return method;
+    }
+
+    public String getHttpVersion() {
+        return httpVersion;
+    }
+
     public static class Builder {
 
         private HttpMethod method;

@@ -3,6 +3,7 @@ package nextstep.jwp.db;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import nextstep.jwp.exception.UsernameConflictException;
 import nextstep.jwp.model.User;
 
 public class InMemoryUserRepository {
@@ -20,6 +21,9 @@ public class InMemoryUserRepository {
 
     public static void save(User user) {
         userIdValidate(user);
+        if (database.containsKey(user.getAccount())) {
+            throw new UsernameConflictException();
+        }
         database.put(user.getAccount(), user);
     }
 

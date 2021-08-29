@@ -2,14 +2,16 @@ package nextstep.jwp.web.network.response;
 
 public enum HttpStatus {
 
-    OK(200),
-    FOUND(302),
-    UNAUTHORIZED(401);
+    OK(200, "OK"),
+    FOUND(302, "FOUND"),
+    UNAUTHORIZED(401, "UNAUTHORIZED");
 
     private final int code;
+    private final String name;
 
-    HttpStatus(int code) {
+    HttpStatus(int code, String name) {
         this.code = code;
+        this.name = name;
     }
 
     public int toCode() {
@@ -17,6 +19,6 @@ public enum HttpStatus {
     }
 
     public String toReasonPhrase() {
-        return name();
+        return name;
     }
 }

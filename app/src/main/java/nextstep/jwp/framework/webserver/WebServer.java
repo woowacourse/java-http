@@ -1,12 +1,13 @@
-package nextstep.jwp;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package nextstep.jwp.framework.webserver;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Objects;
 import java.util.stream.Stream;
+import nextstep.jwp.framework.infrastructure.mapping.RequestMapping;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebServer {
 
@@ -15,9 +16,11 @@ public class WebServer {
     private static final int DEFAULT_PORT = 8080;
 
     private final int port;
+    private final RequestMapping requestMapping;
 
-    public WebServer(int port) {
+    public WebServer(int port, RequestMapping requestMapping) {
         this.port = checkPort(port);
+        this.requestMapping = Objects.requireNonNull(requestMapping);
     }
 
     public void run() {
@@ -34,7 +37,7 @@ public class WebServer {
     private void handle(ServerSocket serverSocket) throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection)).start();
+            new Thread(new RequestHandler(connection, requestMapping)).start();
         }
     }
 

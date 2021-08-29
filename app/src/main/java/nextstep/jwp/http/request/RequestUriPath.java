@@ -2,10 +2,6 @@ package nextstep.jwp.http.request;
 
 import java.util.Objects;
 
-/**
- * /login?something1=123&something2=123
- */
-
 public class RequestUriPath {
     private final SourcePath sourcePath;
     private final QueryParams queryParams;

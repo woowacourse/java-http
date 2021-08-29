@@ -2,7 +2,7 @@ package nextstep.jwp.handler;
 
 import nextstep.jwp.exception.IncorrectHandlerException;
 import nextstep.jwp.handler.dto.LoginRequest;
-import nextstep.jwp.handler.modelandview.ModelAndView;
+import nextstep.jwp.handler.exception.UnauthorizedException;
 import nextstep.jwp.handler.service.LoginService;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.QueryParams;
@@ -17,29 +17,32 @@ public class LoginController implements Handler {
     }
 
     @Override
-    public boolean mapping(RequestLine requestLine) {
-        return requestLine.isFrom("get", "/login") || requestLine.isFrom("post", "/login");
+    public boolean mapping(HttpRequest httpRequest) {
+        RequestLine requestLine = httpRequest.requestLine();
+        return requestLine.isPath("/login");
     }
 
     @Override
-    public ModelAndView service(HttpRequest httpRequest) {
-        RequestLine requestLine = httpRequest.requestLine();
-        if (requestLine.isFrom("get", "/login")) {
+    public ResponseEntity service(HttpRequest httpRequest) {
+        if (httpRequest.isGet()) {
             return printLoginPage();
         }
-        if (requestLine.isFrom("post", "/login")) {
-            return login(httpRequest.requestBody());
+        if (httpRequest.isPost()) {
+            return login(QueryParams.of(httpRequest.requestBody()));
         }
-        throw new IncorrectHandlerException("핸들러가 처리할 수 있는 요청이 아닙니다.");
+        throw new IncorrectHandlerException();
     }
 
-    private ModelAndView printLoginPage() {
-        return ModelAndView.ok("/login.html");
+    private ResponseEntity printLoginPage() {
+        return ResponseEntity.ok("/login.html");
     }
 
-    private ModelAndView login(String requestBody) {
-        QueryParams params = QueryParams.of(requestBody);
-        loginService.login(LoginRequest.fromQueryParams(params));
-        return ModelAndView.redirect("index.html");
+    private ResponseEntity login(QueryParams params) {
+        try{
+            loginService.login(LoginRequest.fromQueryParams(params));
+            return ResponseEntity.redirect("index.html");
+        } catch (UnauthorizedException exception){
+            return ResponseEntity.unauthorized();
+        }
     }
 }

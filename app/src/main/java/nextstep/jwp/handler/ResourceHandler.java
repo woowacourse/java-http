@@ -4,7 +4,6 @@ import java.io.File;
 import java.net.URL;
 import java.util.Objects;
 import nextstep.jwp.ServerConfig;
-import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestLine;
 import nextstep.jwp.http.request.SourcePath;
@@ -14,17 +13,16 @@ public class ResourceHandler implements Handler {
     private static final String RESOURCE_BASE_PATH = ServerConfig.RESOURCE_BASE_PATH;
 
     @Override
-    public boolean mapping(RequestLine requestLine) {
-        String method = requestLine.method();
-        SourcePath sourcePath = requestLine.sourcePath();
-        return (method.equalsIgnoreCase("GET") && isExistResource(sourcePath));
+    public boolean mapping(HttpRequest httpRequest) {
+        RequestLine requestLine = httpRequest.requestLine();
+        return (httpRequest.isGet() && isExistResource(requestLine.sourcePath()));
     }
 
     @Override
-    public ModelAndView service(HttpRequest httpRequest) {
+    public ResponseEntity service(HttpRequest httpRequest) {
         RequestLine requestLine = httpRequest.requestLine();
         SourcePath sourcePath = requestLine.sourcePath();
-        return ModelAndView.ok(sourcePath.getValue());
+        return ResponseEntity.ok(sourcePath.getValue());
     }
 
     private boolean isExistResource(SourcePath sourcePath) {

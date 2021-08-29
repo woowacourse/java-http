@@ -3,35 +3,20 @@ package nextstep.jwp.http.response;
 import nextstep.jwp.handler.modelandview.Model;
 import nextstep.jwp.view.View;
 
-/**
- * Http/1.1 200 OK                       // Status Line Date: Thu, 20 May 2005 21:12:24 GMT   // General Headers
- * Connection: close Server: Apache/1.3.22                 // Response Headers Accept-Ranges: bytes Content-Type:
- * text/html               // Entity Headers Content-Length: 170 last-Modified: Tue, 14 May 2004 10:13:35 GMT
- *
- * <html>                                 // Message Body
- * <head>
- * ..
- * </head>>
- * </html>
- */
-
 public class HttpResponse {
 
     private static final String HTTP_REQUEST_LINE_FORMAT = "HTTP/1.1 %s %s ";
     private static final String HEADER_FORMAT = "%s: %s ";
     private static final String SEPARATE_LINE = "";
 
-    private final String statusLine;
-    private final ResponseHeaders responseHeaders;
-    private final String messageBody;
+    private String statusLine;
+    private ResponseHeaders responseHeaders;
+    private String messageBody;
 
-    public HttpResponse(String statusLine, ResponseHeaders responseHeaders, String messageBody) {
-        this.statusLine = statusLine;
-        this.responseHeaders = responseHeaders;
-        this.messageBody = messageBody;
+    public HttpResponse() {
     }
 
-    public static HttpResponse of(Model model, View view) {
+    public void setResult(Model model, View view) {
         HttpStatus httpStatus = model.httpStatus();
         String statusLine = String.format(HTTP_REQUEST_LINE_FORMAT, httpStatus.code(), httpStatus.name());
 
@@ -46,7 +31,9 @@ public class HttpResponse {
             headers.addAttribute("Location", (String) model.getAttribute("Location"));
         }
 
-        return new HttpResponse(statusLine, headers, view.content());
+        this.statusLine = statusLine;
+        this.responseHeaders = headers;
+        this.messageBody = view.content();
     }
 
     public byte[] responseAsBytes() {

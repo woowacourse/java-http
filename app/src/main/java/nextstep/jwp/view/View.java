@@ -3,7 +3,6 @@ package nextstep.jwp.view;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.List;
 import nextstep.jwp.http.response.ContentType;
 
 public class View {
@@ -46,7 +45,7 @@ public class View {
         return contentType.value();
     }
 
-    public int contentLength(){
+    public int contentLength() {
         return content.getBytes().length;
     }
 

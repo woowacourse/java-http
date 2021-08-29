@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 import nextstep.jwp.exception.BadRequestException;
 import nextstep.jwp.handler.Handler;
-import nextstep.jwp.http.request.RequestLine;
+import nextstep.jwp.http.request.HttpRequest;
 
 public class HandlerMapperImpl implements HandlerMapper {
 
@@ -19,9 +19,9 @@ public class HandlerMapperImpl implements HandlerMapper {
     }
 
     @Override
-    public Handler findHandler(RequestLine requestLine) {
+    public Handler mapping(HttpRequest httpRequest) {
         return handlers.stream()
-                .filter(handler -> handler.mapping(requestLine))
+                .filter(handler -> handler.mapping(httpRequest))
                 .findFirst()
                 .orElseThrow(BadRequestException::new);
     }

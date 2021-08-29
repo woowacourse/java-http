@@ -11,11 +11,13 @@ import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
 
+    private final Assembler assembler = new Assembler();
+
     @Test
     void run() {
         // given
         final MockSocket socket = new MockSocket();
-        final RequestHandler requestHandler = new RequestHandler(socket, new Assembler());
+        final RequestHandler requestHandler = new RequestHandler(socket, assembler.dispatcher());
 
         // when
         requestHandler.run();
@@ -35,7 +37,7 @@ class RequestHandlerTest {
         // given
         final String httpRequest = get("/bad/request.html");
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, new Assembler());
+        final RequestHandler requestHandler = new RequestHandler(socket, assembler.dispatcher());
 
         // when
         requestHandler.run();
@@ -51,7 +53,7 @@ class RequestHandlerTest {
         // given
         final String httpRequest = get("/index.html");
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, new Assembler());
+        final RequestHandler requestHandler = new RequestHandler(socket, assembler.dispatcher());
 
         // when
         requestHandler.run();
@@ -67,7 +69,7 @@ class RequestHandlerTest {
         // given
         final String httpRequest = get("/login");
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, new Assembler());
+        final RequestHandler requestHandler = new RequestHandler(socket, assembler.dispatcher());
 
         // when
         requestHandler.run();
@@ -85,7 +87,7 @@ class RequestHandlerTest {
         final String httpRequest = post("/login", requestBody);
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, new Assembler());
+        final RequestHandler requestHandler = new RequestHandler(socket, assembler.dispatcher());
 
         // when
         requestHandler.run();
@@ -105,7 +107,7 @@ class RequestHandlerTest {
         final String httpRequest = post("/login", requestBody);
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, new Assembler());
+        final RequestHandler requestHandler = new RequestHandler(socket, assembler.dispatcher());
 
         // when
         requestHandler.run();
@@ -122,7 +124,7 @@ class RequestHandlerTest {
         // given
         final String httpRequest = get("/register");
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, new Assembler());
+        final RequestHandler requestHandler = new RequestHandler(socket, assembler.dispatcher());
 
         // when
         requestHandler.run();
@@ -140,7 +142,7 @@ class RequestHandlerTest {
         final String httpRequest = post("/register", requestBody);
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, new Assembler());
+        final RequestHandler requestHandler = new RequestHandler(socket, assembler.dispatcher());
 
         // when
         requestHandler.run();

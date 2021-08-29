@@ -2,7 +2,7 @@ package nextstep.jwp.handler;
 
 import nextstep.jwp.exception.IncorrectHandlerException;
 import nextstep.jwp.handler.dto.RegisterRequest;
-import nextstep.jwp.handler.modelandview.ModelAndView;
+import nextstep.jwp.handler.exception.UserException;
 import nextstep.jwp.handler.service.RegisterService;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.QueryParams;
@@ -17,29 +17,35 @@ public class RegisterController implements Handler {
     }
 
     @Override
-    public boolean mapping(RequestLine requestLine) {
-        return requestLine.isFrom("get", "/register") || requestLine.isFrom("post", "/register");
+    public boolean mapping(HttpRequest httpRequest) {
+        RequestLine requestLine = httpRequest.requestLine();
+        return requestLine.isPath("/register");
     }
 
     @Override
-    public ModelAndView service(HttpRequest httpRequest) {
-        RequestLine requestLine = httpRequest.requestLine();
-        if (requestLine.isFrom("get", "/register")) {
+    public ResponseEntity service(HttpRequest httpRequest) {
+        if (httpRequest.isGet()) {
             return printRegisterPage();
         }
-        if (requestLine.isFrom("post", "/register")) {
-            return register(httpRequest.requestBody());
+
+        if (httpRequest.isPost()) {
+            String requestBody = httpRequest.requestBody();
+            return register(QueryParams.of(requestBody));
         }
-        throw new IncorrectHandlerException("핸들러가 처리할 수 있는 요청이 아닙니다.");
+
+        throw new IncorrectHandlerException();
     }
 
-    private ModelAndView printRegisterPage() {
-        return ModelAndView.ok("/register.html");
+    private ResponseEntity printRegisterPage() {
+        return ResponseEntity.ok("/register.html");
     }
 
-    private ModelAndView register(String requestBody) {
-        QueryParams queryParams = QueryParams.of(requestBody);
-        registerService.register(RegisterRequest.fromQueryParams(queryParams));
-        return ModelAndView.redirect("index.html");
+    private ResponseEntity register(QueryParams queryParams) {
+        try{
+            registerService.register(RegisterRequest.fromQueryParams(queryParams));
+            return ResponseEntity.redirect("index.html");
+        } catch (UserException userException){
+            return ResponseEntity.userException();
+        }
     }
 }

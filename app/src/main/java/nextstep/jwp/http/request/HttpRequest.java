@@ -7,24 +7,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * GET /index.html HTTP/1.1        // Request Line
- * Host: localhost:8000           // Request Headers Connection:
- * keep-alive Upgrade-Insecure-Request: 1
- * Content-Type: text/html
- * Content-Length: 345
- *
- * something1=123&something2=123   // Request Message Body
- */
-
-/**
- * GET /login?something1=123&something2=123  HTTP/1.1        // Request Line
- * Host: localhost:8000                                      // Request Headers Connection:
- * keep-alive Upgrade-Insecure-Request: 1
- * Content-Type: text/html
- * Content-Length: 345
- */
-
 public class HttpRequest {
 
     private final RequestLine requestLine;
@@ -83,5 +65,13 @@ public class HttpRequest {
 
     public String requestBody() {
         return requestBody;
+    }
+
+    public boolean isGet() {
+        return requestLine.method().isGet();
+    }
+
+    public boolean isPost() {
+        return requestLine.method().isPost();
     }
 }

@@ -1,5 +1,6 @@
 package nextstep.jwp.service;
 
+import nextstep.jwp.controller.request.LoginRequest;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.model.User;
@@ -12,9 +13,9 @@ public class LoginService {
         this.userRepository = userRepository;
     }
 
-    public void login(String account, String password) {
-        User user = findByUserAccount(account);
-        user.checkPassword(password);
+    public void login(LoginRequest loginRequest) {
+        User user = findByUserAccount(loginRequest.getAccount());
+        user.checkPassword(loginRequest.getPassword());
     }
 
     private User findByUserAccount(String account) {

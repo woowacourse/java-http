@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.controller.request.LoginRequest;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.model.User;
@@ -32,8 +33,11 @@ class LoginServiceTest {
         @DisplayName("일치하는 account가 없다면 예외가 발생한다.")
         @Test
         void notFoundAccount() {
+            // given
+            LoginRequest loginRequest = new LoginRequest("account", "password");
+
             // when, then
-            assertThatThrownBy(() -> loginService.login("account", "password"))
+            assertThatThrownBy(() -> loginService.login(loginRequest))
                 .isExactlyInstanceOf(UnauthorizedException.class);
         }
 
@@ -45,8 +49,10 @@ class LoginServiceTest {
             String password = "password";
             userRepository.save(new User(account, password, "email"));
 
+            LoginRequest loginRequest = new LoginRequest(account, password + "123");
+
             // when, then
-            assertThatThrownBy(() -> loginService.login(account, password + "something"))
+            assertThatThrownBy(() -> loginService.login(loginRequest))
                 .isExactlyInstanceOf(UnauthorizedException.class);
         }
     }

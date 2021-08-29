@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import nextstep.jwp.controller.request.LoginRequest;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.common.HttpStatus;
 import nextstep.jwp.http.request.HttpRequest;
@@ -22,19 +23,27 @@ public class LoginController extends RestController {
 
     @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
+        try {
+            LoginRequest loginRequest = getLoginRequest(httpRequest);
+            loginService.login(loginRequest);
+
+            LOGGER.debug("Login Success.");
+
+            return HttpResponse.redirect(HttpStatus.FOUND, "/index.html");
+        } catch (UnauthorizedException e) {
+            LOGGER.debug("Login Failed.");
+
+            return HttpResponse.redirect(HttpStatus.FOUND, "/401.html");
+        }
+    }
+
+    private LoginRequest getLoginRequest(HttpRequest httpRequest) {
         String account = httpRequest.getBodyParameter("account");
         String password = httpRequest.getBodyParameter("password");
 
         LOGGER.debug("Login Request => account: {}, password: {}", account, password);
 
-        try {
-            loginService.login(account, password);
-            LOGGER.debug("Login Success.");
-            return HttpResponse.redirect(HttpStatus.FOUND, "/index.html");
-        } catch (UnauthorizedException e) {
-            LOGGER.debug("Login Failed.");
-            return HttpResponse.redirect(HttpStatus.FOUND, "/401.html");
-        }
+        return new LoginRequest(account, password);
     }
 
     @Override

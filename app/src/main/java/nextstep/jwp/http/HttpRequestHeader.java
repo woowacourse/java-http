@@ -2,8 +2,12 @@ package nextstep.jwp.http;
 
 import java.util.*;
 
+import static nextstep.jwp.http.HttpRequest.*;
+
 public class HttpRequestHeader {
-    public static final String CONTENT_LENGTH_HEADER = "Content-Length: ";
+    private static final String CONTENT_LENGTH_HEADER = "Content-Length: ";
+    private static final String QUERY_PARAMETER_DELIMITER = "?";
+    private static final String SPACE = " ";
 
     private final String httpMethod;
     private final String protocol;
@@ -16,7 +20,7 @@ public class HttpRequestHeader {
             throw new IllegalStateException();
         }
 
-        final String[] requestHeaderFirstLine = requestHeaders.get(0).split(" ");
+        final String[] requestHeaderFirstLine = requestHeaders.get(0).split(SPACE);
         final String httpMethod = requestHeaderFirstLine[0];
         final String protocol = requestHeaderFirstLine[2];
         final String uri = requestHeaderFirstLine[1];
@@ -25,7 +29,7 @@ public class HttpRequestHeader {
 
         this.httpMethod = httpMethod;
         this.protocol = protocol;
-        this.path = trimPath(uri, httpMethod);;
+        this.path = trimPath(uri, httpMethod);
         this.queryParameters = queryParameters;
         this.contentLength = contentLength;
     }
@@ -47,7 +51,7 @@ public class HttpRequestHeader {
     private Map<String, String> parseQueryParameters(final String uri) {
         final Map<String, String> newQueryParameters = new HashMap<>();
 
-        final int index = uri.indexOf("?");
+        final int index = uri.indexOf(QUERY_PARAMETER_DELIMITER);
         if (index != -1) {
             final String queryString = uri.substring(index + 1);
             addQueryParameters(newQueryParameters, queryString);
@@ -62,11 +66,11 @@ public class HttpRequestHeader {
         }
 
         ContentType contentType = ContentType.findByUrl(path);
-        if (!contentType.equals(ContentType.NONE) || "POST".equals(httpMethod)) {
+        if (!contentType.equals(ContentType.NONE) || HttpMethod.isPost(httpMethod)) {
             return path;
         }
 
-        final int index = path.indexOf("?");
+        final int index = path.indexOf(QUERY_PARAMETER_DELIMITER);
         if (index != -1) {
             return path.substring(0, index + 1);
         }
@@ -75,10 +79,10 @@ public class HttpRequestHeader {
     }
 
     private void addQueryParameters(final Map<String, String> newQueryParameters, final String queryString) {
-        Arrays.stream(queryString.split("&"))
-                .map(query -> query.split("="))
+        Arrays.stream(queryString.split(QUERY_STRING_DELIMITER))
+                .map(query -> query.split(QUERY_KEY_VALUE_DELIMITER))
                 .forEach(queryPair -> {
-                    newQueryParameters.put(queryPair[0], queryPair[1]);
+                    newQueryParameters.put(queryPair[KEY_INDEX], queryPair[VALUE_INDEX]);
                 });
     }
 

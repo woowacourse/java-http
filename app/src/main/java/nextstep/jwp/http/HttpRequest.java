@@ -3,12 +3,13 @@ package nextstep.jwp.http;
 import java.util.Map;
 
 public class HttpRequest {
+    public static final String QUERY_STRING_DELIMITER = "&";
+    public static final String QUERY_KEY_VALUE_DELIMITER = "=";
+    public static final int KEY_INDEX = 0;
+    public static final int VALUE_INDEX = 1;
+
     private final HttpRequestHeader header;
     private final HttpRequestBody body;
-
-    public HttpRequest(final HttpRequestHeader header) {
-        this(header, null);
-    }
 
     public HttpRequest(final HttpRequestHeader header, final HttpRequestBody body) {
         this.header = header;
@@ -16,7 +17,7 @@ public class HttpRequest {
     }
 
     public boolean isGet() {
-        return "GET".equals(getHttpMethod());
+        return HttpMethod.isGet(getHttpMethod());
     }
 
     public String getHttpMethod() {

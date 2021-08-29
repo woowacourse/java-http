@@ -1,9 +1,8 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.ResourceNotFoundException;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
-import nextstep.jwp.http.HttpStatus;
+import nextstep.jwp.http.ResourceNotFoundException;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +11,8 @@ import java.nio.file.Files;
 import java.util.Objects;
 
 public abstract class Controller {
+    private static final String DEFAULT_PATH = "static";
+
     public HttpResponse doService(final HttpRequest httpRequest) {
         if (httpRequest.isGet()) {
             return doGet(httpRequest);
@@ -22,7 +23,7 @@ public abstract class Controller {
     protected String readFile(final String path) {
         URL url = Thread.currentThread()
                 .getContextClassLoader()
-                .getResource("static" + path);
+                .getResource(DEFAULT_PATH + path);
         try {
             final File file = new File(Objects.requireNonNull(url).getFile());
             return new String(Files.readAllBytes(file.toPath()));

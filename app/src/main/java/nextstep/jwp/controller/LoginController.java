@@ -1,9 +1,6 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.ContentType;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
-import nextstep.jwp.http.HttpStatus;
+import nextstep.jwp.http.*;
 import nextstep.jwp.service.UserService;
 
 import java.util.Map;
@@ -19,7 +16,7 @@ public class LoginController extends Controller {
     public boolean canHandle(final HttpRequest httpRequest) {
         final String httpMethod = httpRequest.getHttpMethod();
         final String path = httpRequest.getPath();
-        return "POST".equals(httpMethod) && "/login".equals(path);
+        return HttpMethod.isPost(httpMethod) && "/login".equals(path);
     }
 
     @Override

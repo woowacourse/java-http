@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static nextstep.jwp.http.HttpRequest.*;
+
 public class HttpRequestBody {
     private final Map<String, String> payload = new HashMap<>();
 
@@ -12,9 +14,9 @@ public class HttpRequestBody {
             return;
         }
 
-        Arrays.stream(payload.split("&"))
-                .map(element -> element.split("="))
-                .forEach(elementPair -> this.payload.put(elementPair[0], elementPair[1]));
+        Arrays.stream(payload.split(QUERY_STRING_DELIMITER))
+                .map(element -> element.split(QUERY_KEY_VALUE_DELIMITER))
+                .forEach(elementPair -> this.payload.put(elementPair[KEY_INDEX], elementPair[VALUE_INDEX]));
     }
 
     public Map<String, String> getPayload() {

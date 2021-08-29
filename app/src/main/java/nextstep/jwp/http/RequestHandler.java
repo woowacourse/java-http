@@ -86,7 +86,7 @@ public class RequestHandler implements Runnable {
 
     private Controller findController(final HttpRequest httpRequest) {
         return controllers.stream()
-                .filter(contoller -> contoller.canHandle(httpRequest))
+                .filter(it -> it.canHandle(httpRequest))
                 .findFirst()
                 .orElseThrow(NoMatchingControllerException::new);
     }

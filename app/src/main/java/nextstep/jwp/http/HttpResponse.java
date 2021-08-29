@@ -15,7 +15,11 @@ public class HttpResponse {
     private final Integer contentLength;
     private final String responseBody;
 
-    public HttpResponse(final String protocol, final HttpStatus httpStatus, final ContentType contentType, final Integer contentLength, final String responseBody) {
+    public HttpResponse(final String protocol,
+                        final HttpStatus httpStatus,
+                        final ContentType contentType,
+                        final Integer contentLength,
+                        final String responseBody) {
         this.protocol = protocol;
         this.httpStatus = httpStatus;
         this.contentType = contentType;

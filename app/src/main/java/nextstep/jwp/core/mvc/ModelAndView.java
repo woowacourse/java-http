@@ -6,6 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import nextstep.jwp.webserver.exception.PageNotFoundException;
 
 public class ModelAndView {
 
@@ -29,8 +30,7 @@ public class ModelAndView {
             final List<String> actual = Files.readAllLines(Paths.get(url.toURI()));
             return String.join("\r\n", actual);
         } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
-            return "";
+            throw new PageNotFoundException();
         }
     }
 

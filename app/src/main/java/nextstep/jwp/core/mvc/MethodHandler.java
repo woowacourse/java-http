@@ -57,7 +57,6 @@ public class MethodHandler extends ResolverHandler {
             httpResponse.addHeader("Content-Type", HTML.contentType());
             return new ModelAndView(viewName, httpRequest.httpUrl());
         } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
             return null;
         }
     }

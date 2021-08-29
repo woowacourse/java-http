@@ -4,12 +4,12 @@ import static nextstep.jwp.resource.FileType.HTML;
 
 import java.io.IOException;
 import java.util.List;
-import nextstep.jwp.web.http.MimeType;
-import nextstep.jwp.web.http.response.body.HttpResponseBody;
-import nextstep.jwp.web.http.response.body.TextHttpResponseBody;
 import nextstep.jwp.resource.FilePath;
 import nextstep.jwp.resource.FileReader;
 import nextstep.jwp.resource.FileType;
+import nextstep.jwp.web.http.MimeType;
+import nextstep.jwp.web.http.response.body.HttpResponseBody;
+import nextstep.jwp.web.http.response.body.TextHttpResponseBody;
 
 public class HtmlResolver implements DataResolver {
 

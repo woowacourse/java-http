@@ -2,9 +2,9 @@ package nextstep.jwp.web.http.response;
 
 import static java.util.stream.Collectors.joining;
 
+import nextstep.jwp.resource.FileType;
 import nextstep.jwp.web.http.HttpHeaders;
 import nextstep.jwp.web.http.HttpProtocol;
-import nextstep.jwp.resource.FileType;
 import nextstep.jwp.web.http.response.body.HttpResponseBody;
 import nextstep.jwp.web.http.response.body.TextHttpResponseBody;
 

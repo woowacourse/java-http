@@ -10,10 +10,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import nextstep.jwp.web.http.HttpHeaders;
 import nextstep.jwp.web.http.HttpProtocol;
-import nextstep.jwp.web.http.util.QueryParser;
 import nextstep.jwp.web.http.request.body.FormDataHttpRequestBody;
 import nextstep.jwp.web.http.request.body.HttpRequestBody;
 import nextstep.jwp.web.http.request.body.TextHttpRequestBody;
+import nextstep.jwp.web.http.util.QueryParser;
 
 public class HttpRequest {
 

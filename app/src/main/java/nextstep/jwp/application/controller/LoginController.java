@@ -2,11 +2,11 @@ package nextstep.jwp.application.controller;
 
 import java.util.Optional;
 import nextstep.jwp.application.db.InMemoryUserRepository;
+import nextstep.jwp.application.domain.User;
 import nextstep.jwp.web.http.request.HttpRequest;
 import nextstep.jwp.web.http.request.body.HttpRequestBody;
 import nextstep.jwp.web.http.response.HttpResponse;
 import nextstep.jwp.web.http.response.HttpStatus;
-import nextstep.jwp.application.domain.User;
 
 public class LoginController {
 

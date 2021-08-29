@@ -1,12 +1,10 @@
 package nextstep.jwp.webserver.controller;
 
 import java.util.EnumSet;
-import java.util.Optional;
 
 import nextstep.jwp.framework.context.AbstractController;
 import nextstep.jwp.framework.http.*;
-import nextstep.jwp.webserver.db.InMemoryUserRepository;
-import nextstep.jwp.webserver.model.User;
+import nextstep.jwp.webserver.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,8 +12,11 @@ public class LoginPageController extends AbstractController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginPageController.class);
 
+    private final UserService userService;
+
     public LoginPageController() {
         super("/login", EnumSet.of(HttpMethod.GET));
+        this.userService = new UserService();
     }
 
     @Override
@@ -25,10 +26,10 @@ public class LoginPageController extends AbstractController {
         }
 
         final String account = httpRequest.getValueFromQuery("account");
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        LOGGER.debug("user : {}", user);
+        final String password = httpRequest.getValueFromQuery("password");
+        LOGGER.debug("로그인 요청 - [account : {}, password : {}]", account, password);
 
-        if (user.isEmpty()) {
+        if (!userService.login(account, password)) {
             return new ResourceResponseTemplate().unauthorized("/401.html");
         }
 

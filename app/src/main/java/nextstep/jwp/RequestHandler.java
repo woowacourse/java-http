@@ -22,7 +22,7 @@ public class RequestHandler implements Runnable {
 
     private final Socket connection;
 
-    public RequestHandler(Socket connection) {
+    public RequestHandler(final Socket connection) {
         this.connection = Objects.requireNonNull(connection);
     }
 
@@ -38,11 +38,10 @@ public class RequestHandler implements Runnable {
 
             HttpResponse httpResponse = new HttpResponse(outputStream);
 
-            if (!httpRequest.isQueryParamsEmpty()) {
-                User user = getUser(httpRequest);
-                passwordCheck(httpRequest, user);
+            if (httpRequest.getUrl().contains("login") && !httpRequest.isQueryParamsEmpty()) {
+                userLogin(httpRequest, httpResponse);
+                return;
             }
-
             httpResponse.transfer(httpRequest.getUrl());
 
         } catch (IOException exception) {
@@ -52,13 +51,26 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private void passwordCheck(final HttpRequest httpRequest, final User user) {
+    private void userLogin(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        if (isValidateUser(httpRequest)) {
+            httpResponse.redirect301Transfer("/index.html");
+        } else {
+            httpResponse.redirect401Transfer("/401.html");
+        }
+    }
+
+    private boolean isValidateUser(final HttpRequest httpRequest) {
+        User user = getUser(httpRequest);
+        return user != null && isCollectPassword(httpRequest, user);
+    }
+
+    private boolean isCollectPassword(final HttpRequest httpRequest, final User user) {
         if (user.checkPassword(httpRequest.getQueryParam("password"))) {
             LOG.debug("password Collect! : {}", user.getAccount());
-            return;
+            return true;
         }
-        LOG.error("password InCollect!!");
-        throw new IllegalArgumentException("password InCollect");
+        LOG.debug("password InCollect!! : {}", user.getAccount());
+        return false;
     }
 
     private User getUser(final HttpRequest httpRequest) {
@@ -69,7 +81,7 @@ public class RequestHandler implements Runnable {
             return user.get();
         }
         LOG.debug("user Not Exist!! : {}", requestUserAccount);
-        throw new IllegalArgumentException("유저가 존재하지 않습니다");
+        return null;
     }
 
     private void close() {

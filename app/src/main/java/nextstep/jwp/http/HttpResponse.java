@@ -29,7 +29,7 @@ public class HttpResponse {
         LOGGER.debug("url : {}", url);
 
         // favicon 오류 보기싫어서 일단 예외처리
-        if (url.endsWith("ico")) {
+        if (url.endsWith(".ico")) {
             return;
         }
 
@@ -45,6 +45,21 @@ public class HttpResponse {
         }
         headers.put("Content-Length: " + responseBody.getBytes().length);
         response200(responseBody);
+    }
+
+    public void redirect301Transfer(final String redirectUrl) throws IOException {
+        String foundResponse = "HTTP/1.1 302 Found\r\n";
+        outputStream.write(foundResponse.getBytes(StandardCharsets.UTF_8));
+        headers.put("Location: " + redirectUrl);
+        responseHeader();
+        send();
+    }
+
+    public void redirect401Transfer(final String redirectUrl) throws IOException {
+        String foundResponse = "HTTP/1.1 401 Unauthorized\r\n";
+        outputStream.write(foundResponse.getBytes(StandardCharsets.UTF_8));
+        String responseBody = getBodyByUrl(DEFAULT_RESOURCE_PATH + redirectUrl);
+        responseHeaderBody(responseBody);
     }
 
     private void setContentType(final String url) {
@@ -71,12 +86,20 @@ public class HttpResponse {
         String okResponse = "HTTP/1.1 200 OK\r\n";
         outputStream.write(okResponse.getBytes(StandardCharsets.UTF_8));
         responseHeaderBody(responseBody);
+        send();
     }
 
     private void responseHeaderBody(final String responseBody) throws IOException {
+        responseHeader();
+        outputStream.write(responseBody.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private void responseHeader() throws IOException {
         outputStream.write(headers.getAllHeaders().getBytes(StandardCharsets.UTF_8));
         outputStream.write("\r\n".getBytes(StandardCharsets.UTF_8));
-        outputStream.write(responseBody.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private void send() throws IOException {
         outputStream.flush();
     }
 }

@@ -25,7 +25,7 @@ public class HttpResponse {
         headers.put(name, value);
     }
 
-    public void write(String message) {
+    public void write(String message) throws IOException {
         if (response != null) {
             response += message;
             return;
@@ -35,10 +35,10 @@ public class HttpResponse {
                 headers.convertToLines(),
                 "",
                 message);
+        outputStream.write(response.getBytes());
     }
 
     public void flush() throws IOException {
-        outputStream.write(response.getBytes());
         outputStream.flush();
     }
 

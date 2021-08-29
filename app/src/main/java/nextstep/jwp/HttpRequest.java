@@ -18,27 +18,26 @@ public class HttpRequest {
     private HttpHeaders headers;
     private Parameters parameters;
 
-    public HttpRequest(InputStream inputStream) throws IOException {
+    public HttpRequest(InputStream inputStream) {
         this.bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        init();
+        try {
+            String line = bufferedReader.readLine();
+            this.requestLine = new RequestLine(line);
+            initHeaders();
+            this.parameters = new Parameters(getQueryString(), getRequestBody());
+        } catch (Exception e) {
+            log.error("Exception stream", e);
+        }
     }
 
-    private void init() throws IOException {
-        String line = bufferedReader.readLine();
-        log.debug("line : {}", line);
-        this.requestLine = new RequestLine(line);
+    private void initHeaders() throws IOException {
+        String line;
         Map<String, String> headers = new HashMap<>();
-        while (!"".equals(line)) {
-            line = bufferedReader.readLine();
-            if (line == null) return;
-            log.debug("line : {}", line);
-            if (!"".equals(line)) {
-                String[] splitHeader = line.split(": ");
-                headers.put(splitHeader[0], splitHeader[1]);
-            }
+        while ((line = bufferedReader.readLine()) != null && !"".equals(line)) {
+            String[] splitHeader = line.split(": ");
+            headers.put(splitHeader[0], splitHeader[1]);
         }
         this.headers = new HttpHeaders(headers);
-        this.parameters = new Parameters(getQueryString(), getRequestBody());
     }
 
     public String getMethod() {

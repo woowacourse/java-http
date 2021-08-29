@@ -15,15 +15,6 @@ public class ResourceFile {
     }
 
     public String getContentType() {
-        if (path.endsWith(".html")) {
-            return "text/html;charset=utf-8";
-        }
-        if (path.endsWith(".css")) {
-            return "text/css";
-        }
-        if (path.endsWith(".js")) {
-            return "text/javascript";
-        }
-        return "text/plain";
+        return ContentType.findContentType(path);
     }
 }

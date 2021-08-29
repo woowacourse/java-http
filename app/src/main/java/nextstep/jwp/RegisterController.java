@@ -27,9 +27,9 @@ public class RegisterController extends AbstractController {
         String email = request.getParameter("email");
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             response.sendRedirect("/500.html");
-        } else {
-            InMemoryUserRepository.save(new User(2, account, password, email));
-            response.sendRedirect("/index.html");
+            return;
         }
+        InMemoryUserRepository.save(new User(2, account, password, email));
+        response.sendRedirect("/index.html");
     }
 }

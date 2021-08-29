@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,7 +42,7 @@ public class HttpResponseTest {
     }
 
     @Test
-    void write() {
+    void write() throws IOException {
         // given, when
         httpResponse.setStatus(200);
         httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");

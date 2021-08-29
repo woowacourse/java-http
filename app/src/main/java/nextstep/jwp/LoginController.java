@@ -26,15 +26,14 @@ public class LoginController extends AbstractController {
     protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
         String account = request.getParameter("account");
         String password = request.getParameter("password");
-        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            if (user.checkPassword(password)) {
-                response.sendRedirect("/index.html");
-            } else {
+        try {
+            User user = InMemoryUserRepository.findByAccount(account).get();
+            if (!user.checkPassword(password)) {
                 response.sendRedirect("/401.html");
+                return;
             }
-        } else {
+            response.sendRedirect("/index.html");
+        } catch (Exception e) {
             response.sendRedirect("/401.html");
         }
     }

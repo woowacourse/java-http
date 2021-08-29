@@ -1,34 +1,23 @@
 package nextstep.jwp.controller;
 
-import static nextstep.jwp.http.request.Method.GET;
-
-import java.io.IOException;
 import nextstep.jwp.controller.request.RegisterRequest;
 import nextstep.jwp.http.common.HttpStatus;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.model.StaticResource;
 import nextstep.jwp.service.RegisterService;
 import nextstep.jwp.service.StaticResourceService;
 
-public class RegisterController implements Controller {
+public class RegisterController extends RestController {
 
     private final RegisterService registerService;
-    private final StaticResourceService staticResourceService;
 
     public RegisterController(RegisterService registerService, StaticResourceService staticResourceService) {
+        super(staticResourceService);
         this.registerService = registerService;
-        this.staticResourceService = staticResourceService;
     }
 
-    private HttpResponse doGet(HttpRequest httpRequest) throws IOException {
-        StaticResource staticResource = staticResourceService.findByPathWithExtension(
-            httpRequest.getUri(), ".html");
-
-        return HttpResponse.withBody(HttpStatus.OK, staticResource);
-    }
-
-    private HttpResponse doPost(HttpRequest httpRequest) {
+    @Override
+    protected HttpResponse doPost(HttpRequest httpRequest) {
         RegisterRequest registerRequest = getRegisterRequest(httpRequest);
         registerService.registerUser(registerRequest);
 
@@ -41,15 +30,6 @@ public class RegisterController implements Controller {
         String email = httpRequest.getBodyParameter("email");
 
         return new RegisterRequest(account, password, email);
-    }
-
-    @Override
-    public HttpResponse doService(HttpRequest httpRequest) throws IOException {
-        if (httpRequest.hasMethod(GET)) {
-            return doGet(httpRequest);
-        }
-
-        return doPost(httpRequest);
     }
 
     @Override

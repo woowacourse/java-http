@@ -10,6 +10,7 @@ import java.util.Objects;
 import nextstep.jwp.dispatcher.handler.Handler;
 import nextstep.jwp.dispatcher.mapping.FileAccessHandlerMapping;
 import nextstep.jwp.dispatcher.mapping.HandlerMapping;
+import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.message.ContentType;
@@ -33,7 +34,7 @@ public class FileAccessHandlerAdapter implements HandlerAdapter {
 
             httpResponse.setContent(content);
         } catch (IOException e) {
-            throw new RuntimeException("존재하지 않는 파일입니다. - 404");
+            throw new NotFoundException();
         }
 
         HttpHeaders headers = new HttpHeaders();
@@ -55,7 +56,7 @@ public class FileAccessHandlerAdapter implements HandlerAdapter {
         String file = "./static" + fileName;
         URL fileResource = getClass().getClassLoader().getResource(file);
         if (Objects.isNull(fileResource)) {
-            throw new RuntimeException("존재하지 않는 파일 입니다. - 404");
+            throw new NotFoundException();
         }
         return Paths.get(fileResource.getPath());
     }

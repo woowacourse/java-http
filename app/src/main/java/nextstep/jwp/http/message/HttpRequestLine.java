@@ -1,6 +1,7 @@
 package nextstep.jwp.http.message;
 
 import java.util.Optional;
+import nextstep.jwp.exception.InternalServerError;
 
 public class HttpRequestLine {
 
@@ -24,7 +25,7 @@ public class HttpRequestLine {
     private void parse(String requestLine) {
         String[] splittedRequestLine = requestLine.split(" ");
         if (splittedRequestLine.length != 3) {
-            throw new RuntimeException("Http Request Line 포맷 에러");
+            throw new InternalServerError();
         }
         method = HttpMethod.of(splittedRequestLine[0]);
         uri = splittedRequestLine[1];

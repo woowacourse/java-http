@@ -3,6 +3,7 @@ package nextstep.jwp.dispatcher.mapping;
 import java.util.Objects;
 import nextstep.jwp.context.ApplicationContext;
 import nextstep.jwp.dispatcher.handler.Handler;
+import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.http.HttpRequest;
 
 public class HttpRequestHandlerMapping implements HandlerMapping {
@@ -22,7 +23,7 @@ public class HttpRequestHandlerMapping implements HandlerMapping {
         ApplicationContext applicationContext = httpRequest.getApplicationContext();
         Handler mappedHandler = applicationContext.getHandler(urlPath);
         if (Objects.isNull(mappedHandler)) {
-            throw new RuntimeException("존재하지 않는 핸들러 - 404");
+            throw new NotFoundException();
         }
         return mappedHandler;
     }

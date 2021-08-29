@@ -3,6 +3,7 @@ package nextstep.project.presentation;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import nextstep.jwp.dispatcher.handler.HttpHandler;
+import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.message.HttpStatus;
@@ -26,10 +27,10 @@ public class UserController extends HttpHandler {
             String requestPassword = queryString.get("password");
 
             User findUser = InMemoryUserRepository.findByAccount(requestAccount)
-                .orElseThrow(() -> new RuntimeException("401"));
+                .orElseThrow(UnauthorizedException::new);
 
             if (!findUser.checkPassword(requestPassword)) {
-                throw new RuntimeException("401");
+                throw new UnauthorizedException();
             }
 
             redirectTo("./index.html", httpResponse);
@@ -38,7 +39,7 @@ public class UserController extends HttpHandler {
                 "./static/login.html",
                 HttpStatus.OK,
                 httpResponse);
-        } catch (RuntimeException e) {
+        } catch (UnauthorizedException e) {
             renderPage(
                 "./static/401.html",
                 HttpStatus.UNAUTHORIZED,

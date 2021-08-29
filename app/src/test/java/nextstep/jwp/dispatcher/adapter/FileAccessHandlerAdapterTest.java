@@ -1,15 +1,19 @@
 package nextstep.jwp.dispatcher.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.in;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import nextstep.jwp.dispatcher.handler.Handler;
 import nextstep.jwp.dispatcher.mapping.FileAccessHandlerMapping;
 import nextstep.jwp.dispatcher.mapping.HandlerMapping;
 import nextstep.jwp.dispatcher.mapping.HttpRequestHandlerMapping;
+import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpResponseImpl;
@@ -90,10 +94,11 @@ class FileAccessHandlerAdapterTest {
 
         // when
         HandlerMapping handlerMapping = new FileAccessHandlerMapping();
+        Handler handler = handlerMapping.getHandler(request);
 
         // then
-        assertThatThrownBy(() ->
-            handlerAdapter.handle(request, response, handlerMapping.getHandler(request))
-        ).isInstanceOf(RuntimeException.class);
+        assertThatThrownBy(() -> {
+            handlerAdapter.handle(request, response, handler);
+        }).isInstanceOf(RuntimeException.class);
     }
 }

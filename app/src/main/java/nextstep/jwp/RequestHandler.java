@@ -12,6 +12,7 @@ import java.util.List;
 import nextstep.jwp.context.ApplicationContext;
 import nextstep.jwp.dispatcher.adapter.HandlerAdapter;
 import nextstep.jwp.dispatcher.mapping.HandlerMapping;
+import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpResponseImpl;
@@ -47,28 +48,23 @@ public class RequestHandler implements Runnable {
     public void run() {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
+        HttpRequest request;
+        HttpResponse response = new HttpResponseImpl();
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-            HttpRequest request = HttpParser.parse(inputStream);
+
+            request = HttpParser.parse(inputStream);
             request.setApplicationContext(applicationContext);
-            HttpResponse response = new HttpResponseImpl();
 
             if (log.isDebugEnabled()) {
                 log.debug("\r\n============== request ==============\r\n{}", request.asString());
             }
 
-            try {
+            HandlerMapping mappedHandler = getHandler(request);
 
-                HandlerMapping mappedHandler = getHandler(request);
+            HandlerAdapter handlerAdapter = getHandlerAdapter(mappedHandler);
 
-                HandlerAdapter handlerAdapter = getHandlerAdapter(mappedHandler);
-
-                handlerAdapter.handle(request, response, mappedHandler.getHandler(request));
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                renderInternalServerError(response);
-            }
+            handlerAdapter.handle(request, response, mappedHandler.getHandler(request));
 
             if (log.isDebugEnabled()) {
                 log.debug("\r\n============== response ==============\r\n{}", response.asString());
@@ -78,6 +74,9 @@ public class RequestHandler implements Runnable {
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
+        } catch (Exception e) {
+            e.printStackTrace();
+            renderInternalServerError(response);
         } finally {
             close();
         }
@@ -108,7 +107,7 @@ public class RequestHandler implements Runnable {
 
             response.setContent(content);
         } catch (IOException e) {
-            throw new RuntimeException("존재하지 않는 파일입니다. - 404");
+            throw new NotFoundException();
         }
 
         HttpHeaders headers = new HttpHeaders();

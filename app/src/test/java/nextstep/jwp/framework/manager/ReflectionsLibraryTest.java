@@ -1,10 +1,10 @@
-package nextstep.jwp.manager;
+package nextstep.jwp.framework.manager;
 
 import nextstep.jwp.application.controller.UserController;
-import nextstep.jwp.manager.annotation.Controller;
-import nextstep.jwp.manager.annotation.GetMapping;
-import nextstep.jwp.manager.annotation.PostMapping;
-import nextstep.jwp.manager.annotation.RequestParameter;
+import nextstep.jwp.framework.manager.annotation.Controller;
+import nextstep.jwp.framework.manager.annotation.GetMapping;
+import nextstep.jwp.framework.manager.annotation.PostMapping;
+import nextstep.jwp.framework.manager.annotation.RequestParameter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
@@ -68,12 +68,14 @@ class ReflectionsLibraryTest {
         final Method loginUserMethod = userControllerClass.getMethod("loginUser", String.class, String.class);
 
         final Parameter[] parameters = loginUserMethod.getParameters();
+        List<String> parameterValues = new ArrayList<>();
         for (Parameter parameter : parameters) {
             final RequestParameter requestParameter = parameter.getAnnotation(RequestParameter.class);
             if (!Objects.isNull(requestParameter)) {
-                System.out.println("requestParameterValue = " + requestParameter.value());
-                System.out.println("parameter.getType() = " + parameter.getType());
+                parameterValues.add(requestParameter.value());
             }
         }
+
+        assertThat(parameterValues).contains("account", "password");
     }
 }

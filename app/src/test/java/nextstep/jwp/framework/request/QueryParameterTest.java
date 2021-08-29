@@ -1,4 +1,4 @@
-package nextstep.jwp.request;
+package nextstep.jwp.framework.request;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -24,6 +24,6 @@ class QueryParameterTest {
         final QueryParameter queryParameter = QueryParameter.of("user=joel&password=pw");
         final String nothing = queryParameter.searchValue("nothing");
 
-        assertThat(nothing).isEqualTo("");
+        assertThat(nothing).isEmpty();
     }
 }

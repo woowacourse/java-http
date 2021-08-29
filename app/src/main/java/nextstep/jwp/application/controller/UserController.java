@@ -1,10 +1,10 @@
 package nextstep.jwp.application.controller;
 
 import nextstep.jwp.application.service.UserService;
-import nextstep.jwp.manager.annotation.Controller;
-import nextstep.jwp.manager.annotation.GetMapping;
-import nextstep.jwp.manager.annotation.PostMapping;
-import nextstep.jwp.manager.annotation.RequestParameter;
+import nextstep.jwp.framework.manager.annotation.Controller;
+import nextstep.jwp.framework.manager.annotation.GetMapping;
+import nextstep.jwp.framework.manager.annotation.PostMapping;
+import nextstep.jwp.framework.manager.annotation.RequestParameter;
 
 @Controller
 public class UserController {
@@ -24,6 +24,7 @@ public class UserController {
     public String loginUser(@RequestParameter(value = "account") String account,
                             @RequestParameter(value = "password") String password) {
         final boolean isUser = userService.loginUser(account, password);
+
         if (isUser) {
             return "redirect: /index.html";
         }

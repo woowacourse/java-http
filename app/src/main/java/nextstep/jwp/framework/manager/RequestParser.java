@@ -1,5 +1,6 @@
-package nextstep.jwp.request;
+package nextstep.jwp.framework.manager;
 
+import nextstep.jwp.framework.request.ClientRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

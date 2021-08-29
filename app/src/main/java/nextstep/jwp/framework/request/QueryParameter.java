@@ -1,4 +1,6 @@
-package nextstep.jwp.request;
+package nextstep.jwp.framework.request;
+
+import nextstep.jwp.framework.request.util.QueryParameterExtractor;
 
 import java.util.Map;
 import java.util.Objects;

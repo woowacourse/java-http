@@ -1,8 +1,8 @@
 package nextstep.jwp;
 
-import nextstep.jwp.manager.DynamicWebManager;
-import nextstep.jwp.manager.RequestManager;
-import nextstep.jwp.manager.StaticResourceManager;
+import nextstep.jwp.framework.manager.DynamicWebManager;
+import nextstep.jwp.framework.manager.RequestManager;
+import nextstep.jwp.framework.manager.StaticResourceManager;
 
 public class JwpApplication {
 

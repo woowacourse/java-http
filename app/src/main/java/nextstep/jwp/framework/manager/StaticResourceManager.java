@@ -1,8 +1,8 @@
-package nextstep.jwp.manager;
+package nextstep.jwp.framework.manager;
 
-import nextstep.jwp.request.ClientRequest;
-import nextstep.jwp.request.HttpMethod;
-import nextstep.jwp.response.ServerResponse;
+import nextstep.jwp.framework.request.ClientRequest;
+import nextstep.jwp.framework.request.HttpMethod;
+import nextstep.jwp.framework.response.ServerResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +21,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static nextstep.jwp.response.HttpStatusCode.*;
+import static nextstep.jwp.framework.response.HttpStatusCode.*;
 
 public class StaticResourceManager {
 

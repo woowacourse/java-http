@@ -1,11 +1,11 @@
-package nextstep.jwp.manager;
+package nextstep.jwp.framework.manager;
 
-import nextstep.jwp.manager.annotation.Controller;
-import nextstep.jwp.manager.annotation.GetMapping;
-import nextstep.jwp.manager.annotation.PostMapping;
-import nextstep.jwp.manager.annotation.RequestParameter;
-import nextstep.jwp.request.ClientRequest;
-import nextstep.jwp.request.HttpMethod;
+import nextstep.jwp.framework.manager.annotation.Controller;
+import nextstep.jwp.framework.manager.annotation.GetMapping;
+import nextstep.jwp.framework.manager.annotation.PostMapping;
+import nextstep.jwp.framework.manager.annotation.RequestParameter;
+import nextstep.jwp.framework.request.ClientRequest;
+import nextstep.jwp.framework.request.HttpMethod;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,10 +39,10 @@ public class DynamicWebManager {
         log.info("*******annotated contollers loaded*******");
     }
 
-    private void registerController(Class<?> bean) {
+    private void registerController(Class<?> controller) {
         final Constructor<?> constructor;
         try {
-            constructor = bean.getConstructor(null);
+            constructor = controller.getConstructor();
             controllers.add(constructor.newInstance());
         } catch (Exception e) {
             throw new IllegalArgumentException("Controller 생성 실패");

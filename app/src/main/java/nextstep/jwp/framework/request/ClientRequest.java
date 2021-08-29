@@ -1,4 +1,4 @@
-package nextstep.jwp.request;
+package nextstep.jwp.framework.request;
 
 import java.util.Map;
 import java.util.Objects;

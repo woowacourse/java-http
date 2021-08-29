@@ -69,7 +69,7 @@ public class HttpResponseImpl implements HttpResponse {
     @Override
     public String asString() {
         return String.join("\r\n",
-            versionOfProtocol + " " + status.getStatus() + " " + status.getDescription(),
+            getVersionOfProtocol() + " " + status.getStatus() + " " + status.getDescription() + " ",
             headers.asString(),
             getContent()
             );

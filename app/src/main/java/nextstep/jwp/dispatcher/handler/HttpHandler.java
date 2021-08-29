@@ -47,8 +47,8 @@ public abstract class HttpHandler implements Handler {
         }
 
         HttpHeaders headers = new HttpHeaders();
-        headers.addHeader("Content-Type", ContentType.HTML.getDescription());
         headers.addHeader("Content-Length", String.valueOf(httpResponse.getContentAsString().length()));
+        headers.addHeader("Content-Type", ContentType.HTML.getDescription());
 
         httpResponse.setHeaders(headers);
         httpResponse.setStatus(httpStatus);

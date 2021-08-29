@@ -2,6 +2,7 @@ package nextstep.jwp.http.message;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -13,7 +14,7 @@ public class HttpHeaders {
     private final String value;
 
     public HttpHeaders() {
-        headers = new HashMap<>();
+        headers = new LinkedHashMap<>();
         value = "";
     }
 
@@ -49,7 +50,7 @@ public class HttpHeaders {
     }
 
     public void addHeader(String name, String value) {
-        headers.put(name, value);
+        headers.put(name, value + " ");
     }
 
     public boolean isExists(String name) {

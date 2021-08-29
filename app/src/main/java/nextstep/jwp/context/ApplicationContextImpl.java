@@ -3,6 +3,7 @@ package nextstep.jwp.context;
 import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.dispatcher.handler.Handler;
+import nextstep.project.presentation.HelloWorldController;
 
 public class ApplicationContextImpl implements ApplicationContext {
 
@@ -24,6 +25,9 @@ public class ApplicationContextImpl implements ApplicationContext {
 
     @Override
     public Handler getHandler(String url) {
+        if ("/".equals(url)) {
+            return new HelloWorldController();
+        }
         return handlers.get(url);
     }
 

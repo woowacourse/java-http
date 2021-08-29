@@ -37,9 +37,9 @@ public class FileAccessHandlerAdapter implements HandlerAdapter {
         }
 
         HttpHeaders headers = new HttpHeaders();
+        headers.addHeader("Content-Length", String.valueOf(httpResponse.getContentAsString().length()));
         headers.addHeader("Content-Type", ContentType.valueByFileExtension(parseFileExtension(
             httpRequest.getRequestURI())).getDescription());
-        headers.addHeader("Content-Length", String.valueOf(httpResponse.getContentAsString().length()));
 
         httpResponse.setHeaders(headers);
         httpResponse.setStatus(HttpStatus.OK);

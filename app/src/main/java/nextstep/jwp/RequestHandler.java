@@ -53,10 +53,11 @@ public class RequestHandler implements Runnable {
             request.setApplicationContext(applicationContext);
             HttpResponse response = new HttpResponseImpl();
 
+            if (log.isDebugEnabled()) {
+                log.debug("\r\n============== request ==============\r\n{}", request.asString());
+            }
+
             try {
-                if (log.isDebugEnabled()) {
-                    log.debug("\r\n============== request ==============\r\n{}", request.asString());
-                }
 
                 HandlerMapping mappedHandler = getHandler(request);
 
@@ -64,11 +65,13 @@ public class RequestHandler implements Runnable {
 
                 handlerAdapter.handle(request, response, mappedHandler.getHandler(request));
 
-                if (log.isDebugEnabled()) {
-                    log.debug("\r\n============== response ==============\r\n{}", response.asString());
-                }
             } catch (Exception e) {
+                e.printStackTrace();
+                renderInternalServerError(response);
+            }
 
+            if (log.isDebugEnabled()) {
+                log.debug("\r\n============== response ==============\r\n{}", response.asString());
             }
 
             outputStream.write(response.asString().getBytes());

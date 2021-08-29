@@ -11,6 +11,7 @@ import nextstep.jwp.dispatcher.adapter.HandlerAdapter;
 import nextstep.jwp.dispatcher.adapter.HandlerAdapterFactory;
 import nextstep.jwp.dispatcher.mapping.HandlerMapping;
 import nextstep.jwp.dispatcher.mapping.HandlerMappingFactory;
+import nextstep.project.presentation.HelloWorldController;
 import nextstep.project.presentation.RegisterController;
 import nextstep.project.presentation.UserController;
 import org.slf4j.Logger;
@@ -39,6 +40,7 @@ public class WebServer {
 
     private void initApplicationContext() {
         applicationContext = new ApplicationContextImpl();
+        applicationContext.addHandler("/", new HelloWorldController());
         applicationContext.addHandler("/login", new UserController());
         applicationContext.addHandler("/register", new RegisterController());
     }

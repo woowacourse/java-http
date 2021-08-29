@@ -111,14 +111,14 @@ class RequestHandlerTest {
             final URL resource = getClass().getClassLoader().getResource("static/login.html");
             String expected = "HTTP/1.1 200 OK \r\n" +
                     "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: 3796 \r\n" +
+                    "Content-Length: 3797 \r\n" +
                     "\r\n" +
                     new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             assertThat(socket.output()).isEqualTo(expected);
         }
 
         @Test
-        @DisplayName("/register 로 접속시, login 페이지를 보여준다.")
+        @DisplayName("/register 로 접속시, register 페이지를 보여준다.")
         void register() throws IOException {
             // given
             final String httpRequest = String.join("\r\n",
@@ -177,7 +177,7 @@ class RequestHandlerTest {
     }
 
     @Nested
-    @DisplayName("로그인을 하면")
+    @DisplayName("쿼리스트링으로 로그인을 하면")
     class Login {
 
         @Test
@@ -217,6 +217,71 @@ class RequestHandlerTest {
                     "Connection: keep-alive ",
                     "",
                     "");
+
+            final MockSocket socket = new MockSocket(httpRequest);
+            final RequestHandler requestHandler = new RequestHandler(socket);
+
+            // when
+            requestHandler.run();
+
+            // then
+            final URL resource = getClass().getClassLoader().getResource("static/401.html");
+            String expected = "HTTP/1.1 401 Unauthorized \r\n" +
+                    "Content-Type: text/html;charset=utf-8 \r\n" +
+                    "Content-Length: 2426 \r\n" +
+                    "\r\n" +
+                    new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            assertThat(socket.output()).isEqualTo(expected);
+        }
+    }
+
+    @Nested
+    @DisplayName("POST로 로그인을 하면")
+    class PostLogin {
+
+        @Test
+        @DisplayName("성공하면 index 페이지를 보여준다.")
+        void success() throws IOException {
+            // given
+            final String httpRequest = String.join("\r\n",
+                    "POST /login HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "Content-Length: 30 ",
+                    "Content-Type: application/x-www-form-urlencoded ",
+                    "Accept: */* ",
+                    "",
+                    "account=gugu&password=password");
+
+            final MockSocket socket = new MockSocket(httpRequest);
+            final RequestHandler requestHandler = new RequestHandler(socket);
+
+            // when
+            requestHandler.run();
+
+            // then
+            final URL resource = getClass().getClassLoader().getResource("static/index.html");
+            String expected = "HTTP/1.1 302 Found \r\n" +
+                    "Content-Type: text/html;charset=utf-8 \r\n" +
+                    "Content-Length: 5564 \r\n" +
+                    "\r\n" +
+                    new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            assertThat(socket.output()).isEqualTo(expected);
+        }
+
+        @Test
+        @DisplayName("실패하면 401 페이지를 보여준다.")
+        void fail() throws IOException {
+            // given
+            final String httpRequest = String.join("\r\n",
+                    "POST /login HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Connection: keep-alive ",
+                    "Content-Length: 30 ",
+                    "Content-Type: application/x-www-form-urlencoded ",
+                    "Accept: */* ",
+                    "",
+                    "account=gugu&password=PASSword");
 
             final MockSocket socket = new MockSocket(httpRequest);
             final RequestHandler requestHandler = new RequestHandler(socket);

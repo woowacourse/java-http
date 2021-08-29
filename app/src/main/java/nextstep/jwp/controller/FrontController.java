@@ -73,6 +73,20 @@ public class FrontController {
                     .responseResource("/index.html")
                     .build();
         }
+
+        if("/login".equals(uri)){
+            Map<String, String> params = body.getParams();
+            if (service.isAuthorized(params)) {
+                return ResponseEntity
+                        .statusCode(StatusCode.FOUND)
+                        .responseResource("/index.html")
+                        .build();
+            }
+            return ResponseEntity
+                    .statusCode(StatusCode.UNAUTHORIZED)
+                    .responseResource("/401.html")
+                    .build();
+        }
         throw new HttpException("올바르지 않은 post 요청입니다.");
     }
 }

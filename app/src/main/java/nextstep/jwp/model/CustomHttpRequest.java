@@ -40,7 +40,9 @@ public class CustomHttpRequest {
 
         if (method.equals("GET")) {
             path = dividePathFromUri(uri);
-            parseParams(params, uri.substring(path.length() + 1));
+            if (!path.equals(uri)) {
+                parseParams(params, uri.substring(path.length() + 1));
+            }
         }
 
         if (method.equals("POST")) {

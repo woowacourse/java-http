@@ -5,10 +5,12 @@ import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.ExtraController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.StaticController;
 
 public enum Controllers {
     LOGIN("/login", new LoginController()),
-    REGISTER("/register", new RegisterController());
+    REGISTER("/register", new RegisterController()),
+    STATIC("/static", new StaticController());
 
     private static final Controller extraController = new ExtraController();
 
@@ -22,7 +24,9 @@ public enum Controllers {
 
     public static Controller mathController(HeaderLine headerLine) {
         final String urlWithoutQuery = headerLine.getRequestURLWithoutQuery();
-
+        if (StaticResources.matchFromHeader(headerLine)) {
+            return STATIC.controller;
+        }
         return Arrays.stream(Controllers.values())
             .filter(element -> element.isSameURIs(urlWithoutQuery))
             .findAny()

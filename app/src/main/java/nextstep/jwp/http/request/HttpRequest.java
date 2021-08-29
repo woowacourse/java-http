@@ -1,10 +1,13 @@
 package nextstep.jwp.http.request;
 
+import static java.util.stream.Collectors.toMap;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import nextstep.jwp.http.HttpHeaders;
@@ -16,17 +19,17 @@ public class HttpRequest {
     private final HttpMethod method;
     private final HttpProtocol protocol;
     private final String url;
+    private final QueryParams queryParams;
     private final HttpRequestBody body;
 
-    public HttpRequest(HttpHeaders headers,
-                       HttpMethod method,
-                       HttpProtocol httpProtocol,
-                       String url,
+    public HttpRequest(HttpHeaders headers, HttpMethod method, HttpProtocol protocol,
+                       String url, QueryParams queryParams,
                        HttpRequestBody body) {
         this.headers = headers;
         this.method = method;
-        this.protocol = httpProtocol;
+        this.protocol = protocol;
         this.url = url;
+        this.queryParams = queryParams;
         this.body = body;
     }
 
@@ -42,6 +45,10 @@ public class HttpRequest {
 
     public String url() {
         return this.url;
+    }
+
+    public QueryParams queryParam() {
+        return queryParams;
     }
 
     public HttpProtocol protocol() {
@@ -79,11 +86,13 @@ public class HttpRequest {
         private static final int HEADER_KEY_INDEX = 0;
         private static final int COMMA_LENGTH = 1;
         private static final int HTTP_PROTOCOL_INDEX = 2;
+        private static final String BLANK = " ";
 
         private HttpHeaders headers = new HttpHeaders();
         private HttpMethod method = null;
         private HttpProtocol httpProtocol = null;
         private String url = "";
+        private QueryParams queryParams = null;
         private HttpRequestBody body = new TextHttpRequestBody("\r\n");
 
         public InputStreamHttpRequestConverter(InputStream inputStream) {
@@ -91,7 +100,7 @@ public class HttpRequest {
         }
 
         public HttpRequest toRequest() {
-            return new HttpRequest(headers, method, httpProtocol, url, body);
+            return new HttpRequest(headers, method, httpProtocol, url, queryParams, body);
         }
 
         private void parse(InputStream inputStream) {
@@ -108,11 +117,13 @@ public class HttpRequest {
         }
 
         private void parseStatusLine(String line) {
-            List<String> parsedStartHeader = Arrays.asList(line.split(" "));
+            List<String> parsedStatusLine = Arrays.asList(line.split(BLANK));
 
-            this.method = HttpMethod.of(parsedStartHeader.get(METHOD_INDEX));
-            this.url = parsedStartHeader.get(FILEPATH_INDEX);
-            this.httpProtocol = HttpProtocol.findByName(parsedStartHeader.get(HTTP_PROTOCOL_INDEX));
+            this.method = HttpMethod.of(parsedStatusLine.get(METHOD_INDEX));
+            QueryParser queryParser = new QueryParser(parsedStatusLine.get(FILEPATH_INDEX));
+            this.queryParams = queryParser.queryParams();
+            this.url = queryParser.parsedUrl();
+            this.httpProtocol = HttpProtocol.findByName(parsedStatusLine.get(HTTP_PROTOCOL_INDEX));
         }
 
         private void parseHeader(String line) {
@@ -131,6 +142,49 @@ public class HttpRequest {
 
             List<String> values = Arrays.asList(rawHeaderValue.split(","));
             headers.add(headerKey, values);
+        }
+    }
+
+    static class QueryParser {
+
+        private static final int NOT_FOUND_INDEX = -1;
+        private static final int QUERY_KEY_INDEX = 0;
+        private static final int QUERY_VALUE_INDEX = 1;
+
+        private static final String QUERY_SEPARATOR = "=";
+        private static final String QUERY_STARTER = "?";
+        private static final String QUERY_AMPERSAND = "&";
+
+        private final String parsedUrl;
+        private final QueryParams queryParams;
+
+        public QueryParser(String url) {
+            int index = url.indexOf(QUERY_STARTER);
+            if (index != NOT_FOUND_INDEX) {
+                this.parsedUrl = url.substring(0, index);
+                this.queryParams = parseQueryParams(url.substring(index + 1));
+                return;
+            }
+            this.parsedUrl = url;
+            this.queryParams = new QueryParams();
+        }
+
+        private QueryParams parseQueryParams(String queryParams) {
+            return new QueryParams(
+                Arrays.stream(queryParams.split(QUERY_AMPERSAND))
+                    .map(it -> Arrays.asList(it.split(QUERY_SEPARATOR)))
+                    .collect(toMap(
+                        it -> it.get(QUERY_KEY_INDEX),
+                        it -> it.get(QUERY_VALUE_INDEX), (o1, o2) -> o1, LinkedHashMap::new))
+            );
+        }
+
+        public QueryParams queryParams() {
+            return queryParams;
+        }
+
+        public String parsedUrl() {
+            return parsedUrl;
         }
     }
 }

@@ -19,15 +19,18 @@ class HttpRequestTest {
     void inputStreamParseTest(String req,
                               HttpMethod expectedMethod,
                               String expectedFilePath,
+                              Map<String, String> queryParams,
                               Map<String, List<String>> expectedHeaders) {
         //given
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(req.getBytes());
         //when
         HttpRequest request = HttpRequest.of(byteArrayInputStream);
         //then
-        System.out.println(request);
         assertThat(request.url()).isEqualTo(expectedFilePath);
         assertThat(request.method()).isEqualTo(expectedMethod);
+        assertThat(request.queryParam().map()).containsExactlyInAnyOrderEntriesOf(
+            queryParams
+        );
         expectedHeaders.forEach((headerKey, headerValues) ->
             assertThat(
                 request.header(headerKey)
@@ -39,24 +42,26 @@ class HttpRequestTest {
         return Stream.of(
             Arguments.of(
                 String.join("\r\n",
-                    "GET /index.html HTTP/1.1 ",
+                    "GET /index HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Connection: keep-alive ",
                     "",
                     ""),
                 HttpMethod.GET,
-                "/index.html",
+                "/index",
+                Map.of(),
                 Map.of("Host", List.of("localhost:8080"), "Connection", List.of("keep-alive"))
             ),
             Arguments.of(
                 String.join("\r\n",
-                    "POST /foo/foo.html HTTP/1.1 ",
+                    "POST /foo/foo HTTP/1.1 ",
                     "Host: 123.41.2.5:55723 ",
                     "Content-type: text/html ",
                     "",
                     ""),
                 HttpMethod.POST,
-                "/foo/foo.html",
+                "/foo/foo",
+                Map.of(),
                 Map.of("Host", List.of("123.41.2.5:55723"), "Content-type", List.of("text/html"))
             ),
             Arguments.of(
@@ -68,7 +73,32 @@ class HttpRequestTest {
                     ""),
                 HttpMethod.GET,
                 "/",
+                Map.of(),
                 Map.of("Host", List.of("0.0.0.0"), "set-cookie", List.of("a:b", "b:c", "c:d"))
+            ),
+            Arguments.of(
+                String.join("\r\n",
+                    "GET /index?query1=value1&query2=value2 HTTP/1.1 ",
+                    "Host: 0.0.0.0 ",
+                    "set-cookie: a:b,b:c,c:d ",
+                    "",
+                    ""),
+                HttpMethod.GET,
+                "/index",
+                Map.of("query1", "value1", "query2", "value2"),
+                Map.of("Host", List.of("0.0.0.0"), "set-cookie", List.of("a:b", "b:c", "c:d"))
+            ),
+            Arguments.of(
+                String.join("\r\n",
+                    "GET /index?user=gugu&password=password HTTP/1.1 ",
+                    "Host: 0.0.0.0 ",
+                    "set-cookie: a:b , c:d ",
+                    "",
+                    ""),
+                HttpMethod.GET,
+                "/index",
+                Map.of("user", "gugu", "password", "password"),
+                Map.of("Host", List.of("0.0.0.0"), "set-cookie", List.of("a:b", "c:d"))
             )
         );
     }

@@ -1,12 +1,11 @@
-package nextstep.jwp;
+package nextstep.jwp.handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.Objects;
 
 public class RequestHandler implements Runnable {
@@ -25,6 +24,8 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
+
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
             final String responseBody = "Hello world!";
 

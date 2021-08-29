@@ -75,14 +75,14 @@ public class HttpResponse {
 
     private void response200(final String responseBody) throws IOException {
         headers.put("Content-Length: " + responseBody.getBytes().length);
-        String okResponse = "HTTP/1.1 200 OK\r\n";
+        String okResponse = HttpStatusCodes._200.getStatusCodeHeader();
         outputStream.write(okResponse.getBytes(StandardCharsets.UTF_8));
         responseHeaderBody(responseBody);
         send();
     }
 
     public void redirect302Transfer(final String redirectUrl) throws IOException {
-        String foundResponse = "HTTP/1.1 302 Found\r\n";
+        String foundResponse = HttpStatusCodes._302.getStatusCodeHeader();
         outputStream.write(foundResponse.getBytes(StandardCharsets.UTF_8));
         headers.put("Location: " + redirectUrl);
         responseHeader();

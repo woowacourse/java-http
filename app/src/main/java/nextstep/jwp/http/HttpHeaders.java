@@ -32,7 +32,7 @@ public class HttpHeaders {
 
     public String getHeaderByKey(final String key) {
         isValidateKey(key);
-        return key + ": " + headers.get(key);
+        return key + DELIMITER + " " + headers.get(key);
     }
 
     private void isValidateKey(final String key) {
@@ -45,7 +45,7 @@ public class HttpHeaders {
     public String getAllHeaders() {
         StringBuilder headerSet = new StringBuilder();
         for (String key : headers.keySet()) {
-            headerSet.append(key).append(": ").append(headers.get(key)).append("\r\n");
+            headerSet.append(key).append(DELIMITER + " ").append(headers.get(key)).append("\r\n");
         }
         return headerSet.toString();
     }

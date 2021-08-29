@@ -1,4 +1,4 @@
-package nextstep.jwp.response;
+package nextstep.jwp.http.response;
 
 public class ResponseBody {
 
@@ -16,7 +16,7 @@ public class ResponseBody {
         return getBytes().length;
     }
 
-    private byte[] getBytes() {
+    public byte[] getBytes() {
         return body.getBytes();
     }
 

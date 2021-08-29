@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.exception.user.OutOfUserIdException;
-import nextstep.jwp.exception.user.UserNotFoundException;
 import nextstep.jwp.exception.user.UserReflectionException;
 import nextstep.jwp.model.User;
 

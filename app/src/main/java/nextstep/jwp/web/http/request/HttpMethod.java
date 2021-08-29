@@ -4,9 +4,15 @@ import java.util.Arrays;
 
 public enum HttpMethod {
     GET,
-    POST;
+    POST,
+    PUT,
+    DELETE,
+    OPTIONS,
+    HEAD,
+    TRACE,
+    PATCH;
 
-    public static HttpMethod of(String name) {
+    public static HttpMethod findByName(String name) {
         return Arrays.stream(values())
             .filter(method -> method.name().equalsIgnoreCase(name))
             .findAny()

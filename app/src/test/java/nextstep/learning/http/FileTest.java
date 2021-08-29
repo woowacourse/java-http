@@ -29,7 +29,6 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
-        // todo
         final URL url = getClass().getClassLoader().getResource(fileName);
         final String actual = url.getFile();
 
@@ -44,7 +43,6 @@ class FileTest {
     void 파일의_내용을_읽는다() throws IOException {
         final String fileName = "nextstep.txt";
 
-        // todo
         URL url = getClass().getClassLoader().getResource(fileName);
         Path path = new File(url.getPath()).toPath();
         final List<String> actual = Files.readAllLines(path);

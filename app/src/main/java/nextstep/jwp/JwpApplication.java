@@ -1,5 +1,7 @@
 package nextstep.jwp;
 
+import nextstep.jwp.web.WebServer;
+
 public class JwpApplication {
 
     public static void main(String[] args) {

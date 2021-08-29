@@ -17,8 +17,21 @@
 - [x] favicon.ico 연결
 - [ ] 테스트 코드 작성
   - [ ] 컨트롤러 테스트 코드
+    - [ ] LoginController 테스트 코드
+    - [ ] RegisterController 테스트 코드
+    - [ ] StaticResourceController 테스트 코드
+    - [ ] Controllers 테스트 코드
   - [ ] HTTP Request 테스트 코드
+    - [ ] RequestLine 테스트 코드
+      - [x] Method 테스트 코드
+      - [x] RequestUri 테스트 코드
+      - [x] HttpVersion 테스트 코드
+    - [ ] RequestHeaders 테스트 코드
+    - [ ] RequestBody 테스트 코드
   - [ ] HTTP Response 테스트 코드
+    - [ ] StatusLine 테스트 코드
+    - [ ] ResponseHeaders 테스트 코드
+    - [ ] ResponseBody 테스트 코드
   - [x] User 테스트 코드
   - [x] Content, ContentType, StaticResource 테스트 코드
   - [x] Service 테스트 코드

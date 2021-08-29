@@ -11,6 +11,7 @@ import nextstep.mockweb.request.MockRequest;
 import nextstep.mockweb.result.MockResult;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -29,6 +30,17 @@ public class AppTest {
         페이지_비교(result.body(), page);
         assertThat(result.statusCode()).isEqualTo(StatusCode.OK);
         assertThat(result.headerValue("Content-Type")).isEqualTo(HTML.contentType());
+    }
+
+    @Test
+    @DisplayName("페이지를 찾을 수 없을 때")
+    public void notFoundPage() throws Exception{
+        // when
+        final MockResult result = MockRequest.get("/awhakschd").result();
+
+        // then
+        페이지_비교(result.body(), "404.html");
+        assertThat(result.statusCode()).isEqualTo(StatusCode.NOT_FOUND);
     }
 
     private void 페이지_비교(String body, String path) {

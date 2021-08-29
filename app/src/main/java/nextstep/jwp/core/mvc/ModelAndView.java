@@ -12,7 +12,6 @@ public class ModelAndView {
 
     private String currentUrl;
     private String viewName;
-    private ModelAttribute modelAttribute;
     private String redirectUrl;
 
     public ModelAndView(String redirectUrl) {

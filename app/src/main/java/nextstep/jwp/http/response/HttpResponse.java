@@ -2,7 +2,7 @@ package nextstep.jwp.http.response;
 
 import com.google.common.base.Strings;
 import nextstep.jwp.http.response.type.ContentType;
-import nextstep.jwp.http.response.type.Status;
+import nextstep.jwp.http.response.type.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,8 +22,8 @@ public class HttpResponse {
     private ResponseHeaders headers = new ResponseHeaders();
     private ResponseBody body = new ResponseBody();
 
-    public void setStatusLine(Status status) {
-        this.statusLine = new StatusLine(status);
+    public void setStatusLine(StatusCode statusCode) {
+        this.statusLine = new StatusLine(statusCode);
     }
 
     public void forward(String uri) {
@@ -35,7 +35,7 @@ public class HttpResponse {
                 return;
             }
 
-            setStatusLine(Status.OK);
+            setStatusLine(StatusCode.OK);
             this.headers.setContentType(ContentType.findByUri(uri));
             this.headers.setContentLength(content.getBytes(StandardCharsets.UTF_8).length);
             this.body = new ResponseBody(content);
@@ -50,7 +50,7 @@ public class HttpResponse {
             String content = readContent(resource);
             assert content != null;
 
-            this.setStatusLine(Status.NOT_FOUND);
+            this.setStatusLine(StatusCode.NOT_FOUND);
             this.headers.setContentType(ContentType.HTML);
             this.headers.setContentLength(content.length());
             this.body = new ResponseBody(content);
@@ -80,7 +80,7 @@ public class HttpResponse {
     }
 
     public void redirect(String redirectUrl) {
-        setStatusLine(Status.FOUND);
+        setStatusLine(StatusCode.FOUND);
         this.headers.setLocation(redirectUrl);
     }
 

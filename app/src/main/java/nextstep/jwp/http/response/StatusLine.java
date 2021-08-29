@@ -1,6 +1,6 @@
 package nextstep.jwp.http.response;
 
-import nextstep.jwp.http.response.type.Status;
+import nextstep.jwp.http.response.type.StatusCode;
 
 public class StatusLine {
     private String protocol;
@@ -10,10 +10,10 @@ public class StatusLine {
     public StatusLine() {
     }
 
-    public StatusLine(Status status) {
+    public StatusLine(StatusCode statusCode) {
         this.protocol = "HTTP/1.1";
-        this.statusCode = status.getCode();
-        this.statusMessage = status.getMessage();
+        this.statusCode = statusCode.getCode();
+        this.statusMessage = statusCode.getMessage();
     }
 
     @Override

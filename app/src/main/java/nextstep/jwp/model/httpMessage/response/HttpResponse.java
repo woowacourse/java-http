@@ -4,8 +4,6 @@ import nextstep.jwp.model.httpMessage.ContentType;
 import nextstep.jwp.model.httpMessage.HttpHeaderType;
 import nextstep.jwp.model.httpMessage.HttpStatus;
 import nextstep.jwp.util.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,15 +11,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
 
 import static nextstep.jwp.model.httpMessage.CommonHttpHeader.DELIMITER;
+import static nextstep.jwp.model.httpMessage.ContentType.HTML;
 import static nextstep.jwp.model.httpMessage.HttpHeaderType.CONTENT_TYPE;
-import static nextstep.jwp.model.httpMessage.HttpHeaderType.LOCATION;
 import static nextstep.jwp.model.httpMessage.HttpStatus.OK;
 import static nextstep.jwp.model.httpMessage.HttpStatus.REDIRECT;
-import static nextstep.jwp.model.httpMessage.ContentType.HTML;
+import static nextstep.jwp.model.httpMessage.response.ResponseHeaderType.LOCATION;
 
 public class HttpResponse {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HttpResponse.class);
+    public static final String EMPTY_LINE = "";
 
     private final OutputStream outputStream;
     private final ResponseHeader headers = new ResponseHeader();
@@ -36,29 +34,27 @@ public class HttpResponse {
         ContentType.of(url).ifPresent(type -> headers.add(CONTENT_TYPE, type.value()));
         String body = FileUtils.readFileOfUrl(url);
         headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
-        writeBody(outputStream, processAllHeaders(body));
+        writeBody(outputStream, processResponseLineAndHeader(body));
     }
 
     public void forwardBody(String body) throws IOException {
         responseLine = new ResponseLine(OK);
         headers.add(CONTENT_TYPE, HTML.value());
         headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
-        String response = processAllHeaders(body);
-        writeBody(outputStream, response);
+        writeBody(outputStream, processResponseLineAndHeader(body));
     }
 
     public void redirect(String path) throws IOException {
         responseLine = new ResponseLine(REDIRECT);
         headers.add(LOCATION, path);
-        String response = processAllHeaders();
-        writeBody(outputStream, response);
+        writeBody(outputStream, processResponseLineAndHeader());
     }
 
-    private String processAllHeaders(String... body) {
+    private String processResponseLineAndHeader(String... body) {
         StringJoiner stringJoiner = new StringJoiner(DELIMITER);
         stringJoiner.add(responseLine.toString());
         stringJoiner.add(headers.toString());
-        stringJoiner.add("");
+        stringJoiner.add(EMPTY_LINE);
         if (body.length > 0) {
             stringJoiner.add(body[0]);
         }

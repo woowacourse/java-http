@@ -10,7 +10,7 @@ public enum ContentType {
     ICON("image/x-icon", ".ico"),
     FORM("application/x-www-form-urlencoded", "");
 
-    protected static final String NAME = "Content-Type";
+    public static final String NAME = "Content-Type";
     private final String value;
     private final String suffix;
 

@@ -27,7 +27,7 @@ class RequestHandlerTest {
                 "",
                 "Hello world!");
         String result = socket.output();
-        assertThat(result).isEqualTo(expected);
+        assertThat(result).contains(expected);
     }
 
     @Test

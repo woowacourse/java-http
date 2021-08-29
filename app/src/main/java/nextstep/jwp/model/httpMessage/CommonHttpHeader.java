@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static nextstep.jwp.model.httpMessage.HttpHeaderType.CONTENT_LENGTH;
@@ -15,7 +16,7 @@ public abstract class CommonHttpHeader implements HttpHeader {
 
     private static final Logger LOG = LoggerFactory.getLogger(CommonHttpHeader.class);
 
-    private final Map<HttpHeaderType, String> commonHeaders = new HashMap<>();
+    private final Map<HttpHeaderType, String> commonHeaders = new LinkedHashMap<>();
 
     public boolean containsKey(HttpHeaderType type) {
         return commonHeaders.containsKey(type);
@@ -23,6 +24,14 @@ public abstract class CommonHttpHeader implements HttpHeader {
 
     public boolean commonHeaderContains(String type) {
         return HttpHeaderType.contains(type);
+    }
+
+    public void add(HttpHeaderType type, String value) {
+        commonHeaders.put(type, value);
+    }
+
+    public Map<HttpHeaderType, String> getCommonHeaders() {
+        return commonHeaders;
     }
 
     @Override

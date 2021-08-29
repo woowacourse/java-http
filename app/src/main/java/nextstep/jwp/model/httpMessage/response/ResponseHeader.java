@@ -13,21 +13,18 @@ public class ResponseHeader extends CommonHttpHeader {
 
     private static final Logger LOG = LoggerFactory.getLogger(ResponseLine.class);
 
-    private final Map<String, String> headers = new LinkedHashMap<>();
+    private final Map<ResponseHeaderType, String> headers = new LinkedHashMap<>();
 
-    public void add(HttpHeaderType type, String value) {
-        headers.put(type.value(), value);
+    public void add(ResponseHeaderType type, String value) {
+        headers.put(type, value);
         LOG.debug("Response header : {}: {}", type.value(), value);
-    }
-
-    public Map<String, String> getHeaders() {
-        return headers;
     }
 
     @Override
     public String toString() {
         StringJoiner stringJoiner = new StringJoiner(DELIMITER);
-        headers.forEach((key, value) -> stringJoiner.add(key + ": " + value + " "));
+        headers.forEach((key, value) -> stringJoiner.add(key.value() + ": " + value + " "));
+        getCommonHeaders().forEach((key, value) -> stringJoiner.add(key.value() + ": " + value + " "));
         return stringJoiner.toString();
     }
 }

@@ -20,8 +20,8 @@ public class HttpHeaders {
     private static Map<String, List<String>> parseHeaders(List<String> headerList) {
         Map<String, List<String>> headers = new HashMap<>();
         for (String header : headerList) {
-            String[] split = header.split("=");
-            headers.put(split[0], Arrays.asList(split[1].split(",")));
+            String[] keyValue = header.split(":");
+            headers.put(keyValue[0], Arrays.asList(keyValue[1].split(",")));
         }
         return headers;
     }

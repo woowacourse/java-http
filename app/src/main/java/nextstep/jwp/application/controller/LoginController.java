@@ -19,7 +19,7 @@ public class LoginController implements Controller {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(RuntimeException::new);
 
-        if (user.checkPassword(password)) {
+        if (!user.checkPassword(password)) {
             throw new RuntimeException();
         }
 

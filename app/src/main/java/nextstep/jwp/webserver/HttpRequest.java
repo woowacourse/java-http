@@ -17,15 +17,15 @@ public class HttpRequest {
     }
 
     private void parseRequest(String request) {
-        String[] requestSplit = request.split("\n\n");
-        String header = requestSplit[0];
+        String[] headerBody = request.split("\n\n");
+        String header = headerBody[0];
 
         List<String> headerLines = header.lines().collect(Collectors.toList());
 
         String requestLine = headerLines.get(0);
         parseRequestLine(requestLine);
         parseHeaders(headerLines);
-        parseBody(requestSplit);
+        parseBody(headerBody);
     }
 
     private void parseRequestLine(String requestLine) {
@@ -52,9 +52,9 @@ public class HttpRequest {
                 headerLines.subList(1, headerLines.size() - 1));
     }
 
-    private void parseBody(String[] requestSplit) {
-        if (requestSplit.length > 1) {
-            this.body = requestSplit[1];
+    private void parseBody(String[] headerBody) {
+        if (headerBody.length > 1) {
+            this.body = headerBody[1];
         }
     }
 

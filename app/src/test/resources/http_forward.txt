@@ -1,6 +1,5 @@
 HTTP/1.1 200 OK 
 Content-Type: text/html;charset=utf-8 
-Content-Length: 5670 
 
 <!DOCTYPE html>
 <html lang="en">

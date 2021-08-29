@@ -1,6 +1,5 @@
 package nextstep.jwp.model.httpMessage.request;
 
-import nextstep.jwp.model.httpMessage.HttpHeaders;
 import nextstep.jwp.model.httpMessage.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,7 @@ public class HttpRequest {
     private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
     private final RequestLine requestLine;
-    private final HttpHeaders headers;
+    private final RequestHeader headers;
     private RequestBody requestBody;
 
     public HttpRequest(InputStream inputStream) throws IOException {
@@ -30,7 +29,7 @@ public class HttpRequest {
         String line = br.readLine();
         requestLine = new RequestLine(line);
 
-        headers = new HttpHeaders();
+        headers = new RequestHeader();
         while (!StringUtils.isEmpty(line)) {
             line = br.readLine();
             if (!StringUtils.isEmptyOrWhitespace(line)) {

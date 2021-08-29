@@ -2,7 +2,7 @@ package nextstep.jwp.model;
 
 import nextstep.jwp.MockSocket;
 import nextstep.jwp.RequestHandler;
-import nextstep.jwp.model.httpMessage.HttpProtocol;
+import nextstep.jwp.model.httpMessage.HttpStatus;
 import nextstep.jwp.model.httpMessage.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,7 @@ class HttpRequestTest {
     @Test
     void request_GET_INDEXT() throws IOException {
         String value = String.join("\r\n",
-                GET + " / " + HttpProtocol.NAME + " ",
+                GET + " / HTTP/1.1 ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
@@ -41,7 +41,7 @@ class HttpRequestTest {
     @Test
     void request_GET_INDEXT_HTML() throws IOException {
         String value = String.join("\r\n",
-                GET + " /index.html " + HttpProtocol.NAME + " ",
+                GET + " /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -62,7 +62,7 @@ class HttpRequestTest {
     @Test
     void request_GET_LOGIN() throws IOException {
         String value = String.join("\r\n",
-                GET + " /login " + HttpProtocol.NAME + " ",
+                GET + " /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "");
@@ -81,7 +81,7 @@ class HttpRequestTest {
     @Test
     void request_GET_LOGIN_with_params() throws IOException {
         String value = String.join("\r\n",
-                POST + " /login " + HttpProtocol.NAME + " ",
+                POST + " /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: 30",
@@ -105,7 +105,7 @@ class HttpRequestTest {
     @Test
     void request_GET_LOGIN_with_query_params() throws IOException {
         String value = String.join("\r\n",
-                GET + " /login?account=gugu&password=password " + HttpProtocol.NAME + " ",
+                GET + " /login?account=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "");
@@ -126,7 +126,7 @@ class HttpRequestTest {
     @Test
     void request_CSS() throws IOException {
         String value = String.join("\r\n",
-                GET + " /css/styles.css " + HttpProtocol.NAME + " ",
+                GET + " /css/styles.css HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/css ",
                 "");
@@ -146,7 +146,7 @@ class HttpRequestTest {
     @Test
     void request_JS() throws IOException {
         String value = String.join("\r\n",
-                GET + " /js/scripts.js " + HttpProtocol.NAME + " ",
+                GET + " /js/scripts.js HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: application/javascript ",
                 "");

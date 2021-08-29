@@ -1,4 +1,8 @@
-package nextstep.jwp.model.httpMessage;
+package nextstep.jwp.model.httpMessage.request;
+
+import nextstep.jwp.model.httpMessage.ContentType;
+import nextstep.jwp.model.httpMessage.HttpHeaderType;
+import nextstep.jwp.model.httpMessage.HttpStatus;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -7,9 +11,9 @@ import java.util.StringJoiner;
 import static nextstep.jwp.model.httpMessage.HttpHeaderType.CONTENT_LENGTH;
 import static nextstep.jwp.model.httpMessage.HttpHeaderType.CONTENT_TYPE;
 
-public class HttpHeaders {
+public class RequestHeader {
     private final Map<String, String> headers = new LinkedHashMap<>();
-    private HttpProtocol protocol;
+    private HttpStatus protocol;
 
     public void add(String name, String value) {
         headers.put(name, value);
@@ -19,7 +23,7 @@ public class HttpHeaders {
         headers.put(name.value(), value);
     }
 
-    public void addProtocol(HttpProtocol protocol) {
+    public void addProtocol(HttpStatus protocol) {
         this.protocol = protocol;
     }
 
@@ -29,7 +33,7 @@ public class HttpHeaders {
 
     public String getAllHeaders() {
         StringJoiner stringJoiner = new StringJoiner("\r\n");
-        stringJoiner.add(protocol.getProtocol() + " ");
+        stringJoiner.add(protocol.toString() + " ");
         addAllHeaders(stringJoiner);
         return stringJoiner.toString();
     }
@@ -42,8 +46,8 @@ public class HttpHeaders {
         }
     }
 
-    public String getProtocol(HttpProtocol protocol) {
-        return protocol.getProtocol();
+    public String getProtocol(HttpStatus protocol) {
+        return protocol.toString();
     }
 
     public void setContentLength(int length) {

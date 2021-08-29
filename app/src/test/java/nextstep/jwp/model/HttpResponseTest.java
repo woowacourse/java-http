@@ -1,6 +1,6 @@
 package nextstep.jwp.model;
 
-import nextstep.jwp.model.httpMessage.HttpResponse;
+import nextstep.jwp.model.httpMessage.response.HttpResponse;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

@@ -1,5 +1,8 @@
-package nextstep.jwp.model.httpMessage;
+package nextstep.jwp.model.httpMessage.response;
 
+import nextstep.jwp.model.httpMessage.ContentType;
+import nextstep.jwp.model.httpMessage.HttpHeaderType;
+import nextstep.jwp.model.httpMessage.HttpStatus;
 import nextstep.jwp.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,31 +12,30 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
 
+import static nextstep.jwp.model.httpMessage.AbstractHttpHeader.DELIMITER;
 import static nextstep.jwp.model.httpMessage.HttpHeaderType.CONTENT_TYPE;
 import static nextstep.jwp.model.httpMessage.HttpHeaderType.LOCATION;
-import static nextstep.jwp.model.httpMessage.HttpProtocol.OK;
-import static nextstep.jwp.model.httpMessage.HttpProtocol.REDIRECT;
+import static nextstep.jwp.model.httpMessage.HttpStatus.OK;
+import static nextstep.jwp.model.httpMessage.HttpStatus.REDIRECT;
 import static nextstep.jwp.model.httpMessage.ContentType.HTML;
 
 public class HttpResponse {
 
     private static final Logger LOG = LoggerFactory.getLogger(HttpResponse.class);
-    private static final String DELIMITER = "\r\n";
 
     private final OutputStream outputStream;
-    private final HttpHeaders headers;
+    private final ResponseHeader headers = new ResponseHeader();
+    private ResponseLine responseLine;
 
     public HttpResponse(OutputStream outputStream) {
         this.outputStream = outputStream;
-        this.headers = new HttpHeaders();
     }
 
     public void forward(String url) throws IOException {
         String body = FileUtils.readFileOfUrl(url);
-        LOG.debug("Response header : url : {}", url);
 
-        headers.addProtocol(OK);
-        LOG.debug("Response header : protocol : {}", headers.getProtocol(OK));
+//        headers.addProtocol(OK);
+        responseLine = new ResponseLine(OK);
 
         ContentType.of(url).ifPresent(type -> headers.add(CONTENT_TYPE, type.value()));
 
@@ -44,7 +46,9 @@ public class HttpResponse {
     }
 
     public void forwardBody(String body) throws IOException {
-        headers.addProtocol(OK);
+//        headers.addProtocol(OK);
+        responseLine = new ResponseLine(OK);
+
         headers.add(CONTENT_TYPE, HTML.value());
 
         String response = processAllHeaders(body);
@@ -52,7 +56,9 @@ public class HttpResponse {
     }
 
     public void redirect(String path) throws IOException {
-        headers.addProtocol(REDIRECT);
+//        headers.addProtocol(REDIRECT);
+        responseLine = new ResponseLine(REDIRECT);
+
         headers.add(LOCATION, path);
 
         String response = processAllHeaders();
@@ -61,7 +67,8 @@ public class HttpResponse {
 
     private String processAllHeaders(String... body) {
         StringJoiner stringJoiner = new StringJoiner(DELIMITER);
-        stringJoiner.add(headers.getAllHeaders());
+        stringJoiner.add(responseLine.toString());
+        stringJoiner.add(headers.toString());
         stringJoiner.add("");
         if (body.length > 0) {
             stringJoiner.add(body[0]);
@@ -74,11 +81,11 @@ public class HttpResponse {
         outputStream.flush();
     }
 
-    public void addProtocol(HttpProtocol httpProtocol) {
-        headers.addProtocol(httpProtocol);
+    public void setStatus(HttpStatus httpStatus) {
+        responseLine = new ResponseLine(httpStatus);
     }
 
-    public void addHeader(HttpHeaderType header, String value) {
-        headers.add(header, value);
+    public void addHeader(HttpHeaderType type, String value) {
+        headers.add(type, value);
     }
 }

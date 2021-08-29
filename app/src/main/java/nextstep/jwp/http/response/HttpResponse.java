@@ -38,6 +38,24 @@ public class HttpResponse {
         }
     }
 
+    public void exception(String uri) {
+        try {
+            URL resource = getClass().getClassLoader().getResource("static" + uri);
+            String content = getContent(resource);
+            if (content == null) {
+                notFound();
+                return;
+            }
+
+            setStatusLine(StatusCode.UNAUTHORIZED);
+            this.responseHeader.setContentType(ContentType.findByUri(uri));
+            this.responseHeader.setContentLength(content.getBytes(StandardCharsets.UTF_8).length);
+            this.responseBody = new ResponseBody(content);
+        } catch (IOException e) {
+            log.error("stream exception");
+        }
+    }
+
     public void redirect(String redirectUrl) {
         setStatusLine(StatusCode.FOUND);
         this.responseHeader.setLocation(redirectUrl);

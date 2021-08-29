@@ -16,7 +16,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) {
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
         RequestBody body = request.getRequestBody();
 
         String account = body.getParam("account");
@@ -26,6 +26,10 @@ public class LoginController extends AbstractController {
         if (user.checkPassword(body.getParam("password"))) {
             log.debug("{} 님이 로그인 하였습니다.", user.getAccount());
             response.redirect("/index.html");
+            return;
         }
+        log.debug("아이디나 비밀번호가 틀립니다.");
+        response.exception("/401.html");
+
     }
 }

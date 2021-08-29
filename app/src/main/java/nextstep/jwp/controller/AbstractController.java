@@ -20,7 +20,7 @@ public class AbstractController implements Controller {
         }
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) {
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {

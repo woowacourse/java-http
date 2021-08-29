@@ -7,8 +7,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +47,25 @@ public class RequestHandler implements Runnable {
 
             if ("/login".equals(requestUri)) {
                 requestUri += ".html";
+            }
+
+            if (requestUri.contains("/login?")) {
+                int index = requestUri.indexOf("?");
+                String path = requestUri.substring(0, index);
+                String queryString = requestUri.substring(index + 1);
+
+                int index2 = queryString.indexOf("&");
+                String account = queryString.substring(0, index2).split("=")[1];
+                String password = queryString.substring(index2 + 1).split("=")[1];
+
+                User user = InMemoryUserRepository.findByAccount(account).orElseThrow(IllegalArgumentException::new);
+
+                if (!user.checkPassword(password)) {
+                    throw new IllegalArgumentException("올바르지 않은 비밀번호입니다.");
+                }
+
+                log.debug(user.toString());
+                return;
             }
 
             final URL resource = getClass().getClassLoader().getResource("static" + requestUri);

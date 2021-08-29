@@ -1,11 +1,12 @@
-package nextstep.jwp;
+package nextstep.jwp.ui.common;
 
 import java.util.Arrays;
 
 public enum ContentType {
     HTML(".html", "text/html;charset=utf-8"),
     CSS(".css", "text/css"),
-    JS(".js", "application/javascript");
+    JS(".js", "application/javascript"),
+    IMAGE(".svg", "image/svg+xml");
 
     private String suffix;
     private String contentType;

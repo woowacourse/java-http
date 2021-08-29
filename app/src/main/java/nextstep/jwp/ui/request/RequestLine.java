@@ -1,11 +1,9 @@
-package nextstep.jwp;
+package nextstep.jwp.ui.request;
 
 public class RequestLine {
-    private final String requestLine;
     private final String[] splitRequestLine;
 
     public RequestLine(String requestLine) {
-        this.requestLine = requestLine;
         this.splitRequestLine = requestLine.split(" ");
     }
 

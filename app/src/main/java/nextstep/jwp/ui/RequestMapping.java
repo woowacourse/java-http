@@ -1,4 +1,6 @@
-package nextstep.jwp;
+package nextstep.jwp.ui;
+
+import nextstep.jwp.ui.request.HttpRequest;
 
 public class RequestMapping {
 
@@ -13,7 +15,7 @@ public class RequestMapping {
         if ("/register".equals(path)) {
             return new RegisterController();
         }
-        return new ViewController();
+        return new ResourceController();
     }
 
 }

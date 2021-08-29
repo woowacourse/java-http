@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.ui.common;
 
 import java.io.IOException;
 

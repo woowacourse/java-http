@@ -1,19 +1,19 @@
-package nextstep.jwp;
+package nextstep.jwp.ui.response;
+
+import nextstep.jwp.ui.common.HttpHeaders;
+import nextstep.jwp.ui.common.ResourceFile;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class HttpResponse {
 
-    private final OutputStream outputStream;
     private String responseLine;
     private String response;
     private HttpHeaders headers;
 
-    public HttpResponse(OutputStream outputStream) {
-        this.outputStream = outputStream;
+    public HttpResponse() {
         this.headers = new HttpHeaders(new LinkedHashMap<>());
     }
 
@@ -25,7 +25,7 @@ public class HttpResponse {
         headers.put(name, value);
     }
 
-    public void write(String message) throws IOException {
+    public void write(String message) {
         if (response != null) {
             response += message;
             return;
@@ -35,11 +35,6 @@ public class HttpResponse {
                 headers.convertToLines(),
                 "",
                 message);
-        outputStream.write(response.getBytes());
-    }
-
-    public void flush() throws IOException {
-        outputStream.flush();
     }
 
     public String getResponseLine() {
@@ -54,26 +49,29 @@ public class HttpResponse {
         return headers.getHeaders();
     }
 
-    public void sendRedirect(String url) throws IOException {
-        sendRedirect(url, 302);
+    public HttpResponse sendRedirect(String url) throws IOException {
+        return sendRedirect(url, 302);
     }
 
-    public void sendRedirect(String url, int code) throws IOException {
+    public HttpResponse sendRedirect(String url, int code) {
         setStatus(code);
         response = String.join("\r\n",
                 responseLine,
                 "Location: " + url);
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+        return this;
     }
 
-    public void forward(String url) throws IOException {
+    public HttpResponse forward(String url, int code) throws IOException {
         ResourceFile resourceFile = new ResourceFile(url);
         String content = resourceFile.getContent();
-        setStatus(200);
+        setStatus(code);
         addHeader("Content-Type", resourceFile.getContentType());
         addHeader("Content-Length", String.valueOf(content.getBytes().length));
         write(content);
-        flush();
+        return this;
+    }
+
+    public HttpResponse forward(String url) throws IOException {
+        return forward(url, 200);
     }
 }

@@ -1,10 +1,13 @@
-package nextstep.jwp;
+package nextstep.jwp.ui.response;
 
 import java.util.Arrays;
 
 public enum HttpStatus {
     OK(200),
-    FOUND(302);
+    FOUND(302),
+    NOT_FOUND(404),
+    INTERNAL_SERVER_ERROR(500),
+    UNAUTHORIZED(401);
 
     private int code;
 

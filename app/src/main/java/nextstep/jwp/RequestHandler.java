@@ -31,14 +31,53 @@ public class RequestHandler implements Runnable {
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             final Map<String, String> httpRequestHeaders = new HashMap<>();
-
             String line = bufferedReader.readLine();
-
             if (line == null) {
                 return;
             }
-
             final String[] request = line.split(" ");
+            final String method = request[0];
+            final String uri = request[1];
+            byte[] body = new byte[0];
+            String status = "200 OK";
+            String location = null;
+
+            if ("/".equals(uri)) {
+                body =Files.readAllBytes(getResources("/index.html").toPath());
+                String response = makeResponse(ContentType.HTML.getType(), "200 OK", location, body);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+            if (uri.endsWith(".html")) {
+                body =Files.readAllBytes(getResources(uri).toPath());
+                String response = makeResponse(ContentType.HTML.getType(), "200 OK", location, body);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+            if (uri.endsWith(".css")) {
+                body =Files.readAllBytes(getResources(uri).toPath());
+                String response = makeResponse(ContentType.CSS.getType(), "200 OK", location, body);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+            if (uri.endsWith(".js")) {
+                body =Files.readAllBytes(getResources(uri).toPath());
+                String response = makeResponse(ContentType.JS.getType(), "200 OK", location, body);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+            if (uri.startsWith("/assets/img")) {
+                body =Files.readAllBytes(getResources(uri).toPath());
+                String response = makeResponse(ContentType.IMAGE.getType(), "200 OK", location, body);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+
             while (bufferedReader.ready()) {
                 line = bufferedReader.readLine();
                 if ("".equals(line)) {
@@ -48,12 +87,8 @@ public class RequestHandler implements Runnable {
                 httpRequestHeaders.put(headers[0], headers[1]);
             }
 
-            final String method = request[0];
-            final String uri = request[1];
             String fileName = uri;
             String requestBody = null;
-            String status = "200 OK";
-            String location = null;
 
             if ("POST".equals(method)) {
                 String rawLength = httpRequestHeaders.get("Content-Length");
@@ -76,11 +111,11 @@ public class RequestHandler implements Runnable {
                     User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
                     if (user.checkPassword(password)) {
                         fileName = "/index.html";
-                        status = "302";
+                        status = "302 FOUND";
                         location = "/index.html";
                     } else {
                         fileName = "/401.html";
-                        status = "302";
+                        status = "302 FOUND";
                         location = "/401.html";
                     }
                 }
@@ -96,14 +131,13 @@ public class RequestHandler implements Runnable {
                     String password = getDataFromQueryString(rawData[2]);
                     InMemoryUserRepository.save(new User(2L, account, password, email));
                     fileName = "/login.html";
-                    status = "302";
+                    status = "302 FOUND";
                     location = "/login.html";
                 }
             }
 
-            byte[] body = new byte[0];
             body = Files.readAllBytes(getResources(fileName).toPath());
-            final String response = makeResponse(status, location, body);
+            final String response = makeResponse(ContentType.HTML.getType(), status, location, body);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -114,10 +148,10 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private String makeResponse(String status, String location, byte[] body) {
+    private String makeResponse(String contentType, String status, String location, byte[] body) {
         return String.join("\r\n",
                 "HTTP/1.1 " + status,
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType,
                 "Content-Length: " + body.length + " ",
                 "Location: " + location,
                 "",

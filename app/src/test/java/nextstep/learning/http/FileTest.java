@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Objects;
@@ -75,14 +76,12 @@ class FileTest {
                 .map(filePath -> filePath.toFile())
                 .collect(Collectors.toList());
 
+        List<String> staticFiles = new ArrayList<>();
         for (File file : collect) {
             final String absolutePath = file.getAbsolutePath();
-            final int aStatic = absolutePath.lastIndexOf("static");
-            System.out.println(absolutePath.substring(aStatic + "static".length()).replaceAll("\\\\", "/"));
-
-            System.out.println("file.getCanonicalPath() = " + file.getCanonicalPath());
-            System.out.println("file.getPath() = " + file.getPath());
-            System.out.println("file.getName() = " + file.getName());
+            staticFiles.add(file.getName());
         }
+
+        assertThat(staticFiles).contains("test.css", "test.html");
     }
 }

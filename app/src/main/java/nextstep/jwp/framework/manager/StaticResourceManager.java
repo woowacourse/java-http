@@ -45,7 +45,7 @@ public class StaticResourceManager {
         try {
             loadStaticResources(classLoader);
         } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("StaticResourceManager 생성 실패!");
         }
         log.info("-------all static resources loaded-------");
     }

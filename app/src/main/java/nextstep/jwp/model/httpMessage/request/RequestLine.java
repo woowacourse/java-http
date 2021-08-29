@@ -35,7 +35,7 @@ public class RequestLine {
         }
 
         path = tokens[1].substring(0, index);
-        params = HttpRequestUtils.parseQueryString(tokens[1].substring(index));
+        params = HttpRequestUtils.parseQueryString(tokens[1].substring(index + 1));
     }
 
     public HttpMethod getMethod() {
@@ -48,5 +48,12 @@ public class RequestLine {
 
     public Map<String, String> getParams() {
         return params;
+    }
+
+    public String getParameter(String param) {
+        if (!params.containsKey(param)) {
+            throw new IllegalArgumentException("해당 쿼리 파라미터가 존재하지 않습니다. (입력 : " + param + ")");
+        }
+        return params.get(param);
     }
 }

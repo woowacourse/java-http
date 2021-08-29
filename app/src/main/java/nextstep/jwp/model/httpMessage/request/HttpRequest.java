@@ -2,7 +2,6 @@ package nextstep.jwp.model.httpMessage.request;
 
 import nextstep.jwp.model.httpMessage.HttpHeaders;
 import nextstep.jwp.model.httpMessage.HttpMethod;
-import nextstep.jwp.util.HttpRequestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.util.StringUtils;
@@ -60,6 +59,10 @@ public class HttpRequest {
         return requestLine.getParams();
     }
 
+    public String getQueryParam(String param) {
+        return requestLine.getParameter(param);
+    }
+
     public String getPath() {
         return requestLine.getPath();
     }
@@ -75,6 +78,11 @@ public class HttpRequest {
         throw new IllegalStateException("form 형식이 아닙니다.");
     }
 
+    private boolean isFormPost() {
+        String contentType = headers.getContentType();
+        return !Objects.isNull(contentType) && contentType.contains(FORM.value());
+    }
+
     public String getHeader(String header) {
         return headers.getHeader(header);
     }
@@ -83,8 +91,7 @@ public class HttpRequest {
         return Objects.requireNonNull(requestBody.getMessage());
     }
 
-    private boolean isFormPost() {
-        String contentType = headers.getContentType();
-        return !Objects.isNull(contentType) && contentType.contains(FORM.value());
+    public int getContentLength() {
+        return headers.getContentLength();
     }
 }

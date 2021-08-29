@@ -3,7 +3,7 @@ package nextstep.jwp.model;
 import nextstep.jwp.db.InMemoryUserRepository;
 
 public class User {
-    private static long CURRENT_ID = InMemoryUserRepository.savedSize();
+    private static long CURRENT_ID = 0;
 
     private final long id;
     private final String account;
@@ -11,6 +11,7 @@ public class User {
     private final String email;
 
     public User(long id, String account, String password, String email) {
+        validateInputs(id, account, password, email);
         this.id = id;
         this.account = account;
         this.password = password;
@@ -21,12 +22,27 @@ public class User {
         this(++CURRENT_ID, account, password, email);
     }
 
+    private void validateInputs(long id, String account, String password, String email) {
+        if (id < CURRENT_ID || account == null || password == null || email == null ||
+            account.isBlank() || password.isBlank() || email.isBlank()) {
+            throw new IllegalArgumentException();
+        }
+    }
+
     public boolean checkPassword(String password) {
         return this.password.equals(password);
     }
 
+    public long getId() {
+        return id;
+    }
+
     public String getAccount() {
         return account;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     @Override

@@ -46,7 +46,7 @@ public class RequestBinder {
             bufferedReader.read(buffer, 0, contentLength);
             return new QueryStringTypeRequestBody(mapQueryString(new String(buffer)));
         }
-        return null;
+        return new QueryStringTypeRequestBody();
     }
 
     private static HttpHeader initializeHeaders(BufferedReader bufferedReader) throws IOException {

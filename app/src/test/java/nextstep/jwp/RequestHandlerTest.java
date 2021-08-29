@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.jwp.handler.RequestHandler;
+import nextstep.jwp.web.handler.RequestHandler;
 import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {

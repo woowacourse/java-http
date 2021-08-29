@@ -1,15 +1,15 @@
 package nextstep.jwp.resource;
 
 import static java.util.stream.Collectors.toList;
-import static nextstep.jwp.http.MimeType.ALL;
-import static nextstep.jwp.http.MimeType.TEST_HTML;
-import static nextstep.jwp.http.MimeType.TEXT_CSS;
-import static nextstep.jwp.http.MimeType.TEXT_JS;
-import static nextstep.jwp.http.MimeType.TEXT_PLAIN;
+import static nextstep.jwp.web.http.MimeType.ALL;
+import static nextstep.jwp.web.http.MimeType.TEST_HTML;
+import static nextstep.jwp.web.http.MimeType.TEXT_CSS;
+import static nextstep.jwp.web.http.MimeType.TEXT_JS;
+import static nextstep.jwp.web.http.MimeType.TEXT_PLAIN;
 
 import java.util.Arrays;
 import java.util.List;
-import nextstep.jwp.http.MimeType;
+import nextstep.jwp.web.http.MimeType;
 
 public enum FileType {
     PLAIN_TEXT("txt", List.of(TEXT_PLAIN, ALL)),

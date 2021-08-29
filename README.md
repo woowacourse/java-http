@@ -2,7 +2,7 @@
 
 ## 1단계
 
-- [ ] GET /index.html 응답하기
+- [x] GET /index.html 응답하기
 - [ ] Query String 파싱
 - [ ] HTTP Status Code 302
 - [ ] POST 방식으로 회원가입

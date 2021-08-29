@@ -2,14 +2,14 @@ package nextstep.jwp.controller;
 
 import java.util.Arrays;
 import java.util.List;
-import nextstep.jwp.http.HttpMethod;
-import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.request.HttpMethod;
+import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 
 public class PageRenderController extends AbstractController {
 
     private static final HttpMethod HTTP_METHOD = HttpMethod.GET;
-    private static final List<String> URI_PATHS = Arrays.asList("/index.html",
+    private static final List<String> URI_PATHS = Arrays.asList("/index.html", "/register",
         "/401.html", "/404.html", "/500.html");
 
     @Override

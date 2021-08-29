@@ -1,13 +1,10 @@
 package nextstep.jwp;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.nio.file.Files;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.ControllerContainer;
-import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.util.RequestBinder;
 import org.slf4j.Logger;

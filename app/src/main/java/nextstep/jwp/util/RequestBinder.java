@@ -7,12 +7,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpHeader;
-import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.request.HttpMethod;
+import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.Protocol;
-import nextstep.jwp.http.QueryStrings;
-import nextstep.jwp.http.URI;
+import nextstep.jwp.http.request.QueryStringTypeRequestBody;
+import nextstep.jwp.http.request.QueryStrings;
+import nextstep.jwp.http.request.RequestBody;
+import nextstep.jwp.http.request.URI;
 
 public class RequestBinder {
 
@@ -31,8 +33,20 @@ public class RequestBinder {
         URI uri = initializeUri(startLine.get(URI_INDEX));
         Protocol protocol = new Protocol(startLine.get(PROTOCOL_INDEX));
         HttpHeader httpHeader = initializeHeaders(bufferedReader);
+        RequestBody requestBody = initializeQueryStringTypeBody(bufferedReader, httpHeader);
 
-        return new HttpRequest(httpMethod, uri, protocol, httpHeader);
+        return new HttpRequest(httpMethod, uri, protocol, httpHeader, requestBody);
+    }
+
+    private static RequestBody initializeQueryStringTypeBody(BufferedReader bufferedReader, HttpHeader httpHeader) throws IOException {
+        String contentLengthValue = httpHeader.getValueByKey("Content-Length");
+        if (null != contentLengthValue) {
+            int contentLength = Integer.parseInt(contentLengthValue);
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            return new QueryStringTypeRequestBody(mapQueryString(new String(buffer)));
+        }
+        return null;
     }
 
     private static HttpHeader initializeHeaders(BufferedReader bufferedReader) throws IOException {
@@ -53,12 +67,15 @@ public class RequestBinder {
 
         QueryStrings queryStrings = new QueryStrings();
         if (elements.length == 2) {
-            queryStrings = new QueryStrings(Splitter.on(QUERY_STRING_DELIMITER)
-                .withKeyValueSeparator(KEY_VALUE_DELIMITER)
-                .split(elements[1]));
+            queryStrings = new QueryStrings(mapQueryString(elements[1]));
         }
 
         return new URI(elements[0], queryStrings);
     }
 
+    private static Map<String, String> mapQueryString(String element) {
+        return Splitter.on(QUERY_STRING_DELIMITER)
+            .withKeyValueSeparator(KEY_VALUE_DELIMITER)
+            .split(element);
+    }
 }

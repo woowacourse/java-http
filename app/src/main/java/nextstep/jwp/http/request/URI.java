@@ -1,6 +1,5 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.request;
 
-import java.util.Map;
 import java.util.Objects;
 
 public class URI {

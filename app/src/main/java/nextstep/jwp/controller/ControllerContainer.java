@@ -2,13 +2,14 @@ package nextstep.jwp.controller;
 
 import java.util.Arrays;
 import java.util.List;
-import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.request.HttpRequest;
 
 public class ControllerContainer {
 
     private static final List<Controller> controllers = Arrays.asList(
         new LoginController(),
-        new PageRenderController()
+        new PageRenderController(),
+        new RegisterController()
     );
 
     public static Controller findController(HttpRequest httpRequest) {

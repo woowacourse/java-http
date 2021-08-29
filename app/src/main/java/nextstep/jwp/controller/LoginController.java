@@ -1,14 +1,10 @@
 package nextstep.jwp.controller;
 
-import java.util.HashMap;
-import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.http.HttpHeader;
-import nextstep.jwp.http.HttpMethod;
-import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
-import nextstep.jwp.http.QueryStrings;
-import nextstep.jwp.http.ResponseStatus;
+import nextstep.jwp.http.request.HttpMethod;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.request.QueryStrings;
 import nextstep.jwp.model.User;
 
 public class LoginController extends AbstractController{
@@ -41,9 +37,9 @@ public class LoginController extends AbstractController{
     private HttpResponse findUserAndRedirect(HttpRequest httpRequest) {
         try {
             validateUserInput(httpRequest.getQueryStrings());
-            return redirect(SUCCESS_REDIRECT_URL);
+            return super.redirect(SUCCESS_REDIRECT_URL);
         } catch (IllegalArgumentException e) {
-            return redirect(FAIL_REDIRECT_URL);
+            return super.redirect(FAIL_REDIRECT_URL);
         }
     }
 
@@ -56,18 +52,6 @@ public class LoginController extends AbstractController{
 
         if (!user.checkPassword(password)) {
             throw new IllegalArgumentException();
-        }
-    }
-
-    private HttpResponse redirect(String redirectUrl) {
-        try {
-            Map<String, String> headers = new HashMap<>();
-            headers.put("Location", redirectUrl);
-
-            return HttpResponse.status(ResponseStatus.FOUND, new HttpHeader(headers));
-        } catch (IllegalArgumentException e) {
-            // TODO: 에러 파일 출력
-            return null;
         }
     }
 }

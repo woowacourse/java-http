@@ -4,16 +4,17 @@ import com.google.common.base.Splitter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.http.HttpMethod;
+import nextstep.jwp.http.request.HttpMethod;
 import nextstep.jwp.http.HttpHeader;
-import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.Protocol;
-import nextstep.jwp.http.QueryStrings;
-import nextstep.jwp.http.URI;
+import nextstep.jwp.http.request.QueryStringTypeRequestBody;
+import nextstep.jwp.http.request.QueryStrings;
+import nextstep.jwp.http.request.URI;
 
 public class TestUtil {
 
-    public static HttpRequest createRequest(String startLine) throws IOException {
+    public static HttpRequest createRequest(String startLine, Map<String, String> requestBody) {
         String requestMessage = startLine + System.lineSeparator() +
             "Host: localhost:8080" + System.lineSeparator() +
             "Connection: keep-alive" + System.lineSeparator() +
@@ -43,7 +44,11 @@ public class TestUtil {
 
         HttpHeader headers = new HttpHeader(headerMap);
 
-        return new HttpRequest(httpMethod, uri, protocol, headers);
+        return new HttpRequest(httpMethod, uri, protocol, headers, new QueryStringTypeRequestBody(requestBody));
+    }
+
+    public static HttpRequest createRequest(String startLine) {
+        return createRequest(startLine, new HashMap<>());
     }
 
 }

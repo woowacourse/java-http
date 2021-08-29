@@ -23,4 +23,8 @@ public class InMemoryUserRepository {
     public static Optional<User> findByAccount(String account) {
         return Optional.ofNullable(database.get(account));
     }
+
+    public static long savedSize() {
+        return database.size();
+    }
 }

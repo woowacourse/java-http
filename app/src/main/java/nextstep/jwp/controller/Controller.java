@@ -1,6 +1,6 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 
 public interface Controller {

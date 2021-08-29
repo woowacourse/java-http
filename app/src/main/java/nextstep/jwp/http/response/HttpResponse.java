@@ -43,7 +43,7 @@ public class HttpResponse {
         }
 
         if (model.contains("Location")) {
-            headers.addAttribute("Location", (String) model.get("Location"));
+            headers.addAttribute("Location", (String) model.getAttribute("Location"));
         }
 
         return new HttpResponse(statusLine, headers, view.content());

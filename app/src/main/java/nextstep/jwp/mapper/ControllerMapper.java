@@ -6,6 +6,7 @@ import nextstep.jwp.handler.LoginController;
 import nextstep.jwp.handler.ModelAndView;
 import nextstep.jwp.handler.RegisterController;
 import nextstep.jwp.handler.service.LoginService;
+import nextstep.jwp.handler.service.RegisterService;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestLine;
 
@@ -19,7 +20,7 @@ public class ControllerMapper implements HandlerMapper {
     public ControllerMapper() {
         controllers = Arrays.asList(
                 new LoginController(new LoginService()),
-                new RegisterController()
+                new RegisterController(new RegisterService())
         );
     }
 
@@ -33,7 +34,7 @@ public class ControllerMapper implements HandlerMapper {
 
     @Override
     public ModelAndView service(HttpRequest request) {
-        Controller controller = search(request.getRequestLine());
+        Controller controller = search(request.requestLine());
         return controller.service(request);
     }
 

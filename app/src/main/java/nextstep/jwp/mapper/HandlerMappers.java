@@ -19,7 +19,7 @@ public class HandlerMappers {
     }
 
     public ModelAndView handle(HttpRequest httpRequest) {
-        HandlerMapper handlerMapper = searchHandlerMapper(httpRequest.getRequestLine());
+        HandlerMapper handlerMapper = searchHandlerMapper(httpRequest.requestLine());
         return handlerMapper.service(httpRequest);
     }
 

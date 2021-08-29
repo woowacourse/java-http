@@ -17,13 +17,13 @@ class HttpRequestTest {
         try (final InputStream inputStream = new ByteArrayInputStream(inputRequest.getBytes())) {
             HttpRequest parsedRequest = HttpRequest.of(inputStream);
 
-            RequestLine requestLine = parsedRequest.getRequestLine();
+            RequestLine requestLine = parsedRequest.requestLine();
             assertThat(requestLine).isEqualTo(RequestLine.of(expectedRequestLine));
 
-            RequestHeaders requestHeaders = parsedRequest.getRequestHeaders();
+            RequestHeaders requestHeaders = parsedRequest.requestHeaders();
             assertThat(requestHeaders.contentLength()).isEqualTo(expectedRequestBody.length());
 
-            String body = parsedRequest.getRequestBody();
+            String body = parsedRequest.requestBody();
             assertThat(body).isEqualTo(expectedRequestBody);
         } catch (IOException e) {
             e.printStackTrace();

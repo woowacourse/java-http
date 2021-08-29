@@ -73,15 +73,15 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    public RequestLine getRequestLine() {
+    public RequestLine requestLine() {
         return requestLine;
     }
 
-    public RequestHeaders getRequestHeaders() {
+    public RequestHeaders requestHeaders() {
         return requestHeaders;
     }
 
-    public String getRequestBody() {
+    public String requestBody() {
         return requestBody;
     }
 }

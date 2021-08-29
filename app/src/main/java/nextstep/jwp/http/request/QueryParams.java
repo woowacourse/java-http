@@ -34,10 +34,6 @@ public class QueryParams {
         return params;
     }
 
-    public boolean isEmpty() {
-        return params.isEmpty();
-    }
-
     public String get(String key) {
         return params.get(key);
     }

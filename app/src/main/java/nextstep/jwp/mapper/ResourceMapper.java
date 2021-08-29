@@ -23,7 +23,7 @@ public class ResourceMapper implements HandlerMapper {
 
     @Override
     public ModelAndView service(HttpRequest httpRequest) {
-        RequestLine requestLine = httpRequest.getRequestLine();
+        RequestLine requestLine = httpRequest.requestLine();
         String method = requestLine.method();
         SourcePath sourcePath = requestLine.sourcePath();
 

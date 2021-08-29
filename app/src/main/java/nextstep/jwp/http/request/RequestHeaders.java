@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class RequestHeaders {
 
-    private Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> headers = new HashMap<>();
 
     public void put(String line) {
         String[] tokens = line.split(": ");

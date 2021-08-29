@@ -1,6 +1,5 @@
 package nextstep.jwp.http.response;
 
-import com.google.common.base.Strings;
 import nextstep.jwp.http.response.type.ContentType;
 import nextstep.jwp.http.response.type.StatusCode;
 import org.slf4j.Logger;
@@ -18,9 +17,13 @@ public class HttpResponse {
     private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
     private static final String NOT_FOUND_URI = "/404.html";
 
-    private StatusLine statusLine = new StatusLine();
-    private ResponseHeaders headers = new ResponseHeaders();
-    private ResponseBody body = new ResponseBody();
+    private final ResponseHeaders headers;
+    private StatusLine statusLine;
+    private ResponseBody body;
+
+    public HttpResponse() {
+        this.headers = new ResponseHeaders();
+    }
 
     public void setStatusLine(StatusCode statusCode) {
         this.statusLine = new StatusLine(statusCode);
@@ -98,7 +101,7 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-        if (Strings.isNullOrEmpty(body.toString())) {
+        if (body == null) {
             return String.join("\r\n", statusLine.toString(), headers.toString());
         }
         return String.join("\r\n", statusLine.toString(), headers.toString(), body.toString());

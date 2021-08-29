@@ -7,7 +7,8 @@ import java.util.Map;
 import java.util.StringJoiner;
 
 public class ResponseHeaders {
-    private Map<String, String> headers = new LinkedHashMap<>();
+
+    private final Map<String, String> headers = new LinkedHashMap<>();
 
     public void setContentType(ContentType contentType) {
         headers.put("Content-Type", contentType.getValue());

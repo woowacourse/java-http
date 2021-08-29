@@ -3,7 +3,6 @@ package nextstep.jwp.handler;
 import java.io.File;
 import java.net.URL;
 import java.util.Objects;
-import nextstep.jwp.exception.IncorrectHandlerException;
 import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestLine;
@@ -23,19 +22,15 @@ public class ResourceHandler implements Handler {
 
     @Override
     public ModelAndView service(HttpRequest httpRequest) {
-        try{
-            RequestLine requestLine = httpRequest.requestLine();
-            SourcePath sourcePath = requestLine.sourcePath();
-            return ModelAndView.ok(sourcePath.getValue());
-        } catch (Exception e){
-            throw new IncorrectHandlerException();
-        }
+        RequestLine requestLine = httpRequest.requestLine();
+        SourcePath sourcePath = requestLine.sourcePath();
+        return ModelAndView.ok(sourcePath.getValue());
     }
 
     private boolean isExistResource(SourcePath sourcePath) {
         final URL resourceUrl = getClass().getResource(RESOURCE_BASE_PATH + sourcePath.getValue());
-        if(Objects.isNull(resourceUrl)){
-          return false;
+        if (Objects.isNull(resourceUrl)) {
+            return false;
         }
         return new File(resourceUrl.getFile()).exists();
     }

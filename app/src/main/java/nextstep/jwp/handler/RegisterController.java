@@ -30,7 +30,7 @@ public class RegisterController implements Handler {
         if (requestLine.isFrom("post", "/register")) {
             return register(httpRequest.requestBody());
         }
-        throw new IncorrectHandlerException();
+        throw new IncorrectHandlerException("핸들러가 처리할 수 있는 요청이 아닙니다.");
     }
 
     private ModelAndView printRegisterPage() {
@@ -38,13 +38,8 @@ public class RegisterController implements Handler {
     }
 
     private ModelAndView register(String requestBody) {
-        try{
-            QueryParams queryParams = QueryParams.of(requestBody);
-            registerService.register(RegisterRequest.fromQueryParams(queryParams));
-            return ModelAndView.redirect("index.html");
-        } catch (Exception e){
-            e.printStackTrace();
-            return ModelAndView.error();
-        }
+        QueryParams queryParams = QueryParams.of(requestBody);
+        registerService.register(RegisterRequest.fromQueryParams(queryParams));
+        return ModelAndView.redirect("index.html");
     }
 }

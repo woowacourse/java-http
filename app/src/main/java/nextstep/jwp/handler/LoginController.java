@@ -1,5 +1,6 @@
 package nextstep.jwp.handler;
 
+import nextstep.jwp.exception.IncorrectHandlerException;
 import nextstep.jwp.handler.dto.LoginRequest;
 import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.handler.service.LoginService;
@@ -29,7 +30,7 @@ public class LoginController implements Handler {
         if (requestLine.isFrom("post", "/login")) {
             return login(httpRequest.requestBody());
         }
-        throw new IllegalArgumentException("핸들러가 처리할 수 있는 요청이 아닙니다.");
+        throw new IncorrectHandlerException("핸들러가 처리할 수 있는 요청이 아닙니다.");
     }
 
     private ModelAndView printLoginPage() {
@@ -37,13 +38,8 @@ public class LoginController implements Handler {
     }
 
     private ModelAndView login(String requestBody) {
-        try {
-            QueryParams params = QueryParams.of(requestBody);
-            loginService.login(LoginRequest.fromQueryParams(params));
-            return ModelAndView.redirect("index.html");
-        } catch (Exception e) {
-            // TODO :: Exception 분리
-            return ModelAndView.unauthorized();
-        }
+        QueryParams params = QueryParams.of(requestBody);
+        loginService.login(LoginRequest.fromQueryParams(params));
+        return ModelAndView.redirect("index.html");
     }
 }

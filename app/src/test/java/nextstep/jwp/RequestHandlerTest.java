@@ -1,13 +1,13 @@
 package nextstep.jwp;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import nextstep.jwp.http.response.HttpStatus;
+import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
 
@@ -33,7 +33,7 @@ class RequestHandlerTest {
     @Test
     void badRequest() throws IOException {
         // given
-        final String httpRequest= request("GET", "/bad/request.html");
+        final String httpRequest = get("/bad/request.html");
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
@@ -43,19 +43,13 @@ class RequestHandlerTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
         final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        final String expected = "HTTP/1.1 404 BAD_REQUEST \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: "+body.getBytes().length+" \r\n" +
-                "\r\n"+
-                body;
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertResponse(socket.output(), HttpStatus.BAD_REQUEST, body);
     }
 
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= request("GET", "/index.html");
+        final String httpRequest = get("/index.html");
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
@@ -64,18 +58,14 @@ class RequestHandlerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertThat(socket.output()).isEqualTo(expected);
+        final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertResponse(socket.output(), HttpStatus.OK, body);
     }
 
     @Test
-    void login() throws IOException {
+    void loginPage() throws IOException {
         // given
-        final String httpRequest= request("GET", "/login");
+        final String httpRequest = get("/login");
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
@@ -85,29 +75,14 @@ class RequestHandlerTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        final String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: "+body.getBytes().length+" \r\n" +
-                "\r\n"+
-                body;
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertResponse(socket.output(), HttpStatus.OK, body);
     }
 
     @Test
-    void loginWithAccountAndPassword() {
+    void login() {
         // given
         final String requestBody = "account=gugu&password=password";
-        final String httpRequest= String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: "+ requestBody.length(),
-                "Content-Type: application/x-www-form-urlencoded",
-                "Accept: */*",
-                "",
-                requestBody,
-                "");
+        final String httpRequest = post("/login", requestBody);
 
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
@@ -124,9 +99,28 @@ class RequestHandlerTest {
     }
 
     @Test
+    void loginWithUnauthorized() throws IOException {
+        // given
+        final String requestBody = "account=invalidAccount&password=password";
+        final String httpRequest = post("/login", requestBody);
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertResponse(socket.output(), HttpStatus.UNAUTHORIZED, body);
+    }
+
+
+    @Test
     void register() throws IOException {
         // given
-        final String httpRequest= request("GET", "/register");
+        final String httpRequest = get("/register");
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
@@ -136,29 +130,14 @@ class RequestHandlerTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        final String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: "+body.getBytes().length+" \r\n" +
-                "\r\n"+
-                body;
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertResponse(socket.output(), HttpStatus.OK, body);
     }
 
     @Test
     void registerPost() {
         // given
         final String requestBody = "account=corgi&password=password&email=hkkang%40woowahan.com";
-        final String httpRequest= String.join("\r\n",
-                "POST /register HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: "+ requestBody.length(),
-                "Content-Type: application/x-www-form-urlencoded",
-                "Accept: */*",
-                "",
-                requestBody,
-                "");
+        final String httpRequest = post("/register", requestBody);
 
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
@@ -174,12 +153,36 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    private static String request(String method, String url){
+    private static void assertResponse(String output, HttpStatus httpStatus, String body) {
+        String expected = "HTTP/1.1 "+ httpStatus.code() + " "+ httpStatus.name()+" \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + body.getBytes().length + " \r\n" +
+                "\r\n" +
+                body;
+
+        assertThat(output).isEqualTo(expected);
+    }
+
+
+    private static String get(String url) {
         return String.join("\r\n",
-                method+" "+url+" HTTP/1.1 ",
+                "GET " + url + " HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
+                "");
+    }
+
+    private static String post(String url, String requestBody) {
+        return String.join("\r\n",
+                "POST "+url+" HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + requestBody.length(),
+                "Content-Type: application/x-www-form-urlencoded",
+                "Accept: */*",
+                "",
+                requestBody,
                 "");
     }
 }

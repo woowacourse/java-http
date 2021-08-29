@@ -7,9 +7,6 @@ public class ViewResolver {
 
     public View resolve(String viewName) {
         try {
-            System.out.println("==== RESOLVE RESOURCE ====");
-            System.out.println(viewName);
-
             if(viewName.isEmpty()){
                 return View.empty();
             }

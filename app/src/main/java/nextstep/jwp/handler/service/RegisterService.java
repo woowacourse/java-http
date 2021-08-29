@@ -2,6 +2,7 @@ package nextstep.jwp.handler.service;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.handler.dto.RegisterRequest;
+import nextstep.jwp.handler.exception.UserException;
 import nextstep.jwp.model.User;
 
 public class RegisterService {
@@ -15,6 +16,6 @@ public class RegisterService {
 
     private void checkIsDuplicatedAccount(String account) {
         InMemoryUserRepository.findByAccount(account)
-                .ifPresent((user) -> new IllegalArgumentException("이미 존재하는 유저입니다."));
+                .ifPresent((user)-> { throw new UserException("이미 존재하는 유저입니다.");});
     }
 }

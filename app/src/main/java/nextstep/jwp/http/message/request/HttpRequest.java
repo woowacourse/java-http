@@ -1,10 +1,9 @@
 package nextstep.jwp.http.message.request;
 
 import java.util.Optional;
-import nextstep.jwp.http.message.element.Body;
-import nextstep.jwp.http.message.element.Cookie;
-import nextstep.jwp.http.message.element.Headers;
-import nextstep.jwp.http.message.element.HttpVersion;
+import java.util.function.Supplier;
+
+import nextstep.jwp.http.message.element.*;
 import nextstep.jwp.http.message.request.request_line.HttpMethod;
 import nextstep.jwp.http.message.request.request_line.HttpPath;
 import nextstep.jwp.http.message.request.request_line.RequestLine;
@@ -43,5 +42,10 @@ public class HttpRequest {
 
     public Cookie getCookie() {
         return headers.getCookie();
+    }
+
+    public Optional<HttpSession> getSession() {
+        return getCookie().get("JSESSIONID")
+                .flatMap(HttpSessions::get);
     }
 }

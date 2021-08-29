@@ -82,12 +82,17 @@ public class Fixture {
     }
 
     public static HttpRequest getHttpRequest(String path) {
-        RequestLine requestLine = new RequestLine(createRequestLine(HttpMethod.GET, path));
         Headers headers = new Headers();
 
         headers.putHeader("Host", "localhost:8080");
         headers.putHeader("Connection", "keep-alive");
         headers.putHeader("Accept", "*/*");
+
+        return getHttpRequest(path, headers);
+    }
+
+    public static HttpRequest getHttpRequest(String path, Headers headers) {
+        RequestLine requestLine = new RequestLine(createRequestLine(HttpMethod.GET, path));
 
         return new HttpRequest(requestLine, headers, Body.empty());
     }

@@ -102,6 +102,7 @@ public class RequestHandler implements Runnable {
         try {
             Controller controller = controllers.findController(httpRequest);
             return controller.doService(httpRequest);
+
         } catch (Exception e) {
             return responseExceptionPage(e);
         }

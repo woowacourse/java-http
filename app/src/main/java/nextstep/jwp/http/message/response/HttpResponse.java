@@ -59,6 +59,10 @@ public class HttpResponse implements Response {
         return new HttpResponse(responseLine, headers, body);
     }
 
+    public void putHeader(String key, String value) {
+        this.headers.putHeader(key, value);
+    }
+
     public String asString() {
         String topOfHeader = String.join(" " + LINE_SEPARATOR.value(), List.of(
             responseLine.asString(),

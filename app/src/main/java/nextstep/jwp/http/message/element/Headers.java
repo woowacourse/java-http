@@ -58,10 +58,4 @@ public class Headers {
             .map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
             .collect(joining(LINE_SEPARATOR.value()));
     }
-
-    public Cookie getCookie() {
-        return getHeader("Cookie")
-                .map(Cookie::new)
-                .orElseGet(Cookie::new);
-    }
 }

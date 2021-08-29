@@ -50,13 +50,17 @@ class HttpRequestTest {
         assertThat(httpRequest.getCookie()).isNotNull();
     }
 
-    @DisplayName("세션이 존재하지 않는다면 Optional null을 반환한다.")
+    @DisplayName("세션이 존재하지 않더라도 언제나 같은 세션을 반환한다.")
     @Test
     void getSession_noValue() {
-        assertThat(httpRequest.getSession()).isNotPresent();
+        assertThat(httpRequest.getSession()).isNotNull();
+
+        HttpSession session1 = httpRequest.getSession();
+        HttpSession session2 = httpRequest.getSession();
+        assertThat(session1).isSameAs(session2);
     }
 
-    @DisplayName("세션이 존재하면 Session을 반환한다.")
+    @DisplayName("세션이 존재하면 언제나 같은 세션을 반환한다.")
     @Test
     void getSession_value() {
         Headers headers = new Headers();
@@ -67,6 +71,10 @@ class HttpRequestTest {
         HttpSession test = new HttpSession("test");
         HttpSessions.put(test);
 
-        assertThat(httpRequest.getSession()).isPresent();
+        assertThat(httpRequest.getSession()).isNotNull();
+
+        HttpSession session1 = httpRequest.getSession();
+        HttpSession session2 = httpRequest.getSession();
+        assertThat(session1).isSameAs(session2);
     }
 }

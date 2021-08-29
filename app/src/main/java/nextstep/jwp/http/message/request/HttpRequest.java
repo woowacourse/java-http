@@ -14,6 +14,9 @@ public class HttpRequest {
     private final Headers headers;
     private final Body body;
 
+    private HttpSession httpSession;
+    private Cookie cookie;
+
     public HttpRequest(RequestLine requestLine, Headers headers, Body body) {
         this.requestLine = requestLine;
         this.headers = headers;
@@ -41,11 +44,20 @@ public class HttpRequest {
     }
 
     public Cookie getCookie() {
-        return headers.getCookie();
+        return getHeader("Cookie")
+                .map(Cookie::new)
+                .orElseGet(Cookie::new);
     }
 
-    public Optional<HttpSession> getSession() {
-        return getCookie().get("JSESSIONID")
-                .flatMap(HttpSessions::get);
+    public HttpSession getSession() {
+        return Optional.ofNullable(httpSession)
+                .orElseGet(() -> {
+                    HttpSession session = new HttpSession();
+                    HttpSessions.put(session);
+                    this.httpSession = session;
+                    return session;
+                });
+
+
     }
 }

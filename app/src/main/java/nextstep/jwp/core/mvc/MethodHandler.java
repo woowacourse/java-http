@@ -58,8 +58,8 @@ public class MethodHandler extends ResolverHandler {
             return new ModelAndView(viewName, httpRequest.httpUrl());
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
+            return null;
         }
-        return null;
     }
 
 //    TODO : ArgumentResolver 완성하기

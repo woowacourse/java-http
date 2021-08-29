@@ -54,9 +54,8 @@ public class ComponentLoader {
             final T target = tClass.getConstructor((Class<?>[]) null).newInstance();
             return new BeanDefinition(tClass, target, tClass.getName());
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new NotFoundBeanException();
         }
-        throw new NotFoundBeanException();
     }
 
     private static Object[] createParameterTargets(Constructor<?> constructor,

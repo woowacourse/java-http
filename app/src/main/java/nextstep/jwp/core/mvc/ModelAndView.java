@@ -30,8 +30,8 @@ public class ModelAndView {
             return String.join("\r\n", actual);
         } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
+            return "";
         }
-        return "";
     }
 
     public void setRedirectUrl(String redirectUrl) {

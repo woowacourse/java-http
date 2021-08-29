@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import javassist.tools.web.BadHttpRequest;
+import nextstep.jwp.webserver.exception.BadRequestException;
 
 public class DefaultHttpRequest implements HttpRequest {
 
@@ -24,7 +26,7 @@ public class DefaultHttpRequest implements HttpRequest {
             this.requestHeader = parseHeader(br);
             this.requestParams = parseParams(br);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new BadRequestException();
         }
     }
 

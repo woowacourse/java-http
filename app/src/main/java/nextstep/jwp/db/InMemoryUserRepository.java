@@ -12,7 +12,7 @@ public class InMemoryUserRepository {
     private final Map<String, User> database;
     private Long autoIncrementId;
 
-    private InMemoryUserRepository(Map<String, User> database, Long autoIncrementId) {
+    public InMemoryUserRepository(Map<String, User> database, Long autoIncrementId) {
         this.database = database;
         this.autoIncrementId = autoIncrementId;
     }

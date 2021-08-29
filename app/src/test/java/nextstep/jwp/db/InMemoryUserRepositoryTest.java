@@ -2,7 +2,8 @@ package nextstep.jwp.db;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Optional;
+import java.util.HashMap;
+import java.util.Map;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.model.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +16,8 @@ class InMemoryUserRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        userRepository = InMemoryUserRepository.initialize();
+        Map<String, User> database = new HashMap<>();
+        userRepository = new InMemoryUserRepository(database, 1L);
     }
 
     @DisplayName("신규 User 저장")
@@ -47,15 +49,5 @@ class InMemoryUserRepositoryTest {
         assertThat(foundUser).usingRecursiveComparison()
             .ignoringFields("id")
             .isEqualTo(user);
-    }
-
-    @DisplayName("initialize 시 초기유저 등록")
-    @Test
-    void initialize() {
-        // given
-        userRepository = InMemoryUserRepository.initialize();
-
-        // when, then
-        assertThat(userRepository.findByAccount("gugu")).isPresent();
     }
 }

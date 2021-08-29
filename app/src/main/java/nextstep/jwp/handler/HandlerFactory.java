@@ -1,36 +1,26 @@
 package nextstep.jwp.handler;
 
-public class HandlerFactory {
+import nextstep.jwp.model.PathType;
+import nextstep.jwp.model.Request;
 
-    public static final String BASE_PATH = "/";
-    public static final String INDEX_PATH = "/index";
-    public static final String LOGIN_PATH = "/login";
-    public static final String REGISTER_PATH = "/register";
-    public static final String CSS_EXTENSION = ".css";
-    public static final String JS_EXTENSION = ".js";
+public class HandlerFactory {
 
     private HandlerFactory() {
     }
 
-    public static Handler handler(String path) {
-        if (BASE_PATH.equals(path)) {
-            return new BaseHandler();
+    public static Handler handler(Request request) {
+        if (request.containsEXTENSION()) {
+            return new StaticFileHandler(request);
         }
-        if (path.contains(INDEX_PATH)) {
-            return new IndexHandler();
+        if (request.isPath(PathType.BASE_PATH)) {
+            return new BaseHandler(request);
         }
-        if (path.contains(LOGIN_PATH)) {
-            return new LoginHandler();
+        if (request.containsPath(PathType.LOGIN_PATH)) {
+            return new LoginHandler(request);
         }
-        if (path.contains(REGISTER_PATH)) {
-            return new RegisterHandler();
+        if (request.containsPath(PathType.REGISTER_PATH)) {
+            return new RegisterHandler(request);
         }
-        if (path.contains(CSS_EXTENSION)) {
-            return new CSSHandler();
-        }
-        if (path.contains(JS_EXTENSION)) {
-            return new JSHandler();
-        }
-        return new UnauthorizedHandler();
+        return new UnauthorizedHandler(request);
     }
 }

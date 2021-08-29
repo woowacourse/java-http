@@ -15,6 +15,10 @@ public class QueryParams {
         this(parseParams(s));
     }
 
+    public QueryParams() {
+        this(new HashMap<>());
+    }
+
     private static Map<String, String> parseParams(String s) {
         Map<String, String> params = new HashMap<>();
         for (String queryString : s.split("&")) {

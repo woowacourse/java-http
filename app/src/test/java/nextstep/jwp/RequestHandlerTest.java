@@ -13,25 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RequestHandlerTest {
 
     @Test
-    void run() {
-        // given
-        final MockSocket socket = new MockSocket();
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
-
-        // then
-        String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @Test
     void index() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
@@ -50,11 +31,36 @@ class RequestHandlerTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + expectedBody.getBytes().length + " \r\n" +
-                "\r\n" +
-                expectedBody;
+        String expected = String.join("\r\n",
+                "HTTP/1.1 200 Ok",
+                "Content-Length: " + expectedBody.getBytes().length,
+                "Content-Type: text/html;charset=utf-8",
+                "",
+                expectedBody);
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void login() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        String expected = String.join("\r\n",
+                "HTTP/1.1 302 Found",
+                "Location: /index.html" //http://localhost
+        );
         assertThat(socket.output()).isEqualTo(expected);
     }
 }

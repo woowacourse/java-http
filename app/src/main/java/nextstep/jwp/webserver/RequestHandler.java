@@ -3,14 +3,10 @@ package nextstep.jwp.webserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class RequestHandler implements Runnable {
@@ -30,19 +26,19 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            HttpRequest httpRequest = new HttpRequest(new String(inputStream.readAllBytes()));
+            String requestString = readInputStream(inputStream);
 
-            Controller controller = Router.get(httpRequest.getUri());
-            String responseBody = handle(controller, httpRequest);
+            // todo 지우기
+            if ("".equals(requestString)) {
+                throw new RuntimeException("requestString 비었음");
+            }
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            HttpRequest httpRequest = new HttpRequest(requestString);
 
-            outputStream.write(response.getBytes());
+            Controller controller = getController(httpRequest);
+            HttpResponse response = controller.handle(httpRequest);
+
+            outputStream.write(response.toBytes());
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
@@ -51,33 +47,32 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private String handle(Controller controller, HttpRequest httpRequest) {
-        if (controller == null) {
-            return respondStaticFile(httpRequest.getUri());
+    private String readInputStream(InputStream inputStream) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+        String line;
+        List<String> lines = new ArrayList<>();
+        while (reader.ready()) {
+            line = reader.readLine();
+            if (line == null) {
+                break;
+            }
+
+            lines.add(line);
         }
-        return controller.handle(httpRequest);
+
+        return String.join("\r\n", lines);
     }
 
-    private String respondStaticFile(String uriPath) {
-        String[] paths = uriPath.split("/");
-        String fileName = paths[paths.length - 1];
-        URL resource = getClass().getClassLoader().getResource("static/" + fileName);
-
-        if (resource == null) {
-            throw new RuntimeException(); // 파일없음
-        }
-        Path path = new File(resource.getPath()).toPath();
-
-        try {
-            return Files.readString(path);
-        } catch (IOException e) {
-            return "파일 read 중 에러 발생";
-        }
+    private Controller getController(HttpRequest httpRequest) {
+        Controller controller = Router.get(httpRequest.getUri());
+        return Objects.requireNonNullElseGet(controller, StaticFileController::new);
     }
 
     private void close() {
         try {
             connection.close();
+            log.debug("Client Connection Close! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
         } catch (IOException exception) {
             log.error("Exception closing socket", exception);
         }

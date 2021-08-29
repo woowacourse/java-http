@@ -8,8 +8,8 @@ public class HttpRequest {
 
     private HttpHeaders httpHeaders;
     private HttpMethod httpMethod;
-    private QueryParams queryParams;
-    private String body;
+    private QueryParams queryParams = new QueryParams();
+    private String body = "";
     private String uri;
 
     public HttpRequest(String requestString) {
@@ -24,8 +24,8 @@ public class HttpRequest {
 
         String requestLine = headerLines.get(0);
         parseRequestLine(requestLine);
-        parseHeaders(headerLines);
-        parseBody(headerBody);
+        initHeaders(headerLines);
+        initBody(headerBody);
     }
 
     private void parseRequestLine(String requestLine) {
@@ -38,21 +38,23 @@ public class HttpRequest {
         String[] splitUri = uriPath.split("\\?");
         uri = splitUri[0];
 
-        parseQueryParams(splitUri);
+        initQueryParams(splitUri);
     }
 
-    private void parseQueryParams(String[] splitUri) {
-        if (splitUri.length > 1) {
-            queryParams = new QueryParams(splitUri[1]);
+    private void initQueryParams(String[] splitUri) {
+        if (splitUri.length < 2) {
+            queryParams = new QueryParams();
+            return;
         }
+        queryParams = new QueryParams(splitUri[1]);
     }
 
-    private void parseHeaders(List<String> headerLines) {
+    private void initHeaders(List<String> headerLines) {
         httpHeaders = new HttpHeaders(
                 headerLines.subList(1, headerLines.size() - 1));
     }
 
-    private void parseBody(String[] headerBody) {
+    private void initBody(String[] headerBody) {
         if (headerBody.length > 1) {
             this.body = headerBody[1];
         }

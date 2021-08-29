@@ -1,15 +1,17 @@
 package nextstep.jwp.webserver;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpHeaders {
 
-    private final Map<String, List<String>> headers;
+    public static final HttpHeaders EMPTY_HEADERS = new HttpHeaders(new HashMap<>());
 
-    public HttpHeaders(Map<String, List<String>> headers) {
+    private final Map<String, String> headers;
+
+    public HttpHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
 
@@ -17,20 +19,34 @@ public class HttpHeaders {
         this(parseHeaders(headerList));
     }
 
-    private static Map<String, List<String>> parseHeaders(List<String> headerList) {
-        Map<String, List<String>> headers = new HashMap<>();
+    public HttpHeaders() {
+        this(new HashMap<>());
+    }
+
+    private static Map<String, String> parseHeaders(List<String> headerList) {
+        Map<String, String> headers = new HashMap<>();
         for (String header : headerList) {
             String[] keyValue = header.split(":");
-            headers.put(keyValue[0], Arrays.asList(keyValue[1].split(",")));
+            headers.put(keyValue[0], keyValue[1]);
         }
         return headers;
     }
 
-    public String get(String header) {
-        return getHeaders(header).get(0);
+    public String get(String name) {
+        return headers.get(name);
     }
 
-    public List<String> getHeaders(String header) {
-        return headers.get(header);
+    public void set(String name, String value) {
+        headers.put(name, value);
+    }
+
+    public String getString() {
+        return headers.keySet().stream()
+                .map(this::headerToString)
+                .collect(Collectors.joining("\r\n"));
+    }
+
+    private String headerToString(String name) {
+        return name + ": " + headers.get(name);
     }
 }

@@ -48,7 +48,7 @@ public class HttpRequest {
         return parameters.getParameterNames();
     }
 
-    public String getParameter(String name) {
+    public String findParameter(String name) {
         return parameters.getParameter(name);
     }
 }

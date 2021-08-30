@@ -60,6 +60,6 @@ class HttpRequestTest {
         assertThat(httpRequest.getVersionOfTheProtocol()).isEqualTo("HTTP/1.1");
         assertThat(httpRequest.findHttpHeader("Content-Type")).isEqualTo(contentType.getContentType());
         assertThat(httpRequest.getParameterNames().hasMoreElements()).isTrue();
-        assertThat(httpRequest.getParameter("account")).isEqualTo("gumgum");
+        assertThat(httpRequest.findParameter("account")).isEqualTo("gumgum");
     }
 }

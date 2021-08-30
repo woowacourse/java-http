@@ -4,10 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class HttpMessageReader {
 
@@ -57,7 +55,6 @@ public class HttpMessageReader {
         }
     }
 
-
     private Map<String, String> initializeHeaders() {
         try {
             Map<String, String> httpRequestHeaders = new HashMap<>();
@@ -87,6 +84,10 @@ public class HttpMessageReader {
         final String[] parameters = extractQueryParameterString(contentLengthString).split("&");
         for (String parameter : parameters) {
             final String[] splitParameter = parameter.split("=");
+            if (splitParameter.length < 2) {
+                params.put(splitParameter[0], "");
+                continue;
+            }
             params.put(splitParameter[0], splitParameter[1]);
         }
         return params;

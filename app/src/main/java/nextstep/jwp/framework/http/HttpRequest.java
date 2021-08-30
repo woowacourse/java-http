@@ -2,7 +2,6 @@ package nextstep.jwp.framework.http;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 import java.util.Objects;
 
 import nextstep.jwp.framework.http.formatter.HttpFormatter;
@@ -45,18 +44,6 @@ public class HttpRequest implements HttpMessage {
         return requestLine.getPath();
     }
 
-    public String getVersion() {
-        return requestLine.getVersion();
-    }
-
-    public Map<String, String> getQueries() {
-        return requestLine.getQueries();
-    }
-
-    public String getValueFromQuery(String key) {
-        return getQueries().get(key);
-    }
-
     @Override
     public HttpHeaders getHttpHeaders() {
         return httpHeaders;
@@ -81,7 +68,7 @@ public class HttpRequest implements HttpMessage {
             return new HttpSession();
         }
 
-        final String sessionId = httpCookies.getCookie(HttpSession.JSESSIONID).getValue();
+        final String sessionId = httpCookies.getValueBy(HttpSession.JSESSIONID);
         return HttpSessions.getSessionOrDefault(sessionId, new HttpSession());
     }
 
@@ -102,6 +89,7 @@ public class HttpRequest implements HttpMessage {
     public static class Builder {
         private RequestLine requestLine;
         private HttpHeaders httpHeaders;
+        private String cookie;
         private StringBuilder requestBody;
 
         public Builder() {
@@ -122,13 +110,19 @@ public class HttpRequest implements HttpMessage {
             return this;
         }
 
-        public Builder header(String name, String value) {
+        public Builder httpHeaders(String name, String value) {
             this.httpHeaders.addHeader(name, value);
             return this;
         }
 
         public Builder httpHeaders(HttpHeaders httpHeaders) {
             this.httpHeaders = httpHeaders;
+            return this;
+        }
+
+        public Builder cookie(String cookie) {
+            httpHeaders(HttpHeaders.COOKIE, cookie);
+            this.cookie = cookie;
             return this;
         }
 
@@ -152,7 +146,11 @@ public class HttpRequest implements HttpMessage {
         }
 
         public HttpRequest build() {
-            return new HttpRequest(requestLine, httpHeaders, requestBody.toString());
+            if (hasHeader(HttpHeaders.COOKIE)) {
+                cookie(getHeaderValue(HttpHeaders.COOKIE));
+            }
+
+            return new HttpRequest(requestLine, httpHeaders, HttpCookies.from(cookie), requestBody.toString());
         }
 
         public boolean hasHeader(String headerName) {

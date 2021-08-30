@@ -17,6 +17,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class LoginControllerTest {
 
@@ -37,17 +40,10 @@ class LoginControllerTest {
     }
 
     @DisplayName("'/login'으로 시작되는 Uri와 매칭된다.")
-    @Test
-    void matchUri() {
-        // when
-        boolean matchResult1 = loginController.matchUri("/login");
-        boolean matchResult2 = loginController.matchUri("/login/wow");
-        boolean matchResult3 = loginController.matchUri("/login?abc=edf");
-
-        // then
-        assertThat(matchResult1).isTrue();
-        assertThat(matchResult2).isTrue();
-        assertThat(matchResult3).isTrue();
+    @ParameterizedTest
+    @ValueSource(strings = {"/login", "/login/now", "/login?abc=def"})
+    void matchUri(String uri) {
+        assertThat(loginController.matchUri(uri)).isTrue();
     }
 
     @DisplayName("HttpRequest Method에 따라 Service 분기")

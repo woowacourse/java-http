@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -106,10 +107,10 @@ class HttpRequestTest {
         HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);
 
         // when
-        String method = httpRequest.extractHttpMethod();
+        HttpMethod method = httpRequest.extractHttpMethod();
 
         // then
-        assertThat(method).isEqualTo("GET");
+        assertThat(method).isEqualTo(HttpMethod.GET);
     }
 
     @Test

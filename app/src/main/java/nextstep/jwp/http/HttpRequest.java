@@ -60,8 +60,9 @@ public class HttpRequest {
         return uri;
     }
 
-    public String extractHttpMethod() {
-        return statusLine.split(BLANK_DELIMITER)[FIRST_WORD_INDEX];
+    public HttpMethod extractHttpMethod() {
+        String httpMethodName = statusLine.split(BLANK_DELIMITER)[FIRST_WORD_INDEX];
+        return HttpMethod.findHttpMethod(httpMethodName);
     }
 
     public Map<String, String> extractFormData() {

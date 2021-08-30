@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.http.CustomException;
+import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 
@@ -14,10 +15,10 @@ public class FrontControllerServlet {
 
     public HttpResponse process() {
         Controller controller = findControllerByHttpURIPath();
-        if (request.extractHttpMethod().equals("GET")) {
+        if (request.extractHttpMethod() == HttpMethod.GET) {
             return controller.get(request);
         }
-        if (request.extractHttpMethod().equals("POST")) {
+        if (request.extractHttpMethod() == HttpMethod.POST) {
             return controller.post(request);
         }
         throw new CustomException("유효하지 않은 HTTP Method입니다.");

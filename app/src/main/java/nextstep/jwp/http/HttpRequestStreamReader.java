@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 public class HttpRequestStreamReader {
 
@@ -64,11 +63,10 @@ public class HttpRequestStreamReader {
     }
 
     private int parseContentLength(List<String> httpRequestHeaders) {
-        Optional<String> contentLengthHeader = httpRequestHeaders.stream()
+        String[] split = httpRequestHeaders.stream()
             .filter(header -> header.startsWith(CONTENT_LENGTH_OF_HEADER_KEY))
-            .findAny();
-
-        String[] split = contentLengthHeader.orElseGet(() -> "Content-Length: 0")
+            .findAny()
+            .orElseGet(() -> "Content-Length: 0")
             .split(": ");
         if (split.length != 2) {
             throw new CustomException("Header에 포함된 Content-Length의 값의 형태가 적절하지 않습니다.");

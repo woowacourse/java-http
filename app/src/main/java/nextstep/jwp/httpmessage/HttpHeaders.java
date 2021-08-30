@@ -5,17 +5,17 @@ import java.util.Map;
 
 public class HttpHeaders {
 
-    private final Map<String, String> httpHeaders;
+    private final Map<String, String> headers;
 
     public HttpHeaders(Map<String, String> httpHeaders) {
-        this.httpHeaders = new HashMap<>(httpHeaders);
+        this.headers = new HashMap<>(httpHeaders);
     }
 
-    public String find(String key) {
-        return httpHeaders.get(key);
+    public String getHeader(String key) {
+        return headers.get(key);
     }
 
     public int size() {
-        return httpHeaders.size();
+        return headers.size();
     }
 }

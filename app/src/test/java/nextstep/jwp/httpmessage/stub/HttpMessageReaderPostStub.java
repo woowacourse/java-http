@@ -35,4 +35,13 @@ public class HttpMessageReaderPostStub extends HttpMessageReader {
         headers.put("Accept", "/*/");
         return headers;
     }
+
+    @Override
+    public Map<String, String> getParameters() {
+        return Map.ofEntries(
+                Map.entry("account", "gumgum"),
+                Map.entry("password", "password2"),
+                Map.entry("email", "ggump%40woowahan.com")
+        );
+    }
 }

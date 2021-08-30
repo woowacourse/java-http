@@ -20,7 +20,7 @@ class HttpHeadersTest {
         //when
         headers.put(key, value);
         final HttpHeaders httpHeaders = new HttpHeaders(headers);
-        final String actual = httpHeaders.find(key);
+        final String actual = httpHeaders.getHeader(key);
         //then
         assertThat(actual).isEqualTo(value);
         assertThat(httpHeaders.size()).isEqualTo(1);
@@ -35,7 +35,7 @@ class HttpHeadersTest {
         //when
         headers.put(key, value);
         final HttpHeaders httpHeaders = new HttpHeaders(headers);
-        final String actual = httpHeaders.find("someThing");
+        final String actual = httpHeaders.getHeader("someThing");
         //then
         assertThat(actual).isNull();
         assertThat(httpHeaders.size()).isEqualTo(1);

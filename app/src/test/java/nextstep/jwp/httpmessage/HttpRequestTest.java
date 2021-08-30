@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("HttpRequest 테스트")
 class HttpRequestTest {
 
-    private static Stream<Arguments> getRequestLineAndHeadersWhenGetRequest() {
+    private static Stream<Arguments> getRequestLineAndHeadersAndParametersWhenGetRequest() {
         return Stream.of(
                 Arguments.of("/test", ContentType.HTML),
                 Arguments.of("/test/test", ContentType.CSS),
@@ -25,21 +25,21 @@ class HttpRequestTest {
 
     @ParameterizedTest
     @MethodSource
-    void getRequestLineAndHeadersWhenGetRequest(String requestUri, ContentType contentType) {
+    void getRequestLineAndHeadersAndParametersWhenGetRequest(String requestUri, ContentType contentType) {
         //given
         //when
         final HttpRequest httpRequest = new HttpRequest(new HttpMessageReaderGetStub(requestUri, contentType));
-        final HttpHeaders httpHeaders = httpRequest.getHttpHeaders();
         //then
         assertThat(httpRequest.getRequestLine()).isEqualTo(HttpMethod.GET + " " + requestUri + " HTTP/1.1");
         assertThat(httpRequest.getHttpMethod()).isEqualTo(HttpMethod.GET);
         assertThat(httpRequest.getPath()).isEqualTo(requestUri);
         assertThat(httpRequest.getVersionOfTheProtocol()).isEqualTo("HTTP/1.1");
-        assertThat(httpHeaders.find("Content-Type")).isEqualTo(contentType.getContentType());
-        assertThat(httpHeaders.size()).isNotEqualTo(0);
+        assertThat(httpRequest.findHttpHeader("Content-Type")).isEqualTo(contentType.getContentType());
+        assertThat(httpRequest.httpHeaderSize()).isNotEqualTo(0);
+        assertThat(httpRequest.getParameterNames().hasMoreElements()).isFalse();
     }
 
-    private static Stream<Arguments> getRequestLineAndHeadersWhenPostRequest() {
+    private static Stream<Arguments> getRequestLineAndHeadersAndParametersWhenPostRequest() {
         return Stream.of(
                 Arguments.of("/test", ContentType.X_WWW_FORM),
                 Arguments.of("/test/test", ContentType.X_WWW_FORM),
@@ -49,17 +49,17 @@ class HttpRequestTest {
 
     @ParameterizedTest
     @MethodSource
-    void getRequestLineAndHeadersWhenPostRequest(String requestUri, ContentType contentType) {
+    void getRequestLineAndHeadersAndParametersWhenPostRequest(String requestUri, ContentType contentType) {
         //given
         //when
         final HttpRequest httpRequest = new HttpRequest(new HttpMessageReaderPostStub(requestUri, contentType));
-        final HttpHeaders httpHeaders = httpRequest.getHttpHeaders();
         //then
         assertThat(httpRequest.getRequestLine()).isEqualTo(HttpMethod.POST + " " + requestUri + " HTTP/1.1");
         assertThat(httpRequest.getHttpMethod()).isEqualTo(HttpMethod.POST);
         assertThat(httpRequest.getPath()).isEqualTo(requestUri);
         assertThat(httpRequest.getVersionOfTheProtocol()).isEqualTo("HTTP/1.1");
-        assertThat(httpHeaders.find("Content-Type")).isEqualTo(contentType.getContentType());
-        assertThat(httpHeaders.size()).isNotEqualTo(0);
+        assertThat(httpRequest.findHttpHeader("Content-Type")).isEqualTo(contentType.getContentType());
+        assertThat(httpRequest.getParameterNames().hasMoreElements()).isTrue();
+        assertThat(httpRequest.getParameter("account")).isEqualTo("gumgum");
     }
 }

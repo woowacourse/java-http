@@ -2,9 +2,11 @@ package nextstep.learning.http;
 
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalTime;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -14,15 +16,19 @@ class ThreadTest {
     void testCounterWithConcurrency() throws InterruptedException {
         int numberOfThreads = 10;
         ExecutorService service = Executors.newFixedThreadPool(10);
+
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
         MyCounter counter = new MyCounter();
+
         for (int i = 0; i < numberOfThreads; i++) {
             service.execute(() -> {
                 counter.increment();
                 latch.countDown();
             });
         }
+        System.out.println("latch.getCount() = " + latch.getCount());
         latch.await();
+        System.out.println("latch.getCount() = " + latch.getCount());
         assertThat(counter.getCount()).isEqualTo(numberOfThreads);
     }
 
@@ -30,8 +36,10 @@ class ThreadTest {
     void testSummationWithConcurrency() throws InterruptedException {
         int numberOfThreads = 2;
         ExecutorService service = Executors.newFixedThreadPool(1);
+
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
         MyCounter counter = new MyCounter();
+
         for (int i = 0; i < numberOfThreads; i++) {
             service.submit(() -> {
                 counter.increment();

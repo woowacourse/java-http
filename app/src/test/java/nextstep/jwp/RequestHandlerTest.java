@@ -69,63 +69,6 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("GET 로그인 성공시 index.html로 리다이렉트")
-    @Test
-    void loginSuccess() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
-                "\r\n" +
-                responseBody;
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @DisplayName("로그인 실패시 401.html로 리다이렉트")
-    @Test
-    void loginFail() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=invalidPassword HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/401.html");
-        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        String expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: /index.html \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
-                "\r\n" +
-                responseBody;
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
     @DisplayName("회원가입 페이지에 접속 가능하다")
     @Test
     void register() throws IOException {
@@ -262,7 +205,40 @@ class RequestHandlerTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        String expected = "HTTP/1.1 200 OK \r\n" +
+        String expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /index.html \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "\r\n" +
+                responseBody;
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("POST 로그인 실패시 401.html로 리다이렉트된다.")
+    @Test
+    void postLoginFail() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */*",
+                "",
+                "account=gugu3&password=password&email=hkkang%40woowahan.com");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /401.html \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +

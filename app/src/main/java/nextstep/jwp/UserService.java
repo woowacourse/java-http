@@ -12,17 +12,6 @@ public class UserService {
     public UserService() {
     }
 
-
-    public Optional<User> findUserFromUri(String uri) {
-        Map<String, String> requestUserData = extractQueryFromLoginUri(uri);
-        String account = requestUserData.getOrDefault("account", null);
-        String password = requestUserData.getOrDefault("password", null);
-
-        Optional<User> user = InMemoryUserRepository.findByAccountAndPassword(account, password);
-
-        return user;
-    }
-
     public Optional<User> findUserFromBody(String requestBody) {
         Map<String, String> loginData = extractUserDataFromRequestBody(requestBody);
         String account = loginData.getOrDefault("account", null);

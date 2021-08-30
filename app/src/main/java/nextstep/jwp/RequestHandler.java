@@ -53,27 +53,16 @@ public class RequestHandler implements Runnable {
             } else if (httpMethod.equals("GET") && (uri.equals("/login.html") || uri.equals("/login"))) {
                 responseBody = getStaticFileContents("/login.html");
                 response = replyOkResponse(responseBody);
-            } else if (httpMethod.equals("GET") && (uri.matches("/login.*account.*password.*"))) {
-                Optional<User> user = userService.findUserFromUri(uri);
-                log.debug(user.toString());
-                if (user.isEmpty()) {
-                    responseBody = getStaticFileContents("/401.html");
-                    response = replyAfterLogin302Response(responseBody);
-                } else {
-                    responseBody = getStaticFileContents("/index.html");
-                    response = replyOkResponse(responseBody);
-                }
             } else if (httpMethod.equals("POST") && (uri.equals("/login.html") || uri.equals("/login"))) {
                 String requestBody = extractRequestBody(bufferedReader, parsedRequestHeaders);
                 Optional<User> user = userService.findUserFromBody(requestBody);
                 if (user.isEmpty()) {
                     responseBody = getStaticFileContents("/401.html");
-                    response = replyAfterLogin302Response(responseBody);
+                    response = replyAfterLogin302Response(responseBody, "/401.html");
                 } else {
                     responseBody = getStaticFileContents("/index.html");
-                    response = replyOkResponse(responseBody);
+                    response = replyAfterLogin302Response(responseBody, "/index.html");
                 }
-
             } else if (httpMethod.equals("GET") && (uri.equals("/register") || uri.equals("/register.html"))) {
                 responseBody = getStaticFileContents("/register.html");
                 response = replyOkResponse(responseBody);
@@ -89,6 +78,9 @@ public class RequestHandler implements Runnable {
             } else if (httpMethod.equals("GET") && uri.matches("/.*(js)$")) {
                 responseBody = getStaticFileContents(uri);
                 response = replyOkJsResponse(responseBody);
+            } else if (httpMethod.equals("GET") && uri.equals("/401.html")) {
+                responseBody = getStaticFileContents(uri);
+                response = replyOkResponse(responseBody);
             }
 
             outputStream.write(response.getBytes());
@@ -110,10 +102,10 @@ public class RequestHandler implements Runnable {
         return requestBody;
     }
 
-    private String replyAfterLogin302Response(String responseBody) {
+    private String replyAfterLogin302Response(String responseBody, String location) {
         final String response = String.join("\r\n",
                 "HTTP/1.1 302 Found ",
-                "Location: /index.html ",
+                "Location: " + location + " ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
@@ -151,7 +143,7 @@ public class RequestHandler implements Runnable {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
-        log.debug("CSS OK Content-Length: " + responseBody.getBytes().length);
+        log.debug("JS OK Content-Length: " + responseBody.getBytes().length);
         return response;
     }
 

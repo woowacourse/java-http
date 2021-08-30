@@ -7,6 +7,7 @@
 
 ### HttpResponse 구현
 - 응답 폼 맞게 구현 (응답 코드, 헤더, 바디)
+- flush() 를 호출하면 바로 폼에 맞는 응답 클라이언트에 전달
 
 ### SPRING CORE
 - 빈 등록 기능 구현
@@ -14,10 +15,21 @@
 - Autowired 구현
 
 ### SPRING MVC
-- 프론트 핸들러 구현
-- 핸들러 매핑 구현 (추후 핸들러 체이닝 구현 필요)
-- 핸들러 어댑터 방식으로 메서드 핸들러 연결
-- 메서드 핸들러 구현
+- DispatcherServlet 구현
+  - 흐름 :
+    1. 필요한 모든 객체 생성 (HandlerMapping, ViewResolver, MultipartResolver)
+    2. Multipart 확인 (Multipart 라면 바로 응답)
+    3. request 에 맞는 Handler 찾기 (HandlerMapping)
+    4. Handler 가 존재하지 않다면 404 에러를 담아주기
+    5. Handler 가 존재한다면 실행 이후 ModelAndView 리턴
+    6. ModelAndView 를 가지고 ViewResolver 실행
+  - 디테일 :
+    - HandlerMapping
+      - 클래스형 핸들러와 메서드형 핸들러(어노테이션 기반)를 나눈다.
+      - 메서드형 핸들러에는 @Controller 기반으로 메서드를 모두 분리해서 해당 클래스에 등록한다.
+      - 메서드형 핸들러에는 ArgumentResolver 와 ReturnValueResolver 를 추가해 편의성을 더해준다.
+    - ViewResolver
+      - view 가 존재한다면 response 에 뷰를 렌더링해서 데이터를 내보낸다.
 
 ### 테스트
 - 요청 응답 테스트 도구 구현

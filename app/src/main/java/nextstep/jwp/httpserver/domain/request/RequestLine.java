@@ -22,7 +22,7 @@ public class RequestLine {
     }
 
     public boolean isPost() {
-        return HttpMethod.POST == httpMethod;
+        return HttpMethod.isPost(httpMethod);
     }
 
     public HttpMethod getHttpMethod() {

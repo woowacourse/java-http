@@ -246,7 +246,7 @@ class RequestHandlerTest {
         // then
         assertThat(socket.output()).contains(
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/js;charset=utf-8 ",
+                "Content-Type: text/javascript;charset=utf-8 ",
                 "Content-Length: 1002"
         );
     }

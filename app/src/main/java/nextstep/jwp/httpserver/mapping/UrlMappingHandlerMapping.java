@@ -24,7 +24,7 @@ public class UrlMappingHandlerMapping implements HandlerMapping {
     public Object getHandler(HttpRequest httpRequest) {
         String requestUri = httpRequest.getRequestUri();
 
-        if (HttpMethod.GET == httpRequest.getHttpMethod()) {
+        if (HttpMethod.isGet(httpRequest.getHttpMethod())) {
             requestUri = removeQueryString(requestUri);
         }
 

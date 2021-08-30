@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.exception.NoMatchingElement;
-import org.checkerframework.checker.units.qual.A;
 
 public class Headers {
 
@@ -28,16 +27,20 @@ public class Headers {
     }
 
     public void add(String header, String value) {
-        List<String> values = this.headerValues.get(header)
-            .orElse(new ArrayList<>());
+        List<String> values = this.headerValues.getOrDefault(
+            header, Optional.of(new ArrayList<>())
+        ).orElseThrow();
+
         values.add(value.trim());
 
         this.headerValues.put(header, Optional.of(values));
     }
 
     public int getContentLength() {
-        List<String> values = this.headerValues.get("Content-Length")
-            .orElse(List.of("0"));
+        List<String> values = this.headerValues.getOrDefault(
+            "Content-Length", Optional.of(List.of("0"))
+        ).orElseThrow();
+
         return Integer.parseInt(values.get(0));
     }
 

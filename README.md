@@ -7,5 +7,5 @@
 - [ ] POST 방식으로 회원가입
   - [x] register html 응답
   - [x] 회원가입 처리
-  - [ ] 로그인 get -> post 변경
+  - [x] 로그인 get -> post 변경
 - [ ] CSS 지원하기

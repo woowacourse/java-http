@@ -43,12 +43,16 @@ class RequestHandlerTest {
     @Test
     void login() {
         // given
+        String body = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + body.getBytes().length,
+                "Content-Type: application/x-www-form-urlencoded",
+                "Accept: */*",
                 "",
-                "");
+                body);
 
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
@@ -59,7 +63,7 @@ class RequestHandlerTest {
         // then
         String expected = String.join("\r\n",
                 "HTTP/1.1 302 Found",
-                "Location: /index.html" //http://localhost
+                "Location: /index.html"
         );
         assertThat(socket.output()).isEqualTo(expected);
     }

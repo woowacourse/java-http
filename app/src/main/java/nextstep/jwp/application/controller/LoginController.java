@@ -11,9 +11,9 @@ public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        String account = request.getQueryParam("account");
-        String password = request.getQueryParam("password");
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+        String account = request.getBody("account");
+        String password = request.getBody("password");
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(RuntimeException::new);

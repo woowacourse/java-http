@@ -3,6 +3,8 @@ package nextstep.jwp.handler;
 import java.util.HashMap;
 import java.util.Map;
 
+import nextstep.jwp.exception.HttpBodyException;
+
 public class HttpBody {
     private final String body;
     private Map<String, String> bodyParamsMap = new HashMap<>();
@@ -27,6 +29,6 @@ public class HttpBody {
         if (bodyParamsMap.containsKey(key)) {
             return bodyParamsMap.get(key);
         }
-        throw new IllegalArgumentException("body의 해당 키를 가지는 값이 존재하지 않습니다.");
+        throw new HttpBodyException("body의 해당 키를 가지는 값이 존재하지 않습니다.");
     }
 }

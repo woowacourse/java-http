@@ -1,12 +1,11 @@
 package nextstep.jwp;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebServer {
 
@@ -34,15 +33,15 @@ public class WebServer {
     private void handle(ServerSocket serverSocket) throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection)).start();
+            new Thread(new FrontController(connection)).start();
         }
     }
 
     public static int defaultPortIfNull(String[] args) {
         return Stream.of(args)
-                .findFirst()
-                .map(Integer::parseInt)
-                .orElse(WebServer.DEFAULT_PORT);
+            .findFirst()
+            .map(Integer::parseInt)
+            .orElse(WebServer.DEFAULT_PORT);
     }
 
     private int checkPort(int port) {

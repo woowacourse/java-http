@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
-import nextstep.HttpInputStreamReader;
+import nextstep.jwp.http.HttpInputStreamReader;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.tomcat.ServletContainer;
@@ -15,9 +15,8 @@ import org.slf4j.LoggerFactory;
 public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
-    private ServletContainer servletContainer = new ServletContainer();
-
     private final Socket connection;
+    private final ServletContainer servletContainer = new ServletContainer();
 
     public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);

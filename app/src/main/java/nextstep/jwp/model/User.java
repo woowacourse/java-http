@@ -2,10 +2,10 @@ package nextstep.jwp.model;
 
 public class User {
 
-    private long id;
     private final String account;
     private final String password;
     private final String email;
+    private long id;
 
     public User(String account, String password, String email) {
         this.account = account;
@@ -28,10 +28,10 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
-                ", account='" + account + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                '}';
+            "id=" + id +
+            ", account='" + account + '\'' +
+            ", email='" + email + '\'' +
+            ", password='" + password + '\'' +
+            '}';
     }
 }

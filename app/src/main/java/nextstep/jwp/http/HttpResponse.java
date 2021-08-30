@@ -5,7 +5,7 @@ import java.util.List;
 
 public class HttpResponse {
 
-    private List<String> header = new LinkedList<>();
+    private final List<String> header = new LinkedList<>();
     private String body;
 
     public HttpResponse() {

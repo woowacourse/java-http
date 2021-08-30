@@ -1,4 +1,4 @@
-package nextstep;
+package nextstep.jwp.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import nextstep.jwp.http.HttpRequest;
 
 public class HttpInputStreamReader {
 
@@ -31,15 +30,17 @@ public class HttpInputStreamReader {
 
         while (bufferedReader.ready()) {
             String line = bufferedReader.readLine();
-            if(line.length() == 0)
+            if (line.length() == 0) {
                 break;
+            }
 
             String[] splitHeaderLine = line.split(": ");
             httpRequestHeaders.put(splitHeaderLine[0], splitHeaderLine[1]);
         }
 
-        if(!httpRequestHeaders.containsKey("Content-Length"))
+        if (!httpRequestHeaders.containsKey("Content-Length")) {
             return new HttpRequest(httpMethod, uri, httpVersion, httpRequestHeaders, parseParameters(uri), "");
+        }
 
         int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
         char[] buffer = new char[contentLength];

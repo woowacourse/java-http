@@ -11,7 +11,7 @@ public class HttpRequest {
     private Map<String, String> parameters;
     private String body;
 
-    public HttpRequest(){
+    public HttpRequest() {
 
     }
 
@@ -29,12 +29,24 @@ public class HttpRequest {
         return httpMethod;
     }
 
+    public void setHttpMethod(String httpMethod) {
+        this.httpMethod = httpMethod;
+    }
+
     public String getUri() {
         return uri;
     }
 
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+
     public String getHttpVersion() {
         return httpVersion;
+    }
+
+    public void setHttpVersion(String httpVersion) {
+        this.httpVersion = httpVersion;
     }
 
     public String getParameterValues(String key) {
@@ -45,32 +57,20 @@ public class HttpRequest {
         return headers;
     }
 
-    public Map<String, String> getParameters() {
-        return parameters;
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    public void setHttpMethod(String httpMethod) {
-        this.httpMethod = httpMethod;
-    }
-
-    public void setUri(String uri) {
-        this.uri = uri;
-    }
-
-    public void setHttpVersion(String httpVersion) {
-        this.httpVersion = httpVersion;
-    }
-
     public void setHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
 
+    public Map<String, String> getParameters() {
+        return parameters;
+    }
+
     public void setParameters(Map<String, String> parameters) {
         this.parameters = parameters;
+    }
+
+    public String getBody() {
+        return body;
     }
 
     public void setBody(String body) {

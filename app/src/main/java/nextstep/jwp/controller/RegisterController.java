@@ -25,12 +25,8 @@ public class RegisterController extends AbstractController {
     @Override
     byte[] post(HttpRequest httpRequest) throws IOException {
         final String[] body = httpRequest.body().split("&");
-        final Map<String, String> registerInfo = new LinkedHashMap<>();
+        final Map<String, String> registerInfo = getRequestBody(body);
 
-        for (String b : body) {
-            final String[] split = b.split("=");
-            registerInfo.put(split[0].trim(), split[1].trim());
-        }
         final String account = registerInfo.get("account");
         final String password = registerInfo.get("password");
         final String email = registerInfo.get("email");
@@ -50,6 +46,15 @@ public class RegisterController extends AbstractController {
                 FileReader.file(Controller.INDEX_PAGE),
                 ContentType.findBy(Controller.INDEX_PAGE)
         );
+    }
+
+    private Map<String, String> getRequestBody(String[] body) {
+        final Map<String, String> registerInfo = new LinkedHashMap<>();
+        for (String b : body) {
+            final String[] split = b.split("=");
+            registerInfo.put(split[0].trim(), split[1].trim());
+        }
+        return registerInfo;
     }
 
     @Override

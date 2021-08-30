@@ -25,31 +25,22 @@ public class LoginController extends AbstractController {
 
     @Override
     public byte[] get(HttpRequest httpRequest) throws IOException {
-        final String uri = httpRequest.uri();
-        if (uri.contains("?")) {
-            byte[] httpRequest1 = login(httpRequest, uri);
-            if (httpRequest1 != null) {
-                return httpRequest1;
-            }
-        }
         return HttpResponse.ok(
                 FileReader.file(httpRequest.uri()),
                 ContentType.findBy(httpRequest.uri())
         );
     }
 
-    private byte[] login(HttpRequest httpRequest, String uri) throws IOException {
-        final String[] split = uri.split(QUERY_STRING_DELIMITER);
-        final String[] queryString = split[1].split(AND_DELIMITER);
-        final Map<String, String> params = new LinkedHashMap<>();
-        for (String s : queryString) {
-            final String[] param = s.split(EQUAL_DELIMITER);
-            params.put(param[0].trim(), param[1].trim());
-        }
+    @Override
+    public byte[] post(HttpRequest httpRequest) throws IOException {
+        final String[] body = httpRequest.body().split("&");
+        final Map<String, String> loginInfo = getRequestBody(body);
+
         final Optional<User> user = InMemoryUserRepository
-                .findByAccount(params.get(ACCOUNT));
+                .findByAccount(loginInfo.get(ACCOUNT));
+
         if (user.isPresent()) {
-            if (user.get().checkPassword(params.get(PASSWORD))) {
+            if (user.get().checkPassword(loginInfo.get(PASSWORD))) {
                 return HttpResponse.found(
                         FileReader.file(Controller.INDEX_PAGE),
                         ContentType.findBy(Controller.INDEX_PAGE)
@@ -62,9 +53,13 @@ public class LoginController extends AbstractController {
         );
     }
 
-    @Override
-    public byte[] post(HttpRequest httpRequest) {
-        return new byte[0];
+    private Map<String, String> getRequestBody(String[] body) {
+        final Map<String, String> registerInfo = new LinkedHashMap<>();
+        for (String b : body) {
+            final String[] split = b.split("=");
+            registerInfo.put(split[0].trim(), split[1].trim());
+        }
+        return registerInfo;
     }
 
     @Override

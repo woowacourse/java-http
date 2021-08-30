@@ -33,8 +33,8 @@ public class HttpRequest {
         return headers;
     }
 
-    public Optional<String> getRequestBody() {
-        return Optional.of(requestBody);
+    public String getRequestBody() {
+        return requestBody;
     }
 
     public static class HttpRequestBuilder {

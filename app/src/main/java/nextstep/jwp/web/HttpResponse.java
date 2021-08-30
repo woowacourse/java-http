@@ -25,6 +25,11 @@ public class HttpResponse {
         return this;
     }
 
+    public HttpResponse location(String location) {
+        headers.put("Location", location);
+        return this;
+    }
+
     public HttpResponse body(String body) {
         this.body = body;
         this.headers.put("Content-Length", Integer.toString(body.getBytes().length));

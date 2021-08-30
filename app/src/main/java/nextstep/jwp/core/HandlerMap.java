@@ -1,8 +1,6 @@
 package nextstep.jwp.core;
 
-import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.NotFoundController;
-import nextstep.jwp.controller.StaticResourceController;
+import nextstep.jwp.controller.*;
 import nextstep.jwp.web.HttpRequest;
 
 import java.net.URI;
@@ -15,6 +13,11 @@ public class HandlerMap {
     private static final Controller NOT_FOUND_CONTROLLER = new NotFoundController();
     private static final Controller STATIC_RESOURCE_CONTROLLER = new StaticResourceController();
     private static final Pattern STATIC_FILE_REQUEST_REGEX = Pattern.compile("(.html|.js|.css|.svg)$");
+
+    static {
+        HANDLER_MAP.put(URI.create("/register"), new RegisterController());
+    }
+
 
     public static Controller getController(HttpRequest request) {
         URI requestUri = request.getRequestUri();

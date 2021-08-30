@@ -3,7 +3,6 @@ package nextstep.jwp.framework.http.formatter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import nextstep.jwp.framework.http.HttpResponse;
 import nextstep.jwp.framework.http.HttpStatus;
 import nextstep.jwp.framework.http.HttpVersion;
 import nextstep.jwp.framework.http.StatusLine;
@@ -18,8 +17,7 @@ class StatusLineFormatterTest {
 
         // given
         final StatusLine statusLine = new StatusLine(HttpVersion.HTTP_1_1, HttpStatus.OK);
-        final HttpResponse httpResponse = new HttpResponse.Builder().statusLine(statusLine).build();
-        final StatusLineFormatter statusLineFormatter = new StatusLineFormatter(httpResponse);
+        final StatusLineFormatter statusLineFormatter = new StatusLineFormatter(statusLine);
 
         // when
         final String httpStatusLine = statusLineFormatter.transform();

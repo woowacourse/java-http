@@ -60,11 +60,11 @@ public class HttpRequest implements HttpMessage {
                                                                  .overwrite(EMPTY)
                                                                  .build();
 
-        HttpFormatter httpFormatter = new RequestLineFormatter(httpRequest);
+        HttpFormatter httpFormatter = new RequestLineFormatter(httpRequest.requestLine);
         StringBuilder stringBuilder = new StringBuilder();
         while (httpFormatter.canRead()) {
             stringBuilder.append(httpFormatter.transform());
-            httpFormatter = httpFormatter.convertNextFormatter();
+            httpFormatter = httpFormatter.convertNextFormatter(httpRequest);
         }
         return stringBuilder.toString();
     }

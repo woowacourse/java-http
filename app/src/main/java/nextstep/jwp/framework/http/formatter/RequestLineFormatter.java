@@ -1,24 +1,20 @@
 package nextstep.jwp.framework.http.formatter;
 
-import java.util.Objects;
-
-import nextstep.jwp.framework.http.HttpRequest;
+import nextstep.jwp.framework.http.HttpMessage;
 import nextstep.jwp.framework.http.RequestLine;
 
-public class RequestLineFormatter extends AbstractHttpFormatter {
+public class RequestLineFormatter implements HttpFormatter {
 
     public static final String REQUEST_LINE_FORMAT = "%s %s %s\r\n";
 
-    private final HttpRequest httpRequest;
+    private final RequestLine requestLine;
 
-    public RequestLineFormatter(HttpRequest httpRequest) {
-        super(httpRequest);
-        this.httpRequest = Objects.requireNonNull(httpRequest);
+    public RequestLineFormatter(RequestLine requestLine) {
+        this.requestLine = requestLine;
     }
 
     @Override
     public String transform() {
-        final RequestLine requestLine = httpRequest.getRequestLine();
         return String.format(REQUEST_LINE_FORMAT,
                 requestLine.getMethod(),
                 requestLine.getPath(),
@@ -26,7 +22,7 @@ public class RequestLineFormatter extends AbstractHttpFormatter {
     }
 
     @Override
-    public HttpFormatter convertNextFormatter() {
-        return new HeaderFormatter(httpRequest);
+    public HttpFormatter convertNextFormatter(HttpMessage httpMessage) {
+        return new HeaderFormatter(httpMessage.getHttpHeaders());
     }
 }

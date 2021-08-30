@@ -40,11 +40,11 @@ public class HttpResponse implements HttpMessage {
     }
 
     public String readAsString(HttpResponse httpResponse) {
-        HttpFormatter httpFormatter = new StatusLineFormatter(httpResponse);
+        HttpFormatter httpFormatter = new StatusLineFormatter(httpResponse.statusLine);
         StringBuilder stringBuilder = new StringBuilder();
         while (httpFormatter.canRead()) {
             stringBuilder.append(httpFormatter.transform());
-            httpFormatter = httpFormatter.convertNextFormatter();
+            httpFormatter = httpFormatter.convertNextFormatter(httpResponse);
         }
         return stringBuilder.toString();
     }

@@ -3,19 +3,20 @@ package nextstep.jwp.framework.http.formatter;
 import nextstep.jwp.framework.http.HttpHeaders;
 import nextstep.jwp.framework.http.HttpMessage;
 
-public class HeaderFormatter extends AbstractHttpFormatter {
+public class HeaderFormatter implements HttpFormatter {
 
     private static final String CRLF = "\r\n";
 
     private static final String HEADER_LINE_FORMAT = "%s: %s " + CRLF;
 
-    public HeaderFormatter(HttpMessage httpMessage) {
-        super(httpMessage);
+    private final HttpHeaders httpHeaders;
+
+    public HeaderFormatter(HttpHeaders httpHeaders) {
+        this.httpHeaders = httpHeaders;
     }
 
     @Override
     public String transform() {
-        final HttpHeaders httpHeaders = httpMessage.getHttpHeaders();
         StringBuilder headers = new StringBuilder();
         httpHeaders.getHeaders()
                    .forEach((key, value) -> headers.append(String.format(HEADER_LINE_FORMAT, key, value)));
@@ -23,7 +24,7 @@ public class HeaderFormatter extends AbstractHttpFormatter {
     }
 
     @Override
-    public HttpFormatter convertNextFormatter() {
-        return new BodyFormatter(httpMessage);
+    public HttpFormatter convertNextFormatter(HttpMessage httpMessage) {
+        return new BodyFormatter(httpMessage.getBody());
     }
 }

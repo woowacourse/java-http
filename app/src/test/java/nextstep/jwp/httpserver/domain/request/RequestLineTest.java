@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("StartLine 단위 테스트")
-class StartLineTest {
+class RequestLineTest {
 
     @Test
     @DisplayName("Http request start line 나누기")
@@ -20,12 +20,12 @@ class StartLineTest {
         String firstLine = "GET /index.html HTTP/1.1";
 
         // when
-        StartLine startLine = StartLine.from(firstLine);
+        RequestLine requestLine = RequestLine.from(firstLine);
 
         // then
-        assertThat(startLine.getHttpMethod()).isEqualTo(HttpMethod.GET);
-        assertThat(startLine.getRequestTarget()).isEqualTo("/index.html");
-        assertThat(startLine.getHttpVersion()).isEqualTo(HttpVersion.HTTP_1_1);
+        assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.GET);
+        assertThat(requestLine.getRequestTarget()).isEqualTo("/index.html");
+        assertThat(requestLine.getHttpVersion()).isEqualTo(HttpVersion.HTTP_1_1);
     }
 
     @Test
@@ -33,10 +33,10 @@ class StartLineTest {
     void isPost() {
         // given
         String firstLine = "POST /login HTTP/1.1";
-        StartLine startLine = StartLine.from(firstLine);
+        RequestLine requestLine = RequestLine.from(firstLine);
 
         // when
-        boolean isPost = startLine.isPost();
+        boolean isPost = requestLine.isPost();
 
         // then
         assertTrue(isPost);
@@ -47,10 +47,10 @@ class StartLineTest {
     void isNotPost() {
         // given
         String firstLine = "GET /index.html HTTP/1.1";
-        StartLine startLine = StartLine.from(firstLine);
+        RequestLine requestLine = RequestLine.from(firstLine);
 
         // when
-        boolean isPost = startLine.isPost();
+        boolean isPost = requestLine.isPost();
 
         // then
         assertFalse(isPost);

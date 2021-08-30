@@ -10,7 +10,7 @@ import java.util.Map;
 import nextstep.jwp.httpserver.domain.Body;
 import nextstep.jwp.httpserver.domain.Headers;
 import nextstep.jwp.httpserver.domain.request.HttpRequest;
-import nextstep.jwp.httpserver.domain.request.StartLine;
+import nextstep.jwp.httpserver.domain.request.RequestLine;
 
 public class HttpRequestParser {
     private static final String LAST_HEADER_SYMBOL = "";
@@ -21,11 +21,11 @@ public class HttpRequestParser {
     public static HttpRequest parse(InputStream inputStream) throws IOException {
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-        final StartLine startLine = StartLine.from(bufferedReader.readLine());
+        final RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
         final Headers headers = extractAllHeaders(bufferedReader);
-        final Body body = extractRequestBody(startLine, headers, bufferedReader);
+        final Body body = extractRequestBody(requestLine, headers, bufferedReader);
 
-        return new HttpRequest(startLine, headers, body);
+        return new HttpRequest(requestLine, headers, body);
     }
 
     private static Headers extractAllHeaders(BufferedReader bufferedReader) throws IOException {
@@ -44,11 +44,11 @@ public class HttpRequestParser {
         return new Headers(headers);
     }
 
-    private static Body extractRequestBody(StartLine startLine, Headers headers, BufferedReader bufferedReader) throws IOException {
+    private static Body extractRequestBody(RequestLine requestLine, Headers headers, BufferedReader bufferedReader) throws IOException {
         final Map<String, String> param = new HashMap<>();
         int contentLength = Integer.parseInt(headers.contentLength());
 
-        if (startLine.isPost() && contentLength > 0) {
+        if (requestLine.isPost() && contentLength > 0) {
             getParameter(bufferedReader, param, contentLength);
         }
 

@@ -7,30 +7,30 @@ import nextstep.jwp.httpserver.domain.Headers;
 import nextstep.jwp.httpserver.domain.HttpMethod;
 
 public class HttpRequest {
-    private final StartLine startLine;
+    private final RequestLine requestLine;
     private final Headers headers;
     private final Body body;
 
-    public HttpRequest(StartLine startLine, Headers headers, Body body) {
-        this.startLine = startLine;
+    public HttpRequest(RequestLine requestLine, Headers headers, Body body) {
+        this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
     }
 
     public String getRequestUri() {
-        return startLine.getRequestTarget();
+        return requestLine.getRequestTarget();
     }
 
     public HttpMethod getHttpMethod() {
-        return startLine.getHttpMethod();
+        return requestLine.getHttpMethod();
     }
 
     public Map<String, String> getBodyToMap() {
         return body.getBody();
     }
 
-    public StartLine getStartLine() {
-        return startLine;
+    public RequestLine getStartLine() {
+        return requestLine;
     }
 
     public Headers getHeaders() {

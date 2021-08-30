@@ -14,8 +14,8 @@ public class HttpResponse implements HttpMessage {
     private final String responseBody;
 
     public HttpResponse(StatusLine statusLine, HttpHeaders httpHeaders, String responseBody) {
-        this.statusLine = statusLine;
-        this.httpHeaders = httpHeaders;
+        this.statusLine = Objects.requireNonNull(statusLine);
+        this.httpHeaders = Objects.requireNonNull(httpHeaders);
         this.responseBody = Objects.requireNonNullElse(responseBody, EMPTY);
     }
 

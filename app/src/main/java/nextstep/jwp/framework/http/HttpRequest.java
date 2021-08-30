@@ -3,6 +3,7 @@ package nextstep.jwp.framework.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.Objects;
 
 import nextstep.jwp.framework.http.formatter.HttpFormatter;
 import nextstep.jwp.framework.http.formatter.RequestLineFormatter;
@@ -17,9 +18,9 @@ public class HttpRequest implements HttpMessage {
     private final String requestBody;
 
     public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders, String requestBody) {
-        this.requestLine = requestLine;
-        this.httpHeaders = httpHeaders;
-        this.requestBody = requestBody;
+        this.requestLine = Objects.requireNonNull(requestLine);
+        this.httpHeaders = Objects.requireNonNull(httpHeaders);
+        this.requestBody = Objects.requireNonNullElse(requestBody, EMPTY);
     }
 
     public static HttpRequest from(InputStream inputStream) throws IOException {

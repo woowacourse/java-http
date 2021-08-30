@@ -1,5 +1,7 @@
 package nextstep.jwp.framework.http.formatter;
 
+import java.util.Objects;
+
 import nextstep.jwp.framework.http.HttpRequest;
 import nextstep.jwp.framework.http.RequestLine;
 
@@ -11,7 +13,7 @@ public class RequestLineFormatter extends AbstractHttpFormatter {
 
     public RequestLineFormatter(HttpRequest httpRequest) {
         super(httpRequest);
-        this.httpRequest = httpRequest;
+        this.httpRequest = Objects.requireNonNull(httpRequest);
     }
 
     @Override

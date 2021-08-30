@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 import nextstep.jwp.framework.http.HttpRequest;
 
@@ -13,7 +14,7 @@ public class HttpRequestParser {
     private final BufferedReader reader;
 
     public HttpRequestParser(InputStream inputStream) {
-        this.reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        this.reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(inputStream), StandardCharsets.UTF_8));
     }
 
     public HttpRequest parseRequest() throws IOException {

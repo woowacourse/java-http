@@ -1,5 +1,7 @@
 package nextstep.jwp.framework.http.formatter;
 
+import java.util.Objects;
+
 import nextstep.jwp.framework.http.HttpResponse;
 import nextstep.jwp.framework.http.StatusLine;
 
@@ -11,7 +13,7 @@ public class StatusLineFormatter extends AbstractHttpFormatter {
 
     public StatusLineFormatter(HttpResponse httpResponse) {
         super(httpResponse);
-        this.httpResponse = httpResponse;
+        this.httpResponse = Objects.requireNonNull(httpResponse);
     }
 
     @Override

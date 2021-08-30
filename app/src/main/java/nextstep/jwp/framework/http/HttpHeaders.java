@@ -37,7 +37,7 @@ public class HttpHeaders {
     }
 
     public HttpHeaders(Map<String, String> httpHeaders) {
-        this.headers = httpHeaders;
+        this.headers = new LinkedHashMap<>(httpHeaders);
     }
 
     public Map<String, String> getHeaders() {

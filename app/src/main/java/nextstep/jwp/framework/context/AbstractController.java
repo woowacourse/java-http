@@ -1,10 +1,12 @@
 package nextstep.jwp.framework.context;
 
+import java.util.EnumSet;
 import java.util.Set;
 
 import nextstep.jwp.framework.http.HttpMethod;
 import nextstep.jwp.framework.http.HttpRequest;
 import nextstep.jwp.framework.http.HttpResponse;
+import nextstep.jwp.framework.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,8 +19,8 @@ public abstract class AbstractController implements Controller {
     protected final Set<HttpMethod> handlingMethod;
 
     protected AbstractController(String mappingUri, Set<HttpMethod> handlingMethod) {
-        this.mappingUri = mappingUri;
-        this.handlingMethod = handlingMethod;
+        this.mappingUri = StringUtils.requireNonBlank(mappingUri);
+        this.handlingMethod = EnumSet.copyOf(handlingMethod);
     }
 
     @Override

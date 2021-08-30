@@ -1,6 +1,9 @@
 package nextstep.jwp.framework.http;
 
 import java.util.Map;
+import java.util.Objects;
+
+import nextstep.jwp.framework.util.StringUtils;
 
 public class URI {
 
@@ -16,8 +19,8 @@ public class URI {
     }
 
     public URI(String path, Query query) {
-        this.path = path;
-        this.query = query;
+        this.path = StringUtils.requireNonBlank(path);
+        this.query = Objects.requireNonNull(query);
     }
 
     public String getPath() {

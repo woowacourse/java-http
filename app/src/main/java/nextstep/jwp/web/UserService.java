@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.web;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnauthorizedException;

@@ -10,7 +10,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
-import nextstep.jwp.UserController;
+import nextstep.jwp.exception.CustomException;
+import nextstep.jwp.web.ControllerAdvice;
+import nextstep.jwp.web.UserController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +37,24 @@ public class RequestHandler implements Runnable {
                 final OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = extractHttpRequest(reader);
-            String response = "";
 
+            String response = handle(httpRequest);
+
+            log.debug("outputStream => {}", response);
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+        } catch (IllegalStateException exception) {
+            log.info("IllegalStateException {}", exception.getMessage());
+        } catch (IOException exception) {
+            log.error("Exception stream", exception);
+        } finally {
+            close();
+        }
+    }
+
+    private String handle(HttpRequest httpRequest) throws IOException {
+        String response = "";
+        try {
             if (checkIfUriHasResourceExtension(httpRequest.uri())) {
                 response = resolveResourceRequest(httpRequest);
             }
@@ -56,25 +74,19 @@ public class RequestHandler implements Runnable {
                     response = userController.register(RequestParam.of(httpRequest.payload()));
                 }
             }
-
-            log.debug("outputStream => {}", response);
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IllegalStateException exception) {
-            log.info("IllegalStateException {}", exception.getMessage());
-        } catch (IOException exception) {
-            log.error("Exception stream", exception);
-        } finally {
-            close();
+        } catch (Exception exception) {
+            return ControllerAdvice.handle(exception);
         }
+
+        return response;
     }
 
     private HttpRequest extractHttpRequest(BufferedReader reader) throws IOException {
-        String firstLine = reader.readLine();
+        String requestLine = reader.readLine();
 
-        String[] firstTokens = firstLine.split(" ");
-        String method = firstTokens[0];
-        String uri = firstTokens[1];
+        String[] tokens = requestLine.split(" ");
+        String method = tokens[0];
+        String uri = tokens[1];
 
         HttpRequest httpRequest = new HttpRequest(method, uri);
 
@@ -87,7 +99,7 @@ public class RequestHandler implements Runnable {
             line = reader.readLine();
         }
 
-        if ("POST".equals(httpRequest.method()) || "PUT".equals(httpRequest.method())) {
+        if (httpRequest.headers().containsKey("Content-Length")) {
             int contentLength = Integer.parseInt(httpRequest.headers().get("Content-Length"));
             char[] buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);

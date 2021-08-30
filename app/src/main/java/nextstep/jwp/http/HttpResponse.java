@@ -22,8 +22,23 @@ public class HttpResponse {
                 "Location: " + redirectTo);
     }
 
+    public static String badRequest() {
+        return String.join("\r\n",
+                "HTTP/1.1 400 Bad Request ");
+    }
+
     public static String unauthorized() {
         return String.join("\r\n",
                 "HTTP/1.1 401 Unauthorized ");
+    }
+
+    public static String notFound() {
+        return String.join("\r\n",
+                "HTTP/1.1 404 Not Found ");
+    }
+
+    public static String internalServerError() {
+        return String.join("\r\n",
+                "HTTP/1.1 500 Internal Server Error ");
     }
 }

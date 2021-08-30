@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.web;
 
 import static nextstep.jwp.http.HttpResponse.found;
 import static nextstep.jwp.http.HttpResponse.redirect;
@@ -29,7 +29,7 @@ public class UserController {
         return resolveView("register");
     }
 
-    public String register(RequestParam params) throws IOException {
+    public String register(RequestParam params) {
         userService.save(params.get("account"), params.get("password"), params.get("email"));
         return redirect("/index.html");
     }

@@ -1,15 +1,14 @@
 package nextstep.jwp;
 
-import nextstep.jwp.http.RequestHandler;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import nextstep.jwp.http.RequestHandler;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
 
@@ -99,7 +98,7 @@ class RequestHandlerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
-        String expected = "HTTP/1.1 404 NOT FOUND \r\n" +
+        String expected = "HTTP/1.1 404 Not Found \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 2475 \r\n" +
                 "\r\n" +
@@ -125,7 +124,7 @@ class RequestHandlerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/401.html");
-        String expected = "HTTP/1.1 401 UNAUTHORIZED \r\n" +
+        String expected = "HTTP/1.1 401 Unauthorized \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 2476 \r\n" +
                 "\r\n" +
@@ -151,7 +150,7 @@ class RequestHandlerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/500.html");
-        String expected = "HTTP/1.1 500 INTERNAL_SERVER_ERROR \r\n" +
+        String expected = "HTTP/1.1 500 Internal Server Error \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 2406 \r\n" +
                 "\r\n" +
@@ -206,7 +205,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
+        String expected = "HTTP/1.1 302  Found \r\n" +
                 "Location: /index.html \r\n" +
                 "\r\n";
         assertThat(socket.output()).containsIgnoringWhitespaces(expected);
@@ -309,7 +308,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
+        String expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: /index.html \r\n" +
                 "\r\n";
         assertThat(socket.output()).containsIgnoringWhitespaces(expected);

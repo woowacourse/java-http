@@ -27,7 +27,7 @@ public class ResourceController implements Controller {
             return response.forward(path, HttpStatus.NOT_FOUND);
         }
         if (path.equals("/401.html")) {
-            return response.forward(path, HttpStatus.NOT_FOUND);
+            return response.forward(path, HttpStatus.UNAUTHORIZED);
         }
         return response.forward(request.getPath());
     }

@@ -6,11 +6,11 @@ import java.util.Objects;
 public class HttpRequest {
 
     private String method;
-    private String uri;
+    private Uri uri;
     private Map<String, String> httpHeaders;
     private RequestBody requestBody;
 
-    private HttpRequest(String method, String uri, Map<String, String> httpHeaders, RequestBody requestBody) {
+    private HttpRequest(String method, Uri uri, Map<String, String> httpHeaders, RequestBody requestBody) {
         this.method = method;
         this.uri = uri;
         this.httpHeaders = httpHeaders;
@@ -25,7 +25,7 @@ public class HttpRequest {
         return method;
     }
 
-    public String getUri() {
+    public Uri getUri() {
         return uri;
     }
 

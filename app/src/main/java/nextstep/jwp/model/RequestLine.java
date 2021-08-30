@@ -3,10 +3,10 @@ package nextstep.jwp.model;
 public class RequestLine {
 
     private final String method;
-    private final String uri;
+    private final Uri uri;
     private final String version;
 
-    public RequestLine(String method, String uri, String version) {
+    public RequestLine(String method, Uri uri, String version) {
         this.method = method;
         this.uri = uri;
         this.version = version;
@@ -16,7 +16,7 @@ public class RequestLine {
         return method;
     }
 
-    public String getUri() {
+    public Uri getUri() {
         return uri;
     }
 

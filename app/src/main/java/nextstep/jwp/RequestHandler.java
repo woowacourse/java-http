@@ -1,7 +1,9 @@
 package nextstep.jwp;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.HttpRequest;
 import nextstep.jwp.model.RequestConverter;
+import nextstep.jwp.model.Uri;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +11,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Map;
 import java.util.Objects;
 
 public class RequestHandler implements Runnable {
@@ -44,15 +47,22 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private String getResponseBody(String uri) throws IOException {
-        if (uri.equals("/")) {
+    private String getResponseBody(Uri uri) throws IOException {
+        String resource = uri.getUri();
+        Map<String, String> queryMap = uri.getQueryMap();
+        String account = queryMap.get("account");
+        log.info("가입된 회원: {}", InMemoryUserRepository.findByAccount(account));
+        if (resource.equals("/")) {
             return "Hello world!";
         }
-        URL resource = getClass().getClassLoader().getResource("static/" + uri);
-        if (resource == null) {
+        if (!resource.contains(".html")) {
+            resource += ".html";
+        }
+        URL url = getClass().getClassLoader().getResource("static/" + resource);
+        if (url == null) {
             throw new IOException("fileName으로 찾은 resource 값이 null 입니다.");
         }
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
     }
 
     private String createResponse(String responseBody) {

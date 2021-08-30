@@ -24,10 +24,14 @@ public class RequestConverter {
             line = bufferedReader.readLine();
         }
 
+        return createHttpRequest(requestHeaders);
+    }
+
+    private static HttpRequest createHttpRequest(StringBuilder requestHeaders) {
         String[] splitRequestHeaders = requestHeaders.toString().split(NEW_LINE);
         String[] requestLineArr = splitRequestHeaders[0].split(" ");
 
-        RequestLine requestLine = new RequestLine(requestLineArr[0], requestLineArr[1], requestLineArr[2]);
+        RequestLine requestLine = new RequestLine(requestLineArr[0], Uri.of(requestLineArr[1]), requestLineArr[2]);
         Map<String, String> httpHeaders = createRequestHeaders(splitRequestHeaders);
 
         return HttpRequest.of(requestLine, httpHeaders);

@@ -60,7 +60,6 @@ public class ControllerMapping {
             .anyMatch(constructor -> constructor.getParameterTypes().length == 0);
     }
 
-
     private Constructor<?> findNoArgumentConstructor(final Class<?> clazz) {
         return Arrays.stream(clazz.getDeclaredConstructors())
             .filter(constructor -> constructor.getParameterTypes().length == 0)

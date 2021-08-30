@@ -3,7 +3,9 @@ package nextstep.jwp;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
@@ -60,8 +62,6 @@ class HttpRequestTest {
         // given
         String statusLine = "GET /login HTTP/1.1 ";
         HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);
-
-        Map<String, String> expected = new HashMap<>();
 
         // when
         Map<String, String> queryString = httpRequest.extractURIQueryParams();
@@ -147,5 +147,51 @@ class HttpRequestTest {
         String statusLine = "POST /login HTTP/1.1 ";
         HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);
         assertThat(httpRequest.isPost()).isTrue();
+    }
+
+    @Test
+    @DisplayName("Header의 정보를 Map으로 추출한다")
+    void extractHeaders() {
+        // given
+        List<String> headerLines = Arrays.asList(
+            "Host: localhost:8080",
+            "Connection: keep-alive"
+        );
+        HttpRequest httpRequest = new HttpRequest(null, headerLines, null);
+        Map<String, String> expected = new HashMap<>();
+        expected.put("Host", "localhost:8080");
+        expected.put("Connection", "keep-alive");
+
+        // when
+        Map<String, String> actual = httpRequest.extractHeaders();
+
+        // then
+        expected.forEach((key, value) -> {
+            assertThat(actual).containsEntry(key, value);
+        });
+    }
+
+    @Test
+    @DisplayName("Cookie의 정보를 Map으로 추출한다")
+    void extractCookies() {
+        // given
+        List<String> headerLines = Arrays.asList(
+            "Host: localhost:8080",
+            "Connection: keep-alive",
+            "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46"
+        );
+        HttpRequest httpRequest = new HttpRequest(null, headerLines, null);
+        Map<String, String> expected = new HashMap<>();
+        expected.put("yummy_cookie", "choco");
+        expected.put("tasty_cookie", "strawberry");
+        expected.put("JSESSIONID", "656cef62-e3c4-40bc-a8df-94732920ed46");
+
+        // when
+        Map<String, String> actual = httpRequest.extractCookies();
+
+        // then
+        expected.forEach((key, value) -> {
+            assertThat(actual).containsEntry(key, value);
+        });
     }
 }

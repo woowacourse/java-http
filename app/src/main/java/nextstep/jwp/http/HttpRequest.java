@@ -14,6 +14,10 @@ public class HttpRequest {
     private static final int FORM_DATA_VALUE_INDEX = 1;
     private static final int QUERY_PARAMS_KEY_INDEX = 0;
     private static final int QUERY_PARAMS_VALUE_INDEX = 1;
+    private static final int HEADER_KEY_INDEX = 0;
+    private static final int HEADER_VALUE_INDEX = 1;
+    private static final int COOKIE_KEY_INDEX = 0;
+    private static final int COOKIE_KEY_VALUE = 1;
 
     private final String statusLine;
     private final String bodyLine;
@@ -71,6 +75,31 @@ public class HttpRequest {
         for (String s : splitFormData) {
             String[] split = s.split("=");
             result.put(split[FORM_DATA_KEY_INDEX], split[FORM_DATA_VALUE_INDEX]);
+        }
+        return result;
+    }
+
+    public Map<String, String> extractHeaders() {
+        Map<String, String> result = new HashMap<>();
+        for (String headerLine : headerLines) {
+            String[] split = headerLine.split(": ");
+            String key = split[HEADER_KEY_INDEX];
+            String value = split[HEADER_VALUE_INDEX];
+            result.put(key, value);
+        }
+        return result;
+    }
+
+    public Map<String, String> extractCookies() {
+        String rawCookie = extractHeaders().get("Cookie");
+        String[] cookies = rawCookie.split("; ");
+
+        Map<String, String> result = new HashMap<>();
+        for (String cookie : cookies) {
+            String[] split = cookie.split("=");
+            String key = split[COOKIE_KEY_INDEX];
+            String value = split[COOKIE_KEY_VALUE];
+            result.put(key, value);
         }
         return result;
     }

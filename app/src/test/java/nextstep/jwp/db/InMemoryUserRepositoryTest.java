@@ -44,7 +44,7 @@ class InMemoryUserRepositoryTest {
     @Test
     @DisplayName("account 가 존재하지 않는다면 null 을 반환한다.")
     void findByAccountNull() {
-        Optional<User> result = InMemoryUserRepository.findByAccount("mungto");
+        Optional<User> result = InMemoryUserRepository.findByAccount("abc");
         // then
         assertThat(result).isNotPresent();
     }

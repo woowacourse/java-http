@@ -1,6 +1,6 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.model.HttpRequest;
+import nextstep.jwp.domain.request.HttpRequest;
 
 public class RequestMapping {
 

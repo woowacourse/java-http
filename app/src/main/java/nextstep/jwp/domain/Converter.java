@@ -1,4 +1,8 @@
-package nextstep.jwp.model;
+package nextstep.jwp.domain;
+
+import nextstep.jwp.domain.request.HttpRequest;
+import nextstep.jwp.domain.request.RequestBody;
+import nextstep.jwp.domain.request.RequestLine;
 
 import java.io.BufferedReader;
 import java.io.IOException;

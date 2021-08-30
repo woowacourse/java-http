@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package nextstep.jwp.domain.response;
 
 public enum HttpStatus {
 

@@ -1,4 +1,6 @@
-package nextstep.jwp.model;
+package nextstep.jwp.domain.response;
+
+import nextstep.jwp.domain.Resource;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -60,8 +62,8 @@ public class HttpResponse {
 
     private void setProperty(HttpStatus httpStatus, String contentType, String body) {
         this.httpStatus = httpStatus;
-        this.headerMap.put("Content-Type", contentType);
-        this.headerMap.put("Content-Length", String.valueOf(body.getBytes().length));
+        this.headerMap.put(CONTENT_TYPE, contentType);
+        this.headerMap.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         this.body = body;
     }
 

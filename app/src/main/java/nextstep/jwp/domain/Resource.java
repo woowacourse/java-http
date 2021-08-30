@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package nextstep.jwp.domain;
 
 import java.io.File;
 import java.io.IOException;

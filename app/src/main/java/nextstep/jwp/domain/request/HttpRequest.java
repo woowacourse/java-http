@@ -1,4 +1,6 @@
-package nextstep.jwp.model;
+package nextstep.jwp.domain.request;
+
+import nextstep.jwp.domain.Uri;
 
 import java.util.Map;
 import java.util.Objects;

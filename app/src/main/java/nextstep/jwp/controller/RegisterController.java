@@ -1,7 +1,11 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.*;
+import nextstep.jwp.domain.*;
+import nextstep.jwp.domain.request.HttpRequest;
+import nextstep.jwp.domain.request.RequestBody;
+import nextstep.jwp.domain.response.HttpResponse;
+import nextstep.jwp.domain.response.HttpStatus;
 
 import java.io.IOException;
 import java.util.Optional;

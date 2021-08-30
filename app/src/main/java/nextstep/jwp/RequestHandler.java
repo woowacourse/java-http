@@ -2,9 +2,9 @@ package nextstep.jwp;
 
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.RequestMapping;
-import nextstep.jwp.model.HttpRequest;
-import nextstep.jwp.model.HttpResponse;
-import nextstep.jwp.model.Converter;
+import nextstep.jwp.domain.request.HttpRequest;
+import nextstep.jwp.domain.response.HttpResponse;
+import nextstep.jwp.domain.Converter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

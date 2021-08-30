@@ -21,6 +21,9 @@ public abstract class AbstractController {
         if ("GET".equals(httpRequest.method())) {
             return get(httpRequest);
         }
+        if ("POST".equals(httpRequest.method())) {
+            return post(httpRequest);
+        }
         return error(HttpError.FORBIDDEN);
     }
 }

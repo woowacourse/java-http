@@ -22,6 +22,10 @@ public class User {
         return account;
     }
 
+    public long getId() {
+        return id;
+    }
+
     @Override
     public String toString() {
         return "User{" +

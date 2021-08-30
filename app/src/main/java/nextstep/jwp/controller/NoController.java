@@ -9,18 +9,19 @@ import nextstep.jwp.http.FileReaderInStaticFolder;
 public class NoController implements Controller {
 
     @Override
-    public HttpResponse get(HttpRequest request) {
-        return renderNotFoundPage();
+    public void get(HttpRequest request, HttpResponse response) {
+        renderNotFoundPage(response);
     }
 
     @Override
-    public HttpResponse post(HttpRequest request) {
-        return renderNotFoundPage();
+    public void post(HttpRequest request, HttpResponse response) {
+        renderNotFoundPage(response);
     }
 
-    private HttpResponse renderNotFoundPage() {
+    private void renderNotFoundPage(HttpResponse response) {
         FileReaderInStaticFolder fileReaderInStaticFolder = new FileReaderInStaticFolder();
-        return new HttpResponse(HttpStatus.NOT_FOUND, fileReaderInStaticFolder.read("404.html"));
+        response.setStatus(HttpStatus.NOT_FOUND);
+        response.setBody(fileReaderInStaticFolder.read("404.html"));
     }
 
     @Override

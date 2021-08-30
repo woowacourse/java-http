@@ -14,14 +14,15 @@ public class RegisterController implements Controller {
     private static final String REGISTER_URI = "/register";
 
     @Override
-    public HttpResponse get(HttpRequest request) {
+    public void get(HttpRequest request, HttpResponse response) {
         FileReaderInStaticFolder fileReaderInStaticFolder = new FileReaderInStaticFolder();
         String htmlOfRegister = fileReaderInStaticFolder.read("register.html");
-        return new HttpResponse(HttpStatus.OK, htmlOfRegister);
+        response.setStatus(HttpStatus.OK);
+        response.setBody(htmlOfRegister);
     }
 
     @Override
-    public HttpResponse post(HttpRequest request) {
+    public void post(HttpRequest request, HttpResponse response) {
         Map<String, String> formData = request.extractFormData();
         String account = formData.get("account");
         String password = formData.get("password");
@@ -29,11 +30,11 @@ public class RegisterController implements Controller {
         if (Objects.nonNull(account) && Objects.nonNull(password) && Objects.nonNull(email)) {
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
-            HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND);
-            httpResponse.putHeader("Location", "/index.html");
-            return httpResponse;
+            response.setStatus(HttpStatus.FOUND);
+            response.putHeader("Location", "/index.html");
+            return;
         }
-        return new HttpResponse(HttpStatus.BAD_REQUEST);
+        response.setStatus(HttpStatus.BAD_REQUEST);
     }
 
     @Override

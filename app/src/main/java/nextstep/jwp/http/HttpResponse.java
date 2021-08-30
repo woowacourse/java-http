@@ -10,6 +10,10 @@ public class HttpResponse {
     private String body;
     private Map<String, String> headers = new HashMap<>();
 
+    public HttpResponse() {
+        this.status = HttpStatus.OK;
+    }
+
     public HttpResponse(HttpStatus status) {
         this(status, "");
     }
@@ -33,6 +37,14 @@ public class HttpResponse {
 
     public String getBody() {
         return body;
+    }
+
+    public void setStatus(HttpStatus status) {
+        this.status = status;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 
     @Override

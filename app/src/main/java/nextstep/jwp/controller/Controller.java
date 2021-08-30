@@ -5,9 +5,9 @@ import nextstep.jwp.http.HttpResponse;
 
 public interface Controller {
 
-    HttpResponse get(HttpRequest request);
+    void get(HttpRequest request, HttpResponse response);
 
-    HttpResponse post(HttpRequest request);
+    void post(HttpRequest request, HttpResponse response);
 
     boolean isSatisfiedBy(String httpUriPath);
 }

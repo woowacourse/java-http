@@ -31,9 +31,10 @@ public class RequestHandler implements Runnable {
                 requestReader.getRequestLines(),
                 requestReader.getBodyLine()
             );
+            HttpResponse httpResponse = new HttpResponse();
 
             if (!httpRequest.isEmptyLine()) {
-                HttpResponse httpResponse = getHttpResponse(httpRequest);
+                getHttpResponse(httpRequest, httpResponse);
                 outputStream.write(httpResponse.getBytes());
             }
             outputStream.flush();
@@ -44,13 +45,14 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private HttpResponse getHttpResponse(HttpRequest httpRequest) {
-        ViewResolver viewResolver = new ViewResolver(httpRequest);
+    private void getHttpResponse(HttpRequest httpRequest, HttpResponse httpResponse) {
+        ViewResolver viewResolver = new ViewResolver(httpRequest, httpResponse);
         if (viewResolver.isExisting()) {
-            return viewResolver.resolve();
+            viewResolver.resolve();
+            return;
         }
-        FrontControllerServlet frontControllerServlet = new FrontControllerServlet(httpRequest);
-        return frontControllerServlet.process();
+        FrontControllerServlet frontControllerServlet = new FrontControllerServlet(httpRequest, httpResponse);
+        frontControllerServlet.process();
     }
 
     private void close() {

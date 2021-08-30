@@ -14,7 +14,7 @@ class ViewResolverTest {
         // given
         String statusLine = "GET /login.html HTTP/1.1 ";
         HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);
-        ViewResolver viewResolver = new ViewResolver(httpRequest);
+        ViewResolver viewResolver = new ViewResolver(httpRequest, new HttpResponse());
 
         // when
         boolean actual = viewResolver.isExisting();
@@ -29,7 +29,7 @@ class ViewResolverTest {
         // given
         String statusLine = "GET /aaaaa.html HTTP/1.1 ";
         HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);
-        ViewResolver viewResolver = new ViewResolver(httpRequest);
+        ViewResolver viewResolver = new ViewResolver(httpRequest, new HttpResponse());
 
         // when
         boolean actual = viewResolver.isExisting();
@@ -44,13 +44,14 @@ class ViewResolverTest {
         // given
         String statusLine = "GET /login.html HTTP/1.1 ";
         HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);
-        ViewResolver viewResolver = new ViewResolver(httpRequest);
+        HttpResponse httpResponse = new HttpResponse();
+        ViewResolver viewResolver = new ViewResolver(httpRequest, httpResponse);
 
         // when
-        HttpResponse actual = viewResolver.resolve();
+        viewResolver.resolve();
 
         // then
-        assertThat(actual.getStatus()).isEqualTo(HttpStatus.OK);
+        assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -59,12 +60,13 @@ class ViewResolverTest {
         // given
         String statusLine = "GET /aaaa.html HTTP/1.1 ";
         HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);
-        ViewResolver viewResolver = new ViewResolver(httpRequest);
+        HttpResponse httpResponse = new HttpResponse();
+        ViewResolver viewResolver = new ViewResolver(httpRequest, httpResponse);
 
         // when
-        HttpResponse actual = viewResolver.resolve();
+        viewResolver.resolve();
 
         // then
-        assertThat(actual.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 }

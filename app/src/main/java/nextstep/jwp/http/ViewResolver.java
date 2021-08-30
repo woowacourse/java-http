@@ -6,9 +6,11 @@ public class ViewResolver {
 
     private boolean isExisting;
     private String staticFile;
+    private final HttpResponse httpResponse;
 
-    public ViewResolver(HttpRequest httpRequest) {
+    public ViewResolver(HttpRequest httpRequest, HttpResponse httpResponse) {
         this.isExisting = false;
+        this.httpResponse = httpResponse;
         initStaticFile(httpRequest);
         initExistingStatus();
     }
@@ -28,10 +30,13 @@ public class ViewResolver {
         return isExisting;
     }
 
-    public HttpResponse resolve() {
+    public void resolve() {
         if (isExisting) {
-            return new HttpResponse(HttpStatus.OK, staticFile);
+            httpResponse.setStatus(HttpStatus.OK);
+            httpResponse.setBody(staticFile);
+            return;
         }
-        return new HttpResponse(HttpStatus.NOT_FOUND, "404.html");
+        httpResponse.setStatus(HttpStatus.NOT_FOUND);
+        httpResponse.setBody("404.html");
     }
 }

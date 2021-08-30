@@ -18,12 +18,12 @@ public class RegisterHandler extends AbstractHandler {
     @Override
     public Response getMessage(Request request) throws IOException {
         final String responseBody = fileByPath(request.path() + FileType.HTML.extension());
-        return new Response(staticFileMessage(FileType.HTML, responseBody));
+        return staticFileMessage(FileType.HTML, responseBody);
     }
 
     @Override
     public Response postMessage(Request request) {
         registerService.register(request);
-        return new Response(redirectMessage(PathType.INDEX.resource()));
+        return redirectMessage(PathType.INDEX.resource());
     }
 }

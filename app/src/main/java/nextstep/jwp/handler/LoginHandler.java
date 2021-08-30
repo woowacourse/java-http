@@ -19,15 +19,15 @@ public class LoginHandler extends AbstractHandler {
     public Response getMessage(Request request) throws IOException {
         if (request.hasQueryString()) {
             loginService.loginByGet(request);
-            return new Response(redirectMessage(PathType.INDEX.resource()));
+            return redirectMessage(PathType.INDEX.resource());
         }
         final String responseBody = fileByPath(request.path() + FileType.HTML.extension());
-        return new Response(staticFileMessage(FileType.HTML, responseBody));
+        return staticFileMessage(FileType.HTML, responseBody);
     }
 
     @Override
     public Response postMessage(Request request) {
         loginService.loginByPost(request);
-        return new Response(redirectMessage(PathType.INDEX.resource()));
+        return redirectMessage(PathType.INDEX.resource());
     }
 }

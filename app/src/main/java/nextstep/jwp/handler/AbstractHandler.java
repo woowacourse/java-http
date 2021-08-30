@@ -23,9 +23,9 @@ public abstract class AbstractHandler implements Handler {
             }
             return postMessage(request);
         } catch (FileNotFoundException exception) {
-            return new Response(redirectMessage(PathType.NOT_FOUND.resource()));
+            return redirectMessage(PathType.NOT_FOUND.resource());
         } catch (LoginException | RegisterException exception) {
-            return new Response(redirectMessage(PathType.UNAUTHORIZED.resource()));
+            return redirectMessage(PathType.UNAUTHORIZED.resource());
         }
     }
 
@@ -37,21 +37,23 @@ public abstract class AbstractHandler implements Handler {
         throw new IllegalStateException();
     }
 
-    protected String staticFileMessage(FileType fileType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + fileType.contentType() + " ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    protected Response staticFileMessage(FileType fileType, String responseBody) {
+        return new Response.Builder()
+                .statusCode("200")
+                .statusText("OK")
+                .contentType(fileType.contentType())
+                .contentLength(responseBody.getBytes().length)
+                .body(responseBody)
+                .build();
     }
 
-    protected String redirectMessage(String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
-                "Location: " + location + " ",
-                "",
-                "");
+    protected Response redirectMessage(String location) {
+        return new Response.Builder()
+                .redirect(true)
+                .statusCode("302")
+                .statusText("FOUND")
+                .location(location)
+                .build();
     }
 
     protected String fileByPath(String requestPath) throws IOException {

@@ -9,17 +9,15 @@ public class ViewResolver {
 
     private static final String NOT_FOUND_FILE_NAME = "/404.html";
 
-    private final ClassLoader classLoader;
     private final String defaultPath;
     private final HttpResponse notFoundResponse;
 
     public ViewResolver(final String defaultPath) {
-        this.classLoader = getClass().getClassLoader();
         this.defaultPath = defaultPath;
-        this.notFoundResponse = notFoundResponse(classLoader, defaultPath);
+        this.notFoundResponse = notFoundResponse(defaultPath);
     }
 
-    private static HttpResponse notFoundResponse(final ClassLoader classLoader, final String defaultPath) {
+    private static HttpResponse notFoundResponse(final String defaultPath) {
         final ResourceView notFoundView = new ResourceView(HttpStatusCode.NOT_FOUND, NOT_FOUND_FILE_NAME);
 
         return notFoundView.httpResponse(defaultPath)

@@ -19,7 +19,6 @@ class ThreadTest {
             final int finalI = i;
             service.execute(() -> {
                 counter.increment();
-                System.out.println(String.format("%d 스레드 running", finalI));
                 latch.countDown();
             });
         }
@@ -37,7 +36,6 @@ class ThreadTest {
             final int finalI = i;
             service.submit(() -> {
                 counter.increment();
-                System.out.println(String.format("%d 스레드 running", finalI));
                 latch.countDown();
             });
         }

@@ -24,7 +24,7 @@ public class RequestMapping {
             new MethodUrl(GET, "/index"), new WelcomeController(),
             new MethodUrl(GET, "/login"), new LoginController(),
             new MethodUrl(POST, "/login"), new LoginController(),
-            new MethodUrl(GET, "/register"), new LoginController(),
+            new MethodUrl(GET, "/register"), new RegisterController(),
             new MethodUrl(POST, "/register"), new RegisterController()
         );
     }

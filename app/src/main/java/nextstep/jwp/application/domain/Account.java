@@ -19,13 +19,6 @@ public class Account {
     }
 
     @Override
-    public String toString() {
-        return "Account{" +
-            "value='" + value + '\'' +
-            '}';
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;

@@ -8,11 +8,13 @@ public class MethodUrl {
     private final String url;
     private final QueryParams queryParams;
 
-    public MethodUrl(HttpMethod method, String url) {
+    public MethodUrl(HttpMethod method,
+                     String url) {
         this(method, url, QueryParams.empty());
     }
 
-    public MethodUrl(HttpMethod method, String url,
+    public MethodUrl(HttpMethod method,
+                     String url,
                      QueryParams queryParams) {
         this.method = method;
         this.url = url;

@@ -11,7 +11,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 class HtmlResolverTest {
 
-    @DisplayName("html파일이 존재하는 url이 들어오면 isSuitable에서 반환하는지 확인")
+    @DisplayName("html파일이 존재하는 url이 들어오면 isExist에서 제대로 된 결과를 반환하는지 확인")
     @ParameterizedTest
     @CsvSource({"wedge/good/index, false", "foo/foofoo, false", "abc.html, false", "nextstep, true"})
     void isSuitableTest(String filePath, boolean expectedResult) {

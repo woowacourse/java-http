@@ -24,12 +24,12 @@ public class HttpRequest {
 
     private final HttpHeaders headers;
     private final HttpProtocol protocol;
-    private final MethodUrl methodUrl;
+    private MethodUrl methodUrl;
     private final HttpRequestBody<?> body;
 
-    private HttpRequest(HttpHeaders headers, HttpProtocol protocol,
-                        MethodUrl methodUrl,
-                        HttpRequestBody<?> body) {
+    public HttpRequest(HttpHeaders headers, HttpProtocol protocol,
+                       MethodUrl methodUrl,
+                       HttpRequestBody<?> body) {
         this.headers = headers;
         this.protocol = protocol;
         this.methodUrl = methodUrl;
@@ -70,8 +70,8 @@ public class HttpRequest {
         return this.body;
     }
 
-    public HttpRequest changeMethodUrl(MethodUrl methodUrl) {
-        return new HttpRequest(headers, protocol, methodUrl, body);
+    public void changeMethodUrl(MethodUrl methodUrl) {
+        this.methodUrl = methodUrl;
     }
 
     @Override

@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 
 public class FileReader {
 
+    // todo FileReader 추상화 또는 메소드 압축 및 얘외 처리 학습 이후 개선
     public static File readFile(String fileUri) throws FileNotFoundException {
         URL resourceUrl = getFileUri("static" + fileUri);
 

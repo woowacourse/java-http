@@ -29,6 +29,7 @@ public class HttpBody {
         if (bodyParamsMap.containsKey(key)) {
             return bodyParamsMap.get(key);
         }
+        // todo HTTP Message 객체 내부에서 발생하는 예외를 어떻게 다룰지 처리는 어디서, 어떻게 할 지 고민
         throw new HttpBodyException("body의 해당 키를 가지는 값이 존재하지 않습니다.");
     }
 }

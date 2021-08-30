@@ -44,7 +44,7 @@ public class HeaderParser extends AbstractHttpParser {
             final List<String> header = separateNameAndValue(headerLine);
             final String name = header.get(NAME_INDEX).trim();
             final String values = header.get(VALUES_INDEX).trim();
-            builder.header(name, values);
+            builder.httpHeaders(name, values);
         }
 
         return new BodyParser(reader, builder);

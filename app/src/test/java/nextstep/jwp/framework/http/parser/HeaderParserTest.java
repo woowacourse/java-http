@@ -28,7 +28,7 @@ class HeaderParserTest {
 
         //then
         HttpRequest expected = new HttpRequest.Builder().requestLine(requestLine)
-                                                        .header("Host", "localhost:8080")
+                                                        .httpHeaders("Host", "localhost:8080")
                                                         .build();
 
         assertThat(httpRequest).usingRecursiveComparison().isEqualTo(expected);
@@ -49,8 +49,8 @@ class HeaderParserTest {
 
         //then
         HttpRequest expected = new HttpRequest.Builder().requestLine(requestLine)
-                                                        .header(HttpHeaders.HOST, "localhost:8080")
-                                                        .header(HttpHeaders.CONNECTION, "keep-alive")
+                                                        .httpHeaders(HttpHeaders.HOST, "localhost:8080")
+                                                        .httpHeaders(HttpHeaders.CONNECTION, "keep-alive")
                                                         .build();
 
         assertThat(httpRequest).usingRecursiveComparison().isEqualTo(expected);

@@ -3,7 +3,6 @@ package nextstep.jwp.controller;
 import nextstep.jwp.application.UserService;
 import nextstep.jwp.model.httpmessage.request.HttpRequest;
 import nextstep.jwp.model.httpmessage.response.HttpResponse;
-import nextstep.jwp.util.FileUtils;
 
 import java.io.IOException;
 

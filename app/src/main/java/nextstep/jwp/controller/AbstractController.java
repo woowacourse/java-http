@@ -13,10 +13,11 @@ public abstract class AbstractController implements Controller {
 
         if (method.isPost()) {
             doPost(request, response);
-            return;
         }
 
-        doGet(request, response);
+        if (method.isGet()) {
+            doGet(request, response);
+        }
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {

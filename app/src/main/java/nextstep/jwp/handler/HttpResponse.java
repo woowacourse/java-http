@@ -8,8 +8,8 @@ import nextstep.jwp.util.File;
 public class HttpResponse {
     public static final String LOCATION_HEADER = "Location";
 
-    final private String httpVersion;
-    final private HttpHeader httpHeader;
+    private final String httpVersion;
+    private final HttpHeader httpHeader;
     
     private HttpStatus httpStatus;
     private String body;

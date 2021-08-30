@@ -10,8 +10,8 @@ public enum ResponseHeaderType {
         this.value = value;
     }
 
-    public String value() {
+    @Override
+    public String toString() {
         return value;
     }
-
 }

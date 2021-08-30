@@ -50,9 +50,10 @@ public class RequestLine {
     }
 
     public String getParameter(String param) {
-        if (!params.containsKey(param)) {
-            throw new IllegalArgumentException("해당 쿼리 파라미터가 존재하지 않습니다. (입력 : " + param + ")");
-        }
-        return params.get(param);
+        return params.computeIfAbsent(param, key -> something(param));
+    }
+
+    private String something(String param) {
+        throw new IllegalArgumentException("해당 쿼리 파라미터가 존재하지 않습니다. (입력 : " + param + ")");
     }
 }

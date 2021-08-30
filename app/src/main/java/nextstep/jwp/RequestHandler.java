@@ -163,16 +163,13 @@ public class RequestHandler implements Runnable {
     private Map<String, String> getParsedRequestHeaders(BufferedReader bufferedReader)
             throws IOException {
 
-
         final Map<String, String> parsedRequests = new HashMap<>();
 
-        if (bufferedReader.ready()) {
-            String requestLine = bufferedReader.readLine();
-            String[] splitHeader = requestLine.split(" ");
-            parsedRequests.put("httpMethod", splitHeader[0]);
-            parsedRequests.put("uri", splitHeader[1]);
-            parsedRequests.put("httpVersion", splitHeader[2]);
-        }
+        String requestLine = bufferedReader.readLine();
+        String[] splitRequestLine = requestLine.split(" ");
+        parsedRequests.put("httpMethod", splitRequestLine[0]);
+        parsedRequests.put("uri", splitRequestLine[1]);
+        parsedRequests.put("httpVersion", splitRequestLine[2]);
 
         while (bufferedReader.ready()) {
             String headers = bufferedReader.readLine();

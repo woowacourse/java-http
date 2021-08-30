@@ -5,7 +5,7 @@ import static nextstep.jwp.web.http.response.HttpStatus.NOT_FOUND;
 import static nextstep.jwp.web.http.response.HttpStatus.OK;
 
 import java.util.List;
-import nextstep.jwp.web.exception.NotFoundException;
+import java.util.NoSuchElementException;
 import nextstep.jwp.web.http.MimeType;
 import nextstep.jwp.web.http.request.HttpRequest;
 import nextstep.jwp.web.http.response.HttpResponse;
@@ -54,7 +54,7 @@ public class WebStatusHandler implements WebHandler {
                 return dataResolver.resolve(filePath);
             }
         }
-        throw new NotFoundException(
+        throw new NoSuchElementException(
             String.format("해당 타입의 파일이 없습니다. 요청받은 accept -> %s, filepath -> %s", acceptType,
                 filePath));
     }

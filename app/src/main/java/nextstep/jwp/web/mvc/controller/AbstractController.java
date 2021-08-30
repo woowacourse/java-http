@@ -5,7 +5,7 @@ import nextstep.jwp.web.http.request.HttpMethod;
 import nextstep.jwp.web.http.request.HttpRequest;
 import nextstep.jwp.web.http.response.HttpResponse;
 
-public class AbstractController implements Controller {
+public abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {

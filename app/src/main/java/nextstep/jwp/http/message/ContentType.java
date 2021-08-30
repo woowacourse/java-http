@@ -5,7 +5,8 @@ import java.util.Arrays;
 public enum ContentType {
     HTML("text/html;charset=utf-8", "html"),
     JAVASCRIPT("text/javascript", "js"),
-    CSS("text/css", "css");
+    CSS("text/css", "css"),
+    SVG("image/svg+xml", "svg");
 
     private String description;
     private String extension;

@@ -1,9 +1,9 @@
 package nextstep.jwp.exception;
 
-public class InternalServerError extends RuntimeException {
+public class InternalServerErrorException extends RuntimeException {
     private static final String MSG = "서버 에러 - 500";
 
-    public InternalServerError() {
+    public InternalServerErrorException() {
         super(MSG);
     }
 }

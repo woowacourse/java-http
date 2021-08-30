@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.context.ApplicationContext;
-import nextstep.jwp.exception.InternalServerError;
+import nextstep.jwp.exception.InternalServerErrorException;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.message.HttpHeaders;
 import nextstep.jwp.http.message.HttpMethod;
@@ -32,7 +32,7 @@ public class HttpParser {
 
             return new HttpRequestImpl(headers, requestLine, body);
         } catch (IOException e) {
-            throw new InternalServerError();
+            throw new InternalServerErrorException();
         }
     }
 

@@ -56,6 +56,20 @@ public class RequestHandler implements Runnable {
             request = HttpParser.parse(inputStream);
             request.setApplicationContext(applicationContext);
 
+            doDispatch(request, response);
+
+            outputStream.write(response.asString().getBytes());
+            outputStream.flush();
+        } catch (IOException exception) {
+            log.error("Exception stream", exception);
+        } finally {
+            close();
+        }
+    }
+
+    private void doDispatch(HttpRequest request, HttpResponse response) {
+        try {
+
             if (log.isDebugEnabled()) {
                 log.debug("\r\n============== request ==============\r\n{}", request.asString());
             }
@@ -70,15 +84,12 @@ public class RequestHandler implements Runnable {
                 log.debug("\r\n============== response ==============\r\n{}", response.asString());
             }
 
-            outputStream.write(response.asString().getBytes());
-            outputStream.flush();
-        } catch (IOException exception) {
-            log.error("Exception stream", exception);
+        } catch (NotFoundException e) {
+            log.error("NotFoundException", e);
+            renderErrorPage("./static/404.html", HttpStatus.NOT_FOUND, response);
         } catch (Exception e) {
             log.error("Exception server", e);
-            renderInternalServerError(response);
-        } finally {
-            close();
+            renderErrorPage("./static/500.html", HttpStatus.INTERNAL_SERVER_ERROR, response);
         }
     }
 
@@ -98,8 +109,8 @@ public class RequestHandler implements Runnable {
             .orElseThrow();
     }
 
-    private void renderInternalServerError(HttpResponse response) {
-        URL fileResource = getClass().getClassLoader().getResource("./static/500.html");
+    private void renderErrorPage(String errorPageUri, HttpStatus status,  HttpResponse response) {
+        URL fileResource = getClass().getClassLoader().getResource(errorPageUri);
         Path path = Paths.get(fileResource.getPath());
         try (InputStream fileInputStream = new FileInputStream(path.toFile())) {
             byte[] bytes = fileInputStream.readAllBytes();
@@ -115,13 +126,12 @@ public class RequestHandler implements Runnable {
         headers.addHeader("Content-Length", String.valueOf(response.getContentAsString().length()));
 
         response.setHeaders(headers);
-        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        response.setStatus(status);
         response.setVersionOfProtocol("HTTP/1.1");
     }
 
     private void close() {
         try {
-
             connection.close();
         } catch (IOException exception) {
             log.error("Exception closing socket", exception);

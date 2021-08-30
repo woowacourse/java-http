@@ -1,7 +1,7 @@
 package nextstep.jwp.http.message;
 
 import java.util.Optional;
-import nextstep.jwp.exception.InternalServerError;
+import nextstep.jwp.exception.HttpRequestFormatException;
 
 public class HttpRequestLine {
 
@@ -25,7 +25,7 @@ public class HttpRequestLine {
     private void parse(String requestLine) {
         String[] splittedRequestLine = requestLine.split(" ");
         if (splittedRequestLine.length != 3) {
-            throw new InternalServerError();
+            throw new HttpRequestFormatException();
         }
         method = HttpMethod.of(splittedRequestLine[0]);
         uri = splittedRequestLine[1];

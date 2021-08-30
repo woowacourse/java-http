@@ -2,16 +2,9 @@ package nextstep.jwp.controller;
 
 import java.util.Arrays;
 import java.util.List;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.infrastructure.http.HttpHeaders;
 import nextstep.jwp.infrastructure.http.request.HttpMethod;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
-import nextstep.jwp.infrastructure.http.request.URI;
-import nextstep.jwp.infrastructure.http.response.HttpResponse;
-import nextstep.jwp.infrastructure.http.response.HttpStatusCode;
-import nextstep.jwp.infrastructure.http.response.HttpStatusLine;
-import nextstep.jwp.infrastructure.http.view.HttpResponseView;
 import nextstep.jwp.infrastructure.http.view.ResourceView;
 import nextstep.jwp.infrastructure.http.view.View;
 

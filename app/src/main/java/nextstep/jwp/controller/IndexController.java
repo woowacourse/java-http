@@ -6,7 +6,7 @@ import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
 import nextstep.jwp.infrastructure.http.view.ResourceView;
 import nextstep.jwp.infrastructure.http.view.View;
 
-public class IndexController implements Controller{
+public class IndexController implements Controller {
 
     @Override
     public HttpRequestLine requestLine() {

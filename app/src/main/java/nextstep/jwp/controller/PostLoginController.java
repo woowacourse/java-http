@@ -10,7 +10,6 @@ import nextstep.jwp.infrastructure.http.objectmapper.UrlEncodingMapper;
 import nextstep.jwp.infrastructure.http.request.HttpMethod;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
-import nextstep.jwp.infrastructure.http.request.URI;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.infrastructure.http.response.HttpStatusCode;
 import nextstep.jwp.infrastructure.http.response.HttpStatusLine;

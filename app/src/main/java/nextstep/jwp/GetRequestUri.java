@@ -40,7 +40,7 @@ public enum GetRequestUri {
             return GetRequestUri.createResponse(REGISTER.httpRequestUri + ".html", "200 OK", "text/html");
         }
     },
-    NOT_FOUND(null) {
+    NOT_FOUND("") {
         @Override
         public String create() throws IOException {
             return GetRequestUri.createResponse("/404.html", "404 Not Found", "text/html");

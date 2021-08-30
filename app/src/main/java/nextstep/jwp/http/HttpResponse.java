@@ -1,15 +1,14 @@
-package nextstep.jwp;
+package nextstep.jwp.http;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class HttpResponse {
 
-    List<String> header = new LinkedList<>();
-    String body;
+    private List<String> header = new LinkedList<>();
+    private String body;
 
-    public HttpResponse(String version, String statusCode, String statusMessage) {
-        header.add(version + " " + statusCode + " " + statusMessage + " ");
+    public HttpResponse() {
     }
 
     public byte[] getBytes() {
@@ -18,6 +17,10 @@ public class HttpResponse {
             response += body;
         }
         return response.getBytes();
+    }
+
+    public void addStartLine(String version, String statusCode, String statusMessage) {
+        header.add(0, version + " " + statusCode + " " + statusMessage + " ");
     }
 
     public void addLocation(String location) {
@@ -36,7 +39,6 @@ public class HttpResponse {
         addContentLength(body.length());
         this.body = "\r\n\r\n" + body;
     }
-
 
     public void setBody(String body) {
         this.body = body;

@@ -1,15 +1,19 @@
-package nextstep.jwp;
+package nextstep.jwp.http;
 
 import java.util.Map;
 
 public class HttpRequest {
 
-    private final String httpMethod;
-    private final String uri;
-    private final String httpVersion;
-    private final Map<String, String> headers;
-    private final Map<String, String> parameters;
-    private final String body;
+    private String httpMethod;
+    private String uri;
+    private String httpVersion;
+    private Map<String, String> headers;
+    private Map<String, String> parameters;
+    private String body;
+
+    public HttpRequest(){
+
+    }
 
     public HttpRequest(String httpMethod, String uri, String httpVersion,
         Map<String, String> headers, Map<String, String> parameters, String body) {
@@ -33,7 +37,7 @@ public class HttpRequest {
         return httpVersion;
     }
 
-    public String getParameterValues(String key){
+    public String getParameterValues(String key) {
         return parameters.get(key);
     }
 
@@ -47,5 +51,29 @@ public class HttpRequest {
 
     public String getBody() {
         return body;
+    }
+
+    public void setHttpMethod(String httpMethod) {
+        this.httpMethod = httpMethod;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+
+    public void setHttpVersion(String httpVersion) {
+        this.httpVersion = httpVersion;
+    }
+
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
+    }
+
+    public void setParameters(Map<String, String> parameters) {
+        this.parameters = parameters;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 }

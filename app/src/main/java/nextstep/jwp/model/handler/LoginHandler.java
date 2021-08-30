@@ -23,8 +23,9 @@ public class LoginHandler implements CustomHandler {
     @Override
     public void handle(JwpHttpRequest jwpHttpRequest, OutputStream outputStream) throws IOException, URISyntaxException {
         if (jwpHttpRequest.isEmptyParams()) {
-            String resourceFile = findResourceFile(RESOURCE_PREFIX + LOGIN_PAGE_PATH);
-            final String response = JwpHttpResponse.ok(resourceFile);
+            String resourceUri = RESOURCE_PREFIX + LOGIN_PAGE_PATH;
+            String resourceFile = findResourceFile(resourceUri);
+            final String response = JwpHttpResponse.ok(resourceUri, resourceFile);
             outputStream.write(response.getBytes());
             return;
         }
@@ -36,8 +37,8 @@ public class LoginHandler implements CustomHandler {
                         () -> loginFail(outputStream));
     }
 
-    private String findResourceFile(String resourceUrl) throws URISyntaxException, IOException {
-        URL resource = getClass().getClassLoader().getResource(resourceUrl);
+    private String findResourceFile(String resourceUri) throws URISyntaxException, IOException {
+        URL resource = getClass().getClassLoader().getResource(resourceUri);
         final Path path = Paths.get(resource.toURI());
         return new String(Files.readAllBytes(path));
     }

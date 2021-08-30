@@ -29,7 +29,7 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             JwpHttpRequest request = JwpHttpRequest.of(reader);
-            CustomHandler handler = HandlerMapper.from(request.getUri()); // todo: 추상화하기!
+            CustomHandler handler = HandlerMapper.from(request.getUri());
             handler.handle(request, outputStream);
             outputStream.flush();
         } catch (IOException | URISyntaxException exception) {

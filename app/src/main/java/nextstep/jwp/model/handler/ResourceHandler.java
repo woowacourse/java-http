@@ -17,10 +17,11 @@ public class ResourceHandler implements CustomHandler {
 
     @Override
     public void handle(JwpHttpRequest jwpHttpRequest, OutputStream outputStream) throws IOException, URISyntaxException {
-        URL resource = getClass().getClassLoader().getResource(RESOURCE_PREFIX + jwpHttpRequest.getUri());
+        String uri = jwpHttpRequest.getUri();
+        URL resource = getClass().getClassLoader().getResource(RESOURCE_PREFIX + uri);
         final Path path = Paths.get(resource.toURI());
         String resourceFile = new String(Files.readAllBytes(path));
-        final String response = JwpHttpResponse.ok(resourceFile);
+        final String response = JwpHttpResponse.ok(uri, resourceFile);
         outputStream.write(response.getBytes());
     }
 }

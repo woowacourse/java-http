@@ -24,7 +24,7 @@ public class JwpHttpRequest {
     private final Map<String, String> params;
 
     public JwpHttpRequest(String requestMethod, String requestUri, String requestHttpVersion, Map<String, String> headers) {
-        this(requestMethod, requestUri, requestHttpVersion, headers, Collections.EMPTY_MAP);
+        this(requestMethod, requestUri, requestHttpVersion, headers, Collections.emptyMap());
     }
 
     public JwpHttpRequest(String method, String uri, String httpVersion, Map<String, String> headers, Map<String, String> params) {
@@ -100,6 +100,18 @@ public class JwpHttpRequest {
 
     public String getUri() {
         return uri;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public String getHttpVersion() {
+        return httpVersion;
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
     }
 
     public boolean isEmptyParams() {

@@ -1,6 +1,7 @@
 package nextstep.jwp;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,44 +36,49 @@ public class RequestHandler implements Runnable {
             if (line == null) {
                 return;
             }
+
             final String[] request = line.split(" ");
             final String method = request[0];
             final String uri = request[1];
             byte[] body = new byte[0];
-            String status = "200 OK";
+            HttpStatus status = HttpStatus.OK;
             String location = null;
 
             if ("/".equals(uri)) {
                 body =Files.readAllBytes(getResources("/index.html").toPath());
-                String response = makeResponse(ContentType.HTML.getType(), "200 OK", location, body);
+                String response = makeResponse(ContentType.HTML.getType(), HttpStatus.OK, location, body);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
                 return;
             }
+
             if (uri.endsWith(".html")) {
                 body =Files.readAllBytes(getResources(uri).toPath());
-                String response = makeResponse(ContentType.HTML.getType(), "200 OK", location, body);
+                String response = makeResponse(ContentType.HTML.getType(), HttpStatus.OK, location, body);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
                 return;
             }
+
             if (uri.endsWith(".css")) {
                 body =Files.readAllBytes(getResources(uri).toPath());
-                String response = makeResponse(ContentType.CSS.getType(), "200 OK", location, body);
+                String response = makeResponse(ContentType.CSS.getType(), HttpStatus.OK, location, body);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
                 return;
             }
+
             if (uri.endsWith(".js")) {
                 body =Files.readAllBytes(getResources(uri).toPath());
-                String response = makeResponse(ContentType.JS.getType(), "200 OK", location, body);
+                String response = makeResponse(ContentType.JS.getType(), HttpStatus.OK, location, body);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
                 return;
             }
+
             if (uri.startsWith("/assets/img")) {
                 body =Files.readAllBytes(getResources(uri).toPath());
-                String response = makeResponse(ContentType.IMAGE.getType(), "200 OK", location, body);
+                String response = makeResponse(ContentType.IMAGE.getType(), HttpStatus.OK, location, body);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
                 return;
@@ -111,11 +117,11 @@ public class RequestHandler implements Runnable {
                     User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
                     if (user.checkPassword(password)) {
                         fileName = "/index.html";
-                        status = "302 FOUND";
+                        status = HttpStatus.FOUND;
                         location = "/index.html";
                     } else {
                         fileName = "/401.html";
-                        status = "302 FOUND";
+                        status = HttpStatus.FOUND;
                         location = "/401.html";
                     }
                 }
@@ -131,7 +137,7 @@ public class RequestHandler implements Runnable {
                     String password = getDataFromQueryString(rawData[2]);
                     InMemoryUserRepository.save(new User(2L, account, password, email));
                     fileName = "/login.html";
-                    status = "302 FOUND";
+                    status = HttpStatus.FOUND;
                     location = "/login.html";
                 }
             }
@@ -148,9 +154,9 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private String makeResponse(String contentType, String status, String location, byte[] body) {
+    private String makeResponse(String contentType, HttpStatus status, String location, byte[] body) {
         return String.join("\r\n",
-                "HTTP/1.1 " + status,
+                "HTTP/1.1 " + status.getStatus(),
                 "Content-Type: " + contentType,
                 "Content-Length: " + body.length + " ",
                 "Location: " + location,

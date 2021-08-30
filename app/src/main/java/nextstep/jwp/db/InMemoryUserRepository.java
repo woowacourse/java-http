@@ -24,7 +24,7 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    public static int getCurrentId() {
-        return currentId;
+    public static int assignId() {
+        return currentId++;
     }
 }

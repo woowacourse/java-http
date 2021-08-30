@@ -24,7 +24,7 @@ public class RegisterController extends AbstractController {
         String account = httpBody.getBodyParams("account");
         String email = httpBody.getBodyParams("email");
         String password = httpBody.getBodyParams("password");
-        User user = new User(InMemoryUserRepository.getCurrentId(), account, password, email);
+        User user = new User(InMemoryUserRepository.assignId(), account, password, email);
         InMemoryUserRepository.save(user);
 
         File file = FileReader.readFile("/index.html");

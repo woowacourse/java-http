@@ -15,25 +15,23 @@ public class HttpResponse {
                 .getBytes();
     }
 
-    public static byte[] found(String content, ContentType contentType) {
+    public static byte[] found(String redirect) {
         return String.join(
                 "\r\n",
                 "HTTP/1.1 302 Found ",
-                "Content-Type: " + contentType.getContentType() + "; charset=utf-8 ",
-                "Content-Length: " + content.getBytes().length + " ",
-                "",
-                content)
+                "Location: " + redirect,
+                redirect)
                 .getBytes();
     }
 
-    public static byte[] error(HttpError exception) throws IOException {
+    public static byte[] error(HttpError error) throws IOException {
         return String.join(
                 "\r\n",
-                "HTTP/1.1" + exception.getCode() + " " + exception.getName() + " ",
+                "HTTP/1.1" + error.getCode() + " " + error.getName() + " ",
                 "Content-Type: text/html; charset=utf-8 ",
-                "Content-Length: " + exception.getResource().getBytes().length + " ",
+                "Content-Length: " + error.getResource().getBytes().length + " ",
                 "",
-                exception.getResource())
+                error.getResource())
                 .getBytes();
     }
 }

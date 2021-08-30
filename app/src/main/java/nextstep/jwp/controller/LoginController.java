@@ -36,10 +36,7 @@ public class LoginController extends AbstractController {
 
         if (user.isPresent()) {
             if (user.get().checkPassword(loginInfo.get("password"))) {
-                return HttpResponse.found(
-                        FileReader.file(Controller.INDEX_PAGE),
-                        ContentType.findBy(Controller.INDEX_PAGE)
-                );
+                return HttpResponse.found(Controller.INDEX_PAGE);
             }
         }
         return HttpResponse.ok(

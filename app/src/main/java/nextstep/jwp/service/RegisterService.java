@@ -13,15 +13,23 @@ public class RegisterService {
     private static final String PASSWORD = "password";
 
     public void register(Request request) {
-        Map<String, String> queries = request.getRequestBody().queries();
-        String account = queries.get(ACCOUNT);
-        String email = queries.get(EMAIL);
-        String password = queries.get(PASSWORD);
+        try {
+            Map<String, String> queries = request.getRequestBody().queries();
+            String account = queries.get(ACCOUNT);
+            String email = queries.get(EMAIL);
+            String password = queries.get(PASSWORD);
+            validate(account, email);
+            User user = new User(account, password, email);
+            InMemoryUserRepository.save(user);
+        } catch (IndexOutOfBoundsException | NullPointerException exception) {
+            throw new RegisterException("잘못된 회원가입입니다.");
+        }
+    }
+
+    private void validate(String account, String email) {
         if (InMemoryUserRepository.existsByAccount(account)
                 || InMemoryUserRepository.existsByEmail(email)) {
             throw new RegisterException("잘못된 회원가입입니다.");
         }
-        User user = new User(account, password, email);
-        InMemoryUserRepository.save(user);
     }
 }

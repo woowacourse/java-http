@@ -14,16 +14,21 @@ public class HttpRequest {
     private final Map<String, String> requestHeaders;
     private final String requestBody;
 
-    public HttpRequest(final InputStreamReader inputStream) throws IOException {
+    public HttpRequest(final InputStreamReader inputStream) {
         final BufferedReader bufferedReader = new BufferedReader(inputStream);
-        List<String> firstLine = parseFirstLine(bufferedReader);
-        this.httpMethod = HttpMethod.matchHttpMethod(firstLine.get(0));
-        this.url = firstLine.get(1).substring(1);
-        this.requestHeaders = parseHeaders(bufferedReader);
-        this.requestBody = parseBody(bufferedReader, requestHeaders);
+        try {
+            List<String> firstLine = parseFirstLine(bufferedReader);
+            this.httpMethod = HttpMethod.matchHttpMethod(firstLine.get(0));
+            this.url = firstLine.get(1).substring(1);
+
+            this.requestHeaders = parseHeaders(bufferedReader);
+            this.requestBody = parseBody(bufferedReader, requestHeaders);
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 
-    private Map<String, String> parseHeaders(BufferedReader bufferedReader) throws IOException {
+    private Map<String, String> parseHeaders(final BufferedReader bufferedReader) throws IOException {
         Map<String, String> headers = new HashMap<>();
         while (bufferedReader.ready()) {
             String line = bufferedReader.readLine();
@@ -36,15 +41,20 @@ public class HttpRequest {
         return headers;
     }
 
-    private List<String> parseFirstLine(BufferedReader bufferedReader) throws IOException {
-        String firstLine = bufferedReader.readLine();
+    private List<String> parseFirstLine(final BufferedReader bufferedReader) {
+        String firstLine;
+        try {
+            firstLine = bufferedReader.readLine();
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
         if (firstLine == null) {
             throw new IllegalArgumentException("request가 존재하지 않습니다.");
         }
         return Arrays.asList(firstLine.split(" "));
     }
 
-    private String parseBody(BufferedReader bufferedReader, Map<String, String> requestHeaders) {
+    private String parseBody(final BufferedReader bufferedReader, final Map<String, String> requestHeaders) {
         if (requestHeaders.containsKey("Content-Length")) {
             try {
                 int contentLength = Integer.parseInt(requestHeaders.get("Content-Length").trim());

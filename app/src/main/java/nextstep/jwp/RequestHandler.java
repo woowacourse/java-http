@@ -1,6 +1,7 @@
 package nextstep.jwp;
 
 import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,17 +34,19 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
-
     }
 
-    private void matchRequest(final InputStream inputStream, final OutputStream outputStream) throws IOException {
+    private void matchRequest(final InputStream inputStream, final OutputStream outputStream) {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        HttpRequest httpRequest = new HttpRequest(inputStreamReader);
+        try {
+            HttpRequest httpRequest = new HttpRequest(inputStreamReader);
+            HttpResponse response = httpRequest.getHttpMethod().matches(httpRequest);
 
-        String response = httpRequest.getHttpMethod().matches(httpRequest);
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+            outputStream.write(response.getResponse().getBytes());
+            outputStream.flush();
+        } catch (IOException | IllegalArgumentException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 
     private void close() {

@@ -1,5 +1,9 @@
 package nextstep.jwp.http;
 
+import nextstep.jwp.http.method.GetMethod;
+import nextstep.jwp.http.method.Method;
+import nextstep.jwp.http.method.PostMethod;
+
 import java.util.Arrays;
 import java.util.function.Function;
 
@@ -9,7 +13,7 @@ public enum HttpMethod {
 
     private final Function<HttpRequest, Method> matchedMethod;
 
-    HttpMethod(Function<HttpRequest, Method> matchedMethod) {
+    HttpMethod(final Function<HttpRequest, Method> matchedMethod) {
         this.matchedMethod = matchedMethod;
     }
 
@@ -20,7 +24,7 @@ public enum HttpMethod {
                 .orElseThrow(() -> new IllegalArgumentException("옳지 않은 함수입니다."));
     }
 
-    public String matches(final HttpRequest httpRequest) {
+    public HttpResponse matches(final HttpRequest httpRequest) {
         return this.matchedMethod.apply(httpRequest).matchFunction();
     }
 }

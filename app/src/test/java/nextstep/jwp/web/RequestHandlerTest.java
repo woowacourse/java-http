@@ -96,16 +96,17 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("회원을 조회해서 로그인에 성공하면 /index.html로 리다이렉트한다 - 성공")
+    @DisplayName("로그인에 성공하면 /index.html로 리다이렉트한다 - 성공")
     @Test
     void loginSuccess() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login?account=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 30",
                 "",
-                "");
+                "account=gugu&password=password");
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         final String resourceAsString = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(resource).getPath())));
 
@@ -116,7 +117,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final String expected = "HTTP/1.1 302 FOUND \r\n" +
+        final String expected = "HTTP/1.1 302 Found \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + resourceAsString.getBytes().length + " \r\n" +
                 "\r\n" +
@@ -124,16 +125,17 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("회원을 조회해서 로그인에 실패하면 /401.html로 리다이렉트한다 - 성공")
+    @DisplayName("로그인에 실패하면 /401.html로 리다이렉트한다 - 성공")
     @Test
     void loginFail() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=1234 HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 26",
                 "",
-                "");
+                "account=gugu&password=1234");
         final URL resource = getClass().getClassLoader().getResource("static/401.html");
         final String resourceAsString = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(resource).getPath())));
 
@@ -144,7 +146,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final String expected = "HTTP/1.1 401 UNAUTHORIZED \r\n" +
+        final String expected = "HTTP/1.1 401 Unauthorized \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + resourceAsString.getBytes().length + " \r\n" +
                 "\r\n" +

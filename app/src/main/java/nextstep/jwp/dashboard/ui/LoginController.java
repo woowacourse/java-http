@@ -22,8 +22,14 @@ public class LoginController extends AbstractController {
 
     @Override
     public HttpResponse doGet(HttpRequest httpRequest) {
-        if (httpRequest.getURI().hasQuery()) {
-            final Map<String, String> queryInfo = extractQuery(httpRequest.getURI().getQuery());
+        log.info("GET /login");
+        return HttpResponse.ofByteArray(HttpStatus.OK, readHtmlFile(getResource()));
+    }
+
+    @Override
+    protected HttpResponse doPost(HttpRequest httpRequest) {
+        try {
+            final Map<String, String> queryInfo = httpRequest.getBody();
             final User user = InMemoryUserRepository.findByAccount(queryInfo.get("account"))
                     .orElseThrow(() -> new UserNotFoundException(queryInfo.get("account")));
             if (user.checkPassword(queryInfo.get("password"))) {
@@ -33,9 +39,9 @@ public class LoginController extends AbstractController {
                 log.info("Login failed");
                 return HttpResponse.ofByteArray(HttpStatus.UNAUTHORIZED, readHtmlFile("/401"));
             }
-        } else {
-            log.info("GET /login");
-            return HttpResponse.ofByteArray(HttpStatus.OK, readHtmlFile(getResource()));
+        } catch (UserNotFoundException e) {
+            log.info(e.getMessage());
+            return HttpResponse.ofByteArray(HttpStatus.UNAUTHORIZED, readHtmlFile("/401"));
         }
     }
 }

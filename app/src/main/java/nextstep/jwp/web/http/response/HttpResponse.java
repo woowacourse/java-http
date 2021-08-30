@@ -38,11 +38,11 @@ public class HttpResponse {
     }
 
     public String toResponseFormat() {
-        final String headers = formatHeaderString();
+        final String formattedHeaders = formatHeaderString();
 
         return String.format(FORMAT,
             protocolName(), statusCode(), statusName(),
-            headers,
+            formattedHeaders,
             responseBody().body()
         );
     }

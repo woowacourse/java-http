@@ -27,13 +27,13 @@ public class HttpRequestHeaderValues {
 
     private void validateBlankOrEmpty(List<String> values) {
         if (values.stream().anyMatch(this::isNullOrEmpty)) {
-            throw new RuntimeException("HttpRequestHeader의 value로 null 혹은 공백이 올 수 없습니다.");
+            throw new IllegalArgumentException("HttpRequestHeader의 value로 null 혹은 공백이 올 수 없습니다.");
         }
     }
 
     private void validateContainsComma(List<String> values) {
         if (values.stream().anyMatch(value -> value.contains(COMMA))) {
-            throw new RuntimeException("HttpRequestHeader의 value에 \",\"가 포함될 수 없습니다.");
+            throw new IllegalArgumentException("HttpRequestHeader의 value에 \",\"가 포함될 수 없습니다.");
         }
     }
 

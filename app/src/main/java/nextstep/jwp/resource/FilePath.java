@@ -7,26 +7,26 @@ import java.util.Objects;
 
 public class FilePath {
 
-    public static final String PREFIX = "static/";
+    public static final String DEFAULT_PREFIX = "static/";
 
     private static final String SLASH = "/";
     private static final int SLASH_SUBSTRING_INDEX = 1;
     private static final String DOT = ".";
 
-    private final String filePath;
+    private final String path;
     private final String prefix;
     private final String suffix;
 
-    public FilePath(String filePath, String suffix) {
-        this(filePath, suffix, PREFIX);
+    public FilePath(String path, String suffix) {
+        this(path, suffix, DEFAULT_PREFIX);
     }
 
-    public FilePath(String filePath, String suffix, String prefix) {
-        if (filePath.startsWith(SLASH)) {
-            filePath = filePath.substring(SLASH_SUBSTRING_INDEX);
+    public FilePath(String path, String suffix, String prefix) {
+        if (path.startsWith(SLASH)) {
+            path = path.substring(SLASH_SUBSTRING_INDEX);
         }
         this.prefix = prefix;
-        this.filePath = filePath;
+        this.path = path;
 
         if (!"".equals(suffix)) {
             suffix = DOT + suffix;
@@ -55,14 +55,14 @@ public class FilePath {
 
     private void validateResourcePath(URL resource) {
         if (Objects.isNull(resource)) {
-            throw new RuntimeException("해당 file은 존재하지 않습니다.");
+            throw new IllegalArgumentException("해당 file은 존재하지 않습니다.");
         }
     }
 
     private String relativePath() {
-        if (filePath.startsWith(prefix)) {
-            return filePath + suffix;
+        if (path.startsWith(prefix)) {
+            return path + suffix;
         }
-        return prefix + filePath + suffix;
+        return prefix + path + suffix;
     }
 }

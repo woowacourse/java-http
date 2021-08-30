@@ -8,12 +8,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import nextstep.jwp.application.domain.Account;
 import nextstep.jwp.application.domain.User;
+import nextstep.jwp.application.exception.UserRuntimeException;
 
 public class InMemoryUserRepository {
 
     private static final Map<Long, User> database = new ConcurrentHashMap<>();
     private static final Map<Account, Long> indexTable = new ConcurrentHashMap<>();
     private static final AtomicLong id = new AtomicLong(0);
+
+    private InMemoryUserRepository() {
+    }
 
     static {
         final User user = new User(id.incrementAndGet(), new Account("gugu"), "password",
@@ -24,11 +28,11 @@ public class InMemoryUserRepository {
     public static void save(User user) {
         final User identifiedUser = user.toIdentifiedEntity(id.incrementAndGet());
         if (!Objects.isNull(indexTable.get(user.account()))) {
-            throw new RuntimeException("존재하는 계정명 입니다.");
+            throw new UserRuntimeException("존재하는 계정명 입니다.");
         }
 
         if (!Objects.isNull(database.get(identifiedUser.id()))) {
-            throw new RuntimeException("존재하는 Primary Key 입니다.");
+            throw new UserRuntimeException("존재하는 Primary Key 입니다.");
         }
 
         database.put(identifiedUser.id(), identifiedUser);

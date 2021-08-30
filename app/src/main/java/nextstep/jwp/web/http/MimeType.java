@@ -12,15 +12,15 @@ public enum MimeType {
     TEXT_ALL("text/*"),
     ALL("*/*");
 
-    private final String mimeType;
+    private final String type;
 
-    MimeType(String mimeType) {
-        this.mimeType = mimeType;
+    MimeType(String type) {
+        this.type = type;
     }
 
     public static MimeType findByName(List<String> mimeTypes) {
         return Arrays.stream(values())
-            .filter(m -> mimeTypes.contains(m.mimeType))
+            .filter(m -> mimeTypes.contains(m.type))
             .findAny()
             .orElse(ALL);
     }

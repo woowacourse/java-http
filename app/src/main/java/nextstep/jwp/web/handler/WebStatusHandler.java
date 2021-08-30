@@ -36,7 +36,6 @@ public class WebStatusHandler implements WebHandler {
             response.replaceResponseBody(
                 resolveData(request.methodUrl().url(), request.mimeType())
             );
-        } else if (response.status() == FOUND) {
         } else if (response.status() == NOT_FOUND) {
             response.replaceResponseBody(
                 resolveData(NOT_FOUND_PAGE_PATH, MimeType.TEXT_HTML)

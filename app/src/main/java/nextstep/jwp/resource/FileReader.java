@@ -16,7 +16,7 @@ public class FileReader {
         try {
             byteData = Files.readAllBytes(filePath.path());
         } catch (IOException e) {
-            throw new RuntimeException(String.format("파일을 읽는데 실패했습니다. -> %s", filePath.path()), e.getCause());
+            throw new IllegalArgumentException(String.format("파일을 읽는데 실패했습니다. -> %s", filePath.path()), e.getCause());
         }
         return new String(byteData);
     }

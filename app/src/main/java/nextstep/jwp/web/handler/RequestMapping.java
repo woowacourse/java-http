@@ -14,9 +14,10 @@ import nextstep.jwp.web.mvc.controller.NotFoundController;
 public class RequestMapping {
 
     private static final Map<MethodUrl, Controller> myMap;
+    private static final Controller NOT_FOUND_CACHE = new NotFoundController();
+    private static final ExceptionController ERROR_CACHE = new ExceptionController();
+
     private final Map<MethodUrl, Controller> controllerMap;
-    private final Controller NOT_FOUND_CACHE = new NotFoundController();
-    private final ExceptionController ERROR_CACHE = new ExceptionController();
 
     static {
         myMap = Map.of(
@@ -38,7 +39,7 @@ public class RequestMapping {
     }
 
     public Controller getController(MethodUrl methodUrl) {
-        return myMap.getOrDefault(methodUrl, NOT_FOUND_CACHE);
+        return controllerMap.getOrDefault(methodUrl, NOT_FOUND_CACHE);
     }
 
     public ExceptionController errorController() {

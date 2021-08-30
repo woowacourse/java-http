@@ -6,7 +6,7 @@ import java.io.IOException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class FileReaderTest {
+class FileReaderTest {
 
     @DisplayName("파일을 읽는 기능")
     @Test

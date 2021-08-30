@@ -1,6 +1,7 @@
 package nextstep.jwp.application.domain;
 
 import java.util.Objects;
+import nextstep.jwp.application.exception.UserRuntimeException;
 
 public class Account {
 
@@ -8,7 +9,7 @@ public class Account {
 
     public Account(String value) {
         if (value.isBlank()) {
-            throw new RuntimeException("계정명은 비어있을 수 없습니다.");
+            throw new UserRuntimeException("계정명은 비어있을 수 없습니다.");
         }
         this.value = value;
     }

@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.List;
+import nextstep.jwp.web.exception.ApplicationRuntimeException;
 import nextstep.jwp.web.http.request.HttpRequest;
 import nextstep.jwp.web.http.response.HttpResponse;
 import nextstep.jwp.web.mvc.controller.Controller;
@@ -44,7 +45,6 @@ public class RequestHandler implements Runnable {
             final OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = HttpRequest.of(inputStream);
-            log.debug(httpRequest.toString());
 
             HttpResponse httpResponse =
                 new HttpResponse
@@ -54,7 +54,6 @@ public class RequestHandler implements Runnable {
             doService(httpRequest, httpResponse);
             doHandle(httpRequest, httpResponse);
 
-//            log.debug(httpResponse.toResponseFormat());
             outputStream.write(httpResponse.toResponseFormat().getBytes());
             outputStream.flush();
         } catch (IOException exception) {
@@ -72,7 +71,7 @@ public class RequestHandler implements Runnable {
         Controller controller = requestMapping.getController(request.methodUrl());
         try {
             controller.service(request, response);
-        } catch (Exception e) {
+        } catch (ApplicationRuntimeException e) {
             log.error("In Service Error", e);
             requestMapping.errorController().service(request, response);
         }

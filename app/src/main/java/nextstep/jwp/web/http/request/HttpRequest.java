@@ -21,11 +21,11 @@ public class HttpRequest {
     private final HttpHeaders headers;
     private final HttpProtocol protocol;
     private final MethodUrl methodUrl;
-    private final HttpRequestBody body;
+    private final HttpRequestBody<?> body;
 
     private HttpRequest(HttpHeaders headers, HttpProtocol protocol,
                         MethodUrl methodUrl,
-                        HttpRequestBody body) {
+                        HttpRequestBody<?> body) {
         this.headers = headers;
         this.protocol = protocol;
         this.methodUrl = methodUrl;
@@ -62,7 +62,7 @@ public class HttpRequest {
         return this.headers.get(key);
     }
 
-    public HttpRequestBody body() {
+    public HttpRequestBody<?> body() {
         return this.body;
     }
 
@@ -96,11 +96,12 @@ public class HttpRequest {
         private static final String BLANK = " ";
         private static final String COLON = ":";
         private static final String COMMA = ",";
+        private static final String EMPTY = "";
 
-        private HttpHeaders headers = new HttpHeaders();
+        private final HttpHeaders headers = new HttpHeaders();
         private HttpProtocol httpProtocol = null;
         private MethodUrl methodUrl = null;
-        private HttpRequestBody body = new TextHttpRequestBody(CRLF);
+        private HttpRequestBody<?> body = new TextHttpRequestBody(CRLF);
 
         public InputStreamHttpRequestConverter(InputStream inputStream) {
             parse(inputStream);
@@ -149,7 +150,7 @@ public class HttpRequest {
         private void parseHeaders(BufferedReader bufferedReader) throws IOException {
             StringBuilder headersBuilder = new StringBuilder();
             String line = BLANK;
-            while (!"".equals(line)) {
+            while (!EMPTY.equals(line)) {
                 line = bufferedReader.readLine();
                 if (Objects.isNull(line)) {
                     break;
@@ -168,7 +169,7 @@ public class HttpRequest {
             List<String> parsedHeader = Arrays.asList(line.split(COLON));
 
             if (parsedHeader.size() < KEY_AND_VALUE_MINIMUM_SIZE) {
-                throw new RuntimeException("request 헤더의 양식이 맞지 않습니다.");
+                throw new IllegalArgumentException("request 헤더의 양식이 맞지 않습니다.");
             }
 
             String headerKey = parsedHeader.get(HEADER_KEY_INDEX);

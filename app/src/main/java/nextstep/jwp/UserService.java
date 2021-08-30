@@ -31,24 +31,6 @@ public class UserService {
                 registerData.get("email")));
     }
 
-    private Map<String, String> extractQueryFromLoginUri(String uri) {
-        Map<String, String> extractedQuery = new HashMap<>();
-
-        int index = uri.indexOf("?");
-        if (index == -1) {
-            return extractedQuery;
-        }
-        String queryString = uri.substring(index + 1);
-
-        String[] splitQuery = queryString.split("[&=]");
-
-        for (int i = 0; i < splitQuery.length; i += 2) {
-            extractedQuery.put(splitQuery[i], splitQuery[i + 1]);
-        }
-
-        return extractedQuery;
-    }
-
     private Map<String, String> extractUserDataFromRequestBody(String requestBody) {
         Map<String, String> extractData = new HashMap<>();
         String[] splitRequestBody = requestBody.split("=|&");

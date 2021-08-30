@@ -2,6 +2,7 @@ package nextstep.jwp.model;
 
 import nextstep.jwp.model.httpmessage.response.HttpResponse;
 import nextstep.jwp.util.FileUtils;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -10,9 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpResponseTest {
 
-    public static final String HTTP_FORWARD_TXT = "./src/test/resources/http_forward.txt";
-    public static final String HTTP_REDIRECT_TXT = "./src/test/resources/http_redirect.txt";
-
+    @DisplayName("인덱스 페이지 조회에 대한 응답을 확인한다.")
     @Test
     void responseForward() throws IOException {
         // given
@@ -33,6 +32,7 @@ class HttpResponseTest {
         assertThat(outputStream.toString()).isEqualTo(expectedHeader);
     }
 
+    @DisplayName("401 페이지 리다이렉트에 대한 응답을 확인한다.")
     @Test
     void responseRedirect() throws IOException {
 

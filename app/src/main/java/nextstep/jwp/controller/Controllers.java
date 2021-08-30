@@ -10,6 +10,7 @@ public class Controllers {
     public Controllers() {
         this.controllers = List.of(
             new DefaultController(),
+            new IndexController(),
             new LoginController(),
             new RegisterController()
         );

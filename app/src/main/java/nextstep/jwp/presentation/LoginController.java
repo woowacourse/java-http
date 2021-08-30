@@ -1,6 +1,7 @@
 package nextstep.jwp.presentation;
 
 import java.io.IOException;
+import java.util.HashMap;
 import nextstep.jwp.FileAccess;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.BadRequestException;
@@ -24,8 +25,10 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        String account = request.getAttribute("account");
-        String password = request.getAttribute("password");
+        HashMap<String, String> parseBody = parseBody(request.getBody());
+
+        String account = parseBody.get("account");
+        String password = parseBody.get("password");
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(
@@ -37,5 +40,19 @@ public class LoginController extends AbstractController {
 
         response.setStatusLine(request.getProtocolVersion(), HttpStatus.FOUND);
         response.addResponseHeader("Location", "/index.html");
+    }
+
+    private HashMap<String, String> parseBody(String requestBody) {
+
+        HashMap<String, String> result = new HashMap<>();
+
+        String[] splitBody = requestBody.split("&");
+
+        for (String body : splitBody) {
+            String[] keyValue = body.split("=");
+            result.put(keyValue[0], keyValue[1]);
+        }
+
+        return result;
     }
 }

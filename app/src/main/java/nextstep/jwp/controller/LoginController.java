@@ -39,11 +39,8 @@ public class LoginController extends AbstractController {
 
     private void passwordCheckProcess(User foundUser, String password, HttpResponse response) {
         if (foundUser.checkPassword(password)) {
-            response.status(HttpStatus.OK)
-                    .contentType(ContentType.PLAIN.toHttpNotation())
-                    .body("login success!" + LINE_SEPARATOR +
-                            "account: " + foundUser.getAccount() + LINE_SEPARATOR  +
-                            "email: " + foundUser.getEmail());
+            response.status(HttpStatus.FOUND)
+                    .location("/index.html");
             return;
         }
         responseUnauthorized(response);

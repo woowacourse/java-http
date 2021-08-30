@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,10 +50,9 @@ class LoginControllerTest {
         requestHandler.run();
 
         // then
-        String expectedBody = "login success!" + LINE_SEPARATOR +
-                "account: gugu" + LINE_SEPARATOR +
-                "email: hkkang@woowahan.com";
+        List<String> expectedLines = List.of("HTTP/1.1 302 FOUND", "Location: /index.html");
 
-        assertThat(socket.output()).contains(expectedBody);
+
+        assertThat(socket.output()).contains(expectedLines);
     }
 }

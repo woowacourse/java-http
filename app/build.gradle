@@ -20,6 +20,16 @@ jacocoTestReport {
         xml.enabled true
         xml.destination(new File("jacoco/jacoco.xml"))
     }
+    finalizedBy jacocoTestCoverageVerification
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            element = 'CLASS'
+            excludes = ["**.JwpApplication", "**.WebServer", "**.AbstractController"]
+        }
+    }
 }
 
 tasks.named('test') {
@@ -39,10 +49,6 @@ dependencies {
 
 application {
     mainClass = 'nextstep.jwp.JwpApplication'
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
 }
 
 sonarqube {

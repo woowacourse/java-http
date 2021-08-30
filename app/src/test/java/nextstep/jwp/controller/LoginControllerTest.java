@@ -10,10 +10,8 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class LoginControllerTest {
-
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     @Test
@@ -32,7 +30,7 @@ class LoginControllerTest {
         String expected = "HTTP/1.1 200 OK\n" +
                 "Content-Length: 3796\n" +
                 "Content-Type: text/html;charset=utf-8\n" +
-                "\n"+
+                "\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
@@ -51,8 +49,8 @@ class LoginControllerTest {
 
         // then
         String expectedBody = "login success!" + LINE_SEPARATOR +
-        "account: gugu" + LINE_SEPARATOR +
-        "email: hkkang@woowahan.com";
+                "account: gugu" + LINE_SEPARATOR +
+                "email: hkkang@woowahan.com";
 
         assertThat(socket.output()).contains(expectedBody);
     }

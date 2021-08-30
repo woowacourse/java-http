@@ -12,6 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class LoginController extends AbstractController {
+    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws Exception {
         if (isLoginProcess(request)) {
@@ -25,7 +27,7 @@ public class LoginController extends AbstractController {
         return request.getParameter("account") != null && request.getParameter("password") != null;
     }
 
-    public void loginProcess(HttpRequest request, HttpResponse response) throws Exception {
+    public void loginProcess(HttpRequest request, HttpResponse response) {
         String account = request.getParameter("account");
         String password = request.getParameter("password");
 
@@ -39,9 +41,10 @@ public class LoginController extends AbstractController {
         if (foundUser.checkPassword(password)) {
             response.status(HttpStatus.OK)
                     .contentType(ContentType.PLAIN.toHttpNotation())
-                    .body("login success!\r\n" +
-                            "account: " + foundUser.getAccount() + "\r\n" +
+                    .body("login success!" + LINE_SEPARATOR +
+                            "account: " + foundUser.getAccount() + LINE_SEPARATOR  +
                             "email: " + foundUser.getEmail());
+            return;
         }
         responseUnauthorized(response);
     }

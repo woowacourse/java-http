@@ -50,52 +50,6 @@ jacocoTestReport {
         html.destination file("$buildDir/jacocoHtml")
         xml.destination file("$buildDir/jacoco.xml")
     }
-    finalizedBy 'jacocoTestCoverageVerification'
-}
-
-jacocoTestCoverageVerification {
-    violationRules {
-        rule {
-            // 'element'가 없으면 프로젝트의 전체 파일을 합친 값을 기준으로 한다.
-            // 위의 리포트에서 'Total'로 표시된 부분이다.
-            limit {
-                // 'counter'를 지정하지 않으면 default는 'INSTRUCTION'
-                // 'value'를 지정하지 않으면 default는 'COVEREDRATIO'
-                minimum = 0.15
-            }
-        }
-
-        // 여러 룰을 생성할 수 있다.
-        rule {
-            // 룰을 간단히 켜고 끌 수 있다.
-            enabled = true
-
-            // 룰을 체크할 단위는 클래스 단위
-            element = 'CLASS'
-
-            // 브랜치 커버리지를 최소한 70% 만족시켜야 한다.
-            limit {
-                counter = 'BRANCH'
-                value = 'COVEREDRATIO'
-                minimum = 0.70
-            }
-
-            // 라인 커버리지를 최소한 80% 만족시켜야 한다.
-            limit {
-                counter = 'LINE'
-                value = 'COVEREDRATIO'
-                minimum = 0.80
-            }
-
-            // 커버리지 체크를 제외할 클래스들
-            excludes = [
-                    // '*.test.*',
-                    '*.Kotlin*',
-                    'nextstep.jwp.JwpApplication'
-            ]
-
-        }
-    }
 }
 
 sonarqube {
@@ -104,5 +58,6 @@ sonarqube {
         property "sonar.projectKey", "woowacourse_be-jwp-http-server"
         property "sonar.organization", "woowacourse"
         property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.coverage.jacoco.xmlReportPaths", "$buildDir/jacoco.xml"
     }
 }

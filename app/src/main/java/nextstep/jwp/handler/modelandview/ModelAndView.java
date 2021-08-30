@@ -1,16 +1,28 @@
 package nextstep.jwp.handler.modelandview;
 
-public class ModelAndView {
-    private Model model;
-    private String viewName;
+import nextstep.jwp.http.response.HttpStatus;
 
-    public ModelAndView(Model model, String viewName) {
+public class ModelAndView {
+    private final Model model;
+    private final String viewName;
+    private final HttpStatus httpStatus;
+
+    public ModelAndView(Model model, String viewName, HttpStatus httpStatus) {
         this.model = model;
         this.viewName = viewName;
+        this.httpStatus = httpStatus;
     }
 
-    public ModelAndView(Model model) {
-        this(model, "");
+    public static ModelAndView of(HttpStatus httpStatus) {
+        return new ModelAndView(Model.EMPTY, "", httpStatus);
+    }
+
+    public static ModelAndView of(Model model, HttpStatus httpStatus) {
+        return new ModelAndView(model, "", httpStatus);
+    }
+
+    public static ModelAndView of(String viewName, HttpStatus httpStatus) {
+        return new ModelAndView(Model.EMPTY, viewName, httpStatus);
     }
 
     public String getViewName() {
@@ -19,5 +31,9 @@ public class ModelAndView {
 
     public Model getModel() {
         return model;
+    }
+
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
     }
 }

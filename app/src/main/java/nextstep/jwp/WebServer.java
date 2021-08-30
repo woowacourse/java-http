@@ -15,17 +15,17 @@ public class WebServer {
     private static final int DEFAULT_PORT = ServerConfig.DEFAULT_PORT;
 
     private final int port;
-    private final Dispatcher dispatcher;
+    private final Assembler container;
 
-    public WebServer(int port, Dispatcher dispatcher) {
+    public WebServer(int port, Assembler container) {
         this.port = checkPort(port);
-        this.dispatcher = dispatcher;
+        this.container = container;
     }
 
     public void run() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             logger.info("Web Server started {} port.", serverSocket.getLocalPort());
-            handle(serverSocket, dispatcher);
+            handle(serverSocket, container.dispatcher());
         } catch (IOException exception) {
             logger.error("Exception accepting connection", exception);
         } catch (RuntimeException exception) {

@@ -2,8 +2,11 @@ package nextstep.jwp.handler;
 
 import nextstep.jwp.ServerConfig;
 import nextstep.jwp.exception.IncorrectHandlerException;
+import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.SourcePath;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpStatus;
 
 import java.net.URL;
 import java.util.Objects;
@@ -18,10 +21,10 @@ public class ResourceHandler implements Handler {
     }
 
     @Override
-    public ResponseEntity service(HttpRequest httpRequest) {
+    public ModelAndView service(HttpRequest httpRequest, HttpResponse httpResponse) {
         SourcePath sourcePath = httpRequest.sourcePath();
         if (isExistResource(sourcePath)) {
-            return ResponseEntity.ok(sourcePath.getValue());
+            return ModelAndView.of(sourcePath.getValue(), HttpStatus.OK);
         }
         throw new IncorrectHandlerException();
     }

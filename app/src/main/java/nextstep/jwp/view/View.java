@@ -3,7 +3,11 @@ package nextstep.jwp.view;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+
+import nextstep.jwp.handler.modelandview.ModelAndView;
+import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.ContentType;
+import nextstep.jwp.http.response.HttpResponse;
 
 public class View {
 
@@ -47,5 +51,13 @@ public class View {
 
     public String content() {
         return content;
+    }
+
+    public void render(ModelAndView modelAndView, HttpResponse httpResponse) {
+        if(!content.isEmpty()){
+            httpResponse.addHeader("Content-Type", contentType());
+            httpResponse.addHeader("Content-Length", String.valueOf(contentLength()));
+            httpResponse.setContent(content, contentType.value());
+        }
     }
 }

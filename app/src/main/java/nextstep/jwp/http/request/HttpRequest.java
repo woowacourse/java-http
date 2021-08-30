@@ -19,10 +19,6 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders) {
-        this(requestLine, requestHeaders, "");
-    }
-
     public static HttpRequest of(InputStream inputStream) throws IOException {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -33,7 +29,7 @@ public class HttpRequest {
         if (headers.hasContent()) {
             return new HttpRequest(requestLine, headers, readBody(bufferedReader, headers.contentLength()));
         }
-        return new HttpRequest(requestLine, headers);
+        return new HttpRequest(requestLine, headers, "");
     }
 
     private static RequestLine readRequestLine(BufferedReader bufferedReader) throws IOException {

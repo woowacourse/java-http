@@ -2,13 +2,18 @@ package nextstep.jwp.handler;
 
 import nextstep.jwp.exception.IncorrectHandlerException;
 import nextstep.jwp.handler.dto.RegisterRequest;
+import nextstep.jwp.handler.modelandview.Model;
+import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.handler.service.RegisterService;
 import nextstep.jwp.http.request.HttpMethod;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.SourcePath;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpStatus;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class RegisterController implements Handler {
@@ -16,7 +21,7 @@ public class RegisterController implements Handler {
     public static final MappingPath PRINT_REGISTER_PAGE_PATH = MappingPath.of(HttpMethod.GET, SourcePath.of("/register"));
     public static final MappingPath REGISTER_POST_PATH = MappingPath.of(HttpMethod.POST, SourcePath.of("/register"));
 
-    private final Map<MappingPath, Function<HttpRequest, ResponseEntity>> handlers = new HashMap<>();
+    private final Map<MappingPath, BiFunction<HttpRequest, HttpResponse, ModelAndView>> handlers = new HashMap<>();
     private final RegisterService registerService;
 
     public RegisterController(RegisterService registerService) {
@@ -26,23 +31,25 @@ public class RegisterController implements Handler {
     }
 
     @Override
-    public boolean mapping(HttpRequest httpRequest) {
-        return handlers.containsKey(MappingPath.of(httpRequest));
+    public boolean mapping(HttpRequest request) {
+        return handlers.containsKey(MappingPath.of(request));
     }
 
     @Override
-    public ResponseEntity service(HttpRequest httpRequest) {
-        return handlers.computeIfAbsent(MappingPath.of(httpRequest), key -> {
+    public ModelAndView service(HttpRequest request, HttpResponse response) {
+        return handlers.computeIfAbsent(MappingPath.of(request), key -> {
             throw new IncorrectHandlerException();
-        }).apply(httpRequest);
+        }).apply(request, response);
     }
 
-    private ResponseEntity printRegisterPage(HttpRequest httpRequest) {
-        return ResponseEntity.ok("/register.html");
+    private ModelAndView printRegisterPage(HttpRequest request, HttpResponse response) {
+        return ModelAndView.of("/register.html", HttpStatus.OK);
     }
 
-    private ResponseEntity register(HttpRequest httpRequest) {
-        registerService.register(RegisterRequest.fromHttpRequest(httpRequest));
-        return ResponseEntity.redirect("index.html");
+    private ModelAndView register(HttpRequest request, HttpResponse response) {
+        registerService.register(RegisterRequest.fromHttpRequest(request));
+
+        response.addHeader("Location", "index.html");
+        return ModelAndView.of(Model.EMPTY, HttpStatus.FOUND);
     }
 }

@@ -3,11 +3,10 @@ package nextstep.jwp;
 import nextstep.jwp.adaptor.HandlerAdaptor;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.handler.Handler;
-import nextstep.jwp.handler.ResponseEntity;
-import nextstep.jwp.handler.modelandview.Model;
 import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpStatus;
 import nextstep.jwp.mapper.HandlerMapper;
 import nextstep.jwp.view.View;
 import nextstep.jwp.view.ViewResolver;
@@ -24,24 +23,22 @@ public class Dispatcher {
         this.viewResolver = viewResolver;
     }
 
-    public HttpResponse dispatch(HttpRequest httpRequest) {
-        ResponseEntity response = service(httpRequest);
+    public void dispatch(HttpRequest request, HttpResponse response) {
+        ModelAndView modelAndView = service(request, response);
+        response.setHttpStatus(modelAndView.getHttpStatus());
 
-        ModelAndView modelAndView = response.modelAndView();
-        Model model = modelAndView.getModel();
         View view = viewResolver.resolve(modelAndView.getViewName());
-
-        return HttpResponse.of(model, view);
+        view.render(modelAndView, response);
     }
 
-    public ResponseEntity service(HttpRequest httpRequest) {
+    public ModelAndView service(HttpRequest request, HttpResponse response) {
         try {
-            Handler handler = handlerMapper.mapping(httpRequest);
-            return handlerAdaptor.handle(handler, httpRequest);
+            Handler handler = handlerMapper.mapping(request);
+            return handlerAdaptor.handle(handler, request, response);
         } catch (NotFoundException notFoundException) {
-            return ResponseEntity.notFoundException();
+            return ModelAndView.of("/404.html", HttpStatus.NOT_FOUND);
         } catch (Exception exception) {
-            return ResponseEntity.unhandledException();
+            return ModelAndView.of("/500.html", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -1,21 +1,23 @@
 package nextstep.jwp.adaptor;
 
 import nextstep.jwp.handler.Handler;
-import nextstep.jwp.handler.ResponseEntity;
 import nextstep.jwp.handler.exception.UnauthorizedException;
 import nextstep.jwp.handler.exception.UserException;
+import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpStatus;
 
 public class HandlerAdaptorImpl implements HandlerAdaptor {
-    public ResponseEntity handle(Handler handler, HttpRequest httpRequest) {
+    public ModelAndView handle(Handler handler, HttpRequest httpRequest, HttpResponse httpResponse) {
         try {
-            return handler.service(httpRequest);
+            return handler.service(httpRequest, httpResponse);
         } catch (UnauthorizedException exception) {
-            return ResponseEntity.unauthorized();
+            return ModelAndView.of("/401.html", HttpStatus.UNAUTHORIZED);
         } catch (UserException userException) {
-            return ResponseEntity.notFoundException();
+            return ModelAndView.of("/404.html", HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            return ResponseEntity.unhandledException();
+            return ModelAndView.of("/500.html", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

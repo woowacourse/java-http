@@ -11,17 +11,17 @@ public class QueryParams {
         this.params = params;
     }
 
-    public QueryParams(String s) {
-        this(parseParams(s));
+    public QueryParams(String paramString) {
+        this(parseParams(paramString));
     }
 
     public QueryParams() {
         this(new HashMap<>());
     }
 
-    private static Map<String, String> parseParams(String s) {
+    private static Map<String, String> parseParams(String paramString) {
         Map<String, String> params = new HashMap<>();
-        for (String queryString : s.split("&")) {
+        for (String queryString : paramString.split("&")) {
             String[] split = queryString.split("=");
             params.put(split[0], split[1]);
         }

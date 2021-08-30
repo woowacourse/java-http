@@ -2,6 +2,7 @@ package nextstep.jwp.webserver;
 
 import nextstep.jwp.application.controller.HelloWorldController;
 import nextstep.jwp.application.controller.LoginController;
+import nextstep.jwp.application.controller.RegisterController;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,6 +14,7 @@ public class Router {
     static {
         add("/", new HelloWorldController());
         add("/login", new LoginController());
+        add("/register", new RegisterController());
     }
 
     private Router() {

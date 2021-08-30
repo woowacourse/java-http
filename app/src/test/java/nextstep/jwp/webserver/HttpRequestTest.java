@@ -17,7 +17,6 @@ class HttpRequestTest {
         // then
         assertThat(httpRequest.getUri()).isEqualTo("/index.html");
         assertThat(httpRequest.getHttpMethod()).isEqualTo(HttpMethod.GET);
-        assertThat(httpRequest.getBody()).isEqualTo("");
         assertThat(httpRequest.getQueryParam("aa")).isEqualTo("11");
         assertThat(httpRequest.getHeader("Host")).isEqualTo("localhost:8080");
         assertThat(httpRequest.getHeader("Connection")).isEqualTo("keep-alive");

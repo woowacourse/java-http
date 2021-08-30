@@ -26,6 +26,10 @@ public class HttpHeaders {
     private static Map<String, String> parseHeaders(List<String> headerList) {
         Map<String, String> headers = new HashMap<>();
         for (String header : headerList) {
+            if ("".equals(header)) {
+                break;
+            }
+
             String[] keyValue = header.split(":", 2);
             headers.put(keyValue[0].trim(), keyValue[1].trim());
         }

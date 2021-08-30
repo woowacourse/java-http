@@ -9,7 +9,7 @@ public class HttpRequest {
     private HttpHeaders httpHeaders;
     private HttpMethod httpMethod;
     private QueryParams queryParams = new QueryParams();
-    private String body = "";
+    private FormBody body = FormBody.emptyBody();
     private String uri;
 
     public HttpRequest(String requestString) {
@@ -17,7 +17,7 @@ public class HttpRequest {
     }
 
     private void parseRequest(String request) {
-        String[] headerBody = request.split("\n\n");
+        String[] headerBody = request.split("\r\n\r\n");
         String header = headerBody[0];
 
         List<String> headerLines = header.lines().collect(Collectors.toList());
@@ -55,9 +55,11 @@ public class HttpRequest {
     }
 
     private void initBody(String[] headerBody) {
-        if (headerBody.length > 1) {
-            this.body = headerBody[1];
+        if (headerBody.length < 2) {
+            return;
         }
+        String bodyString = headerBody[1];
+        body = new FormBody(bodyString);
     }
 
     public String getUri() {
@@ -76,7 +78,7 @@ public class HttpRequest {
         return queryParams.get(param);
     }
 
-    public String getBody() {
-        return body;
+    public String getBody(String name) {
+        return body.get(name);
     }
 }

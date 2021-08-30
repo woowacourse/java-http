@@ -54,7 +54,7 @@ public class HttpResponse {
     }
 
     private void checkAccount() {
-        final Map<String, String> queryParams = body.getBody();
+        final Map<String, String> queryParams = body.getQueryParams();
         final String account = queryParams.get("account");
         final String password = queryParams.get("password");
         final User user = InMemoryUserRepository.findByAccount(account).orElseThrow(DBNotFoundException::new);
@@ -80,7 +80,7 @@ public class HttpResponse {
     }
 
     private void createAccount() {
-        final Map<String, String> queryParams = body.getBody();
+        final Map<String, String> queryParams = body.getQueryParams();
         final String account = queryParams.get("account");
         final String password = queryParams.get("password");
         final String email = queryParams.get("email");

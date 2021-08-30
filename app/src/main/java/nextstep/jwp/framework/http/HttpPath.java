@@ -1,7 +1,6 @@
 package nextstep.jwp.framework.http;
 
 import java.net.URL;
-import java.util.Map;
 import java.util.Objects;
 
 public class HttpPath {
@@ -67,14 +66,6 @@ public class HttpPath {
         }
 
         return new QueryParams();
-    }
-
-    public boolean hasNotQueryParams() {
-        return queryParams.count() == 0;
-    }
-
-    public Map<String, String> queryParams() {
-        return queryParams.getQueryParams();
     }
 
     public boolean isNotExistFile() {

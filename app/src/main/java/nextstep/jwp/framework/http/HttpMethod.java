@@ -1,7 +1,5 @@
 package nextstep.jwp.framework.http;
 
-import static nextstep.jwp.framework.http.HttpRequest.DELIMITER;
-
 import java.util.Arrays;
 
 public enum HttpMethod {
@@ -13,16 +11,10 @@ public enum HttpMethod {
     DELETE("DELETE"),
     OPTIONS("OPTIONS");
 
-    private static final int HTTP_REQUEST_INDEX = 0;
-
     private final String method;
 
     HttpMethod(final String method) {
         this.method = method;
-    }
-
-    public static HttpMethod findRequest(final String line) {
-        return findByString(line.split(DELIMITER)[HTTP_REQUEST_INDEX]);
     }
 
     public static HttpMethod findByString(final String request) {

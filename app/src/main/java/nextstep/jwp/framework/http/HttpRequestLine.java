@@ -26,10 +26,6 @@ public class HttpRequestLine {
         return state.resource();
     }
 
-    public HttpMethod getMethod() {
-        return method;
-    }
-
     public HttpPath getPath() {
         return path;
     }

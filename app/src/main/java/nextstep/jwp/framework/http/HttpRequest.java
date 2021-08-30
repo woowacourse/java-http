@@ -16,9 +16,7 @@ public class HttpRequest {
     public static final String BODY_DELIMITER = LINE_DELIMITER + LINE_DELIMITER;
     private static final int HTTP_REQUEST_LINE_INDEX = 0;
     private static final int HTTP_METHOD_INDEX = 0;
-    private static final int HTTP_BODY_NOT_EXIST_LENGTH = 1;
     private static final int HTTP_HEADER_INDEX = 0;
-    private static final int HTTP_BODY_INDEX = 1;
     private static final int HTTP_PATH_INDEX = 1;
     private static final int HTTP_VERSION_OF_THE_PROTOCOL_INDEX = 2;
 
@@ -63,7 +61,7 @@ public class HttpRequest {
         }
     }
 
-    private HttpRequestLine createRequestLine(final String lines) throws IOException {
+    private HttpRequestLine createRequestLine(final String lines) {
         final String[] line = lines.split(LINE_DELIMITER)[HTTP_REQUEST_LINE_INDEX].split(DELIMITER);
 
         final HttpMethod method = HttpMethod.findByString(line[HTTP_METHOD_INDEX]);
@@ -73,7 +71,7 @@ public class HttpRequest {
         return new HttpRequestLine(method, path, protocolVersion);
     }
 
-    private HttpHeaders createHeader(final String lines) throws IOException {
+    private HttpHeaders createHeader(final String lines) {
         final String[] headers = lines.split(BODY_DELIMITER)[HTTP_HEADER_INDEX].split(LINE_DELIMITER);
         final StringJoiner headerLines = new StringJoiner(LINE_DELIMITER);
 

@@ -95,7 +95,7 @@ public class JwpHttpRequest {
 
     private static void splitKeyAndValue(Map<String, String> params, String queryParam, String delimiter) {
         String[] keyAndValue = queryParam.split(delimiter);
-        params.put(keyAndValue[0], keyAndValue[1]);
+        params.put(keyAndValue[0].trim(), keyAndValue[1].trim());
     }
 
     public String getUri() {

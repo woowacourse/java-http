@@ -30,7 +30,6 @@ public class RegisterController extends AbstractController {
     public HttpResponse doPost(HttpRequest httpRequest) {
         final Map<String, String> payload = httpRequest.getBody();
         final User user = new User(
-                InMemoryUserRepository.nextId(),
                 payload.get("account"),
                 payload.get("password"),
                 payload.get("email")

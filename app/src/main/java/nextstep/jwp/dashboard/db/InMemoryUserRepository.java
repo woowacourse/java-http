@@ -10,13 +10,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
+    private static Long autoIncrement = 1L;
 
     static {
-        final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
+        final User user = new User(autoIncrement++, "gugu", "password", "hkkang@woowahan.com");
         database.put(user.getAccount(), user);
     }
 
     public static void save(User user) {
+        user.setId(autoIncrement++);
         database.put(user.getAccount(), user);
     }
 
@@ -26,9 +28,5 @@ public class InMemoryUserRepository {
 
     public static boolean existsByAccount(String account) {
         return database.containsKey(account);
-    }
-
-    public static Long nextId() {
-        return (long) (database.size() + 1);
     }
 }

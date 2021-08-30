@@ -17,10 +17,25 @@ public class JwpController {
 
     public JwpController() {
         this.mappedFunction = new HashMap<>();
-        this.mappedFunction.put("login", this::login);
+        this.mappedFunction.put("login", this::getLogin);
+        this.mappedFunction.put("register", this::postRegister);
     }
 
-    private Map<HttpStatus, String> login(final String queryString) {
+    private Map<HttpStatus, String> postRegister(final String request) {
+        try {
+            String requestBody = request.split(" ")[1];
+            List<String> params = Arrays.asList(requestBody.split("&"));
+            User user = UserService.registerUser(params);
+            log.info("회원가입된 유저 : " + user.toString());
+            return pageController.mapResponse(Optional.of(HttpStatus.CREATED), "index");
+//            return RequestHandler.getResponse(new BufferedReader(null), "GET /index.html");
+        } catch (IllegalArgumentException e) {
+            log.error(e.getMessage());
+            return pageController.mapResponse(Optional.of(HttpStatus.BAD_REQUEST), "register");
+        }
+    }
+
+    private Map<HttpStatus, String> getLogin(final String queryString) {
         try {
             List<String> params = Arrays.asList(queryString.split("&"));
             User user = UserService.findUser(params);

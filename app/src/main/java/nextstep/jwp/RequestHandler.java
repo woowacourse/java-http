@@ -1,8 +1,6 @@
 package nextstep.jwp;
 
-import nextstep.jwp.controller.JwpController;
-import nextstep.jwp.controller.PageController;
-import nextstep.jwp.model.HttpStatus;
+import nextstep.jwp.model.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,13 +13,9 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
-    private final PageController pageController;
-    private final JwpController jwpController;
 
     public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
-        this.pageController = new PageController();
-        this.jwpController = new JwpController();
     }
 
     @Override
@@ -31,7 +25,7 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             log.info(matchRequest(inputStream, outputStream));
-        } catch (IOException exception) {
+        } catch (IOException | IllegalArgumentException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
@@ -39,57 +33,72 @@ public class RequestHandler implements Runnable {
 
     }
 
-    private String matchRequest(InputStream inputStream, OutputStream outputStream) throws IOException {
+    private String matchRequest(final InputStream inputStream, final OutputStream outputStream) throws IOException {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
         String firstLine = bufferedReader.readLine();
-        if (firstLine != null) {
-            List<String> requestHeader = Arrays.asList(firstLine.split(" "));
-            String response = matchMethod(requestHeader);
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+        if (firstLine == null) {
+            throw new IllegalArgumentException("request가 존재하지 않습니다.");
         }
+
+        String response = getResponse(bufferedReader, firstLine);
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
         return firstLine;
     }
 
-    private String matchMethod(List<String> requestHeader) {
-        if (requestHeader.get(0).equals("GET")) {
-            String request = requestHeader.get(1).substring(1);
-            if(request.contains("?") && request.contains("=")){
-                return getParam(request);
-            }
-            return getPage(request);
-        }
-        throw new IllegalArgumentException("옳지 않은 요청입니다.");
+    public String getResponse(BufferedReader bufferedReader, String firstLine) {
+        List<String> requestHeader = Arrays.asList(firstLine.split(" "));
+        HttpMethod httpMethod = matchMethod(requestHeader);
+        String requestUrl = requestHeader.get(1).substring(1);
+        return matchResponse(bufferedReader, httpMethod, requestUrl);
     }
 
-    private String getParam(final String request) {
+    private String matchResponse(final BufferedReader bufferedReader, final HttpMethod httpMethod, final String requestUrl) {
+        if(httpMethod.equals(HttpMethod.POST)){
+            String requestBody = extractRequestBody(bufferedReader);
+            return httpMethod.matches(requestUrl, requestBody);
+        }
+        return httpMethod.matches(requestUrl, null);
+    }
+
+    private String extractRequestBody(BufferedReader bufferedReader) {
         try {
-            Map.Entry<HttpStatus, String> responseEntry = new ArrayList<>(jwpController.mapResponse(request).entrySet()).get(0);
-            return makeResponse(responseEntry.getKey(), responseEntry.getValue());
-        } catch (IllegalArgumentException e) {
-            return makeResponse(HttpStatus.NOT_FOUND,e.getMessage());
+            List<String> requestHeaders = extractRequestHeaders(bufferedReader);
+            int contentLength = extractContentLength(requestHeaders);
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            return new String(buffer);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("requestBody가 존재하지 않습니다.");
         }
     }
 
-    private String getPage(final String request) {
-        try{
-            Map.Entry<HttpStatus, String> responseEntry = new ArrayList<>(pageController.mapResponse(Optional.empty(), request).entrySet()).get(0);
-            return makeResponse(responseEntry.getKey(), responseEntry.getValue());
-        } catch (IllegalArgumentException e) {
-            return makeResponse(HttpStatus.NOT_FOUND, e.getMessage());
+    private List<String> extractRequestHeaders(BufferedReader bufferedReader) throws IOException {
+        List<String> requestHeaders = new ArrayList<>();
+        while(bufferedReader.ready()){
+            String line = bufferedReader.readLine();
+            if(line.isEmpty()) {
+                break;
+            }
+            requestHeaders.add(line);
         }
-
+        return requestHeaders;
     }
 
-    private String makeResponse(final HttpStatus status, final String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + status.toString(),
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    private int extractContentLength(List<String> requestHeader) {
+        String content = requestHeader.stream()
+                .filter(header -> header.contains("Content-Length"))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("request가 올바르지 않습니다."));
+        return Integer.parseInt(content.split(" ")[1]);
+    }
+
+    private HttpMethod matchMethod(List<String> requestFirstLine) {
+        String requestMethod = requestFirstLine.get(0);
+        return HttpMethod.matchHttpMethod(requestMethod);
     }
 
     private void close() {

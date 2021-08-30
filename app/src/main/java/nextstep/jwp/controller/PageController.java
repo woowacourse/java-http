@@ -21,6 +21,7 @@ public class PageController {
         this.mappedFunction.put("index.html", this::index);
         this.mappedFunction.put("login", this::login);
         this.mappedFunction.put("401", this::unauthorized);
+        this.mappedFunction.put("register", this::register);
     }
 
     public Map<HttpStatus, String> mapResponse(final Optional<HttpStatus> status, final String request) {
@@ -32,33 +33,26 @@ public class PageController {
     }
 
     public Map<HttpStatus, String> index(final HttpStatus status, final String indexRequest) {
-        if (!"".equals(indexRequest) && !indexRequest.contains("index")) {
-            throw new IllegalArgumentException("옳지 않은 페이지명입니다.");
-        }
-        if (status != HttpStatus.OK) {
-            return makeResponse(status, "static/index.html");
-        }
-        return makeResponse(HttpStatus.OK, "static/index.html");
+        return makeResponseWithStatus(status, "static/index.html");
     }
 
     public Map<HttpStatus, String> login(final HttpStatus status, final String requestPage) {
-        if (!requestPage.contains("login")) {
-            throw new IllegalArgumentException("옳지 않은 페이지명입니다.");
-        }
-        if (status != HttpStatus.OK) {
-            return makeResponse(status, "static/login.html");
-        }
-        return makeResponse(HttpStatus.OK, "static/login.html");
+        return makeResponseWithStatus(status, "static/login.html");
     }
 
     public Map<HttpStatus, String> unauthorized(final HttpStatus status, final String requestPage) {
-        if (!requestPage.contains("401")) {
-            throw new IllegalArgumentException("옳지 않은 페이지명입니다.");
-        }
+        return makeResponseWithStatus(status, "static/401.html");
+    }
+
+    public Map<HttpStatus, String> register(final HttpStatus status, final String requestPage) {
+        return makeResponseWithStatus(status, "static/register.html");
+    }
+
+    private Map<HttpStatus, String> makeResponseWithStatus(HttpStatus status, String s) {
         if (status != HttpStatus.OK) {
-            return makeResponse(status, "static/401.html");
+            return makeResponse(status, s);
         }
-        return makeResponse(HttpStatus.OK, "static/401.html");
+        return makeResponse(HttpStatus.OK, s);
     }
 
     private Map<HttpStatus, String> makeResponse(final HttpStatus status, final String request) {

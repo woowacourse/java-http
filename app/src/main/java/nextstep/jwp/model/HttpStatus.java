@@ -1,10 +1,11 @@
 package nextstep.jwp.model;
 
 public enum HttpStatus {
-    OK("200", "Oasdfasdfk"),
+    OK("200", "Ok"),
     FOUND("302", "Found"),
     BAD_REQUEST("400", "Bad Request"),
-    NOT_FOUND("404", "Not Found");
+    NOT_FOUND("404", "Not Found"),
+    CREATED("201", "Created");
 
     private final String code;
     private final String name;

@@ -1,21 +1,16 @@
-package nextstep.jwp.model;
+package nextstep.jwp.http;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.function.Function;
 
 public enum HttpMethod {
     GET(GetMethod::new),
     POST(PostMethod::new);
 
-    private final Function<String, Method> matchedMethod;
+    private final Function<HttpRequest, Method> matchedMethod;
 
-    HttpMethod(Function<String, Method> matchedMethod) {
+    HttpMethod(Function<HttpRequest, Method> matchedMethod) {
         this.matchedMethod = matchedMethod;
-    }
-
-    public String matches(final String requestUrl, final String requestBody) {
-        return this.matchedMethod.apply(requestUrl).matchFunction(requestBody);
     }
 
     public static HttpMethod matchHttpMethod(final String requestMethod) {
@@ -23,5 +18,9 @@ public enum HttpMethod {
                 .filter(method -> method.name().equals(requestMethod))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("옳지 않은 함수입니다."));
+    }
+
+    public String matches(final HttpRequest httpRequest) {
+        return this.matchedMethod.apply(httpRequest).matchFunction();
     }
 }

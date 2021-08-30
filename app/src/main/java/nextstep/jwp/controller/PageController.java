@@ -1,6 +1,6 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.model.HttpStatus;
+import nextstep.jwp.http.HttpStatus;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,33 +33,39 @@ public class PageController {
     }
 
     public Map<HttpStatus, String> index(final HttpStatus status, final String indexRequest) {
-        return makeResponseWithStatus(status, "static/index.html");
+        return makeResponseWithStatus(status, "index.html");
     }
 
     public Map<HttpStatus, String> login(final HttpStatus status, final String requestPage) {
-        return makeResponseWithStatus(status, "static/login.html");
+        return makeResponseWithStatus(status, "login.html");
     }
 
     public Map<HttpStatus, String> unauthorized(final HttpStatus status, final String requestPage) {
-        return makeResponseWithStatus(status, "static/401.html");
+        return makeResponseWithStatus(status, "401.html");
     }
 
     public Map<HttpStatus, String> register(final HttpStatus status, final String requestPage) {
-        return makeResponseWithStatus(status, "static/register.html");
+        return makeResponseWithStatus(status, "register.html");
     }
 
-    private Map<HttpStatus, String> makeResponseWithStatus(HttpStatus status, String s) {
+    public Map<HttpStatus, String> mapContent(final String request) {
+        return makeResponse(HttpStatus.OK, request);
+    }
+
+    private Map<HttpStatus, String> makeResponseWithStatus(final HttpStatus status, final String request) {
         if (status != HttpStatus.OK) {
-            return makeResponse(status, s);
+            return makeResponse(status, request);
         }
-        return makeResponse(HttpStatus.OK, s);
+        return makeResponse(HttpStatus.OK, request);
     }
 
     private Map<HttpStatus, String> makeResponse(final HttpStatus status, final String request) {
         try {
-            final String fileResponse = getFileResponse(request);
+            final String fileResponse = getFileResponse("static/" + request);
+            System.out.println("$%^$%^");
             return Map.of(status, fileResponse);
         } catch (RuntimeException e) {
+            System.out.println("123123");
             return Map.of(status, "해당 페이지가 존재하지 않습니다.");
         }
     }

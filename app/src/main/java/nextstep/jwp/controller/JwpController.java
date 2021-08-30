@@ -1,6 +1,6 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.model.HttpStatus;
+import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
@@ -28,7 +28,6 @@ public class JwpController {
             User user = UserService.registerUser(params);
             log.info("회원가입된 유저 : " + user.toString());
             return pageController.mapResponse(Optional.of(HttpStatus.CREATED), "index");
-//todo: url도 바뀌기 return RequestHandler.getResponse(new BufferedReader(null), "GET /index.html");
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage());
             return pageController.mapResponse(Optional.of(HttpStatus.BAD_REQUEST), "register");

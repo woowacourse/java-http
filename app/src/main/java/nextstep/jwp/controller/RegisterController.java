@@ -42,7 +42,7 @@ public class RegisterController extends AbstractController {
             return HttpResponse.ok(httpRequest.resource());
         }
 
-        final User user = new User(1, account, password, email);
+        final User user = new User(InMemoryUserRepository.findCurrentId(), account, password, email);
         InMemoryUserRepository.save(user);
 
         return HttpResponse.ok(Controller.INDEX_PAGE);

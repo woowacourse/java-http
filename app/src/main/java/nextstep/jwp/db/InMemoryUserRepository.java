@@ -1,8 +1,11 @@
 package nextstep.jwp.db;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.model.User;
 
@@ -21,5 +24,14 @@ public class InMemoryUserRepository {
 
     public static Optional<User> findByAccount(String account) {
         return Optional.ofNullable(database.get(account));
+    }
+
+    public static long findCurrentId() {
+        List<User> userList = new ArrayList<User>(database.values());
+        final long maxId = userList.stream()
+                .mapToLong(User::getId)
+                .max()
+                .orElse(1);
+        return maxId + 1;
     }
 }

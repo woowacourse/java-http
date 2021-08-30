@@ -32,7 +32,7 @@ class HttpRequestParserTest {
                 "Content-Length",
                 "Content-Type",
                 "Accept"));
-        assertThat(actual.getRequestBody()).isPresent();
-        assertThat(actual.getRequestBody().get()).isEqualTo("account=gugu&password=password&email=hkkang%40woowahan.com");
+        assertThat(actual.getRequestBody()).isNotEmpty();
+        assertThat(actual.getRequestBody()).isEqualTo("account=gugu&password=password&email=hkkang%40woowahan.com");
     }
 }

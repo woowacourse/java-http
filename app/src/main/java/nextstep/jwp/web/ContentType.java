@@ -10,7 +10,8 @@ public enum ContentType {
     HTML("text/html", "html", "charset=" + StandardCharsets.UTF_8),
     CSS("text/css", "css", "charset=" + StandardCharsets.UTF_8),
     JS("text/javascript", "js", "charset=" + StandardCharsets.UTF_8),
-    SVG("image/svg+xml", "svg", null);
+    SVG("image/svg+xml", "svg", null),
+    PLAIN("text/plain", "txt", "charset=" + StandardCharsets.UTF_8);
 
     private final String httpNotation;
     private final Pattern fileExtensionPattern;
@@ -30,7 +31,7 @@ public enum ContentType {
                 .orElseThrow(UnsupportedContentType::new);
     }
 
-    private String toHttpNotation() {
+    public String toHttpNotation() {
         return this.httpNotation + (this.encodingType != null ? ";" + this.encodingType.toLowerCase() : "");
     }
 }

@@ -16,8 +16,8 @@ public class HandlerMap {
 
     static {
         HANDLER_MAP.put(URI.create("/register"), new RegisterController());
+        HANDLER_MAP.put(URI.create("/login"), new LoginController());
     }
-
 
     public static Controller getController(HttpRequest request) {
         URI requestUri = request.getRequestUri();

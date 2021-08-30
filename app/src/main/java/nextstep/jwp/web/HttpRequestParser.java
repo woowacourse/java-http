@@ -2,30 +2,29 @@ package nextstep.jwp.web;
 
 import java.io.*;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.stream.Collectors.toMap;
+
 public class HttpRequestParser {
-    private static final int METHOD_INDEX = 0;
-    private static final int URI_INDEX = 1;
-    private static final int FIRST_INDEX_OF_STRING = 0;
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final int METHOD_INDEX = 0;
+    private static final int URI_LINE_INDEX = 1;
+    private static final int REQUEST_URI_INDEX = 0;
+    private static final int PATH_PARAMETER_INDEX = 1;
+    private static final int FIRST_INDEX_OF_STRING = 0;
 
     public static HttpRequest parse(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        HttpRequest.HttpRequestBuilder httpRequestBuilder = HttpRequest.builder();
 
         String startLine = bufferedReader.readLine();
-        String[] startLineElement = startLine.split(" ");
-
-        HttpMethod method = HttpMethod.of(startLineElement[METHOD_INDEX]);
-        URI requestUri = URI.create(startLineElement[URI_INDEX]);
+        parseStartLine(startLine, httpRequestBuilder);
 
         Map<String, String> headers = parseHeaders(bufferedReader);
-
-        HttpRequest.HttpRequestBuilder httpRequestBuilder = HttpRequest.builder()
-                .method(method)
-                .requestUri(requestUri)
-                .headers(headers);
+        httpRequestBuilder.headers(headers);
 
         if (headers.containsKey(CONTENT_LENGTH)) {
             String body = parseBody(bufferedReader, Integer.parseInt(headers.get(CONTENT_LENGTH)));
@@ -35,10 +34,34 @@ public class HttpRequestParser {
         return httpRequestBuilder.build();
     }
 
-    private static String parseBody(Reader reader, int contentLength) throws IOException {
-        char[] buffer = new char[contentLength];
-        reader.read(buffer, 0, contentLength);
-        return new String(buffer);
+    private static void parseStartLine(String startLine, HttpRequest.HttpRequestBuilder httpRequestBuilder) {
+        String[] startLineElement = startLine.split(" ");
+
+        HttpMethod method = HttpMethod.of(startLineElement[METHOD_INDEX]);
+        httpRequestBuilder
+                .method(method);
+
+        String rawRequestUri = startLineElement[URI_LINE_INDEX];
+
+        parseRequestUri(rawRequestUri, httpRequestBuilder);
+    }
+
+    private static void parseRequestUri(String rawRequestUri, HttpRequest.HttpRequestBuilder httpRequestBuilder) {
+        if (rawRequestUri.contains("?")) {
+            String[] uriElements = rawRequestUri.split("\\?");
+            String requestUri = uriElements[REQUEST_URI_INDEX];
+            String parameterLine = uriElements[PATH_PARAMETER_INDEX];
+
+            Map<String, String> parameters = Arrays.stream(parameterLine.split("&"))
+                    .map(row -> row.split("="))
+                    .collect(toMap(element -> element[0], element -> element[1]));
+
+            httpRequestBuilder
+                    .requestUri(URI.create(requestUri))
+                    .parameters(parameters);
+            return;
+        }
+        httpRequestBuilder.requestUri(URI.create(rawRequestUri));
     }
 
     private static Map<String, String> parseHeaders(BufferedReader bufferedReader) throws IOException {
@@ -57,6 +80,12 @@ public class HttpRequestParser {
         }
 
         return headers;
+    }
+
+    private static String parseBody(Reader reader, int contentLength) throws IOException {
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 
 }

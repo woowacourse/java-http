@@ -2,7 +2,9 @@ package nextstep.jwp.http.request;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.StringJoiner;
 import nextstep.jwp.exception.EmptyQueryParametersException;
 import nextstep.jwp.exception.InvalidRequestUriException;
 import nextstep.jwp.exception.QueryParameterNotFoundException;
@@ -96,5 +98,25 @@ public class RequestUri {
 
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public String toString() {
+        if (queryParameters.isEmpty()) {
+            return value;
+        }
+
+        return String.format("%s?%s", value, toStringQueryParam());
+    }
+
+    private String toStringQueryParam() {
+        StringJoiner stringJoiner = new StringJoiner("&");
+
+        for (Entry<String, String> entry : queryParameters.entrySet()) {
+            String queryParam = String.format("%s=%s", entry.getKey(), entry.getValue());
+            stringJoiner.add(queryParam);
+        }
+
+        return stringJoiner.toString();
     }
 }

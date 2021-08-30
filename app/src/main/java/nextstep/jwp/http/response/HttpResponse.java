@@ -7,6 +7,7 @@ import nextstep.jwp.model.StaticResource;
 public class HttpResponse {
 
     private static final String NEW_LINE = System.getProperty("line.separator");
+    private static final String EMPTY_STRING = "";
 
     private final StatusLine statusLine;
     private final ResponseHeaders responseHeaders;
@@ -35,14 +36,23 @@ public class HttpResponse {
     }
 
     public byte[] toBytes() {
-        if (responseBody.isEmpty()) {
-            return joinToBytes(NEW_LINE, statusLine.toString(), responseHeaders.toString());
-        }
-
-        return joinToBytes(NEW_LINE, statusLine.toString(), responseHeaders.toString(), responseBody.toString());
+        return toString().getBytes(StandardCharsets.UTF_8);
     }
 
-    private byte[] joinToBytes(String... strings) {
-        return String.join(NEW_LINE, strings).getBytes(StandardCharsets.UTF_8);
+    @Override
+    public String toString() {
+        if (responseBody.isEmpty()) {
+            return String.join(NEW_LINE,
+                statusLine.toString(),
+                responseHeaders.toString()
+            );
+        }
+
+        return String.join(NEW_LINE,
+            statusLine.toString(),
+            responseHeaders.toString(),
+            EMPTY_STRING,
+            responseBody.toString()
+        );
     }
 }

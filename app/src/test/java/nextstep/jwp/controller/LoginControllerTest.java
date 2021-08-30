@@ -70,8 +70,7 @@ class LoginControllerTest {
                     httpRequest = HttpRequest.parse(inputStream);
                 }
 
-                String expectString = "\n\n"
-                    + "HTTP/1.1 200 OK \n"
+                String expectString = "HTTP/1.1 200 OK \n"
                     + "Content-Length: 13 \n"
                     + "Content-Type: text/html; charset=UTF-8 \n"
                     + "\n"
@@ -94,8 +93,7 @@ class LoginControllerTest {
                     httpRequest = HttpRequest.parse(inputStream);
                 }
 
-                String expectString = "\n\n"
-                    + "HTTP/1.1 404 Not Found \n"
+                String expectString = "HTTP/1.1 404 Not Found \n"
                     + "Content-Length: 9 \n"
                     + "Content-Type: text/html; charset=UTF-8 \n"
                     + "\n"
@@ -142,8 +140,7 @@ class LoginControllerTest {
                 // given
                 userRepository.save(new User(ACCOUNT, PASSWORD, "email"));
 
-                String expectString = "\n\n"
-                    + "HTTP/1.1 302 Found \n"
+                String expectString = "HTTP/1.1 302 Found \n"
                     + "Location: /index.html ";
 
                 // when
@@ -157,8 +154,7 @@ class LoginControllerTest {
             @Test
             void loginFail() throws IOException {
                 // given
-                String expectString = "\n\n"
-                    + "HTTP/1.1 401 Unauthorized \n"
+                String expectString = "HTTP/1.1 401 Unauthorized \n"
                     + "Location: /401.html ";
 
                 // when

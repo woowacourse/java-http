@@ -28,8 +28,7 @@ class HttpResponseTest {
             File file = new File(url.getFile());
             StaticResource staticResource = StaticResource.from(file);
 
-            String expectString = "\n\n"
-                + "HTTP/1.1 200 OK \n"
+            String expectString = "HTTP/1.1 200 OK \n"
                 + "Content-Length: 12 \n"
                 + "Content-Type: text/html; charset=UTF-8 \n"
                 + "\n"
@@ -53,8 +52,7 @@ class HttpResponseTest {
             // given
             String location = "/index.html";
 
-            String expectString = "\n\n"
-                + "HTTP/1.1 301 Moved Permanently \n"
+            String expectString = "HTTP/1.1 301 Moved Permanently \n"
                 + "Location: /index.html ";
 
             // when

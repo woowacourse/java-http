@@ -70,8 +70,7 @@ class RegisterControllerTest {
                     httpRequest = HttpRequest.parse(inputStream);
                 }
 
-                String expectString = "\n\n"
-                    + "HTTP/1.1 200 OK \n"
+                String expectString = "HTTP/1.1 200 OK \n"
                     + "Content-Length: 16 \n"
                     + "Content-Type: text/html; charset=UTF-8 \n"
                     + "\n"
@@ -95,8 +94,7 @@ class RegisterControllerTest {
                     httpRequest = HttpRequest.parse(inputStream);
                 }
 
-                String expectString = "\n\n"
-                    + "HTTP/1.1 404 Not Found \n"
+                String expectString = "HTTP/1.1 404 Not Found \n"
                     + "Content-Length: 9 \n"
                     + "Content-Type: text/html; charset=UTF-8 \n"
                     + "\n"
@@ -143,8 +141,7 @@ class RegisterControllerTest {
             @Test
             void registerSuccess() throws IOException {
                 // given
-                String expectString = "\n\n"
-                    + "HTTP/1.1 301 Moved Permanently \n"
+                String expectString = "HTTP/1.1 301 Moved Permanently \n"
                     + "Location: /index.html ";
 
                 // when
@@ -160,8 +157,7 @@ class RegisterControllerTest {
                 // given
                 userRepository.save(new User(ACCOUNT, PASSWORD, EMAIL));
 
-                String expectString = "\n\n"
-                    + "HTTP/1.1 409 Conflict \n"
+                String expectString = "HTTP/1.1 409 Conflict \n"
                     + "Location: /409.html ";
 
                 // when

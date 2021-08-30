@@ -39,8 +39,7 @@ class StaticResourceControllerTest {
             httpRequest = HttpRequest.parse(inputStream);
         }
 
-        String expectString = "\n\n"
-            + "HTTP/1.1 404 Not Found \n"
+        String expectString = "HTTP/1.1 404 Not Found \n"
             + "Content-Length: 9 \n"
             + "Content-Type: text/html; charset=UTF-8 \n"
             + "\n"
@@ -67,8 +66,7 @@ class StaticResourceControllerTest {
                 httpRequest = HttpRequest.parse(inputStream);
             }
 
-            String expectString = "\n\n"
-                + "HTTP/1.1 200 OK \n"
+            String expectString = "HTTP/1.1 200 OK \n"
                 + "Content-Length: 20 \n"
                 + "Content-Type: text/html; charset=UTF-8 \n"
                 + "\n"
@@ -91,8 +89,7 @@ class StaticResourceControllerTest {
                 httpRequest = HttpRequest.parse(inputStream);
             }
 
-            String expectString = "\n\n"
-                + "HTTP/1.1 200 OK \n"
+            String expectString = "HTTP/1.1 200 OK \n"
                 + "Content-Length: 20 \n"
                 + "Content-Type: text/html; charset=UTF-8 \n"
                 + "\n"

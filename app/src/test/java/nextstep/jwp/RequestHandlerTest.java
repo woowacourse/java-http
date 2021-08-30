@@ -19,8 +19,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = "\n\n"
-            + "HTTP/1.1 200 OK \n"
+        String expected = "HTTP/1.1 200 OK \n"
             + "Content-Length: 11 \n"
             + "Content-Type: text/html; charset=UTF-8 \n"
             + "\n"
@@ -47,8 +46,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = "\n\n"
-            + "HTTP/1.1 200 OK \n"
+        String expected = "HTTP/1.1 200 OK \n"
             + "Content-Length: 11 \n"
             + "Content-Type: text/html; charset=UTF-8 \n"
             + "\n"

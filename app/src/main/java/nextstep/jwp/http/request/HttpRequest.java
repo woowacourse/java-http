@@ -7,6 +7,9 @@ import java.io.InputStreamReader;
 
 public class HttpRequest {
 
+    private static final String NEW_LINE = System.getProperty("line.separator");
+    private static final String EMPTY_STRING = "";
+
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
     private final RequestBody requestBody;
@@ -57,5 +60,22 @@ public class HttpRequest {
 
     public String getBodyParameter(String parameter) {
         return requestBody.getParameter(parameter);
+    }
+
+    @Override
+    public String toString() {
+        if (requestHeaders.requestHasBody()) {
+            return String.join(NEW_LINE,
+                requestLine.toString(),
+                requestHeaders.toString(),
+                EMPTY_STRING,
+                requestBody.toString()
+            );
+        }
+
+        return String.join(NEW_LINE,
+            requestLine.toString(),
+            requestHeaders.toString()
+        );
     }
 }

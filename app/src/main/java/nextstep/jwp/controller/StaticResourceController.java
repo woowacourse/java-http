@@ -7,8 +7,12 @@ import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.model.StaticResource;
 import nextstep.jwp.service.StaticResourceService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class StaticResourceController implements Controller {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StaticResourceController.class);
 
     private final StaticResourceService staticResourceService;
 
@@ -23,6 +27,8 @@ public class StaticResourceController implements Controller {
             return HttpResponse.withBody(HttpStatus.OK, staticResource);
         } catch (StaticResourceNotFoundException e) {
             StaticResource staticResource = staticResourceService.findByPath("/404.html");
+
+            LOGGER.warn(e.getMessage());
 
             return HttpResponse.withBody(HttpStatus.NOT_FOUND, staticResource);
         }

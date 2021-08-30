@@ -9,6 +9,7 @@ public class RequestLine {
     private static final int URI_INDEX = 1;
     private static final int VERSION_INDEX = 2;
     private static final int EXPECT_REQUEST_LINE_LENGTH = 3;
+    private static final String SPACE = " ";
 
     private final Method method;
     private final RequestUri requestUri;
@@ -54,5 +55,10 @@ public class RequestLine {
 
     public boolean hasQueryParam() {
         return requestUri.hasQueryParam();
+    }
+
+    @Override
+    public String toString() {
+        return String.join(SPACE, method.name(), requestUri.toString(), httpVersion.getValue());
     }
 }

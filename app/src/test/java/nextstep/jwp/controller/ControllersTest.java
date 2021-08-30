@@ -46,8 +46,7 @@ class ControllersTest {
                     httpRequest = HttpRequest.parse(inputStream);
                 }
 
-                String expectString = "\n\n"
-                    + "HTTP/1.1 200 OK \n"
+                String expectString = "HTTP/1.1 200 OK \n"
                     + "Content-Length: 13 \n"
                     + "Content-Type: text/html; charset=UTF-8 \n"
                     + "\n"
@@ -74,8 +73,7 @@ class ControllersTest {
                     httpRequest = HttpRequest.parse(inputStream);
                 }
 
-                String expectString = "\n\n"
-                    + "HTTP/1.1 302 Found \n"
+                String expectString = "HTTP/1.1 302 Found \n"
                     + "Location: /index.html ";
 
                 // when
@@ -103,8 +101,7 @@ class ControllersTest {
                     httpRequest = HttpRequest.parse(inputStream);
                 }
 
-                String expectString = "\n\n"
-                    + "HTTP/1.1 200 OK \n"
+                String expectString = "HTTP/1.1 200 OK \n"
                     + "Content-Length: 16 \n"
                     + "Content-Type: text/html; charset=UTF-8 \n"
                     + "\n"
@@ -131,8 +128,7 @@ class ControllersTest {
                     httpRequest = HttpRequest.parse(inputStream);
                 }
 
-                String expectString = "\n\n"
-                    + "HTTP/1.1 301 Moved Permanently \n"
+                String expectString = "HTTP/1.1 301 Moved Permanently \n"
                     + "Location: /index.html ";
 
                 // when
@@ -157,8 +153,7 @@ class ControllersTest {
                     httpRequest = HttpRequest.parse(inputStream);
                 }
 
-                String expectString = "\n\n"
-                    + "HTTP/1.1 200 OK \n"
+                String expectString = "HTTP/1.1 200 OK \n"
                     + "Content-Length: 20 \n"
                     + "Content-Type: text/html; charset=UTF-8 \n"
                     + "\n"
@@ -181,8 +176,7 @@ class ControllersTest {
                     httpRequest = HttpRequest.parse(inputStream);
                 }
 
-                String expectString = "\n\n"
-                    + "HTTP/1.1 200 OK \n"
+                String expectString = "HTTP/1.1 200 OK \n"
                     + "Content-Length: 20 \n"
                     + "Content-Type: text/html; charset=UTF-8 \n"
                     + "\n"

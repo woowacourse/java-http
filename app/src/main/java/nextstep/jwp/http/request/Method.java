@@ -17,7 +17,7 @@ public enum Method {
         try {
             return valueOf(requestMethod);
         } catch (IllegalArgumentException e) {
-            throw new NotImplementedException();
+            throw new NotImplementedException(requestMethod);
         }
     }
 }

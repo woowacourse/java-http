@@ -37,7 +37,7 @@
   - [x] Content, ContentType, StaticResource 테스트 코드
   - [x] Service 테스트 코드
   - [x] InMemoryUserRepository 테스트 코드
-- [ ] 각 동작 로그 남기기
+- [x] 각 동작 로그 남기기
 
 <br>
 

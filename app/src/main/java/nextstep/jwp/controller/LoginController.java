@@ -41,7 +41,7 @@ public class LoginController extends RestController {
         String account = httpRequest.getBodyParameter("account");
         String password = httpRequest.getBodyParameter("password");
 
-        LOGGER.debug("Login Request => account: {}, password: {}", account, password);
+        LOGGER.debug("Login Request => account: {}", account);
 
         return new LoginRequest(account, password);
     }

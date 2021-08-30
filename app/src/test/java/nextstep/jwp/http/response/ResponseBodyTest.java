@@ -36,7 +36,7 @@ class ResponseBodyTest {
         @Test
         void toStringException() {
             // given
-            String expectBodyString = NEW_LINE + RESPONSE_BODY_STRING;
+            String expectBodyString = RESPONSE_BODY_STRING;
 
             // when, then
             assertThat(responseBody.toString()).isEqualTo(expectBodyString);

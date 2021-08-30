@@ -34,7 +34,9 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = HttpRequest.parse(inputStream);
+            LOGGER.info("Parsed HTTP Request!!!\n\n{}\n\n", httpRequest);
             HttpResponse httpResponse = controllers.doService(httpRequest);
+            LOGGER.info("Return HTTP Response!!!\n\n{}\n\n", httpResponse);
 
             flushBytes(outputStream, httpResponse);
         } catch (IOException | InvalidHttpRequestException exception) {

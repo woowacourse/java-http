@@ -6,7 +6,6 @@ import nextstep.jwp.exception.NoResponseBodyException;
 public class ResponseBody {
 
     private static final ResponseBody EMPTY = new ResponseBody(null);
-    private static final String NEW_LINE = System.getProperty("line.separator");
 
     private final String value;
 
@@ -28,6 +27,6 @@ public class ResponseBody {
             throw new NoResponseBodyException();
         }
 
-        return NEW_LINE + value;
+        return value;
     }
 }

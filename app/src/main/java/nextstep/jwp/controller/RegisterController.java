@@ -42,7 +42,7 @@ public class RegisterController extends RestController {
         String password = httpRequest.getBodyParameter("password");
         String email = httpRequest.getBodyParameter("email");
 
-        LOGGER.debug("Register Request => account: {}, password: {}, email: {}", account, password, email);
+        LOGGER.debug("Register Request => account: {}, email: {}", account, email);
 
         return new RegisterRequest(account, password, email);
     }

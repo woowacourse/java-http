@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.StringJoiner;
 import nextstep.jwp.exception.HttpRequestNotHaveBodyException;
 import nextstep.jwp.exception.InvalidRequestHeader;
 
@@ -14,6 +16,7 @@ public class RequestHeaders {
     private static final int EXPECT_LINE_LENGTH = 2;
     private static final String CONTENT_LENGTH = "content-length";
     private static final String TRANSFER_ENCODING = "transfer-encoding";
+    private static final String NEW_LINE = System.getProperty("line.separator");
 
     private final Map<String, String> headers;
 
@@ -66,5 +69,17 @@ public class RequestHeaders {
         }
 
         return Integer.parseInt(headers.get(CONTENT_LENGTH));
+    }
+
+    @Override
+    public String toString() {
+        StringJoiner stringJoiner = new StringJoiner(NEW_LINE);
+
+        for (Entry<String, String> entry : headers.entrySet()) {
+            String header = String.format("%s: %s", entry.getKey(), entry.getValue());
+            stringJoiner.add(header);
+        }
+
+        return stringJoiner.toString();
     }
 }

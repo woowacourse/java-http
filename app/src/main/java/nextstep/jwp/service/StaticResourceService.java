@@ -17,7 +17,7 @@ public class StaticResourceService {
 
             return StaticResource.from(file);
         } catch (NullPointerException e) {
-            throw new StaticResourceNotFoundException();
+            throw new StaticResourceNotFoundException(path);
         }
     }
 

@@ -4,17 +4,17 @@ import java.util.Map;
 
 public class RequestBody {
 
-    private Map<String, String> requestBodies;
+    private Map<String, String> requestBodyMap;
 
-    private RequestBody(Map<String, String> requestBodies) {
-        this.requestBodies = requestBodies;
+    private RequestBody(Map<String, String> requestBodyMap) {
+        this.requestBodyMap = requestBodyMap;
     }
 
-    public static RequestBody of(Map<String, String> requestBodies) {
-        return new RequestBody(requestBodies);
+    public static RequestBody of(Map<String, String> requestBodyMap) {
+        return new RequestBody(requestBodyMap);
     }
 
-    public String getParameter(String key) {
-        return requestBodies.get(key);
+    public String getParam(String key) {
+        return requestBodyMap.get(key);
     }
 }

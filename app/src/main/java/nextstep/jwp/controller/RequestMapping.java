@@ -12,6 +12,9 @@ public class RequestMapping {
         if ("/login".equals(path)) {
             return new LoginController();
         }
+        if ("/register".equals(path)) {
+            return new RegisterController();
+        }
         return new IndexController();
     }
 }

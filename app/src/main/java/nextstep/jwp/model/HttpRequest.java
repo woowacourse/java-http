@@ -17,8 +17,8 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public static HttpRequest of(RequestLine requestLine, Map<String, String> httpHeaders) {
-        return new HttpRequest(requestLine.getMethod(), requestLine.getUri(), httpHeaders, null);
+    public static HttpRequest of(RequestLine requestLine, Map<String, String> httpHeaders, RequestBody requestBody) {
+        return new HttpRequest(requestLine.getMethod(), requestLine.getUri(), httpHeaders, requestBody);
     }
 
     public String getMethod() {

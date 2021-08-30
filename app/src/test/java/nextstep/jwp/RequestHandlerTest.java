@@ -62,6 +62,34 @@ class RequestHandlerTest {
     }
 
     @Test
+    void index_fail() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "POST /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/403.html");
+        final String file = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = String.join("\r\n",
+                "HTTP/1.1 403 Forbidden ",
+                "Content-Type: text/html; charset=utf-8 ",
+                "Content-Length: " + file.getBytes().length + " ",
+                "",
+                file);
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
     void login() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",

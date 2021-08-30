@@ -45,11 +45,11 @@ public class RegisterController extends AbstractController {
         final User user = new User(InMemoryUserRepository.findCurrentId(), account, password, email);
         InMemoryUserRepository.save(user);
 
-        return HttpResponse.ok(Controller.INDEX_PAGE);
+        return HttpResponse.ok(httpRequest.resource(Controller.INDEX_PAGE));
     }
 
     @Override
     byte[] error(HttpError httpError) throws IOException {
-        return new byte[0];
+        return HttpResponse.error(HttpError.FORBIDDEN);
     }
 }

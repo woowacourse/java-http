@@ -5,11 +5,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 import nextstep.jwp.handler.modelandview.ModelAndView;
-import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.ContentType;
 import nextstep.jwp.http.response.HttpResponse;
 
 public class View {
+
+    private static final View EMPTY = new View("");
 
     private final String content;
     private final ContentType contentType;
@@ -38,7 +39,7 @@ public class View {
     }
 
     public static View empty() {
-        return new View("");
+        return EMPTY;
     }
 
     public String contentType() {

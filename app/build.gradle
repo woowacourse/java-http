@@ -1,6 +1,7 @@
 plugins {
     id 'application'
     id 'org.sonarqube' version '3.3'
+    id 'jacoco'
 }
 
 sourceCompatibility = JavaVersion.VERSION_11
@@ -26,6 +27,19 @@ application {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy(jacocoTestReport)
+}
+
+jacoco {
+    toolVersion = "0.8.5"
+}
+
+jacocoTestReport {
+    reports {
+        html.enabled true
+        xml.enabled true
+        csv.enabled false
+    }
 }
 
 sonarqube {

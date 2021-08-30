@@ -165,7 +165,6 @@ class RequestHandlerTest {
         assertThat(output).isEqualTo(expected);
     }
 
-
     private static String get(String url) {
         return String.join("\r\n",
                 "GET " + url + " HTTP/1.1 ",

@@ -1,12 +1,11 @@
 package nextstep.jwp.handler;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.IncorrectHandlerException;
-import nextstep.jwp.handler.dto.LoginRequest;
-import nextstep.jwp.handler.modelandview.Model;
 import nextstep.jwp.handler.modelandview.ModelAndView;
-import nextstep.jwp.handler.service.LoginService;
 import nextstep.jwp.http.request.HttpMethod;
 import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.request.QueryParams;
 import nextstep.jwp.http.request.SourcePath;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpStatus;
@@ -21,10 +20,8 @@ public class LoginController implements Handler {
     private static final MappingPath LOGIN_POST_PATH = MappingPath.of(HttpMethod.POST, SourcePath.of("/login"));
 
     private final Map<MappingPath, BiFunction<HttpRequest, HttpResponse, ModelAndView>> handlers = new HashMap<>();
-    private final LoginService loginService;
 
-    public LoginController(LoginService loginService) {
-        this.loginService = loginService;
+    public LoginController() {
         handlers.put(PRINT_LOGIN_PAGE_PATH, this::printLoginPage);
         handlers.put(LOGIN_POST_PATH, this::login);
     }
@@ -46,9 +43,18 @@ public class LoginController implements Handler {
     }
 
     private ModelAndView login(HttpRequest request, HttpResponse httpResponse) {
-        loginService.login(LoginRequest.fromHttpRequest(request));
+        QueryParams params = QueryParams.of(request.requestBody());
 
-        httpResponse.addHeader("Location", "index.html");
-        return ModelAndView.of(Model.EMPTY, HttpStatus.FOUND);
+        if (checkValidUser(params.get("account"), params.get("password"))) {
+            httpResponse.addHeader("Location", "index.html");
+            return ModelAndView.of(HttpStatus.FOUND);
+        }
+        return ModelAndView.of("/401.html", HttpStatus.UNAUTHORIZED);
+    }
+
+    private boolean checkValidUser(String account, String password) {
+        return InMemoryUserRepository.findByAccount(account)
+                .map(user -> user.checkPassword(password))
+                .orElse(false);
     }
 }

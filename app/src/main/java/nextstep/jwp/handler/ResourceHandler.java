@@ -1,7 +1,6 @@
 package nextstep.jwp.handler;
 
 import nextstep.jwp.ServerConfig;
-import nextstep.jwp.exception.IncorrectHandlerException;
 import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.SourcePath;
@@ -26,7 +25,7 @@ public class ResourceHandler implements Handler {
         if (isExistResource(sourcePath)) {
             return ModelAndView.of(sourcePath.getValue(), HttpStatus.OK);
         }
-        throw new IncorrectHandlerException();
+        return ModelAndView.of("/404.html", HttpStatus.NOT_FOUND);
     }
 
     public boolean isExistResource(SourcePath sourcePath) {

@@ -15,9 +15,6 @@ class RequestHandlerTest {
     @DisplayName("/ 경로 조회")
     @Test
     void run() throws IOException {
-        // given
-        final MockSocket socket = new MockSocket();
-
         // when
         final URL resource = getClass().getClassLoader().getResource("static/hello.html");
 
@@ -79,7 +76,7 @@ class RequestHandlerTest {
 
     @DisplayName("로그인 성공시 index.html로 리다이렉트")
     @Test
-    void successfulLogin() throws IOException {
+    void successfulLogin() {
         assertResponse(
             String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",

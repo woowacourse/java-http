@@ -12,6 +12,8 @@ import java.util.Objects;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
+import nextstep.jwp.infrastructure.http.view.ResourceView;
+import nextstep.jwp.infrastructure.http.view.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,10 +95,8 @@ public class RequestHandler implements Runnable {
     }
 
     private View findViewByRequest(final HttpRequest request) {
-        if (controllerMapping.contains(request)) {
-            return controllerMapping.handle(request);
-        }
-        return View.buildByResource(request.getRequestLine().getUri().getBaseUri());
+        return controllerMapping.handle(request)
+            .orElse(new ResourceView(request.getRequestLine().getUri().getBaseUri()));
     }
 
     private void close() {

@@ -10,6 +10,9 @@ import nextstep.jwp.infrastructure.http.HttpHeaders.Builder;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.infrastructure.http.response.HttpStatusCode;
 import nextstep.jwp.infrastructure.http.response.HttpStatusLine;
+import nextstep.jwp.infrastructure.http.view.HttpResponseView;
+import nextstep.jwp.infrastructure.http.view.ResourceView;
+import nextstep.jwp.infrastructure.http.view.View;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,7 +42,7 @@ class ViewResolverTest {
         );
 
         // then
-        assertThat(viewResolver.resolve(View.buildByResource("notFound"))).isEqualTo(expected);
+        assertThat(viewResolver.resolve(new ResourceView("/notFound"))).isEqualTo(expected);
     }
 
     @DisplayName("HttpResponse를 명시한 경우 리소스 탐색하지 않음")
@@ -53,7 +56,7 @@ class ViewResolverTest {
                 .build(),
             "test"
         );
-        final View view = View.buildByHttpResponse(response);
+        final View view = new HttpResponseView(response);
 
         assertThat(viewResolver.resolve(view)).isEqualTo(response);
     }
@@ -61,7 +64,7 @@ class ViewResolverTest {
     @DisplayName("View가 명시한 리소스 탐색")
     @Test
     void resolveWithResource() throws IOException {
-        final View view = View.buildByResource("/hello.html");
+        final View view = new ResourceView("/hello.html");
         final URL resource = getClass().getClassLoader().getResource("static/hello.html");
 
         assertThat(viewResolver.resolve(view)).isEqualTo(

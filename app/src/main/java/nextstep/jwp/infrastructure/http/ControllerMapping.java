@@ -8,12 +8,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
-import nextstep.jwp.infrastructure.http.response.HttpStatusCode;
+import nextstep.jwp.infrastructure.http.view.View;
 
 public class ControllerMapping {
 
@@ -24,14 +25,12 @@ public class ControllerMapping {
             .collect(Collectors.toMap(Controller::requestLine, controller -> controller));
     }
 
-    public View handle(final HttpRequest request) {
+    public Optional<View> handle(final HttpRequest request) {
         final HttpRequestLine requestLine = request.getRequestLine();
         final HttpRequestLine requestLineWithoutQuery = new HttpRequestLine(requestLine.getHttpMethod(), requestLine.getUri().getBaseUri());
-        if (!contains(request)) {
-            return View.buildByResource(HttpStatusCode.NOT_FOUND, "/404.html");
-        }
 
-        return controllers.get(requestLineWithoutQuery).handle(request);
+        return Optional.ofNullable(controllers.getOrDefault(requestLineWithoutQuery, null))
+            .map(controller -> controller.handle(request));
     }
 
     public boolean contains(final HttpRequest request) {

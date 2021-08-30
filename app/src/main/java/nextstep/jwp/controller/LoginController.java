@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.infrastructure.http.HttpHeaders;
-import nextstep.jwp.infrastructure.http.View;
 import nextstep.jwp.infrastructure.http.request.HttpMethod;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
@@ -12,6 +11,9 @@ import nextstep.jwp.infrastructure.http.request.URI;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.infrastructure.http.response.HttpStatusCode;
 import nextstep.jwp.infrastructure.http.response.HttpStatusLine;
+import nextstep.jwp.infrastructure.http.view.HttpResponseView;
+import nextstep.jwp.infrastructure.http.view.ResourceView;
+import nextstep.jwp.infrastructure.http.view.View;
 
 public class LoginController implements Controller {
 
@@ -31,7 +33,7 @@ public class LoginController implements Controller {
         if (uri.hasKeys(REQUIRED_PARAMETERS)) {
             final String location = locationByLogin(uri);
 
-            return View.buildByHttpResponse(
+            return new HttpResponseView(
                 new HttpResponse(
                     new HttpStatusLine(HttpStatusCode.FOUND),
                     new HttpHeaders.Builder()
@@ -41,7 +43,7 @@ public class LoginController implements Controller {
             );
         }
 
-        return View.buildByResource("/login.html");
+        return new ResourceView("/login.html");
     }
 
     public String locationByLogin(final URI uri) {

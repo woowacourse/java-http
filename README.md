@@ -68,7 +68,7 @@
     - [x] `/register` GET 요청 시 `register.html`페이지를 보여준다.
     - [x] `/register` POST 요청 시 회원가입을 한다. 
         - [x] 가입에 성공하면 302 코드와 함께 `index.html`페이지로 리다이렉트 한다.
-        - [ ] 가입 실패하면 예외 발생 + `500.html`로 리다이렉트 한다.
+        - [x] 가입 실패하면 예외 발생 + `500.html`로 리다이렉트 한다. (본래 400이 적합하지만 에러 페이지가 없으므로 500 반환)
     
 - 다양한 컨텐츠 지원
     - [x] `.css` 등과 같은 정적파일에 알맞은 `Content-Type` 지정 로직을 구현한다. 
@@ -77,11 +77,11 @@
 
 ## 추후 리팩토링
 - [x] BufferReader, InputStreamReader `close()`
-- [ ] Header enum으로 관리
-- [ ] Request/Response에 헤더나 바디값이 없는 경우 기본값 지정 및 호출 시 예외처리 
-- [ ] 예외 발생 시점에 로그
-- [ ] ViewResolver 구현
 - [x] 도메인 ID 관리 로직 변경 
+- [x] Request/Response에 헤더나 바디값이 없는 경우 기본값 지정 및 호출 시 예외처리 
+- [x] 예외 발생 시점에 로그
+- [ ] Header enum으로 관리
+- [ ] ViewResolver 구현
 - [ ] 요청 메세지 파싱 로직 개션
 
 

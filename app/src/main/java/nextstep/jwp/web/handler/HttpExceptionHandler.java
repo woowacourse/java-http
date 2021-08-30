@@ -9,7 +9,7 @@ public class HttpExceptionHandler {
     public void handle(StatusCode statusCode, HttpResponse response) {
         String targetResource = "/" + statusCode.getCode() + ContentType.HTML.getExtension();
 
-        response.setStatusCode(StatusCode.FOUND);
+        response.setStatusLine(StatusCode.FOUND);
         response.addHeader("Location", targetResource);
     }
 }

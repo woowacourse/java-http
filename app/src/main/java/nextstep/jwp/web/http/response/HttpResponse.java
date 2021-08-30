@@ -4,17 +4,17 @@ import nextstep.jwp.web.http.Headers;
 
 public class HttpResponse {
 
-    private final Headers headers;
     private StatusLine statusLine;
+    private Headers headers;
     private ResponseBody body;
 
     public HttpResponse() {
-        this.headers = new Headers();
         this.statusLine = new StatusLine();
+        this.headers = new Headers();
         this.body = new ResponseBody();
     }
 
-    public void setStatusCode(StatusCode statusCode) {
+    public void setStatusLine(StatusCode statusCode) {
         this.statusLine = new StatusLine(statusCode);
     }
 

@@ -3,10 +3,12 @@ package nextstep.jwp.web.http.request;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import nextstep.jwp.exception.NoMatchingElement;
 
 public class RequestBody {
 
-    private Map<String, String> attributes = new HashMap<>();
+    private Map<String, Optional<String>> attributes = new HashMap<>();
 
     private RequestBody() {
     }
@@ -25,11 +27,12 @@ public class RequestBody {
         Arrays.stream(parsedValue)
             .forEach(value -> {
                 String[] keyAndValue = value.split("=");
-                attributes.put(keyAndValue[0], keyAndValue[1]);
+                attributes.put(keyAndValue[0], Optional.ofNullable(keyAndValue[1]));
             });
     }
 
     public String getAttribute(String key) {
-        return attributes.getOrDefault(key, null);
+        return attributes.get(key)
+            .orElseThrow(NoMatchingElement::new);
     }
 }

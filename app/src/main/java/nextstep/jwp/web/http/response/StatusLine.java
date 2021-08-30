@@ -14,7 +14,11 @@ public class StatusLine {
     }
 
     public StatusLine(StatusCode statusCode) {
-        this.protocolVersion = DEFAULT_PROTOCOL_VERSION;
+        this(statusCode, DEFAULT_PROTOCOL_VERSION);
+    }
+
+    public StatusLine(StatusCode statusCode, String protocolVersion) {
+        this.protocolVersion = protocolVersion;
         this.statusCode = statusCode;
     }
 

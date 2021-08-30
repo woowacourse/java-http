@@ -24,7 +24,7 @@ class HttpResponseTest {
             String expected = "HTTP/1.1 200 OK";
 
             // when
-            response.setStatusCode(StatusCode.OK);
+            response.setStatusLine(StatusCode.OK);
             String actual = response.asString();
 
             // then
@@ -39,7 +39,7 @@ class HttpResponseTest {
             String expected = "HTTP/1.1 302 Found";
 
             // when
-            response.setStatusCode(StatusCode.FOUND);
+            response.setStatusLine(StatusCode.FOUND);
             String actual = response.asString();
 
             // then
@@ -54,7 +54,7 @@ class HttpResponseTest {
             String expected = "HTTP/1.1 401 Unauthorized";
 
             // when
-            response.setStatusCode(StatusCode.UNAUTHORIZED);
+            response.setStatusLine(StatusCode.UNAUTHORIZED);
             String actual = response.asString();
 
             // then
@@ -70,7 +70,7 @@ class HttpResponseTest {
         void addHeaders_Success() {
             // given
             HttpResponse response = new HttpResponse();
-            response.setStatusCode(StatusCode.OK);
+            response.setStatusLine(StatusCode.OK);
 
             // when
             response.addHeader("Content-Length", "80");
@@ -88,7 +88,7 @@ class HttpResponseTest {
         void addHeaders_multipleHeaders_Success() {
             // given
             HttpResponse response = new HttpResponse();
-            response.setStatusCode(StatusCode.OK);
+            response.setStatusLine(StatusCode.OK);
 
             // when
             response.addHeader("Content-Length", "80");
@@ -113,7 +113,7 @@ class HttpResponseTest {
             // given
             String body = readIndexHtml();
             HttpResponse response = new HttpResponse();
-            response.setStatusCode(StatusCode.OK);
+            response.setStatusLine(StatusCode.OK);
             response.addHeader("Content-Type", ContentType.HTML.getValue());
             response.addBody(body);
 

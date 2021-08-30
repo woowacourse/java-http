@@ -1,7 +1,5 @@
 package nextstep.jwp.web.http.request;
 
-import java.util.Map;
-
 public class StartLine {
 
     private HttpMethod method;
@@ -26,7 +24,7 @@ public class StartLine {
         return method;
     }
 
-    public Map<String, String> getRequestParams() {
-        return requestTarget.getRequestParams();
+    public String getRequestParams(String key) {
+        return requestTarget.getRequestParams(key);
     }
 }

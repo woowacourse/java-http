@@ -19,9 +19,9 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         String responseBody =
-            new StaticResourceReader(request.getUrl() + ".html").content();
+            new StaticResourceReader(request.getUrl() + ContentType.HTML.getExtension()).content();
 
-        response.setStatusCode(StatusCode.OK);
+        response.setStatusLine(StatusCode.OK);
         response.addHeader("Content-Type", ContentType.HTML.getValue());
         response.addHeader("Content-Length", responseBody.getBytes().length + " ");
         response.addBody(responseBody);
@@ -31,7 +31,7 @@ public class LoginController extends AbstractController {
     protected void doPost(HttpRequest request, HttpResponse response) {
         loginService.login(request.getAttribute("account"), request.getAttribute("password"));
 
-        response.setStatusCode(StatusCode.FOUND);
+        response.setStatusLine(StatusCode.FOUND);
         response.addHeader("Location", "/index.html");
     }
 }

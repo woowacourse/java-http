@@ -21,7 +21,7 @@ public class StaticResourceReader {
     }
 
     public String content() throws IOException {
-        log.debug("Target Resource >> {}", resource);
+        log.debug("Target Resource: {}", resource);
 
         InputStream resourceAsStream =
             getClass().getResourceAsStream("/static" + resource);

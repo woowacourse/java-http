@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import nextstep.jwp.web.http.Headers;
 
 public class HttpRequest {
@@ -55,10 +54,6 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    public Headers httpHeaders() {
-        return headers;
-    }
-
     public HttpMethod getMethod() {
         return startLine.getMethod();
     }
@@ -71,7 +66,7 @@ public class HttpRequest {
         return body.getAttribute(key);
     }
 
-    public Map<String, String> getRequestParams() {
-        return startLine.getRequestParams();
+    public String getRequestParams(String key) {
+        return startLine.getRequestParams(key);
     }
 }

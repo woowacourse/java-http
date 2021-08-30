@@ -2,9 +2,10 @@ package nextstep.jwp.web.http.response;
 
 public class ResponseBody {
 
-    private String body = "";
+    private String body;
 
     public ResponseBody() {
+        body = "";
     }
 
     public ResponseBody(String body) {

@@ -9,7 +9,7 @@ public class DefaultController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        response.setStatusCode(StatusCode.OK);
+        response.setStatusLine(StatusCode.OK);
         response.addHeader("Content-Type", ContentType.HTML.getValue());
         response.addHeader("Content-Length", String.valueOf("Hello world!".getBytes().length));
         response.addBody("Hello world!");

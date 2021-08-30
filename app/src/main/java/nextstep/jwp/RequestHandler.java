@@ -25,14 +25,15 @@ public class RequestHandler implements Runnable {
 
     @Override
     public void run() {
-        LOGGER.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
+        LOGGER.debug("New Client Connect! Connected IP : {}, Port : {}",
+                connection.getInetAddress(),
                 connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
                 final OutputStream outputStream = connection.getOutputStream()) {
             Request request = RequestAssembler.assemble(inputStream);
             Handler handler = HandlerFactory.handler(request);
-            Response response = handler.message();
+            Response response = handler.message(request);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException exception) {

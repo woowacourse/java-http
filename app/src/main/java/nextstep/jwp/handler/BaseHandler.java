@@ -8,12 +8,8 @@ public class BaseHandler extends AbstractHandler {
 
     public static final String BASE_RESPONSE_BODY = "Hello world!";
 
-    public BaseHandler(Request request) {
-        super(request);
-    }
-
     @Override
-    public Response getMessage() {
+    public Response getMessage(Request request) {
         return new Response(staticFileMessage(FileType.HTML, BASE_RESPONSE_BODY));
     }
 }

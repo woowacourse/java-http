@@ -6,12 +6,8 @@ import nextstep.jwp.model.Response;
 
 public class StaticFileHandler extends AbstractHandler {
 
-    public StaticFileHandler(Request request) {
-        super(request);
-    }
-
     @Override
-    public Response getMessage() throws IOException {
+    public Response getMessage(Request request) throws IOException {
         final String responseBody = fileByPath(request.path());
         return new Response(staticFileMessage(request.fileType(), responseBody));
     }

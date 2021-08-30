@@ -5,41 +5,35 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import nextstep.jwp.exception.FileNotFoundException;
+import nextstep.jwp.exception.LoginException;
+import nextstep.jwp.exception.RegisterException;
 import nextstep.jwp.model.FileType;
 import nextstep.jwp.model.MethodType;
 import nextstep.jwp.model.PathType;
 import nextstep.jwp.model.Request;
 import nextstep.jwp.model.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public abstract class AbstractHandler implements Handler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHandler.class);
-    protected static final String ACCOUNT = "account";
-    protected static final String EMAIL = "email";
-    protected static final String PASSWORD = "password";
-
-    protected final Request request;
-
-    protected AbstractHandler(Request request) {
-        this.request = request;
-    }
-
-    @Override
-    public Response message() throws IOException {
+    public Response message(Request request) throws IOException {
         try {
             if (MethodType.isGet(request.getRequestMethod())) {
-                return getMessage();
+                return getMessage(request);
             }
-            return postMessage();
-        } catch (NullPointerException exception) {
+            return postMessage(request);
+        } catch (FileNotFoundException exception) {
             return new Response(redirectMessage(PathType.NOT_FOUND.resource()));
+        } catch (LoginException | RegisterException exception) {
+            return new Response(redirectMessage(PathType.UNAUTHORIZED.resource()));
         }
     }
 
-    @Override
-    public Response postMessage() {
+    protected Response getMessage(Request request) throws IOException {
+        throw new IllegalStateException();
+    }
+
+    protected Response postMessage(Request request) {
         throw new IllegalStateException();
     }
 
@@ -60,9 +54,13 @@ public abstract class AbstractHandler implements Handler {
                 "");
     }
 
-    protected String fileByPath(String requestPath) throws IOException, NullPointerException {
-        final URL resource = getClass().getClassLoader().getResource("static" + requestPath);
-        final Path path = new File(resource.getPath()).toPath();
-        return new String(Files.readAllBytes(path));
+    protected String fileByPath(String requestPath) throws IOException {
+        try {
+            final URL resource = getClass().getClassLoader().getResource("static" + requestPath);
+            final Path path = new File(resource.getPath()).toPath();
+            return new String(Files.readAllBytes(path));
+        } catch (NullPointerException exception) {
+            throw new FileNotFoundException("파일을 찾을 수 없습니다.");
+        }
     }
 }

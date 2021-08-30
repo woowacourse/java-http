@@ -8,12 +8,8 @@ import nextstep.jwp.model.Response;
 
 public class NotFoundHandler extends AbstractHandler {
 
-    public NotFoundHandler(Request request) {
-        super(request);
-    }
-
     @Override
-    public Response getMessage() throws IOException {
+    public Response getMessage(Request request) throws IOException {
         final String responseBody = fileByPath(PathType.NOT_FOUND.resource());
         return new Response(staticFileMessage(FileType.HTML, responseBody));
     }

@@ -33,7 +33,7 @@ public class RegisterController extends RestController {
         } catch (DuplicateAccountException e) {
             LOGGER.debug("Register Failed.");
 
-            return HttpResponse.redirect(HttpStatus.FOUND, "/401.html");
+            return HttpResponse.redirect(HttpStatus.UNAUTHORIZED, "/401.html");
         }
     }
 

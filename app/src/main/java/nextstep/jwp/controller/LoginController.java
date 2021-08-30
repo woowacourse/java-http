@@ -33,7 +33,7 @@ public class LoginController extends RestController {
         } catch (UnauthorizedException e) {
             LOGGER.debug("Login Failed.");
 
-            return HttpResponse.redirect(HttpStatus.FOUND, "/401.html");
+            return HttpResponse.redirect(HttpStatus.UNAUTHORIZED, "/401.html");
         }
     }
 

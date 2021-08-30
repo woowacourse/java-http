@@ -158,7 +158,7 @@ class LoginControllerTest {
             void loginFail() throws IOException {
                 // given
                 String expectString = "\n\n"
-                    + "HTTP/1.1 302 Found \n"
+                    + "HTTP/1.1 401 Unauthorized \n"
                     + "Location: /401.html ";
 
                 // when

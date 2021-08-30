@@ -7,4 +7,4 @@
 - [x] HTTP Status Code 302
 - [ ] POST 방식으로 회원가입
     - GET /register, POST /register 둘 다 필요
-- [ ] CSS 지원하기
+- [x] CSS 지원하기

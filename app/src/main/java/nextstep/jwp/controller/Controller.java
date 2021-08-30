@@ -1,6 +1,8 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
+import nextstep.jwp.ContentType;
+import nextstep.jwp.FileReader;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 
@@ -14,16 +16,18 @@ public class Controller extends AbstractController {
 
     @Override
     byte[] get(HttpRequest httpRequest) throws IOException {
-        return HttpResponse.ok(httpRequest.resource());
+        return HttpResponse
+                .ok(FileReader.file(httpRequest.uri()), ContentType.findBy(httpRequest.uri()));
     }
 
     @Override
-    byte[] post(HttpRequest httpRequest) {
-        return new byte[0];
+    byte[] post(HttpRequest httpRequest) throws IOException {
+        return HttpResponse
+                .ok(FileReader.file(httpRequest.uri()), ContentType.findBy(httpRequest.uri()));
     }
 
     @Override
-    byte[] error(HttpError httpError) {
-        return new byte[0];
+    byte[] error(HttpError httpError) throws IOException {
+        return HttpResponse.error(HttpError.FORBIDDEN);
     }
 }

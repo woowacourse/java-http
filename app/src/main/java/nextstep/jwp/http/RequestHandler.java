@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.http;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,9 +6,6 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
 import nextstep.jwp.controller.AbstractController;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpRequestReader;
-import nextstep.jwp.http.RequestMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

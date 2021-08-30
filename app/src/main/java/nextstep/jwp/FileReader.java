@@ -8,23 +8,21 @@ import java.nio.file.Path;
 
 public class FileReader {
 
-    private static final String[] FILENAME_EXTENSION = {"html", "css", "js", "ico", "svg"};
     private static final String STATIC_RESOURCE = "./static";
 
     public static String file(String uri) throws IOException {
+        ContentType contentType = ContentType.findBy(uri);
         final URL resource = FileReader.class
                 .getClassLoader()
-                .getResource(STATIC_RESOURCE + withExtension(uri));
+                .getResource(STATIC_RESOURCE + withExtension(contentType, uri));
         final Path path = new File(resource.getFile()).toPath();
         return Files.readString(path);
     }
 
-    private static String withExtension(String uri) {
-        for (String extension : FILENAME_EXTENSION) {
-            if (uri.endsWith(extension)) {
-                return uri;
-            }
+    private static String withExtension(ContentType contentType, String uri) {
+        if (ContentType.NONE.equals(contentType)) {
+            return uri + ".html";
         }
-        return uri + ".html";
+        return uri;
     }
 }

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import nextstep.jwp.ContentType;
+import nextstep.jwp.FileReader;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
@@ -30,7 +32,10 @@ public class LoginController extends AbstractController {
                 return httpRequest1;
             }
         }
-        return HttpResponse.ok(httpRequest.resource());
+        return HttpResponse.ok(
+                FileReader.file(httpRequest.uri()),
+                ContentType.findBy(httpRequest.uri())
+        );
     }
 
     private byte[] login(HttpRequest httpRequest, String uri) throws IOException {
@@ -45,10 +50,16 @@ public class LoginController extends AbstractController {
                 .findByAccount(params.get(ACCOUNT));
         if (user.isPresent()) {
             if (user.get().checkPassword(params.get(PASSWORD))) {
-                return HttpResponse.found(httpRequest.resource(Controller.INDEX_PAGE));
+                return HttpResponse.found(
+                        FileReader.file(Controller.INDEX_PAGE),
+                        ContentType.findBy(Controller.INDEX_PAGE)
+                );
             }
         }
-        return error(HttpError.UNAUTHORIZED);
+        return HttpResponse.ok(
+                FileReader.file(httpRequest.uri()),
+                ContentType.findBy(httpRequest.uri())
+        );
     }
 
     @Override

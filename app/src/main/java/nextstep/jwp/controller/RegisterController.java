@@ -3,18 +3,14 @@ package nextstep.jwp.controller;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
-import nextstep.jwp.RequestHandler;
+import nextstep.jwp.ContentType;
+import nextstep.jwp.FileReader;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.model.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class RegisterController extends AbstractController {
-
-    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     public RegisterController(HttpRequest httpRequest) {
         super(httpRequest);
@@ -22,7 +18,8 @@ public class RegisterController extends AbstractController {
 
     @Override
     byte[] get(HttpRequest httpRequest) throws IOException {
-        return HttpResponse.ok(httpRequest.resource());
+        return HttpResponse
+                .ok(FileReader.file(httpRequest.uri()), ContentType.findBy(httpRequest.uri()));
     }
 
     @Override
@@ -38,14 +35,21 @@ public class RegisterController extends AbstractController {
         final String password = registerInfo.get("password");
         final String email = registerInfo.get("email");
 
+        final String responseBody = FileReader.file(httpRequest.uri());
+        final ContentType contentType = ContentType.findBy(httpRequest.uri());
+
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            return HttpResponse.ok(httpRequest.resource());
+            return HttpResponse.ok(responseBody, contentType);
         }
 
-        final User user = new User(InMemoryUserRepository.findCurrentId(), account, password, email);
+        final User user = new User(InMemoryUserRepository.findCurrentId(), account, password,
+                email);
         InMemoryUserRepository.save(user);
 
-        return HttpResponse.ok(httpRequest.resource(Controller.INDEX_PAGE));
+        return HttpResponse.ok(
+                FileReader.file(Controller.INDEX_PAGE),
+                ContentType.findBy(Controller.INDEX_PAGE)
+        );
     }
 
     @Override

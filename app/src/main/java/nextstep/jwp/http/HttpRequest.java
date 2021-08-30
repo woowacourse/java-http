@@ -1,8 +1,6 @@
 package nextstep.jwp.http;
 
-import java.io.IOException;
 import java.util.Map;
-import nextstep.jwp.FileReader;
 
 public class HttpRequest {
 
@@ -25,18 +23,6 @@ public class HttpRequest {
 
     public String uri() {
         return uri;
-    }
-
-    public String resource() throws IOException {
-        return FileReader.file(uri);
-    }
-
-    public String resource(String uri) throws IOException {
-        return FileReader.file(uri);
-    }
-
-    public Map<String, String> headers() {
-        return headers;
     }
 
     public String body() {

@@ -1,11 +1,12 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
+import nextstep.jwp.http.HttpError;
 import nextstep.jwp.http.HttpRequest;
 
 public abstract class AbstractController {
 
-    private HttpRequest httpRequest;
+    private final HttpRequest httpRequest;
 
     public AbstractController(HttpRequest httpRequest) {
         this.httpRequest = httpRequest;

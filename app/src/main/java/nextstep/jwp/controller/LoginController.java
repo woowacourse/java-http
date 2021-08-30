@@ -4,17 +4,17 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import nextstep.jwp.ContentType;
-import nextstep.jwp.FileReader;
+import nextstep.jwp.http.ContentType;
+import nextstep.jwp.http.FileReader;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.http.HttpError;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.model.User;
 
 public class LoginController extends AbstractController {
 
-    private static final String QUERY_STRING_DELIMITER = "\\?";
-    private static final String AND_DELIMITER = "&";
+    private static final String AMPERSAND_DELIMITER = "&";
     private static final String EQUAL_DELIMITER = "=";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
@@ -33,7 +33,7 @@ public class LoginController extends AbstractController {
 
     @Override
     public byte[] post(HttpRequest httpRequest) throws IOException {
-        final String[] body = httpRequest.body().split("&");
+        final String[] body = httpRequest.body().split(AMPERSAND_DELIMITER);
         final Map<String, String> loginInfo = getRequestBody(body);
 
         final Optional<User> user = InMemoryUserRepository
@@ -56,7 +56,7 @@ public class LoginController extends AbstractController {
     private Map<String, String> getRequestBody(String[] body) {
         final Map<String, String> registerInfo = new LinkedHashMap<>();
         for (String b : body) {
-            final String[] split = b.split("=");
+            final String[] split = b.split(EQUAL_DELIMITER);
             registerInfo.put(split[0].trim(), split[1].trim());
         }
         return registerInfo;

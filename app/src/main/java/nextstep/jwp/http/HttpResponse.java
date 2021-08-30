@@ -1,8 +1,6 @@
 package nextstep.jwp.http;
 
 import java.io.IOException;
-import nextstep.jwp.ContentType;
-import nextstep.jwp.controller.HttpError;
 
 public class HttpResponse {
 

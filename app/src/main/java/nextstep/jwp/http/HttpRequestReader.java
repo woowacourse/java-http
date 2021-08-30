@@ -6,12 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HttpRequestReader {
-
-    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     public HttpRequestReader() {
     }
@@ -40,10 +36,14 @@ public class HttpRequestReader {
             }
         }
 
-        char[] buffer = new char[contentLength];
-        reader.read(buffer, 0, contentLength);
-        String requestBody = new String(buffer);
+        String requestBody = readRequestBody(reader, contentLength);
 
         return new HttpRequest(requestMethod, requestUri, requestHeaders, requestBody);
+    }
+
+    private static String readRequestBody(BufferedReader reader, int contentLength) throws IOException {
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 }

@@ -14,8 +14,8 @@ public class ViewResolver {
     }
 
     private void initStaticFile(HttpRequest httpRequest) {
-        StaticFileReader staticFileReader = new StaticFileReader();
-        this.staticFile = staticFileReader.read(httpRequest);
+        FileReaderInStaticFolder fileReaderInStaticFolder = new FileReaderInStaticFolder();
+        this.staticFile = fileReaderInStaticFolder.read(httpRequest);
     }
 
     private void initExistingStatus() {

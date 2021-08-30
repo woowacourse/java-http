@@ -7,7 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public class StaticFileReader {
+public class FileReaderInStaticFolder {
 
     private static final String INDEX_PAGE = "index.html";
 
@@ -18,7 +18,7 @@ public class StaticFileReader {
             fileName = INDEX_PAGE;
         }
         if (requestURIPath.length() > 2) {
-            fileName = requestURIPath.substring(1, requestURIPath.length());
+            fileName = requestURIPath.substring(1);
         }
         return read(fileName);
     }

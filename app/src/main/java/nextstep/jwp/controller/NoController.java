@@ -4,7 +4,7 @@ import nextstep.jwp.http.CustomException;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpStatus;
-import nextstep.jwp.http.StaticFileReader;
+import nextstep.jwp.http.FileReaderInStaticFolder;
 
 public class NoController implements Controller {
 
@@ -19,8 +19,8 @@ public class NoController implements Controller {
     }
 
     private HttpResponse renderNotFoundPage() {
-        StaticFileReader staticFileReader = new StaticFileReader();
-        return new HttpResponse(HttpStatus.NOT_FOUND, staticFileReader.read("404.html"));
+        FileReaderInStaticFolder fileReaderInStaticFolder = new FileReaderInStaticFolder();
+        return new HttpResponse(HttpStatus.NOT_FOUND, fileReaderInStaticFolder.read("404.html"));
     }
 
     @Override

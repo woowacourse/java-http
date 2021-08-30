@@ -6,7 +6,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpStatus;
-import nextstep.jwp.http.StaticFileReader;
+import nextstep.jwp.http.FileReaderInStaticFolder;
 import nextstep.jwp.model.User;
 
 public class RegisterController implements Controller {
@@ -15,8 +15,8 @@ public class RegisterController implements Controller {
 
     @Override
     public HttpResponse get(HttpRequest request) {
-        StaticFileReader staticFileReader = new StaticFileReader();
-        String htmlOfRegister = staticFileReader.read("register.html");
+        FileReaderInStaticFolder fileReaderInStaticFolder = new FileReaderInStaticFolder();
+        String htmlOfRegister = fileReaderInStaticFolder.read("register.html");
         return new HttpResponse(HttpStatus.OK, htmlOfRegister);
     }
 

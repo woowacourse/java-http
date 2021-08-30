@@ -1,7 +1,10 @@
 package nextstep.jwp.httpserver.adapter;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 
@@ -43,14 +46,14 @@ public class StaticResourceHandlerAdapter extends AbstractHandlerAdapter {
         return requestUri;
     }
 
-    private String getResponse(String requestUri, HttpResponse httpResponse, List<String> body) {
+    private String getResponse(String requestUri, HttpResponse httpResponse, List<String> body) throws IOException {
         final StringBuilder responseBody = new StringBuilder();
         for (String bodyLine : body) {
             responseBody.append(bodyLine).append("\r\n");
         }
 
-        int index = requestUri.indexOf(".");
-        httpResponse.addHeader("Content-Type", "text/" + requestUri.substring(index + 1) + ";charset=utf-8");
+        final Path resourcePath = new File(requestUri).toPath();
+        httpResponse.addHeader("Content-Type", Files.probeContentType(resourcePath) + ";charset=utf-8");
         httpResponse.addHeader("Content-Length", Integer.toString(responseBody.toString().getBytes().length));
 
         return httpResponse.responseToString(responseBody.toString());

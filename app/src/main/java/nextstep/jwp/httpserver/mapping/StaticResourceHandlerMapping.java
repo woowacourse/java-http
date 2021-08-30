@@ -9,7 +9,7 @@ public class StaticResourceHandlerMapping implements HandlerMapping {
     public boolean canUse(HttpRequest httpRequest) {
         final String requestUri = httpRequest.getRequestUri();
         return requestUri.endsWith(".html") || requestUri.endsWith(".css")
-                || requestUri.endsWith(".js") || requestUri.equals("/");
+                || requestUri.endsWith(".js") || requestUri.endsWith(".svg") || requestUri.equals("/");
     }
 
     @Override

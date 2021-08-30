@@ -31,10 +31,6 @@ public class RequestLineParser extends AbstractHttpParser {
 
     @Override
     public String readParsingContent() throws IOException {
-        if (!reader.ready()) {
-            throw new IllegalArgumentException("RequestLine 이 비어있습니다.");
-        }
-
         String line = reader.readLine();
         if (!hasLength(line)) {
             throw new IllegalArgumentException("RequestLine 이 비어있습니다.");

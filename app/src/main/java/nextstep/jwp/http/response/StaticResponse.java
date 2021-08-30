@@ -1,7 +1,7 @@
 package nextstep.jwp.http.response;
 
 import java.io.IOException;
-import nextstep.jwp.util.TranslatedFile;
+import nextstep.jwp.util.ViewResolver;
 
 public class StaticResponse {
 
@@ -14,8 +14,8 @@ public class StaticResponse {
     }
 
     public String response() throws IOException {
-        final TranslatedFile translatedFile = new TranslatedFile(path);
-        final String responseBody = translatedFile.staticValue(resourceType);
+        final ViewResolver viewResolver = new ViewResolver(path);
+        final String responseBody = viewResolver.staticValue(resourceType);
         return String.join("\r\n",
             "HTTP/1.1 401 OK ",
             "Content-Type: text/",

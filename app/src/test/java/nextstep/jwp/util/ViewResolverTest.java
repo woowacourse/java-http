@@ -5,17 +5,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
-class TranslatedFileTest {
+class ViewResolverTest {
 
     @Test
     void staticValue() throws IOException {
         //given
         String path = "/nextstep.txt";
-        TranslatedFile translatedFile = new TranslatedFile(path);
+        ViewResolver viewResolver = new ViewResolver(path);
         String answer = "nextstep";
 
         //when
-        String result = translatedFile.staticValue("txt");
+        String result = viewResolver.staticValue("txt");
 
         //then
         assertThat(result).isEqualTo(answer);

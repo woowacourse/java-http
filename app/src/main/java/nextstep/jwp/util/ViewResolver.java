@@ -6,11 +6,11 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class TranslatedFile {
+public class ViewResolver {
 
     private final String requestedURL;
 
-    public TranslatedFile(String requestedURL) {
+    public ViewResolver(String requestedURL) {
         this.requestedURL = requestedURL;
     }
 

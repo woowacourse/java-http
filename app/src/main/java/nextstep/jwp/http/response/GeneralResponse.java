@@ -2,7 +2,7 @@ package nextstep.jwp.http.response;
 
 import java.io.IOException;
 import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.util.TranslatedFile;
+import nextstep.jwp.util.ViewResolver;
 
 public class GeneralResponse {
 
@@ -17,8 +17,8 @@ public class GeneralResponse {
     }
 
     private String buildResponse(String path) throws IOException {
-        final TranslatedFile translatedFile = new TranslatedFile(path);
-        final String responseBody = translatedFile.staticValue("html");
+        final ViewResolver viewResolver = new ViewResolver(path);
+        final String responseBody = viewResolver.staticValue("html");
 
         return String.join("\r\n",
             "HTTP/1.1 200 OK ",

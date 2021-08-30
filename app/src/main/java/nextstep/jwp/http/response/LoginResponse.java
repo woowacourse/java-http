@@ -1,7 +1,7 @@
 package nextstep.jwp.http.response;
 
 import java.io.IOException;
-import nextstep.jwp.util.TranslatedFile;
+import nextstep.jwp.util.ViewResolver;
 
 public class LoginResponse {
 
@@ -12,8 +12,8 @@ public class LoginResponse {
     }
 
     public String successResponse() throws IOException {
-        final TranslatedFile translatedFile = new TranslatedFile(SUCCESS);
-        final String responseBody = translatedFile.staticValue("html");
+        final ViewResolver viewResolver = new ViewResolver(SUCCESS);
+        final String responseBody = viewResolver.staticValue("html");
         return String.join("\r\n",
             "HTTP/1.1 302 OK ",
             "Content-Type: text/html;charset=utf-8 ",
@@ -23,8 +23,8 @@ public class LoginResponse {
     }
 
     public String failedResponse() throws IOException {
-        final TranslatedFile translatedFile = new TranslatedFile(FAIL);
-        final String responseBody = translatedFile.staticValue("html");
+        final ViewResolver viewResolver = new ViewResolver(FAIL);
+        final String responseBody = viewResolver.staticValue("html");
 
         return String.join("\r\n",
             "HTTP/1.1 401 OK ",

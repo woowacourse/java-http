@@ -2,7 +2,9 @@ package nextstep.jwp.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import nextstep.jwp.http.Params.BodyParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,21 +14,21 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final HttpHeaders headers;
-    private String body;
+    private BodyParams bodyParams;
 
     public HttpRequest(final BufferedReader bufferedReader) throws IOException {
         requestLine = new RequestLine(bufferedReader.readLine());
         headers = getHeaders(bufferedReader);
-        bodySet(bufferedReader);
+        setBody(bufferedReader);
     }
 
-    private void bodySet(final BufferedReader bufferedReader) throws IOException {
+    private void setBody(final BufferedReader bufferedReader) throws IOException {
         if (requestLine.isPost()) {
-            body = getBody(bufferedReader);
+            bodyParams = new BodyParams(new HashMap<>(), getBodyData(bufferedReader));
         }
     }
 
-    private String getBody(final BufferedReader bufferedReader) throws IOException {
+    private String getBodyData(final BufferedReader bufferedReader) throws IOException {
         int contentLength = Integer.parseInt(headers.getHeaderDataByKey("Content-Length"));
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
@@ -66,7 +68,7 @@ public class HttpRequest {
         return requestLine.getHttpVersion();
     }
 
-    public String getBody() {
-        return body;
+    public String getBodyDataByKey(final String key) {
+        return bodyParams.get(key);
     }
 }

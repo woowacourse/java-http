@@ -27,10 +27,17 @@ public class HttpResponse implements HttpMessage {
         return statusLine;
     }
 
+    @Override
     public HttpHeaders getHttpHeaders() {
         return httpHeaders;
     }
 
+    @Override
+    public String getHeader(String headerName) {
+        return httpHeaders.get(headerName);
+    }
+
+    @Override
     public String getBody() {
         return responseBody;
     }

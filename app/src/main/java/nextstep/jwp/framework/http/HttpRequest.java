@@ -15,16 +15,26 @@ public class HttpRequest implements HttpMessage {
 
     private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
+    private final HttpCookies httpCookies;
     private final String requestBody;
 
     public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders, String requestBody) {
+        this(requestLine, httpHeaders, new HttpCookies(), requestBody);
+    }
+
+    public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders, HttpCookies httpCookies, String requestBody) {
         this.requestLine = Objects.requireNonNull(requestLine);
         this.httpHeaders = Objects.requireNonNull(httpHeaders);
+        this.httpCookies = Objects.requireNonNull(httpCookies);
         this.requestBody = Objects.requireNonNullElse(requestBody, EMPTY);
     }
 
     public static HttpRequest from(InputStream inputStream) throws IOException {
         return new HttpRequestParser(inputStream).parseRequest();
+    }
+
+    public RequestLine getRequestLine() {
+        return requestLine;
     }
 
     public HttpMethod getMethod() {
@@ -47,12 +57,32 @@ public class HttpRequest implements HttpMessage {
         return getQueries().get(key);
     }
 
-    public RequestLine getRequestLine() {
-        return requestLine;
+    @Override
+    public HttpHeaders getHttpHeaders() {
+        return httpHeaders;
+    }
+
+    @Override
+    public String getHeader(String headerName) {
+        return httpHeaders.get(headerName);
+    }
+
+    @Override
+    public String getBody() {
+        return requestBody;
     }
 
     public boolean isSamePath(String uri) {
         return requestLine.isSamePath(uri);
+    }
+
+    public HttpSession getSession() {
+        if (!httpCookies.contains(HttpSession.JSESSIONID)) {
+            return new HttpSession();
+        }
+
+        final String sessionId = httpCookies.getCookie(HttpSession.JSESSIONID).getValue();
+        return HttpSessions.getSessionOrDefault(sessionId, new HttpSession());
     }
 
     public String readAfterExceptBody() {
@@ -67,16 +97,6 @@ public class HttpRequest implements HttpMessage {
             httpFormatter = httpFormatter.convertNextFormatter(httpRequest);
         }
         return stringBuilder.toString();
-    }
-
-    @Override
-    public HttpHeaders getHttpHeaders() {
-        return httpHeaders;
-    }
-
-    @Override
-    public String getBody() {
-        return requestBody;
     }
 
     public static class Builder {

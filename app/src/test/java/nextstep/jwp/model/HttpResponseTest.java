@@ -1,6 +1,7 @@
 package nextstep.jwp.model;
 
 import nextstep.jwp.model.httpmessage.response.HttpResponse;
+import nextstep.jwp.util.FileUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -14,24 +15,39 @@ class HttpResponseTest {
 
     @Test
     void responseForward() throws IOException {
-        File file = new File(HTTP_FORWARD_TXT);
-        HttpResponse response = new HttpResponse(new FileOutputStream(file));
+        // given
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        HttpResponse response = new HttpResponse(outputStream);
+
+        // when
         response.forward("/index.html");
 
-        BufferedReader reader = new BufferedReader(new FileReader(HTTP_FORWARD_TXT));
-        assertThat(reader.readLine()).isEqualTo("HTTP/1.1 200 OK ");
-        assertThat(reader.readLine()).isEqualTo("Content-Type: text/html;charset=utf-8 ");
-        assertThat(reader.readLine()).isEqualTo("Content-Length: 5564 ");
+        // then
+        String body = FileUtils.readFileOfUrl("/index.html");
+        String expectedHeader = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 5564 ",
+                "",
+                body);
+        assertThat(outputStream.toString()).isEqualTo(expectedHeader);
     }
 
     @Test
     void responseRedirect() throws IOException {
-        File file = new File(HTTP_REDIRECT_TXT);
-        HttpResponse response = new HttpResponse(new FileOutputStream(file));
+
+        // given
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        HttpResponse response = new HttpResponse(outputStream);
+
+        // when
         response.redirect("/401.html");
 
-        BufferedReader reader = new BufferedReader(new FileReader(HTTP_REDIRECT_TXT));
-        assertThat(reader.readLine()).isEqualTo("HTTP/1.1 302 Redirect ");
-        assertThat(reader.readLine()).isEqualTo("Location: /401.html ");
+        // then
+        String expectedHeader = String.join("\r\n",
+                "HTTP/1.1 302 Redirect ",
+                "Location: /401.html ",
+                "");
+        assertThat(outputStream.toString()).hasToString(expectedHeader);
     }
 }

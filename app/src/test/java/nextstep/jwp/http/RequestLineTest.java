@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class RequestLineTest {
+class RequestLineTest {
     @Test
     void GET() {
         RequestLine requestLine = new RequestLine("GET /index.html HTTP/1.1");
@@ -27,6 +27,6 @@ public class RequestLineTest {
 
         assertThat(requestLine.getMethod()).isEqualTo(HttpMethod.GET);
         assertThat(requestLine.getUri()).isEqualTo("/login");
-        assertThat(requestLine.getParams().size()).isEqualTo(2);
+        assertThat(requestLine.getParams()).hasSize(2);
     }
 }

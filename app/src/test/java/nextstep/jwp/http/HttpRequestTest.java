@@ -9,7 +9,7 @@ import java.io.InputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class HttpRequestTest {
+class HttpRequestTest {
     private String testDirectory = "./src/test/resources/static/";
 
     @Test

@@ -1,6 +1,5 @@
 package nextstep.jwp.http;
 
-import nextstep.jwp.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +12,7 @@ import java.nio.file.Files;
 // 응답 데이터의 상태에 따라 적절한 HTTP 헤더를 처리하는 역할
 // HTML, CSS, JS를 읽어 반환하는 부분과 302 코드를 처리하는 부분 담당
 public class HttpResponse {
-    private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
     private final OutputStream outputStream;
 
     public HttpResponse(OutputStream outputStream) {

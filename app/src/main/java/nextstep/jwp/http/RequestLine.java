@@ -7,7 +7,7 @@ import java.util.Map;
 public class RequestLine {
     private final HttpMethod method;
     private String uri;
-    private Map<String, String> params = new HashMap<String, String>();
+    private Map<String, String> params = new HashMap<>();
 
     public RequestLine(String requestLine) {
         final String[] tokens = requestLine.split(" ");

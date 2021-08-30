@@ -1,8 +1,6 @@
-package nextstep.jwp;
+package nextstep.jwp.http;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,21 +27,20 @@ public class RequestHandler implements Runnable {
 
             final HttpRequest httpRequest = new HttpRequest(inputStream);
             final HttpResponse httpResponse = new HttpResponse(outputStream);
-            final String uri = getDefaultPath(httpRequest.getUri());
 
+            final String uri = getDefaultPath(httpRequest.getUri());
             final Map<String, String> requestBody = httpRequest.getParams();
 
             if (uri.startsWith("/login")) {
                 if (requestBody.size() > 0) {
                     String account = httpRequest.getParameter("account");
                     String password = httpRequest.getParameter("password");
-
                     User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
+
                     if (user.checkPassword(password)) {
                         httpResponse.redirect("/index.html");
-                    } else {
-                        httpResponse.redirect("/401.html");
                     }
+                    httpResponse.redirect("/401.html");
                 }
                 httpResponse.forward("/login.html");
             }
@@ -53,6 +50,7 @@ public class RequestHandler implements Runnable {
                     String account = httpRequest.getParameter("account");
                     String email = httpRequest.getParameter("email");
                     String password = httpRequest.getParameter("password");
+
                     InMemoryUserRepository.save(new User(2L, account, password, email));
                     httpResponse.redirect("/login.html");
                 }

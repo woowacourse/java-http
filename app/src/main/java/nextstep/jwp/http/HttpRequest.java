@@ -17,8 +17,8 @@ public class HttpRequest {
     private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
     private RequestLine requestLine;
-    private Map<String, String> headers = new HashMap<String, String>();
-    private Map<String, String> params = new HashMap<String, String>();
+    private Map<String, String> headers = new HashMap<>();
+    private Map<String, String> params = new HashMap<>();
 
     public HttpRequest(InputStream inputStream) {
         try {

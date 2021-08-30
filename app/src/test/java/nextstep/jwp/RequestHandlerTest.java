@@ -269,4 +269,34 @@ class RequestHandlerTest {
                 responseBody;
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @DisplayName("JS 요청시 Content-Type 에 js로 응답한다")
+    @Test
+    void jsResponse() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /assets/chart-area.js HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: application/js,*/*;q=0.1 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/assets/chart-area.js");
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: application/js;charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "\r\n" +
+                responseBody;
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

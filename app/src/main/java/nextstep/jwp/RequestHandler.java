@@ -34,6 +34,7 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
                 final OutputStream outputStream = connection.getOutputStream()) {
+
             UserService userService = new UserService();
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             Map<String, String> parsedRequestHeaders = getParsedRequestHeaders(bufferedReader);
@@ -41,6 +42,7 @@ public class RequestHandler implements Runnable {
             final String uri = parsedRequestHeaders.get("uri");
             String responseBody = "";
             String response = "";
+
             if (parsedRequestHeaders.isEmpty()) {
                 return;
             }
@@ -84,7 +86,11 @@ public class RequestHandler implements Runnable {
             } else if (httpMethod.equals("GET") && uri.equals("/css/styles.css")) {
                 responseBody = getStaticFileContents("/css/styles.css");
                 response = replyOkCssResponse(responseBody);
+            } else if (httpMethod.equals("GET") && uri.matches("/.*(js)$")) {
+                responseBody = getStaticFileContents(uri);
+                response = replyOkJsResponse(responseBody);
             }
+
             outputStream.write(response.getBytes());
             outputStream.flush();
 
@@ -138,6 +144,17 @@ public class RequestHandler implements Runnable {
         return response;
     }
 
+    private String replyOkJsResponse(String responseBody) {
+        final String response = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: application/js;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        log.debug("CSS OK Content-Length: " + responseBody.getBytes().length);
+        return response;
+    }
+
     private String getStaticFileContents(String path) throws IOException {
         URL resource = getClass().getClassLoader().getResource("static" + path);
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -146,11 +163,12 @@ public class RequestHandler implements Runnable {
     private Map<String, String> getParsedRequestHeaders(BufferedReader bufferedReader)
             throws IOException {
 
+
         final Map<String, String> parsedRequests = new HashMap<>();
 
         if (bufferedReader.ready()) {
-            String headers = bufferedReader.readLine();
-            String[] splitHeader = headers.split(" ");
+            String requestLine = bufferedReader.readLine();
+            String[] splitHeader = requestLine.split(" ");
             parsedRequests.put("httpMethod", splitHeader[0]);
             parsedRequests.put("uri", splitHeader[1]);
             parsedRequests.put("httpVersion", splitHeader[2]);

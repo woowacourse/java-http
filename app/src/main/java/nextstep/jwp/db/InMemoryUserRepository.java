@@ -13,7 +13,7 @@ public class InMemoryUserRepository {
     static {
         final User user = new User(1, "gugu", "password", "hkkang@woowahan.com");
         database.put(user.getAccount(), user);
-        autoIncrementId += 2;
+        autoIncrementId += database.size() + 1;
     }
 
     public static void save(User user) {

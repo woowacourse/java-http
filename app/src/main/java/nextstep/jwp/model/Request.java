@@ -1,6 +1,5 @@
 package nextstep.jwp.model;
 
-import java.io.IOException;
 import java.util.Map;
 
 public class Request {
@@ -50,7 +49,7 @@ public class Request {
         return requestPath.hasQueryString();
     }
 
-    public Map<String, String> queries() throws IOException {
+    public Map<String, String> queries() {
         return requestPath.queries();
     }
 }

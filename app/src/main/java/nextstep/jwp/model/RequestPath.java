@@ -1,6 +1,5 @@
 package nextstep.jwp.model;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,8 +11,8 @@ public class RequestPath {
         this.path = path;
     }
 
-    public Map<String, String> queries() throws IOException {
-        int index = findIndex('?');
+    public Map<String, String> queries() {
+        int index = path.indexOf('?');
         String[] querySlices = path.substring(index + 1).split("&");
         Map<String, String> queries = new HashMap<>();
         for (String querySlice : querySlices) {
@@ -25,14 +24,6 @@ public class RequestPath {
 
     public String path() {
         return this.path;
-    }
-
-    private int findIndex(char symbol) throws IOException {
-        int index = path.indexOf(symbol);
-        if (index == -1) {
-            throw new IOException();
-        }
-        return index;
     }
 
     public boolean hasQueryString() {

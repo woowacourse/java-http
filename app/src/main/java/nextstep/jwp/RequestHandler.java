@@ -1,6 +1,7 @@
 package nextstep.jwp;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.model.User;
 import org.slf4j.Logger;
@@ -10,7 +11,6 @@ import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -29,90 +29,63 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            final Map<String, String> httpRequestHeaders = new HashMap<>();
-            String line = bufferedReader.readLine();
-            if (line == null) {
-                return;
-            }
+            HttpRequest httpRequest = new HttpRequest(inputStream);
+            final String method = httpRequest.getMethod();
+            final String uri = httpRequest.getUri();
 
-            final String[] request = line.split(" ");
-            final String method = request[0];
-            final String uri = request[1];
             byte[] body = new byte[0];
             HttpStatus status = HttpStatus.OK;
             String location = null;
 
             if ("/".equals(uri)) {
-                body =Files.readAllBytes(getResources("/index.html").toPath());
-                String response = makeResponse(ContentType.HTML.getType(), HttpStatus.OK, location, body);
+                body = Files.readAllBytes(getResources("/index.html").toPath());
+                String response = makeResponse(ContentType.HTML, status, location, body);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
                 return;
             }
 
             if (uri.endsWith(".html")) {
-                body =Files.readAllBytes(getResources(uri).toPath());
-                String response = makeResponse(ContentType.HTML.getType(), HttpStatus.OK, location, body);
+                body = Files.readAllBytes(getResources(uri).toPath());
+                String response = makeResponse(ContentType.HTML, status, location, body);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
                 return;
             }
 
             if (uri.endsWith(".css")) {
-                body =Files.readAllBytes(getResources(uri).toPath());
-                String response = makeResponse(ContentType.CSS.getType(), HttpStatus.OK, location, body);
+                body = Files.readAllBytes(getResources(uri).toPath());
+                String response = makeResponse(ContentType.CSS, status, location, body);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
                 return;
             }
 
             if (uri.endsWith(".js")) {
-                body =Files.readAllBytes(getResources(uri).toPath());
-                String response = makeResponse(ContentType.JS.getType(), HttpStatus.OK, location, body);
+                body = Files.readAllBytes(getResources(uri).toPath());
+                String response = makeResponse(ContentType.JS, status, location, body);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
                 return;
             }
 
             if (uri.startsWith("/assets/img")) {
-                body =Files.readAllBytes(getResources(uri).toPath());
-                String response = makeResponse(ContentType.IMAGE.getType(), HttpStatus.OK, location, body);
+                body = Files.readAllBytes(getResources(uri).toPath());
+                String response = makeResponse(ContentType.IMAGE, status, location, body);
                 outputStream.write(response.getBytes());
                 outputStream.flush();
                 return;
             }
 
-            while (bufferedReader.ready()) {
-                line = bufferedReader.readLine();
-                if ("".equals(line)) {
-                    break;
-                }
-                String[] headers = line.split(": ");
-                httpRequestHeaders.put(headers[0], headers[1]);
-            }
-
             String fileName = uri;
-            String requestBody = null;
-
-            if ("POST".equals(method)) {
-                String rawLength = httpRequestHeaders.get("Content-Length");
-                if (!Objects.isNull(rawLength)) {
-                    int length = Integer.parseInt(rawLength);
-                    char[] buffer = new char[length];
-                    bufferedReader.read(buffer, 0, length);
-                    requestBody = new String(buffer);
-                }
-            }
+            Map<String, String> requestBody = httpRequest.getParams();
 
             if (uri.startsWith("/login")) {
                 fileName = "/login.html";
 
-                if (!Objects.isNull(requestBody)) {
-                    String[] rawData = requestBody.split("&");
-                    String account = getDataFromQueryString(rawData[0]);
-                    String password = getDataFromQueryString(rawData[1]);
+                if (requestBody.size() > 0) {
+                    String account = httpRequest.getParameter("account");
+                    String password = httpRequest.getParameter("password");
 
                     User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
                     if (user.checkPassword(password)) {
@@ -130,11 +103,10 @@ public class RequestHandler implements Runnable {
             if (uri.startsWith("/register")) {
                 fileName = "/register.html";
 
-                if (!Objects.isNull(requestBody)) {
-                    String[] rawData = requestBody.split("&");
-                    String account = getDataFromQueryString(rawData[0]);
-                    String email = getDataFromQueryString(rawData[1]);
-                    String password = getDataFromQueryString(rawData[2]);
+                if (requestBody.size() > 0) {
+                    String account = httpRequest.getParameter("account");
+                    String email = httpRequest.getParameter("email");
+                    String password = httpRequest.getParameter("password");
                     InMemoryUserRepository.save(new User(2L, account, password, email));
                     fileName = "/login.html";
                     status = HttpStatus.FOUND;
@@ -143,7 +115,7 @@ public class RequestHandler implements Runnable {
             }
 
             body = Files.readAllBytes(getResources(fileName).toPath());
-            final String response = makeResponse(ContentType.HTML.getType(), status, location, body);
+            final String response = makeResponse(ContentType.HTML, status, location, body);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -154,18 +126,14 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private String makeResponse(String contentType, HttpStatus status, String location, byte[] body) {
+    private String makeResponse(ContentType contentType, HttpStatus status, String location, byte[] body) {
         return String.join("\r\n",
                 "HTTP/1.1 " + status.getStatus(),
-                "Content-Type: " + contentType,
+                "Content-Type: " + contentType.getType(),
                 "Content-Length: " + body.length + " ",
                 "Location: " + location,
                 "",
                 new String(body));
-    }
-
-    private String getDataFromQueryString(String data) {
-        return data.substring(data.indexOf("=") + 1);
     }
 
     private File getResources(String fileName) {

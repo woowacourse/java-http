@@ -20,4 +20,9 @@ public class Resource {
         }
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
+
+    public String getContentType() {
+        return ContentType.findContentType(path);
+    }
 }
+

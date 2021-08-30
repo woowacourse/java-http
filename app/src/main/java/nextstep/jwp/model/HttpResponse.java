@@ -52,14 +52,15 @@ public class HttpResponse {
 
     public HttpResponse respond(String uri, HttpStatus httpStatus) throws IOException {
         Resource resourceFile = new Resource(uri);
+        String contentType = resourceFile.getContentType();
         String body = resourceFile.getContent();
-        setProperty(httpStatus, body);
+        setProperty(httpStatus, contentType, body);
         return this;
     }
 
-    private void setProperty(HttpStatus httpStatus, String body) {
+    private void setProperty(HttpStatus httpStatus, String contentType, String body) {
         this.httpStatus = httpStatus;
-        this.headerMap.put("Content-Type", "text/html;charset=utf-8");
+        this.headerMap.put("Content-Type", contentType);
         this.headerMap.put("Content-Length", String.valueOf(body.getBytes().length));
         this.body = body;
     }
@@ -78,3 +79,4 @@ public class HttpResponse {
         return body;
     }
 }
+

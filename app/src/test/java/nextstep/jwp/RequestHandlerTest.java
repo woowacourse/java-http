@@ -11,11 +11,10 @@ import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@Disabled
 class RequestHandlerTest {
 
     @Test
-    void run() {
+    void run() throws IOException {
         // given
         final MockSocket socket = new MockSocket();
         final RequestHandler requestHandler = new RequestHandler(socket);
@@ -25,11 +24,11 @@ class RequestHandlerTest {
 
         // then
         String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 5670 ",
                 "",
-                "Hello world!");
+                new String(Files.readAllBytes(new File(getClass().getClassLoader().getResource("static/index.html").getFile()).toPath())));
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -51,8 +50,8 @@ class RequestHandlerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+        String expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));

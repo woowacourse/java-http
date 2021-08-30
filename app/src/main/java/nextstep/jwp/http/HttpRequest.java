@@ -16,8 +16,7 @@ import java.util.Map;
 public class HttpRequest {
     private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
-    private HttpMethod method;
-    private String uri;
+    private RequestLine requestLine;
     private Map<String, String> headers = new HashMap<String, String>();
     private Map<String, String> params = new HashMap<String, String>();
 
@@ -30,8 +29,7 @@ public class HttpRequest {
             if (line == null) {
                 return;
             }
-
-            parseRequestLine(line);
+            requestLine = new RequestLine(line);
 
             line = bufferedReader.readLine();
             while (bufferedReader.ready()) {
@@ -43,30 +41,14 @@ public class HttpRequest {
                 line = bufferedReader.readLine();
             }
 
-            if (method.isPost()) {
+            if (getMethod().isPost()) {
                 String body = readData(bufferedReader);
                 parseValues(body);
+            } else {
+                params = requestLine.getParams();
             }
         } catch (IOException e) {
             log.error(e.getMessage());
-        }
-    }
-
-    private void parseRequestLine(String requestLine) {
-        final String[] tokens = requestLine.split(" ");
-        method = HttpMethod.valueOf(tokens[0]);
-
-        if (method.isPost()) {
-            uri = tokens[1];
-            return;
-        }
-
-        int index = tokens[1].indexOf("?");
-        if (index == -1) {
-            uri = tokens[1];
-        } else {
-            uri = tokens[1].substring(0, index);
-            parseValues(tokens[1].substring(index + 1));
         }
     }
 
@@ -86,12 +68,12 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    public String getMethod() {
-        return method.name();
+    public HttpMethod getMethod() {
+        return requestLine.getMethod();
     }
 
     public String getUri() {
-        return uri;
+        return requestLine.getUri();
     }
 
     public String getHeader(String name) {

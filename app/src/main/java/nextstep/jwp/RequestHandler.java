@@ -30,7 +30,7 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = new HttpRequest(inputStream);
-            final String method = httpRequest.getMethod();
+            final String method = httpRequest.getMethod().name();
             final String uri = httpRequest.getUri();
 
             byte[] body = new byte[0];

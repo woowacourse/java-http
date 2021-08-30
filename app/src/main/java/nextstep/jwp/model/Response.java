@@ -72,7 +72,7 @@ public class Response {
         }
     }
 
-    public Response(Builder builder) {
+    private Response(Builder builder) {
         this.statusCode = builder.statusCode;
         this.statusText = builder.statusText;
         this.contentType = builder.contentType;

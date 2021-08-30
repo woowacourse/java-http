@@ -24,18 +24,22 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(HttpRequest request) {
-        final Body body = request.getBody();
-        final Map<String, String> params = ParamExtractor.extractParams(body.asString());
-        String account = params.get("account");
-        String password = params.get("password");
+        try{
+            final Body body = request.getBody();
+            final Map<String, String> params = ParamExtractor.extractParams(body.asString());
+            String account = params.get("account");
+            String password = params.get("password");
 
-        final User user = InMemoryUserRepository.findByAccount(account)
-            .orElseThrow(RuntimeException::new);
+            final User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(RuntimeException::new);
 
-        if (!user.checkPassword(password)) {
-            throw new RuntimeException();
+            if (!user.checkPassword(password)) {
+                throw new RuntimeException();
+            }
+            return HttpResponse.redirect(INDEX_RESOURCE_PATH);
+        } catch (RuntimeException e) {
+            return HttpResponse.redirect("/401.html");
         }
-        return HttpResponse.redirect(INDEX_RESOURCE_PATH);
     }
 
     @Override

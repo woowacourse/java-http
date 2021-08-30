@@ -28,7 +28,7 @@ public class JwpController {
             User user = UserService.registerUser(params);
             log.info("회원가입된 유저 : " + user.toString());
             return pageController.mapResponse(Optional.of(HttpStatus.CREATED), "index");
-//            return RequestHandler.getResponse(new BufferedReader(null), "GET /index.html");
+//todo: url도 바뀌기 return RequestHandler.getResponse(new BufferedReader(null), "GET /index.html");
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage());
             return pageController.mapResponse(Optional.of(HttpStatus.BAD_REQUEST), "register");

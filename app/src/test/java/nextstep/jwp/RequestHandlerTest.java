@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class RequestHandlerTest {
+public class RequestHandlerTest {
 
     @Test
     void run() {
@@ -140,7 +140,7 @@ class RequestHandlerTest {
     }
 
 
-    private String toHttpGetRequest(String requestUri) {
+    public static String toHttpGetRequest(String requestUri) {
         return String.join("\r\n",
                 "GET " + requestUri + " HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -149,7 +149,7 @@ class RequestHandlerTest {
                 "");
     }
 
-    private String toHttpPostRequest(String requestUri, String requestBody) {
+    public static String toHttpPostRequest(String requestUri, String requestBody) {
         return String.join("\r\n",
                 "POST " + requestUri + " HTTP/1.1 ",
                 "Host: localhost:8080 ",

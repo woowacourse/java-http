@@ -76,13 +76,13 @@
 <br>
 
 ## 추후 리팩토링
-- [ ] BufferReader `close()`
+- [x] BufferReader, InputStreamReader `close()`
 - [ ] Header enum으로 관리
 - [ ] Request/Response에 헤더나 바디값이 없는 경우 기본값 지정 및 호출 시 예외처리 
 - [ ] 예외 발생 시점에 로그
 - [ ] ViewResolver 구현
-- [ ] 도메인 ID 관리 로직 변경 - UUID 사용(?)
-- [ ] 요청 메세지 파싱 로직 개션 
+- [x] 도메인 ID 관리 로직 변경 
+- [ ] 요청 메세지 파싱 로직 개션
 
 
 <br>

@@ -29,11 +29,7 @@ public class HttpResponse {
     public static byte[] error(HttpError exception) throws IOException {
         return String.join(
                 "\r\n",
-                "HTTP/1.1" + exception.getCode() + " " + exception.getName() + " ",
-                "Content-Type: text/html; charset=utf-8 ",
-                "Content-Length: " + exception.getResource().length() + " ",
-                "",
-                exception.getResource())
+                "HTTP/1.1" + exception.getCode() + " " + exception.getName() + " ")
                 .getBytes();
     }
 }

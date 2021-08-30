@@ -4,15 +4,19 @@ import java.net.URL;
 import nextstep.jwp.framework.http.HttpPath;
 import nextstep.jwp.framework.http.HttpStatus;
 
-public class HttpFoundStatus implements HttpStatusState {
+public class HttpFoundStatus extends HttpStatusState {
+
+    public HttpFoundStatus(final HttpStatus status, final HttpPath path) {
+        super(status, path);
+    }
 
     @Override
-    public HttpStatusState state(HttpStatus httpStatus) {
-        if (httpStatus == HttpStatus.FOUND) {
+    public HttpStatusState state() {
+        if (getStatus() == HttpStatus.FOUND) {
             return this;
         }
 
-        return new HttpUnauthorizedStatus().state(httpStatus);
+        return new HttpUnauthorizedStatus(getStatus(), getPath());
     }
 
     @Override

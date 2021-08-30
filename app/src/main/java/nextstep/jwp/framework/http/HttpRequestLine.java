@@ -1,6 +1,9 @@
 package nextstep.jwp.framework.http;
 
 import java.net.URL;
+import nextstep.jwp.framework.http.HttpStatusState.HttpNotFoundStatus;
+import nextstep.jwp.framework.http.HttpStatusState.HttpOKStatus;
+import nextstep.jwp.framework.http.HttpStatusState.HttpStatusState;
 
 public class HttpRequestLine {
 
@@ -16,18 +19,11 @@ public class HttpRequestLine {
 
     public URL url(final HttpStatus httpStatus) {
         if (path.isNotExistFile()) {
-            return HttpPath.notFound();
+            return new HttpNotFoundStatus(httpStatus, path).resource();
         }
 
-        if (httpStatus == HttpStatus.FOUND || httpStatus == HttpStatus.CREATED) {
-            return HttpPath.index();
-        }
-
-        if (httpStatus == HttpStatus.UNAUTHORIZED) {
-            return HttpPath.unAuthorized();
-        }
-
-        return path.findResourceURL();
+        final HttpStatusState state = new HttpOKStatus(httpStatus, path).state();
+        return state.resource();
     }
 
     public HttpMethod getMethod() {

@@ -4,10 +4,14 @@ import java.net.URL;
 import nextstep.jwp.framework.http.HttpPath;
 import nextstep.jwp.framework.http.HttpStatus;
 
-public class HttpNotFoundStatus implements HttpStatusState {
+public class HttpNotFoundStatus extends HttpStatusState {
+
+    public HttpNotFoundStatus(final HttpStatus status, final HttpPath path) {
+        super(status, path);
+    }
 
     @Override
-    public HttpStatusState state(HttpStatus httpStatus) {
+    public HttpStatusState state() {
         return this;
     }
 

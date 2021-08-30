@@ -6,9 +6,12 @@ import nextstep.jwp.util.ContentType;
 import nextstep.jwp.util.File;
 
 public class HttpResponse {
-    private String httpVersion;
+    public static final String LOCATION_HEADER = "Location";
+
+    final private String httpVersion;
+    final private HttpHeader httpHeader;
+    
     private HttpStatus httpStatus;
-    private HttpHeader httpHeader;
     private String body;
 
     public HttpResponse(HttpRequest httpRequest) {
@@ -23,19 +26,19 @@ public class HttpResponse {
 
     public void redirect(String url, File file) {
         httpStatus = (HttpStatus.FOUND);
-        addHttpHeader("Location", url);
+        addHttpHeader(LOCATION_HEADER, url);
         body(file.getContent(), file.getContentType());
     }
 
     public void unauthorized(String url, File file) {
         httpStatus = (HttpStatus.UNAUTHORIZED);
-        addHttpHeader("Location", url);
+        addHttpHeader(LOCATION_HEADER, url);
         body(file.getContent(), file.getContentType());
     }
 
     public void notFound(String url, File file) {
         httpStatus = (HttpStatus.NOT_FOUND);
-        addHttpHeader("Location", url);
+        addHttpHeader(LOCATION_HEADER, url);
         body(file.getContent(), file.getContentType());
     }
 

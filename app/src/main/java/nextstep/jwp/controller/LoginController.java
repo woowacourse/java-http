@@ -3,10 +3,10 @@ package nextstep.jwp.controller;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
+import nextstep.jwp.exception.UnauthorizedException;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.FileReader;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.HttpError;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
@@ -31,18 +31,24 @@ public class LoginController extends AbstractController {
         final String[] body = httpRequest.body().split("&");
         final Map<String, String> loginInfo = getRequestBody(body);
 
-        final Optional<User> user = InMemoryUserRepository
-                .findByAccount(loginInfo.get("account"));
-
-        if (user.isPresent()) {
-            if (user.get().checkPassword(loginInfo.get("password"))) {
-                return HttpResponse.found(Controller.INDEX_PAGE);
-            }
+        try {
+            login(loginInfo);
+            return HttpResponse.ok(
+                    FileReader.file(httpRequest.uri()),
+                    ContentType.findBy(httpRequest.uri())
+            );
+        } catch (UnauthorizedException e) {
+            return HttpResponse.error(HttpError.UNAUTHORIZED);
         }
-        return HttpResponse.ok(
-                FileReader.file(httpRequest.uri()),
-                ContentType.findBy(httpRequest.uri())
-        );
+
+    }
+
+    private void login(Map<String, String> loginInfo) {
+        final User user = InMemoryUserRepository
+                .findByAccount(loginInfo.get("account"))
+                .orElseThrow(() -> new UnauthorizedException("존재하지 않는 사용자입니다."));
+
+        user.checkPassword(loginInfo.get("password"));
     }
 
     private Map<String, String> getRequestBody(String[] body) {

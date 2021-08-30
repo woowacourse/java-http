@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -96,12 +97,15 @@ class RequestHandlerTest {
     @Test
     void login() throws IOException {
         // given
+        String requestBody = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + requestBody.getBytes().length,
                 "",
-                "");
+                requestBody);
 
         final MockSocket socket = new MockSocket(httpRequest);
         final ApplicationContext applicationContext = ApplicationContextFactory.create();
@@ -121,12 +125,15 @@ class RequestHandlerTest {
     @Test
     void loginFail() throws IOException {
         // given
+        String requestBody = "account=pika&password=password";
         final String httpRequest = String.join("\r\n",
-                "POST /login?account=pika&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + requestBody.getBytes().length,
                 "",
-                "");
+                requestBody);
 
         final MockSocket socket = new MockSocket(httpRequest);
         final ApplicationContext applicationContext = ApplicationContextFactory.create();

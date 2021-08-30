@@ -28,13 +28,12 @@ class RequestHandlerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Length: 5564\r\n" +
-                "Content-Type: text/html;charset=utf-8\r\n" +
-                "\r\n"+
+        String expected = "HTTP/1.1 200 OK\n" +
+                "Content-Length: 5564\n" +
+                "Content-Type: text/html;charset=utf-8\n" +
+                "\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        // todo 통과하지 못하는 이유 찾기
-        // assertThat(socket.output()).isEqualTo(expected);
+         assertThat(socket.output()).isEqualTo(expected);
     }
 }

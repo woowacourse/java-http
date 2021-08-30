@@ -31,14 +31,14 @@ public enum Controllers {
             return STATIC.controller;
         }
         return Arrays.stream(Controllers.values())
-            .filter(element -> element.isSameURIs(urlWithoutQuery))
+            .filter(element -> element.isSameURL(urlWithoutQuery))
             .findAny()
             .map(element -> element.controller)
             .orElse(EXTRA_CONTROLLER);
     }
 
-    private boolean isSameURIs(String targetURI) {
-        return this.uri.equals(targetURI);
+    private boolean isSameURL(String targetURL) {
+        return this.uri.equals(targetURL);
     }
 
 }

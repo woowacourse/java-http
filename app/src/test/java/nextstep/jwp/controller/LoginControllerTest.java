@@ -49,12 +49,12 @@ class LoginControllerTest {
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
     }
 
-    @DisplayName("post요청을 성공적으로 핸들링 하면 index.html페이지를 반환한다")
+    @DisplayName("post요청을 핸들링에 실패하면 401 페이지를 반환한다")
     @Test
     void doPost_fail() {
         final HttpRequest wrongLoginRequest = new HttpRequest(
                 new HttpRequestHeader(List.of("POST /login HTTP/1.1 ")),
-                new HttpRequestBody("account=sakjung&password=password")
+                new HttpRequestBody("account=wow&password=password")
         );
 
         final HttpResponse actual = loginController.doPost(wrongLoginRequest);

@@ -1,6 +1,7 @@
 package nextstep.jwp;
 
 import nextstep.jwp.util.FileUtils;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -10,6 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestHandlerTest {
 
+    @DisplayName("GET / HTTP/1.1 요청을 실행하여 메인 페이지 응답을 확인한다.")
     @Test
     void run() {
         // given
@@ -30,6 +32,7 @@ class RequestHandlerTest {
         assertThat(result).contains(expected);
     }
 
+    @DisplayName("GET /index.html HTTP/1.1 요청을 실행하여 인데스 페이지 응답을 확인한다.")
     @Test
     void index() throws IOException {
         // given
@@ -56,6 +59,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("GET /pomo HTTP/1.1 요청을 실행하여 잘못된 페이지 응답을 확인한다.")
     @Test
     void notFound() throws IOException {
         // given

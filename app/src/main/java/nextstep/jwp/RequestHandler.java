@@ -47,43 +47,43 @@ public class RequestHandler implements Runnable {
 
             if (httpMethod.equals("GET") && (uri.equals("/index") || uri.equals("/index.html") || uri.equals("/"))) {
                 responseBody = getStaticFileContents("/index.html");
-                response = replyOkResponse(responseBody, outputStream);
+                response = replyOkResponse(responseBody);
             } else if (httpMethod.equals("GET") && (uri.equals("/login.html") || uri.equals("/login"))) {
                 responseBody = getStaticFileContents("/login.html");
-                response = replyOkResponse(responseBody, outputStream);
+                response = replyOkResponse(responseBody);
             } else if (httpMethod.equals("GET") && (uri.matches("/login.*account.*password.*"))) {
                 Optional<User> user = userService.findUserFromUri(uri);
                 log.debug(user.toString());
                 if (user.isEmpty()) {
                     responseBody = getStaticFileContents("/401.html");
-                    response = reply302Response(responseBody, outputStream);
+                    response = reply302Response(responseBody);
                 } else {
                     responseBody = getStaticFileContents("/index.html");
-                    response = replyOkResponse(responseBody, outputStream);
+                    response = replyOkResponse(responseBody);
                 }
             } else if (httpMethod.equals("POST") && (uri.equals("/login.html") || uri.equals("/login"))) {
                 String requestBody = extractRequestBody(bufferedReader, parsedRequestHeaders);
                 Optional<User> user = userService.findUserFromBody(requestBody);
                 if (user.isEmpty()) {
                     responseBody = getStaticFileContents("/401.html");
-                    response = reply302Response(responseBody, outputStream);
+                    response = reply302Response(responseBody);
                 } else {
                     responseBody = getStaticFileContents("/index.html");
-                    response = replyOkResponse(responseBody, outputStream);
+                    response = replyOkResponse(responseBody);
                 }
 
             } else if (httpMethod.equals("GET") && (uri.equals("/register") || uri.equals("/register.html"))) {
                 responseBody = getStaticFileContents("/register.html");
-                response = replyOkResponse(responseBody, outputStream);
+                response = replyOkResponse(responseBody);
             } else if (httpMethod.equals("POST") && uri.equals("/register")) {
                 String requestBody = extractRequestBody(bufferedReader, parsedRequestHeaders);
                 userService.saveUser(requestBody);
 
                 responseBody = getStaticFileContents("/index.html");
-                response = replyOkResponse(responseBody, outputStream);
+                response = replyOkResponse(responseBody);
             } else if (httpMethod.equals("GET") && uri.equals("/css/styles.css")) {
                 responseBody = getStaticFileContents("/css/styles.css");
-                response = replyOkCssResponse(responseBody, outputStream);
+                response = replyOkCssResponse(responseBody);
             }
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -104,7 +104,7 @@ public class RequestHandler implements Runnable {
         return requestBody;
     }
 
-    private String reply302Response(String responseBody, OutputStream outputStream) throws IOException {
+    private String reply302Response(String responseBody) {
         final String response = String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Content-Type: text/html;charset=utf-8 ",
@@ -115,7 +115,7 @@ public class RequestHandler implements Runnable {
         return response;
     }
 
-    private String replyOkResponse(String responseBody, OutputStream outputStream) throws IOException {
+    private String replyOkResponse(String responseBody) {
         final String response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
@@ -126,7 +126,7 @@ public class RequestHandler implements Runnable {
         return response;
     }
 
-    private String replyOkCssResponse(String responseBody, OutputStream outputStream) throws IOException {
+    private String replyOkCssResponse(String responseBody) {
         final String response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/css;charset=utf-8 ",

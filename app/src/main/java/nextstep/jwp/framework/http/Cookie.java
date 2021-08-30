@@ -12,4 +12,12 @@ public class Cookie {
         this.name = StringUtils.requireNonBlank(name);
         this.value = StringUtils.requireNonBlank(value);
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getValue() {
+        return value;
+    }
 }

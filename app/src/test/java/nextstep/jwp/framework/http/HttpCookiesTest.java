@@ -18,9 +18,9 @@ class HttpCookiesTest {
         final HttpCookies httpCookies = HttpCookies.from(cookies);
 
         // then
-        final HttpCookies expected = new HttpCookies().addCookie("yummy_cookie", "choco")
-                                                      .addCookie("tasty_cookie", "strawberry")
-                                                      .addCookie("JSESSIONID", "656cef62-e3c4-40bc-a8df-94732920ed46");
+        final HttpCookies expected = new HttpCookies().putCookie("yummy_cookie", "choco")
+                                                      .putCookie("tasty_cookie", "strawberry")
+                                                      .putCookie("JSESSIONID", "656cef62-e3c4-40bc-a8df-94732920ed46");
 
         assertThat(httpCookies).usingRecursiveComparison().isEqualTo(expected);
     }

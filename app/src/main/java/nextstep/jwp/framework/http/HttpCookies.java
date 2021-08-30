@@ -1,19 +1,17 @@
 package nextstep.jwp.framework.http;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HttpCookies {
 
-    private final List<Cookie> cookies;
+    private final Map<String, Cookie> cookies;
 
     public HttpCookies() {
-        this(new ArrayList<>());
+        this(new HashMap<>());
     }
 
-    public HttpCookies(List<Cookie> cookies) {
+    public HttpCookies(Map<String, Cookie> cookies) {
         this.cookies = cookies;
     }
 
@@ -21,23 +19,34 @@ public class HttpCookies {
         return new HttpCookies(HttpCookies.Parser.parse(cookies));
     }
 
-    public HttpCookies addCookie(String name, String value) {
-        return addCookie(new Cookie(name, value));
+    public Cookie getCookie(String name) {
+        return cookies.get(name);
     }
 
-    public HttpCookies addCookie(Cookie cookie) {
-        cookies.add(cookie);
+    public HttpCookies putCookie(String name, String value) {
+        return putCookie(new Cookie(name, value));
+    }
+
+    public HttpCookies putCookie(Cookie cookie) {
+        cookies.put(cookie.getName(), cookie);
         return this;
     }
 
+    public boolean contains(String name) {
+        return cookies.containsKey(name);
+    }
+
     private static class Parser {
-        private static List<Cookie> parse(String cookies) {
-            return Arrays.stream(separateCookies(cookies))
-                         .map(cookie -> {
-                             String[] nameAndValue = separateNameAndValue(cookie);
-                             return new Cookie(nameAndValue[0], nameAndValue[1]);
-                         })
-                         .collect(Collectors.toList());
+        private static final int NAME_INDEX = 0;
+        private static final int VALUE_INDEX = 1;
+
+        private static Map<String, Cookie> parse(String cookies) {
+            final Map<String, Cookie> cookieMap = new HashMap<>();
+            for (String cookie : separateCookies(cookies)) {
+                final String[] nameAndValue = separateNameAndValue(cookie);
+                cookieMap.put(nameAndValue[NAME_INDEX], new Cookie(nameAndValue[NAME_INDEX], nameAndValue[VALUE_INDEX]));
+            }
+            return cookieMap;
         }
 
         private static String[] separateNameAndValue(String cookie) {

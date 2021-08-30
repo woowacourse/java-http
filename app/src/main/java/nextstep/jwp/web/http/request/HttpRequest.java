@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import nextstep.jwp.web.handler.RequestHandler;
 import nextstep.jwp.web.http.HttpHeaders;
 import nextstep.jwp.web.http.HttpProtocol;
 import nextstep.jwp.web.http.MimeType;
@@ -128,7 +127,7 @@ public class HttpRequest {
                     parseBody(new String(buffer));
                 }
             } catch (IOException e) {
-                log.error("IOException! context : " , e);;
+                log.error("IOException! context : " , e);
             }
         }
 

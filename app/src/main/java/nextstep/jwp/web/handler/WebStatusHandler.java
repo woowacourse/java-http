@@ -1,6 +1,5 @@
 package nextstep.jwp.web.handler;
 
-import static nextstep.jwp.web.http.response.HttpStatus.FOUND;
 import static nextstep.jwp.web.http.response.HttpStatus.INTERNAL_ERROR;
 import static nextstep.jwp.web.http.response.HttpStatus.NOT_FOUND;
 import static nextstep.jwp.web.http.response.HttpStatus.OK;

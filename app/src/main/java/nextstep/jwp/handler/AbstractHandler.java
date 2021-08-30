@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.model.FileType;
 import nextstep.jwp.model.MethodType;
+import nextstep.jwp.model.PathType;
 import nextstep.jwp.model.Request;
 import nextstep.jwp.model.Response;
 import org.slf4j.Logger;
@@ -27,10 +28,14 @@ public abstract class AbstractHandler implements Handler {
 
     @Override
     public Response message() throws IOException {
-        if (MethodType.isGet(request.getRequestMethod())) {
-            return getMessage();
+        try {
+            if (MethodType.isGet(request.getRequestMethod())) {
+                return getMessage();
+            }
+            return postMessage();
+        } catch (NullPointerException exception) {
+            return new Response(redirectMessage(PathType.NOT_FOUND.resource()));
         }
-        return postMessage();
     }
 
     @Override
@@ -55,14 +60,9 @@ public abstract class AbstractHandler implements Handler {
                 "");
     }
 
-    protected String fileByPath(String requestPath) throws IOException {
-        try {
-            final URL resource = getClass().getClassLoader().getResource("static" + requestPath);
-            final Path path = new File(resource.getPath()).toPath();
-            return new String(Files.readAllBytes(path));
-        } catch (NullPointerException exception) {
-            LOGGER.error("File not found error", exception);
-            throw new IOException();
-        }
+    protected String fileByPath(String requestPath) throws IOException, NullPointerException {
+        final URL resource = getClass().getClassLoader().getResource("static" + requestPath);
+        final Path path = new File(resource.getPath()).toPath();
+        return new String(Files.readAllBytes(path));
     }
 }

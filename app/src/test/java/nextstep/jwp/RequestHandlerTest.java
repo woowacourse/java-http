@@ -344,6 +344,28 @@ class RequestHandlerTest {
         assertThat(output).isEqualTo(expected);
     }
 
+    @Test
+    void notFoundFile() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /notfoundfile.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: */*",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        // when
+        String output = runRequestHandler(httpRequest);
+
+        // then
+        String expected = "HTTP/1.1 302 FOUND \r\n" +
+                "Location: /404.html \r\n" +
+                "\r\n" +
+                "";
+        assertThat(output).isEqualTo(expected);
+    }
+
     private String runRequestHandler(String httpRequest) {
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);

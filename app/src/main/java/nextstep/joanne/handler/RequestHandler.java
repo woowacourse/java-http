@@ -1,6 +1,7 @@
 package nextstep.joanne.handler;
 
 import nextstep.joanne.converter.HttpRequestResponseConverter;
+import nextstep.joanne.exception.HttpException;
 import nextstep.joanne.http.request.HttpRequest;
 import nextstep.joanne.http.response.HttpResponse;
 import org.slf4j.Logger;
@@ -38,8 +39,12 @@ public class RequestHandler implements Runnable {
             );
 
             Handler handler = new Handler(httpRequest);
-            HttpResponse httpResponse = handler.handle();
-
+            HttpResponse httpResponse;
+            try {
+                httpResponse = handler.handle();
+            } catch (HttpException e) {
+                httpResponse = ErrorHandler.handle(e.httpStatus());
+            }
             outputStream.write(httpResponse.body().getBytes());
             outputStream.flush();
         } catch (IOException exception) {

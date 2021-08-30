@@ -5,13 +5,8 @@ import nextstep.joanne.http.request.HttpRequest;
 import nextstep.joanne.http.response.HttpResponse;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.Objects;
 
 public class HttpRequestResponseConverter {
 
@@ -65,19 +60,9 @@ public class HttpRequestResponseConverter {
         return splitBy(0, "=", messageBody.split("&"));
     }
 
-    public static HttpResponse convertToHttpResponse(HttpStatus httpStatus, String uri, String contentType) throws IOException {
-        if (Objects.equals(uri, "/")) {
-            return new HttpResponse(httpStatus, makeBody(httpStatus, contentType, "Hello world!"));
-        }
-        if (!uri.contains(".")) {
-            uri += ".html";
-        }
-        URL resource = HttpRequestResponseConverter.class.getClassLoader().getResource("static" + uri);
-        if (Objects.isNull(resource)) {
-            throw new IOException(String.format("%s의 resource가 존재하지 않습니다.", uri));
-        }
-        final Path filePath = new File(resource.getPath()).toPath();
-        return new HttpResponse(httpStatus, makeBody(httpStatus, contentType, Files.readString(filePath)));
+    public static HttpResponse convertToHttpResponse(HttpStatus httpStatus, String uri, String contentType) {
+        String byteBody = FileConverter.getResource(uri);
+        return new HttpResponse(httpStatus, makeBody(httpStatus, contentType, byteBody));
     }
 
     private static String makeBody(HttpStatus httpStatus, String contentType, String responseBody) {

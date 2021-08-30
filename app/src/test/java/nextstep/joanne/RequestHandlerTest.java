@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class RequestHandlerTest {
 
     @Test
-    void run() {
+    void run() throws IOException {
         // given
         final MockSocket socket = new MockSocket();
         final RequestHandler requestHandler = new RequestHandler(socket);
@@ -26,8 +26,9 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String responseBody = "Hello world!";
-        String expected = to200OkWithHtml(responseBody);
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String expected = to200OkWithHtml(new String(Files.readAllBytes(
+                new File(Objects.requireNonNull(resource).getFile()).toPath())));
         assertThat(socket.output()).isEqualTo(expected);
     }
 

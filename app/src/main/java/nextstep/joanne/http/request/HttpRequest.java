@@ -40,7 +40,7 @@ public class HttpRequest {
         }
 
         public Builder uri(String uri) {
-            this.uri = new URI(uri);
+            this.uri = URI.of(uri);
             return this;
         }
 
@@ -62,16 +62,6 @@ public class HttpRequest {
         public HttpRequest build() {
             return new HttpRequest(this);
         }
-    }
-
-    public String contentType() {
-        if (requestHeaders.containsResource("css") || uriContains("css")) {
-            return "text/css";
-        }
-        if (requestHeaders.containsResource("js") || uriContains("js")) {
-            return "application/javascript";
-        }
-        return "text/html";
     }
 
     public boolean uriEquals(String uri) {

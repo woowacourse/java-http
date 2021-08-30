@@ -30,8 +30,7 @@ class HttpRequestResponseConverterTest {
 
         HttpRequest httpRequest = HttpRequestResponseConverter.convertToHttpRequest(bufferedReader);
         assertAll(
-                () -> assertThat(httpRequest.contentType()).isEqualTo("text/html"),
-                () -> assertThat(httpRequest.uriEquals("/index")).isTrue(),
+                () -> assertThat(httpRequest.uriEquals("/index.html")).isTrue(),
                 () -> assertThat(httpRequest.isEqualsMethod(HttpMethod.GET)).isTrue()
         );
 
@@ -50,7 +49,7 @@ class HttpRequestResponseConverterTest {
     }
 
     @Test
-    void convertToHttpResponse() throws IOException {
+    void convertToHttpResponse() {
         String uri = "/index.html";
         HttpResponse response = HttpRequestResponseConverter.convertToHttpResponse(HttpStatus.OK, uri, "text/html");
 

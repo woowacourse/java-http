@@ -4,28 +4,38 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import nextstep.jwp.http.common.Body;
+import nextstep.jwp.http.request.requestline.HttpMethod;
+import nextstep.jwp.http.request.requestline.RequestLine;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
     private final HttpHeaders header;
-    private final RequestBody body;
+    private final Body body;
 
     private HttpRequest(RequestLine requestLine, HttpHeaders headers,
-        RequestBody body) throws IOException {
+        Body body) throws IOException {
         this.requestLine = requestLine;
         this.header = headers;
         this.body = body;
     }
 
-    public static HttpRequest parse (InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+    public static HttpRequest parse (BufferedReader bufferedReader) throws IOException {
 
         RequestLine requestLine = RequestLine.parse(bufferedReader.readLine());
         HttpHeaders headers = HttpHeaders.parse(bufferedReader);
-        RequestBody body = RequestBody.parse(bufferedReader, headers);
+        Body body = Body.parse(bufferedReader, headers);
 
         return new HttpRequest(requestLine, headers, body);
+    }
 
+
+    public boolean isGet() {
+        return requestLine.getMethod().equals(HttpMethod.GET);
+    }
+
+    public boolean isPost() {
+        return requestLine.getMethod().equals(HttpMethod.POST);
     }
 }

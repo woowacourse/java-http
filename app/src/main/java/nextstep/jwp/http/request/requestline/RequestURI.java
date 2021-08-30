@@ -1,4 +1,4 @@
-package nextstep.jwp.http.request;
+package nextstep.jwp.http.request.requestline;
 
 public class RequestURI {
 
@@ -8,6 +8,7 @@ public class RequestURI {
         this.requestURI = requestURI;
     }
 
+    // todo : query parsing
     public String getRequestURI() {
         return requestURI;
     }

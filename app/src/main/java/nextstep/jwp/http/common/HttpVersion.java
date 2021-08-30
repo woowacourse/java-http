@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.common;
 
 import java.util.Arrays;
 
@@ -16,5 +16,9 @@ public enum HttpVersion {
             .filter(version -> requestVersion.equals(version.value))
             .findAny()
             .orElseThrow(RuntimeException::new);
+    }
+
+    public String getVersion() {
+        return value;
     }
 }

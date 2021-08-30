@@ -1,4 +1,4 @@
-package nextstep.jwp.http.request;
+package nextstep.jwp.http.request.requestline;
 
 import java.util.Arrays;
 import nextstep.jwp.exception.NotImplementedException;

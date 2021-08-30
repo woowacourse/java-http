@@ -1,6 +1,6 @@
-package nextstep.jwp.http.request;
+package nextstep.jwp.http.request.requestline;
 
-import nextstep.jwp.http.HttpVersion;
+import nextstep.jwp.http.common.HttpVersion;
 
 public class RequestLine {
 
@@ -27,5 +27,9 @@ public class RequestLine {
         HttpVersion httpVersion = HttpVersion.matchOf(slicedLine[VERSION_INDEX]);
 
         return new RequestLine(method, requestURI, httpVersion);
+    }
+
+    public HttpMethod getMethod() {
+        return method;
     }
 }

@@ -34,7 +34,7 @@ public class RequestHandler implements Runnable {
             HttpResponse httpResponse = new HttpResponse();
 
             if (!httpRequest.isEmptyLine()) {
-                getHttpResponse(httpRequest, httpResponse);
+                process(httpRequest, httpResponse);
                 outputStream.write(httpResponse.getBytes());
             }
             outputStream.flush();
@@ -45,7 +45,7 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private void getHttpResponse(HttpRequest httpRequest, HttpResponse httpResponse) {
+    private void process(HttpRequest httpRequest, HttpResponse httpResponse) {
         ViewResolver viewResolver = new ViewResolver(httpRequest, httpResponse);
         if (viewResolver.isExisting()) {
             viewResolver.resolve();

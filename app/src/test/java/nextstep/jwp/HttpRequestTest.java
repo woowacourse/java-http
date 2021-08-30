@@ -132,4 +132,20 @@ class HttpRequestTest {
             assertThat(actual).containsEntry(key, value);
         });
     }
+
+    @Test
+    @DisplayName("HttpMethod가 GET일 경우 true를 반환한다")
+    void isGet() {
+        String statusLine = "GET /login HTTP/1.1 ";
+        HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);
+        assertThat(httpRequest.isGet()).isTrue();
+    }
+
+    @Test
+    @DisplayName("HttpMethod가 POST일 경우 true를 반환한다")
+    void isPost() {
+        String statusLine = "POST /login HTTP/1.1 ";
+        HttpRequest httpRequest = new HttpRequest(statusLine, new ArrayList<>(), null);
+        assertThat(httpRequest.isPost()).isTrue();
+    }
 }

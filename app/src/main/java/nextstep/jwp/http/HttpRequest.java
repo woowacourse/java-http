@@ -74,4 +74,12 @@ public class HttpRequest {
         }
         return result;
     }
+
+    public boolean isGet() {
+        return extractHttpMethod() == HttpMethod.GET;
+    }
+
+    public boolean isPost() {
+        return extractHttpMethod() == HttpMethod.POST;
+    }
 }

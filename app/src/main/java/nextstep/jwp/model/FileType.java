@@ -5,7 +5,8 @@ public enum FileType {
     HTML("text/html", ".html"),
     CSS("text/css", ".css"),
     JS("application/js", ".js"),
-    ICO("image/x-icon", ".ico");
+    ICO("image/x-icon", ".ico"),
+    SVG("image/svg+xml", ".svg");
 
     private String type;
     private String extension;

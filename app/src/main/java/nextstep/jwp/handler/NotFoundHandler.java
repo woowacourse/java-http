@@ -6,15 +6,15 @@ import nextstep.jwp.model.PathType;
 import nextstep.jwp.model.Request;
 import nextstep.jwp.model.Response;
 
-public class UnauthorizedHandler extends AbstractHandler {
+public class NotFoundHandler extends AbstractHandler {
 
-    public UnauthorizedHandler(Request request) {
+    public NotFoundHandler(Request request) {
         super(request);
     }
 
     @Override
     public Response getMessage() throws IOException {
-        final String responseBody = fileByPath(PathType.UNAUTHORIZED.value() + FileType.HTML.extension());
+        final String responseBody = fileByPath(PathType.NOT_FOUND.resource());
         return new Response(staticFileMessage(FileType.HTML, responseBody));
     }
 }

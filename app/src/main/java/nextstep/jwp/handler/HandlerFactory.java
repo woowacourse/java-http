@@ -9,18 +9,18 @@ public class HandlerFactory {
     }
 
     public static Handler handler(Request request) {
+        if (request.isPath(PathType.BASE)) {
+            return new BaseHandler(request);
+        }
+        if (request.containsPath(PathType.LOGIN)) {
+            return new LoginHandler(request);
+        }
+        if (request.containsPath(PathType.REGISTER)) {
+            return new RegisterHandler(request);
+        }
         if (request.containsExtension()) {
             return new StaticFileHandler(request);
         }
-        if (request.isPath(PathType.BASE_PATH)) {
-            return new BaseHandler(request);
-        }
-        if (request.containsPath(PathType.LOGIN_PATH)) {
-            return new LoginHandler(request);
-        }
-        if (request.containsPath(PathType.REGISTER_PATH)) {
-            return new RegisterHandler(request);
-        }
-        return new UnauthorizedHandler(request);
+        return new NotFoundHandler(request);
     }
 }

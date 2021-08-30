@@ -24,9 +24,9 @@ public class LoginHandler extends AbstractHandler {
             String password = queries.get(PASSWORD);
             Optional<User> dbUser = InMemoryUserRepository.findByAccount(account);
             if (dbUser.isPresent() && dbUser.get().checkPassword(password)) {
-                return new Response(redirectMessage(PathType.INDEX_PATH.value() + FileType.HTML.extension()));
+                return new Response(redirectMessage(PathType.INDEX.resource()));
             }
-            return new Response(redirectMessage(PathType.UNAUTHORIZED.value() + FileType.HTML.extension()));
+            return new Response(redirectMessage(PathType.UNAUTHORIZED.resource()));
         }
         final String responseBody = fileByPath(request.path() + FileType.HTML.extension());
         return new Response(staticFileMessage(FileType.HTML, responseBody));
@@ -39,8 +39,8 @@ public class LoginHandler extends AbstractHandler {
         String password = queries.get(PASSWORD);
         Optional<User> dbUser = InMemoryUserRepository.findByAccount(account);
         if (dbUser.isPresent() && dbUser.get().checkPassword(password)) {
-            return new Response(redirectMessage(PathType.INDEX_PATH.value() + FileType.HTML.extension()));
+            return new Response(redirectMessage(PathType.INDEX.resource()));
         }
-        return new Response(redirectMessage(PathType.UNAUTHORIZED.value() + FileType.HTML.extension()));
+        return new Response(redirectMessage(PathType.UNAUTHORIZED.resource()));
     }
 }

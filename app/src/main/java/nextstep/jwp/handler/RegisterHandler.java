@@ -29,10 +29,10 @@ public class RegisterHandler extends AbstractHandler {
         String password = queries.get(PASSWORD);
         if (InMemoryUserRepository.existsByAccount(account)
                 || InMemoryUserRepository.existsByEmail(email)) {
-            return new Response(redirectMessage(PathType.UNAUTHORIZED.value() + FileType.HTML.extension()));
+            return new Response(redirectMessage(PathType.UNAUTHORIZED.resource()));
         }
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        return new Response(redirectMessage(PathType.INDEX_PATH.value() + FileType.HTML.extension()));
+        return new Response(redirectMessage(PathType.INDEX.resource()));
     }
 }

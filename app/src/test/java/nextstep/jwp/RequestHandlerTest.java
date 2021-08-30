@@ -319,6 +319,31 @@ class RequestHandlerTest {
         assertThat(output).isEqualTo(expected);
     }
 
+    @Test
+    void notFoundPath() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /notfoundpath HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: */*",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        // when
+        String output = runRequestHandler(httpRequest);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "\r\n" +
+                responseBody;
+        assertThat(output).isEqualTo(expected);
+    }
+
     private String runRequestHandler(String httpRequest) {
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);

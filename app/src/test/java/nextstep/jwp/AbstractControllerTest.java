@@ -53,7 +53,8 @@ class AbstractControllerTest {
         String body = FileUtils.readFileOfUrl("/index.html");
         String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
+//                "Content-Length: 5564 \r\n" +
+                "Content-Length: 5670 \r\n" +
                 "\r\n" +
                 body;
         assertThat(socket.output()).isEqualTo(expected);
@@ -81,7 +82,8 @@ class AbstractControllerTest {
         String response = String.join("\r\n",
                 "HTTP/1.1 404 Not Found ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 2426 ",
+//                "Content-Length: 2426 ",
+                "Content-Length: 2477 ",
                 "",
                 body);
         assertThat(socket.output()).isEqualTo(response);

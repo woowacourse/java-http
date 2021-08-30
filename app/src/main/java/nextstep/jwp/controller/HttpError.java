@@ -1,5 +1,8 @@
 package nextstep.jwp.controller;
 
+import java.io.IOException;
+import nextstep.jwp.FileReader;
+
 public enum HttpError {
 
     UNAUTHORIZED("Unauthorized", 401, "/401.html"),
@@ -24,7 +27,7 @@ public enum HttpError {
         return code;
     }
 
-    public String getResource() {
-        return resource;
+    public String getResource() throws IOException {
+        return FileReader.file(resource);
     }
 }

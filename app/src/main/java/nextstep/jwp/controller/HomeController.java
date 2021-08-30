@@ -21,12 +21,12 @@ public class HomeController extends AbstractController {
     }
 
     @Override
-    public byte[] post(HttpRequest httpRequest) {
+    public byte[] post(HttpRequest httpRequest) throws IOException {
         return HttpResponse.error(HttpError.FORBIDDEN);
     }
 
     @Override
-    public byte[] error(HttpError httpError) {
+    public byte[] error(HttpError httpError) throws IOException {
         return HttpResponse.error(HttpError.FORBIDDEN);
     }
 }

@@ -13,9 +13,9 @@ public abstract class AbstractController {
 
     abstract byte[] get(HttpRequest httpRequest) throws IOException;
 
-    abstract byte[] post(HttpRequest httpRequest);
+    abstract byte[] post(HttpRequest httpRequest) throws IOException;
 
-    abstract byte[] error(HttpError httpError);
+    abstract byte[] error(HttpError httpError) throws IOException;
 
     public byte[] proceed() throws IOException {
         if ("GET".equals(httpRequest.method())) {

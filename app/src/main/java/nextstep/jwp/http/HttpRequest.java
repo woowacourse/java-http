@@ -6,9 +6,6 @@ import nextstep.jwp.FileReader;
 
 public class HttpRequest {
 
-    private static final String ROOT = "/";
-    private static final String INDEX_HTML = "/index.html";
-
     private final String method;
     private final String uri;
     private final Map<String, String> headers;
@@ -17,16 +14,9 @@ public class HttpRequest {
     public HttpRequest(String method, String uri,
             Map<String, String> headers, String body) {
         this.method = method;
-        this.uri = toRoot(uri);
+        this.uri = uri;
         this.headers = headers;
         this.body = body;
-    }
-
-    private String toRoot(String uri) {
-        if (ROOT.equals(uri)) {
-            return INDEX_HTML;
-        }
-        return uri;
     }
 
     public String method() {
@@ -38,6 +28,10 @@ public class HttpRequest {
     }
 
     public String resource() throws IOException {
+        return FileReader.file(uri);
+    }
+
+    public String resource(String uri) throws IOException {
         return FileReader.file(uri);
     }
 

@@ -6,13 +6,15 @@ import nextstep.jwp.http.HttpResponse;
 
 public class Controller extends AbstractController {
 
+    public static final String INDEX_PAGE = "/index.html";
+
     public Controller(HttpRequest httpRequest) {
         super(httpRequest);
     }
 
     @Override
     byte[] get(HttpRequest httpRequest) throws IOException {
-        return HttpResponse.ok(httpRequest.resource());
+        return HttpResponse.ok(httpRequest.resource(INDEX_PAGE));
     }
 
     @Override

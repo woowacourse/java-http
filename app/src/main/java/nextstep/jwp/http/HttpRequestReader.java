@@ -45,7 +45,6 @@ public class HttpRequestReader {
         reader.read(buffer, 0, contentLength);
         String requestBody = new String(buffer);
 
-        log.debug(requestUri, requestBody);
         return new HttpRequest(requestMethod, requestUri, requestHeaders, requestBody);
     }
 }

@@ -78,7 +78,7 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         String expected = "HTTP/1.1 200 OK\r\n" +
             "Content-Type: text/html;charset=utf-8\r\n" +
-            "Content-Length: 3796\r\n" +
+            "Content-Length: 3797\r\n" +
             "\r\n" +
             new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).isEqualTo(expected);
@@ -86,14 +86,16 @@ class RequestHandlerTest {
 
     @DisplayName("로그인에 성공하면, 302 Found를 받는다.")
     @Test
-    void loginSuccessTest() throws IOException {
+    void loginSuccessTest() {
         // given
         final String httpRequest = String.join("\r\n",
-            "GET /login?account=gugu&password=password HTTP/1.1",
+            "POST /login HTTP/1.1",
             "Host: localhost:8080",
             "Connection: keep-alive",
+            "Content-Length: 30",
             "",
-            "");
+            "account=gugu&password=password"
+        );
 
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
@@ -113,11 +115,12 @@ class RequestHandlerTest {
     void loginFailTest1() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-            "GET /login?account=mungto&password=password HTTP/1.1",
+            "POST /login HTTP/1.1",
             "Host: localhost:8080",
             "Connection: keep-alive",
+            "Content-Length: 32",
             "",
-            "");
+            "account=mungto&password=password");
 
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
@@ -138,11 +141,12 @@ class RequestHandlerTest {
     void loginFailTest2() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-            "GET /login?account=gugu&password=wrongpassword HTTP/1.1",
+            "POST /login HTTP/1.1",
             "Host: localhost:8080",
             "Connection: keep-alive",
+            "Content-Length: 35",
             "",
-            "");
+            "account=gugu&password=wrongpassword");
 
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);

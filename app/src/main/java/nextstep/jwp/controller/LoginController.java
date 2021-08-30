@@ -11,15 +11,11 @@ public class LoginController implements Controller {
 
     @Override
     public void get(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        if (httpRequest.isQueryParamsEmpty()) {
-            httpResponse.transfer(httpRequest.getUrl());
-            return;
-        }
-        loginService.login(httpRequest, httpResponse);
+        httpResponse.transfer(httpRequest.getUrl());
     }
 
     @Override
-    public void post(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-
+    public void post(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        loginService.login(httpRequest, httpResponse);
     }
 }

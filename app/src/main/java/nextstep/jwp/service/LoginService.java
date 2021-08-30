@@ -31,7 +31,7 @@ public class LoginService {
     }
 
     private boolean isCollectPassword(final HttpRequest httpRequest, final User user) {
-        if (user.checkPassword(httpRequest.getQueryParam("password"))) {
+        if (user.checkPassword(httpRequest.getBodyDataByKey("password"))) {
             LOG.debug("password Collect! : {}", user.getAccount());
             return true;
         }
@@ -40,8 +40,9 @@ public class LoginService {
     }
 
     private User getUser(final HttpRequest httpRequest) {
-        String requestUserAccount = httpRequest.getQueryParam("account");
-        Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getQueryParam("account"));
+
+        String requestUserAccount = httpRequest.getBodyDataByKey("account");
+        Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getBodyDataByKey("account"));
         if (user.isPresent()) {
             LOG.debug("user Account : {}", user.get().getAccount());
             return user.get();

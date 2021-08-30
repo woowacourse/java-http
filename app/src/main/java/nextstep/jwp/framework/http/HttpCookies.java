@@ -3,6 +3,8 @@ package nextstep.jwp.framework.http;
 import java.util.HashMap;
 import java.util.Map;
 
+import nextstep.jwp.framework.util.StringUtils;
+
 public class HttpCookies {
 
     private final Map<String, Cookie> cookies;
@@ -21,6 +23,10 @@ public class HttpCookies {
 
     public Cookie getCookie(String name) {
         return cookies.get(name);
+    }
+
+    public String getValueBy(String name) {
+        return getCookie(name).getValue();
     }
 
     public HttpCookies putCookie(String name, String value) {
@@ -54,6 +60,9 @@ public class HttpCookies {
         }
 
         private static String[] separateCookies(String cookies) {
+            if (!StringUtils.hasLength(cookies)) {
+                return new String[]{};
+            }
             return cookies.split("; ");
         }
     }

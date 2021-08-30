@@ -14,7 +14,7 @@ public class Controller extends AbstractController {
 
     @Override
     byte[] get(HttpRequest httpRequest) throws IOException {
-        return HttpResponse.ok(httpRequest.resource(INDEX_PAGE));
+        return HttpResponse.ok(httpRequest.resource());
     }
 
     @Override

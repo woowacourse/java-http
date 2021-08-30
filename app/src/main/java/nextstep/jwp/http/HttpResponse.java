@@ -15,7 +15,7 @@ public class HttpResponse {
                 "\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + content.length() + " ",
+                "Content-Length: " + content.getBytes().length + " ",
                 "",
                 content)
                 .getBytes();
@@ -26,7 +26,7 @@ public class HttpResponse {
                 "\r\n",
                 "HTTP/1.1 302 Found ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + content.length() + " ",
+                "Content-Length: " + content.getBytes().length + " ",
                 "",
                 content)
                 .getBytes();

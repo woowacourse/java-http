@@ -19,7 +19,7 @@ public class UserService {
                                           .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
 
         user.checkPassword(password);
-        return new UserDto(user);
+        return UserDto.from(user);
     }
 
     public void join(String account, String password, String email) {

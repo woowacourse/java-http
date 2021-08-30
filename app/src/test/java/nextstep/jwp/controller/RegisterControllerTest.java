@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class RegisterControllerTest {
     protected static final HttpRequest registerRequest = new HttpRequest(
             new HttpRequestHeader(List.of("POST /register HTTP/1.1 ")),
-            new HttpRequestBody("account=sakjung&password=password&email=sakjung%40sakjung.com")
+            new HttpRequestBody("account=pobi&password=password&email=pobi%40pobi.com")
     );
 
     private final Controller registerController = new RegisterController(new UserService());

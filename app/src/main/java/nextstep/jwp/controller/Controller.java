@@ -20,14 +20,14 @@ public abstract class Controller {
         return doPost(httpRequest);
     }
 
-    protected String readFile(final String path) {
+    public String readFile(final String path) {
         URL url = Thread.currentThread()
                 .getContextClassLoader()
                 .getResource(DEFAULT_PATH + path);
         try {
             final File file = new File(Objects.requireNonNull(url).getFile());
             return new String(Files.readAllBytes(file.toPath()));
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException exception) {
             throw new ResourceNotFoundException();
         }
     }

@@ -1,5 +1,6 @@
 package nextstep.learning.http;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import static org.mockito.Mockito.*;
  * 바이트가 아닌 <b>텍스트(문자)</b>를 읽고 쓰려면 <b>Reader와 Writer</b> 클래스를 연결한다.<br>
  * Reader, Writer는 다양한 문자 인코딩(e.g. UTF-8)을 처리할 수 있다.
  */
+@Disabled
 @DisplayName("Java I/O Stream 클래스 학습 테스트")
 class IOStreamTest {
 

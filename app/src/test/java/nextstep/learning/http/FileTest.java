@@ -1,6 +1,7 @@
 package nextstep.learning.http;
 
 import org.assertj.core.util.Lists;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -13,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * 웹서버는 사용자가 요청한 html 파일을 제공 할 수 있어야 한다.<br>
  * File 클래스를 사용해서 파일을 읽어오고, 사용자에게 전달한다.
  */
+@Disabled
 @DisplayName("File 클래스 학습 테스트")
 class FileTest {
 

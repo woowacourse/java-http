@@ -52,15 +52,15 @@ public class RequestHandler implements Runnable {
     }
 
     private HttpResponse getHttpResponse(final InputStream inputStream) throws IOException {
+        HttpRequest httpRequest = parseRequest(inputStream);
+        final Controller controller = findController(httpRequest);
         try {
-            final HttpRequest httpRequest = parseRequest(inputStream);
-            final Controller controller = findController(httpRequest);
             return controller.doService(httpRequest);
         } catch (ResourceNotFoundException exception) {
-            final HttpRequest httpRequest = HttpRequest.ofStaticFile("/404.html");
+            httpRequest = HttpRequest.ofStaticFile("/404.html");
             return staticResourceController.doService(httpRequest);
         } catch (RuntimeException exception) {
-            final HttpRequest httpRequest = HttpRequest.ofStaticFile("/500.html");
+            httpRequest = HttpRequest.ofStaticFile("/500.html");
             return staticResourceController.doService(httpRequest);
         }
     }

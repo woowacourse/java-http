@@ -34,7 +34,7 @@ public class Request {
         return requestPath.containsPath(pathType);
     }
 
-    public boolean containsEXTENSION() {
+    public boolean containsExtension() {
         return requestPath.containsExtension();
     }
 

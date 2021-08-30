@@ -9,7 +9,7 @@ public class HandlerFactory {
     }
 
     public static Handler handler(Request request) {
-        if (request.containsEXTENSION()) {
+        if (request.containsExtension()) {
             return new StaticFileHandler(request);
         }
         if (request.isPath(PathType.BASE_PATH)) {

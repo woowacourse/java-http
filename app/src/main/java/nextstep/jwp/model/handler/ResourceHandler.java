@@ -1,6 +1,7 @@
 package nextstep.jwp.model.handler;
 
 import nextstep.jwp.model.http_request.JwpHttpRequest;
+import nextstep.jwp.model.http_response.JwpHttpResponse;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -19,12 +20,7 @@ public class ResourceHandler implements CustomHandler {
         URL resource = getClass().getClassLoader().getResource(RESOURCE_PREFIX + jwpHttpRequest.getUri());
         final Path path = Paths.get(resource.toURI());
         String resourceFile = new String(Files.readAllBytes(path));
-        final String response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + resourceFile.getBytes().length + " ",
-                "",
-                resourceFile);
+        final String response = JwpHttpResponse.ok(resourceFile);
         outputStream.write(response.getBytes());
     }
 }

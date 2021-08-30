@@ -8,5 +8,5 @@ import java.net.URISyntaxException;
 
 public interface CustomHandler {
 
-    void handle(JwpHttpRequest uri, OutputStream outputStream) throws IOException, URISyntaxException;
+    void handle(JwpHttpRequest jwpHttpRequest, OutputStream outputStream) throws IOException, URISyntaxException;
 }

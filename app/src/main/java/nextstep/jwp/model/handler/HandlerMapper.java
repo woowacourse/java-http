@@ -7,7 +7,8 @@ import java.util.function.Predicate;
 
 public enum HandlerMapper {
     RESOURCE(uri -> uri.contains("."), new ResourceHandler()),
-    LOGIN(uri -> uri.equals("/login"), new LoginHandler())
+    LOGIN(uri -> uri.equals("/login"), new LoginHandler()),
+    REGISTER(uri -> uri.equals("/register"), new RegisterHandler())
     ;
 
     private final Predicate<String> predicate;
@@ -19,11 +20,10 @@ public enum HandlerMapper {
     }
 
     public static CustomHandler from(String uri) {
-        System.out.println("유입된 uri : " + uri);
         return Arrays.stream(values())
                 .filter(handlerMapper -> handlerMapper.isTrue(uri))
                 .findAny()
-                .orElseThrow(() -> new NotFoundHandlerException())
+                .orElseThrow(NotFoundHandlerException::new)
                 .getCustomHandler()
                 ;
     }

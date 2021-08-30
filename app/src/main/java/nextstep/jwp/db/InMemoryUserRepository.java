@@ -1,6 +1,7 @@
 package nextstep.jwp.db;
 
 
+import nextstep.jwp.exception.AlreadyRegisteredUser;
 import nextstep.jwp.model.user.domain.User;
 
 import java.util.Map;
@@ -11,16 +12,23 @@ public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
 
+    private static int id = 1;
+
     static {
-        final User user = new User(1, "gugu", "password", "hkkang@woowahan.com");
+        final User user = new User(id++, "gugu", "password", "hkkang@woowahan.com");
         database.put(user.getAccount(), user);
     }
 
     public static void save(User user) {
-        database.put(user.getAccount(), user);
+        String account = user.getAccount();
+        if (database.containsKey(account)) {
+            throw new AlreadyRegisteredUser(account);
+        }
+        database.put(account, new User(id++, user.getAccount(), user.getPassword(), user.getEmail()));
     }
 
     public static Optional<User> findByAccount(String account) {
         return Optional.ofNullable(database.get(account));
     }
+
 }

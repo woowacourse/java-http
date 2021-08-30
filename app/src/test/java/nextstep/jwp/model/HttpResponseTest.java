@@ -29,7 +29,7 @@ class HttpResponseTest {
                 "Content-Length: 5564 ",
                 "",
                 body);
-        assertThat(outputStream.toString()).isEqualTo(expectedHeader);
+        assertThat(outputStream.toString()).hasToString(expectedHeader);
     }
 
     @DisplayName("401 페이지 리다이렉트에 대한 응답을 확인한다.")

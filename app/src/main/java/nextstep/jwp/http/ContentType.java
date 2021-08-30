@@ -26,6 +26,10 @@ public enum ContentType {
                 .orElse(NONE);
     }
 
+    public boolean isNone() {
+        return NONE.equals(this);
+    }
+
     public String getContentType() {
         return contentType;
     }

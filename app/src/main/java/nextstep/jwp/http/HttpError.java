@@ -1,7 +1,6 @@
 package nextstep.jwp.http;
 
 import java.io.IOException;
-import nextstep.jwp.http.FileReader;
 
 public enum HttpError {
 

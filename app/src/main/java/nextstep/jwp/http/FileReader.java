@@ -20,7 +20,7 @@ public class FileReader {
     }
 
     private static String withExtension(ContentType contentType, String uri) {
-        if (ContentType.NONE.equals(contentType)) {
+        if (contentType.isNone()) {
             return uri + ".html";
         }
         return uri;

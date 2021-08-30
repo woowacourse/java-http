@@ -2,6 +2,7 @@ package nextstep.jwp.http;
 
 import nextstep.jwp.controller.AbstractController;
 import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.ExceptionController;
 import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
@@ -18,6 +19,14 @@ public class RequestMapper {
         if (httpRequest.uri().startsWith("/register")) {
             return new RegisterController(httpRequest);
         }
-        return new Controller(httpRequest);
+        if (isExistUri(httpRequest.uri())) {
+            return new Controller(httpRequest);
+        }
+        return new ExceptionController(httpRequest);
+    }
+
+    private static boolean isExistUri(String uri) {
+        ContentType contentType = ContentType.findBy(uri);
+        return !contentType.isNone();
     }
 }

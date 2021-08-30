@@ -33,9 +33,9 @@ class RequestHandlerTest {
     }
 
     @Test
-    void badRequest() throws IOException {
+    void notFound() throws IOException {
         // given
-        final String httpRequest = get("/bad/request.html");
+        final String httpRequest = get("/invalid.html");
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket, assembler.dispatcher());
 
@@ -45,7 +45,7 @@ class RequestHandlerTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
         final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertResponse(socket.output(), HttpStatus.BAD_REQUEST, body);
+        assertResponse(socket.output(), HttpStatus.NOT_FOUND, body);
     }
 
     @Test

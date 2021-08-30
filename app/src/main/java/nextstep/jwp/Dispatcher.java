@@ -1,7 +1,7 @@
 package nextstep.jwp;
 
 import nextstep.jwp.adaptor.HandlerAdaptor;
-import nextstep.jwp.exception.BadRequestException;
+import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.handler.Handler;
 import nextstep.jwp.handler.ResponseEntity;
 import nextstep.jwp.handler.modelandview.Model;
@@ -38,8 +38,8 @@ public class Dispatcher {
         try {
             Handler handler = handlerMapper.mapping(httpRequest);
             return handlerAdaptor.handle(handler, httpRequest);
-        } catch (BadRequestException badRequestException) {
-            return ResponseEntity.badRequest();
+        } catch (NotFoundException notFoundException) {
+            return ResponseEntity.notFoundException();
         } catch (Exception exception) {
             return ResponseEntity.unhandledException();
         }

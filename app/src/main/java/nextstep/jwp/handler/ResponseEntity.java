@@ -35,14 +35,14 @@ public class ResponseEntity {
 
     public static ResponseEntity unhandledException() {
         Model model = new Model();
-        model.addAttribute("HttpStatus", HttpStatus.ERROR);
+        model.addAttribute("HttpStatus", HttpStatus.INTERNAL_SERVER_ERROR);
         ModelAndView modelAndView = new ModelAndView(model, "/500.html");
         return new ResponseEntity(modelAndView);
     }
 
-    public static ResponseEntity badRequest() {
+    public static ResponseEntity notFoundException() {
         Model model = new Model();
-        model.addAttribute("HttpStatus", HttpStatus.BAD_REQUEST);
+        model.addAttribute("HttpStatus", HttpStatus.NOT_FOUND);
         ModelAndView modelAndView = new ModelAndView(model, "/404.html");
         return new ResponseEntity(modelAndView);
     }

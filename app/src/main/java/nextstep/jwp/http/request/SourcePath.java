@@ -22,6 +22,10 @@ public class SourcePath {
         return this.path.equalsIgnoreCase(path);
     }
 
+    public String getValue() {
+        return path;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -37,9 +41,5 @@ public class SourcePath {
     @Override
     public int hashCode() {
         return Objects.hash(path);
-    }
-
-    public String getValue() {
-        return path;
     }
 }

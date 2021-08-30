@@ -37,10 +37,6 @@ public class View {
         return new View("");
     }
 
-    public boolean isEmpty() {
-        return content.isEmpty();
-    }
-
     public String contentType() {
         return contentType.value();
     }

@@ -71,7 +71,7 @@ public class HttpRequest {
         return requestLine.method().isGet();
     }
 
-    public boolean isPost() {
-        return requestLine.method().isPost();
+    public SourcePath sourcePath() {
+        return requestLine.sourcePath();
     }
 }

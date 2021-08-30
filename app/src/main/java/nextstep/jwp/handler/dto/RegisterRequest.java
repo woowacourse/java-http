@@ -1,5 +1,6 @@
 package nextstep.jwp.handler.dto;
 
+import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.QueryParams;
 import nextstep.jwp.model.User;
 
@@ -16,6 +17,11 @@ public class RegisterRequest {
 
     public static RegisterRequest fromQueryParams(QueryParams params) {
         return new RegisterRequest(params.get("account"), params.get("password"), params.get("email"));
+    }
+
+    public static RegisterRequest fromHttpRequest(HttpRequest request) {
+        QueryParams params = QueryParams.of(request.requestBody());
+        return fromQueryParams(params);
     }
 
     public User toEntity() {

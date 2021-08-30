@@ -1,12 +1,12 @@
 package nextstep.jwp.handler;
 
-import java.io.File;
+import nextstep.jwp.ServerConfig;
+import nextstep.jwp.exception.IncorrectHandlerException;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.request.SourcePath;
+
 import java.net.URL;
 import java.util.Objects;
-import nextstep.jwp.ServerConfig;
-import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.request.RequestLine;
-import nextstep.jwp.http.request.SourcePath;
 
 public class ResourceHandler implements Handler {
 
@@ -14,22 +14,20 @@ public class ResourceHandler implements Handler {
 
     @Override
     public boolean mapping(HttpRequest httpRequest) {
-        RequestLine requestLine = httpRequest.requestLine();
-        return (httpRequest.isGet() && isExistResource(requestLine.sourcePath()));
+        return (httpRequest.isGet() && isExistResource(httpRequest.sourcePath()));
     }
 
     @Override
     public ResponseEntity service(HttpRequest httpRequest) {
-        RequestLine requestLine = httpRequest.requestLine();
-        SourcePath sourcePath = requestLine.sourcePath();
-        return ResponseEntity.ok(sourcePath.getValue());
+        SourcePath sourcePath = httpRequest.sourcePath();
+        if (isExistResource(sourcePath)) {
+            return ResponseEntity.ok(sourcePath.getValue());
+        }
+        throw new IncorrectHandlerException();
     }
 
-    private boolean isExistResource(SourcePath sourcePath) {
+    public boolean isExistResource(SourcePath sourcePath) {
         final URL resourceUrl = getClass().getResource(RESOURCE_BASE_PATH + sourcePath.getValue());
-        if (Objects.isNull(resourceUrl)) {
-            return false;
-        }
-        return new File(resourceUrl.getFile()).exists();
+        return !Objects.isNull(resourceUrl);
     }
 }

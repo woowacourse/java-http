@@ -27,7 +27,7 @@ public class HttpResponse {
     public static byte[] error(HttpError error) throws IOException {
         return String.join(
                 "\r\n",
-                "HTTP/1.1" + error.getCode() + " " + error.getName() + " ",
+                "HTTP/1.1 " + error.getCode() + " " + error.getName() + " ",
                 "Content-Type: text/html; charset=utf-8 ",
                 "Content-Length: " + error.getResource().getBytes().length + " ",
                 "",

@@ -6,15 +6,15 @@ import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.http.FileReaderInStaticFolder;
 
-public class NoController implements Controller {
+public class NoController extends AbstractController {
 
     @Override
-    public void get(HttpRequest request, HttpResponse response) {
+    public void doGet(HttpRequest request, HttpResponse response) {
         renderNotFoundPage(response);
     }
 
     @Override
-    public void post(HttpRequest request, HttpResponse response) {
+    public void doPost(HttpRequest request, HttpResponse response) {
         renderNotFoundPage(response);
     }
 

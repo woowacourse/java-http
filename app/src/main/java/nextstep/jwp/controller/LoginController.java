@@ -10,12 +10,12 @@ import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.http.FileReaderInStaticFolder;
 import nextstep.jwp.model.User;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final String LOGIN_URI = "/login";
 
     @Override
-    public void get(HttpRequest request, HttpResponse response) {
+    public void doGet(HttpRequest request, HttpResponse response) {
         FileReaderInStaticFolder fileReaderInStaticFolder = new FileReaderInStaticFolder();
         String htmlOfLogin = fileReaderInStaticFolder.read("login.html");
         response.setStatus(HttpStatus.OK);
@@ -23,7 +23,7 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public void post(HttpRequest request, HttpResponse response) {
+    public void doPost(HttpRequest request, HttpResponse response) {
         FileReaderInStaticFolder fileReaderInStaticFolder = new FileReaderInStaticFolder();
         Map<String, String> formData = request.extractFormData();
         String account = formData.get("account");

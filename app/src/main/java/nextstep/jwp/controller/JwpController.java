@@ -27,10 +27,10 @@ public class JwpController {
             List<String> params = Arrays.asList(requestBody.split("&"));
             User user = UserService.registerUser(params);
             log.info("회원가입된 유저 : " + user.toString());
-            return pageController.mapResponse(Optional.of(HttpStatus.CREATED), "index");
+            return pageController.mapResponse(HttpStatus.CREATED, "index");
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage());
-            return pageController.mapResponse(Optional.of(HttpStatus.BAD_REQUEST), "register");
+            return pageController.mapResponse(HttpStatus.BAD_REQUEST, "register");
         }
     }
 
@@ -39,10 +39,10 @@ public class JwpController {
             List<String> params = Arrays.asList(queryString.split("&"));
             User user = UserService.findUser(params);
             log.info("로그인한 유저 : " + user.toString());
-            return pageController.mapResponse(Optional.of(HttpStatus.FOUND), "index");
+            return pageController.mapResponse(HttpStatus.FOUND, "index");
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage());
-            return pageController.mapResponse(Optional.of(HttpStatus.BAD_REQUEST), "401");
+            return pageController.mapResponse(HttpStatus.BAD_REQUEST, "401");
         }
     }
 

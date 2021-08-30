@@ -40,7 +40,7 @@ public class GetMethod extends Method {
     }
 
     private HttpResponse getPage(final String request) {
-        return getHttpResponse(TEXT_HTML, pageController.mapResponse(Optional.empty(), request));
+        return getHttpResponse(TEXT_HTML, pageController.mapResponse(HttpStatus.OK, request));
     }
 
     private HttpResponse getHttpResponse(final String contentType, final Map<HttpStatus, String> mappedResponse) {

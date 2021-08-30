@@ -24,10 +24,10 @@ public class PageController {
         this.mappedFunction.put("register", this::register);
     }
 
-    public Map<HttpStatus, String> mapResponse(final Optional<HttpStatus> status, final String request) {
+    public Map<HttpStatus, String> mapResponse(HttpStatus status, final String request) {
         return this.mappedFunction.keySet().stream()
                 .filter(request::contains)
-                .map(s -> this.mappedFunction.get(s).apply(status.orElse(HttpStatus.OK), request))
+                .map(s -> this.mappedFunction.get(s).apply(status, request))
                 .findAny()
                 .orElse(Map.of(HttpStatus.NOT_FOUND, "해당 페이지가 존재하지 않습니다."));
     }

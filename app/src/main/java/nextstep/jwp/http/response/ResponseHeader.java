@@ -3,6 +3,7 @@ package nextstep.jwp.http.response;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 public class ResponseHeader {
@@ -16,7 +17,7 @@ public class ResponseHeader {
         headers.put(header, contents);
     }
 
-    public HashMap<String, ArrayList<String>> getHeaders() {
+    public Map<String, ArrayList<String>> getHeaders() {
         return headers;
     }
 

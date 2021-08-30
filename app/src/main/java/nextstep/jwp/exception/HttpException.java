@@ -4,7 +4,7 @@ import nextstep.jwp.http.response.status.HttpStatus;
 
 public class HttpException extends RuntimeException {
 
-    private HttpStatus httpStatus;
+    private final HttpStatus httpStatus;
 
     public HttpException(HttpStatus httpStatus, String message) {
         super(message);

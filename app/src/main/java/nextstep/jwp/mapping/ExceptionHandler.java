@@ -6,6 +6,9 @@ import nextstep.jwp.http.response.status.HttpStatus;
 
 public class ExceptionHandler {
 
+    private ExceptionHandler() {
+    }
+
     public static void handle(HttpStatus httpStatus, HttpRequest httpRequest,
             HttpResponse httpResponse) {
         String resource = "/" + httpStatus.getValue() + ".html";

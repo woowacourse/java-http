@@ -7,6 +7,9 @@ import nextstep.jwp.presentation.RegisterController;
 
 public class ApplicationContextFactory {
 
+    private ApplicationContextFactory() {
+    }
+
     public static ApplicationContext create() {
         HashMap<String, Object> hashMap = new HashMap<>();
 

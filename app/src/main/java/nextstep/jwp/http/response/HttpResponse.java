@@ -8,13 +8,6 @@ public class HttpResponse {
     private ResponseHeader responseHeader = new ResponseHeader();
     private String responseBody = "";
 
-    private HttpResponse(StatusLine statusLine, ResponseHeader responseHeader,
-            String responseBody) {
-        this.statusLine = statusLine;
-        this.responseHeader = responseHeader;
-        this.responseBody = responseBody;
-    }
-
     public HttpResponse() {
     }
 

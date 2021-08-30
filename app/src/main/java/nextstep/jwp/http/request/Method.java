@@ -4,13 +4,13 @@ public enum Method {
     GET("GET"),
     POST("POST");
 
-    private String method;
+    private String methodName;
 
-    Method(String method) {
-        this.method = method;
+    Method(String methodName) {
+        this.methodName = methodName;
     }
 
-    public String getMethod() {
-        return method;
+    public String getMethodName() {
+        return methodName;
     }
 }

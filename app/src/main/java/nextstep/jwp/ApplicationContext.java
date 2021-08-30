@@ -1,14 +1,14 @@
 package nextstep.jwp;
 
-import java.util.HashMap;
+import java.util.Map;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.presentation.Controller;
 
 public class ApplicationContext {
 
-    private final HashMap<String, Object> controllers;
+    private final Map<String, Object> controllers;
 
-    public ApplicationContext(HashMap<String, Object> controllers) {
+    public ApplicationContext(Map<String, Object> controllers) {
         this.controllers = controllers;
     }
 

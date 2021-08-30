@@ -4,34 +4,34 @@ import java.util.Map;
 
 public class HttpBody {
 
-    private final QueryParams body;
+    private final QueryParams queryParams;
 
     public HttpBody() {
-        this.body = new QueryParams();
+        this.queryParams = new QueryParams();
     }
 
-    public HttpBody(final String body) {
-        this.body = new QueryParams(body);
+    public HttpBody(final String queryParams) {
+        this(new QueryParams(queryParams));
     }
 
-    public HttpBody(final QueryParams body) {
-        this.body = body;
+    public HttpBody(final QueryParams queryParams) {
+        this.queryParams = queryParams;
     }
 
     public boolean hasBody() {
-        return !(body.count() == 0);
+        return !(queryParams.count() == 0);
     }
 
     public boolean hasNotBody() {
-        return body.count() == 0;
+        return !hasBody();
     }
 
-    public Map<String, String> getBody() {
-        return body.getQueryParams();
+    public Map<String, String> getQueryParams() {
+        return queryParams.getQueryParams();
     }
 
     @Override
     public String toString() {
-        return body.toString();
+        return queryParams.toString();
     }
 }

@@ -1,5 +1,6 @@
-package nextstep.jwp;
+package nextstep.jwp.server;
 
+import nextstep.jwp.controller.Controllers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,31 +11,32 @@ import java.util.stream.Stream;
 
 public class WebServer {
 
-    private static final Logger logger = LoggerFactory.getLogger(WebServer.class);
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebServer.class);
     private static final int DEFAULT_PORT = 8080;
 
     private final int port;
+    private final Controllers controllers;
 
     public WebServer(int port) {
         this.port = checkPort(port);
+        this.controllers = Controllers.loadContext();
     }
 
     public void run() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            logger.info("Web Server started {} port.", serverSocket.getLocalPort());
+            LOGGER.info("Web Server started {} port.", serverSocket.getLocalPort());
             handle(serverSocket);
         } catch (IOException exception) {
-            logger.error("Exception accepting connection", exception);
+            LOGGER.error("Exception accepting connection", exception);
         } catch (RuntimeException exception) {
-            logger.error("Unexpected error", exception);
+            LOGGER.error("Unexpected error", exception);
         }
     }
 
     private void handle(ServerSocket serverSocket) throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection)).start();
+            new Thread(new RequestHandler(connection, controllers)).start();
         }
     }
 

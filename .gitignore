@@ -122,3 +122,5 @@ gen
 
 # Ignore Gradle build output directory
 build
+
+app/jacoco/jacoco.xml

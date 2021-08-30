@@ -4,6 +4,8 @@ import java.util.Objects;
 
 public class StringUtils {
 
+    private StringUtils() {}
+
     public static String requireNonBlank(String str) {
         if (!hasLength(str)) {
             throw new IllegalArgumentException("빈 문자열입니다.");

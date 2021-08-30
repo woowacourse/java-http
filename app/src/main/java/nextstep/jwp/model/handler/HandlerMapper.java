@@ -19,6 +19,7 @@ public enum HandlerMapper {
     }
 
     public static CustomHandler from(String uri) {
+        System.out.println("유입된 uri : " + uri);
         return Arrays.stream(values())
                 .filter(handlerMapper -> handlerMapper.isTrue(uri))
                 .findAny()

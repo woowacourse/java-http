@@ -2,12 +2,13 @@ package nextstep.jwp;
 
 import nextstep.jwp.model.handler.CustomHandler;
 import nextstep.jwp.model.handler.HandlerMapper;
-import nextstep.jwp.model.JwpHttpRequest;
+import nextstep.jwp.model.http_request.JwpHttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.URISyntaxException;
 import java.util.Objects;
 
 public class RequestHandler implements Runnable {
@@ -31,7 +32,7 @@ public class RequestHandler implements Runnable {
             CustomHandler handler = HandlerMapper.from(request.getUri()); // todo: 추상화하기!
             handler.handle(request, outputStream);
             outputStream.flush();
-        } catch (IOException exception) {
+        } catch (IOException | URISyntaxException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();

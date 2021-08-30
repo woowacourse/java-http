@@ -12,6 +12,6 @@ public class DefaultController extends AbstractController {
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
         log.debug("HTTP GET Resource Request: {}", request.getPath());
-        response.forward(request.getPath());
+        response.responseOk(request.getPath());
     }
 }

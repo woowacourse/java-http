@@ -19,7 +19,7 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         log.debug("HTTP GET Login Request: {}", request.getPath());
-        response.forward("/login.html");
+        response.responseOk("/login.html");
     }
 
     @Override
@@ -27,9 +27,9 @@ public class LoginController extends AbstractController {
         log.debug("HTTP POST Login Request: {}", request.getPath());
         try {
             userService.login(request);
-            response.redirect("http://" + request.getHeader("Host") + "/index.html");
+            response.responseRedirect("http://" + request.getHeader("Host") + "/index.html");
         } catch (IllegalArgumentException exception) {
-            response.redirect("http://" + request.getHeader("Host") + "/401.html");
+            response.responseRedirect("http://" + request.getHeader("Host") + "/401.html");
         }
     }
 }

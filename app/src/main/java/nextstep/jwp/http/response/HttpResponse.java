@@ -30,7 +30,7 @@ public class HttpResponse {
         this.statusLine = new StatusLine(statusCode);
     }
 
-    public void forward(String uri) {
+    public void responseOk(String uri) {
         try {
             URL resource = findResource(uri);
             String content = readContent(resource);
@@ -83,7 +83,7 @@ public class HttpResponse {
         return new String(bytes);
     }
 
-    public void redirect(String redirectUrl) {
+    public void responseRedirect(String redirectUrl) {
         setStatusLine(StatusCode.FOUND);
         this.headers.setLocation(redirectUrl);
     }

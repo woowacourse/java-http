@@ -19,7 +19,7 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         log.debug("HTTP GET Register Request: {}", request.getPath());
-        response.forward("/register.html");
+        response.responseOk("/register.html");
     }
 
     @Override
@@ -27,9 +27,9 @@ public class RegisterController extends AbstractController {
         log.debug("HTTP POST Register Request: {}", request.getPath());
         try {
             userService.signUp(request);
-            response.redirect("http://" + request.getHeader("Host") + "/index.html");
+            response.responseRedirect("http://" + request.getHeader("Host") + "/index.html");
         } catch (IllegalArgumentException exception) {
-            response.redirect("http://" + request.getHeader("Host") + "/register.html");
+            response.responseRedirect("http://" + request.getHeader("Host") + "/register.html");
         }
     }
 }

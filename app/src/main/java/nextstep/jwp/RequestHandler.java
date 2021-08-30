@@ -1,6 +1,7 @@
 package nextstep.jwp;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.http.ContentTypeMapper;
 import nextstep.jwp.http.HttpRequestHeader;
 import nextstep.jwp.model.User;
 import org.slf4j.Logger;
@@ -10,7 +11,6 @@ import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -37,7 +37,9 @@ public class RequestHandler implements Runnable {
             HttpRequestHeader httpRequestHeader = new HttpRequestHeader(br);
             String method = httpRequestHeader.getMethod();
             String resource = httpRequestHeader.getResource();
+            System.out.println(resource);
             Map<String, String> httpRequestHeaders = httpRequestHeader.getHeaders();
+
             String responseHeader = "";
             String responseBody = "";
 
@@ -45,93 +47,83 @@ public class RequestHandler implements Runnable {
                 responseBody = "Hello world!";
                 responseHeader = "200 OK";
             }
-            if (resource.equals("/index.html")) {
-                String filePath = "static/index.html";
-                final URL url = getClass().getClassLoader().getResource(filePath);
-                File file = new File(Objects.requireNonNull(url).getFile());
-                final Path path = file.toPath();
-                responseBody = new String(Files.readAllBytes(path));
+
+            if (resource.contains(".")) {
+                responseBody = createResponseBody(resource);
                 responseHeader = "200 OK";
             }
+
             if (method.equals("GET") && resource.equals("/register")) {
-                String requestUri = "static/register.html";
-                final URL url = getClass().getClassLoader().getResource(requestUri);
-                File file = new File(Objects.requireNonNull(url).getFile());
-                final Path path = file.toPath();
-                responseBody = new String(Files.readAllBytes(path));
+                responseBody = createResponseBody("/register.html");
                 responseHeader = "200 OK";
             }
             if (method.equals("POST") && resource.equals("/register")) {
-                String requestUri = "static/index.html";
-                final URL url = getClass().getClassLoader().getResource(requestUri);
-                File file = new File(Objects.requireNonNull(url).getFile());
-                final Path path = file.toPath();
-                responseBody = new String(Files.readAllBytes(path));
+                responseBody = createResponseBody("/index.html");
                 responseHeader = "200 OK";
 
                 int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
                 char[] buffer = new char[contentLength];
                 br.read(buffer, 0, contentLength);
-                String requestBody = new String(buffer);
+                String queries = new String(buffer);
 
-                Map<String, String> queryMap = new HashMap<>();
-                String[] queries = requestBody.split("&");
-                for (String query : queries) {
-                    int equalIndex = query.indexOf("=");
-                    String key = query.substring(0, equalIndex);
-                    String value = query.substring(equalIndex + 1);
-                    queryMap.put(key, value);
-                }
-
-                InMemoryUserRepository.save(new User(InMemoryUserRepository.size() + 1,
+                Map<String, String> queryMap = createQueryMap(queries);
+                User user = new User(InMemoryUserRepository.size() + 1,
                         queryMap.get("account"),
                         queryMap.get("email"),
-                        queryMap.get("password")));
+                        queryMap.get("password"));
+                InMemoryUserRepository.save(user);
             }
             if (resource.contains("?")) {
                 int index = resource.indexOf("?");
-                String queryString = resource.substring(index + 1);
-                Map<String, String> queryMap = new HashMap<>();
-                String[] queries = queryString.split("&");
-                for (String query : queries) {
-                    int equalIndex = query.indexOf("=");
-                    String key = query.substring(0, equalIndex);
-                    String value = query.substring(equalIndex + 1);
-                    queryMap.put(key, value);
-                }
+                String queries = resource.substring(index + 1);
+                Map<String, String> queryMap = createQueryMap(queries);
                 Optional<User> account = InMemoryUserRepository.findByAccount(queryMap.get("account"));
                 if (account.isPresent()) {
-                    String requestUri = "static/index.html";
-                    final URL url = getClass().getClassLoader().getResource(requestUri);
-                    File file = new File(Objects.requireNonNull(url).getFile());
-                    final Path path = file.toPath();
-                    responseBody = new String(Files.readAllBytes(path));
+                    responseBody = createResponseBody("/index.html");
                     responseHeader = "302 FOUND";
                 } else {
-                    String requestUri = "static/401.html";
-                    final URL url = getClass().getClassLoader().getResource(requestUri);
-                    File file = new File(Objects.requireNonNull(url).getFile());
-                    final Path path = file.toPath();
-                    responseBody = new String(Files.readAllBytes(path));
+                    responseBody = createResponseBody("/401.html");
                     responseHeader = "401 UNAUTHORIZED";
                 }
             }
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 " + responseHeader + " ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-
-            outputStream.write(response.getBytes());
+            outputStream.write(createResponse(responseHeader, responseBody, ContentTypeMapper.extractContentType(resource)).getBytes());
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
         }
+    }
+
+    private Map<String, String> createQueryMap(String queryString) {
+        Map<String, String> queryMap = new HashMap<>();
+        String[] queries = queryString.split("&");
+        for (String query : queries) {
+            int equalIndex = query.indexOf("=");
+            String key = query.substring(0, equalIndex);
+            String value = query.substring(equalIndex + 1);
+            queryMap.put(key, value);
+        }
+        return queryMap;
+    }
+
+    private String createResponseBody(String render) throws IOException {
+        String filePath = "static" + render;
+        final URL url = getClass().getClassLoader().getResource(filePath);
+        File file = new File(Objects.requireNonNull(url).getFile());
+        byte[] bytes = Files.readAllBytes(file.toPath());
+        return new String(bytes);
+    }
+
+    private String createResponse(String responseHeader, String responseBody, String contentType) {
+        final String response = String.join("\r\n",
+                "HTTP/1.1 " + responseHeader + " ",
+                "Content-Type: " + contentType,
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+        return response;
     }
 
     private void close() {

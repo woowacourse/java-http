@@ -11,32 +11,12 @@ import org.junit.jupiter.api.Test;
 class RequestHandlerTest {
 
     @Test
-    void run() {
-        // given
-        final MockSocket socket = new MockSocket();
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
-
-        // then
-        String expected = String.join("\r\n",
-            "HTTP/1.1 200 OK ",
-            "Content-Type: text/html;charset=utf-8 ",
-            "Content-Length: 12 ",
-            "",
-            "Hello world!");
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @Test
     void index() throws IOException {
         // given
         final String httpRequest = String.join(System.lineSeparator(),
             "GET /index.html HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
-            "",
             "");
 
         final MockSocket socket = new MockSocket(httpRequest);
@@ -48,7 +28,7 @@ class RequestHandlerTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         String expected = "HTTP/1.1 200 OK" + System.lineSeparator() +
-            "Content-Length: 5564 " + System.lineSeparator() +
+            "Content-Length: 4406 " + System.lineSeparator() +
             "Content-Type: text/html;charset=utf-8 " + System.lineSeparator() +
             System.lineSeparator() +
             new String(Files.readAllBytes(new File(resource.getFile()).toPath()));

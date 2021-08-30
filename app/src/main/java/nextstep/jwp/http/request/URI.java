@@ -1,7 +1,5 @@
 package nextstep.jwp.http.request;
 
-import java.util.Objects;
-
 public class URI {
 
     private static final String PATH_PREFIX = "/";

@@ -1,13 +1,13 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.response;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import nextstep.jwp.http.HttpHeader;
 
 public class HttpResponse {
 
     private static final String PROTOCOL = "HTTP/1.1";
-    private static final String FINAL_HEADER_ELEMENT = "";
     private static final String BLANK = " ";
     private static final String HEADER_DELIMITER = ": ";
 

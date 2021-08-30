@@ -1,20 +1,18 @@
 package nextstep.jwp;
 
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.ControllerContainer;
-import nextstep.jwp.controller.PageRenderController;
-import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
-import nextstep.jwp.util.RequestBinder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.ControllerContainer;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.util.RequestBinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RequestHandler implements Runnable {
 
@@ -31,7 +29,7 @@ public class RequestHandler implements Runnable {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-             final OutputStream outputStream = connection.getOutputStream()) {
+            final OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = RequestBinder.createRequestByMessage(bufferedReader);
             Controller controller = ControllerContainer.findController(httpRequest);

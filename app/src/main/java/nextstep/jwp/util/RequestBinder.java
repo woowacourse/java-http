@@ -8,9 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import nextstep.jwp.http.HttpHeader;
+import nextstep.jwp.http.Protocol;
 import nextstep.jwp.http.request.HttpMethod;
 import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.Protocol;
 import nextstep.jwp.http.request.QueryStringTypeRequestBody;
 import nextstep.jwp.http.request.QueryStrings;
 import nextstep.jwp.http.request.RequestBody;
@@ -38,7 +38,8 @@ public class RequestBinder {
         return new HttpRequest(httpMethod, uri, protocol, httpHeader, requestBody);
     }
 
-    private static RequestBody initializeQueryStringTypeBody(BufferedReader bufferedReader, HttpHeader httpHeader) throws IOException {
+    private static RequestBody initializeQueryStringTypeBody(BufferedReader bufferedReader, HttpHeader httpHeader)
+        throws IOException {
         String contentLengthValue = httpHeader.getValueByKey("Content-Length");
         if (null != contentLengthValue) {
             int contentLength = Integer.parseInt(contentLengthValue);

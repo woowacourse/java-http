@@ -1,15 +1,13 @@
 package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import nextstep.TestUtil;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.http.HttpResponse;
-import nextstep.jwp.http.ResponseStatus;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.ResponseStatus;
 import nextstep.jwp.http.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

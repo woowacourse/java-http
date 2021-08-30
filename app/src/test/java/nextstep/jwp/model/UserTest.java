@@ -2,9 +2,7 @@ package nextstep.jwp.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
-import nextstep.jwp.db.InMemoryUserRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,12 +23,10 @@ class UserTest {
     @DisplayName("User를 생성할때 아이디를 자동으로 생성한다.")
     @Test
     void autoCreateUserID() {
-        long idCount = InMemoryUserRepository.savedSize();
         User user1 = new User("user1", "password", "email");
         User user2 = new User("user2", "password", "email");
 
-        assertThat(user1.getId()).isEqualTo(idCount + 1);
-        assertThat(user2.getId()).isEqualTo(idCount + 2);
+        assertThat(user1.getId() < user2.getId()).isTrue();
     }
 
     @DisplayName("User 생성시 누락된 정보가 있으면 예외를 반환한다.")

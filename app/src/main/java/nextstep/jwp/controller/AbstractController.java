@@ -3,8 +3,8 @@ package nextstep.jwp.controller;
 import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.http.HttpHeader;
-import nextstep.jwp.http.HttpResponse;
-import nextstep.jwp.http.ResponseStatus;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.ResponseStatus;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.util.FileUtil;
 

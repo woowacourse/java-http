@@ -2,7 +2,7 @@ package nextstep.jwp.http.request;
 
 import java.util.Map;
 
-public class QueryStringTypeRequestBody extends QueryStrings implements RequestBody{
+public class QueryStringTypeRequestBody extends QueryStrings implements RequestBody {
 
     public QueryStringTypeRequestBody() {
     }

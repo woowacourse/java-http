@@ -1,8 +1,7 @@
 package nextstep.jwp.model;
 
-import nextstep.jwp.db.InMemoryUserRepository;
-
 public class User {
+
     private static long CURRENT_ID = 0;
 
     private final long id;
@@ -48,10 +47,10 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
-                ", account='" + account + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                '}';
+            "id=" + id +
+            ", account='" + account + '\'' +
+            ", email='" + email + '\'' +
+            ", password='" + password + '\'' +
+            '}';
     }
 }

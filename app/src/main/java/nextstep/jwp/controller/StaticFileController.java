@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import java.util.Arrays;
 import java.util.List;
-import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.request.HttpMethod;
 import nextstep.jwp.http.request.HttpRequest;
 

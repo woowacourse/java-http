@@ -1,13 +1,13 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.request.HttpMethod;
 import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.request.RequestBody;
 import nextstep.jwp.model.User;
 
-public class RegisterController extends AbstractController{
+public class RegisterController extends AbstractController {
 
     private static final HttpMethod HTTP_METHOD = HttpMethod.POST;
     private static final String URI_PATH = "/register";

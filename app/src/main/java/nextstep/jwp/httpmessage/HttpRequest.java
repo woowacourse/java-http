@@ -3,13 +3,15 @@ package nextstep.jwp.httpmessage;
 public class HttpRequest {
 
     private final RequestLine requestLine;
+    private final HttpHeaders httpHeaders;
 
     public HttpRequest(HttpMessageReader bufferedReader) {
-        this(new RequestLine(bufferedReader.getStartLine()));
+        this(new RequestLine(bufferedReader.getStartLine()), new HttpHeaders(bufferedReader.getHeaders()));
     }
 
-    public HttpRequest(RequestLine requestLine) {
+    public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders) {
         this.requestLine = requestLine;
+        this.httpHeaders = httpHeaders;
     }
 
     public String getRequestLine() {
@@ -26,5 +28,9 @@ public class HttpRequest {
 
     public String getVersionOfTheProtocol() {
         return requestLine.getVersionOfTheProtocol();
+    }
+
+    public HttpHeaders getHttpHeaders() {
+        return httpHeaders;
     }
 }

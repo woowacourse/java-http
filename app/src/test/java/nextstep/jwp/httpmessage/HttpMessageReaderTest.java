@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,5 +34,17 @@ class HttpMessageReaderTest {
         final String actual = httpMessageReader.getStartLine();
         //then
         assertThat(actual).isEmpty();
+    }
+
+    @Test
+    void getHeaders() {
+        //given
+        final String requestUri = "/test";
+        final String input = RequestHandlerTest.toHttpGetRequest(requestUri);
+        //when
+        final HttpMessageReader httpMessageReader = new HttpMessageReader(new ByteArrayInputStream(input.getBytes()));
+        final Map<String, String> headers = httpMessageReader.getHeaders();
+        //then
+        assertThat(headers.size()).isNotEqualTo(0);
     }
 }

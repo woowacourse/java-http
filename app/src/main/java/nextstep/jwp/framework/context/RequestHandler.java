@@ -40,7 +40,7 @@ public class RequestHandler implements Runnable {
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } catch (Exception e) {
-            log.error("error : {}", e.getMessage());
+            log.error("Exception", e);
         } finally {
             close();
         }

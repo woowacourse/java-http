@@ -1,9 +1,10 @@
-package nextstep.jwp.framework.http;
+package nextstep.jwp.framework.http.template;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import nextstep.jwp.framework.http.template.StringResponseTemplate;
+import nextstep.jwp.framework.http.HttpResponse;
+import nextstep.jwp.framework.http.HttpStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,22 +23,6 @@ class StringResponseTemplateTest {
         final HttpResponse expected = HttpResponse.status(HttpStatus.OK)
                                                   .contentType("text/plain;charset=utf-8")
                                                   .body(RESPONSE)
-                                                  .build();
-
-        assertThat(response).usingRecursiveComparison().isEqualTo(expected);
-    }
-
-    @Test
-    @DisplayName("Found 상태코드와 리소스 패스 반환 테스트")
-    void foundTest() {
-
-        // when
-        final HttpResponse response = new StringResponseTemplate().found(RESPONSE);
-
-        //then
-        final HttpResponse expected = HttpResponse.status(HttpStatus.FOUND)
-                                                  .location(RESPONSE)
-                                                  .contentType("text/plain;charset=utf-8")
                                                   .build();
 
         assertThat(response).usingRecursiveComparison().isEqualTo(expected);

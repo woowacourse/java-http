@@ -5,12 +5,15 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpRequestParserTest {
     @Test
     void parse() throws IOException {
+        // given
         String request = "POST /register HTTP/1.1\n" +
                 "Host: localhost:8080\n" +
                 "Connection: keep-alive\n" +
@@ -20,10 +23,12 @@ class HttpRequestParserTest {
                 "\n" +
                 "account=gugu&password=password&email=hkkang%40woowahan.com";
 
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(request.getBytes());
+        InputStream inputStream = new ByteArrayInputStream(request.getBytes());
 
-        HttpRequest actual = HttpRequestParser.parse(byteArrayInputStream);
+        // when
+        HttpRequest actual = HttpRequestParser.parse(inputStream);
 
+        // then
         assertThat(actual.getMethod()).isEqualTo(HttpMethod.POST);
         assertThat(actual.getRequestUri().toString()).isEqualTo("/register");
         assertThat(actual.getHeaders()).containsKeys(Arrays.array(
@@ -34,5 +39,21 @@ class HttpRequestParserTest {
                 "Accept"));
         assertThat(actual.getRequestBody()).isNotEmpty();
         assertThat(actual.getRequestBody()).isEqualTo("account=gugu&password=password&email=hkkang%40woowahan.com");
+    }
+
+    @Test
+    void parseParameter() throws IOException {
+        // given
+        String request = "GET /login?account=gugu&password=password HTTP/1.1\n" +
+                "Host: localhost:8080\n" +
+                "Connection: keep-alive\n" +
+                "Accept: */*\n";
+        InputStream inputStream = new ByteArrayInputStream(request.getBytes());
+
+        // when
+        HttpRequest actual = HttpRequestParser.parse(inputStream);
+
+        // then
+        assertThat(actual.getParameters()).containsAllEntriesOf(Map.of("account", "gugu", "password", "password"));
     }
 }

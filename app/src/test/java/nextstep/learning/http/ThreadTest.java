@@ -12,7 +12,7 @@ class ThreadTest {
 
     @Test
     void testCounterWithConcurrency() throws InterruptedException {
-        int numberOfThreads = 10;
+        int numberOfThreads = 100;
         ExecutorService service = Executors.newFixedThreadPool(10);
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
         MyCounter counter = new MyCounter();

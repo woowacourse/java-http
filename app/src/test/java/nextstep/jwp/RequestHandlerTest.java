@@ -1,6 +1,7 @@
 package nextstep.jwp;
 
 import nextstep.jwp.http.RequestHandler;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -10,6 +11,7 @@ import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Disabled
 class RequestHandlerTest {
 
     @Test

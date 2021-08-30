@@ -8,4 +8,6 @@ public interface Controller {
     HttpResponse get(HttpRequest request);
 
     HttpResponse post(HttpRequest request);
+
+    boolean isSatisfiedBy(String httpUriPath);
 }

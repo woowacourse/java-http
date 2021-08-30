@@ -12,6 +12,8 @@ import nextstep.jwp.model.User;
 
 public class LoginController implements Controller {
 
+    private static final String LOGIN_URI = "/login";
+
     @Override
     public HttpResponse get(HttpRequest request) {
         StaticFileReader staticFileReader = new StaticFileReader();
@@ -37,5 +39,10 @@ public class LoginController implements Controller {
             return new HttpResponse(HttpStatus.UNAUTHORIZED, htmlOf401);
         }
         return new HttpResponse(HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    public boolean isSatisfiedBy(String httpUriPath) {
+        return httpUriPath.equals(LOGIN_URI);
     }
 }

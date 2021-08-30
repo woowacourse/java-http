@@ -11,6 +11,8 @@ import nextstep.jwp.model.User;
 
 public class RegisterController implements Controller {
 
+    private static final String REGISTER_URI = "/register";
+
     @Override
     public HttpResponse get(HttpRequest request) {
         StaticFileReader staticFileReader = new StaticFileReader();
@@ -32,5 +34,10 @@ public class RegisterController implements Controller {
             return httpResponse;
         }
         return new HttpResponse(HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    public boolean isSatisfiedBy(String httpUriPath) {
+        return httpUriPath.equals(REGISTER_URI);
     }
 }

@@ -2,8 +2,6 @@ package nextstep.jwp.http.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import nextstep.jwp.http.common.Body;
 import nextstep.jwp.http.request.requestline.HttpMethod;
 import nextstep.jwp.http.request.requestline.RequestLine;
@@ -15,13 +13,13 @@ public class HttpRequest {
     private final Body body;
 
     private HttpRequest(RequestLine requestLine, HttpHeaders headers,
-        Body body) throws IOException {
+        Body body) {
         this.requestLine = requestLine;
         this.header = headers;
         this.body = body;
     }
 
-    public static HttpRequest parse (BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest parse(BufferedReader bufferedReader) throws IOException {
 
         RequestLine requestLine = RequestLine.parse(bufferedReader.readLine());
         HttpHeaders headers = HttpHeaders.parse(bufferedReader);
@@ -30,6 +28,13 @@ public class HttpRequest {
         return new HttpRequest(requestLine, headers, body);
     }
 
+    public boolean matchURI(String uri) {
+        return requestLine.matchURI(uri);
+    }
+
+    public RequestLine getRequestLine() {
+        return requestLine;
+    }
 
     public boolean isGet() {
         return requestLine.getMethod().equals(HttpMethod.GET);

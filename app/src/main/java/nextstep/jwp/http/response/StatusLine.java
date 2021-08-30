@@ -3,6 +3,7 @@ package nextstep.jwp.http.response;
 import nextstep.jwp.http.common.HttpVersion;
 
 public class StatusLine {
+
     private final HttpVersion httpVersion;
     private final HttpStatus httpStatus;
 
@@ -12,6 +13,7 @@ public class StatusLine {
     }
 
     public String asString() {
-        return String.join("%s %s", httpVersion.getVersion(), httpStatus.getCode());
+        return String.format("%s %s %s", httpVersion.getVersion(), httpStatus.getCode(),
+            httpStatus.getMessage());
     }
 }

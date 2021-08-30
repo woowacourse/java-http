@@ -18,12 +18,12 @@ public class HttpHeaders {
         Map<String, String> headers = new HashMap<>();
         String line = bufferedReader.readLine();
 
-        while(isNotEmpty(line)) {
-            line = bufferedReader.readLine();
+        while (isNotEmpty(line)) {
             String[] slicedLine = line.split(":");
             String key = slicedLine[0];
             String value = slicedLine[1];
             headers.put(key, value);
+            line = bufferedReader.readLine();
         }
         return new HttpHeaders(headers);
     }

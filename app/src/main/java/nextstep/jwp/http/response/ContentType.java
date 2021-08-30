@@ -1,6 +1,7 @@
 package nextstep.jwp.http.response;
 
 import java.util.Arrays;
+import nextstep.jwp.http.request.requestline.RequestURI;
 
 public enum ContentType {
     TEXT("txt", "text/plain"),
@@ -18,12 +19,13 @@ public enum ContentType {
         this.value = value;
     }
 
-    public static ContentType matchOf(String uri) {
-        String suffix = uri.split("\\.")[1];
-
+    public static String of(RequestURI uri) {
+        String suffix = uri.getRequestURI().split("\\.")[1];
         return Arrays.stream(ContentType.values())
             .filter(contentType -> contentType.getSuffix().equals(suffix))
-            .findAny().orElseThrow(IllegalAccessError::new);
+            .findAny()
+            .orElseThrow(IllegalAccessError::new)
+            .value;
     }
 
     public String getSuffix() {

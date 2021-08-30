@@ -51,8 +51,8 @@ public class RequestHandler implements Runnable {
         try {
             Controller controller = controllers.findController(httpRequest);
             return controller.process(httpRequest);
-        } catch (IOException e) {
-            throw new RuntimeException();
+        } catch (Exception e) {
+            return HttpResponse.redirect("/404.html");
         }
     }
 

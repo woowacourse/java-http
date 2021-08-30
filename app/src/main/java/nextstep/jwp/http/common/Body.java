@@ -40,6 +40,10 @@ public class Body {
         }
     }
 
+    public static Body empty() {
+        return EMPTY_BODY;
+    }
+
     public int length() {
         return value.getBytes().length;
     }

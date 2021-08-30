@@ -53,6 +53,12 @@ public class HttpResponse {
         return "static/" + uri;
     }
 
+    public static HttpResponse redirect(String uri) {
+        final ResponseHeaders headers = new ResponseHeaders();
+        headers.putHeader("Location", uri);
+        return of(HttpStatus.FOUND, headers, Body.empty());
+    }
+
     public String asString() {
         String header = String
             .join(" \r\n", List.of(statusLine.asString(), responseHeaders.asString()));

@@ -32,15 +32,23 @@ public class HttpRequest {
         return requestLine.matchURI(uri);
     }
 
-    public RequestLine getRequestLine() {
-        return requestLine;
-    }
-
     public boolean isGet() {
         return requestLine.getMethod().equals(HttpMethod.GET);
     }
 
     public boolean isPost() {
         return requestLine.getMethod().equals(HttpMethod.POST);
+    }
+
+    public RequestLine getRequestLine() {
+        return requestLine;
+    }
+
+    public HttpHeaders getHeader() {
+        return header;
+    }
+
+    public Body getBody() {
+        return body;
     }
 }

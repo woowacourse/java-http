@@ -40,8 +40,7 @@ public abstract class AbstractController implements Controller {
         throw new IllegalArgumentException("등록되지 않은 HTTP Method 입니다.");
     }
 
-    @Override
-    public HttpResponse doGet(HttpRequest httpRequest) {
+    protected HttpResponse doGet(HttpRequest httpRequest) {
         logUnsupportedRequest(httpRequest);
         throw new UnsupportedOperationException();
     }
@@ -51,8 +50,7 @@ public abstract class AbstractController implements Controller {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public HttpResponse doPost(HttpRequest httpRequest) {
+    protected HttpResponse doPost(HttpRequest httpRequest) {
         logUnsupportedRequest(httpRequest);
         throw new UnsupportedOperationException();
     }

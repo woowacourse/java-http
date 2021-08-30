@@ -2,17 +2,29 @@ package nextstep.jwp.httpmessage;
 
 public class HttpRequest {
 
-    private final String requestLine;
+    private final RequestLine requestLine;
 
     public HttpRequest(HttpMessageReader bufferedReader) {
-        this(bufferedReader.getStartLine());
+        this(new RequestLine(bufferedReader.getStartLine()));
     }
 
-    public HttpRequest(String requestLine) {
+    public HttpRequest(RequestLine requestLine) {
         this.requestLine = requestLine;
     }
 
     public String getRequestLine() {
-        return requestLine;
+        return requestLine.getLine();
+    }
+
+    public HttpMethod getHttpMethod() {
+        return requestLine.getMethod();
+    }
+
+    public String getPath() {
+        return requestLine.getPath();
+    }
+
+    public String getVersionOfTheProtocol() {
+        return requestLine.getVersionOfTheProtocol();
     }
 }

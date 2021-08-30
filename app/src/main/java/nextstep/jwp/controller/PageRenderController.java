@@ -24,7 +24,7 @@ public class PageRenderController extends AbstractController {
     }
 
     @Override
-    public HttpResponse doService(HttpRequest httpRequest) {
+    public HttpResponse run(HttpRequest httpRequest) {
         return super.renderPage(httpRequest.getPath());
     }
 }

@@ -18,7 +18,7 @@ class FileUtilTest {
     void findHTMLFilePath(String input) throws IOException {
         URL resource = getClass().getClassLoader().getResource("static/test.html");
         String expected = new String(Files.readAllBytes(Paths.get(resource.getPath())));
-        String actual = FileUtil.readHTMLFileByUriPath(input);
+        String actual = FileUtil.readStaticFileByUriPath(input);
 
         assertThat(actual).isEqualTo(expected);
     }

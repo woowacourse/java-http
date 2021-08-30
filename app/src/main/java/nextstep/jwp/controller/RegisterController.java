@@ -24,7 +24,7 @@ public class RegisterController extends AbstractController{
     }
 
     @Override
-    public HttpResponse doService(HttpRequest httpRequest) {
+    public HttpResponse run(HttpRequest httpRequest) {
         RequestBody requestBody = httpRequest.getRequestBody();
         String account = requestBody.getValue("account");
         String password = requestBody.getValue("password");

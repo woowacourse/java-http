@@ -28,7 +28,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    public HttpResponse doService(HttpRequest httpRequest) {
+    public HttpResponse run(HttpRequest httpRequest) {
         try {
             validateUserInput(httpRequest.getRequestBody());
             return super.redirect(SUCCESS_REDIRECT_URL);

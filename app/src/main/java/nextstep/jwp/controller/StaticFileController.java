@@ -23,10 +23,10 @@ public class StaticFileController extends AbstractController {
     }
 
     @Override
-    public HttpResponse doService(HttpRequest httpRequest) {
+    public HttpResponse run(HttpRequest httpRequest) {
         if (httpRequest.getPath().endsWith(".css")) {
             return super.applyCSSFile(httpRequest.getPath());
         }
-        return super.applyStaticFile(httpRequest.getPath());
+        return super.renderPage(httpRequest.getPath());
     }
 }

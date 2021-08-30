@@ -10,6 +10,8 @@ import nextstep.jwp.util.FileUtil;
 
 public abstract class AbstractController implements Controller {
 
+    private static final String INTERNAL_SERVER_ERROR_REDIRECT_URL = "http://localhost:8080/500.html";
+
     @Override
     public boolean isMatchingController(HttpRequest httpRequest) {
         return isMatchingHttpMethod(httpRequest) && isMatchingUriPath(httpRequest);
@@ -17,25 +19,12 @@ public abstract class AbstractController implements Controller {
 
     protected HttpResponse renderPage(String uriPath) {
         try {
-            String responseBody = FileUtil.readHTMLFileByUriPath(uriPath);
-            return HttpResponse.status(ResponseStatus.OK,
-                HttpHeader.getHTMLResponseHeader(responseBody),
-                responseBody);
-        } catch (IllegalArgumentException e) {
-            // TODO: 에러 파일 출력
-            return null;
-        }
-    }
-
-    protected HttpResponse applyStaticFile(String uriPath) {
-        try {
             String responseBody = FileUtil.readStaticFileByUriPath(uriPath);
             return HttpResponse.status(ResponseStatus.OK,
                 HttpHeader.getHTMLResponseHeader(responseBody),
                 responseBody);
         } catch (IllegalArgumentException e) {
-            // TODO: 에러 파일 출력
-            return null;
+            return redirect(INTERNAL_SERVER_ERROR_REDIRECT_URL);
         }
     }
 
@@ -46,10 +35,19 @@ public abstract class AbstractController implements Controller {
                 HttpHeader.getCSSResponseHeader(responseBody),
                 responseBody);
         } catch (IllegalArgumentException e) {
-            // TODO: 에러 파일 출력
-            return null;
+            return redirect(INTERNAL_SERVER_ERROR_REDIRECT_URL);
         }
     }
+
+    @Override
+    public HttpResponse doService(HttpRequest httpRequest) {
+        try {
+            return run(httpRequest);
+        } catch (IllegalArgumentException e) {
+            return redirect(INTERNAL_SERVER_ERROR_REDIRECT_URL);
+        }
+    }
+
 
     protected HttpResponse redirect(String redirectUrl) {
         Map<String, String> headers = new HashMap<>();
@@ -57,6 +55,8 @@ public abstract class AbstractController implements Controller {
 
         return HttpResponse.status(ResponseStatus.FOUND, new HttpHeader(headers));
     }
+
+    protected abstract HttpResponse run(HttpRequest httpRequest);
 
     abstract boolean isMatchingHttpMethod(HttpRequest httpRequest);
 

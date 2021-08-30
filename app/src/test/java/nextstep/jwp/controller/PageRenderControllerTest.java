@@ -17,10 +17,10 @@ class PageRenderControllerTest {
     @ParameterizedTest
     @ValueSource(strings = {"/index.html", "/register", "/login", "/401.html", "/404.html", "/500.html"})
     void doService(String input) {
-        Controller controller = new PageRenderController();
+        PageRenderController controller = new PageRenderController();
         HttpRequest request = TestUtil.createRequest("GET " + input +  " HTTP/1.1");
 
-        HttpResponse httpResponse = controller.doService(request);
+        HttpResponse httpResponse = controller.run(request);
         assertThat(httpResponse.getResponseStatus()).isEqualTo(ResponseStatus.OK);
     }
 }

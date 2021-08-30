@@ -22,7 +22,7 @@ public class HttpResponse {
     public void forward(String uri) {
         try {
             byte[] body = Files.readAllBytes(getResources(uri).toPath());
-            ContentType contentType = findContentType(uri);
+            ContentType contentType = ContentType.findContentType(uri);
             String response = responseOk(contentType, body);
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -39,22 +39,6 @@ public class HttpResponse {
         } catch (IOException e) {
             log.error(e.getMessage());
         }
-    }
-
-    private ContentType findContentType(String uri) {
-        if (uri.endsWith(".css")) {
-            return ContentType.CSS;
-        }
-
-        if (uri.endsWith(".js")) {
-            return ContentType.JS;
-        }
-
-        if (uri.startsWith("/assets/img")) {
-            return ContentType.IMAGE;
-        }
-
-        return ContentType.HTML;
     }
 
     private String responseOk(ContentType contentType, byte[] body) {

@@ -144,4 +144,53 @@ class RequestHandlerTest {
         assertThat(socket.output()).contains(expected);
         assertThat(socket.output()).contains(expected2);
     }
+
+    @Test
+    @DisplayName("JSESSIONID가 없으면 Http Response Header에 Set-Cookie를 통해 JSESSIONID를 반환해준다.")
+    void JSessionId() {
+        // given
+        final String httpRequest = String.join("\r\n",
+            "POST /register HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "Content-Length: 80",
+            "Content-Type: application/x-www-form-urlencoded",
+            "Accept: */*",
+            "",
+            "account=gugu&password=password&email=hkkang%40woowahan.com");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        assertThat(socket.output()).contains("Set-Cookie: JSESSIONID=");
+    }
+
+    @Test
+    @DisplayName("JSESSIONID가 있으면 Http Response Header에 Set-Cookie에 JSESSIONID가 포함되지 않는다.")
+    void JSessionId_existing() {
+        // given
+        final String httpRequest = String.join("\r\n",
+            "POST /register HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "Content-Length: 80",
+            "Content-Type: application/x-www-form-urlencoded",
+            "Accept: */*",
+            "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
+            "",
+            "account=gugu&password=password&email=hkkang%40woowahan.com");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        assertThat(socket.output()).doesNotContain("JSESSIONID");
+    }
 }

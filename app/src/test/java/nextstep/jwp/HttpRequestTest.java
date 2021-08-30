@@ -194,4 +194,40 @@ class HttpRequestTest {
             assertThat(actual).containsEntry(key, value);
         });
     }
+
+    @Test
+    @DisplayName("JSESSIONID가 있으면 true를 반환한다.")
+    void containsJSessionId_true() {
+        // given
+        List<String> headerLines = Arrays.asList(
+            "Host: localhost:8080",
+            "Connection: keep-alive",
+            "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46"
+        );
+        HttpRequest httpRequest = new HttpRequest(null, headerLines, null);
+
+        // when
+        boolean actual = httpRequest.containsJSessionId();
+
+        // then
+        assertThat(actual).isTrue();
+    }
+
+    @Test
+    @DisplayName("JSESSIONID가 있으면 false를 반환한다.")
+    void containsJSessionId_false() {
+        // given
+        List<String> headerLines = Arrays.asList(
+            "Host: localhost:8080",
+            "Connection: keep-alive",
+            "Cookie: yummy_cookie=choco; tasty_cookie=strawberry"
+        );
+        HttpRequest httpRequest = new HttpRequest(null, headerLines, null);
+
+        // when
+        boolean actual = httpRequest.containsJSessionId();
+
+        // then
+        assertThat(actual).isFalse();
+    }
 }

@@ -1,14 +1,22 @@
 package nextstep.jwp.http;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class HttpResponse {
 
     private static final String HTTP_LINE_SEPERATOR = "\r\n";
+    private static final int COOKIE_VALUE_INDEX = 1;
+    private static final int COOKIE_KEY_INDEX = 0;
+    private static final String HEADER_KEY_OF_JSESSIONID = "JSESSIONID";
+    private static final String HEADER_KEY_OF_SET_COOKIE = "Set-Cookie";
     private HttpStatus status;
     private String body;
     private Map<String, String> headers = new HashMap<>();
+    private Map<String, String> cookies = new HashMap<>();
 
     public HttpResponse() {
         this.status = HttpStatus.OK;
@@ -24,7 +32,24 @@ public class HttpResponse {
     }
 
     public void putHeader(String key, String value) {
+        if (key.equals(HEADER_KEY_OF_SET_COOKIE)) {
+            String[] split = value.split("=");
+            putCookie(split[COOKIE_KEY_INDEX], split[COOKIE_VALUE_INDEX]);
+            return;
+        }
         headers.put(key, value);
+    }
+
+    public void putCookie(String key, String value) {
+        cookies.put(key, value);
+    }
+
+    private String getCookieAsString() {
+        List<String> cookiesAsString = new ArrayList<>();
+        cookies.forEach((key, value) -> {
+            cookiesAsString.add(key + "=" + value);
+        });
+        return String.join("; ", cookiesAsString);
     }
 
     public byte[] getBytes() {
@@ -61,6 +86,7 @@ public class HttpResponse {
 
     private String makeHeaderLines() {
         StringBuilder sb = new StringBuilder();
+        headers.put(HEADER_KEY_OF_SET_COOKIE, getCookieAsString());
         headers.forEach((key, value) -> {
             sb.append(key);
             sb.append(": ");
@@ -68,5 +94,9 @@ public class HttpResponse {
             sb.append(HTTP_LINE_SEPERATOR);
         });
         return sb.toString();
+    }
+
+    public void createJSessionId() {
+        cookies.put(HEADER_KEY_OF_JSESSIONID, UUID.randomUUID().toString());
     }
 }

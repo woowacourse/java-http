@@ -18,6 +18,8 @@ public class HttpRequest {
     private static final int HEADER_VALUE_INDEX = 1;
     private static final int COOKIE_KEY_INDEX = 0;
     private static final int COOKIE_KEY_VALUE = 1;
+    private static final String HEADER_KEY_OF_COOKIE = "Cookie";
+    private static final String HEADER_KEY_OF_JSESSIONID = "JSESSIONID";
 
     private final String statusLine;
     private final String bodyLine;
@@ -91,15 +93,17 @@ public class HttpRequest {
     }
 
     public Map<String, String> extractCookies() {
-        String rawCookie = extractHeaders().get("Cookie");
-        String[] cookies = rawCookie.split("; ");
-
+        String rawCookie = extractHeaders().get(HEADER_KEY_OF_COOKIE);
         Map<String, String> result = new HashMap<>();
-        for (String cookie : cookies) {
-            String[] split = cookie.split("=");
-            String key = split[COOKIE_KEY_INDEX];
-            String value = split[COOKIE_KEY_VALUE];
-            result.put(key, value);
+        if (!Objects.isNull(rawCookie)) {
+            String[] cookies = rawCookie.split("; ");
+
+            for (String cookie : cookies) {
+                String[] split = cookie.split("=");
+                String key = split[COOKIE_KEY_INDEX];
+                String value = split[COOKIE_KEY_VALUE];
+                result.put(key, value);
+            }
         }
         return result;
     }
@@ -110,5 +114,10 @@ public class HttpRequest {
 
     public boolean isPost() {
         return extractHttpMethod() == HttpMethod.POST;
+    }
+
+    public boolean containsJSessionId() {
+        String JSessionId = extractCookies().get(HEADER_KEY_OF_JSESSIONID);
+        return !Objects.isNull(JSessionId);
     }
 }

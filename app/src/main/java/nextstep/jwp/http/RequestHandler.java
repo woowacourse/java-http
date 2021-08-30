@@ -28,7 +28,7 @@ public class RequestHandler implements Runnable {
             HttpRequestStreamReader requestReader = new HttpRequestStreamReader(inputStream);
             HttpRequest httpRequest = new HttpRequest(
                 requestReader.getStatusLine(),
-                requestReader.getRequestLines(),
+                requestReader.getHeaderLines(),
                 requestReader.getBodyLine()
             );
             HttpResponse httpResponse = new HttpResponse();
@@ -46,6 +46,9 @@ public class RequestHandler implements Runnable {
     }
 
     private void process(HttpRequest httpRequest, HttpResponse httpResponse) {
+        if (!httpRequest.containsJSessionId()) {
+            httpResponse.createJSessionId();
+        }
         ViewResolver viewResolver = new ViewResolver(httpRequest, httpResponse);
         if (viewResolver.isExisting()) {
             viewResolver.resolve();

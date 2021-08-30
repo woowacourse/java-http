@@ -10,10 +10,8 @@ import java.util.Map;
 
 public class QueryParams {
 
-    private static final String QUERY_PARAMETER_REGEX = "&";
-    private static final String QUERY_PARAMETER_KEY_VALUE_REGEX = "=";
-    private static final int KEY = 0;
-    private static final int VALUE = 1;
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> queryParams;
 
@@ -27,11 +25,11 @@ public class QueryParams {
 
     private Map<String, String> createQueryParams(String query) {
         final Map<String, String> queryParams = new HashMap<>();
-        final String[] params = query.split(QUERY_PARAMETER_REGEX);
+        final String[] params = query.split("&");
 
         for (String param : params) {
-            final String[] element = param.split(QUERY_PARAMETER_KEY_VALUE_REGEX);
-            queryParams.put(element[KEY], element[VALUE]);
+            final String[] element = param.split("=");
+            queryParams.put(element[KEY_INDEX], element[VALUE_INDEX]);
         }
 
         return queryParams;

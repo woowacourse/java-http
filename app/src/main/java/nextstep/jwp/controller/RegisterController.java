@@ -1,7 +1,6 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.FileReader;
@@ -9,6 +8,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.HttpError;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.utils.RequestParams;
 import nextstep.jwp.model.User;
 
 public class RegisterController extends AbstractController {
@@ -26,7 +26,7 @@ public class RegisterController extends AbstractController {
     @Override
     byte[] post(HttpRequest httpRequest) throws IOException {
         final String[] body = httpRequest.body().split("&");
-        final Map<String, String> registerInfo = getRequestBody(body);
+        final Map<String, String> registerInfo =  RequestParams.requestParams(body);
 
         final String account = registerInfo.get("account");
         final String password = registerInfo.get("password");
@@ -44,15 +44,6 @@ public class RegisterController extends AbstractController {
         InMemoryUserRepository.save(user);
 
         return HttpResponse.found(Controller.INDEX_PAGE);
-    }
-
-    private Map<String, String> getRequestBody(String[] body) {
-        final Map<String, String> registerInfo = new LinkedHashMap<>();
-        for (String b : body) {
-            final String[] split = b.split("=");
-            registerInfo.put(split[0].trim(), split[1].trim());
-        }
-        return registerInfo;
     }
 
     @Override

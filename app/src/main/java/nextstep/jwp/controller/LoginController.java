@@ -32,25 +32,21 @@ public class LoginController extends AbstractController {
         String password = httpBody.getBodyParams("password");
 
         try {
-            User user = getUser(account);
-
-            if (user.checkPassword(password)) {
-                File file = FileReader.readFile("/index.html");
-                httpResponse.redirect("/index.html", file);
-
-            } else {
-                File file = FileReader.readErrorFile("/401.html");
-                httpResponse.unauthorized("/401.html", file);
+            User user = findUser(account);
+            if (!user.checkPassword(password)) {
+                throw new LoginException("User의 정보와 입력한 정보가 일치하지 않습니다.");
             }
+
+            File file = FileReader.readFile("/index.html");
+            httpResponse.redirect("/index.html", file);
         } catch (LoginException e) {
             File file = FileReader.readErrorFile("/401.html");
             httpResponse.unauthorized("/401.html", file);
         }
     }
 
-    private User getUser(String account) {
-        return InMemoryUserRepository.findByAccount(account).orElseThrow(() -> {
-            throw new LoginException("해당 User가 존재하지 않습니다.");
-        });
+    private User findUser(String account) {
+        return InMemoryUserRepository.findByAccount(account)
+                                     .orElseThrow(() -> { throw new LoginException("해당 User가 존재하지 않습니다."); });
     }
 }

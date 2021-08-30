@@ -64,11 +64,11 @@ public class HttpRequest {
         return httpUri.getTotalUri().contains("?");
     }
 
-    public boolean isGetRequest() {
+    public boolean isGet() {
         return httpMethod == HttpMethod.GET;
     }
 
-    public boolean isPostRequest() {
+    public boolean isPost() {
         return httpMethod == HttpMethod.POST;
     }
 

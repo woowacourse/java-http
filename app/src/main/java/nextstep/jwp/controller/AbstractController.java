@@ -9,11 +9,11 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws FileNotFoundException {
-        if (httpRequest.isGetRequest()) {
+        if (httpRequest.isGet()) {
             doGet(httpRequest, httpResponse);
         }
 
-        if (httpRequest.isPostRequest()) {
+        if (httpRequest.isPost()) {
             doPost(httpRequest, httpResponse);
         }
     }

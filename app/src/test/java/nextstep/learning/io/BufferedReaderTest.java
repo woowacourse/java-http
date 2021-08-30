@@ -10,16 +10,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import org.assertj.core.api.ThrowableAssert;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 
 class BufferedReaderTest {
 
     @ParameterizedTest
     @MethodSource
-    @DisplayName("")
+    @DisplayName("빈 문자열일 때 ready 반환값 테스트")
     void readyTest(String line, boolean expected) throws IOException {
 
         // given
@@ -44,7 +41,7 @@ class BufferedReaderTest {
 
     @ParameterizedTest
     @MethodSource
-    @DisplayName("")
+    @DisplayName("빈 문자열일 때 readLine 반환값 테스트")
     void readLineTest(String line, String expected) throws IOException {
 
         // given
@@ -64,35 +61,6 @@ class BufferedReaderTest {
                 Arguments.of("\r", ""),
                 Arguments.of("\n", ""),
                 Arguments.of("\r\n", "")
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource
-    @DisplayName("")
-    void readLineExceptionTest(String line, boolean whetherExceptionThrow) {
-
-        // given
-        final BufferedReader bufferedReader = new BufferedReader(new StringReader(line));
-
-        // when
-        ThrowableAssert.ThrowingCallable callable = bufferedReader::readLine;
-
-        // then
-        if (whetherExceptionThrow) {
-            assertThatCode(callable).isExactlyInstanceOf(IOException.class);
-        } else {
-            assertThatCode(callable).doesNotThrowAnyException();
-        }
-    }
-
-    private static Stream<Arguments> readLineExceptionTest() {
-        return Stream.of(
-                Arguments.of("", false),
-                Arguments.of(" ", false),
-                Arguments.of("\r", false),
-                Arguments.of("\n", false),
-                Arguments.of("\r\n", false)
         );
     }
 }

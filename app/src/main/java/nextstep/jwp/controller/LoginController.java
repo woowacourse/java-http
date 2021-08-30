@@ -4,6 +4,7 @@ package nextstep.jwp.controller;
 import nextstep.jwp.application.UserService;
 import nextstep.jwp.model.httpmessage.request.HttpRequest;
 import nextstep.jwp.model.httpmessage.response.HttpResponse;
+import nextstep.jwp.view.ModelAndView;
 
 import java.io.IOException;
 
@@ -16,17 +17,16 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
+    protected void doPost(HttpRequest request, HttpResponse response, ModelAndView mv) throws IOException {
         if (userService.isExistUser(request)) {
-            response.redirect("/index.html");
-            return;
+            response.forward("/index.html");
         }
 
         response.redirect("/401.html");
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
+    protected void doGet(HttpRequest request, HttpResponse response, ModelAndView mv) throws IOException {
         response.forward("/login.html");
     }
 }

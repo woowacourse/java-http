@@ -1,6 +1,7 @@
 package nextstep.jwp.model.httpmessage.response;
 
 import nextstep.jwp.model.httpmessage.common.ContentType;
+import nextstep.jwp.model.httpmessage.common.HttpHeader;
 import nextstep.jwp.model.httpmessage.common.HttpHeaderType;
 import nextstep.jwp.util.FileUtils;
 
@@ -22,13 +23,14 @@ public class HttpResponse {
     private final OutputStream outputStream;
     private final ResponseHeader headers = new ResponseHeader();
     private ResponseLine responseLine;
+    private String body;
 
     public HttpResponse(OutputStream outputStream) {
         this.outputStream = outputStream;
     }
 
     public void forward(String url) throws IOException {
-        responseLine = new ResponseLine(OK);
+        setStatus(OK);
         ContentType.of(url).ifPresent(type -> headers.add(CONTENT_TYPE, type.value()));
         String body = FileUtils.readFileOfUrl(url);
         headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
@@ -36,14 +38,14 @@ public class HttpResponse {
     }
 
     public void forwardBody(String body) throws IOException {
-        responseLine = new ResponseLine(OK);
+        setStatus(OK);
         headers.add(CONTENT_TYPE, HTML.value());
         headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
         writeBody(outputStream, processResponseLineAndHeader(body));
     }
 
     public void redirect(String path) throws IOException {
-        responseLine = new ResponseLine(REDIRECT);
+        setStatus(REDIRECT);
         headers.add(LOCATION, path);
         writeBody(outputStream, processResponseLineAndHeader());
     }
@@ -69,10 +71,30 @@ public class HttpResponse {
     }
 
     public void sendError(String url) throws IOException {
-        responseLine = new ResponseLine(NOT_FOUND);
+        setStatus(NOT_FOUND);
         headers.setContentType(HTML.value());
         String body = FileUtils.readFileOfUrl(url);
         headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
         writeBody(outputStream, processResponseLineAndHeader(body));
+    }
+
+    public void setStatus(HttpStatus status) {
+        responseLine = new ResponseLine(status);
+    }
+
+    public HttpHeader getHeaders() {
+        return headers;
+    }
+
+    public OutputStream getOutputStream() {
+        return outputStream;
+    }
+
+    public ResponseLine getResponseLine() {
+        return responseLine;
+    }
+
+    public String getHeader(String value) {
+        return headers.getHeader(value);
     }
 }

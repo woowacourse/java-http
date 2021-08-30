@@ -15,7 +15,7 @@ import static nextstep.jwp.model.httpmessage.common.ContentType.FORM;
 import static nextstep.jwp.model.httpmessage.common.HttpHeaderType.CONTENT_LENGTH;
 
 public class HttpRequest {
-    private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpRequest.class);
 
     private final RequestLine requestLine;
     private final RequestHeader headers;
@@ -31,7 +31,7 @@ public class HttpRequest {
         while (!StringUtils.isEmpty(line)) {
             line = br.readLine();
             if (!StringUtils.isEmptyOrWhitespace(line)) {
-                log.debug("Request header : {}", line);
+                LOG.debug("Request header : {}", line);
                 String[] split = line.split(": ");
                 headers.add(split[0].trim(), split[1].trim());
             }
@@ -39,7 +39,7 @@ public class HttpRequest {
 
         if (headers.containsKey(CONTENT_LENGTH)) {
             int length = headers.getContentLength();
-            log.debug("Request content-length : {}", length);
+            LOG.debug("Request content-length : {}", length);
 
             char[] buffer = readBody(br, length);
             requestBody = new RequestBody(new String(buffer));
@@ -56,7 +56,7 @@ public class HttpRequest {
         return requestLine.getParameter(param);
     }
 
-    public String getPath() {
+    public String getRequestURI() {
         return requestLine.getPath();
     }
 

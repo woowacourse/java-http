@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 public class ResponseLine {
 
     private static final Logger LOG = LoggerFactory.getLogger(ResponseLine.class);
-    private static final String PROTOCOL = "HTTP/1.1";
+    public static final String PROTOCOL = "HTTP/1.1";
     private final HttpStatus httpStatus;
 
     public ResponseLine(HttpStatus status) {

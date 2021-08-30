@@ -1,7 +1,7 @@
 package nextstep.jwp.model;
 
 import nextstep.jwp.MockSocket;
-import nextstep.jwp.RequestHandler;
+import nextstep.jwp.DispatcherServlet;
 import nextstep.jwp.model.httpmessage.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,12 +25,12 @@ class HttpRequestTest {
                 "Hello world!");
 
         MockSocket socket = new MockSocket(value);
-        RequestHandler requestHandler = new RequestHandler(socket);
-        requestHandler.run();
+        DispatcherServlet dispatcherServlet = new DispatcherServlet(socket);
+        dispatcherServlet.run();
 
         HttpRequest request = new HttpRequest(socket.getInputStream());
         assertThat(request.getMethod()).isEqualTo(GET);
-        assertThat(request.getPath()).isEqualTo("/");
+        assertThat(request.getRequestURI()).isEqualTo("/");
         assertThat(request.getHeader("Content-Type")).isEqualTo("text/html;charset=utf-8");
         assertThat(request.getContentLength()).isEqualTo(12);
         assertThat(request.getRequestBody()).isEqualTo("Hello world!");
@@ -47,12 +47,12 @@ class HttpRequestTest {
                 "");
 
         MockSocket socket = new MockSocket(value);
-        RequestHandler requestHandler = new RequestHandler(socket);
-        requestHandler.run();
+        DispatcherServlet dispatcherServlet = new DispatcherServlet(socket);
+        dispatcherServlet.run();
 
         HttpRequest request = new HttpRequest(socket.getInputStream());
         assertThat(request.getMethod()).isEqualTo(GET);
-        assertThat(request.getPath()).isEqualTo("/index.html");
+        assertThat(request.getRequestURI()).isEqualTo("/index.html");
         assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
         assertThat(request.getHeader("Connection")).isEqualTo("keep-alive");
     }
@@ -66,12 +66,12 @@ class HttpRequestTest {
                 "Connection: keep-alive ",
                 "");
         final MockSocket socket = new MockSocket(value);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final DispatcherServlet dispatcherServlet = new DispatcherServlet(socket);
 
-        requestHandler.run();
+        dispatcherServlet.run();
         HttpRequest request = new HttpRequest(socket.getInputStream());
         assertThat(request.getMethod()).isEqualTo(GET);
-        assertThat(request.getPath()).isEqualTo("/login");
+        assertThat(request.getRequestURI()).isEqualTo("/login");
         assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
         assertThat(request.getHeader("Connection")).isEqualTo("keep-alive");
     }
@@ -88,12 +88,12 @@ class HttpRequestTest {
                 "",
                 "account=gugu&password=password");
         final MockSocket socket = new MockSocket(value);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final DispatcherServlet dispatcherServlet = new DispatcherServlet(socket);
 
-        requestHandler.run();
+        dispatcherServlet.run();
         HttpRequest request = new HttpRequest(socket.getInputStream());
         assertThat(request.getMethod()).isEqualTo(POST);
-        assertThat(request.getPath()).isEqualTo("/login");
+        assertThat(request.getRequestURI()).isEqualTo("/login");
         assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
         assertThat(request.getHeader("Connection")).isEqualTo("keep-alive");
         assertThat(request.getParameter("account")).isEqualTo("gugu");
@@ -109,12 +109,12 @@ class HttpRequestTest {
                 "Connection: keep-alive ",
                 "");
         final MockSocket socket = new MockSocket(value);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final DispatcherServlet dispatcherServlet = new DispatcherServlet(socket);
 
-        requestHandler.run();
+        dispatcherServlet.run();
         HttpRequest request = new HttpRequest(socket.getInputStream());
         assertThat(request.getMethod()).isEqualTo(GET);
-        assertThat(request.getPath()).isEqualTo("/login");
+        assertThat(request.getRequestURI()).isEqualTo("/login");
         assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
         assertThat(request.getHeader("Connection")).isEqualTo("keep-alive");
         assertThat(request.getQueryParam("account")).isEqualTo("gugu");
@@ -130,13 +130,13 @@ class HttpRequestTest {
                 "Accept: text/css ",
                 "");
         final MockSocket socket = new MockSocket(value);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final DispatcherServlet dispatcherServlet = new DispatcherServlet(socket);
 
-        requestHandler.run();
+        dispatcherServlet.run();
         HttpRequest request = new HttpRequest(socket.getInputStream());
 
         assertThat(request.getMethod()).isEqualTo(GET);
-        assertThat(request.getPath()).isEqualTo("/css/styles.css");
+        assertThat(request.getRequestURI()).isEqualTo("/css/styles.css");
         assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
         assertThat(request.getHeader("Accept")).isEqualTo("text/css");
     }
@@ -150,13 +150,13 @@ class HttpRequestTest {
                 "Accept: application/javascript ",
                 "");
         final MockSocket socket = new MockSocket(value);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final DispatcherServlet dispatcherServlet = new DispatcherServlet(socket);
 
-        requestHandler.run();
+        dispatcherServlet.run();
         HttpRequest request = new HttpRequest(socket.getInputStream());
 
         assertThat(request.getMethod()).isEqualTo(GET);
-        assertThat(request.getPath()).isEqualTo("/js/scripts.js");
+        assertThat(request.getRequestURI()).isEqualTo("/js/scripts.js");
         assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
         assertThat(request.getHeader("Accept")).isEqualTo("application/javascript");
     }

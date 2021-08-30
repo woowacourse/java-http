@@ -3,7 +3,7 @@ package nextstep.jwp.model.httpmessage.common;
 import java.util.Arrays;
 
 public enum HttpHeaderType {
-    CONTENT_TYPE(ContentType.CONTENT_TYPE),
+    CONTENT_TYPE(ContentType.VALUE),
     CONTENT_LENGTH("Content-Length");
 
     private final String value;

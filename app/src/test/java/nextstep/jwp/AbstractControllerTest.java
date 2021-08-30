@@ -9,17 +9,17 @@ import java.io.IOException;
 import static nextstep.jwp.model.httpmessage.request.HttpMethod.GET;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class RequestHandlerTest {
+class AbstractControllerTest {
 
     @DisplayName("GET / HTTP/1.1 요청을 실행하여 메인 페이지 응답을 확인한다.")
     @Test
     void run() {
         // given
         final MockSocket socket = new MockSocket();
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final DispatcherServlet dispatcherServlet = new DispatcherServlet(socket);
 
         // when
-        requestHandler.run();
+        dispatcherServlet.run();
 
         // then
         String expected = String.join("\r\n",
@@ -44,10 +44,10 @@ class RequestHandlerTest {
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final DispatcherServlet dispatcherServlet = new DispatcherServlet(socket);
 
         // when
-        requestHandler.run();
+        dispatcherServlet.run();
 
         // then
         String body = FileUtils.readFileOfUrl("/index.html");
@@ -71,10 +71,10 @@ class RequestHandlerTest {
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final DispatcherServlet dispatcherServlet = new DispatcherServlet(socket);
 
         // when
-        requestHandler.run();
+        dispatcherServlet.run();
 
         // then
         String body = FileUtils.readFileOfUrl("/404.html");

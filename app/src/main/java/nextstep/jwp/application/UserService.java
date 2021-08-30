@@ -22,7 +22,7 @@ public class UserService {
                 request.getParameter(PASSWORD));
     }
 
-    public void saveUser(HttpRequest request) throws UserPrincipalNotFoundException {
+    public User save(HttpRequest request) throws UserPrincipalNotFoundException {
         User newUser = new User(request.getParameter(ACCOUNT),
                 request.getParameter(PASSWORD),
                 request.getParameter(EMAIL));
@@ -31,6 +31,7 @@ public class UserService {
         User savedUser = findByAccount(request)
                 .orElseThrow(() -> new UserPrincipalNotFoundException("해당 유저가 존재하지 않습니다. (account : " + request.getParameter(ACCOUNT) + ")"));
         LOG.debug("Saved user : {}", savedUser);
+        return savedUser;
     }
 
     public Optional<User> findByAccount(HttpRequest request) {

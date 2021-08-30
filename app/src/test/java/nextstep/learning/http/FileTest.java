@@ -1,11 +1,15 @@
 package nextstep.learning.http;
 
-import org.assertj.core.util.Lists;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.nio.file.Path;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,11 +27,14 @@ class FileTest {
      */
     @Test
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
+        // given
         final String fileName = "nextstep.txt";
 
-        // todo
-        final String actual = "";
+        // when
+        final URL url = Thread.currentThread().getContextClassLoader().getResource(fileName);
+        final String actual = url.getPath();
 
+        // then
         assertThat(actual).endsWith(fileName);
     }
 
@@ -36,15 +43,16 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException, URISyntaxException {
+        // given
         final String fileName = "nextstep.txt";
 
-        // todo
-        final Path path = null;
+        // when
+        final URL url = Thread.currentThread().getContextClassLoader().getResource(fileName);
+        final Path path = Paths.get(url.toURI());
+        final List<String> actual = Files.readAllLines(path);
 
-        // todo
-        final List<String> actual = Lists.emptyList();
-
+        // then
         assertThat(actual).containsOnly("nextstep");
     }
 }

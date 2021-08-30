@@ -1,5 +1,9 @@
 package nextstep.jwp;
 
+import nextstep.jwp.exception.BaseException;
+import nextstep.jwp.http.Request;
+import nextstep.jwp.http.Response;
+import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,7 +11,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+
+import static nextstep.jwp.http.AcceptType.TEXT_CSS;
+import static nextstep.jwp.http.Header.ACCEPT;
+import static nextstep.jwp.http.Header.CONTENT_TYPE;
 
 public class RequestHandler implements Runnable {
 
@@ -15,33 +25,97 @@ public class RequestHandler implements Runnable {
 
     private final Socket connection;
 
-    public RequestHandler(Socket connection) {
+    private final UserService userService;
+
+    public RequestHandler(Socket connection, UserService userService) {
         this.connection = Objects.requireNonNull(connection);
+        this.userService = userService;
     }
 
     @Override
     public void run() {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream()) {
+            Request request = Request.of(inputStream);
+            byte[] response = new byte[0];
 
-        try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
+            if (request.checkMethod("GET")) {
+                response = get(request);
+            }
 
-            final String responseBody = "Hello world!";
+            if (request.checkMethod("POST")) {
+                response = post(request);
+            }
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(response);
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
         }
+    }
+
+    private byte[] get(Request request) throws IOException {
+        if (checkCssRequest(request)) {
+            Map<String, String> responseHeader = new HashMap<>();
+            responseHeader.put(CONTENT_TYPE, TEXT_CSS);
+            return Response.ok(responseHeader, request.getPath());
+        }
+
+        if (request.getPath().equals("/")) {
+            return Response.ok("Hello world!".getBytes());
+        }
+
+        if (request.isMatchedPath("/login")) {
+            return Response.ok("/login.html");
+        }
+
+        if (request.isMatchedPath("/register")) {
+            return Response.ok("/register.html");
+        }
+
+        return Response.ok(request.getPath());
+    }
+
+    private byte[] post(Request request) {
+        if (request.isMatchedPath("/login")) {
+            return login(request);
+        }
+
+        if (request.isMatchedPath("/register")) {
+            return signUp(request);
+        }
+
+        return Response.notFound();
+    }
+
+    private byte[] login(Request request) {
+        try {
+            userService.login(request.getQueryValue("account"), request.getQueryValue("password"));
+            return Response.redirect302("/index.html");
+        } catch (BaseException e) {
+            return Response.redirect302("/401.html");
+        }
+    }
+
+    private byte[] signUp(Request request) {
+        try {
+            userService.save(request.getQueryValue("account"), request.getQueryValue("password"),
+                    request.getQueryValue("email"));
+            return Response.redirect302("/index.html");
+        } catch (BaseException e) {
+            return Response.redirect302("/401.html");
+        }
+    }
+
+    private boolean checkCssRequest(Request request) {
+        if (request.hasHeaderValue(ACCEPT)) {
+            String accept = request.getHeaderValue(ACCEPT);
+            return accept.contains(TEXT_CSS);
+        }
+        return false;
     }
 
     private void close() {

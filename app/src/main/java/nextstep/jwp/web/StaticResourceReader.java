@@ -28,9 +28,14 @@ public class StaticResourceReader {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resourceAsStream));
         StringBuilder sb = new StringBuilder();
 
-        while (bufferedReader.ready()) {
-            sb.append(bufferedReader.readLine());
-            sb.append("\n");
+        try (
+            resourceAsStream;
+            bufferedReader
+        ) {
+            while (bufferedReader.ready()) {
+                sb.append(bufferedReader.readLine());
+                sb.append("\n");
+            }
         }
 
         return sb.toString();

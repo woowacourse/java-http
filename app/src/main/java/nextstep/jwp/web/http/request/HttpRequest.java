@@ -50,6 +50,8 @@ public class HttpRequest {
 
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
+        bufferedReader.close();
+
         return new String(buffer);
     }
 

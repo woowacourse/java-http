@@ -1,5 +1,7 @@
-package nextstep.jwp;
+package nextstep.jwp.ui;
 
+import nextstep.jwp.ui.request.HttpRequest;
+import nextstep.jwp.ui.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
+
 
 public class RequestHandler implements Runnable {
 
@@ -25,17 +28,11 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-
-            final String responseBody = "Hello world!";
-
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            HttpRequest request = new HttpRequest(inputStream);
+            RequestMapping requestMapping = new RequestMapping();
+            Controller controller = requestMapping.getController(request);
+            HttpResponse response = controller.service(request);
+            outputStream.write(response.getResponse().getBytes());
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);

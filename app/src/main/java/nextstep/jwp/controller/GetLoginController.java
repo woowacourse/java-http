@@ -15,7 +15,7 @@ import nextstep.jwp.infrastructure.http.view.HttpResponseView;
 import nextstep.jwp.infrastructure.http.view.ResourceView;
 import nextstep.jwp.infrastructure.http.view.View;
 
-public class LoginController implements Controller {
+public class GetLoginController implements Controller {
 
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
@@ -28,31 +28,6 @@ public class LoginController implements Controller {
 
     @Override
     public View handle(final HttpRequest request) {
-        final URI uri = request.getRequestLine().getUri();
-
-        if (uri.hasKeys(REQUIRED_PARAMETERS)) {
-            final String location = locationByLogin(uri);
-
-            return new HttpResponseView(
-                new HttpResponse(
-                    new HttpStatusLine(HttpStatusCode.FOUND),
-                    new HttpHeaders.Builder()
-                        .header("Location", location)
-                        .build()
-                )
-            );
-        }
-
         return new ResourceView("/login.html");
-    }
-
-    public String locationByLogin(final URI uri) {
-        final String account = uri.getValue(ACCOUNT);
-        final String password = uri.getValue(PASSWORD);
-
-        if (InMemoryUserRepository.existsByAccountAndPassword(account, password)) {
-            return "/index.html";
-        }
-        return "/401.html";
     }
 }

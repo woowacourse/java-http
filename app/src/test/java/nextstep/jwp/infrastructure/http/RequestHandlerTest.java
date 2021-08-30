@@ -86,7 +86,7 @@ class RequestHandlerTest {
             "");
         final String response = "HTTP/1.1 200 OK \r\n" +
             "Content-Type: text/html;charset=utf-8 \r\n" +
-            "Content-Length: 3796 \r\n" +
+            "Content-Length: 3797 \r\n" +
             "\r\n" +
             new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -97,11 +97,13 @@ class RequestHandlerTest {
     @Test
     void successfulLogin() {
         final String request = String.join("\r\n",
-            "GET /login?account=gugu&password=password HTTP/1.1 ",
+            "POST /login HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
+            "Content-Length: 30",
+            "Content-Type: application/x-www-form-urlencoded",
             "",
-            "");
+            "account=gugu&password=password");
         final String response = "HTTP/1.1 302 FOUND \r\n"
             + "Location: /index.html \r\n"
             + "\r\n";
@@ -113,11 +115,13 @@ class RequestHandlerTest {
     @Test
     void failToLogin() {
         final String request = String.join("\r\n",
-            "GET /login?account=gugu&password=password2 HTTP/1.1 ",
+            "POST /login HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
+            "Content-Length: 31",
+            "Content-Type: application/x-www-form-urlencoded",
             "",
-            "");
+            "account=gugu&password=password2 \r\n");
         final String response = "HTTP/1.1 302 FOUND \r\n"
             + "Location: /401.html \r\n"
             + "\r\n";
@@ -181,11 +185,13 @@ class RequestHandlerTest {
             + "Location: /index.html \r\n"
             + "\r\n";
         final String request2 = String.join("\r\n",
-            "GET /login?account=root&password=rootpassword HTTP/1.1 ",
+            "POST /login HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
+            "Content-Length: 34",
+            "Content-Type: application/x-www-form-urlencoded",
             "",
-            "");
+            "account=root&password=rootpassword");
 
         assertResponse(request1, response);
         assertResponse(request2, response);

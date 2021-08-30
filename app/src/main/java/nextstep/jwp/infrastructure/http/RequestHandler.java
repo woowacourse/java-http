@@ -96,7 +96,7 @@ public class RequestHandler implements Runnable {
 
     private View findViewByRequest(final HttpRequest request) {
         return controllerMapping.handle(request)
-            .orElse(new ResourceView(request.getRequestLine().getUri().getBaseUri()));
+            .orElseGet(() -> new ResourceView(request.getRequestLine().getUri().getBaseUri()));
     }
 
     private void close() {

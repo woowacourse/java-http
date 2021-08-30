@@ -55,6 +55,26 @@ public class GetRequestUriTest {
     }
 
     @Test
+    @DisplayName("CSS 지원")
+    void createCssResponse() throws IOException {
+        final URL resource = GetRequestUri.class.getClassLoader().getResource("static//css/styles.css");
+        final Path path = new File(resource.getPath()).toPath();
+        String result = Files.readAllLines(path).stream()
+                             .map(String::valueOf)
+                             .collect(Collectors.joining());
+
+        String expected = String.join("\r\n",
+                "HTTP/1.1 " + "200 OK" + " ",
+                "Content-Type: " + "text/css" + ";charset=utf-8 ",
+                "Content-Length: " + result.getBytes().length + " ",
+                "", result);
+
+        String response = GetRequestUri.createResponse("/css/styles.css");
+
+        assertThat(response).isEqualTo(expected);
+    }
+
+    @Test
     @DisplayName("로그인 페이지를 응답한다.")
     void createLoginResponse() throws IOException {
         final URL resource = GetRequestUri.class.getClassLoader().getResource("static/login.html");

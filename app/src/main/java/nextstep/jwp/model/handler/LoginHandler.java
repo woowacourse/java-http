@@ -1,6 +1,7 @@
 package nextstep.jwp.model.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.NotFoundResourceException;
 import nextstep.jwp.model.http_request.JwpHttpRequest;
 import nextstep.jwp.model.http_response.JwpHttpResponse;
 import nextstep.jwp.model.user.domain.User;
@@ -49,7 +50,7 @@ public class LoginHandler implements CustomHandler {
                 final String response = JwpHttpResponse.found(LOGIN_SUCCESS_PATH);
                 outputStream.write(response.getBytes());
             } catch (IOException e) {
-                e.printStackTrace();
+                throw new NotFoundResourceException(LOGIN_SUCCESS_PATH);
             }
             return;
         }
@@ -62,7 +63,7 @@ public class LoginHandler implements CustomHandler {
             String response = JwpHttpResponse.found(LOGIN_FAILURE_PATH);
             outputStream.write(response.getBytes());
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new NotFoundResourceException(LOGIN_FAILURE_PATH);
         }
     }
 }

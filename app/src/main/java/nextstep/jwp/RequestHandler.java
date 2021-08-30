@@ -1,5 +1,9 @@
 package nextstep.jwp;
 
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.model.httpmessage.request.HttpRequest;
+import nextstep.jwp.model.httpmessage.response.HttpResponse;
+import nextstep.jwp.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,17 +30,21 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final String responseBody = "Hello world!";
+            HttpRequest httpRequest = new HttpRequest(inputStream);
+            HttpResponse httpResponse = new HttpResponse(outputStream);
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            Controller controller = RequestMapping.getController(httpRequest.getPath());
+            if (controller == null) {
+                if (FileUtils.existFile(httpRequest.getPath())) {
+                    httpResponse.forward(httpRequest.getPath());
+                    return;
+                }
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+                httpResponse.sendError("/404.html");
+                return;
+            }
+
+            controller.service(httpRequest, httpResponse);
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {

@@ -1,16 +1,17 @@
 package nextstep.jwp;
 
+import nextstep.jwp.util.FileUtils;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
 
+import static nextstep.jwp.model.httpmessage.request.HttpMethod.GET;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestHandlerTest {
 
+    @DisplayName("GET / HTTP/1.1 요청을 실행하여 메인 페이지 응답을 확인한다.")
     @Test
     void run() {
         // given
@@ -27,14 +28,16 @@ class RequestHandlerTest {
                 "Content-Length: 12 ",
                 "",
                 "Hello world!");
-        assertThat(socket.output()).isEqualTo(expected);
+        String result = socket.output();
+        assertThat(result).contains(expected);
     }
 
+    @DisplayName("GET /index.html HTTP/1.1 요청을 실행하여 인데스 페이지 응답을 확인한다.")
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
+        final String httpRequest = String.join("\r\n",
+                GET + " /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -47,12 +50,40 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String body = FileUtils.readFileOfUrl("/index.html");
         String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                "\r\n" +
+                body;
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("GET /pomo HTTP/1.1 요청을 실행하여 잘못된 페이지 응답을 확인한다.")
+    @Test
+    void notFound() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                GET + " /pomo HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        String body = FileUtils.readFileOfUrl("/404.html");
+        String response = String.join("\r\n",
+                "HTTP/1.1 404 Not Found ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 2426 ",
+                "",
+                body);
+        assertThat(socket.output()).isEqualTo(response);
     }
 }

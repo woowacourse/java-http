@@ -17,11 +17,18 @@ public class PostMethod extends Method {
     @Override
     public HttpResponse matchFunction() {
         try {
-            String request = String.join(" ", httpRequest.getUrl(), httpRequest.getRequestBody());
+            String request = getParams();
             Map.Entry<HttpStatus, String> responseEntry = new ArrayList<>(jwpController.mapResponse(request).entrySet()).get(0);
             return new HttpResponse(responseEntry.getKey(), "text/html", responseEntry.getValue());
         } catch (IllegalArgumentException e) {
             return new HttpResponse(HttpStatus.NOT_FOUND, "text/html", e.getMessage());
         }
+    }
+
+    private String getParams() {
+        if(httpRequest.getRequestBody() == null){
+            return String.join(" ", httpRequest.getUrl());
+        }
+        return String.join(" ", httpRequest.getUrl(), httpRequest.getRequestBody());
     }
 }

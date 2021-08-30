@@ -62,10 +62,8 @@ public class PageController {
     private Map<HttpStatus, String> makeResponse(final HttpStatus status, final String request) {
         try {
             final String fileResponse = getFileResponse("static/" + request);
-            System.out.println("$%^$%^");
             return Map.of(status, fileResponse);
         } catch (RuntimeException e) {
-            System.out.println("123123");
             return Map.of(status, "해당 페이지가 존재하지 않습니다.");
         }
     }

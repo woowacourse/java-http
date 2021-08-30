@@ -17,7 +17,7 @@ public class JwpController {
 
     public JwpController() {
         this.mappedFunction = new HashMap<>();
-        this.mappedFunction.put("login", this::getLogin);
+        this.mappedFunction.put("login", this::postLogin);
         this.mappedFunction.put("register", this::postRegister);
     }
 
@@ -34,7 +34,7 @@ public class JwpController {
         }
     }
 
-    private Map<HttpStatus, String> getLogin(final String queryString) {
+    private Map<HttpStatus, String> postLogin(final String queryString) {
         try {
             List<String> params = Arrays.asList(queryString.split("&"));
             User user = UserService.findUser(params);

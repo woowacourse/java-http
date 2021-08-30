@@ -154,15 +154,15 @@ class RegisterControllerTest {
                 assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
             }
 
-            @DisplayName("회원가입 실패시 '/401.html' redirect response를 반환 받는다.")
+            @DisplayName("회원가입 실패시 '/409.html' redirect response를 반환 받는다.")
             @Test
             void registerFail() throws IOException {
                 // given
                 userRepository.save(new User(ACCOUNT, PASSWORD, EMAIL));
 
                 String expectString = "\n\n"
-                    + "HTTP/1.1 401 Unauthorized \n"
-                    + "Location: /401.html ";
+                    + "HTTP/1.1 409 Conflict \n"
+                    + "Location: /409.html ";
 
                 // when
                 HttpResponse httpResponse = registerController.doService(httpRequest);

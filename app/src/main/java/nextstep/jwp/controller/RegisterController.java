@@ -13,12 +13,6 @@ import nextstep.jwp.model.User;
 
 public class RegisterController extends AbstractController {
 
-    private static final String AMPERSAND_DELIMITER = "&";
-    private static final String EQUAL_DELIMITER = "=";
-    private static final String ACCOUNT = "account";
-    private static final String PASSWORD = "password";
-    private static final String EMAIL = "email";
-
     public RegisterController(HttpRequest httpRequest) {
         super(httpRequest);
     }
@@ -31,12 +25,12 @@ public class RegisterController extends AbstractController {
 
     @Override
     byte[] post(HttpRequest httpRequest) throws IOException {
-        final String[] body = httpRequest.body().split(AMPERSAND_DELIMITER);
+        final String[] body = httpRequest.body().split("&");
         final Map<String, String> registerInfo = getRequestBody(body);
 
-        final String account = registerInfo.get(ACCOUNT);
-        final String password = registerInfo.get(PASSWORD);
-        final String email = registerInfo.get(EMAIL);
+        final String account = registerInfo.get("account");
+        final String password = registerInfo.get("password");
+        final String email = registerInfo.get("email");
 
         final String responseBody = FileReader.file(httpRequest.uri());
         final ContentType contentType = ContentType.findBy(httpRequest.uri());
@@ -58,7 +52,7 @@ public class RegisterController extends AbstractController {
     private Map<String, String> getRequestBody(String[] body) {
         final Map<String, String> registerInfo = new LinkedHashMap<>();
         for (String b : body) {
-            final String[] split = b.split(EQUAL_DELIMITER);
+            final String[] split = b.split("=");
             registerInfo.put(split[0].trim(), split[1].trim());
         }
         return registerInfo;

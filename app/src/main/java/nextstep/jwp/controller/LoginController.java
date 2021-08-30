@@ -14,11 +14,6 @@ import nextstep.jwp.model.User;
 
 public class LoginController extends AbstractController {
 
-    private static final String AMPERSAND_DELIMITER = "&";
-    private static final String EQUAL_DELIMITER = "=";
-    private static final String ACCOUNT = "account";
-    private static final String PASSWORD = "password";
-
     public LoginController(HttpRequest httpRequest) {
         super(httpRequest);
     }
@@ -33,14 +28,14 @@ public class LoginController extends AbstractController {
 
     @Override
     public byte[] post(HttpRequest httpRequest) throws IOException {
-        final String[] body = httpRequest.body().split(AMPERSAND_DELIMITER);
+        final String[] body = httpRequest.body().split("&");
         final Map<String, String> loginInfo = getRequestBody(body);
 
         final Optional<User> user = InMemoryUserRepository
-                .findByAccount(loginInfo.get(ACCOUNT));
+                .findByAccount(loginInfo.get("account"));
 
         if (user.isPresent()) {
-            if (user.get().checkPassword(loginInfo.get(PASSWORD))) {
+            if (user.get().checkPassword(loginInfo.get("password"))) {
                 return HttpResponse.found(
                         FileReader.file(Controller.INDEX_PAGE),
                         ContentType.findBy(Controller.INDEX_PAGE)
@@ -56,7 +51,7 @@ public class LoginController extends AbstractController {
     private Map<String, String> getRequestBody(String[] body) {
         final Map<String, String> registerInfo = new LinkedHashMap<>();
         for (String b : body) {
-            final String[] split = b.split(EQUAL_DELIMITER);
+            final String[] split = b.split("=");
             registerInfo.put(split[0].trim(), split[1].trim());
         }
         return registerInfo;

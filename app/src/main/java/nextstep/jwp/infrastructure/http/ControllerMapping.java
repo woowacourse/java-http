@@ -33,12 +33,6 @@ public class ControllerMapping {
             .map(controller -> controller.handle(request));
     }
 
-    public boolean contains(final HttpRequest request) {
-        final HttpRequestLine requestLine = request.getRequestLine();
-        final HttpRequestLine requestLineWithoutQuery = new HttpRequestLine(requestLine.getHttpMethod(), requestLine.getUri().getBaseUri());
-        return controllers.containsKey(requestLineWithoutQuery);
-    }
-
     private Set<Controller> findAllControllers(final String controllerPackage) {
         final Set<Class<?>> classes = findAllClassesUsingClassLoader(controllerPackage);
         return classes.stream()

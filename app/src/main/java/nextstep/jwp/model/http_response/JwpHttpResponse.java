@@ -6,7 +6,6 @@ public class JwpHttpResponse {
     }
 
     public static String ok(String resourceUri, String resourceFile) {
-        System.out.println("resourceUri = " + resourceUri);
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + JwpContentType.find(resourceUri) + ";charset=utf-8 ",

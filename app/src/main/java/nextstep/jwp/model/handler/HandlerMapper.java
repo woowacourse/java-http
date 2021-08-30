@@ -20,7 +20,6 @@ public enum HandlerMapper {
     }
 
     public static CustomHandler from(String uri) {
-        System.out.println("요청 uri : " + uri);
         return Arrays.stream(values())
                 .filter(handlerMapper -> handlerMapper.isSatisfied(uri))
                 .findAny()

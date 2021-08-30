@@ -1,12 +1,10 @@
-package nextstep.jwp.domain;
+package nextstep.jwp.http.common;
 
 import java.util.Objects;
 
 public enum HttpMethod {
     GET("GET"),
-    POST("POST"),
-    DELETE("DELETE"),
-    PUT("PUT");
+    POST("POST");
 
     private final String method;
 

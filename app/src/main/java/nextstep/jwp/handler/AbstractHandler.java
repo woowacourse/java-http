@@ -40,7 +40,7 @@ public abstract class AbstractHandler implements Handler {
     protected String staticFileMessage(FileType fileType, String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: " + fileType.type() + ";charset=utf-8 ",
+                "Content-Type: " + fileType.contentType() + " ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

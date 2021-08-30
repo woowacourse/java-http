@@ -28,7 +28,7 @@ class RequestHandlerTest {
         // then
         String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/html; charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
                 "Hello world!");
@@ -52,7 +52,7 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
                 responseBody;
@@ -76,7 +76,7 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
                 responseBody;
@@ -188,7 +188,7 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
                 responseBody;
@@ -287,7 +287,7 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/css;charset=utf-8 \r\n" +
+                "Content-Type: text/css; charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
                 responseBody;
@@ -312,7 +312,7 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: application/js;charset=utf-8 \r\n" +
+                "Content-Type: application/javascript; charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
                 responseBody;
@@ -337,7 +337,7 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
                 responseBody;

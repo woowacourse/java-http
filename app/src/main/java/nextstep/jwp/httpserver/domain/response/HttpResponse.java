@@ -41,10 +41,18 @@ public class HttpResponse {
         }
     }
 
+    public HttpResponse() {
+        headers = new Headers();
+    }
+
     private HttpResponse(Builder builder) {
         this.statusLine = builder.statusLine;
         this.headers = builder.headers;
         this.body = builder.body;
+    }
+
+    public void addHeader(String key, String value) {
+        this.headers.addHeader(key, value);
     }
 
     public String statusLine() {
@@ -53,9 +61,22 @@ public class HttpResponse {
         return httpVersion.getVersion() + " " + statusCode.getCode() + " " + statusCode.getStatusText() + " ";
     }
 
-    public String getLocation() {
-        Map<String, String> headers = this.headers.getHeaders();
-        return headers.get("Location");
+    public String responseToString(String responseBody) {
+        return String.join("\r\n",
+                statusLine(),
+                headers.responseFormat(),
+                "",
+                responseBody
+        );
+    }
+
+    public String defaultErrorRedirectResponse(StatusCode code, String responseBody) {
+        headers.addHeader("Location", "/" + code.getCode() + ".html");
+        return String.join("\r\n",
+                "HTTP/1.1 " + StatusCode.FOUND.getCode() + " " + StatusCode.FOUND.getStatusText() + " ",
+                headers.responseFormat(),
+                "",
+                responseBody);
     }
 
     public StatusLine getStatusLine() {

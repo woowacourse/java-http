@@ -15,7 +15,7 @@ public class UserService {
     }
 
     public void save(String account, String password, String email) {
-        User user = new User(2L, account, password, email);
+        User user = new User(null, account, password, email);
         InMemoryUserRepository.save(user);
     }
 }

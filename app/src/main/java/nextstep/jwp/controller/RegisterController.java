@@ -43,10 +43,7 @@ public class RegisterController extends AbstractController {
                 email);
         InMemoryUserRepository.save(user);
 
-        return HttpResponse.ok(
-                FileReader.file(Controller.INDEX_PAGE),
-                ContentType.findBy(Controller.INDEX_PAGE)
-        );
+        return HttpResponse.found(Controller.INDEX_PAGE);
     }
 
     private Map<String, String> getRequestBody(String[] body) {

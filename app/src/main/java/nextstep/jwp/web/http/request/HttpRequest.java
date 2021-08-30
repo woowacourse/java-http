@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import nextstep.jwp.web.handler.RequestHandler;
 import nextstep.jwp.web.http.HttpHeaders;
 import nextstep.jwp.web.http.HttpProtocol;
 import nextstep.jwp.web.http.MimeType;
@@ -15,8 +16,12 @@ import nextstep.jwp.web.http.request.body.FormDataHttpRequestBody;
 import nextstep.jwp.web.http.request.body.HttpRequestBody;
 import nextstep.jwp.web.http.request.body.TextHttpRequestBody;
 import nextstep.jwp.web.http.util.QueryParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpRequest {
+
+    private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
 
     private final HttpHeaders headers;
     private final HttpProtocol protocol;
@@ -123,7 +128,7 @@ public class HttpRequest {
                     parseBody(new String(buffer));
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("IOException! context : " , e);;
             }
         }
 

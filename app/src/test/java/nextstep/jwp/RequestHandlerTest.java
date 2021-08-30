@@ -2,10 +2,8 @@ package nextstep.jwp;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
+import nextstep.jwp.framework.context.RequestHandler;
+import nextstep.jwp.framework.util.ResourceUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,8 +20,8 @@ class RequestHandlerTest {
 
         // then
         String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/plain;charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
                 "Hello world!");
@@ -31,9 +29,9 @@ class RequestHandlerTest {
     }
 
     @Test
-    void index() throws IOException {
+    void index() {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -47,12 +45,37 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = String.join("\r\n", "HTTP/1.1 200 OK",
+                "Content-Type: text/html; charset=utf-8 ",
+                "Content-Length: 5564 ",
+                "",
+                ResourceUtils.readString("/index.html"));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void error() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /error.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        String expected = String.join("\r\n", "HTTP/1.1 200 OK",
+                "Content-Type: text/html; charset=utf-8 ",
+                "Content-Length: 2426 ",
+                "",
+                ResourceUtils.readString("/404.html"));
         assertThat(socket.output()).isEqualTo(expected);
     }
 }

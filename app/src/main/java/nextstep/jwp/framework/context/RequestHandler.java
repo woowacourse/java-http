@@ -1,17 +1,19 @@
-package nextstep.jwp;
+package nextstep.jwp.framework.context;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.Objects;
+
+import nextstep.jwp.framework.http.HttpRequest;
+import nextstep.jwp.framework.http.HttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+
+    public static final String MESSAGE_LOG_FORMAT = "\n\nHTTP REQUEST\n{}\nHTTP RESPONSE\n{}";
 
     private final Socket connection;
 
@@ -26,19 +28,19 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final String responseBody = "Hello world!";
+            final HttpRequest httpRequest = HttpRequest.from(inputStream);
+            final Controller controller = ControllerMapping.findController(httpRequest);
+            final HttpResponse httpResponse = controller.handle(httpRequest);
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            log.info(MESSAGE_LOG_FORMAT, httpRequest.readAfterExceptBody(), httpResponse.readAfterExceptBody());
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
+            writer.write(httpResponse.readAsString());
+            writer.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
+        } catch (Exception e) {
+            log.error("error : {}", e.getMessage());
         } finally {
             close();
         }

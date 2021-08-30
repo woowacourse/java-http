@@ -5,6 +5,8 @@ Thumbs.db:encryptable
 ehthumbs.db
 ehthumbs_vista.db
 
+app/jacoco/jacoco.xml
+
 # Dump file
 *.stackdump
 

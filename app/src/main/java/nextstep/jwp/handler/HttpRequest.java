@@ -21,7 +21,7 @@ public class HttpRequest {
         this.httpBody = httpBody;
     }
 
-    public static HttpRequest fromRequest(BufferedReader reader) throws IOException {
+    public static HttpRequest from(BufferedReader reader) throws IOException {
         String startLine = reader.readLine();
         String[] startLineSplit = startLine.split(" ");
         if (startLineSplit.length < 3) {

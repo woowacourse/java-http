@@ -6,7 +6,7 @@ public enum Exception {
 
     INTERNAL_SERVER_ERROR(500, "Internal Server Error.", InternalServerErrorException.class),
 
-    INVALID_HTTP_REQEUST(400, "Invalid Http Request.", InvalidHttpRequestException.class),
+    INVALID_HTTP_REQUEST(400, "Invalid Http Request.", InvalidHttpRequestException.class),
     INVALID_REQUEST_URI(400, "Invalid Request URI.", InvalidRequestUriException.class),
     INVALID_REQUEST_LINE(400, "Invalid Request Line.", InvalidRequestLineException.class),
     INVALID_REQUEST_HEADER(400, "Invalid Request Header.", InvalidRequestHeader.class),

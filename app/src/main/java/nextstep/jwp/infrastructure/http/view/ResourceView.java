@@ -14,6 +14,10 @@ import nextstep.jwp.infrastructure.http.response.HttpStatusLine;
 
 public class ResourceView implements View {
 
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String CONTENT_TYPE_DELIMITER = ";";
+    private static final String CHARSET_KEY = "charset=";
     private final ClassLoader classLoader = getClass().getClassLoader();
     private final HttpStatusCode statusCode;
     private final String resourceName;
@@ -40,9 +44,10 @@ public class ResourceView implements View {
             return new HttpResponse(
                 new HttpStatusLine(statusCode),
                 new HttpHeaders.Builder()
-                    .header("Content-Type",
-                        String.join(";", Files.probeContentType(path), "charset=" + Charset.defaultCharset().displayName().toLowerCase(Locale.ROOT)))
-                    .header("Content-Length", String.valueOf(responseBody.getBytes().length))
+                    .header(CONTENT_TYPE,
+                        String.join(CONTENT_TYPE_DELIMITER, Files.probeContentType(path),
+                            CHARSET_KEY + Charset.defaultCharset().displayName().toLowerCase(Locale.ROOT)))
+                    .header(CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length))
                     .build(),
                 responseBody
             );

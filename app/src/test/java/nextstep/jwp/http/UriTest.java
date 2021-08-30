@@ -20,7 +20,7 @@ class UriTest {
     }
 
     @Test
-    @DisplayName("위의 조건에 해당하지 않는다면 false를 반환한다.")
+    @DisplayName("위의 조건에 해당하지 않는다면 false 를 반환한다.")
     void isUriFileFalse() {
         Uri uri = Uri.valueOf("/login");
 

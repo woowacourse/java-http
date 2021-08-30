@@ -1,15 +1,12 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
-import nextstep.jwp.RequestHandler;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HomeController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final String ROOT_PAGE = "/";
 
     public HomeController(HttpRequest httpRequest) {
         super(httpRequest);
@@ -17,6 +14,9 @@ public class HomeController extends AbstractController {
 
     @Override
     public byte[] get(HttpRequest httpRequest) throws IOException {
+        if (ROOT_PAGE.equals(httpRequest.uri())) {
+            return HttpResponse.ok(httpRequest.resource(Controller.INDEX_PAGE));
+        }
         return HttpResponse.ok(httpRequest.resource());
     }
 

@@ -31,6 +31,7 @@ public class RequestHandler implements Runnable {
                 final OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = HttpRequestReader.httpRequest(inputStream);
+            log.debug("Requested Uri : {}", httpRequest.uri());
 
             AbstractController abstractController = RequestMapper.map(httpRequest);
             byte[] response = abstractController.proceed();

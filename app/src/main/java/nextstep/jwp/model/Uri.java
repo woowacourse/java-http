@@ -38,12 +38,12 @@ public class Uri {
         return queryMap;
     }
 
-    public String getUri() {
-        return uri;
-    }
-
     public String getPath() {
         return path;
+    }
+
+    public String getUri() {
+        return uri;
     }
 
     public Map<String, String> getQueryMap() {

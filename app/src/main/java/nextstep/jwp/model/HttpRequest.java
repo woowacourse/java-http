@@ -25,8 +25,12 @@ public class HttpRequest {
         return method;
     }
 
-    public Uri getUri() {
-        return uri;
+    public String getUri() {
+        return uri.getUri();
+    }
+
+    public Map<String, String> getQueryMap() {
+        return uri.getQueryMap();
     }
 
     public Map<String, String> getHttpHeaders() {

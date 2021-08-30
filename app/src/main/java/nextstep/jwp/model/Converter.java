@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class RequestConverter {
+public class Converter {
 
     private static final String NEW_LINE = "\r\n";
 
-    private RequestConverter() {
+    private Converter() {
     }
 
     public static HttpRequest convertToHttpRequest(final BufferedReader bufferedReader) throws IOException {

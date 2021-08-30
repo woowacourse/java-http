@@ -41,7 +41,7 @@ public class HttpRequest {
         Map<String, String> headerMap = new HashMap<>();
         while (reader.ready()) {
             String headerLine = reader.readLine();
-            if (headerLine.equals("")) {
+            if ("".equals(headerLine)) {
                 break;
             }
             String[] headerLineSplit = headerLine.split(": ");

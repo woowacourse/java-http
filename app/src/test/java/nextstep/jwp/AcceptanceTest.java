@@ -94,7 +94,7 @@ public class AcceptanceTest {
             "Content-Type: application/x-www-form-urlencoded",
             "Accept: */*",
             "",
-            "account=whybe&password=password&email=hybeom@gmail.com");
+            "account=mungto&password=password&email=hybeom@gmail.com");
 
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);

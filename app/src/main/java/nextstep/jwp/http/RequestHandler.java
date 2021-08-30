@@ -2,6 +2,7 @@ package nextstep.jwp.http;
 
 import nextstep.jwp.controller.*;
 import nextstep.jwp.exception.NoMatchingControllerException;
+import nextstep.jwp.exception.ResourceNotFoundException;
 import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import java.util.Objects;
 
 public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final Controller staticResourceController = new StaticResourceController();
     private static final List<Controller> controllers = new ArrayList<>();
 
     private final Socket connection;
@@ -23,7 +25,7 @@ public class RequestHandler implements Runnable {
         final UserService userService = new UserService();
         controllers.add(new LoginController(userService));
         controllers.add(new RegisterController(userService));
-        controllers.add(new StaticResourceController());
+        controllers.add(staticResourceController);
     }
 
     public RequestHandler(Socket connection) {
@@ -37,10 +39,7 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final HttpRequest httpRequest = parseRequest(inputStream);
-
-            final Controller controller = findController(httpRequest);
-            final HttpResponse httpResponse = controller.doService(httpRequest);
+            final HttpResponse httpResponse = getHttpResponse(inputStream);
             final String responseMessage = httpResponse.toResponseMessage();
 
             outputStream.write(responseMessage.getBytes());
@@ -49,6 +48,20 @@ public class RequestHandler implements Runnable {
             log.error("Exception stream", exception);
         } finally {
             close();
+        }
+    }
+
+    private HttpResponse getHttpResponse(final InputStream inputStream) throws IOException {
+        try {
+            final HttpRequest httpRequest = parseRequest(inputStream);
+            final Controller controller = findController(httpRequest);
+            return controller.doService(httpRequest);
+        } catch (ResourceNotFoundException exception) {
+            final HttpRequest httpRequest = HttpRequest.ofStaticFile("/404.html");
+            return staticResourceController.doService(httpRequest);
+        } catch (RuntimeException exception) {
+            final HttpRequest httpRequest = HttpRequest.ofStaticFile("/500.html");
+            return staticResourceController.doService(httpRequest);
         }
     }
 

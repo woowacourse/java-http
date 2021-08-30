@@ -1,5 +1,6 @@
 package nextstep.jwp.http;
 
+import java.util.List;
 import java.util.Map;
 
 public class HttpRequest {
@@ -14,6 +15,13 @@ public class HttpRequest {
     public HttpRequest(final HttpRequestHeader header, final HttpRequestBody body) {
         this.header = header;
         this.body = body;
+    }
+
+    public static HttpRequest ofStaticFile(final String url) {
+        return new HttpRequest(
+                new HttpRequestHeader(List.of("GET " + url + " HTTP/1.1 ")),
+                null
+        );
     }
 
     public boolean isGet() {

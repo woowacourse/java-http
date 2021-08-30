@@ -1,9 +1,8 @@
 package nextstep.jwp.http.request.requestline;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
+import nextstep.jwp.util.ParamExtractor;
 
 public class RequestURI {
 
@@ -26,12 +25,7 @@ public class RequestURI {
         if (!uri.contains("?")) {
             return new HashMap<>();
         }
-        String params = uri.substring(uri.indexOf("?") + 1);
-        String[] splitParams = params.split("&");
-
-        return Arrays.stream(splitParams)
-            .map(param -> param.split("="))
-            .collect(Collectors.toMap(param -> param[0], param -> param[1]));
+        return ParamExtractor.extractParams(uri);
     }
 
     public String getParamValue(String key) {

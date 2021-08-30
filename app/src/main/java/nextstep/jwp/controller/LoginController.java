@@ -2,12 +2,15 @@ package nextstep.jwp.controller;
 
 import static nextstep.jwp.controller.IndexController.INDEX_RESOURCE_PATH;
 
+import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.http.common.Body;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.requestline.RequestURI;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpStatus;
 import nextstep.jwp.model.User;
+import nextstep.jwp.util.ParamExtractor;
 
 public class LoginController extends AbstractController {
 
@@ -21,9 +24,10 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(HttpRequest request) {
-        final RequestURI uri = request.getRequestLine().getRequestURI();
-        String account = uri.getParamValue("account");
-        String password = uri.getParamValue("password");
+        final Body body = request.getBody();
+        final Map<String, String> params = ParamExtractor.extractParams(body.asString());
+        String account = params.get("account");
+        String password = params.get("password");
 
         final User user = InMemoryUserRepository.findByAccount(account)
             .orElseThrow(RuntimeException::new);
@@ -31,7 +35,6 @@ public class LoginController extends AbstractController {
         if (!user.checkPassword(password)) {
             throw new RuntimeException();
         }
-
         return HttpResponse.redirect(INDEX_RESOURCE_PATH);
     }
 

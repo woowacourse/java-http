@@ -42,8 +42,6 @@ public class HttpResponse {
         headers.putHeader("Content-Type", ContentType.of(uri));
         headers.putHeader("Content-Length", String.valueOf(body.length()));
         return of(httpStatus, headers, body);
-
-
     }
 
     private static String setPrefix(String uri) {

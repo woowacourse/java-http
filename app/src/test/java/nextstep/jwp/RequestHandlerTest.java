@@ -118,6 +118,7 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/401.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /index.html \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +

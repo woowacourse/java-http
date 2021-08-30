@@ -18,6 +18,7 @@ public class InMemoryUserRepository {
 
     public static void save(User user) {
         database.put(user.getAccount(), user);
+        InMemoryUserRepository.autoIncrementId += 1;
     }
 
     public static Optional<User> findByAccount(String account) {

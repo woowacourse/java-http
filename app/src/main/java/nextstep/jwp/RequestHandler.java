@@ -56,7 +56,7 @@ public class RequestHandler implements Runnable {
                 log.debug(user.toString());
                 if (user.isEmpty()) {
                     responseBody = getStaticFileContents("/401.html");
-                    response = reply302Response(responseBody);
+                    response = replyAfterLogin302Response(responseBody);
                 } else {
                     responseBody = getStaticFileContents("/index.html");
                     response = replyOkResponse(responseBody);
@@ -66,7 +66,7 @@ public class RequestHandler implements Runnable {
                 Optional<User> user = userService.findUserFromBody(requestBody);
                 if (user.isEmpty()) {
                     responseBody = getStaticFileContents("/401.html");
-                    response = reply302Response(responseBody);
+                    response = replyAfterLogin302Response(responseBody);
                 } else {
                     responseBody = getStaticFileContents("/index.html");
                     response = replyOkResponse(responseBody);
@@ -104,9 +104,10 @@ public class RequestHandler implements Runnable {
         return requestBody;
     }
 
-    private String reply302Response(String responseBody) {
+    private String replyAfterLogin302Response(String responseBody) {
         final String response = String.join("\r\n",
                 "HTTP/1.1 302 Found ",
+                "Location: /index.html ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

@@ -33,7 +33,6 @@ public class UserService {
         return user;
     }
 
-
     public void saveUser(String requestBody) {
         Map<String, String> registerData = extractUserDataFromRequestBody(requestBody);
 
@@ -41,7 +40,6 @@ public class UserService {
                 registerData.get("account"),
                 registerData.get("password"),
                 registerData.get("email")));
-        InMemoryUserRepository.autoIncrementId += 1;
     }
 
     private Map<String, String> extractQueryFromLoginUri(String uri) {

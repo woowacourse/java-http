@@ -182,7 +182,7 @@ class RequestHandlerTest {
 
     private void assertResponse(final String httpRequest, final String httpResponse) {
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, new ControllerMapping("nextstep.jwp.infrastructure.http.controller"));
+        final RequestHandler requestHandler = new RequestHandler(socket, new ControllerMapping("nextstep.jwp.controller"));
 
         requestHandler.run();
 

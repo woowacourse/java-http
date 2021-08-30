@@ -1,4 +1,4 @@
-package nextstep.jwp.infrastructure.http.controller;
+package nextstep.jwp.controller;
 
 import nextstep.jwp.infrastructure.http.View;
 import nextstep.jwp.infrastructure.http.request.HttpMethod;

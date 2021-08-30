@@ -15,7 +15,7 @@ public class WebServer {
 
     private static final int DEFAULT_PORT = 8080;
 
-    private static final ControllerMapping CONTROLLER_MAPPING = new ControllerMapping("nextstep.jwp.infrastructure.http.controller");
+    private static final ControllerMapping CONTROLLER_MAPPING = new ControllerMapping("nextstep.jwp.controller");
 
     private final int port;
 

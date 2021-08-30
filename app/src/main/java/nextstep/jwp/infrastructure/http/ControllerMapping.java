@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import nextstep.jwp.infrastructure.http.controller.Controller;
+import nextstep.jwp.controller.Controller;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
 import nextstep.jwp.infrastructure.http.response.HttpStatusCode;

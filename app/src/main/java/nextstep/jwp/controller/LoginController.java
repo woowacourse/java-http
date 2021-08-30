@@ -1,4 +1,4 @@
-package nextstep.jwp.infrastructure.http.controller;
+package nextstep.jwp.controller;
 
 import java.util.Arrays;
 import java.util.List;

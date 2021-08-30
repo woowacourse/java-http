@@ -36,7 +36,7 @@ public class ControllerMapping {
     private Set<Controller> findAllControllers(final String controllerPackage) {
         final Set<Class<?>> classes = findAllClassesUsingClassLoader(controllerPackage);
         return classes.stream()
-            .filter(clazz -> clazz.getDeclaredConstructors().length != 0)
+            .filter(this::hasConstructor)
             .filter(this::hasNoArgumentConstructor)
             .map(this::findNoArgumentConstructor)
             .map(constructor -> {
@@ -47,6 +47,10 @@ public class ControllerMapping {
                 }
             })
             .collect(Collectors.toSet());
+    }
+
+    private boolean hasConstructor(final Class<?> clazz) {
+        return clazz.getDeclaredConstructors().length != 0;
     }
 
     private boolean hasNoArgumentConstructor(final Class<?> clazz) {

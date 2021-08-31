@@ -6,6 +6,8 @@ import java.io.IOException;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.ViewResolver;
+import nextstep.jwp.web.db.InMemoryUserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 class RegisterControllerTest {
@@ -27,5 +29,10 @@ class RegisterControllerTest {
 
         String actual = controller.doService(httpRequest);
         assertThat(actual).isEqualTo(HttpResponse.redirect("/index.html"));
+    }
+
+    @AfterEach
+    void tearDown() {
+        InMemoryUserRepository.clear();
     }
 }

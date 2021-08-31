@@ -20,6 +20,7 @@ public class LoginController extends AbstractController {
     protected void doPost(HttpRequest request, HttpResponse response, ModelAndView mv) throws IOException {
         if (userService.isExistUser(request)) {
             response.forward("/index.html");
+            return;
         }
 
         response.redirect("/401.html");

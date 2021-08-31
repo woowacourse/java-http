@@ -17,8 +17,9 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 
+import static nextstep.jwp.model.httpmessage.response.HttpStatus.NOT_FOUND;
+import static nextstep.jwp.model.httpmessage.response.HttpStatus.UNAUTHORIZED;
 import static nextstep.jwp.model.httpmessage.response.ResponseLine.PROTOCOL;
 
 
@@ -40,15 +41,21 @@ public class FrontController {
 //        controller.process(request, response);
         RequestMapping requestMapping = new RequestMapping();
         Object handler = requestMapping.getHandler(request);
-        if (handler == null) {
-            response.setStatus(HttpStatus.NOT_FOUND);
+        if (handler == null) { // url 매핑이 없는 경우
+            String path = request.getPath();
+            if (FileUtils.existFile(path)) { // 정적 파일이 있는 경우
+                response.forward(request.getPath());
+                return;
+            }
+//            response.setStatus(HttpStatus.NOT_FOUND);
+            response.sendError(NOT_FOUND);
             return;
         }
 
         HandlerAdapters handlerAdapters = new HandlerAdapters();
         HandlerAdapter adapter = handlerAdapters.getHandlerAdapter(handler);
         if (adapter == null) {
-            response.sendError("/401.html");
+            response.sendError(NOT_FOUND);
             return;
         }
 
@@ -64,7 +71,7 @@ public class FrontController {
             OutputStream outputStream = response.getOutputStream();
             if (mv.getModel().size() > 0) {
                 outputStream.write(String.format("%s %s ", PROTOCOL, mv.getStatus()).getBytes());
-                outputStream.write(String.format("%s: %s ", ContentType.VALUE, response.getHeader(ContentType.VALUE)).getBytes());
+                outputStream.write(String.format("%s: %s ", ContentType.STRING, response.getHeader(ContentType.STRING)).getBytes());
                 outputStream.write(((String) mv.getModel().get("body")).getBytes());
                 outputStream.flush();
                 return;

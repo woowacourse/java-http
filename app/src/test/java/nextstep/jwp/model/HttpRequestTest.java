@@ -30,7 +30,7 @@ class HttpRequestTest {
 
         HttpRequest request = new HttpRequest(socket.getInputStream());
         assertThat(request.getMethod()).isEqualTo(GET);
-        assertThat(request.getRequestURI()).isEqualTo("/");
+        assertThat(request.getPath()).isEqualTo("/");
         assertThat(request.getHeader("Content-Type")).isEqualTo("text/html;charset=utf-8");
         assertThat(request.getContentLength()).isEqualTo(12);
         assertThat(request.getRequestBody()).isEqualTo("Hello world!");
@@ -52,7 +52,7 @@ class HttpRequestTest {
 
         HttpRequest request = new HttpRequest(socket.getInputStream());
         assertThat(request.getMethod()).isEqualTo(GET);
-        assertThat(request.getRequestURI()).isEqualTo("/index.html");
+        assertThat(request.getPath()).isEqualTo("/index.html");
         assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
         assertThat(request.getHeader("Connection")).isEqualTo("keep-alive");
     }
@@ -136,7 +136,7 @@ class HttpRequestTest {
         HttpRequest request = new HttpRequest(socket.getInputStream());
 
         assertThat(request.getMethod()).isEqualTo(GET);
-        assertThat(request.getRequestURI()).isEqualTo("/css/styles.css");
+        assertThat(request.getPath()).isEqualTo("/css/styles.css");
         assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
         assertThat(request.getHeader("Accept")).isEqualTo("text/css");
     }
@@ -156,7 +156,7 @@ class HttpRequestTest {
         HttpRequest request = new HttpRequest(socket.getInputStream());
 
         assertThat(request.getMethod()).isEqualTo(GET);
-        assertThat(request.getRequestURI()).isEqualTo("/js/scripts.js");
+        assertThat(request.getPath()).isEqualTo("/js/scripts.js");
         assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
         assertThat(request.getHeader("Accept")).isEqualTo("application/javascript");
     }

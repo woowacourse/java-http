@@ -1,5 +1,6 @@
 package nextstep.jwp.model.httpmessage.request;
 
+import nextstep.jwp.model.httpmessage.common.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.util.StringUtils;
@@ -10,9 +11,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.Optional;
 
 import static nextstep.jwp.model.httpmessage.common.ContentType.FORM;
 import static nextstep.jwp.model.httpmessage.common.HttpHeaderType.CONTENT_LENGTH;
+import static nextstep.jwp.model.httpmessage.common.HttpHeaderType.CONTENT_TYPE;
 
 public class HttpRequest {
     private static final Logger LOG = LoggerFactory.getLogger(HttpRequest.class);
@@ -57,6 +60,13 @@ public class HttpRequest {
     }
 
     public String getRequestURI() {
+        String path = requestLine.getPath();
+        return ContentType.of(path)
+                .map(type -> path.replace(type.suffix(), ""))
+                .orElseGet(requestLine::getPath);
+    }
+
+    public String getPath() {
         return requestLine.getPath();
     }
 

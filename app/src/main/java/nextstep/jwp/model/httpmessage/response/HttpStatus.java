@@ -3,18 +3,23 @@ package nextstep.jwp.model.httpmessage.response;
 public enum HttpStatus {
     OK("200", "OK"),
     REDIRECT("302", "Redirect"),
-    NOT_FOUND("404", "Not Found");
+    NOT_FOUND("404", "Not Found"),
+    UNAUTHORIZED("401", "Unauthorized");
 
-    private final String status;
+    private final String value;
     private final String message;
 
-    HttpStatus(String status, String message) {
-        this.status = status;
+    HttpStatus(String value, String message) {
+        this.value = value;
         this.message = message;
+    }
+
+    public String value() {
+        return value;
     }
 
     @Override
     public String toString() {
-        return status + " " + message;
+        return value + " " + message;
     }
 }

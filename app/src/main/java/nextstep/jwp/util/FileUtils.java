@@ -9,10 +9,16 @@ import java.util.Objects;
 
 public class FileUtils {
 
+    public static final String PREFIX = "/";
+
     private FileUtils() {
     }
 
     public static String readFileOfUrl(String url) throws IOException {
+        if (!url.startsWith(PREFIX)) {
+            url = PREFIX + url;
+        }
+
         URL resource = FileUtils.class.getClassLoader().getResource("static" + url);
         String file = Objects.requireNonNull(resource).getFile();
         Path path = new File(file).toPath();

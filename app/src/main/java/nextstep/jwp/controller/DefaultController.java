@@ -26,9 +26,8 @@ public class DefaultController extends AbstractController {
 
 //        mv.setStatus(OK);
 //        LOG.debug("Response status : {}", OK);
-//
-        String url = request.getRequestURI();
-        response.forward(url);
+
+        response.forward("/index.html");
 //
 //        ContentType contentType = ContentType.of(url).get();
 //        response.addHeader(CONTENT_TYPE, contentType.value());

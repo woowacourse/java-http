@@ -11,7 +11,7 @@ public enum ContentType {
     SVG("image/svg+xml", ".svg"),
     FORM("application/x-www-form-urlencoded", "");
 
-    public static final String VALUE = "Content-Type";
+    public static final String STRING = "Content-Type";
     private final String value;
     private final String suffix;
 
@@ -34,5 +34,9 @@ public enum ContentType {
 
     public String value() {
         return value;
+    }
+
+    public String suffix() {
+        return suffix;
     }
 }

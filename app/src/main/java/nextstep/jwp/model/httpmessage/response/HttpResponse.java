@@ -29,12 +29,12 @@ public class HttpResponse {
         this.outputStream = outputStream;
     }
 
-    public void forward(String url) throws IOException {
+    public void forward(String path) throws IOException {
         setStatus(OK);
-        ContentType.of(url).ifPresent(type -> headers.add(CONTENT_TYPE, type.value()));
-        String body = FileUtils.readFileOfUrl(url);
-        headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
-        writeBody(outputStream, processResponseLineAndHeader(body));
+        ContentType.of(path).ifPresent(type -> headers.add(CONTENT_TYPE, type.value()));
+        String bodies = FileUtils.readFileOfUrl(path);
+        headers.setContentLength(bodies.getBytes(StandardCharsets.UTF_8).length);
+        writeBody(outputStream, processResponseLineAndHeader(bodies));
     }
 
     public void forwardBody(String body) throws IOException {
@@ -70,10 +70,10 @@ public class HttpResponse {
         headers.add(type, value);
     }
 
-    public void sendError(String url) throws IOException {
-        setStatus(NOT_FOUND);
+    public void sendError(HttpStatus status) throws IOException {
+        setStatus(status);
         headers.setContentType(HTML.value());
-        String body = FileUtils.readFileOfUrl(url);
+        String body = FileUtils.readFileOfUrl(status.value() + HTML.suffix());
         headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
         writeBody(outputStream, processResponseLineAndHeader(body));
     }

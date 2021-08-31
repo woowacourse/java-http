@@ -22,15 +22,17 @@ public class RequestMapping {
         handlerMappingMaps.put("/login", new LoginController());
         handlerMappingMaps.put("/register", new RegisterController());
 
-        handlerMappingMaps.put("/index.html", new DefaultController());
-        handlerMappingMaps.put("/401.html", new DefaultController());
+//        handlerMappingMaps.put("/index.html", new DefaultController());
+//        handlerMappingMaps.put("/401.html", new DefaultController());
 
-        handlerMappingMaps.put("/favicon.ico", new DefaultController());
-        handlerMappingMaps.put("/js/scripts.js", new DefaultController());
-        handlerMappingMaps.put("/assets/chart-area.js", new DefaultController());
-        handlerMappingMaps.put("/assets/chart-bar.js", new DefaultController());
-        handlerMappingMaps.put("/assets/chart-pie.js", new DefaultController());
-        handlerMappingMaps.put("/css/styles.css", new DefaultController());
+        handlerMappingMaps.put("/index", new DefaultController());
+
+//        handlerMappingMaps.put("/favicon.ico", new DefaultController());
+//        handlerMappingMaps.put("/js/scripts.js", new DefaultController());
+//        handlerMappingMaps.put("/assets/chart-area.js", new DefaultController());
+//        handlerMappingMaps.put("/assets/chart-bar.js", new DefaultController());
+//        handlerMappingMaps.put("/assets/chart-pie.js", new DefaultController());
+//        handlerMappingMaps.put("/css/styles.css", new DefaultController());
     }
 
     public Object getHandler(HttpRequest request) {

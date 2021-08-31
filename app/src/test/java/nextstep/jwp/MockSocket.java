@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MockSocket extends Socket {
+    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     private final String request;
     private final List<Byte> bytes = new ArrayList<>();
@@ -20,7 +21,7 @@ public class MockSocket extends Socket {
     }
 
     public MockSocket() {
-        this("GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+        this("GET / HTTP/1.1" + LINE_SEPARATOR + "Host: localhost:8080" + LINE_SEPARATOR + LINE_SEPARATOR);
     }
 
     public InetAddress getInetAddress() {

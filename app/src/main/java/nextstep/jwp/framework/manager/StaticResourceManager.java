@@ -98,7 +98,9 @@ public class StaticResourceManager {
         result = result.replace(REDIRECT_INDICATOR, "");
         final HttpRequest resultRequest = HttpRequest.of(HttpMethod.GET, result);
         if (canHandle(resultRequest)) {
-            return HttpResponse.of(staticResources.get(resultRequest), FOUND);
+            final HttpResponse httpResponse = HttpResponse.of(staticResources.get(resultRequest), FOUND);
+            httpResponse.appendRedirectInfo(result);
+            return httpResponse;
         }
         throw new IllegalArgumentException("컨트롤러에서 반환한 값에 해당하는 리다이렉트 정적 자원이 없습니다.");
     }

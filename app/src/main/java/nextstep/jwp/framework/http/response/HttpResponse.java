@@ -39,6 +39,10 @@ public class HttpResponse {
                 ResponseBody.of(content));
     }
 
+    public void appendRedirectInfo(final String location) {
+        responseHttpHeader.appendRedirectInfo(location);
+    }
+
     public String generateResponse() {
         final String responseLine = protocolVersion.getProtocol() + LINE_SEPARATOR +
                 responseStatus.getStatusCode() + LINE_SEPARATOR + responseStatus.getStatusMessage();

@@ -9,6 +9,7 @@ public class ResponseHttpHeader {
 
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String CONTENT_TYPE = "Content-Type";
+    private static final String LOCATION = "Location";
 
     private final Map<String, String> responseHttpHeaderMap;
 
@@ -22,6 +23,10 @@ public class ResponseHttpHeader {
 
         final String contentType = FileExtensionHeaderValue.of(extension).getHeaderValue();
         responseHttpHeaderMap.put(CONTENT_TYPE, contentType);
+    }
+
+    public void appendRedirectInfo(final String location) {
+        responseHttpHeaderMap.put(LOCATION, location);
     }
 
     public String generateResponse() {

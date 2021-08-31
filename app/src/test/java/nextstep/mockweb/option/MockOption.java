@@ -11,19 +11,18 @@ public class MockOption {
 
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String FORM_DATA = "application/x-www-form-urlencoded";
+    private static String sessionId = "";
 
     private final RequestInfo requestInfo;
     private final OptionInfo optionInfo;
     private final DispatcherServlet dispatcherServlet;
     private final HttpSessions httpSessions;
-    private final String sessionId;
 
     public MockOption(RequestInfo requestInfo, DispatcherServlet dispatcherServlet, HttpSessions httpSessions) {
         this.requestInfo = requestInfo;
         this.optionInfo = new OptionInfo();
         this.dispatcherServlet = dispatcherServlet;
         this.httpSessions = httpSessions;
-        this.sessionId = "123412341234";
         httpSessions.getSession(sessionId);
         requestInfo.addHeader("Cookie", "JSESSIONID="+sessionId);
     }
@@ -56,5 +55,9 @@ public class MockOption {
         final String result = mockSocket.output();
         optionInfo.executeAfterOption(result);
         return result;
+    }
+
+    public static void setSessionId(String sessionId) {
+        MockOption.sessionId = sessionId;
     }
 }

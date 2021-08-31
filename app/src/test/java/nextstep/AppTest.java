@@ -6,16 +6,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.UUID;
 import nextstep.jwp.webserver.response.StatusCode;
+import nextstep.mockweb.option.MockOption;
 import nextstep.mockweb.request.MockRequest;
 import nextstep.mockweb.result.MockResult;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 public class AppTest {
+
+    @BeforeEach
+    void setUp() {
+        MockOption.setSessionId(UUID.randomUUID().toString());
+    }
 
     @DisplayName("페이지 테스트")
     @ParameterizedTest

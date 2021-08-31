@@ -18,19 +18,19 @@ public class AbstractController implements Controller {
             doPost(request, response);
             return;
         }
-        responseMethodNotAllowed(request, response);
+        responseMethodNotAllowed(response);
     }
 
     public void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        responseMethodNotAllowed(request, response);
+        responseMethodNotAllowed(response);
     }
 
     public void doPost(HttpRequest request, HttpResponse response) throws Exception {
-        responseMethodNotAllowed(request, response);
+        responseMethodNotAllowed(response);
 
     }
 
-    private void responseMethodNotAllowed(HttpRequest request, HttpResponse response) {
+    private void responseMethodNotAllowed(HttpResponse response) {
         response.status(HttpStatus.METHOD_NOT_ALLOWED);
     }
 

@@ -18,6 +18,9 @@ public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
+    public static final String HTTP_VERSION = "HTTP/1.1";
+    public static final String ERROR_PREFIX = "[ERROR] ";
+
     private final Socket connection;
     private final RequestMapping requestMapping;
 
@@ -40,11 +43,11 @@ public class RequestHandler implements Runnable {
             bufferedWriter.write(response);
             bufferedWriter.flush();
         } catch (DefaultFileNotFoundException e) {
-            log.error("[ERROR]", e);
+            log.error(ERROR_PREFIX, e);
         } catch (IOException e) {
-            log.error("[ERROR] Exception In Stream", e);
+            log.error(ERROR_PREFIX + "Exception In Stream", e);
         } catch (Exception e) {
-            log.error("[ERROR] Unknown Exception", e);
+            log.error(ERROR_PREFIX + "Unknown Exception", e);
         } finally {
             close();
         }
@@ -65,20 +68,20 @@ public class RequestHandler implements Runnable {
             return httpResponse.makeHttpMessage();
 
         } catch (HttpMessageException e) {
-            log.error("[ERROR]", e);
-            HttpResponse httpResponse = new HttpResponse("HTTP/1.1");
+            log.error(ERROR_PREFIX, e);
+            HttpResponse httpResponse = new HttpResponse(HTTP_VERSION);
             httpResponse.badRequest("/400.html");
             return httpResponse.makeHttpMessage();
 
         } catch (FileNotFoundException | URISyntaxException e) {
-            log.error("[ERROR]", e);
-            HttpResponse httpResponse = new HttpResponse("HTTP/1.1");
+            log.error(ERROR_PREFIX, e);
+            HttpResponse httpResponse = new HttpResponse(HTTP_VERSION);
             httpResponse.notFound("/404.html");
             return httpResponse.makeHttpMessage();
 
         } catch (IOException e) {
-            log.error("[ERROR] Exception reading socket", e);
-            HttpResponse httpResponse = new HttpResponse("HTTP/1.1");
+            log.error(ERROR_PREFIX + "Exception reading socket", e);
+            HttpResponse httpResponse = new HttpResponse(HTTP_VERSION);
             httpResponse.internalServerError("/500.html");
             return httpResponse.makeHttpMessage();
         }
@@ -88,7 +91,7 @@ public class RequestHandler implements Runnable {
         try {
             connection.close();
         } catch (IOException e) {
-            log.error("[ERROR] Exception closing socket", e);
+            log.error(ERROR_PREFIX + "Exception closing socket", e);
         }
     }
 }

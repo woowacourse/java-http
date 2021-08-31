@@ -34,14 +34,13 @@ public class HttpHeader {
 
     public String makeHttpMessage(HttpCookie cookies) {
         List<String> headers = new ArrayList<>();
-        for (String key : headerMap.keySet()) {
-            String join = String.join(": ", key, headerMap.get(key) + " ");
+        for (Map.Entry<String, String> entry: headerMap.entrySet()) {
+            String join = String.join(": ", entry.getKey(), entry.getValue() + " ");
             headers.add(join);
         }
 
         Map<String, Cookie> cookieMap = cookies.getCookieMap();
-        for (String key : cookieMap.keySet()) {
-            Cookie cookie = cookieMap.get(key);
+        for (Cookie cookie : cookieMap.values()) {
             headers.add("Set-Cookie: " + cookie.makeSetCookieHttpMessage() + " ");
         }
 

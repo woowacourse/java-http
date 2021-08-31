@@ -17,12 +17,15 @@ import nextstep.jwp.model.User;
 
 public class LoginController extends AbstractController {
 
+
+    public static final String INDEX_HTML = "/index.html";
+
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException, URISyntaxException {
         try {
             HttpSession session = httpRequest.getSession();
             if (session.containsAttribute("user")) {
-                httpResponse.redirect("/index.html");
+                httpResponse.redirect(INDEX_HTML);
                 return;
             }
         } catch (NoSuchElementException e) {
@@ -55,7 +58,7 @@ public class LoginController extends AbstractController {
                 final HttpSession session = httpRequest.getSession();
                 session.setAttribute("user", user);
 
-                httpResponse.redirect("/index.html");
+                httpResponse.redirect(INDEX_HTML);
                 return;
             }
 
@@ -64,7 +67,7 @@ public class LoginController extends AbstractController {
             session.setAttribute("user", user);
 
             httpResponse.setCookie(new Cookie("JSESSIONID", sessionId));
-            httpResponse.redirect("/index.html");
+            httpResponse.redirect(INDEX_HTML);
         } catch (LoginException | NoSuchElementException e) {
             httpResponse.unauthorized("/401.html");
         }

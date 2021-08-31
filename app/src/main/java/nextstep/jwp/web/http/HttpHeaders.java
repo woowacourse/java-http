@@ -6,12 +6,14 @@ import java.util.List;
 import java.util.Map;
 import nextstep.jwp.web.http.request.HttpRequestHeaderValues;
 import nextstep.jwp.web.http.response.ContentType;
+import nextstep.jwp.web.http.session.HttpCookie;
 
 public class HttpHeaders {
 
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String LOCATION = "Location";
+    private static final String COOKIE = "Cookie";
 
     private final Map<String, HttpRequestHeaderValues> headers;
 
@@ -57,6 +59,11 @@ public class HttpHeaders {
 
     public void setContentType(ContentType contentType) {
         set(CONTENT_TYPE, contentType.getMimeType());
+    }
+
+    public HttpCookie getCookie() {
+        String rawCookie = get(COOKIE).toValuesString();
+        return new HttpCookie(rawCookie);
     }
 
     public void setLocation(String url) {

@@ -15,7 +15,8 @@ public class Login {
 
     public boolean isSuccess() {
         final String account = query.get("account");
+        final String password = query.get("password");
         final Optional<User> wrappedUser = InMemoryUserRepository.findByAccount(account);
-        return wrappedUser.isPresent();
+        return wrappedUser.isPresent() && wrappedUser.get().checkPassword(password);
     }
 }

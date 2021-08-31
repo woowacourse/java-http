@@ -3,6 +3,7 @@ package nextstep.jwp.handler;
 import java.io.*;
 import java.net.Socket;
 import java.util.Objects;
+import java.util.UUID;
 
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.handler.request.HttpRequest;
@@ -50,6 +51,8 @@ public class RequestHandler implements Runnable {
 
     public String handleRequest(HttpRequest httpRequest) {
         HttpResponse httpResponse = new HttpResponse(httpRequest);
+        setSessionCookie(httpRequest, httpResponse);
+
         try {
             if (httpRequest.isRequestStaticFile()) {
                 nextstep.jwp.util.File file = FileReader.readFile(httpRequest.getRequestUrl());
@@ -64,6 +67,12 @@ public class RequestHandler implements Runnable {
             File file = FileReader.readErrorFile("/404.html");
             httpResponse.notFound("/404.html", file);
             return httpResponse.makeHttpMessage();
+        }
+    }
+
+    private void setSessionCookie(HttpRequest httpRequest, HttpResponse httpResponse) {
+        if (!httpRequest.containsCookie("JSESSIONID")) {
+            httpResponse.setCookie(new Cookie("JSESSIONID", UUID.randomUUID().toString()));
         }
     }
 

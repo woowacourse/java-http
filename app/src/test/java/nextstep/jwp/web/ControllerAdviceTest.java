@@ -42,6 +42,12 @@ class ControllerAdviceTest {
     }
 
     @Test
+    void nullPointerException() {
+        String result = ControllerAdvice.handle(new NullPointerException());
+        assertThat(result).isEqualTo(HttpResponse.internalServerError());
+    }
+
+    @Test
     void exception() {
         String result = ControllerAdvice.handle(new Exception());
         assertThat(result).isEqualTo(HttpResponse.internalServerError());

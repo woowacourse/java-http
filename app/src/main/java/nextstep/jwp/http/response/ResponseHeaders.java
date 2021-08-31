@@ -32,4 +32,8 @@ public class ResponseHeaders {
         }
         return joiner.toString().getBytes(StandardCharsets.UTF_8);
     }
+
+    public void setCookie(String cookie) {
+        this.headers.put("Set-Cookie", "JSESSIONID=" + cookie);
+    }
 }

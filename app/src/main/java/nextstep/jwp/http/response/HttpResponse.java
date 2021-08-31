@@ -126,4 +126,8 @@ public class HttpResponse {
         outputStream.write(headers.getByte());
         outputStream.flush();
     }
+
+    public void setCookie(String cookie) {
+        this.headers.setCookie(cookie);
+    }
 }

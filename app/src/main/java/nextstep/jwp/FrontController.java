@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.Socket;
 import java.util.Objects;
+import java.util.UUID;
 
 public class FrontController implements Runnable {
 
@@ -30,6 +31,9 @@ public class FrontController implements Runnable {
 
             HttpRequest request = new HttpRequest(reader);
             HttpResponse response = new HttpResponse();
+            if (!request.hasSessionId()) {
+                response.setCookie(UUID.randomUUID().toString());
+            }
 
             String uri = request.getPath();
             Controller controller = RequestMapping.getController(uri);

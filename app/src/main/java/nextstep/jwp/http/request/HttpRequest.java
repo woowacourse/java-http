@@ -1,5 +1,6 @@
 package nextstep.jwp.http.request;
 
+import nextstep.jwp.http.HttpCookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +14,7 @@ public class HttpRequest {
     private RequestLine requestLine;
     private RequestHeaders headers;
     private RequestBody body;
+    private HttpCookie cookie = new HttpCookie();
 
     public HttpRequest(BufferedReader reader) {
         try {
@@ -32,6 +34,9 @@ public class HttpRequest {
             String line = reader.readLine();
             if (line == null) {
                 throw new IllegalStateException("HTTP Header Line이 null일 수 없습니다.");
+            }
+            if (line.contains("Cookie")) {
+                this.cookie = HttpCookie.of(line);
             }
             if ("".equals(line)) break;
             requestHeaders.put(line);
@@ -63,5 +68,9 @@ public class HttpRequest {
 
     public boolean isPost() {
         return this.requestLine.isPost();
+    }
+
+    public boolean hasSessionId() {
+        return cookie.hasSessionId();
     }
 }

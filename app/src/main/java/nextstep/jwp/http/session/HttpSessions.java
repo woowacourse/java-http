@@ -9,7 +9,8 @@ public class HttpSessions {
 
     private static final Map<String, HttpSession> SESSIONS = new ConcurrentHashMap<>();
 
-    private HttpSessions() {}
+    private HttpSessions() {
+    }
 
     public static HttpSession createSession() {
         final String id = UUID.randomUUID().toString();

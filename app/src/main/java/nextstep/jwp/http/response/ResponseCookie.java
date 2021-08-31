@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ResponseCookie {
-    
+
     private final Map<String, String> cookies;
 
     public ResponseCookie() {

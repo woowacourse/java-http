@@ -13,8 +13,10 @@ class LoginTest {
     void isSuccess() {
         //given
         final String id = "gugu";
+        final String password = "password";
         final Map<String, String> map = new HashMap<>();
         map.put("account", id);
+        map.put("password", password);
         final Login login = new Login(map);
 
         //when

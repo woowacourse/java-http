@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 import javassist.tools.web.BadHttpRequest;
 import nextstep.jwp.webserver.exception.BadRequestException;
 
@@ -83,5 +85,10 @@ public class DefaultHttpRequest implements HttpRequest {
     @Override
     public String getAttribute(String key) {
         return requestParams.getParam(key);
+    }
+
+    @Override
+    public Map<String, String> getRequestParams() {
+        return new HashMap<>(requestParams.getParams());
     }
 }

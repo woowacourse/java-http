@@ -1,6 +1,6 @@
-package nextstep.jwp.core.mvc.mapping;
+package nextstep.jwp.mvc.mapping;
 
-import nextstep.jwp.core.mvc.Handler;
+import nextstep.jwp.mvc.handler.Handler;
 import nextstep.jwp.webserver.request.HttpRequest;
 
 public interface HandlerMapping {

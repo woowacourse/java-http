@@ -1,4 +1,4 @@
-package nextstep.jwp.core.mvc;
+package nextstep.jwp.mvc.view;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -6,7 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import nextstep.jwp.webserver.exception.PageNotFoundException;
+import nextstep.jwp.mvc.exception.PageNotFoundException;
 
 public class ModelAndView {
 

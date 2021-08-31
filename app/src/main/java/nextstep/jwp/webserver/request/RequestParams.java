@@ -46,6 +46,10 @@ public class RequestParams {
         return params.get(key);
     }
 
+    public Map<String, String> getParams() {
+        return params;
+    }
+
     private String parseValue(String[] value) {
         if(value.length < 2) {
             return "";

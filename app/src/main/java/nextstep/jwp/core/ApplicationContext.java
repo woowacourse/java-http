@@ -2,7 +2,7 @@ package nextstep.jwp.core;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
-import nextstep.jwp.core.annotation.Controller;
+import nextstep.jwp.mvc.mapping.HandlerMapping;
 
 public interface ApplicationContext {
 
@@ -15,4 +15,6 @@ public interface ApplicationContext {
     <T> List<T> getBeansByType(Class<T> type);
 
     List<Object> getBeansWithAnnotation(Class<? extends Annotation> annotation);
+
+    void insertBean(Object bean);
 }

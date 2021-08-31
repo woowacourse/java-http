@@ -1,7 +1,7 @@
 package nextstep.jwp.webserver.response;
 
 import java.util.Arrays;
-import nextstep.jwp.webserver.exception.PageNotFoundException;
+import nextstep.jwp.mvc.exception.PageNotFoundException;
 
 public enum ContentType {
     CSS(".css", "text/css"),
@@ -23,6 +23,10 @@ public enum ContentType {
                 .findAny()
                 .orElseThrow(PageNotFoundException::new)
                 .contentType;
+    }
+
+    public static String contentTypeKey() {
+        return "Content-Type";
     }
 
     public String contentType() {

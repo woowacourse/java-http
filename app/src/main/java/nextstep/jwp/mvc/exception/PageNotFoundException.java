@@ -1,4 +1,4 @@
-package nextstep.jwp.webserver.exception;
+package nextstep.jwp.mvc.exception;
 
 import nextstep.jwp.core.exception.StatusException;
 import nextstep.jwp.webserver.response.StatusCode;

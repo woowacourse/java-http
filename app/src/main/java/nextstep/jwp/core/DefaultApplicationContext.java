@@ -40,4 +40,10 @@ public class DefaultApplicationContext implements ApplicationContext {
     public List<Object> getBeansWithAnnotation(Class<? extends Annotation> annotation) {
         return beanContainer.getBeansWithAnnotation(annotation);
     }
+
+    @Override
+    public void insertBean(Object bean) {
+        final Class<?> beanClass = bean.getClass();
+        beanContainer.addBeans(new BeanDefinition(beanClass, bean, beanClass.getName()));
+    }
 }

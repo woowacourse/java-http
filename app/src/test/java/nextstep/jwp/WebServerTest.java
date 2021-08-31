@@ -1,6 +1,6 @@
 package nextstep.jwp;
 
-import nextstep.jwp.webserver.exception.PageNotFoundException;
+import nextstep.jwp.mvc.exception.PageNotFoundException;
 import nextstep.jwp.webserver.response.StatusCode;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;

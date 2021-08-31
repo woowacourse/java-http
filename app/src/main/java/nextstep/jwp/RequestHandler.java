@@ -1,6 +1,5 @@
 package nextstep.jwp;
 
-import nextstep.jwp.core.mvc.FrontHandler;
 import nextstep.jwp.webserver.request.DefaultHttpRequest;
 import nextstep.jwp.webserver.request.HttpRequest;
 import nextstep.jwp.webserver.response.DefaultHttpResponse;
@@ -19,11 +18,9 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
-    private final FrontHandler frontHandler;
 
-    public RequestHandler(Socket connection, FrontHandler frontHandler) {
+    public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
-        this.frontHandler = frontHandler;
     }
 
     @Override
@@ -33,12 +30,9 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = new DefaultHttpRequest(inputStream);
-            HttpResponse httpResponse = new DefaultHttpResponse();
+            HttpResponse httpResponse = new DefaultHttpResponse(outputStream);
 
             final String response = frontHandler.getResponse(httpRequest, httpResponse).totalResponse();
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {

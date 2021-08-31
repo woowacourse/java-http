@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 import nextstep.jwp.core.annotation.Autowired;
 import nextstep.jwp.core.annotation.Component;
-import nextstep.jwp.core.annotation.Controller;
+import nextstep.jwp.mvc.annotation.Controller;
 import nextstep.jwp.core.exception.NotFoundBeanException;
 import org.reflections.Reflections;
 

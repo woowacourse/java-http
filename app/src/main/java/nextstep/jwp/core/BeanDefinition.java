@@ -15,7 +15,7 @@ public class BeanDefinition {
     }
 
     public <U> boolean isTypeOf(Class<U> tClass) {
-        return clazz.isAssignableFrom(tClass);
+        return tClass.isAssignableFrom(clazz);
     }
 
     public Object getTarget() {

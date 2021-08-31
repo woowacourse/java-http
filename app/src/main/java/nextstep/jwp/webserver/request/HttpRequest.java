@@ -1,5 +1,7 @@
 package nextstep.jwp.webserver.request;
 
+import java.util.Map;
+
 public interface HttpRequest {
 
     HttpMethod httpMethod();
@@ -7,4 +9,6 @@ public interface HttpRequest {
     String httpUrl();
 
     String getAttribute(String key);
+
+    Map<String, String> getRequestParams();
 }

@@ -1,13 +1,18 @@
 package nextstep.jwp;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.ControllerContainer;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.util.RequestBinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RequestHandler implements Runnable {
 
@@ -23,19 +28,14 @@ public class RequestHandler implements Runnable {
     public void run() {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
-        try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
+        try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            final OutputStream outputStream = connection.getOutputStream()) {
 
-            final String responseBody = "Hello world!";
+            HttpRequest httpRequest = RequestBinder.createRequestByMessage(bufferedReader);
+            Controller controller = ControllerContainer.findController(httpRequest);
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            HttpResponse httpResponse = controller.doService(httpRequest);
+            outputStream.write(httpResponse.toResponseMessage().getBytes());
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);

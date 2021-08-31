@@ -1,19 +1,13 @@
 package nextstep.jwp;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,16 +28,15 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
                 final OutputStream outputStream = connection.getOutputStream()) {
-
             UserService userService = new UserService();
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            Map<String, String> parsedRequestHeaders = getParsedRequestHeaders(bufferedReader);
-            final String httpMethod = parsedRequestHeaders.get("httpMethod");
-            final String uri = parsedRequestHeaders.get("uri");
+            Request request = Request.createFromInputStream(inputStream);
+
+            final String httpMethod = request.getRequestLine("httpMethod");
+            final String uri = request.getRequestLine("uri");
             String responseBody = "";
             String response = "";
 
-            if (parsedRequestHeaders.isEmpty()) {
+            if (request.isEmpty()) {
                 return;
             }
 
@@ -54,21 +47,21 @@ public class RequestHandler implements Runnable {
                 responseBody = getStaticFileContents("/login.html");
                 response = replyOkResponse(responseBody);
             } else if (httpMethod.equals("POST") && (uri.equals("/login.html") || uri.equals("/login"))) {
-                String requestBody = extractRequestBody(bufferedReader, parsedRequestHeaders);
-                Optional<User> user = userService.findUserFromBody(requestBody);
-                if (user.isEmpty()) {
-                    responseBody = getStaticFileContents("/401.html");
-                    response = replyAfterLogin302Response(responseBody, "/401.html");
-                } else {
-                    responseBody = getStaticFileContents("/index.html");
-                    response = replyAfterLogin302Response(responseBody, "/index.html");
-                }
+//                String requestBody = extractRequestBody(bufferedReader, parsedRequestHeaders);
+//                Optional<User> user = userService.findUserFromBody(requestBody);
+//                if (user.isEmpty()) {
+//                    responseBody = getStaticFileContents("/401.html");
+//                    response = replyAfterLogin302Response(responseBody, "/401.html");
+//                } else {
+//                    responseBody = getStaticFileContents("/index.html");
+//                    response = replyAfterLogin302Response(responseBody, "/index.html");
+//                }
             } else if (httpMethod.equals("GET") && (uri.equals("/register") || uri.equals("/register.html"))) {
                 responseBody = getStaticFileContents("/register.html");
                 response = replyOkResponse(responseBody);
             } else if (httpMethod.equals("POST") && uri.equals("/register")) {
-                String requestBody = extractRequestBody(bufferedReader, parsedRequestHeaders);
-                userService.saveUser(requestBody);
+//                String requestBody = extractRequestBody(bufferedReader, parsedRequestHeaders);
+//                userService.saveUser(requestBody);
 
                 responseBody = getStaticFileContents("/index.html");
                 response = replyOkResponse(responseBody);
@@ -93,14 +86,6 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private String extractRequestBody(BufferedReader bufferedReader, Map<String, String> parsedRequestHeaders)
-            throws IOException {
-        int contentLength = Integer.parseInt(parsedRequestHeaders.get("Content-Length").strip());
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        String requestBody = new String(buffer);
-        return requestBody;
-    }
 
     private String replyAfterLogin302Response(String responseBody, String location) {
         final String response = String.join("\r\n",
@@ -152,28 +137,6 @@ public class RequestHandler implements Runnable {
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
-    private Map<String, String> getParsedRequestHeaders(BufferedReader bufferedReader)
-            throws IOException {
-
-        final Map<String, String> parsedRequests = new HashMap<>();
-
-        String requestLine = bufferedReader.readLine();
-        String[] splitRequestLine = requestLine.split(" ");
-        parsedRequests.put("httpMethod", splitRequestLine[0]);
-        parsedRequests.put("uri", splitRequestLine[1]);
-        parsedRequests.put("httpVersion", splitRequestLine[2]);
-
-        while (bufferedReader.ready()) {
-            String headers = bufferedReader.readLine();
-            String[] splitHeader = headers.split(": ");
-            if (splitHeader[0].equals("")) {
-                break;
-            }
-            parsedRequests.put(splitHeader[0], splitHeader[1]);
-        }
-
-        return parsedRequests;
-    }
 
     private void close() {
         try {

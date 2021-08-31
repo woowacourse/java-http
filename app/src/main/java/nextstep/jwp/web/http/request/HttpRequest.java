@@ -109,7 +109,7 @@ public class HttpRequest {
         private void parse(InputStream inputStream) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             try {
-                parseStatusLine(bufferedReader);
+                parseRequestLine(bufferedReader);
                 parseHeaders(bufferedReader);
                 int contentLength = this.headers.contentLength();
                 if (contentLength != 0) {
@@ -122,7 +122,7 @@ public class HttpRequest {
             }
         }
 
-        private void parseStatusLine(BufferedReader bufferedReader)
+        private void parseRequestLine(BufferedReader bufferedReader)
             throws IOException {
             List<String> parsedStatusLine = Arrays.asList(bufferedReader.readLine().split(BLANK));
 

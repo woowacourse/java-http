@@ -1,9 +1,10 @@
 package nextstep.jwp.resource;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
 import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 public enum FileType {
     PLAIN_TEXT("txt"),
@@ -14,8 +15,9 @@ public enum FileType {
     SVG("svg"),
     NONE("");
 
-    private static final List<FileType> CACHE_LIST = Arrays.stream(values())
-        .collect(toList());
+    private static final Map<String, FileType> CACHE = Arrays.stream(values())
+        .collect(toMap(FileType::getText,Function.identity()));
+
     private final String text;
 
     FileType(String text) {
@@ -23,10 +25,7 @@ public enum FileType {
     }
 
     public static FileType findByName(String extension) {
-        return CACHE_LIST.stream()
-            .filter(fileType -> fileType.text.equals(extension))
-            .findAny()
-            .orElseThrow(() -> new RuntimeException("매치되는 확장자 명이 없습니다."));
+        return CACHE.getOrDefault(extension, NONE);
     }
 
     public String getText() {

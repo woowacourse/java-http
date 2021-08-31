@@ -2,6 +2,8 @@ package nextstep.jwp.http;
 
 import nextstep.jwp.exception.NoMatchingControllerException;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.infrastructure.RequestHandler;
+import nextstep.jwp.infrastructure.RequestMapping;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +17,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RequestHandlerTest {
     private final String protocol = "HTTP/1.1";
+    private final RequestMapping requestMapping = new RequestMapping();
 
     @DisplayName("index 페이지를 요청하면 index 페이지와 함께 올바른 형식으로 응답을 반환한다")
     @Test
@@ -28,7 +31,7 @@ class RequestHandlerTest {
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
 
         // when
         requestHandler.run();
@@ -59,7 +62,7 @@ class RequestHandlerTest {
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
 
         // when
         requestHandler.run();
@@ -90,7 +93,7 @@ class RequestHandlerTest {
                 "account=gugu&password=password&email=hkkang%40woowahan.com");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
 
         // when
         requestHandler.run();
@@ -125,7 +128,7 @@ class RequestHandlerTest {
                 requestBody);
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
 
         // when
         requestHandler.run();
@@ -156,7 +159,7 @@ class RequestHandlerTest {
                 requestBody);
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
 
         // when
         requestHandler.run();
@@ -182,7 +185,7 @@ class RequestHandlerTest {
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
 
         assertThatThrownBy(requestHandler::run)
                 .isInstanceOf(NoMatchingControllerException.class);

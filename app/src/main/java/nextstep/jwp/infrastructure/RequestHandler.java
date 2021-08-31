@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package nextstep.jwp.infrastructure;
 
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.LoginController;
@@ -20,21 +20,14 @@ import java.util.Objects;
 
 public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
-    private static final Controller staticResourceController = new StaticResourceController();
-    private static final List<Controller> controllers = new ArrayList<>();
 
     private final Socket connection;
+    private final RequestMapping requestMapping;
     private BufferedReader inputStreamReader;
 
-    static {
-        final UserService userService = new UserService();
-        controllers.add(new LoginController(userService));
-        controllers.add(new RegisterController(userService));
-        controllers.add(staticResourceController);
-    }
-
-    public RequestHandler(Socket connection) {
+    public RequestHandler(final Socket connection, final RequestMapping requestMapping) {
         this.connection = Objects.requireNonNull(connection);
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -59,23 +52,16 @@ public class RequestHandler implements Runnable {
     private HttpResponse getHttpResponse(final InputStream inputStream) throws IOException {
         inputStreamReader = new BufferedReader(new InputStreamReader(inputStream));
         HttpRequest httpRequest = HttpRequest.parseRequest(inputStreamReader);
-        final Controller controller = findController(httpRequest);
+        Controller controller = requestMapping.findController(httpRequest);
         try {
             return controller.doService(httpRequest);
         } catch (ResourceNotFoundException exception) {
             httpRequest = HttpRequest.ofStaticFile("/404.html");
-            return staticResourceController.doService(httpRequest);
+            return requestMapping.getStaticResourceController().doService(httpRequest);
         } catch (RuntimeException exception) {
             httpRequest = HttpRequest.ofStaticFile("/500.html");
-            return staticResourceController.doService(httpRequest);
+            return requestMapping.getStaticResourceController().doService(httpRequest);
         }
-    }
-
-    private Controller findController(final HttpRequest httpRequest) {
-        return controllers.stream()
-                .filter(it -> it.canHandle(httpRequest))
-                .findAny()
-                .orElseThrow(NoMatchingControllerException::new);
     }
 
     private void close() {

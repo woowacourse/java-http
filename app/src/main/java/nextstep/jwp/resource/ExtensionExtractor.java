@@ -9,6 +9,9 @@ public class ExtensionExtractor {
     private static final String BLANK = "";
     private static final int EXIST_EXTENSION_SIZE = 2;
 
+    private ExtensionExtractor() {
+    }
+
     public static String extract(String url) {
         List<String> list = Arrays.asList(url.split(DOT_PATTERN));
         if (list.size() < EXIST_EXTENSION_SIZE) {

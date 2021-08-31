@@ -10,20 +10,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
+    private static Long nextId = 1L;
 
     static {
-        final User user = new User(1, "gugu", "password", "hkkang@woowahan.com");
-        database.put(user.getAccount(), user);
+        final User user = new User("gugu", "password", "hkkang@woowahan.com");
+        save(user);
     }
 
     public static User save(User user) {
-        Long nextId = 1L + database.values().stream()
-                .mapToLong(User::getId)
-                .max()
-                .orElseThrow(() -> new RuntimeException("PK 값을 산출할 수 없습니다."));
-        // todo 예외 생성
-
-        User persistedUser = new User(nextId, user.getAccount(), user.getPassword(), user.getEmail());
+        User persistedUser = new User(nextId++, user.getAccount(), user.getPassword(), user.getEmail());
         database.put(persistedUser.getAccount(), persistedUser);
 
         return persistedUser;

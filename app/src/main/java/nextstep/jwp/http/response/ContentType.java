@@ -4,7 +4,8 @@ public enum ContentType {
 
     CSS_UTF8("text/css;charset=utf-8"),
     HTML_UTF8("text/html;charset=utf-8"),
-    PLAIN_UTF8("text/plain;charset=utf-8");
+    PLAIN_UTF8("text/plain;charset=utf-8"),
+    SVG_UTF8("image/svg+xml;charset=utf-8");
 
     private final String type;
 
@@ -18,6 +19,9 @@ public enum ContentType {
         }
         if (extension.equals("html")) {
             return HTML_UTF8;
+        }
+        if(extension.equals("svg")){
+            return SVG_UTF8;
         }
         return PLAIN_UTF8;
     }

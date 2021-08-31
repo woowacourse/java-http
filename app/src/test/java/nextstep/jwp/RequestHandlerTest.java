@@ -155,7 +155,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    private static void assertResponse(String output, HttpStatus httpStatus, String body) {
+    public static void assertResponse(String output, HttpStatus httpStatus, String body) {
         String expected = "HTTP/1.1 " + httpStatus.code() + " " + httpStatus.name() + " \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + body.getBytes().length + " \r\n" +

@@ -57,4 +57,8 @@ public class Assembler {
     public Dispatcher dispatcher() {
         return dispatcher;
     }
+
+    public ViewResolver viewSolver() {
+        return viewResolver;
+    }
 }

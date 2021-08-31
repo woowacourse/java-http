@@ -17,10 +17,6 @@ public class ModelAndView {
         return new ModelAndView(Model.EMPTY, "", httpStatus);
     }
 
-    public static ModelAndView of(Model model, HttpStatus httpStatus) {
-        return new ModelAndView(model, "", httpStatus);
-    }
-
     public static ModelAndView of(String viewName, HttpStatus httpStatus) {
         return new ModelAndView(Model.EMPTY, viewName, httpStatus);
     }

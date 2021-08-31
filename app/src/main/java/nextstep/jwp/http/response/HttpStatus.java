@@ -16,8 +16,4 @@ public enum HttpStatus {
     public int code() {
         return code;
     }
-
-    public boolean isFound(){
-        return this.equals(FOUND);
-    }
 }

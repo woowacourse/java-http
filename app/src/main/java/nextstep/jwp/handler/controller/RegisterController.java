@@ -10,9 +10,6 @@ import nextstep.jwp.model.User;
 
 public class RegisterController extends AbstractController {
 
-    public RegisterController() {
-    }
-
     @Override
     protected ModelAndView doGet(HttpRequest request, HttpResponse response) {
         return ModelAndView.of("/register.html", HttpStatus.OK);

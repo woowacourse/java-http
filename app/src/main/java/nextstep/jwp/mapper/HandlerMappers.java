@@ -10,19 +10,19 @@ import java.util.Objects;
 
 public class HandlerMappers implements HandlerMapper {
 
-    private final List<HandlerMapper> handlerMappers;
+    private final List<HandlerMapper> mappers;
 
-    private HandlerMappers(List<HandlerMapper> handlerMappers) {
-        this.handlerMappers = handlerMappers;
+    private HandlerMappers(List<HandlerMapper> mappers) {
+        this.mappers = mappers;
     }
 
-    public HandlerMappers(HandlerMapper... handlerMappers) {
-        this(Arrays.asList(handlerMappers));
+    public HandlerMappers(HandlerMapper... mappers) {
+        this(Arrays.asList(mappers));
     }
 
     @Override
     public Handler mapping(HttpRequest httpRequest) {
-        return handlerMappers.stream()
+        return mappers.stream()
                 .map(handler -> handler.mapping(httpRequest))
                 .filter(handler->!Objects.isNull(handler))
                 .findFirst()

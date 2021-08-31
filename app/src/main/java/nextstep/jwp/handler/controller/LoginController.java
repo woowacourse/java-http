@@ -9,9 +9,6 @@ import nextstep.jwp.http.response.HttpStatus;
 
 public class LoginController extends AbstractController {
 
-    public LoginController() {
-    }
-
     @Override
     protected ModelAndView doGet(HttpRequest request, HttpResponse response) {
         return ModelAndView.of("/login.html", HttpStatus.OK);

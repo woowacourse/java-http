@@ -27,6 +27,10 @@ public class RequestLine {
         return uriPath.getSourcePath();
     }
 
+    public QueryParams queryParams(){
+        return uriPath.getQueryParams();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

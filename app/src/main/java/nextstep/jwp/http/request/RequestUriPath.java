@@ -29,6 +29,10 @@ public class RequestUriPath {
         return sourcePath;
     }
 
+    public QueryParams getQueryParams() {
+        return queryParams;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

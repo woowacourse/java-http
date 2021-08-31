@@ -29,4 +29,12 @@ public class User {
     public void setId(long id) {
         this.id = id;
     }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
 }

@@ -11,8 +11,12 @@ public class ServerConfig {
     public static final String RESOURCE_BASE_PATH = "/static";
     public static final String ROOT_RESPONSE = "Hello world!";
 
-    public static final Map<String, Class<? extends AbstractController>> CONTROLLER_MAP = new HashMap<>() {{
-        put("/login", LoginController.class);
-        put("/register", RegisterController.class);
-    }};
+    public static final Map<String, Class<? extends AbstractController>> CONTROLLER_MAP = new HashMap<>();
+
+    static {
+        CONTROLLER_MAP.put("/login", LoginController.class);
+        CONTROLLER_MAP.put("/register", RegisterController.class);
+    }
+
+    private ServerConfig() { }
 }

@@ -1,7 +1,10 @@
 package nextstep.jwp.mapping;
 
+import java.io.IOException;
+import nextstep.jwp.FileAccess;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.content.ContentType;
 import nextstep.jwp.http.response.status.HttpStatus;
 
 public class ExceptionHandler {
@@ -10,10 +13,14 @@ public class ExceptionHandler {
     }
 
     public static void handle(HttpStatus httpStatus, HttpRequest httpRequest,
-            HttpResponse httpResponse) {
-        String resource = "/" + httpStatus.getValue() + ".html";
+            HttpResponse httpResponse) throws IOException {
+        String path = "/" + httpStatus.getValue() + ".html";
 
-        httpResponse.setStatusLine(httpRequest.getProtocolVersion(), httpStatus);
-        httpResponse.addResponseHeader("Location", resource);
+        String resource = new FileAccess(path).getFile();
+
+        httpResponse.setStatusLine(httpRequest.getProtocolVersion(), HttpStatus.OK);
+        httpResponse.addResponseHeader("Content-Type", ContentType.HTML.getType());
+        httpResponse.addResponseHeader("Content-Length", String.valueOf(resource.getBytes().length));
+        httpResponse.setResponseBody(resource);
     }
 }

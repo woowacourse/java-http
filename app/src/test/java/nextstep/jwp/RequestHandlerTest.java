@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -55,11 +54,8 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         FileAccess file = new FileAccess("/index.html");
 
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + file.getFile().getBytes().length + " \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = expectedFileAccessResponse(resource, file);
+
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -171,11 +167,7 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         FileAccess file = new FileAccess("/register.html");
 
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + file.getFile().getBytes().length + " \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = expectedFileAccessResponse(resource, file);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -204,5 +196,13 @@ class RequestHandlerTest {
         String expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: /index.html \r\n\r\n";
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private String expectedFileAccessResponse(URL resource, FileAccess file) throws IOException {
+        return "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + file.getFile().getBytes().length + " \r\n" +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 }

@@ -22,11 +22,11 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
-    private final ApplicationContext applicationContext;
+    private final HandlerMapping handlerMapping;
 
     public RequestHandler(Socket connection, ApplicationContext applicationContext) {
         this.connection = Objects.requireNonNull(connection);
-        this.applicationContext = applicationContext;
+        this.handlerMapping = new HandlerMapping(applicationContext);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class RequestHandler implements Runnable {
 
     private void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
         try {
-            Handler mappedHandler = HandlerMapping.getHandler(httpRequest, applicationContext);
+            Handler mappedHandler = handlerMapping.getHandler(httpRequest);
             mappedHandler.handle(httpRequest, httpResponse);
         } catch (HttpException e) {
             ExceptionHandler.handle(e.getHttpStatus(), httpRequest, httpResponse);

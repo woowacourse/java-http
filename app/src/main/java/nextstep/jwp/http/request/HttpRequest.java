@@ -20,7 +20,7 @@ public class HttpRequest {
     public static HttpRequest create(BufferedReader bufferedReader) {
 
         try {
-            RequestStartLine requestStartLine = new RequestStartLine(bufferedReader);
+            RequestStartLine requestStartLine = RequestStartLine.create(bufferedReader);
             RequestHeaders requestHeaders = new RequestHeaders(bufferedReader);
             String body = "";
             if (requestHeaders.isExistContentLength()) {

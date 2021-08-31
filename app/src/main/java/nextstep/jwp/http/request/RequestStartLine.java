@@ -11,23 +11,33 @@ public class RequestStartLine {
     private HashMap<String, String> queryString;
     private String versionOfProtocol;
 
-    public RequestStartLine(BufferedReader bufferedReader) throws IOException {
+    private RequestStartLine(Method method, String path,
+            HashMap<String, String> queryString, String versionOfProtocol) {
+        this.method = method;
+        this.path = path;
+        this.queryString = queryString;
+        this.versionOfProtocol = versionOfProtocol;
+    }
+
+    public static RequestStartLine create(BufferedReader bufferedReader) throws IOException {
         String[] splitLine = bufferedReader.readLine().split(" ");
 
-        this.method = Method.valueOf(splitLine[0]);
-        this.path = splitLine[1];
-        this.versionOfProtocol = splitLine[2];
-        this.queryString = new HashMap<>();
+        Method method = Method.valueOf(splitLine[0]);
+        String path = splitLine[1];
+        String versionOfProtocol = splitLine[2];
+        HashMap<String, String> queryString = new HashMap<>();
 
         if (path.contains("?")) {
             String uri = splitLine[1];
             int index = uri.indexOf("?");
-            this.path = uri.substring(0, index);
-            this.queryString = queryString(uri.substring(index + 1));
+            path = uri.substring(0, index);
+            queryString = queryString(uri.substring(index + 1));
         }
+
+        return new RequestStartLine(method, path, queryString, versionOfProtocol);
     }
 
-    private HashMap<String, String> queryString(String uri) {
+    private static HashMap<String, String> queryString(String uri) {
         HashMap<String, String> hashMap = new HashMap<>();
 
         String[] queries = uri.split("&");

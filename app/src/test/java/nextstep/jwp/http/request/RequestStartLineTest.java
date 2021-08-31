@@ -22,7 +22,7 @@ class RequestStartLineTest {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         //when
 
-        RequestStartLine requestStartLine = new RequestStartLine(bufferedReader);
+        RequestStartLine requestStartLine = RequestStartLine.create(bufferedReader);
         //then
 
         assertThat(requestStartLine.getMethod()).isEqualTo(Method.GET);
@@ -40,7 +40,7 @@ class RequestStartLineTest {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         //when
 
-        RequestStartLine requestStartLine = new RequestStartLine(bufferedReader);
+        RequestStartLine requestStartLine = RequestStartLine.create(bufferedReader);
         //then
 
         assertThat(requestStartLine.getMethod()).isEqualTo(Method.GET);

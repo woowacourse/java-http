@@ -6,17 +6,20 @@ import nextstep.jwp.presentation.Controller;
 
 public class HandlerMapping {
 
-    private HandlerMapping() {
+    private final Handler fileAccessHandler = new FileAccessHandler();
+
+    private final ApplicationContext applicationContext;
+
+    public HandlerMapping(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
     }
 
-    public static Handler getHandler(HttpRequest request, ApplicationContext applicationContext) {
-
+    public Handler getHandler(HttpRequest request) {
         Controller controller = applicationContext.getController(request);
 
-        if (controller == null) {
-            return new FileAccessHandler();
+        if(controller == null) {
+            return fileAccessHandler;
         }
-
         return new HttpRequestHandler(controller);
     }
 }

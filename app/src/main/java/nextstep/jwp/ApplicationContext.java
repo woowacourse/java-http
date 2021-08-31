@@ -15,10 +15,6 @@ public class ApplicationContext {
     public Controller getController(HttpRequest request) {
         String path = request.getPath();
 
-        if (controllers.containsKey(path)) {
-            return (Controller) controllers.get(path);
-        }
-
-        return null;
+        return (Controller) controllers.get(path);
     }
 }

@@ -1,23 +1,24 @@
-package nextstep.jwp.db;
+package nextstep.jwp.app.db;
 
-
-import nextstep.jwp.model.User;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import nextstep.jwp.app.domain.User;
 
 public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
+    private static Long id = 1L;
 
     static {
-        final User user = new User(1, "gugu", "password", "hkkang@woowahan.com");
+        final User user = new User(id++, "gugu", "password", "hkkang@woowahan.com");
         database.put(user.getAccount(), user);
     }
 
     public static void save(User user) {
-        database.put(user.getAccount(), user);
+        User saveUser = new User(id, user.getAccount(), user.getPassword(), user.getEmail());
+        database.put(user.getAccount(), saveUser);
     }
 
     public static Optional<User> findByAccount(String account) {

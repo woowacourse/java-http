@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class HttpResponse {
 
@@ -102,7 +103,7 @@ public class HttpResponse {
 
     public void write(OutputStream outputStream) {
         try {
-            if (body == null) {
+            if (Objects.isNull(body)) {
                 writeWithoutBody(outputStream);
             } else {
                 writeWithBody(outputStream);

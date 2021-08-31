@@ -11,7 +11,7 @@ public class RequestHeaders {
 
     public void put(String line) {
         String[] tokens = line.split(": ");
-        this.headers.put(tokens[0], tokens[1]);
+        this.headers.put(tokens[0].trim(), tokens[1].trim());
     }
 
     public int getContentLength() {
@@ -19,10 +19,10 @@ public class RequestHeaders {
         if (Strings.isNullOrEmpty(contentLength)) {
             return 0;
         }
-        return Integer.parseInt(contentLength.trim());
+        return Integer.parseInt(contentLength);
     }
 
     public String getHeader(String key) {
-        return headers.get(key).trim();
+        return headers.get(key);
     }
 }

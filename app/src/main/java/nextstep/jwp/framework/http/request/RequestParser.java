@@ -1,5 +1,8 @@
 package nextstep.jwp.framework.http.request;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +14,8 @@ import static nextstep.jwp.framework.http.common.Constants.HTTP_HEADER_SEPARATOR
 import static nextstep.jwp.framework.http.common.Constants.NEWLINE;
 
 public class RequestParser {
+
+    private static final Logger log = LoggerFactory.getLogger(RequestParser.class);
 
     private final BufferedReader bufferedReader;
 
@@ -38,6 +43,7 @@ public class RequestParser {
         final String requestLine = parseRequestLine(header);
         final Map<String, String> requestHttpHeader = parseRequestHttpHeader(header);
         final String requestBody = parseRequestBody(requestHttpHeader);
+        log.info("########## client request line = {}, body ={} ##########", requestLine, requestBody);
         return HttpRequest.from(requestLine, requestHttpHeader, requestBody);
     }
 

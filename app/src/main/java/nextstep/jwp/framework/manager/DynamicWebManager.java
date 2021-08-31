@@ -30,7 +30,7 @@ public class DynamicWebManager {
     }
 
     private void initializeControllers() {
-        Reflections reflections = new Reflections("nextstep.jwp.application");
+        final Reflections reflections = new Reflections("nextstep.jwp.application");
         final Set<Class<?>> annotatedControllers = reflections.getTypesAnnotatedWith(Controller.class);
         for (Class<?> controller : annotatedControllers) {
             registerController(controller);
@@ -38,10 +38,9 @@ public class DynamicWebManager {
         log.info("########## annotated contollers loaded ##########");
     }
 
-    private void registerController(Class<?> controller) {
-        final Constructor<?> constructor;
+    private void registerController(final Class<?> controller) {
         try {
-            constructor = controller.getConstructor();
+            final Constructor<?> constructor = controller.getConstructor();
             controllers.add(constructor.newInstance());
         } catch (Exception e) {
             throw new IllegalArgumentException("Controller 생성 실패");
@@ -53,18 +52,14 @@ public class DynamicWebManager {
             final Class<?> controllerClass = controller.getClass();
             final Method[] methods = controllerClass.getMethods();
             for (Method method : methods) {
-                registerHandler(controller, method);
+                registerGetMethodHandlerIfRequired(controller, method);
+                registerPostMethodHandlerIfRequired(controller, method);
             }
         }
         log.info("########## controller handlers loaded ##########");
     }
 
-    private void registerHandler(Object controller, Method method) {
-        registerGetMethod(controller, method);
-        registerPostMethod(controller, method);
-    }
-
-    private void registerGetMethod(Object controller, Method method) {
+    private void registerGetMethodHandlerIfRequired(final Object controller, final Method method) {
         final GetMapping getMapping = method.getAnnotation(GetMapping.class);
         if (!Objects.isNull(getMapping)) {
             final String requestUrl = getMapping.value();
@@ -72,7 +67,7 @@ public class DynamicWebManager {
         }
     }
 
-    private void registerPostMethod(Object controller, Method method) {
+    private void registerPostMethodHandlerIfRequired(final Object controller, final Method method) {
         final PostMapping postMapping = method.getAnnotation(PostMapping.class);
         if (!Objects.isNull(postMapping)) {
             final String requestUrl = postMapping.value();
@@ -80,11 +75,11 @@ public class DynamicWebManager {
         }
     }
 
-    public boolean canHandle(HttpRequest httpRequest) {
+    public boolean canHandle(final HttpRequest httpRequest) {
         return dynamicWebHandler.containsKey(httpRequest);
     }
 
-    public String handle(HttpRequest httpRequest) {
+    public String handle(final HttpRequest httpRequest) {
         final Map<Object, Method> handler = dynamicWebHandler.get(httpRequest);
         final Object controller = handler.keySet().iterator().next();
         final Method method = handler.get(controller);
@@ -98,7 +93,7 @@ public class DynamicWebManager {
         }
     }
 
-    private List<String> mapMethodParameters(HttpRequest httpRequest, Method method) {
+    private List<String> mapMethodParameters(final HttpRequest httpRequest, final Method method) {
         final Parameter[] parameters = method.getParameters();
         return Arrays.stream(parameters)
                 .map(parameter -> parameter.getAnnotation(RequestParameter.class))

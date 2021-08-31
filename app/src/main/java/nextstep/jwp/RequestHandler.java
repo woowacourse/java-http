@@ -27,12 +27,14 @@ public class RequestHandler implements Runnable {
 
             String requestLine = bufferedReader.readLine();
 
-            String requestHttpMethod = requestLine.split(" ")[0];
-            String requestUri = requestLine.split(" ")[1];
+            String[] splitRequestLine = requestLine.split(" ");
+            String requestHttpMethod = splitRequestLine[0];
+            String requestUri = splitRequestLine[1];
 
             final StringBuilder stringBuilder = new StringBuilder();
 
             String line = null;
+
             do {
                 line = bufferedReader.readLine();
                 if (line == null) {
@@ -43,20 +45,21 @@ public class RequestHandler implements Runnable {
             } while (!"".equals(line));
 
 
-            if ("POST".equals(requestHttpMethod)) {
-                String requestBody = readRequestBody(bufferedReader, stringBuilder);
-                String response = PostRequestUri.createResponse(requestUri, requestBody);
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-            }
+            String response = null;
 
             if ("GET".equals(requestHttpMethod)) {
-                String response = GetRequestUri.createResponse(requestUri);
-                outputStream.write(response.getBytes());
-                outputStream.flush();
+                response = GetRequestUri.createResponse(requestUri);
+            } else if ("POST".equals(requestHttpMethod)) {
+                String requestBody = readRequestBody(bufferedReader, stringBuilder);
+                response = PostRequestUri.createResponse(requestUri, requestBody);
             }
+            outputStream.write(response.getBytes());
+            outputStream.flush();
+
         } catch (IOException exception) {
             log.error("Exception stream", exception);
+        } catch (IllegalArgumentException e) {
+            log.error(e.getMessage());
         } finally {
             close();
         }

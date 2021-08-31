@@ -20,9 +20,10 @@ public enum PostRequestUri {
             String[] splitBody = requestBody.split("&");
             String account = splitBody[0].split("=")[1];
             String password = splitBody[1].split("=")[1];
-            Optional<User> user = InMemoryUserRepository.findByAccount(account);
 
-            if (user.isEmpty() || !user.get().checkPassword(password)) {
+            User user = InMemoryUserRepository.findByAccount(account).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+            if (user.checkPassword(password)) {
                 return PostRequestUri.createResponse("/401.html", "302 Found", "text/html", "/401.html");
             }
 

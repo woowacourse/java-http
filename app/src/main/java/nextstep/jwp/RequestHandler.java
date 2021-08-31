@@ -78,7 +78,8 @@ public class RequestHandler implements Runnable {
                 String queries = resource.substring(index + 1);
                 Map<String, String> queryMap = createQueryMap(queries);
                 Optional<User> account = InMemoryUserRepository.findByAccount(queryMap.get("account"));
-                if (account.isPresent()) {
+
+                if (account.isPresent() && account.get().checkPassword(queryMap.get("password"))) {
                     responseBody = createResponseBody("/index.html");
                     responseHeader = "302 FOUND";
                 } else {

@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.stream.Stream;
+import nextstep.jwp.http.HttpSession;
+import nextstep.jwp.http.HttpSessions;
 import nextstep.jwp.http.RequestHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -94,14 +96,16 @@ class RequestHandlerTest {
 
     @Test
     @DisplayName("POST /login로 요청해서, 로그인 성공하면 응답 헤더에 http status code를 302로 반환한다.")
-    void login_redirect() throws IOException {
+    void login_redirect() {
         // given
+        HttpSessions.put(new HttpSession("656cef62-e3c4-40bc-a8df-94732920ed46"));
         String formData = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
             "POST /login HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
             "Content-Length: " + formData.length(),
+            "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
             "",
             "account=gugu&password=password");
 

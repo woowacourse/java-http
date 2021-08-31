@@ -8,7 +8,7 @@ public class HttpSession {
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
-    HttpSession(String id) {
+    public HttpSession(String id) {
         this.id = id;
     }
 

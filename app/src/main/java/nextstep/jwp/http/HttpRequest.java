@@ -129,5 +129,4 @@ public class HttpRequest {
         }
         return Optional.ofNullable(HttpSessions.getSession(jSessionId));
     }
-
 }

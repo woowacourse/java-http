@@ -53,17 +53,17 @@ public abstract class MethodHandler implements Handler {
     public ModelAndView doRequest(HttpRequest httpRequest, HttpResponse httpResponse) {
         Object returnValue;
         try {
-            returnValue = method.invoke(target, getMethodParameters(httpRequest));
+            returnValue = method.invoke(target, getMethodParameters(httpRequest, httpResponse));
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new MethodHandlerException();
         }
         return handleReturn(returnValue);
     }
 
-    private Object[] getMethodParameters(HttpRequest httpRequest) {
+    private Object[] getMethodParameters(HttpRequest httpRequest, HttpResponse httpResponse) {
         final Object[] parameters = new Object[methodParameters.size()];
         for (MethodParameter methodParameter : methodParameters) {
-            final Object value = argumentResolverContainer.resolve(methodParameter, httpRequest);
+            final Object value = argumentResolverContainer.resolve(methodParameter, httpRequest, httpResponse);
             parameters[methodParameter.getParameterOrder()] = value;
         }
         return parameters;

@@ -10,17 +10,10 @@ import nextstep.jwp.mvc.exception.PageNotFoundException;
 
 public class ModelAndView {
 
-    private String currentUrl;
     private String viewName;
-    private String redirectUrl;
 
-    public ModelAndView(String redirectUrl) {
-        this.redirectUrl = redirectUrl;
-    }
-
-    public ModelAndView(String viewName, String httpUrl) {
+    public ModelAndView(String viewName) {
         this.viewName = viewName;
-        this.currentUrl = httpUrl;
     }
 
     public String getViewAsString() {
@@ -31,17 +24,5 @@ public class ModelAndView {
         } catch (IOException | URISyntaxException e) {
             throw new PageNotFoundException();
         }
-    }
-
-    public void setRedirectUrl(String redirectUrl) {
-        this.redirectUrl = redirectUrl;
-    }
-
-    public boolean isRedirect() {
-        return redirectUrl != null;
-    }
-
-    public String getRedirectUrl() {
-        return redirectUrl;
     }
 }

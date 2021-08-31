@@ -30,4 +30,14 @@ public class MethodParameter {
     public int getParameterOrder() {
         return parameterOrder;
     }
+
+    public boolean isTypeOf(Class<?> aClass) {
+        return parameterClass.isTypeOf(aClass);
+    }
+
+    public <T> T getAnnotationOf(Class<T> annotationClass) {
+        return (T) Arrays.stream(annotations).filter(annotation -> annotation.getClass().isInstance(annotationClass))
+                .findAny()
+                .orElseThrow(() -> new IllegalStateException("no exists parameter value"));
+    }
 }

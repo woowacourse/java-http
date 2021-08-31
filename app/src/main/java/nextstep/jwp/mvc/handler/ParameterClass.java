@@ -37,4 +37,8 @@ public class ParameterClass {
             throw new IllegalStateException("can not create object");
         }
     }
+
+    public boolean isTypeOf(Class<?> aClass) {
+        return parameterClass.isAssignableFrom(aClass);
+    }
 }

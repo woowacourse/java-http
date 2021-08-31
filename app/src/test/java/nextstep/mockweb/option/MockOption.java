@@ -2,7 +2,6 @@ package nextstep.mockweb.option;
 
 import nextstep.jwp.MockSocket;
 import nextstep.jwp.RequestHandler;
-import nextstep.jwp.core.mvc.FrontHandler;
 import nextstep.mockweb.result.MockResult;
 import nextstep.mockweb.request.RequestInfo;
 
@@ -13,12 +12,11 @@ public class MockOption {
 
     private final RequestInfo requestInfo;
     private final OptionInfo optionInfo;
-    private final FrontHandler frontHandler;
+//    private final FrontHandler frontHandler;
 
-    public MockOption(RequestInfo requestInfo, FrontHandler frontHandler) {
+    public MockOption(RequestInfo requestInfo) {
         this.requestInfo = requestInfo;
         this.optionInfo = new OptionInfo();
-        this.frontHandler = frontHandler;
     }
 
     public MockResult result() {
@@ -45,7 +43,7 @@ public class MockOption {
     private String doRequest(RequestInfo requestInfo, OptionInfo optionInfo) {
         final MockSocket mockSocket = new MockSocket(requestInfo.asRequest());
         optionInfo.executeBeforeOption(requestInfo);
-        new RequestHandler(mockSocket, frontHandler).run();
+        new RequestHandler(mockSocket).run();
         final String result = mockSocket.output();
         optionInfo.executeAfterOption(result);
         return result;

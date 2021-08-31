@@ -32,7 +32,7 @@ public class RequestHandler implements Runnable {
             HttpRequest httpRequest = new DefaultHttpRequest(inputStream);
             HttpResponse httpResponse = new DefaultHttpResponse(outputStream);
 
-            final String response = frontHandler.getResponse(httpRequest, httpResponse).totalResponse();
+//            final String response = frontHandler.getResponse(httpRequest, httpResponse).totalResponse();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {

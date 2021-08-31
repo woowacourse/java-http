@@ -1,12 +1,13 @@
 package nextstep.jwp;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.stream.Stream;
+import nextstep.jwp.infrastructure.http.ControllerMapping;
+import nextstep.jwp.infrastructure.http.RequestHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebServer {
 
@@ -14,10 +15,19 @@ public class WebServer {
 
     private static final int DEFAULT_PORT = 8080;
 
+    private static final ControllerMapping CONTROLLER_MAPPING = new ControllerMapping("nextstep.jwp.controller");
+
     private final int port;
 
     public WebServer(int port) {
         this.port = checkPort(port);
+    }
+
+    public static int defaultPortIfNull(String[] args) {
+        return Stream.of(args)
+            .findFirst()
+            .map(Integer::parseInt)
+            .orElse(WebServer.DEFAULT_PORT);
     }
 
     public void run() {
@@ -34,15 +44,8 @@ public class WebServer {
     private void handle(ServerSocket serverSocket) throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection)).start();
+            new Thread(new RequestHandler(connection, CONTROLLER_MAPPING)).start();
         }
-    }
-
-    public static int defaultPortIfNull(String[] args) {
-        return Stream.of(args)
-                .findFirst()
-                .map(Integer::parseInt)
-                .orElse(WebServer.DEFAULT_PORT);
     }
 
     private int checkPort(int port) {

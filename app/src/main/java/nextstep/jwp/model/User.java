@@ -2,16 +2,24 @@ package nextstep.jwp.model;
 
 public class User {
 
-    private final long id;
+    private final Long id;
     private final String account;
     private final String password;
     private final String email;
 
-    public User(long id, String account, String password, String email) {
+    public User(Long id, String account, String password, String email) {
         this.id = id;
         this.account = account;
         this.password = password;
         this.email = email;
+    }
+
+    public User(final String account, final String password, final String email) {
+        this(null, account, password, email);
+    }
+
+    public User(long id, User user) {
+        this(id, user.account, user.password, user.email);
     }
 
     public boolean checkPassword(String password) {
@@ -25,10 +33,10 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
-                ", account='" + account + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                '}';
+            "id=" + id +
+            ", account='" + account + '\'' +
+            ", email='" + email + '\'' +
+            ", password='" + password + '\'' +
+            '}';
     }
 }

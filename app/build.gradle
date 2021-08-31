@@ -1,6 +1,7 @@
 plugins {
     id 'application'
     id 'org.sonarqube' version '3.3'
+    id 'jacoco'
 }
 
 sourceCompatibility = JavaVersion.VERSION_11
@@ -28,6 +29,10 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+tasks.named('sonarqube').configure {
+    dependsOn test
+}
+
 sonarqube {
     properties {
         property "sonar.sourceEncoding", "UTF-8"
@@ -36,3 +41,10 @@ sonarqube {
         property "sonar.host.url", "https://sonarcloud.io"
     }
 }
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+    }
+}
+test.finalizedBy jacocoTestReport

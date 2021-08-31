@@ -1,6 +1,5 @@
 package nextstep.mockweb.result;
 
-import nextstep.jwp.webserver.request.HttpMethod;
 import nextstep.jwp.webserver.response.StatusCode;
 
 public class MockResult {

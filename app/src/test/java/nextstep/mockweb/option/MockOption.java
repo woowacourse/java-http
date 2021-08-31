@@ -14,7 +14,6 @@ public class MockOption {
     private final RequestInfo requestInfo;
     private final OptionInfo optionInfo;
     private final DispatcherServlet dispatcherServlet;
-//    private final FrontHandler frontHandler;
 
     public MockOption(RequestInfo requestInfo, DispatcherServlet dispatcherServlet) {
         this.requestInfo = requestInfo;

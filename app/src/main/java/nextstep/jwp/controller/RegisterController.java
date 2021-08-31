@@ -47,9 +47,4 @@ public class RegisterController extends RestController {
 
         return new RegisterRequest(account, password, email);
     }
-
-    @Override
-    public boolean matchUri(String uri) {
-        return uri.startsWith("/register");
-    }
 }

@@ -17,8 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 class RegisterControllerTest {
 
@@ -36,13 +34,6 @@ class RegisterControllerTest {
         StaticResourceService staticResourceService = new StaticResourceService();
 
         registerController = new RegisterController(registerService, staticResourceService);
-    }
-
-    @DisplayName("'/register'으로 시작되는 Uri와 매칭된다.")
-    @ParameterizedTest
-    @ValueSource(strings = {"/register", "/register/wow", "/register?abc=def"})
-    void matchUri(String uri) {
-        assertThat(registerController.matchUri(uri)).isTrue();
     }
 
     @DisplayName("HttpRequest Method에 따라 Service 분기")

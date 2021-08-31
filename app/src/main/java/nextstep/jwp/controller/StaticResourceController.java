@@ -38,9 +38,4 @@ public class StaticResourceController implements Controller {
     public HttpResponse doService(HttpRequest httpRequest) throws IOException {
         return doGet(httpRequest);
     }
-
-    @Override
-    public boolean matchUri(String uri) {
-        return false;
-    }
 }

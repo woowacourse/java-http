@@ -45,9 +45,4 @@ public class LoginController extends RestController {
 
         return new LoginRequest(account, password);
     }
-
-    @Override
-    public boolean matchUri(String uri) {
-        return uri.startsWith("/login");
-    }
 }

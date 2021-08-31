@@ -17,8 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 class LoginControllerTest {
 
@@ -36,13 +34,6 @@ class LoginControllerTest {
         StaticResourceService staticResourceService = new StaticResourceService();
 
         loginController = new LoginController(loginService, staticResourceService);
-    }
-
-    @DisplayName("'/login'으로 시작되는 Uri와 매칭된다.")
-    @ParameterizedTest
-    @ValueSource(strings = {"/login", "/login/now", "/login?abc=def"})
-    void matchUri(String uri) {
-        assertThat(loginController.matchUri(uri)).isTrue();
     }
 
     @DisplayName("HttpRequest Method에 따라 Service 분기")

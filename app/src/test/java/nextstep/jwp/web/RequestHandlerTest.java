@@ -29,11 +29,12 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + resourceAsString.getBytes().length + " \r\n" +
-                "\r\n" +
-                resourceAsString;
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + resourceAsString.getBytes().length + " ",
+                "",
+                resourceAsString);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -58,11 +59,12 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + resourceAsString.getBytes().length + " \r\n" +
-                "\r\n" +
-                resourceAsString;
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + resourceAsString.getBytes().length + " ",
+                "",
+                resourceAsString);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -86,27 +88,26 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + resourceAsString.getBytes().length + " \r\n" +
-                "\r\n" +
-                resourceAsString;
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + resourceAsString.getBytes().length + " ",
+                "",
+                resourceAsString);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
     @DisplayName("로그인에 성공하면 /index.html로 리다이렉트한다 - 성공")
     @Test
-    void loginSuccess() throws IOException {
+    void loginSuccess() {
         // given
         final String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: 30",
                 "",
                 "account=gugu&password=password");
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final String resourceAsString = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(resource).getPath())));
 
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
@@ -115,15 +116,15 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final String expected = "HTTP/1.1 302 Found \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + resourceAsString.getBytes().length + " \r\n" +
-                "\r\n" +
-                resourceAsString;
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: /index.html ",
+                "",
+                "");
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("로그인에 실패하면 /401.html로 리다이렉트한다 - 성공")
+    @DisplayName("로그인에 실패하면 /401.html을 출력한다 - 성공")
     @Test
     void loginFail() throws IOException {
         // given
@@ -131,7 +132,7 @@ class RequestHandlerTest {
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-Length: 26",
+                "Content-Length: 26 ",
                 "",
                 "account=gugu&password=1234");
         final URL resource = getClass().getClassLoader().getResource("static/401.html");
@@ -144,11 +145,12 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final String expected = "HTTP/1.1 401 Unauthorized \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + resourceAsString.getBytes().length + " \r\n" +
-                "\r\n" +
-                resourceAsString;
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 401 Unauthorized ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + resourceAsString.getBytes().length + " ",
+                "",
+                resourceAsString);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -172,29 +174,28 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + resourceAsString.getBytes().length + " \r\n" +
-                "\r\n" +
-                resourceAsString;
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + resourceAsString.getBytes().length + " ",
+                "",
+                resourceAsString);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("POST /register 요청에 index.html 파일을 포함하여 응답한다 - 성공")
+    @DisplayName("POST /register 요청이 성공적으로 처리되면 /index.html로 리다이렉트한다 - 성공")
     @Test
-    void registerSuccess() throws IOException {
+    void registerSuccess() {
         // given
         final String httpRequest = String.join("\r\n",
-                "POST /register HTTP/1.1",
-                "Host: localhost:8080",
-                "Connection: keep-alive",
-                "Content-Length: 58",
-                "Content-Type: application/x-www-form-urlencoded",
-                "Accept: */*",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 58 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
                 "",
                 "account=pobi&password=password&email=pobi%40woowahan.com");
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final String resourceAsString = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(resource).getPath())));
 
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
@@ -202,11 +203,11 @@ class RequestHandlerTest {
         // when // then
         assertThatCode(requestHandler::run)
                 .doesNotThrowAnyException();
-        final String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + resourceAsString.getBytes().length + " \r\n" +
-                "\r\n" +
-                resourceAsString;
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: /index.html ",
+                "",
+                "");
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -230,11 +231,12 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/css \r\n" +
-                "Content-Length: " + resourceAsString.getBytes().length + " \r\n" +
-                "\r\n" +
-                resourceAsString;
+        final String expected = String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/css ",
+                "Content-Length: " + resourceAsString.getBytes().length + " ",
+                "",
+                resourceAsString);
         assertThat(socket.output()).isEqualTo(expected);
     }
 }

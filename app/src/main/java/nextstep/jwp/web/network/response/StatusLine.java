@@ -2,6 +2,8 @@ package nextstep.jwp.web.network.response;
 
 public class StatusLine {
 
+    private static final String STATUS_LINE_FORMAT = "%s %s %s ";
+
     private final String protocolVersion;
     private HttpStatus httpStatus;
 
@@ -10,8 +12,8 @@ public class StatusLine {
         this.httpStatus = httpStatus;
     }
 
-    public String asString() {
-        return protocolVersion + " " + httpStatus.toCode() + " " + httpStatus.toReasonPhrase() + " ";
+    public String print() {
+        return String.format(STATUS_LINE_FORMAT, protocolVersion, httpStatus.toCode(), httpStatus.toReasonPhrase());
     }
 
     public void setStatus(HttpStatus status) {

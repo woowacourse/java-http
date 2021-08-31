@@ -32,7 +32,6 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-
             final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
 
             final HttpRequest httpRequest  = new HttpRequest(inputStream);
@@ -41,7 +40,7 @@ public class RequestHandler implements Runnable {
             final Controller mappedController = controllerMapping.findByResource(httpRequest.getPath());
             mappedController.service(httpRequest, httpResponse);
 
-            bufferedWriter.write(httpResponse.asString());
+            bufferedWriter.write(httpResponse.print());
             bufferedWriter.flush();
             bufferedWriter.close();
         } catch (IOException exception) {

@@ -42,8 +42,7 @@ public class RegisterController extends AbstractController {
         }
         InMemoryUserRepository.save(user);
         log.info(String.format("New User Registered. user id : %d, account : %s", user.getId(), user.getAccount()));
-        final View view = new View("/index");
-        response.setStatus(HttpStatus.OK);
-        response.setBody(view);
+        response.setStatus(HttpStatus.FOUND);
+        response.setHeader("Location", "/index.html");
     }
 }

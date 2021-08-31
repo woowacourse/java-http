@@ -37,9 +37,8 @@ public class LoginController extends AbstractController {
                     .orElseThrow(() -> new UserNotFoundException(queryInfo.get("account")));
             if (user.checkPassword(queryInfo.get("password"))) {
                 log.info("Login successful!");
-                final View view = new View("/index");
                 response.setStatus(HttpStatus.FOUND);
-                response.setBody(view);
+                response.setHeader("Location", "/index.html");
             } else {
                 log.info("Login failed");
                 final View view = new View("/401");

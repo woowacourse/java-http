@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.model.Request;
 import nextstep.jwp.model.RequestBody;
-import nextstep.jwp.model.RequestPath;
+import nextstep.jwp.model.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,12 +23,10 @@ public class RequestAssembler {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line = reader.readLine();
         LOGGER.debug(line);
-        String[] firstLine = line.split(" ");
-        String requestMethod = firstLine[0];
-        RequestPath requestPath = new RequestPath(firstLine[1]);
+        RequestLine requestLine = new RequestLine(line);
         Map<String, String> headers = headers(reader, line);
         RequestBody requestBody = requestBody(reader, headers);
-        return new Request(requestMethod, headers, requestPath, requestBody);
+        return new Request(requestLine, headers, requestBody);
     }
 
     private static RequestBody requestBody(BufferedReader reader, Map<String, String> headers) throws IOException {
@@ -46,16 +44,12 @@ public class RequestAssembler {
     private static Map<String, String> headers(BufferedReader reader, String line) throws IOException {
         Map<String, String> headers = new HashMap<>();
         while (!"".equals(line)) {
-            if (line == null) {
-                return headers;
-            }
             line = reader.readLine();
             LOGGER.debug(line);
             String[] parsedLine = line.split(": ");
-            if (parsedLine.length < 2) {
-                break;
+            if (parsedLine.length > 1) {
+                headers.put(parsedLine[0], parsedLine[1]);
             }
-            headers.put(parsedLine[0], parsedLine[1]);
         }
         return headers;
     }

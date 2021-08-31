@@ -33,7 +33,7 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
                 final OutputStream outputStream = connection.getOutputStream()) {
             Request request = RequestAssembler.assemble(inputStream);
-            Controller controller = requestMapping.getController(request.path());
+            Controller controller = requestMapping.getController(request.getPath());
             Response response = controller.doService(request);
             outputStream.write(response.getBytes());
             outputStream.flush();

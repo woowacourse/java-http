@@ -17,7 +17,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     public Response doGet(Request request) throws IOException {
-        final String responseBody = fileByPath(request.path() + FileType.HTML.extension());
+        final String responseBody = fileByPath(request.getPath() + FileType.HTML.extension());
         return staticFileMessage(request, FileType.HTML, responseBody);
     }
 

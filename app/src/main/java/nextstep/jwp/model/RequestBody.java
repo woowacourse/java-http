@@ -1,7 +1,8 @@
 package nextstep.jwp.model;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RequestBody {
 
@@ -12,12 +13,8 @@ public class RequestBody {
     }
 
     public Map<String, String> queries() {
-        String[] querySlices = body.split("&");
-        Map<String, String> queries = new HashMap<>();
-        for (String querySlice : querySlices) {
-            String[] query = querySlice.split("=");
-            queries.put(query[0], query[1]);
-        }
-        return queries;
+        return Stream.of(body.split("&"))
+                .map(x -> x.split("="))
+                .collect(Collectors.toMap(x -> x[0], x -> x[1]));
     }
 }

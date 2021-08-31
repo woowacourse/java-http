@@ -8,7 +8,7 @@ public class StaticFileController extends AbstractController {
 
     @Override
     public Response doGet(Request request) throws IOException {
-        final String responseBody = fileByPath(request.path());
-        return staticFileMessage(request, request.fileType(), responseBody);
+        final String responseBody = fileByPath(request.getPath());
+        return staticFileMessage(request, request.getFileType(), responseBody);
     }
 }

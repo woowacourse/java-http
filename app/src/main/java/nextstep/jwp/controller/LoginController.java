@@ -25,11 +25,11 @@ public class LoginController extends AbstractController {
         if (Objects.nonNull(user)) {
             return redirectMessage(request, PathType.INDEX.resource());
         }
-        if (request.hasQueryString()) {
+        if (request.hasQueries()) {
             loginService.loginByGet(request);
             return redirectMessage(request, PathType.INDEX.resource());
         }
-        final String responseBody = fileByPath(request.path() + FileType.HTML.extension());
+        final String responseBody = fileByPath(request.getPath() + FileType.HTML.extension());
         return staticFileMessage(request, FileType.HTML, responseBody);
     }
 

@@ -14,7 +14,7 @@ public class RegisterService {
 
     public void register(Request request) {
         try {
-            Map<String, String> queries = request.getRequestBody().queries();
+            Map<String, String> queries = request.getBody().queries();
             String account = queries.get(ACCOUNT);
             String email = queries.get(EMAIL);
             String password = queries.get(PASSWORD);

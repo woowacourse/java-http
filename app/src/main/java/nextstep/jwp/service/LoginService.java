@@ -14,7 +14,7 @@ public class LoginService {
 
     public void loginByGet(Request request) {
         try {
-            Map<String, String> queries = request.queries();
+            Map<String, String> queries = request.getQueries();
             String account = queries.get(ACCOUNT);
             String password = queries.get(PASSWORD);
             User user = getUser(account);
@@ -28,7 +28,7 @@ public class LoginService {
 
     public void loginByPost(Request request) {
         try {
-            Map<String, String> queries = request.getRequestBody().queries();
+            Map<String, String> queries = request.getBody().queries();
             String account = queries.get(ACCOUNT);
             String password = queries.get(PASSWORD);
             User user = getUser(account);

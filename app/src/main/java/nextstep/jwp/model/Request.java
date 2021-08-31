@@ -5,18 +5,15 @@ import java.util.UUID;
 
 public class Request {
 
-    private String requestMethod;
-    private RequestPath requestPath;
-    private Map<String, String> requestHeaders;
-    private RequestBody requestBody;
+    private final RequestLine requestLine;
+    private Map<String, String> headers;
+    private RequestBody body;
     private Session session;
 
-    public Request(String requestMethod, Map<String, String> requestHeaders,
-                   RequestPath requestPath, RequestBody requestBody) {
-        this.requestMethod = requestMethod;
-        this.requestHeaders = requestHeaders;
-        this.requestPath = requestPath;
-        this.requestBody = requestBody;
+    public Request(RequestLine requestLine, Map<String, String> headers, RequestBody body) {
+        this.requestLine = requestLine;
+        this.headers = headers;
+        this.body = body;
         this.session = initializeSession();
     }
 
@@ -26,15 +23,15 @@ public class Request {
     }
 
     public String getRequestMethod() {
-        return requestMethod;
+        return requestLine.getMethod();
     }
 
-    public RequestBody getRequestBody() {
-        return requestBody;
+    public RequestBody getBody() {
+        return body;
     }
 
     public boolean hasCookieHeader() {
-        return requestHeaders.containsKey("Cookie");
+        return headers.containsKey("Cookie");
     }
 
     public Session getSession() {
@@ -42,25 +39,25 @@ public class Request {
     }
 
     private String initializeSessionId() {
-        if (requestHeaders.containsKey("Cookie")) {
-            return new Cookie(requestHeaders.get("Cookie")).getSessionId();
+        if (headers.containsKey("Cookie")) {
+            return new Cookie(headers.get("Cookie")).getSessionId();
         }
         return UUID.randomUUID().toString();
     }
 
-    public FileType fileType() {
-        return requestPath.fileType();
+    public FileType getFileType() {
+        return requestLine.getFileType();
     }
 
-    public String path() {
-        return requestPath.path();
+    public String getPath() {
+        return requestLine.getPath();
     }
 
-    public boolean hasQueryString() {
-        return requestPath.hasQueryString();
+    public boolean hasQueries() {
+        return requestLine.hasQueries();
     }
 
-    public Map<String, String> queries() {
-        return requestPath.queries();
+    public Map<String, String> getQueries() {
+        return requestLine.getQueries();
     }
 }

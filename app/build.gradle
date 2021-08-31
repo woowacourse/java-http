@@ -35,6 +35,7 @@ sonarqube {
         property "sonar.sourceEncoding", "UTF-8"
         property "sonar.projectKey", "woowacourse_be-jwp-http-server"
         property "sonar.organization", "woowacourse"
+        property "sonar.host.url", "https://sonarcloud.io"
         property "sonar.coverage.jacoco.xmlReportPaths", "jacoco/jacoco.xml"
     }
 }

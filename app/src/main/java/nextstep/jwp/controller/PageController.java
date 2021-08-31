@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiFunction;
 
 public class PageController {
@@ -24,7 +23,7 @@ public class PageController {
         this.mappedFunction.put("register", this::register);
     }
 
-    public Map<HttpStatus, String> mapResponse(HttpStatus status, final String request) {
+    public Map<HttpStatus, String> mapResponse(final HttpStatus status, final String request) {
         return this.mappedFunction.keySet().stream()
                 .filter(request::contains)
                 .map(s -> this.mappedFunction.get(s).apply(status, request))
@@ -68,6 +67,7 @@ public class PageController {
         }
     }
 
+    //이거 response로
     public String getFileResponse(final String request) {
         try {
             final Path path = new File(getPath(request)).toPath();

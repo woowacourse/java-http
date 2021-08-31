@@ -42,7 +42,7 @@ public class RequestHandler implements Runnable {
             HttpRequest httpRequest = new HttpRequest(inputStreamReader);
             HttpResponse response = httpRequest.getHttpMethod().matches(httpRequest);
 
-            outputStream.write(response.getResponse().getBytes());
+            outputStream.write(response.getHttpResponse().getBytes());
             outputStream.flush();
         } catch (IOException | IllegalArgumentException e) {
             throw new IllegalArgumentException(e.getMessage());

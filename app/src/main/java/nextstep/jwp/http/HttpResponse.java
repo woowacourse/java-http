@@ -37,6 +37,11 @@ public class HttpResponse {
                 "HTTP/1.1 404 Not Found ");
     }
 
+    public static String methodNotAllowed() {
+        return String.join("\r\n",
+                "HTTP/1.1 405 Method Not Allowed ");
+    }
+
     public static String internalServerError() {
         return String.join("\r\n",
                 "HTTP/1.1 500 Internal Server Error ");

@@ -2,9 +2,9 @@ package nextstep.jwp.web.exceptionhandler;
 
 import nextstep.jwp.http.HttpResponse;
 
-public class NotFoundExceptionHandler implements ExceptionHandler {
+public class MethodNotAllowedExceptionHandler implements ExceptionHandler {
     @Override
     public String handle(Exception exception) {
-        return HttpResponse.notFound();
+        return HttpResponse.methodNotAllowed();
     }
 }

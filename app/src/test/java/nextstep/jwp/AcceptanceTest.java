@@ -46,7 +46,7 @@ public class AcceptanceTest {
         // then
         String entire = socket.output();
         assertThat(socket.output()).isNotEmpty();
-        assertThat(redirectCode(entire)).isEqualTo(code);
+        assertThat(getCode(entire)).isEqualTo(code);
     }
 
     static Stream<Arguments> secondAndThirdMission() {
@@ -84,7 +84,7 @@ public class AcceptanceTest {
         // then
         String entire = socket.output();
         assertThat(socket.output()).isNotEmpty();
-        assertThat(redirectCode(entire)).isEqualTo(code);
+        assertThat(getCode(entire)).isEqualTo(code);
     }
 
     static Stream<Arguments> fourthMission() {
@@ -137,12 +137,6 @@ public class AcceptanceTest {
     private String getCode(String entireResponse) {
         String[] lines = entireResponse.split("\n");
         String[] firstHeaderLine = lines[0].split(" ");
-        return firstHeaderLine[1];
-    }
-
-    private String redirectCode(String entireResponse) {
-        String[] lines = entireResponse.split("\n");
-        String[] firstHeaderLine = lines[4].split(" ");
         return firstHeaderLine[1];
     }
 }

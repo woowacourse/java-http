@@ -8,7 +8,7 @@ public class HttpResponse {
         this.response = response;
     }
 
-    public String responseBody() {
+    public String value() {
         return this.response;
     }
 

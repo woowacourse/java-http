@@ -35,13 +35,7 @@ public class RequestHandler implements Runnable {
             final RequestMapping requestMapping = new RequestMapping();
             final Controller controller = requestMapping.getController(httpRequest);
             controller.service(httpRequest, httpResponse);
-            final String responseBody = httpResponse.responseBody();
-            final String response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+            final String response = httpResponse.value();
 
             outputStream.write(response.getBytes());
             outputStream.flush();

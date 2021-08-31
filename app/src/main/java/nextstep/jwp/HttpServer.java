@@ -8,9 +8,9 @@ import java.util.Objects;
 import nextstep.jwp.constants.Headers;
 import nextstep.jwp.constants.Http;
 import nextstep.jwp.controller.FrontController;
-import nextstep.jwp.http.RequestBody;
-import nextstep.jwp.http.RequestHeader;
-import nextstep.jwp.http.RequestLine;
+import nextstep.jwp.request.RequestBody;
+import nextstep.jwp.request.RequestHeader;
+import nextstep.jwp.request.RequestLine;
 
 public class HttpServer {
     private final BufferedReader reader;

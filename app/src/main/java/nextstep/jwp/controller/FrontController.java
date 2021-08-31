@@ -6,9 +6,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import nextstep.jwp.constants.HttpMethod;
 import nextstep.jwp.exception.HttpException;
-import nextstep.jwp.http.RequestBody;
-import nextstep.jwp.http.RequestLine;
-import nextstep.jwp.http.ResponseEntity;
+import nextstep.jwp.request.RequestBody;
+import nextstep.jwp.request.RequestLine;
+import nextstep.jwp.response.ResponseEntity;
 
 public class FrontController {
     private final RequestLine requestLine;

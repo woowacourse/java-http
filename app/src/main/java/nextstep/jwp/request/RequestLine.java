@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package nextstep.jwp.request;
 
 import nextstep.jwp.constants.Http;
 import nextstep.jwp.constants.HttpMethod;

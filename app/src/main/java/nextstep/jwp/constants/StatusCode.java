@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package nextstep.jwp.constants;
 
 public enum StatusCode {
     OK("200", "OK"),

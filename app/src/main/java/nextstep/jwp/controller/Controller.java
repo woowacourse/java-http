@@ -2,9 +2,9 @@ package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.util.Map;
-import nextstep.jwp.http.RequestBody;
-import nextstep.jwp.http.ResponseEntity;
-import nextstep.jwp.http.StatusCode;
+import nextstep.jwp.constants.StatusCode;
+import nextstep.jwp.request.RequestBody;
+import nextstep.jwp.response.ResponseEntity;
 import nextstep.jwp.service.HttpService;
 
 public class Controller {

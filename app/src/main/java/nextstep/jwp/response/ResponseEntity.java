@@ -1,10 +1,11 @@
-package nextstep.jwp.http;
+package nextstep.jwp.response;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.constants.Http;
+import nextstep.jwp.constants.StatusCode;
 
 public class ResponseEntity {
 

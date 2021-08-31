@@ -1,20 +1,14 @@
 package nextstep.jwp.model.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.NotFoundResourceException;
 import nextstep.jwp.model.http_request.JwpHttpRequest;
 import nextstep.jwp.model.http_response.JwpHttpResponse;
 import nextstep.jwp.model.user.domain.User;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
-public class LoginHandler implements CustomHandler {
+public class LoginHandler extends DefaultHttpHandler {
 
     private static final String RESOURCE_PREFIX = "static/";
     private static final String LOGIN_PAGE_PATH = "login.html";
@@ -22,48 +16,29 @@ public class LoginHandler implements CustomHandler {
     private static final String LOGIN_FAILURE_PATH = "401.html";
 
     @Override
-    public void handle(JwpHttpRequest jwpHttpRequest, OutputStream outputStream) throws IOException, URISyntaxException {
+    public String handle(JwpHttpRequest jwpHttpRequest) throws URISyntaxException, IOException {
         if (jwpHttpRequest.isEmptyParams()) {
             String resourceUri = RESOURCE_PREFIX + LOGIN_PAGE_PATH;
             String resourceFile = findResourceFile(resourceUri);
-            final String response = JwpHttpResponse.ok(resourceUri, resourceFile);
-            outputStream.write(response.getBytes());
-            return;
+            return JwpHttpResponse.ok(resourceUri, resourceFile);
         }
 
         String account = jwpHttpRequest.getParam("account");
         String password = jwpHttpRequest.getParam("password");
-        InMemoryUserRepository.findByAccount(account)
-                .ifPresentOrElse(user -> requestLogin(user, password, outputStream),
-                        () -> loginFail(outputStream));
+        return InMemoryUserRepository.findByAccount(account)
+                .map(user -> requestLogin(user, password))
+                .orElseGet(this::loginFail);
     }
 
-    private String findResourceFile(String resourceUri) throws URISyntaxException, IOException {
-        URL resource = getClass().getClassLoader().getResource(resourceUri);
-        final Path path = Paths.get(resource.toURI());
-        return new String(Files.readAllBytes(path));
-    }
-
-    private void requestLogin(User user, String password, OutputStream outputStream) {
+    private String requestLogin(User user, String password) {
         if (user.checkPassword(password)) {
-            try {
-                final String response = JwpHttpResponse.found(LOGIN_SUCCESS_PATH);
-                outputStream.write(response.getBytes());
-            } catch (IOException e) {
-                throw new NotFoundResourceException(LOGIN_SUCCESS_PATH);
-            }
-            return;
+            return JwpHttpResponse.found(LOGIN_SUCCESS_PATH);
         }
 
-        loginFail(outputStream);
+        return loginFail();
     }
 
-    private void loginFail(OutputStream outputStream) {
-        try {
-            String response = JwpHttpResponse.found(LOGIN_FAILURE_PATH);
-            outputStream.write(response.getBytes());
-        } catch (IOException e) {
-            throw new NotFoundResourceException(LOGIN_FAILURE_PATH);
-        }
+    private String loginFail() {
+        return JwpHttpResponse.found(LOGIN_FAILURE_PATH);
     }
 }

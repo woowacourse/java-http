@@ -30,7 +30,8 @@ public class RequestHandler implements Runnable {
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             JwpHttpRequest request = JwpHttpRequest.of(reader);
             CustomHandler handler = HandlerMapper.from(request.getUri());
-            handler.handle(request, outputStream);
+            String response = handler.handle(request);
+            outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | URISyntaxException exception) {
             log.error("Exception stream", exception);

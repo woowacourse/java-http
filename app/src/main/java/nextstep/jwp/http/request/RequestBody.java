@@ -6,6 +6,10 @@ import java.util.Map;
 
 public class RequestBody {
 
+    private final int KEY_INDEX = 0;
+    private final int VALUE_INDEX = 1;
+    private final int PARAM_LENGTH = 2;
+
     private final Map<String, String> params = new HashMap<>();
 
     public RequestBody(String requestBody) {
@@ -18,9 +22,9 @@ public class RequestBody {
             if (Strings.isNullOrEmpty(parameter)) {
                 continue;
             }
-            String[] temp = parameter.split("=");
-            if (temp.length == 2) {
-                params.put(temp[0], temp[1]);
+            String[] param = parameter.split("=");
+            if (param.length == PARAM_LENGTH) {
+                params.put(param[KEY_INDEX], param[VALUE_INDEX]);
             }
         }
     }

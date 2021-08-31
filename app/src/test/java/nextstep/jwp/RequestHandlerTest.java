@@ -15,25 +15,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RequestHandlerTest {
 
-    @Test
-    void run() {
-        // given
-        final MockSocket socket = new MockSocket();
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
-
-        // then
-        String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
     @DisplayName("GET /index.html 요청시 파일 불러오기")
     @Test
     void index() throws IOException {

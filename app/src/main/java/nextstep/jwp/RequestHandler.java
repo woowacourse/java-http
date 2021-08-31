@@ -15,7 +15,6 @@ import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.request.RequestURI;
 import nextstep.jwp.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,18 +41,15 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
             final OutputStream outputStream = connection.getOutputStream()) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
             HttpRequest httpRequest = new HttpRequest(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
-            RequestURI requestURI = httpRequest.getRequestURI();
 
             Controller controller = controllerMap
-                .getOrDefault(requestURI.getRequestURI(), new HomeController());
+                .getOrDefault(httpRequest.getRequestURI(), new HomeController());
             controller.process(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
-
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {

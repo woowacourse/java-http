@@ -67,8 +67,8 @@ public class HttpRequest {
         return httpMethod;
     }
 
-    public RequestURI getRequestURI() {
-        return this.requestURI;
+    public String getRequestURI() {
+        return this.requestURI.getUri();
     }
 
     public HttpHeader getHttpHeader() {

@@ -2,13 +2,13 @@ package nextstep.jwp.http.request;
 
 public class RequestURI {
 
-    private final String requestURI;
+    private final String uri;
 
-    public RequestURI(String requestURI) {
-        this.requestURI = requestURI;
+    public RequestURI(String uri) {
+        this.uri = uri;
     }
 
-    public String getRequestURI() {
-        return requestURI;
+    public String getUri() {
+        return uri;
     }
 }

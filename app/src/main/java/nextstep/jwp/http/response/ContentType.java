@@ -11,8 +11,11 @@ public enum ContentType {
     JS("js", "application/javascript"),
     SVG("svg", "image/svg+xml");
 
+    private static final int INDEX = 1;
+
     private final String suffix;
     private final String value;
+
 
     ContentType(String suffix, String value) {
         this.suffix = suffix;
@@ -20,7 +23,7 @@ public enum ContentType {
     }
 
     public static ContentType findByUri(String uri) {
-        String suffix = uri.split("\\.")[1];
+        String suffix = uri.split("\\.")[INDEX];
 
         return Arrays.stream(ContentType.values())
             .filter(contentType -> contentType.getSuffix().equals(suffix))

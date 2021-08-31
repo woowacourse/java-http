@@ -2,6 +2,7 @@ package nextstep.jwp.http.response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 public class ResponseHeader {
@@ -13,10 +14,16 @@ public class ResponseHeader {
     }
 
     public void setContentType(ContentType contentType) {
+        if (Objects.isNull(contentType)) {
+            return;
+        }
         this.headers.put("Content-Type", contentType.getValue());
     }
 
     public void setContentLength(int length) {
+        if (length == 0) {
+            return;
+        }
         this.headers.put("Content-Length", String.valueOf(length));
     }
 

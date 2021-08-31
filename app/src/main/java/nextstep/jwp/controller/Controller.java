@@ -7,5 +7,5 @@ import nextstep.jwp.http.response.HttpResponse;
 
 public interface Controller {
 
-    void process(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException;
+    void process(HttpRequest request, HttpResponse response) throws IOException;
 }

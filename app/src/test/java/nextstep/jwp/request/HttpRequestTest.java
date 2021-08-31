@@ -37,7 +37,7 @@ public class HttpRequestTest {
         RequestBody requestBody = httpRequest.getRequestBody();
 
         assertThat(httpRequest.getHttpMethod()).isEqualTo(HttpMethod.POST);
-        assertThat(httpRequest.getRequestURI().getRequestURI()).isEqualTo("/register");
+        assertThat(httpRequest.getRequestURI()).isEqualTo("/register");
         assertThat(httpRequest.getHttpHeader().getContentLength()).isEqualTo(80);
         assertThat(requestBody.getParam("account")).isEqualTo("gugu");
 

@@ -15,9 +15,13 @@ public enum HttpMethod {
 
     public static HttpMethod of(String methodName) {
         return Arrays.stream(values())
-            .filter(httpMethod -> httpMethod.getMethod().equals(methodName))
+            .filter(httpMethod -> httpMethod.isSameMethod(methodName))
             .findAny()
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 http 요청입니다."));
+    }
+
+    private boolean isSameMethod(String methodName) {
+        return getMethod().equals(methodName);
     }
 
     private String getMethod() {

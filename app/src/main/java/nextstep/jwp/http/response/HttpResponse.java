@@ -1,17 +1,16 @@
 package nextstep.jwp.http.response;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HttpResponse {
 
     private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
+    private static final String STREAM_EXCEPTION = "stream exception";
+
     private final ResponseHeader responseHeader;
     private StatusLine statusLine;
     private ResponseBody responseBody;
@@ -20,74 +19,53 @@ public class HttpResponse {
         this.responseHeader = new ResponseHeader();
     }
 
-    public void forward(String uri) throws IOException {
+    public void forward(String uri) {
         try {
-            URL resource = getClass().getClassLoader().getResource("static" + uri);
-            String content = getContent(resource);
-            if (content == null) {
-                notFound();
-                return;
-            }
-
-            setStatusLine(StatusCode.OK);
-            this.responseHeader.setContentType(ContentType.findByUri(uri));
-            this.responseHeader.setContentLength(content.getBytes(StandardCharsets.UTF_8).length);
-            this.responseBody = new ResponseBody(content);
+            ViewResolver viewResolver = new ViewResolver(uri);
+            String content = viewResolver.getContent();
+            makeResponse(content, StatusCode.OK, uri);
         } catch (IOException e) {
-            log.error("stream exception");
+            log.error(STREAM_EXCEPTION);
         }
     }
 
     public void exception(String uri) {
         try {
-            URL resource = getClass().getClassLoader().getResource("static" + uri);
-            String content = getContent(resource);
-            if (content == null) {
-                notFound();
-                return;
-            }
+            ViewResolver viewResolver = new ViewResolver(uri);
+            String content = viewResolver.getContent();
 
-            setStatusLine(StatusCode.UNAUTHORIZED);
-            this.responseHeader.setContentType(ContentType.findByUri(uri));
-            this.responseHeader.setContentLength(content.getBytes(StandardCharsets.UTF_8).length);
-            this.responseBody = new ResponseBody(content);
+            makeResponse(content, StatusCode.UNAUTHORIZED, uri);
         } catch (IOException e) {
-            log.error("stream exception");
+            log.error(STREAM_EXCEPTION);
         }
+    }
+
+    private void notFound(String uri) {
+        try {
+            ViewResolver viewResolver = new ViewResolver(uri);
+            String content = viewResolver.getContent();
+
+            makeResponse(content, StatusCode.NOT_FOUND, uri);
+        } catch (IOException e) {
+            log.error(STREAM_EXCEPTION);
+        }
+
+    }
+
+    private void makeResponse(String content, StatusCode statusCode, String uri) {
+        if (Objects.isNull(content)) {
+            notFound("/404.html");
+            return;
+        }
+        setStatusLine(statusCode);
+        this.responseHeader.setContentType(ContentType.findByUri(uri));
+        this.responseHeader.setContentLength(content.getBytes(StandardCharsets.UTF_8).length);
+        this.responseBody = new ResponseBody(content);
     }
 
     public void redirect(String redirectUrl) {
         setStatusLine(StatusCode.FOUND);
         this.responseHeader.setLocation(redirectUrl);
-    }
-
-    private String getContent(URL resource) throws IOException {
-        if (resource == null) {
-            return null;
-        }
-        Path path = new File(resource.getPath()).toPath();
-        return Files.readString(path);
-    }
-
-    private void notFound() throws IOException {
-        try {
-            URL resource = getClass().getClassLoader().getResource("/404.html");
-            String content = getContent(resource);
-
-            this.setStatusLine(StatusCode.NOT_FOUND);
-            this.responseHeader.setContentType(ContentType.HTML);
-            this.responseBody = new ResponseBody(content);
-        } catch (IOException e) {
-            log.error("stream exception");
-        }
-
-    }
-
-    public void message(String message) {
-        setStatusLine(StatusCode.OK);
-        responseHeader.setContentType(ContentType.HTML);
-        responseHeader.setContentLength(message.length());
-        responseBody = new ResponseBody(message);
     }
 
     public void setStatusLine(StatusCode statusCode) {
@@ -100,7 +78,7 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-        if (responseBody == null) {
+        if (Objects.isNull(responseBody)) {
             return String.join("\r\n", statusLine.toString(), responseHeader.toString());
         }
         return String.join("\r\n", statusLine.toString(), responseHeader.toString(),

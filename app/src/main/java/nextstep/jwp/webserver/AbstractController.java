@@ -27,7 +27,7 @@ public abstract class AbstractController implements Controller {
         URL resource = getClass().getClassLoader().getResource("static/" + fileName);
 
         if (resource == null) {
-            throw new RuntimeException(); // 파일없음
+            throw new RuntimeException();
         }
         Path path = new File(resource.getPath()).toPath();
 
@@ -38,4 +38,16 @@ public abstract class AbstractController implements Controller {
         }
     }
 
+    protected String getContentType(String extension) {
+        if ("js".equals(extension)) {
+            return "text/javascript";
+        }
+        if ("css".equals(extension)) {
+            return "text/css";
+        }
+        if ("html".equals(extension)) {
+            return "text/html";
+        }
+        return "text/plain";
+    }
 }

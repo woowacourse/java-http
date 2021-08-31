@@ -13,6 +13,10 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String body = readStaticFile("register.html");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", getContentType("html") + ";charset=utf-8");
+        response.setHeaders(headers);
         response.setStatusCode(StatusCode._200_OK);
         response.setBody(body);
     }

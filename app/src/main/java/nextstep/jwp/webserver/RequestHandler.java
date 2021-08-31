@@ -39,7 +39,6 @@ public class RequestHandler implements Runnable {
         } catch (IOException ioException) {
             log.error("Exception stream", ioException);
         } catch (Exception exception) {
-            // 예외 핸들링
             log.error("Exception", exception);
         } finally {
             close();

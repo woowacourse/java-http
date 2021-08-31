@@ -13,22 +13,8 @@ public class StaticFileController extends AbstractController {
         response.setStatusCode(StatusCode._200_OK);
         response.setBody(body);
 
-//        String accept = request.getHeader("Accept");
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", getContentType(extension));
+        headers.set("Content-Type", getContentType(extension) + ";charset=utf-8");
         response.setHeaders(headers);
-    }
-
-    private String getContentType(String extension) {
-        if ("js".equals(extension)) {
-            return "text/javascript";
-        }
-        if ("css".equals(extension)) {
-            return "text/css";
-        }
-        if ("html".equals(extension)) {
-            return "text/html";
-        }
-        return "text/plain";
     }
 }

@@ -28,7 +28,6 @@ public class HttpResponse {
     private void setDefaultHeaders() {
         if (body != null && body.length() > 0) {
             headers.set("Content-Length", String.valueOf(body.getBytes().length));
-            headers.set("Content-Type", "text/html;charset=utf-8");
         }
     }
 

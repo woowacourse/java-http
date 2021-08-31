@@ -7,14 +7,22 @@ public class User {
     private final String password;
     private final String email;
 
-    public User(long id, String account, String password, String email) {
+    public static User of(final long id, final User user) {
+        return new User(id, user.getAccount(), user.getPassword(), user.getEmail());
+    }
+
+    public User(final String account, final String password, final String email) {
+        this(-1, account, password, email);
+    }
+
+    public User(final long id, final String account, final String password, final String email) {
         this.id = id;
         this.account = account;
         this.password = password;
         this.email = email;
     }
 
-    public boolean checkPassword(String password) {
+    public boolean checkPassword(final String password) {
         return this.password.equals(password);
     }
 
@@ -22,13 +30,21 @@ public class User {
         return account;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
-                ", account='" + account + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                '}';
+            "id=" + id +
+            ", account='" + account + '\'' +
+            ", email='" + email + '\'' +
+            ", password='" + password + '\'' +
+            '}';
     }
 }

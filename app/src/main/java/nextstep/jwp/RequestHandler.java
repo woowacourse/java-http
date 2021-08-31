@@ -1,44 +1,54 @@
 package nextstep.jwp;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.ControllerMapper;
+import nextstep.jwp.http.HttpMethod;
+import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
-import java.util.Objects;
-
 public class RequestHandler implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
 
-    public RequestHandler(Socket connection) {
+    public RequestHandler(final Socket connection) {
         this.connection = Objects.requireNonNull(connection);
     }
 
     @Override
     public void run() {
-        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
+        LOG.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
+            final OutputStream outputStream = connection.getOutputStream()) {
+            HttpRequest httpRequest = new HttpRequest(
+                new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
+            );
 
-            final String responseBody = "Hello world!";
+            HttpResponse httpResponse = new HttpResponse(outputStream);
+            Controller controller = ControllerMapper.getControllerByUrl(httpRequest.getUrl());
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            if (controller == null) {
+                httpResponse.transfer(httpRequest.getUrl());
+            } else if (httpRequest.getHttpMethod().equals(HttpMethod.GET)) {
+                controller.get(httpRequest, httpResponse);
+            } else if (httpRequest.getHttpMethod().equals(HttpMethod.POST)) {
+                controller.post(httpRequest, httpResponse);
+            }
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
         } catch (IOException exception) {
-            log.error("Exception stream", exception);
+            LOG.error("Exception stream", exception);
         } finally {
             close();
         }
@@ -48,7 +58,7 @@ public class RequestHandler implements Runnable {
         try {
             connection.close();
         } catch (IOException exception) {
-            log.error("Exception closing socket", exception);
+            LOG.error("Exception closing socket", exception);
         }
     }
 }

@@ -2,20 +2,20 @@ package nextstep.jwp.model;
 
 public class User {
 
-    private long id;
+    private final Long id;
     private final String account;
     private final String password;
     private final String email;
 
     public User(String account, String password, String email) {
+        this(null, account, password, email);
+    }
+
+    public User(Long id, String account, String password, String email) {
+        this.id = id;
         this.account = account;
         this.password = password;
         this.email = email;
-    }
-
-    public User(long id, String account, String password, String email) {
-        this(account, password, email);
-        this.id = id;
     }
 
     public boolean checkPassword(String password) {

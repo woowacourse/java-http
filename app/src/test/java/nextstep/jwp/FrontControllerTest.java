@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class FrontControllerTest {
 
-    @DisplayName("GET / 요청 시 'Hello world!' 메시지를 응답한다.")
+    @DisplayName("요청에 쿠키가 없으면 응답에 set-cookie를 심어보낸다.")
     @Test
     void run() {
         // given
@@ -23,39 +23,7 @@ class FrontControllerTest {
         frontController.run();
 
         // then
-        String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @DisplayName("GET /index.html 요청 시 index.html를 응답한다.")
-    @Test
-    void index() throws IOException {
-        // given
-        final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final FrontController frontController = new FrontController(socket);
-
-        // when
-        frontController.run();
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertThat(socket.output()).isEqualTo(expected);
+        String expectedContains = "Set-Cookie: JSESSIONID=";
+        assertThat(socket.output()).contains(expectedContains);
     }
 }

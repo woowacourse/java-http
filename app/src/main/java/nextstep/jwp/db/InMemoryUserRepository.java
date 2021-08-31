@@ -12,7 +12,7 @@ public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
 
-    private static int id = 1;
+    private static Long id = 1L;
 
     static {
         final User user = new User(id++, "gugu", "password", "hkkang@woowahan.com");
@@ -30,5 +30,4 @@ public class InMemoryUserRepository {
     public static Optional<User> findByAccount(String account) {
         return Optional.ofNullable(database.get(account));
     }
-
 }

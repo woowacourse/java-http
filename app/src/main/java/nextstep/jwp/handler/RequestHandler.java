@@ -72,7 +72,9 @@ public class RequestHandler implements Runnable {
 
     private void setSessionCookie(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (!httpRequest.containsCookie("JSESSIONID")) {
-            httpResponse.setCookie(new Cookie("JSESSIONID", UUID.randomUUID().toString()));
+            String sessionId = UUID.randomUUID().toString();
+            HttpSessions.add(sessionId);
+            httpResponse.setCookie(new Cookie("JSESSIONID", sessionId));
         }
     }
 

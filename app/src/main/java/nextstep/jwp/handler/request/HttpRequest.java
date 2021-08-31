@@ -5,9 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import nextstep.jwp.handler.HttpBody;
-import nextstep.jwp.handler.HttpCookie;
-import nextstep.jwp.handler.HttpHeader;
+import nextstep.jwp.handler.*;
 import nextstep.jwp.handler.constant.HttpMethod;
 
 public class HttpRequest {
@@ -70,6 +68,15 @@ public class HttpRequest {
 
     public boolean containsCookie(String name) {
         return cookie.contains(name);
+    }
+
+    public HttpSession getSession() {
+        Cookie sessionCookie = cookie.getCookie("JSESSIONID");
+        if (sessionCookie == null) {
+            return null;
+        }
+        String sessionId = sessionCookie.getValue();
+        return HttpSessions.getSession(sessionId);
     }
 
     public boolean isGet() {

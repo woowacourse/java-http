@@ -35,4 +35,20 @@ public class Cookie {
     public String getName() {
         return name;
     }
+
+    public String getValue() {
+        return value;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public boolean isSecure() {
+        return secure;
+    }
+
+    public boolean isHttpOnly() {
+        return httpOnly;
+    }
 }

@@ -26,7 +26,6 @@ public class HttpHeader {
             String[] cookies = headerMap.get("Cookie").split("; ");
             for (String cookie : cookies) {
                 String[] cookieKeyValue = cookie.split("=");
-                System.out.println(cookieKeyValue[0]);
                 httpCookie.setCookie(new Cookie(cookieKeyValue[0], cookieKeyValue[1]));
             }
         }

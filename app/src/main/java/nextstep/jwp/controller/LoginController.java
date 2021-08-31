@@ -1,10 +1,12 @@
 package nextstep.jwp.controller;
 
 import java.io.FileNotFoundException;
+import java.util.NoSuchElementException;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.LoginException;
 import nextstep.jwp.handler.HttpBody;
+import nextstep.jwp.handler.HttpSession;
 import nextstep.jwp.handler.request.HttpRequest;
 import nextstep.jwp.handler.response.HttpResponse;
 import nextstep.jwp.model.User;
@@ -15,6 +17,19 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws FileNotFoundException {
+        try {
+            HttpSession session = httpRequest.getSession();
+            if (session.containsAttribute("user")) {
+                File file = FileReader.readFile("/index.html");
+                httpResponse.redirect("index.html", file);
+                return;
+            }
+        } catch (NoSuchElementException e) {
+            File file = FileReader.readHtmlFile(httpRequest.getRequestUrl());
+            httpResponse.ok(file);
+            return;
+        }
+
         if (httpRequest.isUriContainsQuery()) {
             doGetWithQuery(httpRequest, httpResponse);
             return;
@@ -37,9 +52,12 @@ public class LoginController extends AbstractController {
                 throw new LoginException("User의 정보와 입력한 정보가 일치하지 않습니다.");
             }
 
+            final HttpSession httpSession = httpRequest.getSession();
+            httpSession.setAttribute("user", user);
+
             File file = FileReader.readFile("/index.html");
             httpResponse.redirect("/index.html", file);
-        } catch (LoginException e) {
+        } catch (LoginException | NoSuchElementException e) {
             File file = FileReader.readErrorFile("/401.html");
             httpResponse.unauthorized("/401.html", file);
         }

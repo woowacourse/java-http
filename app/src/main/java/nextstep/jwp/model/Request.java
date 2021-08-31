@@ -48,18 +48,6 @@ public class Request {
         return UUID.randomUUID().toString();
     }
 
-    public boolean isPath(PathType pathType) {
-        return requestPath.isPath(pathType);
-    }
-
-    public boolean containsPath(PathType pathType) {
-        return requestPath.containsPath(pathType);
-    }
-
-    public boolean containsExtension() {
-        return requestPath.containsExtension();
-    }
-
     public FileType fileType() {
         return requestPath.fileType();
     }

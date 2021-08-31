@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.request.HttpRequest;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {

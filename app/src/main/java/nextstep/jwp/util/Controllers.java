@@ -6,7 +6,7 @@ import nextstep.jwp.controller.ExtraController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.StaticController;
-import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.service.LoginService;
 import nextstep.jwp.service.RegisterService;
 

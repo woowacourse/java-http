@@ -1,9 +1,9 @@
 package nextstep.jwp.framework.manager;
 
-import nextstep.jwp.framework.request.HttpRequest;
-import nextstep.jwp.framework.request.RequestParser;
-import nextstep.jwp.framework.response.HttpResponse;
-import nextstep.jwp.framework.response.ResponseSender;
+import nextstep.jwp.framework.http.request.HttpRequest;
+import nextstep.jwp.framework.http.request.RequestParser;
+import nextstep.jwp.framework.http.response.HttpResponse;
+import nextstep.jwp.framework.http.response.ResponseSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,10 +40,10 @@ public class RequestManager {
                 return staticResourceManager.handleDynamicResult(dynamicWebProcessResult);
             }
 
-            return staticResourceManager.handleNotFound(httpRequest);
+            return staticResourceManager.handleNotFound();
         } catch (Exception e) {
             log.error("@@@@@@@internal server error occurred! = {}@@@@@@@", e.getMessage());
-            return staticResourceManager.handleInternalServerError(httpRequest);
+            return staticResourceManager.handleInternalServerError();
         }
     }
 }

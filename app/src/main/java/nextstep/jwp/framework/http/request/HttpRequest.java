@@ -1,15 +1,14 @@
-package nextstep.jwp.framework.request;
+package nextstep.jwp.framework.http.request;
 
-import nextstep.jwp.framework.request.details.*;
+import nextstep.jwp.framework.http.common.ProtocolVersion;
+import nextstep.jwp.framework.http.request.details.*;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 import java.util.Objects;
 
-public class HttpRequest {
+import static nextstep.jwp.framework.http.common.Constants.LINE_SEPARATOR;
 
-    private static final String REQUEST_SEPARATOR = " ";
+public class HttpRequest {
 
     private final HttpMethod httpMethod;
     private final RequestUrl requestUrl;
@@ -37,7 +36,7 @@ public class HttpRequest {
 
     public static HttpRequest from(final String requestLine, final Map<String, String> requestHttpHeader,
                                    final String requestBody) {
-        final String[] requestInfos = requestLine.split(REQUEST_SEPARATOR);
+        final String[] requestInfos = requestLine.split(LINE_SEPARATOR);
         return new HttpRequest(
                 HttpMethod.of(requestInfos[0]),
                 RequestUrl.of(requestInfos[1]),

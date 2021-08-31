@@ -1,6 +1,6 @@
-package nextstep.jwp.framework.response.details;
+package nextstep.jwp.framework.http.response.details;
 
-public enum Status {
+public enum ResponseStatus {
 
     OK(200, "OK"),
     FOUND(302, "FOUND"),
@@ -10,7 +10,7 @@ public enum Status {
     private final int statusCode;
     private final String statusMessage;
 
-    Status(int statusCode, String statusMessage) {
+    ResponseStatus(final int statusCode, final String statusMessage) {
         this.statusCode = statusCode;
         this.statusMessage = statusMessage;
     }

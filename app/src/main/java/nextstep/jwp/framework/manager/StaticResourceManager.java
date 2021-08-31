@@ -1,8 +1,8 @@
 package nextstep.jwp.framework.manager;
 
-import nextstep.jwp.framework.request.HttpRequest;
-import nextstep.jwp.framework.request.details.HttpMethod;
-import nextstep.jwp.framework.response.HttpResponse;
+import nextstep.jwp.framework.http.request.HttpRequest;
+import nextstep.jwp.framework.http.request.details.HttpMethod;
+import nextstep.jwp.framework.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static nextstep.jwp.framework.response.details.Status.*;
+import static nextstep.jwp.framework.http.response.details.ResponseStatus.*;
 
 public class StaticResourceManager {
 
@@ -80,15 +80,15 @@ public class StaticResourceManager {
         return HttpResponse.of(staticResources.get(httpRequest), OK);
     }
 
-    public HttpResponse handleNotFound(HttpRequest httpRequest) {
+    public HttpResponse handleNotFound() {
         return HttpResponse.of(this.notFoundFile, NOT_FOUND);
     }
 
-    public HttpResponse handleInternalServerError(HttpRequest httpRequest) {
+    public HttpResponse handleInternalServerError() {
         return HttpResponse.of(this.internalServerErrorFile, INTERNAL_SERVER_ERROR);
     }
 
-    public HttpResponse handleDynamicResult(String result) throws IOException {
+    public HttpResponse handleDynamicResult(String result) {
         if (result.contains(REDIRECT_INDICATOR)) {
             return handleRedirect(result);
         }

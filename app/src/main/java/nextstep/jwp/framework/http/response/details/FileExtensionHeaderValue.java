@@ -1,4 +1,4 @@
-package nextstep.jwp.framework.response.details;
+package nextstep.jwp.framework.http.response.details;
 
 import java.util.Arrays;
 
@@ -12,11 +12,11 @@ public enum FileExtensionHeaderValue {
 
     private final String headerValue;
 
-    FileExtensionHeaderValue(String headerValue) {
+    FileExtensionHeaderValue(final String headerValue) {
         this.headerValue = headerValue;
     }
 
-    public static FileExtensionHeaderValue of(String fileExtension) {
+    public static FileExtensionHeaderValue of(final String fileExtension) {
         return Arrays.stream(values())
                 .filter(value -> value.name().equalsIgnoreCase(fileExtension))
                 .findAny()

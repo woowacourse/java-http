@@ -1,16 +1,16 @@
-package nextstep.jwp.framework.request.details;
+package nextstep.jwp.framework.http.common;
 
 public class ProtocolVersion {
 
     private static final String DEFAULT_VERSION = "HTTP/1.1";
 
-    private String protocol;
+    private final String protocol;
 
-    public ProtocolVersion(String protocol) {
+    public ProtocolVersion(final String protocol) {
         this.protocol = protocol;
     }
 
-    public static ProtocolVersion of(String protocol) {
+    public static ProtocolVersion of(final String protocol) {
         return new ProtocolVersion(protocol);
     }
 

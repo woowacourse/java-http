@@ -1,19 +1,22 @@
-package nextstep.jwp.framework.response.details;
+package nextstep.jwp.framework.http.response.details;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static nextstep.jwp.framework.http.common.Constants.*;
 
 public class ResponseHttpHeader {
 
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String CONTENT_TYPE = "Content-Type";
 
-    private final Map<String, String> responseHttpHeaderMap = new HashMap<>();
+    private final Map<String, String> responseHttpHeaderMap;
 
     public ResponseHttpHeader() {
+        responseHttpHeaderMap = new HashMap<>();
     }
 
-    public void appendResponseBodyInfo(String responseBody, String extension) {
+    public void appendResponseBodyInfo(final String responseBody, final String extension) {
         final int contentLength = responseBody.getBytes().length;
         responseHttpHeaderMap.put(CONTENT_LENGTH, String.valueOf(contentLength));
 
@@ -24,9 +27,11 @@ public class ResponseHttpHeader {
     public String generateResponse() {
         final StringBuilder response = new StringBuilder();
 
-        for (String key : responseHttpHeaderMap.keySet()) {
-            final String value = responseHttpHeaderMap.get(key);
-            response.append(key).append(": ").append(value).append("\r\n");
+        for (Map.Entry<String, String> responseHttpHeader : responseHttpHeaderMap.entrySet()) {
+            final String headerKey = responseHttpHeader.getKey();
+            final String headerValue = responseHttpHeader.getValue();
+            response.append(headerKey).append(HTTP_HEADER_SEPARATOR).append(LINE_SEPARATOR)
+                    .append(headerValue).append(NEWLINE);
         }
 
         return response.toString();

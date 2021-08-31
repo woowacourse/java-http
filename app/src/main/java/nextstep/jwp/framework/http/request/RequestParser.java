@@ -1,4 +1,4 @@
-package nextstep.jwp.framework.request;
+package nextstep.jwp.framework.http.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,11 +7,10 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RequestParser {
+import static nextstep.jwp.framework.http.common.Constants.HTTP_HEADER_SEPARATOR;
+import static nextstep.jwp.framework.http.common.Constants.NEWLINE;
 
-    private static final String NEWLINE = "\r\n";
-    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
-    private static final String HTTP_HEADER_KEY_VALUE_SEPARATOR = ":";
+public class RequestParser {
 
     private final BufferedReader bufferedReader;
 
@@ -54,15 +53,16 @@ public class RequestParser {
         final Map<String, String> requestHttpHeaders = new HashMap<>();
         final String[] httpHeaders = requestHeaders.split(NEWLINE);
         for (String httpHeader : httpHeaders) {
-            final String[] headerKeyAndValue = httpHeader.split(HTTP_HEADER_KEY_VALUE_SEPARATOR);
-            requestHttpHeaders.put(headerKeyAndValue[0], headerKeyAndValue[1]);
+            final String[] headerKeyAndValue = httpHeader.split(HTTP_HEADER_SEPARATOR);
+            requestHttpHeaders.put(headerKeyAndValue[0].trim(), headerKeyAndValue[1].trim());
         }
         return requestHttpHeaders;
     }
 
     private String parseRequestBody(final Map<String, String> requestHttpHeader) throws IOException {
-        if (requestHttpHeader.containsKey(CONTENT_LENGTH_HEADER)) {
-            final int contentLength = Integer.parseInt(requestHttpHeader.get(CONTENT_LENGTH_HEADER).trim());
+        final String contentLengthHeader = "Content-Length";
+        if (requestHttpHeader.containsKey(contentLengthHeader)) {
+            final int contentLength = Integer.parseInt(requestHttpHeader.get(contentLengthHeader));
             char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
             return new String(buffer);

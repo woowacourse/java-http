@@ -1,4 +1,4 @@
-package nextstep.jwp.framework.response.util;
+package nextstep.jwp.framework.http.response.util;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -10,14 +10,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-public class FileUtil {
+import static nextstep.jwp.framework.http.common.Constants.NEWLINE;
 
-    private static final String NEWLINE = "\r\n";
+public class FileUtil {
 
     private FileUtil() {
     }
 
-    public static String read(File file) {
+    public static String read(final File file) {
         try {
             final String path = URLDecoder.decode(file.getAbsolutePath(), StandardCharsets.UTF_8);
             final List<String> fileLines = Files.readAllLines(Path.of(path));
@@ -32,7 +32,7 @@ public class FileUtil {
         }
     }
 
-    public static String getExtension(File file) {
+    public static String getExtension(final File file) {
         return FilenameUtils.getExtension(file.getName());
     }
 }

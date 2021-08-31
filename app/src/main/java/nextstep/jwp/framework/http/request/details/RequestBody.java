@@ -1,6 +1,6 @@
-package nextstep.jwp.framework.request.details;
+package nextstep.jwp.framework.http.request.details;
 
-import nextstep.jwp.framework.request.util.QueryParameterExtractor;
+import nextstep.jwp.framework.http.request.util.QueryParameterExtractor;
 
 import java.util.Map;
 import java.util.Objects;
@@ -9,11 +9,11 @@ public class RequestBody {
 
     private final Map<String, String> requestBodyMap;
 
-    private RequestBody(Map<String, String> requestBodyMap) {
+    private RequestBody(final Map<String, String> requestBodyMap) {
         this.requestBodyMap = requestBodyMap;
     }
 
-    public static RequestBody of(String queryStringFormat) {
+    public static RequestBody of(final String queryStringFormat) {
         if (Objects.isNull(queryStringFormat) || queryStringFormat.isEmpty()) {
             return null;
         }
@@ -21,7 +21,7 @@ public class RequestBody {
         return new RequestBody(requestBody);
     }
 
-    public String find(String key) {
+    public String find(final String key) {
         return requestBodyMap.get(key);
     }
 }

@@ -19,7 +19,7 @@ public enum ContentType {
 
     ContentType(String httpNotation, String fileExtension, String encodingType) {
         this.httpNotation = httpNotation;
-        this.fileExtensionPattern = Pattern.compile("." + fileExtension);
+        this.fileExtensionPattern = Pattern.compile("\\." + fileExtension);
         this.encodingType = encodingType;
     }
 

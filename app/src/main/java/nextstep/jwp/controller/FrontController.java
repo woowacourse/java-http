@@ -20,13 +20,13 @@ public class FrontController {
     }
 
     public String response() throws Exception {
-        final String httpMethod = requestLine.getHttpMethod();
+        final HttpMethod httpMethod = requestLine.getHttpMethod();
         final String uri = requestLine.getUri();
         Controller controller = new Controller();
-        if (HttpMethod.GET.equals(httpMethod)) {
+        if (HttpMethod.GET == httpMethod) {
             return getMapping(uri, controller);
         }
-        if (HttpMethod.POST.equals(httpMethod)) {
+        if (HttpMethod.POST == httpMethod) {
             return postMapping(uri, controller);
         }
 

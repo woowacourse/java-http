@@ -1,8 +1,7 @@
 package nextstep.jwp.http;
 
-import java.util.HashMap;
-import java.util.Map;
 import nextstep.jwp.constants.Http;
+import nextstep.jwp.constants.HttpMethod;
 import nextstep.jwp.exception.HttpException;
 
 public class RequestLine {
@@ -12,13 +11,11 @@ public class RequestLine {
 
     private final String httpMethod;
     private final String uri;
-    private final Map<String, String> params;
 
     public RequestLine(String requestLine) {
         String[] requests = splitRequestLine(requestLine);
         this.httpMethod = requests[METHOD];
         this.uri = requests[URI];
-        this.params = new HashMap<>();
     }
 
     private String[] splitRequestLine(String requestLine) {
@@ -29,8 +26,8 @@ public class RequestLine {
         return requests;
     }
 
-    public String getHttpMethod() {
-        return this.httpMethod;
+    public HttpMethod getHttpMethod() {
+        return HttpMethod.findHttpMethod(httpMethod);
     }
 
     public String getUri() {

@@ -10,7 +10,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import nextstep.jwp.web.http.HttpHeaders;
 import nextstep.jwp.web.http.HttpProtocol;
-import nextstep.jwp.web.http.MimeType;
 import nextstep.jwp.web.http.request.body.FormDataHttpRequestBody;
 import nextstep.jwp.web.http.request.body.HttpRequestBody;
 import nextstep.jwp.web.http.request.body.TextHttpRequestBody;
@@ -40,14 +39,6 @@ public class HttpRequest {
         InputStreamHttpRequestConverter inputStreamHttpRequestConverter =
             new InputStreamHttpRequestConverter(inputStream);
         return inputStreamHttpRequestConverter.toRequest();
-    }
-
-    public boolean isJsonOrHtml() {
-        return mimeType() == MimeType.TEXT_HTML || mimeType() == MimeType.JSON;
-    }
-
-    public MimeType mimeType() {
-        return this.headers.mimeType();
     }
 
     public MethodUrl methodUrl() {
@@ -127,7 +118,7 @@ public class HttpRequest {
                     parseBody(new String(buffer));
                 }
             } catch (IOException e) {
-                log.error("IOException! context : " , e);
+                log.error("IOException! context : ", e);
             }
         }
 

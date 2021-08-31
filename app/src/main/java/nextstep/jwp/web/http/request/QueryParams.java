@@ -11,11 +11,11 @@ public class QueryParams {
         this.params = params;
     }
 
-    public static QueryParams empty(){
+    public static QueryParams empty() {
         return new QueryParams(new HashMap<>());
     }
 
-    public Map<String, String> map(){
+    public Map<String, String> map() {
         return Map.copyOf(params);
     }
 

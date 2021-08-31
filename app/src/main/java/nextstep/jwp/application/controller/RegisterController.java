@@ -18,10 +18,10 @@ public class RegisterController extends AbstractController {
         String email = (String) body.getAttribute("email");
         String password = (String) body.getAttribute("password");
 
-        User user = new User(account, email, password);
+        User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
         response.setStatus(HttpStatus.FOUND);
-        response.headers().add("Location", "/login");
+        response.headers().setLocation("/login");
     }
 }

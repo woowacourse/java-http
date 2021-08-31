@@ -1,6 +1,7 @@
 package nextstep.jwp.web.handler;
 
-import static nextstep.jwp.web.http.request.HttpMethod.*;
+import static nextstep.jwp.web.http.request.HttpMethod.GET;
+import static nextstep.jwp.web.http.request.HttpMethod.POST;
 
 import java.util.Map;
 import nextstep.jwp.application.controller.LoginController;
@@ -21,6 +22,7 @@ public class RequestMapping {
 
     static {
         myMap = Map.of(
+            new MethodUrl(GET, "/"), new WelcomeController(),
             new MethodUrl(GET, "/index"), new WelcomeController(),
             new MethodUrl(GET, "/login"), new LoginController(),
             new MethodUrl(POST, "/login"), new LoginController(),

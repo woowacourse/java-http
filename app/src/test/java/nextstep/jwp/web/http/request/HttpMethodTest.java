@@ -10,7 +10,7 @@ class HttpMethodTest {
 
     @DisplayName("이름으로 메소드를 검색한다.")
     @ParameterizedTest
-    @CsvSource({"get,GET","post,POST", "patch,PATCH",
+    @CsvSource({"get,GET", "post,POST", "patch,PATCH",
         "put,PUT", "options,OPTIONS", "delete,DELETE",
         "trace,TRACE"
     })

@@ -8,6 +8,7 @@ public class NotFoundController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {
-        response.setStatus(HttpStatus.NOT_FOUND);
+        response.setStatus(HttpStatus.FOUND);
+        response.headers().setLocation("/404.html");
     }
 }

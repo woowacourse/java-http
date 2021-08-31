@@ -9,7 +9,9 @@ import java.net.Socket;
 import java.util.List;
 import nextstep.jwp.web.exception.ApplicationRuntimeException;
 import nextstep.jwp.web.http.request.HttpRequest;
+import nextstep.jwp.web.http.response.ContentType;
 import nextstep.jwp.web.http.response.HttpResponse;
+import nextstep.jwp.web.http.response.HttpResponseImpl;
 import nextstep.jwp.web.mvc.controller.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,17 +46,17 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
             final OutputStream outputStream = connection.getOutputStream()) {
 
-            HttpRequest httpRequest = HttpRequest.of(inputStream);
+            HttpRequest request = HttpRequest.of(inputStream);
 
-            HttpResponse httpResponse =
-                new HttpResponse
-                    .Builder(httpRequest.protocol(), OK)
+            HttpResponse response =
+                new HttpResponseImpl
+                    .Builder(request, OK)
                     .build();
 
-            doService(httpRequest, httpResponse);
-            doHandle(httpRequest, httpResponse);
+            doService(request, response);
+            doHandle(request, response);
 
-            outputStream.write(httpResponse.toResponseFormat().getBytes());
+            outputStream.write(response.toString().getBytes());
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
@@ -64,7 +66,7 @@ public class RequestHandler implements Runnable {
     }
 
     private void doService(HttpRequest request, HttpResponse response) {
-        if (!request.isJsonOrHtml()) {
+        if (ContentType.isStaticResource(request.methodUrl().url())) {
             return;
         }
 

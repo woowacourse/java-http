@@ -24,7 +24,7 @@ class QueryParserTest {
         assertThat(queryParams.map()).containsExactlyInAnyOrderEntriesOf(expectedResult);
     }
 
-    static Stream<Arguments> queryParseTest(){
+    static Stream<Arguments> queryParseTest() {
         return Stream.of(
             Arguments.of(
                 "?a=b&b=c&c=d",

@@ -1,23 +1,16 @@
 package nextstep.jwp.application.controller;
 
 import static nextstep.jwp.web.http.request.HttpMethod.GET;
-import static nextstep.jwp.web.http.request.HttpMethod.POST;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
-import nextstep.jwp.application.db.InMemoryUserRepository;
-import nextstep.jwp.application.domain.User;
-import nextstep.jwp.resource.FileType;
 import nextstep.jwp.web.http.HttpHeaders;
 import nextstep.jwp.web.http.HttpProtocol;
 import nextstep.jwp.web.http.request.HttpRequest;
 import nextstep.jwp.web.http.request.MethodUrl;
-import nextstep.jwp.web.http.request.body.FormDataHttpRequestBody;
-import nextstep.jwp.web.http.request.body.HttpRequestBody;
 import nextstep.jwp.web.http.request.body.TextHttpRequestBody;
 import nextstep.jwp.web.http.response.HttpResponse;
+import nextstep.jwp.web.http.response.HttpResponseImpl.Builder;
 import nextstep.jwp.web.http.response.HttpStatus;
-import nextstep.jwp.web.http.response.body.TextHttpResponseBody;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -32,10 +25,7 @@ class WelcomeControllerTest {
             new MethodUrl(GET, "/null"),
             new TextHttpRequestBody(""));
 
-        HttpResponse response = HttpResponse.ok(
-            HttpProtocol.HTTP1_1,
-            new TextHttpResponseBody("", FileType.HTML)
-        );
+        HttpResponse response = new Builder(request, HttpStatus.OK).build();
 
         //when
         WelcomeController welcomeController = new WelcomeController();

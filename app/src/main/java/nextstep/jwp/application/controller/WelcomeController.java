@@ -11,7 +11,7 @@ import nextstep.jwp.web.mvc.controller.AbstractController;
 public class WelcomeController extends AbstractController {
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response)  {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         request.changeMethodUrl(new MethodUrl(GET, "/index", QueryParams.empty()));
         super.doGet(request, response);
     }

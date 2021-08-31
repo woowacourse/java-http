@@ -1,5 +1,7 @@
 package nextstep.jwp.web.mvc.controller;
 
+import static nextstep.jwp.web.http.response.ContentType.HTML;
+
 import nextstep.jwp.web.exception.ApplicationRuntimeException;
 import nextstep.jwp.web.http.request.HttpMethod;
 import nextstep.jwp.web.http.request.HttpRequest;
@@ -9,12 +11,15 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {
+        response.setContentType(HTML);
         HttpMethod method = HttpMethod.findByName(request.methodUrl().method().name());
-        switch (method){
+        switch (method) {
             case GET:
-                doGet(request, response); break;
+                doGet(request, response);
+                break;
             case POST:
-                doPost(request, response); break;
+                doPost(request, response);
+                break;
             default:
         }
     }
@@ -22,5 +27,6 @@ public abstract class AbstractController implements Controller {
     protected void doPost(HttpRequest request, HttpResponse response)
         throws ApplicationRuntimeException { /* NOOP */ }
 
-    protected void doGet(HttpRequest request, HttpResponse response) throws ApplicationRuntimeException { /* NOOP */ }
+    protected void doGet(HttpRequest request, HttpResponse response)
+        throws ApplicationRuntimeException { /* NOOP */ }
 }

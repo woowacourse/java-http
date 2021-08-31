@@ -32,7 +32,7 @@ public class FilePath {
             suffix = DOT + suffix;
         }
 
-        this.suffix =  suffix;
+        this.suffix = suffix;
     }
 
     public Path path() {

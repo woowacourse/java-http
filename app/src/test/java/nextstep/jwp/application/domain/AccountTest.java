@@ -3,7 +3,6 @@ package nextstep.jwp.application.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +12,7 @@ class AccountTest {
     @Test
     void emptyAccountTest() {
         //given
-        String empty ="";
+        String empty = "";
         String onlyBlank = "    ";
         //when
         //then

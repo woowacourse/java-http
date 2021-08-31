@@ -17,12 +17,15 @@ public class LoginController extends AbstractController {
 
         String account = (String) body.getAttribute("account");
         Optional<User> foundAccount = InMemoryUserRepository.findByAccount(account);
+        response.setStatus(HttpStatus.FOUND);
+
         if (foundAccount.isPresent()) {
             boolean pass = foundAccount.get().checkPassword((String) body.getAttribute("password"));
             if (pass) {
-                response.setStatus(HttpStatus.FOUND);
-                response.headers().add("Location", "/index");
+                response.headers().setLocation("/index");
+                return;
             }
         }
+        response.headers().add("Location", "/401.html");
     }
 }

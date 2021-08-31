@@ -23,23 +23,44 @@ class RequestHandlerTest {
             "",
             "");
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
         // when
-        requestHandler.run();
+        final MockSocket socket = createRequestHandlerAndRun(httpRequest);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
+        String resource = "static/index.html";
+        String header = "HTTP/1.1 200 OK \r\n" +
             "Content-Type: text/html;charset=utf-8 \r\n" +
             "Content-Length: 5549 \r\n" +
-            "\r\n" +
-            new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertThat(socket.output()).isEqualTo(expected);
+            "\r\n";
+
+        assertResponseIsEqueal(socket, resource, header);
     }
 
-    @DisplayName("css자원을 확인")
+    @DisplayName("html 요청 시 인덱스 페이지를 확인")
+    @Test
+    void indexHtml() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+            "GET /index.html HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "",
+            "");
+
+        // when
+        final MockSocket socket = createRequestHandlerAndRun(httpRequest);
+
+        // then
+        String resource = "static/index.html";
+        String header = "HTTP/1.1 200 OK \r\n" +
+            "Content-Type: text/html;charset=utf-8 \r\n" +
+            "Content-Length: 5549 \r\n" +
+            "\r\n";
+
+        assertResponseIsEqueal(socket, resource, header);
+    }
+
+    @DisplayName("css 자원 요청 확인")
     @Test
     void cssTest() throws IOException {
         // given
@@ -50,18 +71,52 @@ class RequestHandlerTest {
             "",
             "");
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
         // when
-        requestHandler.run();
+        final MockSocket socket = createRequestHandlerAndRun(httpRequest);
 
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        String expected = "HTTP/1.1 200 OK \r\n" +
+        String resource = "static/css/styles.css";
+        String header = "HTTP/1.1 200 OK \r\n" +
             "Content-Type: text/css \r\n" +
             "Content-Length: 211991 \r\n" +
-            "\r\n" +
+            "\r\n";
+        // then
+        assertResponseIsEqueal(socket, resource, header);
+    }
+
+    @DisplayName("svg 자원 요청 확인")
+    @Test
+    void svgTest() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+            "GET /assets/img/error-404-monochrome.svg HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "",
+            "");
+
+        // when
+        final MockSocket socket = createRequestHandlerAndRun(httpRequest);
+
+        String resource = "static/assets/img/error-404-monochrome.svg";
+        String header = "HTTP/1.1 200 OK \r\n" +
+            "Content-Type: image/svg \r\n" +
+            "Content-Length: 6076 \r\n" +
+            "\r\n";
+        // then
+        assertResponseIsEqueal(socket, resource, header);
+    }
+
+    private MockSocket createRequestHandlerAndRun(String httpRequest) {
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+        requestHandler.run();
+        return socket;
+    }
+
+    private void assertResponseIsEqueal(MockSocket socket, String resourcePath, String header)
+        throws IOException {
+        final URL resource = getClass().getClassLoader().getResource(resourcePath);
+        String expected = header +
             new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).isEqualTo(expected);
     }

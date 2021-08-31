@@ -4,38 +4,22 @@ import static nextstep.jwp.resource.FileType.HTML;
 
 import nextstep.jwp.resource.FilePath;
 import nextstep.jwp.resource.FileReader;
-import nextstep.jwp.resource.FileType;
-import nextstep.jwp.web.http.MimeType;
-import nextstep.jwp.web.http.response.body.HttpResponseBody;
-import nextstep.jwp.web.http.response.body.TextHttpResponseBody;
+import nextstep.jwp.web.http.response.ContentType;
+import nextstep.jwp.web.http.response.HttpResponse;
 
-public class HtmlResolver implements DataResolver {
+public class HtmlResolver implements ViewResolver {
 
     @Override
-    public boolean isResourceExist(String url) {
-        return new FilePath(url, HTML.getText()).isExist();
-    }
-
-    public boolean isExist(String url, String prefix) {
-        return new FilePath(url, HTML.getText(), prefix).isExist();
+    public boolean isSuitable(HttpResponse response) {
+        return response.isSuitableContentType(ContentType.HTML);
     }
 
     @Override
-    public boolean isSuitable(MimeType mimeType) {
-        return FileType.findByMimeType(mimeType).contains(HTML);
+    public void resolve(HttpResponse response) {
+        FileReader fileReader = new FileReader(
+            new FilePath(response.request().methodUrl().url(), HTML.getText()));
+        String body = fileReader.readAllFile();
+        response.setBody(body);
+        response.headers().setContentLength(body.getBytes().length);
     }
-
-    @Override
-    public HttpResponseBody resolve(String url){
-        final FileReader fileReader = new FileReader(new FilePath(url, HTML.getText()));
-
-        return new TextHttpResponseBody(fileReader.readAllFile(), HTML);
-    }
-
-    public HttpResponseBody resolve(String url, String prefix) {
-        final FileReader fileReader = new FileReader(new FilePath(url, HTML.getText(), prefix));
-
-        return new TextHttpResponseBody(fileReader.readAllFile(), HTML);
-    }
-
 }

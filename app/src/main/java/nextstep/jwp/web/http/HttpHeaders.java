@@ -5,10 +5,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import nextstep.jwp.web.http.request.HttpRequestHeaderValues;
+import nextstep.jwp.web.http.response.ContentType;
 
 public class HttpHeaders {
 
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String LOCATION = "Location";
 
     private final Map<String, HttpRequestHeaderValues> headers;
 
@@ -48,9 +51,16 @@ public class HttpHeaders {
         }
     }
 
-    public MimeType mimeType() {
-        List<String> accepts = get("Accept").list();
-        return MimeType.findByName(accepts);
+    public void setContentLength(int contentLength) {
+        set(CONTENT_LENGTH, String.valueOf(contentLength));
+    }
+
+    public void setContentType(ContentType contentType) {
+        set(CONTENT_TYPE, contentType.getMimeType());
+    }
+
+    public void setLocation(String url) {
+        set(LOCATION, url);
     }
 
     public Map<String, HttpRequestHeaderValues> map() {

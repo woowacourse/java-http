@@ -1,18 +1,20 @@
 package nextstep.jwp.tomcat;
 
 import java.io.IOException;
-import java.util.LinkedList;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.reponse.HttpResponse;
+import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.servlet.StaticResourceServlet;
 import nextstep.jwp.servlet.UserLoginServlet;
 import nextstep.jwp.servlet.UserRegisterServlet;
 
 public class ServletContainer {
 
-    private static final List<Servlet> SERVLETS = new LinkedList<>();
+    public static final String STATIC_RESOURCE_PATH = "/static";
+    private static final List<Servlet> SERVLETS = new ArrayList<>();
     private static final StaticResourceServlet STATIC_RESOURCE_SERVLET = new StaticResourceServlet();
 
     static {
@@ -26,11 +28,11 @@ public class ServletContainer {
             return;
         }
 
-        Servlet servlet = findServletByRequestMapping(httpRequest.getUri());
+        Servlet servlet = findServletByRequestURI(httpRequest.getRequestURI());
         servlet.service(httpRequest, httpResponse);
     }
 
-    private Servlet findServletByRequestMapping(String requestMapping) {
+    private Servlet findServletByRequestURI(String requestMapping) {
         return SERVLETS.stream()
             .filter(it -> it.isSameRequestMapping(requestMapping))
             .findAny()
@@ -39,10 +41,7 @@ public class ServletContainer {
 
 
     public boolean isStaticResourceRequest(HttpRequest httpRequest) {
-        String uri = httpRequest.getUri();
-
-        return httpRequest.getBody().isEmpty()
-            && (!Objects.isNull(getClass().getResource("/static/" + uri))
-            || !Objects.isNull(getClass().getResource("/static/" + uri + ".html")));
+        URL resource = getClass().getResource(STATIC_RESOURCE_PATH + httpRequest.getRequestURI());
+        return !Objects.isNull(resource);
     }
 }

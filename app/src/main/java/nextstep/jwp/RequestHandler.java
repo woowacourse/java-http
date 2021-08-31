@@ -5,9 +5,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
-import nextstep.jwp.http.HttpInputStreamReader;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.reponse.HttpResponse;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.util.HttpInputStreamReader;
 import nextstep.jwp.tomcat.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,12 +30,12 @@ public class RequestHandler implements Runnable {
             final OutputStream outputStream = connection.getOutputStream()) {
 
             HttpInputStreamReader httpInputStreamReader = new HttpInputStreamReader(inputStream);
-            HttpRequest httpRequest = httpInputStreamReader.readHttpRequest();
+            HttpRequest httpRequest = httpInputStreamReader.createHttpRequest();
             HttpResponse httpResponse = new HttpResponse();
 
             servletContainer.process(httpRequest, httpResponse);
-
-            outputStream.write(httpResponse.getBytes());
+            String httpResponseValue = httpResponse.getValue();
+            outputStream.write(httpResponseValue.getBytes());
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);

@@ -2,8 +2,8 @@ package nextstep.jwp.tomcat;
 
 import java.io.IOException;
 import nextstep.jwp.RequestHandler;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.reponse.HttpResponse;
+import nextstep.jwp.http.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,12 +14,12 @@ public abstract class Servlet {
 
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
 
-        if (httpRequest.getHttpMethod().equals("GET")) {
+        if (httpRequest.isGetRequest()) {
             doGet(httpRequest, httpResponse);
             return;
         }
 
-        if (httpRequest.getHttpMethod().equals("POST")) {
+        if (httpRequest.isPostRequest()) {
             doPost(httpRequest, httpResponse);
         }
 
@@ -29,11 +29,11 @@ public abstract class Servlet {
         return requestMapping.startsWith(this.requestMappingUri);
     }
 
-    public void doGet(HttpRequest httpRequest, HttpResponse response) throws IOException {
+    public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
 
     }
 
-    public void doPost(HttpRequest httpRequest, HttpResponse response) {
+    public void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
 
     }
 

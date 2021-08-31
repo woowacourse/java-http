@@ -1,14 +1,9 @@
 package nextstep.jwp.servlet;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Objects;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.reponse.HttpResponse;
+import nextstep.jwp.http.reponse.HttpStatus;
+import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.tomcat.Servlet;
 
 public class StaticResourceServlet extends Servlet {
@@ -18,33 +13,14 @@ public class StaticResourceServlet extends Servlet {
 
     @Override
     public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        String fileName = httpRequest.getUri();
-        URL resource = getClass().getResource("/static/" + fileName);
+        httpResponse.setStatus(HttpStatus.OK);
+        String requestURI = httpRequest.getRequestURI();
 
-        if (Objects.isNull(resource)) {
-            resource = getClass().getResource("/static/" + fileName + ".html");
+        if (requestURI.equals("/")) {
+            httpResponse.addFile("/hello.html");
+            return;
         }
-
-        httpResponse.addStartLine("HTTP/1.1", "200", "OK");
-        addContentType(fileName, httpResponse);
-        httpResponse.addBody(readFile(resource));
-    }
-
-    private String readFile(URL resource) throws IOException {
-        Path path = new File(resource.getPath()).toPath();
-        List<String> file = Files.readAllLines(path);
-        String responseBody = String.join("\r\n", file);
-        return responseBody;
-    }
-
-    private void addContentType(String fileName, HttpResponse httpResponse) {
-        if (fileName.endsWith(".css")) {
-            httpResponse.addContentType("text/css,*/*;q=0.1");
-        } else if (fileName.endsWith(".js")) {
-            httpResponse.addContentType("text/javascript");
-        } else {
-            httpResponse.addContentType("text/html;charset=utf-8");
-        }
+        httpResponse.addFile(requestURI);
     }
 
 }

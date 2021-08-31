@@ -20,6 +20,8 @@ public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
     private static final String HTTP_STATUS_200 = "200 OK";
+    private static final String HTTP_STATUS_302 = "302 FOUND";
+    private static final String HTTP_STATUS_401 = "401 UNAUTHORIZED";
 
     private final Socket connection;
 
@@ -40,61 +42,76 @@ public class RequestHandler implements Runnable {
             String resource = httpRequestHeader.getResource();
             Map<String, String> httpRequestHeaders = httpRequestHeader.getHeaders();
 
-            String responseHeader = "";
+            String responseStatusCode = "";
             String responseBody = "";
+            String response = "";
 
             if (resource.equals("/")) {
+                responseStatusCode = HTTP_STATUS_200;
                 responseBody = "Hello world!";
-                responseHeader = HTTP_STATUS_200;
+                response = create200Response(responseStatusCode, responseBody, ContentTypeMapper.extractContentType(resource));
             }
 
             if (resource.contains(".")) {
-                responseBody = createResponseBody(resource);
-                responseHeader = HTTP_STATUS_200;
+                responseStatusCode = HTTP_STATUS_200;
+                responseBody = createStaticFileResponseBody(resource);
+                response = create200Response(responseStatusCode, responseBody, ContentTypeMapper.extractContentType(resource));
             }
 
             if (method.equals("GET") && resource.equals("/register")) {
-                responseBody = createResponseBody("/register.html");
-                responseHeader = HTTP_STATUS_200;
+                responseStatusCode = HTTP_STATUS_200;
+                responseBody = createStaticFileResponseBody("/register.html");
+                response = create200Response(responseStatusCode, responseBody, ContentTypeMapper.extractContentType(resource));
             }
-            if (method.equals("POST") && resource.equals("/register")) {
-                responseBody = createResponseBody("/index.html");
-                responseHeader = HTTP_STATUS_200;
 
-                int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
-                char[] buffer = new char[contentLength];
-                br.read(buffer, 0, contentLength);
-                String queries = new String(buffer);
-
-                Map<String, String> queryMap = createQueryMap(queries);
-                User user = new User(InMemoryUserRepository.size() + 1L,
-                        queryMap.get("account"),
-                        queryMap.get("email"),
-                        queryMap.get("password"));
-                InMemoryUserRepository.save(user);
+            if (method.equals("GET") && resource.equals("/login")) {
+                responseStatusCode = HTTP_STATUS_200;
+                responseBody = createStaticFileResponseBody("/login.html");
+                response = create200Response(responseStatusCode, responseBody, ContentTypeMapper.extractContentType(resource));
             }
-            if (resource.contains("?")) {
-                int index = resource.indexOf("?");
-                String queries = resource.substring(index + 1);
+
+            if (method.equals("POST") && resource.equals("/login")) {
+                String queries = extractRequestBody(br, httpRequestHeaders);
                 Map<String, String> queryMap = createQueryMap(queries);
                 Optional<User> account = InMemoryUserRepository.findByAccount(queryMap.get("account"));
 
                 if (account.isPresent() && account.get().checkPassword(queryMap.get("password"))) {
-                    responseBody = createResponseBody("/index.html");
-                    responseHeader = "302 FOUND";
+                    responseStatusCode = HTTP_STATUS_302;
+                    response = create302Response(responseStatusCode, "/index.html");
                 } else {
-                    responseBody = createResponseBody("/401.html");
-                    responseHeader = "401 UNAUTHORIZED";
+                    responseStatusCode = HTTP_STATUS_401;
+                    responseBody = createStaticFileResponseBody("/401.html");
+                    response = create200Response(responseStatusCode, responseBody, ContentTypeMapper.extractContentType(resource));
                 }
             }
 
-            outputStream.write(createResponse(responseHeader, responseBody, ContentTypeMapper.extractContentType(resource)).getBytes());
+            if (method.equals("POST") && resource.equals("/register")) {
+                String queries = extractRequestBody(br, httpRequestHeaders);
+                Map<String, String> queryMap = createQueryMap(queries);
+                User user = new User(InMemoryUserRepository.size() + 1L,
+                        queryMap.get("account"),
+                        queryMap.get("password"),
+                        queryMap.get("email"));
+                InMemoryUserRepository.save(user);
+
+                responseStatusCode = HTTP_STATUS_200;
+                responseBody = createStaticFileResponseBody("/index.html");
+                response = create200Response(responseStatusCode, responseBody, ContentTypeMapper.extractContentType(resource));
+            }
+            outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
         }
+    }
+
+    private String extractRequestBody(BufferedReader br, Map<String, String> httpRequestHeaders) throws IOException {
+        int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
+        char[] buffer = new char[contentLength];
+        br.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 
     private Map<String, String> createQueryMap(String queryString) {
@@ -109,7 +126,7 @@ public class RequestHandler implements Runnable {
         return queryMap;
     }
 
-    private String createResponseBody(String render) throws IOException {
+    private String createStaticFileResponseBody(String render) throws IOException {
         String filePath = "static" + render;
         final URL url = getClass().getClassLoader().getResource(filePath);
         File file = new File(Objects.requireNonNull(url).getFile());
@@ -117,13 +134,19 @@ public class RequestHandler implements Runnable {
         return new String(bytes);
     }
 
-    private String createResponse(String responseHeader, String responseBody, String contentType) {
+    private String create200Response(String responseHeader, String responseBody, String contentType) {
         return String.join("\r\n",
                 "HTTP/1.1 " + responseHeader + " ",
                 "Content-Type: " + contentType + " ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private String create302Response(String responseHeader, String redirectUrl) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + responseHeader + " ",
+                "Location: http://localhost:8080" + redirectUrl);
     }
 
     private void close() {

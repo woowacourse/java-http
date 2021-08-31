@@ -23,7 +23,11 @@ public class RequestPath {
     }
 
     public String path() {
-        return this.path;
+        int index = path.indexOf('?');
+        if (index < 0) {
+            return path;
+        }
+        return path.substring(0, index);
     }
 
     public boolean hasQueryString() {

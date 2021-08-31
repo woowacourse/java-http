@@ -1,4 +1,4 @@
-package nextstep.jwp.handler;
+package nextstep.jwp.controller;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,14 +14,14 @@ import nextstep.jwp.model.PathType;
 import nextstep.jwp.model.Request;
 import nextstep.jwp.model.Response;
 
-public abstract class AbstractHandler implements Handler {
+public abstract class AbstractController implements Controller {
 
-    public Response message(Request request) throws IOException {
+    public Response doService(Request request) throws IOException {
         try {
             if (MethodType.isGet(request.getRequestMethod())) {
-                return getMessage(request);
+                return doGet(request);
             }
-            return postMessage(request);
+            return doPost(request);
         } catch (FileNotFoundException exception) {
             return redirectMessage(request, PathType.NOT_FOUND.resource());
         } catch (LoginException | RegisterException exception) {
@@ -29,11 +29,11 @@ public abstract class AbstractHandler implements Handler {
         }
     }
 
-    protected Response getMessage(Request request) throws IOException {
+    protected Response doGet(Request request) throws IOException {
         throw new IllegalStateException();
     }
 
-    protected Response postMessage(Request request) {
+    protected Response doPost(Request request) {
         throw new IllegalStateException();
     }
 

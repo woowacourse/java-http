@@ -5,8 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
-import nextstep.jwp.handler.Handler;
-import nextstep.jwp.handler.HandlerFactory;
+import nextstep.jwp.controller.Controller;
 import nextstep.jwp.model.Request;
 import nextstep.jwp.model.Response;
 import nextstep.jwp.utils.RequestAssembler;
@@ -18,9 +17,11 @@ public class RequestHandler implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
+    private final RequestMapping requestMapping;
 
-    public RequestHandler(Socket connection) {
+    public RequestHandler(Socket connection, RequestMapping requestMapping) {
         this.connection = Objects.requireNonNull(connection);
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -32,8 +33,8 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
                 final OutputStream outputStream = connection.getOutputStream()) {
             Request request = RequestAssembler.assemble(inputStream);
-            Handler handler = HandlerFactory.handler(request);
-            Response response = handler.message(request);
+            Controller controller = requestMapping.getController(request.path());
+            Response response = controller.doService(request);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException exception) {

@@ -1,4 +1,4 @@
-package nextstep.jwp.handler;
+package nextstep.jwp.controller;
 
 import java.io.IOException;
 import nextstep.jwp.model.FileType;
@@ -7,22 +7,22 @@ import nextstep.jwp.model.Request;
 import nextstep.jwp.model.Response;
 import nextstep.jwp.service.RegisterService;
 
-public class RegisterHandler extends AbstractHandler {
+public class RegisterController extends AbstractController {
 
     private final RegisterService registerService;
 
-    public RegisterHandler(RegisterService registerService) {
+    public RegisterController(RegisterService registerService) {
         this.registerService = registerService;
     }
 
     @Override
-    public Response getMessage(Request request) throws IOException {
+    public Response doGet(Request request) throws IOException {
         final String responseBody = fileByPath(request.path() + FileType.HTML.extension());
         return staticFileMessage(request, FileType.HTML, responseBody);
     }
 
     @Override
-    public Response postMessage(Request request) {
+    public Response doPost(Request request) {
         registerService.register(request);
         return redirectMessage(request, PathType.INDEX.resource());
     }

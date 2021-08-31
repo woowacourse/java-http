@@ -1,4 +1,4 @@
-package nextstep.jwp.handler;
+package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -10,16 +10,16 @@ import nextstep.jwp.model.Session;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.LoginService;
 
-public class LoginHandler extends AbstractHandler {
+public class LoginController extends AbstractController {
 
     private final LoginService loginService;
 
-    public LoginHandler(LoginService loginService) {
+    public LoginController(LoginService loginService) {
         this.loginService = loginService;
     }
 
     @Override
-    public Response getMessage(Request request) throws IOException {
+    public Response doGet(Request request) throws IOException {
         Session session = request.getSession();
         User user = (User) session.getAttribute("user");
         if (Objects.nonNull(user)) {
@@ -34,7 +34,7 @@ public class LoginHandler extends AbstractHandler {
     }
 
     @Override
-    public Response postMessage(Request request) {
+    public Response doPost(Request request) {
         loginService.loginByPost(request);
         return redirectMessage(request, PathType.INDEX.resource());
     }

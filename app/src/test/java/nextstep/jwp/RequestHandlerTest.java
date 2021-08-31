@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
 
+    private final RequestMapping requestMapping = new RequestMapping();
+
     @Test
     void run() {
         // given
@@ -334,7 +336,7 @@ class RequestHandlerTest {
     }
 
     @Test
-    void notFoundPath() throws IOException {
+    void notFoundPath() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /notfoundpath HTTP/1.1 ",
@@ -349,13 +351,10 @@ class RequestHandlerTest {
         String output = runRequestHandler(httpRequest);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/404.html");
-        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html; charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+        String expected = "HTTP/1.1 302 FOUND \r\n" +
+                "Location: /404.html \r\n" +
                 "\r\n" +
-                responseBody;
+                "";
         assertThat(output).isEqualTo(expected);
     }
 
@@ -440,7 +439,7 @@ class RequestHandlerTest {
 
     private String runRequestHandler(String httpRequest) {
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
         requestHandler.run();
         return socket.output();
     }

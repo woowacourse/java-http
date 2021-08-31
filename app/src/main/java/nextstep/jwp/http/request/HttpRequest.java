@@ -70,4 +70,8 @@ public class HttpRequest {
     public SourcePath sourcePath() {
         return requestLine.sourcePath();
     }
+
+    public HttpMethod httpMethod() {
+        return requestLine.method();
+    }
 }

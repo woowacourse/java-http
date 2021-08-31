@@ -31,7 +31,7 @@ public class Dispatcher {
     public ModelAndView service(HttpRequest request, HttpResponse response) {
         try {
             Handler handler = handlerMapper.mapping(request);
-            return handler.service(request, response);
+            return handler.handle(request, response);
         } catch (NotFoundException notFoundException) {
             return ModelAndView.of("/404.html", HttpStatus.NOT_FOUND);
         } catch (Exception exception) {

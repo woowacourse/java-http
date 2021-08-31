@@ -1,28 +1,30 @@
 package nextstep.jwp.mapper;
 
-import java.util.Arrays;
-import java.util.List;
-
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.handler.Handler;
 import nextstep.jwp.http.request.HttpRequest;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
 public class HandlerMapperImpl implements HandlerMapper {
 
-    private final List<Handler> handlers;
+    private final List<HandlerMapper> handlerMappers;
 
-    private HandlerMapperImpl(List<Handler> handlers) {
-        this.handlers = handlers;
+    private HandlerMapperImpl(List<HandlerMapper> handlerMappers) {
+        this.handlerMappers = handlerMappers;
     }
 
-    public HandlerMapperImpl(Handler... handlers) {
-        this(Arrays.asList(handlers));
+    public HandlerMapperImpl(HandlerMapper... handlerMappers) {
+        this(Arrays.asList(handlerMappers));
     }
 
     @Override
     public Handler mapping(HttpRequest httpRequest) {
-        return handlers.stream()
-                .filter(handler -> handler.mapping(httpRequest))
+        return handlerMappers.stream()
+                .map(handler -> handler.mapping(httpRequest))
+                .filter(handler->!Objects.isNull(handler))
                 .findFirst()
                 .orElseThrow(NotFoundException::new);
     }

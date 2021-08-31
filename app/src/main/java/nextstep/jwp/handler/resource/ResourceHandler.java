@@ -1,4 +1,4 @@
-package nextstep.jwp.handler;
+package nextstep.jwp.handler.resource;
 
 import nextstep.jwp.ServerConfig;
 import nextstep.jwp.handler.modelandview.ModelAndView;
@@ -10,17 +10,16 @@ import nextstep.jwp.http.response.HttpStatus;
 import java.net.URL;
 import java.util.Objects;
 
-public class ResourceHandler implements Handler {
+public class ResourceHandler implements IResourceHandler {
 
     private static final String RESOURCE_BASE_PATH = ServerConfig.RESOURCE_BASE_PATH;
 
-    @Override
     public boolean mapping(HttpRequest httpRequest) {
         return (httpRequest.isGet() && isExistResource(httpRequest.sourcePath()));
     }
 
     @Override
-    public ModelAndView service(HttpRequest httpRequest, HttpResponse httpResponse) {
+    public ModelAndView handle(HttpRequest httpRequest, HttpResponse httpResponse) {
         SourcePath sourcePath = httpRequest.sourcePath();
         if (isExistResource(sourcePath)) {
             return ModelAndView.of(sourcePath.getValue(), HttpStatus.OK);

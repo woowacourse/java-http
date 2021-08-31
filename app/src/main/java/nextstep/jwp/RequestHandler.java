@@ -32,7 +32,6 @@ public class RequestHandler implements Runnable {
                 final OutputStream outputStream = connection.getOutputStream()) {
             UserService userService = new UserService();
             Request request = Request.createFromInputStream(inputStream);
-//            Response response = Response.createFrom;
             final String httpMethod = request.getRequestLine("httpMethod");
             final String uri = request.getRequestLine("uri");
             String responseBody = "";
@@ -43,38 +42,38 @@ public class RequestHandler implements Runnable {
             }
 
             if (httpMethod.equals("GET") && (uri.equals("/index") || uri.equals("/index.html") || uri.equals("/"))) {
-                responseBody = getStaticFileContents("/index.html");
+                responseBody = ResponseBody.createByPath("/index.html").getResponseBody();
                 response = replyOkResponse(responseBody);
             } else if (httpMethod.equals("GET") && (uri.equals("/login.html") || uri.equals("/login"))) {
-                responseBody = getStaticFileContents("/login.html");
+                responseBody = ResponseBody.createByPath("/login.html").getResponseBody();
                 response = replyOkResponse(responseBody);
             } else if (httpMethod.equals("POST") && (uri.equals("/login.html") || uri.equals("/login"))) {
                 String requestBody = request.getBody();
                 Optional<User> user = userService.findUserFromBody(requestBody);
                 if (user.isEmpty()) {
-                    responseBody = getStaticFileContents("/401.html");
+                    responseBody = ResponseBody.createByPath("/401.html").getResponseBody();
                     response = replyAfterLogin302Response(responseBody, "/401.html");
                 } else {
-                    responseBody = getStaticFileContents("/index.html");
+                    responseBody = ResponseBody.createByPath("/index.html").getResponseBody();
                     response = replyAfterLogin302Response(responseBody, "/index.html");
                 }
             } else if (httpMethod.equals("GET") && (uri.equals("/register") || uri.equals("/register.html"))) {
-                responseBody = getStaticFileContents("/register.html");
+                responseBody = ResponseBody.createByPath("/register.html").getResponseBody();
                 response = replyOkResponse(responseBody);
             } else if (httpMethod.equals("POST") && uri.equals("/register")) {
                 String requestBody = request.getBody();
                 userService.saveUser(requestBody);
 
-                responseBody = getStaticFileContents("/index.html");
+                responseBody = ResponseBody.createByPath("/index.html").getResponseBody();
                 response = replyOkResponse(responseBody);
             } else if (httpMethod.equals("GET") && uri.equals("/css/styles.css")) {
-                responseBody = getStaticFileContents("/css/styles.css");
+                responseBody = ResponseBody.createByPath("/css/styles.css").getResponseBody();
                 response = replyOkCssResponse(responseBody);
             } else if (httpMethod.equals("GET") && uri.matches("/.*(js)$")) {
-                responseBody = getStaticFileContents(uri);
+                responseBody = ResponseBody.createByPath(uri).getResponseBody();
                 response = replyOkJsResponse(responseBody);
             } else if (httpMethod.equals("GET") && uri.equals("/401.html")) {
-                responseBody = getStaticFileContents(uri);
+                responseBody = ResponseBody.createByPath(uri).getResponseBody();
                 response = replyOkResponse(responseBody);
             }
 

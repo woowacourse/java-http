@@ -35,7 +35,7 @@ public class StaticResourceController implements Controller {
     }
 
     @Override
-    public HttpResponse doService(HttpRequest httpRequest) throws IOException {
+    public HttpResponse service(HttpRequest httpRequest) throws IOException {
         return doGet(httpRequest);
     }
 }

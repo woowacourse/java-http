@@ -22,7 +22,13 @@ public abstract class RestController implements Controller {
         this.staticResourceService = staticResourceService;
     }
 
-    protected abstract HttpResponse doPost(HttpRequest httpRequest);
+    public HttpResponse service(HttpRequest httpRequest) throws IOException {
+        if (httpRequest.hasMethod(GET)) {
+            return doGet(httpRequest);
+        }
+
+        return doPost(httpRequest);
+    }
 
     private HttpResponse doGet(HttpRequest httpRequest) throws IOException {
         try {
@@ -39,11 +45,5 @@ public abstract class RestController implements Controller {
         }
     }
 
-    public HttpResponse doService(HttpRequest httpRequest) throws IOException {
-        if (httpRequest.hasMethod(GET)) {
-            return doGet(httpRequest);
-        }
-
-        return doPost(httpRequest);
-    }
+    protected abstract HttpResponse doPost(HttpRequest httpRequest);
 }

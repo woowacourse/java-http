@@ -1,9 +1,8 @@
-package nextstep.jwp;
+package nextstep.jwp.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import nextstep.jwp.controller.Controllers;
-import nextstep.jwp.server.RequestHandler;
+import nextstep.jwp.MockSocket;
 import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
@@ -12,8 +11,8 @@ class RequestHandlerTest {
     void run() {
         // given
         final MockSocket socket = new MockSocket();
-        final Controllers controllers = Controllers.loadContext();
-        final RequestHandler requestHandler = new RequestHandler(socket, controllers);
+        final RequestMapping requestMapping = RequestMapping.loadContext();
+        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
 
         // when
         requestHandler.run();
@@ -39,8 +38,8 @@ class RequestHandlerTest {
             "");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final Controllers controllers = Controllers.loadContext();
-        final RequestHandler requestHandler = new RequestHandler(socket, controllers);
+        final RequestMapping requestMapping = RequestMapping.loadContext();
+        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
 
         // when
         requestHandler.run();

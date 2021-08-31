@@ -45,7 +45,7 @@ class StaticResourceControllerTest {
             + "NOT FOUND";
 
         // when
-        HttpResponse httpResponse = staticResourceController.doService(httpRequest);
+        HttpResponse httpResponse = staticResourceController.service(httpRequest);
 
         // then
         assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
@@ -72,7 +72,7 @@ class StaticResourceControllerTest {
                 + "static page is good!";
 
             // when
-            HttpResponse httpResponse = staticResourceController.doService(httpRequest);
+            HttpResponse httpResponse = staticResourceController.service(httpRequest);
 
             // then
             assertThat(httpResponse.toBytes()).isEqualTo(
@@ -96,7 +96,7 @@ class StaticResourceControllerTest {
                 + "static page is good!";
 
             // when
-            HttpResponse httpResponse = staticResourceController.doService(httpRequest);
+            HttpResponse httpResponse = staticResourceController.service(httpRequest);
 
             // then
             assertThat(httpResponse.toBytes()).isEqualTo(

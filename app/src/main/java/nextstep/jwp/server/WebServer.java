@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.stream.Stream;
-import nextstep.jwp.controller.Controllers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,11 +13,11 @@ public class WebServer {
     private static final int DEFAULT_PORT = 8080;
 
     private final int port;
-    private final Controllers controllers;
+    private final RequestMapping requestMapping;
 
     public WebServer(int port) {
         this.port = checkPort(port);
-        this.controllers = Controllers.loadContext();
+        this.requestMapping = RequestMapping.loadContext();
     }
 
     public void run() {
@@ -35,7 +34,7 @@ public class WebServer {
     private void handle(ServerSocket serverSocket) throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection, controllers)).start();
+            new Thread(new RequestHandler(connection, requestMapping)).start();
         }
     }
 

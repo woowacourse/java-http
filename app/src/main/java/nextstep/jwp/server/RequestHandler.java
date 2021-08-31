@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
-import nextstep.jwp.controller.Controllers;
 import nextstep.jwp.exception.InvalidHttpRequestException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
@@ -18,11 +17,11 @@ public class RequestHandler implements Runnable {
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
-    private final Controllers controllers;
+    private final RequestMapping requestMapping;
 
-    public RequestHandler(Socket connection, Controllers controllers) {
+    public RequestHandler(Socket connection, RequestMapping requestMapping) {
         this.connection = Objects.requireNonNull(connection);
-        this.controllers = controllers;
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -35,7 +34,7 @@ public class RequestHandler implements Runnable {
 
             HttpRequest httpRequest = HttpRequest.parse(inputStream);
             LOGGER.info("Parsed HTTP Request!!!\n\n{}\n\n", httpRequest);
-            HttpResponse httpResponse = controllers.doService(httpRequest);
+            HttpResponse httpResponse = requestMapping.doService(httpRequest);
             LOGGER.info("Return HTTP Response!!!\n\n{}\n\n", httpResponse);
 
             flushBytes(outputStream, httpResponse);

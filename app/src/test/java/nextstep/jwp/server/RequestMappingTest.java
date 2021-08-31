@@ -1,4 +1,4 @@
-package nextstep.jwp.controller;
+package nextstep.jwp.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,16 +15,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class ControllersTest {
+class RequestMappingTest {
 
     private static final String NEW_LINE = System.getProperty("line.separator");
 
-    private Controllers controllers;
+    private RequestMapping requestMapping;
     private HttpRequest httpRequest;
 
     @BeforeEach
     void setUp() {
-        controllers = Controllers.loadContext();
+        requestMapping = RequestMapping.loadContext();
     }
 
     @DisplayName("split 메서드를 이용해 URI을 파싱한다.")
@@ -69,7 +69,7 @@ class ControllersTest {
                     + "login is good";
 
                 // when
-                HttpResponse httpResponse = controllers.doService(httpRequest);
+                HttpResponse httpResponse = requestMapping.doService(httpRequest);
 
                 // then
                 assertThat(httpResponse.toBytes()).isEqualTo(
@@ -94,7 +94,7 @@ class ControllersTest {
                     + "Location: /index.html ";
 
                 // when
-                HttpResponse httpResponse = controllers.doService(httpRequest);
+                HttpResponse httpResponse = requestMapping.doService(httpRequest);
 
                 // then
                 assertThat(httpResponse.toBytes()).isEqualTo(
@@ -126,7 +126,7 @@ class ControllersTest {
                     + "register is good";
 
                 // when
-                HttpResponse httpResponse = controllers.doService(httpRequest);
+                HttpResponse httpResponse = requestMapping.doService(httpRequest);
 
                 // then
                 assertThat(httpResponse.toBytes()).isEqualTo(
@@ -151,7 +151,7 @@ class ControllersTest {
                     + "Location: /index.html ";
 
                 // when
-                HttpResponse httpResponse = controllers.doService(httpRequest);
+                HttpResponse httpResponse = requestMapping.doService(httpRequest);
 
                 // then
                 assertThat(httpResponse.toBytes()).isEqualTo(
@@ -181,7 +181,7 @@ class ControllersTest {
                     + "static page is good!";
 
                 // when
-                HttpResponse httpResponse = controllers.doService(httpRequest);
+                HttpResponse httpResponse = requestMapping.doService(httpRequest);
 
                 // then
                 assertThat(httpResponse.toBytes()).isEqualTo(
@@ -206,7 +206,7 @@ class ControllersTest {
                     + "static page is good!";
 
                 // when
-                HttpResponse httpResponse = controllers.doService(httpRequest);
+                HttpResponse httpResponse = requestMapping.doService(httpRequest);
 
                 // then
                 assertThat(httpResponse.toBytes()).isEqualTo(

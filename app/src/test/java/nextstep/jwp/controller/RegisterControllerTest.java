@@ -63,7 +63,7 @@ class RegisterControllerTest {
                     + "register is good";
 
                 // when
-                HttpResponse httpResponse = registerController.doService(httpRequest);
+                HttpResponse httpResponse = registerController.service(httpRequest);
 
                 // then
                 assertThat(httpResponse.toBytes()).isEqualTo(
@@ -88,7 +88,7 @@ class RegisterControllerTest {
                     + "NOT FOUND";
 
                 // when
-                HttpResponse httpResponse = registerController.doService(httpRequest);
+                HttpResponse httpResponse = registerController.service(httpRequest);
 
                 // then
                 assertThat(httpResponse.toBytes()).isEqualTo(
@@ -133,7 +133,7 @@ class RegisterControllerTest {
                     + "Location: /index.html ";
 
                 // when
-                HttpResponse httpResponse = registerController.doService(httpRequest);
+                HttpResponse httpResponse = registerController.service(httpRequest);
 
                 // then
                 assertThat(httpResponse.toBytes()).isEqualTo(
@@ -150,7 +150,7 @@ class RegisterControllerTest {
                     + "Location: /409.html ";
 
                 // when
-                HttpResponse httpResponse = registerController.doService(httpRequest);
+                HttpResponse httpResponse = registerController.service(httpRequest);
 
                 // then
                 assertThat(httpResponse.toBytes()).isEqualTo(

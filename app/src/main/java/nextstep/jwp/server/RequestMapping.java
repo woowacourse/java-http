@@ -1,8 +1,12 @@
-package nextstep.jwp.controller;
+package nextstep.jwp.server;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.StaticResourceController;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
@@ -10,20 +14,20 @@ import nextstep.jwp.service.LoginService;
 import nextstep.jwp.service.RegisterService;
 import nextstep.jwp.service.StaticResourceService;
 
-public class Controllers {
+public class RequestMapping {
 
     private static final int ROOT_PATH_INDEX = 1;
 
     private final Map<String, Controller> restControllers;
     private final Controller staticResourceController;
 
-    private Controllers(Map<String, Controller> restControllers,
-                        Controller staticResourceController) {
+    private RequestMapping(Map<String, Controller> restControllers,
+                           Controller staticResourceController) {
         this.restControllers = restControllers;
         this.staticResourceController = staticResourceController;
     }
 
-    public static Controllers loadContext() {
+    public static RequestMapping loadContext() {
         InMemoryUserRepository userRepository = InMemoryUserRepository.initialize();
         LoginService loginService = new LoginService(userRepository);
         RegisterService registerService = new RegisterService(userRepository);
@@ -38,7 +42,7 @@ public class Controllers {
             staticResourceService);
         restControllers.put("register", registerController);
 
-        return new Controllers(restControllers, staticResourceController);
+        return new RequestMapping(restControllers, staticResourceController);
     }
 
     public HttpResponse doService(HttpRequest httpRequest) throws IOException {
@@ -47,7 +51,7 @@ public class Controllers {
 
         Controller controller = findByUri(rootUri);
 
-        return controller.doService(httpRequest);
+        return controller.service(httpRequest);
     }
 
     private Controller findByUri(String rootUri) {

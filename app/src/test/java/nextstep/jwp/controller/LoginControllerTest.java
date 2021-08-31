@@ -63,7 +63,7 @@ class LoginControllerTest {
                     + "login is good";
 
                 // when
-                HttpResponse httpResponse = loginController.doService(httpRequest);
+                HttpResponse httpResponse = loginController.service(httpRequest);
 
                 // then
                 assertThat(httpResponse.toBytes()).isEqualTo(
@@ -88,7 +88,7 @@ class LoginControllerTest {
                     + "NOT FOUND";
 
                 // when
-                HttpResponse httpResponse = loginController.doService(httpRequest);
+                HttpResponse httpResponse = loginController.service(httpRequest);
 
                 // then
                 assertThat(httpResponse.toBytes()).isEqualTo(
@@ -133,7 +133,7 @@ class LoginControllerTest {
                     + "Location: /index.html ";
 
                 // when
-                HttpResponse httpResponse = loginController.doService(httpRequest);
+                HttpResponse httpResponse = loginController.service(httpRequest);
 
                 // then
                 assertThat(httpResponse.toBytes()).isEqualTo(
@@ -148,7 +148,7 @@ class LoginControllerTest {
                     + "Location: /401.html ";
 
                 // when
-                HttpResponse httpResponse = loginController.doService(httpRequest);
+                HttpResponse httpResponse = loginController.service(httpRequest);
 
                 // then
                 assertThat(httpResponse.toBytes()).isEqualTo(

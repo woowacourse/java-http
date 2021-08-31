@@ -7,10 +7,13 @@ import java.io.InputStreamReader;
 import java.util.Objects;
 import nextstep.jwp.constants.Headers;
 import nextstep.jwp.constants.Http;
+import nextstep.jwp.constants.StatusCode;
 import nextstep.jwp.controller.FrontController;
+import nextstep.jwp.exception.PageNotFoundException;
 import nextstep.jwp.request.RequestBody;
 import nextstep.jwp.request.RequestHeader;
 import nextstep.jwp.request.RequestLine;
+import nextstep.jwp.response.ResponseEntity;
 
 public class HttpServer {
     private final BufferedReader reader;
@@ -55,8 +58,14 @@ public class HttpServer {
 
     public String getResponse() throws Exception {
         final FrontController frontController = new FrontController(this.body, this.requestLine);
-
-        return frontController.response();
+        try {
+            return frontController.response();
+        } catch (PageNotFoundException e) {
+            return ResponseEntity
+                    .statusCode(StatusCode.NOT_FOUND)
+                    .responseResource("/404.html")
+                    .build();
+        }
     }
 
 }

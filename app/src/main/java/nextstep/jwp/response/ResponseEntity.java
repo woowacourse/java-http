@@ -4,19 +4,21 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.constants.ContentType;
 import nextstep.jwp.constants.Http;
 import nextstep.jwp.constants.StatusCode;
+import nextstep.jwp.exception.PageNotFoundException;
 
 public class ResponseEntity {
 
     private final StatusCode statusCode;
     private final String responseBody;
-    private final String contentType;
+    private final ContentType contentType;
 
     public static class Builder {
         private StatusCode statusCode = StatusCode.OK;
         private String responseBody = "";
-        private String contentType = Http.DEFAULT_CONTENT_TYPE;
+        private ContentType contentType = ContentType.HTML;
 
         private Builder() {
         }
@@ -41,15 +43,16 @@ public class ResponseEntity {
         public String build() {
             return String.join(Http.NEW_LINE,
                     "HTTP/1.1 " + this.statusCode.getStatusCode() + " " + this.statusCode.getStatus() + " ",
-                    "Content-Type: text/" + contentType + ";charset=utf-8 ",
+                    "Content-Type: " + contentType.getContentType() + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
         }
 
-        private String extractContentType(String uri) {
+        private ContentType extractContentType(String uri) {
             String[] splitByExtension = uri.split(Http.FILE_EXTENSION_SEPARATOR);
-            return splitByExtension[splitByExtension.length - 1];
+            String fileType = splitByExtension[splitByExtension.length - 1];
+            return ContentType.findContentType(fileType);
         }
 
         private String checkFileExtension(String uri) {
@@ -60,8 +63,12 @@ public class ResponseEntity {
         }
 
         private String findResource(String uri) throws IOException {
-            final URL resource = getClass().getClassLoader().getResource(Http.DIRECTORY_STATIC + uri);
-            return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            try {
+                final URL resource = getClass().getClassLoader().getResource(Http.DIRECTORY_STATIC + uri);
+                return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            } catch (NullPointerException e) {
+                throw new PageNotFoundException("해당하는 정적 리소스 페이지가 없어요");
+            }
         }
 
     }

@@ -17,7 +17,7 @@ public class UrlEncodingMapper implements DataMapper {
         final String[] parameters = data.split(PARAMETER_DELIMITER);
 
         for (final String parameter : parameters) {
-            List<String> keyAndValue = Arrays.stream(parameter.split(KEY_AND_VALUE_DELIMITER))
+            List<String> keyAndValue = Arrays.stream(parameter.split(KEY_AND_VALUE_DELIMITER, 2))
                 .collect(Collectors.toList());
 
             if (keyAndValue.size() != 2) {

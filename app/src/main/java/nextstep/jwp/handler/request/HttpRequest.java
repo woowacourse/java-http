@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import nextstep.jwp.handler.HttpBody;
+import nextstep.jwp.handler.HttpCookie;
 import nextstep.jwp.handler.HttpHeader;
 import nextstep.jwp.handler.constant.HttpMethod;
 
@@ -13,11 +14,13 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final HttpHeader header;
+    private final HttpCookie cookie;
     private final HttpBody body;
 
-    public HttpRequest(HttpMethod httpMethod, String httpUri, String httpVersion, HttpHeader header, HttpBody body) {
+    public HttpRequest(HttpMethod httpMethod, String httpUri, String httpVersion, HttpHeader header, HttpCookie cookie, HttpBody body) {
         this.requestLine = new RequestLine(httpMethod, new RequestUrl(httpUri), httpVersion);
         this.header = header;
+        this.cookie = cookie;
         this.body = body;
     }
 
@@ -32,9 +35,10 @@ public class HttpRequest {
         String httpUri = startLineSplit[1];
         String httpVersion = startLineSplit[2];
         HttpHeader header = extractHeader(reader);
+        HttpCookie cookie = header.getCookie();
         HttpBody body = extractBody(reader, header.getContentLength());
 
-        return new HttpRequest(httpMethod, httpUri, httpVersion, header, body);
+        return new HttpRequest(httpMethod, httpUri, httpVersion, header, cookie, body);
     }
 
     private static HttpHeader extractHeader(BufferedReader reader) throws IOException {
@@ -62,6 +66,10 @@ public class HttpRequest {
 
     public boolean isUriContainsQuery() {
         return requestLine.hasQueryParams();
+    }
+
+    public boolean containsCookie(String name) {
+        return cookie.contains(name);
     }
 
     public boolean isGet() {

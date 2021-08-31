@@ -1,6 +1,6 @@
 package nextstep.jwp.httpmessage.stub;
 
-import nextstep.jwp.ContentType;
+import nextstep.jwp.httpmessage.ContentType;
 import nextstep.jwp.httpmessage.HttpMessageReader;
 import org.junit.jupiter.api.DisplayName;
 

@@ -87,7 +87,6 @@ public class HttpMessageReader {
         if (Objects.isNull(contentLengthString)) {
             return Collections.emptyMap();
         }
-
         return Stream.of(extractQueryParameterString(contentLengthString).split("&"))
                 .map(it -> it.split("=", 2))
                 .collect(Collectors.toMap(it -> it[0], it -> it[1]));

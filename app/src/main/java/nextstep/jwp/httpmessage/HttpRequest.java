@@ -36,7 +36,7 @@ public class HttpRequest {
         return requestLine.getVersionOfTheProtocol();
     }
 
-    public String findHttpHeader(String name) {
+    public String getHeader(String name) {
         return httpHeaders.getHeader(name);
     }
 
@@ -48,7 +48,7 @@ public class HttpRequest {
         return parameters.getParameterNames();
     }
 
-    public String findParameter(String name) {
+    public String getParameter(String name) {
         return parameters.getParameter(name);
     }
 }

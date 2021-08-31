@@ -1,6 +1,7 @@
 package nextstep.jwp;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.httpmessage.ContentType;
 import nextstep.jwp.httpmessage.HttpMessageReader;
 import nextstep.jwp.httpmessage.HttpMethod;
 import nextstep.jwp.httpmessage.HttpRequest;
@@ -101,8 +102,8 @@ public class RequestHandler implements Runnable {
     }
 
     private String loginRequest(HttpRequest httpRequest) {
-        final User user = findUserByAccount(httpRequest.findParameter("account"));
-        if (user.checkPassword(httpRequest.findParameter("password"))) {
+        final User user = findUserByAccount(httpRequest.getParameter("account"));
+        if (user.checkPassword(httpRequest.getParameter("password"))) {
             return user.toString();
         }
         LOG.info("옳지 않은 비밀번호입니다.");
@@ -119,7 +120,7 @@ public class RequestHandler implements Runnable {
     }
 
     private void registerRequest(HttpRequest httpRequest) {
-        final User user = new User(httpRequest.findParameter("account"), httpRequest.findParameter("password"), httpRequest.findParameter("email"));
+        final User user = new User(httpRequest.getParameter("account"), httpRequest.getParameter("password"), httpRequest.getParameter("email"));
         InMemoryUserRepository.save(user);
     }
 

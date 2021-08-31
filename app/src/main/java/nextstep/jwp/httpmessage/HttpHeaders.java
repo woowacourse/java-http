@@ -18,4 +18,8 @@ public class HttpHeaders {
     public int size() {
         return headers.size();
     }
+
+    public void setHeader(String key, String value) {
+        headers.put(key, value);
+    }
 }

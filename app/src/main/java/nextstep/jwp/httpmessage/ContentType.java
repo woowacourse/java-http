@@ -1,6 +1,7 @@
-package nextstep.jwp;
+package nextstep.jwp.httpmessage;
 
 public enum ContentType {
+
     HTML("text/html;charset=utf-8"),
     CSS("text/css"),
     JAVASCRIPT("application/javascript; charset=UTF-8"),

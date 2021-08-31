@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.MockSocket;
 import nextstep.jwp.RequestHandler;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -16,6 +17,7 @@ class LoginControllerTest {
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     @Test
+    @DisplayName("로그인 페이지를 응답한다.")
     void loginPage() throws IOException {
         // given
         final String httpRequest = "GET /login HTTP/1.1";
@@ -39,6 +41,7 @@ class LoginControllerTest {
     }
 
     @Test
+    @DisplayName("로그인 URL에 QueryParameter가 있는 경우 로그인 요청으로 처리한다.")
     void loginProcess() {
         // given
         final String httpRequest = "GET /login?account=gugu&password=password HTTP/1.1";

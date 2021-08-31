@@ -1,6 +1,7 @@
 package nextstep.jwp.web;
 
 import org.assertj.core.util.Arrays;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -14,6 +15,7 @@ class HttpRequestParserTest {
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     @Test
+    @DisplayName("HTTP 요청으로부터 HttpRequest 객체를 만들어낼 수 있다.")
     void parse() throws IOException {
         // given
         String contentType = "account=gugu&password=password&email=hkkang%40woowahan.com";
@@ -45,6 +47,7 @@ class HttpRequestParserTest {
     }
 
     @Test
+    @DisplayName("요청 URL에 QueryParameter가 포함되어 있다면, 요청 URL만을 분리해내고, 파라미터는 따로 Parsing한다.")
     void parseParameter() throws IOException {
         // given
         String request = String.join(LINE_SEPARATOR,

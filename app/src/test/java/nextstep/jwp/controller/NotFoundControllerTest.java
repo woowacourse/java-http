@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.MockSocket;
 import nextstep.jwp.RequestHandler;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -15,6 +16,7 @@ class NotFoundControllerTest {
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     @Test
+    @DisplayName("유효하지 않은 URL에 대한 응답은 404html 페이지와 Not Found 응답 코드로 응답한다.")
     void notFoundTest() throws IOException {
         final String httpRequest = "GET /invalid-path HTTP/1.1";
 

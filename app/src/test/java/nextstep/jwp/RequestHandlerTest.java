@@ -1,5 +1,6 @@
 package nextstep.jwp;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -13,6 +14,7 @@ class RequestHandlerTest {
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     @Test
+    @DisplayName("/index.html에 대한 요청을 보내 RequestHandler가 정상 실행되는지 테스트한다.")
     void index() throws IOException {
         // given
         final String httpRequest = String.join(LINE_SEPARATOR,

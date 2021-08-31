@@ -4,6 +4,7 @@ import nextstep.jwp.MockSocket;
 import nextstep.jwp.RequestHandler;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -18,6 +19,7 @@ class RegisterControllerTest {
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     @Test
+    @DisplayName("회원가입 페이지를 응답한다.")
     void registerPage() throws IOException {
         // given
         final String httpRequest = "GET /register HTTP/1.1";
@@ -41,6 +43,7 @@ class RegisterControllerTest {
     }
 
     @Test
+    @DisplayName("회원가입 요청을 처리한다.")
     void register() {
         // given
         String requestBody = "account=kimkim&password=password&email=kimkim@woowa.com";

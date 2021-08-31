@@ -2,12 +2,16 @@ package nextstep.jwp.view;
 
 import java.io.File;
 import java.net.URL;
-import nextstep.jwp.ServerConfig;
 
 public class ViewResolver {
 
-    private static final String ROOT_RESPONSE = ServerConfig.ROOT_RESPONSE;
-    private static final String RESOURCE_BASE_PATH = ServerConfig.RESOURCE_BASE_PATH;
+    private final String rootResponse;
+    private final String resourceBasePath;
+
+    public ViewResolver(String rootResponse, String resourceBasePath) {
+        this.rootResponse = rootResponse;
+        this.resourceBasePath = resourceBasePath;
+    }
 
     public View resolve(String viewName) {
         try {
@@ -16,10 +20,10 @@ public class ViewResolver {
             }
 
             if (viewName.equals("/")) {
-                return View.asString(ROOT_RESPONSE);
+                return View.asString(rootResponse);
             }
 
-            final URL resourceUrl = getClass().getResource(RESOURCE_BASE_PATH + viewName);
+            final URL resourceUrl = getClass().getResource(resourceBasePath + viewName);
             return View.asFile(new File(resourceUrl.getFile()));
         } catch (Exception e) {
             throw new IllegalArgumentException("view not found");

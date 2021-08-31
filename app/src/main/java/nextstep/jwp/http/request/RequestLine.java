@@ -44,8 +44,4 @@ public class RequestLine {
     public int hashCode() {
         return Objects.hash(method, uriPath, protocolVersion);
     }
-
-    public boolean isPath(String path) {
-        return sourcePath().isPath(path);
-    }
 }

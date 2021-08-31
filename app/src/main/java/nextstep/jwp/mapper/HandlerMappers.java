@@ -8,15 +8,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class HandlerMapperImpl implements HandlerMapper {
+public class HandlerMappers implements HandlerMapper {
 
     private final List<HandlerMapper> handlerMappers;
 
-    private HandlerMapperImpl(List<HandlerMapper> handlerMappers) {
+    private HandlerMappers(List<HandlerMapper> handlerMappers) {
         this.handlerMappers = handlerMappers;
     }
 
-    public HandlerMapperImpl(HandlerMapper... handlerMappers) {
+    public HandlerMappers(HandlerMapper... handlerMappers) {
         this(Arrays.asList(handlerMappers));
     }
 

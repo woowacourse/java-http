@@ -11,11 +11,10 @@ import java.util.Map;
 
 public class ControllerMapper implements HandlerMapper {
 
-    private final Map<String, AbstractController> controllers = new HashMap<>();
+    private final Map<String, AbstractController> controllers;
 
-    public ControllerMapper() {
-        controllers.put("/login", new LoginController());
-        controllers.put("/register", new RegisterController());
+    public ControllerMapper(Map<String, AbstractController> controllers) {
+        this.controllers = controllers;
     }
 
     @Override

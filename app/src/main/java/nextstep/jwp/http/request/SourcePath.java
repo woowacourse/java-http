@@ -18,10 +18,6 @@ public class SourcePath {
         return new SourcePath(uriPath);
     }
 
-    public boolean isPath(String path) {
-        return this.path.equalsIgnoreCase(path);
-    }
-
     public String getValue() {
         return path;
     }

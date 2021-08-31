@@ -1,5 +1,6 @@
 package nextstep.jwp.mapper;
 
+import java.util.Arrays;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.handler.Handler;
 import nextstep.jwp.handler.resource.ResourceHandler;
@@ -9,10 +10,14 @@ import java.util.List;
 
 public class ResourceHandlerMapper implements  HandlerMapper {
 
-    List<ResourceHandler> handlers;
+    private final List<ResourceHandler> handlers;
 
     public ResourceHandlerMapper(List<ResourceHandler> handlers) {
         this.handlers = handlers;
+    }
+
+    public ResourceHandlerMapper(ResourceHandler... resourceHandlers){
+        this(Arrays.asList(resourceHandlers));
     }
 
     @Override

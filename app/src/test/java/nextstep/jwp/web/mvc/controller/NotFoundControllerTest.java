@@ -11,6 +11,7 @@ import nextstep.jwp.web.http.request.body.TextHttpRequestBody;
 import nextstep.jwp.web.http.response.HttpResponse;
 import nextstep.jwp.web.http.response.HttpResponseImpl.Builder;
 import nextstep.jwp.web.http.response.HttpStatus;
+import nextstep.jwp.web.http.session.HttpCookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -22,6 +23,7 @@ class NotFoundControllerTest {
         //given
         HttpRequest request = new HttpRequest(new HttpHeaders(),
             HttpProtocol.HTTP1_1,
+            new HttpCookie(""),
             new MethodUrl(GET, "/"),
             new TextHttpRequestBody(""));
 

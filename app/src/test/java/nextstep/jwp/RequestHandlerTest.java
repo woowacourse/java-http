@@ -102,6 +102,7 @@ class RequestHandlerTest {
             "Content-Type: image/svg+xml \r\n" +
             "Content-Length: 6568 \r\n" +
             "\r\n";
+
         // then
         assertResponseIsEqueal(socket, resource, header);
     }

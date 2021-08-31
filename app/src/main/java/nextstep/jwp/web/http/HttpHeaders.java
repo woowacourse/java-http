@@ -14,6 +14,7 @@ public class HttpHeaders {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String LOCATION = "Location";
     private static final String COOKIE = "Cookie";
+    private static final String SET_COOKIE = "Set-Cookie";
 
     private final Map<String, HttpRequestHeaderValues> headers;
 
@@ -68,6 +69,10 @@ public class HttpHeaders {
 
     public void setLocation(String url) {
         set(LOCATION, url);
+    }
+
+    public void setResponseCookie(HttpCookie cookie) {
+        set(SET_COOKIE, cookie.asString());
     }
 
     public Map<String, HttpRequestHeaderValues> map() {

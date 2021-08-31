@@ -3,6 +3,7 @@ package nextstep.jwp.web.http.response;
 import nextstep.jwp.web.http.HttpHeaders;
 import nextstep.jwp.web.http.HttpProtocol;
 import nextstep.jwp.web.http.request.HttpRequest;
+import nextstep.jwp.web.http.session.HttpCookie;
 
 public interface HttpResponse {
 
@@ -23,4 +24,6 @@ public interface HttpResponse {
     void setStatus(HttpStatus status);
 
     void setBody(String body);
+
+    void setCookie(HttpCookie cookie);
 }

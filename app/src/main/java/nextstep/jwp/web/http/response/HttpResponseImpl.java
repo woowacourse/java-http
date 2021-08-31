@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.joining;
 import nextstep.jwp.web.http.HttpHeaders;
 import nextstep.jwp.web.http.HttpProtocol;
 import nextstep.jwp.web.http.request.HttpRequest;
+import nextstep.jwp.web.http.session.HttpCookie;
 
 public class HttpResponseImpl implements HttpResponse {
 
@@ -81,6 +82,11 @@ public class HttpResponseImpl implements HttpResponse {
     @Override
     public void setBody(String body) {
         this.body = body;
+    }
+
+    @Override
+    public void setCookie(HttpCookie cookie) {
+        this.headers.setResponseCookie(cookie);
     }
 
     @Override

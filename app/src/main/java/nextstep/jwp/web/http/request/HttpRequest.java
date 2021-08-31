@@ -13,6 +13,7 @@ import nextstep.jwp.web.http.HttpProtocol;
 import nextstep.jwp.web.http.request.body.FormDataHttpRequestBody;
 import nextstep.jwp.web.http.request.body.HttpRequestBody;
 import nextstep.jwp.web.http.request.body.TextHttpRequestBody;
+import nextstep.jwp.web.http.session.HttpCookie;
 import nextstep.jwp.web.http.util.QueryParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,14 +24,18 @@ public class HttpRequest {
 
     private final HttpHeaders headers;
     private final HttpProtocol protocol;
+    private final HttpCookie cookie;
     private MethodUrl methodUrl;
     private final HttpRequestBody<?> body;
 
-    public HttpRequest(HttpHeaders headers, HttpProtocol protocol,
+    public HttpRequest(HttpHeaders headers,
+                       HttpProtocol protocol,
+                       HttpCookie cookie,
                        MethodUrl methodUrl,
                        HttpRequestBody<?> body) {
         this.headers = headers;
         this.protocol = protocol;
+        this.cookie = cookie;
         this.methodUrl = methodUrl;
         this.body = body;
     }
@@ -51,6 +56,10 @@ public class HttpRequest {
 
     public HttpProtocol protocol() {
         return protocol;
+    }
+
+    public HttpCookie cookie() {
+        return cookie;
     }
 
     public HttpRequestHeaderValues header(String key) {
@@ -96,14 +105,16 @@ public class HttpRequest {
         private final HttpHeaders headers = new HttpHeaders();
         private HttpProtocol httpProtocol = null;
         private MethodUrl methodUrl = null;
+        private HttpCookie cookie = null;
         private HttpRequestBody<?> body = new TextHttpRequestBody(CRLF);
 
         public InputStreamHttpRequestConverter(InputStream inputStream) {
             parse(inputStream);
+            this.cookie = headers.getCookie();
         }
 
         public HttpRequest toRequest() {
-            return new HttpRequest(headers, httpProtocol, methodUrl, body);
+            return new HttpRequest(headers, httpProtocol, cookie, methodUrl, body);
         }
 
         private void parse(InputStream inputStream) {

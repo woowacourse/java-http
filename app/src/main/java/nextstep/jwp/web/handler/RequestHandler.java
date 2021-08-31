@@ -27,7 +27,7 @@ public class RequestHandler implements Runnable {
     public RequestHandler(Socket connection) {
         this(connection,
             new RequestMapping(),
-            List.of(new WebStatusHandler())
+            List.of(new WebStatusHandler(), new SessionHandler())
         );
     }
 

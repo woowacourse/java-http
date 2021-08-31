@@ -20,11 +20,11 @@ public class ViewResolver {
             }
 
             if (viewName.equals("/")) {
-                return View.asString(rootResponse);
+                return View.of(rootResponse);
             }
 
             final URL resourceUrl = getClass().getResource(resourceBasePath + viewName);
-            return View.asFile(new File(resourceUrl.getFile()));
+            return View.of(new File(resourceUrl.getFile()));
         } catch (Exception e) {
             throw new IllegalArgumentException("view not found");
         }

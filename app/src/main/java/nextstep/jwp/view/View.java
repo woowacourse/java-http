@@ -24,11 +24,11 @@ public class View {
         this(content, ContentType.empty());
     }
 
-    public static View asString(String content) {
+    public static View of(String content) {
         return new View(content, ContentType.PLAIN_UTF8);
     }
 
-    public static View asFile(File file) throws IOException {
+    public static View of(File file) throws IOException {
         String fileName = file.getName();
         String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
 

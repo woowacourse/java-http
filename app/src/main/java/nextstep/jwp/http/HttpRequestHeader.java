@@ -26,7 +26,7 @@ public class HttpRequestHeader {
                 return;
             }
             String[] header = line.split(": ");
-            headers.put(header[0], header[1]);
+            headers.put(header[0].trim(), header[1].trim());
         }
     }
 
@@ -40,14 +40,5 @@ public class HttpRequestHeader {
 
     public Map<String, String> getHeaders() {
         return headers;
-    }
-
-    @Override
-    public String toString() {
-        return "HttpRequestHeader{" +
-                "method='" + method + '\'' +
-                ", resource='" + resource + '\'' +
-                ", headers=" + headers +
-                '}';
     }
 }

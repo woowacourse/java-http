@@ -17,10 +17,6 @@ public class InMemoryUserRepository {
     }
 
     public static User save(User input) {
-        if (database.containsKey(input.getAccount())) {
-            throw new IllegalArgumentException("이미 존재하는 User 계정입니다.");
-        }
-
         User user = new User(++autoIncrement, input.getAccount(), input.getPassword(), input.getEmail());
         database.put(input.getAccount(), input);
 

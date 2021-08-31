@@ -26,6 +26,7 @@ class LoginControllerTest {
     void post() throws IOException {
         String account = "wannte";
         String password = "password";
+
         InMemoryUserRepository.save(new User(null, account, password, "email@email.com"));
 
         HttpRequest httpRequest = new HttpRequest("POST", "/login");

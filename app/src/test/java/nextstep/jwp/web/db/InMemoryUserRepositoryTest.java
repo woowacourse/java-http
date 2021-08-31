@@ -1,7 +1,6 @@
 package nextstep.jwp.web.db;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Optional;
 import nextstep.jwp.web.model.User;
@@ -10,6 +9,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class InMemoryUserRepositoryTest {
+
     @Test
     @DisplayName("User 저장")
     void save() {
@@ -18,16 +18,6 @@ class InMemoryUserRepositoryTest {
         User savedUser = InMemoryUserRepository.save(inputUser);
 
         assertThat(savedUser.getId()).isNotNull();
-    }
-
-    @Test
-    @DisplayName("User 저장 시 동일 Account 에러 발생")
-    void saveDouble() {
-        User inputUser = new User(null, "wannte", "password", "mail@mail.com");
-
-        InMemoryUserRepository.save(inputUser);
-
-        assertThatThrownBy(() -> InMemoryUserRepository.save(inputUser)).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

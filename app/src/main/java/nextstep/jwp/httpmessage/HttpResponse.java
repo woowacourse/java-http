@@ -12,7 +12,7 @@ public class HttpResponse {
     private Object body;
 
     public HttpResponse() {
-        this(null, new HttpHeaders(), null);
+        this(new StatusLine(HttpVersion.HTTP1_1, HttpStatusCode.OK), new HttpHeaders(), null);
     }
 
     public HttpResponse(StatusLine statusLine, HttpHeaders httpHeaders, Object body) {
@@ -39,6 +39,10 @@ public class HttpResponse {
 
     public HttpStatusCode getHttpStatusCode() {
         return statusLine.getHttpStatusCode();
+    }
+
+    public void addHeader(String key, int value) {
+        httpHeaders.setHeader(key, String.valueOf(value));
     }
 
     public void addHeader(String key, String value) {

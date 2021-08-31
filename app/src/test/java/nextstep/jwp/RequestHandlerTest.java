@@ -164,7 +164,9 @@ public class RequestHandlerTest {
     private String toHttp302Response(String redirectUrl) {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
-                "Location: http://localhost:8080" + redirectUrl);
+                "Location: http://localhost:8080" + redirectUrl + " ",
+                "",
+                "");
     }
 
     private String toHttp200TextHtmlResponse(String expectResponseBody) {

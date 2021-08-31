@@ -1,15 +1,15 @@
 package nextstep.jwp;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.httpmessage.ContentType;
-import nextstep.jwp.httpmessage.HttpMessageReader;
-import nextstep.jwp.httpmessage.HttpMethod;
-import nextstep.jwp.httpmessage.HttpRequest;
+import nextstep.jwp.httpmessage.*;
 import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -21,7 +21,6 @@ public class RequestHandler implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(RequestHandler.class);
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
     private static final String STATIC_PATH = "static";
-    private static final String HEADER_DELIMITER = ": ";
 
     private final Socket connection;
 
@@ -36,46 +35,61 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             final HttpRequest httpRequest = new HttpRequest(new HttpMessageReader(inputStream));
+            final HttpResponse httpResponse = new HttpResponse();
+
             final String extractedUri = httpRequest.getPath();
             final HttpMethod extractedMethod = httpRequest.getHttpMethod();
 
             if ("/".equals(extractedUri)) {
-                final String response = http200Message(DEFAULT_RESPONSE_BODY, ContentType.HTML.getContentType());
-                writeOutputStream(outputStream, response);
+                writeHttpResponseWithBody(httpResponse, ContentType.HTML, DEFAULT_RESPONSE_BODY);
+                writeOutputStream(outputStream, httpResponse.getHttpMessage());
+                return;
+            }
+            if (extractedUri.endsWith(".ico")) {
+                writeHttpResponseWithBody(httpResponse, ContentType.ICON, responseBodyByStaticURLPath(extractedUri));
+                writeOutputStream(outputStream, httpResponse.getHttpMessage());
                 return;
             }
 
             if (extractedUri.endsWith(".html")) {
-                writeOutputStream(outputStream, httpStaticFileResponse(STATIC_PATH, extractedUri, ContentType.HTML));
+                writeHttpResponseWithBody(httpResponse, ContentType.HTML, responseBodyByStaticURLPath(extractedUri));
+                writeOutputStream(outputStream, httpResponse.getHttpMessage());
                 return;
             }
 
             if (extractedUri.endsWith(".css")) {
-                writeOutputStream(outputStream, httpStaticFileResponse(STATIC_PATH, extractedUri, ContentType.CSS));
+                writeHttpResponseWithBody(httpResponse, ContentType.CSS, responseBodyByStaticURLPath(extractedUri));
+                writeOutputStream(outputStream, httpResponse.getHttpMessage());
                 return;
             }
 
             if (extractedUri.endsWith(".js")) {
-                writeOutputStream(outputStream, httpStaticFileResponse(STATIC_PATH, extractedUri, ContentType.JAVASCRIPT));
+                writeHttpResponseWithBody(httpResponse, ContentType.JAVASCRIPT, responseBodyByStaticURLPath(extractedUri));
+                writeOutputStream(outputStream, httpResponse.getHttpMessage());
                 return;
             }
 
             if (extractedUri.startsWith("/assets/img")) {
-                writeOutputStream(outputStream, httpStaticFileResponse(STATIC_PATH, extractedUri, ContentType.IMAGE));
+                writeHttpResponseWithBody(httpResponse, ContentType.IMAGE, responseBodyByStaticURLPath(extractedUri));
+                writeOutputStream(outputStream, httpResponse.getHttpMessage());
                 return;
             }
+
 
             if ("/login".equals(extractedUri)) {
                 if (HttpMethod.POST.equals(extractedMethod)) {
                     try {
                         loginRequest(httpRequest);
-                        writeOutputStream(outputStream, http302Response("/index.html"));
+                        writeHttpResponseWithRedirect(httpResponse, getPathWithOrigin(httpRequest, "/index.html"));
+                        writeOutputStream(outputStream, httpResponse.getHttpMessage());
                     } catch (RuntimeException exception) {
-                        writeOutputStream(outputStream, http302Response("/401.html"));
+                        writeHttpResponseWithRedirect(httpResponse, getPathWithOrigin(httpRequest, "/401.html"));
+                        writeOutputStream(outputStream, httpResponse.getHttpMessage());
                     }
                     return;
                 }
-                writeOutputStream(outputStream, httpStaticFileResponse(STATIC_PATH, extractedUri + ".html", ContentType.HTML));
+                writeHttpResponseWithBody(httpResponse, ContentType.HTML, responseBodyByStaticURLPath(extractedUri + ".html"));
+                writeOutputStream(outputStream, httpResponse.getHttpMessage());
                 return;
             }
 
@@ -83,22 +97,30 @@ public class RequestHandler implements Runnable {
                 if (HttpMethod.POST.equals(extractedMethod)) {
                     try {
                         registerRequest(httpRequest);
-                        writeOutputStream(outputStream, http302Response("/index.html"));
+                        writeHttpResponseWithRedirect(httpResponse, getPathWithOrigin(httpRequest, "/index.html"));
+                        writeOutputStream(outputStream, httpResponse.getHttpMessage());
                     } catch (RuntimeException exception) {
-                        writeOutputStream(outputStream, http302Response("/401.html"));
+                        writeHttpResponseWithRedirect(httpResponse, getPathWithOrigin(httpRequest, "/401.html"));
+                        writeOutputStream(outputStream, httpResponse.getHttpMessage());
                     }
                     return;
                 }
-                writeOutputStream(outputStream, httpStaticFileResponse(STATIC_PATH, extractedUri + ".html", ContentType.HTML));
+                writeHttpResponseWithBody(httpResponse, ContentType.HTML, responseBodyByStaticURLPath(extractedUri + ".html"));
+                writeOutputStream(outputStream, httpResponse.getHttpMessage());
                 return;
             }
 
-            writeOutputStream(outputStream, http302Response("/404.html"));
+            writeHttpResponseWithRedirect(httpResponse, getPathWithOrigin(httpRequest, "/404.html"));
+            writeOutputStream(outputStream, httpResponse.getHttpMessage());
         } catch (IOException exception) {
             LOG.error("Exception stream", exception);
         } finally {
             close();
         }
+    }
+
+    private String getPathWithOrigin(HttpRequest httpRequest, String uri) {
+        return "http://" + httpRequest.getHeader("Host") + uri;
     }
 
     private String loginRequest(HttpRequest httpRequest) {
@@ -129,34 +151,26 @@ public class RequestHandler implements Runnable {
         outputStream.flush();
     }
 
-    private String httpStaticFileResponse(String resourcesPath, String targetUri, ContentType contentType) {
-        return http200Message(responseBodyByURLPath(resourcesPath, targetUri), contentType.getContentType());
+    private void writeHttpResponseWithBody(HttpResponse httpResponse, ContentType contentType, String body) {
+        httpResponse.addHeader("Content-Type", contentType.getContentType());
+        httpResponse.addHeader("Content-Length", body.getBytes().length);
+        httpResponse.setBody(body);
     }
 
-    private String responseBodyByURLPath(String resourcesPath, String targetUri) {
+    private void writeHttpResponseWithRedirect(HttpResponse httpResponse, String redirectUri) {
+        httpResponse.setStatusLine(new StatusLine(HttpVersion.HTTP1_1, HttpStatusCode.FOUND));
+        httpResponse.addHeader("Location", redirectUri);
+    }
+
+    private String responseBodyByStaticURLPath(String targetUri) {
         try {
-            final URL url = getClass().getClassLoader().getResource(resourcesPath + targetUri);
+            final URL url = getClass().getClassLoader().getResource(STATIC_PATH + targetUri);
             return Files.readString(new File(url.getFile()).toPath());
         } catch (IOException exception) {
-            LOG.info("리소스를 가져오려는 url이 존재하지 않습니다. 입력값: {}", resourcesPath + targetUri);
+            LOG.info("리소스를 가져오려는 url이 존재하지 않습니다. 입력값: {}", STATIC_PATH + targetUri);
             throw new IllegalStateException(String.format("리소스를 가져오려는 url이 존재하지 않습니다. 입력값: %s",
-                    resourcesPath + targetUri));
+                    STATIC_PATH + targetUri));
         }
-    }
-
-    private String http200Message(String responseBody, String contentType) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + " ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private String http302Response(String redirectUrl) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: http://localhost:8080" + redirectUrl);
     }
 
     private void close() {

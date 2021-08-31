@@ -6,7 +6,8 @@ public enum ContentType {
     CSS("text/css"),
     JAVASCRIPT("application/javascript; charset=UTF-8"),
     X_WWW_FORM("application/x-www-form-urlencoded"),
-    IMAGE("image/svg+xml");
+    IMAGE("image/svg+xml"),
+    ICON("image/x-icon");
 
     private String contentType;
 

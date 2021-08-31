@@ -21,7 +21,7 @@ public class RequestHeader {
         String line;
         while (!LAST_OF_HEADER_LINE.equals(line = bufferedReader.readLine()) && Objects.nonNull(line)) {
             final int indexOfHeaderDelimiter = line.indexOf(HEADER_DELIMITER);
-            final String headerName = line.substring(0, indexOfHeaderDelimiter);
+            final String headerName = line.substring(0, indexOfHeaderDelimiter).trim();
             final String headerValue = line.substring(indexOfHeaderDelimiter + 1).trim();
             requestHeaders.put(headerName, headerValue);
         }

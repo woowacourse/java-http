@@ -30,6 +30,10 @@ public class RequestLine {
         return createRequestLine(requestLine);
     }
 
+    private static boolean hasQueryString(String requestLine) {
+        return requestLine.contains(QUERY_STRING_STARTING_CHARACTER);
+    }
+
     public static RequestLine createRequestLine(String requestLine) {
         final String[] splitRequestLine = requestLine.split(REQUEST_LINE_DELIMITER);
         HttpMethod httpMethod = HttpMethod.of(splitRequestLine[HTTP_METHOD_INDEX]);
@@ -51,7 +55,23 @@ public class RequestLine {
         return new RequestLine(httpMethod, path, parameters, versionOfProtocol);
     }
 
-    private static boolean hasQueryString(String requestLine) {
-        return requestLine.contains(QUERY_STRING_STARTING_CHARACTER);
+    public String getParameter(String name) {
+        return this.parameters.getParameter(name);
+    }
+
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
+    }
+
+    public String getRequestPath() {
+        return requestPath;
+    }
+
+    public QueryStringParameters getParameters() {
+        return parameters;
+    }
+
+    public String getVersionOfProtocol() {
+        return versionOfProtocol;
     }
 }

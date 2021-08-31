@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class QueryStringParameters {
+    private static final String QUERY_STRINGS_SPLIT_REGEX = "&";
+    private static final String QUERY_STRING_KEY_VALUE_SPLIT_REGEX = "=";
     public static final String NON_EXIST_PARAMETER_EXCEPTION_MESSAGE = "존재하지 않는 파라미터 이름입니다.";
     private static final QueryStringParameters EMPTY_PARAMETERS = new QueryStringParameters(Collections.emptyMap());
 
@@ -28,8 +30,8 @@ public class QueryStringParameters {
     }
 
     private static Map<String, String> extracted(String requestQueryString) {
-        return Stream.of(requestQueryString.split("&"))
-                .map(queryString -> queryString.split("="))
+        return Stream.of(requestQueryString.split(QUERY_STRINGS_SPLIT_REGEX))
+                .map(queryString -> queryString.split(QUERY_STRING_KEY_VALUE_SPLIT_REGEX))
                 .collect(Collectors.toMap(queryString -> queryString[0], queryString -> queryString[1]));
     }
 

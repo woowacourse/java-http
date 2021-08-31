@@ -1,10 +1,10 @@
 package nextstep.jwp.controller;
 
-@Controller
-public class IndexController {
+import nextstep.jwp.request.HttpRequest;
 
-    @RequestMapping(path = "/index", method = "GET")
-    public String index() {
+public class IndexController implements Controller {
+
+    public String index(HttpRequest httpRequest) {
         return "index.html";
     }
 }

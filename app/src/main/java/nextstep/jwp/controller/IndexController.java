@@ -1,20 +1,20 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
-import nextstep.jwp.infrastructure.http.request.Method;
-import nextstep.jwp.infrastructure.http.request.RequestLine;
-import nextstep.jwp.infrastructure.http.view.ResourceView;
-import nextstep.jwp.infrastructure.http.view.View;
+import nextstep.jwp.infrastructure.http.response.HttpResponse;
+import nextstep.jwp.infrastructure.http.response.ResponseLine;
+import nextstep.jwp.infrastructure.http.response.StatusCode;
 
-public class IndexController implements Controller {
+public class IndexController extends AbstractController {
 
     @Override
-    public RequestLine requestLine() {
-        return new RequestLine(Method.GET, "/index");
+    public String uri() {
+        return "/index";
     }
 
     @Override
-    public View handle(final HttpRequest request) {
-        return new ResourceView("/index.html");
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+        response.setResponseLine(new ResponseLine(StatusCode.OK));
+        respondByFile("/index.html", response);
     }
 }

@@ -1,14 +1,14 @@
 package nextstep.jwp.infrastructure.http.request;
 
-import nextstep.jwp.infrastructure.http.HttpHeaders;
+import nextstep.jwp.infrastructure.http.Headers;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final HttpHeaders headers;
+    private final Headers headers;
     private final String messageBody;
 
-    public HttpRequest(final RequestLine requestLine, final HttpHeaders headers, final String messageBody) {
+    public HttpRequest(final RequestLine requestLine, final Headers headers, final String messageBody) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.messageBody = messageBody;
@@ -18,7 +18,7 @@ public class HttpRequest {
         return requestLine;
     }
 
-    public HttpHeaders getHeaders() {
+    public Headers getHeaders() {
         return headers;
     }
 

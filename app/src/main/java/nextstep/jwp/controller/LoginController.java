@@ -4,19 +4,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.infrastructure.http.HttpHeaders;
 import nextstep.jwp.infrastructure.http.objectmapper.DataMapper;
 import nextstep.jwp.infrastructure.http.objectmapper.UrlEncodingMapper;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
-import nextstep.jwp.infrastructure.http.request.Method;
-import nextstep.jwp.infrastructure.http.request.RequestLine;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.infrastructure.http.response.ResponseLine;
 import nextstep.jwp.infrastructure.http.response.StatusCode;
-import nextstep.jwp.infrastructure.http.view.HttpResponseView;
-import nextstep.jwp.infrastructure.http.view.View;
 
-public class PostLoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final DataMapper DATA_MAPPER = new UrlEncodingMapper();
     private static final String ACCOUNT = "account";
@@ -24,34 +19,30 @@ public class PostLoginController implements Controller {
     private static final List<String> REQUIRED_PARAMETERS = Arrays.asList(ACCOUNT, PASSWORD);
 
     @Override
-    public RequestLine requestLine() {
-        return new RequestLine(Method.POST, "/login");
+    public String uri() {
+        return "/login";
     }
 
     @Override
-    public View handle(final HttpRequest request) {
+    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+        response.setResponseLine(new ResponseLine(StatusCode.OK));
+        respondByFile("/login.html", response);
+    }
+
+    @Override
+    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         final Map<String, String> body = DATA_MAPPER.parse(request.getMessageBody());
         if (!containsAllKey(body)) {
-            return redirectView("/500.html");
+            redirect("/500.html", response);
+            return;
         }
 
-        return redirectView(locationByLogin(body));
+        redirect(locationByLogin(body), response);
     }
 
     private boolean containsAllKey(final Map<String, String> body) {
         return REQUIRED_PARAMETERS.stream()
             .allMatch(body::containsKey);
-    }
-
-    private HttpResponseView redirectView(final String location) {
-        return new HttpResponseView(
-            new HttpResponse(
-                new ResponseLine(StatusCode.FOUND),
-                new HttpHeaders.Builder()
-                    .header("Location", location)
-                    .build()
-            )
-        );
     }
 
     public String locationByLogin(final Map<String, String> body) {
@@ -62,5 +53,10 @@ public class PostLoginController implements Controller {
             return "/index.html";
         }
         return "/401.html";
+    }
+
+    private void redirect(final String location, final HttpResponse response) {
+        response.setResponseLine(new ResponseLine(StatusCode.FOUND));
+        response.addHeader("Location", location);
     }
 }

@@ -1,20 +1,20 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
-import nextstep.jwp.infrastructure.http.request.Method;
-import nextstep.jwp.infrastructure.http.request.RequestLine;
-import nextstep.jwp.infrastructure.http.view.ResourceView;
-import nextstep.jwp.infrastructure.http.view.View;
+import nextstep.jwp.infrastructure.http.response.HttpResponse;
+import nextstep.jwp.infrastructure.http.response.ResponseLine;
+import nextstep.jwp.infrastructure.http.response.StatusCode;
 
-public class HelloController implements Controller {
+public class HelloController extends AbstractController {
 
     @Override
-    public RequestLine requestLine() {
-        return new RequestLine(Method.GET, "/");
+    public String uri() {
+        return "/";
     }
 
     @Override
-    public View handle(final HttpRequest request) {
-        return new ResourceView("/hello.html");
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        response.setResponseLine(new ResponseLine(StatusCode.OK));
+        respondByFile("/hello.html", response);
     }
 }

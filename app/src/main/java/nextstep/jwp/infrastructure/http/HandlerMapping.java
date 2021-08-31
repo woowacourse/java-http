@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -12,25 +13,30 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nextstep.jwp.controller.Controller;
+import nextstep.jwp.infrastructure.http.handler.ControllerHandler;
+import nextstep.jwp.infrastructure.http.handler.FileHandler;
+import nextstep.jwp.infrastructure.http.handler.Handler;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.request.RequestLine;
-import nextstep.jwp.infrastructure.http.view.View;
 
-public class ControllerMapping {
+public class HandlerMapping {
 
-    private final Map<RequestLine, Controller> controllers;
+    private static final FileResolver FILE_RESOLVER = new FileResolver("static");
 
-    public ControllerMapping(final String controllerPackage) {
+    private final Map<String, Controller> controllers;
+
+    public HandlerMapping(final String controllerPackage) {
         this.controllers = findAllControllers(controllerPackage).stream()
-            .collect(Collectors.toMap(Controller::requestLine, controller -> controller));
+            .collect(Collectors.toMap(Controller::uri, controller -> controller));
     }
 
-    public Optional<View> handle(final HttpRequest request) {
+    public Handler getHandler(final HttpRequest request) {
         final RequestLine requestLine = request.getRequestLine();
-        final RequestLine requestLineWithoutQuery = new RequestLine(requestLine.getHttpMethod(), requestLine.getUri().getBaseUri());
+        final String baseUri = requestLine.getUri().getBaseUri();
 
-        return Optional.ofNullable(controllers.getOrDefault(requestLineWithoutQuery, null))
-            .map(controller -> controller.handle(request));
+        return Optional.ofNullable(controllers.getOrDefault(baseUri, null))
+            .map(controller -> (Handler) new ControllerHandler(controller))
+            .orElseGet(() -> new FileHandler(FILE_RESOLVER));
     }
 
     private Set<Controller> findAllControllers(final String controllerPackage) {
@@ -55,7 +61,7 @@ public class ControllerMapping {
 
     private boolean hasNoArgumentConstructor(final Class<?> clazz) {
         return Arrays.stream(clazz.getDeclaredConstructors())
-            .anyMatch(constructor -> constructor.getParameterTypes().length == 0);
+            .anyMatch(constructor -> constructor.getParameterTypes().length == 0 && Modifier.isPublic(constructor.getModifiers()));
     }
 
     private Constructor<?> findNoArgumentConstructor(final Class<?> clazz) {

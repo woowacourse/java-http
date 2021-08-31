@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.stream.Stream;
-import nextstep.jwp.infrastructure.http.ControllerMapping;
+import nextstep.jwp.infrastructure.http.HandlerMapping;
 import nextstep.jwp.infrastructure.http.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,7 @@ public class WebServer {
 
     private static final int DEFAULT_PORT = 8080;
 
-    private static final ControllerMapping CONTROLLER_MAPPING = new ControllerMapping("nextstep.jwp.controller");
+    private static final HandlerMapping CONTROLLER_MAPPING = new HandlerMapping("nextstep.jwp.controller");
 
     private final int port;
 

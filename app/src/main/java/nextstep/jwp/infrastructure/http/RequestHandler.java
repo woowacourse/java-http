@@ -12,8 +12,6 @@ import java.util.Objects;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.request.RequestLine;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
-import nextstep.jwp.infrastructure.http.view.ResourceView;
-import nextstep.jwp.infrastructure.http.view.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,13 +21,11 @@ public class RequestHandler implements Runnable {
     private static final String CONTENT_LENGTH = "Content-Length";
 
     private final Socket connection;
-    private final ControllerMapping controllerMapping;
-    private final ViewResolver viewResolver;
+    private final HandlerMapping handlerMapping;
 
-    public RequestHandler(final Socket connection, final ControllerMapping controllerMapping) {
+    public RequestHandler(final Socket connection, final HandlerMapping handlerMapping) {
         this.connection = Objects.requireNonNull(connection);
-        this.controllerMapping = controllerMapping;
-        this.viewResolver = new ViewResolver("static");
+        this.handlerMapping = handlerMapping;
     }
 
     @Override
@@ -42,15 +38,16 @@ public class RequestHandler implements Runnable {
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final HttpRequest request = requestFromReader(bufferedReader);
-            final View view = findViewByRequest(request);
-            final HttpResponse httpResponse = viewResolver.resolve(view);
+            final HttpResponse response = new HttpResponse();
 
-            outputStream.write(httpResponse.toString().getBytes());
+            handlerMapping.getHandler(request).handle(request, response);
+
+            outputStream.write(response.toString().getBytes());
             outputStream.flush();
-        } catch (IOException exception) {
-            log.error("Exception stream", exception);
         } catch (IllegalArgumentException exception) {
             log.error("Exception occurs", exception);
+        } catch (Exception exception) {
+            log.error("Exception stream", exception);
         } finally {
             close();
         }
@@ -58,7 +55,7 @@ public class RequestHandler implements Runnable {
 
     private HttpRequest requestFromReader(final BufferedReader bufferedReader) throws IOException {
         final RequestLine requestLine = requestLineFromReader(bufferedReader);
-        final HttpHeaders headers = headerFromReader(bufferedReader);
+        final Headers headers = headerFromReader(bufferedReader);
         final String body = bodyFromReader(bufferedReader, headers);
 
         return new HttpRequest(requestLine, headers, body);
@@ -68,7 +65,7 @@ public class RequestHandler implements Runnable {
         return RequestLine.of(bufferedReader.readLine());
     }
 
-    private HttpHeaders headerFromReader(final BufferedReader bufferedReader) throws IOException {
+    private Headers headerFromReader(final BufferedReader bufferedReader) throws IOException {
         final List<String> lines = new ArrayList<>();
         String line;
 
@@ -79,10 +76,10 @@ public class RequestHandler implements Runnable {
             lines.add(line);
         }
 
-        return HttpHeaders.of(lines);
+        return Headers.of(lines);
     }
 
-    private String bodyFromReader(final BufferedReader bufferedReader, final HttpHeaders headers) throws IOException {
+    private String bodyFromReader(final BufferedReader bufferedReader, final Headers headers) throws IOException {
         if (!headers.hasKey(CONTENT_LENGTH)) {
             return "";
         }
@@ -92,11 +89,6 @@ public class RequestHandler implements Runnable {
         bufferedReader.read(buffer, 0, contentLength);
 
         return new String(buffer);
-    }
-
-    private View findViewByRequest(final HttpRequest request) {
-        return controllerMapping.handle(request)
-            .orElseGet(() -> new ResourceView(request.getRequestLine().getUri().getBaseUri()));
     }
 
     private void close() {

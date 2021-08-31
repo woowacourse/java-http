@@ -7,7 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Optional;
-import nextstep.jwp.infrastructure.http.HttpHeaders;
+import nextstep.jwp.infrastructure.http.Headers;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.infrastructure.http.response.ResponseLine;
 import nextstep.jwp.infrastructure.http.response.StatusCode;
@@ -43,7 +43,7 @@ public class ResourceView implements View {
             final String responseBody = Files.readString(path);
             return new HttpResponse(
                 new ResponseLine(statusCode),
-                new HttpHeaders.Builder()
+                new Headers.Builder()
                     .header(CONTENT_TYPE,
                         String.join(CONTENT_TYPE_DELIMITER, Files.probeContentType(path),
                             CHARSET_KEY + Charset.defaultCharset().displayName().toLowerCase(Locale.ROOT)))

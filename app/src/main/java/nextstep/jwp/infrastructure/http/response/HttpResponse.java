@@ -2,22 +2,42 @@ package nextstep.jwp.infrastructure.http.response;
 
 
 import java.util.Objects;
-import nextstep.jwp.infrastructure.http.HttpHeaders;
+import nextstep.jwp.infrastructure.http.Headers;
 
 public class HttpResponse {
 
-    private final ResponseLine responseLine;
-    private final HttpHeaders headers;
-    private final String messageBody;
+    private ResponseLine responseLine;
+    private Headers headers;
+    private String messageBody;
 
-    public HttpResponse(final ResponseLine responseLine, final HttpHeaders headers, final String messageBody) {
+    public HttpResponse() {
+        this(new ResponseLine(StatusCode.OK), new Headers(), "");
+    }
+
+    public HttpResponse(final ResponseLine responseLine, final Headers headers, final String messageBody) {
         this.responseLine = responseLine;
         this.headers = headers;
         this.messageBody = messageBody;
     }
 
-    public HttpResponse(final ResponseLine responseLine, final HttpHeaders headers) {
+    public HttpResponse(final ResponseLine responseLine, final Headers headers) {
         this(responseLine, headers, "");
+    }
+
+    public void setResponseLine(final ResponseLine responseLine) {
+        this.responseLine = responseLine;
+    }
+
+    public void setHeaders(final Headers headers) {
+        this.headers = headers;
+    }
+
+    public void addHeader(final String key, final String value) {
+        this.headers.add(key, value);
+    }
+
+    public void setMessageBody(final String messageBody) {
+        this.messageBody = messageBody;
     }
 
     @Override

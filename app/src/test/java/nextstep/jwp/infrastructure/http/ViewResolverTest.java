@@ -6,10 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.jwp.infrastructure.http.HttpHeaders.Builder;
+import nextstep.jwp.infrastructure.http.Headers.Builder;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
-import nextstep.jwp.infrastructure.http.response.StatusCode;
 import nextstep.jwp.infrastructure.http.response.ResponseLine;
+import nextstep.jwp.infrastructure.http.response.StatusCode;
 import nextstep.jwp.infrastructure.http.view.HttpResponseView;
 import nextstep.jwp.infrastructure.http.view.ResourceView;
 import nextstep.jwp.infrastructure.http.view.View;
@@ -34,7 +34,7 @@ class ViewResolverTest {
 
         final HttpResponse expected = new HttpResponse(
             new ResponseLine(StatusCode.NOT_FOUND),
-            new HttpHeaders.Builder()
+            new Headers.Builder()
                 .header("Content-Type", "text/html;charset=utf-8")
                 .header("Content-Length", "2426")
                 .build(),

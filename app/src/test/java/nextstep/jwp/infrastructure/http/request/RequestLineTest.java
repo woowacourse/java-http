@@ -13,7 +13,7 @@ class RequestLineTest {
     void of() {
         final RequestLine line = RequestLine.of("POST /register HTTP/1.1");
 
-        assertThat(line.getHttpMethod()).isEqualTo(Method.POST);
+        assertThat(line.getMethod()).isEqualTo(Method.POST);
         assertThat(line.getUri()).isEqualTo(new URI("/register"));
         assertThat(line.getHttpVersion()).isEqualTo("HTTP/1.1");
     }

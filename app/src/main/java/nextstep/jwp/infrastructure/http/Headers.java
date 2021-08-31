@@ -3,14 +3,13 @@ package nextstep.jwp.infrastructure.http;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class HttpHeaders {
+public class Headers {
 
     private static final String KEY_DELIMITER = ": ";
     private static final String VALUE_DELIMITER = ", ";
@@ -19,12 +18,16 @@ public class HttpHeaders {
     private static final int SPLIT_HEADER_SIZE = 2;
     private final Map<String, List<String>> elements;
 
-    public HttpHeaders(final Map<String, List<String>> elements) {
+    public Headers() {
+        this(new LinkedHashMap<>());
+    }
+
+    public Headers(final Map<String, List<String>> elements) {
         this.elements = elements;
     }
 
-    public static HttpHeaders of(final List<String> headers) {
-        final Map<String, List<String>> values = new HashMap<>();
+    public static Headers of(final List<String> headers) {
+        final Map<String, List<String>> values = new LinkedHashMap<>();
 
         for (String header : headers) {
             final List<String> splitHeader = Arrays.asList(header.split(KEY_DELIMITER));
@@ -32,7 +35,7 @@ public class HttpHeaders {
             values.put(splitHeader.get(KEY_INDEX), splitHeaderValues(splitHeader.get(VALUE_INDEX)));
         }
 
-        return new HttpHeaders(values);
+        return new Headers(values);
     }
 
     private static List<String> splitHeaderValues(final String splitValues) {
@@ -43,6 +46,13 @@ public class HttpHeaders {
         if (splitHeader.size() != SPLIT_HEADER_SIZE) {
             throw new IllegalArgumentException(String.format("잘못된 Headers 형식 입니다.(%s)", String.join("", splitHeader)));
         }
+    }
+
+    public void add(final String key, final String value) {
+        if (elements.containsKey(key)) {
+            elements.get(key).add(value);
+        }
+        elements.put(key, Collections.singletonList(value));
     }
 
     public boolean hasKey(final String key) {
@@ -68,7 +78,7 @@ public class HttpHeaders {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final HttpHeaders headers = (HttpHeaders) o;
+        final Headers headers = (Headers) o;
         return Objects.equals(elements, headers.elements);
     }
 
@@ -94,8 +104,8 @@ public class HttpHeaders {
             return this;
         }
 
-        public HttpHeaders build() {
-            return new HttpHeaders(elements);
+        public Headers build() {
+            return new Headers(elements);
         }
     }
 }

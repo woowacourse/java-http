@@ -10,9 +10,10 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class NotFoundControllerTest {
+    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+
     @Test
     void notFoundTest() throws IOException {
         final String httpRequest = "GET /invalid-path HTTP/1.1";
@@ -24,12 +25,12 @@ class NotFoundControllerTest {
         requestHandler.run();
 
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
-        String expected =
-                "HTTP/1.1 404 NOT_FOUND\n" +
-                "Content-Length: 2426\n" +
-                "Content-Type: text/html;charset=utf-8\n" +
-                "\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        byte[] expectedBody = Files.readAllBytes(new File(resource.getFile()).toPath());
+        String expected = String.join(LINE_SEPARATOR,
+                "HTTP/1.1 404 NOT_FOUND",
+                        "Content-Length: " + expectedBody.length,
+                        "Content-Type: text/html;charset=utf-8" + LINE_SEPARATOR,
+                        new String(expectedBody));
 
         assertThat(socket.output()).isEqualTo(expected);
     }

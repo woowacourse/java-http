@@ -11,17 +11,20 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpRequestParserTest {
+    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
+
     @Test
     void parse() throws IOException {
         // given
-        String request = "POST /register HTTP/1.1\n" +
-                "Host: localhost:8080\n" +
-                "Connection: keep-alive\n" +
-                "Content-Length: 58\n" +
-                "Content-Type: application/x-www-form-urlencoded\n" +
-                "Accept: */*\n" +
-                "\n" +
-                "account=gugu&password=password&email=hkkang%40woowahan.com";
+        String contentType = "account=gugu&password=password&email=hkkang%40woowahan.com";
+        String request = String.join(LINE_SEPARATOR,
+                "POST /register HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: " + contentType.length(),
+                "Content-Type: application/x-www-form-urlencoded",
+                "Accept: */*" + LINE_SEPARATOR,
+                contentType);
 
         InputStream inputStream = new ByteArrayInputStream(request.getBytes());
 
@@ -38,16 +41,17 @@ class HttpRequestParserTest {
                 "Content-Type",
                 "Accept"));
         assertThat(actual.getRequestBody()).isNotEmpty();
-        assertThat(actual.getRequestBody()).isEqualTo("account=gugu&password=password&email=hkkang%40woowahan.com");
+        assertThat(actual.getRequestBody()).isEqualTo(contentType);
     }
 
     @Test
     void parseParameter() throws IOException {
         // given
-        String request = "GET /login?account=gugu&password=password HTTP/1.1\n" +
-                "Host: localhost:8080\n" +
-                "Connection: keep-alive\n" +
-                "Accept: */*\n";
+        String request = String.join(LINE_SEPARATOR,
+                "GET /login?account=gugu&password=password HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Accept: */*");
         InputStream inputStream = new ByteArrayInputStream(request.getBytes());
 
         // when

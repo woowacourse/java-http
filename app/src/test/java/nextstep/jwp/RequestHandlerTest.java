@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import nextstep.jwp.framework.RequestHandler;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,7 @@ class RequestHandlerTest {
         // given
         final MockSocket socket = new MockSocket();
         final RequestHandler requestHandler = new RequestHandler(socket);
-        final Path path = new File("/Users/wilder/IdeaProjects/jwp-dashboard-http/app/build/resources/main/static/404.html").toPath();
+        final Path path = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("404.html")).getPath()).toPath();
         final String htmlValue = Files.readString(path);
 
         // when

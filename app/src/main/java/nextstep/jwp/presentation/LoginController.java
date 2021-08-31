@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import nextstep.jwp.FileAccess;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.BadRequestException;
+import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.content.ContentType;
@@ -32,10 +32,10 @@ public class LoginController extends AbstractController {
 
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(
-                        () -> new BadRequestException(HttpStatus.UNAUTHORIZED, "존재하지 않는 아이디입니다."));
+                        () -> new UnauthorizedException(HttpStatus.UNAUTHORIZED, "존재하지 않는 아이디입니다."));
 
         if (!user.checkPassword(password)) {
-            throw new BadRequestException(HttpStatus.UNAUTHORIZED, "올바르지 않은 패스워드입니다.");
+            throw new UnauthorizedException(HttpStatus.UNAUTHORIZED, "올바르지 않은 패스워드입니다.");
         }
 
         response.setStatusLine(request.getProtocolVersion(), HttpStatus.FOUND);

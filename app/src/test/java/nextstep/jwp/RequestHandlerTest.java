@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.http.response.status.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -54,7 +55,7 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         FileAccess file = new FileAccess("/index.html");
 
-        String expected = expectedFileAccessResponse(resource, file);
+        String expected = expectedFileAccessResponse(HttpStatus.OK, resource, file);
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -81,11 +82,7 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         FileAccess file = new FileAccess("/login.html");
 
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + file.getFile().getBytes().length + " \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = expectedFileAccessResponse(HttpStatus.OK, resource, file);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -139,8 +136,10 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = "HTTP/1.1 401 Unauthorized \r\n" +
-                "Location: /401.html \r\n\r\n";
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        FileAccess file = new FileAccess("/401.html");
+
+        String expected = expectedFileAccessResponse(HttpStatus.UNAUTHORIZED, resource, file);
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -167,23 +166,25 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         FileAccess file = new FileAccess("/register.html");
 
-        String expected = expectedFileAccessResponse(resource, file);
+        String expected = expectedFileAccessResponse(HttpStatus.OK, resource, file);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
     @DisplayName("회원가입 페이지 POST 요청 - 성공")
     @Test
-    void registerPOST() throws IOException {
+    void registerPOST() {
         // given
+        String requestBody = "account=pika&password=password&email=pika%40woowahan.com";
+
         final String httpRequest = String.join("\r\n",
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-Length: 80",
+                "Content-Length: " + requestBody.getBytes().length,
                 "Content-Type: application/x-www-form-urlencoded",
                 "Accept: */*",
                 "",
-                "account=gugu&password=password&email=hkkang%40woowahan.com");
+                requestBody);
 
         final MockSocket socket = new MockSocket(httpRequest);
         final ApplicationContext applicationContext = ApplicationContextFactory.create();
@@ -195,11 +196,44 @@ class RequestHandlerTest {
         // then
         String expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: /index.html \r\n\r\n";
+
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    private String expectedFileAccessResponse(URL resource, FileAccess file) throws IOException {
-        return "HTTP/1.1 200 OK \r\n" +
+    @DisplayName("회원가입 페이지 POST 요청 중복된 아이디일 경우 - 실패")
+    @Test
+    void registerPOSTDuplicated() throws IOException {
+        // given
+        String requestBody = "account=gugu&password=password&email=gugu%40woowahan.com";
+
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + requestBody.getBytes().length,
+                "Content-Type: application/x-www-form-urlencoded",
+                "Accept: */*",
+                "",
+                requestBody);
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final ApplicationContext applicationContext = ApplicationContextFactory.create();
+        final RequestHandler requestHandler = new RequestHandler(socket, applicationContext);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/500.html");
+        FileAccess file = new FileAccess("/500.html");
+
+        String expected = expectedFileAccessResponse(HttpStatus.INTERNAL_SERVER_ERROR, resource, file);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private String expectedFileAccessResponse(HttpStatus httpStatus, URL resource, FileAccess file) throws IOException {
+        return "HTTP/1.1 " + httpStatus.getValue() + " " + httpStatus.getReasonPhrase() + " \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + file.getFile().getBytes().length + " \r\n" +
                 "\r\n" +

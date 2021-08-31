@@ -18,7 +18,7 @@ public class ExceptionHandler {
 
         String resource = new FileAccess(path).getFile();
 
-        httpResponse.setStatusLine(httpRequest.getProtocolVersion(), HttpStatus.OK);
+        httpResponse.setStatusLine(httpRequest.getProtocolVersion(), httpStatus);
         httpResponse.addResponseHeader("Content-Type", ContentType.HTML.getType());
         httpResponse.addResponseHeader("Content-Length", String.valueOf(resource.getBytes().length));
         httpResponse.setResponseBody(resource);

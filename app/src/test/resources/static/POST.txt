@@ -1,0 +1,12 @@
+POST /login HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+Content-Length: 30
+Cache-Control: max-age=0
+sec-ch-ua: "Chromium";v="92", " Not A;Brand";v="99", "Google Chrome";v="92"
+sec-ch-ua-mobile: ?0
+Upgrade-Insecure-Requests: 1
+Origin: http://localhost:8080
+Content-Type: application/x-www-form-urlencoded
+
+account=gugu&password=password

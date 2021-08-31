@@ -11,11 +11,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
-import java.util.Optional;
 
 import static nextstep.jwp.model.httpmessage.common.ContentType.FORM;
 import static nextstep.jwp.model.httpmessage.common.HttpHeaderType.CONTENT_LENGTH;
-import static nextstep.jwp.model.httpmessage.common.HttpHeaderType.CONTENT_TYPE;
 
 public class HttpRequest {
     private static final Logger LOG = LoggerFactory.getLogger(HttpRequest.class);

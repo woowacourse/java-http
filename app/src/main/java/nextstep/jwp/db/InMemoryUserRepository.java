@@ -29,6 +29,7 @@ public class InMemoryUserRepository {
     }
 
     public static boolean existUserByAccountAndPassword(String account, String password) {
-        return database.get(account).checkPassword(password);
+
+        return database.get(account) != null && database.get(account).checkPassword(password);
     }
 }

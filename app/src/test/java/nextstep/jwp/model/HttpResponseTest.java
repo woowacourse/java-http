@@ -1,5 +1,7 @@
 package nextstep.jwp.model;
 
+import nextstep.jwp.HttpServlet;
+import nextstep.jwp.MockSocket;
 import nextstep.jwp.model.httpmessage.response.HttpResponse;
 import nextstep.jwp.util.FileUtils;
 import org.junit.jupiter.api.DisplayName;
@@ -15,11 +17,11 @@ class HttpResponseTest {
     @Test
     void responseForward() throws IOException {
         // given
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        HttpResponse response = new HttpResponse(outputStream);
+        MockSocket socket = new MockSocket("GET /index HTTP/1.1 \r\n");
+        HttpServlet httpServlet = new HttpServlet(socket);
 
         // when
-        response.forward("/index.html");
+        httpServlet.run();
 
         // then
         String body = FileUtils.readFileOfUrl("/index.html");
@@ -30,25 +32,31 @@ class HttpResponseTest {
                 "Content-Length: 5670 ",
                 "",
                 body);
-        assertThat(outputStream.toString()).hasToString(expectedHeader);
+        assertThat(socket.output()).hasToString(expectedHeader);
     }
 
     @DisplayName("401 페이지 리다이렉트에 대한 응답을 확인한다.")
     @Test
     void responseRedirect() throws IOException {
-
         // given
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        HttpResponse response = new HttpResponse(outputStream);
+        String request = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: 32",
+                "",
+                "account=gugu&password=password11");
+        MockSocket socket = new MockSocket(request);
+        HttpServlet httpServlet = new HttpServlet(socket);
 
         // when
-        response.redirect("/401.html");
+        httpServlet.run();
 
         // then
         String expectedHeader = String.join("\r\n",
                 "HTTP/1.1 302 Redirect ",
                 "Location: /401.html ",
                 "");
-        assertThat(outputStream.toString()).hasToString(expectedHeader);
+        assertThat(socket.output()).hasToString(expectedHeader);
     }
 }

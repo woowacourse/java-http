@@ -8,7 +8,10 @@ import nextstep.jwp.view.ModelAndView;
 
 import java.io.IOException;
 
-import static nextstep.jwp.application.UserService.*;
+import static nextstep.jwp.model.httpmessage.common.ContentType.HTML;
+import static nextstep.jwp.model.httpmessage.response.HttpStatus.OK;
+import static nextstep.jwp.model.httpmessage.response.HttpStatus.REDIRECT;
+import static nextstep.jwp.model.httpmessage.response.ResponseHeaderType.LOCATION;
 
 public class RegisterController extends AbstractController {
 
@@ -20,12 +23,16 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response, ModelAndView mv) throws IOException {
-        response.forward("/register.html");
+        response.setStatus(OK);
+        response.setContentType(HTML.value());
+        mv.setViewName("/register");
     }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response, ModelAndView mv) throws IOException {
-        User saveUser = userService.save(request);
-        response.redirect("/index.html");
+        User savedUser = userService.save(request); // FIXME : 로그인된 유저의 데이터를 활용
+        response.setStatus(REDIRECT);
+        mv.setViewName("/index.html");
+        response.addHeader(LOCATION, "/index.html");
     }
 }

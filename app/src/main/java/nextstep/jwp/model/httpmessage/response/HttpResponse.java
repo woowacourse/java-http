@@ -1,19 +1,13 @@
 package nextstep.jwp.model.httpmessage.response;
 
-import nextstep.jwp.model.httpmessage.common.ContentType;
 import nextstep.jwp.model.httpmessage.common.HttpHeader;
-import nextstep.jwp.model.httpmessage.common.HttpHeaderType;
-import nextstep.jwp.util.FileUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
 
 import static nextstep.jwp.model.httpmessage.common.CommonHttpHeader.DELIMITER;
-import static nextstep.jwp.model.httpmessage.common.ContentType.HTML;
-import static nextstep.jwp.model.httpmessage.common.HttpHeaderType.CONTENT_TYPE;
-import static nextstep.jwp.model.httpmessage.response.HttpStatus.*;
+import static nextstep.jwp.model.httpmessage.response.HttpStatus.REDIRECT;
 import static nextstep.jwp.model.httpmessage.response.ResponseHeaderType.LOCATION;
 
 public class HttpResponse {
@@ -29,28 +23,13 @@ public class HttpResponse {
         this.outputStream = outputStream;
     }
 
-    public void forward(String path) throws IOException {
-        setStatus(OK);
-        ContentType.of(path).ifPresent(type -> headers.add(CONTENT_TYPE, type.value()));
-        String bodies = FileUtils.readFileOfUrl(path);
-        headers.setContentLength(bodies.getBytes(StandardCharsets.UTF_8).length);
-        writeBody(outputStream, processResponseLineAndHeader(bodies));
-    }
-
-    public void forwardBody(String body) throws IOException {
-        setStatus(OK);
-        headers.add(CONTENT_TYPE, HTML.value());
-        headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
-        writeBody(outputStream, processResponseLineAndHeader(body));
-    }
-
     public void redirect(String path) throws IOException {
         setStatus(REDIRECT);
         headers.add(LOCATION, path);
         writeBody(outputStream, processResponseLineAndHeader());
     }
 
-    private String processResponseLineAndHeader(String... body) {
+    public String processResponseLineAndHeader(String... body) {
         StringJoiner stringJoiner = new StringJoiner(DELIMITER);
         stringJoiner.add(responseLine.toString());
         stringJoiner.add(headers.toString());
@@ -64,22 +43,6 @@ public class HttpResponse {
     private void writeBody(OutputStream outputStream, String response) throws IOException {
         outputStream.write(response.getBytes());
         outputStream.flush();
-    }
-
-    public void addHeader(HttpHeaderType type, String value) {
-        headers.add(type, value);
-    }
-
-    public void sendError(HttpStatus status) throws IOException {
-        setStatus(status);
-        headers.setContentType(HTML.value());
-        String body = FileUtils.readFileOfUrl(status.value() + HTML.suffix());
-        headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
-        writeBody(outputStream, processResponseLineAndHeader(body));
-    }
-
-    public void setStatus(HttpStatus status) {
-        responseLine = new ResponseLine(status);
     }
 
     public HttpHeader getHeaders() {
@@ -96,5 +59,33 @@ public class HttpResponse {
 
     public String getHeader(String value) {
         return headers.getHeader(value);
+    }
+
+    public String getContentType() {
+        return headers.getContentType();
+    }
+
+    public void setContentType(String value) {
+        headers.setContentType(value);
+    }
+
+    public int getContentLength() {
+        return headers.getContentLength();
+    }
+
+    public void setContentLength(int length) {
+        headers.setContentLength(length);
+    }
+
+    public void addHeader(ResponseHeaderType type, String value) {
+        headers.add(type, value);
+    }
+
+    public HttpStatus getStatus() {
+        return responseLine.getStatus();
+    }
+
+    public void setStatus(HttpStatus status) {
+        responseLine = new ResponseLine(status);
     }
 }

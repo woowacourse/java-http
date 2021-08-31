@@ -8,6 +8,7 @@ import nextstep.jwp.view.ModelAndView;
 import java.io.IOException;
 
 public class MainControllerHandlerAdapter implements HandlerAdapter {
+
     @Override
     public boolean supports(Object handler) {
         return (handler instanceof MainController);

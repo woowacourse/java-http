@@ -6,7 +6,6 @@ import nextstep.jwp.model.httpmessage.response.HttpResponse;
 import nextstep.jwp.view.ModelAndView;
 
 import java.io.IOException;
-import java.lang.ref.ReferenceQueue;
 
 public abstract class AbstractController implements Controller {
     @Override

@@ -1,97 +1,100 @@
 package nextstep.jwp;
 
-import nextstep.jwp.controller.FrontController;
+import com.sun.nio.sctp.IllegalUnbindException;
+import nextstep.jwp.adapter.HandlerAdapter;
+import nextstep.jwp.adapter.HandlerAdapters;
+import nextstep.jwp.model.httpmessage.common.ContentType;
 import nextstep.jwp.model.httpmessage.request.HttpRequest;
 import nextstep.jwp.model.httpmessage.response.HttpResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import nextstep.jwp.util.FileUtils;
+import nextstep.jwp.view.ModelAndView;
+import nextstep.jwp.view.View;
+import nextstep.jwp.view.ViewResolver;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Socket;
-import java.util.Objects;
 
-public class DispatcherServlet implements Runnable {
+import static nextstep.jwp.model.httpmessage.common.ContentType.HTML;
+import static nextstep.jwp.model.httpmessage.common.HttpHeaderType.CONTENT_LENGTH;
+import static nextstep.jwp.model.httpmessage.response.HttpStatus.*;
 
-    private static final Logger log = LoggerFactory.getLogger(DispatcherServlet.class);
 
-    private final Socket connection;
+public class DispatcherServlet {
 
-    public DispatcherServlet(Socket connection) {
-        this.connection = Objects.requireNonNull(connection);
-    }
+    public void service(HttpRequest request, HttpResponse response) throws IOException, ServletException {
+        RequestMapping requestMapping = new RequestMapping();
 
-    @Override
-    public void run() {
-        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
+        Object handler = requestMapping.getHandler(request);
+        if (handler == null) {
+            String path = request.getPath();
+            ModelAndView mv = new ModelAndView();
 
-        try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
+            if (FileUtils.existFile(path)) { // 정적 파일인 경우
+                response.setStatus(OK);
+                ContentType contentType = ContentType.of(path)
+                        .orElseThrow(() -> new IllegalArgumentException("처리할 수 없는 정적 파일입니다. (url : " + path + ")"));
+                response.setContentType(contentType.value());
+                View view = new View(FileUtils.getAbsolutePath(path));
+                view.render(mv, response);
+                return;
+            }
 
-            HttpRequest httpRequest = new HttpRequest(inputStream);
-            HttpResponse httpResponse = new HttpResponse(outputStream);
+            response.setStatus(NOT_FOUND);
+            response.getHeaders().setContentType(HTML.value());
 
-            FrontController frontController = new FrontController();
-            frontController.service(httpRequest, httpResponse);
-
-//            HandlerAdapter ha =  getHandlerAdapter(mappedHandler.getHandler());
-////            Controller adapter = RequestMapping.getController(httpRequest.getRequestURI());
-////            if (adapter == null) {
-////                httpResponse.sendError("/401.html");
-////                return;
-////            }
-
-//            ModelAndView mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
-////            ModelAndView mv = adapter.handle(httpRequest, httpResponse);
-
-//            processDispatchResult(httpRequest, httpResponse, handler)
-////            processDispatchResult(httpRequest, httpResponse, mv);
-//            FrontController frontController = new FrontController();
-//            frontController.service(httpRequest, httpResponse);
-
-            // 정적 컨텐츠 일때
-
-            // 아예 없는 url 매핑 시
-//            Controller controller = RequestMapping.getController(httpRequest.getRequestURI());
-//            if (controller == null) {
-//                if (FileUtils.existFile(httpRequest.getRequestURI())) {
-//                    httpResponse.forward(httpRequest.getRequestURI());
-//                    return;
-//                }
-//
-//                httpResponse.sendError("/404.html");
-//                return;
-//            }
-//
-//            controller.service(httpRequest, httpResponse);
-        } catch (IOException | ServletException exception) {
-            log.error("Exception stream", exception);
-        } finally {
-            close();
+            mv.setViewName("/404.html");
+            processDispatchResult(response, mv);
+            return;
         }
-    }
-//    @Nullable
-//	protected View resolveViewName(String viewName, @Nullable Map<String, Object> model,
-//			Locale locale, HttpServletRequest request) throws Exception {
-//
-//		if (this.viewResolvers != null) {
-//			for (ViewResolver viewResolver : this.viewResolvers) {
-//				View view = viewResolver.resolveViewName(viewName, locale);
-//				if (view != null) {
-//					return view;
-//				}
-//			}
-//		}
-//		return null;
-//	}
 
-    private void close() {
-        try {
-            connection.close();
-        } catch (IOException exception) {
-            log.error("Exception closing socket", exception);
+        HandlerAdapters handlerAdapters = new HandlerAdapters();
+        HandlerAdapter adapter = handlerAdapters.getHandlerAdapter(handler);
+        if (adapter == null) {
+            ModelAndView mv = new ModelAndView();
+            response.setStatus(NOT_FOUND);
+            response.getHeaders().setContentType(HTML.value());
+
+            mv.setViewName("/404.html");
+            processDispatchResult(response, mv);
+            return;
+        }
+
+        ModelAndView mv = adapter.handle(request, response, handler);
+
+        processDispatchResult(response, mv);
+    }
+
+    private void processDispatchResult(HttpResponse response, ModelAndView mv) throws IOException {
+        View view;
+        if (mv.getViewName() == null) { // view가 없는 경우`
+            OutputStream outputStream = response.getOutputStream();
+            if (mv.getModel().size() > 0) { // body가 있다면 stringmessageconverter?
+                outputStream.write((response.getResponseLine().toString() + "\r\n").getBytes());
+                outputStream.write(String.format("%s: %s \r\n", ContentType.CONTENT_TYPE_HEADER, response.getContentType()).getBytes());
+                outputStream.write(String.format("%s: %s \r\n", CONTENT_LENGTH.value(), response.getContentLength()).getBytes());
+                outputStream.write("\r\n".getBytes());
+                outputStream.write(((String) mv.getModel().get("body")).getBytes());
+                outputStream.flush();
+                return;
+            }
+            throw new IllegalArgumentException("출력할 수 없는 결과입니다.");
+        }
+
+        String viewName = mv.getViewName();
+        if (viewName != null) {
+            ViewResolver viewResolver = new ViewResolver();
+            view = viewResolver.resolveViewName(viewName);
+            if (view == null) {
+                throw new IllegalUnbindException("cannot bind view. (viewName : " + viewName + ")");
+            }
+
+            if (response.getStatus() == REDIRECT) {
+                view.redirect(mv, response);
+                return;
+            }
+
+            view.render(mv, response);
         }
     }
 }

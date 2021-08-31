@@ -16,14 +16,19 @@ public class ResponseHeader extends CommonHttpHeader {
 
     public void add(ResponseHeaderType type, String value) {
         headers.put(type, value);
-        LOG.debug("Response header : {}: {}", type, value);
     }
 
     @Override
     public String toString() {
         StringJoiner stringJoiner = new StringJoiner(DELIMITER);
-        headers.forEach((key, value) -> stringJoiner.add(key + ": " + value + " "));
-        getCommonHeaders().forEach((key, value) -> stringJoiner.add(key.value() + ": " + value + " "));
+        headers.forEach((key, value) -> {
+            stringJoiner.add(key + ": " + value + " ");
+            LOG.info("Response header : {}", key + ": " + value + " ");
+        });
+        getCommonHeaders().forEach((key, value) -> {
+            stringJoiner.add(key.value() + ": " + value + " ");
+            LOG.info("Response header : {}", key.value() + ": " + value + " ");
+        });
         return stringJoiner.toString();
     }
 }

@@ -1,6 +1,6 @@
 package nextstep.jwp;
 
-import nextstep.jwp.controller.DefaultController;
+import nextstep.jwp.controller.IndexController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.MainController;
 import nextstep.jwp.controller.RegisterController;
@@ -22,21 +22,11 @@ public class RequestMapping {
         handlerMappingMaps.put("/login", new LoginController());
         handlerMappingMaps.put("/register", new RegisterController());
 
-//        handlerMappingMaps.put("/index.html", new DefaultController());
-//        handlerMappingMaps.put("/401.html", new DefaultController());
-
-        handlerMappingMaps.put("/index", new DefaultController());
-
-//        handlerMappingMaps.put("/favicon.ico", new DefaultController());
-//        handlerMappingMaps.put("/js/scripts.js", new DefaultController());
-//        handlerMappingMaps.put("/assets/chart-area.js", new DefaultController());
-//        handlerMappingMaps.put("/assets/chart-bar.js", new DefaultController());
-//        handlerMappingMaps.put("/assets/chart-pie.js", new DefaultController());
-//        handlerMappingMaps.put("/css/styles.css", new DefaultController());
+        handlerMappingMaps.put("/index", new IndexController());
     }
 
     public Object getHandler(HttpRequest request) {
-        String requestURI = request.getRequestURI();
+        String requestURI = request.getPath();
         return handlerMappingMaps.get(requestURI);
     }
 }

@@ -16,10 +16,10 @@ class AbstractControllerTest {
     void run() {
         // given
         final MockSocket socket = new MockSocket();
-        final DispatcherServlet dispatcherServlet = new DispatcherServlet(socket);
+        final HttpServlet httpServlet = new HttpServlet(socket);
 
         // when
-        dispatcherServlet.run();
+        httpServlet.run();
 
         // then
         String expected = String.join("\r\n",
@@ -29,7 +29,7 @@ class AbstractControllerTest {
                 "",
                 "Hello world!");
         String result = socket.output();
-        assertThat(result).contains(expected);
+        assertThat(result).hasToString(expected);
     }
 
     @DisplayName("GET /index.html HTTP/1.1 요청을 실행하여 인데스 페이지 응답을 확인한다.")
@@ -44,10 +44,10 @@ class AbstractControllerTest {
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final DispatcherServlet dispatcherServlet = new DispatcherServlet(socket);
+        final HttpServlet httpServlet = new HttpServlet(socket);
 
         // when
-        dispatcherServlet.run();
+        httpServlet.run();
 
         // then
         String body = FileUtils.readFileOfUrl("/index.html");
@@ -72,10 +72,10 @@ class AbstractControllerTest {
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final DispatcherServlet dispatcherServlet = new DispatcherServlet(socket);
+        final HttpServlet httpServlet = new HttpServlet(socket);
 
         // when
-        dispatcherServlet.run();
+        httpServlet.run();
 
         // then
         String body = FileUtils.readFileOfUrl("/404.html");

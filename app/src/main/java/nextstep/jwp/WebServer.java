@@ -41,7 +41,7 @@ public class WebServer {
     private void handle(ServerSocket serverSocket) throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new DispatcherServlet(connection)).start();
+            new Thread(new HttpServlet(connection)).start();
         }
     }
 

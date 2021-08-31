@@ -10,8 +10,14 @@ import java.util.Objects;
 public class FileUtils {
 
     public static final String PREFIX = "/";
+    public static final String STATIC = "static";
 
     private FileUtils() {
+    }
+
+    public static String getAbsolutePath(String path) {
+        URL resource = FileUtils.class.getClassLoader().getResource(STATIC + path);
+        return Objects.requireNonNull(resource).getFile();
     }
 
     public static String readFileOfUrl(String url) throws IOException {

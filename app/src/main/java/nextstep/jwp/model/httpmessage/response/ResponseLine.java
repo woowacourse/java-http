@@ -1,19 +1,17 @@
 package nextstep.jwp.model.httpmessage.response;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-
 public class ResponseLine {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ResponseLine.class);
     public static final String PROTOCOL = "HTTP/1.1";
     private final HttpStatus httpStatus;
 
     public ResponseLine(HttpStatus status) {
         this.httpStatus = status;
-        LOG.debug("Response line : {}", this);
+    }
+
+    public HttpStatus getStatus() {
+        return httpStatus;
     }
 
     @Override

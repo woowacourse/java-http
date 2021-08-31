@@ -21,7 +21,7 @@ class LoginControllerTest {
             new HttpRequestBody("account=gugu&password=password")
     );
 
-    private final Controller loginController = new LoginController(new UserService());
+    private final AbstractController loginController = new LoginController(new UserService());
 
     @DisplayName("컨트롤러가 해당 요청을 처리할 수 있으면 true, 아니면 false")
     @Test

@@ -7,7 +7,7 @@ import nextstep.jwp.service.UserService;
 
 import java.util.Map;
 
-public class LoginController extends Controller {
+public class LoginController extends AbstractController {
     private final UserService userService;
 
     public LoginController(final UserService userService) {

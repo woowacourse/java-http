@@ -21,7 +21,7 @@ class RegisterControllerTest {
             new HttpRequestBody("account=pobi&password=password&email=pobi%40pobi.com")
     );
 
-    private final Controller registerController = new RegisterController(new UserService());
+    private final AbstractController registerController = new RegisterController(new UserService());
 
     @DisplayName("컨트롤러가 해당 요청을 처리할 수 있으면 true, 아니면 false")
     @Test

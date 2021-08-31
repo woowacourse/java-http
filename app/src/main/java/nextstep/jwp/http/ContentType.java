@@ -10,6 +10,7 @@ public enum ContentType {
     CSS( "text/css", path -> path.endsWith(".css")),
     JS("text/js", path -> path.endsWith(".js")),
     ICO("image/x-icon", path -> path.endsWith(".ico")),
+    SVG("image/x-icon", path -> path.endsWith(".svg")),
     NONE("text/html", path -> true);
 
     private final String mimeType;

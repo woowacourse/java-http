@@ -19,7 +19,7 @@ class StaticResourceControllerTest {
             null
     );
 
-    private final Controller staticResourceController = new StaticResourceController();
+    private final AbstractController staticResourceController = new StaticResourceController();
 
     @DisplayName("컨트롤러가 해당 요청을 처리할 수 있으면 true, 아니면 false")
     @Test

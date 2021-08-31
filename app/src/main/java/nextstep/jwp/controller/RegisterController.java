@@ -5,7 +5,7 @@ import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.service.UserService;
 
-public class RegisterController extends Controller {
+public class RegisterController extends AbstractController {
     private final UserService userService;
 
     public RegisterController(final UserService userService) {

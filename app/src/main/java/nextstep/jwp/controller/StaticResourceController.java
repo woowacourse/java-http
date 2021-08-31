@@ -4,7 +4,7 @@ import nextstep.jwp.http.*;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 
-public class StaticResourceController extends Controller {
+public class StaticResourceController extends AbstractController {
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
         final HttpMethod httpMethod = httpRequest.getHttpMethod();

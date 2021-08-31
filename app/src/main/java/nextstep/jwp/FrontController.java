@@ -36,10 +36,10 @@ public class FrontController implements Runnable {
 
         try (
             final InputStream inputStream = connection.getInputStream();
-            final OutputStream outputStream = connection.getOutputStream()
+            final OutputStream outputStream = connection.getOutputStream();
+            final BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(inputStream))
         ) {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
             HttpRequest request = new HttpRequest(bufferedReader);
             HttpResponse response = new HttpResponse();
 

@@ -25,6 +25,7 @@ public class HttpRequest {
     private final String statusLine;
     private final String bodyLine;
     private List<String> headerLines;
+    private HttpSession httpSession;
 
     public HttpRequest(String statusLine, List<String> headerLines, String bodyLine) {
         this.statusLine = statusLine;
@@ -123,10 +124,17 @@ public class HttpRequest {
     }
 
     public Optional<HttpSession> getSession() {
+        if (!Objects.isNull(httpSession)) {
+            return Optional.of(httpSession);
+        }
         String jSessionId = extractCookies().get(HEADER_KEY_OF_JSESSIONID);
         if (Objects.isNull(jSessionId)) {
             return Optional.empty();
         }
         return Optional.ofNullable(HttpSessions.getSession(jSessionId));
+    }
+
+    public void setSession(HttpSession httpSession) {
+        this.httpSession = httpSession;
     }
 }

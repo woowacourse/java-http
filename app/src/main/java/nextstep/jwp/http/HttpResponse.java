@@ -98,7 +98,7 @@ public class HttpResponse {
 
     public String createJSessionId() {
         String jSessionId = UUID.randomUUID().toString();
-        cookies.put(HEADER_KEY_OF_JSESSIONID, UUID.randomUUID().toString());
+        cookies.put(HEADER_KEY_OF_JSESSIONID, jSessionId);
         return jSessionId;
     }
 }

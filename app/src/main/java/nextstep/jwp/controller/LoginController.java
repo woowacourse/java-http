@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.CustomException;
 import nextstep.jwp.http.FileReaderInStaticFolder;
@@ -18,9 +19,23 @@ public class LoginController extends AbstractController {
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
         FileReaderInStaticFolder fileReaderInStaticFolder = new FileReaderInStaticFolder();
-        String htmlOfLogin = fileReaderInStaticFolder.read("login.html");
         response.setStatus(HttpStatus.OK);
-        response.setBody(htmlOfLogin);
+        request.getSession()
+            .ifPresentOrElse(
+                (session) -> {
+                    if (!Objects.isNull(session.getAttribute("user"))) {
+                        String htmlOfIndex = fileReaderInStaticFolder.read("index.html");
+                        response.setBody(htmlOfIndex);
+                        return;
+                    };
+                    String htmlOfLogin = fileReaderInStaticFolder.read("login.html");
+                    response.setBody(htmlOfLogin);
+                },
+                () -> {
+                    String htmlOfLogin = fileReaderInStaticFolder.read("login.html");
+                    response.setBody(htmlOfLogin);
+                }
+            );
     }
 
     @Override
@@ -38,8 +53,8 @@ public class LoginController extends AbstractController {
         if (user.checkPassword(password)) {
             response.setStatus(HttpStatus.FOUND);
             response.putHeader("Location", "/index.html");
-            HttpSession session = request.getSession()
-                .orElseThrow(() -> new CustomException("서버에서 세션을 정상적으로 생성하지 않았습니다."));
+            Optional<HttpSession> sessionPossible = request.getSession();
+            HttpSession session = sessionPossible.get();
             session.setAttribute("user", user);
             return;
         }

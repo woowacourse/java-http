@@ -23,6 +23,7 @@ public class WebServer {
     public void run() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             logger.info("Web Server started {} port.", serverSocket.getLocalPort());
+            BeanFactory.init();
             handle(serverSocket);
         } catch (IOException exception) {
             logger.error("Exception accepting connection", exception);

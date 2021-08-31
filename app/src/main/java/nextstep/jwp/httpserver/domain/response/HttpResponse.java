@@ -5,7 +5,6 @@ import java.util.Map;
 import nextstep.jwp.httpserver.domain.Body;
 import nextstep.jwp.httpserver.domain.Headers;
 import nextstep.jwp.httpserver.domain.HttpVersion;
-import nextstep.jwp.httpserver.domain.StatusCode;
 
 public class HttpResponse {
     private StatusLine statusLine;
@@ -42,13 +41,26 @@ public class HttpResponse {
     }
 
     public HttpResponse() {
-        headers = new Headers();
+        this(new StatusLine(), new Headers(), new Body());
     }
 
     private HttpResponse(Builder builder) {
-        this.statusLine = builder.statusLine;
-        this.headers = builder.headers;
-        this.body = builder.body;
+        this(builder.statusLine, builder.headers, builder.body);
+    }
+
+    public HttpResponse(StatusLine statusLine, Headers headers, Body body) {
+        this.statusLine = statusLine;
+        this.headers = headers;
+        this.body = body;
+    }
+
+    public void ok() {
+        statusLine = new StatusLine(StatusCode.OK);
+    }
+
+    public void redirect(String url) {
+        this.statusLine = new StatusLine(StatusCode.FOUND);
+        addHeader("Location", url);
     }
 
     public void addHeader(String key, String value) {
@@ -68,15 +80,6 @@ public class HttpResponse {
                 "",
                 responseBody
         );
-    }
-
-    public String defaultErrorRedirectResponse(StatusCode code, String responseBody) {
-        headers.addHeader("Location", "/" + code.getCode() + ".html");
-        return String.join("\r\n",
-                "HTTP/1.1 " + StatusCode.FOUND.getCode() + " " + StatusCode.FOUND.getStatusText() + " ",
-                headers.responseFormat(),
-                "",
-                responseBody);
     }
 
     public StatusLine getStatusLine() {

@@ -7,7 +7,7 @@ import java.io.InputStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import nextstep.jwp.httpserver.domain.HttpMethod;
+import nextstep.jwp.httpserver.domain.request.HttpMethod;
 import nextstep.jwp.httpserver.domain.HttpVersion;
 import nextstep.jwp.httpserver.domain.request.HttpRequest;
 

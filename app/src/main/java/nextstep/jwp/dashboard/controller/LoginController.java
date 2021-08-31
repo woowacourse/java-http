@@ -4,10 +4,10 @@ import java.util.Map;
 
 import nextstep.jwp.dashboard.controller.dto.UserDto;
 import nextstep.jwp.dashboard.service.UserService;
-import nextstep.jwp.httpserver.controller.AbstractController;
-import nextstep.jwp.httpserver.domain.StatusCode;
 import nextstep.jwp.httpserver.domain.request.HttpRequest;
 import nextstep.jwp.httpserver.domain.response.HttpResponse;
+import nextstep.jwp.httpserver.exception.GlobalException;
+import nextstep.jwp.httpserver.handler.controller.AbstractController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,21 +22,21 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doGet(HttpRequest httpRequest, Map<String, String> param) {
-        return new HttpResponse.Builder()
-                .statusCode(StatusCode.OK)
-                .build();
+    protected void doGet(HttpRequest request, HttpResponse response) {
+        response.ok();
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest httpRequest, Map<String, String> param) {
-        String account = param.get("account");
-        String password = param.get("password");
-        UserDto userDto = userService.login(account, password);
-        log.debug(userDto.toString());
-        return new HttpResponse.Builder()
-                .statusCode(StatusCode.FOUND)
-                .header("Location", "/index.html")
-                .build();
+    protected void doPost(HttpRequest request, HttpResponse response) {
+        try {
+            final Map<String, String> parameters = request.getBodyToMap();
+            final UserDto userDto = userService.login(parameters.get("account"), parameters.get("password"));
+            log.debug(userDto.toString());
+            response.redirect("/index.html");
+        } catch (GlobalException e) {
+            response.redirect("/" + e.getStatusCode().getCode() + ".html");
+        } catch (Exception e) {
+            response.redirect("/500.html");
+        }
     }
 }

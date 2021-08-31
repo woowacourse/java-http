@@ -1,20 +1,11 @@
 package nextstep.jwp.httpserver.adapter;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-
-import nextstep.jwp.httpserver.controller.StaticResourceController;
-import nextstep.jwp.httpserver.domain.StatusCode;
-import nextstep.jwp.httpserver.domain.View;
 import nextstep.jwp.httpserver.domain.request.HttpRequest;
 import nextstep.jwp.httpserver.domain.response.HttpResponse;
+import nextstep.jwp.httpserver.domain.view.ModelAndView;
+import nextstep.jwp.httpserver.handler.controller.StaticResourceController;
 
-public class StaticResourceHandlerAdapter extends AbstractHandlerAdapter {
+public class StaticResourceHandlerAdapter implements HandlerAdapter {
 
     @Override
     public boolean supports(Object handler) {
@@ -22,21 +13,11 @@ public class StaticResourceHandlerAdapter extends AbstractHandlerAdapter {
     }
 
     @Override
-    public View handle(HttpRequest httpRequest, Object handler) throws URISyntaxException, IOException {
+    public ModelAndView handle(HttpRequest httpRequest, HttpResponse httpResponse, Object handler) throws Exception {
         final StaticResourceController staticResourceController = (StaticResourceController) handler;
-
-        final String requestUri = httpRequest.getRequestUri();
-        final String path = getResourcePath(requestUri);
-
-        HttpResponse httpResponse = new HttpResponse();
-        try {
-            httpResponse = staticResourceController.service(httpRequest, new HashMap<>());
-            final List<String> body = readFile(path);
-            final String response = getResponse(path, httpResponse, body);
-            return new View(path, response);
-        } catch (RuntimeException e) {
-            return exceptionResponse(httpResponse, StatusCode.NOT_FOUND);
-        }
+        final String path = getResourcePath(httpRequest.getRequestUri());
+        staticResourceController.service(httpRequest, httpResponse);
+        return new ModelAndView(path);
     }
 
     private String getResourcePath(String requestUri) {
@@ -44,18 +25,5 @@ public class StaticResourceHandlerAdapter extends AbstractHandlerAdapter {
             return "/index.html";
         }
         return requestUri;
-    }
-
-    private String getResponse(String requestUri, HttpResponse httpResponse, List<String> body) throws IOException {
-        final StringBuilder responseBody = new StringBuilder();
-        for (String bodyLine : body) {
-            responseBody.append(bodyLine).append("\r\n");
-        }
-
-        final Path resourcePath = new File(requestUri).toPath();
-        httpResponse.addHeader("Content-Type", Files.probeContentType(resourcePath) + ";charset=utf-8");
-        httpResponse.addHeader("Content-Length", Integer.toString(responseBody.toString().getBytes().length));
-
-        return httpResponse.responseToString(responseBody.toString());
     }
 }

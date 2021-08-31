@@ -1,6 +1,6 @@
 package nextstep.jwp.httpserver.exception;
 
-import nextstep.jwp.httpserver.domain.StatusCode;
+import nextstep.jwp.httpserver.domain.response.StatusCode;
 
 public class EntityNotFoundException extends GlobalException {
     public EntityNotFoundException(String message) {

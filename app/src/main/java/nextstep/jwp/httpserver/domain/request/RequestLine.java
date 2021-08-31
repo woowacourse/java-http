@@ -1,6 +1,5 @@
 package nextstep.jwp.httpserver.domain.request;
 
-import nextstep.jwp.httpserver.domain.HttpMethod;
 import nextstep.jwp.httpserver.domain.HttpVersion;
 
 public class RequestLine {
@@ -19,6 +18,10 @@ public class RequestLine {
     public static RequestLine from(String line) {
         String[] piece = line.split(SEPARATOR);
         return new RequestLine(HttpMethod.valueOf(piece[0]), piece[1], HttpVersion.version(piece[2]));
+    }
+
+    public boolean isGet() {
+        return HttpMethod.isGet(httpMethod);
     }
 
     public boolean isPost() {

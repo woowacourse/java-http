@@ -1,4 +1,4 @@
-package nextstep.jwp.httpserver.domain;
+package nextstep.jwp.httpserver.domain.request;
 
 public enum HttpMethod {
     GET, POST;

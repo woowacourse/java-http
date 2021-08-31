@@ -4,7 +4,6 @@ import java.util.Map;
 
 import nextstep.jwp.httpserver.domain.Body;
 import nextstep.jwp.httpserver.domain.Headers;
-import nextstep.jwp.httpserver.domain.HttpMethod;
 
 public class HttpRequest {
     private final RequestLine requestLine;
@@ -15,6 +14,14 @@ public class HttpRequest {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
+    }
+
+    public boolean isGet() {
+        return requestLine.isGet();
+    }
+
+    public boolean isPost() {
+        return requestLine.isPost();
     }
 
     public String getRequestUri() {

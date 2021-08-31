@@ -7,7 +7,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import nextstep.jwp.httpserver.domain.HttpVersion;
-import nextstep.jwp.httpserver.domain.StatusCode;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

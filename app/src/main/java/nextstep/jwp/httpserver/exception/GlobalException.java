@@ -1,6 +1,6 @@
 package nextstep.jwp.httpserver.exception;
 
-import nextstep.jwp.httpserver.domain.StatusCode;
+import nextstep.jwp.httpserver.domain.response.StatusCode;
 
 public class GlobalException extends RuntimeException {
     private final StatusCode statusCode;

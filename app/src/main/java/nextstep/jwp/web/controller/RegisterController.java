@@ -23,8 +23,9 @@ public class RegisterController extends AbstractController {
         String password = params.get("password");
         String email = params.get("email");
 
-        if (InMemoryUserRepository.findByAccount(account).isPresent())
+        if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             throw new BadRequestException("이미 존재하는 계정입니다.");
+        }
 
         User user = new User(null, account, password, email);
         InMemoryUserRepository.save(user);

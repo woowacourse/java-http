@@ -14,6 +14,9 @@ public class ResourceResolver {
     private static final String RESOURCE_PREFIX = "static";
     private static final List<String> RESOURCE_SUFFIXES = List.of(".html", ".js", ".css", ".csv", ".ico");
 
+    private ResourceResolver() {
+    }
+
     public static boolean checkIfUriHasResourceExtension(String uri) {
         for (String suffix : RESOURCE_SUFFIXES) {
             if (uri.endsWith(suffix)) {
@@ -24,8 +27,9 @@ public class ResourceResolver {
     }
 
     public static String resolveResourceRequest(HttpRequest request) throws IOException {
-        if (!"GET".equals(request.method()))
+        if (!"GET".equals(request.method())) {
             throw new MethodNotAllowedException("Resource요청은 GET만 가능합니다.");
+        }
 
         final URL resource = ResourceResolver.class.getClassLoader().getResource(RESOURCE_PREFIX + request.uri());
         if (Objects.isNull(resource)) {

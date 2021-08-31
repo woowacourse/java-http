@@ -28,7 +28,7 @@ class InMemoryUserRepositoryTest {
         InMemoryUserRepository.save(user);
 
         Optional<User> foundUser = InMemoryUserRepository.findByAccount(account);
-        assertThat(foundUser.isPresent()).isTrue();
+        assertThat(foundUser).isPresent();
     }
 
     @Test
@@ -37,7 +37,7 @@ class InMemoryUserRepositoryTest {
         String notExistingAccount = "notExisting";
 
         Optional<User> foundUser = InMemoryUserRepository.findByAccount(notExistingAccount);
-        assertThat(foundUser.isEmpty()).isTrue();
+        assertThat(foundUser).isEmpty();
     }
 
     @AfterEach

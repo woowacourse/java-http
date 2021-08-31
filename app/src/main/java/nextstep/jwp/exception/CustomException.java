@@ -2,10 +2,10 @@ package nextstep.jwp.exception;
 
 public abstract class CustomException extends RuntimeException {
 
-    public CustomException() {
+    protected CustomException() {
     }
 
-    public CustomException(String message) {
+    protected CustomException(String message) {
         super(message);
     }
 }

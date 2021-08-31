@@ -20,6 +20,9 @@ public class RequestMapper {
         mapper.put(isAcceptable("/register"), new RegisterController());
     }
 
+    private RequestMapper() {
+    }
+
     private static Predicate<HttpRequest> isAcceptable(String uri) {
         return httpRequest -> httpRequest.uri().equals(uri);
     }

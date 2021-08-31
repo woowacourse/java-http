@@ -27,6 +27,9 @@ public class ControllerAdvice {
         handlers.put(Exception.class, new InternalServerErrorExceptionHandler());
     }
 
+    private ControllerAdvice() {
+    }
+
     public static String handle(Exception exception) {
 
         ExceptionHandler exceptionHandler = handlers.entrySet().stream()

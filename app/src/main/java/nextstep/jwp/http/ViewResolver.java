@@ -10,7 +10,10 @@ import nextstep.jwp.exception.NotFoundException;
 
 public class ViewResolver {
     private static final String VIEW_PREFIX = "static/";
-    private final static String VIEW_SUFFIX = ".html";
+    private static final String VIEW_SUFFIX = ".html";
+
+    private ViewResolver() {
+    }
 
     public static String resolveView(String viewName) throws IOException {
         final URL resource = ViewResolver.class.getClassLoader().getResource(VIEW_PREFIX + viewName + VIEW_SUFFIX);

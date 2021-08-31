@@ -16,6 +16,9 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
+    private InMemoryUserRepository() {
+    }
+
     public static User save(User input) {
         User user = new User(++autoIncrement, input.getAccount(), input.getPassword(), input.getEmail());
         database.put(input.getAccount(), input);

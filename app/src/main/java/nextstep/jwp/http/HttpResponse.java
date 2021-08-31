@@ -1,6 +1,9 @@
 package nextstep.jwp.http;
 
 public class HttpResponse {
+    private HttpResponse() {
+    }
+
     public static String ok(String contentType, String payload) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",

@@ -4,8 +4,8 @@ import static nextstep.jwp.httpmessage.HttpMessageReader.SP;
 
 public class StatusLine {
 
-    private HttpVersion httpVersion;
-    private HttpStatusCode httpStatusCode;
+    private final HttpVersion httpVersion;
+    private final HttpStatusCode httpStatusCode;
 
     public StatusLine(HttpVersion httpVersion, HttpStatusCode httpStatusCode) {
         this.httpVersion = httpVersion;

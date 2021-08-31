@@ -1,50 +1,54 @@
 package nextstep.jwp.httpmessage;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Collections;
-import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 
+import static nextstep.jwp.httpmessage.HttpMessageReader.CRLF;
+import static nextstep.jwp.httpmessage.HttpMessageReader.SP;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("HttpResponse 테스트")
 class HttpResponseTest {
 
-    @Test
-    void responseGetStatus() {
-        //given
-        final HttpResponse httpResponse = new HttpResponse(new StatusLine(HttpVersion.HTTP1_1, HttpStatusCode.OK), new HttpHeaders(Collections.emptyMap()));
-        //when
-        final String statusLine = httpResponse.getStatusLine();
-        //then
-        assertThat(statusLine).isEqualTo("HTTP/1.1 200 OK");
-        assertThat(httpResponse.getHttpVersion()).isEqualTo(HttpVersion.HTTP1_1);
-        assertThat(httpResponse.getHttpStatusCode()).isEqualTo(HttpStatusCode.OK);
+    private static Stream<Arguments> responseHttpMessage() {
+        return Stream.of(
+                Arguments.of(HttpVersion.HTTP1_1, HttpStatusCode.FOUND, "Location", "/index.html", null),
+                Arguments.of(HttpVersion.HTTP1_1, HttpStatusCode.OK, "Content-Type", "text/html;charset=utf-8", "ok"),
+                Arguments.of(HttpVersion.HTTP1_1, HttpStatusCode.OK, null, null, null)
+        );
     }
 
-    @Test
-    void responsePostStatus() {
+    @ParameterizedTest
+    @MethodSource
+    void responseHttpMessage(HttpVersion httpVersion, HttpStatusCode httpStatusCode, String headerKey, String headerValue, Object responseBody) {
         //given
-        final HttpResponse httpResponse = new HttpResponse(new StatusLine(HttpVersion.HTTP1_1, HttpStatusCode.FOUND), new HttpHeaders(Collections.emptyMap()));
+        final HttpResponse httpResponse = new HttpResponse();
         //when
-        final String statusLine = httpResponse.getStatusLine();
+        httpResponse.setStatusLine(new StatusLine(httpVersion, httpStatusCode));
+        httpResponse.addHeader(headerKey, headerValue);
+        httpResponse.setBody(responseBody);
+        final String expectedResponseMessage = toHttpResponseMessage(httpResponse.getStatusLine(), httpResponse.getHttpHeadersAsString(), responseBody);
         //then
-        assertThat(statusLine).isEqualTo("HTTP/1.1 302 Found");
-        assertThat(httpResponse.getHttpVersion()).isEqualTo(HttpVersion.HTTP1_1);
-        assertThat(httpResponse.getHttpStatusCode()).isEqualTo(HttpStatusCode.FOUND);
+        assertThat(httpResponse.getStatusLineAsString()).isEqualTo(httpVersion.getValue() + SP + httpStatusCode.getValue() + SP + httpStatusCode.getReasonPhrase());
+        assertThat(httpResponse.getHttpVersion()).isEqualTo(httpVersion);
+        assertThat(httpResponse.getHttpStatusCode()).isEqualTo(httpStatusCode);
+        assertThat(httpResponse.getHeader(headerKey)).isEqualTo(headerValue);
+        assertThat(httpResponse.getHttpHeaders()).isNotNull();
+        assertThat(httpResponse.getHttpMessage()).isEqualTo(expectedResponseMessage);
     }
 
-    @Test
-    void setHeader() {
-        //given
-        final Map<String, String> headers = Collections.emptyMap();
-        final HttpResponse httpResponse = new HttpResponse(new StatusLine(HttpVersion.HTTP1_1, HttpStatusCode.FOUND), new HttpHeaders(headers));
-        final String key = "Location";
-        final String value = "/index.html";
-        //when
-        httpResponse.setHeader(key, value);
-        //then
-        assertThat(httpResponse.getHeader(key)).isEqualTo(value);
+    private String toHttpResponseMessage(StatusLine statusLine, String httpHeaderString, Object body) {
+        if (Objects.isNull(body)) {
+            body = "";
+        }
+        return String.join(CRLF,
+                statusLine.getLine() + SP,
+                httpHeaderString,
+                body.toString());
     }
 }

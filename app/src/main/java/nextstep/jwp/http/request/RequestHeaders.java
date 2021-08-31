@@ -1,11 +1,16 @@
 package nextstep.jwp.http.request;
 
+import nextstep.jwp.exception.UnAuthorizedException;
+import nextstep.jwp.http.session.HttpSession;
+import nextstep.jwp.http.session.HttpSessions;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RequestHeaders {
 
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final Map<String, String> headersExceptCookies;
     private final RequestCookie requestCookie;
@@ -40,5 +45,14 @@ public class RequestHeaders {
 
     public RequestCookie getHttpCookie() {
         return requestCookie;
+    }
+
+    public HttpSession getSession() {
+        if (requestCookie.containsKey(JSESSIONID)) {
+            final String sessionId = requestCookie.get(JSESSIONID);
+            return HttpSessions.getSession(sessionId)
+                    .orElseThrow(() -> new UnAuthorizedException("유효하지 않은 세션 id 입니다."));
+        }
+        return HttpSessions.createSession();
     }
 }

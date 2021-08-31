@@ -13,17 +13,25 @@ public enum ContentType {
         this.type = type;
     }
 
-    public static ContentType parseFromExtension(String extension) {
+    public static ContentType fromExtension(String extension) {
         if (extension.equals("css")) {
             return CSS_UTF8;
         }
         if (extension.equals("html")) {
             return HTML_UTF8;
         }
-        if(extension.equals("svg")){
+        if (extension.equals("svg")) {
             return SVG_UTF8;
         }
         return PLAIN_UTF8;
+    }
+
+    public static ContentType fromFileName(String fileName) {
+        if (fileName.contains(".")) {
+            String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
+            return ContentType.fromExtension(extension);
+        }
+        return empty();
     }
 
     public static ContentType empty() {

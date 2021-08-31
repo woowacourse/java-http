@@ -21,6 +21,10 @@ public class ModelAndView {
         return new ModelAndView(Model.EMPTY, viewName, httpStatus);
     }
 
+    public static ModelAndView of(Model model, String viewName, HttpStatus httpStatus) {
+        return new ModelAndView(model, viewName, httpStatus);
+    }
+
     public String getViewName() {
         return viewName;
     }

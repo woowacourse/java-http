@@ -11,7 +11,7 @@ import nextstep.jwp.http.response.HttpStatus;
 import nextstep.jwp.model.User;
 import org.junit.jupiter.api.Test;
 
-class RequestHandlerTest {
+public class RequestHandlerTest {
 
     private final Assembler assembler = new Assembler();
 

@@ -1,41 +1,44 @@
 package nextstep.jwp.view;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-
+import nextstep.jwp.handler.modelandview.Model;
 import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.http.response.ContentType;
 import nextstep.jwp.http.response.HttpResponse;
 
 public class View {
 
-    private static final View EMPTY = new View("");
+    private static final View EMPTY = new View("", "", ContentType.empty());
 
+    private final String viewName;
     private final String content;
     private final ContentType contentType;
 
-    public View(String content, ContentType contentType) {
+    private View(String viewName, String content, ContentType contentType) {
+        this.viewName = viewName;
         this.content = content;
         this.contentType = contentType;
     }
 
-    public View(String content) {
-        this(content, ContentType.empty());
+    public static View of(String viewName, String content) {
+        return new View(viewName, content, ContentType.fromFileName(viewName));
     }
 
-    public static View of(String content) {
-        return new View(content, ContentType.PLAIN_UTF8);
+    public void render(ModelAndView modelAndView, HttpResponse httpResponse) {
+        String rendered = renderedView(modelAndView.getModel());
+        if (!rendered.isEmpty()) {
+            httpResponse.addHeader("Content-Type", contentType());
+            httpResponse.addHeader("Content-Length", String.valueOf(contentLength()));
+            httpResponse.setContent(rendered, contentType.value());
+        }
     }
 
-    public static View of(File file) throws IOException {
-        String fileName = file.getName();
-        String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-
-        String content = String.join("\n", Files.readAllLines(file.toPath())) + "\n";
-        ContentType contentType = ContentType.parseFromExtension(extension);
-
-        return new View(content, contentType);
+    private String renderedView(Model model) {
+        String rendered = content;
+        for (String key : model.keys()) {
+            Object attribute = model.getAttribute(key);
+            rendered = rendered.replace("${"+key+"}", attribute.toString());
+        }
+        return rendered;
     }
 
     public static View empty() {
@@ -52,13 +55,5 @@ public class View {
 
     public String content() {
         return content;
-    }
-
-    public void render(ModelAndView modelAndView, HttpResponse httpResponse) {
-        if(!content.isEmpty()){
-            httpResponse.addHeader("Content-Type", contentType());
-            httpResponse.addHeader("Content-Length", String.valueOf(contentLength()));
-            httpResponse.setContent(content, contentType.value());
-        }
     }
 }

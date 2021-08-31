@@ -1,6 +1,7 @@
 package nextstep.jwp.handler.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.handler.modelandview.Model;
 import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.QueryParams;
@@ -25,6 +26,9 @@ public class RegisterController extends AbstractController {
             response.addHeader("Location", "index.html");
             return ModelAndView.of(HttpStatus.FOUND);
         }
-        return ModelAndView.of("/400.html", HttpStatus.BAD_REQUEST);
+
+        Model model = new Model();
+        model.addAttribute("errorMessage", "가입 실패");
+        return ModelAndView.of(model,"/400.html", HttpStatus.BAD_REQUEST);
     }
 }

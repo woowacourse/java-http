@@ -31,7 +31,7 @@ public class CharlieHttpResponse implements HttpResponse {
         ResponseLine responseLine = ResponseLine.httpResponseLine(HttpStatusCode.OK);
         ResponseHeader responseHeader = new ResponseHeader();
         ResponseBody responseBody = ResponseBody.of(viewName);
-        responseHeader.addHeader("Content-Type", "text/html;charset=utf-8");
+        responseHeader.addHeader("Content-Type", ContentType.getValue(viewName));
         responseHeader.addHeader("Content-Length", String.valueOf(responseBody.getContentLength()));
         return new CharlieHttpResponse(responseLine, responseHeader, responseBody);
     }

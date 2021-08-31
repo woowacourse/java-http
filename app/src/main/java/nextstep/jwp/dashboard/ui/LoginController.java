@@ -4,6 +4,7 @@ import nextstep.jwp.dashboard.exception.UserNotFoundException;
 import nextstep.jwp.web.controller.AbstractController;
 import nextstep.jwp.dashboard.db.InMemoryUserRepository;
 import nextstep.jwp.dashboard.domain.User;
+import nextstep.jwp.web.controller.View;
 import nextstep.jwp.web.network.request.HttpRequest;
 import nextstep.jwp.web.network.response.HttpResponse;
 import nextstep.jwp.web.network.response.HttpStatus;
@@ -23,7 +24,7 @@ public class LoginController extends AbstractController {
     @Override
     public HttpResponse doGet(HttpRequest httpRequest) {
         log.info("GET /login");
-        return HttpResponse.ofByteArray(HttpStatus.OK, readHtmlFile(getResource()));
+        return HttpResponse.ofView(HttpStatus.OK, new View(getResource() + ".html"));
     }
 
     @Override
@@ -34,14 +35,14 @@ public class LoginController extends AbstractController {
                     .orElseThrow(() -> new UserNotFoundException(queryInfo.get("account")));
             if (user.checkPassword(queryInfo.get("password"))) {
                 log.info("Login successful!");
-                return HttpResponse.ofByteArray(HttpStatus.FOUND, readIndex());
+                return HttpResponse.ofView(HttpStatus.FOUND, new View("/index"));
             } else {
                 log.info("Login failed");
-                return HttpResponse.ofByteArray(HttpStatus.UNAUTHORIZED, readHtmlFile("/401"));
+                return HttpResponse.ofView(HttpStatus.UNAUTHORIZED, new View("/401"));
             }
         } catch (UserNotFoundException e) {
             log.info(e.getMessage());
-            return HttpResponse.ofByteArray(HttpStatus.UNAUTHORIZED, readHtmlFile("/401"));
+            return HttpResponse.ofView(HttpStatus.UNAUTHORIZED, new View("/401"));
         }
     }
 }

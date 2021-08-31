@@ -1,6 +1,8 @@
 package nextstep.jwp.web.network.response;
 
 
+import nextstep.jwp.web.controller.View;
+
 public class HttpResponse {
 
     private final StatusLine statusLine;
@@ -15,16 +17,12 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse ofByteArray(HttpStatus httpStatus, byte[] body) {
-        return new HttpResponse(httpStatus, ContentType.HTML, new String(body));
+    public static HttpResponse ofView(HttpStatus httpStatus, View view) {
+        return new HttpResponse(httpStatus, view.getContentType(), view.render());
     }
 
     public static HttpResponse ofByteArray(HttpStatus httpStatus, ContentType contentType, byte[] body) {
         return new HttpResponse(httpStatus, contentType, new String(body));
-    }
-
-    public static HttpResponse ofString(HttpStatus httpStatus, ContentType contentType, String body) {
-        return new HttpResponse(httpStatus, contentType, body);
     }
 
     public String asString() {

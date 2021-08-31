@@ -1,6 +1,5 @@
 package nextstep.jwp.web.controller;
 
-import nextstep.jwp.web.network.response.ContentType;
 import nextstep.jwp.web.network.request.HttpRequest;
 import nextstep.jwp.web.network.response.HttpResponse;
 import nextstep.jwp.web.network.response.HttpStatus;
@@ -18,39 +17,12 @@ public class DefaultController extends AbstractController {
     @Override
     public HttpResponse doGet(HttpRequest httpRequest) {
         final String path = httpRequest.getPath();
-        if ("/css/styles.css".equals(path)) {
-            log.info("GET /css/styles.css");
-            final byte[] bytes = readFile(path);
-            return HttpResponse.ofByteArray(HttpStatus.OK, ContentType.CSS, bytes);
+        log.info("GET {}", path);
+        if (getResource().equals(path)) {
+            final View view = new View("/index.html");
+            return HttpResponse.ofView(HttpStatus.OK, view);
         }
-        if ("/js/scripts.js".equals(path)) {
-            log.info("GET /js/scripts.js");
-            final byte[] bytes = readFile(path);
-            return HttpResponse.ofByteArray(HttpStatus.OK, ContentType.JAVASCRIPT, bytes);
-        }
-        if ("/assets/chart-pie.js".equals(path)) {
-            log.info("GET /assets/chart-pie.js");
-            final byte[] bytes = readFile(path);
-            return HttpResponse.ofByteArray(HttpStatus.OK, ContentType.JAVASCRIPT, bytes);
-        }
-        if ("/assets/chart-area.js".equals(path)) {
-            log.info("GET /assets/chart-area.js");
-            final byte[] bytes = readFile(path);
-            return HttpResponse.ofByteArray(HttpStatus.OK, ContentType.JAVASCRIPT, bytes);
-        }
-        if ("/assets/chart-bar.js".equals(path)) {
-            log.info("GET /assets/chart-bar.js");
-            final byte[] bytes = readFile(path);
-            return HttpResponse.ofByteArray(HttpStatus.OK, ContentType.JAVASCRIPT, bytes);
-        }
-        if ("/favicon.ico".equals(path)) {
-            log.info("GET /favicon.ico");
-            final byte[] bytes = readFile(path);
-            return HttpResponse.ofByteArray(HttpStatus.OK, ContentType.IMAGE, bytes);
-        }
-
-        log.info("GET /index.html");
-        final byte[] bytes = readIndex();
-        return HttpResponse.ofByteArray(HttpStatus.OK, bytes);
+        final View view = new View(path);
+        return HttpResponse.ofView(HttpStatus.OK, view);
     }
 }

@@ -4,6 +4,7 @@ import nextstep.jwp.dashboard.exception.DuplicateUserException;
 import nextstep.jwp.web.controller.AbstractController;
 import nextstep.jwp.dashboard.db.InMemoryUserRepository;
 import nextstep.jwp.dashboard.domain.User;
+import nextstep.jwp.web.controller.View;
 import nextstep.jwp.web.network.request.HttpRequest;
 import nextstep.jwp.web.network.response.HttpResponse;
 import nextstep.jwp.web.network.response.HttpStatus;
@@ -23,7 +24,7 @@ public class RegisterController extends AbstractController {
     @Override
     public HttpResponse doGet(HttpRequest httpRequest) {
         log.info("GET /register");
-        return HttpResponse.ofByteArray(HttpStatus.OK, readHtmlFile(getResource()));
+        return HttpResponse.ofView(HttpStatus.OK, new View(getResource() + ".html"));
     }
 
     @Override
@@ -39,6 +40,6 @@ public class RegisterController extends AbstractController {
         }
         InMemoryUserRepository.save(user);
         log.info(String.format("New User Registered. user id : %d, account : %s", user.getId(), user.getAccount()));
-        return HttpResponse.ofByteArray(HttpStatus.OK, readIndex());
+        return HttpResponse.ofView(HttpStatus.OK, new View("/index"));
     }
 }

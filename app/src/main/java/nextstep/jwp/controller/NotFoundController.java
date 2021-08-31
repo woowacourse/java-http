@@ -7,7 +7,7 @@ import nextstep.jwp.web.HttpStatus;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class NotFoundController implements Controller {
+public class NotFoundController extends AbstractController {
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
         String notFoundHtmlPagePath = getClass().getClassLoader().getResource("static/404.html").getPath();

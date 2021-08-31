@@ -54,6 +54,7 @@ public class HttpResponse {
         return String.join("\r\n",
                 "HTTP/1.1 " + HttpStatus.FOUND.getStatus(),
                 "Location: " + location,
+                "",
                 "");
     }
 

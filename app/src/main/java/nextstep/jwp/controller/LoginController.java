@@ -3,7 +3,7 @@ package nextstep.jwp.controller;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.DBNotFoundException;
-import nextstep.jwp.exception.PasswordNotMatchException;
+import nextstep.jwp.exception.PasswordMismatchException;
 import nextstep.jwp.framework.http.HttpBody;
 import nextstep.jwp.framework.http.HttpRequest;
 import nextstep.jwp.framework.http.HttpResponse;
@@ -27,7 +27,7 @@ public class LoginController extends AbstractController {
         try {
             checkAccount(body);
             return HttpStatus.FOUND;
-        } catch (DBNotFoundException | PasswordNotMatchException ignore) {
+        } catch (DBNotFoundException | PasswordMismatchException ignore) {
             return HttpStatus.UNAUTHORIZED;
         }
     }
@@ -42,6 +42,6 @@ public class LoginController extends AbstractController {
         if (user.checkPassword(password)) {
             return;
         }
-        throw new PasswordNotMatchException();
+        throw new PasswordMismatchException();
     }
 }

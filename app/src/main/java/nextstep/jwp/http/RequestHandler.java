@@ -52,7 +52,8 @@ public class RequestHandler implements Runnable {
     }
 
     private HttpResponse getHttpResponse(final InputStream inputStream) throws IOException {
-        HttpRequest httpRequest = parseRequest(inputStream);
+        inputStreamReader = new BufferedReader(new InputStreamReader(inputStream));
+        HttpRequest httpRequest = HttpRequest.parseRequest(inputStreamReader);
         final Controller controller = findController(httpRequest);
         try {
             return controller.doService(httpRequest);
@@ -65,41 +66,10 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private HttpRequest parseRequest(final InputStream inputStream) throws IOException {
-        inputStreamReader = new BufferedReader(new InputStreamReader(inputStream));
-
-        final List<String> requestHeaders = parseRequestHeaders();
-        final HttpRequestHeader httpRequestHeader = new HttpRequestHeader(requestHeaders);
-
-        final String requestBody = parseRequestBody(httpRequestHeader);
-        final HttpRequestBody httpRequestBody = new HttpRequestBody(requestBody);
-
-        return new HttpRequest(httpRequestHeader, httpRequestBody);
-    }
-
-    private List<String> parseRequestHeaders() throws IOException {
-        final List<String> requestHeaders = new ArrayList<>();
-        String line;
-        while (!"".equals(line = inputStreamReader.readLine())) {
-            if (line == null) {
-                break;
-            }
-            requestHeaders.add(line);
-        }
-        return requestHeaders;
-    }
-
-    private String parseRequestBody(final HttpRequestHeader httpRequestHeader) throws IOException {
-        int contentLength = httpRequestHeader.getContentLength();
-        char[] buffer = new char[contentLength];
-        inputStreamReader.read(buffer, 0, contentLength);
-        return new String(buffer);
-    }
-
     private Controller findController(final HttpRequest httpRequest) {
         return controllers.stream()
                 .filter(it -> it.canHandle(httpRequest))
-                .findFirst()
+                .findAny()
                 .orElseThrow(NoMatchingControllerException::new);
     }
 

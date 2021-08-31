@@ -23,11 +23,11 @@ public class JwpHttpRequest {
     private final Map<String, String> headers;
     private final Map<String, String> params;
 
-    public JwpHttpRequest(String requestMethod, String requestUri, String requestHttpVersion, Map<String, String> headers) {
+    private JwpHttpRequest(String requestMethod, String requestUri, String requestHttpVersion, Map<String, String> headers) {
         this(requestMethod, requestUri, requestHttpVersion, headers, Collections.emptyMap());
     }
 
-    public JwpHttpRequest(String method, String uri, String httpVersion, Map<String, String> headers, Map<String, String> params) {
+    private JwpHttpRequest(String method, String uri, String httpVersion, Map<String, String> headers, Map<String, String> params) {
         this.method = method;
         this.uri = uri;
         this.httpVersion = httpVersion;

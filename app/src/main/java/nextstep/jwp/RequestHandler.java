@@ -35,9 +35,11 @@ public class RequestHandler implements Runnable {
                 connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
-                final OutputStream outputStream = connection.getOutputStream()) {
+                final OutputStream outputStream = connection.getOutputStream();
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            HttpRequest httpRequest = httpRequestParser(inputStream);
+            HttpRequest httpRequest = httpRequestParser(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
 
             handle(httpRequest, httpResponse);
@@ -66,11 +68,7 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private HttpRequest httpRequestParser(InputStream inputStream) throws IOException {
-
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
+    private HttpRequest httpRequestParser(BufferedReader bufferedReader) throws IOException {
         return HttpRequest.create(bufferedReader);
     }
 

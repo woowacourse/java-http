@@ -1,7 +1,7 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.handler.HttpRequest;
-import nextstep.jwp.handler.HttpResponse;
+import nextstep.jwp.handler.request.HttpRequest;
+import nextstep.jwp.handler.response.HttpResponse;
 import nextstep.jwp.util.File;
 import nextstep.jwp.util.FileReader;
 

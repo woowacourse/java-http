@@ -2,8 +2,8 @@ package nextstep.jwp.controller;
 
 import java.io.FileNotFoundException;
 
-import nextstep.jwp.handler.HttpRequest;
-import nextstep.jwp.handler.HttpResponse;
+import nextstep.jwp.handler.request.HttpRequest;
+import nextstep.jwp.handler.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
 

@@ -10,6 +10,8 @@ import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.ErrorController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.handler.request.HttpRequest;
+import nextstep.jwp.handler.response.HttpResponse;
 import nextstep.jwp.util.File;
 import nextstep.jwp.util.FileReader;
 import org.slf4j.Logger;

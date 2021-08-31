@@ -1,4 +1,6 @@
-package nextstep.jwp.handler;
+package nextstep.jwp.handler.request;
+
+import nextstep.jwp.handler.constant.HttpMethod;
 
 public class RequestLine {
     private final HttpMethod method;

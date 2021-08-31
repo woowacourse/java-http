@@ -1,4 +1,6 @@
-package nextstep.jwp.handler;
+package nextstep.jwp.handler.response;
+
+import nextstep.jwp.handler.constant.HttpStatus;
 
 public class ResponseLine {
     private final String version;

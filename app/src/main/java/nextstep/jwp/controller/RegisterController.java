@@ -4,8 +4,8 @@ import java.io.FileNotFoundException;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.handler.HttpBody;
-import nextstep.jwp.handler.HttpRequest;
-import nextstep.jwp.handler.HttpResponse;
+import nextstep.jwp.handler.request.HttpRequest;
+import nextstep.jwp.handler.response.HttpResponse;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.File;
 import nextstep.jwp.util.FileReader;

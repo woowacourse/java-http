@@ -1,9 +1,13 @@
-package nextstep.jwp.handler;
+package nextstep.jwp.handler.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import nextstep.jwp.handler.HttpBody;
+import nextstep.jwp.handler.HttpHeader;
+import nextstep.jwp.handler.constant.HttpMethod;
 
 public class HttpRequest {
 

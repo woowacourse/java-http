@@ -1,4 +1,4 @@
-package nextstep.jwp.handler;
+package nextstep.jwp.handler.constant;
 
 public enum HttpStatus {
 

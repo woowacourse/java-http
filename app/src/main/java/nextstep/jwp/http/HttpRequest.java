@@ -16,19 +16,31 @@ public class HttpRequest {
     private static final int NONE_QUERY = -1;
 
     private final List<String> headerLines;
+    private final List<String> bodyLines;
 
-    public HttpRequest(List<String> headerLines) {
+    public HttpRequest(List<String> headerLines, List<String> bodyLines) {
         this.headerLines = headerLines;
+        this.bodyLines = bodyLines;
     }
 
     public static HttpRequest readFromInputStream(InputStream inputStream) throws IOException {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         final List<String> headerLine = new ArrayList<>();
+        final List<String> bodyLine = new ArrayList<>();
+        fillRequestPart(reader, headerLine);
+        fillRequestPart(reader, bodyLine);
+        return new HttpRequest(headerLine, bodyLine);
+    }
+
+    private static void fillRequestPart(BufferedReader reader, List<String> headerLine)
+        throws IOException {
         while (reader.ready()) {
             final String oneLine = reader.readLine();
+            if ("".equals(oneLine)) {
+                break;
+            }
             headerLine.add(oneLine);
         }
-        return new HttpRequest(headerLine);
     }
 
     public String method() {
@@ -50,7 +62,7 @@ public class HttpRequest {
     }
 
     public Map<String, String> body() {
-        final String rawBody = headerLines.get(headerLines.size() - 1);
+        final String rawBody = bodyLines.get(0);
         return Arrays.stream(rawBody.split("&"))
             .map(singleBody -> singleBody.split("="))
             .collect(toMap(unitBody -> unitBody[0], unitBody -> unitBody[1]));

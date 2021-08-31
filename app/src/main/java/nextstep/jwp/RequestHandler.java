@@ -1,7 +1,7 @@
 package nextstep.jwp;
 
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.RequestMapping;
+import nextstep.jwp.controller.RequestMapper;
 import nextstep.jwp.domain.request.HttpRequest;
 import nextstep.jwp.domain.response.HttpResponse;
 import nextstep.jwp.domain.Converter;
@@ -33,7 +33,7 @@ public class RequestHandler implements Runnable {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
             final HttpRequest httpRequest = Converter.convertToHttpRequest(reader);
-            final Controller controller = RequestMapping.getController(httpRequest);
+            final Controller controller = RequestMapper.getController(httpRequest);
             final HttpResponse httpResponse = controller.service(httpRequest);
 
             outputStream.write(httpResponse.getBytes());

@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.domain.request.HttpRequest;
 
-public class RequestMapping {
+public class RequestMapper {
 
     public static Controller getController(HttpRequest httpRequest) {
         String path = httpRequest.getUri();

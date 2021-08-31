@@ -2,8 +2,6 @@ package nextstep.jwp.web.network.request;
 
 import nextstep.jwp.web.exception.InputException;
 import nextstep.jwp.web.network.URI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -65,7 +63,7 @@ public class HttpRequest {
         final Map<String, String> bodyAsMap = new HashMap<>();
         final String[] params = body.split("&");
         for (String param : params) {
-            final String[] keyAndValue = param.split("=");
+            final String[] keyAndValue = param.split("=", 2);
             bodyAsMap.put(keyAndValue[0], keyAndValue[1]);
         }
         return bodyAsMap;

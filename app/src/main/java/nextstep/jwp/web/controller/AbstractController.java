@@ -27,10 +27,8 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) {
-        throw new UnsupportedOperationException();
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) {
-        throw new UnsupportedOperationException();
     }
 }

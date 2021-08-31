@@ -22,13 +22,11 @@ public class MethodHandlerMapping implements HandlerMapping {
 
     public MethodHandlerMapping(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
+        this.argumentResolverContainer = new ArgumentResolverContainer();
         final List<Object> controllers =
                 applicationContext.getBeansWithAnnotation(Controller.class);
         this.methodHandlers = mapToMethodHandlers(controllers);
-        this.argumentResolverContainer = new ArgumentResolverContainer();
     }
-
-
 
     private List<Handler> mapToMethodHandlers(List<Object> controllers) {
         List<Handler> handlers = new ArrayList<>();

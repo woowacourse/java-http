@@ -12,11 +12,12 @@ public class MethodParameter {
     private Annotation[] annotations;
     private ParameterClass parameterClass;
 
-    public MethodParameter(Parameter parameter, int parameterOrder) {
+    public MethodParameter(Class<?> parameterType, Parameter parameter,
+            int parameterOrder) {
         this.parameter = parameter;
         this.parameterOrder = parameterOrder;
         this.annotations = parameter.getDeclaredAnnotations();
-        this.parameterClass = new ParameterClass(parameter.getClass());
+        this.parameterClass = new ParameterClass(parameterType);
     }
 
     public boolean hasAnnotationType(Class<? extends Annotation> annotationType) {

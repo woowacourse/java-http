@@ -11,7 +11,7 @@ public class WebServerTest {
     @Test
     @DisplayName("webServer test")
     public void webServer() throws Exception{
-        final WebServer webServer = new WebServer(8888);
+        final WebServer webServer = new WebServer(8888, dispatcherServlet);
         Assertions.assertThat(webServer).isNotNull();
     }
 

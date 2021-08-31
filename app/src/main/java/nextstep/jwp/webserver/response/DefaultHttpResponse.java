@@ -76,6 +76,18 @@ public class DefaultHttpResponse implements HttpResponse {
     }
 
     @Override
+    public void flushAsRedirect(String redirectUrl) {
+        addStatus(StatusCode.FOUND);
+        addHeader(LOCATION, redirectUrl);
+        replaceNewContent();
+        flush();
+    }
+
+    private void replaceNewContent() {
+        this.content = new StringBuilder();
+    }
+
+    @Override
     public String totalResponse() {
         return String.format(RESPONSE_FORM, statusLine(), headerLine(), content);
     }

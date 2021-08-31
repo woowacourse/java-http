@@ -17,4 +17,6 @@ public interface HttpResponse {
     void addRedirectUrl(String url);
 
     void flush();
+
+    void flushAsRedirect(String redirectUrl);
 }

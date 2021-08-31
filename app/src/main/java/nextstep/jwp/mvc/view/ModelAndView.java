@@ -25,4 +25,8 @@ public class ModelAndView {
             throw new PageNotFoundException();
         }
     }
+
+    public String getViewName() {
+        return viewName;
+    }
 }

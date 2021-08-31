@@ -1,7 +1,5 @@
 package nextstep.jwp.app.ui;
 
-import nextstep.jwp.mvc.annotation.ModelAttribute;
-
 public class NabomTest {
 
 

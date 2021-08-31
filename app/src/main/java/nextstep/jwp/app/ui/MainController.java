@@ -10,7 +10,7 @@ import nextstep.jwp.webserver.response.HttpResponse;
 public class MainController {
 
     @RequestMapping(method = HttpMethod.GET, path = "/")
-    public String index(HttpRequest httpRequest, HttpResponse httpResponse) {
+    public String index() {
         return "index.html";
     }
 }

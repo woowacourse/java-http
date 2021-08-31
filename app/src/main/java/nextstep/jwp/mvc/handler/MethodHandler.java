@@ -30,9 +30,10 @@ public abstract class MethodHandler implements Handler {
 
     private List<MethodParameter> methodParameters() {
         List<MethodParameter> methodParameters = new ArrayList<>();
+        final Class<?>[] parameterTypes = method.getParameterTypes();
         final Parameter[] parameters = method.getParameters();
-        for (int i = 0; i < parameters.length; i++) {
-            methodParameters.add(new MethodParameter(parameters[i], i));
+        for (int i = 0; i < parameterTypes.length; i++) {
+            methodParameters.add(new MethodParameter(parameterTypes[i], parameters[i], i));
         }
         return methodParameters;
     }

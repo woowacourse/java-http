@@ -6,8 +6,12 @@ import nextstep.jwp.webserver.exception.NoFileExistsException;
 import nextstep.jwp.webserver.request.HttpRequest;
 import nextstep.jwp.webserver.response.HttpResponse;
 import nextstep.jwp.webserver.response.StatusCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExceptionResolverContainer {
+    private static final Logger log = LoggerFactory.getLogger(ExceptionResolverContainer.class);
+
 
     private List<ExceptionResolver> exceptionResolvers;
 
@@ -29,17 +33,18 @@ public class ExceptionResolverContainer {
                     return;
                 }
             }
-            serverError(httpResponse);
+            serverError(httpResponse, e);
         } catch (NoFileExistsException noFileExistsException) {
-            serverError(httpResponse);
+            serverError(httpResponse, noFileExistsException);
         }
     }
 
-    private void serverError(HttpResponse httpResponse) {
+    private void serverError(HttpResponse httpResponse, Exception exception) {
         try {
             httpResponse.addStatus(StatusCode.SERVER_ERROR);
             httpResponse.addPage("static/500.html");
             httpResponse.flush();
+            exception.printStackTrace();
         } catch (NoFileExistsException e) {
             throw new IllegalStateException("unknown exception");
         }

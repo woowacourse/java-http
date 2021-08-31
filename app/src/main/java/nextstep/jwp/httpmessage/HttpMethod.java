@@ -16,7 +16,7 @@ public enum HttpMethod {
                 .forEach(it -> httpMethods.put(it.name(), it));
     }
 
-    public static HttpMethod find(String httpMethod) {
+    public static HttpMethod findBy(String httpMethod) {
         if (Objects.isNull(httpMethod)) {
             return null;
         }

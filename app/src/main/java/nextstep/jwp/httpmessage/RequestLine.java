@@ -1,14 +1,14 @@
 package nextstep.jwp.httpmessage;
 
-public class RequestLine {
+import static nextstep.jwp.httpmessage.HttpMessageReader.SP;
 
-    private static final String LINE_DELIMITER = " ";
+public class RequestLine {
 
     private final String line;
     private final String[] splitLine;
 
     public RequestLine(String line) {
-        this(line, line.split(LINE_DELIMITER));
+        this(line, line.split(SP));
     }
 
     public RequestLine(String line, String[] splitLine) {
@@ -21,7 +21,7 @@ public class RequestLine {
     }
 
     public HttpMethod getMethod() {
-        return HttpMethod.find(splitLine[0]);
+        return HttpMethod.findBy(splitLine[0]);
     }
 
     public String getPath() {

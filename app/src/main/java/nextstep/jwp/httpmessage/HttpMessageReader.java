@@ -4,10 +4,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class HttpMessageReader {
+
+    public static final String SP = " ";
+    public static final String CRLF = "\r\n";
 
     private static final String HEADER_DELIMITER = ": ";
 
@@ -80,17 +87,10 @@ public class HttpMessageReader {
         if (Objects.isNull(contentLengthString)) {
             return Collections.emptyMap();
         }
-        final Map<String, String> params = new HashMap<>();
-        final String[] parameters = extractQueryParameterString(contentLengthString).split("&");
-        for (String parameter : parameters) {
-            final String[] splitParameter = parameter.split("=");
-            if (splitParameter.length < 2) {
-                params.put(splitParameter[0], "");
-                continue;
-            }
-            params.put(splitParameter[0], splitParameter[1]);
-        }
-        return params;
+
+        return Stream.of(extractQueryParameterString(contentLengthString).split("&"))
+                .map(it -> it.split("=", 2))
+                .collect(Collectors.toMap(it -> it[0], it -> it[1]));
     }
 
     private String extractQueryParameterString(String contentLengthString) {

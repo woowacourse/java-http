@@ -9,7 +9,7 @@ import java.io.IOException;
 public class IndexController implements Controller {
 
     @Override
-    public HttpResponse service(HttpRequest request) throws IOException {
+    public HttpResponse service(HttpRequest request) {
         HttpResponse response = new HttpResponse();
         try {
             String uri = request.getUri();
@@ -20,6 +20,9 @@ public class IndexController implements Controller {
     }
 
     private HttpResponse findHttpResponse(HttpRequest request, HttpResponse response, String uri) throws IOException {
+        if (uri.equals("/400.html")) {
+            return response.respond(uri, HttpStatus.BAD_REQUEST);
+        }
         if (uri.equals("/401.html")) {
             return response.respond(uri, HttpStatus.UNAUTHORIZED);
         }

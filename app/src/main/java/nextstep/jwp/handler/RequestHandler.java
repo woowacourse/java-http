@@ -75,7 +75,7 @@ public class RequestHandler implements Runnable {
             HttpResponse httpResponse = new HttpResponse("HTTP/1.1");
             httpResponse.notFound("/404.html");
             return httpResponse.makeHttpMessage();
-            
+
         } catch (IOException e) {
             log.error("[ERROR] Exception reading socket", e);
             HttpResponse httpResponse = new HttpResponse("HTTP/1.1");
@@ -88,7 +88,7 @@ public class RequestHandler implements Runnable {
         try {
             connection.close();
         } catch (IOException e) {
-            log.error("Exception closing socket", e);
+            log.error("[ERROR] Exception closing socket", e);
         }
     }
 }

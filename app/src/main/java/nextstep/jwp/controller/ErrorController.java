@@ -5,8 +5,6 @@ import java.net.URISyntaxException;
 
 import nextstep.jwp.handler.request.HttpRequest;
 import nextstep.jwp.handler.response.HttpResponse;
-import nextstep.jwp.util.File;
-import nextstep.jwp.util.FileReader;
 
 public class ErrorController extends AbstractController {
 

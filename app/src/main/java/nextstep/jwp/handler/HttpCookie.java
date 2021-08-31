@@ -20,7 +20,7 @@ public class HttpCookie {
             return cookieMap.get(name);
         }
 
-        throw new NoSuchElementException( "[" + name + "]을/를 name으로 가지는 Cookie가 존재하지 않습니다.");
+        throw new NoSuchElementException("[" + name + "]을/를 name으로 가지는 Cookie가 존재하지 않습니다.");
     }
 
     public void setCookie(Cookie cookie) {

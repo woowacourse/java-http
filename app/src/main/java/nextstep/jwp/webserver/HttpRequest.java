@@ -1,8 +1,10 @@
 package nextstep.jwp.webserver;
 
-import java.util.Arrays;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 public class HttpRequest {
 
@@ -12,26 +14,24 @@ public class HttpRequest {
     private FormBody body = FormBody.emptyBody();
     private String uri;
 
-    public HttpRequest(String requestString) {
-        parseRequest(requestString);
+    public HttpRequest(BufferedReader bufferedReader) {
+        parseRequest(bufferedReader);
     }
 
-    private void parseRequest(String request) {
-        String[] headerBody = request.split("\r\n\r\n");
-        String header = headerBody[0];
-
-        List<String> headerLines = header.lines().collect(Collectors.toList());
-
-        String requestLine = headerLines.get(0);
-        parseRequestLine(requestLine);
-        initHeaders(headerLines);
-        initBody(headerBody);
+    private void parseRequest(BufferedReader bufferedReader) {
+        try {
+            parseRequestLine(bufferedReader.readLine());
+            initHeaders(bufferedReader);
+            initBody(bufferedReader);
+        } catch (IOException e) {
+            throw new RuntimeException("잘못된 요청 형식");
+        }
     }
 
     private void parseRequestLine(String requestLine) {
-        List<String> tokens = Arrays.asList(requestLine.split(" "));
-        httpMethod = HttpMethod.from(tokens.get(0));
-        parsePath(tokens.get(1));
+        String[] tokens = requestLine.split(" ");
+        httpMethod = HttpMethod.from(tokens[0]);
+        parsePath(tokens[1]);
     }
 
     private void parsePath(String uriPath) {
@@ -49,17 +49,25 @@ public class HttpRequest {
         queryParams = new QueryParams(splitUri[1]);
     }
 
-    private void initHeaders(List<String> headerLines) {
-        httpHeaders = new HttpHeaders(
-                headerLines.subList(1, headerLines.size()));
+    private void initHeaders(BufferedReader br) throws IOException {
+        List<String> lines = new ArrayList<>();
+        for (String line = br.readLine(); !"".equals(line); line = br.readLine()) {
+            lines.add(line);
+        }
+
+        httpHeaders = new HttpHeaders(lines);
     }
 
-    private void initBody(String[] headerBody) {
-        if (headerBody.length < 2) {
-            return;
+    private void initBody(BufferedReader bufferedReader) throws IOException {
+        if (httpMethod == HttpMethod.POST && httpHeaders.contains("Content-Length")) {
+            int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
+            char[] buffer = new char[contentLength];
+            int read = bufferedReader.read(buffer, 0, contentLength);
+            if (read == -1) {
+                return;
+            }
+            this.body = new FormBody(new String(buffer));
         }
-        String bodyString = headerBody[1];
-        body = new FormBody(bodyString);
     }
 
     public String getUri() {
@@ -79,6 +87,10 @@ public class HttpRequest {
     }
 
     public String getBody(String name) {
-        return body.get(name);
+        String value = body.get(name);
+        if (Objects.isNull(value)) {
+            throw new RuntimeException("body 없음");
+        }
+        return value;
     }
 }

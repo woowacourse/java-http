@@ -26,8 +26,6 @@ public class WebServer {
             handle(serverSocket);
         } catch (IOException exception) {
             logger.error("Exception accepting connection", exception);
-        } catch (RuntimeException exception) {
-            logger.error("Unexpected error", exception);
         }
     }
 

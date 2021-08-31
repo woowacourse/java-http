@@ -7,8 +7,6 @@ import java.util.stream.Collectors;
 
 public class HttpHeaders {
 
-    public static final HttpHeaders EMPTY_HEADERS = new HttpHeaders(new HashMap<>());
-
     private final Map<String, String> headers;
 
     public HttpHeaders(Map<String, String> headers) {
@@ -52,5 +50,9 @@ public class HttpHeaders {
 
     private String headerToString(String name) {
         return name + ": " + headers.get(name);
+    }
+
+    public boolean contains(String header) {
+        return headers.containsKey(header);
     }
 }

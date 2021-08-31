@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
-    private static long autoIncrementValue = 1;
+    private static long seq = 0L;
 
     static {
         final User user = new User("gugu", "password", "hkkang@woowahan.com");
@@ -18,9 +18,10 @@ public class InMemoryUserRepository {
     }
 
     public static void save(User user) {
-        user.setId(autoIncrementValue);
+        if (user.getId() == 0) {
+            user.setId(++seq);
+        }
         database.put(user.getAccount(), user);
-        autoIncrementValue++;
     }
 
     public static Optional<User> findByAccount(String account) {

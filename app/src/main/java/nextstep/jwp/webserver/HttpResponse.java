@@ -9,20 +9,24 @@ public class HttpResponse {
     public HttpResponse() {
     }
 
-    public HttpResponse(StatusCode statusCode, HttpHeaders headers, String body) {
-        this.statusCode = statusCode;
-        this.headers = headers;
-        this.body = body;
-    }
+    public static void errorPage(BaseException baseException, HttpResponse response) {
+        String body = readErrorPage(baseException);
 
-    public static HttpResponse ok(String body) {
-        return new HttpResponse(StatusCode._200_OK, HttpHeaders.EMPTY_HEADERS, body);
-    }
-
-    public static HttpResponse redirect(String redirectUrl) {
         HttpHeaders headers = new HttpHeaders();
-        headers.set("Location", redirectUrl);
-        return new HttpResponse(StatusCode._302_FOUND, headers, "");
+        headers.set("Content-Type", "text/html;charset=utf-8");
+        response.setHeaders(headers);
+        response.setStatusCode(StatusCode._302_FOUND);
+        response.setBody(body);
+    }
+
+    private static String readErrorPage(BaseException baseException) {
+        if (baseException.getStatusCode() == 401) {
+            return FileReader.readStaticFile("401.html");
+        }
+        if (baseException.getStatusCode() == 404) {
+            return FileReader.readStaticFile("404.html");
+        }
+        return FileReader.readStaticFile("500.html");
     }
 
     private void setDefaultHeaders() {

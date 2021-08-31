@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,8 +30,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expectedBody = getResponseBody("static/index.html");
         String expected = String.join("\r\n",
                 "HTTP/1.1 200 Ok",
                 "Content-Length: " + expectedBody.getBytes().length,
@@ -85,8 +85,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/register.html");
-        String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expectedBody = getResponseBody("static/register.html");
         String expected = String.join("\r\n",
                 "HTTP/1.1 200 Ok",
                 "Content-Length: " + expectedBody.getBytes().length,
@@ -142,14 +141,19 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expectedBody = getResponseBody("static/css/styles.css");
         String expected = String.join("\r\n",
                 "HTTP/1.1 200 Ok",
                 "Content-Length: " + expectedBody.getBytes().length,
                 "Content-Type: text/css;charset=utf-8",
                 "",
-                "");
-        assertThat(socket.output()).startsWith(expected);
+                expectedBody);
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private String getResponseBody(String path) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource(path);
+        return new String(Files.readAllBytes(
+                new File(Objects.requireNonNull(resource).getFile()).toPath()));
     }
 }

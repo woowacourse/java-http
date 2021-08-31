@@ -6,8 +6,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class RequestHandler implements Runnable {
@@ -25,14 +23,20 @@ public class RequestHandler implements Runnable {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
+             final OutputStream outputStream = connection.getOutputStream();
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            String requestString = readInputStream(inputStream);
-            HttpRequest httpRequest = new HttpRequest(requestString);
+            HttpRequest httpRequest;
             HttpResponse httpResponse = new HttpResponse();
 
-            Controller controller = getController(httpRequest);
-            controller.service(httpRequest, httpResponse);
+            try {
+                httpRequest = getHttpRequest(bufferedReader);
+                Controller controller = getController(httpRequest);
+                controller.service(httpRequest, httpResponse);
+            } catch (BaseException baseException) {
+                HttpResponse.errorPage(baseException, httpResponse);
+                log.error("BaseException", baseException);
+            }
 
             outputStream.write(httpResponse.toBytes());
             outputStream.flush();
@@ -45,21 +49,8 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private String readInputStream(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-
-        String line;
-        List<String> lines = new ArrayList<>();
-        while (reader.ready()) {
-            line = reader.readLine();
-            if (line == null) {
-                break;
-            }
-
-            lines.add(line);
-        }
-
-        return String.join("\r\n", lines);
+    private HttpRequest getHttpRequest(BufferedReader bufferedReader) throws IOException {
+        return new HttpRequest(bufferedReader);
     }
 
     private Controller getController(HttpRequest httpRequest) {

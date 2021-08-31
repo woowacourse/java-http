@@ -1,18 +1,14 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.request;
+
+import nextstep.jwp.http.HttpMethod;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class HttpRequest {
-    public static final String QUERY_STRING_DELIMITER = "&";
-    public static final String QUERY_KEY_VALUE_DELIMITER = "=";
-    public static final int KEY_INDEX = 0;
-    public static final int VALUE_INDEX = 1;
-
     private final HttpRequestHeader header;
     private final HttpRequestBody body;
 
@@ -57,11 +53,11 @@ public class HttpRequest {
     }
 
     public boolean isGet() {
-        return HttpMethod.isGet(getHttpMethod());
+        return getHttpMethod().isGet();
     }
 
-    public String getHttpMethod() {
-        return header.getHttpMethod().toUpperCase();
+    public HttpMethod getHttpMethod() {
+        return header.getHttpMethod();
     }
 
     public String getPath() {

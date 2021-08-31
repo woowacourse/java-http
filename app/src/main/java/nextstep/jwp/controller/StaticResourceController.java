@@ -1,13 +1,15 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.http.*;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.HttpResponse;
 
 public class StaticResourceController extends Controller {
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
-        final String httpMethod = httpRequest.getHttpMethod();
+        final HttpMethod httpMethod = httpRequest.getHttpMethod();
         final String path = httpRequest.getPath();
-        return HttpMethod.isGet(httpMethod) && isStaticFileRequest(path);
+        return httpMethod.isGet() && isStaticFileRequest(path);
     }
 
     private boolean isStaticFileRequest(String path) {

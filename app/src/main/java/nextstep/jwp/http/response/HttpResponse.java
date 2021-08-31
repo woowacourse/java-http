@@ -1,4 +1,7 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.response;
+
+import nextstep.jwp.http.ContentType;
+import nextstep.jwp.http.HttpStatus;
 
 public class HttpResponse {
     private static final String OK_RESPONSE_FORMAT =

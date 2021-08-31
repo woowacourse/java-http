@@ -2,19 +2,22 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestBody;
+import nextstep.jwp.http.request.RequestHeaders;
 import nextstep.jwp.http.request.RequestLine;
 import nextstep.jwp.http.response.ContentType;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.model.User;
 import nextstep.jwp.service.LoginService;
 import nextstep.jwp.staticresource.StaticResource;
 import nextstep.jwp.staticresource.StaticResourceFinder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.mock;
 
 @DisplayName("LoginController 테스트")
@@ -29,7 +32,8 @@ class LoginControllerTest {
     void getLogin() {
         //given
         final RequestLine requestLine = new RequestLine("GET /login HTTP/1.1");
-        final HttpRequest request = new HttpRequest(requestLine, null, null);
+        final RequestHeaders headers = new RequestHeaders(new HashMap<>());
+        final HttpRequest request = new HttpRequest(requestLine, headers, null);
         final HttpResponse response = new HttpResponse();
         final StaticResource staticResource = new StaticResource(ContentType.HTML, "content");
 
@@ -47,11 +51,13 @@ class LoginControllerTest {
     void postLogin() {
         //given
         final RequestLine requestLine = new RequestLine("POST /login HTTP/1.1");
+        final RequestHeaders headers = new RequestHeaders(new HashMap<>());
         final RequestBody requestBody = new RequestBody("account=inbi&password=1234");
-        final HttpRequest request = new HttpRequest(requestLine, null, requestBody);
+        final User user = new User(1L, "inbi", "1234", "inbi@email.com");
+        final HttpRequest request = new HttpRequest(requestLine, headers, requestBody);
         final HttpResponse response = new HttpResponse();
 
-        willDoNothing().given(loginService).login(any(String.class), any(String.class));
+        willReturn(user).given(loginService).login(any(String.class), any(String.class));
 
         //when
         loginController.service(request, response);

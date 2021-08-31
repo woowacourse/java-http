@@ -34,7 +34,7 @@ public class WebServer {
     }
 
     private void handle(ServerSocket serverSocket) throws IOException {
-        ExecutorService service = Executors.newFixedThreadPool(100);
+        ExecutorService service = Executors.newFixedThreadPool(25);
 
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {

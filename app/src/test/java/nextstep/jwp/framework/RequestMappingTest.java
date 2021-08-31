@@ -21,7 +21,7 @@ class RequestMappingTest {
     void createDefaultController() {
         //given
         RequestMapping requestMapping = RequestMapping.create();
-        HttpRequestLine httpRequestLine = new HttpRequestLine(HttpMethod.GET, new HttpPath("/index.html"), new ProtocolVersion("HTTP/1.1"));
+        HttpRequestLine httpRequestLine = new HttpRequestLine(HttpMethod.GET, new HttpPath("/static/index.html"), new ProtocolVersion("HTTP/1.1"));
 
         //when
         Controller controller = requestMapping.getController(new HttpRequest(httpRequestLine, null, null));

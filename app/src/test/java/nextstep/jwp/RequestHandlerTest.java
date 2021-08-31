@@ -19,7 +19,7 @@ class RequestHandlerTest {
         // given
         final MockSocket socket = new MockSocket();
         final RequestHandler requestHandler = new RequestHandler(socket);
-        final Path path = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("404.html")).getPath()).toPath();
+        final Path path = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("static/404.html")).getPath()).toPath();
         final String htmlValue = Files.readString(path);
 
         // when

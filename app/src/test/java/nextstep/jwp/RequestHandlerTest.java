@@ -9,6 +9,7 @@ import java.util.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import nextstep.jwp.exception.handler.DefaultFileNotFoundException;
 import nextstep.jwp.handler.HttpSessions;
 import nextstep.jwp.handler.RequestHandler;
 import nextstep.jwp.handler.constant.HttpMethod;
@@ -16,6 +17,7 @@ import nextstep.jwp.handler.constant.HttpStatus;
 import nextstep.jwp.model.User;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RequestHandlerTest {
 
@@ -321,6 +323,49 @@ class RequestHandlerTest {
         HTTP_Response_body가_일치하는지_확인(httpResponse, content);
     }
 
+    @DisplayName("Controller에 매핑되어 있지 않은 URL로 접근할 때 404 Error 반환")
+    @Test
+    void controller_not_mapped_url() throws IOException {
+        // given
+        List<String> headers = new ArrayList<>();
+        final String httpRequest = mockRequest(HttpMethod.GET, "/logout", headers, "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        String httpResponse = socket.output();
+
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        String content = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        List<String> expectedHeaders = Arrays.asList(
+                "Content-Length: " + content.getBytes().length + " ",
+                "Location: /404.html ",
+                "Content-Type: text/html;charset=utf-8 "
+        );
+
+        HTTP_Response_start_line_형식을_준수하는지_확인(httpResponse, HttpStatus.NOT_FOUND);
+        HTTP_Response_header가_원하는_header를_포함하는지_확인(httpResponse, expectedHeaders);
+        HTTP_Response_body가_일치하는지_확인(httpResponse, content);
+    }
+
+    @DisplayName("HTTP Request Start Line 형식에 맞지 않는 경우 400 Error 발생하지만 400.html이 존재하지 않아 DefaultFileNotExist 에러 발")
+    @Test
+    void http_start_line_error() throws IOException {
+        // given
+        List<String> headers = new ArrayList<>();
+        final String httpRequest = invalidMockRequest(HttpMethod.GET, "/login", headers, "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // then
+        assertThatThrownBy(requestHandler::run).isInstanceOf(DefaultFileNotFoundException.class);
+    }
+
     String mockRequest(HttpMethod method, String uri, List<String> headers, String body) {
         List<String> defaultHeader = new ArrayList<>(Arrays.asList("Host: localhost:8080", "Connection: keep-alive"));
         defaultHeader.addAll(headers);
@@ -330,6 +375,21 @@ class RequestHandlerTest {
 
         return String.join("\r\n",
                 method.getMethodName() + " " + uri + " " + "HTTP/1.1 ",
+                header + " ",
+                "",
+                body
+        );
+    }
+
+    String invalidMockRequest(HttpMethod method, String uri, List<String> headers, String body) {
+        List<String> defaultHeader = new ArrayList<>(Arrays.asList("Host: localhost:8080", "Connection: keep-alive"));
+        defaultHeader.addAll(headers);
+
+        headers.addAll(defaultHeader);
+        String header = String.join(" \r\n", headers);
+
+        return String.join("\r\n",
+                method.getMethodName() + " " + "HTTP/1.1 ",
                 header + " ",
                 "",
                 body

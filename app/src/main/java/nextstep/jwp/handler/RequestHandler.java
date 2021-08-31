@@ -44,6 +44,7 @@ public class RequestHandler implements Runnable {
             bufferedWriter.flush();
         } catch (DefaultFileNotFoundException e) {
             log.error(ERROR_PREFIX, e);
+            throw e;
         } catch (IOException e) {
             log.error(ERROR_PREFIX + "Exception In Stream", e);
         } catch (Exception e) {

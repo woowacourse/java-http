@@ -10,6 +10,15 @@ import java.util.Optional;
 
 public class UserService {
 
+    private static final UserService USER_SERVICE = new UserService();
+
+    private UserService() {
+    }
+
+    public static UserService getUserService() {
+        return USER_SERVICE;
+    }
+
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     public void login(HttpRequest request) {

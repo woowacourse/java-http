@@ -8,6 +8,14 @@ import org.slf4j.LoggerFactory;
 public class DefaultController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(DefaultController.class);
+    private static final DefaultController DEFAULT_CONTROLLER = new DefaultController();
+
+    private DefaultController(){
+    }
+
+    public static DefaultController getInstance() {
+        return DEFAULT_CONTROLLER;
+    }
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {

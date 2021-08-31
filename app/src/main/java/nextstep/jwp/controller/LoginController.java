@@ -6,14 +6,28 @@ import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
+
 public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static LoginController loginController = null;
 
     private final UserService userService;
 
-    public LoginController(UserService userService) {
+    private LoginController(UserService userService) {
         this.userService = userService;
+    }
+
+    public static void createInstance(UserService userService) {
+        if (Objects.isNull(loginController)) {
+            loginController = new LoginController(userService);
+        }
+    }
+
+    public static LoginController getInstance() {
+        assert (loginController != null) : "생성된 객체가 없습니다.";
+        return loginController;
     }
 
     @Override

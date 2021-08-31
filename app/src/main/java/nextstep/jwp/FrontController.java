@@ -1,16 +1,13 @@
 package nextstep.jwp;
 
-import nextstep.jwp.controller.*;
+import nextstep.jwp.controller.Controller;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 public class FrontController implements Runnable {
@@ -18,13 +15,9 @@ public class FrontController implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(FrontController.class);
 
     private final Socket connection;
-    private final Map<String, Controller> controllerMap = new HashMap<>();
 
     public FrontController(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
-        controllerMap.put("/", new IndexController());
-        controllerMap.put("/login", new LoginController(new UserService()));
-        controllerMap.put("/register", new RegisterController(new UserService()));
     }
 
     @Override
@@ -39,7 +32,7 @@ public class FrontController implements Runnable {
             HttpResponse response = new HttpResponse();
 
             String uri = request.getPath();
-            Controller controller = controllerMap.getOrDefault(uri, new DefaultController());
+            Controller controller = RequestMapping.getController(uri);
             controller.process(request, response);
 
             response.write(outputStream);

@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package nextstep.jwp.model.user.domain;
 
 public class User {
 
@@ -6,6 +6,10 @@ public class User {
     private final String account;
     private final String password;
     private final String email;
+
+    public User(String account, String password, String email) {
+        this(0L, account, password, email);
+    }
 
     public User(long id, String account, String password, String email) {
         this.id = id;
@@ -20,6 +24,14 @@ public class User {
 
     public String getAccount() {
         return account;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getEmail() {
+        return email;
     }
 
     @Override

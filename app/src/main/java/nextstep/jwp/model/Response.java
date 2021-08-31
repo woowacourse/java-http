@@ -8,6 +8,13 @@ public class Response {
             "Content-Length: %d ",
             "",
             "%s");
+    private static final String STATIC_FILE_MESSAGE_FORMAT_WITH_COOKIE = String.join("\r\n",
+            "HTTP/1.1 %s %s ",
+            "Content-Type: %s ",
+            "Content-Length: %d ",
+            "Set-Cookie: %s",
+            "",
+            "%s");
     private static final String REDIRECT_MESSAGE_FORMAT = String.join("\r\n",
             "HTTP/1.1 %s %s ",
             "Location: %s ",
@@ -19,8 +26,10 @@ public class Response {
     private final String contentType;
     private final String body;
     private final String location;
+    private final Request request;
     private final int contentLength;
     private final boolean redirect;
+    private final boolean setCookie;
 
     public static class Builder {
 
@@ -29,8 +38,17 @@ public class Response {
         private String contentType;
         private String body;
         private String location;
+        private Request request;
         private int contentLength;
         private boolean redirect;
+        private boolean setCookie = true;
+
+        public Builder(Request request) {
+            if (request.hasCookieHeader()) {
+                setCookie = false;
+            }
+            this.request = request;
+        }
 
         public Builder statusCode(String statusCode) {
             this.statusCode = statusCode;
@@ -80,6 +98,8 @@ public class Response {
         this.body = builder.body;
         this.redirect = builder.redirect;
         this.location = builder.location;
+        this.setCookie = builder.setCookie;
+        this.request = builder.request;
     }
 
     public byte[] getBytes() {
@@ -88,6 +108,16 @@ public class Response {
                             statusCode,
                             statusText,
                             location)
+                    .getBytes();
+        }
+        if (setCookie) {
+            return String.format(STATIC_FILE_MESSAGE_FORMAT_WITH_COOKIE,
+                            statusCode,
+                            statusText,
+                            contentType,
+                            contentLength,
+                            "JSESSIONID=" + request.getSession().getId(),
+                            body)
                     .getBytes();
         }
         return String.format(STATIC_FILE_MESSAGE_FORMAT,

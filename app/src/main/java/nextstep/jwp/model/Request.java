@@ -1,6 +1,7 @@
 package nextstep.jwp.model;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class Request {
 
@@ -8,6 +9,7 @@ public class Request {
     private RequestPath requestPath;
     private Map<String, String> requestHeaders;
     private RequestBody requestBody;
+    private Session session;
 
     public Request(String requestMethod, Map<String, String> requestHeaders,
                    RequestPath requestPath, RequestBody requestBody) {
@@ -15,6 +17,12 @@ public class Request {
         this.requestHeaders = requestHeaders;
         this.requestPath = requestPath;
         this.requestBody = requestBody;
+        this.session = initializeSession();
+    }
+
+    private Session initializeSession() {
+        String id = initializeSessionId();
+        return Sessions.getSession(id);
     }
 
     public String getRequestMethod() {
@@ -23,6 +31,21 @@ public class Request {
 
     public RequestBody getRequestBody() {
         return requestBody;
+    }
+
+    public boolean hasCookieHeader() {
+        return requestHeaders.containsKey("Cookie");
+    }
+
+    public Session getSession() {
+        return session;
+    }
+
+    private String initializeSessionId() {
+        if (requestHeaders.containsKey("Cookie")) {
+            return new Cookie(requestHeaders.get("Cookie")).getSessionId();
+        }
+        return UUID.randomUUID().toString();
     }
 
     public boolean isPath(PathType pathType) {

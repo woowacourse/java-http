@@ -23,9 +23,9 @@ public abstract class AbstractHandler implements Handler {
             }
             return postMessage(request);
         } catch (FileNotFoundException exception) {
-            return redirectMessage(PathType.NOT_FOUND.resource());
+            return redirectMessage(request, PathType.NOT_FOUND.resource());
         } catch (LoginException | RegisterException exception) {
-            return redirectMessage(PathType.UNAUTHORIZED.resource());
+            return redirectMessage(request, PathType.UNAUTHORIZED.resource());
         }
     }
 
@@ -37,8 +37,8 @@ public abstract class AbstractHandler implements Handler {
         throw new IllegalStateException();
     }
 
-    protected Response staticFileMessage(FileType fileType, String responseBody) {
-        return new Response.Builder()
+    protected Response staticFileMessage(Request request, FileType fileType, String responseBody) {
+        return new Response.Builder(request)
                 .statusCode("200")
                 .statusText("OK")
                 .contentType(fileType.contentType())
@@ -47,8 +47,8 @@ public abstract class AbstractHandler implements Handler {
                 .build();
     }
 
-    protected Response redirectMessage(String location) {
-        return new Response.Builder()
+    protected Response redirectMessage(Request request, String location) {
+        return new Response.Builder(request)
                 .redirect(true)
                 .statusCode("302")
                 .statusText("FOUND")

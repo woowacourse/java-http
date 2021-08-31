@@ -19,6 +19,7 @@ class RequestHandlerTest {
         final String httpRequest = String.join("\r\n",
                 "GET / HTTP/1.1",
                 "Host: localhost:8080",
+                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
                 "",
                 "");
 
@@ -42,6 +43,7 @@ class RequestHandlerTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
                 "",
                 "");
 
@@ -66,6 +68,7 @@ class RequestHandlerTest {
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
                 "",
                 "");
 
@@ -90,6 +93,7 @@ class RequestHandlerTest {
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
                 "",
                 "");
 
@@ -111,6 +115,7 @@ class RequestHandlerTest {
                 "GET /login?account=gugu&password=notpassword HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
                 "",
                 "");
 
@@ -134,6 +139,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: " + requestBody.getBytes().length + " ",
+                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
                 "",
                 requestBody);
 
@@ -157,6 +163,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: " + requestBody.getBytes().length + " ",
+                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
                 "",
                 requestBody);
 
@@ -178,6 +185,7 @@ class RequestHandlerTest {
                 "GET /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
                 "",
                 "");
 
@@ -204,6 +212,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: " + requestBody.getBytes().length + " ",
+                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
                 "",
                 requestBody);
 
@@ -232,6 +241,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: " + requestBody.getBytes().length + " ",
+                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
                 "",
                 requestBody);
 
@@ -255,6 +265,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: " + requestBody.getBytes().length + " ",
+                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
                 "",
                 requestBody);
 
@@ -277,6 +288,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Accept: text/css,*/*;q=0.1",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
                 "",
                 "");
 
@@ -302,6 +314,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Accept: */*",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
                 "",
                 "");
 
@@ -327,6 +340,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Accept: */*",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
                 "",
                 "");
 
@@ -352,6 +366,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Accept: */*",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
                 "",
                 "");
 
@@ -364,6 +379,29 @@ class RequestHandlerTest {
                 "\r\n" +
                 "";
         assertThat(output).isEqualTo(expected);
+    }
+
+    @Test
+    void cookie() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        // when
+        String output = runRequestHandler(httpRequest);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "Set-Cookie: JSESSIONID=";
+        assertThat(output).startsWith(expected);
     }
 
     private String runRequestHandler(String httpRequest) {

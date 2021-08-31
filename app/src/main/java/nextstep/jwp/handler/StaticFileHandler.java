@@ -9,6 +9,6 @@ public class StaticFileHandler extends AbstractHandler {
     @Override
     public Response getMessage(Request request) throws IOException {
         final String responseBody = fileByPath(request.path());
-        return staticFileMessage(request.fileType(), responseBody);
+        return staticFileMessage(request, request.fileType(), responseBody);
     }
 }

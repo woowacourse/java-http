@@ -10,6 +10,6 @@ public class BaseHandler extends AbstractHandler {
 
     @Override
     public Response getMessage(Request request) {
-        return staticFileMessage(FileType.HTML, BASE_RESPONSE_BODY);
+        return staticFileMessage(request, FileType.HTML, BASE_RESPONSE_BODY);
     }
 }

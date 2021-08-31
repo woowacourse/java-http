@@ -22,7 +22,7 @@ public class LoginController extends AbstractController {
         response.setStatus(HttpStatus.OK);
         request.getSession()
             .ifPresentOrElse(
-                (session) -> {
+                session -> {
                     if (!Objects.isNull(session.getAttribute("user"))) {
                         String htmlOfIndex = fileReaderInStaticFolder.read("index.html");
                         response.setBody(htmlOfIndex);
@@ -53,8 +53,9 @@ public class LoginController extends AbstractController {
         if (user.checkPassword(password)) {
             response.setStatus(HttpStatus.FOUND);
             response.putHeader("Location", "/index.html");
+
             Optional<HttpSession> sessionPossible = request.getSession();
-            HttpSession session = sessionPossible.get();
+            HttpSession session = sessionPossible.orElseThrow(() -> new CustomException("세션이 존재하지 않습니다."));
             session.setAttribute("user", user);
             return;
         }

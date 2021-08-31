@@ -46,9 +46,7 @@ public class HttpResponse {
 
     private String getCookieAsString() {
         List<String> cookiesAsString = new ArrayList<>();
-        cookies.forEach((key, value) -> {
-            cookiesAsString.add(key + "=" + value);
-        });
+        cookies.forEach((key, value) -> cookiesAsString.add(key + "=" + value));
         return String.join("; ", cookiesAsString);
     }
 

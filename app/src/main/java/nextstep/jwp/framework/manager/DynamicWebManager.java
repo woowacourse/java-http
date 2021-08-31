@@ -30,13 +30,12 @@ public class DynamicWebManager {
     }
 
     private void initializeControllers() {
-        log.info("*******loading annotated controllers*******");
         Reflections reflections = new Reflections("nextstep.jwp.application");
         final Set<Class<?>> annotatedControllers = reflections.getTypesAnnotatedWith(Controller.class);
         for (Class<?> controller : annotatedControllers) {
             registerController(controller);
         }
-        log.info("*******annotated contollers loaded*******");
+        log.info("########## annotated contollers loaded ##########");
     }
 
     private void registerController(Class<?> controller) {
@@ -50,7 +49,6 @@ public class DynamicWebManager {
     }
 
     private void loadControllerHandler() {
-        log.info("*******loading controller handlers*******");
         for (Object controller : controllers) {
             final Class<?> controllerClass = controller.getClass();
             final Method[] methods = controllerClass.getMethods();
@@ -58,7 +56,7 @@ public class DynamicWebManager {
                 registerHandler(controller, method);
             }
         }
-        log.info("*******controller handlers loaded*******");
+        log.info("########## controller handlers loaded ##########");
     }
 
     private void registerHandler(Object controller, Method method) {

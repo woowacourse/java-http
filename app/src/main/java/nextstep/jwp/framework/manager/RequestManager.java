@@ -42,7 +42,7 @@ public class RequestManager {
 
             return staticResourceManager.handleNotFound();
         } catch (Exception e) {
-            log.error("@@@@@@@internal server error occurred! = {}@@@@@@@", e.getMessage());
+            log.error("########## internal server error occurred! = {} ##########", e.getMessage());
             return staticResourceManager.handleInternalServerError();
         }
     }

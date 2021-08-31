@@ -21,7 +21,7 @@ public class UserService {
         final Optional<User> user = userRepository.findByAccount(account);
         if (user.isEmpty()) {
             log.info("존재하지 않는 계정에 대한 로그인 요청 = {}", account);
-            throw new IllegalArgumentException("없는 사용자 입니다.");
+            return false;
         }
 
         User loginUser = user.get();

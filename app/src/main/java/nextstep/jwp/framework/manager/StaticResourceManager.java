@@ -36,7 +36,6 @@ public class StaticResourceManager {
     private final File internalServerErrorFile;
 
     public StaticResourceManager() {
-        log.info("-------loading static resources-------");
         final ClassLoader classLoader = getClass().getClassLoader();
         this.notFoundFile = new File(Objects.requireNonNull(classLoader.getResource(NOT_FOUND_FILE_PATH)).getFile());
         this.internalServerErrorFile = new File(Objects.requireNonNull(classLoader.getResource(INTERNAL_SERVER_ERROR_FILE_PATH)).getFile());
@@ -46,7 +45,7 @@ public class StaticResourceManager {
         } catch (IOException | URISyntaxException e) {
             throw new IllegalStateException("StaticResourceManager 생성 실패!");
         }
-        log.info("-------all static resources loaded-------");
+        log.info("########## all static resources loaded ##########");
     }
 
     private void loadStaticResources(ClassLoader classLoader) throws IOException, URISyntaxException {

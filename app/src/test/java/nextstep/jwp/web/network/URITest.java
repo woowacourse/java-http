@@ -32,6 +32,19 @@ class URITest {
         assertThat(path).isEqualTo("/login");
     }
 
+    @DisplayName("URI에 query가 존재해도 path를 추출할 수 있다 - 성공")
+    @Test
+    void getPathWhenQueryExists() {
+        // given
+        final URI uri = new URI("/login?account=gugu&password=password");
+
+        // when
+        final String path = uri.getPath();
+
+        // then
+        assertThat(path).isEqualTo("/login");
+    }
+
     @DisplayName("URI에서 query를 추출한다 - 성공")
     @Test
     void hasQuery() {
@@ -43,5 +56,16 @@ class URITest {
 
         // then
         assertThat(query).isEqualTo("account=gugu&password=password");
+    }
+
+    @DisplayName("URI는 동등성을 보장한다 - 성공")
+    @Test
+    void equals() {
+        // given
+        final URI firstURI = new URI("/index.html");
+        final URI secondURI = new URI("/index.html");
+
+        // when // then
+        assertThat(firstURI).isEqualTo(secondURI);
     }
 }

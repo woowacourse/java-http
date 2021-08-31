@@ -1,4 +1,4 @@
-package nextstep.jwp.framework.request;
+package nextstep.jwp.framework.request.details;
 
 import nextstep.jwp.framework.request.util.QueryParameterExtractor;
 

@@ -1,5 +1,6 @@
 package nextstep.jwp.framework.request;
 
+import nextstep.jwp.framework.request.details.QueryParameter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

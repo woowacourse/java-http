@@ -4,8 +4,8 @@ import nextstep.jwp.framework.manager.annotation.Controller;
 import nextstep.jwp.framework.manager.annotation.GetMapping;
 import nextstep.jwp.framework.manager.annotation.PostMapping;
 import nextstep.jwp.framework.manager.annotation.RequestParameter;
-import nextstep.jwp.framework.request.ClientRequest;
-import nextstep.jwp.framework.request.HttpMethod;
+import nextstep.jwp.framework.request.HttpRequest;
+import nextstep.jwp.framework.request.details.HttpMethod;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +22,7 @@ public class DynamicWebManager {
     private static final Logger log = LoggerFactory.getLogger(DynamicWebManager.class);
 
     private final Set<Object> controllers = new HashSet<>();
-    private final Map<ClientRequest, Map<Object, Method>> dynamicWebHandler = new HashMap<>();
+    private final Map<HttpRequest, Map<Object, Method>> dynamicWebHandler = new HashMap<>();
 
     public DynamicWebManager() {
         initializeControllers();
@@ -70,7 +70,7 @@ public class DynamicWebManager {
         final GetMapping getMapping = method.getAnnotation(GetMapping.class);
         if (!Objects.isNull(getMapping)) {
             final String requestUrl = getMapping.value();
-            dynamicWebHandler.put(ClientRequest.of(HttpMethod.GET, requestUrl), Collections.singletonMap(controller, method));
+            dynamicWebHandler.put(HttpRequest.of(HttpMethod.GET, requestUrl), Collections.singletonMap(controller, method));
         }
     }
 
@@ -78,19 +78,19 @@ public class DynamicWebManager {
         final PostMapping postMapping = method.getAnnotation(PostMapping.class);
         if (!Objects.isNull(postMapping)) {
             final String requestUrl = postMapping.value();
-            dynamicWebHandler.put(ClientRequest.of(HttpMethod.POST, requestUrl), Collections.singletonMap(controller, method));
+            dynamicWebHandler.put(HttpRequest.of(HttpMethod.POST, requestUrl), Collections.singletonMap(controller, method));
         }
     }
 
-    public boolean canHandle(ClientRequest clientRequest) {
-        return dynamicWebHandler.containsKey(clientRequest);
+    public boolean canHandle(HttpRequest httpRequest) {
+        return dynamicWebHandler.containsKey(httpRequest);
     }
 
-    public String handle(ClientRequest clientRequest) {
-        final Map<Object, Method> handler = dynamicWebHandler.get(clientRequest);
+    public String handle(HttpRequest httpRequest) {
+        final Map<Object, Method> handler = dynamicWebHandler.get(httpRequest);
         final Object controller = handler.keySet().iterator().next();
         final Method method = handler.get(controller);
-        final List<String> methodParameters = mapMethodParameters(clientRequest, method);
+        final List<String> methodParameters = mapMethodParameters(httpRequest, method);
 
         try {
             final Object result = method.invoke(controller, methodParameters.toArray(new String[0]));
@@ -100,13 +100,13 @@ public class DynamicWebManager {
         }
     }
 
-    private List<String> mapMethodParameters(ClientRequest clientRequest, Method method) {
+    private List<String> mapMethodParameters(HttpRequest httpRequest, Method method) {
         final Parameter[] parameters = method.getParameters();
         return Arrays.stream(parameters)
                 .map(parameter -> parameter.getAnnotation(RequestParameter.class))
                 .filter(requestParameter -> !Objects.isNull(requestParameter))
                 .map(RequestParameter::value)
-                .map(clientRequest::searchRequestBody)
+                .map(httpRequest::searchRequestBody)
                 .collect(Collectors.toList());
     }
 }

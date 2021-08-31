@@ -1,6 +1,6 @@
-package nextstep.jwp.framework.response;
+package nextstep.jwp.framework.response.details;
 
-public enum HttpStatusCode {
+public enum Status {
 
     OK(200, "OK"),
     FOUND(302, "FOUND"),
@@ -8,18 +8,18 @@ public enum HttpStatusCode {
     INTERNAL_SERVER_ERROR(500, "INTERNAL SERVER ERROR");
 
     private final int statusCode;
-    private final String statusText;
+    private final String statusMessage;
 
-    HttpStatusCode(int statusCode, String statusText) {
+    Status(int statusCode, String statusMessage) {
         this.statusCode = statusCode;
-        this.statusText = statusText;
+        this.statusMessage = statusMessage;
     }
 
     public int getStatusCode() {
         return statusCode;
     }
 
-    public String getStatusText() {
-        return statusText;
+    public String getStatusMessage() {
+        return statusMessage;
     }
 }

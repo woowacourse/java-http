@@ -122,4 +122,34 @@ class RequestHandlerTest {
         );
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void css() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1",
+                "Host: localhost:8080",
+                "Accept: text/css,*/*;q=0.1",
+                "Connection: keep-alive",
+                "Content-Type: text/css;charset=utf-8",
+                "",
+                "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        String expectedBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = String.join("\r\n",
+                "HTTP/1.1 200 Ok",
+                "Content-Length: " + expectedBody.getBytes().length,
+                "Content-Type: text/css;charset=utf-8",
+                "",
+                expectedBody);
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

@@ -51,7 +51,7 @@ public class HttpRequest {
 
     private void initHeaders(List<String> headerLines) {
         httpHeaders = new HttpHeaders(
-                headerLines.subList(1, headerLines.size() - 1));
+                headerLines.subList(1, headerLines.size()));
     }
 
     private void initBody(String[] headerBody) {

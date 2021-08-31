@@ -18,6 +18,7 @@ public class DefaultViewResolver implements ViewResolver {
         if(viewName.startsWith(REDIRECT_FORM)) {
             final String redirectUrl = viewName.substring(REDIRECT_FORM.length());
             httpResponse.flushAsRedirect(redirectUrl);
+            return;
         }
         try {
             httpResponse.addPage("static/" + viewName);

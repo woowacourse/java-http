@@ -3,6 +3,7 @@ package nextstep.jwp;
 import nextstep.jwp.mvc.DispatcherServlet;
 import nextstep.jwp.webserver.request.DefaultHttpRequest;
 import nextstep.jwp.webserver.request.HttpRequest;
+import nextstep.jwp.webserver.request.HttpSessions;
 import nextstep.jwp.webserver.response.DefaultHttpResponse;
 import nextstep.jwp.webserver.response.HttpResponse;
 import org.slf4j.Logger;
@@ -20,10 +21,12 @@ public class RequestHandler implements Runnable {
 
     private final Socket connection;
     private final DispatcherServlet dispatcherServlet;
+    private HttpSessions httpSessions;
 
-    public RequestHandler(Socket connection, DispatcherServlet dispatcherServlet) {
+    public RequestHandler(Socket connection, DispatcherServlet dispatcherServlet, HttpSessions httpSessions) {
         this.connection = Objects.requireNonNull(connection);
         this.dispatcherServlet = dispatcherServlet;
+        this.httpSessions = httpSessions;
     }
 
     @Override
@@ -34,6 +37,8 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = new DefaultHttpRequest(inputStream);
             HttpResponse httpResponse = new DefaultHttpResponse(outputStream);
+
+            httpRequest.prepareCookieAndSession(httpResponse, httpSessions);
 
             dispatcherServlet.doDispatch(httpRequest, httpResponse);
         } catch (IOException exception) {

@@ -21,6 +21,8 @@ public class ArgumentResolverContainer {
         argumentResolvers.add(new HttpResponseArgumentResolver());
         argumentResolvers.add(new ModelAttributeArgumentResolver());
         argumentResolvers.add(new RequestParamsArgumentResolver());
+        argumentResolvers.add(new HttpCookieArgumentResolver());
+        argumentResolvers.add(new HttpSessionArgumentResolver());
         return argumentResolvers;
     }
 

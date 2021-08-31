@@ -7,7 +7,8 @@ public class NotFoundExceptionResolver extends AbstractExceptionResolver{
 
     @Override
     public boolean supportsException(Exception exception) {
-        return exception.getClass().isAssignableFrom(PageNotFoundException.class);
+//        return exception.getClass().isAssignableFrom(PageNotFoundException.class);
+        return false;
     }
 
     @Override

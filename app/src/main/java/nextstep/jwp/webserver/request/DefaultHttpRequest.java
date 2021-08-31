@@ -6,24 +6,21 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import javassist.tools.web.BadHttpRequest;
+import java.util.UUID;
 import nextstep.jwp.webserver.exception.BadRequestException;
+import nextstep.jwp.webserver.response.HttpResponse;
 
 public class DefaultHttpRequest implements HttpRequest {
 
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String FORM_DATA = "application/x-www-form-urlencoded";
     private static final String UTF_8 = "UTF-8";
+    private static final String COOKIE = "Cookie";
+    private static final String SESSION_ID_KEY = "JSESSIONID";
 
     private RequestLine requestLine;
     private RequestHeader requestHeader;
     private RequestParams requestParams;
-
-    public DefaultHttpRequest(HttpMethod httpMethod, String url) {
-        this.requestLine = new RequestLine(httpMethod, url);
-        this.requestHeader = new RequestHeader();
-        this.requestParams = new RequestParams();
-    }
+    private HttpCookie httpCookie;
+    private HttpSession httpSession;
 
     public DefaultHttpRequest(InputStream inputStream) {
 
@@ -31,45 +28,11 @@ public class DefaultHttpRequest implements HttpRequest {
             final BufferedReader br =
                     new BufferedReader(new InputStreamReader(inputStream, UTF_8));
             this.requestLine = new RequestLine(br.readLine());
-            this.requestHeader = parseHeader(br);
-            this.requestParams = parseParams(br);
+            this.requestHeader = new RequestHeader(br);
+            this.requestParams = new RequestParams(br, requestHeader, requestLine.queryString());
         } catch (IOException e) {
             throw new BadRequestException();
         }
-    }
-
-    private RequestHeader parseHeader(BufferedReader br) throws IOException {
-        final RequestHeader newHeader = new RequestHeader();
-        String line;
-        while (!(line = br.readLine()).equals("")) {
-            newHeader.add(line);
-        }
-        return newHeader;
-    }
-
-    private RequestParams parseParams(BufferedReader br) throws IOException {
-        RequestParams newParams = new RequestParams();
-        newParams.addParams(requestLine.queryString());
-        char[] body = readBody(br);
-
-        if (isFormData(requestHeader.get(CONTENT_TYPE))) {
-            newParams.addParams(String.copyValueOf(body));
-            return newParams;
-        }
-
-        newParams.addBody(String.copyValueOf(body));
-        return newParams;
-    }
-
-    private char[] readBody(BufferedReader br) throws IOException {
-        int contentLength = requestHeader.contentLength();
-        char[] body = new char[contentLength];
-        br.read(body, 0, contentLength);
-        return body;
-    }
-
-    private boolean isFormData(String contentType) {
-        return FORM_DATA.equals(contentType);
     }
 
     @Override
@@ -90,5 +53,26 @@ public class DefaultHttpRequest implements HttpRequest {
     @Override
     public Map<String, String> getRequestParams() {
         return new HashMap<>(requestParams.getParams());
+    }
+
+    @Override
+    public void prepareCookieAndSession(HttpResponse httpResponse, HttpSessions httpSessions) {
+        this.httpCookie = new HttpCookie(requestHeader.get(COOKIE));
+        String sessionId = httpCookie.getValue(SESSION_ID_KEY);
+        if(sessionId == null || sessionId.isEmpty()) {
+            sessionId = UUID.randomUUID().toString();
+            httpResponse.addHeader("Set-Cookie", SESSION_ID_KEY + "=" + sessionId);
+        }
+        this.httpSession = httpSessions.getSession(sessionId);
+    }
+
+    @Override
+    public HttpCookie getCookie() {
+        return httpCookie;
+    }
+
+    @Override
+    public HttpSession getSession() {
+        return httpSession;
     }
 }

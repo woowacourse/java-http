@@ -1,6 +1,7 @@
 package nextstep.jwp;
 
 import nextstep.jwp.mvc.DispatcherServlet;
+import nextstep.jwp.webserver.request.HttpSessions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,10 +18,13 @@ public class WebServer {
 
     private final int port;
     private final DispatcherServlet dispatcherServlet;
+    private final HttpSessions httpSessions;
 
-    public WebServer(int port, DispatcherServlet dispatcherServlet) {
+    public WebServer(int port, DispatcherServlet dispatcherServlet,
+            HttpSessions httpSessions) {
         this.port = checkPort(port);
         this.dispatcherServlet = dispatcherServlet;
+        this.httpSessions = httpSessions;
     }
 
     public void run() {
@@ -37,7 +41,7 @@ public class WebServer {
     private void handle(ServerSocket serverSocket) throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection, dispatcherServlet)).start();
+            new Thread(new RequestHandler(connection, dispatcherServlet, httpSessions)).start();
         }
     }
 

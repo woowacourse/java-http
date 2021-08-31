@@ -4,6 +4,8 @@
 ### HttpRequest 구현
 - 라인, 헤더, 바디 구분해서 구현
 - 각각에 데이터 구분지어 삽입
+- HttpCookie 를 생성
+- 모든 세션 정보를 가지는 HttpSessions 와 각 세션 객체 생성
 
 ### HttpResponse 구현
 - 응답 폼 맞게 구현 (응답 코드, 헤더, 바디)
@@ -18,11 +20,12 @@
 - DispatcherServlet 구현
   - 흐름 :
     1. 필요한 모든 객체 생성 (HandlerMapping, ViewResolver, MultipartResolver)
-    2. Multipart 확인 (Multipart 라면 바로 응답)
-    3. request 에 맞는 Handler 찾기 (HandlerMapping)
-    4. Handler 가 존재하지 않다면 404 에러를 담아주기
+    2. request 에 맞는 Handler 찾기 (HandlerMapping)
+    3. Handler 가 존재하지 않다면 static resource 확인
+    4. static Resource 도 존재하지 않다면 404 에러를 담아주기
     5. Handler 가 존재한다면 실행 이후 ModelAndView 리턴
     6. ModelAndView 를 가지고 ViewResolver 실행
+    7. 위 과정에서 오류가 생긴다면 ErrorResolver 실행
   - 디테일 :
     - HandlerMapping
       - 클래스형 핸들러와 메서드형 핸들러(어노테이션 기반)를 나눈다.

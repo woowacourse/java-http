@@ -44,11 +44,41 @@ public class AppTest {
     }
 
     @Test
+    @DisplayName("로그인 실패")
+    public void login_fail() throws Exception{
+        final MockResult result = MockRequest.post("/login", null)
+                .addFormData("account", "nabom")
+                .addFormData("password", "nanana")
+                .logAll()
+                .result();
+
+        assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
+        assertThat(result.headerValue("Location")).isEqualTo("/unauthorized");
+    }
+
+    @Test
     @DisplayName("로그인 성공")
     public void login_success() throws Exception{
         final MockResult result = MockRequest.post("/login")
                 .addFormData("account", "nabom")
                 .addFormData("password", "nabom")
+                .logAll()
+                .result();
+
+        assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
+        assertThat(result.headerValue("Location")).isEqualTo("/");
+    }
+
+    @Test
+    @DisplayName("로그인 성공 이후 세션확인")
+    public void login_success_session() throws Exception{
+        MockRequest.post("/login")
+                .addFormData("account", "nabom")
+                .addFormData("password", "nabom")
+                .logAll()
+                .result();
+
+        final MockResult result = MockRequest.get("/login")
                 .logAll()
                 .result();
 
@@ -80,19 +110,6 @@ public class AppTest {
 
         assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
         assertThat(result.headerValue("Location")).isEqualTo("/register");
-    }
-
-    @Test
-    @DisplayName("로그인 실패")
-    public void login_fail() throws Exception{
-        final MockResult result = MockRequest.post("/login", null)
-                .addFormData("account", "nabom")
-                .addFormData("password", "nanana")
-                .logAll()
-                .result();
-
-        assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
-        assertThat(result.headerValue("Location")).isEqualTo("/unauthorized");
     }
 
     private void 페이지_비교(String body, String path) {

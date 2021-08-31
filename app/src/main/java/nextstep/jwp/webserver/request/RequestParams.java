@@ -1,20 +1,55 @@
 package nextstep.jwp.webserver.request;
 
+import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
+
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.webserver.response.HttpResponse;
+import nextstep.jwp.webserver.util.HttpRequestParser;
 
 public class RequestParams {
 
-    private static final String VALUE_DELIMITER = "=";
     private static final String AND_DELIMITER = "&";
-    private static final int KEY_INDEX = 0;
-    private static final int VALUE_INDEX = 1;
+    private static final String FORM_DATA = "application/x-www-form-urlencoded";
 
-    private String body;
     private Map<String, String> params;
+    private String body;
 
-    public RequestParams() {
-        this.params = new HashMap<>();
+    public RequestParams(BufferedReader br, RequestHeader requestHeader, String queryString) throws IOException {
+        this.params = parseParams(queryString);
+        parseBody(br, requestHeader);
+    }
+
+
+    private Map<String, String> parseParams(String queryString) {
+        if (queryString == null || queryString.isEmpty()) {
+            return new HashMap<>();
+        }
+        return HttpRequestParser.parseValues(queryString, AND_DELIMITER);
+    }
+
+    private void parseBody(BufferedReader br, RequestHeader requestHeader) throws IOException {
+        char[] body = readBody(br, requestHeader);
+
+        if (isFormData(requestHeader.get(CONTENT_TYPE))) {
+            addParams(String.copyValueOf(body));
+            return;
+        }
+
+        addBody(String.copyValueOf(body));
+    }
+
+    private char[] readBody(BufferedReader br, RequestHeader requestHeader) throws IOException {
+        int contentLength = requestHeader.contentLength();
+        char[] body = new char[contentLength];
+        br.read(body, 0, contentLength);
+        return body;
+    }
+
+    private boolean isFormData(String contentType) {
+        return FORM_DATA.equals(contentType);
     }
 
     public void addBody(String content) {
@@ -25,21 +60,11 @@ public class RequestParams {
         this.params.put(key, value);
     }
 
-    public void addParams(String data) {
+    private void addParams(String data) {
         if (data == null || data.isEmpty()) {
             return;
         }
-        final String[] eachValues = data.split(AND_DELIMITER);
-        addValues(eachValues);
-    }
-
-    private void addValues(String[] eachValues) {
-        for (String eachValue : eachValues) {
-            final String[] value = eachValue.split(VALUE_DELIMITER);
-            String key = value[KEY_INDEX];
-            String val = parseValue(value);
-            addParams(key, val);
-        }
+        params.putAll(HttpRequestParser.parseValues(data, AND_DELIMITER));
     }
 
     public String getParam(String key) {
@@ -48,12 +73,5 @@ public class RequestParams {
 
     public Map<String, String> getParams() {
         return params;
-    }
-
-    private String parseValue(String[] value) {
-        if(value.length < 2) {
-            return "";
-        }
-        return value[VALUE_INDEX];
     }
 }

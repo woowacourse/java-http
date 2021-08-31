@@ -16,9 +16,6 @@ public class MockSocket extends Socket {
     private final List<Byte> bytes = new ArrayList<>();
 
     public MockSocket(String request) {
-        System.out.println("--------request-----------");
-        System.out.println(request);
-        System.out.println("--------request-----------");
         this.request = request;
     }
 

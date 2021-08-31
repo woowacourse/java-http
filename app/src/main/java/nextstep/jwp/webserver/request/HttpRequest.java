@@ -1,6 +1,7 @@
 package nextstep.jwp.webserver.request;
 
 import java.util.Map;
+import nextstep.jwp.webserver.response.HttpResponse;
 
 public interface HttpRequest {
 
@@ -11,4 +12,10 @@ public interface HttpRequest {
     String getAttribute(String key);
 
     Map<String, String> getRequestParams();
+
+    void prepareCookieAndSession(HttpResponse httpResponse, HttpSessions httpSessions);
+
+    HttpCookie getCookie();
+
+    HttpSession getSession();
 }

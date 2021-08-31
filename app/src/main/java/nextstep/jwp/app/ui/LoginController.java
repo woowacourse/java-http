@@ -9,6 +9,7 @@ import nextstep.jwp.mvc.annotation.Controller;
 import nextstep.jwp.mvc.annotation.ModelAttribute;
 import nextstep.jwp.mvc.annotation.RequestMapping;
 import nextstep.jwp.webserver.request.HttpMethod;
+import nextstep.jwp.webserver.request.HttpSession;
 
 @Controller
 public class LoginController {
@@ -21,12 +22,16 @@ public class LoginController {
     }
 
     @RequestMapping(method = HttpMethod.GET, path = "/login")
-    public String loginPage() {
+    public String loginPage(HttpSession httpSession) {
+        final Member member = (Member) httpSession.getAttribute("member");
+        if(member != null) {
+            return "redirect:/";
+        }
         return "login.html";
     }
 
     @RequestMapping(method = HttpMethod.POST, path = "/login")
-    public String login(@ModelAttribute MemberRequest memberRequest) {
+    public String login(@ModelAttribute MemberRequest memberRequest, HttpSession httpSession) {
 
         if(memberRequest.getAccount() == null || memberRequest.getPassword() == null) return "login.html";
 
@@ -34,6 +39,7 @@ public class LoginController {
         if(member.isEmpty() || member.get().invalidPassword(memberRequest.getPassword())) {
             return "redirect:/unauthorized";
         }
+        httpSession.setAttribute("member", member.get());
         return "redirect:/";
     }
 

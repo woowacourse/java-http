@@ -2,14 +2,9 @@ package nextstep.jwp.handler;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.ErrorController;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.handler.request.HttpRequest;
 import nextstep.jwp.handler.response.HttpResponse;
 import nextstep.jwp.util.File;
@@ -23,12 +18,11 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
-    private final Map<String, Controller> controllerMap = new HashMap<>();
+    private final RequestMapping requestMapping;
 
     public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
-        controllerMap.put("/login", new LoginController());
-        controllerMap.put("/register", new RegisterController());
+        this.requestMapping = new RequestMapping();
     }
 
     @Override
@@ -63,7 +57,7 @@ public class RequestHandler implements Runnable {
                 return httpResponse.makeHttpMessage();
             }
 
-            Controller controller = controllerMap.getOrDefault(httpRequest.getRequestUrl(), new ErrorController());
+            Controller controller = requestMapping.findController(httpRequest);
             controller.handle(httpRequest, httpResponse);
             return httpResponse.makeHttpMessage();
         } catch (FileNotFoundException fileNotFoundException) {

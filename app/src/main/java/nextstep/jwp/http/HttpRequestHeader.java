@@ -6,13 +6,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpRequestHeader {
-    private final String method;
-    private final String resource;
+    private String method;
+    private String resource;
     private final Map<String, String> headers = new HashMap<>();
 
 
     public HttpRequestHeader(BufferedReader bufferedReader) throws IOException {
-        String[] firstLine = bufferedReader.readLine().split(" ");
+        String firstLineBuffer = bufferedReader.readLine();
+        if (firstLineBuffer == null) {
+            return;
+        }
+        String[] firstLine = firstLineBuffer.split(" ");
         method = firstLine[0];
         resource = firstLine[1];
 

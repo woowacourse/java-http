@@ -54,6 +54,14 @@ public enum GetRequestUri {
     }
 
     public static String createResponse(String requestUri) throws IOException {
+        if (requestUri.endsWith("js")) {
+            return GetRequestUri.createResponse(requestUri, "200 OK", "text/javascript");
+        }
+
+        if (requestUri.endsWith("svg")) {
+            return GetRequestUri.createResponse(requestUri, "200 OK", "image/svg+xml");
+        }
+
         return Arrays.stream(GetRequestUri.values())
                      .filter(getRequestUri -> getRequestUri.hasSameUri(requestUri))
                      .findFirst()

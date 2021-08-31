@@ -29,10 +29,10 @@ public class RequestLine {
 
     private void parseValues(String values) {
         String[] tokens = values.split("&");
-        Arrays.stream(tokens).forEach(this::getDataFromQueryString);
+        Arrays.stream(tokens).forEach(this::putDataFromQueryString);
     }
 
-    private void getDataFromQueryString(String data) {
+    private void putDataFromQueryString(String data) {
         params.put(data.substring(0, data.indexOf("=")), data.substring(data.indexOf("=") + 1));
     }
 

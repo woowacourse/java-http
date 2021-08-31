@@ -19,7 +19,7 @@ public class LoginController extends AbstractController {
             doGetWithQuery(httpRequest, httpResponse);
             return;
         }
-        File file = FileReader.readHtmlFile(httpRequest.getHttpUri());
+        File file = FileReader.readHtmlFile(httpRequest.getRequestUrl());
         httpResponse.ok(file);
     }
 

@@ -56,12 +56,12 @@ public class RequestHandler implements Runnable {
         HttpResponse httpResponse = new HttpResponse(httpRequest);
         try {
             if (httpRequest.isRequestStaticFile()) {
-                nextstep.jwp.util.File file = FileReader.readFile(httpRequest.getHttpUri());
+                nextstep.jwp.util.File file = FileReader.readFile(httpRequest.getRequestUrl());
                 httpResponse.ok(file);
                 return httpResponse.makeHttpMessage();
             }
 
-            Controller controller = controllerMap.getOrDefault(httpRequest.getHttpUri(), new ErrorController());
+            Controller controller = controllerMap.getOrDefault(httpRequest.getRequestUrl(), new ErrorController());
             controller.handle(httpRequest, httpResponse);
             return httpResponse.makeHttpMessage();
         } catch (FileNotFoundException fileNotFoundException) {

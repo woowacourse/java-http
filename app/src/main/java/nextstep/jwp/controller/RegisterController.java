@@ -14,7 +14,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws FileNotFoundException {
-        File file = FileReader.readHtmlFile(httpRequest.getHttpUri());
+        File file = FileReader.readHtmlFile(httpRequest.getRequestUrl());
         httpResponse.ok(file);
     }
 

@@ -7,16 +7,12 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private final HttpMethod httpMethod;
-    private final HttpUri httpUri;
-    private final String httpVersion;
+    private final RequestLine requestLine;
     private final HttpHeader httpHeader;
     private final HttpBody httpBody;
 
     public HttpRequest(HttpMethod httpMethod, String httpUri, String httpVersion, HttpHeader httpHeader, HttpBody httpBody) {
-        this.httpMethod = httpMethod;
-        this.httpUri = new HttpUri(httpUri);
-        this.httpVersion = httpVersion;
+        this.requestLine = new RequestLine(httpMethod, new RequestUrl(httpUri), httpVersion);
         this.httpHeader = httpHeader;
         this.httpBody = httpBody;
     }
@@ -57,27 +53,27 @@ public class HttpRequest {
     }
 
     public boolean isRequestStaticFile() {
-        return httpUri.getUri().contains(".") && httpMethod == HttpMethod.GET;
+        return requestLine.hasFileSuffixUri() && isGet();
     }
 
     public boolean isUriContainsQuery() {
-        return httpUri.getTotalUri().contains("?");
+        return requestLine.hasQueryParams();
     }
 
     public boolean isGet() {
-        return httpMethod == HttpMethod.GET;
+        return requestLine.isSameMethodAs(HttpMethod.GET);
     }
 
     public boolean isPost() {
-        return httpMethod == HttpMethod.POST;
+        return requestLine.isSameMethodAs(HttpMethod.POST);
     }
 
-    public String getHttpUri() {
-        return httpUri.getRequestUri();
+    public String getRequestUrl() {
+        return requestLine.getRequestUrl().getUrl();
     }
 
     public String getHttpVersion() {
-        return httpVersion;
+        return requestLine.getVersion();
     }
 
     public HttpBody getHttpBody() {

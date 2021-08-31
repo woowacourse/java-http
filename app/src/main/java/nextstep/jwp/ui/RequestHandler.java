@@ -18,9 +18,11 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
+    private final RequestMapping requestMapping;
 
-    public RequestHandler(Socket connection) {
+    public RequestHandler(Socket connection, RequestMapping requestMapping) {
         this.connection = Objects.requireNonNull(connection);
+        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -30,7 +32,6 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest request = new HttpRequest(inputStream);
-            RequestMapping requestMapping = new RequestMapping();
             Controller controller = requestMapping.getController(request);
 
             HttpResponse response = controller.service(request);

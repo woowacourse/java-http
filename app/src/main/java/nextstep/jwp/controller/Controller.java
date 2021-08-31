@@ -16,35 +16,35 @@ public class Controller {
     }
 
     @GetMapping(path = "/")
-    public String basic(String uri) {
+    public String basic() {
         return ResponseEntity
                 .responseBody("Hello world!")
                 .build();
     }
 
     @GetMapping(path = "/login")
-    public String login(String uri) throws IOException {
+    public String login() throws IOException {
         return ResponseEntity
-                .responseResource(uri)
+                .responseResource("/login.html")
                 .build();
     }
 
     @GetMapping(path = "/register")
-    public String register(String uri) throws IOException {
+    public String register() throws IOException {
         return ResponseEntity
-                .responseResource(uri)
+                .responseResource("/register.html")
                 .build();
     }
 
     @GetMapping(path = "/index")
-    public String index(String uri) throws IOException {
+    public String index() throws IOException {
         return ResponseEntity
-                .responseResource(uri)
+                .responseResource("/index.html")
                 .build();
     }
 
     @PostMapping(path = "/register")
-    public String register(String uri, RequestBody body) throws IOException {
+    public String register(RequestBody body) throws IOException {
         Map<String, String> params = body.getParams();
         service.register(params);
         return ResponseEntity
@@ -54,7 +54,7 @@ public class Controller {
     }
 
     @PostMapping(path = "/login")
-    public String login(String uri, RequestBody body) throws IOException {
+    public String login(RequestBody body) throws IOException {
         Map<String, String> params = body.getParams();
         if (service.isAuthorized(params)) {
             return ResponseEntity

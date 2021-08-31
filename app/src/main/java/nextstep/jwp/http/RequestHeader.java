@@ -1,22 +1,29 @@
 package nextstep.jwp.http;
 
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import nextstep.jwp.constants.Headers;
+import nextstep.jwp.constants.Http;
 
 public class RequestHeader {
-    private final String headers;
+    private final Map<String, String> headers;
 
-    public RequestHeader(String headers) {
-        this.headers = headers;
+    public RequestHeader(String headerLines) {
+        this.headers = parseHeaders(headerLines);
     }
 
-    public Optional<String> get(String key) {
-        final Pattern pattern = Pattern.compile("(?<=" + key + ": ).+");
-        Matcher matcher = pattern.matcher(headers);
-        if (matcher.find()) {
-            return Optional.of(matcher.group().trim());
-        }
-        return Optional.empty();
+    private Map<String, String> parseHeaders(String lines) {
+        return Stream.of(lines.split(Http.NEW_LINE))
+                .map(line -> line.split(Headers.SEPARATOR))
+                .collect(Collectors.toMap(x -> x[Headers.KEY].trim(), x -> x[Headers.VALUE].trim()));
+    }
+
+    public boolean contains(String key) {
+        return headers.containsKey(key);
+    }
+
+    public String get(String key) {
+        return headers.get(key);
     }
 }

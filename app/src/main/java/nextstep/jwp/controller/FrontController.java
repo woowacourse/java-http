@@ -36,7 +36,7 @@ public class FrontController {
     private String postMapping(String uri, Controller controller) throws Exception {
         for (Method method : Controller.class.getDeclaredMethods()) {
             if (matchPostMapping(method, uri)) {
-                return (String) method.invoke(controller, uri, body);
+                return (String) method.invoke(controller, body);
             }
         }
         throw new HttpException("잘못된 http post 요청입니다.");
@@ -45,7 +45,7 @@ public class FrontController {
     private String getMapping(String uri, Controller controller) throws Exception {
         for (Method method : Controller.class.getDeclaredMethods()) {
             if (matchGetMapping(method, uri)) {
-                return (String) method.invoke(controller, uri);
+                return (String) method.invoke(controller);
             }
         }
 

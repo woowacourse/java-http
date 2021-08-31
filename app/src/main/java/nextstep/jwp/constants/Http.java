@@ -9,4 +9,7 @@ public class Http {
     public static final String FILE_EXTENSION_HTML = ".html";
     public static final String DIRECTORY_STATIC = "static";
     public static final String DEFAULT_CONTENT_TYPE = "html";
+
+    private Http() {
+    }
 }

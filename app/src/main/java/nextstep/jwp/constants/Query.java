@@ -6,4 +6,7 @@ public class Query {
     public static final String QUESTION = "?";
     public static final int KEY = 0;
     public static final int VALUE = 1;
+
+    private Query() {
+    }
 }

@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Optional;
+import java.util.Objects;
 import nextstep.jwp.constants.Headers;
 import nextstep.jwp.constants.Http;
 import nextstep.jwp.controller.FrontController;
@@ -13,47 +13,44 @@ import nextstep.jwp.http.RequestHeader;
 import nextstep.jwp.http.RequestLine;
 
 public class HttpServer {
+    private final BufferedReader reader;
     private final RequestLine requestLine;
     private final RequestHeader headers;
     private final RequestBody body;
 
     public HttpServer(InputStream inputStream) throws IOException {
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        this.requestLine = new RequestLine(extractRequestLine(bufferedReader));
-        this.headers = new RequestHeader(extractHeaders(bufferedReader));
-        this.body = new RequestBody(extractRequestBody(bufferedReader));
+        this.reader = new BufferedReader(new InputStreamReader(inputStream));
+        this.requestLine = new RequestLine(extractRequestLine());
+        this.headers = new RequestHeader(extractHeaders());
+        this.body = new RequestBody(extractRequestBody());
     }
 
-    private String extractHeaders(BufferedReader bufferedReader) throws IOException {
-        final StringBuilder request = new StringBuilder();
-        String line = null;
-        while (!Http.EMPTY_LINE.equals(line)) {
-            line = bufferedReader.readLine();
-
-            if (line == null) {
-                break;
-            }
-
-            request.append(line)
-                    .append(Http.NEW_LINE);
-
-        }
-        return request.toString();
-    }
-
-    public String extractRequestLine(BufferedReader reader) throws IOException {
+    private String extractRequestLine() throws IOException {
         return reader.readLine();
     }
 
-    public String extractRequestBody(BufferedReader reader) throws IOException {
-        final Optional<String> contentLengthHeader = headers.get(Headers.CONTENT_LENGTH);
-        if (contentLengthHeader.isPresent()) {
-            int contentLength = Integer.parseInt(contentLengthHeader.get());
+    private String extractHeaders() throws IOException {
+        final StringBuilder headerLines = new StringBuilder();
+        String header = null;
+        while (!Http.EMPTY_LINE.equals(header)) {
+            header = reader.readLine();
+            if (Objects.isNull(header)) {
+                break;
+            }
+            headerLines.append(header)
+                    .append(Http.NEW_LINE);
+        }
+        return headerLines.toString();
+    }
+
+    private String extractRequestBody() throws IOException {
+        if (headers.contains(Headers.CONTENT_LENGTH)) {
+            int contentLength = Integer.parseInt(headers.get(Headers.CONTENT_LENGTH));
             char[] buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);
             return new String(buffer);
         }
-        return null;
+        return Http.EMPTY_LINE;
     }
 
     public String getResponse() throws Exception {

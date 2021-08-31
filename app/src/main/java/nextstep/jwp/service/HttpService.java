@@ -15,7 +15,8 @@ public class HttpService {
     }
 
     public void register(Map<String, String> params) {
-        final User user = new User(InMemoryUserRepository.size() + 1, params.get(UserParams.ACCOUNT), params.get(UserParams.PASSWORD),
+        final User user = new User(InMemoryUserRepository.size() + 1, params.get(UserParams.ACCOUNT),
+                params.get(UserParams.PASSWORD),
                 params.get(UserParams.EMAIL));
         InMemoryUserRepository.save(user);
     }

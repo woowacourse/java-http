@@ -30,7 +30,7 @@ public class RequestHandler implements Runnable {
             final HttpResponse httpResponse = new HttpResponse(outputStream);
 
             final String uri = getDefaultPath(httpRequest.getUri());
-            final Map<String, String> requestBody = httpRequest.getParams();
+            final Map<String, String> requestBody = httpRequest.getRequestBody();
 
             if (uri.startsWith("/login")) {
                 if (requestBody.size() > 0) {

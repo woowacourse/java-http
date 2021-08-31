@@ -1,12 +1,13 @@
 package nextstep.jwp.http;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RequestLine {
     private final HttpMethod method;
-    private String uri;
+    private final String uri;
     private Map<String, String> params = new HashMap<>();
 
     public RequestLine(String requestLine) {
@@ -23,17 +24,11 @@ public class RequestLine {
             uri = tokens[1];
         } else {
             uri = tokens[1].substring(0, index);
-            parseValues(tokens[1].substring(index + 1));
+            String queryString = tokens[1].substring(index + 1);
+            params = Stream.of(queryString.split("&"))
+                    .map(x -> x.split("="))
+                    .collect(Collectors.toMap(x -> x[0], x -> x[1]));
         }
-    }
-
-    private void parseValues(String values) {
-        String[] tokens = values.split("&");
-        Arrays.stream(tokens).forEach(this::putDataFromQueryString);
-    }
-
-    private void putDataFromQueryString(String data) {
-        params.put(data.substring(0, data.indexOf("=")), data.substring(data.indexOf("=") + 1));
     }
 
     public HttpMethod getMethod() {
@@ -46,5 +41,9 @@ public class RequestLine {
 
     public Map<String, String> getParams() {
         return params;
+    }
+
+    public String getParameter(String name) {
+        return params.get(name);
     }
 }

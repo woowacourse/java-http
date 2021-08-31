@@ -27,12 +27,16 @@ public class HttpResponse {
     }
 
     private void putHeaders(ContentType contentType) {
-        headers.put("Content-Type", contentType.getValue() + ";charset=utf-8");
-        headers.put("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+        headers.addExceptCookie("Content-Type", contentType.getValue() + ";charset=utf-8");
+        headers.addExceptCookie("Content-Length", String.valueOf(body.getBytes(StandardCharsets.UTF_8).length));
+    }
+
+    public void addCookie(String key, String value) {
+        headers.addCookie(key, value);
     }
 
     public void assignLocationHeader(String locationHeader) {
-        headers.put("Location", locationHeader);
+        headers.addExceptCookie("Location", locationHeader);
     }
 
     public byte[] getBytes() {

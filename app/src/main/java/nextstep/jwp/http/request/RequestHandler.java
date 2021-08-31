@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
+import java.util.UUID;
 
 public class RequestHandler {
 
@@ -33,8 +34,14 @@ public class RequestHandler {
 
             final HttpRequest request = httpRequestParser.parse(inputStream);
             final RequestLine requestLine = request.getRequestLine();
+            final RequestCookie requestCookie = request.getCookie();
+
             final Controller controller = requestMapping.getController(requestLine.getUri());
             final HttpResponse response = getResponse(request, controller);
+
+            if (!requestCookie.containsKey("JSESSIONID")) {
+                response.addCookie("JSESSIONID", String.valueOf(UUID.randomUUID()));
+            }
 
             doResponse(outputStream, response);
         } catch (IOException exception) {

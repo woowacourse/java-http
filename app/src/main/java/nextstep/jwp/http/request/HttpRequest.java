@@ -28,4 +28,8 @@ public class HttpRequest {
     public RequestBody getBody() {
         return body;
     }
+
+    public RequestCookie getCookie() {
+        return headers.getHttpCookie();
+    }
 }

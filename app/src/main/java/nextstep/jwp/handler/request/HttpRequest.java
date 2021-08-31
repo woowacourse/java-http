@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import nextstep.jwp.exception.handler.HttpMessageException;
 import nextstep.jwp.handler.*;
 import nextstep.jwp.handler.constant.HttpMethod;
 
@@ -26,7 +27,7 @@ public class HttpRequest {
         String startLine = reader.readLine();
         String[] startLineSplit = startLine.split(" ");
         if (startLineSplit.length < 3) {
-            throw new IllegalArgumentException("http start line 형식이 올바르지 않습니다.");
+            throw new HttpMessageException("HTTP Request Start-Line 형식이 올바르지 않습니다.");
         }
 
         HttpMethod httpMethod = HttpMethod.from(startLineSplit[0]);

@@ -33,7 +33,6 @@ public class Dispatcher {
             Handler handler = handlerMapper.mapping(request);
             return handler.handle(request, response);
         } catch (NotFoundException notFoundException) {
-            notFoundException.printStackTrace();
             return ModelAndView.of("/404.html", HttpStatus.NOT_FOUND);
         } catch (Exception exception) {
             return ModelAndView.of("/500.html", HttpStatus.INTERNAL_SERVER_ERROR);

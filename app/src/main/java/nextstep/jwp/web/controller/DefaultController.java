@@ -19,9 +19,8 @@ public class DefaultController extends AbstractController {
         final String path = request.getPath();
         log.info("GET {}", path);
         if (getResource().equals(path)) {
-            final View view = new View("/index.html");
-            response.setStatus(HttpStatus.OK);
-            response.setBody(view);
+            response.setStatus(HttpStatus.FOUND);
+            response.setHeader("Location", "/index.html");
             return;
         }
         final View view = new View(path);

@@ -1,8 +1,8 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
@@ -12,10 +12,12 @@ import nextstep.jwp.service.StaticResourceService;
 
 public class Controllers {
 
-    private final List<Controller> restControllers;
+    private static final int ROOT_PATH_INDEX = 1;
+
+    private final Map<String, Controller> restControllers;
     private final Controller staticResourceController;
 
-    private Controllers(List<Controller> restControllers, Controller staticResourceController) {
+    private Controllers(Map<String, Controller> restControllers, Controller staticResourceController) {
         this.restControllers = restControllers;
         this.staticResourceController = staticResourceController;
     }
@@ -28,23 +30,30 @@ public class Controllers {
 
         Controller staticResourceController = new StaticResourceController(staticResourceService);
 
+        Map<String, Controller> restControllers = new HashMap<>();
         Controller loginController = new LoginController(loginService, staticResourceService);
-        Controller registerController = new RegisterController(registerService, staticResourceService);
-        List<Controller> controllers = Arrays.asList(loginController, registerController);
+        restControllers.put("login", loginController);
+        Controller registerController = new RegisterController(registerService,
+            staticResourceService);
+        restControllers.put("register", registerController);
 
-        return new Controllers(controllers, staticResourceController);
+        return new Controllers(restControllers, staticResourceController);
     }
 
     public HttpResponse doService(HttpRequest httpRequest) throws IOException {
-        Controller controller = findByUri(httpRequest.getUri());
+        String requestUri = httpRequest.getUri();
+        String rootUri = requestUri.split("/")[ROOT_PATH_INDEX];
+
+        Controller controller = findByUri(rootUri);
 
         return controller.doService(httpRequest);
     }
 
-    private Controller findByUri(String requestUri) {
-        return restControllers.stream()
-            .filter(controller -> controller.matchUri(requestUri))
-            .findAny()
-            .orElse(staticResourceController);
+    private Controller findByUri(String rootUri) {
+        if (restControllers.containsKey(rootUri)) {
+            return restControllers.get(rootUri);
+        }
+
+        return staticResourceController;
     }
 }

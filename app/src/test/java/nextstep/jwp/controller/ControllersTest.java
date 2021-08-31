@@ -6,12 +6,15 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class ControllersTest {
 
@@ -23,6 +26,20 @@ class ControllersTest {
     @BeforeEach
     void setUp() {
         controllers = Controllers.loadContext();
+    }
+
+    @DisplayName("split 메서드를 이용해 URI을 파싱한다.")
+    @ParameterizedTest
+    @ValueSource(strings = {"/login", "/login/abc/f", "/login/"})
+    void splitUri(String requestUri) {
+        // given
+        String expectResult = "login";
+
+        // when
+        String[] splitedUri = requestUri.split("/");
+
+        // then
+        assertThat(splitedUri[1]).isEqualTo(expectResult);
     }
 
     @DisplayName("URI에 따라 컨트롤러를 찾아 요청을 수행한다.")

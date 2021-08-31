@@ -1,32 +1,32 @@
 package nextstep.jwp.controller;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.LoginException;
+import nextstep.jwp.handler.Cookie;
 import nextstep.jwp.handler.HttpBody;
 import nextstep.jwp.handler.HttpSession;
+import nextstep.jwp.handler.HttpSessions;
 import nextstep.jwp.handler.request.HttpRequest;
 import nextstep.jwp.handler.response.HttpResponse;
 import nextstep.jwp.model.User;
-import nextstep.jwp.util.File;
-import nextstep.jwp.util.FileReader;
 
 public class LoginController extends AbstractController {
 
     @Override
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws FileNotFoundException {
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException, URISyntaxException {
         try {
             HttpSession session = httpRequest.getSession();
             if (session.containsAttribute("user")) {
-                File file = FileReader.readFile("/index.html");
-                httpResponse.redirect("index.html", file);
+                httpResponse.redirect("/index.html");
                 return;
             }
         } catch (NoSuchElementException e) {
-            File file = FileReader.readHtmlFile(httpRequest.getRequestUrl());
-            httpResponse.ok(file);
+            httpResponse.ok(httpRequest.getRequestUrl() + ".html");
             return;
         }
 
@@ -34,14 +34,13 @@ public class LoginController extends AbstractController {
             doGetWithQuery(httpRequest, httpResponse);
             return;
         }
-        File file = FileReader.readHtmlFile(httpRequest.getRequestUrl());
-        httpResponse.ok(file);
+        httpResponse.ok(httpRequest.getRequestUrl() + ".html");
     }
 
     private void doGetWithQuery(HttpRequest httpRequest, HttpResponse httpResponse) {}
 
     @Override
-    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws FileNotFoundException {
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException, URISyntaxException {
         HttpBody httpBody = httpRequest.getBody();
         String account = httpBody.getBodyParams("account");
         String password = httpBody.getBodyParams("password");
@@ -52,15 +51,29 @@ public class LoginController extends AbstractController {
                 throw new LoginException("User의 정보와 입력한 정보가 일치하지 않습니다.");
             }
 
-            final HttpSession httpSession = httpRequest.getSession();
-            httpSession.setAttribute("user", user);
+            if (httpRequest.containsCookie("JSESSIONID")) {
+                final HttpSession session = httpRequest.getSession();
+                session.setAttribute("user", user);
 
-            File file = FileReader.readFile("/index.html");
-            httpResponse.redirect("/index.html", file);
+                httpResponse.redirect("/index.html");
+                return;
+            }
+
+            String sessionId = saveSession();
+            HttpSession session = HttpSessions.getSession(sessionId);
+            session.setAttribute("user", user);
+
+            httpResponse.setCookie(new Cookie("JSESSIONID", sessionId));
+            httpResponse.redirect("/index.html");
         } catch (LoginException | NoSuchElementException e) {
-            File file = FileReader.readErrorFile("/401.html");
-            httpResponse.unauthorized("/401.html", file);
+            httpResponse.unauthorized("/401.html");
         }
+    }
+
+    private String saveSession() {
+        String sessionId = UUID.randomUUID().toString();
+        HttpSessions.add(sessionId);
+        return sessionId;
     }
 
     private User findUser(String account) {

@@ -60,9 +60,6 @@ public class FilePath {
     }
 
     private String relativePath() {
-        if (path.startsWith(prefix)) {
-            return path + suffix;
-        }
         return prefix + path + suffix;
     }
 }

@@ -30,7 +30,7 @@ class RequestHandlerTest {
         String resource = "static/index.html";
         String header = "HTTP/1.1 200 OK \r\n" +
             "Content-Type: text/html;charset=utf-8 \r\n" +
-            "Content-Length: 5549 \r\n" +
+            "Content-Length: 4416 \r\n" +
             "\r\n";
 
         assertResponseIsEqueal(socket, resource, header);
@@ -54,7 +54,7 @@ class RequestHandlerTest {
         String resource = "static/index.html";
         String header = "HTTP/1.1 200 OK \r\n" +
             "Content-Type: text/html;charset=utf-8 \r\n" +
-            "Content-Length: 5549 \r\n" +
+            "Content-Length: 4416 \r\n" +
             "\r\n";
 
         assertResponseIsEqueal(socket, resource, header);
@@ -77,7 +77,7 @@ class RequestHandlerTest {
         String resource = "static/css/styles.css";
         String header = "HTTP/1.1 200 OK \r\n" +
             "Content-Type: text/css \r\n" +
-            "Content-Length: 211991 \r\n" +
+            "Content-Length: 212515 \r\n" +
             "\r\n";
         // then
         assertResponseIsEqueal(socket, resource, header);
@@ -99,8 +99,8 @@ class RequestHandlerTest {
 
         String resource = "static/assets/img/error-404-monochrome.svg";
         String header = "HTTP/1.1 200 OK \r\n" +
-            "Content-Type: image/svg \r\n" +
-            "Content-Length: 6076 \r\n" +
+            "Content-Type: image/svg+xml \r\n" +
+            "Content-Length: 6568 \r\n" +
             "\r\n";
         // then
         assertResponseIsEqueal(socket, resource, header);

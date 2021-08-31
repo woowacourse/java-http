@@ -32,6 +32,7 @@ class NotFoundControllerTest {
         notFoundController.service(request, response);
 
         //then
-        assertThat(response.status()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.status()).isEqualTo(HttpStatus.FOUND);
+        assertThat(response.headers().get("Location").toValuesString()).isEqualTo("/404.html");
     }
 }

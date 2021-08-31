@@ -15,6 +15,11 @@ import nextstep.jwp.handler.constant.HttpMethod;
 import nextstep.jwp.handler.constant.HttpStatus;
 import nextstep.jwp.model.User;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import nextstep.jwp.handler.RequestHandler;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestHandlerTest {

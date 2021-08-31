@@ -30,6 +30,15 @@ class HttpResponseTest {
         assertThat(new File(testDirectory + "responseFound.txt")).isNotNull();
     }
 
+    @Test
+    void responseNotFound() throws FileNotFoundException {
+        // responseNotFound.txt 결과는 응답 body에 404.html이 포함되어 있어야 함
+        HttpResponse httpResponse = new HttpResponse(createOutputStream("responseNotFound.txt"));
+        httpResponse.forward("/strangeUrl");
+
+        assertThat(new File(testDirectory + "responseNotFound.txt")).isNotNull();
+    }
+
     private OutputStream createOutputStream(String fileName) throws FileNotFoundException {
         return new FileOutputStream(new File(testDirectory + fileName));
     }

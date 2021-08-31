@@ -33,35 +33,48 @@ public class RequestHandler implements Runnable {
             final Map<String, String> requestBody = httpRequest.getRequestBody();
 
             if (uri.startsWith("/login")) {
-                if (requestBody.size() > 0) {
-                    String account = httpRequest.getParameter("account");
-                    String password = httpRequest.getParameter("password");
-                    User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
-
-                    if (user.checkPassword(password)) {
-                        httpResponse.redirect(INDEX_HTML);
-                    }
-                    httpResponse.redirect("/401.html");
-                }
-                httpResponse.forward("/login.html");
+                login(httpRequest, httpResponse, requestBody);
             }
 
             if (uri.startsWith("/register")) {
-                if (requestBody.size() > 0) {
-                    String account = httpRequest.getParameter("account");
-                    String email = httpRequest.getParameter("email");
-                    String password = httpRequest.getParameter("password");
-
-                    InMemoryUserRepository.save(new User(2L, account, password, email));
-                    httpResponse.redirect(INDEX_HTML);
-                }
-                httpResponse.forward("/register.html");
+                register(httpRequest, httpResponse, requestBody);
             }
+
             httpResponse.forward(uri);
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
+        }
+    }
+
+    private void login(HttpRequest httpRequest, HttpResponse httpResponse, Map<String, String> requestBody) {
+        if (requestBody.size() > 0) {
+            String account = httpRequest.getParameter("account");
+            String password = httpRequest.getParameter("password");
+            User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
+
+            validateUserPassword(httpResponse, password, user);
+            httpResponse.redirect("/401.html");
+        }
+        httpResponse.forward("/login.html");
+    }
+
+    private void register(HttpRequest httpRequest, HttpResponse httpResponse, Map<String, String> requestBody) {
+        if (requestBody.size() > 0) {
+            String account = httpRequest.getParameter("account");
+            String email = httpRequest.getParameter("email");
+            String password = httpRequest.getParameter("password");
+
+            InMemoryUserRepository.save(new User(2L, account, password, email));
+            httpResponse.redirect(INDEX_HTML);
+        }
+        httpResponse.forward("/register.html");
+    }
+
+    private void validateUserPassword(HttpResponse httpResponse, String password, User user) {
+        if (user.checkPassword(password)) {
+            httpResponse.redirect(INDEX_HTML);
         }
     }
 

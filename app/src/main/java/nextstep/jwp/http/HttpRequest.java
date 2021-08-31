@@ -33,23 +33,30 @@ public class HttpRequest {
             requestLine = new RequestLine(line);
 
             line = bufferedReader.readLine();
-            while (bufferedReader.ready()) {
-                if ("".equals(line)) {
-                    break;
-                }
-                String[] tokens = line.split(": ");
-                headers.put(tokens[0], tokens[1]);
-                line = bufferedReader.readLine();
-            }
-
-            if (getMethod().isPost()) {
-                String body = readResponseBody(bufferedReader);
-                requestBody = Stream.of(body.split("&"))
-                        .map(x -> x.split("="))
-                        .collect(Collectors.toMap(x -> x[0], x -> x[1]));
-            }
+            addHeaders(bufferedReader, line);
+            addResponseBody(bufferedReader);
         } catch (IOException e) {
             log.error(e.getMessage());
+        }
+    }
+
+    private void addHeaders(BufferedReader bufferedReader, String line) throws IOException {
+        while (bufferedReader.ready()) {
+            if ("".equals(line)) {
+                break;
+            }
+            String[] tokens = line.split(": ");
+            headers.put(tokens[0], tokens[1]);
+            line = bufferedReader.readLine();
+        }
+    }
+
+    private void addResponseBody(BufferedReader bufferedReader) throws IOException {
+        if (getMethod().isPost()) {
+            String body = readResponseBody(bufferedReader);
+            requestBody = Stream.of(body.split("&"))
+                    .map(x -> x.split("="))
+                    .collect(Collectors.toMap(x -> x[0], x -> x[1]));
         }
     }
 

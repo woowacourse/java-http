@@ -20,15 +20,19 @@ public class RequestLine {
         }
 
         int index = tokens[1].indexOf("?");
+        uri = getUriAndParamsFromRequestLine(tokens, index);
+    }
+
+    private String getUriAndParamsFromRequestLine(String[] tokens, int index) {
         if (index == -1) {
-            uri = tokens[1];
-        } else {
-            uri = tokens[1].substring(0, index);
-            String queryString = tokens[1].substring(index + 1);
-            params = Stream.of(queryString.split("&"))
-                    .map(x -> x.split("="))
-                    .collect(Collectors.toMap(x -> x[0], x -> x[1]));
+            return tokens[1];
         }
+
+        String queryString = tokens[1].substring(index + 1);
+        params = Stream.of(queryString.split("&"))
+                .map(x -> x.split("="))
+                .collect(Collectors.toMap(x -> x[0], x -> x[1]));
+        return tokens[1].substring(0, index);
     }
 
     public HttpMethod getMethod() {

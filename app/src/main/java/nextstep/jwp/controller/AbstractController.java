@@ -2,23 +2,25 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.framework.http.HttpRequest;
 import nextstep.jwp.framework.http.HttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AbstractController implements Controller {
 
+    protected final Logger logger = LoggerFactory.getLogger(getClass().getSimpleName());
+
     @Override
-    public void service(HttpRequest request, HttpResponse response) throws Exception {
-        if (request.isPost()) {
+    public void service(final HttpRequest request, final HttpResponse response) {
+        if (request.isGet()) {
+            doGet(request, response);
+        } else if (request.isPost()) {
             doPost(request, response);
-            return;
         }
-        doGet(request, response);
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
-
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
     }
 
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
     }
 }

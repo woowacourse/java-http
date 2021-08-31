@@ -16,7 +16,7 @@ public class HttpFoundStatus extends HttpStatusState {
             return this;
         }
 
-        return new HttpUnauthorizedStatus(getStatus(), getPath());
+        return new HttpUnauthorizedStatus(getStatus(), getPath()).state();
     }
 
     @Override

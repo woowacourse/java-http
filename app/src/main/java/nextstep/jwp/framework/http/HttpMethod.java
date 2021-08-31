@@ -11,28 +11,29 @@ public enum HttpMethod {
     DELETE("DELETE"),
     OPTIONS("OPTIONS");
 
-    private final String method;
+    private final String name;
 
-    HttpMethod(final String method) {
-        this.method = method;
+    HttpMethod(final String name) {
+        this.name = name;
     }
 
     public static HttpMethod findByString(final String request) {
         return Arrays.stream(HttpMethod.values())
-            .filter(httpMethod -> httpMethod.getMethod().equals(request))
+            .filter(httpMethod -> httpMethod.getName().equals(request))
             .findAny()
             .orElseThrow(UnsupportedOperationException::new);
     }
 
-    public String getMethod() {
-        return method;
-    }
-
     public boolean isPost() {
-        return this.method.equals(POST.method);
+        return this.name.equals(POST.name);
     }
 
     public boolean isGet() {
-        return this.method.equals(GET.method);
+        return this.name.equals(GET.name);
+    }
+
+
+    public String getName() {
+        return name;
     }
 }

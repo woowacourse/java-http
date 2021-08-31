@@ -4,22 +4,23 @@ import java.net.URL;
 import nextstep.jwp.framework.http.HttpPath;
 import nextstep.jwp.framework.http.HttpStatus;
 
-public class HttpUnauthorizedStatus extends HttpStatusState {
+public class HttpCreatedStatus extends HttpStatusState {
 
-    public HttpUnauthorizedStatus(final HttpStatus status, final HttpPath path) {
+    public HttpCreatedStatus(final HttpStatus status, final HttpPath path) {
         super(status, path);
     }
 
     @Override
     public HttpStatusState state() {
-        if (getStatus() == HttpStatus.UNAUTHORIZED) {
+        if (getStatus() == HttpStatus.CREATED) {
             return this;
         }
-        return new HttpNotFoundStatus(getStatus(), getPath()).state();
+
+        return new HttpFoundStatus(getStatus(), getPath()).state();
     }
 
     @Override
     public URL resource() {
-        return HttpPath.unAuthorized();
+        return HttpPath.index();
     }
 }

@@ -28,7 +28,7 @@ public class QueryParams {
         final String[] params = query.split("&");
 
         for (String param : params) {
-            final String[] element = param.split("=");
+            final String[] element = param.split("=", 2);
             queryParams.put(element[KEY_INDEX], element[VALUE_INDEX]);
         }
 

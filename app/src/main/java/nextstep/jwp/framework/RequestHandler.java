@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
+import nextstep.jwp.controller.Controller;
 import nextstep.jwp.framework.http.HttpRequest;
 import nextstep.jwp.framework.http.HttpResponse;
 import org.slf4j.Logger;
@@ -25,13 +26,18 @@ public class RequestHandler implements Runnable {
         // log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
-            final HttpRequest httpRequest = new HttpRequest(inputStream);
-            final HttpResponse httpResponse = httpRequest.toHttpResponse();
+            final OutputStream outputStream = connection.getOutputStream()) {
+            final RequestMapping requestMapping = RequestMapping.create();
+            final HttpRequest request = new HttpRequest(inputStream);
+            final HttpResponse response = new HttpResponse();
+            final Controller controller = requestMapping.getController(request);
 
-            doOutputStream(outputStream, httpResponse);
+            controller.service(request, response);
+            doOutputStream(outputStream, response);
         } catch (IOException exception) {
             log.error("Exception stream", exception);
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             close();
         }

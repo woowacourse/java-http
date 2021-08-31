@@ -20,16 +20,9 @@ public class HttpPath {
     private static final String NOT_FOUND_PAGE = "404.html";
 
     private String path;
-    private QueryParams queryParams;
 
     public HttpPath(final String path) {
-        try {
-            this.path = createPath(path);
-            this.queryParams = createQueryParams(path);
-        } catch (ArrayIndexOutOfBoundsException e) {
-            this.path = NOT_FOUND_PAGE;
-            this.queryParams = new QueryParams();
-        }
+        this.path = createPath(path);
     }
 
     public static URL index() {
@@ -56,16 +49,6 @@ public class HttpPath {
         }
 
         return resourcePath;
-    }
-
-    public static QueryParams createQueryParams(final String path) {
-        final String[] splitQuery = path.substring(FILE_ROOT_INDEX).split(QUERY_DELIMITER);
-
-        if (splitQuery.length == QUERY_CONTAINS_COUNT) {
-            return new QueryParams(splitQuery[QUERY_PARAMETER_INDEX]);
-        }
-
-        return new QueryParams();
     }
 
     public boolean isNotExistFile() {

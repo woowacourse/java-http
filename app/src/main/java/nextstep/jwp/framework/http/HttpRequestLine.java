@@ -17,16 +17,20 @@ public class HttpRequestLine {
         this.protocolVersion = protocolVersion;
     }
 
-    public URL url(final HttpStatus httpStatus) {
+    public URL url(final HttpStatus status) {
         if (path.isNotExistFile()) {
-            return new HttpNotFoundStatus(httpStatus, path).resource();
+            return new HttpNotFoundStatus(status, path).resource();
         }
 
-        final HttpStatusState state = new HttpOKStatus(httpStatus, path).state();
+        final HttpStatusState state = new HttpOKStatus(status, path).state();
         return state.resource();
     }
 
-    public HttpPath getPath() {
+    public HttpMethod getMethod() {
+        return method;
+    }
+
+    public HttpPath path() {
         return path;
     }
 
@@ -36,6 +40,10 @@ public class HttpRequestLine {
 
     public boolean isPost() {
         return method.isPost();
+    }
+
+    public boolean isGet() {
+        return method.isGet();
     }
 
     public boolean isNotPost() {

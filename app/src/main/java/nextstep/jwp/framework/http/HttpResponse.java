@@ -6,92 +6,24 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ThreadLocalRandom;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.DBNotFoundException;
-import nextstep.jwp.exception.PasswordNotMatchException;
-import nextstep.jwp.model.User;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class HttpResponse {
 
     private static final String NEW_LINE = System.lineSeparator();
-    private final Logger logger = LoggerFactory.getLogger(getClass().getSimpleName());
 
-    private final ProtocolVersion protocolVersion;
-    private final HttpStatus status;
-    private final HttpHeaders headers;
-    private final HttpBody body;
-    private final URL resourceURL;
+    private ProtocolVersion protocolVersion;
+    private HttpStatus status;
+    private HttpHeaders headers;
+    private HttpBody body;
+    private URL resourceURL;
 
-    public HttpResponse(final HttpRequestLine httpRequestLine, final HttpHeaders headers, final HttpBody body) {
-        this.protocolVersion = httpRequestLine.getProtocolVersion();
+    public void create(HttpRequestLine requestLine, HttpHeaders headers, HttpBody body, HttpStatus status) {
+        this.protocolVersion = requestLine.getProtocolVersion();
         this.headers = headers;
         this.body = body;
-        this.status = operate(httpRequestLine.getPath(), HttpStatus.OK);
-        this.resourceURL = httpRequestLine.url(status);
-    }
-
-    private HttpStatus operate(final HttpPath path, HttpStatus status) {
-        status = login(path, status, body);
-        return register(path, status, body);
-    }
-
-    private HttpStatus login(final HttpPath path, HttpStatus status, final HttpBody body) {
-        if (!path.getPath().equals("login.html") || body.hasNotBody()) {
-            return status;
-        }
-
-        try {
-            checkAccount();
-            return HttpStatus.FOUND;
-        } catch (DBNotFoundException | PasswordNotMatchException ignore) {
-            return HttpStatus.UNAUTHORIZED;
-        }
-    }
-
-    private void checkAccount() {
-        final Map<String, String> queryParams = body.getQueryParams();
-        final String account = queryParams.get("account");
-        final String password = queryParams.get("password");
-        final User user = InMemoryUserRepository.findByAccount(account).orElseThrow(DBNotFoundException::new);
-
-        logger.debug(account + "님이 접속했습니다.");
-        if (user.checkPassword(password)) {
-            return;
-        }
-        throw new PasswordNotMatchException();
-    }
-
-    private HttpStatus register(final HttpPath path, HttpStatus status, final HttpBody body) {
-        if (!path.getPath().equals("register.html") || body.hasNotBody()) {
-            return status;
-        }
-
-        try {
-            createAccount();
-            return HttpStatus.CREATED;
-        } catch (DBNotFoundException ignored) {
-            return HttpStatus.UNAUTHORIZED;
-        }
-    }
-
-    private void createAccount() {
-        final Map<String, String> queryParams = body.getQueryParams();
-        final String account = queryParams.get("account");
-        final String password = queryParams.get("password");
-        final String email = queryParams.get("email");
-
-        InMemoryUserRepository.save(new User(generateRandomId(), account, password, email));
-        logger.debug(account + "님의 새로운 계정이 생성 되었습니다.");
-    }
-
-    private int generateRandomId() {
-        return ThreadLocalRandom.current()
-            .nextInt(Integer.MAX_VALUE);
+        this.status = status;
+        this.resourceURL = requestLine.url(status);
     }
 
     public byte[] getBytes() throws IOException {

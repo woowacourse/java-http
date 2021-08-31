@@ -90,12 +90,28 @@ public class HttpRequest {
         return new HttpBody(readBody(reader));
     }
 
-    public HttpResponse toHttpResponse() {
-        return new HttpResponse(requestLine, headers, body);
-    }
-
     public boolean isPost() {
         return requestLine.isPost();
+    }
+
+    public boolean isGet() {
+        return requestLine.isGet();
+    }
+
+    public String pathValue() {
+        return requestLine.path().getPath();
+    }
+
+    public HttpMethod getMethod() {
+        return requestLine.getMethod();
+    }
+
+    public URL getResource() {
+        return requestLine.path().findResourceURL();
+    }
+
+    public HttpPath path() {
+        return requestLine.path();
     }
 
     public HttpRequestLine getRequestLine() {
@@ -106,7 +122,7 @@ public class HttpRequest {
         return headers;
     }
 
-    public URL getResource() {
-        return requestLine.getPath().findResourceURL();
+    public HttpBody getBody() {
+        return body;
     }
 }

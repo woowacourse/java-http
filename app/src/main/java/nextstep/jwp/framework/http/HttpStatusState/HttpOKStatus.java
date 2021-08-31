@@ -16,7 +16,7 @@ public class HttpOKStatus extends HttpStatusState {
             return this;
         }
 
-        return new HttpFoundStatus(getStatus(), getPath());
+        return new HttpCreatedStatus(getStatus(), getPath()).state();
     }
 
     @Override

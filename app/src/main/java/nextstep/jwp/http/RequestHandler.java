@@ -79,15 +79,13 @@ public class RequestHandler implements Runnable {
 
     private List<String> parseRequestHeaders() throws IOException {
         final List<String> requestHeaders = new ArrayList<>();
-        String line = inputStreamReader.readLine();
-        while (!"".equals(line)) {
-            requestHeaders.add(line);
-            line = inputStreamReader.readLine();
+        String line;
+        while (!"".equals(line = inputStreamReader.readLine())) {
             if (line == null) {
                 break;
             }
+            requestHeaders.add(line);
         }
-
         return requestHeaders;
     }
 

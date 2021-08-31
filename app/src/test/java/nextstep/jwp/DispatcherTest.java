@@ -10,11 +10,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestHeaders;
 import nextstep.jwp.http.request.RequestLine;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpStatus;
+import nextstep.jwp.model.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +29,11 @@ class DispatcherTest {
     @Test
     void dispatchController() {
         // given
-        final String requestBody = "account=corgi&password=password&email=hkkang%40woowahan.com";
+        final String account = "corgi";
+        final String password = "password";
+        final String email = "hkkang%40woowahan.com";
+
+        final String requestBody = "account=" + account + "&password=" + password + "&email=" + email;
 
         RequestLine requestLine = RequestLine.of("POST /register HTTP/1.1");
         RequestHeaders requestHeaders = RequestHeaders.of(Arrays.asList("Content-Length: " + requestBody.length()));
@@ -40,10 +46,11 @@ class DispatcherTest {
         String responseAsString = new String(httpResponse.responseAsBytes(), StandardCharsets.UTF_8);
 
         // then
-        final String expected = "HTTP/1.1 302 FOUND \r\n" +
+        final String expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: index.html \r\n" +
                 "\r\n";
         assertThat(responseAsString).isEqualTo(expected);
+        InMemoryUserRepository.delete(new User(account, password, email));
     }
 
     @DisplayName("ResourceHandler 요청 처리")
@@ -85,9 +92,9 @@ class DispatcherTest {
 
     @DisplayName("로그인 실패에 Unauthorized 출력")
     @Test
-    void badRequest() throws IOException {
+    void unauthorized() throws IOException {
         // given
-        final String requestBody = "account=corgi&password=password&email=hkkang%40woowahan.com";
+        final String requestBody = "account=account&password=password&email=hkkang%40woowahan.com";
 
         RequestLine requestLine = RequestLine.of("POST /login HTTP/1.1");
         RequestHeaders requestHeaders = RequestHeaders.of(Arrays.asList("Content-Length: " + requestBody.length()));

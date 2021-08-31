@@ -15,7 +15,7 @@ public class HttpResponse {
     }
 
     public void setHttpStatus(HttpStatus httpStatus) {
-        statusLine = String.format(HTTP_REQUEST_LINE_FORMAT, httpStatus.code(), httpStatus.name());
+        statusLine = String.format(HTTP_REQUEST_LINE_FORMAT, httpStatus.code(), httpStatus.status());
     }
 
     public void setContent(String content, String contentType) {

@@ -6,7 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.response.HttpStatus;
+import nextstep.jwp.model.User;
 import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
@@ -93,7 +95,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final String expected = "HTTP/1.1 302 FOUND \r\n" +
+        final String expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: index.html \r\n" +
                 "\r\n";
 
@@ -137,8 +139,12 @@ class RequestHandlerTest {
 
     @Test
     void registerPost() {
+        final String account = "corgi";
+        final String password = "password";
+        final String email = "hkkang%40woowahan.com";
+
         // given
-        final String requestBody = "account=corgi&password=password&email=hkkang%40woowahan.com";
+        final String requestBody = "account=" + account + "&password=" + password + "&email=" + email;
         final String httpRequest = post("/register", requestBody);
 
         final MockSocket socket = new MockSocket(httpRequest);
@@ -148,15 +154,16 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final String expected = "HTTP/1.1 302 FOUND \r\n" +
+        final String expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: index.html \r\n" +
                 "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
+        InMemoryUserRepository.delete(new User(account, password, email));
     }
 
     public static void assertResponse(String output, HttpStatus httpStatus, String body) {
-        String expected = "HTTP/1.1 " + httpStatus.code() + " " + httpStatus.name() + " \r\n" +
+        String expected = "HTTP/1.1 " + httpStatus.code() + " " + httpStatus.status() + " \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + body.getBytes().length + " \r\n" +
                 "\r\n" +

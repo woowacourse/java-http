@@ -28,6 +28,6 @@ public class RegisterController extends AbstractController {
             response.addHeader("Location", "index.html");
             return ModelAndView.of(HttpStatus.FOUND);
         }
-        return ModelAndView.of("/404.html", HttpStatus.NOT_FOUND);
+        return ModelAndView.of("/400.html", HttpStatus.BAD_REQUEST);
     }
 }

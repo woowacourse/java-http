@@ -4,6 +4,7 @@ import nextstep.jwp.http.session.HttpSession;
 import nextstep.jwp.http.session.HttpSessions;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RequestHeaders {
@@ -53,5 +54,22 @@ public class RequestHeaders {
                     .orElse(HttpSessions.createSession());
         }
         return HttpSessions.createSession();
+    }
+
+    public boolean isLoggedIn() {
+        if (requestCookie.containsKey(JSESSIONID)) {
+            return sessionHasUserAttribute();
+        }
+        return false;
+    }
+
+    private boolean sessionHasUserAttribute() {
+        final String sessionId = requestCookie.get(JSESSIONID);
+        final Optional<HttpSession> optionalSession = HttpSessions.getSession(sessionId);
+        if (optionalSession.isEmpty()) {
+            return false;
+        }
+        final HttpSession session = optionalSession.get();
+        return session.hasAttribute("user");
     }
 }

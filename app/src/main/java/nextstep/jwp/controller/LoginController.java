@@ -31,8 +31,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        final HttpSession httpSession = request.getSession();
-        if (httpSession.hasAttribute("user")) {
+        if (request.isLoggedIn()) {
             assignRedirectToResponse(response, "http://localhost:8080/index.html");
             return;
         }

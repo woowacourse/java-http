@@ -38,4 +38,8 @@ public class HttpRequest {
     public HttpSession getSession() {
         return headers.getSession();
     }
+
+    public boolean isLoggedIn() {
+        return headers.isLoggedIn();
+    }
 }

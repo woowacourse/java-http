@@ -6,6 +6,7 @@ import nextstep.jwp.model.httpmessage.response.HttpResponse;
 import nextstep.jwp.view.ModelAndView;
 
 import java.io.IOException;
+import java.lang.ref.ReferenceQueue;
 
 public abstract class AbstractController implements Controller {
     @Override
@@ -24,8 +25,10 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void doGet(HttpRequest request, HttpResponse response, ModelAndView mv) throws IOException {
+        throw new IllegalAccessError("해당 URI에서의 GET 메소드가 존재하지 않습니다. (URI : " + request.getRequestURI() + ")");
     }
 
     protected void doPost(HttpRequest request, HttpResponse response, ModelAndView mv) throws IOException {
+        throw new IllegalAccessError("해당 URI에서의 POST 메소드가 존재하지 않습니다. (URI : " + request.getRequestURI() + ")");
     }
 }

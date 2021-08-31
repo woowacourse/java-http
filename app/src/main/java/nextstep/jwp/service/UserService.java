@@ -26,7 +26,7 @@ public class UserService {
             throw new DuplicateAccountException();
         });
 
-        final User user = new User(2L, account, password, email);
+        final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
     }
 }

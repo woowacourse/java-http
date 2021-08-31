@@ -8,6 +8,7 @@ import nextstep.jwp.web.HttpResponse;
 import nextstep.jwp.web.HttpStatus;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -52,10 +53,11 @@ public class LoginController extends AbstractController {
     }
 
     private void loginPageProcess(HttpResponse response) throws IOException {
-        String loginHtmlPath = getClass().getClassLoader().getResource("static/login.html").getPath();
+        URL resource = getClass().getClassLoader().getResource("static/login.html");
+        String loginHtmlPath = resource.getPath();
 
         response.status(HttpStatus.OK)
-                .contentType("text/html;charset=utf-8")
+                .contentType(ContentType.toHttpNotationFromFileExtension(resource.getFile()))
                 .body(new String(Files.readAllBytes(Path.of(loginHtmlPath))));
     }
 }

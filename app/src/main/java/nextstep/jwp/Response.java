@@ -11,4 +11,11 @@ public class Response {
         this.responseBody = responseBody;
     }
 
+
+    public String getResponseToString() {
+        return String.join("\r\n",
+                responseLine.getResponseLine(),
+                responseHeader.getResponseHeader(),
+                responseBody.getResponseBody());
+    }
 }

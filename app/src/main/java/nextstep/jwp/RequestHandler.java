@@ -1,12 +1,9 @@
 package nextstep.jwp;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.Objects;
 import java.util.Optional;
 import nextstep.jwp.model.User;
@@ -89,55 +86,37 @@ public class RequestHandler implements Runnable {
 
 
     private String replyAfterLogin302Response(String responseBody, String location) {
-        final String response = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: " + location + " ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        log.debug("302 Content-Length: " + responseBody.getBytes().length);
-        return response;
+        return new Response(
+                new ResponseLine("302", "Found"),
+                new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.HTML,
+                        responseBody.getBytes().length).
+                        location(location).build(),
+                ResponseBody.createByString(responseBody)).getResponseToString();
     }
 
     private String replyOkResponse(String responseBody) {
-        final String response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        log.debug("OK Content-Length: " + responseBody.getBytes().length);
-        return response;
+        return new Response(
+                new ResponseLine("200", "OK"),
+                new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.HTML,
+                        responseBody.getBytes().length).build(),
+                ResponseBody.createByString(responseBody)).getResponseToString();
     }
 
     private String replyOkCssResponse(String responseBody) {
-        final String response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/css;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        log.debug("CSS OK Content-Length: " + responseBody.getBytes().length);
-        return response;
+        return new Response(
+                new ResponseLine("200", "OK"),
+                new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.CSS,
+                        responseBody.getBytes().length).build(),
+                ResponseBody.createByString(responseBody)).getResponseToString();
     }
 
     private String replyOkJsResponse(String responseBody) {
-        final String response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: application/js;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-        log.debug("JS OK Content-Length: " + responseBody.getBytes().length);
-        return response;
+        return new Response(
+                new ResponseLine("200", "OK"),
+                new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.JS,
+                        responseBody.getBytes().length).build(),
+                ResponseBody.createByString(responseBody)).getResponseToString();
     }
-
-    private String getStaticFileContents(String path) throws IOException {
-        URL resource = getClass().getClassLoader().getResource("static" + path);
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-    }
-
 
     private void close() {
         try {

@@ -10,15 +10,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InMemoryUserRepository {
 
     private final Map<String, User> database;
-    private Long autoIncrementId;
+    private long autoIncrementId;
 
-    public InMemoryUserRepository(Map<String, User> database, Long autoIncrementId) {
+    public InMemoryUserRepository(Map<String, User> database, long autoIncrementId) {
         this.database = database;
         this.autoIncrementId = autoIncrementId;
     }
 
     public static InMemoryUserRepository initialize() {
-        Long id = 1L;
+        long id = 1L;
         User user = new User(id++, "gugu", "password", "hkkang@woowahan.com");
 
         Map<String, User> database = new ConcurrentHashMap<>();

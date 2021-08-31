@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private final static int NONE_QUERY = -1;
+    private static final int NONE_QUERY = -1;
 
     private final List<String> headerLines;
 

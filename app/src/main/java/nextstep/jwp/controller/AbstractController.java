@@ -6,9 +6,6 @@ import nextstep.jwp.util.Methods;
 
 public abstract class AbstractController implements Controller {
 
-    public AbstractController() {
-    }
-
     @Override
     public void service(HttpRequest request, HttpResponse response) throws Exception {
         if (Methods.isGet(request.method())) {

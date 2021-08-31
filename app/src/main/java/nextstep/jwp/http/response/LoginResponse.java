@@ -9,9 +9,6 @@ public class LoginResponse {
     private static final String SUCCESS = "/index";
     private static final String FAIL = "/401";
 
-    public LoginResponse() {
-    }
-
     public String successResponse() throws IOException {
         final ViewResolver viewResolver = new ViewResolver(SUCCESS);
         final String responseBody = viewResolver.staticValue("html");

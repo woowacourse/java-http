@@ -15,6 +15,7 @@ public class LoginController extends AbstractController {
         this.loginService = loginService;
     }
 
+    @Override
     public void doPost(HttpRequest request, HttpResponse response) throws Exception {
         final boolean isSuccess = loginService.login(request);
         final LoginResponse loginResponse = new LoginResponse();
@@ -22,6 +23,7 @@ public class LoginController extends AbstractController {
         response.setResponse(loginResult);
     }
 
+    @Override
     public void doGet(HttpRequest request, HttpResponse response) throws Exception {
         final GeneralResponse generalResponse = new GeneralResponse(request);
         response.setResponse(generalResponse.getResponse());

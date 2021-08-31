@@ -92,11 +92,18 @@ public class RequestHandler implements Runnable {
                         queryMap.get("account"),
                         queryMap.get("password"),
                         queryMap.get("email"));
-                InMemoryUserRepository.save(user);
 
-                responseStatusCode = HTTP_STATUS_200;
-                responseBody = createStaticFileResponseBody("/index.html");
-                response = create200Response(responseStatusCode, responseBody, ContentTypeMapper.extractContentType(resource));
+                Optional<User> account = InMemoryUserRepository.findByAccount(queryMap.get("account"));
+                if (account.isPresent()) {
+                    responseStatusCode = HTTP_STATUS_401;
+                    responseBody = createStaticFileResponseBody("/401.html");
+                    response = create200Response(responseStatusCode, responseBody, ContentTypeMapper.extractContentType(resource));
+
+                } else {
+                    InMemoryUserRepository.save(user);
+                    responseStatusCode = HTTP_STATUS_302;
+                    response = create302Response(responseStatusCode, "/index.html");
+                }
             }
             outputStream.write(response.getBytes());
             outputStream.flush();

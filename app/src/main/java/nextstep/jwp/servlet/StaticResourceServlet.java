@@ -9,6 +9,7 @@ import nextstep.jwp.tomcat.Servlet;
 public class StaticResourceServlet extends Servlet {
 
     public StaticResourceServlet() {
+        super("/");
     }
 
     @Override

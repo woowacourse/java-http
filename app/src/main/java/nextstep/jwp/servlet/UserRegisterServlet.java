@@ -11,7 +11,7 @@ import nextstep.jwp.tomcat.Servlet;
 public class UserRegisterServlet extends Servlet {
 
     public UserRegisterServlet() {
-        this.requestMappingUri = "/register";
+        super("/register");
     }
 
     @Override

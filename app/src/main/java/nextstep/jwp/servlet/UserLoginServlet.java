@@ -12,7 +12,7 @@ import nextstep.jwp.tomcat.Servlet;
 public class UserLoginServlet extends Servlet {
 
     public UserLoginServlet() {
-        this.requestMappingUri = "/login";
+        super("/login");
     }
 
     @Override

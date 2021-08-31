@@ -9,8 +9,12 @@ import org.slf4j.LoggerFactory;
 
 public abstract class Servlet {
 
-    protected String requestMappingUri;
+    protected final String requestMappingUri;
     protected Logger log = LoggerFactory.getLogger(RequestHandler.class);
+
+    public Servlet(String requestMappingUri) {
+        this.requestMappingUri = requestMappingUri;
+    }
 
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
 

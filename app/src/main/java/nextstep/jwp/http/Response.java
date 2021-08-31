@@ -1,5 +1,7 @@
 package nextstep.jwp.http;
 
+import java.nio.charset.StandardCharsets;
+
 public class Response {
 
     private static final String NEW_LINE = "\r\n";
@@ -12,7 +14,7 @@ public class Response {
     }
 
     public byte[] getBytes() {
-        return message.getBytes();
+        return message.getBytes(StandardCharsets.UTF_8);
     }
 
     public static Response create200OK(Request request, String responseBody) {
@@ -25,10 +27,10 @@ public class Response {
         return new Response(message);
     }
 
-    public static Response create302Found(Request request, String location) {
+    public static Response create302Found(String location) {
         String message = String.join(NEW_LINE,
             "HTTP/1.1 302 Found ",
-            "Location: " + request.getParameter("Host") + location
+            "Location: " + location
         );
         return new Response(message);
     }
@@ -38,26 +40,6 @@ public class Response {
             "HTTP/1.1 400 Bad Request ",
             "",
             errorMessage);
-        return new Response(message);
-    }
-
-    public static Response create500InternalServerError(String responseBody) {
-        String message = String.join(NEW_LINE,
-            "HTTP/1.1 500 Internal Server Error",
-            "Content-Type: text/html;charset=utf-8 ",
-            CONTENT_LENGTH + responseBody.getBytes().length + " ",
-            "",
-            responseBody);
-        return new Response(message);
-    }
-
-    public static Response create404NotFound(String responseBody) {
-        String message = String.join(NEW_LINE,
-            "HTTP/1.1 404 Not Found",
-            "Content-Type: text/html;charset=utf-8 ",
-            CONTENT_LENGTH + responseBody.getBytes().length + " ",
-            "",
-            responseBody);
         return new Response(message);
     }
 

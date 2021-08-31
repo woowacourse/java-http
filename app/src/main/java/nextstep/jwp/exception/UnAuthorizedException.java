@@ -1,10 +1,10 @@
 package nextstep.jwp.exception;
 
-public class UnauthorizedException extends RuntimeException {
+public class UnAuthorizedException extends RuntimeException {
 
     private static final String MESSAGE = "허용되지 않은 유저입니다.";
 
-    public UnauthorizedException() {
+    public UnAuthorizedException() {
         super(MESSAGE);
     }
 }

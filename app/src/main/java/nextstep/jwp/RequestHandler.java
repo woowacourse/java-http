@@ -15,7 +15,7 @@ import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.BadRequestMessageException;
 import nextstep.jwp.exception.NotFoundException;
-import nextstep.jwp.exception.UnauthorizedException;
+import nextstep.jwp.exception.UnAuthorizedException;
 import nextstep.jwp.exception.UsernameConflictException;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.Request;
@@ -62,17 +62,16 @@ public class RequestHandler implements Runnable {
             final Request request = createdRequest(bufferedReader);
             return response(request);
         } catch (BadRequestMessageException exception) {
-            log.error("잘못된 요청이 들어옴");
             return Response.create400BadRequest(exception.getMessage());
         } catch (NotFoundException exception) {
-            log.error(exception.getMessage());
-            return Response.create404NotFound(getResponseBody("static/404.html"));
+            return Response.create302Found("/404.html");
         } catch (UsernameConflictException exception) {
             return Response.create409Conflict(exception.getMessage());
-        }
-        catch (Exception exception) {
-            log.error("알수없는 에러가 발생");
-            return Response.create500InternalServerError(getResponseBody("static/500.html"));
+        } catch (UnAuthorizedException exception) {
+            return Response.create302Found("/401.html");
+        } catch (Exception exception) {
+            log.error("알수없는 에러가 발생 : {}", exception.getMessage());
+            return Response.create302Found("500.html");
         }
     }
 
@@ -95,7 +94,7 @@ public class RequestHandler implements Runnable {
                 .body(body)
                 .build();
         } catch (Exception e) {
-            log.debug("Request Error : {}", e.getMessage());
+            log.error("Request Error : {}", e.getMessage());
             throw new BadRequestMessageException();
         }
     }
@@ -164,12 +163,12 @@ public class RequestHandler implements Runnable {
         if (request.isUriMatch("/login")) {
             User user = InMemoryUserRepository
                 .findByAccount(request.getRequestBody("account"))
-                .orElseThrow(UnauthorizedException::new);
+                .orElseThrow(UnAuthorizedException::new);
             if (user.checkPassword(request.getRequestBody("password"))) {
-                log.debug("{} login success", user.getAccount());
-                return Response.create302Found(request, "/index.html");
+                log.info("{} login success", user.getAccount());
+                return Response.create302Found("/index.html");
             }
-            throw new UnauthorizedException();
+            throw new UnAuthorizedException();
         }
         if (request.isUriMatch("/register")) {
             String account = request.getRequestBody("account");
@@ -177,8 +176,8 @@ public class RequestHandler implements Runnable {
             String email = request.getRequestBody("email");
             User user = new User(0, account, password, email);
             InMemoryUserRepository.save(user);
-            log.debug("{} user create success", user.getAccount());
-            return Response.create302Found(request, "/index.html");
+            log.info("{} user create success", user.getAccount());
+            return Response.create302Found("/index.html");
         }
         throw new NotFoundException(request);
     }

@@ -39,7 +39,7 @@ public class Request {
     }
 
     public String acceptType() {
-        return header.acceptType();
+        return header.acceptType(uri);
     }
 
     public String getUri() {

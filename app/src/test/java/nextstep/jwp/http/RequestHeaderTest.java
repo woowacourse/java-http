@@ -44,7 +44,7 @@ class RequestHeaderTest {
         // given
         RequestHeader requestHeader = getHeader(target);
         // when
-        String accept = requestHeader.acceptType();
+        String accept = requestHeader.acceptType(Uri.valueOf(expected));
         // then
         assertThat(accept).isEqualTo(expected);
     }

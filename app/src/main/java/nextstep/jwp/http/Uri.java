@@ -14,14 +14,14 @@ public class Uri {
         this.queryString = queryString;
     }
 
-    public static Uri valueOf(@Nonnull String pullUri) {
-        int index = pullUri.indexOf("?");
+    public static Uri valueOf(@Nonnull String fullUri) {
+        int index = fullUri.indexOf("?");
         if (index == -1) {
-            return new Uri(pullUri, new HashMap<>());
+            return new Uri(fullUri, new HashMap<>());
         }
         Map<String, String> queryString = new HashMap<>();
-        String uri = pullUri.substring(0, index);
-        for (String query : pullUri.substring(index + 1).split("&")) {
+        String uri = fullUri.substring(0, index);
+        for (String query : fullUri.substring(index + 1).split("&")) {
             String[] keyValue = query.split("=");
             String key = keyValue[0];
             String value = keyValue[1];

@@ -1,6 +1,5 @@
 package nextstep.jwp.http.request;
 
-import nextstep.jwp.exception.UnAuthorizedException;
 import nextstep.jwp.http.session.HttpSession;
 import nextstep.jwp.http.session.HttpSessions;
 
@@ -51,7 +50,7 @@ public class RequestHeaders {
         if (requestCookie.containsKey(JSESSIONID)) {
             final String sessionId = requestCookie.get(JSESSIONID);
             return HttpSessions.getSession(sessionId)
-                    .orElseThrow(() -> new UnAuthorizedException("유효하지 않은 세션 id 입니다."));
+                    .orElse(HttpSessions.createSession());
         }
         return HttpSessions.createSession();
     }

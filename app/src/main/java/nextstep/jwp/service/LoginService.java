@@ -4,6 +4,7 @@ import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.LoginException;
 import nextstep.jwp.model.Request;
+import nextstep.jwp.model.Session;
 import nextstep.jwp.model.User;
 
 public class LoginService {
@@ -18,6 +19,8 @@ public class LoginService {
             String password = queries.get(PASSWORD);
             User user = getUser(account);
             checkPassword(user, password);
+            Session session = request.getSession();
+            session.setAttribute("user", user);
         } catch (IndexOutOfBoundsException | NullPointerException exception) {
             throw new LoginException("잘못된 로그인입니다.");
         }
@@ -30,6 +33,8 @@ public class LoginService {
             String password = queries.get(PASSWORD);
             User user = getUser(account);
             checkPassword(user, password);
+            Session session = request.getSession();
+            session.setAttribute("user", user);
         } catch (IndexOutOfBoundsException | NullPointerException exception) {
             throw new LoginException("잘못된 로그인입니다.");
         }

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Optional;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.junit.jupiter.api.Test;
@@ -17,9 +18,9 @@ class RequestHandlerTest {
     void run() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET / HTTP/1.1",
-                "Host: localhost:8080",
-                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
+                "GET / HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 "");
 
@@ -43,7 +44,7 @@ class RequestHandlerTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 "");
 
@@ -68,7 +69,7 @@ class RequestHandlerTest {
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 "");
 
@@ -93,7 +94,7 @@ class RequestHandlerTest {
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 "");
 
@@ -115,7 +116,7 @@ class RequestHandlerTest {
                 "GET /login?account=gugu&password=notpassword HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 "");
 
@@ -139,7 +140,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: " + requestBody.getBytes().length + " ",
-                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 requestBody);
 
@@ -163,7 +164,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: " + requestBody.getBytes().length + " ",
-                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 requestBody);
 
@@ -185,7 +186,7 @@ class RequestHandlerTest {
                 "GET /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 "");
 
@@ -212,7 +213,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: " + requestBody.getBytes().length + " ",
-                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 requestBody);
 
@@ -241,7 +242,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: " + requestBody.getBytes().length + " ",
-                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 requestBody);
 
@@ -265,7 +266,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: " + requestBody.getBytes().length + " ",
-                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 requestBody);
 
@@ -288,7 +289,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Accept: text/css,*/*;q=0.1",
                 "Connection: keep-alive ",
-                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 "");
 
@@ -314,7 +315,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Accept: */*",
                 "Connection: keep-alive ",
-                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 "");
 
@@ -340,7 +341,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Accept: */*",
                 "Connection: keep-alive ",
-                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 "");
 
@@ -366,7 +367,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Accept: */*",
                 "Connection: keep-alive ",
-                "Cookie: JSESSIONID=bdd5e5a4-9ace-44b2-b03f-9bac2694627c",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 "");
 
@@ -402,6 +403,39 @@ class RequestHandlerTest {
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "Set-Cookie: JSESSIONID=";
         assertThat(output).startsWith(expected);
+    }
+
+    @Test
+    void loginAgain() {
+        // given
+        final String requestBody = "account=gugu&password=password";
+        final UUID uuid = UUID.randomUUID();
+        final String firstRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + requestBody.getBytes().length + " ",
+                "Cookie: JSESSIONID=" + uuid + " ",
+                "",
+                requestBody);
+        runRequestHandler(firstRequest);
+        final String secondRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=" + uuid + " ",
+                "",
+                "");
+
+        // when
+        String output = runRequestHandler(secondRequest);
+
+        // then
+        String expected = "HTTP/1.1 302 FOUND \r\n" +
+                "Location: /index.html \r\n" +
+                "\r\n" +
+                "";
+        assertThat(output).isEqualTo(expected);
     }
 
     private String runRequestHandler(String httpRequest) {

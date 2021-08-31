@@ -30,11 +30,12 @@ class RegisterControllerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
-        String expected = "HTTP/1.1 200 OK" + LINE_SEPARATOR +
-                "Content-Length: 4319" + LINE_SEPARATOR +
-                "Content-Type: text/html;charset=utf-8" + LINE_SEPARATOR +
-                LINE_SEPARATOR +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        byte[] expectedBody = Files.readAllBytes(new File(resource.getFile()).toPath());
+        String expected = String.join(LINE_SEPARATOR,
+                "HTTP/1.1 200 OK",
+                "Content-Length: " + expectedBody.length,
+                "Content-Type: text/html;charset=utf-8" + LINE_SEPARATOR,
+                new String(expectedBody));
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -42,10 +43,11 @@ class RegisterControllerTest {
     @Test
     void register() {
         // given
-        final String httpRequest = "POST /register HTTP/1.1" + LINE_SEPARATOR +
-                "Content-Length: 55" + LINE_SEPARATOR +
-                LINE_SEPARATOR +
-                "account=kimkim&password=password&email=kimkim@woowa.com";
+        String requestBody = "account=kimkim&password=password&email=kimkim@woowa.com";
+        final String httpRequest = String.join(LINE_SEPARATOR,
+                "POST /register HTTP/1.1",
+                "Content-Length: " + requestBody.length() + LINE_SEPARATOR,
+                requestBody);
 
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);

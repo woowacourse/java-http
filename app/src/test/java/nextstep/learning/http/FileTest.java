@@ -38,7 +38,8 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final Path path = Path.of(Objects.requireNonNull(this.getClass().getClassLoader().getResource(fileName)).getPath());
+        final Path path = Path.of(
+                Objects.requireNonNull(this.getClass().getClassLoader().getResource(fileName)).getPath());
 
         // todo
         List<String> actual = null;

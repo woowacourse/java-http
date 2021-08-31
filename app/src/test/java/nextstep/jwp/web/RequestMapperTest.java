@@ -1,10 +1,11 @@
-package nextstep.jwp.http;
+package nextstep.jwp.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.stream.Stream;
 import nextstep.jwp.exception.NotFoundException;
+import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.web.controller.Controller;
 import nextstep.jwp.web.controller.HomeController;
 import nextstep.jwp.web.controller.LoginController;

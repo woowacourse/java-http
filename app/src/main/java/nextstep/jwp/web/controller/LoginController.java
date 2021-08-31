@@ -3,12 +3,12 @@ package nextstep.jwp.web.controller;
 import static nextstep.jwp.http.HttpResponse.found;
 
 import java.io.IOException;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.RequestParam;
 import nextstep.jwp.http.ViewResolver;
-import nextstep.jwp.model.User;
+import nextstep.jwp.web.db.InMemoryUserRepository;
+import nextstep.jwp.web.model.User;
 
 public class LoginController extends AbstractController {
 

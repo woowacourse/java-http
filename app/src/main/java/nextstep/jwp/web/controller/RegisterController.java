@@ -1,12 +1,12 @@
 package nextstep.jwp.web.controller;
 
 import java.io.IOException;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.RequestParam;
 import nextstep.jwp.http.ViewResolver;
-import nextstep.jwp.model.User;
+import nextstep.jwp.web.db.InMemoryUserRepository;
+import nextstep.jwp.web.model.User;
 
 public class RegisterController extends AbstractController {
 

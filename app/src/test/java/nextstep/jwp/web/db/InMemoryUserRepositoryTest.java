@@ -1,10 +1,10 @@
-package nextstep.jwp.db;
+package nextstep.jwp.web.db;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Optional;
-import nextstep.jwp.model.User;
+import nextstep.jwp.web.model.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

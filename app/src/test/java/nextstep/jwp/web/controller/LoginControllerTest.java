@@ -3,11 +3,11 @@ package nextstep.jwp.web.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.ViewResolver;
-import nextstep.jwp.model.User;
+import nextstep.jwp.web.db.InMemoryUserRepository;
+import nextstep.jwp.web.model.User;
 import org.junit.jupiter.api.Test;
 
 class LoginControllerTest {

@@ -3,6 +3,7 @@ package nextstep.jwp.http;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +16,7 @@ public class HttpRequest {
     private final HttpRequestHeader header;
     private final HttpRequestBody body;
 
-    private HttpRequest(final HttpRequestHeader header, final HttpRequestBody body) {
+    public HttpRequest(final HttpRequestHeader header, final HttpRequestBody body) {
         this.header = header;
         this.body = body;
     }

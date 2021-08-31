@@ -10,7 +10,7 @@ public enum ContentType {
     CSS( "text/css", path -> path.endsWith(".css")),
     JS("text/js", path -> path.endsWith(".js")),
     ICO("image/x-icon", path -> path.endsWith(".ico")),
-    NONE("text/html", path -> !path.matches(".*?\\..*"));
+    NONE("text/html", path -> true);
 
     private final String mimeType;
     private final Predicate<String> expression;

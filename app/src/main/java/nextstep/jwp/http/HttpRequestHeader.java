@@ -7,7 +7,7 @@ import static nextstep.jwp.http.HttpRequest.*;
 public class HttpRequestHeader {
     private static final String CONTENT_LENGTH_HEADER = "Content-Length: ";
     private static final String QUERY_PARAMETER_DELIMITER = "?";
-    private static final String SPACE = " ";
+    private static final String SPACE_DELIMITER = " ";
 
     private final String httpMethod;
     private final String protocol;
@@ -20,7 +20,7 @@ public class HttpRequestHeader {
             throw new IllegalStateException();
         }
 
-        final String[] requestHeaderFirstLine = requestHeaders.get(0).split(SPACE);
+        final String[] requestHeaderFirstLine = requestHeaders.get(0).split(SPACE_DELIMITER);
         final String requestHttpMethod = requestHeaderFirstLine[0];
         final String requestProtocol = requestHeaderFirstLine[2];
         final String requestUri = requestHeaderFirstLine[1];
@@ -29,7 +29,7 @@ public class HttpRequestHeader {
 
         this.httpMethod = requestHttpMethod;
         this.protocol = requestProtocol;
-        this.path = trimPath(requestUri, requestHttpMethod);
+        this.path = adjustPath(requestUri, requestHttpMethod);
         this.queryParameters = requestQueryParameters;
         this.contentLength = requestContentLength;
     }
@@ -60,7 +60,7 @@ public class HttpRequestHeader {
         return newQueryParameters;
     }
 
-    private String trimPath(final String path, final String httpMethod) {
+    private String adjustPath(final String path, final String httpMethod) {
         if ("/".equals(path)) {
             return "/index.html";
         }

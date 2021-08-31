@@ -1,19 +1,18 @@
 package nextstep.jwp.web.controller;
 
-import static nextstep.jwp.http.HttpResponse.redirect;
-import static nextstep.jwp.http.ViewResolver.resolveView;
-
 import java.io.IOException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.RequestParam;
+import nextstep.jwp.http.ViewResolver;
 import nextstep.jwp.model.User;
 
 public class RegisterController extends AbstractController {
 
     @Override
     protected String doGet(HttpRequest httpRequest) throws IOException {
-        return resolveView("register");
+        return ViewResolver.resolveView("register");
     }
 
     @Override
@@ -26,6 +25,6 @@ public class RegisterController extends AbstractController {
         User user = new User(null, account, password, email);
         InMemoryUserRepository.save(user);
 
-        return redirect("/index.html");
+        return HttpResponse.redirect("/index.html");
     }
 }

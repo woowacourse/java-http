@@ -31,5 +31,4 @@ public class LoginController extends AbstractController {
 
         return found("/index.html");
     }
-
 }

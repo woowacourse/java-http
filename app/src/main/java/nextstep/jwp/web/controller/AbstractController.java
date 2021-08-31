@@ -5,6 +5,7 @@ import nextstep.jwp.exception.MethodNotAllowedException;
 import nextstep.jwp.http.HttpRequest;
 
 public abstract class AbstractController implements Controller {
+
     @Override
     public String doService(HttpRequest httpRequest) throws IOException {
         String method = httpRequest.method();

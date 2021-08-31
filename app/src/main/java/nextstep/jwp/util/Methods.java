@@ -11,10 +11,10 @@ public enum Methods {
     }
 
     public static boolean isGet(String targetMethod) {
-        return "GET".equals(targetMethod);
+        return GET.name().equalsIgnoreCase(targetMethod);
     }
 
     public static boolean isPost(String targetMethod) {
-        return "POST".equals(targetMethod);
+        return POST.name().equalsIgnoreCase(targetMethod);
     }
 }

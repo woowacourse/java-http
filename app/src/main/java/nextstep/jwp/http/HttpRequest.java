@@ -1,11 +1,13 @@
 package nextstep.jwp.http;
 
+import static java.util.stream.Collectors.toMap;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +23,7 @@ public class HttpRequest {
 
     public static HttpRequest readFromInputStream(InputStream inputStream) throws IOException {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        final List<String> headerLine = new LinkedList<>();
+        final List<String> headerLine = new ArrayList<>();
         while (reader.ready()) {
             final String oneLine = reader.readLine();
             headerLine.add(oneLine);
@@ -47,21 +49,11 @@ public class HttpRequest {
         return rawURL.substring(0, index);
     }
 
-    public String getRequestURL() {
-        final String firstLine = headerLines.get(0);
-        final String[] splitFirstLine = firstLine.split(" ");
-        return splitFirstLine[1];
-    }
-
     public Map<String, String> body() {
         final String rawBody = headerLines.get(headerLines.size() - 1);
-        final String[] splitBody = rawBody.split("&");
-        final Map<String, String> bodyQuery = new HashMap<>();
-        for (String singleBody : splitBody) {
-            final String[] unitBody = singleBody.split("=");
-            bodyQuery.put(unitBody[0], unitBody[1]);
-        }
-        return bodyQuery;
+        return Arrays.stream(rawBody.split("&"))
+            .map(singleBody -> singleBody.split("="))
+            .collect(toMap(unitBody -> unitBody[0], unitBody -> unitBody[1]));
     }
 
     public boolean isResource() {

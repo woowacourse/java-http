@@ -1,5 +1,7 @@
-package nextstep.jwp;
+package nextstep.jwp.controller;
 
+import nextstep.jwp.MockSocket;
+import nextstep.jwp.RequestHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -10,19 +12,17 @@ import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class RequestHandlerTest {
+class StaticResourceControllerTest {
     public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     @Test
-    @DisplayName("/index.html에 대한 요청을 보내 RequestHandler가 정상 실행되는지 테스트한다.")
-    void index() throws IOException {
+    @DisplayName("요청 URL로부터 정적 파일에 대한 요청인지 구분하여 정상 처리할 수 있다.")
+    void requestStaticFile() throws IOException {
         // given
         final String httpRequest = String.join(LINE_SEPARATOR,
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+                "Connection: keep-alive ");
 
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
@@ -33,7 +33,6 @@ class RequestHandlerTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         byte[] expectedBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-
         String expected = String.join(LINE_SEPARATOR,
                 "HTTP/1.1 200 OK",
                 "Content-Length: " + expectedBody.length,

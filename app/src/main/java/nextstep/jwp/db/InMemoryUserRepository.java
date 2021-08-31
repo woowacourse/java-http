@@ -10,14 +10,18 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
+    private static Long nextId = 1L;
 
     static {
-        final User user = new User(1, "gugu", "password", "hkkang@woowahan.com");
-        database.put(user.getAccount(), user);
+        final User user = new User("gugu", "password", "hkkang@woowahan.com");
+        save(user);
     }
 
-    public static void save(User user) {
-        database.put(user.getAccount(), user);
+    public static User save(User user) {
+        User persistedUser = new User(nextId++, user.getAccount(), user.getPassword(), user.getEmail());
+        database.put(persistedUser.getAccount(), persistedUser);
+
+        return persistedUser;
     }
 
     public static Optional<User> findByAccount(String account) {

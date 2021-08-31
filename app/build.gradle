@@ -1,6 +1,7 @@
 plugins {
     id 'application'
     id 'org.sonarqube' version '3.3'
+    id "jacoco"
 }
 
 sourceCompatibility = JavaVersion.VERSION_11
@@ -8,6 +9,32 @@ targetCompatibility = JavaVersion.VERSION_11
 
 repositories {
     mavenCentral()
+}
+
+jacoco {
+    toolVersion = "0.8.5"
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        xml.destination(new File("jacoco/jacoco.xml"))
+    }
+    finalizedBy jacocoTestCoverageVerification
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            element = 'CLASS'
+            excludes = ["**.JwpApplication", "**.WebServer", "**.AbstractController"]
+        }
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    finalizedBy(jacocoTestReport)
 }
 
 dependencies {
@@ -24,15 +51,12 @@ application {
     mainClass = 'nextstep.jwp.JwpApplication'
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
-}
-
 sonarqube {
     properties {
         property "sonar.sourceEncoding", "UTF-8"
         property "sonar.projectKey", "woowacourse_be-jwp-http-server"
         property "sonar.organization", "woowacourse"
         property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.coverage.jacoco.xmlReportPaths", "jacoco/jacoco.xml"
     }
 }

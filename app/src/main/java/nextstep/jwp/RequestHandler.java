@@ -19,6 +19,7 @@ import java.util.Optional;
 public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final String HTTP_STATUS_200 = "200 OK";
 
     private final Socket connection;
 
@@ -37,7 +38,6 @@ public class RequestHandler implements Runnable {
             HttpRequestHeader httpRequestHeader = new HttpRequestHeader(br);
             String method = httpRequestHeader.getMethod();
             String resource = httpRequestHeader.getResource();
-            System.out.println(resource);
             Map<String, String> httpRequestHeaders = httpRequestHeader.getHeaders();
 
             String responseHeader = "";
@@ -45,21 +45,21 @@ public class RequestHandler implements Runnable {
 
             if (resource.equals("/")) {
                 responseBody = "Hello world!";
-                responseHeader = "200 OK";
+                responseHeader = HTTP_STATUS_200;
             }
 
             if (resource.contains(".")) {
                 responseBody = createResponseBody(resource);
-                responseHeader = "200 OK";
+                responseHeader = HTTP_STATUS_200;
             }
 
             if (method.equals("GET") && resource.equals("/register")) {
                 responseBody = createResponseBody("/register.html");
-                responseHeader = "200 OK";
+                responseHeader = HTTP_STATUS_200;
             }
             if (method.equals("POST") && resource.equals("/register")) {
                 responseBody = createResponseBody("/index.html");
-                responseHeader = "200 OK";
+                responseHeader = HTTP_STATUS_200;
 
                 int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
                 char[] buffer = new char[contentLength];
@@ -67,7 +67,7 @@ public class RequestHandler implements Runnable {
                 String queries = new String(buffer);
 
                 Map<String, String> queryMap = createQueryMap(queries);
-                User user = new User(InMemoryUserRepository.size() + 1,
+                User user = new User(InMemoryUserRepository.size() + 1L,
                         queryMap.get("account"),
                         queryMap.get("email"),
                         queryMap.get("password"));
@@ -117,13 +117,12 @@ public class RequestHandler implements Runnable {
     }
 
     private String createResponse(String responseHeader, String responseBody, String contentType) {
-        final String response = String.join("\r\n",
+        return String.join("\r\n",
                 "HTTP/1.1 " + responseHeader + " ",
-                "Content-Type: " + contentType,
+                "Content-Type: " + contentType + " ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
-        return response;
     }
 
     private void close() {

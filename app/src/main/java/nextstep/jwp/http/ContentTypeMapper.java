@@ -3,7 +3,7 @@ package nextstep.jwp.http;
 import java.util.Arrays;
 
 public enum ContentTypeMapper {
-    HTML(".html", "text/html;charset=utf-8 "),
+    HTML(".html", "text/html;charset=utf-8"),
     CSS(".css", "text/css"),
     JAVASCRIPT(".js", "application/javascript; charset=UTF-8"),
     ICON(".ico", "image/x-icon");

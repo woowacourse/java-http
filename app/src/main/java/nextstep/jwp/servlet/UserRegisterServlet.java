@@ -1,12 +1,10 @@
 package nextstep.jwp.servlet;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.reponse.HttpResponse;
+import nextstep.jwp.http.reponse.HttpStatus;
+import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.model.User;
 import nextstep.jwp.tomcat.Servlet;
 
@@ -17,34 +15,25 @@ public class UserRegisterServlet extends Servlet {
     }
 
     @Override
-    public void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
-        saveUser(httpRequest);
-
-        httpResponse.addStartLine("HTTP/1.1", "302", "Found");
-        httpResponse.addContentType("text/html;charset=utf-8");
-        httpResponse.addLocation("index.html");
+    public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+        httpResponse.setStatus(HttpStatus.OK);
+        httpResponse.addFile("/register.html");
     }
 
-    private void saveUser(HttpRequest httpRequest) {
-        Map<String, String> parsedFormData = parseFormData(httpRequest);
-        InMemoryUserRepository.save(
-            new User(parsedFormData.get("account"), parsedFormData.get("password"), parsedFormData.get("email"))
+    @Override
+    public void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+        User user = new User(
+            httpRequest.getParameter("account"),
+            httpRequest.getParameter("password"),
+            httpRequest.getParameter("email")
         );
 
-        User user = InMemoryUserRepository.findByAccount(parsedFormData.get("account"))
-            .orElseThrow(IllegalArgumentException::new);
-        log.debug("회원 가입 완료! 유저 정보 : {}", user);
-    }
+        InMemoryUserRepository.save(user);
+        log.info("회원 가입 완료! 유저 정보 : {}", user);
 
-    private Map<String, String> parseFormData(HttpRequest httpRequest) {
-        Map<String, String> params = new HashMap<>();
-        List<String> split = Arrays.asList(httpRequest.getBody().split("&"));
-
-        split.stream().forEach(it -> {
-            String[] split1 = it.split("=");
-            params.put(split1[0], split1[1]);
-        });
-        return params;
+        httpResponse.setStatus(HttpStatus.FOUND);
+        httpResponse.setHeader("Content-Type", "text/html;charset=utf-8");
+        httpResponse.setHeader("Location", "index.html");
     }
 
 }

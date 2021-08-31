@@ -114,4 +114,60 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("\"GET /register\" 요청을 보내면, register.html 파일을 응답한다.")
+    @Test
+    void register_html() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+            "GET /register HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "",
+            "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        String expected = "HTTP/1.1 200 OK \r\n" +
+            "Content-Length: 4319 \r\n" +
+            "Content-Type: text/html;charset=utf-8 \r\n" +
+            "\r\n" +
+            new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("유효한 로그인 정보가 담긴 form 데이터와 함께 \"POST /register\" 요청을 보내면, 로그인을 진행하고, index.html로 리다이렉트 한다.")
+    @Test
+    void register() {
+        // given
+        final String httpRequest = String.join("\r\n",
+            "POST /register HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "Content-Length: 80",
+            "Content-Type: application/x-www-form-urlencoded",
+            "Accept: */*",
+            "",
+            "account=gugu&password=password&email=hkkang%40woowahan.com");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        String expected = "HTTP/1.1 302 Found \r\n" +
+            "Location: index.html \r\n" +
+            "Content-Type: text/html;charset=utf-8 ";
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
 }

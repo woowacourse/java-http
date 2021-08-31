@@ -68,13 +68,13 @@ public class RequestHandler implements Runnable {
             controller.handle(httpRequest, httpResponse);
             return httpResponse.makeHttpMessage();
 
-        } catch (HttpMessageException e) {
+        } catch (HttpMessageException | URISyntaxException e) {
             log.error(ERROR_PREFIX, e);
             HttpResponse httpResponse = new HttpResponse(HTTP_VERSION);
             httpResponse.badRequest("/400.html");
             return httpResponse.makeHttpMessage();
 
-        } catch (FileNotFoundException | URISyntaxException e) {
+        } catch (FileNotFoundException e) {
             log.error(ERROR_PREFIX, e);
             HttpResponse httpResponse = new HttpResponse(HTTP_VERSION);
             httpResponse.notFound("/404.html");

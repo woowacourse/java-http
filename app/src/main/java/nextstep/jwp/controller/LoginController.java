@@ -19,7 +19,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest request) throws IOException {
+    protected HttpResponse doPost(HttpRequest request) {
         RequestBody requestBody = request.getRequestBody();
         HttpResponse response = new HttpResponse();
         String account = requestBody.getParam("account");

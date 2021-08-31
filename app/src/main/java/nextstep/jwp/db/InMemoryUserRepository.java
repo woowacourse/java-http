@@ -31,4 +31,8 @@ public class InMemoryUserRepository {
     public static int getLatestId() {
         return database.size();
     }
+
+    public static void clear() {
+        database.clear();
+    }
 }

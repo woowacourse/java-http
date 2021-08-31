@@ -1,6 +1,7 @@
 package nextstep.jwp.db;
 
 import nextstep.jwp.domain.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -9,6 +10,13 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class InMemoryUserRepositoryTest {
+
+    @BeforeEach
+    void setUp() {
+        InMemoryUserRepository.clear();
+        final User user = new User(1, "gugu", "password", "hkkang@woowahan.com");
+        InMemoryUserRepository.save(user);
+    }
 
     @DisplayName("유저 조회")
     @Test

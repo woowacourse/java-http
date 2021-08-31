@@ -1,8 +1,9 @@
 package nextstep.jwp.http.response;
 
 import java.io.IOException;
-import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.util.HttpStatus;
+import nextstep.jwp.util.StaticResources;
 import nextstep.jwp.util.ViewResolver;
 
 public class GeneralResponse {
@@ -19,13 +20,14 @@ public class GeneralResponse {
 
     private String buildResponse(String path) throws IOException {
         final ViewResolver viewResolver = new ViewResolver(path);
-        final String responseBody = viewResolver.staticValue("html");
+        final StaticResources staticResource = StaticResources.basicType();
+        final String responseBody = viewResolver.staticValue(staticResource.resource());
 
         String firstLine = String.join(" ","HTTP/1.1", HttpStatus.OK.value(),
             HttpStatus.OK.method());
         return String.join("\r\n",
             firstLine,
-            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Type:" + staticResource.type(),
             "Content-Length: " + responseBody.getBytes().length + " ",
             "",
             responseBody);

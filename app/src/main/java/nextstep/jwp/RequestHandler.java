@@ -7,8 +7,8 @@ import java.net.Socket;
 import java.util.Objects;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.RequestMapping;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,14 +29,12 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
             final OutputStream outputStream = connection.getOutputStream()) {
-
             final HttpRequest httpRequest = HttpRequest.readFromInputStream(inputStream);
             final HttpResponse httpResponse = new HttpResponse("");
             final RequestMapping requestMapping = new RequestMapping();
             final Controller controller = requestMapping.getController(httpRequest);
             controller.service(httpRequest, httpResponse);
             final String response = httpResponse.value();
-
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (Exception exception) {

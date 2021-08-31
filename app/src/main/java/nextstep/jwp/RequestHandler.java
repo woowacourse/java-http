@@ -8,6 +8,8 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
+import java.util.Optional;
+import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +32,7 @@ public class RequestHandler implements Runnable {
                 final OutputStream outputStream = connection.getOutputStream()) {
             UserService userService = new UserService();
             Request request = Request.createFromInputStream(inputStream);
-
+//            Response response = Response.createFrom;
             final String httpMethod = request.getRequestLine("httpMethod");
             final String uri = request.getRequestLine("uri");
             String responseBody = "";
@@ -47,21 +49,21 @@ public class RequestHandler implements Runnable {
                 responseBody = getStaticFileContents("/login.html");
                 response = replyOkResponse(responseBody);
             } else if (httpMethod.equals("POST") && (uri.equals("/login.html") || uri.equals("/login"))) {
-//                String requestBody = extractRequestBody(bufferedReader, parsedRequestHeaders);
-//                Optional<User> user = userService.findUserFromBody(requestBody);
-//                if (user.isEmpty()) {
-//                    responseBody = getStaticFileContents("/401.html");
-//                    response = replyAfterLogin302Response(responseBody, "/401.html");
-//                } else {
-//                    responseBody = getStaticFileContents("/index.html");
-//                    response = replyAfterLogin302Response(responseBody, "/index.html");
-//                }
+                String requestBody = request.getBody();
+                Optional<User> user = userService.findUserFromBody(requestBody);
+                if (user.isEmpty()) {
+                    responseBody = getStaticFileContents("/401.html");
+                    response = replyAfterLogin302Response(responseBody, "/401.html");
+                } else {
+                    responseBody = getStaticFileContents("/index.html");
+                    response = replyAfterLogin302Response(responseBody, "/index.html");
+                }
             } else if (httpMethod.equals("GET") && (uri.equals("/register") || uri.equals("/register.html"))) {
                 responseBody = getStaticFileContents("/register.html");
                 response = replyOkResponse(responseBody);
             } else if (httpMethod.equals("POST") && uri.equals("/register")) {
-//                String requestBody = extractRequestBody(bufferedReader, parsedRequestHeaders);
-//                userService.saveUser(requestBody);
+                String requestBody = request.getBody();
+                userService.saveUser(requestBody);
 
                 responseBody = getStaticFileContents("/index.html");
                 response = replyOkResponse(responseBody);

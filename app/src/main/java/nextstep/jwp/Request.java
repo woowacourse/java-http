@@ -32,4 +32,8 @@ public class Request {
     public boolean isEmpty() {
         return requestLine.isEmpty();
     }
+
+    public String getBody() {
+        return requestBody.getRequestBody();
+    }
 }

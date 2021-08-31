@@ -12,6 +12,7 @@ import java.util.Objects;
 
 public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final String INDEX_HTML = "/index.html";
     private final Socket connection;
 
     public RequestHandler(Socket connection) {
@@ -38,7 +39,7 @@ public class RequestHandler implements Runnable {
                     User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
 
                     if (user.checkPassword(password)) {
-                        httpResponse.redirect("/index.html");
+                        httpResponse.redirect(INDEX_HTML);
                     }
                     httpResponse.redirect("/401.html");
                 }
@@ -52,7 +53,7 @@ public class RequestHandler implements Runnable {
                     String password = httpRequest.getParameter("password");
 
                     InMemoryUserRepository.save(new User(2L, account, password, email));
-                    httpResponse.redirect("/login.html");
+                    httpResponse.redirect(INDEX_HTML);
                 }
                 httpResponse.forward("/register.html");
             }
@@ -66,7 +67,7 @@ public class RequestHandler implements Runnable {
 
     private String getDefaultPath(String uri) {
         if ("/".equals(uri)) {
-            return "/index.html";
+            return INDEX_HTML;
         }
         return uri;
     }

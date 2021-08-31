@@ -1,13 +1,13 @@
-package nextstep.jwp;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package nextstep.jwp.http;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
+import nextstep.jwp.controller.AbstractController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RequestHandler implements Runnable {
 
@@ -21,21 +21,20 @@ public class RequestHandler implements Runnable {
 
     @Override
     public void run() {
-        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
+        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
+                connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
+                final OutputStream outputStream = connection.getOutputStream()) {
 
-            final String responseBody = "Hello world!";
+            HttpRequest httpRequest = HttpRequestReader.httpRequest(inputStream);
+            log.debug("Request : {} {}", httpRequest.method(), httpRequest.uri());
+            log.debug("Requested Body : {}", httpRequest.body());
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            AbstractController abstractController = RequestMapper.map(httpRequest);
+            byte[] response = abstractController.proceed();
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response);
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);

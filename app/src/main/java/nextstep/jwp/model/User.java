@@ -1,5 +1,7 @@
 package nextstep.jwp.model;
 
+import nextstep.jwp.exception.UnauthorizedException;
+
 public class User {
 
     private final long id;
@@ -15,11 +17,18 @@ public class User {
     }
 
     public boolean checkPassword(String password) {
-        return this.password.equals(password);
+        if (this.password.equals(password)) {
+            return true;
+        }
+        throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");
     }
 
     public String getAccount() {
         return account;
+    }
+
+    public long getId() {
+        return id;
     }
 
     @Override

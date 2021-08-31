@@ -1,6 +1,6 @@
 # HTTP 서버 구현하기
 
-## 기능 요구사항
+## 1단계 기능 요구사항
 - [x] GET /index.html 응답하기
 - [x] Query String 파싱
   - [x] /login으로 접속하면 로그인 페이지(login.html) 보여준다.
@@ -16,3 +16,11 @@
   - [x] 클라이언트에서 요청하면 CSS파일도 제공하도록 수정
   - [x] 클라이언트에서 요청하는 js, img 파일 모두 제공하도록 수정
   - [x] 루트경로(/)로 접속하면 index.html 보여준다.
+
+## 2, 3단계 기능 요구사항 및 리팩터링 사항
+- [x] HTTP 요청을 처리하는 클래스 분리
+- [x] HTTP 응답을 처리하는 클래스 분리
+- [ ] Controller 인터페이스 추가
+  - [ ] url 경로에 따른 if절 분기 제거
+- [ ] Cookie에 JSESSIONID 값 저장
+- [ ] Session 구현하기

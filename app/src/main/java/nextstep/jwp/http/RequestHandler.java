@@ -47,7 +47,8 @@ public class RequestHandler implements Runnable {
 
     private void process(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (!httpRequest.containsJSessionId()) {
-            httpResponse.createJSessionId();
+            String jSessionId = httpResponse.createJSessionId();
+            HttpSessions.put(new HttpSession(jSessionId));
         }
         ViewResolver viewResolver = new ViewResolver(httpRequest, httpResponse);
         if (viewResolver.isExisting()) {

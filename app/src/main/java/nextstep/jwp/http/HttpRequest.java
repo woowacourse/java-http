@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 public class HttpRequest {
 
@@ -120,4 +121,13 @@ public class HttpRequest {
         String JSessionId = extractCookies().get(HEADER_KEY_OF_JSESSIONID);
         return !Objects.isNull(JSessionId);
     }
+
+    public Optional<HttpSession> getSession() {
+        String jSessionId = extractCookies().get(HEADER_KEY_OF_JSESSIONID);
+        if (Objects.isNull(jSessionId)) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(HttpSessions.getSession(jSessionId));
+    }
+
 }

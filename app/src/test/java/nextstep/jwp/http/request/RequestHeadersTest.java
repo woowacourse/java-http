@@ -54,7 +54,8 @@ class RequestHeadersTest {
     class includeContentLength {
 
         private final int contentLengthValue = 100;
-        private final String contentLength = String.format("Content-Length: %d", contentLengthValue);
+        private final String contentLength = String.format("Content-Length: %d",
+            contentLengthValue);
         private final String inputHeaders = String.join(NEW_LINE, contentLength, "", "");
 
         @DisplayName("Content-Length 헤더로 Request-Body 가 있음을 판단한다.")
@@ -63,7 +64,8 @@ class RequestHeadersTest {
             RequestHeaders requestHeaders;
 
             try (InputStream inputStream = new ByteArrayInputStream(inputHeaders.getBytes())) {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(inputStream));
                 requestHeaders = RequestHeaders.parse(bufferedReader);
             }
 
@@ -76,7 +78,8 @@ class RequestHeadersTest {
             RequestHeaders requestHeaders;
 
             try (InputStream inputStream = new ByteArrayInputStream(inputHeaders.getBytes())) {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(inputStream));
                 requestHeaders = RequestHeaders.parse(bufferedReader);
             }
 
@@ -96,7 +99,8 @@ class RequestHeadersTest {
             RequestHeaders requestHeaders;
 
             try (InputStream inputStream = new ByteArrayInputStream(inputHeaders.getBytes())) {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(inputStream));
                 requestHeaders = RequestHeaders.parse(bufferedReader);
             }
 
@@ -109,7 +113,8 @@ class RequestHeadersTest {
             RequestHeaders requestHeaders;
 
             try (InputStream inputStream = new ByteArrayInputStream(inputHeaders.getBytes())) {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(inputStream));
                 requestHeaders = RequestHeaders.parse(bufferedReader);
             }
 

@@ -46,7 +46,8 @@ class RequestUriTest {
         private static final String QUERY = "query";
         private static final String PARAMETER = "param";
 
-        private final RequestUri requestUri = RequestUri.parse(String.format("/path?%s=%s", QUERY, PARAMETER));
+        private final RequestUri requestUri = RequestUri.parse(
+            String.format("/path?%s=%s", QUERY, PARAMETER));
 
         @DisplayName("queryParameters를 가진다.")
         @Test

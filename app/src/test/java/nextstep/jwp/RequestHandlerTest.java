@@ -1,10 +1,10 @@
 package nextstep.jwp;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import nextstep.jwp.controller.Controllers;
 import nextstep.jwp.server.RequestHandler;
 import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestHandlerTest {
 
@@ -31,12 +31,12 @@ class RequestHandlerTest {
     @Test
     void index() {
         // given
-        final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        final String httpRequest = String.join("\r\n",
+            "GET /index.html HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "",
+            "");
 
         final MockSocket socket = new MockSocket(httpRequest);
         final Controllers controllers = Controllers.loadContext();

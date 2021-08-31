@@ -18,7 +18,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class LoginControllerTest {
@@ -76,14 +75,16 @@ class LoginControllerTest {
                 HttpResponse httpResponse = loginController.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
 
             @DisplayName("요청한 파일이 없으면 '404.html' response를 반환 받는다.")
             @Test
             void findLoginHtmlFail() throws IOException {
                 // given
-                String requestString = String.join(NEW_LINE, "GET /login/something HTTP/1.1", "", "");
+                String requestString = String.join(NEW_LINE, "GET /login/something HTTP/1.1", "",
+                    "");
                 try (InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(
                     StandardCharsets.UTF_8))) {
                     httpRequest = HttpRequest.parse(inputStream);
@@ -99,7 +100,8 @@ class LoginControllerTest {
                 HttpResponse httpResponse = loginController.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
         }
 
@@ -143,7 +145,8 @@ class LoginControllerTest {
                 HttpResponse httpResponse = loginController.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
 
             @DisplayName("로그인 실패시 '/401.html' redirect response를 반환 받는다.")
@@ -157,7 +160,8 @@ class LoginControllerTest {
                 HttpResponse httpResponse = loginController.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
         }
     }

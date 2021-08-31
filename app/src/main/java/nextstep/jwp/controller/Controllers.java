@@ -17,7 +17,8 @@ public class Controllers {
     private final Map<String, Controller> restControllers;
     private final Controller staticResourceController;
 
-    private Controllers(Map<String, Controller> restControllers, Controller staticResourceController) {
+    private Controllers(Map<String, Controller> restControllers,
+                        Controller staticResourceController) {
         this.restControllers = restControllers;
         this.staticResourceController = staticResourceController;
     }

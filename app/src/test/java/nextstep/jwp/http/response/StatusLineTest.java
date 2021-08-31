@@ -1,6 +1,8 @@
 package nextstep.jwp.http.response;
 
-import static nextstep.jwp.http.common.HttpStatus.*;
+import static nextstep.jwp.http.common.HttpStatus.BAD_REQUEST;
+import static nextstep.jwp.http.common.HttpStatus.NO_CONTENT;
+import static nextstep.jwp.http.common.HttpStatus.OK;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import nextstep.jwp.http.common.HttpVersion;
@@ -18,11 +20,13 @@ class StatusLineTest {
         StatusLine badRequestStatusLine = StatusLine.from(BAD_REQUEST);
 
         String expectOkStatusLineString = String.format("%s %s %s ",
-                HttpVersion.HTTP_1_1.getValue(), OK.getCodeString(), OK.getReasonPhrase());
+            HttpVersion.HTTP_1_1.getValue(), OK.getCodeString(), OK.getReasonPhrase());
         String expectNoContentStatusLineString = String.format("%s %s %s ",
-            HttpVersion.HTTP_1_1.getValue(), NO_CONTENT.getCodeString(), NO_CONTENT.getReasonPhrase());
+            HttpVersion.HTTP_1_1.getValue(), NO_CONTENT.getCodeString(),
+            NO_CONTENT.getReasonPhrase());
         String expectBadRequestStatusLineString = String.format("%s %s %s ",
-            HttpVersion.HTTP_1_1.getValue(), BAD_REQUEST.getCodeString(), BAD_REQUEST.getReasonPhrase());
+            HttpVersion.HTTP_1_1.getValue(), BAD_REQUEST.getCodeString(),
+            BAD_REQUEST.getReasonPhrase());
 
         // when, then
         assertThat(okStatusLine.toString()).isEqualTo(expectOkStatusLineString);

@@ -32,7 +32,8 @@ class ResponseHeadersTest {
             byte[] bytes = Files.readAllBytes(file.toPath());
             StaticResource staticResource = StaticResource.from(file);
 
-            String expectContentTypeString = String.format("Content-Type: %s ", contentType.getType());
+            String expectContentTypeString = String.format("Content-Type: %s ",
+                contentType.getType());
             String expectContentLengthString = String.format("Content-Length: %d ", bytes.length);
 
             // when
@@ -41,7 +42,8 @@ class ResponseHeadersTest {
             String[] headersStrings = headersString.split(NEW_LINE);
 
             // then
-            assertThat(headersStrings).containsExactlyInAnyOrder(expectContentTypeString, expectContentLengthString);
+            assertThat(headersStrings).containsExactlyInAnyOrder(expectContentTypeString,
+                expectContentLengthString);
         }
     }
 

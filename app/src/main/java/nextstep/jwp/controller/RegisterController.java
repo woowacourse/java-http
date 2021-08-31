@@ -16,7 +16,8 @@ public class RegisterController extends RestController {
 
     private final RegisterService registerService;
 
-    public RegisterController(RegisterService registerService, StaticResourceService staticResourceService) {
+    public RegisterController(RegisterService registerService,
+                              StaticResourceService staticResourceService) {
         super(staticResourceService);
         this.registerService = registerService;
     }

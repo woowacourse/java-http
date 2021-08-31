@@ -1,10 +1,8 @@
 package nextstep.jwp.model;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.exception.InvalidFileExtensionException;
-import org.checkerframework.checker.units.qual.C;
 
 public enum ContentType {
     HTML("html", "text/html; charset=UTF-8"),

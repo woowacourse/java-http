@@ -6,7 +6,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -73,7 +72,8 @@ class ControllersTest {
                 HttpResponse httpResponse = controllers.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
 
             @DisplayName("POST 요청")
@@ -97,7 +97,8 @@ class ControllersTest {
                 HttpResponse httpResponse = controllers.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
         }
 
@@ -128,7 +129,8 @@ class ControllersTest {
                 HttpResponse httpResponse = controllers.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
 
             @DisplayName("POST 요청")
@@ -152,7 +154,8 @@ class ControllersTest {
                 HttpResponse httpResponse = controllers.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
         }
 
@@ -164,7 +167,8 @@ class ControllersTest {
             @Test
             void get() throws IOException {
                 // given
-                String requestString = String.join(NEW_LINE, "GET /static-page.html HTTP/1.1", "", "");
+                String requestString = String.join(NEW_LINE, "GET /static-page.html HTTP/1.1", "",
+                    "");
                 try (InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(
                     StandardCharsets.UTF_8))) {
                     httpRequest = HttpRequest.parse(inputStream);
@@ -180,14 +184,16 @@ class ControllersTest {
                 HttpResponse httpResponse = controllers.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
 
             @DisplayName("POST 요청")
             @Test
             void post() throws IOException {
                 // given
-                String requestString = String.join(NEW_LINE, "POST /static-page.html HTTP/1.1", "", "");
+                String requestString = String.join(NEW_LINE, "POST /static-page.html HTTP/1.1", "",
+                    "");
                 try (InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(
                     StandardCharsets.UTF_8))) {
                     httpRequest = HttpRequest.parse(inputStream);
@@ -203,7 +209,8 @@ class ControllersTest {
                 HttpResponse httpResponse = controllers.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
         }
     }

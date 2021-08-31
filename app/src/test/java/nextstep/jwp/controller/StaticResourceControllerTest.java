@@ -1,7 +1,6 @@
 package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -76,7 +75,8 @@ class StaticResourceControllerTest {
             HttpResponse httpResponse = staticResourceController.doService(httpRequest);
 
             // then
-            assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+            assertThat(httpResponse.toBytes()).isEqualTo(
+                expectString.getBytes(StandardCharsets.UTF_8));
         }
 
         @DisplayName("POST 요청")
@@ -99,7 +99,8 @@ class StaticResourceControllerTest {
             HttpResponse httpResponse = staticResourceController.doService(httpRequest);
 
             // then
-            assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+            assertThat(httpResponse.toBytes()).isEqualTo(
+                expectString.getBytes(StandardCharsets.UTF_8));
         }
     }
 }

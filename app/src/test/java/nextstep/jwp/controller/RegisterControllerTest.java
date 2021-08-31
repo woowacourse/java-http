@@ -75,7 +75,8 @@ class RegisterControllerTest {
                 HttpResponse httpResponse = registerController.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
 
             @DisplayName("요청한 파일이 없으면 '404.html' response를 반환 받는다.")
@@ -99,7 +100,8 @@ class RegisterControllerTest {
                 HttpResponse httpResponse = registerController.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
         }
 
@@ -143,7 +145,8 @@ class RegisterControllerTest {
                 HttpResponse httpResponse = registerController.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
 
             @DisplayName("회원가입 실패시 '/409.html' redirect response를 반환 받는다.")
@@ -159,7 +162,8 @@ class RegisterControllerTest {
                 HttpResponse httpResponse = registerController.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
         }
     }

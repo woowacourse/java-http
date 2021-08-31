@@ -40,6 +40,7 @@ class UserTest {
         User user = new User(ACCOUNT, EMAIL, PASSWORD);
 
         // when, then
-        assertThatThrownBy(() -> user.checkPassword("WRONG_PASSWORD")).isExactlyInstanceOf(UnauthorizedException.class);
+        assertThatThrownBy(() -> user.checkPassword("WRONG_PASSWORD")).isExactlyInstanceOf(
+            UnauthorizedException.class);
     }
 }

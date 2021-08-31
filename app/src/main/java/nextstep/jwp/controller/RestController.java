@@ -26,8 +26,8 @@ public abstract class RestController implements Controller {
 
     private HttpResponse doGet(HttpRequest httpRequest) throws IOException {
         try {
-            StaticResource staticResource = staticResourceService.findByPathWithExtension(
-                httpRequest.getUri(), ".html");
+            StaticResource staticResource = staticResourceService
+                .findByPathWithExtension(httpRequest.getUri(), ".html");
 
             return HttpResponse.withBody(HttpStatus.OK, staticResource);
         } catch (StaticResourceNotFoundException e) {

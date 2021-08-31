@@ -38,7 +38,8 @@ class HttpResponseTest {
             httpResponse = HttpResponse.withBody(HttpStatus.OK, staticResource);
 
             // then
-            assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+            assertThat(httpResponse.toBytes()).isEqualTo(
+                expectString.getBytes(StandardCharsets.UTF_8));
         }
     }
 
@@ -59,7 +60,8 @@ class HttpResponseTest {
             httpResponse = HttpResponse.redirect(HttpStatus.MOVED_PERMANENTLY, location);
 
             // then
-            assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+            assertThat(httpResponse.toBytes()).isEqualTo(
+                expectString.getBytes(StandardCharsets.UTF_8));
         }
     }
 }

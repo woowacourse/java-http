@@ -30,7 +30,8 @@ class HttpRequestTest {
             "",
             "");
 
-        try (InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.UTF_8))) {
+        try (InputStream inputStream = new ByteArrayInputStream(
+            requestString.getBytes(StandardCharsets.UTF_8))) {
             httpRequest = HttpRequest.parse(inputStream);
         }
     }
@@ -67,10 +68,12 @@ class HttpRequestTest {
         @BeforeEach
         void setUp() throws IOException {
             String uriWithQuery = String.format("%s?%s=%s", URI, QUERY, PARAMETER);
-            String requestLineWithQuery = String.format("%s %s %s", GET, uriWithQuery, HTTP_VERSION);
+            String requestLineWithQuery = String.format("%s %s %s", GET, uriWithQuery,
+                HTTP_VERSION);
             String requestString = String.join(NEW_LINE, requestLineWithQuery, "", "");
 
-            try (InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.UTF_8))) {
+            try (InputStream inputStream = new ByteArrayInputStream(
+                requestString.getBytes(StandardCharsets.UTF_8))) {
                 httpRequest = HttpRequest.parse(inputStream);
             }
         }
@@ -99,13 +102,15 @@ class HttpRequestTest {
     @Nested
     class RequestWithOutUriQuery {
 
-        private final String requestLineWithOutQuery = String.format("%s %s %s", GET, URI, HTTP_VERSION);
+        private final String requestLineWithOutQuery = String.format("%s %s %s", GET, URI,
+            HTTP_VERSION);
 
         @BeforeEach
         void setUp() throws IOException {
             String requestString = String.join(NEW_LINE, requestLineWithOutQuery, "", "");
 
-            try (InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.UTF_8))) {
+            try (InputStream inputStream = new ByteArrayInputStream(
+                requestString.getBytes(StandardCharsets.UTF_8))) {
                 httpRequest = HttpRequest.parse(inputStream);
             }
         }
@@ -126,13 +131,16 @@ class HttpRequestTest {
         @DisplayName("Request-Body가 없다면")
         @Nested
         class RequestWithOutBody {
-            private final String requestString = String.join(NEW_LINE, requestLineWithOutQuery, "", "");
+
+            private final String requestString = String.join(NEW_LINE, requestLineWithOutQuery, "",
+                "");
 
             @DisplayName("body parameter 요청시 예외가 발생한다.")
             @Test
             void getBodyParameterException() throws IOException {
                 // given
-                try (InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.UTF_8))) {
+                try (InputStream inputStream = new ByteArrayInputStream(
+                    requestString.getBytes(StandardCharsets.UTF_8))) {
                     httpRequest = HttpRequest.parse(inputStream);
                 }
 
@@ -161,7 +169,8 @@ class HttpRequestTest {
                     body
                 );
 
-                try (InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.UTF_8))) {
+                try (InputStream inputStream = new ByteArrayInputStream(
+                    requestString.getBytes(StandardCharsets.UTF_8))) {
                     httpRequest = HttpRequest.parse(inputStream);
                 }
             }

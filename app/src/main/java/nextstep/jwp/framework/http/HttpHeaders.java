@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class HttpHeaders {
 
-    public static final String HEADER_DELIMITER = ":";
+    public static final String HEADER_DELIMITER = ": ";
     public static final String SPACE = " ";
     private static final int HEADER_KEY_INDEX = 0;
     private static final int VALUE_KEY_INDEX = 1;
@@ -44,8 +44,9 @@ public class HttpHeaders {
 
         for (final String key : headers.keySet()) {
             builder.append(key)
-                .append(HEADER_DELIMITER + SPACE)
+                .append(HEADER_DELIMITER)
                 .append(headers.get(key))
+                .append(SPACE)
                 .append(LINE_DELIMITER);
         }
 

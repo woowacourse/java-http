@@ -20,7 +20,7 @@ public class MockSocket extends Socket {
     }
 
     public MockSocket() {
-        this("GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+        this("GET / HTTP/1.1\r\nContent-Type: text/html;charset=utf-8\r\nContent-Length: 12\r\n\r\n");
     }
 
     public InetAddress getInetAddress() {

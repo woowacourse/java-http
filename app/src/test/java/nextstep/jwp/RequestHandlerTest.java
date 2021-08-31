@@ -1,24 +1,25 @@
 package nextstep.jwp;
 
-import nextstep.jwp.framework.RequestHandler;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import java.nio.file.Path;
+import nextstep.jwp.framework.RequestHandler;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
 
-    @Disabled
     @Test
-    void run() {
+    void run() throws IOException {
         // given
         final MockSocket socket = new MockSocket();
         final RequestHandler requestHandler = new RequestHandler(socket);
+        final Path path = new File("/Users/wilder/IdeaProjects/jwp-dashboard-http/app/build/resources/main/static/404.html").toPath();
+        final String htmlValue = Files.readString(path);
 
         // when
         requestHandler.run();
@@ -26,10 +27,10 @@ class RequestHandlerTest {
         // then
         String expected = String.join("\r\n",
             "HTTP/1.1 200 OK ",
-            "Content-Type: text/html;charset=utf-8 ",
             "Content-Length: 12 ",
+            "Content-Type: text/html;charset=utf-8 ",
             "",
-            "Hello world!");
+            htmlValue);
         assertThat(socket.output()).isEqualTo(expected);
     }
 

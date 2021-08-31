@@ -4,10 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import nextstep.jwp.httpserver.domain.Body;
+import nextstep.jwp.httpserver.domain.Cookie;
 import nextstep.jwp.httpserver.domain.Headers;
 import nextstep.jwp.httpserver.domain.request.HttpRequest;
 import nextstep.jwp.httpserver.domain.request.RequestLine;
@@ -23,9 +24,10 @@ public class HttpRequestParser {
 
         final RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
         final Headers headers = extractAllHeaders(bufferedReader);
+        final List<Cookie> cookies = extractCookieFromHeaders(headers);
         final Body body = extractRequestBody(requestLine, headers, bufferedReader);
 
-        return new HttpRequest(requestLine, headers, body);
+        return new HttpRequest(requestLine, headers, cookies, body);
     }
 
     private static Headers extractAllHeaders(BufferedReader bufferedReader) throws IOException {
@@ -42,6 +44,17 @@ public class HttpRequestParser {
         }
 
         return new Headers(headers);
+    }
+
+    private static List<Cookie> extractCookieFromHeaders(Headers headers) {
+        final String cookieChain = headers.getCookie();
+        if (cookieChain.isBlank()) {
+            return new ArrayList<>();
+        }
+        return Arrays.stream(cookieChain.split("; "))
+                     .map(c -> c.split("=", 2))
+                     .map(c -> new Cookie(c[0], c[1]))
+                     .collect(Collectors.toList());
     }
 
     private static Body extractRequestBody(RequestLine requestLine, Headers headers, BufferedReader bufferedReader) throws IOException {

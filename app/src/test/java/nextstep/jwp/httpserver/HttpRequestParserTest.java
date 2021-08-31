@@ -35,7 +35,7 @@ class HttpRequestParserTest {
         // then
         assertThat(request.getHttpMethod()).isEqualTo(HttpMethod.GET);
         assertThat(request.getRequestUri()).isEqualTo("/index.html");
-        assertThat(request.getStartLine().getHttpVersion()).isEqualTo(HttpVersion.HTTP_1_1);
+        assertThat(request.getRequestLine().getHttpVersion()).isEqualTo(HttpVersion.HTTP_1_1);
         assertTrue(request.getHeaders().getHeaders().containsKey("Host"));
         assertTrue(request.getHeaders().getHeaders().containsKey("Connection"));
     }

@@ -1,18 +1,22 @@
 package nextstep.jwp.httpserver.domain.request;
 
+import java.util.List;
 import java.util.Map;
 
 import nextstep.jwp.httpserver.domain.Body;
+import nextstep.jwp.httpserver.domain.Cookie;
 import nextstep.jwp.httpserver.domain.Headers;
 
 public class HttpRequest {
     private final RequestLine requestLine;
     private final Headers headers;
+    private final List<Cookie> cookies;
     private final Body body;
 
-    public HttpRequest(RequestLine requestLine, Headers headers, Body body) {
+    public HttpRequest(RequestLine requestLine, Headers headers, List<Cookie> cookies, Body body) {
         this.requestLine = requestLine;
         this.headers = headers;
+        this.cookies = cookies;
         this.body = body;
     }
 
@@ -22,6 +26,11 @@ public class HttpRequest {
 
     public boolean isPost() {
         return requestLine.isPost();
+    }
+
+    public boolean hasSessionId() {
+        return cookies.stream()
+                      .anyMatch(Cookie::isSessionId);
     }
 
     public String getRequestUri() {
@@ -36,12 +45,16 @@ public class HttpRequest {
         return body.getBody();
     }
 
-    public RequestLine getStartLine() {
+    public RequestLine getRequestLine() {
         return requestLine;
     }
 
     public Headers getHeaders() {
         return headers;
+    }
+
+    public List<Cookie> getCookies() {
+        return cookies;
     }
 
     public Body getBody() {

@@ -5,12 +5,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import nextstep.jwp.httpserver.adapter.HandlerAdapter;
+import nextstep.jwp.httpserver.domain.Cookie;
 import nextstep.jwp.httpserver.domain.request.HttpRequest;
 import nextstep.jwp.httpserver.domain.response.HttpResponse;
 import nextstep.jwp.httpserver.domain.view.ModelAndView;
@@ -55,6 +53,9 @@ public class RequestHandler implements Runnable {
 
             final Object handler = getHandler(httpRequest);
             final HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
+
+            preHandle(httpRequest, httpResponse);
+
             final ModelAndView mv = handlerAdapter.handle(httpRequest, httpResponse, handler);
             render(mv, httpResponse, outputStream);
         } catch (Exception exception) {
@@ -77,6 +78,15 @@ public class RequestHandler implements Runnable {
                               .filter(adapter -> adapter.supports(handler))
                               .findFirst()
                               .orElseThrow(() -> new IllegalArgumentException("처리할 수 있는 어댑터가 없습니다."));
+    }
+
+    private void preHandle(HttpRequest httpRequest, HttpResponse httpResponse) {
+        httpRequest.getCookies()
+                   .forEach(httpResponse::addCookie);
+        if (!httpRequest.hasSessionId()) {
+            Cookie cookie = new Cookie("JSESSIONID", UUID.randomUUID().toString());
+            httpResponse.addCookie(cookie);
+        }
     }
 
     private void render(ModelAndView mv, HttpResponse httpResponse, OutputStream outputStream) throws IOException, URISyntaxException {

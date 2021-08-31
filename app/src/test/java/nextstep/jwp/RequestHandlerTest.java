@@ -250,4 +250,61 @@ class RequestHandlerTest {
                 "Content-Length: 1002"
         );
     }
+    
+    @Test
+    @DisplayName("request의 Cookie에 JSESSIONID가 없는 경우 response에 JSESSIONID를 넘겨준다.")
+    void noJSESSIONID() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Accept: */* ",
+                "");
+
+        BeanFactory.init();
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 5670",
+                "Set-Cookie: JSESSIONID="
+        );
+    }
+
+    @Test
+    @DisplayName("request의 Cookie에 JSESSIONID가 있는 경우 response에 같은 JSESSIONID가 담겨있다.")
+    void cookieJSESSIONID() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Accept: */* ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
+                "");
+
+        BeanFactory.init();
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 5670 ",
+                "Set-Cookie: yummy_cookie=choco",
+                "Set-Cookie: tasty_cookie=strawberry",
+                "Set-Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46"
+        );
+    }
 }

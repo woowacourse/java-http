@@ -32,6 +32,13 @@ public class Headers {
                       .collect(Collectors.joining("\r\n"));
     }
 
+    public String getCookie() {
+        if (!headers.containsKey("Cookie")) {
+            return "";
+        }
+        return headers.get("Cookie");
+    }
+
     public Map<String, String> getHeaders() {
         return headers;
     }

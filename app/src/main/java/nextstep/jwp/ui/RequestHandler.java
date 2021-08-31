@@ -1,5 +1,6 @@
 package nextstep.jwp.ui;
 
+import nextstep.jwp.ui.controller.Controller;
 import nextstep.jwp.ui.request.HttpRequest;
 import nextstep.jwp.ui.response.HttpResponse;
 import org.slf4j.Logger;
@@ -31,8 +32,10 @@ public class RequestHandler implements Runnable {
             HttpRequest request = new HttpRequest(inputStream);
             RequestMapping requestMapping = new RequestMapping();
             Controller controller = requestMapping.getController(request);
+
             HttpResponse response = controller.service(request);
-            outputStream.write(response.getResponse().getBytes());
+            String responseContent = response.getResponse();
+            outputStream.write(responseContent.getBytes());
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
@@ -40,6 +43,8 @@ public class RequestHandler implements Runnable {
             close();
         }
     }
+
+    //TODO: 예외 다 잡아주기
 
     private void close() {
         try {

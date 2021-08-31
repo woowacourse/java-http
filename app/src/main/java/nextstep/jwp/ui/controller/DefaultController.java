@@ -1,4 +1,4 @@
-package nextstep.jwp.ui;
+package nextstep.jwp.ui.controller;
 
 import nextstep.jwp.ui.request.HttpRequest;
 import nextstep.jwp.ui.response.HttpResponse;

@@ -1,21 +1,31 @@
 package nextstep.jwp.ui;
 
+import nextstep.jwp.ui.controller.Controller;
+import nextstep.jwp.ui.controller.DefaultController;
+import nextstep.jwp.ui.controller.LoginController;
+import nextstep.jwp.ui.controller.RegisterController;
+import nextstep.jwp.ui.controller.ResourceController;
 import nextstep.jwp.ui.request.HttpRequest;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class RequestMapping {
 
-    public Controller getController(HttpRequest httpRequest) {
-        String path = httpRequest.getPath();
-        if ("/".equals(path)) {
-            return new DefaultController();
-        }
-        if ("/login".equals(path)) {
-            return new LoginController();
-        }
-        if ("/register".equals(path)) {
-            return new RegisterController();
-        }
-        return new ResourceController();
+    private static Map<String, Controller> CONTROLLERS = new HashMap<>();
+
+    static {
+        CONTROLLERS.put("/", new DefaultController());
+        CONTROLLERS.put("/login", new LoginController());
+        CONTROLLERS.put("/register", new RegisterController());
     }
 
+    public Controller getController(HttpRequest httpRequest) {
+        String path = httpRequest.getPath();
+        return CONTROLLERS.keySet().stream()
+                .filter(mappingPath -> mappingPath.equals(path))
+                .map(mappingPath -> CONTROLLERS.get(mappingPath))
+                .findFirst()
+                .orElse(new ResourceController());
+    }
 }

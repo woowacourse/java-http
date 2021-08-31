@@ -49,7 +49,7 @@ public class HttpResponse {
         return headers.getHeaders();
     }
 
-    public HttpResponse sendRedirect(String url) throws IOException {
+    public HttpResponse sendRedirect(String url) {
         return sendRedirect(url, 302);
     }
 

@@ -1,5 +1,6 @@
-package nextstep.jwp.ui;
+package nextstep.jwp.ui.controller;
 
+import nextstep.jwp.ui.RequestHandler;
 import nextstep.jwp.ui.request.HttpRequest;
 import nextstep.jwp.ui.response.HttpResponse;
 import nextstep.jwp.exception.UserNotFoundException;
@@ -21,7 +22,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest request) throws IOException {
+    protected HttpResponse doPost(HttpRequest request) {
         String account = request.getParameter("account");
         String password = request.getParameter("password");
         HttpResponse response = new HttpResponse();
@@ -33,7 +34,7 @@ public class LoginController extends AbstractController {
             }
             return response.sendRedirect("/index.html");
         } catch (UserNotFoundException e) {
-            log.debug(e.getMessage());
+            log.error(e.getMessage());
             return response.sendRedirect("/401.html");
         }
     }

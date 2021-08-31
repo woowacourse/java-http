@@ -1,4 +1,4 @@
-package nextstep.jwp.ui;
+package nextstep.jwp.ui.controller;
 
 import nextstep.jwp.ui.request.HttpRequest;
 import nextstep.jwp.ui.response.HttpResponse;
@@ -8,7 +8,7 @@ import java.io.IOException;
 public class ResourceController implements Controller {
 
     @Override
-    public HttpResponse service(HttpRequest request) throws IOException {
+    public HttpResponse service(HttpRequest request) {
         HttpResponse response = new HttpResponse();
         try {
             String path = request.getPath();

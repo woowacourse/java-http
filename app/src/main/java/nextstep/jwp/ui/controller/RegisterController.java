@@ -1,4 +1,4 @@
-package nextstep.jwp.ui;
+package nextstep.jwp.ui.controller;
 
 import nextstep.jwp.ui.request.HttpRequest;
 import nextstep.jwp.ui.response.HttpResponse;
@@ -16,7 +16,7 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest request) throws IOException {
+    protected HttpResponse doPost(HttpRequest request) {
         String account = request.getParameter("account");
         String password = request.getParameter("password");
         String email = request.getParameter("email");

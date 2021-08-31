@@ -26,11 +26,17 @@ public class HttpRequest {
 
     public HttpRequest(final InputStream inputStream) throws IOException {
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        String lines = readInputStream(bufferedReader);
+        final String lines = readInputStream(bufferedReader);
 
         this.requestLine = createRequestLine(lines);
         this.headers = createHeader(lines);
         this.body = createBody(bufferedReader);
+    }
+
+    public HttpRequest(HttpRequestLine requestLine, HttpHeaders headers, HttpBody body) {
+        this.requestLine = requestLine;
+        this.headers = headers;
+        this.body = body;
     }
 
     private String readInputStream(final BufferedReader bufferedReader) throws IOException {

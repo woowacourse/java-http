@@ -55,8 +55,7 @@ public class HttpResponse {
     public HttpResponse respond(String uri, HttpStatus httpStatus) throws IOException {
         Resource resourceFile = new Resource(uri);
         String contentType = resourceFile.getContentType();
-        String body = resourceFile.getContent();
-        setProperty(httpStatus, contentType, body);
+        setProperty(httpStatus, contentType, resourceFile.getContent());
         return this;
     }
 

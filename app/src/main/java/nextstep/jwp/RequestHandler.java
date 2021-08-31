@@ -15,7 +15,6 @@ import java.util.Objects;
 public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
-    private static final String NEW_LINE = "\r\n";
 
     private final Socket connection;
 

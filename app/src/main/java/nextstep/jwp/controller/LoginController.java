@@ -27,7 +27,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws FileNotFoundException {
-        HttpBody httpBody = httpRequest.getHttpBody();
+        HttpBody httpBody = httpRequest.getBody();
         String account = httpBody.getBodyParams("account");
         String password = httpBody.getBodyParams("password");
 

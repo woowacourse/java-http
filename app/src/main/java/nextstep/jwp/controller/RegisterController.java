@@ -20,7 +20,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws FileNotFoundException {
-        HttpBody httpBody = httpRequest.getHttpBody();
+        HttpBody httpBody = httpRequest.getBody();
         String account = httpBody.getBodyParams("account");
         String email = httpBody.getBodyParams("email");
         String password = httpBody.getBodyParams("password");

@@ -8,13 +8,13 @@ import java.util.Map;
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final HttpHeader httpHeader;
-    private final HttpBody httpBody;
+    private final HttpHeader header;
+    private final HttpBody body;
 
-    public HttpRequest(HttpMethod httpMethod, String httpUri, String httpVersion, HttpHeader httpHeader, HttpBody httpBody) {
+    public HttpRequest(HttpMethod httpMethod, String httpUri, String httpVersion, HttpHeader header, HttpBody body) {
         this.requestLine = new RequestLine(httpMethod, new RequestUrl(httpUri), httpVersion);
-        this.httpHeader = httpHeader;
-        this.httpBody = httpBody;
+        this.header = header;
+        this.body = body;
     }
 
     public static HttpRequest from(BufferedReader reader) throws IOException {
@@ -27,10 +27,10 @@ public class HttpRequest {
         HttpMethod httpMethod = HttpMethod.from(startLineSplit[0]);
         String httpUri = startLineSplit[1];
         String httpVersion = startLineSplit[2];
-        HttpHeader httpHeader = extractHeader(reader);
-        HttpBody httpBody = extractBody(reader, httpHeader.getContentLength());
+        HttpHeader header = extractHeader(reader);
+        HttpBody body = extractBody(reader, header.getContentLength());
 
-        return new HttpRequest(httpMethod, httpUri, httpVersion, httpHeader, httpBody);
+        return new HttpRequest(httpMethod, httpUri, httpVersion, header, body);
     }
 
     private static HttpHeader extractHeader(BufferedReader reader) throws IOException {
@@ -76,7 +76,7 @@ public class HttpRequest {
         return requestLine.getVersion();
     }
 
-    public HttpBody getHttpBody() {
-        return httpBody;
+    public HttpBody getBody() {
+        return body;
     }
 }

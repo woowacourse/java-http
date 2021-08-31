@@ -17,6 +17,7 @@ public abstract class AbstractController implements Controller {
     private static final String CONTENT_TYPE_DELIMITER = ";";
     private static final String CHARSET_KEY = "charset=";
     private static final FileResolver FILE_RESOLVER = new FileResolver("static");
+
     private final Map<Method, CheckedBiConsumer<HttpRequest, HttpResponse>> methodMap;
 
     protected AbstractController() {

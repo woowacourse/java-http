@@ -15,7 +15,7 @@ public class WebServer {
 
     private static final int DEFAULT_PORT = 8080;
 
-    private static final HandlerMapping CONTROLLER_MAPPING = new HandlerMapping("nextstep.jwp.controller");
+    private static final HandlerMapping HANDLER_MAPPING = new HandlerMapping("nextstep.jwp.controller");
 
     private final int port;
 
@@ -44,7 +44,7 @@ public class WebServer {
     private void handle(ServerSocket serverSocket) throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection, CONTROLLER_MAPPING)).start();
+            new Thread(new RequestHandler(connection, HANDLER_MAPPING)).start();
         }
     }
 

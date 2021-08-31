@@ -22,6 +22,7 @@ import nextstep.jwp.infrastructure.http.request.RequestLine;
 public class HandlerMapping {
 
     private static final FileResolver FILE_RESOLVER = new FileResolver("static");
+    private static final FileHandler FILE_HANDLER = new FileHandler(FILE_RESOLVER);
 
     private final Map<String, Controller> controllers;
 
@@ -36,7 +37,7 @@ public class HandlerMapping {
 
         return Optional.ofNullable(controllers.getOrDefault(baseUri, null))
             .map(controller -> (Handler) new ControllerHandler(controller))
-            .orElseGet(() -> new FileHandler(FILE_RESOLVER));
+            .orElse(FILE_HANDLER);
     }
 
     private Set<Controller> findAllControllers(final String controllerPackage) {

@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import nextstep.jwp.infrastructure.http.reader.HttpRequestReader;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.request.RequestLine;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
@@ -18,7 +19,6 @@ import org.slf4j.LoggerFactory;
 public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
-    private static final String CONTENT_LENGTH = "Content-Length";
 
     private final Socket connection;
     private final HandlerMapping handlerMapping;
@@ -37,7 +37,8 @@ public class RequestHandler implements Runnable {
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            final HttpRequest request = requestFromReader(bufferedReader);
+            final HttpRequestReader httpRequestReader = new HttpRequestReader(bufferedReader);
+            final HttpRequest request = httpRequestReader.readHttpRequest();
             final HttpResponse response = new HttpResponse();
 
             handlerMapping.getHandler(request).handle(request, response);
@@ -51,44 +52,6 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
-    }
-
-    private HttpRequest requestFromReader(final BufferedReader bufferedReader) throws IOException {
-        final RequestLine requestLine = requestLineFromReader(bufferedReader);
-        final Headers headers = headerFromReader(bufferedReader);
-        final String body = bodyFromReader(bufferedReader, headers);
-
-        return new HttpRequest(requestLine, headers, body);
-    }
-
-    private RequestLine requestLineFromReader(final BufferedReader bufferedReader) throws IOException {
-        return RequestLine.of(bufferedReader.readLine());
-    }
-
-    private Headers headerFromReader(final BufferedReader bufferedReader) throws IOException {
-        final List<String> lines = new ArrayList<>();
-        String line;
-
-        while (Objects.nonNull(line = bufferedReader.readLine())) {
-            if ("".equals(line)) {
-                break;
-            }
-            lines.add(line);
-        }
-
-        return Headers.of(lines);
-    }
-
-    private String bodyFromReader(final BufferedReader bufferedReader, final Headers headers) throws IOException {
-        if (!headers.hasKey(CONTENT_LENGTH)) {
-            return "";
-        }
-
-        int contentLength = Integer.parseInt(headers.getValue(CONTENT_LENGTH).get(0));
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-
-        return new String(buffer);
     }
 
     private void close() {

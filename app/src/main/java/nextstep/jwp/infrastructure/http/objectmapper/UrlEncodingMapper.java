@@ -10,6 +10,8 @@ public class UrlEncodingMapper implements DataMapper {
 
     private static final String PARAMETER_DELIMITER = "&";
     private static final String KEY_AND_VALUE_DELIMITER = "=";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     @Override
     public Map<String, String> parse(final String data) {
@@ -20,11 +22,11 @@ public class UrlEncodingMapper implements DataMapper {
             List<String> keyAndValue = Arrays.stream(parameter.split(KEY_AND_VALUE_DELIMITER, 2))
                 .collect(Collectors.toList());
 
-            if (keyAndValue.size() != 2) {
+            if (keyAndValue.size() != 2 || "".equals(keyAndValue.get(KEY_INDEX))) {
                 throw new IllegalArgumentException("Invalid format.");
             }
 
-            result.put(keyAndValue.get(0), keyAndValue.get(1));
+            result.put(keyAndValue.get(KEY_INDEX), keyAndValue.get(VALUE_INDEX));
         }
 
         return result;

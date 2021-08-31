@@ -13,23 +13,24 @@ public abstract class AbstractController implements Controller {
     }
 
     @Override
-    public String getResource() {
+    public final String getResource() {
         return resource;
     }
 
     @Override
-    public HttpResponse execute(HttpRequest httpRequest) {
-        if (HttpMethod.POST.equals(httpRequest.getHttpMethod())) {
-            return doPost(httpRequest);
+    public final void service(HttpRequest request, HttpResponse response) {
+        if (HttpMethod.POST.equals(request.getHttpMethod())) {
+            doPost(request, response);
+            return;
         }
-        return doGet(httpRequest);
+        doGet(request, response);
     }
 
-    protected HttpResponse doGet(HttpRequest httpRequest) {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         throw new UnsupportedOperationException();
     }
 
-    protected HttpResponse doPost(HttpRequest httpRequest) {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         throw new UnsupportedOperationException();
     }
 }

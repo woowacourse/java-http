@@ -7,5 +7,5 @@ public interface Controller {
 
     String getResource();
 
-    HttpResponse execute(HttpRequest httpRequest);
+    void service(HttpRequest httpRequest, HttpResponse httpResponse);
 }

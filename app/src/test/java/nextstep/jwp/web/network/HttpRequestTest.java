@@ -29,10 +29,9 @@ class HttpRequestTest {
                 "",
                 "");
         final InputStream inputStream = new ByteArrayInputStream(requestAsString.getBytes());
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         // when // then
-        assertThatCode(() -> HttpRequest.of(bufferedReader))
+        assertThatCode(() -> new HttpRequest(inputStream))
                 .doesNotThrowAnyException();
     }
 
@@ -48,10 +47,9 @@ class HttpRequestTest {
                 "",
                 "");
         final InputStream inputStream = new ByteArrayInputStream(requestAsString.getBytes());
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         // when
-        final HttpRequest httpRequest = HttpRequest.of(bufferedReader);
+        final HttpRequest httpRequest = new HttpRequest(inputStream);
         final HttpMethod actual = httpRequest.getHttpMethod();
 
         // then
@@ -70,10 +68,9 @@ class HttpRequestTest {
                 "",
                 "");
         final InputStream inputStream = new ByteArrayInputStream(requestAsString.getBytes());
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         // when
-        final HttpRequest httpRequest = HttpRequest.of(bufferedReader);
+        final HttpRequest httpRequest = new HttpRequest(inputStream);
         final URI actual = httpRequest.getURI();
 
         // then
@@ -94,10 +91,9 @@ class HttpRequestTest {
                 "",
                 "account=gugu&password=password&email=hkkang%40woowahan.com");
         final InputStream inputStream = new ByteArrayInputStream(requestAsString.getBytes());
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         // when
-        final HttpRequest httpRequest = HttpRequest.of(bufferedReader);
+        final HttpRequest httpRequest = new HttpRequest(inputStream);
         final Map<String, String> actual = httpRequest.getBody();
 
         // then

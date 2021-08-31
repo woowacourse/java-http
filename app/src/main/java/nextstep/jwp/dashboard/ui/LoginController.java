@@ -22,27 +22,35 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    public HttpResponse doGet(HttpRequest httpRequest) {
+    public void doGet(HttpRequest request, HttpResponse response) {
         log.info("GET /login");
-        return HttpResponse.ofView(HttpStatus.OK, new View(getResource() + ".html"));
+        final View view = new View(getResource() + ".html");
+        response.setStatus(HttpStatus.OK);
+        response.setBody(view);
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest httpRequest) {
+    protected void doPost(HttpRequest request, HttpResponse response) {
         try {
-            final Map<String, String> queryInfo = httpRequest.getBody();
+            final Map<String, String> queryInfo = request.getBody();
             final User user = InMemoryUserRepository.findByAccount(queryInfo.get("account"))
                     .orElseThrow(() -> new UserNotFoundException(queryInfo.get("account")));
             if (user.checkPassword(queryInfo.get("password"))) {
                 log.info("Login successful!");
-                return HttpResponse.ofView(HttpStatus.FOUND, new View("/index"));
+                final View view = new View("/index");
+                response.setStatus(HttpStatus.FOUND);
+                response.setBody(view);
             } else {
                 log.info("Login failed");
-                return HttpResponse.ofView(HttpStatus.UNAUTHORIZED, new View("/401"));
+                final View view = new View("/401");
+                response.setStatus(HttpStatus.UNAUTHORIZED);
+                response.setBody(view);
             }
         } catch (UserNotFoundException e) {
             log.info(e.getMessage());
-            return HttpResponse.ofView(HttpStatus.UNAUTHORIZED, new View("/401"));
+            final View view = new View("/401");
+            response.setStatus(HttpStatus.UNAUTHORIZED);
+            response.setBody(view);
         }
     }
 }

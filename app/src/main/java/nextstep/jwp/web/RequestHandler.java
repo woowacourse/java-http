@@ -8,11 +8,9 @@ import nextstep.jwp.web.network.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
@@ -35,16 +33,17 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final HttpRequest httpRequest = HttpRequest.of(bufferedReader);
-
-            final ControllerMapping controllerMapping = new ControllerMapping(ControllerFactory.create());
-            final Controller foundController = controllerMapping.findByResource(httpRequest.getPath());
-            final HttpResponse httpResponse = foundController.execute(httpRequest);
-
             final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
+
+            final HttpRequest httpRequest  = new HttpRequest(inputStream);
+            final HttpResponse httpResponse = new HttpResponse();
+            final ControllerMapping controllerMapping = new ControllerMapping(ControllerFactory.create());
+            final Controller mappedController = controllerMapping.findByResource(httpRequest.getPath());
+            mappedController.service(httpRequest, httpResponse);
+
             bufferedWriter.write(httpResponse.asString());
             bufferedWriter.flush();
+            bufferedWriter.close();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {

@@ -22,14 +22,16 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    public HttpResponse doGet(HttpRequest httpRequest) {
+    public void doGet(HttpRequest request, HttpResponse response) {
         log.info("GET /register");
-        return HttpResponse.ofView(HttpStatus.OK, new View(getResource() + ".html"));
+        final View view = new View(getResource() + ".html");
+        response.setStatus(HttpStatus.OK);
+        response.setBody(view);
     }
 
     @Override
-    public HttpResponse doPost(HttpRequest httpRequest) {
-        final Map<String, String> payload = httpRequest.getBody();
+    public void doPost(HttpRequest request, HttpResponse response) {
+        final Map<String, String> payload = request.getBody();
         final User user = new User(
                 payload.get("account"),
                 payload.get("password"),
@@ -40,6 +42,8 @@ public class RegisterController extends AbstractController {
         }
         InMemoryUserRepository.save(user);
         log.info(String.format("New User Registered. user id : %d, account : %s", user.getId(), user.getAccount()));
-        return HttpResponse.ofView(HttpStatus.OK, new View("/index"));
+        final View view = new View("/index");
+        response.setStatus(HttpStatus.OK);
+        response.setBody(view);
     }
 }

@@ -5,24 +5,16 @@ import nextstep.jwp.web.controller.View;
 
 public class HttpResponse {
 
-    private final StatusLine statusLine;
-    private final ContentType contentType;
-    private final int contentLength;
-    private final String body;
+    private StatusLine statusLine;
+    private ContentType contentType;
+    private int contentLength;
+    private String body;
 
-    private HttpResponse(HttpStatus httpStatus, ContentType contentType, String body) {
-        this.statusLine = new StatusLine(httpStatus);
-        this.contentType = contentType;
-        this.contentLength = body.getBytes().length;
-        this.body = body;
-    }
-
-    public static HttpResponse ofView(HttpStatus httpStatus, View view) {
-        return new HttpResponse(httpStatus, view.getContentType(), view.render());
-    }
-
-    public static HttpResponse ofByteArray(HttpStatus httpStatus, ContentType contentType, byte[] body) {
-        return new HttpResponse(httpStatus, contentType, new String(body));
+    public HttpResponse() {
+        this.statusLine = new StatusLine(HttpStatus.OK);
+        this.contentType = ContentType.HTML;
+        this.contentLength = 0;
+        this.body = "";
     }
 
     public String asString() {
@@ -32,6 +24,16 @@ public class HttpResponse {
                 "Content-Length: " + contentLength + " ",
                 "",
                 body);
+    }
+
+    public void setStatus(HttpStatus status) {
+        this.statusLine.setStatus(status);
+    }
+
+    public void setBody(View view) {
+        this.body = view.render();
+        this.contentType = view.getContentType();
+        this.contentLength = this.body.getBytes().length;
     }
 }
 

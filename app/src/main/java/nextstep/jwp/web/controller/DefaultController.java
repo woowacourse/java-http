@@ -15,14 +15,17 @@ public class DefaultController extends AbstractController {
     }
 
     @Override
-    public HttpResponse doGet(HttpRequest httpRequest) {
-        final String path = httpRequest.getPath();
+    public void doGet(HttpRequest request, HttpResponse response) {
+        final String path = request.getPath();
         log.info("GET {}", path);
         if (getResource().equals(path)) {
             final View view = new View("/index.html");
-            return HttpResponse.ofView(HttpStatus.OK, view);
+            response.setStatus(HttpStatus.OK);
+            response.setBody(view);
+            return;
         }
         final View view = new View(path);
-        return HttpResponse.ofView(HttpStatus.OK, view);
+        response.setStatus(HttpStatus.OK);
+        response.setBody(view);
     }
 }

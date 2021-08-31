@@ -7,14 +7,14 @@ import nextstep.jwp.webserver.model.User;
 
 public class UserService {
 
-    public boolean login(String account, String password) {
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+    public boolean login(User user) {
+        final Optional<User> savedUser = InMemoryUserRepository.findByAccount(user.getAccount());
 
-        if (user.isEmpty()) {
+        if (savedUser.isEmpty()) {
             return false;
         }
 
-        return user.get().checkPassword(password);
+        return savedUser.get().checkPassword(user);
     }
 
     public void register(User user) {

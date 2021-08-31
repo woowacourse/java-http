@@ -4,17 +4,17 @@ import nextstep.jwp.infrastructure.http.HttpHeaders;
 
 public class HttpRequest {
 
-    private final HttpRequestLine requestLine;
+    private final RequestLine requestLine;
     private final HttpHeaders headers;
     private final String messageBody;
 
-    public HttpRequest(final HttpRequestLine requestLine, final HttpHeaders headers, final String messageBody) {
+    public HttpRequest(final RequestLine requestLine, final HttpHeaders headers, final String messageBody) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.messageBody = messageBody;
     }
 
-    public HttpRequestLine getRequestLine() {
+    public RequestLine getRequestLine() {
         return requestLine;
     }
 

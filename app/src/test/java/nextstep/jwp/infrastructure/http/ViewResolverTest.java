@@ -8,8 +8,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.infrastructure.http.HttpHeaders.Builder;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
-import nextstep.jwp.infrastructure.http.response.HttpStatusCode;
-import nextstep.jwp.infrastructure.http.response.HttpStatusLine;
+import nextstep.jwp.infrastructure.http.response.StatusCode;
+import nextstep.jwp.infrastructure.http.response.ResponseLine;
 import nextstep.jwp.infrastructure.http.view.HttpResponseView;
 import nextstep.jwp.infrastructure.http.view.ResourceView;
 import nextstep.jwp.infrastructure.http.view.View;
@@ -33,7 +33,7 @@ class ViewResolverTest {
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
 
         final HttpResponse expected = new HttpResponse(
-            new HttpStatusLine(HttpStatusCode.NOT_FOUND),
+            new ResponseLine(StatusCode.NOT_FOUND),
             new HttpHeaders.Builder()
                 .header("Content-Type", "text/html;charset=utf-8")
                 .header("Content-Length", "2426")
@@ -49,7 +49,7 @@ class ViewResolverTest {
     @Test
     void resolveWithoutResource() {
         final HttpResponse response = new HttpResponse(
-            new HttpStatusLine(HttpStatusCode.NOT_FOUND),
+            new ResponseLine(StatusCode.NOT_FOUND),
             new Builder()
                 .header("Content-Type", "text/html;charset=utf-8")
                 .header("Content-Length", "2426")
@@ -69,7 +69,7 @@ class ViewResolverTest {
 
         assertThat(viewResolver.resolve(view)).isEqualTo(
             new HttpResponse(
-                new HttpStatusLine(HttpStatusCode.OK),
+                new ResponseLine(StatusCode.OK),
                 new Builder()
                     .header("Content-Type", "text/html;charset=utf-8")
                     .header("Content-Length", "12")

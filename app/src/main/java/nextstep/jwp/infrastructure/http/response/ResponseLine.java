@@ -2,19 +2,19 @@ package nextstep.jwp.infrastructure.http.response;
 
 import java.util.Objects;
 
-public class HttpStatusLine {
+public class ResponseLine {
 
     private static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
 
     private final String httpVersion;
-    private final HttpStatusCode statusCode;
+    private final StatusCode statusCode;
 
-    public HttpStatusLine(final String httpVersion, final HttpStatusCode statusCode) {
+    public ResponseLine(final String httpVersion, final StatusCode statusCode) {
         this.httpVersion = httpVersion;
         this.statusCode = statusCode;
     }
 
-    public HttpStatusLine(final HttpStatusCode statusCode) {
+    public ResponseLine(final StatusCode statusCode) {
         this(DEFAULT_HTTP_VERSION, statusCode);
     }
 
@@ -31,7 +31,7 @@ public class HttpStatusLine {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final HttpStatusLine that = (HttpStatusLine) o;
+        final ResponseLine that = (ResponseLine) o;
         return Objects.equals(httpVersion, that.httpVersion) && statusCode == that.statusCode;
     }
 

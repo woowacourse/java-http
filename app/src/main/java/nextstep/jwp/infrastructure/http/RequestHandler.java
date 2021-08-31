@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
-import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
+import nextstep.jwp.infrastructure.http.request.RequestLine;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.infrastructure.http.view.ResourceView;
 import nextstep.jwp.infrastructure.http.view.View;
@@ -57,15 +57,15 @@ public class RequestHandler implements Runnable {
     }
 
     private HttpRequest requestFromReader(final BufferedReader bufferedReader) throws IOException {
-        final HttpRequestLine requestLine = requestLineFromReader(bufferedReader);
+        final RequestLine requestLine = requestLineFromReader(bufferedReader);
         final HttpHeaders headers = headerFromReader(bufferedReader);
         final String body = bodyFromReader(bufferedReader, headers);
 
         return new HttpRequest(requestLine, headers, body);
     }
 
-    private HttpRequestLine requestLineFromReader(final BufferedReader bufferedReader) throws IOException {
-        return HttpRequestLine.of(bufferedReader.readLine());
+    private RequestLine requestLineFromReader(final BufferedReader bufferedReader) throws IOException {
+        return RequestLine.of(bufferedReader.readLine());
     }
 
     private HttpHeaders headerFromReader(final BufferedReader bufferedReader) throws IOException {

@@ -13,12 +13,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
-import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
+import nextstep.jwp.infrastructure.http.request.RequestLine;
 import nextstep.jwp.infrastructure.http.view.View;
 
 public class ControllerMapping {
 
-    private final Map<HttpRequestLine, Controller> controllers;
+    private final Map<RequestLine, Controller> controllers;
 
     public ControllerMapping(final String controllerPackage) {
         this.controllers = findAllControllers(controllerPackage).stream()
@@ -26,8 +26,8 @@ public class ControllerMapping {
     }
 
     public Optional<View> handle(final HttpRequest request) {
-        final HttpRequestLine requestLine = request.getRequestLine();
-        final HttpRequestLine requestLineWithoutQuery = new HttpRequestLine(requestLine.getHttpMethod(), requestLine.getUri().getBaseUri());
+        final RequestLine requestLine = request.getRequestLine();
+        final RequestLine requestLineWithoutQuery = new RequestLine(requestLine.getHttpMethod(), requestLine.getUri().getBaseUri());
 
         return Optional.ofNullable(controllers.getOrDefault(requestLineWithoutQuery, null))
             .map(controller -> controller.handle(request));

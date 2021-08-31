@@ -6,24 +6,24 @@ import nextstep.jwp.infrastructure.http.HttpHeaders;
 
 public class HttpResponse {
 
-    private final HttpStatusLine statusLine;
+    private final ResponseLine responseLine;
     private final HttpHeaders headers;
     private final String messageBody;
 
-    public HttpResponse(final HttpStatusLine statusLine, final HttpHeaders headers, final String messageBody) {
-        this.statusLine = statusLine;
+    public HttpResponse(final ResponseLine responseLine, final HttpHeaders headers, final String messageBody) {
+        this.responseLine = responseLine;
         this.headers = headers;
         this.messageBody = messageBody;
     }
 
-    public HttpResponse(final HttpStatusLine statusLine, final HttpHeaders headers) {
-        this(statusLine, headers, "");
+    public HttpResponse(final ResponseLine responseLine, final HttpHeaders headers) {
+        this(responseLine, headers, "");
     }
 
     @Override
     public String toString() {
         return String.join("\r\n",
-            statusLine.toString(),
+            responseLine.toString(),
             headers.toString(),
             "",
             messageBody
@@ -39,12 +39,12 @@ public class HttpResponse {
             return false;
         }
         final HttpResponse that = (HttpResponse) o;
-        return Objects.equals(statusLine, that.statusLine) && Objects.equals(headers, that.headers) && Objects
+        return Objects.equals(responseLine, that.responseLine) && Objects.equals(headers, that.headers) && Objects
             .equals(messageBody, that.messageBody);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(statusLine, headers, messageBody);
+        return Objects.hash(responseLine, headers, messageBody);
     }
 }

@@ -9,8 +9,8 @@ import java.util.Locale;
 import java.util.Optional;
 import nextstep.jwp.infrastructure.http.HttpHeaders;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
-import nextstep.jwp.infrastructure.http.response.HttpStatusCode;
-import nextstep.jwp.infrastructure.http.response.HttpStatusLine;
+import nextstep.jwp.infrastructure.http.response.ResponseLine;
+import nextstep.jwp.infrastructure.http.response.StatusCode;
 
 public class ResourceView implements View {
 
@@ -19,16 +19,16 @@ public class ResourceView implements View {
     private static final String CONTENT_TYPE_DELIMITER = ";";
     private static final String CHARSET_KEY = "charset=";
     private final ClassLoader classLoader = getClass().getClassLoader();
-    private final HttpStatusCode statusCode;
+    private final StatusCode statusCode;
     private final String resourceName;
 
-    public ResourceView(final HttpStatusCode statusCode, final String resourceName) {
+    public ResourceView(final StatusCode statusCode, final String resourceName) {
         this.statusCode = statusCode;
         this.resourceName = resourceName;
     }
 
     public ResourceView(final String resourceName) {
-        this(HttpStatusCode.OK, resourceName);
+        this(StatusCode.OK, resourceName);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class ResourceView implements View {
         try {
             final String responseBody = Files.readString(path);
             return new HttpResponse(
-                new HttpStatusLine(statusCode),
+                new ResponseLine(statusCode),
                 new HttpHeaders.Builder()
                     .header(CONTENT_TYPE,
                         String.join(CONTENT_TYPE_DELIMITER, Files.probeContentType(path),

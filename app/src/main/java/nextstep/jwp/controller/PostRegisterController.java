@@ -5,12 +5,12 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.infrastructure.http.HttpHeaders;
 import nextstep.jwp.infrastructure.http.objectmapper.DataMapper;
 import nextstep.jwp.infrastructure.http.objectmapper.UrlEncodingMapper;
-import nextstep.jwp.infrastructure.http.request.HttpMethod;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
-import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
+import nextstep.jwp.infrastructure.http.request.Method;
+import nextstep.jwp.infrastructure.http.request.RequestLine;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
-import nextstep.jwp.infrastructure.http.response.HttpStatusCode;
-import nextstep.jwp.infrastructure.http.response.HttpStatusLine;
+import nextstep.jwp.infrastructure.http.response.ResponseLine;
+import nextstep.jwp.infrastructure.http.response.StatusCode;
 import nextstep.jwp.infrastructure.http.view.HttpResponseView;
 import nextstep.jwp.infrastructure.http.view.View;
 import nextstep.jwp.model.User;
@@ -23,8 +23,8 @@ public class PostRegisterController implements Controller {
     private static final String EMAIL = "email";
 
     @Override
-    public HttpRequestLine requestLine() {
-        return new HttpRequestLine(HttpMethod.POST, "/register");
+    public RequestLine requestLine() {
+        return new RequestLine(Method.POST, "/register");
     }
 
     @Override
@@ -36,7 +36,7 @@ public class PostRegisterController implements Controller {
 
         return new HttpResponseView(
             new HttpResponse(
-                new HttpStatusLine(HttpStatusCode.FOUND),
+                new ResponseLine(StatusCode.FOUND),
                 new HttpHeaders.Builder()
                     .header("Location", "/index.html")
                     .build()

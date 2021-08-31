@@ -7,12 +7,12 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.infrastructure.http.HttpHeaders;
 import nextstep.jwp.infrastructure.http.objectmapper.DataMapper;
 import nextstep.jwp.infrastructure.http.objectmapper.UrlEncodingMapper;
-import nextstep.jwp.infrastructure.http.request.HttpMethod;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
-import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
+import nextstep.jwp.infrastructure.http.request.Method;
+import nextstep.jwp.infrastructure.http.request.RequestLine;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
-import nextstep.jwp.infrastructure.http.response.HttpStatusCode;
-import nextstep.jwp.infrastructure.http.response.HttpStatusLine;
+import nextstep.jwp.infrastructure.http.response.ResponseLine;
+import nextstep.jwp.infrastructure.http.response.StatusCode;
 import nextstep.jwp.infrastructure.http.view.HttpResponseView;
 import nextstep.jwp.infrastructure.http.view.View;
 
@@ -24,8 +24,8 @@ public class PostLoginController implements Controller {
     private static final List<String> REQUIRED_PARAMETERS = Arrays.asList(ACCOUNT, PASSWORD);
 
     @Override
-    public HttpRequestLine requestLine() {
-        return new HttpRequestLine(HttpMethod.POST, "/login");
+    public RequestLine requestLine() {
+        return new RequestLine(Method.POST, "/login");
     }
 
     @Override
@@ -46,7 +46,7 @@ public class PostLoginController implements Controller {
     private HttpResponseView redirectView(final String location) {
         return new HttpResponseView(
             new HttpResponse(
-                new HttpStatusLine(HttpStatusCode.FOUND),
+                new ResponseLine(StatusCode.FOUND),
                 new HttpHeaders.Builder()
                     .header("Location", location)
                     .build()

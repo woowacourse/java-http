@@ -14,7 +14,7 @@ class InMemoryUserRepositoryTest {
     @BeforeEach
     void setUp() {
         InMemoryUserRepository.clear();
-        final User user = new User(1, "gugu", "password", "hkkang@woowahan.com");
+        final User user = new User("gugu", "password", "hkkang@woowahan.com");
         InMemoryUserRepository.save(user);
     }
 
@@ -34,7 +34,7 @@ class InMemoryUserRepositoryTest {
     @Test
     void testSave() {
         //given
-        User newUser = new User(2L, "NEW_USER", "1234", "email@google.com");
+        User newUser = new User("NEW_USER", "1234", "email@google.com");
         InMemoryUserRepository.save(newUser);
         //when
         User findUser = InMemoryUserRepository.findByAccount("NEW_USER").get();
@@ -46,13 +46,12 @@ class InMemoryUserRepositoryTest {
     @Test
     void testGetLatestId() {
         //given
-        int latestId = InMemoryUserRepository.getLatestId();
-        User newUser1 = new User(latestId++, "NEW_USER1", "1234", "email1@google.com");
-        User newUser2 = new User(latestId++, "NEW_USER2", "4321", "email2@google.com");
+        User newUser1 = new User("NEW_USER1", "1234", "email1@google.com");
+        User newUser2 = new User("NEW_USER2", "4321", "email2@google.com");
         InMemoryUserRepository.save(newUser1);
         InMemoryUserRepository.save(newUser2);
         //when
         //then
-        assertThat(InMemoryUserRepository.getLatestId()).isEqualTo(3);
+        assertThat(InMemoryUserRepository.size()).isEqualTo(3);
     }
 }

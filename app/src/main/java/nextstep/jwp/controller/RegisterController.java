@@ -26,8 +26,7 @@ public class RegisterController extends AbstractController {
         if (user.isPresent()) {
             return response.redirect("/400.html", HttpStatus.BAD_REQUEST);
         }
-        int latest = InMemoryUserRepository.getLatestId();
-        User signupUser = new User(latest++, requestBody.getParam("account"), requestBody.getParam("password"), requestBody.getParam("email"));
+        User signupUser = new User(requestBody.getParam("account"), requestBody.getParam("password"), requestBody.getParam("email"));
         InMemoryUserRepository.save(signupUser);
         return response.redirect("/index.html", HttpStatus.FOUND);
     }

@@ -12,6 +12,7 @@ import nextstep.jwp.constants.StatusCode;
 import nextstep.jwp.controller.MappingHandler;
 import nextstep.jwp.exception.BadRequestException;
 import nextstep.jwp.exception.PageNotFoundException;
+import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.request.RequestBody;
 import nextstep.jwp.request.RequestHeader;
 import nextstep.jwp.request.RequestLine;
@@ -63,26 +64,42 @@ public class HttpServer {
         try {
             return mappingHandler.response();
         } catch (InvocationTargetException e) {
-            if (e.getTargetException() instanceof BadRequestException) {
-                return ResponseEntity
-                        .statusCode(StatusCode.BAD_REQUEST)
-                        .responseResource("/400.html")
-                        .build();
-            }
-            return ResponseEntity
-                    .statusCode(StatusCode.INTERNAL_SERVER_ERROR)
-                    .responseResource("/500.html")
-                    .build();
+            return handleReflectionException(e);
         } catch (PageNotFoundException e) {
             return ResponseEntity
                     .statusCode(StatusCode.NOT_FOUND)
                     .responseResource("/404.html")
                     .build();
-        } catch (Exception e) {
+        } catch (UnauthorizedException e){
+            return ResponseEntity
+                    .statusCode(StatusCode.UNAUTHORIZED)
+                    .responseResource("/401.html")
+                    .build();
+        }
+        catch (Exception e) {
             return ResponseEntity
                     .statusCode(StatusCode.INTERNAL_SERVER_ERROR)
                     .responseResource("/500.html")
                     .build();
         }
+    }
+
+    private String handleReflectionException(InvocationTargetException e) throws IOException {
+        if (e.getTargetException() instanceof BadRequestException) {
+            return ResponseEntity
+                    .statusCode(StatusCode.BAD_REQUEST)
+                    .responseResource("/400.html")
+                    .build();
+        }
+        if (e.getTargetException() instanceof UnauthorizedException) {
+            return ResponseEntity
+                    .statusCode(StatusCode.UNAUTHORIZED)
+                    .responseResource("/401.html")
+                    .build();
+        }
+        return ResponseEntity
+                .statusCode(StatusCode.INTERNAL_SERVER_ERROR)
+                .responseResource("/500.html")
+                .build();
     }
 }

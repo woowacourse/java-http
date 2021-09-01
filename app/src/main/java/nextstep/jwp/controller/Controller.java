@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 import nextstep.jwp.constants.Header;
 import nextstep.jwp.constants.StatusCode;
+import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.request.RequestBody;
 import nextstep.jwp.response.ResponseEntity;
 import nextstep.jwp.service.HttpService;
@@ -52,16 +53,12 @@ public class Controller {
     @PostMapping(path = "/login")
     public String login(RequestBody body) throws IOException {
         Map<String, String> params = body.getParams();
-        if (HttpService.isAuthorized(params)) {
-            return ResponseEntity
-                    .statusCode(StatusCode.FOUND)
-                    .responseResource("/index.html")
-                    .build();
+        if (!HttpService.isAuthorized(params)) {
+            throw new UnauthorizedException("인증되지 않은 사용자 입니다.");
         }
         return ResponseEntity
-                .statusCode(StatusCode.UNAUTHORIZED)
-                .responseResource("/401.html")
+                .statusCode(StatusCode.FOUND)
+                .responseResource("/index.html")
                 .build();
-
     }
 }

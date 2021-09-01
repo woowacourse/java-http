@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.constants.UserParams;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.AuthorizationException;
+import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.exception.BadRequestException;
 import nextstep.jwp.model.User;
 
@@ -14,7 +14,7 @@ public class HttpService {
 
     public static Boolean isAuthorized(Map<String, String> params) {
         User user = InMemoryUserRepository.findByAccount(params.get(UserParams.ACCOUNT))
-                .orElseThrow(() -> new AuthorizationException("해당하는 유저가 없어요"));
+                .orElseThrow(() -> new UnauthorizedException("해당하는 유저가 없어요"));
         return user.checkPassword(params.get(UserParams.PASSWORD));
     }
 

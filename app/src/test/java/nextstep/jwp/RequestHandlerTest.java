@@ -318,7 +318,7 @@ class RequestHandlerTest {
                     "Content-Type: application/x-www-form-urlencoded ",
                     "Accept: */* ",
                     "",
-                    "account=gugu&password=password&email=hkkang%40woowahan.com ");
+                    "account=gugu2&password=password&email=hkkang%40woowahan.com ");
 
             final MockSocket socket = new MockSocket(httpRequest);
             final RequestHandler requestHandler = new RequestHandler(socket);

@@ -41,7 +41,7 @@ class FileTest {
      */
     @Test
     void 파일의_내용을_읽는다() throws IOException {
-        final String fileName = "nextstep";
+        final String fileName = "nextstep.txt";
 
         final URL url = getClass().getClassLoader().getResource(fileName);
         final Path path = new File(url.getPath()).toPath();

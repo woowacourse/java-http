@@ -22,6 +22,7 @@ public class ResponseLine {
                 SPACE +
                 statusCode.getStatusCode() +
                 SPACE +
-                statusCode.getStatusMessage();
+                statusCode.getStatusMessage() +
+                SPACE;
     }
 }

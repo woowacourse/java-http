@@ -5,7 +5,7 @@ import nextstep.jwp.exception.PageNotFoundError;
 import java.util.Arrays;
 
 public enum ContentType {
-    HTML(".html", "text/html; charset=UTF-8"),
+    HTML(".html", "text/html; charset=utf-8"),
     CSS(".css", "text/css"),
     JS(".js", "application/javascript"),
     SVG(".svg", "image/svg+xml");

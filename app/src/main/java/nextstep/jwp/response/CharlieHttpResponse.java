@@ -18,7 +18,7 @@ public class CharlieHttpResponse implements HttpResponse {
 
     public static CharlieHttpResponse createResponse(String viewName) {
         if (viewName.startsWith(REDIRECT_FORM)) {
-            String redirectLocation = viewName.substring(REDIRECT_FORM.length());
+            String redirectLocation = viewName.substring(REDIRECT_FORM.length()).trim();
             return redirectResponse(redirectLocation);
         }
         return okResponse(viewName);

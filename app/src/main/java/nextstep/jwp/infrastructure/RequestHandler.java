@@ -1,6 +1,6 @@
 package nextstep.jwp.infrastructure;
 
-import nextstep.jwp.model.CustomHttpRequest;
+import nextstep.jwp.model.web.request.CustomHttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

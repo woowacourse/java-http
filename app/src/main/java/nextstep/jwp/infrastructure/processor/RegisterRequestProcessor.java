@@ -1,8 +1,8 @@
 package nextstep.jwp.infrastructure.processor;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.CustomHttpRequest;
-import nextstep.jwp.model.CustomHttpResponse;
+import nextstep.jwp.model.web.request.CustomHttpRequest;
+import nextstep.jwp.model.web.response.CustomHttpResponse;
 import nextstep.jwp.model.User;
 
 import java.io.OutputStream;

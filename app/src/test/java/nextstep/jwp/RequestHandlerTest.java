@@ -2,8 +2,8 @@ package nextstep.jwp;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.infrastructure.RequestHandler;
-import nextstep.jwp.model.ContentType;
-import nextstep.jwp.model.CustomHttpResponse;
+import nextstep.jwp.model.web.ContentType;
+import nextstep.jwp.model.web.response.CustomHttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

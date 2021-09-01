@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package nextstep.jwp.model.web.response;
 
 public class CustomHttpResponse {
 

@@ -1,7 +1,7 @@
 package nextstep.jwp.infrastructure.processor;
 
-import nextstep.jwp.model.CustomHttpRequest;
-import nextstep.jwp.model.CustomHttpResponse;
+import nextstep.jwp.model.web.request.CustomHttpRequest;
+import nextstep.jwp.model.web.response.CustomHttpResponse;
 
 import java.io.OutputStream;
 

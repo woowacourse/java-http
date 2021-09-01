@@ -3,6 +3,7 @@ package nextstep.jwp.http.response;
 import java.nio.charset.StandardCharsets;
 import nextstep.jwp.http.common.HttpStatus;
 import nextstep.jwp.model.StaticResource;
+import nextstep.jwp.server.HttpSession;
 
 public class HttpResponse {
 
@@ -28,17 +29,17 @@ public class HttpResponse {
         return new HttpResponse(statusLine, responseHeaders, responseBody);
     }
 
-    public static HttpResponse redirect(HttpStatus httpStatus, String location) {
+    public static HttpResponse withBodyAndCookie(HttpStatus httpStatus, StaticResource staticResource, String cookie) {
         StatusLine statusLine = StatusLine.from(httpStatus);
-        ResponseHeaders responseHeaders = ResponseHeaders.ofRedirect(location);
-        ResponseBody responseBody = ResponseBody.empty();
+        ResponseHeaders responseHeaders = ResponseHeaders.ofBodyAndSetCookie(staticResource, cookie);
+        ResponseBody responseBody = new ResponseBody(staticResource.getContent());
 
         return new HttpResponse(statusLine, responseHeaders, responseBody);
     }
 
-    public static HttpResponse redirectWithSetCookie(HttpStatus httpStatus, String location, String cookie) {
+    public static HttpResponse redirect(HttpStatus httpStatus, String location) {
         StatusLine statusLine = StatusLine.from(httpStatus);
-        ResponseHeaders responseHeaders = ResponseHeaders.ofRedirectWithSetCookie(location, cookie);
+        ResponseHeaders responseHeaders = ResponseHeaders.ofRedirect(location);
         ResponseBody responseBody = ResponseBody.empty();
 
         return new HttpResponse(statusLine, responseHeaders, responseBody);

@@ -1,10 +1,12 @@
 package nextstep.jwp.controller;
 
+import java.io.IOException;
 import nextstep.jwp.controller.request.RegisterRequest;
 import nextstep.jwp.exception.DuplicateAccountException;
 import nextstep.jwp.http.common.HttpStatus;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.model.StaticResource;
 import nextstep.jwp.service.RegisterService;
 import nextstep.jwp.service.StaticResourceService;
 import org.slf4j.Logger;
@@ -15,15 +17,17 @@ public class RegisterController extends RestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(RegisterController.class);
 
     private final RegisterService registerService;
+    private final StaticResourceService staticResourceService;
 
     public RegisterController(RegisterService registerService,
                               StaticResourceService staticResourceService) {
         super(staticResourceService);
         this.registerService = registerService;
+        this.staticResourceService = staticResourceService;
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest httpRequest) {
+    protected HttpResponse doPost(HttpRequest httpRequest) throws IOException {
         try {
             RegisterRequest registerRequest = getRegisterRequest(httpRequest);
             registerService.registerUser(registerRequest);
@@ -34,7 +38,8 @@ public class RegisterController extends RestController {
         } catch (DuplicateAccountException e) {
             LOGGER.debug("Register Failed.");
 
-            return HttpResponse.redirect(HttpStatus.CONFLICT, "/409.html");
+            StaticResource resource = staticResourceService.findByPath("/409.html");
+            return HttpResponse.withBody(HttpStatus.CONFLICT, resource);
         }
     }
 

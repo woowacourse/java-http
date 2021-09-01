@@ -2,11 +2,13 @@ package nextstep.jwp.controller;
 
 import static nextstep.jwp.http.common.HttpStatus.*;
 
+import java.io.IOException;
 import nextstep.jwp.controller.request.LoginRequest;
 import nextstep.jwp.controller.response.LoginResponse;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.model.StaticResource;
 import nextstep.jwp.service.LoginService;
 import nextstep.jwp.service.StaticResourceService;
 import org.slf4j.Logger;
@@ -17,14 +19,16 @@ public class LoginController extends RestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
 
     private final LoginService loginService;
+    private final StaticResourceService staticResourceService;
 
     public LoginController(LoginService loginService, StaticResourceService staticResourceService) {
         super(staticResourceService);
         this.loginService = loginService;
+        this.staticResourceService = staticResourceService;
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest httpRequest) {
+    protected HttpResponse doPost(HttpRequest httpRequest) throws IOException {
         try {
             if (httpRequest.hasCookie() && loginService.isAlreadyLogin(httpRequest.getCookie())) {
                 return HttpResponse.redirect(FOUND, "/index.html");
@@ -35,11 +39,13 @@ public class LoginController extends RestController {
 
             LOGGER.debug("Login Success.");
 
-            return HttpResponse.redirectWithSetCookie(FOUND, "/index.html", loginResponse.getSessionId());
+            StaticResource resource = staticResourceService.findByPath("/index.html");
+            return HttpResponse.withBodyAndCookie(OK, resource, loginResponse.toCookieString());
         } catch (UnauthorizedException e) {
             LOGGER.debug("Login Failed.");
 
-            return HttpResponse.redirect(UNAUTHORIZED, "/401.html");
+            StaticResource resource = staticResourceService.findByPath("/401.html");
+            return HttpResponse.withBody(UNAUTHORIZED, resource);
         }
     }
 

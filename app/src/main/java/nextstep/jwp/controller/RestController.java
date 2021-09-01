@@ -45,5 +45,5 @@ public abstract class RestController implements Controller {
         }
     }
 
-    protected abstract HttpResponse doPost(HttpRequest httpRequest);
+    protected abstract HttpResponse doPost(HttpRequest httpRequest) throws IOException;
 }

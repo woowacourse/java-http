@@ -2,7 +2,6 @@ package nextstep.jwp.http.response;
 
 import static nextstep.jwp.http.common.HttpHeader.CONTENT_LENGTH;
 import static nextstep.jwp.http.common.HttpHeader.CONTENT_TYPE;
-import static nextstep.jwp.http.common.HttpHeader.COOKIE;
 import static nextstep.jwp.http.common.HttpHeader.LOCATION;
 import static nextstep.jwp.http.common.HttpHeader.SET_COOKIE;
 
@@ -31,19 +30,20 @@ public class ResponseHeaders {
         return new ResponseHeaders(headers);
     }
 
-    public static ResponseHeaders ofRedirect(String location) {
+    public static ResponseHeaders ofBodyAndSetCookie(StaticResource staticResource, String cookie) {
         Map<String, String> headers = new HashMap<>();
 
-        headers.put(LOCATION.toRawString(), location);
+        headers.put(CONTENT_TYPE.toRawString(), staticResource.getContentType());
+        headers.put(CONTENT_LENGTH.toRawString(), staticResource.getContentLength());
+        headers.put(SET_COOKIE.toRawString(), cookie);
 
         return new ResponseHeaders(headers);
     }
 
-    public static ResponseHeaders ofRedirectWithSetCookie(String location, String cookie) {
+    public static ResponseHeaders ofRedirect(String location) {
         Map<String, String> headers = new HashMap<>();
 
         headers.put(LOCATION.toRawString(), location);
-        headers.put(SET_COOKIE.toRawString(), cookie);
 
         return new ResponseHeaders(headers);
     }

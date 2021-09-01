@@ -2,13 +2,15 @@ package nextstep.jwp.controller.response;
 
 public class LoginResponse {
 
-    private final String sessionId;
+    private final String sessionKey;
+    private final String sessionValue;
 
-    public LoginResponse(String sessionId) {
-        this.sessionId = sessionId;
+    public LoginResponse(String sessionKey, String sessionValue) {
+        this.sessionKey = sessionKey;
+        this.sessionValue = sessionValue;
     }
 
-    public String getSessionId() {
-        return sessionId;
+    public String toCookieString() {
+        return String.format("%s=%s;", sessionKey, sessionValue);
     }
 }

@@ -15,6 +15,8 @@ import nextstep.jwp.server.HttpSessions;
 
 public class LoginService {
 
+    private static final String SESSION_PARAMETER = "JSESSIONID";
+
     private final InMemoryUserRepository userRepository;
     private final HttpSessions httpSessions;
 
@@ -32,7 +34,7 @@ public class LoginService {
         httpSession.setAttribute("user", user);
         httpSessions.addSession(httpSession);
 
-        return new LoginResponse(httpSession.getId());
+        return new LoginResponse(SESSION_PARAMETER, httpSession.getId());
     }
 
     private User findByUserAccount(String account) {
@@ -42,7 +44,7 @@ public class LoginService {
 
     public boolean isAlreadyLogin(HttpCookie httpCookie) {
         try {
-            httpSessions.findObject(httpCookie.getParameter("JSESSIONID"), "user");
+            httpSessions.findObject(httpCookie.getParameter(SESSION_PARAMETER), "user");
 
             return true;
         } catch (SessionNotFoundException | SessionAttributeNotFoundException | QueryParameterNotFoundException e) {

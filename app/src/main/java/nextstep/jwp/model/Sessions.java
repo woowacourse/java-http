@@ -10,10 +10,8 @@ public class Sessions {
     private Sessions() {
     }
 
-    public static Session getSession(String id) {
-        if (!SESSIONS.containsKey(id)) {
-            SESSIONS.put(id, new Session(id));
-        }
-        return SESSIONS.get(id);
+    public static Session getSession(Cookie cookie) {
+        String id = cookie.getSessionId();
+        return SESSIONS.computeIfAbsent(id, k -> new Session(id));
     }
 }

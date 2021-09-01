@@ -1,25 +1,24 @@
 package nextstep.jwp.model;
 
 import java.util.Map;
-import java.util.UUID;
 
 public class Request {
 
     private final RequestLine requestLine;
-    private Map<String, String> headers;
-    private RequestBody body;
-    private Session session;
+    private final RequestHeaders headers;
+    private final RequestBody body;
+    private final Session session;
 
-    public Request(RequestLine requestLine, Map<String, String> headers, RequestBody body) {
+    public Request(RequestLine requestLine, RequestHeaders headers, RequestBody body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
-        this.session = initializeSession();
+        this.session = establishSession();
     }
 
-    private Session initializeSession() {
-        String id = initializeSessionId();
-        return Sessions.getSession(id);
+    private Session establishSession() {
+        Cookie cookie = headers.getCookie();
+        return Sessions.getSession(cookie);
     }
 
     public String getRequestMethod() {
@@ -30,19 +29,12 @@ public class Request {
         return body;
     }
 
-    public boolean hasCookieHeader() {
-        return headers.containsKey("Cookie");
+    public boolean hasCookie() {
+        return headers.hasCookie();
     }
 
     public Session getSession() {
         return session;
-    }
-
-    private String initializeSessionId() {
-        if (headers.containsKey("Cookie")) {
-            return new Cookie(headers.get("Cookie")).getSessionId();
-        }
-        return UUID.randomUUID().toString();
     }
 
     public FileType getFileType() {

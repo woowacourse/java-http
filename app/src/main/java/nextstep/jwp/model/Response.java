@@ -44,7 +44,7 @@ public class Response {
         private boolean setCookie = true;
 
         public Builder(Request request) {
-            if (request.hasCookieHeader()) {
+            if (request.hasCookie()) {
                 setCookie = false;
             }
             this.request = request;

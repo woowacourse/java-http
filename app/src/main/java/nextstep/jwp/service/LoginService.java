@@ -21,15 +21,15 @@ public class LoginService {
             .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다. 회원가입을 해주세요"));
     }
 
-    public boolean isLoginUser(HttpRequest request, HttpResponse response) {
-        String jSessionId = request.getId();
-        log.debug("로그인 페이지 jsessionid = {}", jSessionId);
+    public boolean isLoginUser(String jSessionId) {
         HttpSession httpSession = HttpSessions.getSession(jSessionId);
         User user = getUser(httpSession);
+
         if (Objects.nonNull(user)) {
-            response.redirect("/index.html");
+            log.debug("user 정보 : {}", user.getAccount());
             return true;
         }
+        log.debug("false 입니다");
         return false;
     }
 

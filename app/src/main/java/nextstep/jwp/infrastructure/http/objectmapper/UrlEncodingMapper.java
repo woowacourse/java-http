@@ -22,13 +22,17 @@ public class UrlEncodingMapper implements DataMapper {
             List<String> keyAndValue = Arrays.stream(parameter.split(KEY_AND_VALUE_DELIMITER, 2))
                 .collect(Collectors.toList());
 
-            if (keyAndValue.size() != 2 || "".equals(keyAndValue.get(KEY_INDEX))) {
-                throw new IllegalArgumentException("Invalid format.");
-            }
+            validateKeyAndValue(keyAndValue);
 
             result.put(keyAndValue.get(KEY_INDEX), keyAndValue.get(VALUE_INDEX));
         }
 
         return result;
+    }
+
+    private void validateKeyAndValue(final List<String> keyAndValue) {
+        if (keyAndValue.size() != 2 || "".equals(keyAndValue.get(KEY_INDEX))) {
+            throw new IllegalArgumentException("Invalid format.");
+        }
     }
 }

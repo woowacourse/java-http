@@ -19,8 +19,8 @@ class HeadersTest {
             .header("Content-Length", "13")
             .build();
 
-        assertThat(headers.getValue("Content-Type")).isEqualTo(Collections.singletonList("text/html;charset=utf-8"));
-        assertThat(headers.getValue("Content-Length")).isEqualTo(Collections.singletonList("13"));
+        assertThat(headers.getValue("Content-Type")).isEqualTo("text/html;charset=utf-8");
+        assertThat(headers.getValue("Content-Length")).isEqualTo("13");
     }
 
     @DisplayName("HTTP 헤더 생성 테스트")
@@ -31,8 +31,8 @@ class HeadersTest {
             "Content-Length: 13"
         ));
 
-        assertThat(headers.getValue("Content-Type")).isEqualTo(Collections.singletonList("text/html;charset=utf-8"));
-        assertThat(headers.getValue("Content-Length")).isEqualTo(Collections.singletonList("13"));
+        assertThat(headers.getValue("Content-Type")).isEqualTo("text/html;charset=utf-8");
+        assertThat(headers.getValue("Content-Length")).isEqualTo("13");
     }
 
     @DisplayName("잘못된 헤더 형식일 경우 예외 처리")

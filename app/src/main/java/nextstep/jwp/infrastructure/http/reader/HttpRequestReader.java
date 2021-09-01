@@ -50,7 +50,7 @@ public class HttpRequestReader {
             return "";
         }
 
-        int contentLength = Integer.parseInt(headers.getValue(CONTENT_LENGTH).get(0));
+        int contentLength = Integer.parseInt(headers.getValue(CONTENT_LENGTH));
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
 

@@ -1,13 +1,12 @@
 package nextstep.jwp.infrastructure.http;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import nextstep.jwp.infrastructure.http.request.Cookie;
 
 public class Headers {
 
@@ -16,30 +15,28 @@ public class Headers {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
     private static final int SPLIT_HEADER_SIZE = 2;
-    private final Map<String, List<String>> elements;
+    private static final String COOKIE = "Cookie";
+
+    private final Map<String, String> elements;
 
     public Headers() {
         this(new LinkedHashMap<>());
     }
 
-    public Headers(final Map<String, List<String>> elements) {
+    public Headers(final Map<String, String> elements) {
         this.elements = elements;
     }
 
     public static Headers of(final List<String> headers) {
-        final Map<String, List<String>> values = new LinkedHashMap<>();
+        final Map<String, String> elements = new LinkedHashMap<>();
 
         for (String header : headers) {
             final List<String> splitHeader = Arrays.asList(header.split(KEY_DELIMITER));
             validateHeaderFormat(splitHeader);
-            values.put(splitHeader.get(KEY_INDEX), splitHeaderValues(splitHeader.get(VALUE_INDEX)));
+            elements.put(splitHeader.get(KEY_INDEX), splitHeader.get(VALUE_INDEX));
         }
 
-        return new Headers(values);
-    }
-
-    private static List<String> splitHeaderValues(final String splitValues) {
-        return Arrays.asList(splitValues.split(VALUE_DELIMITER));
+        return new Headers(elements);
     }
 
     private static void validateHeaderFormat(final List<String> splitHeader) {
@@ -49,17 +46,21 @@ public class Headers {
     }
 
     public void add(final String key, final String value) {
-        if (elements.containsKey(key)) {
-            elements.get(key).add(value);
-        }
-        elements.put(key, Collections.singletonList(value));
+        elements.put(key, value);
     }
 
     public boolean hasKey(final String key) {
         return elements.containsKey(key);
     }
 
-    public List<String> getValue(final String key) {
+    public Cookie getCookie() {
+        if (elements.containsKey(COOKIE)) {
+            return Cookie.of(elements.get(COOKIE));
+        }
+        return new Cookie();
+    }
+
+    public String getValue(final String key) {
         return elements.get(key);
     }
 
@@ -89,17 +90,13 @@ public class Headers {
 
     public static class Builder {
 
-        private final Map<String, List<String>> elements;
+        private final Map<String, String> elements;
 
         public Builder() {
             elements = new LinkedHashMap<>();
         }
 
         public Builder header(final String key, final String value) {
-            return header(key, new ArrayList<>(Collections.singletonList(value)));
-        }
-
-        public Builder header(final String key, final List<String> value) {
             elements.put(key, value);
             return this;
         }

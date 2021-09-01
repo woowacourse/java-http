@@ -54,7 +54,7 @@ public class RequestHandler implements Runnable {
     }
 
     private Controller getController(HttpRequest httpRequest) {
-        Controller controller = Router.get(httpRequest.getUri());
+        Controller controller = RequestMapping.get(httpRequest.getUri());
         return Objects.requireNonNullElseGet(controller, StaticFileController::new);
     }
 

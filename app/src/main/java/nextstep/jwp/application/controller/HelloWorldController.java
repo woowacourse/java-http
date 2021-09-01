@@ -7,6 +7,13 @@ import nextstep.jwp.webserver.StatusCode;
 
 public class HelloWorldController extends AbstractController {
 
+    private static final String MAPPING_URL = "/";
+
+    @Override
+    public String mappingUri() {
+        return MAPPING_URL;
+    }
+
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         response.setStatusCode(StatusCode._200_OK);

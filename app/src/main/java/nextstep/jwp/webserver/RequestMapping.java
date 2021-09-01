@@ -7,21 +7,18 @@ import nextstep.jwp.application.controller.RegisterController;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Router {
+public class RequestMapping {
 
     private static final Map<String, Controller> router = new HashMap<>();
 
     static {
-        add("/", new HelloWorldController());
-        add("/login", new LoginController());
-        add("/register", new RegisterController());
+        add(new HelloWorldController());
+        add(new LoginController());
+        add(new RegisterController());
     }
 
-    private Router() {
-    }
-
-    public static void add(String path, Controller controller) {
-        router.put(path, controller);
+    public static void add(Controller controller) {
+        router.put(controller.mappingUri(), controller);
     }
 
     public static Controller get(String path) {

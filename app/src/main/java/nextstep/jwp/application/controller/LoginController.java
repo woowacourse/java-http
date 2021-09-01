@@ -9,7 +9,13 @@ import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
+    private static final String MAPPING_URL = "/login";
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+
+    @Override
+    public String mappingUri() {
+        return MAPPING_URL;
+    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {

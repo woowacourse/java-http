@@ -17,4 +17,9 @@ public class StaticFileController extends AbstractController {
         headers.set("Content-Type", getContentType(extension) + ";charset=utf-8");
         response.setHeaders(headers);
     }
+
+    @Override
+    public String mappingUri() {
+        throw new UnsupportedOperationException();
+    }
 }

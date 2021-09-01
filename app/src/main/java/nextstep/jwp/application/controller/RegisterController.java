@@ -8,7 +8,13 @@ import org.slf4j.LoggerFactory;
 
 public class RegisterController extends AbstractController {
 
+    private static final String MAPPING_URL = "/register";
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
+
+    @Override
+    public String mappingUri() {
+        return MAPPING_URL;
+    }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {

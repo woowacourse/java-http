@@ -1,73 +1,99 @@
 package nextstep.jwp.http;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import static nextstep.jwp.http.Header.CONTENT_LENGTH;
 import static nextstep.jwp.http.Header.CONTENT_TYPE;
 
-public class HttpResponse {
+public class  HttpResponse {
+    private DataOutputStream dataOutputStream = null;
+    private Map<String, String> headers = new HashMap<>();
 
-    private HttpResponse() {
+    public HttpResponse(OutputStream outputStream) {
+        dataOutputStream = new DataOutputStream(outputStream);
     }
 
-
-    public static byte[] ok(String resourcePath) throws IOException {
-        Map<String, String> headerMap = new LinkedHashMap<>();
-        headerMap.put(CONTENT_TYPE, "text/html;charset=utf-8");
-        return ok(headerMap, resourcePath);
+    public void addHeader(String key, String value) {
+        headers.put(key, value);
     }
 
-    public static byte[] ok(Map<String, String> header, String resourcePath) throws IOException {
+    public void ok(String resourcePath) {
         URL resource = HttpResponse.class.getClassLoader().getResource("static" + resourcePath);
+        try {
+            Path path = new File(resource.getPath()).toPath();
+            byte[] body = Files.readAllBytes(path);
+            if (resourcePath.endsWith(".css")) {
+                headers.put(CONTENT_TYPE, "text/css");
+            } else if (resourcePath.endsWith(".js")) {
+                headers.put(CONTENT_TYPE, "application/javascript");
+            } else {
+                headers.put(CONTENT_TYPE, "text/html;charset=utf-8");
+            }
+            headers.put(CONTENT_LENGTH, body.length + "");
+            ok(body);
+            dataOutputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-        if (resource == null) {
-            return HttpResponse.notFound();
+    public void ok(byte[] body) {
+        try {
+            dataOutputStream.writeBytes("HTTP/1.1 200 OK \r\n");
+            attachHeaderToResponse();
+            attachBodyToResponse(body);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void redirect(String redirectUrl) {
+        try {
+            dataOutputStream.writeBytes("HTTP/1.1 302 Found \r\n");
+            attachHeaderToResponse();
+            dataOutputStream.writeBytes("Location: " + redirectUrl + " \r\n");
+            dataOutputStream.writeBytes("\r\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void notFound() {
+        try {
+            dataOutputStream.writeBytes("HTTP/1.1 404 Not Found \r\n");
+            dataOutputStream.writeBytes("\r\n");
+            attachHeaderToResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void attachHeaderToResponse() {
+        try {
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                dataOutputStream.writeBytes(entry.getKey() + ": " + entry.getValue() + " \r\n");
+            }
+            dataOutputStream.writeBytes("\r\n");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        final Path path = new File(resource.getPath()).toPath();
-        byte[] body = Files.readAllBytes(path);
-        header.put(CONTENT_LENGTH, String.valueOf(body.length));
-
-        return ok(header, body);
     }
 
-    public static byte[] ok(byte[] body) {
-        Map<String, String> headerMap = new LinkedHashMap<>();
-        headerMap.put(CONTENT_TYPE, "text/html;charset=utf-8");
-        headerMap.put(CONTENT_LENGTH, String.valueOf(body.length));
-        return ok(headerMap, body);
-    }
-
-    public static byte[] ok(Map<String, String> header, byte[] body) {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("HTTP/1.1 200 OK \r\n");
-
-        for (Map.Entry<String, String> entry : header.entrySet()) {
-            stringBuilder.append(entry.getKey() + ": " + entry.getValue() + " \r\n");
+    private void attachBodyToResponse(byte[] body) {
+        try {
+            dataOutputStream.write(body, 0, body.length);
+            dataOutputStream.writeBytes("\r\n");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        stringBuilder.append("\r\n");
-        stringBuilder.append(new String(body));
-
-        return stringBuilder.toString().getBytes();
-    }
-
-    public static byte[] redirect302(String locationUrl) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Redirect ",
-                "Location: " + locationUrl + " ",
-                "").getBytes();
-    }
-
-    public static byte[] notFound() {
-        return String.join("\r\n",
-                "HTTP/1.1 404 Not Found ",
-                "").getBytes();
     }
 }

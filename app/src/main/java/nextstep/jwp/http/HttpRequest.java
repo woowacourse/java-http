@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpRequest {
+    private static final String CONTENT_LENGTH = "Content-Length";
+
     private final HttpMethod httpMethod;
     private final String url;
     private final Map<String, String> requestParams;
@@ -22,7 +24,7 @@ public class HttpRequest {
             List<String> requestLine = parseFirstLine(bufferedReader);
             this.httpMethod = HttpMethod.matchHttpMethod(requestLine.get(0));
             this.url = requestLine.get(1).substring(1);
-            this.requestParams = parseParams(url);
+            this.requestParams = parseRequestParams(url);
             this.requestHeaders = parseHeaders(bufferedReader);
             this.requestBody = parseBody(bufferedReader, requestHeaders);
         } catch (IOException e) {
@@ -30,30 +32,32 @@ public class HttpRequest {
         }
     }
 
-    private Map<String, String> parseParams(final String requestUrl) {
+    private List<String> parseFirstLine(final BufferedReader bufferedReader) {
+        String firstLine;
+        try {
+            firstLine = bufferedReader.readLine();
+        } catch (IOException e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+        if (firstLine == null) {
+            throw new IllegalArgumentException("요청이 존재하지 않습니다.");
+        }
+        return Arrays.asList(firstLine.split(" "));
+    }
+
+    private Map<String, String> parseRequestParams(final String requestUrl) {
         int paramIndex = requestUrl.indexOf("?");
         if (paramIndex < 0) {
             return new HashMap<>();
         }
-        return parseBody(requestUrl, paramIndex);
+        return parseParams(requestUrl, paramIndex);
     }
 
-    private Map<String, String> parseBody(final String requestUrl, int paramIndex) {
-        String[] splitParams = requestUrl.substring(paramIndex + 1).split("&");
+    private Map<String, String> parseParams(final String request, int paramIndex) {
+        String[] splitParams = request.substring(paramIndex + 1).split("&");
         return Arrays.stream(splitParams)
                 .map(param -> param.split("=", 2))
                 .collect(Collectors.toMap(param -> param[0], param -> param[1]));
-    }
-
-    public Map<String, String> parseRequestBodyParams() {
-        if(requestBody == null) {
-            return new HashMap<>();
-        }
-        return parseBody(requestBody, -1);
-    }
-
-    public boolean containsFunctionInUrl(final String functionNames) {
-        return url.contains(functionNames);
     }
 
     private Map<String, String> parseHeaders(final BufferedReader bufferedReader) throws IOException {
@@ -69,35 +73,33 @@ public class HttpRequest {
         return headers;
     }
 
-    private List<String> parseFirstLine(final BufferedReader bufferedReader) {
-        String firstLine;
-        try {
-            firstLine = bufferedReader.readLine();
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e.getMessage());
-        }
-        if (firstLine == null) {
-            throw new IllegalArgumentException("request가 존재하지 않습니다.");
-        }
-        return Arrays.asList(firstLine.split(" "));
-    }
-
     private String parseBody(final BufferedReader bufferedReader, final Map<String, String> requestHeaders) {
-        if (requestHeaders.containsKey("Content-Length")) {
-            try {
-                int contentLength = Integer.parseInt(requestHeaders.get("Content-Length").trim());
-                char[] buffer = new char[contentLength];
-                bufferedReader.read(buffer, 0, contentLength);
-                return new String(buffer);
-            } catch (IOException e) {
-                throw new IllegalArgumentException("requestBody가 존재하지 않습니다.");
-            }
+        if (requestHeaders.containsKey(CONTENT_LENGTH)) {
+            int contentLength = Integer.parseInt(requestHeaders.get(CONTENT_LENGTH).trim());
+            return parseContentBody(bufferedReader, contentLength);
         }
         return null;
     }
 
-    public Map<String, String> getRequestParams() {
-        return requestParams;
+    private String parseContentBody(BufferedReader bufferedReader, int contentLength) {
+        try {
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            return new String(buffer);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("requestBody가 존재하지 않습니다.");
+        }
+    }
+
+    public Map<String, String> parseRequestBodyParams() {
+        if(requestBody == null) {
+            return new HashMap<>();
+        }
+        return parseParams(requestBody, -1);
+    }
+
+    public boolean containsFunctionInUrl(final String functionNames) {
+        return url.contains(functionNames);
     }
 
     public HttpMethod getHttpMethod() {
@@ -106,5 +108,9 @@ public class HttpRequest {
 
     public String getUrl() {
         return url;
+    }
+
+    public Map<String, String> getRequestParams() {
+        return requestParams;
     }
 }

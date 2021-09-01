@@ -2,12 +2,14 @@ package nextstep.jwp.http.common;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
+import nextstep.jwp.exception.InvalidRequestHeader;
+import nextstep.jwp.exception.QueryParameterNotFoundException;
 
 public class HttpCookie {
 
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final int EXPECT_LINE_LENGTH = 2;
 
     private final Map<String, String> cookies;
 
@@ -20,7 +22,7 @@ public class HttpCookie {
 
         Map<String, String> cookies = new HashMap<>();
         for (String cookie : splitedCookies) {
-            String[] splitedCookie = cookie.trim().split("=");
+            String[] splitedCookie = splitCookie(cookie);
 
             String cookieKey = splitedCookie[KEY_INDEX];
             String cookieValue = splitedCookie[VALUE_INDEX];
@@ -31,8 +33,21 @@ public class HttpCookie {
         return new HttpCookie(cookies);
     }
 
-    public void create() {
-        UUID uuid = UUID.randomUUID();
-        cookies.put("JSESSIONID", uuid.toString());
+    private static String[] splitCookie(String cookie) {
+        String[] splitedCookie = cookie.trim().split("=");
+
+        if (splitedCookie.length != EXPECT_LINE_LENGTH) {
+            throw new InvalidRequestHeader();
+        }
+
+        return splitedCookie;
+    }
+
+    public String getParameter(String parameter) {
+        if (cookies.containsKey(parameter.toLowerCase())) {
+            return cookies.get(parameter.toLowerCase());
+        }
+
+        throw new QueryParameterNotFoundException();
     }
 }

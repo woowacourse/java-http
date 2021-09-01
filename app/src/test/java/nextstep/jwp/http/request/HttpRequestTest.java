@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import nextstep.jwp.exception.EmptyQueryParametersException;
 import nextstep.jwp.exception.QueryParameterNotFoundException;
+import nextstep.jwp.http.common.HttpCookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -56,6 +57,47 @@ class HttpRequestTest {
 
         // then
         assertThat(uri).isEqualTo(URI);
+    }
+
+    @DisplayName("Cookie 정보 요청시")
+    @Nested
+    class GetCookie {
+
+        @DisplayName("Cookie를 가지고 있다면 HttpCookie를 반환한다.")
+        @Test
+        void getCookie() throws IOException {
+            // given
+            String requestLineWithQuery = String.format("%s %s %s", GET, URI, HTTP_VERSION);
+            String requestString = String.join(NEW_LINE, requestLineWithQuery,
+                "Cookie: wow=1234; ", "", "");
+
+            try (InputStream inputStream = new ByteArrayInputStream(
+                requestString.getBytes(StandardCharsets.UTF_8))) {
+                httpRequest = HttpRequest.parse(inputStream);
+            }
+
+            // then
+            assertThat(httpRequest.hasCookie()).isTrue();
+            assertThat(httpRequest.getCookie()).isExactlyInstanceOf(HttpCookie.class);
+        }
+
+        @DisplayName("Cookie가 없다면 예외가 발생한다.")
+        @Test
+        void getCookieException() throws IOException {
+            // given
+            String requestLineWithQuery = String.format("%s %s %s", GET, URI, HTTP_VERSION);
+            String requestString = String.join(NEW_LINE, requestLineWithQuery, "", "");
+
+            try (InputStream inputStream = new ByteArrayInputStream(
+                requestString.getBytes(StandardCharsets.UTF_8))) {
+                httpRequest = HttpRequest.parse(inputStream);
+            }
+
+            // then
+            assertThat(httpRequest.hasCookie()).isFalse();
+            assertThatThrownBy(httpRequest::getCookie)
+                .isExactlyInstanceOf(QueryParameterNotFoundException.class);
+        }
     }
 
     @DisplayName("Uri Query와 함께 요청시")

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import nextstep.jwp.http.common.HttpCookie;
 
 public class HttpRequest {
 
@@ -52,12 +53,20 @@ public class HttpRequest {
         return requestLine.hasQueryParam();
     }
 
+    public boolean hasCookie() {
+        return requestHeaders.hasCookie();
+    }
+
     public String getUri() {
         return requestLine.getUri();
     }
 
     public String getUriParameter(String parameter) {
         return requestLine.getUriParameter(parameter);
+    }
+
+    public HttpCookie getCookie() {
+        return requestHeaders.getCookie();
     }
 
     public String getBodyParameter(String parameter) {

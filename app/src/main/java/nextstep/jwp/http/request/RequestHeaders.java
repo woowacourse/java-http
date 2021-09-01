@@ -12,6 +12,8 @@ import java.util.Map.Entry;
 import java.util.StringJoiner;
 import nextstep.jwp.exception.HttpRequestNotHaveBodyException;
 import nextstep.jwp.exception.InvalidRequestHeader;
+import nextstep.jwp.exception.QueryParameterNotFoundException;
+import nextstep.jwp.http.common.HttpCookie;
 
 public class RequestHeaders {
 
@@ -57,7 +59,7 @@ public class RequestHeaders {
         return splitedLine;
     }
 
-    public boolean requestHasCookie() {
+    public boolean hasCookie() {
         return headers.containsKey(COOKIE.toLowerString());
     }
 
@@ -66,17 +68,21 @@ public class RequestHeaders {
             || headers.containsKey(TRANSFER_ENCODING.toLowerString());
     }
 
-    private boolean requestNotHaveBody() {
-        return !headers.containsKey(CONTENT_LENGTH.toLowerString())
-            || headers.containsKey(TRANSFER_ENCODING.toLowerString());
+    public HttpCookie getCookie() {
+        if (hasCookie()) {
+            String cookieHeader = headers.get(COOKIE.toLowerString());
+            return HttpCookie.parse(cookieHeader);
+        }
+
+        throw new QueryParameterNotFoundException();
     }
 
     public int getContentLength() {
-        if (requestNotHaveBody()) {
-            throw new HttpRequestNotHaveBodyException();
+        if (requestHasBody()) {
+            return Integer.parseInt(headers.get(CONTENT_LENGTH.toLowerString()));
         }
 
-        return Integer.parseInt(headers.get(CONTENT_LENGTH.toLowerString()));
+        throw new HttpRequestNotHaveBodyException();
     }
 
     @Override

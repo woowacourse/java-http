@@ -1,14 +1,7 @@
 package nextstep.jwp.model.httpmessage.response;
 
-import nextstep.jwp.model.httpmessage.common.HttpHeader;
-
-import java.io.IOException;
 import java.io.OutputStream;
-import java.util.StringJoiner;
-
-import static nextstep.jwp.model.httpmessage.common.CommonHttpHeader.DELIMITER;
-import static nextstep.jwp.model.httpmessage.response.HttpStatus.REDIRECT;
-import static nextstep.jwp.model.httpmessage.response.ResponseHeaderType.LOCATION;
+import java.util.Map;
 
 public class HttpResponse {
 
@@ -17,36 +10,13 @@ public class HttpResponse {
     private final OutputStream outputStream;
     private final ResponseHeader headers = new ResponseHeader();
     private ResponseLine responseLine;
-    private String body;
 
     public HttpResponse(OutputStream outputStream) {
         this.outputStream = outputStream;
     }
 
-    public void redirect(String path) throws IOException {
-        setStatus(REDIRECT);
-        headers.add(LOCATION, path);
-        writeBody(outputStream, processResponseLineAndHeader());
-    }
-
-    public String processResponseLineAndHeader(String... body) {
-        StringJoiner stringJoiner = new StringJoiner(DELIMITER);
-        stringJoiner.add(responseLine.toString());
-        stringJoiner.add(headers.toString());
-        stringJoiner.add(EMPTY_LINE);
-        if (body.length > 0) {
-            stringJoiner.add(body[0]);
-        }
-        return stringJoiner.toString();
-    }
-
-    private void writeBody(OutputStream outputStream, String response) throws IOException {
-        outputStream.write(response.getBytes());
-        outputStream.flush();
-    }
-
-    public HttpHeader getHeaders() {
-        return headers;
+    public Map<Object, String> getHeaders() {
+        return headers.getAllHeaders();
     }
 
     public OutputStream getOutputStream() {

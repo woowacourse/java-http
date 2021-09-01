@@ -11,7 +11,6 @@ import java.io.IOException;
 import static nextstep.jwp.model.httpmessage.common.ContentType.HTML;
 import static nextstep.jwp.model.httpmessage.response.HttpStatus.OK;
 import static nextstep.jwp.model.httpmessage.response.HttpStatus.REDIRECT;
-import static nextstep.jwp.model.httpmessage.response.ResponseHeaderType.LOCATION;
 
 public class RegisterController extends AbstractController {
 
@@ -30,9 +29,13 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response, ModelAndView mv) throws IOException {
-        User savedUser = userService.save(request); // FIXME : 로그인된 유저의 데이터를 활용
+        if (userService.findByAccount(request).isPresent()) {
+            response.setStatus(REDIRECT);
+            mv.setViewName("/401.html");
+            return;
+        }
+        User savedUser = userService.save(request); // TODO : 로그인된 유저의 데이터를 활용
         response.setStatus(REDIRECT);
         mv.setViewName("/index.html");
-        response.addHeader(LOCATION, "/index.html");
     }
 }

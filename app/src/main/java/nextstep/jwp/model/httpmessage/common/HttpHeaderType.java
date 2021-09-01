@@ -24,7 +24,8 @@ public enum HttpHeaderType {
                 .orElseThrow(() -> new IllegalArgumentException("해당 헤더 타입이 존재하지 않습니다."));
     }
 
-    public String value() {
+    @Override
+    public String toString() {
         return value;
     }
 }

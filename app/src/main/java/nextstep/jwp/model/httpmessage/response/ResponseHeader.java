@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.StringJoiner;
 
 public class ResponseHeader extends CommonHttpHeader {
 
@@ -18,17 +17,10 @@ public class ResponseHeader extends CommonHttpHeader {
         headers.put(type, value);
     }
 
-    @Override
-    public String toString() {
-        StringJoiner stringJoiner = new StringJoiner(DELIMITER);
-        headers.forEach((key, value) -> {
-            stringJoiner.add(key + ": " + value + " ");
-            LOG.info("Response header : {}", key + ": " + value + " ");
-        });
-        getCommonHeaders().forEach((key, value) -> {
-            stringJoiner.add(key.value() + ": " + value + " ");
-            LOG.info("Response header : {}", key.value() + ": " + value + " ");
-        });
-        return stringJoiner.toString();
+    public Map<Object, String> getAllHeaders() {
+        Map<Object, String> results = new LinkedHashMap<>();
+        results.putAll(headers);
+        results.putAll(getCommonHeaders());
+        return results;
     }
 }

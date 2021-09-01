@@ -4,14 +4,18 @@ import nextstep.jwp.util.FileUtils;
 
 public class ViewResolver {
 
+    public static final String PREFIX = "/";
     private static final String SUFFIX = ".html";
 
-    public View resolveViewName(String viewName) {
+    public String resolve(String viewName) {
+        if (!viewName.startsWith(PREFIX)) {
+            viewName = PREFIX + viewName;
+        }
+
         if (!viewName.endsWith(SUFFIX)) {
             viewName = viewName + SUFFIX;
         }
 
-        String path = FileUtils.getAbsolutePath(viewName);
-        return new View(path);
+        return FileUtils.getAbsolutePath(viewName);
     }
 }

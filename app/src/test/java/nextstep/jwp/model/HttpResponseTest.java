@@ -2,12 +2,11 @@ package nextstep.jwp.model;
 
 import nextstep.jwp.HttpServlet;
 import nextstep.jwp.MockSocket;
-import nextstep.jwp.model.httpmessage.response.HttpResponse;
 import nextstep.jwp.util.FileUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,7 +54,7 @@ class HttpResponseTest {
         // then
         String expectedHeader = String.join("\r\n",
                 "HTTP/1.1 302 Redirect ",
-                "Location: /401.html ",
+                "Location: " + FileUtils.getAbsolutePath("/401.html") + " ",
                 "");
         assertThat(socket.output()).hasToString(expectedHeader);
     }

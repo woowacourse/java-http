@@ -20,4 +20,8 @@ public class ModelAndView {
     public Map<String, Object> getModel() {
         return model;
     }
+
+    public boolean hasModel() {
+        return model.size() > 0;
+    }
 }

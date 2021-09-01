@@ -25,14 +25,19 @@ public class FileUtils {
             url = PREFIX + url;
         }
 
-        URL resource = FileUtils.class.getClassLoader().getResource("static" + url);
+        URL resource = FileUtils.class.getClassLoader().getResource(STATIC + url);
         String file = Objects.requireNonNull(resource).getFile();
         Path path = new File(file).toPath();
         return new String(Files.readAllBytes(path));
     }
 
-    public static boolean existFile(String url) {
-        URL resource = FileUtils.class.getClassLoader().getResource("static" + url);
+    public static boolean isStaticFile(String url) {
+        URL resource = FileUtils.class.getClassLoader().getResource(STATIC + url);
         return resource != null;
+    }
+
+    public static String getRelativePath(String viewName) {
+        String[] splitView = viewName.split(PREFIX);
+        return splitView[splitView.length - 1];
     }
 }

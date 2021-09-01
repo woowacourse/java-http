@@ -30,7 +30,9 @@ class RequestHandlerTest {
             "Content-Type: text/html;charset=utf-8 ",
             "",
             "Hello world!");
-        assertThat(socket.output()).isEqualTo(expected);
+
+        String socketOutput = socket.output();
+        assertThat(socketOutput).isEqualTo(expected);
     }
 
     @DisplayName("\"GET /index.html\" 요청을 보내면, index.html 파일을 응답한다.")
@@ -58,7 +60,8 @@ class RequestHandlerTest {
             "\r\n" +
             new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        String socketOutput = socket.output();
+        assertThat(socketOutput).isEqualTo(expected);
     }
 
     @DisplayName("\"GET /login\" 요청을 보내면, login.html 파일을 응답한다.")
@@ -86,7 +89,8 @@ class RequestHandlerTest {
             "\r\n" +
             new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        String socketOutput = socket.output();
+        assertThat(socketOutput).isEqualTo(expected);
     }
 
     @DisplayName("\"POST /login\" 요청을 보내서 로그인이 됐다면, index.html로 리다이렉트한다.")
@@ -113,10 +117,11 @@ class RequestHandlerTest {
         String contentTypeHeader = "Content-Type: text/html;charset=utf-8";
         String setCookieHeader = "Set-Cookie: ";
 
-        assertThat(socket.output().contains(responseLine)).isTrue();
-        assertThat(socket.output().contains(locationHeader)).isTrue();
-        assertThat(socket.output().contains(contentTypeHeader)).isTrue();
-        assertThat(socket.output().contains(setCookieHeader)).isTrue();
+        String socketOutput = socket.output();
+        assertThat(socketOutput.contains(responseLine)).isTrue();
+        assertThat(socketOutput.contains(locationHeader)).isTrue();
+        assertThat(socketOutput.contains(contentTypeHeader)).isTrue();
+        assertThat(socketOutput.contains(setCookieHeader)).isTrue();
     }
 
     @DisplayName("\"GET /login\" 세션으로 로그인을 성공하면, index.html로 리다이렉트 한다.")
@@ -148,7 +153,8 @@ class RequestHandlerTest {
             "\r\n" +
             new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        String socketOutput = socket.output();
+        assertThat(socketOutput).isEqualTo(expected);
     }
 
     @DisplayName("\"GET /register\" 요청을 보내면, register.html 파일을 응답한다.")
@@ -176,7 +182,8 @@ class RequestHandlerTest {
             "\r\n" +
             new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        assertThat(socket.output()).isEqualTo(expected);
+        String socketOutput = socket.output();
+        assertThat(socketOutput).isEqualTo(expected);
     }
 
     @DisplayName("유효한 로그인 정보가 담긴 form 데이터와 함께 \"POST /register\" 요청을 보내면, 로그인을 진행하고, index.html로 리다이렉트 한다.")
@@ -204,7 +211,8 @@ class RequestHandlerTest {
             "Location: index.html \r\n" +
             "Content-Type: text/html;charset=utf-8 ";
 
-        assertThat(socket.output()).isEqualTo(expected);
+        String socketOutput = socket.output();
+        assertThat(socketOutput).isEqualTo(expected);
     }
 
     private String 로그인_성공() {

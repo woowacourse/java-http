@@ -6,8 +6,8 @@ import nextstep.jwp.infrastructure.http.Headers;
 
 public class HttpResponse {
 
-    private ResponseLine responseLine;
     private final Headers headers;
+    private ResponseLine responseLine;
     private String messageBody;
 
     public HttpResponse() {

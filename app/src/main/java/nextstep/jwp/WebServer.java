@@ -5,8 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.stream.Stream;
 import nextstep.jwp.infrastructure.http.HandlerMapping;
-import nextstep.jwp.infrastructure.http.interceptor.InterceptorResolver;
 import nextstep.jwp.infrastructure.http.RequestHandler;
+import nextstep.jwp.infrastructure.http.interceptor.InterceptorResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -40,6 +40,7 @@ public class RequestHandler implements Runnable {
 
             final HttpRequestReader httpRequestReader = new HttpRequestReader(bufferedReader);
             final HttpRequest request = httpRequestReader.readHttpRequest();
+            log.debug(request.getHeaders().toString());
             final HttpResponse response = new HttpResponse();
 
             interceptor.preHandle(request, response);

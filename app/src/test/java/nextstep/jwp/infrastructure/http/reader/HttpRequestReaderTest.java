@@ -2,7 +2,6 @@ package nextstep.jwp.infrastructure.http.reader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -13,7 +12,6 @@ import nextstep.jwp.infrastructure.http.Headers;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.request.Method;
 import nextstep.jwp.infrastructure.http.request.RequestLine;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

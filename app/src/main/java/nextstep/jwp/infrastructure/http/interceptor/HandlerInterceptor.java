@@ -6,5 +6,6 @@ import nextstep.jwp.infrastructure.http.response.HttpResponse;
 public interface HandlerInterceptor {
 
     void preHandle(final HttpRequest request, final HttpResponse response) throws Exception;
+
     void postHandle(final HttpRequest request, final HttpResponse response) throws Exception;
 }

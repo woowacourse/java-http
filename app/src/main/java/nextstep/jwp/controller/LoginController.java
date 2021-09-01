@@ -3,6 +3,8 @@ package nextstep.jwp.controller;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import nextstep.jwp.db.InMemorySessionRepository;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.infrastructure.http.objectmapper.DataMapper;
 import nextstep.jwp.infrastructure.http.objectmapper.UrlEncodingMapper;
@@ -10,6 +12,8 @@ import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.infrastructure.http.response.ResponseLine;
 import nextstep.jwp.infrastructure.http.response.StatusCode;
+import nextstep.jwp.model.Session;
+import nextstep.jwp.model.User;
 
 public class LoginController extends AbstractController {
 
@@ -32,12 +36,15 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         final Map<String, String> body = DATA_MAPPER.parse(request.getMessageBody());
-        if (!containsAllKey(body)) {
-            redirect("/500.html", response);
+        final Optional<String> sessionId = request.getHeaders()
+            .getCookie()
+            .getValue("JSESSIONID");
+        if (sessionId.isEmpty() || !containsAllKey(body)) {
+            redirect("/401.html", response);
             return;
         }
 
-        redirect(locationByLogin(body), response);
+        redirect(locationByLogin(body, sessionId.get()), response);
     }
 
     private boolean containsAllKey(final Map<String, String> body) {
@@ -45,14 +52,18 @@ public class LoginController extends AbstractController {
             .allMatch(body::containsKey);
     }
 
-    public String locationByLogin(final Map<String, String> body) {
+    private String locationByLogin(final Map<String, String> body, String sessionId) {
         final String account = body.get(ACCOUNT);
         final String password = body.get(PASSWORD);
 
-        if (InMemoryUserRepository.existsByAccountAndPassword(account, password)) {
-            return "/index.html";
+        if (!InMemoryUserRepository.existsByAccountAndPassword(account, password)) {
+            return "/401.html";
         }
-        return "/401.html";
+        final User user = InMemoryUserRepository.findByAccount(account);
+        final Session session = InMemorySessionRepository.getSession(sessionId);
+        session.setAttribute("user", user);
+
+        return "/index.html";
     }
 
     private void redirect(final String location, final HttpResponse response) {

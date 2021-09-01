@@ -1,10 +1,7 @@
 package nextstep.jwp.infrastructure.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
-import nextstep.jwp.controller.RegisterController;
-import nextstep.jwp.infrastructure.http.handler.ControllerHandler;
 import nextstep.jwp.infrastructure.http.handler.FileHandler;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.request.Method;

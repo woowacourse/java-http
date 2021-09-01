@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Cookie {
@@ -47,15 +48,12 @@ public class Cookie {
         }
     }
 
-    public String getValue(final String key) {
-        if (!hasKey(key)) {
-            throw new IllegalArgumentException(String.format("Cannot find key.(%s)", key));
-        }
-        return elements.get(key);
+    public Optional<String> getValue(final String key) {
+        return Optional.ofNullable(elements.get(key));
     }
 
-    public boolean hasKey(final String key) {
-        return elements.containsKey(key);
+    public boolean hasNotKey(final String key) {
+        return !elements.containsKey(key);
     }
 
     @Override

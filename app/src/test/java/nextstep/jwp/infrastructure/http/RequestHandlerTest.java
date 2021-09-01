@@ -26,6 +26,7 @@ class RequestHandlerTest {
             "",
             "");
         final String response = "HTTP/1.1 200 OK \r\n" +
+            "Set-Cookie: JSESSIONID=1234 \r\n" +
             "Content-Type: text/html;charset=utf-8 \r\n" +
             "Content-Length: 12 \r\n" +
             "\r\n" +
@@ -47,6 +48,7 @@ class RequestHandlerTest {
             "",
             "");
         final String response = "HTTP/1.1 200 OK \r\n" +
+            "Set-Cookie: JSESSIONID=1234 \r\n" +
             "Content-Type: text/html;charset=utf-8 \r\n" +
             "Content-Length: 5564 \r\n" +
             "\r\n" +
@@ -67,6 +69,7 @@ class RequestHandlerTest {
             "",
             "");
         final String response = "HTTP/1.1 200 OK \r\n" +
+            "Set-Cookie: JSESSIONID=1234 \r\n" +
             "Content-Type: text/html;charset=utf-8 \r\n" +
             "Content-Length: 5564 \r\n" +
             "\r\n" +
@@ -87,6 +90,7 @@ class RequestHandlerTest {
             "",
             "");
         final String response = "HTTP/1.1 200 OK \r\n" +
+            "Set-Cookie: JSESSIONID=1234 \r\n" +
             "Content-Type: text/html;charset=utf-8 \r\n" +
             "Content-Length: 3797 \r\n" +
             "\r\n" +
@@ -101,14 +105,14 @@ class RequestHandlerTest {
         final String request = String.join("\r\n",
             "POST /login HTTP/1.1 ",
             "Host: localhost:8080 ",
-            "Connection: keep-alive ",
             "Content-Length: 30",
             "Content-Type: application/x-www-form-urlencoded",
             "",
             "account=gugu&password=password");
-        final String response = "HTTP/1.1 302 FOUND \r\n"
-            + "Location: /index.html \r\n"
-            + "\r\n";
+        final String response = "HTTP/1.1 302 FOUND \r\n" +
+            "Set-Cookie: JSESSIONID=1234 \r\n" +
+            "Location: /index.html \r\n" +
+            "\r\n";
 
         assertResponse(request, response);
     }
@@ -124,9 +128,10 @@ class RequestHandlerTest {
             "Content-Type: application/x-www-form-urlencoded",
             "",
             "account=gugu&password=password2 \r\n");
-        final String response = "HTTP/1.1 302 FOUND \r\n"
-            + "Location: /401.html \r\n"
-            + "\r\n";
+        final String response = "HTTP/1.1 302 FOUND \r\n" +
+            "Set-Cookie: JSESSIONID=1234 \r\n" +
+            "Location: /401.html \r\n" +
+            "\r\n";
 
         assertResponse(request, response);
     }
@@ -142,11 +147,12 @@ class RequestHandlerTest {
             "Connection: keep-alive ",
             "",
             "");
-        final String response = "HTTP/1.1 404 NOT FOUND \r\n"
-            + "Content-Type: text/html;charset=utf-8 \r\n"
-            + "Content-Length: 2426 \r\n"
-            + "\r\n"
-            + new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String response = "HTTP/1.1 404 NOT FOUND \r\n" +
+            "Set-Cookie: JSESSIONID=1234 \r\n" +
+            "Content-Type: text/html;charset=utf-8 \r\n" +
+            "Content-Length: 2426 \r\n" +
+            "\r\n" +
+            new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertResponse(request, response);
     }
@@ -162,11 +168,12 @@ class RequestHandlerTest {
             "Connection: keep-alive ",
             "",
             "");
-        final String response = "HTTP/1.1 200 OK \r\n"
-            + "Content-Type: text/html;charset=utf-8 \r\n"
-            + "Content-Length: 4319 \r\n"
-            + "\r\n"
-            + new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String response = "HTTP/1.1 200 OK \r\n" +
+            "Set-Cookie: JSESSIONID=1234 \r\n" +
+            "Content-Type: text/html;charset=utf-8 \r\n" +
+            "Content-Length: 4319 \r\n" +
+            "\r\n" +
+            new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertResponse(request, response);
     }
@@ -183,9 +190,10 @@ class RequestHandlerTest {
             "Accept: */*",
             "",
             "account=root&password=rootpassword&email=junroot0909@gmail.com");
-        final String response = "HTTP/1.1 302 FOUND \r\n"
-            + "Location: /index.html \r\n"
-            + "\r\n";
+        final String response = "HTTP/1.1 302 FOUND \r\n" +
+            "Set-Cookie: JSESSIONID=1234 \r\n" +
+            "Location: /index.html \r\n" +
+            "\r\n";
         final String request2 = String.join("\r\n",
             "POST /login HTTP/1.1 ",
             "Host: localhost:8080 ",

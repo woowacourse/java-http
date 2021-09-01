@@ -15,6 +15,10 @@ public class HttpRequest {
         this.messageBody = messageBody;
     }
 
+    public void addHeader(final String key, final String value) {
+        headers.add(key, value);
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
     }

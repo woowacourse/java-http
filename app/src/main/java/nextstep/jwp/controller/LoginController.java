@@ -4,17 +4,19 @@ import static nextstep.jwp.controller.IndexController.INDEX_RESOURCE_PATH;
 
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.common.Body;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.requestline.RequestURI;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpStatus;
+import nextstep.jwp.http.util.ParamExtractor;
 import nextstep.jwp.model.User;
-import nextstep.jwp.util.ParamExtractor;
 
 public class LoginController extends AbstractController {
 
     private static final String LOGIN_RESOURCE_PATH = "/login.html";
+    private static final String UNAUTHORIZED_PATH = "/401.html";
 
     @Override
     protected HttpResponse doGet(HttpRequest request) {
@@ -30,14 +32,14 @@ public class LoginController extends AbstractController {
             String password = params.get("password");
 
             final User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(UnauthorizedException::new);
 
             if (!user.checkPassword(password)) {
-                throw new RuntimeException();
+                throw new UnauthorizedException();
             }
             return HttpResponse.redirect(INDEX_RESOURCE_PATH);
-        } catch (RuntimeException e) {
-            return HttpResponse.redirect("/401.html");
+        } catch (UnauthorizedException e) {
+            return HttpResponse.redirect(UNAUTHORIZED_PATH);
         }
     }
 }

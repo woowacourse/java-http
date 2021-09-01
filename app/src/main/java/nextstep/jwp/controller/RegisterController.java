@@ -11,8 +11,8 @@ import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.requestline.RequestURI;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpStatus;
+import nextstep.jwp.http.util.ParamExtractor;
 import nextstep.jwp.model.User;
-import nextstep.jwp.util.ParamExtractor;
 
 public class RegisterController extends AbstractController {
 

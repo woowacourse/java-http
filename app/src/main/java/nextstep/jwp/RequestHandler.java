@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final String INTERNAL_SERVER_ERROR_PATH = "/500.html";
 
     private final Socket connection;
     private final Controllers controllers;
@@ -51,8 +52,9 @@ public class RequestHandler implements Runnable {
         try {
             Controller controller = controllers.findController(httpRequest);
             return controller.process(httpRequest);
-        } catch (Exception e) {
-            return HttpResponse.redirect("/404.html");
+        } catch (RuntimeException exception) {
+            log.error("Internal server error", exception);
+            return HttpResponse.redirect(INTERNAL_SERVER_ERROR_PATH);
         }
     }
 

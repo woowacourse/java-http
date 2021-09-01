@@ -1,6 +1,7 @@
 package nextstep.jwp.http.common;
 
 import java.util.Arrays;
+import nextstep.jwp.exception.HTTPVersionNotSupportedException;
 
 public enum HttpVersion {
     HTTP_1_1("HTTP/1.1");
@@ -15,7 +16,7 @@ public enum HttpVersion {
         return Arrays.stream(values())
             .filter(version -> requestVersion.equals(version.value))
             .findAny()
-            .orElseThrow(RuntimeException::new);
+            .orElseThrow(HTTPVersionNotSupportedException::new);
     }
 
     public String getVersion() {

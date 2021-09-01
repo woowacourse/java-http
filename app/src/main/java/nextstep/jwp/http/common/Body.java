@@ -3,6 +3,7 @@ package nextstep.jwp.http.common;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
 import nextstep.jwp.http.request.HttpHeaders;
@@ -30,8 +31,10 @@ public class Body {
         return EMPTY_BODY;
     }
 
-    public static Body parse(File file) {
+    public static Body parse(String path) {
         try {
+            URL resource = Objects.requireNonNull(ClassLoader.getSystemResource(path));
+            File file = new File(resource.getPath());
             String content = new String(Files.readAllBytes(file.toPath()));
             return new Body(content);
         } catch (IOException e) {

@@ -16,4 +16,20 @@ public class RequestLine {
         this.queryString = queryString;
         this.version = version;
     }
+
+    public HttpMethod httpMethod() {
+        return httpMethod;
+    }
+
+    public String uri() {
+        return uri;
+    }
+
+    public Map<String, String> queryString() {
+        return queryString;
+    }
+
+    public String version() {
+        return version;
+    }
 }

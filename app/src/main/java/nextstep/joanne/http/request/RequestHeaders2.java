@@ -16,4 +16,8 @@ public class RequestHeaders2 {
     public String get(String key) {
         return headers.get(key);
     }
+
+    public Map<String, String> headers() {
+        return headers;
+    }
 }

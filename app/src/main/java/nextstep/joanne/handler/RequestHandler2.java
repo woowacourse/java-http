@@ -15,6 +15,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 public class RequestHandler2 implements Runnable {
@@ -39,14 +40,8 @@ public class RequestHandler2 implements Runnable {
 
             final HttpRequest2 httpRequest = httpRequestParser.parse(br);
 
-            Handler handler = new Handler(httpRequest);
             HttpResponse httpResponse;
-            try {
-                httpResponse = handler.handle();
-            } catch (HttpException e) {
-                httpResponse = ErrorHandler.handle(e.httpStatus());
-            }
-            outputStream.write(httpResponse.body().getBytes());
+            outputStream.write("".getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);

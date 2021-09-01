@@ -29,10 +29,12 @@ public class HttpRequestParser {
     private RequestLine parseRequestLine(String request) {
         String[] requestLine = request.split(" ");
         final HttpMethod httpMethod = HttpMethod.valueOf(requestLine[0]);
-        final String uri = requestLine[1];
+        String uri = requestLine[1];
         Map<String, String> queryString = new HashMap<>();
         if (uri.contains("?")) {
-            queryString = parseExtraMessage(uri);
+            final int idx = uri.indexOf("?");
+            queryString = parseExtraMessage(uri.substring(idx + 1));
+            uri = uri.substring(0, idx);
         }
         final String version = requestLine[2];
         return new RequestLine(httpMethod, uri, queryString, version);

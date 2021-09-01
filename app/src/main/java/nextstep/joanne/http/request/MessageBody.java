@@ -8,4 +8,8 @@ public class MessageBody {
     public MessageBody(Map<String, String> body) {
         this.body = body;
     }
+
+    public Map<String, String> body() {
+        return body;
+    }
 }

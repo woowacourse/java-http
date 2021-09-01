@@ -10,4 +10,16 @@ public class HttpRequest2 {
         this.requestHeaders = requestHeaders;
         this.messageBody = messageBody;
     }
+
+    public RequestLine requestLine() {
+        return requestLine;
+    }
+
+    public RequestHeaders2 requestHeaders() {
+        return requestHeaders;
+    }
+
+    public MessageBody messageBody() {
+        return messageBody;
+    }
 }

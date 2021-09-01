@@ -12,6 +12,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
 
+import static nextstep.Fixture.makePostRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestHandlerTest {
@@ -126,18 +127,6 @@ class RequestHandlerTest {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
-    }
-
-    private String makePostRequest(String uri, String body) {
-        return String.join("\r\n",
-                "POST " + uri + " HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + body.getBytes().length,
-                "",
-                body,
-                "",
-                "");
     }
 
     @Test

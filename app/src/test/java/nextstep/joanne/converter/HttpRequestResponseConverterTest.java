@@ -16,6 +16,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+import static nextstep.Fixture.makeGetRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
@@ -37,15 +38,6 @@ class HttpRequestResponseConverterTest {
         connection.close();
         inputStream.close();
         bufferedReader.close();
-    }
-
-    private String makeGetRequest(String uri) {
-        return String.join("\r\n",
-                "GET " + uri + " HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
     }
 
     @Test

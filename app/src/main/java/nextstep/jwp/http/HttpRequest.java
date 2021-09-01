@@ -63,6 +63,10 @@ public class HttpRequest {
         return header.get(headerValue);
     }
 
+    public HttpCookie getCookie() {
+        return HttpCookie.of(header.get("Cookie"));
+    }
+
     public boolean checkMethod(String method) {
         return requestLine.checkMethod(method);
     }

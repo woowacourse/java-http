@@ -1,6 +1,7 @@
 package nextstep.jwp;
 
 import nextstep.jwp.controller.Controller;
+import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.controller.RequestMapping;
@@ -13,6 +14,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
+import java.util.UUID;
+
+import static nextstep.jwp.http.HttpCookie.J_SESSION_ID;
 
 public class RequestHandler implements Runnable {
 
@@ -44,11 +48,22 @@ public class RequestHandler implements Runnable {
             }
 
             controller.service(httpRequest, httpResponse);
+            setCookie(httpRequest, httpResponse);
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
         }
+    }
+
+    private void setCookie(HttpRequest httpRequest, HttpResponse httpResponse) {
+        HttpCookie httpCookie = httpRequest.getCookie();
+        if (httpCookie.hasCookie(J_SESSION_ID)) {
+            httpResponse.addHeader(J_SESSION_ID, httpCookie.getCookie(J_SESSION_ID));
+            return;
+        }
+        
+        httpResponse.addHeader(J_SESSION_ID, UUID.randomUUID().toString());
     }
 
     private String getDefaultPath(String path) {

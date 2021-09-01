@@ -1,11 +1,14 @@
 package nextstep.jwp;
 
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.RequestMapper;
+import nextstep.jwp.domain.request.HttpRequest;
+import nextstep.jwp.domain.response.HttpResponse;
+import nextstep.jwp.domain.Converter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.Objects;
 
@@ -26,18 +29,15 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final String responseBody = "Hello world!";
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final HttpRequest httpRequest = Converter.convertToHttpRequest(reader);
+            final Controller controller = RequestMapper.getController(httpRequest);
+            final HttpResponse httpResponse = controller.service(httpRequest);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.getBytes());
             outputStream.flush();
-        } catch (IOException exception) {
+        } catch (Exception exception) {
             log.error("Exception stream", exception);
         } finally {
             close();

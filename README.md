@@ -1,8 +1,8 @@
 # 쿠키 세션 구현하기
 - [x] HttpCookie에 JSESSION 값 저장하기
   - [x] HttpCookie 테스트 코드 작성
-- [ ] HttpSession 구현하기
-- [ ] HttpCookie, HttpSession으로 변경된 객체 테스트 코드 작성
+- [x] HttpSession 구현하기
+- [x] HttpCookie, HttpSession으로 변경된 객체 테스트 코드 작성
 
 # HTTP 서버 구현하기
 

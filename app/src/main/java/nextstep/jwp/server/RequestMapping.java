@@ -21,26 +21,25 @@ public class RequestMapping {
     private final Map<String, Controller> restControllers;
     private final Controller staticResourceController;
 
-    private RequestMapping(Map<String, Controller> restControllers,
-                           Controller staticResourceController) {
+    public RequestMapping(Map<String, Controller> restControllers, Controller staticResourceController) {
         this.restControllers = restControllers;
         this.staticResourceController = staticResourceController;
     }
 
     public static RequestMapping loadContext() {
         InMemoryUserRepository userRepository = InMemoryUserRepository.initialize();
-        LoginService loginService = new LoginService(userRepository);
+        HttpSessions httpSessions = new HttpSessions();
+        LoginService loginService = new LoginService(userRepository, httpSessions);
         RegisterService registerService = new RegisterService(userRepository);
         StaticResourceService staticResourceService = new StaticResourceService();
-
-        Controller staticResourceController = new StaticResourceController(staticResourceService);
 
         Map<String, Controller> restControllers = new HashMap<>();
         Controller loginController = new LoginController(loginService, staticResourceService);
         restControllers.put("login", loginController);
-        Controller registerController = new RegisterController(registerService,
-            staticResourceService);
+        Controller registerController = new RegisterController(registerService, staticResourceService);
         restControllers.put("register", registerController);
+
+        Controller staticResourceController = new StaticResourceController(staticResourceService);
 
         return new RequestMapping(restControllers, staticResourceController);
     }

@@ -31,12 +31,12 @@ public class User {
         }
     }
 
-    public String getAccount() {
-        return account;
-    }
-
     public Long getId() {
         return id;
+    }
+
+    public String getAccount() {
+        return account;
     }
 
     @Override

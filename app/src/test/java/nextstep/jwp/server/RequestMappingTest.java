@@ -90,15 +90,19 @@ class RequestMappingTest {
                     httpRequest = HttpRequest.parse(inputStream);
                 }
 
-                String expectString = "HTTP/1.1 302 Found \n"
-                    + "Location: /index.html ";
+                String expectStatusLine = "HTTP/1.1 302 Found";
+                String expectCookie = "Set-Cookie:";
+                String expectLocation = "Location: /index.html";
 
                 // when
                 HttpResponse httpResponse = requestMapping.doService(httpRequest);
+                String response = new String(httpResponse.toBytes());
+                String[] splitedResponse = response.split("\n");
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(
-                    expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(splitedResponse[0].trim()).isEqualTo(expectStatusLine);
+                assertThat(splitedResponse[1].startsWith(expectCookie)).isTrue();
+                assertThat(splitedResponse[2].trim()).isEqualTo(expectLocation);
             }
         }
 

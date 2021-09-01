@@ -32,8 +32,6 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    public abstract boolean canHandle(final HttpRequest httpRequest);
-
     public abstract HttpResponse doGet(final HttpRequest httpRequest);
 
     public abstract HttpResponse doPost(final HttpRequest httpRequest);

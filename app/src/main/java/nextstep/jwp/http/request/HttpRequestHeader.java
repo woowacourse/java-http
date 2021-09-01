@@ -1,15 +1,20 @@
 package nextstep.jwp.http.request;
 
 import nextstep.jwp.http.HttpMethod;
+import nextstep.jwp.http.authentication.HttpCookie;
 
 import java.util.List;
 import java.util.Map;
 
 public class HttpRequestHeader {
+    private static final int REQUEST_LINE_INDEX = 0;
     private static final String CONTENT_LENGTH_HEADER = "Content-Length: ";
-    public static final int REQUEST_LINE_INDEX = 0;
+    private static final String COOKIE_HEADER = "Cookie: ";
+    private static final String ZERO_STRING = "0";
+    private static final String EMPTY_STRING = "";
 
     private final RequestLine requestLine;
+    private final HttpCookie httpCookie;
     private final int contentLength;
 
     public HttpRequestHeader(final List<String> requestHeaders) {
@@ -18,21 +23,35 @@ public class HttpRequestHeader {
         }
 
         this.requestLine = new RequestLine(requestHeaders.get(REQUEST_LINE_INDEX));
+        this.httpCookie = new HttpCookie(parseHttpCookie(requestHeaders));
         this.contentLength = parseContentLength(requestHeaders);
     }
 
-    private int parseContentLength(final List<String> requestHeaders) {
-        final String contentLengthHeader = requestHeaders.stream()
-                .filter(header -> header.startsWith(CONTENT_LENGTH_HEADER))
-                .findFirst()
-                .orElseGet(() -> null);
-
-        if (contentLengthHeader == null) {
-            return 0;
+    // TODO: parsing 로직 중복 처리
+    private String parseHttpCookie(final List<String> requestHeaders) {
+        String httpCookieValue = requestHeaders.stream()
+                .filter(header -> header.startsWith(COOKIE_HEADER))
+                .findAny()
+                .orElseGet(() -> EMPTY_STRING);
+        if (!httpCookieValue.isEmpty()) {
+            httpCookieValue = httpCookieValue.substring(COOKIE_HEADER.length());
         }
+        return httpCookieValue;
+    }
 
-        final String contentLengthValue = contentLengthHeader.substring(CONTENT_LENGTH_HEADER.length());
-        return Integer.parseInt(contentLengthValue);
+    private int parseContentLength(final List<String> requestHeaders) {
+        String contentLengthHeader = requestHeaders.stream()
+                .filter(header -> header.startsWith(CONTENT_LENGTH_HEADER))
+                .findAny()
+                .orElseGet(() -> ZERO_STRING);
+        if (!contentLengthHeader.equals(ZERO_STRING)) {
+            contentLengthHeader = contentLengthHeader.substring(CONTENT_LENGTH_HEADER.length());
+        }
+        return Integer.parseInt(contentLengthHeader);
+    }
+
+    public boolean doesNotHaveJSession() {
+        return httpCookie.doesNotHaveJSession();
     }
 
     public HttpMethod getHttpMethod() {
@@ -53,5 +72,9 @@ public class HttpRequestHeader {
 
     public int getContentLength() {
         return contentLength;
+    }
+
+    public HttpCookie getCookie() {
+        return httpCookie;
     }
 }

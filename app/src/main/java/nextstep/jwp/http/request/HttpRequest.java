@@ -1,6 +1,7 @@
 package nextstep.jwp.http.request;
 
 import nextstep.jwp.http.HttpMethod;
+import nextstep.jwp.http.authentication.HttpCookie;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -74,5 +75,13 @@ public class HttpRequest {
 
     public Map<String, String> getPayload() {
         return body.getPayload();
+    }
+
+    public HttpCookie getCookie() {
+        return header.getCookie();
+    }
+
+    public boolean doesNotHaveJSession() {
+        return header.doesNotHaveJSession();
     }
 }

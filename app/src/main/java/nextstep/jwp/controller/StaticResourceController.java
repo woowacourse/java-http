@@ -28,6 +28,7 @@ public class StaticResourceController extends AbstractController {
         return new HttpResponse(
                 httpRequest.getProtocol(),
                 httpStatus,
+                httpRequest.getCookie(),
                 ContentType.findByUrl(path),
                 responseBody.getBytes().length,
                 responseBody);

@@ -32,6 +32,7 @@ public class RegisterController extends AbstractController {
         return new HttpResponse(
                 httpRequest.getProtocol(),
                 HttpStatus.SEE_OTHER,
+                httpRequest.getCookie(),
                 redirectUrl
         );
     }

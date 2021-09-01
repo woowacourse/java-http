@@ -91,4 +91,8 @@ public class HttpResponse {
                 httpHeaders.getHeadersAsString(),
                 getBody().toString());
     }
+
+    public void setCookie(String key, String value) {
+        httpHeaders.setCookie(key, value);
+    }
 }

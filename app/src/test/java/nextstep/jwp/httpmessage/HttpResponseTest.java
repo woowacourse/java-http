@@ -35,6 +35,7 @@ class HttpResponseTest {
         httpResponse.setStatusLine(new StatusLine(httpVersion, httpStatusCode));
         httpResponse.addHeader(headerKey, headerValue);
         httpResponse.setBody(responseBody);
+        httpResponse.setCookie("JSESSIONID", "656cef62-e3c4-40bc-a8df-94732920ed46");
         final String expectedResponseMessage = toHttpResponseMessage(httpResponse.getStatusLine(), httpResponse.getHttpHeadersAsString(), responseBody);
         //then
         assertThat(httpResponse.getStatusLineAsString()).isEqualTo(httpVersion.getValue() + SP + httpStatusCode.getValue() + SP + httpStatusCode.getReasonPhrase());
@@ -43,6 +44,7 @@ class HttpResponseTest {
         assertThat(httpResponse.getHeader(headerKey)).isEqualTo(headerValue);
         assertThat(httpResponse.getHttpHeaders()).isNotNull();
         assertThat(httpResponse.getHttpMessage()).isEqualTo(expectedResponseMessage);
+        assertThat(httpResponse.getHttpHeaders().getHeader("Set-Cookie")).isEqualTo("JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
     }
 
     private String toHttpResponseMessage(StatusLine statusLine, String httpHeaderString, Object body) {

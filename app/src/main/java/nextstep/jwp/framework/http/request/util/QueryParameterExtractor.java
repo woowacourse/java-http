@@ -17,7 +17,7 @@ public class QueryParameterExtractor {
     public static Map<String, String> extract(final String request) {
         final Map<String, String> requestQueryString = new HashMap<>();
         for (String query : request.split(QUERY_PARAM_SEPARATOR)) {
-            final String[] queriedValue = query.split(KEY_VALUE_SEPARATOR);
+            final String[] queriedValue = query.split(KEY_VALUE_SEPARATOR, 2);
             requestQueryString.put(queriedValue[0], removeNewLine(queriedValue[1]));
         }
         return requestQueryString;

@@ -109,8 +109,4 @@ public class HttpRequest {
     public String getUrl() {
         return url;
     }
-
-    public Map<String, String> getRequestParams() {
-        return requestParams;
-    }
 }

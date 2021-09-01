@@ -4,6 +4,7 @@ import java.util.Map;
 
 import nextstep.jwp.dashboard.controller.dto.UserDto;
 import nextstep.jwp.dashboard.service.UserService;
+import nextstep.jwp.httpserver.domain.HttpSession;
 import nextstep.jwp.httpserver.domain.request.HttpRequest;
 import nextstep.jwp.httpserver.domain.response.HttpResponse;
 import nextstep.jwp.httpserver.exception.GlobalException;
@@ -23,7 +24,13 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        response.ok();
+        HttpSession session = request.getSession();
+        UserDto user = (UserDto) session.getAttribute("user");
+        if (user == null) {
+            response.ok();
+            return;
+        }
+        response.redirect("/index.html");
     }
 
     @Override
@@ -32,6 +39,10 @@ public class LoginController extends AbstractController {
             final Map<String, String> parameters = request.getBodyToMap();
             final UserDto userDto = userService.login(parameters.get("account"), parameters.get("password"));
             log.debug(userDto.toString());
+
+            HttpSession session = request.getSession();
+            session.setAttribute("user", userDto);
+
             response.redirect("/index.html");
         } catch (GlobalException e) {
             response.redirect("/" + e.getStatusCode().getCode() + ".html");

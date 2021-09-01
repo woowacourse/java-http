@@ -5,10 +5,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import nextstep.jwp.httpserver.adapter.HandlerAdapter;
 import nextstep.jwp.httpserver.domain.Cookie;
+import nextstep.jwp.httpserver.domain.HttpSession;
+import nextstep.jwp.httpserver.domain.HttpSessions;
 import nextstep.jwp.httpserver.domain.request.HttpRequest;
 import nextstep.jwp.httpserver.domain.response.HttpResponse;
 import nextstep.jwp.httpserver.domain.view.ModelAndView;
@@ -51,18 +56,28 @@ public class RequestHandler implements Runnable {
             final HttpRequest httpRequest = HttpRequestParser.parse(inputStream);
             final HttpResponse httpResponse = new HttpResponse();
 
+            doSessionFilter(httpRequest);
+
             final Object handler = getHandler(httpRequest);
             final HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
 
-            preHandle(httpRequest, httpResponse);
-
             final ModelAndView mv = handlerAdapter.handle(httpRequest, httpResponse, handler);
-            render(mv, httpResponse, outputStream);
+            render(mv, httpResponse);
+            commitSession(httpRequest, httpResponse);
+
+            outputStream.write(httpResponse.getResult().getBytes());
+            outputStream.flush();
         } catch (Exception exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
         }
+    }
+
+    private void doSessionFilter(HttpRequest httpRequest) {
+        final String sessionId = httpRequest.sessionIdInCookie();
+        final HttpSession session = HttpSessions.getSession(sessionId);
+        httpRequest.setSession(session);
     }
 
     private Object getHandler(HttpRequest httpRequest) {
@@ -80,20 +95,9 @@ public class RequestHandler implements Runnable {
                               .orElseThrow(() -> new IllegalArgumentException("처리할 수 있는 어댑터가 없습니다."));
     }
 
-    private void preHandle(HttpRequest httpRequest, HttpResponse httpResponse) {
-        httpRequest.getCookies()
-                   .forEach(httpResponse::addCookie);
-        if (!httpRequest.hasSessionId()) {
-            Cookie cookie = new Cookie("JSESSIONID", UUID.randomUUID().toString());
-            httpResponse.addCookie(cookie);
-        }
-    }
-
-    private void render(ModelAndView mv, HttpResponse httpResponse, OutputStream outputStream) throws IOException, URISyntaxException {
-        View view = resolve(mv);
-        String result = view.render(httpResponse);
-        outputStream.write(result.getBytes());
-        outputStream.flush();
+    private void render(ModelAndView mv, HttpResponse httpResponse) throws IOException, URISyntaxException {
+        final View view = resolve(mv);
+        view.render(httpResponse);
     }
 
     private View resolve(ModelAndView mv) {
@@ -101,6 +105,25 @@ public class RequestHandler implements Runnable {
             return new View("static" + mv.getViewName());
         }
         return new View("static" + mv.getViewName() + ".html");
+    }
+
+    private void commitSession(HttpRequest httpRequest, HttpResponse httpResponse) {
+        final HttpSession originalSession = HttpSessions.getSession(httpRequest.getSessionId());
+        originalSession.invalidate();
+        final HttpSession session = httpRequest.getSession();
+        HttpSessions.save(session);
+
+        addCookie(httpRequest, httpResponse);
+    }
+
+    private void addCookie(HttpRequest httpRequest, HttpResponse httpResponse) {
+        httpRequest.getCookies()
+                   .forEach(httpResponse::addCookie);
+
+        if (!httpResponse.hasSessionCookie()) {
+            final Cookie cookie = new Cookie("JSESSIONID", httpRequest.getSessionId());
+            httpResponse.addCookie(cookie);
+        }
     }
 
     private void close() {

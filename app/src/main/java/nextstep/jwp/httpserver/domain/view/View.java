@@ -18,7 +18,7 @@ public class View {
         this.viewPath = viewPath;
     }
 
-    public String render(HttpResponse httpResponse) throws URISyntaxException, IOException {
+    public void render(HttpResponse httpResponse) throws URISyntaxException, IOException {
         List<String> body;
         try {
             body = readFile(viewPath);
@@ -26,7 +26,7 @@ public class View {
             body = readFile("static/404.html");
         }
 
-        return response(httpResponse, body);
+        responseBody(httpResponse, body);
     }
 
     private List<String> readFile(String filePath) throws URISyntaxException, IOException {
@@ -35,17 +35,17 @@ public class View {
         return Files.readAllLines(path);
     }
 
-    private String response(HttpResponse httpResponse, List<String> body) throws IOException {
+    private void responseBody(HttpResponse httpResponse, List<String> body) throws IOException {
         final StringBuilder bodyBuilder = new StringBuilder();
         for (String bodyLine : body) {
             bodyBuilder.append(bodyLine).append("\r\n");
         }
         final String responseBody = bodyBuilder.toString();
 
+        httpResponse.setBody(responseBody);
+
         final Path resourcePath = new File(viewPath).toPath();
         httpResponse.addHeader("Content-Type", Files.probeContentType(resourcePath) + ";charset=utf-8");
         httpResponse.addHeader("Content-Length", Integer.toString(responseBody.getBytes().length));
-
-        return httpResponse.responseToString(responseBody);
     }
 }

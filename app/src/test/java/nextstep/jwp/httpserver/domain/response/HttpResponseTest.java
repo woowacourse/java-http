@@ -1,8 +1,5 @@
 package nextstep.jwp.httpserver.domain.response;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,14 +14,11 @@ class HttpResponseTest {
     @DisplayName("HttpResponse 빌더 패턴 테스트")
     void builder() {
         // given
-        Map<String, String> body = new HashMap<>();
-        body.put("name", "air");
-
         // when
         HttpResponse httpResponse = new HttpResponse.Builder()
                 .statusCode(StatusCode.CREATED)
                 .header("Location", "1")
-                .body(body)
+                .body("name=air")
                 .build();
 
         // then

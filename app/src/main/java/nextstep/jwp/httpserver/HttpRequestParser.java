@@ -27,7 +27,7 @@ public class HttpRequestParser {
         final List<Cookie> cookies = extractCookieFromHeaders(headers);
         final Body body = extractRequestBody(requestLine, headers, bufferedReader);
 
-        return new HttpRequest(requestLine, headers, cookies, body);
+        return new HttpRequest(requestLine, headers, cookies, null, body);
     }
 
     private static Headers extractAllHeaders(BufferedReader bufferedReader) throws IOException {

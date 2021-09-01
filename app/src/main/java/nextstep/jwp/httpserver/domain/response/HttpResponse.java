@@ -2,9 +2,7 @@ package nextstep.jwp.httpserver.domain.response;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
-import nextstep.jwp.httpserver.domain.Body;
 import nextstep.jwp.httpserver.domain.Cookie;
 import nextstep.jwp.httpserver.domain.Headers;
 import nextstep.jwp.httpserver.domain.HttpVersion;
@@ -12,13 +10,13 @@ import nextstep.jwp.httpserver.domain.HttpVersion;
 public class HttpResponse {
     private StatusLine statusLine;
     private Headers headers;
-    private Body body;
+    private String body;
     private List<Cookie> cookies;
 
     public static class Builder {
         private StatusLine statusLine;
         private Headers headers;
-        private Body body;
+        private String body;
         private List<Cookie> cookies;
 
         public Builder() {
@@ -35,8 +33,8 @@ public class HttpResponse {
             return this;
         }
 
-        public Builder body(Map<String, String> body) {
-            this.body = new Body(body);
+        public Builder body(String body) {
+            this.body = body;
             return this;
         }
 
@@ -51,14 +49,14 @@ public class HttpResponse {
     }
 
     public HttpResponse() {
-        this(new StatusLine(), new Headers(), new Body(), new ArrayList<>());
+        this(new StatusLine(), new Headers(), "", new ArrayList<>());
     }
 
     private HttpResponse(Builder builder) {
         this(builder.statusLine, builder.headers, builder.body, builder.cookies);
     }
 
-    public HttpResponse(StatusLine statusLine, Headers headers, Body body, List<Cookie> cookies) {
+    public HttpResponse(StatusLine statusLine, Headers headers, String body, List<Cookie> cookies) {
         this.statusLine = statusLine;
         this.headers = headers;
         this.body = body;
@@ -82,19 +80,24 @@ public class HttpResponse {
         cookies.add(cookie);
     }
 
+    public boolean hasSessionCookie() {
+        return cookies.stream()
+                      .anyMatch(Cookie::isSessionId);
+    }
+
     public String statusLine() {
         final HttpVersion httpVersion = statusLine.getHttpVersion();
         final StatusCode statusCode = statusLine.getStatusCode();
         return httpVersion.getVersion() + " " + statusCode.getCode() + " " + statusCode.getStatusText() + " ";
     }
 
-    public String responseToString(String responseBody) {
+    public String getResult() {
         return String.join("\r\n",
                 statusLine(),
                 headers.responseFormat(),
                 allCookies(),
                 "",
-                responseBody
+                body
         );
     }
 
@@ -119,6 +122,10 @@ public class HttpResponse {
         return cookieHeader.toString();
     }
 
+    public void setBody(String body) {
+        this.body = body;
+    }
+
     public StatusLine getStatusLine() {
         return statusLine;
     }
@@ -127,7 +134,7 @@ public class HttpResponse {
         return headers;
     }
 
-    public Body getBody() {
+    public String getBody() {
         return body;
     }
 }

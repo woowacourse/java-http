@@ -6,17 +6,20 @@ import java.util.Map;
 import nextstep.jwp.httpserver.domain.Body;
 import nextstep.jwp.httpserver.domain.Cookie;
 import nextstep.jwp.httpserver.domain.Headers;
+import nextstep.jwp.httpserver.domain.HttpSession;
 
 public class HttpRequest {
     private final RequestLine requestLine;
     private final Headers headers;
     private final List<Cookie> cookies;
+    private HttpSession session;
     private final Body body;
 
-    public HttpRequest(RequestLine requestLine, Headers headers, List<Cookie> cookies, Body body) {
+    public HttpRequest(RequestLine requestLine, Headers headers, List<Cookie> cookies, HttpSession session, Body body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.cookies = cookies;
+        this.session = session;
         this.body = body;
     }
 
@@ -28,9 +31,20 @@ public class HttpRequest {
         return requestLine.isPost();
     }
 
-    public boolean hasSessionId() {
+    public String sessionIdInCookie() {
         return cookies.stream()
-                      .anyMatch(Cookie::isSessionId);
+                      .filter(Cookie::isSessionId)
+                      .findFirst()
+                      .map(Cookie::getValue)
+                      .orElse("");
+    }
+
+    public String getSessionId() {
+        return session.getId();
+    }
+
+    public void setSession(HttpSession session) {
+        this.session = session;
     }
 
     public String getRequestUri() {
@@ -55,6 +69,10 @@ public class HttpRequest {
 
     public List<Cookie> getCookies() {
         return cookies;
+    }
+
+    public HttpSession getSession() {
+        return session;
     }
 
     public Body getBody() {

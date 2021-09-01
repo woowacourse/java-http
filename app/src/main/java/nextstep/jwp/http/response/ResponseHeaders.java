@@ -36,6 +36,10 @@ public class ResponseHeaders {
         headers.put(key, String.valueOf(value));
     }
 
+    public String getAttribute(String name) {
+        return headers.get(name);
+    }
+
     public List<String> asLines(String format) {
         return headers.keySet().stream()
                 .map(key -> String.format(format, key, headers.get(key)))

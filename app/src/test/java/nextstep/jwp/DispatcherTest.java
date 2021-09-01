@@ -110,7 +110,7 @@ class DispatcherTest {
         assertResponseWithFile(responseAsString, "401.html", HttpStatus.UNAUTHORIZED);
     }
 
-    @DisplayName("서버 에러시 INTERNEL SERVER ERROR 출력")
+    @DisplayName("서버 에러시 INTERNAL SERVER ERROR 출력")
     @Test
     void internalServerError() throws IOException {
         // given
@@ -130,6 +130,23 @@ class DispatcherTest {
 
         // then
         assertResponseWithFile(responseAsString, "500.html", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @DisplayName("쿠키에 Session이 존재하지 않는 경우 SessionId를 응답한다")
+    @Test
+    void responseSessionId() {
+        // given
+        RequestLine requestLine = RequestLine.of("GET /login HTTP/1.1");
+        RequestHeaders requestHeaders = RequestHeaders.of(Collections.emptyList());
+
+        HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, "");
+        HttpResponse httpResponse = new HttpResponse();
+
+        // when
+        dispatcher.dispatch(httpRequest, httpResponse);
+
+        // then
+        assertThat(httpResponse.getHeaderAttribute("Set-Cookie")).isNotNull();
     }
 
     private void assertResponseWithFile(String response, String filePath, HttpStatus httpStatus) throws IOException {

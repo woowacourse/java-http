@@ -2,6 +2,7 @@ package nextstep.jwp.http.request;
 
 import java.util.Arrays;
 import java.util.Collections;
+import nextstep.jwp.http.cookie.HttpCookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

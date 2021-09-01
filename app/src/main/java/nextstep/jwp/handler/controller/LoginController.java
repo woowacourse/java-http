@@ -11,6 +11,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected ModelAndView doGet(HttpRequest request, HttpResponse response) {
+        response.setCookie(request.httpCookie());
         return ModelAndView.of("/login.html", HttpStatus.OK);
     }
 

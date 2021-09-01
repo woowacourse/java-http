@@ -1,8 +1,13 @@
 package nextstep.jwp.http.response;
 
+import nextstep.jwp.http.cookie.HttpCookie;
+import nextstep.jwp.http.session.HttpSession;
+
 public class HttpResponse {
 
-    private static final String HTTP_REQUEST_LINE_FORMAT = "HTTP/1.1 %s %s ";
+    // TODO :: RESPONSE 에 너무 엮이는 것은 아닐까
+
+    private static final String HTTP_STATUS_LINE_FORMAT = "HTTP/1.1 %s %s ";
     private static final String HEADER_FORMAT = "%s: %s ";
     private static final String SEPARATE_LINE = "";
 
@@ -15,7 +20,7 @@ public class HttpResponse {
     }
 
     public void setHttpStatus(HttpStatus httpStatus) {
-        statusLine = String.format(HTTP_REQUEST_LINE_FORMAT, httpStatus.code(), httpStatus.status());
+        statusLine = String.format(HTTP_STATUS_LINE_FORMAT, httpStatus.code(), httpStatus.status());
     }
 
     public void setContent(String content, String contentType) {
@@ -23,6 +28,17 @@ public class HttpResponse {
         responseHeaders.addAttribute("Content-Length", content.getBytes().length);
 
         messageBody = content;
+    }
+
+    public void setCookie(HttpCookie cookie) {
+        if (cookie.hasSessionId()) {
+            addHeader("Cookie", cookie.asResponseLine());
+            return;
+        }
+
+        HttpSession newSession = new HttpSession();
+        String id = newSession.getId();
+        addHeader("Set-Cookie", id);
     }
 
     public byte[] responseAsBytes() {
@@ -35,5 +51,9 @@ public class HttpResponse {
                 String.join("\r\n", responseHeaders.asLines(HEADER_FORMAT)),
                 SEPARATE_LINE,
                 messageBody);
+    }
+
+    public String getHeaderAttribute(String name) {
+        return responseHeaders.getAttribute(name);
     }
 }

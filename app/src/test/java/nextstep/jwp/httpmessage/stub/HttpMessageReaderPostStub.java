@@ -1,7 +1,7 @@
 package nextstep.jwp.httpmessage.stub;
 
 import nextstep.jwp.httpmessage.ContentType;
-import nextstep.jwp.httpmessage.HttpMessageReader;
+import nextstep.jwp.httpmessage.httprequest.HttpMessageReader;
 import org.junit.jupiter.api.DisplayName;
 
 import java.io.ByteArrayInputStream;

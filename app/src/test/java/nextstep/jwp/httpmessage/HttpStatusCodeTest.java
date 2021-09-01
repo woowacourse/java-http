@@ -1,5 +1,6 @@
 package nextstep.jwp.httpmessage;
 
+import nextstep.jwp.httpmessage.httpresponse.HttpStatusCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

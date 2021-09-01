@@ -1,4 +1,4 @@
-package nextstep.jwp.httpmessage;
+package nextstep.jwp.httpmessage.httpresponse;
 
 import java.util.Arrays;
 import java.util.HashMap;

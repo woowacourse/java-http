@@ -3,8 +3,8 @@ package nextstep.jwp.httpmessage;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static nextstep.jwp.httpmessage.HttpMessageReader.CRLF;
-import static nextstep.jwp.httpmessage.HttpMessageReader.SP;
+import static nextstep.jwp.httpmessage.httprequest.HttpMessageReader.CRLF;
+import static nextstep.jwp.httpmessage.httprequest.HttpMessageReader.SP;
 
 public class HttpHeaders {
 

@@ -1,6 +1,8 @@
-package nextstep.jwp.httpmessage;
+package nextstep.jwp.httpmessage.httprequest;
 
-import static nextstep.jwp.httpmessage.HttpMessageReader.SP;
+import nextstep.jwp.httpmessage.HttpMethod;
+
+import static nextstep.jwp.httpmessage.httprequest.HttpMessageReader.SP;
 
 public class RequestLine {
 

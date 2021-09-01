@@ -1,4 +1,7 @@
-package nextstep.jwp.httpmessage;
+package nextstep.jwp.httpmessage.httprequest;
+
+import nextstep.jwp.httpmessage.HttpHeaders;
+import nextstep.jwp.httpmessage.HttpMethod;
 
 import java.util.Enumeration;
 

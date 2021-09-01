@@ -1,4 +1,4 @@
-package nextstep.jwp.httpmessage;
+package nextstep.jwp.httpmessage.httprequest;
 
 import java.io.BufferedReader;
 import java.io.IOException;

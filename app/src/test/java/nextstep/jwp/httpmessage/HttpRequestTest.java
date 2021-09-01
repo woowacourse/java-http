@@ -1,5 +1,6 @@
 package nextstep.jwp.httpmessage;
 
+import nextstep.jwp.httpmessage.httprequest.HttpRequest;
 import nextstep.jwp.httpmessage.stub.HttpMessageReaderGetStub;
 import nextstep.jwp.httpmessage.stub.HttpMessageReaderPostStub;
 import org.junit.jupiter.api.DisplayName;

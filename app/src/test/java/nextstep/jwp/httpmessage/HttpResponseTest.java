@@ -1,5 +1,8 @@
 package nextstep.jwp.httpmessage;
 
+import nextstep.jwp.httpmessage.httpresponse.HttpResponse;
+import nextstep.jwp.httpmessage.httpresponse.HttpStatusCode;
+import nextstep.jwp.httpmessage.httpresponse.StatusLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -8,8 +11,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static nextstep.jwp.httpmessage.HttpMessageReader.CRLF;
-import static nextstep.jwp.httpmessage.HttpMessageReader.SP;
+import static nextstep.jwp.httpmessage.httprequest.HttpMessageReader.CRLF;
+import static nextstep.jwp.httpmessage.httprequest.HttpMessageReader.SP;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("HttpResponse 테스트")

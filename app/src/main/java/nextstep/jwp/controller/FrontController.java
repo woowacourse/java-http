@@ -3,9 +3,9 @@ package nextstep.jwp.controller;
 import nextstep.jwp.controller.modelview.ModelView;
 import nextstep.jwp.controller.modelview.View;
 import nextstep.jwp.httpmessage.ContentType;
-import nextstep.jwp.httpmessage.HttpRequest;
-import nextstep.jwp.httpmessage.HttpResponse;
-import nextstep.jwp.httpmessage.HttpStatusCode;
+import nextstep.jwp.httpmessage.httprequest.HttpRequest;
+import nextstep.jwp.httpmessage.httpresponse.HttpResponse;
+import nextstep.jwp.httpmessage.httpresponse.HttpStatusCode;
 
 import java.util.Collections;
 import java.util.HashMap;

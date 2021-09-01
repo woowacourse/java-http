@@ -1,9 +1,12 @@
-package nextstep.jwp.httpmessage;
+package nextstep.jwp.httpmessage.httpresponse;
+
+import nextstep.jwp.httpmessage.HttpHeaders;
+import nextstep.jwp.httpmessage.HttpVersion;
 
 import java.util.Objects;
 
-import static nextstep.jwp.httpmessage.HttpMessageReader.CRLF;
-import static nextstep.jwp.httpmessage.HttpMessageReader.SP;
+import static nextstep.jwp.httpmessage.httprequest.HttpMessageReader.CRLF;
+import static nextstep.jwp.httpmessage.httprequest.HttpMessageReader.SP;
 
 public class HttpResponse {
 

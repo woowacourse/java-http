@@ -1,5 +1,6 @@
 package nextstep.jwp.httpmessage;
 
+import nextstep.jwp.httpmessage.httprequest.Parameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

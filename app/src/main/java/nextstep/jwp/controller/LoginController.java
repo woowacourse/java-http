@@ -3,7 +3,6 @@ package nextstep.jwp.controller;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.session.HttpSession;
-import nextstep.jwp.http.session.HttpSessions;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
@@ -38,7 +37,7 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) {
         log.debug("HTTP GET Login Request: {}", request.getPath());
         HttpSession session = request.getSession();
-        if (HttpSessions.contains(session)) {
+        if (Objects.nonNull(session.getAttribute("user"))) {
             response.responseRedirect(HTTP + request.getHeader("Host") + "/index.html");
             return;
         }
@@ -53,8 +52,6 @@ public class LoginController extends AbstractController {
 
             HttpSession session = request.getSession();
             session.setAttribute("user", loginUser);
-            HttpSessions.put(session);
-
             response.responseRedirect(HTTP + request.getHeader("Host") + "/index.html");
         } catch (IllegalArgumentException exception) {
             response.responseRedirect(HTTP + request.getHeader("Host") + "/401.html");

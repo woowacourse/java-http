@@ -19,6 +19,7 @@ public class HttpSession {
     }
 
     public void setAttribute(String name, Object value) {
+        this.values.put(name, value);
     }
 
     public Object getAttribute(String name) {
@@ -26,9 +27,11 @@ public class HttpSession {
     }
 
     public void removeAttribute(String name) {
+        this.values.remove(name);
     }
 
     public void invalidate() {
+        HttpSessions.remove(id);
     }
 }
 

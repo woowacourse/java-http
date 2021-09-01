@@ -30,7 +30,7 @@ public class HttpCookie {
         return this.cookies.containsKey(SESSION_NAME);
     }
 
-    public HttpSession getSession() {
-        return new HttpSession(this.cookies.get(SESSION_NAME));
+    public String getSessionId() {
+        return this.cookies.get(SESSION_NAME);
     }
 }

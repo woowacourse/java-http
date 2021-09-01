@@ -3,6 +3,7 @@ package nextstep.jwp.http.request;
 import com.google.common.base.Strings;
 import nextstep.jwp.http.session.HttpCookie;
 import nextstep.jwp.http.session.HttpSession;
+import nextstep.jwp.http.session.HttpSessions;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +40,6 @@ public class RequestHeaders {
     }
 
     public HttpSession getSession() {
-       return this.cookie.getSession();
+        return HttpSessions.getSession(cookie.getSessionId());
     }
 }

@@ -40,7 +40,7 @@ class LoginControllerTest extends ControllerTest {
     @Test
     void doPost() {
         // given
-        String requestBody = "account=gugu&password=password";
+        String requestBody = "account=admin&password=1234";
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",

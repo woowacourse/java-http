@@ -66,7 +66,7 @@ class RequestHandlerTest {
     @DisplayName("정적 요청에 응답한다.")
     void preserveStaticResource(String uri) throws IOException {
         // given
-        final String httpRequest = makeGetRequest(uri);
+        final String httpRequest = makeGetRequestWithCookie(uri);
         socket = new MockSocket(httpRequest);
         requestHandler = new RequestHandler(
                 socket,

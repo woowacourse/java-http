@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class UserServiceTest {
+class LoginServiceTest {
 
     @DisplayName("로그인을 한다.")
     @Test
@@ -18,8 +18,8 @@ class UserServiceTest {
         String password = "password";
 
         // when
-        UserService userService = new UserService();
-        assertThatCode(() -> userService.login(account, password))
+        LoginService loginService = new LoginService();
+        assertThatCode(() -> loginService.login(account, password))
                 .doesNotThrowAnyException();
     }
 
@@ -31,8 +31,8 @@ class UserServiceTest {
         String password = "password";
 
         // when
-        UserService userService = new UserService();
-        assertThatThrownBy(() -> userService.login(account, password))
+        LoginService loginService = new LoginService();
+        assertThatThrownBy(() -> loginService.login(account, password))
                 .isInstanceOf(UserNotFoundException.class);
     }
 
@@ -44,8 +44,8 @@ class UserServiceTest {
         String password = "melong";
 
         // when
-        UserService userService = new UserService();
-        assertThatThrownBy(() -> userService.login(account, password))
+        LoginService loginService = new LoginService();
+        assertThatThrownBy(() -> loginService.login(account, password))
                 .isInstanceOf(LoginFailedException.class);
 
     }

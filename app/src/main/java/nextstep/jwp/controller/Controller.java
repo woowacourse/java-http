@@ -5,5 +5,6 @@ import nextstep.jwp.http.response.HttpResponse;
 
 public interface Controller {
     HttpResponse doService(final HttpRequest httpRequest);
+
     boolean canHandle(final HttpRequest httpRequest);
 }

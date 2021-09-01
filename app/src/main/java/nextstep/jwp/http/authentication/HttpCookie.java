@@ -23,4 +23,8 @@ public class HttpCookie {
     public boolean doesNotHaveJSession() {
         return !cookies.containsKey(JSESSION_KEY);
     }
+
+    public String getJSession() {
+        return cookies.get(JSESSION_KEY);
+    }
 }

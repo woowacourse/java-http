@@ -2,10 +2,8 @@ package nextstep.jwp.http.response;
 
 import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.HttpStatus;
-import nextstep.jwp.http.authentication.HttpCookie;
 
 import java.util.Objects;
-import java.util.UUID;
 
 public class HttpResponse {
     private static final String OK_RESPONSE_FORMAT =
@@ -28,7 +26,7 @@ public class HttpResponse {
 
     private final String protocol;
     private final HttpStatus httpStatus;
-    private final UUID jSession;
+    private final String jSession;
     private final ContentType contentType;
     private final Integer contentLength;
     private final String location;
@@ -42,7 +40,7 @@ public class HttpResponse {
 
     public HttpResponse(final String protocol,
                         final HttpStatus httpStatus,
-                        final UUID jSession,
+                        final String jSession,
                         final String location) {
         this(protocol, httpStatus, jSession, null, null, location, null);
     }
@@ -57,7 +55,7 @@ public class HttpResponse {
 
     public HttpResponse(final String protocol,
                         final HttpStatus httpStatus,
-                        final UUID jSession,
+                        final String jSession,
                         final ContentType contentType,
                         final Integer contentLength,
                         final String responseBody) {
@@ -66,7 +64,7 @@ public class HttpResponse {
 
     public HttpResponse(final String protocol,
                         final HttpStatus httpStatus,
-                        final UUID jSession,
+                        final String jSession,
                         final ContentType contentType,
                         final Integer contentLength,
                         final String location,
@@ -81,27 +79,30 @@ public class HttpResponse {
     }
 
     public String toResponseMessage() {
-        if (Objects.nonNull(location)) {
-            return String.format(REDIRECT_RESPONSE_FORMAT,
+        String header;
+        if (Objects.isNull(location)) {
+            header = String.format(OK_RESPONSE_FORMAT,
                     protocol,
                     httpStatus.getCode(),
                     httpStatus.getMessage(),
-                    location
+                    contentType.getMimeType(),
+                    contentLength
             );
+
+            return header + "\r\n" + responseBody;
         }
 
-        String header = String.format(OK_RESPONSE_FORMAT,
+        header = String.format(REDIRECT_RESPONSE_FORMAT,
                 protocol,
                 httpStatus.getCode(),
                 httpStatus.getMessage(),
-                contentType.getMimeType(),
-                contentLength
+                location
         );
 
-        if (Objects.isNull(jSession)) {
-            header = header + String.format(COOKIE_FORMAT, jSession) + "\r\n";
+        if (Objects.nonNull(jSession)) {
+            header += String.format(COOKIE_FORMAT, jSession) + "\r\n";
         }
 
-        return header + "\r\n" + responseBody;
+        return header;
     }
 }

@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.*;
+import nextstep.jwp.http.ContentType;
+import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.HttpRequestBody;
 import nextstep.jwp.http.request.HttpRequestHeader;
@@ -13,7 +14,6 @@ import java.util.List;
 
 import static nextstep.jwp.controller.StaticResourceControllerTest.staticResourceRequest;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class LoginControllerTest {
     protected static final HttpRequest loginRequest = new HttpRequest(
@@ -42,7 +42,7 @@ class LoginControllerTest {
                 redirectUrl
         );
 
-        assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+        assertThat(actual).usingRecursiveComparison().ignoringExpectedNullFields().isEqualTo(expected);
     }
 
     @DisplayName("post요청을 핸들링에 실패하면 401 페이지를 반환한다")

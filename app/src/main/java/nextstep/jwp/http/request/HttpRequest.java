@@ -1,13 +1,15 @@
 package nextstep.jwp.http.request;
 
 import nextstep.jwp.http.HttpMethod;
-import nextstep.jwp.http.authentication.HttpCookie;
+import nextstep.jwp.http.authentication.HttpSession;
+import nextstep.jwp.http.authentication.HttpSessions;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class HttpRequest {
     private final HttpRequestHeader header;
@@ -65,6 +67,18 @@ public class HttpRequest {
         return getHttpMethod().isGet();
     }
 
+    public HttpSession getSession() {
+        if (header.doesNotHaveJSession()) {
+            final String id = UUID.randomUUID().toString();
+            final HttpSession httpSession = new HttpSession(id);
+            HttpSessions.addSession(id, httpSession);
+            return httpSession;
+        }
+
+        final String id = header.getJSession();
+        return HttpSessions.getSession(id);
+    }
+
     public HttpMethod getHttpMethod() {
         return header.getHttpMethod();
     }
@@ -83,9 +97,5 @@ public class HttpRequest {
 
     public Map<String, String> getPayload() {
         return body.getPayload();
-    }
-
-    public HttpCookie getCookie() {
-        return header.getCookie();
     }
 }

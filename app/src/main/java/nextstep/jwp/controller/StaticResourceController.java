@@ -1,10 +1,8 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.*;
+import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
-
-import java.util.UUID;
 
 public class StaticResourceController extends AbstractController {
     @Override
@@ -19,11 +17,6 @@ public class StaticResourceController extends AbstractController {
                 || path.endsWith(".css")
                 || path.endsWith(".js")
                 || path.endsWith(".ico");
-    }
-
-    @Override
-    protected UUID createUuid(final HttpRequest httpRequest) {
-        return null;
     }
 
     @Override

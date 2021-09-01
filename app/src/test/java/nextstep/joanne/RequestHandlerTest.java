@@ -5,7 +5,6 @@ import nextstep.joanne.server.handler.RequestHandler;
 import nextstep.joanne.server.handler.controller.ControllerFactory;
 import nextstep.joanne.server.http.request.HttpRequestParser;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -18,6 +17,8 @@ import java.nio.file.Files;
 import java.util.Objects;
 
 import static nextstep.Fixture.makeGetRequest;
+import static nextstep.Fixture.makeGetRequestWithCookie;
+import static nextstep.Fixture.makeGetRequestWithCookieWithoutSessionId;
 import static nextstep.Fixture.makePostRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -226,5 +227,43 @@ class RequestHandlerTest {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    @DisplayName("헤더에 Cookie가 있고, JSESSION 아이디가 없는 경우 응답에 JSESSIONID를 포함한다.")
+    @Test
+    void cookie() {
+        // given
+        final String httpRequest = makeGetRequestWithCookieWithoutSessionId("/index.html");
+        socket = new MockSocket(httpRequest);
+        requestHandler = new RequestHandler(
+                socket,
+                new HandlerMapping(ControllerFactory.addControllers()),
+                new HttpRequestParser()
+        );
+        // when
+        requestHandler.run();
+
+        // then
+        assertThat(socket.output()).contains("Set-Cookie");
+        assertThat(socket.output()).contains("JSESSIONID");
+    }
+
+    @DisplayName("헤더에 Cookie가 있고, JSESSION 아이디가 없는 경우 응답에 JSESSIONID를 포함한다.")
+    @Test
+    void cookieWithSessionId() {
+        // given
+        final String httpRequest = makeGetRequestWithCookie("/index.html");
+        socket = new MockSocket(httpRequest);
+        requestHandler = new RequestHandler(
+                socket,
+                new HandlerMapping(ControllerFactory.addControllers()),
+                new HttpRequestParser()
+        );
+        // when
+        requestHandler.run();
+
+        // then
+        assertThat(socket.output()).doesNotContain("Set-Cookie");
+        assertThat(socket.output()).doesNotContain("JSESSIONID");
     }
 }

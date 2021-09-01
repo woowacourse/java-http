@@ -41,7 +41,7 @@ public class HttpRequestParser {
     }
 
     private Map<String, String> parseExtraMessage(String uri) {
-        return Stream.of(uri.split("&", 2))
+        return Stream.of(uri.split("&"))
             .map(x -> x.split("="))
             .collect(Collectors.toMap(x -> x[0], x-> x[1]));
     }
@@ -55,7 +55,14 @@ public class HttpRequestParser {
                         (a, b) -> b,
                         HashMap::new
                 ));
-        return new Headers(headers);
+        return checkHasCookie(new Headers(headers));
+    }
+
+    private Headers checkHasCookie(Headers headers) {
+        if (headers.hasCookie()) {
+            headers.putCookie(headers.get("Cookie"));
+        }
+        return headers;
     }
 
     private MessageBody parseMessageBody(Headers requestHeaders,

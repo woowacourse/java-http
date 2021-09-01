@@ -1,15 +1,13 @@
 package nextstep.joanne.server.http;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class Headers {
-    private final Map<String, String> headers;
+    private Map<String, String> headers = new LinkedHashMap<>();
+    private Cookie cookie = new Cookie();
 
     public Headers() {
-        headers = new LinkedHashMap<>();
     }
 
     public Headers(Map<String, String> headers) {
@@ -29,9 +27,7 @@ public class Headers {
     }
 
     public void addHeader(String key, String value) {
-        if (Objects.nonNull(headers)) {
-            headers.put(key, value);
-        }
+        headers.put(key, value);
     }
 
     public String getHeaders() {
@@ -40,5 +36,21 @@ public class Headers {
             stringBuilder.append(key).append(": ").append(value).append(" \r\n");
         });
         return stringBuilder.toString();
+    }
+
+    public boolean hasCookie() {
+        return headers.containsKey("Cookie");
+    }
+
+    public void putCookie(String cookie) {
+        this.cookie = new Cookie(cookie);
+    }
+
+    public String makeSessionId() {
+        return cookie.makeSessionId();
+    }
+
+    public boolean hasSessionId() {
+        return cookie.hasSessionId();
     }
 }

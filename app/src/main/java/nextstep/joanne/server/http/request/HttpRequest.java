@@ -37,4 +37,16 @@ public class HttpRequest {
     public String uri() {
         return requestLine.uri();
     }
+
+    public boolean hasCookie() {
+        return requestHeaders.hasCookie();
+    }
+
+    public boolean hasSessionId() {
+        return requestHeaders.hasSessionId();
+    }
+
+    public String getNewSessionId() {
+        return requestHeaders.makeSessionId();
+    }
 }

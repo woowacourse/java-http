@@ -20,7 +20,7 @@
 - [x] Add Interface Of Controller
 
 ## 3단계 - 요구사항
-- [ ] Cookie에 JSESSION값 저장하기
+- [x] Cookie에 JSESSION값 저장하기
 - [ ] SESSION 구현하기
 
 ## 참고 자료

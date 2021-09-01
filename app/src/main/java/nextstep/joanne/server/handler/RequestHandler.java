@@ -43,11 +43,7 @@ public class RequestHandler implements Runnable {
             HttpResponse httpResponse = new HttpResponse();
             final Controller controller = handlerMapping.get(httpRequest);
 
-            try {
-                controller.service(httpRequest, httpResponse);
-            } catch (HttpException e) {
-                ControllerAdvice.handle(httpRequest, httpResponse, e.httpStatus());
-            }
+            handle(httpRequest, httpResponse, controller);
 
             outputStream.write(httpResponse.getBody().getBytes());
             outputStream.flush();
@@ -55,6 +51,17 @@ public class RequestHandler implements Runnable {
             log.error("Exception stream", exception);
         } finally {
             close();
+        }
+    }
+
+    private void handle(HttpRequest httpRequest, HttpResponse httpResponse, Controller controller) {
+        try {
+            controller.service(httpRequest, httpResponse);
+            if (httpRequest.hasCookie() && !httpRequest.hasSessionId()) {
+                httpResponse.addHeaders("Set-Cookie", httpRequest.getNewSessionId());
+            }
+        } catch (HttpException e) {
+            ControllerAdvice.handle(httpRequest, httpResponse, e.httpStatus());
         }
     }
 

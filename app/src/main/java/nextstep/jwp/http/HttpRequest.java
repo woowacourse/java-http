@@ -46,6 +46,9 @@ public class HttpRequest {
     }
 
     public Map<String, String> parseRequestBodyParams() {
+        if(requestBody == null) {
+            return new HashMap<>();
+        }
         return parseBody(requestBody, -1);
     }
 
@@ -91,6 +94,10 @@ public class HttpRequest {
             }
         }
         return null;
+    }
+
+    public Map<String, String> getRequestParams() {
+        return requestParams;
     }
 
     public HttpMethod getHttpMethod() {

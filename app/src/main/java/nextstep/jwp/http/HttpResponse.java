@@ -24,7 +24,7 @@ public class HttpResponse {
         return String.join("\r\n",
                 "HTTP/1.1 " + status.toString(),
                 "Content-Type: " + httpContentType.getContentTypeResponse(),
-                "Content-Length: " + responseBody.getBytes().length,
+                "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
     }

@@ -39,7 +39,7 @@ public class MemberController extends AbstractController {
 
     private HttpResponse postLogin(final HttpRequest request) {
         try {
-            Map<String, String> requestParams = request.parseRequestBodyParams();
+            Map<String, String> requestParams = request.getRequestParams();
             User user = UserService.findUser(requestParams);
             log.info("로그인한 유저 : {}", user);
             return new HttpResponse(HttpStatus.FOUND, "index.html");

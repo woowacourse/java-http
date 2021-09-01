@@ -3,6 +3,8 @@ package nextstep.jwp;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import nextstep.jwp.request.RequestLine;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RequestLineTest {
@@ -25,6 +27,6 @@ public class RequestLineTest {
     @Test
     @DisplayName("RequestLine 생성 - 실패")
     void createRequestLineFailure() {
-         assertThrows(IllegalArgumentException.class, () -> new RequestLine(null));
+        assertThrows(IllegalArgumentException.class, () -> new RequestLine(null));
     }
 }

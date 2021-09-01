@@ -1,4 +1,6 @@
-package nextstep.jwp;
+package nextstep.jwp.request;
+
+import static nextstep.jwp.RequestHandler.LOG;
 
 public class RequestLine {
     public static final String SPACE = " ";
@@ -15,6 +17,7 @@ public class RequestLine {
         if (line == null) {
             throw new IllegalArgumentException("Request Line이 존재하지 않습니다.");
         }
+        LOG.info("RequestLine: {}", line);
         return line.split(SPACE);
     }
 

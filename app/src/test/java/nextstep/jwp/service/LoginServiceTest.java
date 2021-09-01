@@ -23,9 +23,18 @@ class LoginServiceTest {
     }
 
     @Test
-    @DisplayName("로그인이 실패하면 에러가 발생한다.")
-    void loginValidateException() {
+    @DisplayName("아이디가 존재하지 않다면 에러가 발생한다.")
+    void loginValidateIdException() {
         User user = new User(0L, "error", "password", "");
+
+        assertThatThrownBy(() -> LOGIN_SERVICE.loginValidate(user))
+            .isInstanceOf(UnauthorizedException.class);
+    }
+
+    @Test
+    @DisplayName("아이디가 존재하지 않다면 에러가 발생한다.")
+    void loginValidatePasswordException() {
+        User user = new User(0L, "gugu", "error", "");
 
         assertThatThrownBy(() -> LOGIN_SERVICE.loginValidate(user))
             .isInstanceOf(UnauthorizedException.class);

@@ -47,13 +47,10 @@ class RequestMappingTest {
     @Test
     @DisplayName("로그인 컨트롤러 반환 테스트")
     void methodNotAllowed() {
-        // given
         Request request = createRequest("/error");
 
-        // when
         assertThatThrownBy(() -> requestMapping.getController(request))
         .isInstanceOf(NotFoundException.class);
-
     }
 
     private Request createRequest(String uri) {

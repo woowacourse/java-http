@@ -13,7 +13,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(Request request, Response response) throws IOException {
-        String responseBody = FileConverter.fileToString(request.getUri() + ".html");
+        String responseBody = FileConverter.fileToString("/login.html");
         response.set200OK(request, responseBody);
     }
 

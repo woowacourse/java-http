@@ -12,7 +12,7 @@ public class NotFoundException extends RuntimeException {
             request.getUri(),
             request.getHttpVersion(),
             "에 대한 정보를 찾을 수 없습니다."
-            );
+        );
     }
 
     @Override

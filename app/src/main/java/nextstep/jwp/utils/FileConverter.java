@@ -8,7 +8,8 @@ import java.util.Objects;
 
 public class FileConverter {
 
-    private FileConverter() {}
+    private FileConverter() {
+    }
 
     public static String fileToString(String uri) throws IOException {
         URL resource = FileConverter.class.getClassLoader().getResource("static" + uri);

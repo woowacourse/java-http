@@ -8,6 +8,7 @@ import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.service.UserService;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class LoginController extends AbstractController {
     private final UserService userService;
@@ -24,6 +25,15 @@ public class LoginController extends AbstractController {
     }
 
     @Override
+    protected UUID createUuid(final HttpRequest httpRequest) {
+        UUID uuid = null;
+        if (httpRequest.doesNotHaveJSession()) {
+            uuid = UUID.randomUUID();
+        }
+        return uuid;
+    }
+
+    @Override
     public HttpResponse doPost(final HttpRequest httpRequest) {
         try {
             final Map<String, String> payload = httpRequest.getPayload();
@@ -31,14 +41,11 @@ public class LoginController extends AbstractController {
             final String password = payload.get("password");
             userService.login(account, password);
 
-//            final UUID uuid = UUID.randomUUID();
-
             final String redirectUrl = "/index.html";
             return new HttpResponse(
                     httpRequest.getProtocol(),
                     HttpStatus.FOUND,
-                    redirectUrl
-            );
+                    redirectUrl);
         } catch (Exception exception) {
             final String unauthorizedUrl = "/401.html";
             final String responseBody = readFile(unauthorizedUrl);

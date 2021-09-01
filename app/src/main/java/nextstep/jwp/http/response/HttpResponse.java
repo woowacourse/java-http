@@ -23,11 +23,12 @@ public class HttpResponse {
 
     private static final String COOKIE_FORMAT =
             String.join("\r\n",
-                    "Set-Cookie: %s",
+                    "Set-Cookie: JSESSIONID=%s",
                     "");
 
     private final String protocol;
     private final HttpStatus httpStatus;
+    private final UUID jSession;
     private final ContentType contentType;
     private final Integer contentLength;
     private final String location;
@@ -36,7 +37,14 @@ public class HttpResponse {
     public HttpResponse(final String protocol,
                         final HttpStatus httpStatus,
                         final String location) {
-        this(protocol, httpStatus, null, null, location, null);
+        this(protocol, httpStatus, null, null, null, location, null);
+    }
+
+    public HttpResponse(final String protocol,
+                        final HttpStatus httpStatus,
+                        final UUID jSession,
+                        final String location) {
+        this(protocol, httpStatus, jSession, null, null, location, null);
     }
 
     public HttpResponse(final String protocol,
@@ -44,17 +52,28 @@ public class HttpResponse {
                         final ContentType contentType,
                         final Integer contentLength,
                         final String responseBody) {
-        this(protocol, httpStatus, contentType, contentLength, null, responseBody);
+        this(protocol, httpStatus, null, contentType, contentLength, null, responseBody);
     }
 
     public HttpResponse(final String protocol,
                         final HttpStatus httpStatus,
+                        final UUID jSession,
+                        final ContentType contentType,
+                        final Integer contentLength,
+                        final String responseBody) {
+        this(protocol, httpStatus, jSession, contentType, contentLength, null, responseBody);
+    }
+
+    public HttpResponse(final String protocol,
+                        final HttpStatus httpStatus,
+                        final UUID jSession,
                         final ContentType contentType,
                         final Integer contentLength,
                         final String location,
                         final String responseBody) {
         this.protocol = protocol;
         this.httpStatus = httpStatus;
+        this.jSession = jSession;
         this.contentType = contentType;
         this.contentLength = contentLength;
         this.location = location;
@@ -79,9 +98,9 @@ public class HttpResponse {
                 contentLength
         );
 
-//        if (httpCookie.doesNotHaveJSession()) {
-//            header = header + String.format(COOKIE_FORMAT, UUID.randomUUID());
-//        }
+        if (Objects.isNull(jSession)) {
+            header = header + String.format(COOKIE_FORMAT, jSession) + "\r\n";
+        }
 
         return header + "\r\n" + responseBody;
     }

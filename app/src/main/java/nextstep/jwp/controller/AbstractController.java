@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
+import java.util.UUID;
 
 public abstract class AbstractController implements Controller {
     private static final String DEFAULT_PATH = "static";
@@ -46,10 +47,13 @@ public abstract class AbstractController implements Controller {
         return new HttpResponse(
                 httpRequest.getProtocol(),
                 httpStatus,
+                createUuid(httpRequest),
                 contentType,
                 responseBody.getBytes().length,
                 responseBody);
     }
+
+    protected abstract UUID createUuid(final HttpRequest httpRequest);
 
     public abstract HttpResponse doPost(final HttpRequest httpRequest);
 }

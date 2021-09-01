@@ -5,6 +5,8 @@ import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.service.UserService;
 
+import java.util.UUID;
+
 public class RegisterController extends AbstractController {
     private final UserService userService;
 
@@ -17,6 +19,11 @@ public class RegisterController extends AbstractController {
         final HttpMethod httpMethod = httpRequest.getHttpMethod();
         final String path = httpRequest.getPath();
         return (httpMethod.isGet() || httpMethod.isPost()) && "/register".equals(path);
+    }
+
+    @Override
+    protected UUID createUuid(final HttpRequest httpRequest) {
+        return null;
     }
 
     @Override

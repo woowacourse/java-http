@@ -95,4 +95,8 @@ public class HttpRequest {
     public int getContentLength() {
         return headers.getContentLength();
     }
+
+    public void addHeader(RequestHeaderType type, String value) {
+        headers.add(type.value(), value);
+    }
 }

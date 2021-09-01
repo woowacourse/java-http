@@ -21,7 +21,6 @@ public class RequestMapping {
         handlerMappingMaps.put("/", new MainController());
         handlerMappingMaps.put("/login", new LoginController());
         handlerMappingMaps.put("/register", new RegisterController());
-
         handlerMappingMaps.put("/index", new IndexController());
     }
 

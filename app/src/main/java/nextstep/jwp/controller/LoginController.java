@@ -1,8 +1,10 @@
 package nextstep.jwp.controller;
 
+import static nextstep.jwp.http.common.HttpStatus.*;
+
 import nextstep.jwp.controller.request.LoginRequest;
+import nextstep.jwp.controller.response.LoginResponse;
 import nextstep.jwp.exception.UnauthorizedException;
-import nextstep.jwp.http.common.HttpStatus;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.service.LoginService;
@@ -24,16 +26,20 @@ public class LoginController extends RestController {
     @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
         try {
+            if (httpRequest.hasCookie() && loginService.isAlreadyLogin(httpRequest.getCookie())) {
+                return HttpResponse.redirect(FOUND, "/index.html");
+            }
+
             LoginRequest loginRequest = getLoginRequest(httpRequest);
-            loginService.login(loginRequest);
+            LoginResponse loginResponse = loginService.login(loginRequest);
 
             LOGGER.debug("Login Success.");
 
-            return HttpResponse.redirect(HttpStatus.FOUND, "/index.html");
+            return HttpResponse.redirectWithSetCookie(FOUND, "/index.html", loginResponse.getSessionId());
         } catch (UnauthorizedException e) {
             LOGGER.debug("Login Failed.");
 
-            return HttpResponse.redirect(HttpStatus.UNAUTHORIZED, "/401.html");
+            return HttpResponse.redirect(UNAUTHORIZED, "/401.html");
         }
     }
 

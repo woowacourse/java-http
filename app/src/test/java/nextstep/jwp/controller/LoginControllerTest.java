@@ -11,6 +11,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.model.User;
+import nextstep.jwp.server.HttpSessions;
 import nextstep.jwp.service.LoginService;
 import nextstep.jwp.service.StaticResourceService;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +31,8 @@ class LoginControllerTest {
         HashMap<String, User> database = new HashMap<>();
         userRepository = new InMemoryUserRepository(database, 1L);
 
-        LoginService loginService = new LoginService(userRepository);
+        HttpSessions httpSessions = new HttpSessions();
+        LoginService loginService = new LoginService(userRepository, httpSessions);
         StaticResourceService staticResourceService = new StaticResourceService();
 
         loginController = new LoginController(loginService, staticResourceService);
@@ -123,21 +125,68 @@ class LoginControllerTest {
                 }
             }
 
-            @DisplayName("로그인 성공시 '/index.html' redirect response를 반환 받는다.")
+            @DisplayName("로그인 성공시 쿠키와 함께 '/index.html' redirect response를 반환 받는다.")
             @Test
             void loginSuccess() throws IOException {
                 // given
                 userRepository.save(new User(ACCOUNT, PASSWORD, "email"));
 
-                String expectString = "HTTP/1.1 302 Found \n"
-                    + "Location: /index.html ";
+                String expectStatusLine = "HTTP/1.1 302 Found";
+                String expectCookie = "Set-Cookie:";
+                String expectLocation = "Location: /index.html";
 
                 // when
                 HttpResponse httpResponse = loginController.service(httpRequest);
+                String response = new String(httpResponse.toBytes());
+                String[] splitedResponse = response.split("\n");
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(
-                    expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(splitedResponse[0].trim()).isEqualTo(expectStatusLine);
+                assertThat(splitedResponse[1].startsWith(expectCookie)).isTrue();
+                assertThat(splitedResponse[2].trim()).isEqualTo(expectLocation);
+            }
+
+            @DisplayName("이미 로그인 되어 있을 경우 '/index.html' redirect response를 반환 받는다.")
+            @Test
+            void alreadyLogin() throws IOException {
+                // given
+                userRepository.save(new User(ACCOUNT, PASSWORD, "email"));
+
+                HttpResponse httpResponse = loginController.service(httpRequest);
+                String cookie = getParsingCookie(httpResponse);
+
+                String body = String.format("account=%s&password=%s", ACCOUNT, PASSWORD);
+                int contentLength = body.getBytes(StandardCharsets.UTF_8).length;
+
+                String requestString = String.join(NEW_LINE,
+                    "POST /login HTTP/1.1",
+                    String.format("Cookie: JSESSIONID=%s;", cookie),
+                    String.format("Content-Length: %d", contentLength),
+                    "",
+                    body
+                );
+
+                try (InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(
+                    StandardCharsets.UTF_8))) {
+                    httpRequest = HttpRequest.parse(inputStream);
+                }
+
+                String expectStatusLine = "HTTP/1.1 302 Found \n"
+                    + "Location: /index.html ";
+
+                // when
+                HttpResponse response = loginController.doPost(httpRequest);
+
+                // then
+                assertThat(response.toBytes()).isEqualTo(
+                    expectStatusLine.getBytes(StandardCharsets.UTF_8));
+            }
+
+            private String getParsingCookie(HttpResponse httpResponse) {
+                String CookieHeader = httpResponse.toString().split("\n")[1];
+                String cookieValue = CookieHeader.split(":")[1];
+
+                return cookieValue.trim();
             }
 
             @DisplayName("로그인 실패시 '/401.html' redirect response를 반환 받는다.")

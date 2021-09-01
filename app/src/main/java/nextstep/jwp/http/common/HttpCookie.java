@@ -34,7 +34,9 @@ public class HttpCookie {
     }
 
     private static String[] splitCookie(String cookie) {
-        String[] splitedCookie = cookie.trim().split("=");
+        String[] splitedCookie = cookie.trim()
+            .toLowerCase()
+            .split("=");
 
         if (splitedCookie.length != EXPECT_LINE_LENGTH) {
             throw new InvalidRequestHeader();

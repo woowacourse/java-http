@@ -36,6 +36,14 @@ public class HttpResponse {
         return new HttpResponse(statusLine, responseHeaders, responseBody);
     }
 
+    public static HttpResponse redirectWithSetCookie(HttpStatus httpStatus, String location, String cookie) {
+        StatusLine statusLine = StatusLine.from(httpStatus);
+        ResponseHeaders responseHeaders = ResponseHeaders.ofRedirectWithSetCookie(location, cookie);
+        ResponseBody responseBody = ResponseBody.empty();
+
+        return new HttpResponse(statusLine, responseHeaders, responseBody);
+    }
+
     public byte[] toBytes() {
         return toString().getBytes(StandardCharsets.UTF_8);
     }

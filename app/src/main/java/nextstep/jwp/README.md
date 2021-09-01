@@ -14,10 +14,10 @@
 
 ## 2단계 - 리팩토링
 
-* [] Controller를 유저 정의 컨트롤러와 표준 컨트롤러로 분리
-   * [] 표준 컨트롤러는 클래스패스의 정적 파일을 읽는 컨트롤러 
-* [] 피드백 요구 사항
-  * [] HttpRequest 내부 필드를 RequestLine 및 OtherLines로 분리
-  * [] AdjustHttpStatus를 HttpStatus 내부로 변경
-* [] HttpRequestHeader 내부 RequestLine 분리
+* [x] Controller를 유저 정의 컨트롤러와 표준 컨트롤러로 분리
+   * [x] 표준 컨트롤러는 클래스패스의 정적 파일을 읽는 컨트롤러 
+* [x] 피드백 요구 사항
+  * [x] HttpRequest 내부 필드를 RequestLine 및 OtherLines로 분리
+  * [x] AdjustHttpStatus를 HttpStatus 내부로 변경
+* [x] HttpRequestHeader 내부 RequestLine 분리
 * [] JaCoCo 설정 추가

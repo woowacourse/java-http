@@ -9,16 +9,6 @@ public class RequestMapper {
     }
 
     public static Controller getController(HttpRequest httpRequest) {
-        String path = httpRequest.getUri();
-        if ("/".equals(path)) {
-            return new DefaultController();
-        }
-        if ("/login".equals(path)) {
-            return new LoginController();
-        }
-        if ("/register".equals(path)) {
-            return new RegisterController();
-        }
-        return new IndexController();
+        return ControllerManager.findControllerByUri(httpRequest.getUri());
     }
 }

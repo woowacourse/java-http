@@ -16,11 +16,12 @@ public class HttpResponse {
 
     private HttpStatus httpStatus;
     private Map<String, String> headerMap;
-    private String body = "";
+    private String body;
 
     public HttpResponse() {
-        httpStatus = null;
-        headerMap = new LinkedHashMap<>();
+        this.httpStatus = null;
+        this.headerMap = new LinkedHashMap<>();
+        this.body = "";
     }
 
     public HttpResponse(HttpStatus httpStatus, Map<String, String> headerMap, String body) {

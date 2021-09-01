@@ -165,61 +165,6 @@ class RequestHandlerTest {
         }
     }
 
-    @Disabled
-    @Nested
-    @DisplayName("쿼리스트링으로 로그인을 하면")
-    class Login {
-
-        @Test
-        @DisplayName("성공하면 index 페이지를 보여준다.")
-        void success() throws IOException {
-            // given
-            final String httpRequest = String.join("\r\n",
-                    "GET /login?account=gugu&password=password HTTP/1.1 ",
-                    "Host: localhost:8080 ",
-                    "Connection: keep-alive ",
-                    "",
-                    "");
-
-            final MockSocket socket = new MockSocket(httpRequest);
-            final RequestHandler requestHandler = new RequestHandler(socket);
-
-            // when
-            requestHandler.run();
-
-            // then
-            String expected = response302IndexPage();
-            assertThat(socket.output()).isEqualTo(expected);
-        }
-
-        @Test
-        @DisplayName("실패하면 401 페이지를 보여준다.")
-        void fail() throws IOException {
-            // given
-            final String httpRequest = String.join("\r\n",
-                    "GET /login?account=gugu&password=PASSword HTTP/1.1 ",
-                    "Host: localhost:8080 ",
-                    "Connection: keep-alive ",
-                    "",
-                    "");
-
-            final MockSocket socket = new MockSocket(httpRequest);
-            final RequestHandler requestHandler = new RequestHandler(socket);
-
-            // when
-            requestHandler.run();
-
-            // then
-            final URL resource = getClass().getClassLoader().getResource("static/401.html");
-            String expected = "HTTP/1.1 401 Unauthorized \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: 2426 \r\n" +
-                    "\r\n" +
-                    new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            assertThat(socket.output()).isEqualTo(expected);
-        }
-    }
-
     @Nested
     @DisplayName("POST로 로그인을 하면")
     class PostLogin {

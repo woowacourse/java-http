@@ -1,8 +1,9 @@
 package nextstep.jwp;
 
-import nextstep.jwp.http.handler.CustomHandler;
-import nextstep.jwp.http.handler.HandlerMapper;
+import nextstep.jwp.http.controller.Controller;
+import nextstep.jwp.http.controller.RequestMapping;
 import nextstep.jwp.http.http_request.JwpHttpRequest;
+import nextstep.jwp.http.http_response.JwpHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,9 +30,9 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             JwpHttpRequest request = JwpHttpRequest.of(reader);
-            CustomHandler handler = HandlerMapper.from(request.getUri());
-            String response = handler.handle(request);
-            outputStream.write(response.getBytes());
+            Controller handler = RequestMapping.getController(request.getUri());
+            JwpHttpResponse response = handler.handle(request);
+            outputStream.write(response.toBytes());
             outputStream.flush();
         } catch (IOException | URISyntaxException exception) {
             log.error("Exception stream", exception);

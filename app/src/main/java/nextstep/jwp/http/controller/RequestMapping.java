@@ -1,30 +1,33 @@
-package nextstep.jwp.http.handler;
+package nextstep.jwp.http.controller;
 
+import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.controller.ResourceHandler;
 import nextstep.jwp.exception.NotFoundHandlerException;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
 
-public enum HandlerMapper {
+public enum RequestMapping {
     RESOURCE(uri -> uri.contains("."), new ResourceHandler()),
-    LOGIN(uri -> uri.equals("/login"), new LoginHandler()),
-    REGISTER(uri -> uri.equals("/register"), new RegisterHandler())
+    LOGIN(uri -> uri.equals("/login"), new LoginController()),
+    REGISTER(uri -> uri.equals("/register"), new RegisterController())
     ;
 
     private final Predicate<String> predicate;
-    private final CustomHandler customHandler;
+    private final Controller controller;
 
-    HandlerMapper(Predicate<String> predicate, CustomHandler customHandler) {
+    RequestMapping(Predicate<String> predicate, Controller controller) {
         this.predicate = predicate;
-        this.customHandler = customHandler;
+        this.controller = controller;
     }
 
-    public static CustomHandler from(String uri) {
+    public static Controller getController(String uri) {
         return Arrays.stream(values())
                 .filter(handlerMapper -> handlerMapper.isSatisfied(uri))
                 .findAny()
                 .orElseThrow(NotFoundHandlerException::new)
-                .customHandler
+                .controller
                 ;
     }
 

@@ -11,34 +11,42 @@ public class JwpHttpResponse {
     private final Headers headers;
     private final String body;
 
-    public JwpHttpResponse(StatusCode statusCode, Headers headers, String body) {
+    private JwpHttpResponse(StatusCode statusCode, Headers headers, String body) {
         this.statusCode = statusCode;
         this.headers = headers;
         this.body = body;
     }
 
-    public static String ok(String resourceUri, String resourceFile) {
+    public static JwpHttpResponse ok(String resourceUri, String resourceFile) {
         return new Builder()
                 .statusCode(StatusCode.OK)
                 .header("Content-Type", JwpContentType.find(resourceUri))
                 .header("Content-Length", resourceFile.getBytes().length)
                 .body(resourceFile)
-                .build().toString();
+                .build();
     }
 
-    public static String found(String redirectUri) {
+    public static JwpHttpResponse found(String redirectUri) {
         return new Builder()
                 .statusCode(StatusCode.FOUND)
                 .header("Location", "http://localhost:8080/" + redirectUri)
-                .build().toString();
+                .build();
     }
 
-    @Override
-    public String toString() {
+    public static JwpHttpResponse notFound(String resourceFile) {
+        return new Builder()
+                .statusCode(StatusCode.OK)
+                .header("Content-Type", JwpContentType.HTML.getResourceType())
+                .header("Content-Length", resourceFile.getBytes().length)
+                .body(resourceFile)
+                .build();
+    }
+
+    public byte[] toBytes() {
         return String.join("\r\n",
                 HTTP_VERSION + " " + statusCode.toString() + " ",
                 headers.toString(),
-                body);
+                body).getBytes();
     }
 
     static class Builder {
@@ -78,6 +86,5 @@ public class JwpHttpResponse {
             }
             return new JwpHttpResponse(this.statusCode, this.headers, this.body);
         }
-
     }
 }

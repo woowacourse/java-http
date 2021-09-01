@@ -30,4 +30,8 @@ public enum JwpContentType {
     private boolean isSatisfied(String resourceFile) {
         return this.condition.test(resourceFile);
     }
+
+    public String getResourceType() {
+        return resourceType;
+    }
 }

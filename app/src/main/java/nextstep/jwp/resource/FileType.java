@@ -16,7 +16,7 @@ public enum FileType {
     NONE("");
 
     private static final Map<String, FileType> CACHE = Arrays.stream(values())
-        .collect(toMap(FileType::getText,Function.identity()));
+        .collect(toMap(FileType::getText, Function.identity()));
 
     private final String text;
 

@@ -1,6 +1,5 @@
 package nextstep.jwp.web.http.response;
 
-import static java.util.stream.Collectors.toList;
 import static nextstep.jwp.resource.ExtensionExtractor.extract;
 
 import java.util.Arrays;

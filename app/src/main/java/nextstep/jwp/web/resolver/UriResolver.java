@@ -7,7 +7,7 @@ import nextstep.jwp.resource.FileReader;
 import nextstep.jwp.web.http.response.ContentType;
 import nextstep.jwp.web.http.response.HttpResponse;
 
-public class HtmlResolver implements ViewResolver {
+public class UriResolver implements ViewResolver {
 
     @Override
     public boolean isSuitable(HttpResponse response) {

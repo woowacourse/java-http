@@ -23,7 +23,7 @@
 - [x] 예외처리
 - [ ] response()의 책임분리
 - [x] match~Mapping 코드 중복
-- [ ] account 가 동일한 유저에 대한 예외처리
+- [x] account 가 동일한 유저에 대한 예외처리
 - [x] header, body의 map 구조
 - [ ] testCode request 중복
 - [x] Content-Type 내용 알맞게 수정

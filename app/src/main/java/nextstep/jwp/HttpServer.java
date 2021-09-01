@@ -4,11 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 import nextstep.jwp.constants.Header;
 import nextstep.jwp.constants.Http;
 import nextstep.jwp.constants.StatusCode;
 import nextstep.jwp.controller.MappingHandler;
+import nextstep.jwp.exception.BadRequestException;
 import nextstep.jwp.exception.PageNotFoundException;
 import nextstep.jwp.request.RequestBody;
 import nextstep.jwp.request.RequestHeader;
@@ -60,6 +62,17 @@ public class HttpServer {
         final MappingHandler mappingHandler = new MappingHandler(this.requestLine, this.requestBody);
         try {
             return mappingHandler.response();
+        } catch (InvocationTargetException e) {
+            if (e.getTargetException() instanceof BadRequestException) {
+                return ResponseEntity
+                        .statusCode(StatusCode.BAD_REQUEST)
+                        .responseResource("/400.html")
+                        .build();
+            }
+            return ResponseEntity
+                    .statusCode(StatusCode.INTERNAL_SERVER_ERROR)
+                    .responseResource("/500.html")
+                    .build();
         } catch (PageNotFoundException e) {
             return ResponseEntity
                     .statusCode(StatusCode.NOT_FOUND)

@@ -6,12 +6,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
+import nextstep.jwp.WebApplicationContext;
+import nextstep.jwp.infrastructure.http.interceptor.HandlerInterceptor;
 import nextstep.jwp.infrastructure.http.reader.HttpRequestReader;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
-import nextstep.jwp.infrastructure.http.request.RequestLine;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +21,12 @@ public class RequestHandler implements Runnable {
 
     private final Socket connection;
     private final HandlerMapping handlerMapping;
+    private final HandlerInterceptor interceptor;
 
-    public RequestHandler(final Socket connection, final HandlerMapping handlerMapping) {
+    public RequestHandler(final Socket connection, final WebApplicationContext context) {
         this.connection = Objects.requireNonNull(connection);
-        this.handlerMapping = handlerMapping;
+        this.handlerMapping = context.getHandlerMapping();
+        this.interceptor = context.getInterceptor();
     }
 
     @Override
@@ -41,7 +42,9 @@ public class RequestHandler implements Runnable {
             final HttpRequest request = httpRequestReader.readHttpRequest();
             final HttpResponse response = new HttpResponse();
 
+            interceptor.preHandle(request, response);
             handlerMapping.getHandler(request).handle(request, response);
+            interceptor.postHandle(request, response);
 
             outputStream.write(response.toString().getBytes());
             outputStream.flush();

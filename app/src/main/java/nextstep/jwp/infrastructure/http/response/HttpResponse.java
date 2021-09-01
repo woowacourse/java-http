@@ -7,7 +7,7 @@ import nextstep.jwp.infrastructure.http.Headers;
 public class HttpResponse {
 
     private ResponseLine responseLine;
-    private Headers headers;
+    private final Headers headers;
     private String messageBody;
 
     public HttpResponse() {
@@ -28,12 +28,12 @@ public class HttpResponse {
         this.responseLine = responseLine;
     }
 
-    public void setHeaders(final Headers headers) {
-        this.headers = headers;
-    }
-
     public void addHeader(final String key, final String value) {
         this.headers.add(key, value);
+    }
+
+    public Headers getHeaders() {
+        return headers;
     }
 
     public void setMessageBody(final String messageBody) {

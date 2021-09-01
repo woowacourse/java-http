@@ -16,6 +16,7 @@ public class Headers {
     private static final int VALUE_INDEX = 1;
     private static final int SPLIT_HEADER_SIZE = 2;
     private static final String COOKIE = "Cookie";
+    private static final String SET_COOKIE = "Set-Cookie";
 
     private final Map<String, String> elements;
 

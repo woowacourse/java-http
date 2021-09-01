@@ -21,12 +21,12 @@ public class UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
-    public void login(HttpRequest request) {
+    public User login(HttpRequest request) {
         String account = request.getParameter("account");
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent() && user.get().checkPassword(request.getParameter("password"))) {
             log.debug("User Login Success! account: {}", user);
-            return;
+            return user.get();
         }
         log.debug("User Login Fail!");
         throw new IllegalArgumentException("로그인에 실패하였습니다.");

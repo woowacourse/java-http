@@ -1,17 +1,18 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.session;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static nextstep.jwp.http.session.HttpSession.SESSION_NAME;
+
 public class HttpCookie {
-    public static final String SESSION_NAME = "JSESSIONID";
+    public static final String COOKIE_NAME = "Cookie";
     private final Map<String, String> cookies;
 
     public static HttpCookie of(String line) {
-        String[] tokens = line.split(": ");
-        Map<String, String> cookieMap = Stream.of(tokens[1].split("; "))
+        Map<String, String> cookieMap = Stream.of(line.split("; "))
                 .map(x -> x.split("="))
                 .collect(Collectors.toMap(y -> y[0], y -> y[1]));
         return new HttpCookie(cookieMap);
@@ -27,5 +28,9 @@ public class HttpCookie {
 
     public boolean hasSessionId() {
         return this.cookies.containsKey(SESSION_NAME);
+    }
+
+    public HttpSession getSession() {
+        return new HttpSession(this.cookies.get(SESSION_NAME));
     }
 }

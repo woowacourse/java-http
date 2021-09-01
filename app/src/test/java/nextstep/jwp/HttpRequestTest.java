@@ -65,4 +65,31 @@ public class HttpRequestTest {
                         entry("Content-Length", "30"), entry("Content-Type", "application/x-www-form-urlencoded"),
                         entry("Accept", "*/*"));
     }
+
+    @Test
+    @DisplayName("헤더의 쿠키 값이 파싱되어서 저장된다.")
+    void parseCookie() {
+        // given
+        String request = String.join("\r\n",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Accept: */*",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
+                "",
+                "");
+        httpRequest = new HttpRequest(new ByteArrayInputStream(request.getBytes()));
+
+        //when
+        //then
+        assertThat(httpRequest.getMethod()).isEqualTo("GET");
+        assertThat(httpRequest.getPath()).isEqualTo("/index.html");
+        assertThat(httpRequest.getHeaders())
+                .contains(entry("Host", "localhost:8080"), entry("Connection", "keep-alive"),
+                        entry("Accept", "*/*"),
+                        entry("Cookie", "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46"));
+        assertThat(httpRequest.getCookie())
+                .contains(entry("yummy_cookie", "choco"), entry("tasty_cookie", "strawberry"),
+                        entry("JSESSIONID", "656cef62-e3c4-40bc-a8df-94732920ed46"));
+    }
 }

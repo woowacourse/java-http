@@ -2,6 +2,7 @@ package nextstep.jwp.ui.request;
 
 import nextstep.jwp.exception.BadRequestException;
 import nextstep.jwp.ui.RequestHandler;
+import nextstep.jwp.ui.common.HttpCookie;
 import nextstep.jwp.ui.common.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class HttpRequest {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -21,6 +23,7 @@ public class HttpRequest {
     private RequestLine requestLine;
     private HttpHeaders headers;
     private Parameters parameters;
+    private HttpCookie httpCookie;
 
     public HttpRequest(InputStream inputStream) {
         this.bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
@@ -34,10 +37,19 @@ public class HttpRequest {
             this.requestLine = new RequestLine(line);
             this.headers = parseHeaders();
             this.parameters = parseParameters();
+            this.httpCookie = parseCookie();
         } catch (IOException e) {
             log.error("http request read lines exception", e);
             throw new BadRequestException();
         }
+    }
+
+    private HttpCookie parseCookie() {
+        String cookies = getHeaders().get("Cookie");
+        if (Objects.isNull(cookies)) {
+            return new HttpCookie();
+        }
+        return new HttpCookie(cookies);
     }
 
     private HttpHeaders parseHeaders() throws IOException {
@@ -82,5 +94,9 @@ public class HttpRequest {
 
     public String getParameter(String key) {
         return parameters.get(key);
+    }
+
+    public Map<String, String> getCookie() {
+        return httpCookie.getCookie();
     }
 }

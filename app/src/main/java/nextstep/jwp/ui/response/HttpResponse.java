@@ -1,5 +1,6 @@
 package nextstep.jwp.ui.response;
 
+import nextstep.jwp.ui.common.HttpCookie;
 import nextstep.jwp.ui.common.HttpHeaders;
 import nextstep.jwp.ui.common.ResourceFile;
 
@@ -11,9 +12,11 @@ public class HttpResponse {
     private String responseLine;
     private String response;
     private HttpHeaders headers;
+    private HttpCookie httpCookie;
 
     public HttpResponse() {
         this.headers = new HttpHeaders(new LinkedHashMap<>());
+        this.httpCookie = new HttpCookie();
     }
 
     public void setStatus(HttpStatus httpStatus) {
@@ -59,6 +62,9 @@ public class HttpResponse {
         ResourceFile resourceFile = new ResourceFile(url);
         String content = resourceFile.getContent();
         setStatus(httpStatus);
+        if (resourceFile.getContentType().equals("text/html;charset=utf-8")) {
+            addHeader("Set-Cookie", httpCookie.convertString());
+        }
         addHeader("Content-Type", resourceFile.getContentType());
         addHeader("Content-Length", String.valueOf(content.getBytes().length));
         write(content);
@@ -66,5 +72,9 @@ public class HttpResponse {
 
     public void forward(String url) {
         forward(url, HttpStatus.OK);
+    }
+
+    public void addCookie(String name, String value) {
+        httpCookie.addCookie(name, value);
     }
 }

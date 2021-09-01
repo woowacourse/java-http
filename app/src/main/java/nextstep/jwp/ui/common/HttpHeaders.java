@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpHeaders {
-    //TODO: Header 중복해서 여러 개 받을 수 있도록 수정
     private Map<String, String> headers;
 
     public HttpHeaders(Map<String, String> headers) {

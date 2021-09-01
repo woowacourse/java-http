@@ -17,89 +17,56 @@ class RequestHandlerTest {
     private static final String HOST = "Host: http://localhost:8080";
     private static final String CONNECTION = "Connection: keep-alive";
     private static final String DEFAULT_BODY = "account=gugu&password=password&email=hkkang%40woowahan.com";
+    private static final String TEXT_HTML = "text/html";
+    private static final String INDEX_HTML = "index.html";
 
     @Test
     @DisplayName("index 테스트")
     void index() throws IOException {
         // given
-        final String httpRequest= createGetRequest("/index.html", "*/*");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final String httpRequest= createGetRequest(INDEX_HTML, "*/*");
 
         // when
-        requestHandler.run();
+        final MockSocket socket = getMockSocket(httpRequest);
 
         // then
-        final String responseBody = getResponseBody("static/index.html");
-
-        String expected = String.join(NEW_LINE, "HTTP/1.1 200 OK",
-            "Content-Type: text/html;charset=utf-8 ",
-            "Content-Length: "+ responseBody.getBytes().length + " ",
-            "",
-            responseBody);
+        String expected = createResponseOK(INDEX_HTML, TEXT_HTML);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test
     @DisplayName("login Get 테스트")
     void loginGet() throws IOException {
-        final String httpRequest= createGetRequest("/login", "*/*");
+        final String httpRequest= createGetRequest("login", "*/*");
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
+        final MockSocket socket = getMockSocket(httpRequest);
 
         // then
-        String responseBody = getResponseBody("static/login.html");
-
-        String expected = String.join(NEW_LINE, "HTTP/1.1 200 OK",
-            "Content-Type: text/html;charset=utf-8 ",
-            "Content-Length: "+ responseBody.getBytes().length + " ",
-            "",
-            responseBody);
+        String expected = createResponseOK("login.html", TEXT_HTML);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test
     @DisplayName("login Post 테스트")
     void loginPost() {
-        final String httpRequest = createPostRequest("/login", DEFAULT_BODY);
+        final String httpRequest = createPostRequest("login", DEFAULT_BODY);
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final MockSocket socket = getMockSocket(httpRequest);
 
-        // when
-        requestHandler.run();
-
-        String expected = String.join(NEW_LINE,
-            "HTTP/1.1 302 Found",
-            "Location: /index.html"
-        );
+        String expected = createResponseFound(INDEX_HTML);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test
     @DisplayName("register Get 테스트")
     void registerGet() throws IOException {
-        final String httpRequest= createGetRequest("/register", "*/*");
+        final String httpRequest= createGetRequest("register", "*/*");
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
+        final MockSocket socket = getMockSocket(httpRequest);
 
         // then
-        String responseBody = getResponseBody("static/register.html");
+        String expected = createResponseOK("register.html", TEXT_HTML);
 
-        String expected = String.join(NEW_LINE, "HTTP/1.1 200 OK",
-            "Content-Type: text/html;charset=utf-8 ",
-            "Content-Length: "+ responseBody.getBytes().length + " ",
-            "",
-            responseBody);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -108,62 +75,40 @@ class RequestHandlerTest {
     void registerPost() {
         String body = "account=test&password=password&email=mungto%40woowahan.com";
 
-        final String httpRequest= createPostRequest("/register", body);
+        final String httpRequest= createPostRequest("register", body);
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final MockSocket socket = getMockSocket(httpRequest);
 
-        // when
-        requestHandler.run();
-
-        String expected = String.join(NEW_LINE,
-            "HTTP/1.1 302 Found",
-            "Location: /index.html"
-        );
+        String expected = createResponseFound(INDEX_HTML);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test
     @DisplayName("css 테스트")
     void css() throws IOException {
-        final String httpRequest= createGetRequest("/css/styles.css", "text/css");
+        final String styleCss = "css/styles.css";
+        final String type = "text/css";
+        final String httpRequest= createGetRequest(styleCss, type);
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
+        final MockSocket socket = getMockSocket(httpRequest);
 
         // then
-        String responseBody = getResponseBody("static/css/styles.css");
-
-        String expected = String.join(NEW_LINE, "HTTP/1.1 200 OK",
-            "Content-Type: text/css;charset=utf-8 ",
-            "Content-Length: "+ responseBody.getBytes().length + " ",
-            "",
-            responseBody);
+        String expected = createResponseOK(styleCss, type);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test
     @DisplayName("javascript 테스트")
     void javascript() throws IOException {
-        final String httpRequest= createGetRequest("/js/scripts.js", "application/javascript");
+        final String scripts = "js/scripts.js";
+        final String type = "application/javascript";
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final String httpRequest= createGetRequest(scripts, type);
 
-        // when
-        requestHandler.run();
+        final MockSocket socket = getMockSocket(httpRequest);
 
         // then
-        String responseBody = getResponseBody("static/js/scripts.js");
-
-        String expected = String.join(NEW_LINE, "HTTP/1.1 200 OK",
-            "Content-Type: application/javascript;charset=utf-8 ",
-            "Content-Length: "+ responseBody.getBytes().length + " ",
-            "",
-            responseBody);
+        String expected = createResponseOK(scripts, type);
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -172,11 +117,7 @@ class RequestHandlerTest {
     void badRequest() {
         final String httpRequest= "";
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
+        final MockSocket socket = getMockSocket(httpRequest);
 
         String expected = String.join(NEW_LINE, "HTTP/1.1 400 Bad Request",
             "",
@@ -187,30 +128,20 @@ class RequestHandlerTest {
     @Test
     @DisplayName("요청처리를 하지 않은 요청을 하면 404가 반환된다.")
     void notFound() {
-        final String httpRequest= createGetRequest("/getError", "*/*");
+        final String httpRequest= createGetRequest("getError", "*/*");
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final MockSocket socket = getMockSocket(httpRequest);
 
-        requestHandler.run();
-
-        String expected = String.join(NEW_LINE,
-            "HTTP/1.1 302 Found",
-            "Location: /404.html"
-        );
+        String expected = createResponseFound("404.html");
         assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test
     @DisplayName("존재하는 유저로 회원가입 요청을 하면 409가 반환된다.")
     void conflict() {
-        final String httpRequest= createPostRequest("/register", DEFAULT_BODY);
+        final String httpRequest= createPostRequest("register", DEFAULT_BODY);
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
+        final MockSocket socket = getMockSocket(httpRequest);
 
         String expected = String.join(NEW_LINE,
             "HTTP/1.1 409 Conflict",
@@ -226,18 +157,11 @@ class RequestHandlerTest {
 
         String body = "account=fail&password=password&email=hkkang%40woowahan.com";
 
-        final String httpRequest= createPostRequest("/login", body);
+        final String httpRequest= createPostRequest("login", body);
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final MockSocket socket = getMockSocket(httpRequest);
 
-        // when
-        requestHandler.run();
-
-        String expected = String.join(NEW_LINE,
-            "HTTP/1.1 302 Found",
-            "Location: /401.html"
-        );
+        String expected = createResponseFound("401.html");
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -249,7 +173,7 @@ class RequestHandlerTest {
 
     private String createGetRequest(String url, String accept) {
         return String.join(NEW_LINE,
-            "GET " + url + " HTTP/1.1",
+            "GET /" + url + " HTTP/1.1",
             HOST,
             CONNECTION,
             "Accept: " + accept,
@@ -259,11 +183,36 @@ class RequestHandlerTest {
 
     private String createPostRequest(String url, String body) {
         return String.join(NEW_LINE,
-            "POST " + url + " HTTP/1.1",
+            "POST /" + url + " HTTP/1.1",
             HOST,
             CONNECTION,
             "Content-Length: " + body.length(),
             "",
             body);
+    }
+
+    private String createResponseOK(String fileName, String contentType) throws IOException {
+        final String responseBody = getResponseBody("static/" + fileName);
+
+        return String.join(NEW_LINE, "HTTP/1.1 200 OK",
+            "Content-Type: " + contentType + ";charset=utf-8",
+            "Content-Length: "+ responseBody.getBytes().length,
+            "",
+            responseBody);
+    }
+
+    private String createResponseFound(String url) {
+        return String.join(NEW_LINE,
+            "HTTP/1.1 302 Found",
+            "Location: /" + url
+        );
+    }
+
+    private MockSocket getMockSocket(String httpRequest) {
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        requestHandler.run();
+        return socket;
     }
 }

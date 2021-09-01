@@ -21,8 +21,8 @@ public class Response {
 
     public static Response create200OK(Request request, String responseBody) {
         String message = String.join(NEW_LINE,
-            "Content-Type: " + request.acceptType() + ";charset=utf-8 ",
-            CONTENT_LENGTH + responseBody.getBytes().length + " ",
+            "Content-Type: " + request.acceptType() + ";charset=utf-8",
+            CONTENT_LENGTH + responseBody.getBytes().length,
             "",
             responseBody);
         return new Response(message, HttpStatus.OK);

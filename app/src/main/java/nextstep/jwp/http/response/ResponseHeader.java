@@ -1,8 +1,9 @@
-package nextstep.jwp;
+package nextstep.jwp.http.response;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import nextstep.jwp.http.SupportedContentType;
 
 public class ResponseHeader {
     private final HeaderLocation location;

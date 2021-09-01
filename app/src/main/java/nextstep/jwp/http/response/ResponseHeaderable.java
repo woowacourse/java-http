@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.http.response;
 
 public interface ResponseHeaderable {
 

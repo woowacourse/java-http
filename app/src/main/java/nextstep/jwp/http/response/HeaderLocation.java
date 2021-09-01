@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.http.response;
 
 public class HeaderLocation implements ResponseHeaderable {
     private final String location;

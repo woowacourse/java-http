@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.http;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,6 +6,12 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
 import java.util.Optional;
+import nextstep.jwp.UserService;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.ResponseBody;
+import nextstep.jwp.http.response.ResponseHeader;
+import nextstep.jwp.http.response.ResponseLine;
 import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,13 +34,13 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
                 final OutputStream outputStream = connection.getOutputStream()) {
             UserService userService = new UserService();
-            Request request = Request.createFromInputStream(inputStream);
-            final String httpMethod = request.getRequestLine("httpMethod");
-            final String uri = request.getRequestLine("uri");
+            HttpRequest httpRequest = HttpRequest.createFromInputStream(inputStream);
+            final String httpMethod = httpRequest.getRequestLine("httpMethod");
+            final String uri = httpRequest.getRequestLine("uri");
             String responseBody = "";
             String response = "";
 
-            if (request.isEmpty()) {
+            if (httpRequest.isEmpty()) {
                 return;
             }
 
@@ -45,7 +51,7 @@ public class RequestHandler implements Runnable {
                 responseBody = ResponseBody.createByPath("/login.html").getResponseBody();
                 response = replyOkResponse(responseBody);
             } else if (httpMethod.equals("POST") && (uri.equals("/login.html") || uri.equals("/login"))) {
-                String requestBody = request.getBody();
+                String requestBody = httpRequest.getBody();
                 Optional<User> user = userService.findUserFromBody(requestBody);
                 if (user.isEmpty()) {
                     responseBody = ResponseBody.createByPath("/401.html").getResponseBody();
@@ -58,7 +64,7 @@ public class RequestHandler implements Runnable {
                 responseBody = ResponseBody.createByPath("/register.html").getResponseBody();
                 response = replyOkResponse(responseBody);
             } else if (httpMethod.equals("POST") && uri.equals("/register")) {
-                String requestBody = request.getBody();
+                String requestBody = httpRequest.getBody();
                 userService.saveUser(requestBody);
 
                 responseBody = ResponseBody.createByPath("/index.html").getResponseBody();
@@ -86,7 +92,7 @@ public class RequestHandler implements Runnable {
 
 
     private String replyAfterLogin302Response(String responseBody, String location) {
-        return new Response(
+        return new HttpResponse(
                 new ResponseLine("302", "Found"),
                 new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.HTML,
                         responseBody.getBytes().length).
@@ -95,7 +101,7 @@ public class RequestHandler implements Runnable {
     }
 
     private String replyOkResponse(String responseBody) {
-        return new Response(
+        return new HttpResponse(
                 new ResponseLine("200", "OK"),
                 new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.HTML,
                         responseBody.getBytes().length).build(),
@@ -103,7 +109,7 @@ public class RequestHandler implements Runnable {
     }
 
     private String replyOkCssResponse(String responseBody) {
-        return new Response(
+        return new HttpResponse(
                 new ResponseLine("200", "OK"),
                 new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.CSS,
                         responseBody.getBytes().length).build(),
@@ -111,7 +117,7 @@ public class RequestHandler implements Runnable {
     }
 
     private String replyOkJsResponse(String responseBody) {
-        return new Response(
+        return new HttpResponse(
                 new ResponseLine("200", "OK"),
                 new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.JS,
                         responseBody.getBytes().length).build(),

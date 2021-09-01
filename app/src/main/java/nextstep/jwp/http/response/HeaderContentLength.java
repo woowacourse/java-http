@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.http.response;
 
 public class HeaderContentLength implements ResponseHeaderable {
     private final Integer contentLength;

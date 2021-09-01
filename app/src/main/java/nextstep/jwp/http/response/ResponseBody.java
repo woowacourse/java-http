@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.http.response;
 
 import java.io.File;
 import java.io.IOException;

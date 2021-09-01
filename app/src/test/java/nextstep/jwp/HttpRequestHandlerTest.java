@@ -7,10 +7,11 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.http.RequestHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class RequestHandlerTest {
+class HttpRequestHandlerTest {
 
     @DisplayName("index.html 불러오기")
     @Test

@@ -1,4 +1,6 @@
-package nextstep.jwp;
+package nextstep.jwp.http;
+
+import nextstep.jwp.http.response.ResponseHeaderable;
 
 public enum SupportedContentType implements ResponseHeaderable {
     HTML("Content-Type: text/html;charset=utf-8"),

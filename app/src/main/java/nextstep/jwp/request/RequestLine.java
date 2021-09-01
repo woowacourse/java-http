@@ -19,7 +19,7 @@ public class RequestLine {
     }
 
     private String[] splitRequestLine(String requestLine) {
-        String[] requests = requestLine.split(Http.SEPARATOR);
+        String[] requests = requestLine.split(Http.EMPTY_SPACE_SEPARATOR);
         if (requests.length < REQUEST_LINE_SIZE) {
             throw new HttpException("올바르지 않은 http 요청이 들어왔습니다.");
         }

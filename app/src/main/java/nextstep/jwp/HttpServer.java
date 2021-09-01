@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Objects;
-import nextstep.jwp.constants.Headers;
+import nextstep.jwp.constants.Header;
 import nextstep.jwp.constants.Http;
 import nextstep.jwp.constants.StatusCode;
 import nextstep.jwp.controller.FrontController;
@@ -47,8 +47,8 @@ public class HttpServer {
     }
 
     private String extractRequestBody() throws IOException {
-        if (headers.contains(Headers.CONTENT_LENGTH)) {
-            int contentLength = Integer.parseInt(headers.get(Headers.CONTENT_LENGTH));
+        if (headers.contains(Header.CONTENT_LENGTH.getKey())) {
+            int contentLength = Integer.parseInt(headers.get(Header.CONTENT_LENGTH.getKey()));
             char[] buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);
             return new String(buffer);

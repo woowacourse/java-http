@@ -331,6 +331,7 @@ class RequestHandlerTest {
             String expected = "HTTP/1.1 302 Found \r\n" +
                     "Content-Type: text/html;charset=utf-8 \r\n" +
                     "Content-Length: 5564 \r\n" +
+                    "Location: /index.html \r\n" +
                     "\r\n" +
                     new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             assertThat(socket.output()).isEqualTo(expected);

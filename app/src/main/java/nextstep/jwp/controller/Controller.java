@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.util.Map;
+import nextstep.jwp.constants.Header;
 import nextstep.jwp.constants.StatusCode;
 import nextstep.jwp.request.RequestBody;
 import nextstep.jwp.response.ResponseEntity;
@@ -49,6 +50,7 @@ public class Controller {
         service.register(params);
         return ResponseEntity
                 .statusCode(StatusCode.FOUND)
+                .addHeaders(Header.LOCATION, "/index.html")
                 .responseResource("/index.html")
                 .build();
     }

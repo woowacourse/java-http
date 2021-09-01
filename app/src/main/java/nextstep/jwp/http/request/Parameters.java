@@ -1,6 +1,5 @@
 package nextstep.jwp.http.request;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,9 +43,6 @@ public class Parameters {
         }
     }
 
-    public boolean isEmpty() {
-        return parameters.isEmpty();
-    }
 }
 
 

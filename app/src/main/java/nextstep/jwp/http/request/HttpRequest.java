@@ -42,10 +42,6 @@ public class HttpRequest {
         return POST.equals(httpRequestLine.getMethod());
     }
 
-    public boolean containSession() {
-        return httpCookie.containSession();
-    }
-
     public String getSessionId(){
         return httpCookie.getSessionId();
     }

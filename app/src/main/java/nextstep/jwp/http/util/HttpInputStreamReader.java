@@ -11,7 +11,6 @@ import nextstep.jwp.http.request.HttpHeader;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.HttpRequestLine;
 import nextstep.jwp.http.request.Parameters;
-import nextstep.jwp.http.stateful.HttpSession;
 
 public class HttpInputStreamReader {
 

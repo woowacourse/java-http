@@ -43,10 +43,6 @@ public class HttpCookie {
         httpCookies.put(key, value);
     }
 
-    public boolean containSession() {
-        return httpCookies.containsKey(JSESSION_ID);
-    }
-
     public String getSessionId() {
         return httpCookies.get(JSESSION_ID);
     }

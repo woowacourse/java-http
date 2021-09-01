@@ -59,7 +59,7 @@ public class RequestParser {
         final Map<String, String> requestHttpHeaders = new HashMap<>();
         final String[] httpHeaders = requestHeaders.split(NEWLINE);
         for (String httpHeader : httpHeaders) {
-            final String[] headerKeyAndValue = httpHeader.split(HTTP_HEADER_SEPARATOR);
+            final String[] headerKeyAndValue = httpHeader.split(HTTP_HEADER_SEPARATOR, 2);
             requestHttpHeaders.put(headerKeyAndValue[0].trim(), headerKeyAndValue[1].trim());
         }
         return requestHttpHeaders;

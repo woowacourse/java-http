@@ -16,6 +16,8 @@ public class HttpRequest {
 
     private RequestBody body;
 
+    private HttpRequestCookie cookie;
+
     private HttpRequest() {
     }
 
@@ -64,6 +66,17 @@ public class HttpRequest {
 
     public String getAttribute(String key) {
         return body.getAttribute(key);
+    }
+
+    public String getCookieValue(String key) {
+        if (cookie == null) {
+            cookie = new HttpRequestCookie(
+                headers.getValue("Cookie")
+                    .get(0)
+            );
+        }
+
+        return cookie.get(key);
     }
 
     public String getRequestParams(String key) {

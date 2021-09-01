@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 public class RequestHandler implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    public static final Logger LOG = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
 
@@ -19,47 +19,39 @@ public class RequestHandler implements Runnable {
 
     @Override
     public void run() {
-        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
+        LOG.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream();
-             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));) {
+             final OutputStream outputStream = connection.getOutputStream();) {
 
-            String requestLine = bufferedReader.readLine();
-
-            String[] splitRequestLine = requestLine.split(" ");
-            String requestHttpMethod = splitRequestLine[0];
-            String requestUri = splitRequestLine[1];
-
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             final StringBuilder stringBuilder = new StringBuilder();
 
-            String line = null;
+            RequestLine requestLine = new RequestLine(bufferedReader.readLine());
 
+            String line;
             do {
                 line = bufferedReader.readLine();
-                if (line == null) {
-                    return;
-                }
+                LOG.info("headers : {}", line);
                 stringBuilder.append(line).append("\r\n");
-                log.debug(line);
             } while (!"".equals(line));
 
 
             String response = null;
 
-            if ("GET".equals(requestHttpMethod)) {
-                response = GetRequestUri.createResponse(requestUri);
-            } else if ("POST".equals(requestHttpMethod)) {
+            if (requestLine.isGet()) {
+                response = GetRequestUri.createResponse(requestLine.getPath());
+            } else if (requestLine.isPost()) {
                 String requestBody = readRequestBody(bufferedReader, stringBuilder);
-                response = PostRequestUri.createResponse(requestUri, requestBody);
+                response = PostRequestUri.createResponse(requestLine.getPath(), requestBody);
             }
             outputStream.write(response.getBytes());
             outputStream.flush();
 
         } catch (IOException exception) {
-            log.error("Exception stream", exception);
+            LOG.error("Exception stream", exception);
         } catch (IllegalArgumentException e) {
-            log.error(e.getMessage());
+            LOG.error(e.getMessage());
         } finally {
             close();
         }
@@ -77,7 +69,7 @@ public class RequestHandler implements Runnable {
         try {
             connection.close();
         } catch (IOException exception) {
-            log.error("Exception closing socket", exception);
+            LOG.error("Exception closing socket", exception);
         }
     }
 }

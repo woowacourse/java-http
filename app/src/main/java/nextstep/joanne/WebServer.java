@@ -1,6 +1,7 @@
 package nextstep.joanne;
 
 import nextstep.joanne.handler.RequestHandler;
+import nextstep.joanne.http.request.HttpRequestParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

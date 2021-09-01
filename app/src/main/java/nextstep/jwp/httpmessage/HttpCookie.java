@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 public class HttpCookie {
 
+    public static final String JESSIONID = "JESSIONID";
     private Map<String, String> cookies = new LinkedHashMap<>();
 
     public HttpCookie() {
@@ -34,5 +35,13 @@ public class HttpCookie {
         return cookies.entrySet().stream()
                 .map(it -> it.getKey() + "=" + it.getValue())
                 .collect(Collectors.joining("; "));
+    }
+
+    public String getSessionId() {
+        return cookies.get(JESSIONID);
+    }
+
+    public void setSessionId(String sessionId) {
+        cookies.put(JESSIONID, sessionId);
     }
 }

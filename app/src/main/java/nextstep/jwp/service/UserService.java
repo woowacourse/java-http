@@ -16,10 +16,10 @@ public class UserService {
 
     }
 
-    public String login(UserRequest userRequest) {
+    public User login(UserRequest userRequest) {
         final User user = findUserByAccount(userRequest.getAccount());
         if (user.checkPassword(userRequest.getPassword())) {
-            return user.toString();
+            return user;
         }
         LOG.info("옳지 않은 비밀번호입니다.");
         throw new IllegalArgumentException("옳지 않은 비밀번호입니다.");

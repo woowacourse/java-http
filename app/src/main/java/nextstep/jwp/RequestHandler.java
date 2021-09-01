@@ -30,7 +30,7 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             final HttpRequest httpRequest = new HttpRequest(new HttpMessageReader(inputStream));
-            final HttpResponse httpResponse = new HttpResponse();
+            final HttpResponse httpResponse = new HttpResponse(httpRequest);
 
             final FrontController frontController = new FrontController();
             frontController.service(httpRequest, httpResponse);

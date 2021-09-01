@@ -64,9 +64,9 @@ public class RequestHandlerTest {
         assertThat(actual).isEqualTo(expected);
     }
 
-    static private Stream<Arguments> Post_요청에_대해_응답한다() {
+    static private Stream<Arguments> Post_요청_실패에_대해_응답한다() {
         return Stream.of(
-                Arguments.of("/login", "account=gugu&password=password", "/index.html"),
+                Arguments.of("/login", "account=&password=password", "/401.html"),
                 Arguments.of("/login", "account=gugu&password=passwor", "/401.html"),
                 Arguments.of("/login", "account=ggu&password=password", "/401.html")
         );
@@ -74,7 +74,7 @@ public class RequestHandlerTest {
 
     @ParameterizedTest
     @MethodSource
-    void Post_요청에_대해_응답한다(String requestUri, String requestBody, String redirectUrl) {
+    void Post_요청_실패에_대해_응답한다(String requestUri, String requestBody, String redirectUrl) {
         // given
         final String httpRequest = toHttpPostRequest(requestUri, requestBody);
         final MockSocket socket = new MockSocket(httpRequest);

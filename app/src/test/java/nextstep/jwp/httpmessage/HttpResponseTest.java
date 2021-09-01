@@ -30,7 +30,7 @@ class HttpResponseTest {
     @MethodSource
     void responseHttpMessage(HttpVersion httpVersion, HttpStatusCode httpStatusCode, String headerKey, String headerValue, Object responseBody) {
         //given
-        final HttpResponse httpResponse = new HttpResponse();
+        final HttpResponse httpResponse = new HttpResponse(null);
         //when
         httpResponse.setStatusLine(new StatusLine(httpVersion, httpStatusCode));
         httpResponse.addHeader(headerKey, headerValue);

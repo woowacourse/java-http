@@ -46,19 +46,6 @@ public enum ContentType {
         throw new IllegalStateException("찾을 수 없는 확장자 입니다.");
     }
 
-    public static String getSuffixByUri(String target) {
-        for (Map.Entry<String, ContentType> entry : contentTypes.entrySet()) {
-            if (target.contains(entry.getKey())) {
-                return entry.getValue().suffix;
-            }
-        }
-        throw new IllegalStateException("찾을 수 없는 확장자 입니다.");
-    }
-
-    public static ContentType getContentTypeByUri(String target) {
-        return contentTypes.get(getSuffixByUri(target));
-    }
-
     public String getValue() {
         return value;
     }

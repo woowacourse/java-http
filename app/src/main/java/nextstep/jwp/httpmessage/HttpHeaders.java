@@ -53,4 +53,13 @@ public class HttpHeaders {
         httpCookie.setCookie(key, value);
         headers.put("Set-Cookie", httpCookie.toValuesString());
     }
+
+    public String getSessionId() {
+        return httpCookie.getSessionId();
+    }
+
+    public void setSessionId(String sessionId) {
+        httpCookie.setSessionId(sessionId);
+        headers.put("Set-Cookie", httpCookie.toValuesString());
+    }
 }

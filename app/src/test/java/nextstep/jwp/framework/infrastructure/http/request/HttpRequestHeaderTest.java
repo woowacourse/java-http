@@ -113,7 +113,7 @@ class HttpRequestHeaderTest {
                 HttpRequestHeader header = HttpRequestHeader.from(headers);
 
                 // then
-                assertThat(header.getContentLength()).isEqualTo(13);
+                assertThat(header.getContentLength()).isEqualTo("13");
             }
         }
 

@@ -24,6 +24,6 @@ public enum ContentType {
     }
 
     public String getContentType() {
-        return contentType;
+        return contentType + ";charset=utf-8";
     }
 }

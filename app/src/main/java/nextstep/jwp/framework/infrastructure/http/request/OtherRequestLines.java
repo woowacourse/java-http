@@ -5,20 +5,20 @@ import java.util.List;
 import java.util.Map;
 import nextstep.jwp.framework.infrastructure.http.header.HttpHeaders;
 
-public class OtherLines {
+public class OtherRequestLines {
 
     private static final String CONTENT_LENGTH_DELIMITER = ": ";
 
     private final Map<HttpHeaders, String> otherLines;
 
-    public OtherLines(Map<HttpHeaders, String> otherLines) {
+    public OtherRequestLines(Map<HttpHeaders, String> otherLines) {
         this.otherLines = otherLines;
     }
 
-    public static OtherLines from(List<String> httpRequestHeaders) {
+    public static OtherRequestLines from(List<String> httpRequestHeaders) {
         Map<HttpHeaders, String> otherLines = new EnumMap<>(HttpHeaders.class);
         parseContentLength(otherLines, httpRequestHeaders);
-        return new OtherLines(otherLines);
+        return new OtherRequestLines(otherLines);
     }
 
     private static void parseContentLength(
@@ -35,7 +35,7 @@ public class OtherLines {
             );
     }
 
-    public int getContentLength() {
-        return Integer.parseInt(otherLines.get(HttpHeaders.CONTENT_LENGTH));
+    public String get(HttpHeaders httpHeaders) {
+        return otherLines.get(httpHeaders);
     }
 }

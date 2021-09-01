@@ -10,17 +10,17 @@ import nextstep.jwp.framework.infrastructure.protocol.Protocol;
 public class HttpRequestHeader {
 
     private final RequestLine requestLine;
-    private final OtherLines otherLines;
+    private final OtherRequestLines otherRequestLines;
 
     public HttpRequestHeader(String url) {
         this(new RequestLine(HttpMethod.GET, url, Protocol.HTTP1_1, new HashMap<>()),
-            new OtherLines(new EnumMap<>(HttpHeaders.class))
+            new OtherRequestLines(new EnumMap<>(HttpHeaders.class))
         );
     }
 
-    public HttpRequestHeader(RequestLine requestLine, OtherLines otherLines) {
+    public HttpRequestHeader(RequestLine requestLine, OtherRequestLines otherRequestLines) {
         this.requestLine = requestLine;
-        this.otherLines = otherLines;
+        this.otherRequestLines = otherRequestLines;
     }
 
     public static HttpRequestHeader from(List<String> httpRequestHeaders) {
@@ -28,8 +28,8 @@ public class HttpRequestHeader {
             throw new IllegalStateException("Invalid Http Request Header");
         }
         RequestLine requestLine = RequestLine.from(httpRequestHeaders.get(0));
-        OtherLines otherLines = OtherLines.from(httpRequestHeaders);
-        return new HttpRequestHeader(requestLine, otherLines);
+        OtherRequestLines otherRequestLines = OtherRequestLines.from(httpRequestHeaders);
+        return new HttpRequestHeader(requestLine, otherRequestLines);
     }
 
     public HttpMethod getMethod() {
@@ -44,7 +44,7 @@ public class HttpRequestHeader {
         return requestLine.getProtocol();
     }
 
-    public int getContentLength() {
-        return otherLines.getContentLength();
+    public String getContentLength() {
+        return otherRequestLines.get(HttpHeaders.CONTENT_LENGTH);
     }
 }

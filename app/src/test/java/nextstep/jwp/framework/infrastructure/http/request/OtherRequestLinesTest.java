@@ -5,12 +5,13 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 import java.util.Arrays;
 import java.util.List;
+import nextstep.jwp.framework.infrastructure.http.header.HttpHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-@DisplayName("OtherLines 단위 테스트")
-class OtherLinesTest {
+@DisplayName("OtherRequestLines 단위 테스트")
+class OtherRequestLinesTest {
 
     @DisplayName("from 메서드는")
     @Nested
@@ -30,10 +31,10 @@ class OtherLinesTest {
                 );
 
                 // when
-                OtherLines otherLines = OtherLines.from(headers);
+                OtherRequestLines otherRequestLines = OtherRequestLines.from(headers);
 
                 // then
-                assertThat(otherLines.getContentLength()).isEqualTo(13);
+                assertThat(otherRequestLines.get(HttpHeaders.CONTENT_LENGTH)).isEqualTo("13");
             }
         }
 
@@ -51,7 +52,7 @@ class OtherLinesTest {
                 );
 
                 // when, then
-                assertThatCode(() -> OtherLines.from(headers))
+                assertThatCode(() -> OtherRequestLines.from(headers))
                     .isInstanceOf(RuntimeException.class);
             }
         }

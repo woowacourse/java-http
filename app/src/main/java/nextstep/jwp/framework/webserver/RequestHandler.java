@@ -93,7 +93,7 @@ public class RequestHandler implements Runnable {
         HttpRequestHeader httpRequestHeader,
         BufferedReader bufferedReader
     ) {
-        int contentLength = httpRequestHeader.getContentLength();
+        int contentLength = Integer.parseInt(httpRequestHeader.getContentLength());
         if (contentLength == 0) {
             return new HttpRequestBody(null);
         }

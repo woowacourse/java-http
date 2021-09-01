@@ -1,49 +1,33 @@
 package nextstep.jwp.framework.infrastructure.http.response;
 
+import java.util.EnumMap;
+import nextstep.jwp.framework.infrastructure.http.content.ContentType;
+import nextstep.jwp.framework.infrastructure.http.header.HttpHeaders;
 import nextstep.jwp.framework.infrastructure.http.status.HttpStatus;
 import nextstep.jwp.framework.infrastructure.protocol.Protocol;
-import nextstep.jwp.framework.infrastructure.http.content.ContentType;
 
 public class HttpResponse {
 
-    private static final String RESPONSE_FORMAT =
-        String.join("\r\n",
-            "%s %s %s ",
-            "Content-Type: %s;charset=utf-8 ",
-            "Content-Length: %d ", ""
-        );
+    private static final String HTTP_RESPONSE_FORMAT = "%s\r\n%s";
 
-    private Protocol protocol;
-    private HttpStatus httpStatus;
-    private ContentType contentType;
-    private String location;
-    private int contentLength;
-    private String responseBody;
+    private final HttpResponseHeader httpResponseHeader;
+    private final HttpResponseBody httpResponseBody;
 
     public HttpResponse(
-        Protocol protocol,
-        HttpStatus httpStatus,
-        ContentType contentType,
-        String location,
-        int contentLength,
-        String responseBody
+        HttpResponseHeader httpResponseHeader,
+        HttpResponseBody httpResponseBody
     ) {
-        this.protocol = protocol;
-        this.httpStatus = httpStatus;
-        this.contentType = contentType;
-        this.location = location;
-        this.contentLength = contentLength;
-        this.responseBody = responseBody;
+        this.httpResponseHeader = httpResponseHeader;
+        this.httpResponseBody = httpResponseBody;
     }
 
     public static class Builder {
 
         private Protocol protocol;
         private HttpStatus httpStatus;
-        private ContentType contentType;
-        private String location;
         private String responseBody;
-        private int contentLength;
+        private final OtherResponseLines otherResponseLines =
+            new OtherResponseLines(new EnumMap<>(HttpHeaders.class));
 
         public Builder protocol(Protocol protocol) {
             this.protocol = protocol;
@@ -56,44 +40,34 @@ public class HttpResponse {
         }
 
         public Builder contentType(ContentType contentType) {
-            this.contentType = contentType;
+            otherResponseLines.add(HttpHeaders.CONTENT_TYPE, contentType.getContentType());
             return this;
         }
 
         public Builder location(String location) {
-            this.location = location;
+            otherResponseLines.add(HttpHeaders.LOCATION, location);
             return this;
         }
 
         public Builder responseBody(String responseBody) {
             this.responseBody = responseBody;
-            this.contentLength = responseBody.getBytes().length;
+            int contentLength = responseBody.getBytes().length;
+            otherResponseLines.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(contentLength));
             return this;
         }
 
         public HttpResponse build() {
-            return new HttpResponse(
-                this.protocol,
-                this.httpStatus,
-                this.contentType,
-                this.location,
-                this.contentLength,
-                this.responseBody
-            );
+            ResponseLine responseLine = new ResponseLine(protocol, httpStatus);
+            HttpResponseHeader httpResponseHeader =
+                new HttpResponseHeader(responseLine, otherResponseLines);
+            HttpResponseBody httpResponseBody = new HttpResponseBody(responseBody);
+            return new HttpResponse(httpResponseHeader, httpResponseBody);
         }
     }
 
     public String writeResponseMessage() {
-        String header = String.format(RESPONSE_FORMAT,
-            protocol.getName(),
-            httpStatus.getCode(),
-            httpStatus.getMessage(),
-            contentType.getContentType(),
-            contentLength
-        );
-        if (httpStatus.equals(HttpStatus.FOUND)) {
-            header += "Location: " + location + "\r\n";
-        }
-        return header + "\r\n" + responseBody;
+        String header = httpResponseHeader.write();
+        String body = httpResponseBody.getResponseBody();
+        return String.format(HTTP_RESPONSE_FORMAT, header, body);
     }
 }

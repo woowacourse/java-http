@@ -1,9 +1,8 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.http.request.URI;
+import nextstep.jwp.http.HttpSession;
 import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.http.request.HttpMethod;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestBody;
 import nextstep.jwp.model.User;
@@ -23,26 +22,39 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest httpRequest) {
+        HttpSession session = httpRequest.getSession();
+        if (session != null && session.getUser() != null) {
+            return super.redirect(SUCCESS_REDIRECT_URL);
+        }
         return super.renderPage(httpRequest);
     }
 
     @Override
     public HttpResponse doPost(HttpRequest httpRequest) {
         try {
-            validateUserInput(httpRequest.getRequestBody());
+            User validatedUser = getValidatedUser(httpRequest.getRequestBody());
+            HttpSession session = httpRequest.getSession();
+            session.setUser(validatedUser);
+
             return super.redirect(SUCCESS_REDIRECT_URL);
         } catch (IllegalArgumentException e) {
             return super.redirect(FAIL_REDIRECT_URL);
         }
     }
 
-    private void validateUserInput(RequestBody requestBody) {
+    private User getValidatedUser(RequestBody requestBody) {
         String account = requestBody.getValue(ACCOUNT);
         String password = requestBody.getValue(PASSWORD);
 
         User user = InMemoryUserRepository.findByAccount(account)
             .orElseThrow(IllegalArgumentException::new);
 
+        validateUserInput(password, user);
+
+        return user;
+    }
+
+    private void validateUserInput(String password, User user) {
         if (!user.checkPassword(password)) {
             throw new IllegalArgumentException();
         }

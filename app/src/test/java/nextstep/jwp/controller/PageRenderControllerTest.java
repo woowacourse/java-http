@@ -14,7 +14,7 @@ class PageRenderControllerTest {
 
     @DisplayName("페이지를 요청하면 OK 응답을 반환한다.")
     @ParameterizedTest
-    @ValueSource(strings = {"/index.html", "/register", "/login", "/401.html", "/404.html", "/500.html"})
+    @ValueSource(strings = {"/index.html", "/401.html", "/404.html", "/500.html"})
     void doService(String input) {
         PageRenderController controller = new PageRenderController();
         HttpRequest request = TestUtil.createRequest("GET " + input + " HTTP/1.1");

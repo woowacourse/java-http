@@ -54,6 +54,7 @@ public abstract class AbstractController implements Controller {
             }
             return redirect(NOT_FOUND_ERROR_REDIRECT_URL);
         } catch (IllegalArgumentException e) {
+            logger.error("ERROR! RequestURI : {}, Stack : ", httpRequest.getPath(), e);
             return redirect(INTERNAL_SERVER_ERROR_REDIRECT_URL);
         }
     }

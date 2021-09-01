@@ -12,14 +12,17 @@ public class HttpSession {
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
-    public HttpSession(User user) {
+    public HttpSession() {
         this.id = UUID.randomUUID().toString();
-        setAttribute(USER, user);
         HttpSessions.add(this);
     }
 
     public String getId() {
         return this.id;
+    }
+
+    public void setUser(User user) {
+        setAttribute(USER, user);
     }
 
     public User getUser() {

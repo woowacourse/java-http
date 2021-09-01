@@ -20,4 +20,8 @@ public class HttpSessions {
     }
 
     private HttpSessions() {}
+
+    public static void clear() {
+        SESSIONS.clear();
+    }
 }

@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
@@ -37,7 +36,7 @@ public class HttpCookie {
 
     public static HttpCookie ofSessionCookie() {
         return new HttpCookie(new HashMap<>(Map.of(
-            JSESSIONID, UUID.randomUUID().toString()
+            JSESSIONID, new HttpSession().getId()
         )));
     }
 
@@ -56,5 +55,9 @@ public class HttpCookie {
 
     public boolean containsSessionId() {
         return cookies.containsKey(JSESSIONID);
+    }
+
+    public String getSessionId() {
+        return cookies.get(JSESSIONID);
     }
 }

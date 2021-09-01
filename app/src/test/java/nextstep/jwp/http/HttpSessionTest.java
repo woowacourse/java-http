@@ -12,7 +12,8 @@ class HttpSessionTest {
     @Test
     void create() {
         User user = new User(100L, "user", "password", "email");
-        HttpSession httpSession = new HttpSession(user);
+        HttpSession httpSession = new HttpSession();
+        httpSession.setUser(user);
 
         assertThat(httpSession.getUser()).isEqualTo(user);
         assertThat(HttpSessions.getSession(httpSession.getId())).isEqualTo(httpSession);
@@ -22,7 +23,8 @@ class HttpSessionTest {
     @Test
     void invalidate() {
         User user = new User(100L, "user", "password", "email");
-        HttpSession httpSession = new HttpSession(user);
+        HttpSession httpSession = new HttpSession();
+        httpSession.setUser(user);
         httpSession.invalidate();
 
         assertThat(HttpSessions.getSession(httpSession.getId())).isNull();

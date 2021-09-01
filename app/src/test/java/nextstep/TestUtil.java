@@ -4,6 +4,7 @@ import com.google.common.base.Splitter;
 import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.http.HttpHeader;
+import nextstep.jwp.http.HttpSession;
 import nextstep.jwp.http.Protocol;
 import nextstep.jwp.http.request.HttpMethod;
 import nextstep.jwp.http.request.HttpRequest;
@@ -39,6 +40,13 @@ public class TestUtil {
         HttpHeader headers = new HttpHeader(headerMap);
 
         return new HttpRequest(httpMethod, uri, protocol, headers, new QueryStringTypeRequestBody(requestBody));
+    }
+
+    public static HttpSession addSession(HttpRequest httpRequest) {
+        HttpHeader httpHeader = httpRequest.getHttpHeader();
+        HttpSession httpSession = new HttpSession();
+        httpHeader.addAttribute("Cookie", "JSESSIONID=" + httpSession.getId());
+        return httpSession;
     }
 
     public static HttpRequest createRequest(String startLine) {

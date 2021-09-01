@@ -50,7 +50,7 @@ public class HttpRequest {
         String line = null;
         while (true) {
             line = request.readLine();
-            if (line.isBlank()) {
+            if (line == null || line.isBlank()) {
                 break;
             }
             String[] keyAndValue = line.split(":");

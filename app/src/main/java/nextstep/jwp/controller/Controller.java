@@ -10,12 +10,6 @@ import nextstep.jwp.service.HttpService;
 
 public class Controller {
 
-    private final HttpService service;
-
-    public Controller() {
-        this.service = new HttpService();
-    }
-
     @GetMapping(path = "/")
     public String basic() {
         return ResponseEntity
@@ -47,7 +41,7 @@ public class Controller {
     @PostMapping(path = "/register")
     public String register(RequestBody body) throws IOException {
         Map<String, String> params = body.getParams();
-        service.register(params);
+        HttpService.register(params);
         return ResponseEntity
                 .statusCode(StatusCode.FOUND)
                 .addHeaders(Header.LOCATION, "/index.html")
@@ -58,7 +52,7 @@ public class Controller {
     @PostMapping(path = "/login")
     public String login(RequestBody body) throws IOException {
         Map<String, String> params = body.getParams();
-        if (service.isAuthorized(params)) {
+        if (HttpService.isAuthorized(params)) {
             return ResponseEntity
                     .statusCode(StatusCode.FOUND)
                     .responseResource("/index.html")

@@ -7,7 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.model.User;
 
 public class InMemoryUserRepository {
-
     private static final Map<String, User> database = new ConcurrentHashMap<>();
 
     static {

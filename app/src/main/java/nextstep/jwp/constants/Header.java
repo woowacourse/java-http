@@ -14,5 +14,4 @@ public enum Header {
     public String getKey() {
         return this.key;
     }
-
 }

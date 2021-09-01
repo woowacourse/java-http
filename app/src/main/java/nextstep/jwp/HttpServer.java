@@ -56,7 +56,7 @@ public class HttpServer {
         return Http.EMPTY_LINE;
     }
 
-    public String getResponse() throws Exception {
+    public String getResponse() throws IOException {
         final FrontController frontController = new FrontController(this.body, this.requestLine);
         try {
             return frontController.response();
@@ -65,7 +65,11 @@ public class HttpServer {
                     .statusCode(StatusCode.NOT_FOUND)
                     .responseResource("/404.html")
                     .build();
+        } catch (Exception e) {
+            return ResponseEntity
+                    .statusCode(StatusCode.INTERNAL_SERVER_ERROR)
+                    .responseResource("/500.html")
+                    .build();
         }
     }
-
 }

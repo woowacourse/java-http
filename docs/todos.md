@@ -14,13 +14,13 @@
   - [x] null 대신 예외나 다른 방식 처리
   - [ ] response 의 책임
 - JwpApplication
-  - [ ] 로그 인스턴스 확인
+  - [x] 로그 인스턴스 확인
 - [x] 유틸성 클래스 인스턴스화 방지
-- [ ] HttpService 필드 확인
+- [x] HttpService 필드 확인
 - [x] controller에 URI 가 필요?
 - [ ] requestLine, body의 인스턴스화?!?!
-- [ ] 개행 통일하기
-- [ ] 예외 Logging 처리
+- [x] 개행 통일하기
+- [x] 예외처리
 - [ ] response()의 책임분리
 - [ ] match~Mapping 코드 중복
 - [ ] account 가 동일한 유저에 대한 예외처리

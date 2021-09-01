@@ -1,11 +1,10 @@
 package nextstep.jwp.infrastructure.http.handler;
 
-import nextstep.jwp.infrastructure.http.FileResolver;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.infrastructure.http.response.StatusCode;
 
-public class ExceptionHandler implements Handler{
+public class ExceptionHandler implements Handler {
 
     private final FileHandler fileHandler;
 

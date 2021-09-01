@@ -49,7 +49,7 @@ public class RequestHandler implements Runnable {
 
             outputStream.write(response.toString().getBytes());
             outputStream.flush();
-        }  catch (Exception exception) {
+        } catch (Exception exception) {
             log.error("Exception stream", exception);
         } finally {
             close();

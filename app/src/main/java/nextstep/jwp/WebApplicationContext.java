@@ -1,7 +1,6 @@
 package nextstep.jwp;
 
 import nextstep.jwp.infrastructure.http.HandlerMapping;
-import nextstep.jwp.infrastructure.http.handler.FileHandler;
 import nextstep.jwp.infrastructure.http.interceptor.HandlerInterceptor;
 
 public class WebApplicationContext {

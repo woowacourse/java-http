@@ -38,11 +38,10 @@ public class Parameters {
     private void parseKeyValue(String keyValueString) {
         String[] splitQueryString = keyValueString.split("&");
 
-        Arrays.stream(splitQueryString)
-            .forEach(keyValue -> {
-                String[] splitKeyValue = keyValue.split(KEY_VALUE_SEPARATOR);
-                parameters.put(splitKeyValue[0], splitKeyValue[1]);
-            });
+        for (String queryString : splitQueryString) {
+            splitQueryString = queryString.split(KEY_VALUE_SEPARATOR);
+            parameters.put(splitQueryString[0], splitQueryString[1]);
+        }
     }
 
     public boolean isEmpty() {

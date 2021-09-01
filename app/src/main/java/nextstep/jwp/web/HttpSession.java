@@ -4,10 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpSession {
+    public static final String SESSION_NAME = "JSESSIONID";
+
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
-    HttpSession(String id) {
+    public HttpSession(String id) {
         this.id = id;
     }
 

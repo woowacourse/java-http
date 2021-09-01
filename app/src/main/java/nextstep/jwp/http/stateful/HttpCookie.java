@@ -8,7 +8,6 @@ import java.util.Map;
 public class HttpCookie {
 
     public static final String JSESSION_ID = "JSESSIONID";
-    private static final String SET_COOKIE = "Set-Cookie: ";
     private static final String COOKIE_SEPARATOR = "; ";
     private static final String COOKIE_KEY_VALUE_SEPARATOR = "=";
 
@@ -29,18 +28,6 @@ public class HttpCookie {
             String[] split = it.split(COOKIE_KEY_VALUE_SEPARATOR);
             httpCookies.put(split[0], split[1]);
         });
-    }
-
-    private String getCookieValue(String key) {
-        return httpCookies.get(key);
-    }
-
-    public boolean containsKey(String key) {
-        return httpCookies.containsKey(key);
-    }
-
-    public void setCookie(String key, String value) {
-        httpCookies.put(key, value);
     }
 
     public String getSessionId() {

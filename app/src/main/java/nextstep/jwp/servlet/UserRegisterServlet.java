@@ -31,9 +31,7 @@ public class UserRegisterServlet extends Servlet {
         InMemoryUserRepository.save(user);
         log.info("회원 가입 완료! 유저 정보 : {}", user);
 
-        httpResponse.setStatus(HttpStatus.FOUND);
-        httpResponse.setHeader("Content-Type", "text/html;charset=utf-8");
-        httpResponse.setHeader("Location", "index.html");
+        httpResponse.sendRedirect("/index.html");
     }
 
 }

@@ -23,7 +23,7 @@ public class UserService {
         String account = getAccount(params);
         String password = getPassword(params);
         String email = getEmail(params);
-        User user = new User(InMemoryUserRepository.id++, account, password, email);
+        User user = new User(0L, account, password, email);
         InMemoryUserRepository.save(user);
         return user;
     }

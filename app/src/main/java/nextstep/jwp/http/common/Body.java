@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
+import nextstep.jwp.exception.UnprocessableEntityException;
 import nextstep.jwp.http.request.HttpHeaders;
 
 public class Body {
@@ -38,8 +39,7 @@ public class Body {
             String content = new String(Files.readAllBytes(file.toPath()));
             return new Body(content);
         } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException();
+            throw new UnprocessableEntityException();
         }
     }
 

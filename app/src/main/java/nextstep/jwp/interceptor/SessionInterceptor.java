@@ -3,7 +3,6 @@ package nextstep.jwp.interceptor;
 import java.util.UUID;
 import nextstep.jwp.db.InMemorySessionRepository;
 import nextstep.jwp.infrastructure.http.interceptor.HandlerInterceptor;
-import nextstep.jwp.infrastructure.http.request.Cookie;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.model.Session;
@@ -17,8 +16,7 @@ public class SessionInterceptor implements HandlerInterceptor {
 
     @Override
     public void preHandle(final HttpRequest request, final HttpResponse response) throws Exception {
-        final Cookie cookie = request.getHeaders().getCookie();
-        if (cookie.hasNotKey(SESSION_KEY)) {
+        if (request.hasNotCookie(SESSION_KEY)) {
             final String sessionId = String.valueOf(UUID.randomUUID());
             final String sessionCookie = String.join(KEY_VALUE_DELIMITER, SESSION_KEY, sessionId);
             request.addHeader(COOKIE_KEY, sessionCookie);

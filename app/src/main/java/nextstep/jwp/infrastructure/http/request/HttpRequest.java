@@ -1,6 +1,7 @@
 package nextstep.jwp.infrastructure.http.request;
 
 import java.util.Objects;
+import java.util.Optional;
 import nextstep.jwp.infrastructure.http.Headers;
 
 public class HttpRequest {
@@ -19,8 +20,20 @@ public class HttpRequest {
         headers.add(key, value);
     }
 
+    public String getBaseUri() {
+        return requestLine.getBaseUri();
+    }
+
     public RequestLine getRequestLine() {
         return requestLine;
+    }
+
+    public boolean hasNotCookie(final String key) {
+        return !headers.getCookie().hasKey(key);
+    }
+
+    public Optional<String> getCookie(final String key) {
+        return headers.getCookie().getValue(key);
     }
 
     public Headers getHeaders() {

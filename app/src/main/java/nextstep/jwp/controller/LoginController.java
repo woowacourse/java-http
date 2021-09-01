@@ -21,6 +21,7 @@ public class LoginController extends AbstractController {
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final List<String> REQUIRED_PARAMETERS = Arrays.asList(ACCOUNT, PASSWORD);
+    private static final String SESSION_KEY = "JSESSIONID";
 
     @Override
     public String uri() {
@@ -36,9 +37,8 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
         final Map<String, String> body = DATA_MAPPER.parse(request.getMessageBody());
-        final Optional<String> sessionId = request.getHeaders()
-            .getCookie()
-            .getValue("JSESSIONID");
+        final Optional<String> sessionId = request.getCookie(SESSION_KEY);
+
         if (sessionId.isEmpty() || !containsAllKey(body)) {
             redirect("/401.html", response);
             return;

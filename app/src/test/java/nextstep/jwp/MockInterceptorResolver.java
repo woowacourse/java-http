@@ -2,7 +2,6 @@ package nextstep.jwp;
 
 import nextstep.jwp.db.InMemorySessionRepository;
 import nextstep.jwp.infrastructure.http.interceptor.HandlerInterceptor;
-import nextstep.jwp.infrastructure.http.request.Cookie;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.model.Session;
@@ -19,8 +18,7 @@ public class MockInterceptorResolver implements HandlerInterceptor {
 
     @Override
     public void preHandle(final HttpRequest request, final HttpResponse response) throws Exception {
-        final Cookie cookie = request.getHeaders().getCookie();
-        if (cookie.hasNotKey(SESSION_KEY)) {
+        if (request.hasNotCookie(SESSION_KEY)) {
             final String sessionId = "1234";
             final String sessionCookie = String.join(KEY_VALUE_DELIMITER, SESSION_KEY, sessionId);
             request.addHeader(COOKIE_KEY, sessionCookie);

@@ -24,9 +24,7 @@ public class FileHandler implements Handler {
 
     @Override
     public void handle(final HttpRequest request, final HttpResponse response) throws Exception {
-        final String filePath = request.getRequestLine()
-            .getUri()
-            .getBaseUri();
+        final String filePath = request.getBaseUri();
 
         if (fileResolver.hasFile(filePath)) {
             respondWithFile(response, filePath, StatusCode.OK);

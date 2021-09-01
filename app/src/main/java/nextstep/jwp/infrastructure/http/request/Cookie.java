@@ -52,8 +52,8 @@ public class Cookie {
         return Optional.ofNullable(elements.get(key));
     }
 
-    public boolean hasNotKey(final String key) {
-        return !elements.containsKey(key);
+    public boolean hasKey(final String key) {
+        return elements.containsKey(key);
     }
 
     @Override

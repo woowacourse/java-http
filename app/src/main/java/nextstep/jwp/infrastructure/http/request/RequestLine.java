@@ -37,6 +37,10 @@ public class RequestLine {
         return new RequestLine(Method.valueOf(result.get(METHOD_INDEX)), result.get(URI_INDEX), result.get(VERSION_INDEX));
     }
 
+    public String getBaseUri() {
+        return uri.getBaseUri();
+    }
+
     public Method getMethod() {
         return method;
     }

@@ -2,7 +2,6 @@ package nextstep.jwp.model;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class Session {
 
@@ -19,13 +18,5 @@ public class Session {
 
     public void setAttribute(String name, Object value) {
         values.put(name, value);
-    }
-
-    public Optional<Object> getAttribute(String name) {
-        return Optional.ofNullable(values.get(name));
-    }
-
-    public void removeAttribute(String name) {
-        values.remove(name);
     }
 }

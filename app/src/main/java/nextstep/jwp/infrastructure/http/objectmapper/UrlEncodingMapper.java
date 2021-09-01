@@ -23,7 +23,6 @@ public class UrlEncodingMapper implements DataMapper {
                 .collect(Collectors.toList());
 
             validateKeyAndValue(keyAndValue);
-
             result.put(keyAndValue.get(KEY_INDEX), keyAndValue.get(VALUE_INDEX));
         }
 

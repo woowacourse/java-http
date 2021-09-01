@@ -8,7 +8,7 @@ public class HttpSession {
     public static final String SESSION_NAME = "JSESSIONID";
 
     private final String id;
-    private final Map<String, Object> values = new HashMap<>();
+    private Map<String, Object> values = new HashMap<>();
 
     HttpSession(String id) {
         this.id = id;
@@ -32,6 +32,7 @@ public class HttpSession {
 
     public void invalidate() {
         HttpSessions.remove(id);
+        this.values = new HashMap<>();
     }
 }
 

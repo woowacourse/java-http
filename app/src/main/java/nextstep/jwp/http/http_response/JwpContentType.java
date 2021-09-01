@@ -10,7 +10,8 @@ public enum JwpContentType {
     CSS(".css", "text/css;charset=utf-8"),
     JS(".js", "application/javascript;charset=utf-8"),
     ICON(".ico", "image/x-icon;charset=utf-8"),
-    SVG(".svg", "image/svg+xml;charset=utf-8");
+    SVG(".svg", "image/svg+xml;charset=utf-8")
+    ;
 
     private final Predicate<String> condition;
     private final String contentType;

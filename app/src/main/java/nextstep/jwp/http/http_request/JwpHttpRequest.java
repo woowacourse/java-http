@@ -1,139 +1,98 @@
 package nextstep.jwp.http.http_request;
 
 import com.google.common.net.HttpHeaders;
-import nextstep.jwp.exception.NotFoundParamException;
 import nextstep.jwp.http.common.Headers;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.util.Collections;
-import java.util.HashMap;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class JwpHttpRequest {
 
-    public static final Logger logger = LoggerFactory.getLogger(JwpHttpRequest.class);
-
+    private static final String HEADER_DELIMITER = ": ";
     private static final String REQUEST_DELIMITER = " ";
-    private static final String QUERY_STRING_SYMBOL = "?";
-    private static final String PARAM_DELIMITER = "&";
-    private static final String PARAM_KEY_AND_VALUE_DELIMITER = "=";
 
-    private final JwpHttpMethod method;
-    private final String uri;
-    private final String httpVersion;
+    private final RequestLine requestLine;
     private final Headers headers;
-    private final Map<String, String> params;
+    private final RequestBody requestBody;
 
-    private JwpHttpRequest(JwpHttpMethod method, String uri, String httpVersion, Headers headers) {
-        this(method, uri, httpVersion, headers, Collections.emptyMap());
+    public JwpHttpRequest(BufferedReader reader) throws IOException {
+        this.requestLine = new RequestLine(parseRequestLine(reader));
+        this.headers = new Headers(parseHeaders(reader));
+        this.requestBody = new RequestBody(parseRequestBody(reader));
     }
 
-    private JwpHttpRequest(JwpHttpMethod method, String uri, String httpVersion, Headers headers, Map<String, String> params) {
-        this.method = method;
-        this.uri = uri;
-        this.httpVersion = httpVersion;
-        this.headers = headers;
-        this.params = params;
-    }
-
-    public static JwpHttpRequest of(BufferedReader reader) throws IOException {
+    private String[] parseRequestLine(BufferedReader reader) throws IOException {
         String requestHeader = reader.readLine();
         if (requestHeader == null) {
             throw new IllegalArgumentException("올바르지 않은 요청입니다.");
         }
-
-        String[] requestInfos = requestHeader.split(REQUEST_DELIMITER);
-        JwpHttpMethod requestMethod = JwpHttpMethod.of(requestInfos[0]);
-        String requestUri = requestInfos[1];
-        String requestHttpVersion = requestInfos[2];
-        logger.info("Request METHOD: [{}] URI: {}", requestMethod, requestUri);
-
-        Headers headers = Headers.of(reader);
-
-        if (requestMethod.isGetRequest()) {
-            return get(JwpHttpMethod.GET, requestUri, requestHttpVersion, headers);
-        }
-
-        if (requestMethod.isPostRequest()) {
-            return post(reader, requestMethod, requestUri, requestHttpVersion, headers);
-        }
-
-        return new JwpHttpRequest(requestMethod, requestUri, requestHttpVersion, headers);
+        return requestHeader.split(REQUEST_DELIMITER);
     }
 
-    private static JwpHttpRequest get(JwpHttpMethod requestMethod, String requestUri, String requestHttpVersion, Headers headers) {
-        if (!requestUri.contains(QUERY_STRING_SYMBOL)) {
-            return new JwpHttpRequest(requestMethod, requestUri, requestHttpVersion, headers);
+    private Map<String, List<String>> parseHeaders(BufferedReader reader) throws IOException {
+        Map<String, List<String>> headerValues = new LinkedHashMap<>();
+        String line = reader.readLine();
+        while (!line.isBlank()) {
+            String[] keyAndValue = line.split(HEADER_DELIMITER);
+            putHeader(headerValues, keyAndValue);
+            line = reader.readLine();
         }
 
-        int index = requestUri.indexOf(QUERY_STRING_SYMBOL);
-        String path = requestUri.substring(0, index);
-        String queryString = requestUri.substring(index + 1);
-        String[] queryParams = queryString.split(PARAM_DELIMITER);
-        Map<String, String> params = parseParams(queryParams);
-        return new JwpHttpRequest(requestMethod, path, requestHttpVersion, headers, params);
+        return headerValues;
     }
 
-    private static JwpHttpRequest post(BufferedReader reader, JwpHttpMethod requestMethod, String requestUri, String requestHttpVersion, Headers headers) throws IOException {
+    private void putHeader(Map<String, List<String>> headers, String[] keyAndValue) {
+        String headerName = keyAndValue[0];
+        String headerValue = keyAndValue[1];
+        if (!headers.containsKey(headerName)) {
+            ArrayList<String> headerValues = new ArrayList<>();
+            headerValues.add(headerValue.trim());
+            headers.put(headerName.trim(), headerValues);
+            return;
+        }
+
+        List<String> headerValues = headers.get(headerName);
+        headerValues.add(headerValue);
+    }
+
+    private String parseRequestBody(BufferedReader reader) throws IOException {
         if (headers.hasNoContent()) {
-            return new JwpHttpRequest(requestMethod, requestUri, requestHttpVersion, headers);
+            return null;
         }
 
         int contentLength = Integer.parseInt(headers.getHeaderValue(HttpHeaders.CONTENT_LENGTH));
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
-        String requestBody = URLDecoder.decode(new String(buffer), "UTF-8");
-        String[] jsonParams = requestBody.split(PARAM_DELIMITER);
-        Map<String, String> params = parseParams(jsonParams);
-        return new JwpHttpRequest(requestMethod, requestUri, requestHttpVersion, headers, params);
-    }
-
-    private static Map<String, String> parseParams(String[] queryParams) {
-        Map<String, String> params = new HashMap<>();
-        for (String queryParam : queryParams) {
-            splitKeyAndValue(params, queryParam, PARAM_KEY_AND_VALUE_DELIMITER);
-        }
-        return params;
-    }
-
-    private static void splitKeyAndValue(Map<String, String> params, String queryParam, String delimiter) {
-        String[] keyAndValue = queryParam.split(delimiter);
-        params.put(keyAndValue[0].trim(), keyAndValue[1].trim());
+        return URLDecoder.decode(new String(buffer), StandardCharsets.UTF_8);
     }
 
     public String getUri() {
-        return uri;
-    }
-
-    public JwpHttpMethod getMethod() {
-        return method;
-    }
-
-    public String getHttpVersion() {
-        return httpVersion;
-    }
-
-    public Headers getHeaders() {
-        return headers;
+        return requestLine.getUri();
     }
 
     public String getParam(String key) {
-        if (!params.containsKey(key)) {
-            throw new NotFoundParamException(key);
-        }
-
-        return params.get(key);
+        return requestBody.getParam(key);
     }
 
     public boolean isGetRequest() {
-        return method.isGetRequest();
+        return requestLine.isGetRequest();
     }
 
     public boolean isPostRequest() {
-        return method.isPostRequest();
+        return requestLine.isPostRequest();
+    }
+
+    public boolean hasQueryParams() {
+        return requestLine.hasQueryParams();
+    }
+
+    public String getQueryParam(String param) {
+        return requestLine.getQueryParam(param);
     }
 }

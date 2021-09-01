@@ -1,7 +1,7 @@
 package nextstep.jwp.http.controller;
 
-import nextstep.jwp.controller.NotFoundController;
 import nextstep.jwp.controller.LoginController;
+import nextstep.jwp.controller.NotFoundController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.controller.ResourceController;
 
@@ -10,9 +10,8 @@ import java.util.function.Predicate;
 
 public enum RequestMapping {
     RESOURCE(uri -> uri.contains("."), new ResourceController()),
-    LOGIN(uri -> uri.equals("/login"), new LoginController()),
-    REGISTER(uri -> uri.equals("/register"), new RegisterController())
-    ;
+    LOGIN(uri -> uri.startsWith("/login"), new LoginController()),
+    REGISTER(uri -> uri.startsWith("/register"), new RegisterController());
 
     private final Predicate<String> predicate;
     private final Controller controller;

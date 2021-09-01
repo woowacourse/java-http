@@ -6,6 +6,8 @@ import nextstep.jwp.http.common.Headers;
 public class JwpHttpResponse {
 
     private static final String HTTP_VERSION = "HTTP/1.1";
+    private static final String NOT_FOUND_ERROR_PAGE = "404.html";
+    private static final String INTERNAL_SERVER_ERROR_PAGE = "500.html";
 
     private final StatusCode statusCode;
     private final Headers headers;
@@ -29,16 +31,21 @@ public class JwpHttpResponse {
     public static JwpHttpResponse found(String redirectUri) {
         return new Builder()
                 .statusCode(StatusCode.FOUND)
-                .header("Location", "http://localhost:8080/" + redirectUri)
+                .location(redirectUri)
                 .build();
     }
 
-    public static JwpHttpResponse notFound(String resourceFile) {
+    public static JwpHttpResponse notFound() {
         return new Builder()
                 .statusCode(StatusCode.NOT_FOUND)
-                .header("Content-Type", JwpContentType.HTML.getContentType())
-                .header("Content-Length", resourceFile.getBytes().length)
-                .body(resourceFile)
+                .location(NOT_FOUND_ERROR_PAGE)
+                .build();
+    }
+
+    public static JwpHttpResponse internalServerError() {
+        return new Builder()
+                .statusCode(StatusCode.INTERNAL_SERVER_ERROR)
+                .location(INTERNAL_SERVER_ERROR_PAGE)
                 .build();
     }
 
@@ -50,7 +57,9 @@ public class JwpHttpResponse {
     }
 
     static class Builder {
+
         private static final String EMPTY_RESPONSE_BODY = "";
+        private static final String DEFAULT_HOST = "http://localhost:8080/";
 
         private StatusCode statusCode;
         private Headers headers;
@@ -72,6 +81,11 @@ public class JwpHttpResponse {
 
         public Builder header(String key, String value) {
             this.headers.addHeader(key, value);
+            return this;
+        }
+
+        public Builder location(String location) {
+            this.headers.addHeader("Location", DEFAULT_HOST + location);
             return this;
         }
 

@@ -29,15 +29,27 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            JwpHttpRequest request = JwpHttpRequest.of(reader);
-            Controller handler = RequestMapping.getController(request.getUri());
-            JwpHttpResponse response = handler.handle(request);
+            JwpHttpResponse response = handleRequest(reader);
             outputStream.write(response.toBytes());
             outputStream.flush();
-        } catch (IOException | URISyntaxException exception) {
+        } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
+        }
+    }
+
+    private JwpHttpResponse handleRequest(BufferedReader reader) {
+        try {
+            JwpHttpRequest request = new JwpHttpRequest(reader);
+            Controller handler = RequestMapping.getController(request.getUri());
+            return handler.handle(request);
+        } catch (IOException | URISyntaxException e) {
+            log.error(e.getMessage());
+            return JwpHttpResponse.notFound();
+        } catch (Exception e) {
+            log.error("RuntimeException: {}", e.getMessage());
+            return JwpHttpResponse.internalServerError();
         }
     }
 

@@ -18,18 +18,17 @@ public class LoginController extends AbstractController {
 
     @Override
     public JwpHttpResponse doGet(JwpHttpRequest request) throws URISyntaxException, IOException {
+        if (request.hasQueryParams()) {
+            String account = request.getQueryParam("account");
+            String password = request.getQueryParam("password");
+            return InMemoryUserRepository.findByAccount(account)
+                    .map(user -> requestLogin(user, password))
+                    .orElseGet(this::loginFail);
+        }
+
         String resourceUri = RESOURCE_PREFIX + LOGIN_PAGE_PATH;
         String resourceFile = findResourceFile(resourceUri);
         return JwpHttpResponse.ok(resourceUri, resourceFile);
-    }
-
-    @Override
-    public JwpHttpResponse doPost(JwpHttpRequest request) { //todo: G
-        String account = request.getParam("account");
-        String password = request.getParam("password");
-        return InMemoryUserRepository.findByAccount(account)
-                .map(user -> requestLogin(user, password))
-                .orElseGet(this::loginFail);
     }
 
     private JwpHttpResponse requestLogin(User user, String password) {

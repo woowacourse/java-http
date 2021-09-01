@@ -3,13 +3,12 @@ package nextstep.jwp.http.common;
 import com.google.common.net.HttpHeaders;
 import nextstep.jwp.exception.NotFoundHeaderException;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Headers {
-
-    private static final String HEADER_DELIMITER = ": ";
 
     private final Map<String, List<String>> values;
 
@@ -19,18 +18,6 @@ public class Headers {
 
     public Headers(Map<String, List<String>> values) {
         this.values = new LinkedHashMap<>(values);
-    }
-
-    public static Headers of(BufferedReader reader) throws IOException {
-        Headers headers = new Headers();
-        String line = reader.readLine();
-        while (!line.isBlank()) {
-            String[] keyAndValue = line.split(HEADER_DELIMITER);
-            headers.addHeader(keyAndValue[0].trim(), keyAndValue[1].trim());
-            line = reader.readLine();
-        }
-
-        return headers;
     }
 
     public void addHeader(String key, String value) {
@@ -68,10 +55,6 @@ public class Headers {
         }
 
         return headerValues.get(0);
-    }
-
-    public boolean containsHeader(String header) {
-        return values.containsKey(header);
     }
 
     public boolean hasNoContent() {

@@ -14,7 +14,6 @@ import java.nio.file.Paths;
 public abstract class AbstractController implements Controller {
 
     protected static final String RESOURCE_PREFIX = "static";
-    private static final String NOT_FOUND_ERROR_PAGE = "/404.html";
 
     @Override
     public JwpHttpResponse handle(JwpHttpRequest request) throws URISyntaxException, IOException {
@@ -31,14 +30,12 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public JwpHttpResponse doGet(JwpHttpRequest request) throws URISyntaxException, IOException {
-        String resourceFile = findResourceFile(RESOURCE_PREFIX + NOT_FOUND_ERROR_PAGE);
-        return JwpHttpResponse.notFound(resourceFile);
+        return JwpHttpResponse.notFound();
     }
 
     @Override
-    public JwpHttpResponse doPost(JwpHttpRequest request) throws URISyntaxException, IOException {
-        String resourceFile = findResourceFile(RESOURCE_PREFIX + NOT_FOUND_ERROR_PAGE);
-        return JwpHttpResponse.notFound(resourceFile);
+    public JwpHttpResponse doPost(JwpHttpRequest request) {
+        return JwpHttpResponse.notFound();
     }
 
     protected String findResourceFile(String uri) throws URISyntaxException, IOException {

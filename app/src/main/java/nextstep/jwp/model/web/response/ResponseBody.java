@@ -7,4 +7,8 @@ public class ResponseBody {
     public ResponseBody(String body) {
         this.body = body;
     }
+
+    public byte[] bodyBytes() {
+        return body.getBytes();
+    }
 }

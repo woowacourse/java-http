@@ -3,7 +3,6 @@ package nextstep.jwp;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.infrastructure.RequestHandler;
 import nextstep.jwp.model.web.ContentType;
-import nextstep.jwp.model.web.response.CustomHttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -63,7 +62,7 @@ class RequestHandlerTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         byte[] readBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-        String expected = CustomHttpResponse.ok(ContentType.contentTypeFromUri("/index.html"), new String(readBytes));
+        String expected = CustomHttpResponse2.ok(ContentType.contentTypeFromUri("/index.html"), new String(readBytes));
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -87,7 +86,7 @@ class RequestHandlerTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         byte[] readBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-        String expected = CustomHttpResponse.ok(ContentType.contentTypeFromUri("/login.html"), new String(readBytes));
+        String expected = CustomHttpResponse2.ok(ContentType.contentTypeFromUri("/login.html"), new String(readBytes));
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -113,7 +112,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = CustomHttpResponse.found("index.html");
+        String expected = CustomHttpResponse2.found("index.html");
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -139,7 +138,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = CustomHttpResponse.found("401.html");
+        String expected = CustomHttpResponse2.found("401.html");
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -163,7 +162,7 @@ class RequestHandlerTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         byte[] readBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-        String expected = CustomHttpResponse.ok(ContentType.contentTypeFromUri("/register.html"), new String(readBytes));
+        String expected = CustomHttpResponse2.ok(ContentType.contentTypeFromUri("/register.html"), new String(readBytes));
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -189,7 +188,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = CustomHttpResponse.found("login.html");
+        String expected = CustomHttpResponse2.found("login.html");
         assertThat(socket.output()).isEqualTo(expected);
 
         assertThat(InMemoryUserRepository.findByAccount("bepoz")).isNotEmpty();

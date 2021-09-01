@@ -1,0 +1,45 @@
+package nextstep.jwp.infrastructure.controller;
+
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
+import nextstep.jwp.model.web.ResourceFinder;
+import nextstep.jwp.model.web.StatusCode;
+import nextstep.jwp.model.web.request.CustomHttpRequest;
+import nextstep.jwp.model.web.response.CustomHttpResponse;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class RegisterController extends AbstractController {
+
+    private static final String REGISTER_SUCCESS_URI = "/login.html";
+
+    @Override
+    protected void doGet(CustomHttpRequest request, CustomHttpResponse response) throws Exception {
+        String resource = ResourceFinder.resource(request.getUri());
+
+        response.setStatusLine(StatusCode.OK, request.getVersionOfProtocol());
+        response.setHeaders(headers(resource.getBytes().length));
+        response.setResponseBody(resource);
+    }
+
+    @Override
+    protected void doPost(CustomHttpRequest request, CustomHttpResponse response) throws Exception {
+        User user = new User(
+                request.getBodyValue("account"),
+                request.getBodyValue("password"),
+                request.getBodyValue("email")
+        );
+        InMemoryUserRepository.save(user);
+
+        response.setStatusLine(StatusCode.FOUND, request.getVersionOfProtocol());
+        response.setHeaders(postHeaders(REGISTER_SUCCESS_URI));
+    }
+
+    private Map<String, String> postHeaders(String url) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Location", url);
+
+        return headers;
+    }
+}

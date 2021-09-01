@@ -1,9 +1,9 @@
 package nextstep.jwp.model.web;
 
 public enum ContentType {
-    HTML("text/html", ".html"),
-    CSS("text/css", ".css"),
-    JS("text/js", ".js");
+    HTML("text/html", "html"),
+    CSS("text/css", "css"),
+    JS("text/js", "js");
 
     private String contentType;
     private String resourceSuffix;
@@ -19,12 +19,16 @@ public enum ContentType {
         return findContentType(uri);
     }
 
-    private static String findContentType(String resourceSuffix) {
+    public static String findContentType(String resourceSuffix) {
         for (ContentType type : values()) {
             if (type.resourceSuffix.equals(resourceSuffix)) {
                 return type.contentType;
             }
         }
         throw new RuntimeException("content-type not found");
+    }
+
+    public String getContentType() {
+        return contentType;
     }
 }

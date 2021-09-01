@@ -6,9 +6,9 @@ public class HttpResponse {
 
     private StatusLine statusLine;
     private Headers headers;
-    private ResponseBody body;
+    private CustomHttpResponse body;
 
-    public HttpResponse(StatusLine statusLine, Headers headers, ResponseBody body) {
+    public HttpResponse(StatusLine statusLine, Headers headers, CustomHttpResponse body) {
         this.statusLine = statusLine;
         this.headers = headers;
         this.body = body;

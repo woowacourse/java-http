@@ -9,4 +9,8 @@ public class RequestBody {
     public RequestBody(Map<String, String> bodies) {
         this.bodies = bodies;
     }
+
+    public String getValue(String key) {
+        return bodies.get(key);
+    }
 }

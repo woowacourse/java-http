@@ -1,6 +1,7 @@
 package nextstep.jwp.model.web.request;
 
 import nextstep.jwp.model.web.Headers;
+import nextstep.jwp.model.web.HttpMethod;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -52,5 +53,21 @@ public class CustomHttpRequest {
         }
 
         return headers;
+    }
+
+    public HttpMethod getMethod() {
+        return requestLine.getMethod();
+    }
+
+    public String getVersionOfProtocol() {
+        return requestLine.getVersionOfProtocol();
+    }
+
+    public String getBodyValue(String key) {
+        return requestBody.getValue(key);
+    }
+
+    public String getUri() {
+        return requestLine.getUri();
     }
 }

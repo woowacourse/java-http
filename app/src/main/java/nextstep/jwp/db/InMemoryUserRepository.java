@@ -34,6 +34,11 @@ public class InMemoryUserRepository {
         }
     }
 
+    public static boolean login(String account, String password) {
+        User user = database.get(account);
+        return user.checkPassword(password);
+    }
+
     public static Optional<User> findByAccount(String account) {
         return Optional.ofNullable(database.get(account));
     }

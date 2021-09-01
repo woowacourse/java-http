@@ -2,8 +2,6 @@ package nextstep.jwp.model.web.request;
 
 import nextstep.jwp.model.web.HttpMethod;
 
-import java.util.Map;
-
 public class RequestLine {
 
     private final HttpMethod method;
@@ -20,7 +18,11 @@ public class RequestLine {
     }
 
     private String parseUri(String uri) {
-        return uri.split("\\?")[0];
+        String parsedUri = uri.split("\\?")[0];
+        if (parsedUri.contains(".")) {
+            return parsedUri;
+        }
+        return parsedUri + ".html";
     }
 
     private RequestParams parseRequestParams(String uri) {
@@ -35,15 +37,15 @@ public class RequestLine {
         return params;
     }
 
-    public String getUri() {
-        return uri;
+    public HttpMethod getMethod() {
+        return method;
     }
 
     public String getVersionOfProtocol() {
         return versionOfProtocol;
     }
 
-    public Map<String, String> getRequestParams() {
-        return requestParams.getParams();
+    public String getUri() {
+        return uri;
     }
 }

@@ -1,5 +1,7 @@
 package nextstep.jwp.framework.infrastructure.http.status;
 
+import java.util.Arrays;
+
 public enum HttpStatus {
     OK("200", "OK"),
     FOUND("302", "Found"),
@@ -13,6 +15,18 @@ public enum HttpStatus {
     HttpStatus(String code, String message) {
         this.code = code;
         this.message = message;
+    }
+
+    public static HttpStatus assumeFromHttpStatusPage(String url) {
+        return Arrays.stream(HttpStatus.values())
+            .filter(httpStatus -> httpStatus.existsWithin(url))
+            .findAny()
+            .orElseGet(() -> HttpStatus.OK);
+    }
+
+    private boolean existsWithin(String url) {
+        String defaultHttpStatusPage = code + ".html";
+        return url.endsWith(defaultHttpStatusPage);
     }
 
     public String getCode() {

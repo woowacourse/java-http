@@ -1,6 +1,7 @@
-package nextstep.jwp.framework.controller;
+package nextstep.jwp.framework.controller.custom;
 
 import java.util.Map;
+import nextstep.jwp.framework.controller.CustomController;
 import nextstep.jwp.framework.infrastructure.http.content.ContentType;
 import nextstep.jwp.framework.infrastructure.http.method.HttpMethod;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
@@ -8,11 +9,11 @@ import nextstep.jwp.framework.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.framework.infrastructure.http.status.HttpStatus;
 import nextstep.jwp.web.application.UserService;
 
-public class LoginController extends AbstractController {
+public class RegisterController extends CustomController {
 
     private final UserService userService;
 
-    public LoginController(UserService userService) {
+    public RegisterController(UserService userService) {
         this.userService = userService;
     }
 
@@ -20,13 +21,12 @@ public class LoginController extends AbstractController {
     public boolean canProcess(HttpRequest httpRequest) {
         HttpMethod httpMethod = httpRequest.getMethod();
         String url = httpRequest.getUrl();
-        return url.equals("/login") &&
+        return url.equals("/register") &&
             (httpMethod.equals(HttpMethod.GET) || httpMethod.equals(HttpMethod.POST));
     }
 
-    @Override
     protected HttpResponse doGet(HttpRequest httpRequest) {
-        String url = "/login.html";
+        String url = "/register.html";
         return new HttpResponse.Builder()
             .protocol(httpRequest.getProtocol())
             .httpStatus(HttpStatus.OK)
@@ -35,11 +35,14 @@ public class LoginController extends AbstractController {
             .build();
     }
 
-    @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
         Map<String, String> attributes = httpRequest.getContentAsAttributes();
         try {
-            userService.login(attributes.get("account"), attributes.get("password"));
+            userService.register(
+                attributes.get("account"),
+                attributes.get("password"),
+                attributes.get("email")
+            );
             String redirectUrl = "/index.html";
             return new HttpResponse.Builder()
                 .protocol(httpRequest.getProtocol())

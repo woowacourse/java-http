@@ -5,7 +5,8 @@ import java.util.Arrays;
 public enum ContentType {
     HTML(".html", "text/html"),
     CSS(".css", "text/css"),
-    JS(".js", "text/javascript");
+    JS(".js", "text/javascript"),
+    PLAIN("", "text/plain");
 
     private final String extension;
     private final String contentType;
@@ -19,7 +20,7 @@ public enum ContentType {
         return Arrays.stream(ContentType.values())
             .filter(t -> resourceFilePath.endsWith(t.extension))
             .findAny()
-            .orElseThrow(() -> new IllegalStateException("유효하지 않은 파일 확장자"));
+            .orElseGet(() -> ContentType.PLAIN);
     }
 
     public String getContentType() {

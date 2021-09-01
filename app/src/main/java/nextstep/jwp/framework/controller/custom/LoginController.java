@@ -1,6 +1,7 @@
-package nextstep.jwp.framework.controller;
+package nextstep.jwp.framework.controller.custom;
 
 import java.util.Map;
+import nextstep.jwp.framework.controller.CustomController;
 import nextstep.jwp.framework.infrastructure.http.content.ContentType;
 import nextstep.jwp.framework.infrastructure.http.method.HttpMethod;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
@@ -8,11 +9,11 @@ import nextstep.jwp.framework.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.framework.infrastructure.http.status.HttpStatus;
 import nextstep.jwp.web.application.UserService;
 
-public class RegisterController extends AbstractController {
+public class LoginController extends CustomController {
 
     private final UserService userService;
 
-    public RegisterController(UserService userService) {
+    public LoginController(UserService userService) {
         this.userService = userService;
     }
 
@@ -20,12 +21,13 @@ public class RegisterController extends AbstractController {
     public boolean canProcess(HttpRequest httpRequest) {
         HttpMethod httpMethod = httpRequest.getMethod();
         String url = httpRequest.getUrl();
-        return url.equals("/register") &&
+        return url.equals("/login") &&
             (httpMethod.equals(HttpMethod.GET) || httpMethod.equals(HttpMethod.POST));
     }
 
+    @Override
     protected HttpResponse doGet(HttpRequest httpRequest) {
-        String url = "/register.html";
+        String url = "/login.html";
         return new HttpResponse.Builder()
             .protocol(httpRequest.getProtocol())
             .httpStatus(HttpStatus.OK)
@@ -34,14 +36,11 @@ public class RegisterController extends AbstractController {
             .build();
     }
 
+    @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
         Map<String, String> attributes = httpRequest.getContentAsAttributes();
         try {
-            userService.register(
-                attributes.get("account"),
-                attributes.get("password"),
-                attributes.get("email")
-            );
+            userService.login(attributes.get("account"), attributes.get("password"));
             String redirectUrl = "/index.html";
             return new HttpResponse.Builder()
                 .protocol(httpRequest.getProtocol())

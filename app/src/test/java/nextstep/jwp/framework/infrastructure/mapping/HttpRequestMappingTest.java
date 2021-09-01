@@ -6,10 +6,10 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import java.util.Arrays;
 import nextstep.jwp.framework.config.FactoryConfiguration;
 import nextstep.jwp.framework.controller.Controller;
-import nextstep.jwp.framework.controller.IndexPageController;
-import nextstep.jwp.framework.controller.LoginController;
-import nextstep.jwp.framework.controller.RegisterController;
-import nextstep.jwp.framework.controller.StaticResourceController;
+import nextstep.jwp.framework.controller.custom.IndexPageController;
+import nextstep.jwp.framework.controller.custom.LoginController;
+import nextstep.jwp.framework.controller.custom.RegisterController;
+import nextstep.jwp.framework.controller.standard.StaticResourceController;
 import nextstep.jwp.framework.infrastructure.exception.NotFoundException;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequestBody;
@@ -46,7 +46,7 @@ class HttpRequestMappingTest {
             }
         }
 
-        @DisplayName("/ Get Mapping 컨트롤러에 부합하는 요청이라면")
+        @DisplayName(" / Get Mapping 컨트롤러에 부합하는 요청이라면")
         @Nested
         class Context_get_mapping_controller {
 

@@ -10,7 +10,6 @@ import nextstep.jwp.framework.infrastructure.exception.NotFoundException;
 import nextstep.jwp.framework.infrastructure.http.method.HttpMethod;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.framework.infrastructure.http.response.HttpResponse;
-import nextstep.jwp.framework.infrastructure.http.status.HttpStatus;
 
 public abstract class AbstractController implements Controller {
 
@@ -29,8 +28,8 @@ public abstract class AbstractController implements Controller {
         try {
             Path path = Paths.get(resource.toURI());
             return String.join("\r\n", Files.readAllLines(path));
-        } catch (IOException | URISyntaxException exception) {
-            throw new NotFoundException(HttpStatus.NOT_FOUND);
+        } catch (IOException | URISyntaxException | RuntimeException exception) {
+            throw new NotFoundException();
         }
     }
 

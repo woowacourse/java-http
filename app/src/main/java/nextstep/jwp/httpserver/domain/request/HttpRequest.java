@@ -41,7 +41,7 @@ public class HttpRequest {
 
     public boolean hasSessionId() {
         return cookies.stream()
-                .anyMatch(Cookie::isSessionId);
+                      .anyMatch(Cookie::isSessionId);
     }
 
     public String getSessionId() {

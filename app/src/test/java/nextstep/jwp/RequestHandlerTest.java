@@ -86,16 +86,7 @@ class RequestHandlerTest {
     @DisplayName("POST /login 요청 시 index.html 반환")
     void login() {
         // given
-        String body = "account=gugu&password=password";
-        final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + body.getBytes().length,
-                "Content-Type: application/x-www-form-urlencoded ",
-                "Accept: */* ",
-                "",
-                body);
+        final String httpRequest = 로그인_요청("gugu", "password");
 
         BeanFactory.init();
         final MockSocket socket = new MockSocket(httpRequest);
@@ -250,7 +241,7 @@ class RequestHandlerTest {
                 "Content-Length: 1002"
         );
     }
-    
+
     @Test
     @DisplayName("request의 Cookie에 JSESSIONID가 없는 경우 response에 JSESSIONID를 넘겨준다.")
     void noJSESSIONID() {
@@ -279,7 +270,7 @@ class RequestHandlerTest {
     }
 
     @Test
-    @DisplayName("request의 Cookie에 JSESSIONID가 있는 경우 response에 같은 JSESSIONID가 담겨있다.")
+    @DisplayName("request의 Cookie에 JSESSIONID가 있는 경우 response에 JSESSIONID가 담겨있지 않는다.")
     void cookieJSESSIONID() {
         // given
         final String httpRequest = String.join("\r\n",
@@ -301,10 +292,20 @@ class RequestHandlerTest {
         assertThat(socket.output()).contains(
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 5670 ",
-                "Set-Cookie: yummy_cookie=choco",
-                "Set-Cookie: tasty_cookie=strawberry",
-                "Set-Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46"
+                "Content-Length: 5670 "
         );
+    }
+
+    private String 로그인_요청(String account, String password) {
+        String body = "account=" + account + "&password=" + password;
+        return String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + body.getBytes().length,
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
+                "",
+                body);
     }
 }

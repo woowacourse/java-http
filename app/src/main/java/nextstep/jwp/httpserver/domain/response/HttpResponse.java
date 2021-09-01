@@ -129,6 +129,10 @@ public class HttpResponse {
         return headers;
     }
 
+    public List<Cookie> getCookies() {
+        return cookies;
+    }
+
     public String getBody() {
         return body;
     }

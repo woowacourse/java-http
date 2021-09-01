@@ -28,7 +28,7 @@ class RequestLineTest {
     }
 
     @Test
-    @DisplayName("HTTP Method가 POST가 아닌 경우")
+    @DisplayName("HTTP Method가 POST인 경우")
     void isPost() {
         // given
         String firstLine = "POST /login HTTP/1.1";
@@ -53,5 +53,33 @@ class RequestLineTest {
 
         // then
         assertFalse(isPost);
+    }
+
+    @Test
+    @DisplayName("HTTP Method가 GET인 경우")
+    void isGet() {
+        // given
+        String firstLine = "GET /login HTTP/1.1";
+        RequestLine requestLine = RequestLine.from(firstLine);
+
+        // when
+        boolean isGet = requestLine.isGet();
+
+        // then
+        assertTrue(isGet);
+    }
+
+    @Test
+    @DisplayName("HTTP Method가 GET이 아닌 경우")
+    void isNotGet() {
+        // given
+        String firstLine = "POST /index.html HTTP/1.1";
+        RequestLine requestLine = RequestLine.from(firstLine);
+
+        // when
+        boolean isGet = requestLine.isGet();
+
+        // then
+        assertFalse(isGet);
     }
 }

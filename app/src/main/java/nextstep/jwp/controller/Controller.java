@@ -58,6 +58,7 @@ public class Controller {
         }
         return ResponseEntity
                 .statusCode(StatusCode.FOUND)
+                .addHeaders(Header.LOCATION, "/index.html")
                 .responseResource("/index.html")
                 .build();
     }

@@ -21,13 +21,13 @@
 - [x] requestLine, body의 인스턴스화?!?!
 - [x] 개행 통일하기
 - [x] 예외처리
-- [ ] response()의 책임분리
+- [x] response()의 책임분리
 - [x] match~Mapping 코드 중복
 - [x] account 가 동일한 유저에 대한 예외처리
 - [x] header, body의 map 구조
-- [ ] testCode request 중복
+- [x] testCode response 중복
 - [x] Content-Type 내용 알맞게 수정
 - [x] QueryString 메소드 사용되지 않음
 ## 개별 수정사항
 - [x] response 응답코드에 맞는 헤더 전송
-- [ ] 테스트코드 촘촘하게 추가하기
+- [x] 테스트코드 촘촘하게 추가하기

@@ -1,5 +1,6 @@
 package nextstep.jwp.http.reponse;
 
+import static nextstep.jwp.http.stateful.HttpCookie.JSESSION_ID;
 import static nextstep.jwp.tomcat.ServletContainer.STATIC_RESOURCE_PATH;
 
 import java.io.File;
@@ -8,7 +9,11 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.UUID;
 import nextstep.jwp.http.request.HttpHeader;
+import nextstep.jwp.http.stateful.HttpSession;
+import nextstep.jwp.http.stateful.HttpSessions;
+import nextstep.jwp.model.User;
 
 public class HttpResponse {
 
@@ -18,7 +23,7 @@ public class HttpResponse {
     private HttpHeader httpHeader = new HttpHeader();
     private String httpBody;
 
-    public String getValue(){
+    public String getValue() {
         String response = httpStatusLine.getValue() + NEW_LINE + httpHeader.getValue();
         if (httpBody != null) {
             response += NEW_LINE + NEW_LINE + httpBody;
@@ -54,4 +59,12 @@ public class HttpResponse {
         setHeader("Content-Type", ContentType.matchByFileExtension(fileName));
     }
 
+    public void createSession(User user) {
+        String uuid = String.valueOf(UUID.randomUUID());
+        HttpSession httpSession = new HttpSession(uuid);
+        httpSession.setAttribute(User.class.getName(), user);
+        HttpSessions.addSession(uuid, httpSession);
+
+        setHeader("Set-Cookie", JSESSION_ID + "=" + uuid);
+    }
 }

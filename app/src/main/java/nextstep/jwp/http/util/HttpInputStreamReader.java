@@ -6,10 +6,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.http.stateful.HttpCookie;
 import nextstep.jwp.http.request.HttpHeader;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.HttpRequestLine;
 import nextstep.jwp.http.request.Parameters;
+import nextstep.jwp.http.stateful.HttpSession;
 
 public class HttpInputStreamReader {
 
@@ -25,10 +27,11 @@ public class HttpInputStreamReader {
     public HttpRequest createHttpRequest() throws IOException {
         HttpRequestLine httpRequestLine = new HttpRequestLine(bufferedReader.readLine());
         HttpHeader httpHeader = new HttpHeader(parseHeader());
+        HttpCookie httpCookie = new HttpCookie(httpHeader.getCookie());
         String httpBody = parseBody(httpHeader);
-
         Parameters parameters = new Parameters(httpRequestLine.getRequestURI(), httpBody);
-        return new HttpRequest(httpRequestLine, httpHeader, httpBody, parameters);
+
+        return new HttpRequest(httpRequestLine, httpHeader, httpCookie, httpBody, parameters);
     }
 
     private String parseBody(HttpHeader httpHeader) throws IOException {

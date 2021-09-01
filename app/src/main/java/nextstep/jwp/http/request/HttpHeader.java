@@ -41,4 +41,7 @@ public class HttpHeader {
         return String.join("\r\n", headers);
     }
 
+    public String getCookie() {
+        return httpRequestHeaders.get("Cookie");
+    }
 }

@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.DBNotFoundException;
@@ -43,8 +44,7 @@ public class RegisterController extends AbstractController {
     }
 
     private int generateRandomId() {
-        return ThreadLocalRandom.current()
-            .nextInt(Integer.MAX_VALUE);
+        return new Random().nextInt(Integer.MAX_VALUE);
     }
 
 }

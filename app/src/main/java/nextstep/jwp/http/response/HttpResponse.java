@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.response;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -26,6 +26,7 @@ public class  HttpResponse {
     }
 
     public void ok(String resourcePath) {
+        System.out.println(resourcePath);
         URL resource = HttpResponse.class.getClassLoader().getResource("static" + resourcePath);
         try {
             Path path = new File(resource.getPath()).toPath();
@@ -57,8 +58,7 @@ public class  HttpResponse {
 
     public void redirect(String redirectUrl) {
         try {
-            dataOutputStream.writeBytes("HTTP/1.1 302 Found \r\n");
-            attachHeaderToResponse();
+            dataOutputStream.writeBytes("HTTP/1.1 302 Redirect \r\n");
             dataOutputStream.writeBytes("Location: " + redirectUrl + " \r\n");
             dataOutputStream.writeBytes("\r\n");
         } catch (IOException e) {
@@ -70,7 +70,6 @@ public class  HttpResponse {
         try {
             dataOutputStream.writeBytes("HTTP/1.1 404 Not Found \r\n");
             dataOutputStream.writeBytes("\r\n");
-            attachHeaderToResponse();
         } catch (IOException e) {
             e.printStackTrace();
         }

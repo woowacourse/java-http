@@ -1,10 +1,9 @@
 package nextstep.jwp.http;
 
-import org.assertj.core.api.Assertions;
+import nextstep.jwp.http.request.HttpRequest;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
-import java.net.URL;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

@@ -1,4 +1,8 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.request;
+
+import nextstep.jwp.http.HttpCookie;
+import nextstep.jwp.http.session.HttpSession;
+import nextstep.jwp.http.session.HttpSessions;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.net.HttpHeaders.CONTENT_LENGTH;
+import static nextstep.jwp.http.HttpCookie.J_SESSION_ID;
 import static nextstep.jwp.http.HttpUtil.parseQuery;
 
 public class HttpRequest {
@@ -63,7 +68,7 @@ public class HttpRequest {
         return header.get(headerValue);
     }
 
-    public HttpCookie getCookie() {
+    public HttpCookie getCookies() {
         return HttpCookie.of(header.get("Cookie"));
     }
 
@@ -85,5 +90,9 @@ public class HttpRequest {
 
     public Map<String, String> getQuery() {
         return query;
+    }
+
+    public HttpSession getSession() {
+        return HttpSessions.getSession(getCookies().getCookie(J_SESSION_ID));
     }
 }

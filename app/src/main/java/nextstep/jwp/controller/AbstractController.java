@@ -1,8 +1,11 @@
 package nextstep.jwp.controller;
 
 
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.session.HttpSession;
+import nextstep.jwp.model.User;
+
 public class AbstractController implements Controller{
 
     @Override
@@ -21,5 +24,21 @@ public class AbstractController implements Controller{
 
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
 
+    }
+
+    protected User getUser(HttpSession session) {
+        if (session == null) {
+            return null;
+        }
+
+        return (User) session.getAttribute("user");
+    }
+
+    protected boolean isLogin(HttpSession httpSession) {
+        Object user = getUser(httpSession);
+        if (user == null) {
+            return false;
+        }
+        return true;
     }
 }

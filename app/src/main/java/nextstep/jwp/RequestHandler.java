@@ -2,8 +2,8 @@ package nextstep.jwp;
 
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.http.HttpCookie;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.controller.RequestMapping;
 import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
@@ -47,8 +47,8 @@ public class RequestHandler implements Runnable {
                 return;
             }
 
-            controller.service(httpRequest, httpResponse);
             setCookie(httpRequest, httpResponse);
+            controller.service(httpRequest, httpResponse);
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
@@ -57,13 +57,13 @@ public class RequestHandler implements Runnable {
     }
 
     private void setCookie(HttpRequest httpRequest, HttpResponse httpResponse) {
-        HttpCookie httpCookie = httpRequest.getCookie();
-        if (httpCookie.hasCookie(J_SESSION_ID)) {
-            httpResponse.addHeader(J_SESSION_ID, httpCookie.getCookie(J_SESSION_ID));
+        HttpCookie httpCookie = httpRequest.getCookies();
+        if (httpCookie.getCookie(J_SESSION_ID) != null) {
+            httpResponse.addHeader("Set-Cookie", J_SESSION_ID+"="+httpCookie.getCookie(J_SESSION_ID));
             return;
         }
-        
-        httpResponse.addHeader(J_SESSION_ID, UUID.randomUUID().toString());
+
+        httpResponse.addHeader("Set-Cookie", J_SESSION_ID+"="+ UUID.randomUUID());
     }
 
     private String getDefaultPath(String path) {

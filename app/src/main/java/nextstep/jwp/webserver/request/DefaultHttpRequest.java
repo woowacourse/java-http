@@ -14,13 +14,12 @@ public class DefaultHttpRequest implements HttpRequest {
 
     private static final String UTF_8 = "UTF-8";
     private static final String COOKIE = "Cookie";
-    private static final String SESSION_ID_KEY = "JSESSIONID";
 
     private RequestLine requestLine;
     private RequestHeader requestHeader;
     private RequestParams requestParams;
     private HttpCookie httpCookie;
-    private HttpSession httpSession;
+    private SessionUtil sessionUtil;
 
     public DefaultHttpRequest(InputStream inputStream) {
 
@@ -30,6 +29,7 @@ public class DefaultHttpRequest implements HttpRequest {
             this.requestLine = new RequestLine(br.readLine());
             this.requestHeader = new RequestHeader(br);
             this.requestParams = new RequestParams(br, requestHeader, requestLine.queryString());
+            this.httpCookie = new HttpCookie(requestHeader.get(COOKIE));
         } catch (IOException e) {
             throw new BadRequestException();
         }
@@ -56,23 +56,21 @@ public class DefaultHttpRequest implements HttpRequest {
     }
 
     @Override
-    public void prepareCookieAndSession(HttpResponse httpResponse, HttpSessions httpSessions) {
-        this.httpCookie = new HttpCookie(requestHeader.get(COOKIE));
-        String sessionId = httpCookie.getValue(SESSION_ID_KEY);
-        if(sessionId == null || sessionId.isEmpty()) {
-            sessionId = UUID.randomUUID().toString();
-            httpResponse.addHeader("Set-Cookie", SESSION_ID_KEY + "=" + sessionId);
-        }
-        this.httpSession = httpSessions.getSession(sessionId);
-    }
-
-    @Override
     public HttpCookie getCookie() {
         return httpCookie;
     }
 
     @Override
     public HttpSession getSession() {
-        return httpSession;
+        final String sessionId = httpCookie.getValue(SessionUtil.SESSION_ID_KEY);
+        if(sessionId == null || sessionId.isEmpty()) {
+            return sessionUtil.createSession();
+        }
+        return sessionUtil.getSession(sessionId);
+    }
+
+    @Override
+    public void addSessionCreator(SessionUtil sessionUtil) {
+        this.sessionUtil = sessionUtil;
     }
 }

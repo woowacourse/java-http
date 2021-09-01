@@ -13,9 +13,9 @@ public interface HttpRequest {
 
     Map<String, String> getRequestParams();
 
-    void prepareCookieAndSession(HttpResponse httpResponse, HttpSessions httpSessions);
-
     HttpCookie getCookie();
 
     HttpSession getSession();
+
+    void addSessionCreator(SessionUtil sessionUtil);
 }

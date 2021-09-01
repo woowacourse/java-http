@@ -18,8 +18,7 @@ public class LoginController extends AbstractController {
     @Override
     public void doPost(HttpRequest request, HttpResponse response) throws Exception {
         final boolean isSuccess = loginService.login(request);
-        final LoginResponse loginResponse = new LoginResponse();
-        final String loginResult = loginResult(isSuccess, loginResponse);
+        final String loginResult = loginResult(request, isSuccess);
         response.setResponse(loginResult);
     }
 
@@ -29,9 +28,11 @@ public class LoginController extends AbstractController {
         response.setResponse(generalResponse.getResponse());
     }
 
-    private String loginResult(boolean isSuccess, LoginResponse loginResponse) throws IOException {
+    private String loginResult(HttpRequest request, boolean isSuccess) throws IOException {
+        final LoginResponse loginResponse = new LoginResponse();
+        final String token = loginService.token(request);
         if (isSuccess) {
-            return loginResponse.successResponse();
+            return loginResponse.successResponse(token);
         }
         return loginResponse.failedResponse();
     }

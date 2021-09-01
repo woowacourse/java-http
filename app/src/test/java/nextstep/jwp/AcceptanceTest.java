@@ -2,6 +2,8 @@ package nextstep.jwp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -138,5 +140,46 @@ public class AcceptanceTest {
         String[] lines = entireResponse.split("\n");
         String[] firstHeaderLine = lines[0].split(" ");
         return firstHeaderLine[1];
+    }
+
+    @DisplayName("미션 6번째 요구사항")
+    @Test
+    void loginSuccessWithToken() {
+        //given
+        final String httpRequest = String.join("\r\n",
+            "POST /login HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "Content-Length: 80",
+            "Content-Type: application/x-www-form-urlencoded",
+            "Accept: */*",
+            "",
+            "account=gugu&password=password&email=hybeom@gmail.com");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final String entire = socket.output();
+        final Map<String, String> headers = extractHeaderLines(entire);
+        assertThat(headers).containsKey("Set-Cookie");
+        assertThat(getCode(entire)).isEqualTo("302");
+    }
+
+    private Map<String, String> extractHeaderLines(String rawResponse) {
+        Map<String, String> headers = new HashMap<>();
+        String[] response = rawResponse.split("\n");
+        for (int i = 1; i < response.length; i++) {
+            final String rawHeader = response[i];
+            if ("\r".equals(rawHeader)) {
+                break;
+            }
+            String[] header = rawHeader.split(": ");
+            headers.put(header[0], header[1]);
+        }
+        return headers;
     }
 }

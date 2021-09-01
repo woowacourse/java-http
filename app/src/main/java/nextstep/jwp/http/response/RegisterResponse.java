@@ -29,26 +29,25 @@ public class RegisterResponse {
         final ViewResolver viewResolver = new ViewResolver(SUCCESS);
         final StaticResources staticResource = StaticResources.basicType();
         final String responseBody = viewResolver.staticValue(staticResource.resource());
-        String firstLine = String.join(" ","HTTP/1.1", HttpStatus.FOUND.value(),
-            HttpStatus.FOUND.method());
-        return String.join("\r\n",
-            firstLine,
-            "Location: /index",
-            "Content-Type:" + staticResource.type(),
-            "Content-Length: " + responseBody.getBytes().length + " ",
-            "",
-            responseBody);
+        return responseOnTryingRegister(staticResource, responseBody, HttpStatus.FOUND,
+            "Location: /index");
     }
 
     public String failedResponse() throws IOException {
         final ViewResolver viewResolver = new ViewResolver(FAIL);
         final StaticResources staticResource = StaticResources.basicType();
         final String responseBody = viewResolver.staticValue(staticResource.resource());
-        String firstLine = String.join(" ","HTTP/1.1", HttpStatus.UNAUTHORIZED.value(),
-            HttpStatus.UNAUTHORIZED.method());
+        return responseOnTryingRegister(staticResource, responseBody, HttpStatus.UNAUTHORIZED,
+            "Location: /401");
+    }
+
+    private String responseOnTryingRegister(StaticResources staticResource, String responseBody,
+        HttpStatus unauthorized, String s) {
+        String firstLine = String.join(" ", "HTTP/1.1", unauthorized.value(),
+            unauthorized.method());
         return String.join("\r\n",
             firstLine,
-            "Location: /401",
+            s,
             "Content-Type:" + staticResource.type(),
             "Content-Length: " + responseBody.getBytes().length + " ",
             "",

@@ -22,8 +22,8 @@ public class HttpRequest {
     public static HttpRequest readFromInputStream(InputStream inputStream) throws IOException {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         final Map<String, String> headerLines = new HashMap<>();
-        final HttpRequestHeader httpRequestHeader = new HttpRequestHeader(headerLines);
         fillHeaderPart(reader, headerLines);
+        final HttpRequestHeader httpRequestHeader = HttpRequestHeader.from(headerLines);
         final String body = extractBody(reader, httpRequestHeader);
         final HttpRequestBody httpRequestBody = new HttpRequestBody(body);
         return new HttpRequest(httpRequestHeader, httpRequestBody);

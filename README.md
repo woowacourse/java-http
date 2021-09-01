@@ -12,5 +12,5 @@
 - [x] CSS 지원하기 
 
 ## 쿠키 및 세션 구현
-- [] Cookie JSESSIONID 값 저장하기
+- [x] Cookie JSESSIONID 값 저장하기
 - [] Session 구현하기

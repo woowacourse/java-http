@@ -79,4 +79,8 @@ public class HttpResponse {
         }
         return getResources("/404.html");
     }
+
+    public void setSession(String sessionId) {
+        addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
+    }
 }

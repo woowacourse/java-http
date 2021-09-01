@@ -12,8 +12,8 @@ class HttpCookieTest {
         String rawCookie = "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
 
         HttpCookie httpCookie = new HttpCookie(rawCookie);
-        assertThat(httpCookie.getCookie("yummy_cookie")).isEqualTo("choco");
-        assertThat(httpCookie.getCookie("tasty_cookie")).isEqualTo("strawberry");
-        assertThat(httpCookie.getCookie("JSESSIONID")).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
+        assertThat(httpCookie.get("yummy_cookie")).isEqualTo("choco");
+        assertThat(httpCookie.get("tasty_cookie")).isEqualTo("strawberry");
+        assertThat(httpCookie.get("JSESSIONID")).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
     }
 }

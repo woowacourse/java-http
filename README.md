@@ -23,4 +23,4 @@
 - [x] Controller 인터페이스 추가
   - [x] url 경로에 따른 if절 분기 제거
 - [x] Cookie 구현하기
-- [ ] Session 구현하기
+- [x] Session 구현하기

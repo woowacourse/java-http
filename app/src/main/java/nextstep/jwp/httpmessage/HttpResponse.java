@@ -8,7 +8,7 @@ import static nextstep.jwp.httpmessage.HttpMessageReader.SP;
 public class HttpResponse {
 
     private StatusLine statusLine;
-    private HttpHeaders httpHeaders;
+    private final HttpHeaders httpHeaders;
     private Object body;
 
     public HttpResponse() {
@@ -35,6 +35,14 @@ public class HttpResponse {
 
     public String getStatusLineAsString() {
         return statusLine.getLine();
+    }
+
+    public void setHttpStatusCode(HttpStatusCode httpStatusCode) {
+        this.statusLine.setHttpStatusCode(httpStatusCode);
+    }
+
+    public boolean isSameHttpStatusCode(HttpStatusCode httpStatusCode) {
+        return this.statusLine.getHttpStatusCode().equals(httpStatusCode);
     }
 
     public HttpStatusCode getHttpStatusCode() {

@@ -33,7 +33,7 @@ class HttpRequestTest {
         assertThat(httpRequest.getHttpMethod()).isEqualTo(HttpMethod.GET);
         assertThat(httpRequest.getPath()).isEqualTo(requestUri);
         assertThat(httpRequest.getVersionOfTheProtocol()).isEqualTo("HTTP/1.1");
-        assertThat(httpRequest.getHeader("Content-Type")).isEqualTo(contentType.getContentType());
+        assertThat(httpRequest.getHeader("Content-Type")).isEqualTo(contentType.getValue());
         assertThat(httpRequest.httpHeaderSize()).isNotEqualTo(0);
         assertThat(httpRequest.getParameterNames().hasMoreElements()).isFalse();
     }
@@ -57,7 +57,7 @@ class HttpRequestTest {
         assertThat(httpRequest.getHttpMethod()).isEqualTo(HttpMethod.POST);
         assertThat(httpRequest.getPath()).isEqualTo(requestUri);
         assertThat(httpRequest.getVersionOfTheProtocol()).isEqualTo("HTTP/1.1");
-        assertThat(httpRequest.getHeader("Content-Type")).isEqualTo(contentType.getContentType());
+        assertThat(httpRequest.getHeader("Content-Type")).isEqualTo(contentType.getValue());
         assertThat(httpRequest.getParameterNames().hasMoreElements()).isTrue();
         assertThat(httpRequest.getParameter("account")).isEqualTo("gumgum");
     }

@@ -29,7 +29,7 @@ public class HttpMessageReaderGetStub extends HttpMessageReader {
     public Map<String, String> getHeaders() {
         final Map<String, String> headers = new HashMap<>();
         headers.put("Host", "localhost:8080");
-        headers.put("Content-Type", contentType.getContentType());
+        headers.put("Content-Type", contentType.getValue());
         headers.put("Connection", "keep-alive");
         return headers;
     }

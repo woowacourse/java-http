@@ -36,6 +36,10 @@ public class HttpRequest {
         return requestLine.getVersionOfTheProtocol();
     }
 
+    public Parameters getParameters() {
+        return parameters;
+    }
+
     public String getHeader(String name) {
         return httpHeaders.getHeader(name);
     }

@@ -93,7 +93,7 @@ public enum HttpStatusCode {
 
     private static final Map<Integer, HttpStatusCode> values = new HashMap<>();
 
-    static{
+    static {
         Arrays.stream(values())
                 .forEach(it -> values.put(it.value, it));
     }

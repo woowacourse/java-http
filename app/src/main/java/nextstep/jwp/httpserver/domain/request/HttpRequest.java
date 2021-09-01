@@ -39,6 +39,11 @@ public class HttpRequest {
                       .orElse("");
     }
 
+    public boolean hasSessionId() {
+        return cookies.stream()
+                .anyMatch(Cookie::isSessionId);
+    }
+
     public String getSessionId() {
         return session.getId();
     }

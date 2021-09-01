@@ -117,10 +117,7 @@ public class RequestHandler implements Runnable {
     }
 
     private void addCookie(HttpRequest httpRequest, HttpResponse httpResponse) {
-        httpRequest.getCookies()
-                   .forEach(httpResponse::addCookie);
-
-        if (!httpResponse.hasSessionCookie()) {
+        if (!httpRequest.hasSessionId()) {
             final Cookie cookie = new Cookie("JSESSIONID", httpRequest.getSessionId());
             httpResponse.addCookie(cookie);
         }

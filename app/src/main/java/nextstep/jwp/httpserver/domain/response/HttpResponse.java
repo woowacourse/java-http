@@ -80,11 +80,6 @@ public class HttpResponse {
         cookies.add(cookie);
     }
 
-    public boolean hasSessionCookie() {
-        return cookies.stream()
-                      .anyMatch(Cookie::isSessionId);
-    }
-
     public String statusLine() {
         final HttpVersion httpVersion = statusLine.getHttpVersion();
         final StatusCode statusCode = statusLine.getStatusCode();

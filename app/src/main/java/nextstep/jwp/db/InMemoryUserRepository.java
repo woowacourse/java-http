@@ -19,7 +19,7 @@ public class InMemoryUserRepository {
     }
 
     static {
-        final User user = new User( "gugu", "password", "hkkang@woowahan.com");
+        final User user = new User( "gugu", "1234", "hkkang@woowahan.com");
         user.assignId(INITIAL_VALUE);
         database.put(user.getAccount(), user);
     }

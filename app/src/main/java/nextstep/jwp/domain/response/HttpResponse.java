@@ -32,21 +32,21 @@ public class HttpResponse {
 
     public byte[] getBytes() {
         return String.join(NEW_LINE,
-                getHttpLine(),
+                getStatusLine(),
                 toHeaderLine(headerMap),
                 "",
                 body
         ).getBytes();
     }
 
+    private String getStatusLine() {
+        return HTTP_VERSION + " " + httpStatus.value() + " " + httpStatus.responsePhrase() + " ";
+    }
+
     private String toHeaderLine(Map<String, String> headerMap) {
         return headerMap.entrySet().stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
                 .collect(Collectors.joining(NEW_LINE));
-    }
-
-    private String getHttpLine() {
-        return HTTP_VERSION + " " + httpStatus.value() + " " + httpStatus.responsePhrase() + " ";
     }
 
     public HttpResponse respond(String uri) throws IOException {
@@ -62,8 +62,8 @@ public class HttpResponse {
 
     private void setProperty(HttpStatus httpStatus, String contentType, String body) {
         this.httpStatus = httpStatus;
-        this.headerMap.put(CONTENT_TYPE, contentType);
         this.headerMap.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+        this.headerMap.put(CONTENT_TYPE, contentType);
         this.body = body;
     }
 
@@ -79,6 +79,10 @@ public class HttpResponse {
 
     public String getBody() {
         return body;
+    }
+
+    public void setCookie(String JSessionId) {
+        headerMap.put("Set-Cookie", "JSESSIONID=" + JSessionId);
     }
 }
 

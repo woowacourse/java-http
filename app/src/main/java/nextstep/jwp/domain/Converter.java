@@ -43,9 +43,19 @@ public class Converter {
         return HttpRequest.of(requestLine, httpHeaders, requestBody);
     }
 
+    private static Map<String, String> createRequestHeaders(String[] splitRequestHeaders) {
+        Map<String, String> headers = new LinkedHashMap<>();
+        for (int i = 1; i < splitRequestHeaders.length; i++) {
+            String[] split = splitRequestHeaders[i].split(": ");
+            headers.put(split[0], split[1]);
+
+        }
+        return headers;
+    }
+
     private static RequestBody createRequestBody(Map<String, String> httpHeaders, BufferedReader reader) throws IOException {
-        if (httpHeaders.get("Content-Length:") != null) {
-            int contentLength = Integer.parseInt(httpHeaders.get("Content-Length:"));
+        if (httpHeaders.get("Content-Length") != null) {
+            int contentLength = Integer.parseInt(httpHeaders.get("Content-Length"));
             char[] buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);
             Map<String, String> requestBodyMap = collectRequestBody(new String(buffer));
@@ -65,15 +75,5 @@ public class Converter {
             requestBodyMap.put(splitRequestParam[0], splitRequestParam[1]);
         }
         return requestBodyMap;
-    }
-
-    private static Map<String, String> createRequestHeaders(String[] splitRequestHeaders) {
-        Map<String, String> headers = new LinkedHashMap<>();
-        for (int i = 1; i < splitRequestHeaders.length; i++) {
-            String[] split = splitRequestHeaders[i].split(" ");
-            headers.put(split[0], split[1]);
-
-        }
-        return headers;
     }
 }

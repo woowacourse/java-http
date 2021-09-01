@@ -9,7 +9,7 @@ import nextstep.jwp.controller.NotFoundController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.http.request.HttpRequest;
 
-public class RequestMapping {
+public class RequestMapper {
     private static Map<String, Controller> HANDLER_MAP = new HashMap<>();
 
     static {

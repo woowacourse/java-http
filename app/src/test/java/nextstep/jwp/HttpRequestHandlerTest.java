@@ -18,7 +18,7 @@ class HttpRequestHandlerTest {
     void index() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
+                "GET /index HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -31,7 +31,7 @@ class HttpRequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final URL resource = getClass().getClassLoader().getResource("static/index");
 
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
@@ -42,7 +42,7 @@ class HttpRequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("/login 시 /login.html 페이지로 이동하도록 설정")
+    @DisplayName("/login 시 /login 페이지로 이동하도록 설정")
     @Test
     void loginPage() throws IOException {
         // given
@@ -60,7 +60,7 @@ class HttpRequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final URL resource = getClass().getClassLoader().getResource("static/login");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
@@ -88,7 +88,7 @@ class HttpRequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        final URL resource = getClass().getClassLoader().getResource("static/register");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
@@ -143,7 +143,7 @@ class HttpRequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        final URL resource = getClass().getClassLoader().getResource("static/index");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
@@ -274,6 +274,35 @@ class HttpRequestHandlerTest {
                 "\r\n" +
                 responseBody;
 
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("없는 페이지 탐색시 Not Found 페이지 출력")
+    @Test
+    void NotFound() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /index6.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = "HTTP/1.1 404 Not Found \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "\r\n" +
+                responseBody;
         assertThat(socket.output()).isEqualTo(expected);
     }
 }

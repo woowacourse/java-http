@@ -34,10 +34,10 @@ public class ControllerTest {
             RequestBody requestBody = new RequestBody("");
             HttpRequest httpRequest = new HttpRequest(requestLine, requestHeader, requestBody);
 
-            RequestMapping requestMapping = new RequestMapping();
+            RequestMapper requestMapper = new RequestMapper();
 
             // when
-            Controller controller = requestMapping.getController(httpRequest);
+            Controller controller = requestMapper.getController(httpRequest);
 
             // then
             assertThat(controller).isInstanceOf(NotFoundController.class);
@@ -55,10 +55,10 @@ public class ControllerTest {
             RequestBody requestBody = new RequestBody("");
             HttpRequest httpRequest = new HttpRequest(requestLine, requestHeader, requestBody);
 
-            RequestMapping requestMapping = new RequestMapping();
+            RequestMapper requestMapper = new RequestMapper();
 
             // when
-            Controller controller = requestMapping.getController(httpRequest);
+            Controller controller = requestMapper.getController(httpRequest);
 
             // then
             assertThat(controller).isInstanceOf(IndexController.class);
@@ -76,10 +76,10 @@ public class ControllerTest {
             RequestBody requestBody = new RequestBody("");
             HttpRequest httpRequest = new HttpRequest(requestLine, requestHeader, requestBody);
 
-            RequestMapping requestMapping = new RequestMapping();
+            RequestMapper requestMapper = new RequestMapper();
 
             // when
-            Controller controller = requestMapping.getController(httpRequest);
+            Controller controller = requestMapper.getController(httpRequest);
 
             // then
             assertThat(controller).isInstanceOf(RegisterController.class);
@@ -97,10 +97,10 @@ public class ControllerTest {
             RequestBody requestBody = new RequestBody("");
             HttpRequest httpRequest = new HttpRequest(requestLine, requestHeader, requestBody);
 
-            RequestMapping requestMapping = new RequestMapping();
+            RequestMapper requestMapper = new RequestMapper();
 
             // when
-            Controller controller = requestMapping.getController(httpRequest);
+            Controller controller = requestMapper.getController(httpRequest);
 
             // then
             assertThat(controller).isInstanceOf(LoginController.class);

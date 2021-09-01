@@ -26,7 +26,7 @@ public class HttpRequest {
         return new HttpRequest(requestLine, requestHeader, requestBody);
     }
 
-    public String getRequestLine(String requestLineName) {
+    public String getRequestLinePart(String requestLineName) {
         return this.requestLine.get(requestLineName);
     }
 

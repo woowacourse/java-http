@@ -38,8 +38,9 @@ public class RequestHandler implements Runnable {
                 log.error("BaseException", baseException);
             }
 
-            outputStream.write(httpResponse.toBytes());
-            outputStream.flush();
+            final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
+            writer.write(httpResponse.readAsString());
+            writer.flush();
         } catch (IOException ioException) {
             log.error("Exception stream", ioException);
         } catch (Exception exception) {

@@ -35,7 +35,7 @@ public class HttpResponse {
         }
     }
 
-    public byte[] toBytes() {
+    public String readAsString() {
         setDefaultHeaders();
 
         String response = String.join("\r\n",
@@ -45,8 +45,7 @@ public class HttpResponse {
         if (body != null && body.length() > 0) {
             response = String.join("\r\n", response, "", body);
         }
-
-        return response.getBytes();
+        return response;
     }
 
     public void setBody(String body) {

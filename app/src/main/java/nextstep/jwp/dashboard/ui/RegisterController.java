@@ -31,7 +31,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     public void doPost(HttpRequest request, HttpResponse response) {
-        final Map<String, String> payload = request.bodyAsMap();
+        final Map<String, String> payload = request.getBodyAsMap();
         final User user = new User(
                 payload.get("account"),
                 payload.get("password"),

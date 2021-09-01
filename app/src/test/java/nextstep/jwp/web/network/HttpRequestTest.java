@@ -92,7 +92,7 @@ class HttpRequestTest {
 
         // when
         final HttpRequest httpRequest = new HttpRequest(inputStream);
-        final Map<String, String> actual = httpRequest.bodyAsMap();
+        final Map<String, String> actual = httpRequest.getBodyAsMap();
 
         // then
         assertThat(actual)

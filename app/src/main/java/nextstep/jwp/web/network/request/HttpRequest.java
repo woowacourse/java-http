@@ -24,7 +24,7 @@ public class HttpRequest {
 
     private int contentLength() {
         final String contentLengthAsString = this.headers.get("Content-Length");
-        if (contentLengthAsString.equals("")) {
+        if (contentLengthAsString == null) {
             return 0;
         }
         return Integer.parseInt(this.headers.get("Content-Length"));
@@ -38,11 +38,15 @@ public class HttpRequest {
         return requestLine.getURI();
     }
 
-    public Map<String, String> bodyAsMap() {
-        return body.asMap();
-    }
-
     public String getPath() {
         return getURI().getPath();
+    }
+
+    public Cookies getCookies() {
+        return headers.getCookies();
+    }
+
+    public Map<String, String> getBodyAsMap() {
+        return body.asMap();
     }
 }

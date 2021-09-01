@@ -20,4 +20,4 @@
   * [x] HttpRequest 내부 필드를 RequestLine 및 OtherLines로 분리
   * [x] AdjustHttpStatus를 HttpStatus 내부로 변경
 * [x] HttpRequestHeader 내부 RequestLine 분리
-* [] JaCoCo 설정 추가
+* [x] JaCoCo 설정 추가

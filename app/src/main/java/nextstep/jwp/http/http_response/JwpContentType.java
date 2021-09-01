@@ -1,4 +1,4 @@
-package nextstep.jwp.model.http_response;
+package nextstep.jwp.http.http_response;
 
 import nextstep.jwp.exception.NotFoundContentTypeException;
 
@@ -24,7 +24,7 @@ public enum JwpContentType {
                 .filter(type -> type.isSatisfied(resourceUri))
                 .findAny()
                 .orElseThrow(NotFoundContentTypeException::new)
-                .resourceType;
+                .resourceType + ";charset=utf-8";
     }
 
     private boolean isSatisfied(String resourceFile) {

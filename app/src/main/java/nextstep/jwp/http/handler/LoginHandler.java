@@ -1,8 +1,8 @@
-package nextstep.jwp.model.handler;
+package nextstep.jwp.http.handler;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.http_request.JwpHttpRequest;
-import nextstep.jwp.model.http_response.JwpHttpResponse;
+import nextstep.jwp.http.http_request.JwpHttpRequest;
+import nextstep.jwp.http.http_response.JwpHttpResponse;
 import nextstep.jwp.model.user.domain.User;
 
 import java.io.IOException;

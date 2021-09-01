@@ -1,4 +1,4 @@
-package nextstep.jwp.model.handler;
+package nextstep.jwp.http.handler;
 
 import nextstep.jwp.exception.NotFoundHandlerException;
 

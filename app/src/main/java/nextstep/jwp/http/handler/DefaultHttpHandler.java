@@ -1,4 +1,4 @@
-package nextstep.jwp.model.handler;
+package nextstep.jwp.http.handler;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -11,7 +11,10 @@ public abstract class DefaultHttpHandler implements CustomHandler {
 
     protected String findResourceFile(String uri) throws URISyntaxException, IOException {
         URL resource = getClass().getClassLoader().getResource(uri);
-        final Path path = Paths.get(resource.toURI());
-        return new String(Files.readAllBytes(path));
+        if (resource != null) {
+            final Path path = Paths.get(resource.toURI());
+            return new String(Files.readAllBytes(path));
+        }
+        return "";
     }
 }

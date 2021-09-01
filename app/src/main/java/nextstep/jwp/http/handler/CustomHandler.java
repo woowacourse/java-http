@@ -1,6 +1,6 @@
-package nextstep.jwp.model.handler;
+package nextstep.jwp.http.handler;
 
-import nextstep.jwp.model.http_request.JwpHttpRequest;
+import nextstep.jwp.http.http_request.JwpHttpRequest;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

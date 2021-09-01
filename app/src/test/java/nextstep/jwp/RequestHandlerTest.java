@@ -97,7 +97,7 @@ class RequestHandlerTest {
 
         // then
         String expected = String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
+                "HTTP/1.1 302 Found ",
                 "Location: http://localhost:8080/index.html ",
                 "",
                 "");
@@ -127,7 +127,7 @@ class RequestHandlerTest {
 
         // then
         String expected = String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
+                "HTTP/1.1 302 Found ",
                 "Location: http://localhost:8080/401.html ",
                 "",
                 "");
@@ -157,7 +157,7 @@ class RequestHandlerTest {
 
         // then
         String expected = String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
+                "HTTP/1.1 302 Found ",
                 "Location: http://localhost:8080/401.html ",
                 "",
                 "");
@@ -215,7 +215,7 @@ class RequestHandlerTest {
 
         // then
         String expected = String.join("\r\n",
-                "HTTP/1.1 302 FOUND ",
+                "HTTP/1.1 302 Found ",
                 "Location: http://localhost:8080/index.html ",
                 "",
                 "");
@@ -240,7 +240,7 @@ class RequestHandlerTest {
         final RequestHandler requestHandler = new RequestHandler(socket);
 
         // when // then
-        assertThatThrownBy(() -> requestHandler.run())
+        assertThatThrownBy(requestHandler::run)
                 .isExactlyInstanceOf(AlreadyRegisteredUser.class);
     }
 

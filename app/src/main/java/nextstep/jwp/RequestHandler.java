@@ -1,8 +1,8 @@
 package nextstep.jwp;
 
-import nextstep.jwp.model.handler.CustomHandler;
-import nextstep.jwp.model.handler.HandlerMapper;
-import nextstep.jwp.model.http_request.JwpHttpRequest;
+import nextstep.jwp.http.handler.CustomHandler;
+import nextstep.jwp.http.handler.HandlerMapper;
+import nextstep.jwp.http.http_request.JwpHttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

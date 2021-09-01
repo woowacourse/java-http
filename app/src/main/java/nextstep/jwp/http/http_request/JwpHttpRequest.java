@@ -1,6 +1,9 @@
-package nextstep.jwp.model.http_request;
+package nextstep.jwp.http.http_request;
 
 import nextstep.jwp.exception.NotFoundParamException;
+import nextstep.jwp.http.common.Headers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,23 +14,24 @@ import java.util.Map;
 
 public class JwpHttpRequest {
 
+    public static final Logger logger = LoggerFactory.getLogger(JwpHttpRequest.class);
+
     private static final String REQUEST_DELIMITER = " ";
-    private static final String HEADER_DELIMITER = ": ";
     private static final String QUERY_STRING_SYMBOL = "?";
     private static final String PARAM_DELIMITER = "&";
     private static final String PARAM_KEY_AND_VALUE_DELIMITER = "=";
 
-    private final String method;
+    private final JwpHttpMethod method;
     private final String uri;
     private final String httpVersion;
-    private final Map<String, String> headers;
+    private final Headers headers;
     private final Map<String, String> params;
 
-    private JwpHttpRequest(String requestMethod, String requestUri, String requestHttpVersion, Map<String, String> headers) {
-        this(requestMethod, requestUri, requestHttpVersion, headers, Collections.emptyMap());
+    private JwpHttpRequest(JwpHttpMethod method, String uri, String httpVersion, Headers headers) {
+        this(method, uri, httpVersion, headers, Collections.emptyMap());
     }
 
-    private JwpHttpRequest(String method, String uri, String httpVersion, Map<String, String> headers, Map<String, String> params) {
+    private JwpHttpRequest(JwpHttpMethod method, String uri, String httpVersion, Headers headers, Map<String, String> params) {
         this.method = method;
         this.uri = uri;
         this.httpVersion = httpVersion;
@@ -42,35 +46,25 @@ public class JwpHttpRequest {
         }
 
         String[] requestInfos = requestHeader.split(REQUEST_DELIMITER);
-        String requestMethod = requestInfos[0];
+        JwpHttpMethod requestMethod = JwpHttpMethod.of(requestInfos[0]);
         String requestUri = requestInfos[1];
         String requestHttpVersion = requestInfos[2];
+        logger.info("Request METHOD: [{}] URI: {}", requestMethod, requestUri);
 
-        Map<String, String> headers = extractedHeaders(reader);
+        Headers headers = Headers.of(reader);
 
-        if (requestMethod.equals("GET")) {
-            return get(requestMethod, requestUri, requestHttpVersion, headers);
+        if (requestMethod.isGetRequest()) {
+            return get(JwpHttpMethod.GET, requestUri, requestHttpVersion, headers);
         }
 
-        if (requestMethod.equals("POST")) {
+        if (requestMethod.isPostRequest()) {
             return post(reader, requestMethod, requestUri, requestHttpVersion, headers);
         }
 
         return new JwpHttpRequest(requestMethod, requestUri, requestHttpVersion, headers);
     }
 
-    private static Map<String, String> extractedHeaders(BufferedReader reader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        String line = reader.readLine();
-        while (!line.isBlank()) {
-            splitKeyAndValue(headers, line, HEADER_DELIMITER);
-            line = reader.readLine();
-        }
-
-        return headers;
-    }
-
-    private static JwpHttpRequest get(String requestMethod, String requestUri, String requestHttpVersion, Map<String, String> headers) {
+    private static JwpHttpRequest get(JwpHttpMethod requestMethod, String requestUri, String requestHttpVersion, Headers headers) {
         if (!requestUri.contains(QUERY_STRING_SYMBOL)) {
             return new JwpHttpRequest(requestMethod, requestUri, requestHttpVersion, headers);
         }
@@ -83,8 +77,8 @@ public class JwpHttpRequest {
         return new JwpHttpRequest(requestMethod, path, requestHttpVersion, headers, params);
     }
 
-    private static JwpHttpRequest post(BufferedReader reader, String requestMethod, String requestUri, String requestHttpVersion, Map<String, String> headers) throws IOException {
-        int contentLength = Integer.parseInt(headers.get("Content-Length"));
+    private static JwpHttpRequest post(BufferedReader reader, JwpHttpMethod requestMethod, String requestUri, String requestHttpVersion, Headers headers) throws IOException {
+        int contentLength = Integer.parseInt(headers.getHeaderValue("Content-Length"));
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         String requestBody = URLDecoder.decode(new String(buffer), "UTF-8");
@@ -110,7 +104,7 @@ public class JwpHttpRequest {
         return uri;
     }
 
-    public String getMethod() {
+    public JwpHttpMethod getMethod() {
         return method;
     }
 
@@ -118,7 +112,7 @@ public class JwpHttpRequest {
         return httpVersion;
     }
 
-    public Map<String, String> getHeaders() {
+    public Headers getHeaders() {
         return headers;
     }
 
@@ -132,5 +126,13 @@ public class JwpHttpRequest {
         }
 
         return params.get(key);
+    }
+
+    public boolean isGetRequest() {
+        return method.isGetRequest();
+    }
+
+    public boolean isPostRequest() {
+        return method.isPostRequest();
     }
 }

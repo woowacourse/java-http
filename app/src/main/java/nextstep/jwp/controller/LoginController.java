@@ -2,26 +2,31 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import nextstep.jwp.web.ContentType;
-import nextstep.jwp.web.HttpRequest;
-import nextstep.jwp.web.HttpResponse;
-import nextstep.jwp.web.HttpStatus;
+import nextstep.jwp.web.*;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class LoginController extends AbstractController {
-    public static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        if (isLoggedIn(request)) {
+            redirectHomePage(response);
+            return;
+        }
         if (isLoginProcess(request)) {
             loginProcess(request, response);
             return;
         }
         loginPageProcess(response);
+    }
+
+    private boolean isLoggedIn(HttpRequest request) {
+        return Objects.nonNull(request.getCookie(HttpSession.SESSION_NAME));
     }
 
     private boolean isLoginProcess(HttpRequest request) {
@@ -34,17 +39,30 @@ public class LoginController extends AbstractController {
 
         InMemoryUserRepository.findByAccount(account)
                 .ifPresentOrElse(
-                        foundUser -> passwordCheckProcess(foundUser, password, response),
+                        foundUser -> passwordCheckProcess(foundUser, password, request, response),
                         () -> responseUnauthorized(response));
     }
 
-    private void passwordCheckProcess(User foundUser, String password, HttpResponse response) {
+    private void passwordCheckProcess(User foundUser, String password, HttpRequest request, HttpResponse response) {
         if (foundUser.checkPassword(password)) {
-            response.status(HttpStatus.FOUND)
-                    .location("/index.html");
+            issueSession(foundUser, request, response);
+            redirectHomePage(response);
             return;
         }
         responseUnauthorized(response);
+    }
+
+    private void issueSession(User foundUser, HttpRequest request, HttpResponse response) {
+        HttpSession session = request.getSession();
+        session.setAttribute("user", foundUser);
+
+        Cookie sessionCookie = new Cookie(HttpSession.SESSION_NAME, session.getId());
+        response.setCookie(sessionCookie);
+    }
+
+    private void redirectHomePage(HttpResponse response) {
+        response.status(HttpStatus.FOUND)
+                .location("/index.html");
     }
 
     private void responseUnauthorized(HttpResponse response) {

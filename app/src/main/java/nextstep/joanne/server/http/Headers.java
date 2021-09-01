@@ -53,4 +53,8 @@ public class Headers {
     public boolean hasSessionId() {
         return cookie.hasSessionId();
     }
+
+    public HttpSession getSession() {
+        return HttpSessions.getSession(cookie.getSessionId());
+    }
 }

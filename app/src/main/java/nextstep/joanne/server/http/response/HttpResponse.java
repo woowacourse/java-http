@@ -50,4 +50,9 @@ public class HttpResponse {
         }
         return String.format("%s\r\n%s\r\n%s", getStatusLine(), getHeaders(), body);
     }
+
+    public void redirect(String uri) {
+        addStatus(HttpStatus.FOUND);
+        addHeaders("Location", uri);
+    }
 }

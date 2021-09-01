@@ -21,7 +21,7 @@
 
 ## 3단계 - 요구사항
 - [x] Cookie에 JSESSION값 저장하기
-- [ ] SESSION 구현하기
+- [x] SESSION 구현하기
 
 ## 참고 자료
 ### Http Request

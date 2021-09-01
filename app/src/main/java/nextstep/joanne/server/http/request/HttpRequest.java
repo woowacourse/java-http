@@ -2,6 +2,7 @@ package nextstep.joanne.server.http.request;
 
 import nextstep.joanne.server.http.Headers;
 import nextstep.joanne.server.http.HttpMethod;
+import nextstep.joanne.server.http.HttpSession;
 
 public class HttpRequest {
     private final RequestLine requestLine;
@@ -48,5 +49,9 @@ public class HttpRequest {
 
     public String getNewSessionId() {
         return requestHeaders.makeSessionId();
+    }
+
+    public HttpSession getSession() {
+        return requestHeaders.getSession();
     }
 }

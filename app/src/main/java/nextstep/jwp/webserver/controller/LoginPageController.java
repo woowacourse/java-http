@@ -10,7 +10,6 @@ import nextstep.jwp.framework.http.template.RedirectResponseTemplate;
 import nextstep.jwp.framework.http.template.ResourceResponseTemplate;
 import nextstep.jwp.webserver.db.InMemoryUserRepository;
 import nextstep.jwp.webserver.model.User;
-import nextstep.jwp.webserver.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,11 +17,8 @@ public class LoginPageController extends AbstractController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginPageController.class);
 
-    private final UserService userService;
-
     public LoginPageController() {
         super("/login", EnumSet.of(HttpMethod.GET, HttpMethod.POST));
-        this.userService = new UserService();
     }
 
     @Override

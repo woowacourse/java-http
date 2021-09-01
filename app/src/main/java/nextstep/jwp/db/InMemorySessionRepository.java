@@ -25,8 +25,4 @@ public class InMemorySessionRepository {
     public static boolean hasSession(final String id) {
         return SESSIONS.containsKey(id);
     }
-
-    static void remove(final String id) {
-        SESSIONS.remove(id);
-    }
 }

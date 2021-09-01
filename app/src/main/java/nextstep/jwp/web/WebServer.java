@@ -1,12 +1,14 @@
-package nextstep.jwp;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package nextstep.jwp.web;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
+import nextstep.jwp.web.handler.RequestHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebServer {
 
@@ -32,17 +34,19 @@ public class WebServer {
     }
 
     private void handle(ServerSocket serverSocket) throws IOException {
+        ExecutorService service = Executors.newFixedThreadPool(25);
+
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection)).start();
+            service.submit(new RequestHandler(connection));
         }
     }
 
     public static int defaultPortIfNull(String[] args) {
         return Stream.of(args)
-                .findFirst()
-                .map(Integer::parseInt)
-                .orElse(WebServer.DEFAULT_PORT);
+            .findFirst()
+            .map(Integer::parseInt)
+            .orElse(WebServer.DEFAULT_PORT);
     }
 
     private int checkPort(int port) {

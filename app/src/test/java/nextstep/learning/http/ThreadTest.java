@@ -1,12 +1,11 @@
 package nextstep.learning.http;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 class ThreadTest {
 
@@ -17,6 +16,7 @@ class ThreadTest {
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
         MyCounter counter = new MyCounter();
         for (int i = 0; i < numberOfThreads; i++) {
+            final int finalI = i;
             service.execute(() -> {
                 counter.increment();
                 latch.countDown();
@@ -28,11 +28,12 @@ class ThreadTest {
 
     @Test
     void testSummationWithConcurrency() throws InterruptedException {
-        int numberOfThreads = 2;
+        int numberOfThreads = 20;
         ExecutorService service = Executors.newFixedThreadPool(1);
         CountDownLatch latch = new CountDownLatch(numberOfThreads);
         MyCounter counter = new MyCounter();
         for (int i = 0; i < numberOfThreads; i++) {
+            final int finalI = i;
             service.submit(() -> {
                 counter.increment();
                 latch.countDown();
@@ -46,7 +47,7 @@ class ThreadTest {
 
         private int count;
 
-        public void increment() {
+        public synchronized void increment() {
             int temp = count;
             count = temp + 1;
         }

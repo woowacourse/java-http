@@ -7,25 +7,50 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpRequest {
     private final HttpMethod httpMethod;
     private final String url;
+    private final Map<String, String> requestParams;
     private final Map<String, String> requestHeaders;
     private final String requestBody;
 
     public HttpRequest(final InputStreamReader inputStream) {
         final BufferedReader bufferedReader = new BufferedReader(inputStream);
         try {
-            List<String> firstLine = parseFirstLine(bufferedReader);
-            this.httpMethod = HttpMethod.matchHttpMethod(firstLine.get(0));
-            this.url = firstLine.get(1).substring(1);
-
+            List<String> requestLine = parseFirstLine(bufferedReader);
+            this.httpMethod = HttpMethod.matchHttpMethod(requestLine.get(0));
+            this.url = requestLine.get(1).substring(1);
+            this.requestParams = parseParams(url);
             this.requestHeaders = parseHeaders(bufferedReader);
             this.requestBody = parseBody(bufferedReader, requestHeaders);
         } catch (IOException e) {
             throw new IllegalArgumentException(e.getMessage());
         }
+    }
+
+    private Map<String, String> parseParams(final String requestUrl) {
+        int paramIndex = requestUrl.indexOf("?");
+        if (paramIndex < 0) {
+            return new HashMap<>();
+        }
+        return parseBody(requestUrl, paramIndex);
+    }
+
+    private Map<String, String> parseBody(final String requestUrl, int paramIndex) {
+        String[] splitParams = requestUrl.substring(paramIndex + 1).split("&");
+        return Arrays.stream(splitParams)
+                .map(param -> param.split("=", 2))
+                .collect(Collectors.toMap(param -> param[0], param -> param[1]));
+    }
+
+    public Map<String, String> parseRequestBodyParams() {
+        return parseBody(requestBody, -1);
+    }
+
+    public boolean containsFunctionInUrl(final String functionNames) {
+        return url.contains(functionNames);
     }
 
     private Map<String, String> parseHeaders(final BufferedReader bufferedReader) throws IOException {
@@ -74,13 +99,5 @@ public class HttpRequest {
 
     public String getUrl() {
         return url;
-    }
-
-    public Map<String, String> getRequestHeaders() {
-        return requestHeaders;
-    }
-
-    public String getRequestBody() {
-        return requestBody;
     }
 }

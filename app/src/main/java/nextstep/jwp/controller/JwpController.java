@@ -1,56 +1,31 @@
 package nextstep.jwp.controller;
 
+import nextstep.jwp.http.HttpContentType;
+import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpStatus;
-import nextstep.jwp.model.User;
-import nextstep.jwp.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Map;
 import java.util.function.Function;
 
-public class JwpController {
-    private static final Logger log = LoggerFactory.getLogger(JwpController.class);
-
-    private final Map<String, Function<String, Map<HttpStatus, String>>> mappedFunction;
-    private final PageController pageController = new PageController();
-
-    public JwpController() {
-        this.mappedFunction = new HashMap<>();
-        this.mappedFunction.put("login", this::postLogin);
-        this.mappedFunction.put("register", this::postRegister);
+public class JwpController extends AbstractController {
+    @Override
+    void doGet(final HttpRequest request, HttpResponse response) {
+        final Map<String, Function<HttpRequest, HttpResponse>> mappedFunction = Map.of(
+                "index", this::getBasicPage,
+                "401", this::getBasicPage,
+                "404", this::getBasicPage,
+                "500", this::getBasicPage
+        );
+        HttpResponse httpResponse = getHttpResponse(request, mappedFunction);
+        response.setResponse(httpResponse.getResponse());
     }
 
-    private Map<HttpStatus, String> postRegister(final String request) {
-        try {
-            String requestBody = request.split(" ")[1];
-            List<String> params = Arrays.asList(requestBody.split("&"));
-            User user = UserService.registerUser(params);
-            log.info("회원가입된 유저 : " + user.toString());
-            return pageController.mapResponse(HttpStatus.CREATED, "index");
-        } catch (IllegalArgumentException e) {
-            log.error(e.getMessage());
-            return pageController.mapResponse(HttpStatus.BAD_REQUEST, "register");
-        }
+    @Override
+    void doPost(final HttpRequest request, HttpResponse response) {
     }
 
-    private Map<HttpStatus, String> postLogin(final String queryString) {
-        try {
-            List<String> params = Arrays.asList(queryString.split("&"));
-            User user = UserService.findUser(params);
-            log.info("로그인한 유저 : " + user.toString());
-            return pageController.mapResponse(HttpStatus.FOUND, "index");
-        } catch (IllegalArgumentException e) {
-            log.error(e.getMessage());
-            return pageController.mapResponse(HttpStatus.BAD_REQUEST, "401");
-        }
-    }
-
-    public Map<HttpStatus, String> mapResponse(final String request) {
-        return this.mappedFunction.keySet().stream()
-                .filter(request::contains)
-                .map(s -> this.mappedFunction.get(s).apply(request))
-                .findAny()
-                .orElse(Map.of(HttpStatus.NOT_FOUND, "해당 페이지가 존재하지 않습니다."));
+    private HttpResponse getBasicPage(final HttpRequest request) {
+        return new HttpResponse(HttpStatus.OK, HttpContentType.NOTHING, request.getUrl());
     }
 }

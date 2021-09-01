@@ -1,7 +1,6 @@
-package nextstep.jwp;
+package nextstep.jwp.http;
 
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.controller.AbstractController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +16,7 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
+    private final RequestMapping requestMapping = new RequestMapping();
 
     public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
@@ -40,9 +40,12 @@ public class RequestHandler implements Runnable {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         try {
             HttpRequest httpRequest = new HttpRequest(inputStreamReader);
-            HttpResponse response = httpRequest.getHttpMethod().matches(httpRequest);
+            HttpResponse httpResponse = new HttpResponse();
 
-            outputStream.write(response.getHttpResponse().getBytes());
+            AbstractController abstractController = requestMapping.getAbstractController(httpRequest);
+            abstractController.service(httpRequest, httpResponse);
+
+            outputStream.write(httpResponse.getResponse().getBytes());
             outputStream.flush();
         } catch (IOException | IllegalArgumentException e) {
             throw new IllegalArgumentException(e.getMessage());

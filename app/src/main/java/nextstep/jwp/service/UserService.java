@@ -3,11 +3,13 @@ package nextstep.jwp.service;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 
-import java.util.List;
+import java.util.Map;
 
 public class UserService {
+    private UserService() {
+    }
 
-    public static User findUser(final List<String> params) {
+    public static User findUser(final Map<String, String> params) {
         String account = getAccount(params);
         String password = getPassword(params);
         User userByAccount = findUserByAccount(account);
@@ -17,7 +19,7 @@ public class UserService {
         return userByAccount;
     }
 
-    public static User registerUser(final List<String> params) {
+    public static User registerUser(final Map<String, String> params) {
         String account = getAccount(params);
         String password = getPassword(params);
         String email = getEmail(params);
@@ -31,27 +33,27 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
     }
 
-    private static String getPassword(final List<String> params) {
-        return params.stream()
-                .filter(param -> param.contains("password"))
-                .map(param -> param.split("=")[1])
+    private static String getAccount(final Map<String, String> params) {
+        return params.entrySet().stream()
+                .filter(param -> param.getKey().equals("account"))
+                .map(Map.Entry::getValue)
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("계정이 존재하지 않습니다."));
+    }
+
+    private static String getPassword(final Map<String, String> params) {
+        return params.entrySet().stream()
+                .filter(param -> param.getKey().equals("password"))
+                .map(Map.Entry::getValue)
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("비밀번호가 존재하지 않습니다."));
     }
 
-    private static String getAccount(final List<String> params) {
-        return params.stream()
-                .filter(param -> param.contains("account"))
-                .map(param -> param.split("=")[1])
+    private static String getEmail(final Map<String, String> params) {
+        return params.entrySet().stream()
+                .filter(param -> param.getKey().equals("email"))
+                .map(Map.Entry::getValue)
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("아이디가 존재하지 않습니다."));
-    }
-
-    private static String getEmail(final List<String> params) {
-        return params.stream()
-                .filter(param -> param.contains("email"))
-                .map(param -> param.split("=")[1])
-                .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("아이디가 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("이메일이 존재하지 않습니다."));
     }
 }

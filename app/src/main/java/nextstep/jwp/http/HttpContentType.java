@@ -2,22 +2,27 @@ package nextstep.jwp.http;
 
 import java.util.Arrays;
 
-public enum ContentType {
-    JS("text/css"),
-    SVG("text/css"),
+public enum HttpContentType {
+    JS("text/js"),
+    SVG("image/svg+xml"),
     CSS("text/css"),
+    FAVICON("*/*"),
     NOTHING("text/html");
 
     private final String contentTypeResponse;
 
-    ContentType(String contentTypeResponse) {
+    HttpContentType(final String contentTypeResponse) {
         this.contentTypeResponse = contentTypeResponse;
     }
 
-    public static ContentType matches(final String contentTypeHeader) {
+    public static HttpContentType matches(final String contentTypeHeader) {
         return Arrays.stream(values())
                 .filter(contentType -> contentTypeHeader.toLowerCase().contains(contentType.name().toLowerCase()))
                 .findAny()
                 .orElse(NOTHING);
+    }
+
+    public String getContentTypeResponse() {
+        return contentTypeResponse;
     }
 }

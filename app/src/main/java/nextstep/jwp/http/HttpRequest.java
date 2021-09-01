@@ -9,40 +9,30 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.net.HttpHeaders.CONTENT_LENGTH;
+import static nextstep.jwp.http.HttpUtil.parseQuery;
 
 public class HttpRequest {
-    private final String method;
-    private final String path;
     private final Map<String, String> header;
     private final Map<String, String> query;
+    private final RequestLine requestLine;
 
-    private HttpRequest(String method, String path, Map<String, String> header, Map<String, String> query) {
-        this.method = method;
-        this.path = path;
+    private HttpRequest(RequestLine requestLine, Map<String, String> header, Map<String, String> query) {
         this.header = header;
         this.query = query;
+        this.requestLine = requestLine;
     }
 
     public static HttpRequest of(InputStream inputStream) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         String requestLine = br.readLine();
-        String[] parsedRequestLine = requestLine.split(" ");
-        String method = parsedRequestLine[0];
-        String url = parsedRequestLine[1];
         Map<String, String> header = parseHeader(br);
         Map<String, String> query = new HashMap<>();
+
         if (header.containsKey(CONTENT_LENGTH)) {
             query.putAll(parseQuery(parseBody(br, Integer.parseInt(header.get(CONTENT_LENGTH)))));
         }
 
-        int queryStartIndex = url.indexOf("?");
-
-        if (queryStartIndex != -1) {
-            query.putAll(parseQuery(url.substring(queryStartIndex + 1)));
-            url = url.substring(0, queryStartIndex);
-        }
-
-        return new HttpRequest(method, url, header, query);
+        return new HttpRequest(RequestLine.of(requestLine), header, query);
     }
 
     private static Map<String, String> parseHeader(BufferedReader request) throws IOException {
@@ -59,18 +49,6 @@ public class HttpRequest {
         return header;
     }
 
-    private static Map<String, String> parseQuery(String query) {
-        Map<String, String> queryMap = new HashMap<>();
-
-        String[] data = query.split("&");
-        for (String each : data) {
-            String[] keyAndValue = each.split("=");
-            queryMap.put(keyAndValue[0], keyAndValue[1]);
-        }
-
-        return queryMap;
-    }
-
     private static String parseBody(BufferedReader request, int contentLength) throws IOException {
         char[] buffer = new char[contentLength];
         request.read(buffer, 0, contentLength);
@@ -85,12 +63,8 @@ public class HttpRequest {
         return header.get(headerValue);
     }
 
-    public boolean isMatchedPath(String path) {
-        return this.path.startsWith(path);
-    }
-
     public boolean checkMethod(String method) {
-        return this.method.equals(method);
+        return requestLine.checkMethod(method);
     }
 
     public String getQueryValue(String queryValue) {
@@ -98,7 +72,7 @@ public class HttpRequest {
     }
 
     public String getPath() {
-        return path;
+        return requestLine.getPath();
     }
 
     public Map<String, String> getHeader() {

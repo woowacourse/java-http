@@ -1,13 +1,10 @@
 package nextstep.jwp;
 
-import ch.qos.logback.core.joran.conditional.IfAction;
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.exception.BaseException;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
-import nextstep.jwp.mvc.RequestMapping;
+import nextstep.jwp.controller.RequestMapping;
 import nextstep.jwp.service.UserService;
-import org.checkerframework.framework.qual.IgnoreInWholeProgramInference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,13 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-
-import static nextstep.jwp.http.AcceptType.TEXT_CSS;
-import static nextstep.jwp.http.Header.ACCEPT;
-import static nextstep.jwp.http.Header.CONTENT_TYPE;
 
 public class RequestHandler implements Runnable {
 

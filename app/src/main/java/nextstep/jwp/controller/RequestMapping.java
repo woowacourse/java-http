@@ -1,7 +1,6 @@
-package nextstep.jwp.mvc;
+package nextstep.jwp.controller;
 
 import nextstep.jwp.ApplicationContext;
-import nextstep.jwp.controller.Controller;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

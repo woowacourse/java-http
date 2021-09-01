@@ -28,7 +28,6 @@ public class HttpResponse {
 
     private final String protocol;
     private final HttpStatus httpStatus;
-    private final HttpCookie httpCookie;
     private final ContentType contentType;
     private final Integer contentLength;
     private final String location;
@@ -36,30 +35,26 @@ public class HttpResponse {
 
     public HttpResponse(final String protocol,
                         final HttpStatus httpStatus,
-                        final HttpCookie httpCookie,
                         final String location) {
-        this(protocol, httpStatus, httpCookie, null, null, location, null);
+        this(protocol, httpStatus, null, null, location, null);
     }
 
     public HttpResponse(final String protocol,
                         final HttpStatus httpStatus,
-                        final HttpCookie httpCookie,
                         final ContentType contentType,
                         final Integer contentLength,
                         final String responseBody) {
-        this(protocol, httpStatus, httpCookie, contentType, contentLength, null, responseBody);
+        this(protocol, httpStatus, contentType, contentLength, null, responseBody);
     }
 
     public HttpResponse(final String protocol,
                         final HttpStatus httpStatus,
-                        final HttpCookie httpCookie,
                         final ContentType contentType,
                         final Integer contentLength,
                         final String location,
                         final String responseBody) {
         this.protocol = protocol;
         this.httpStatus = httpStatus;
-        this.httpCookie = httpCookie;
         this.contentType = contentType;
         this.contentLength = contentLength;
         this.location = location;
@@ -84,9 +79,9 @@ public class HttpResponse {
                 contentLength
         );
 
-        if (httpCookie.doesNotHaveJSession()) {
-            header = header + String.format(COOKIE_FORMAT, UUID.randomUUID());
-        }
+//        if (httpCookie.doesNotHaveJSession()) {
+//            header = header + String.format(COOKIE_FORMAT, UUID.randomUUID());
+//        }
 
         return header + "\r\n" + responseBody;
     }

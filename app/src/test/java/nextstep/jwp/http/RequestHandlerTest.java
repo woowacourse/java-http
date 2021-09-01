@@ -50,12 +50,12 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected.toResponseMessage());
     }
 
-    @DisplayName("존재하지 않는 페이지를 요청하면 404 페이지를 반환한다")
+    @DisplayName("요청을 처리할 수 있는 handler가 없을 때, 500 페이지를 반환한다")
     @Test
-    void not_found() throws IOException {
+    void no_matching_controller() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
-                "GET /sakjung HTTP/1.1 ",
+                "PUT /sakjung HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -68,11 +68,11 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        final URL resource = getClass().getClassLoader().getResource("static/500.html");
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         final HttpResponse expected = new HttpResponse(
                 protocol,
-                HttpStatus.NOT_FOUND,
+                HttpStatus.INTERNAL_SERVER_ERROR,
                 ContentType.HTML,
                 responseBody.getBytes().length,
                 responseBody
@@ -172,22 +172,5 @@ class RequestHandlerTest {
         );
 
         assertThat(socket.output()).isEqualTo(expected.toResponseMessage());
-    }
-
-    @DisplayName("요청을 처리할 수 없는 handler가 없을 때, 에러를 반환한다")
-    @Test
-    void no_matching_controller_exception() {
-        final String httpRequest= String.join("\r\n",
-                "PUT /sakjung HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
-
-        assertThatThrownBy(requestHandler::run)
-                .isInstanceOf(NoMatchingControllerException.class);
     }
 }

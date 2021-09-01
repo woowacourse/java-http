@@ -54,6 +54,10 @@ public class HttpRequestHeader {
         return httpCookie.doesNotHaveJSession();
     }
 
+    public boolean doesNotHaveQueryParameters() {
+        return requestLine.doesNotHaveQueryParameters();
+    }
+
     public HttpMethod getHttpMethod() {
         return requestLine.getHttpMethod();
     }

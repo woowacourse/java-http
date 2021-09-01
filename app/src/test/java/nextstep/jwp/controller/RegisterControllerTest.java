@@ -30,13 +30,6 @@ class RegisterControllerTest {
         assertThat(registerController.canHandle(staticResourceRequest)).isFalse();
     }
 
-    @DisplayName("get요청을 핸들링 하려하면 exception을 던진다")
-    @Test
-    void doGet() {
-        assertThatThrownBy(() -> registerController.doGet(registerRequest))
-                .isInstanceOf(UnsupportedOperationException.class);
-    }
-
     @DisplayName("post요청을 성공적으로 핸들링 하면 index.html페이지를 반환한다")
     @Test
     void doPost_success() {

@@ -1,12 +1,13 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.*;
+import nextstep.jwp.http.ContentType;
+import nextstep.jwp.http.HttpMethod;
+import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.service.UserService;
 
 import java.util.Map;
-import java.util.UUID;
 
 public class LoginController extends AbstractController {
     private final UserService userService;
@@ -19,29 +20,23 @@ public class LoginController extends AbstractController {
     public boolean canHandle(final HttpRequest httpRequest) {
         final HttpMethod httpMethod = httpRequest.getHttpMethod();
         final String path = httpRequest.getPath();
-        return httpMethod.isPost() && "/login".equals(path);
-    }
-
-    @Override
-    public HttpResponse doGet(HttpRequest httpRequest) {
-        throw new UnsupportedOperationException();
+        return (httpMethod.isGet() || httpMethod.isPost()) && "/login".equals(path);
     }
 
     @Override
     public HttpResponse doPost(final HttpRequest httpRequest) {
         try {
-            final Map<String, String> queryParameters = httpRequest.getPayload();
-            final String account = queryParameters.get("account");
-            final String password = queryParameters.get("password");
+            final Map<String, String> payload = httpRequest.getPayload();
+            final String account = payload.get("account");
+            final String password = payload.get("password");
             userService.login(account, password);
 
-            final UUID uuid = UUID.randomUUID();
+//            final UUID uuid = UUID.randomUUID();
 
             final String redirectUrl = "/index.html";
             return new HttpResponse(
                     httpRequest.getProtocol(),
                     HttpStatus.FOUND,
-                    httpRequest.getCookie(),
                     redirectUrl
             );
         } catch (Exception exception) {
@@ -51,7 +46,6 @@ public class LoginController extends AbstractController {
             return new HttpResponse(
                     httpRequest.getProtocol(),
                     HttpStatus.findHttpStatusByUrl(unauthorizedUrl),
-                    httpRequest.getCookie(),
                     ContentType.findByUrl(unauthorizedUrl),
                     responseBody.getBytes().length,
                     responseBody);

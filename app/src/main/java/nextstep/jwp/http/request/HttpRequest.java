@@ -53,6 +53,14 @@ public class HttpRequest {
         return new String(buffer);
     }
 
+    public boolean doesNotHaveJSession() {
+        return header.doesNotHaveJSession();
+    }
+
+    public boolean doesNotHaveQueryParameters() {
+        return header.doesNotHaveQueryParameters();
+    }
+
     public boolean isGet() {
         return getHttpMethod().isGet();
     }
@@ -79,9 +87,5 @@ public class HttpRequest {
 
     public HttpCookie getCookie() {
         return header.getCookie();
-    }
-
-    public boolean doesNotHaveJSession() {
-        return header.doesNotHaveJSession();
     }
 }

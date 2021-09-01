@@ -27,7 +27,7 @@ public class RequestLine {
         final Map<String, String> requestQueryParameters = parseQueryParameters(requestPath);
 
         this.httpMethod = requestHttpMethod;
-        this.path = adjustPath(requestPath, requestHttpMethod);
+        this.path = adjustPath(requestPath);
         this.protocol = requestProtocol;
         this.queryParameters = requestQueryParameters;
     }
@@ -44,22 +44,22 @@ public class RequestLine {
         return newQueryParameters;
     }
 
-    private String adjustPath(final String path, final HttpMethod httpMethod) {
+    private String adjustPath(final String path) {
         if ("/".equals(path)) {
             return "/index.html";
         }
 
-        ContentType contentType = ContentType.findByUrl(path);
-        if (!contentType.equals(ContentType.NONE) || httpMethod.isPost()) {
+        final ContentType contentType = ContentType.findByUrl(path);
+        final int index = path.indexOf(QUERY_PARAMETER_DELIMITER);
+        if (contentType.hasFileExtension() || index == -1) {
             return path;
         }
 
-        final int index = path.indexOf(QUERY_PARAMETER_DELIMITER);
-        if (index != -1) {
-            return path.substring(0, index + 1);
-        }
+        return path.substring(0, index + 1);
+    }
 
-        return path + ".html";
+    public boolean doesNotHaveQueryParameters() {
+        return queryParameters.isEmpty();
     }
 
     public HttpMethod getHttpMethod() {

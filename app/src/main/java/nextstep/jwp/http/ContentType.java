@@ -28,6 +28,10 @@ public enum ContentType {
                 .orElseThrow(NoSuchContentTypeException::new);
     }
 
+    public boolean hasFileExtension() {
+        return !this.equals(NONE);
+    }
+
     public String getMimeType() {
         return mimeType;
     }

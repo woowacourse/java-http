@@ -52,8 +52,8 @@ public class RequestHandler implements Runnable {
     private HttpResponse getHttpResponse(final InputStream inputStream) throws IOException {
         inputStreamReader = new BufferedReader(new InputStreamReader(inputStream));
         HttpRequest httpRequest = HttpRequest.parseRequest(inputStreamReader);
-        Controller controller = requestMapping.findController(httpRequest);
         try {
+            Controller controller = requestMapping.findController(httpRequest);
             return controller.doService(httpRequest);
         } catch (ResourceNotFoundException exception) {
             httpRequest = HttpRequest.ofStaticFile("/404.html");

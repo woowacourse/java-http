@@ -1,5 +1,7 @@
 package nextstep.jwp.controller;
 
+import nextstep.jwp.http.ContentType;
+import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.exception.ResourceNotFoundException;
@@ -32,7 +34,22 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    public abstract HttpResponse doGet(final HttpRequest httpRequest);
+    protected HttpResponse doGet(final HttpRequest httpRequest) {
+        String path = httpRequest.getPath();
+        final ContentType contentType = ContentType.findByUrl(path);
+        if (!contentType.hasFileExtension() && httpRequest.doesNotHaveQueryParameters()) {
+            path += ".html";
+        }
+        final String responseBody = readFile(path);
+        final HttpStatus httpStatus = HttpStatus.findHttpStatusByUrl(path);
+
+        return new HttpResponse(
+                httpRequest.getProtocol(),
+                httpStatus,
+                contentType,
+                responseBody.getBytes().length,
+                responseBody);
+    }
 
     public abstract HttpResponse doPost(final HttpRequest httpRequest);
 }

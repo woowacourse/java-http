@@ -16,12 +16,7 @@ public class RegisterController extends AbstractController {
     public boolean canHandle(final HttpRequest httpRequest) {
         final HttpMethod httpMethod = httpRequest.getHttpMethod();
         final String path = httpRequest.getPath();
-        return httpMethod.isPost() && "/register".equals(path);
-    }
-
-    @Override
-    public HttpResponse doGet(HttpRequest httpRequest) {
-        throw new UnsupportedOperationException();
+        return (httpMethod.isGet() || httpMethod.isPost()) && "/register".equals(path);
     }
 
     @Override
@@ -32,7 +27,6 @@ public class RegisterController extends AbstractController {
         return new HttpResponse(
                 httpRequest.getProtocol(),
                 HttpStatus.SEE_OTHER,
-                httpRequest.getCookie(),
                 redirectUrl
         );
     }

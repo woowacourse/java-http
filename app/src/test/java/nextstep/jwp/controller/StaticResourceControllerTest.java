@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class StaticResourceControllerTest {
     protected static final HttpRequest staticResourceRequest = new HttpRequest(
-            new HttpRequestHeader(List.of("GET /register HTTP/1.1 ")),
+            new HttpRequestHeader(List.of("GET /index.html HTTP/1.1 ")),
             null
     );
 
@@ -33,7 +33,7 @@ class StaticResourceControllerTest {
     void doGet() {
         final HttpResponse actual = staticResourceController.doGet(staticResourceRequest);
 
-        final String url = "/register.html";
+        final String url = "/index.html";
         final String responseBody = staticResourceController.readFile(url);
         final HttpStatus httpStatus = HttpStatus.findHttpStatusByUrl(url);
 

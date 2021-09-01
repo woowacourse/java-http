@@ -20,21 +20,6 @@ public class StaticResourceController extends AbstractController {
     }
 
     @Override
-    public HttpResponse doGet(final HttpRequest httpRequest) {
-        String path = httpRequest.getPath();
-        final String responseBody = readFile(path);
-        final HttpStatus httpStatus = HttpStatus.findHttpStatusByUrl(path);
-
-        return new HttpResponse(
-                httpRequest.getProtocol(),
-                httpStatus,
-                httpRequest.getCookie(),
-                ContentType.findByUrl(path),
-                responseBody.getBytes().length,
-                responseBody);
-    }
-
-    @Override
     public HttpResponse doPost(final HttpRequest httpRequest) {
         throw new UnsupportedOperationException();
     }

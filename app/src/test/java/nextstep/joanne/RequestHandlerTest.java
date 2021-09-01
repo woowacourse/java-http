@@ -1,6 +1,10 @@
 package nextstep.joanne;
 
-import nextstep.joanne.handler.RequestHandler;
+import nextstep.joanne.server.handler.HandlerMapping;
+import nextstep.joanne.server.handler.RequestHandler;
+import nextstep.joanne.server.handler.controller.ControllerFactory;
+import nextstep.joanne.server.http.request.HttpRequestParser;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,12 +21,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestHandlerTest {
 
+    // given
+    MockSocket socket;
+    RequestHandler requestHandler;
+
+    @BeforeEach
+    void setUp() {
+        socket = new MockSocket();
+        requestHandler = new RequestHandler(
+                socket,
+                new HandlerMapping(ControllerFactory.addControllers()),
+                new HttpRequestParser()
+        );
+    }
+
     @Test
     void run() throws IOException {
-        // given
-        final MockSocket socket = new MockSocket();
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
         // when
         requestHandler.run();
 
@@ -36,7 +50,7 @@ class RequestHandlerTest {
     private String to200OkWithHtml(String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/html",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
@@ -48,9 +62,6 @@ class RequestHandlerTest {
     void preserveStaticResource(String uri) throws IOException {
         // given
         final String httpRequest = makeGetRequest(uri);
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
 
         // when
         requestHandler.run();
@@ -71,8 +82,6 @@ class RequestHandlerTest {
         //given
         final String uri = "/css/styles.css";
         final String httpRequest = makeGetRequest(uri);
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
 
         //when
         requestHandler.run();
@@ -95,7 +104,7 @@ class RequestHandlerTest {
     private String to200OkWithCSS() {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/css;charset=utf-8 ",
+                "Content-Type: text/css",
                 "Content-Length: 211991 ",
                 "",
                 "");
@@ -106,9 +115,6 @@ class RequestHandlerTest {
     void loginWithQueryString() throws IOException {
         // given
         final String httpRequest = makePostRequest("/login.html", "account=gugu&password=password");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
 
         // when
         requestHandler.run();
@@ -123,7 +129,7 @@ class RequestHandlerTest {
     private String to302FoundWithHtml(String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/html ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
@@ -134,9 +140,6 @@ class RequestHandlerTest {
     void loginWithQueryStringWhenWrongAccount() throws IOException {
         // given
         final String httpRequest = makePostRequest("/login", "account=merong&password=merong");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
 
         // when
         requestHandler.run();
@@ -150,7 +153,7 @@ class RequestHandlerTest {
     private String to401UnauthorizedWithHtml(String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 401 Unauthorized ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/html ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
@@ -162,9 +165,6 @@ class RequestHandlerTest {
         // given
         final String httpRequest = makePostRequest("/register.html",
                 "account=joanne&password=password&email=hkkang%40woowahan.com");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
 
         // when
         requestHandler.run();
@@ -182,9 +182,6 @@ class RequestHandlerTest {
         // given
         final String httpRequest = makeGetRequest("/joanne.html");
 
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
         // when
         requestHandler.run();
 
@@ -197,8 +194,8 @@ class RequestHandlerTest {
 
     private String to404NotFoundWithHtml(String responseBody) {
         return String.join("\r\n",
-                "HTTP/1.1 404 Not Found ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "HTTP/1.1 404 Not Found",
+                "Content-Type: text/html",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

@@ -1,5 +1,9 @@
 package nextstep.jwp.http;
 
+import nextstep.jwp.http.authentication.HttpSession;
+import nextstep.jwp.http.authentication.HttpSessions;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.request.HttpRequestHeader;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.infrastructure.RequestHandler;
 import nextstep.jwp.infrastructure.RequestMapping;
@@ -10,6 +14,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -105,6 +111,38 @@ class RequestHandlerTest {
                 ContentType.HTML,
                 responseBody.getBytes().length,
                 responseBody
+        );
+
+        assertThat(socket.output()).isEqualTo(expected.toResponseMessage());
+    }
+
+    @DisplayName("login get 요청이 왔을 때, cookie가 있다면 index.html페이지를 출력한다")
+    @Test
+    void login_get_with_cookie() throws IOException {
+        // given
+        final String uuid = UUID.randomUUID().toString();
+        final HttpSession httpSession = new HttpSession(uuid);
+        HttpSessions.addSession(uuid, httpSession);
+
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=" + uuid,
+                "",
+                "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final HttpResponse expected = new HttpResponse(
+                protocol,
+                HttpStatus.FOUND,
+                "/index.html"
         );
 
         assertThat(socket.output()).isEqualTo(expected.toResponseMessage());

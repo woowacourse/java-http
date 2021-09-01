@@ -36,12 +36,12 @@ public abstract class AbstractController implements Controller {
 
     protected HttpResponse doGet(final HttpRequest httpRequest) {
         String path = httpRequest.getPath();
-        final ContentType contentType = ContentType.findByUrl(path);
-        if (!contentType.hasFileExtension() && httpRequest.doesNotHaveQueryParameters()) {
+        if (!ContentType.findByUrl(path).hasFileExtension() && httpRequest.doesNotHaveQueryParameters()) {
             path += ".html";
         }
         final String responseBody = readFile(path);
         final HttpStatus httpStatus = HttpStatus.findHttpStatusByUrl(path);
+        final ContentType contentType = ContentType.findByUrl(path);
 
         return new HttpResponse(
                 httpRequest.getProtocol(),

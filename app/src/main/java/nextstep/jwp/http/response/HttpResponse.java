@@ -105,9 +105,8 @@ public class HttpResponse {
         try {
             if (Objects.isNull(body)) {
                 writeWithoutBody(outputStream);
-            } else {
-                writeWithBody(outputStream);
             }
+            writeWithBody(outputStream);
         } catch (IOException exception) {
             log.error("Exception output stream", exception);
         }

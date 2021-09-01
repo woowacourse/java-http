@@ -12,7 +12,7 @@
 - [x] CSS 지원하기
 
 ## 2 단계
-- [ ] RequestMapping: uri로 컨트롤러 반환
+- [x] RequestMapping: uri로 컨트롤러 반환
 
 ## 3 단계
 - [ ] HttpCookie 구현

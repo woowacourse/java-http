@@ -20,10 +20,12 @@ public class HttpResponse {
     }
 
     private static String readErrorPage(BaseException baseException) {
-        if (baseException.getStatusCode() == 401) {
+        int statusCode = baseException.getStatusCode();
+
+        if (statusCode == 401) {
             return FileReader.readStaticFile("401.html");
         }
-        if (baseException.getStatusCode() == 404) {
+        if (statusCode == 404 || statusCode == 405) {
             return FileReader.readStaticFile("404.html");
         }
         return FileReader.readStaticFile("500.html");

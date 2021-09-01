@@ -19,9 +19,13 @@ public abstract class AbstractController implements Controller {
         }
     }
 
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */ }
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+        throw new MethodNotAllowedException();
+    }
 
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception { /* NOOP */ }
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        throw new MethodNotAllowedException();
+    }
 
     protected String readStaticFile(String fileName) {
         URL resource = getClass().getClassLoader().getResource("static/" + fileName);

@@ -33,7 +33,7 @@ public class RequestHandler implements Runnable {
                 httpRequest = getHttpRequest(bufferedReader);
                 Controller controller = getController(httpRequest);
                 controller.service(httpRequest, httpResponse);
-            } catch (BaseException baseException) {
+            } catch (BaseException baseException) { // todo: ExceptionHandler 인터페이스 구현, ExceptionResolver에 등록
                 HttpResponse.errorPage(baseException, httpResponse);
                 log.error("BaseException", baseException);
             }

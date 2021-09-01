@@ -10,12 +10,14 @@ import java.nio.file.Path;
 import java.util.Objects;
 import nextstep.jwp.framework.RequestHandler;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
 
+    @DisplayName("GET 요청")
     @Test
-    void run() throws IOException {
+    void get() throws IOException {
         // given
         final MockSocket socket = new MockSocket();
         final RequestHandler requestHandler = new RequestHandler(socket);
@@ -29,6 +31,28 @@ class RequestHandlerTest {
         String expected = String.join("\r\n",
             "HTTP/1.1 200 OK ",
             "Content-Length: 12 ",
+            "Content-Type: text/html;charset=utf-8 ",
+            "",
+            htmlValue);
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("POST 요청")
+    @Test
+    void post() throws IOException {
+        // given
+        final MockSocketWithBody socket = new MockSocketWithBody();
+        final RequestHandler requestHandler = new RequestHandler(socket);
+        final Path path = new File(Objects.requireNonNull(getClass().getClassLoader().getResource("static/index.html")).getPath()).toPath();
+        final String htmlValue = Files.readString(path);
+
+        // when
+        requestHandler.run();
+
+        // then
+        String expected = String.join("\r\n",
+            "HTTP/1.1 302 Found ",
+            "Content-Length: 46 ",
             "Content-Type: text/html;charset=utf-8 ",
             "",
             htmlValue);

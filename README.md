@@ -14,8 +14,8 @@
 ## 2, 3단계 요구사항
 - [x] 리팩토링 - 적절한 클래스를 추가하고 역할을 부여하여 객체 분리
 - [x] Controller 인터페이스 추가
-- [ ] Cookie에 JSESSIONID 값 저장하기 
-- [ ] Session 구현하기
+- [x] Cookie에 JSESSIONID 값 저장하기 
+- [x] Session 구현하기
 
 <br>
 

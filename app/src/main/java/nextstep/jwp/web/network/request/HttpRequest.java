@@ -1,54 +1,33 @@
 package nextstep.jwp.web.network.request;
 
-import nextstep.jwp.web.exception.InputException;
 import nextstep.jwp.web.network.URI;
+import nextstep.jwp.web.network.response.HttpHeaders;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
 import java.util.Map;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final Map<String, String> headers;
-    private final String body;
+    private final HttpHeaders headers;
+    private final HttpBody body;
 
     public HttpRequest(InputStream inputStream) {
-        try {
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            this.requestLine = RequestLine.of(bufferedReader.readLine());
-            this.headers = parseHeaders(bufferedReader);
-            this.body = parseBody(bufferedReader, headers);
-        } catch (IOException exception) {
-            throw new InputException("Exception while reading http request");
-        }
+        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+        this.requestLine = RequestLine.of(bufferedReader);
+        this.headers = HttpHeaders.of(bufferedReader);
+        this.body = HttpBody.of(bufferedReader, contentLength());
     }
 
-    private static Map<String, String> parseHeaders(BufferedReader bufferedReader) throws IOException {
-        final Map<String, String> headers = new HashMap<>();
-        String line = bufferedReader.readLine();
-        while(!"".equals(line)) {
-            final String[] keyValue = line.split(":");
-            headers.put(keyValue[0].trim(), keyValue[1].trim());
-            line = bufferedReader.readLine();
-            if (line == null) {
-                break;
-            }
+    private int contentLength() {
+        final String contentLengthAsString = this.headers.get("Content-Length");
+        if (contentLengthAsString.equals("")) {
+            return 0;
         }
-        return headers;
-    }
-
-    private static String parseBody(BufferedReader bufferedReader, Map<String, String> headers) throws IOException {
-        if (bufferedReader.ready()) {
-            final int contentLength = Integer.parseInt(headers.get("Content-Length"));
-            final char[] buffer = new char[contentLength];
-            bufferedReader.read(buffer, 0, contentLength);
-            return new String(buffer);
-        }
-        return "";
+        return Integer.parseInt(this.headers.get("Content-Length"));
     }
 
     public HttpMethod getHttpMethod() {
@@ -59,14 +38,8 @@ public class HttpRequest {
         return requestLine.getURI();
     }
 
-    public Map<String, String> getBody() {
-        final Map<String, String> bodyAsMap = new HashMap<>();
-        final String[] params = body.split("&");
-        for (String param : params) {
-            final String[] keyAndValue = param.split("=", 2);
-            bodyAsMap.put(keyAndValue[0], keyAndValue[1]);
-        }
-        return bodyAsMap;
+    public Map<String, String> bodyAsMap() {
+        return body.asMap();
     }
 
     public String getPath() {

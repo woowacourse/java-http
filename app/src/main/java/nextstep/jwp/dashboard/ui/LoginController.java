@@ -33,7 +33,7 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         try {
-            final Map<String, String> queryInfo = request.getBody();
+            final Map<String, String> queryInfo = request.bodyAsMap();
             final User user = InMemoryUserRepository.findByAccount(queryInfo.get("account"))
                     .orElseThrow(() -> new UserNotFoundException(queryInfo.get("account")));
             if (user.checkPassword(queryInfo.get("password"))) {

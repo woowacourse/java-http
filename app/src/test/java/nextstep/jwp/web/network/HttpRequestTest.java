@@ -5,10 +5,8 @@ import nextstep.jwp.web.network.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Map;
 
 import static java.util.Map.entry;
@@ -94,7 +92,7 @@ class HttpRequestTest {
 
         // when
         final HttpRequest httpRequest = new HttpRequest(inputStream);
-        final Map<String, String> actual = httpRequest.getBody();
+        final Map<String, String> actual = httpRequest.bodyAsMap();
 
         // then
         assertThat(actual)

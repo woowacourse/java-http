@@ -7,7 +7,7 @@ import nextstep.jwp.http.http_response.JwpHttpResponse;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-public class ResourceHandler extends AbstractController {
+public class ResourceController extends AbstractController {
 
     @Override
     public JwpHttpResponse doGet(JwpHttpRequest request) throws URISyntaxException, IOException {

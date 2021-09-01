@@ -1,5 +1,6 @@
 package nextstep.jwp.http.http_request;
 
+import com.google.common.net.HttpHeaders;
 import nextstep.jwp.exception.NotFoundParamException;
 import nextstep.jwp.http.common.Headers;
 import org.slf4j.Logger;
@@ -78,7 +79,11 @@ public class JwpHttpRequest {
     }
 
     private static JwpHttpRequest post(BufferedReader reader, JwpHttpMethod requestMethod, String requestUri, String requestHttpVersion, Headers headers) throws IOException {
-        int contentLength = Integer.parseInt(headers.getHeaderValue("Content-Length"));
+        if (headers.hasNoContent()) {
+            return new JwpHttpRequest(requestMethod, requestUri, requestHttpVersion, headers);
+        }
+
+        int contentLength = Integer.parseInt(headers.getHeaderValue(HttpHeaders.CONTENT_LENGTH));
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         String requestBody = URLDecoder.decode(new String(buffer), "UTF-8");
@@ -114,10 +119,6 @@ public class JwpHttpRequest {
 
     public Headers getHeaders() {
         return headers;
-    }
-
-    public boolean isEmptyParams() {
-        return params.isEmpty();
     }
 
     public String getParam(String key) {

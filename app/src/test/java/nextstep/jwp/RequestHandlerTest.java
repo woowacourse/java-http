@@ -244,4 +244,62 @@ class RequestHandlerTest {
                 .isExactlyInstanceOf(AlreadyRegisteredUser.class);
     }
 
+    @DisplayName("[GET] /foo - FAIL")
+    @Test
+    void notRegisteredGetRequestMapping() throws URISyntaxException, IOException {
+        // given
+        String request = String.join("\r\n",
+                "GET /foo HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        final MockSocket socket = new MockSocket(request);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        Path path = Paths.get(resource.toURI());
+        String resourceFile = new String(Files.readAllBytes(path));
+        String expected = String.join("\r\n",
+                "HTTP/1.1 404 Not Found ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + resourceFile.getBytes().length + " ",
+                "",
+                resourceFile);
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("[POST] /foo - FAIL")
+    @Test
+    void notRegisteredPOSTRequestMapping() throws URISyntaxException, IOException {
+        // given
+        String request = String.join("\r\n",
+                "POST /foo HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + 0 + " ",
+                "",
+                "");
+        final MockSocket socket = new MockSocket(request);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        Path path = Paths.get(resource.toURI());
+        String resourceFile = new String(Files.readAllBytes(path));
+        String expected = String.join("\r\n",
+                "HTTP/1.1 404 Not Found ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + resourceFile.getBytes().length + " ",
+                "",
+                resourceFile);
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

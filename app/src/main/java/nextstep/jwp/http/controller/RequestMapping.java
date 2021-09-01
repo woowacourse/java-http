@@ -1,15 +1,15 @@
 package nextstep.jwp.http.controller;
 
+import nextstep.jwp.controller.NotFoundController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
-import nextstep.jwp.controller.ResourceHandler;
-import nextstep.jwp.exception.NotFoundHandlerException;
+import nextstep.jwp.controller.ResourceController;
 
 import java.util.Arrays;
 import java.util.function.Predicate;
 
 public enum RequestMapping {
-    RESOURCE(uri -> uri.contains("."), new ResourceHandler()),
+    RESOURCE(uri -> uri.contains("."), new ResourceController()),
     LOGIN(uri -> uri.equals("/login"), new LoginController()),
     REGISTER(uri -> uri.equals("/register"), new RegisterController())
     ;
@@ -26,8 +26,8 @@ public enum RequestMapping {
         return Arrays.stream(values())
                 .filter(handlerMapper -> handlerMapper.isSatisfied(uri))
                 .findAny()
-                .orElseThrow(NotFoundHandlerException::new)
-                .controller
+                .map(mapper -> mapper.controller)
+                .orElseGet(NotFoundController::new)
                 ;
     }
 

@@ -1,5 +1,6 @@
 package nextstep.jwp.http.common;
 
+import com.google.common.net.HttpHeaders;
 import nextstep.jwp.exception.NotFoundHeaderException;
 
 import java.io.BufferedReader;
@@ -67,5 +68,14 @@ public class Headers {
         }
 
         return headerValues.get(0);
+    }
+
+    public boolean containsHeader(String header) {
+        return values.containsKey(header);
+    }
+
+    public boolean hasNoContent() {
+        return !values.containsKey(HttpHeaders.CONTENT_LENGTH)
+                || values.get(HttpHeaders.CONTENT_LENGTH).get(0).equals("0");
     }
 }

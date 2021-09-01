@@ -6,17 +6,22 @@ import java.util.Arrays;
 import java.util.function.Predicate;
 
 public enum JwpContentType {
-    HTML(uri -> uri.endsWith(".html"), "text/html"),
-    CSS(uri -> uri.endsWith(".css"), "text/css"),
-    JS(uri -> uri.endsWith(".js"), "application/javascript"),
-    ;
+    HTML(".html", "text/html;charset=utf-8"),
+    CSS(".css", "text/css;charset=utf-8"),
+    JS(".js", "application/javascript;charset=utf-8"),
+    ICON(".ico", "image/x-icon;charset=utf-8"),
+    SVG(".svg", "image/svg+xml;charset=utf-8");
 
     private final Predicate<String> condition;
-    private final String resourceType;
+    private final String contentType;
 
-    JwpContentType(Predicate<String> condition, String resourceType) {
+    JwpContentType(String type, String contentType) {
+        this(uri -> uri.endsWith(type), contentType);
+    }
+
+    JwpContentType(Predicate<String> condition, String contentType) {
         this.condition = condition;
-        this.resourceType = resourceType;
+        this.contentType = contentType;
     }
 
     public static String find(String resourceUri) {
@@ -24,14 +29,14 @@ public enum JwpContentType {
                 .filter(type -> type.isSatisfied(resourceUri))
                 .findAny()
                 .orElseThrow(NotFoundContentTypeException::new)
-                .resourceType + ";charset=utf-8";
+                .contentType;
     }
 
     private boolean isSatisfied(String resourceFile) {
         return this.condition.test(resourceFile);
     }
 
-    public String getResourceType() {
-        return resourceType;
+    public String getContentType() {
+        return contentType;
     }
 }

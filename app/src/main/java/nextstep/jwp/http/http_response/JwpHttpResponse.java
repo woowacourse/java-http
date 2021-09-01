@@ -35,8 +35,8 @@ public class JwpHttpResponse {
 
     public static JwpHttpResponse notFound(String resourceFile) {
         return new Builder()
-                .statusCode(StatusCode.OK)
-                .header("Content-Type", JwpContentType.HTML.getResourceType())
+                .statusCode(StatusCode.NOT_FOUND)
+                .header("Content-Type", JwpContentType.HTML.getContentType())
                 .header("Content-Length", resourceFile.getBytes().length)
                 .body(resourceFile)
                 .build();

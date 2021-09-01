@@ -24,7 +24,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(HttpRequest request) {
-        try{
+        try {
             final Body body = request.getBody();
             final Map<String, String> params = ParamExtractor.extractParams(body.asString());
             String account = params.get("account");

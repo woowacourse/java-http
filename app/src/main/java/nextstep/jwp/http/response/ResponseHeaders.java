@@ -12,7 +12,7 @@ public class ResponseHeaders {
         this.headers = headers;
     }
 
-    public ResponseHeaders(){
+    public ResponseHeaders() {
         this(new HashMap<>());
     }
 

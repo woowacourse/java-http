@@ -19,7 +19,6 @@ public class RegisterController extends AbstractController {
     private static final String REGISTER_PATH = "/register";
     private static final String REGISTER_RESOURCE_PATH = "/register.html";
 
-
     @Override
     protected HttpResponse doGet(HttpRequest request) {
         return HttpResponse.of(HttpStatus.OK, new RequestURI(REGISTER_RESOURCE_PATH));

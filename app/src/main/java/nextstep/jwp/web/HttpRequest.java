@@ -1,5 +1,7 @@
 package nextstep.jwp.web;
 
+import nextstep.jwp.db.HttpSessions;
+
 import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -72,6 +74,15 @@ public class HttpRequest {
                 .map(cookiePair -> cookiePair.split("="))
                 .map(nameValueArr -> new Cookie(nameValueArr[0], nameValueArr[1]))
                 .collect(Collectors.toList());
+    }
+
+    public HttpSession getSession() {
+        Cookie sessionCookie = getCookie(HttpSession.SESSION_NAME);
+        if (sessionCookie != null) {
+            String sessionId = sessionCookie.getValue();
+            return HttpSessions.getSession(sessionId);
+        }
+        return HttpSessions.issueSession();
     }
 
     public String getRequestBody() {

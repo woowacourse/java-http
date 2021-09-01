@@ -5,7 +5,7 @@ import nextstep.jwp.constants.HttpMethod;
 import nextstep.jwp.exception.HttpException;
 import nextstep.jwp.request.RequestBody;
 
-public class PostHandler implements Handler{
+public class PostHandler implements Handler {
     private final HttpMethod httpMethod = HttpMethod.POST;
     private final RequestBody requestBody;
 
@@ -13,7 +13,7 @@ public class PostHandler implements Handler{
         this.requestBody = requestBody;
     }
 
-    public boolean matchHttpMethod(HttpMethod httpMethod){
+    public boolean matchHttpMethod(HttpMethod httpMethod) {
         return this.httpMethod == httpMethod;
     }
 

@@ -70,13 +70,12 @@ public class HttpServer {
                     .statusCode(StatusCode.NOT_FOUND)
                     .responseResource("/404.html")
                     .build();
-        } catch (UnauthorizedException e){
+        } catch (UnauthorizedException e) {
             return ResponseEntity
                     .statusCode(StatusCode.UNAUTHORIZED)
                     .responseResource("/401.html")
                     .build();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity
                     .statusCode(StatusCode.INTERNAL_SERVER_ERROR)
                     .responseResource("/500.html")

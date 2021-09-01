@@ -17,8 +17,12 @@ import nextstep.jwp.request.RequestBody;
 import nextstep.jwp.request.RequestHeader;
 import nextstep.jwp.request.RequestLine;
 import nextstep.jwp.response.ResponseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpServer {
+    private static final Logger log = LoggerFactory.getLogger(HttpServer.class);
+
     private final BufferedReader reader;
     private final RequestLine requestLine;
     private final RequestHeader headers;
@@ -64,18 +68,22 @@ public class HttpServer {
         try {
             return mappingHandler.response();
         } catch (InvocationTargetException e) {
+            log.info(e.getMessage());
             return handleReflectionException(e);
         } catch (PageNotFoundException e) {
+            log.info(e.getMessage());
             return ResponseEntity
                     .statusCode(StatusCode.NOT_FOUND)
                     .responseResource("/404.html")
                     .build();
         } catch (UnauthorizedException e) {
+            log.info(e.getMessage());
             return ResponseEntity
                     .statusCode(StatusCode.UNAUTHORIZED)
                     .responseResource("/401.html")
                     .build();
         } catch (Exception e) {
+            log.error(e.getMessage());
             return ResponseEntity
                     .statusCode(StatusCode.INTERNAL_SERVER_ERROR)
                     .responseResource("/500.html")

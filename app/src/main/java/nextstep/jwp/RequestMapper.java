@@ -8,6 +8,9 @@ import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 
 public class RequestMapper {
+    private RequestMapper() {
+    }
+
     private static final Map<String, Controller> CONTROLLERS = new HashMap<>();
 
     static {

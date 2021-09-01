@@ -12,6 +12,7 @@ public class HttpRequestParser {
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final int METHOD_INDEX = 0;
     private static final int URI_LINE_INDEX = 1;
+    private static final int HTTP_VERSION_INDEX = 2;
     private static final int REQUEST_URI_INDEX = 0;
     private static final int PATH_PARAMETER_INDEX = 1;
     private static final int FIRST_INDEX_OF_STRING = 0;
@@ -44,6 +45,7 @@ public class HttpRequestParser {
         String rawRequestUri = startLineElement[URI_LINE_INDEX];
 
         parseRequestUri(rawRequestUri, httpRequestBuilder);
+        httpRequestBuilder.httpVersion(HttpVersion.of(startLineElement[HTTP_VERSION_INDEX]));
     }
 
     private static void parseRequestUri(String rawRequestUri, HttpRequest.HttpRequestBuilder httpRequestBuilder) {

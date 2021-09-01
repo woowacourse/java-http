@@ -6,19 +6,16 @@ import java.util.Map;
 import java.util.Optional;
 
 public class HttpRequest {
-    private final HttpMethod method;
-    private final URI requestUri;
+    private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final Map<String, String> parameters;
     private final String requestBody;
 
-    public HttpRequest(HttpMethod method,
-                       URI requestUri,
+    public HttpRequest(RequestLine requestLine,
                        Map<String, String> headers,
                        Map<String, String> parameters,
                        String requestBody) {
-        this.method = method;
-        this.requestUri = requestUri;
+        this.requestLine = requestLine;
         this.headers = headers;
         this.parameters = parameters;
         this.requestBody = requestBody;
@@ -29,11 +26,15 @@ public class HttpRequest {
     }
 
     public HttpMethod getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public URI getRequestUri() {
-        return requestUri;
+        return requestLine.getRequestUri();
+    }
+
+    public HttpVersion getHttpVersion() {
+        return requestLine.getHttpVersion();
     }
 
     public Map<String, String> getHeaders() {
@@ -55,6 +56,7 @@ public class HttpRequest {
     public static class HttpRequestBuilder {
         private HttpMethod method;
         private URI requestUri;
+        private HttpVersion httpVersion;
         private Map<String, String> headers = new HashMap<>();
         private Map<String, String> parameters = new HashMap<>();
         private String body;
@@ -66,6 +68,11 @@ public class HttpRequest {
 
         public HttpRequestBuilder requestUri(URI uri) {
             this.requestUri = uri;
+            return this;
+        }
+
+        public HttpRequestBuilder httpVersion(HttpVersion httpVersion) {
+            this.httpVersion = httpVersion;
             return this;
         }
 
@@ -85,7 +92,7 @@ public class HttpRequest {
         }
 
         public HttpRequest build() {
-            return new HttpRequest(method, requestUri, headers, parameters, body);
+            return new HttpRequest(new RequestLine(method, requestUri, httpVersion), headers, parameters, body);
         }
     }
 }

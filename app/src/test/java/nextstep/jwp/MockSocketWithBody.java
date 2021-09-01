@@ -10,17 +10,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MockSocket extends Socket {
+public class MockSocketWithBody extends Socket {
 
     private final String request;
     private final List<Byte> bytes = new ArrayList<>();
 
-    public MockSocket(String request) {
+    public MockSocketWithBody(String request) {
         this.request = request;
     }
 
-    public MockSocket() {
-        this("GET / HTTP/1.1\r\nContent-Type: text/html;charset=utf-8\r\nContent-Length: 12\r\n\r\n");
+    public MockSocketWithBody() {
+        this("POST /login.html HTTP/1.1\r\nContent-Type: text/html;charset=utf-8\r\nContent-Length: 46\r\n\r\naccount=gugu&password=password&email=hkkang%40woowahan.com\r\n");
     }
 
     public InetAddress getInetAddress() {

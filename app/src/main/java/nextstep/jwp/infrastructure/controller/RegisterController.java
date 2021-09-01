@@ -6,17 +6,21 @@ import nextstep.jwp.model.web.ResourceFinder;
 import nextstep.jwp.model.web.StatusCode;
 import nextstep.jwp.model.web.request.CustomHttpRequest;
 import nextstep.jwp.model.web.response.CustomHttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class RegisterController extends AbstractController {
 
+    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
     private static final String REGISTER_SUCCESS_URI = "/login.html";
 
     @Override
     protected void doGet(CustomHttpRequest request, CustomHttpResponse response) throws Exception {
-        String resource = ResourceFinder.resource(request.getUri());
+        log.debug("Http Request - GET /register");
+        String resource = ResourceFinder.resource(request.getUri() + ".html");
 
         response.setStatusLine(StatusCode.OK, request.getVersionOfProtocol());
         response.setHeaders(headers(resource.getBytes().length));
@@ -25,6 +29,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(CustomHttpRequest request, CustomHttpResponse response) throws Exception {
+        log.debug("Http Request - POST /register");
         User user = new User(
                 request.getBodyValue("account"),
                 request.getBodyValue("password"),

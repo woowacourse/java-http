@@ -1,9 +1,9 @@
 package nextstep.jwp.model.web;
 
 public enum ContentType {
-    HTML("text/html", "html"),
-    CSS("text/css", "css"),
-    JS("text/js", "js");
+    HTML("text/html;charset=utf-8", "html"),
+    CSS("text/css;charset=utf-8", "css"),
+    JS("text/js;charset=utf-8", "js");
 
     private String contentType;
     private String resourceSuffix;

@@ -18,11 +18,7 @@ public class RequestLine {
     }
 
     private String parseUri(String uri) {
-        String parsedUri = uri.split("\\?")[0];
-        if (parsedUri.contains(".")) {
-            return parsedUri;
-        }
-        return parsedUri + ".html";
+        return uri.split("\\?")[0];
     }
 
     private RequestParams parseRequestParams(String uri) {

@@ -35,6 +35,9 @@ public class InMemoryUserRepository {
     }
 
     public static boolean login(String account, String password) {
+        if (!database.containsKey(account)) {
+            return false;
+        }
         User user = database.get(account);
         return user.checkPassword(password);
     }

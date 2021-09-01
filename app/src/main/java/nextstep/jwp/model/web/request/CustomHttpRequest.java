@@ -33,6 +33,9 @@ public class CustomHttpRequest {
 
     private static Map<String, String> parseHttpBody(BufferedReader reader, Headers headers) throws IOException {
         int contentLength = headers.getContentLength();
+        if (contentLength == 0) {
+            return new HashMap<>();
+        }
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         String bodyLine = new String(buffer);
@@ -48,7 +51,7 @@ public class CustomHttpRequest {
         String line = "";
 
         while (!("".equals(line = reader.readLine()))) {
-            String[] kV = line.split("; ");
+            String[] kV = line.split(": ");
             headers.put(kV[0], kV[1]);
         }
 

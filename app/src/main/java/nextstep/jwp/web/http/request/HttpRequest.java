@@ -70,6 +70,7 @@ public class HttpRequest {
     public HttpSession session() {
         return session;
     }
+
     public HttpRequestHeaderValues header(String key) {
         return this.headers.get(key);
     }
@@ -93,7 +94,7 @@ public class HttpRequest {
             body.getBody();
     }
 
-    static class InputStreamHttpRequestConverter {
+    private static class InputStreamHttpRequestConverter {
 
         private static final int METHOD_INDEX = 0;
         private static final int FILEPATH_INDEX = 1;

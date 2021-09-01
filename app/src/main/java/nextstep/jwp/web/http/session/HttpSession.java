@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class HttpSession {
+
     private final String id;
     private final Map<String, Object> values = new ConcurrentHashMap<>();
     private boolean isNew;

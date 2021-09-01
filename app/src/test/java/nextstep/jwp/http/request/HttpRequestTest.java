@@ -1,5 +1,8 @@
 package nextstep.jwp.http.request;
 
+import java.util.Arrays;
+import java.util.Collections;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -28,6 +31,30 @@ class HttpRequestTest {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @DisplayName("쿠기가 있는 경우, 쿠키 값을 반환한다.")
+    @Test
+    void cookie() {
+        RequestLine requestLine = RequestLine.of("GET / HTTP/1.1");
+        RequestHeaders requestHeaders = RequestHeaders.of(
+                Arrays.asList("Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46")
+        );
+
+        HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, "");
+        assertThat(httpRequest.httpCookie().getAttributes("yummy_cookie")).isEqualTo("choco");
+        assertThat(httpRequest.httpCookie().getAttributes("tasty_cookie")).isEqualTo("strawberry");
+
+    }
+
+    @DisplayName("쿠기가 없는 경우, 빈 쿠키 객체를 반환한다.")
+    @Test
+    void emptyCookie() {
+        RequestLine requestLine = RequestLine.of("GET / HTTP/1.1");
+        RequestHeaders requestHeaders = RequestHeaders.of(Collections.emptyList());
+
+        HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, "");
+        assertThat(httpRequest.httpCookie()).isEqualTo(HttpCookie.EMPTY);
     }
 
     private String mockRequest(String expectedRequestLine, String expectedRequestBody) {

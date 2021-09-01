@@ -6,6 +6,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import nextstep.jwp.http.session.HttpSession;
+import nextstep.jwp.http.session.HttpSessions;
 
 public class HttpRequest {
 
@@ -73,5 +76,30 @@ public class HttpRequest {
 
     public HttpMethod httpMethod() {
         return requestLine.method();
+    }
+
+    public HttpCookie httpCookie(){
+        // TODO :: null 체크 방식 수정, 쿠키가 없는 경우
+        return HttpCookie.of(requestHeaders.cookie());
+    }
+
+    public String sessionId() {
+        // TODO :: null 체크 방식 수정, 쿠키가 없는 경우
+        String cookieQueryString = requestLine.queryParams().get("Cookie");
+        if (Objects.isNull(cookieQueryString)) {
+            QueryParams cookie = QueryParams.of(cookieQueryString);
+            return cookie.get("sessionId");
+        }
+        return null;
+    }
+
+    public HttpSession getSession() {
+        String sessionId = sessionId();
+        // TODO :: 세션 값이 없거나, 잘못된 경우 어떻게 처리할 것인지.
+
+        if (Objects.isNull(sessionId)) {
+            return null;
+        }
+        return HttpSessions.getSession(sessionId);
     }
 }

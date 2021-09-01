@@ -33,4 +33,8 @@ public class RequestHeaders {
     public int contentLength() {
         return Integer.parseInt(headers.get("Content-Length"));
     }
+
+    public String cookie() {
+        return headers.get("Cookie");
+    }
 }

@@ -19,20 +19,19 @@ import org.slf4j.LoggerFactory;
 
 public class RegisterController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RegisterController.class);
 
     @Override
     protected View doGet(HttpRequest request, HttpResponse response) {
-        log.debug("Register - HTTP GET Request");
+        LOG.debug("Register - HTTP GET Request");
 
         response.forward(OK, request.getUri());
-
         return new View(request.getPath());
     }
 
     @Override
     protected View doPost(HttpRequest request, HttpResponse response) {
-        log.debug("Register - HTTP POST Request");
+        LOG.debug("Register - HTTP POST Request");
 
         Map<String, String> query = request.getQuery();
         Optional<User> findUser = InMemoryUserRepository

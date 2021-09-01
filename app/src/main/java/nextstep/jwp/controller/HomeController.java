@@ -1,8 +1,8 @@
 package nextstep.jwp.controller;
 
+import static nextstep.jwp.http.response.HttpStatus.BAD_REQUEST;
 import static nextstep.jwp.http.response.HttpStatus.OK;
 
-import nextstep.jwp.exception.controller.InvalidPostRequestException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.view.View;
@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 public class HomeController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(HomeController.class);
+    private static final String PATH = "/400";
 
     @Override
     protected View doGet(HttpRequest request, HttpResponse response) {
@@ -25,6 +26,7 @@ public class HomeController extends AbstractController {
     protected View doPost(HttpRequest request, HttpResponse response) {
         log.debug("Home - HTTP POST Request");
 
-        throw new InvalidPostRequestException();
+        response.forward(BAD_REQUEST, PATH);
+        return new View(PATH);
     }
 }

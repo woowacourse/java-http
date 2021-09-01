@@ -17,11 +17,11 @@ import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);
 
     @Override
     protected View doGet(HttpRequest request, HttpResponse response) {
-        log.debug("Login - HTTP GET Request");
+        LOG.debug("Login - HTTP GET Request");
 
         response.forward(OK, request.getUri());
         return new View(request.getPath());
@@ -29,7 +29,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected View doPost(HttpRequest request, HttpResponse response) {
-        log.debug("Login - HTTP POST Request");
+        LOG.debug("Login - HTTP POST Request");
 
         Map<String, String> query = request.getQuery();
         Optional<User> user = InMemoryUserRepository.findByAccount(query.get(ACCOUNT.getInfo()));

@@ -36,10 +36,6 @@ public class HttpRequest {
         return headers.getCookie().getValue(key);
     }
 
-    public Headers getHeaders() {
-        return headers;
-    }
-
     public String getMessageBody() {
         return messageBody;
     }

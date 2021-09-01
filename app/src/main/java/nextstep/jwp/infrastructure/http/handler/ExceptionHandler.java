@@ -13,7 +13,7 @@ public class ExceptionHandler implements Handler {
     }
 
     @Override
-    public void handle(final HttpRequest request, final HttpResponse response) throws Exception {
+    public void handle(final HttpRequest request, final HttpResponse response) {
         fileHandler.respondWithFile(response, "/500.html", StatusCode.INTERNAL_SERVER_ERROR);
     }
 }

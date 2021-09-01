@@ -34,7 +34,7 @@ public class Cookie {
     private static Map<String, String> parse(final String value) {
         return Arrays.stream(value.split(DELIMITER))
             .map(String::trim)
-            .map((keyAndValue) -> {
+            .map(keyAndValue -> {
                 final String[] split = keyAndValue.split(KEY_AND_VALUE_DELIMITER, 2);
                 validateKeyAndValue(split);
                 return split;

@@ -23,7 +23,7 @@ public class FileHandler implements Handler {
     }
 
     @Override
-    public void handle(final HttpRequest request, final HttpResponse response) throws Exception {
+    public void handle(final HttpRequest request, final HttpResponse response) {
         final String filePath = request.getBaseUri();
 
         if (fileResolver.hasFile(filePath)) {

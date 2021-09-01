@@ -13,7 +13,7 @@ public class IndexController extends AbstractController {
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         response.setResponseLine(new ResponseLine(StatusCode.OK));
         respondByFile("/index.html", response);
     }

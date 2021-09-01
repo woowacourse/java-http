@@ -6,7 +6,7 @@ public enum StatusCode {
     BAD_REQUEST(400, "BAD REQUEST"),
     UNAUTHORIZED(401, "UNAUTHORIZED"),
     NOT_FOUND(404, "NOT FOUND"),
-    INTERNAL_SERVER_ERROR(500, "INTERNAL SERVER ERRROR");
+    INTERNAL_SERVER_ERROR(500, "INTERNAL SERVER ERROR");
 
     private final int value;
     private final String message;

@@ -29,13 +29,13 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doGet(final HttpRequest request, final HttpResponse response) {
         response.setResponseLine(new ResponseLine(StatusCode.OK));
         respondByFile("/login.html", response);
     }
 
     @Override
-    protected void doPost(final HttpRequest request, final HttpResponse response) throws Exception {
+    protected void doPost(final HttpRequest request, final HttpResponse response) {
         final Map<String, String> body = DATA_MAPPER.parse(request.getMessageBody());
         final Optional<String> sessionId = request.getCookie(SESSION_KEY);
 

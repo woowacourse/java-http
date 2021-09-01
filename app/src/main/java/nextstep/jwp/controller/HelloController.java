@@ -13,7 +13,7 @@ public class HelloController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) {
         response.setResponseLine(new ResponseLine(StatusCode.OK));
         respondByFile("/hello.html", response);
     }

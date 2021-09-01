@@ -16,10 +16,10 @@ public class HttpRequest {
     }
 
     private RequestBody parseRequestBody(BufferedReader reader, String length) throws IOException {
-        if (Integer.parseInt(length) == 0) {
+        int contentLength = Integer.parseInt(length);
+        if (contentLength == 0) {
             return null;
         }
-        int contentLength = Integer.parseInt(length);
         return new RequestBody(reader, contentLength);
     }
 

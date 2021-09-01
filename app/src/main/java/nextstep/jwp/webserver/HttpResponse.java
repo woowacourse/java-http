@@ -6,9 +6,6 @@ public class HttpResponse {
     private HttpHeaders headers = new HttpHeaders();
     private String body = "";
 
-    public HttpResponse() {
-    }
-
     public static void errorPage(BaseException baseException, HttpResponse response) {
         String body = readErrorPage(baseException);
 

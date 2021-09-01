@@ -22,14 +22,12 @@ public class FormBody {
     private static Map<String, String> parseBody(String bodyString) {
         Map<String, String> body = new HashMap<>();
         for (String queryString : bodyString.split("&")) {
-            String[] split = queryString.split("=");
-            body.put(split[0], split[1]);
+            int index = queryString.indexOf("=");
+            String key = queryString.substring(0, index);
+            String value = queryString.substring(index + 1).trim();
+            body.put(key, value);
         }
         return body;
-    }
-
-    public static FormBody emptyBody() {
-        return new FormBody();
     }
 
     public String get(String name) {

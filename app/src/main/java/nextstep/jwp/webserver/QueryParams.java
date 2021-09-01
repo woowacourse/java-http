@@ -22,8 +22,10 @@ public class QueryParams {
     private static Map<String, String> parseParams(String paramString) {
         Map<String, String> params = new HashMap<>();
         for (String queryString : paramString.split("&")) {
-            String[] split = queryString.split("=");
-            params.put(split[0], split[1]);
+            int index = queryString.indexOf("=");
+            String key = queryString.substring(0, index);
+            String value = queryString.substring(index + 1).trim();
+            params.put(key, value);
         }
         return params;
     }

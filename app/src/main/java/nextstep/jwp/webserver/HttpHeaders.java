@@ -27,11 +27,16 @@ public class HttpHeaders {
             if ("".equals(header)) {
                 break;
             }
-
-            String[] keyValue = header.split(":", 2);
-            headers.put(keyValue[0].trim(), keyValue[1].trim());
+            putHeader(headers, header);
         }
         return headers;
+    }
+
+    private static void putHeader(Map<String, String> headers, String header) {
+        int index = header.indexOf(":");
+        String key = header.substring(0, index);
+        String value = header.substring(index + 1).trim();
+        headers.put(key, value);
     }
 
     public String get(String name) {

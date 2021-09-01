@@ -16,4 +16,5 @@
 
 ## 3 단계
 - [ ] HttpCookie 구현
+  - [x] Cookie 파싱
 - [ ] HttpSession 구현

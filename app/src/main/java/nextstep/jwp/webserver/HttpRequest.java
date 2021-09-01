@@ -8,10 +8,11 @@ import java.util.Objects;
 
 public class HttpRequest {
 
-    private HttpHeaders httpHeaders;
+    private HttpHeaders httpHeaders = new HttpHeaders();
     private HttpMethod httpMethod;
+    private HttpCookie httpCookie = new HttpCookie();
     private QueryParams queryParams = new QueryParams();
-    private FormBody body = FormBody.emptyBody();
+    private FormBody body = new FormBody();
     private String uri;
 
     public HttpRequest(BufferedReader bufferedReader) {
@@ -54,8 +55,10 @@ public class HttpRequest {
         for (String line = br.readLine(); !"".equals(line); line = br.readLine()) {
             lines.add(line);
         }
-
         httpHeaders = new HttpHeaders(lines);
+        if (httpHeaders.contains("Cookie")) {
+            httpCookie = new HttpCookie(httpHeaders.get("Cookie"));
+        }
     }
 
     private void initBody(BufferedReader bufferedReader) throws IOException {
@@ -80,6 +83,10 @@ public class HttpRequest {
 
     public HttpMethod getHttpMethod() {
         return httpMethod;
+    }
+
+    public String getCookie(String cookie) {
+        return httpCookie.get(cookie);
     }
 
     public String getQueryParam(String param) {

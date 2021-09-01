@@ -11,10 +11,6 @@ repositories {
     mavenCentral()
 }
 
-jacoco {
-    toolVersion = "0.8.5"
-}
-
 dependencies {
     implementation 'ch.qos.logback:logback-classic:1.2.3'
     implementation 'com.google.guava:guava:29.0-jre'
@@ -25,10 +21,14 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
 }
 
+jacoco {
+    toolVersion = "0.8.5"
+}
+
 jacocoTestReport {
     reports {
-        csv.enabled true
-        csv.destination(new File("jacoco/jacoco.csv"))
+        xml.enabled true
+        xml.destination(new File("jacoco/jacoco.xml"))
     }
     finalizedBy 'jacocoTestCoverageVerification'
 }
@@ -37,7 +37,7 @@ application {
     mainClass = 'nextstep.jwp.JwpApplication'
 }
 
-test {
+tasks.named('test') {
     useJUnitPlatform()
     finalizedBy(jacocoTestReport)
 }
@@ -48,6 +48,6 @@ sonarqube {
         property "sonar.projectKey", "woowacourse_be-jwp-http-server"
         property "sonar.organization", "woowacourse"
         property "sonar.host.url", "https://sonarcloud.io"
-        property "sonar.coverage.jacoco.xmlReportPaths", "jacoco/jacoco.csv"
+        property "sonar.coverage.jacoco.xmlReportPaths", "jacoco/jacoco.xml"
     }
 }

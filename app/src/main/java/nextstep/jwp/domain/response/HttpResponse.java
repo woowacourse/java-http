@@ -67,8 +67,8 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public HttpResponse redirect(String uri, HttpStatus httpStatus) {
-        this.httpStatus = httpStatus;
+    public HttpResponse redirect(String uri) {
+        this.httpStatus = HttpStatus.FOUND;
         headerMap.put("Location", uri);
         return this;
     }

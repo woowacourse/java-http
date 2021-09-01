@@ -1,11 +1,10 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.domain.*;
+import nextstep.jwp.domain.User;
 import nextstep.jwp.domain.request.HttpRequest;
 import nextstep.jwp.domain.request.RequestBody;
 import nextstep.jwp.domain.response.HttpResponse;
-import nextstep.jwp.domain.response.HttpStatus;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -31,11 +30,11 @@ public class LoginController extends AbstractController {
     private HttpResponse postRespond(HttpResponse response, String account, String password) {
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isEmpty()) {
-            return response.redirect("/400.html", HttpStatus.BAD_REQUEST);
+            return response.redirect("/400.html");
         }
         if (!user.get().checkPassword(password)) {
-            return response.redirect("/401.html", HttpStatus.UNAUTHORIZED);
+            return response.redirect("/401.html");
         }
-        return response.redirect("/index.html", HttpStatus.FOUND);
+        return response.redirect("/index.html");
     }
 }

@@ -1,9 +1,9 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.session.HttpSession;
-import nextstep.jwp.http.session.HttpSessions;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.session.HttpSession;
+import nextstep.jwp.http.session.HttpSessions;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
@@ -14,6 +14,7 @@ import java.util.Objects;
 public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    public static final String HTTP = "http://";
     private static LoginController loginController = null;
 
     private final UserService userService;
@@ -38,7 +39,8 @@ public class LoginController extends AbstractController {
         log.debug("HTTP GET Login Request: {}", request.getPath());
         HttpSession session = request.getSession();
         if (HttpSessions.contains(session)) {
-            response.responseRedirect("http://" + request.getHeader("Host") + "/index.html");
+            response.responseRedirect(HTTP + request.getHeader("Host") + "/index.html");
+            return;
         }
         response.responseOk("/login.html");
     }
@@ -50,12 +52,12 @@ public class LoginController extends AbstractController {
             User loginUser = userService.login(request);
 
             HttpSession session = request.getSession();
-            HttpSessions.put(session);
             session.setAttribute("user", loginUser);
+            HttpSessions.put(session);
 
-            response.responseRedirect("http://" + request.getHeader("Host") + "/index.html");
+            response.responseRedirect(HTTP + request.getHeader("Host") + "/index.html");
         } catch (IllegalArgumentException exception) {
-            response.responseRedirect("http://" + request.getHeader("Host") + "/401.html");
+            response.responseRedirect(HTTP + request.getHeader("Host") + "/401.html");
         }
     }
 }

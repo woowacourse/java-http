@@ -32,7 +32,7 @@ public class FrontController {
 
         if (Objects.isNull(controller)) {
             httpResponse.setHttpStatusCode(HttpStatusCode.NOT_FOUND);
-            error(httpRequest, httpResponse);
+            errorResolver(httpRequest, httpResponse);
             return;
         }
 
@@ -42,12 +42,13 @@ public class FrontController {
             view.render(modelView.getModel(), httpRequest, httpResponse);
         } catch (RuntimeException illegalArgumentException) {
             httpResponse.setHttpStatusCode(HttpStatusCode.UNAUTHORIZED);
-            error(httpRequest, httpResponse);
+            errorResolver(httpRequest, httpResponse);
         }
     }
 
-    public void error(HttpRequest httpRequest, HttpResponse httpResponse) {
+    public void errorResolver(HttpRequest httpRequest, HttpResponse httpResponse) {
         View view = new View("/" + httpResponse.getHttpStatusCode().getValue() + ".html");
+        httpResponse.setHttpStatusCode(HttpStatusCode.FOUND);
         view.render(Collections.emptyMap(), httpRequest, httpResponse);
     }
 

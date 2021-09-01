@@ -27,8 +27,7 @@ public class View {
 
     public void render(Map<String, Object> model, HttpRequest httpRequest, HttpResponse httpResponse) {
         if (httpResponse.isSameHttpStatusCode(HttpStatusCode.FOUND)) {
-            httpResponse.setStatusLine(new StatusLine(HttpVersion.HTTP1_1, HttpStatusCode.FOUND));
-            httpResponse.addHeader("Location", viewPath);
+            httpResponse.addHeader("Location", "http://" + httpRequest.getHeader("Host") + viewPath);
             return;
         }
 

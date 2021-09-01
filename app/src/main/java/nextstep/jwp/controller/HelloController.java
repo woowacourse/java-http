@@ -12,7 +12,7 @@ public class HelloController extends AbstractController {
 
     @Override
     protected ModelView doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
-        httpResponse.setBody("Hello World!");
+        httpResponse.setBody("Hello world!");
         return new ModelView("/");
     }
 

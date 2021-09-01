@@ -4,6 +4,7 @@ import nextstep.jwp.controller.dto.UserRequest;
 import nextstep.jwp.controller.modelview.ModelView;
 import nextstep.jwp.httpmessage.httprequest.HttpRequest;
 import nextstep.jwp.httpmessage.httpresponse.HttpResponse;
+import nextstep.jwp.httpmessage.httpresponse.HttpStatusCode;
 import nextstep.jwp.service.UserService;
 
 public class UserRegisterController extends AbstractController {
@@ -24,6 +25,7 @@ public class UserRegisterController extends AbstractController {
         userService.register(new UserRequest(httpRequest.getParameter("account"),
                 httpRequest.getParameter("password"),
                 httpRequest.getParameter("email")));
+        httpResponse.setHttpStatusCode(HttpStatusCode.FOUND);
         return new ModelView("/index.html");
     }
 }

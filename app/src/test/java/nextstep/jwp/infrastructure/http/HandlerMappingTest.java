@@ -16,7 +16,7 @@ class HandlerMappingTest {
 
     @BeforeEach
     void setUp() {
-        handlerMapping = new HandlerMapping("nextstep.jwp.controller");
+        handlerMapping = new HandlerMapping("nextstep.jwp.controller", new FileHandler(new FileResolver("static")));
     }
 
     @DisplayName("경로에 맞는 컨트롤러가 없다면 파일 핸들러를 반환")

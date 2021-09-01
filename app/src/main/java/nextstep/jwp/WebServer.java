@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.stream.Stream;
+import nextstep.jwp.infrastructure.http.FileResolver;
 import nextstep.jwp.infrastructure.http.HandlerMapping;
 import nextstep.jwp.infrastructure.http.RequestHandler;
+import nextstep.jwp.infrastructure.http.handler.FileHandler;
 import nextstep.jwp.infrastructure.http.interceptor.InterceptorResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +18,8 @@ public class WebServer {
 
     private static final int DEFAULT_PORT = 8080;
 
-    private static final HandlerMapping HANDLER_MAPPING = new HandlerMapping("nextstep.jwp.controller");
+    private static final FileHandler FILE_HANDLER = new FileHandler(new FileResolver("static"));
+    private static final HandlerMapping HANDLER_MAPPING = new HandlerMapping("nextstep.jwp.controller", FILE_HANDLER);
     private static final InterceptorResolver INTERCEPTOR_RESOLVER = new InterceptorResolver("nextstep.jwp.interceptor");
     private static final WebApplicationContext CONTEXT = new WebApplicationContext(HANDLER_MAPPING, INTERCEPTOR_RESOLVER);
 

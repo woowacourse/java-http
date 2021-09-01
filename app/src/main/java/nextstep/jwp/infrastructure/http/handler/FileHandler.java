@@ -34,7 +34,7 @@ public class FileHandler implements Handler {
         respondWithFile(response, NOT_FOUND_FILE, StatusCode.NOT_FOUND);
     }
 
-    private void respondWithFile(final HttpResponse response, final String filePath, final StatusCode statusCode) {
+    public void respondWithFile(final HttpResponse response, final String filePath, final StatusCode statusCode) {
         final String contentType = fileResolver.contentType(filePath);
         final String charSet = Charset.defaultCharset().displayName().toLowerCase(Locale.ROOT);
         final String responseBody = fileResolver.read(filePath);

@@ -13,14 +13,13 @@ import nextstep.jwp.infrastructure.http.request.RequestLine;
 
 public class HandlerMapping {
 
-    private static final FileResolver FILE_RESOLVER = new FileResolver("static");
-    private static final FileHandler FILE_HANDLER = new FileHandler(FILE_RESOLVER);
-
     private final Map<String, Controller> controllers;
+    private final FileHandler fileHandler;
 
-    public HandlerMapping(final String controllerPackage) {
+    public HandlerMapping(final String controllerPackage, final FileHandler fileHandler) {
         this.controllers = findAllControllers(controllerPackage).stream()
             .collect(Collectors.toMap(Controller::uri, controller -> controller));
+        this.fileHandler = fileHandler;
     }
 
     private static Set<Controller> findAllControllers(final String controllerPackage) {
@@ -34,6 +33,10 @@ public class HandlerMapping {
 
         return Optional.ofNullable(controllers.getOrDefault(baseUri, null))
             .map(controller -> (Handler) new ControllerHandler(controller))
-            .orElse(FILE_HANDLER);
+            .orElse(fileHandler);
+    }
+
+    public FileHandler getFileHandler() {
+        return fileHandler;
     }
 }

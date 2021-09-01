@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
 import nextstep.jwp.WebApplicationContext;
+import nextstep.jwp.infrastructure.http.handler.ExceptionHandler;
 import nextstep.jwp.infrastructure.http.interceptor.HandlerInterceptor;
 import nextstep.jwp.infrastructure.http.reader.HttpRequestReader;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
@@ -22,11 +23,13 @@ public class RequestHandler implements Runnable {
     private final Socket connection;
     private final HandlerMapping handlerMapping;
     private final HandlerInterceptor interceptor;
+    private final ExceptionHandler exceptionHandler;
 
     public RequestHandler(final Socket connection, final WebApplicationContext context) {
         this.connection = Objects.requireNonNull(connection);
         this.handlerMapping = context.getHandlerMapping();
         this.interceptor = context.getInterceptor();
+        this.exceptionHandler = new ExceptionHandler(handlerMapping.getFileHandler());
     }
 
     @Override
@@ -40,21 +43,27 @@ public class RequestHandler implements Runnable {
 
             final HttpRequestReader httpRequestReader = new HttpRequestReader(bufferedReader);
             final HttpRequest request = httpRequestReader.readHttpRequest();
-            log.debug(request.getHeaders().toString());
             final HttpResponse response = new HttpResponse();
 
-            interceptor.preHandle(request, response);
-            handlerMapping.getHandler(request).handle(request, response);
-            interceptor.postHandle(request, response);
+            handle(request, response);
 
             outputStream.write(response.toString().getBytes());
             outputStream.flush();
-        } catch (IllegalArgumentException exception) {
-            log.error("Exception occurs", exception);
-        } catch (Exception exception) {
+        }  catch (Exception exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
+        }
+    }
+
+    private void handle(final HttpRequest request, final HttpResponse response) throws Exception {
+        try {
+            interceptor.preHandle(request, response);
+            handlerMapping.getHandler(request).handle(request, response);
+            interceptor.postHandle(request, response);
+        } catch (IllegalArgumentException exception) {
+            log.error("Exception occurs", exception);
+            exceptionHandler.handle(request, response);
         }
     }
 

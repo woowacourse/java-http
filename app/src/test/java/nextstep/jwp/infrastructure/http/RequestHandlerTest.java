@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import nextstep.jwp.MockInterceptorResolver;
 import nextstep.jwp.MockSocket;
 import nextstep.jwp.WebApplicationContext;
+import nextstep.jwp.infrastructure.http.handler.FileHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -209,7 +210,7 @@ class RequestHandlerTest {
 
     private void assertResponse(final String httpRequest, final String httpResponse) {
         final MockSocket socket = new MockSocket(httpRequest);
-        final HandlerMapping handlerMapping = new HandlerMapping("nextstep.jwp.controller");
+        final HandlerMapping handlerMapping = new HandlerMapping("nextstep.jwp.controller", new FileHandler(new FileResolver("static")));
         final MockInterceptorResolver interceptorResolver = new MockInterceptorResolver();
         final WebApplicationContext context = new WebApplicationContext(handlerMapping, interceptorResolver);
         final RequestHandler requestHandler = new RequestHandler(socket, context);

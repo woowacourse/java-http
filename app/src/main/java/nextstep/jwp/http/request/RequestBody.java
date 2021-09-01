@@ -19,6 +19,9 @@ public class RequestBody {
     }
 
     public void setQuery() {
+        if (body.isEmpty()) {
+            return;
+        }
         String[] splitBody = body.split("&");
 
         for (String each : splitBody) {

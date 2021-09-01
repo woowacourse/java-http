@@ -18,6 +18,10 @@ public class RequestHeader {
         header.put(splitLine[0], splitLine[1]);
     }
 
+    public boolean isContentLength() {
+        return header.containsKey("Content-Length");
+    }
+
     public String getValue(String key) {
         return header.get(key);
     }

@@ -1,6 +1,7 @@
 package nextstep.jwp.http.request;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.Map;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.exception.http.request.InvalidHttpRequestException;
@@ -21,10 +22,7 @@ public class HttpRequest {
             new RequestLine(readStartLine(reader).split(SPLIT_DELIMITER)),
             new RequestHeader()
         );
-
-        if (isPost()) {
-            setBody(reader);
-        }
+        setHeaderAndBody(reader);
     }
 
     private static String readStartLine(BufferedReader reader) {
@@ -35,29 +33,35 @@ public class HttpRequest {
         }
     }
 
-    private void setBody(BufferedReader reader) {
-        this.body = new RequestBody(readBody(reader));
-    }
-
-    private String readBody(BufferedReader reader) {
+    private void setHeaderAndBody(BufferedReader reader) {
         try {
-            while (reader.ready()) {
-                String line = reader.readLine();
-
-                if ("".equals(line)) {
-                    break;
-                }
-                header.setHeader(line);
-            }
-
-            int contentLength = Integer.parseInt(header.getValue("Content-Length"));
-            char[] buffer = new char[contentLength];
-            reader.read(buffer, 0, contentLength);
-            
-            return new String(buffer);
+            setHeader(reader);
+            this.body = setBody(reader);
         } catch (Exception e) {
             throw new InvalidHttpRequestException();
         }
+    }
+
+    private void setHeader(BufferedReader reader) throws IOException {
+        while (reader.ready()) {
+            String readLine = reader.readLine();
+
+            if ("".equals(readLine)) {
+                break;
+            }
+            header.setHeader(readLine);
+        }
+    }
+
+    private RequestBody setBody(BufferedReader reader) throws IOException {
+        if (header.isContentLength()) {
+            int contentLength = Integer.parseInt(header.getValue("Content-Length"));
+            char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+
+            return new RequestBody(new String(buffer));
+        }
+        return new RequestBody("");
     }
 
     public HttpRequest(

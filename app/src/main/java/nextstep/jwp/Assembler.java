@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import nextstep.jwp.handler.controller.AbstractController;
-import nextstep.jwp.handler.resource.ResourceHandler;
+import nextstep.jwp.handler.resource.ResourceHandlerImpl;
 import nextstep.jwp.mapper.ControllerMapper;
 import nextstep.jwp.mapper.HandlerMapper;
 import nextstep.jwp.mapper.HandlerMappers;
@@ -37,7 +37,7 @@ public class Assembler {
     }
 
     private ResourceHandlerMapper resourceHandlerMapper() {
-        List<ResourceHandler> handlerBeans = Arrays.asList(new ResourceHandler());
+        List<ResourceHandlerImpl> handlerBeans = Arrays.asList(new ResourceHandlerImpl());
         return new ResourceHandlerMapper(handlerBeans);
     }
 

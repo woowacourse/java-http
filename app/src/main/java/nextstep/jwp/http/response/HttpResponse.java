@@ -11,8 +11,8 @@ public class HttpResponse {
     private static final String HEADER_FORMAT = "%s: %s ";
     private static final String SEPARATE_LINE = "";
 
-    private String statusLine = "";
-    private ResponseHeaders responseHeaders = new ResponseHeaders();
+    private final ResponseHeaders responseHeaders = new ResponseHeaders();
+    private HttpStatus httpStatus;
     private String messageBody = "";
 
     public void addHeader(String key, String value) {
@@ -20,7 +20,7 @@ public class HttpResponse {
     }
 
     public void setHttpStatus(HttpStatus httpStatus) {
-        statusLine = String.format(HTTP_STATUS_LINE_FORMAT, httpStatus.code(), httpStatus.status());
+        this.httpStatus = httpStatus;
     }
 
     public void setContent(String content, String contentType) {
@@ -46,14 +46,20 @@ public class HttpResponse {
     }
 
     public String responseAsString() {
+        String statusLine = String.format(HTTP_STATUS_LINE_FORMAT, httpStatus.code(), httpStatus.status());
+        String headerLine = String.join("\r\n", responseHeaders.asLines(HEADER_FORMAT));
         return String.join("\r\n",
                 statusLine,
-                String.join("\r\n", responseHeaders.asLines(HEADER_FORMAT)),
+                headerLine,
                 SEPARATE_LINE,
                 messageBody);
     }
 
     public String getHeaderAttribute(String name) {
         return responseHeaders.getAttribute(name);
+    }
+
+    public HttpStatus httpStatus() {
+        return httpStatus;
     }
 }

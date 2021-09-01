@@ -3,6 +3,8 @@ package nextstep.jwp.http.response;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toMap;
+
 public class ResponseHeaders {
 
     private final Map<String, String> headers;
@@ -16,15 +18,10 @@ public class ResponseHeaders {
     }
 
     public static ResponseHeaders of(List<String> lines) {
-        Map<String, String> headers = new HashMap<>();
-
-        for (String line : lines) {
-            String[] pair = line.split(": ");
-            if (pair.length != 2) {
-                break;
-            }
-            headers.put(pair[0], pair[1]);
-        }
+        Map<String, String> headers = lines.stream()
+                .map(line -> line.split(": "))
+                .filter(pair -> pair.length == 2)
+                .collect(toMap(pair -> pair[0], pair -> pair[1]));
         return new ResponseHeaders(headers);
     }
 

@@ -41,7 +41,7 @@ public class RegisterController extends AbstractController {
             throw new DuplicateUserException(user.getAccount());
         }
         InMemoryUserRepository.save(user);
-        log.info(String.format("New User Registered. user id : %d, account : %s", user.getId(), user.getAccount()));
+        log.info("New User Registered. user id : {}, account : {}", user.getId(), user.getAccount());
         response.setStatus(HttpStatus.FOUND);
         response.setHeader("Location", "/index.html");
     }

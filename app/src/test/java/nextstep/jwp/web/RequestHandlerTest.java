@@ -105,6 +105,7 @@ class RequestHandlerTest {
         // then
         assertThat(socket.output()).contains(
                 "HTTP/1.1 302 Found ",
+                "Set-Cookie: JSESSIONID=",
                 "Location: /index.html "
         );
     }

@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class LoginController extends AbstractController {
 
@@ -36,9 +37,14 @@ public class LoginController extends AbstractController {
             final User user = InMemoryUserRepository.findByAccount(queryInfo.get("account"))
                     .orElseThrow(() -> new UserNotFoundException(queryInfo.get("account")));
             if (user.checkPassword(queryInfo.get("password"))) {
-                log.info("Login successful!");
+                log.info("Login successful! user account: {}", user.getAccount());
+
                 response.setStatus(HttpStatus.FOUND);
+
+                final UUID jsessionid = UUID.randomUUID();
+                response.setHeader("Set-Cookie", "JSESSIONID=" + jsessionid);
                 response.setHeader("Location", "/index.html");
+                log.info("Sent jsessionid to user {}. jsessionid: {}", user.getAccount(), jsessionid);
             } else {
                 log.info("Login failed");
                 final View view = new View("/401");

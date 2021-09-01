@@ -7,7 +7,8 @@ public enum ContentType {
     HTML(".html", "text/html;charset=utf-8"),
     CSS(".css", "text/css"),
     JS(".js", "application/javascript"),
-    IMAGE(".svg", "image/svg+xml");
+    IMAGE(".svg", "image/svg+xml"),
+    FAVICON(".ico", "image/x-cion");
 
     private String suffix;
     private String contentType;

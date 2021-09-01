@@ -59,10 +59,10 @@ public class HttpResponse {
         setHeader("Content-Type", ContentType.matchByFileExtension(fileName));
     }
 
-    public void createSession(User user) {
+    public void createSession(String sessionValueKey, User user) {
         String uuid = String.valueOf(UUID.randomUUID());
         HttpSession httpSession = new HttpSession(uuid);
-        httpSession.setAttribute(User.class.getName(), user);
+        httpSession.setAttribute(sessionValueKey, user);
         HttpSessions.addSession(uuid, httpSession);
 
         setHeader("Set-Cookie", JSESSION_ID + "=" + uuid);

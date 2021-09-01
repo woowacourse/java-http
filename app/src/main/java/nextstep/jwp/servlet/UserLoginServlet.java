@@ -44,7 +44,7 @@ public class UserLoginServlet extends Servlet {
 
         if (isCorrectUser(httpRequest, possibleUser)) {
             log.debug("로그인 완료! 유저 정보 : {}", possibleUser);
-            httpResponse.createSession(possibleUser.get());
+            httpResponse.createSession(User.class.getName(), possibleUser.get());
             httpResponse.sendRedirect("/index.html");
             return;
         }

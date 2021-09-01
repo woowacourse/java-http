@@ -18,6 +18,8 @@ public class HttpResponse {
 
     private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
     private static final String NOT_FOUND_URI = "/404.html";
+    private static final String EMPTY_LINE = "\r\n";
+    private static final String STATIC = "static";
 
     private final ResponseHeaders headers;
     private StatusLine statusLine;
@@ -71,7 +73,7 @@ public class HttpResponse {
     }
 
     private URL findResource(String uri) {
-        return getClass().getClassLoader().getResource("static" + uri);
+        return getClass().getClassLoader().getResource(STATIC + uri);
     }
 
     private String readContent(URL resource) throws IOException {
@@ -116,7 +118,7 @@ public class HttpResponse {
     private void writeWithBody(OutputStream outputStream) throws IOException {
         outputStream.write(statusLine.getByte());
         outputStream.write(headers.getByte());
-        outputStream.write("\r\n".getBytes(StandardCharsets.UTF_8));
+        outputStream.write(EMPTY_LINE.getBytes(StandardCharsets.UTF_8));
         outputStream.write(body.getByte());
         outputStream.flush();
     }

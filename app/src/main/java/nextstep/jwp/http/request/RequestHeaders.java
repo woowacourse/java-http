@@ -12,11 +12,12 @@ import static nextstep.jwp.http.session.HttpCookie.COOKIE_NAME;
 
 public class RequestHeaders {
 
+    private static final String DELIMITER = ": ";
     private final Map<String, String> headers = new HashMap<>();
     private HttpCookie cookie = new HttpCookie();
 
     public void put(String line) {
-        String[] tokens = line.split(": ");
+        String[] tokens = line.split(DELIMITER);
         if (COOKIE_NAME.equals(tokens[0])) {
             this.cookie = HttpCookie.of(tokens[1]);
         }

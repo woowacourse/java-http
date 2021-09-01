@@ -11,6 +11,10 @@ import java.util.Map;
 public class RequestLine {
 
     private static final Logger log = LoggerFactory.getLogger(RequestLine.class);
+    private static final String QUERY_STRING_DELIMITER = "?";
+    private static final String BLANK = " ";
+    private static final String KEY_VALUE_DELIMITER = "=";
+    private static final String PARAM_DELIMITER = "&";
 
     private HttpMethod method;
     private String path;
@@ -22,8 +26,8 @@ public class RequestLine {
             String[] tokens = splitByBlank(line);
             this.method = HttpMethod.of(tokens[0]);
             String uri = tokens[1];
-            if (uri.contains("?")) {
-                final int index = uri.indexOf("?");
+            if (uri.contains(QUERY_STRING_DELIMITER)) {
+                final int index = uri.indexOf(QUERY_STRING_DELIMITER);
                 this.path = uri.substring(0, index);
                 this.queryParams = extractQueryParams(uri.substring(index + 1));
             } else {
@@ -39,7 +43,7 @@ public class RequestLine {
         if (line == null) {
             throw new IllegalStateException("HTTP Request Line이 null일 수 없습니다.");
         }
-        String[] tokens = line.split(" ");
+        String[] tokens = line.split(BLANK);
         if (tokens.length != 3) {
             throw new IllegalStateException("RequestLine의 형식이 올바르지 않습니다.");
         }
@@ -48,12 +52,12 @@ public class RequestLine {
 
     private Map<String, String> extractQueryParams(String queryString) {
         Map<String, String> params = new HashMap<>();
-        String[] tokens = queryString.split("&");
+        String[] tokens = queryString.split(PARAM_DELIMITER);
         for (String token : tokens) {
             if (Strings.isNullOrEmpty(token)) {
                 continue;
             }
-            String[] tmp = token.split("=");
+            String[] tmp = token.split(KEY_VALUE_DELIMITER);
             if (tmp.length == 2) {
                 params.put(tmp[0], tmp[1]);
             }

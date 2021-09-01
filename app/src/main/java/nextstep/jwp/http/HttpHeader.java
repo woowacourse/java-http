@@ -27,7 +27,6 @@ public class HttpHeader {
         Map<String, String> headers = new HashMap<>();
         headers.put("Content-Type", contentType);
         headers.put("Content-Length", responseBody.getBytes().length + "");
-        headers.put("Set-Cookie", "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
 
         return new HttpHeader(headers);
     }

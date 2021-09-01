@@ -13,7 +13,7 @@ class ControllerContainerTest {
 
     @DisplayName("PageRenderController를 찾는다")
     @ParameterizedTest
-    @ValueSource(strings = {"/index.html", "/login", "/register", "/401.html", "/500.html", "/404.html"})
+    @ValueSource(strings = {"/index.html", "/401.html", "/500.html", "/404.html"})
     void findPageRenderController(String input) {
         String firstLine = "GET " + input + " HTTP/1.1";
         HttpRequest httpRequest = TestUtil.createRequest(firstLine);

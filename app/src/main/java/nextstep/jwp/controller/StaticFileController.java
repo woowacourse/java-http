@@ -8,13 +8,7 @@ import nextstep.jwp.http.request.HttpRequest;
 
 public class StaticFileController extends AbstractController {
 
-    private static final HttpMethod HTTP_METHOD = HttpMethod.GET;
     private static final List<String> URI_PATHS = Arrays.asList("/assets", "/js", "/css");
-
-    @Override
-    boolean isMatchingHttpMethod(HttpRequest httpRequest) {
-        return HTTP_METHOD == httpRequest.getHttpMethod();
-    }
 
     @Override
     boolean isMatchingUriPath(HttpRequest httpRequest) {
@@ -23,10 +17,15 @@ public class StaticFileController extends AbstractController {
     }
 
     @Override
-    public HttpResponse run(HttpRequest httpRequest) {
+    public HttpResponse doGet(HttpRequest httpRequest) {
         if (httpRequest.getPath().endsWith(".css")) {
             return super.applyCSSFile(httpRequest.getPath());
         }
         return super.renderPage(httpRequest.getPath());
+    }
+
+    @Override
+    protected HttpResponse doPost(HttpRequest httpRequest) {
+        return super.redirect(getNotFoundErrorRedirectUrl());
     }
 }

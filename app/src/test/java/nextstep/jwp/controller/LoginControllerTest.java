@@ -22,7 +22,7 @@ class LoginControllerTest {
         requestBody.put("password", "password");
         HttpRequest request = TestUtil.createRequest("POST /login HTTP/1.1", requestBody);
 
-        HttpResponse httpResponse = controller.run(request);
+        HttpResponse httpResponse = controller.doPost(request);
         assertThat(httpResponse.getResponseStatus()).isEqualTo(ResponseStatus.FOUND);
         assertThat(httpResponse.getHttpHeader().getValueByKey("Location")).contains("/index.html");
     }
@@ -36,7 +36,7 @@ class LoginControllerTest {
         requestBody.put("password", "wrong");
         HttpRequest request = TestUtil.createRequest("POST /login HTTP/1.1", requestBody);
 
-        HttpResponse httpResponse = controller.run(request);
+        HttpResponse httpResponse = controller.doPost(request);
         assertThat(httpResponse.getResponseStatus()).isEqualTo(ResponseStatus.FOUND);
         assertThat(httpResponse.getHttpHeader().getValueByKey("Location")).contains("/401.html");
     }

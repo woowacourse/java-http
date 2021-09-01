@@ -19,7 +19,19 @@ class PageRenderControllerTest {
         PageRenderController controller = new PageRenderController();
         HttpRequest request = TestUtil.createRequest("GET " + input + " HTTP/1.1");
 
-        HttpResponse httpResponse = controller.run(request);
+        HttpResponse httpResponse = controller.doGet(request);
         assertThat(httpResponse.getResponseStatus()).isEqualTo(ResponseStatus.OK);
+    }
+
+    @DisplayName("POST 요청이 들어오면 404 에러 페이지로 리다이렉트한다.")
+    @ParameterizedTest
+    @ValueSource(strings = {"/index.html", "/401.html", "/404.html", "/500.html"})
+    void doPostError(String input) {
+        PageRenderController controller = new PageRenderController();
+        HttpRequest request = TestUtil.createRequest("POST " + input + " HTTP/1.1");
+
+        HttpResponse httpResponse = controller.doPost(request);
+        assertThat(httpResponse.getResponseStatus()).isEqualTo(ResponseStatus.FOUND);
+        assertThat(httpResponse.getHttpHeader().getValueByKey("Location")).contains("/404.html");
     }
 }

@@ -1,9 +1,11 @@
 package nextstep.jwp.web;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class HttpRequest {
     private final RequestLine requestLine;
@@ -45,12 +47,35 @@ public class HttpRequest {
         return parameters;
     }
 
-    public String getRequestBody() {
-        return requestBody;
-    }
-
     public String getParameter(String parameter) {
         return this.parameters.get(parameter);
+    }
+
+    public Cookie getCookie(String name) {
+        List<Cookie> cookies = getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        return cookies.stream()
+                .filter(cookie -> cookie.getName().equals(name))
+                .findFirst()
+                .orElse(null);
+    }
+
+    public List<Cookie> getCookies() {
+        String values = this.headers.get("Cookie");
+        if (values == null) {
+            return null;
+        }
+        return Arrays.stream(values.split(";"))
+                .map(String::strip)
+                .map(cookiePair -> cookiePair.split("="))
+                .map(nameValueArr -> new Cookie(nameValueArr[0], nameValueArr[1]))
+                .collect(Collectors.toList());
+    }
+
+    public String getRequestBody() {
+        return requestBody;
     }
 
     public static class HttpRequestBuilder {

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,5 +63,46 @@ class HttpRequestParserTest {
 
         // then
         assertThat(actual.getParameters()).containsAllEntriesOf(Map.of("account", "gugu", "password", "password"));
+    }
+
+    @Test
+    @DisplayName("헤더 값으로부터 쿠키를 추출할 수 있다.")
+    public void getCookies() throws IOException {
+        String request = String.join(LINE_SEPARATOR,
+                "GET /login?account=gugu&password=password HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Accept: */*",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
+        InputStream inputStream = new ByteArrayInputStream(request.getBytes());
+
+        // when
+        HttpRequest httpRequest = HttpRequestParser.parse(inputStream);
+        List<Cookie> cookies = httpRequest.getCookies();
+
+        // then
+        assertThat(cookies).containsExactlyInAnyOrder(
+                new Cookie("yummy_cookie", "choco"),
+                new Cookie("tasty_cookie", "strawberry"),
+                new Cookie("JSESSIONID", "656cef62-e3c4-40bc-a8df-94732920ed46"));
+    }
+
+    @Test
+    @DisplayName("원하는 쿠키값을 찾을 수 있다.")
+    void getCookie() throws IOException {
+        String request = String.join(LINE_SEPARATOR,
+                "GET /login?account=gugu&password=password HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Accept: */*",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
+        InputStream inputStream = new ByteArrayInputStream(request.getBytes());
+
+        // when
+        HttpRequest httpRequest = HttpRequestParser.parse(inputStream);
+        Cookie actual = httpRequest.getCookie("JSESSIONID");
+
+        // then
+        assertThat(actual).isEqualTo(new Cookie("JSESSIONID", "656cef62-e3c4-40bc-a8df-94732920ed46"));
     }
 }

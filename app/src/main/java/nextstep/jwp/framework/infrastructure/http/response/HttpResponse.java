@@ -9,6 +9,7 @@ import nextstep.jwp.framework.infrastructure.protocol.Protocol;
 public class HttpResponse {
 
     private static final String HTTP_RESPONSE_FORMAT = "%s\r\n%s";
+    private static final String COOKE_FORMAT = "%s=%s";
 
     private final HttpResponseHeader httpResponseHeader;
     private final HttpResponseBody httpResponseBody;
@@ -53,6 +54,12 @@ public class HttpResponse {
             this.responseBody = responseBody;
             int contentLength = responseBody.getBytes().length;
             otherResponseLines.add(HttpHeaders.CONTENT_LENGTH, String.valueOf(contentLength));
+            return this;
+        }
+
+        public Builder cookie(String key, String value) {
+            String cookie = String.format(COOKE_FORMAT, key, value);
+            otherResponseLines.add(HttpHeaders.SET_COOKIE, cookie);
             return this;
         }
 

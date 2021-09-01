@@ -1,11 +1,10 @@
 package nextstep.jwp.framework.controller.custom;
 
 import nextstep.jwp.framework.controller.CustomController;
-import nextstep.jwp.framework.infrastructure.http.content.ContentType;
+import nextstep.jwp.framework.controller.ResponseTemplate;
 import nextstep.jwp.framework.infrastructure.http.method.HttpMethod;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.framework.infrastructure.http.response.HttpResponse;
-import nextstep.jwp.framework.infrastructure.http.status.HttpStatus;
 
 public class IndexPageController extends CustomController {
 
@@ -16,13 +15,7 @@ public class IndexPageController extends CustomController {
 
     @Override
     protected HttpResponse doGet(HttpRequest httpRequest) {
-        String url = "/index.html";
-        return new HttpResponse.Builder()
-            .protocol(httpRequest.getProtocol())
-            .httpStatus(HttpStatus.OK)
-            .contentType(ContentType.find(url))
-            .responseBody(readFile(url))
-            .build();
+        return ResponseTemplate.ok("/index.html").build();
     }
 
     @Override

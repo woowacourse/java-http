@@ -9,6 +9,7 @@ import nextstep.jwp.framework.controller.custom.IndexPageController;
 import nextstep.jwp.framework.controller.custom.LoginController;
 import nextstep.jwp.framework.controller.custom.RegisterController;
 import nextstep.jwp.framework.controller.standard.StaticResourceController;
+import nextstep.jwp.framework.infrastructure.random.UUIdGenerator;
 import nextstep.jwp.web.application.UserService;
 
 public class FactoryConfiguration {
@@ -23,7 +24,7 @@ public class FactoryConfiguration {
     private static List<Controller> customControllers() {
         UserService userService = new UserService();
         return Arrays.asList(
-            new LoginController(userService),
+            new LoginController(userService, new UUIdGenerator()),
             new RegisterController(userService),
             new IndexPageController()
         );

@@ -1,20 +1,26 @@
 package nextstep.jwp.framework.controller.custom;
 
 import java.util.Map;
+import java.util.Objects;
 import nextstep.jwp.framework.controller.CustomController;
-import nextstep.jwp.framework.infrastructure.http.content.ContentType;
+import nextstep.jwp.framework.controller.ResponseTemplate;
 import nextstep.jwp.framework.infrastructure.http.method.HttpMethod;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.framework.infrastructure.http.response.HttpResponse;
-import nextstep.jwp.framework.infrastructure.http.status.HttpStatus;
+import nextstep.jwp.framework.infrastructure.http.session.HttpSession;
+import nextstep.jwp.framework.infrastructure.http.session.HttpSessions;
+import nextstep.jwp.framework.infrastructure.random.RandomIdGenerator;
 import nextstep.jwp.web.application.UserService;
+import nextstep.jwp.web.domain.User;
 
 public class LoginController extends CustomController {
 
     private final UserService userService;
+    private final RandomIdGenerator randomIdGenerator;
 
-    public LoginController(UserService userService) {
+    public LoginController(UserService userService, RandomIdGenerator randomIdGenerator) {
         this.userService = userService;
+        this.randomIdGenerator = randomIdGenerator;
     }
 
     @Override
@@ -27,36 +33,26 @@ public class LoginController extends CustomController {
 
     @Override
     protected HttpResponse doGet(HttpRequest httpRequest) {
-        String url = "/login.html";
-        return new HttpResponse.Builder()
-            .protocol(httpRequest.getProtocol())
-            .httpStatus(HttpStatus.OK)
-            .contentType(ContentType.find(url))
-            .responseBody(readFile(url))
-            .build();
+        HttpSession httpSession = HttpSessions.getSession(httpRequest);
+        if (Objects.isNull(httpSession) || Objects.isNull(httpSession.getAttribute("user"))) {
+            return ResponseTemplate.ok("/login.html").build();
+        }
+        return ResponseTemplate.redirect("/index.html").build();
     }
 
     @Override
     protected HttpResponse doPost(HttpRequest httpRequest) {
         Map<String, String> attributes = httpRequest.getContentAsAttributes();
+        String uuid = randomIdGenerator.generateId();
         try {
-            userService.login(attributes.get("account"), attributes.get("password"));
-            String redirectUrl = "/index.html";
-            return new HttpResponse.Builder()
-                .protocol(httpRequest.getProtocol())
-                .httpStatus(HttpStatus.FOUND)
-                .contentType(ContentType.find(redirectUrl))
-                .location(redirectUrl)
-                .responseBody(readFile(redirectUrl))
+            User login = userService.login(attributes.get("account"), attributes.get("password"));
+            HttpSessions.addSession(uuid);
+            HttpSessions.getSession(uuid).setAttribute("user", login);
+            return ResponseTemplate.redirect("/index.html")
+                .cookie("JSESSIONID", uuid)
                 .build();
         } catch (RuntimeException runtimeException) {
-            String errorUrl = "/401.html";
-            return new HttpResponse.Builder()
-                .protocol(httpRequest.getProtocol())
-                .httpStatus(HttpStatus.UNAUTHORIZED)
-                .contentType(ContentType.find(errorUrl))
-                .responseBody(readFile(errorUrl))
-                .build();
+            return ResponseTemplate.unauthorize("/401.html").build();
         }
     }
 }

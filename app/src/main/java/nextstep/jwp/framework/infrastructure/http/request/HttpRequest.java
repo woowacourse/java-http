@@ -1,6 +1,7 @@
 package nextstep.jwp.framework.infrastructure.http.request;
 
 import java.util.Map;
+import nextstep.jwp.framework.infrastructure.http.cookie.HttpCookies;
 import nextstep.jwp.framework.infrastructure.http.method.HttpMethod;
 import nextstep.jwp.framework.infrastructure.http.status.HttpStatus;
 import nextstep.jwp.framework.infrastructure.protocol.Protocol;
@@ -39,5 +40,9 @@ public class HttpRequest {
 
     public Protocol getProtocol() {
         return httpRequestHeader.getProtocol();
+    }
+
+    public HttpCookies getCookie() {
+        return httpRequestHeader.getCookie();
     }
 }

@@ -3,10 +3,19 @@ package nextstep.jwp;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import nextstep.common.MockIdGenerator;
 import nextstep.common.TestUtil;
 import nextstep.jwp.framework.config.FactoryConfiguration;
+import nextstep.jwp.framework.controller.Controller;
+import nextstep.jwp.framework.controller.custom.LoginController;
 import nextstep.jwp.framework.infrastructure.http.status.HttpStatus;
+import nextstep.jwp.framework.infrastructure.mapping.HttpRequestMapping;
+import nextstep.jwp.framework.infrastructure.mapping.RequestMapping;
 import nextstep.jwp.framework.webserver.RequestHandler;
+import nextstep.jwp.web.application.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -106,13 +115,19 @@ class RequestHandlerTest {
             "account=gugu&password=password");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, FactoryConfiguration.requestMapping());
+        LoginController loginController =
+            new LoginController(new UserService(), new MockIdGenerator());
+        List<Controller> customControllers = Arrays.asList(loginController);
+        RequestMapping requestMapping =
+            new HttpRequestMapping(customControllers, Collections.emptyList());
+
+        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
 
         // when
         requestHandler.run();
 
         // then
         assertThat(socket.output())
-            .isEqualTo(TestUtil.writeResponse("/index.html", HttpStatus.FOUND));
+            .isEqualTo(TestUtil.writeResponseWithCookie("/index.html", HttpStatus.FOUND));
     }
 }

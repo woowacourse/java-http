@@ -2,11 +2,10 @@ package nextstep.jwp.framework.controller.custom;
 
 import java.util.Map;
 import nextstep.jwp.framework.controller.CustomController;
-import nextstep.jwp.framework.infrastructure.http.content.ContentType;
+import nextstep.jwp.framework.controller.ResponseTemplate;
 import nextstep.jwp.framework.infrastructure.http.method.HttpMethod;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.framework.infrastructure.http.response.HttpResponse;
-import nextstep.jwp.framework.infrastructure.http.status.HttpStatus;
 import nextstep.jwp.web.application.UserService;
 
 public class RegisterController extends CustomController {
@@ -26,13 +25,7 @@ public class RegisterController extends CustomController {
     }
 
     protected HttpResponse doGet(HttpRequest httpRequest) {
-        String url = "/register.html";
-        return new HttpResponse.Builder()
-            .protocol(httpRequest.getProtocol())
-            .httpStatus(HttpStatus.OK)
-            .contentType(ContentType.find(url))
-            .responseBody(readFile(url))
-            .build();
+        return ResponseTemplate.ok("/register.html").build();
     }
 
     protected HttpResponse doPost(HttpRequest httpRequest) {
@@ -43,22 +36,9 @@ public class RegisterController extends CustomController {
                 attributes.get("password"),
                 attributes.get("email")
             );
-            String redirectUrl = "/index.html";
-            return new HttpResponse.Builder()
-                .protocol(httpRequest.getProtocol())
-                .httpStatus(HttpStatus.FOUND)
-                .contentType(ContentType.find(redirectUrl))
-                .location(redirectUrl)
-                .responseBody(readFile(redirectUrl))
-                .build();
+            return ResponseTemplate.redirect("/index.html").build();
         } catch (RuntimeException runtimeException) {
-            String errorUrl = "/401.html";
-            return new HttpResponse.Builder()
-                .protocol(httpRequest.getProtocol())
-                .httpStatus(HttpStatus.UNAUTHORIZED)
-                .contentType(ContentType.find(errorUrl))
-                .responseBody(readFile(errorUrl))
-                .build();
+            return ResponseTemplate.unauthorize("/401.html").build();
         }
     }
 }

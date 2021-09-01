@@ -1,7 +1,7 @@
 package nextstep.jwp.framework.controller.standard;
 
+import nextstep.jwp.framework.controller.ResponseTemplate;
 import nextstep.jwp.framework.controller.StandardController;
-import nextstep.jwp.framework.infrastructure.http.content.ContentType;
 import nextstep.jwp.framework.infrastructure.http.method.HttpMethod;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.framework.infrastructure.http.response.HttpResponse;
@@ -18,12 +18,7 @@ public class StaticResourceController extends StandardController {
     protected HttpResponse doGet(HttpRequest httpRequest) {
         String url = httpRequest.getUrl();
         HttpStatus httpStatus = HttpStatus.assumeFromHttpStatusPage(url);
-        return new HttpResponse.Builder()
-            .protocol(httpRequest.getProtocol())
-            .httpStatus(httpStatus)
-            .contentType(ContentType.find(httpRequest.getUrl()))
-            .responseBody(readFile(url))
-            .build();
+        return ResponseTemplate.template(httpStatus, url).build();
     }
 
     @Override

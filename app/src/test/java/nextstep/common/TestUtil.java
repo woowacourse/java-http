@@ -12,7 +12,29 @@ import nextstep.jwp.framework.infrastructure.protocol.Protocol;
 
 public class TestUtil {
 
+    private static final MockIdGenerator GENERATOR = new MockIdGenerator();
+
     private TestUtil() {
+    }
+
+    public static String writeResponseWithCookie(String url, HttpStatus httpStatus) {
+        try {
+            url = "/static" + url;
+            Path path = Paths.get(TestUtil.class.getResource(url).toURI());
+            String responseBody = String.join("\r\n", Files.readAllLines(path));
+            Builder builder = new Builder()
+                .httpStatus(httpStatus)
+                .protocol(Protocol.HTTP1_1)
+                .contentType(ContentType.find(url))
+                .responseBody(responseBody)
+                .cookie("JSESSIONID", GENERATOR.generateId());
+            if (httpStatus == HttpStatus.FOUND) {
+                builder.location("/index.html");
+            }
+            return builder.build().writeResponseMessage();
+        } catch (IOException | URISyntaxException exception) {
+            throw new IllegalStateException(exception);
+        }
     }
 
     public static String writeResponse(String url, HttpStatus httpStatus) {

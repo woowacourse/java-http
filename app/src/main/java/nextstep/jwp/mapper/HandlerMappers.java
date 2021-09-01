@@ -25,7 +25,7 @@ public class HandlerMappers implements HandlerMapper {
         return mappers.stream()
                 .map(handler -> handler.mapping(httpRequest))
                 .filter(handler->!Objects.isNull(handler))
-                .findFirst()
+                .findAny()
                 .orElseThrow(NotFoundException::new);
     }
 }

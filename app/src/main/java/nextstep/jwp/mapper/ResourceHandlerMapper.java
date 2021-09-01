@@ -24,7 +24,7 @@ public class ResourceHandlerMapper implements  HandlerMapper {
     public Handler mapping(HttpRequest httpRequest) {
         return handlers.stream()
                 .filter(handler -> handler.mapping(httpRequest))
-                .findFirst()
+                .findAny()
                 .orElseThrow(NotFoundException::new);
     }
 }

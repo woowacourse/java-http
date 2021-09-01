@@ -45,6 +45,6 @@ class ViewTest {
         view.render(modelAndView, httpResponse);
 
         assertResponse(httpResponse.responseAsString(), HttpStatus.BAD_REQUEST,
-                content.replace("errorMessage", "bad request"));
+                content.replace("${errorMessage}", "bad request"));
     }
 }

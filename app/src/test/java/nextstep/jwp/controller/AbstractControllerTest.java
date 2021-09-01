@@ -4,12 +4,11 @@ import nextstep.jwp.http.session.HttpSession;
 import nextstep.jwp.http.session.HttpSessions;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class AbstractControllerTest {
 
@@ -21,6 +20,7 @@ class AbstractControllerTest {
         session.setAttribute("user", new User("test", "test", "test@test.com"));
 
         LoginController loginController = new LoginController(new UserService());
-        loginController.isLogin(session);
+
+        Assertions.assertThat(loginController.isLogin(session)).isTrue();
     }
 }

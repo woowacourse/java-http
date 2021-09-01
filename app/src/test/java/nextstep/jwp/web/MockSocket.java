@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.web;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

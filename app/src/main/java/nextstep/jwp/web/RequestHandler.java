@@ -1,11 +1,18 @@
-package nextstep.jwp;
+package nextstep.jwp.web;
 
+import nextstep.jwp.web.controller.Controller;
+import nextstep.jwp.web.controller.ControllerFactory;
+import nextstep.jwp.web.controller.ControllerMapping;
+import nextstep.jwp.web.network.request.HttpRequest;
+import nextstep.jwp.web.network.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.Objects;
 
@@ -25,18 +32,17 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
+            final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
 
-            final String responseBody = "Hello world!";
+            final HttpRequest httpRequest  = new HttpRequest(inputStream);
+            final HttpResponse httpResponse = new HttpResponse();
+            final ControllerMapping controllerMapping = new ControllerMapping(ControllerFactory.create());
+            final Controller mappedController = controllerMapping.findByResource(httpRequest.getPath());
+            mappedController.service(httpRequest, httpResponse);
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            bufferedWriter.write(httpResponse.print());
+            bufferedWriter.flush();
+            bufferedWriter.close();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {

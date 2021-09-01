@@ -11,10 +11,14 @@ public class HttpSessions {
 
     private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
 
+    private HttpSessions() {
+
+    }
+
     public static HttpSession getSession(String id) {
         HttpSession httpSession = SESSIONS.get(id);
         if (httpSession == null) {
-            log.debug("세션이 없습니다 = {}" , "null");
+            log.debug("세션이 없습니다 = {}", "null");
             return new HttpSession(id);
         }
         log.debug("세션이 있습니다 ok");
@@ -23,10 +27,6 @@ public class HttpSessions {
 
     public static void remove(String id) {
         SESSIONS.remove(id);
-    }
-
-    private HttpSessions() {
-
     }
 
     public static void setAttribute(String id, HttpSession httpSession) {

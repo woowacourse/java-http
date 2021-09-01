@@ -67,11 +67,12 @@ class RequestHandlerTest {
     void postLogin() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 30",
                 "",
-                "");
+                "account=gugu&password=password");
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
@@ -89,11 +90,12 @@ class RequestHandlerTest {
     void postLoginException() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&password=wrong HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 25",
                 "",
-                "");
+                "account=gugu&password=pwd");
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 

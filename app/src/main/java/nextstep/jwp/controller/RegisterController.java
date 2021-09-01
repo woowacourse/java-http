@@ -1,8 +1,6 @@
 package nextstep.jwp.controller;
 
 import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.DBNotFoundException;
 import nextstep.jwp.framework.http.HttpBody;
@@ -39,12 +37,7 @@ public class RegisterController extends AbstractController {
         final String password = queryParams.get("password");
         final String email = queryParams.get("email");
 
-        InMemoryUserRepository.save(new User(generateRandomId(), account, password, email));
+        InMemoryUserRepository.save(new User(2L, account, password, email));
         logger.debug(account + "님의 새로운 계정이 생성 되었습니다.");
     }
-
-    private int generateRandomId() {
-        return new Random().nextInt(Integer.MAX_VALUE);
-    }
-
 }

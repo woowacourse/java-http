@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 // 응답 데이터의 상태에 따라 적절한 HTTP 헤더를 처리하는 역할
@@ -16,7 +16,7 @@ import java.util.Map;
 public class HttpResponse {
     private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
     private final OutputStream outputStream;
-    private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> headers = new LinkedHashMap<>();
 
     public HttpResponse(OutputStream outputStream) {
         this.outputStream = outputStream;
@@ -57,7 +57,6 @@ public class HttpResponse {
 
     private void responseBody(byte[] body) throws IOException {
         outputStream.write(body);
-        outputStream.write("\r\n".getBytes());
         outputStream.flush();
     }
 

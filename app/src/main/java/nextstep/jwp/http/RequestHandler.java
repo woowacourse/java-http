@@ -8,10 +8,10 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
 import nextstep.jwp.app.ui.Controller;
-import nextstep.jwp.http.infra.RequestConverter;
 import nextstep.jwp.http.mapping.RequestMapping;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.util.RequestConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,16 +1,15 @@
 package nextstep.jwp.http.request;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class URI {
 
-    private final String uri;
-    private String resourceUri;
-    private HashMap<String, String> queryString;
+    private final String path;
+    private final Map<String, String> queryString;
 
-    private URI(String uri, String resourceUri, HashMap<String, String> queryString) {
-        this.uri = uri;
-        this.resourceUri = resourceUri;
+    private URI(String path, Map<String, String> queryString) {
+        this.path = path;
         this.queryString = queryString;
     }
 
@@ -18,9 +17,9 @@ public class URI {
         HashMap<String, String> queryString = new HashMap<>();
         int index = uri.indexOf("?");
         if (index < 0) {
-            return new URI(uri, uri, null);
+            return new URI(uri, null);
         }
-        String resourceUri = uri.substring(0, index);
+        String path = uri.substring(0, index);
         String queries = uri.substring(index + 1);
         if (!queries.isEmpty()) {
             String[] queryStrings = queries.split("&");
@@ -29,18 +28,18 @@ public class URI {
                 queryString.put(values[0], values[1]);
             }
         }
-        return new URI(uri, resourceUri, queryString);
+        return new URI(path, queryString);
     }
 
-    public String getUri() {
-        return uri;
+    public String getPath() {
+        return path;
     }
 
-    public String getResourceUri() {
-        return resourceUri;
-    }
-
-    public HashMap<String, String> getQueryString() {
+    public Map<String, String> getQueryString() {
         return queryString;
+    }
+
+    public String getQueryParameter(String key) {
+        return queryString.get(key);
     }
 }

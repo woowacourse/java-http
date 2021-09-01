@@ -8,8 +8,8 @@ public enum ContentType {
     JS(".js", "application/javascript"),
     IMAGE(".svg", "image/svg+xml");
 
-    private String suffix;
-    private String contentType;
+    private final String suffix;
+    private final String contentType;
 
     ContentType(String suffix, String contentType) {
         this.suffix = suffix;

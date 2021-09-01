@@ -6,18 +6,22 @@ import nextstep.jwp.http.common.ResourceFile;
 
 public class HttpResponse {
 
-    private static final String NEWLINE = "\r\n";
+    private static final String CRLF = "\r\n";
     private static final String HTTP_VERSION = "HTTP/1.1 ";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
-
+    private static final String LOCATION = "Location";
 
     private HttpStatus httpStatus;
     private HttpHeaders httpHeaders;
-    private String body = "";
+    private String body;
 
     public HttpResponse() {
-        this.httpHeaders = HttpHeaders.of();
+        this(null, HttpHeaders.of(), null);
+    }
+
+    public HttpResponse(HttpStatus httpStatus, String body) {
+        this(httpStatus, HttpHeaders.of(), body);
     }
 
     public HttpResponse(HttpStatus httpStatus, HttpHeaders httpHeaders, String body) {
@@ -47,7 +51,7 @@ public class HttpResponse {
     }
 
     public byte[] getResponseByByte() {
-        return String.join(NEWLINE,
+        return String.join(CRLF,
                 getHttpLine(),
                 httpHeaders.convertToLines(),
                 "",
@@ -56,7 +60,8 @@ public class HttpResponse {
     }
 
     private String getHttpLine() {
-        return HTTP_VERSION + httpStatus.value() + " " + httpStatus.responsePhrase() + " ";
+        return String
+                .format("%s %s %s ", HTTP_VERSION, httpStatus.value(), httpStatus.responsePhrase());
     }
 
     public HttpResponse forward(String uri) throws IOException {
@@ -67,19 +72,15 @@ public class HttpResponse {
         ResourceFile resourceFile = new ResourceFile(uri);
         String body = resourceFile.getContent();
         setHttpStatus(httpStatus);
-        addHeader("Content-Type", resourceFile.getContentType());
-        addHeader("Content-Length", String.valueOf(body.getBytes().length));
+        addHeader(CONTENT_TYPE, resourceFile.getContentType());
+        addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         setBody(body);
         return this;
     }
 
-    public HttpResponse sendRedirect(String uri) {
-        return sendRedirect(uri, HttpStatus.FOUND);
-    }
-
     public HttpResponse sendRedirect(String uri, HttpStatus httpStatus) {
         setHttpStatus(httpStatus);
-        httpHeaders.addHeader("Location", uri);
+        httpHeaders.addHeader(LOCATION, uri);
         return this;
     }
 }

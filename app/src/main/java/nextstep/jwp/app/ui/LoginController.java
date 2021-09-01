@@ -22,20 +22,20 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest request) throws IOException {
-        String account = request.getParameter("account");
-        String password = request.getParameter("password");
+    protected HttpResponse doPost(HttpRequest request) {
+        String account = request.getBodyParameter("account");
+        String password = request.getBodyParameter("password");
         HttpResponse response = new HttpResponse();
         try {
             User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(UserNotFoundException::new);
             if (!user.checkPassword(password)) {
-                return response.sendRedirect("/401.html", HttpStatus.UNAUTHORIZED);
+                return response.sendRedirect(ERROR_401_HTML, HttpStatus.UNAUTHORIZED);
             }
-            return response.sendRedirect("/index.html");
+            return response.sendRedirect(INDEX_HTML, HttpStatus.FOUND);
         } catch (UserNotFoundException e) {
             log.debug(e.getMessage());
-            return response.sendRedirect("/401.html", HttpStatus.UNAUTHORIZED);
+            return response.sendRedirect(ERROR_401_HTML, HttpStatus.UNAUTHORIZED);
         }
     }
 }

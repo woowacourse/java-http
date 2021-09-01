@@ -1,4 +1,4 @@
-package nextstep.jwp.http.infra;
+package nextstep.jwp.http.util;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -14,8 +14,8 @@ public class RequestHeaderBuilder {
 
     public RequestHeaderBuilder addHeader(String[] splitRequestHeaders) {
         for (int i = 1; i < splitRequestHeaders.length; i++) {
-            String[] separateHeaderByColon = splitRequestHeaders[i].split(":");
-            headers.put(separateHeaderByColon[0], separateHeaderByColon[1].trim());
+            String[] separateHeaderByColon = splitRequestHeaders[i].split(":", 2);
+            headers.put(separateHeaderByColon[0].trim(), separateHeaderByColon[1].trim());
         }
         return this;
     }

@@ -1,18 +1,19 @@
-package nextstep.jwp.http.infra;
+package nextstep.jwp.http.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import nextstep.jwp.http.common.HttpHeaders;
 import nextstep.jwp.http.request.RequestBody;
 
 public class RequestBodyBuilder {
 
-    private final HashMap<String, String> requestBodies;
+    private Map<String, String> requestBodies;
     private final BufferedReader bufferedReader;
 
     public RequestBodyBuilder(BufferedReader bufferedReader) {
-        requestBodies = new HashMap<>();
+        requestBodies = new LinkedHashMap<>();
         this.bufferedReader = bufferedReader;
     }
 
@@ -26,12 +27,17 @@ public class RequestBodyBuilder {
                 return this;
             }
             String[] splitRequestBody = requestBody.split("&");
-            for (int i = 0; i < splitRequestBody.length; i++) {
-                String[] separateHeaderByColon = splitRequestBody[i].split("=");
-                this.requestBodies.put(separateHeaderByColon[0], separateHeaderByColon[1].trim());
-            }
+
+            addBodies(splitRequestBody);
         }
         return this;
+    }
+
+    private void addBodies(String[] splitRequestBody) {
+        for (String s : splitRequestBody) {
+            String[] separateHeaderByColon = s.split("=");
+            requestBodies.put(separateHeaderByColon[0].trim(), separateHeaderByColon[1].trim());
+        }
     }
 
     public RequestBody build() {

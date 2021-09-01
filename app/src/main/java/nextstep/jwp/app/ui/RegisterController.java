@@ -17,14 +17,14 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doPost(HttpRequest request) throws IOException {
-        String account = request.getParameter("account");
-        String password = request.getParameter("password");
-        String email = request.getParameter("email");
+        String account = request.getBodyParameter("account");
+        String password = request.getBodyParameter("password");
+        String email = request.getBodyParameter("email");
         HttpResponse response = new HttpResponse();
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            return response.sendRedirect("/500.html", HttpStatus.INTERNAL_SERVER_ERROR);
+            return response.sendRedirect(ERROR_500_HTML, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         InMemoryUserRepository.save(new User(null, account, password, email));
-        return response.sendRedirect("/index.html");
+        return response.sendRedirect(INDEX_HTML, HttpStatus.FOUND);
     }
 }

@@ -1,4 +1,4 @@
-package nextstep.jwp.http.infra;
+package nextstep.jwp.http.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,11 +22,10 @@ public class RequestConverter {
         }
 
         String[] splitRequestHeaders = requestHeaders.toString().split("\n");
-        String[] requestLine = splitRequestHeaders[0].split(" ");
+        String requestLine = splitRequestHeaders[0];
 
         return new HttpRequest.Builder(bufferedReader)
-                .method(requestLine[0])
-                .uri(requestLine[1])
+                .requestLine(requestLine)
                 .requestHeaders(splitRequestHeaders)
                 .requestBody()
                 .build();

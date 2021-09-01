@@ -21,12 +21,12 @@ public class HttpSession {
         return this.id;
     }
 
-    public void setUser(User user) {
-        setAttribute(USER, user);
-    }
-
     public User getUser() {
         return (User) getAttribute(USER);
+    }
+
+    public void setUser(User user) {
+        setAttribute(USER, user);
     }
 
     private void setAttribute(String name, Object value) {

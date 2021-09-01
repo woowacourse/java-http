@@ -2,14 +2,12 @@ package nextstep.jwp.controller;
 
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.RequestHandler;
 import nextstep.jwp.http.ContentType;
-import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpHeader;
 import nextstep.jwp.http.request.HttpMethod;
+import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.ResponseStatus;
-import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +18,10 @@ public abstract class AbstractController implements Controller {
     private static final String NOT_FOUND_ERROR_REDIRECT_URL = "http://localhost:8080/404.html";
 
     private Logger logger = LoggerFactory.getLogger(AbstractController.class);
+
+    public static String getNotFoundErrorRedirectUrl() {
+        return NOT_FOUND_ERROR_REDIRECT_URL;
+    }
 
     @Override
     public boolean isMatchingController(HttpRequest httpRequest) {
@@ -64,10 +66,6 @@ public abstract class AbstractController implements Controller {
         headers.put("Location", redirectUrl);
 
         return HttpResponse.status(ResponseStatus.FOUND, new HttpHeader(headers));
-    }
-
-    public static String getNotFoundErrorRedirectUrl() {
-        return NOT_FOUND_ERROR_REDIRECT_URL;
     }
 
     protected abstract HttpResponse doGet(HttpRequest httpRequest);

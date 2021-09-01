@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.HashMap;
 import java.util.Map;
 import nextstep.TestUtil;
-import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpSession;
 import nextstep.jwp.http.HttpSessions;
 import nextstep.jwp.http.request.HttpRequest;
@@ -13,7 +12,6 @@ import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.ResponseStatus;
 import nextstep.jwp.model.User;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

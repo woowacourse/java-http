@@ -3,9 +3,8 @@ package nextstep.jwp.controller;
 import java.util.Arrays;
 import java.util.List;
 import nextstep.jwp.http.ContentType;
-import nextstep.jwp.http.HttpSessions;
-import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.HttpResponse;
 
 public class StaticFileController extends AbstractController {
 

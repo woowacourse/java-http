@@ -3,9 +3,9 @@ package nextstep.jwp.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import nextstep.TestUtil;
+import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.ResponseStatus;
-import nextstep.jwp.http.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;

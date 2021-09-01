@@ -2,10 +2,12 @@ package nextstep.joanne.handler;
 
 import nextstep.joanne.converter.HttpRequestResponseConverter;
 import nextstep.joanne.exception.HttpException;
+import nextstep.joanne.handler.controller.Controller;
 import nextstep.joanne.http.request.HttpRequest;
 import nextstep.joanne.http.request.HttpRequest2;
 import nextstep.joanne.http.request.HttpRequestParser;
 import nextstep.joanne.http.response.HttpResponse;
+import nextstep.joanne.http.response.HttpResponse2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,10 +25,12 @@ public class RequestHandler2 implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
+    private final HandlerMapping handlerMapping;
     private final HttpRequestParser httpRequestParser;
 
-    public RequestHandler2(Socket connection, HttpRequestParser httpRequestParser) {
+    public RequestHandler2(Socket connection, HandlerMapping handlerMapping, HttpRequestParser httpRequestParser) {
         this.connection = Objects.requireNonNull(connection);
+        this.handlerMapping = handlerMapping;
         this.httpRequestParser = httpRequestParser;
     }
 
@@ -39,8 +43,11 @@ public class RequestHandler2 implements Runnable {
             final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
 
             final HttpRequest2 httpRequest = httpRequestParser.parse(br);
+            HttpResponse2 httpResponse = new HttpResponse2();
+            final Controller controller = handlerMapping.get(httpRequest);
+            controller.service(httpRequest, httpResponse);
 
-            HttpResponse httpResponse;
+
             outputStream.write("".getBytes(StandardCharsets.UTF_8));
             outputStream.flush();
         } catch (IOException exception) {

@@ -15,7 +15,6 @@ public class HttpRequestParser {
     }
 
     public HttpRequest2 parse(final BufferedReader br) throws IOException {
-        // 빈 행이 올때까지 요청을 읽어들인다.
         final StringBuilder stringBuilder = read(br);
         final String[] requests = stringBuilder.toString().split("\n");
 

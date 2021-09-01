@@ -27,7 +27,6 @@ public class HttpRequestHeader {
         this.contentLength = parseContentLength(requestHeaders);
     }
 
-    // TODO: parsing 로직 중복 처리
     private String parseHttpCookie(final List<String> requestHeaders) {
         String httpCookieValue = requestHeaders.stream()
                 .filter(header -> header.startsWith(COOKIE_HEADER))

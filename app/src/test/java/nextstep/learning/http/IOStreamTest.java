@@ -17,7 +17,7 @@ import static org.mockito.Mockito.*;
  * <b>InputStream</b>은 데이터를 읽고, <b>OutputStream</b>은 데이터를 쓴다.<br>
  * <b>FilterStream</b>은 InputStream이나 OutputStream에 연결될 수 있다.<br>
  * FilterStream은 읽거나 쓰는 데이터를 수정할 때 사용한다. (e.g. 암호화, 압축, 포맷 변환)<br>
- *<br>
+ * <br>
  * <b>Stream</b>은 데이터를 <b>바이트</b>로 읽고 쓴다.<br>
  * 바이트가 아닌 <b>텍스트(문자)</b>를 읽고 쓰려면 <b>Reader와 Writer</b> 클래스를 연결한다.<br>
  * Reader, Writer는 다양한 문자 인코딩(e.g. UTF-8)을 처리할 수 있다.

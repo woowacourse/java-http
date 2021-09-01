@@ -1,6 +1,5 @@
 package nextstep.jwp.http;
 
-import nextstep.jwp.exception.NoMatchingControllerException;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.infrastructure.RequestHandler;
 import nextstep.jwp.infrastructure.RequestMapping;
@@ -13,7 +12,6 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RequestHandlerTest {
     private final String protocol = "HTTP/1.1";
@@ -23,7 +21,7 @@ class RequestHandlerTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -54,7 +52,7 @@ class RequestHandlerTest {
     @Test
     void no_matching_controller() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "PUT /sakjung HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -85,7 +83,7 @@ class RequestHandlerTest {
     @Test
     void internal_server_error() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -117,7 +115,7 @@ class RequestHandlerTest {
     void login_post() throws IOException {
         // given
         final String requestBody = "account=gugu&password=password";
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",

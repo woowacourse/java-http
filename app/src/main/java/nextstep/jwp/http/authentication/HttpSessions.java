@@ -16,7 +16,4 @@ public class HttpSessions {
     public static void addSession(final String id, final HttpSession httpSession) {
         SESSIONS.putIfAbsent(id, httpSession);
     }
-
-    public static void remove(String id) {
-    }
 }

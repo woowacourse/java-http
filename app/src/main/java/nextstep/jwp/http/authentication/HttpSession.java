@@ -18,13 +18,4 @@ public class HttpSession {
     public void setAttribute(String name, Object value) {
         values.put(name, value);
     }
-
-//    public Object getAttribute(String name) {
-//    }
-//
-//    public void removeAttribute(String name) {
-//    }
-//
-//    public void invalidate() {
-//    }
 }

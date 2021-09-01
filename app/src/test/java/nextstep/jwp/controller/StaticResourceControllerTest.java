@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.*;
+import nextstep.jwp.http.ContentType;
+import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.HttpRequestHeader;
 import nextstep.jwp.http.response.HttpResponse;

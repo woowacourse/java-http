@@ -1,21 +1,14 @@
 package nextstep.jwp.infrastructure;
 
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.RegisterController;
-import nextstep.jwp.controller.StaticResourceController;
-import nextstep.jwp.exception.NoMatchingControllerException;
 import nextstep.jwp.exception.ResourceNotFoundException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 public class RequestHandler implements Runnable {

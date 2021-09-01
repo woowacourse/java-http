@@ -24,6 +24,10 @@ public class RequestUrl {
         return new RequestUrl(parsedRequestUrl, null);
     }
 
+    public String getUrl() {
+        return url;
+    }
+
     public QueryParameter getQueryParam() {
         return queryParameter;
     }

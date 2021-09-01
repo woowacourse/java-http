@@ -42,15 +42,31 @@ public class HttpRequest {
                 RequestUrl.of(requestInfos[1]),
                 ProtocolVersion.of(requestInfos[2]),
                 RequestHttpHeader.of(requestHttpHeader),
-                RequestBody.of(requestBody));
+                RequestBody.asQueryString(requestBody));
+    }
+
+    public String searchRequestBody(final String key) {
+        return requestBody.find(key);
+    }
+
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
+    }
+
+    public RequestUrl getRequestUrl() {
+        return requestUrl;
+    }
+
+    public ProtocolVersion getProtocolVersion() {
+        return protocolVersion;
     }
 
     public RequestHttpHeader getRequestHttpHeader() {
         return requestHttpHeader;
     }
 
-    public String searchRequestBody(final String key) {
-        return requestBody.find(key);
+    public RequestBody getRequestBody() {
+        return requestBody;
     }
 
     @Override

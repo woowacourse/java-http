@@ -1,6 +1,5 @@
-package nextstep.jwp.framework.http.request;
+package nextstep.jwp.framework.http.request.details;
 
-import nextstep.jwp.framework.http.request.details.HttpMethod;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

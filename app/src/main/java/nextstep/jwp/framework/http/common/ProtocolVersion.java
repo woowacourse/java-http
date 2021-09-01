@@ -1,5 +1,7 @@
 package nextstep.jwp.framework.http.common;
 
+import java.util.Objects;
+
 public class ProtocolVersion {
 
     private static final String DEFAULT_VERSION = "HTTP/1.1";
@@ -20,5 +22,18 @@ public class ProtocolVersion {
 
     public String getProtocol() {
         return protocol;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ProtocolVersion that = (ProtocolVersion) o;
+        return Objects.equals(protocol, that.protocol);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(protocol);
     }
 }

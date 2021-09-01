@@ -13,7 +13,7 @@ public class RequestBody {
         this.requestBodyMap = requestBodyMap;
     }
 
-    public static RequestBody of(final String queryStringFormat) {
+    public static RequestBody asQueryString(final String queryStringFormat) {
         if (Objects.isNull(queryStringFormat) || queryStringFormat.isEmpty()) {
             return null;
         }

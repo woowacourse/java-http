@@ -35,7 +35,7 @@ public class DynamicWebManager {
         for (Class<?> controller : annotatedControllers) {
             registerController(controller);
         }
-        log.info("########## annotated contollers loaded ##########");
+        log.info("########## annotated controllers loaded ##########");
     }
 
     private void registerController(final Class<?> controller) {

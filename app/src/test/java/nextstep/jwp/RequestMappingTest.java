@@ -7,7 +7,7 @@ import java.util.HashMap;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
-import nextstep.jwp.exception.MethodNotAllowedException;
+import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.Request;
 import org.junit.jupiter.api.DisplayName;
@@ -52,7 +52,7 @@ class RequestMappingTest {
 
         // when
         assertThatThrownBy(() -> requestMapping.getController(request))
-        .isInstanceOf(MethodNotAllowedException.class);
+        .isInstanceOf(NotFoundException.class);
 
     }
 

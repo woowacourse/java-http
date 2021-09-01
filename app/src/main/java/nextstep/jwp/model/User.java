@@ -26,6 +26,10 @@ public class User {
         return account;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
     public void setId(long id) {
         this.id = id;
     }

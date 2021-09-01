@@ -5,7 +5,7 @@ import java.util.Map;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
-import nextstep.jwp.exception.MethodNotAllowedException;
+import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.http.Request;
 
 public class RequestMapping {
@@ -26,6 +26,6 @@ public class RequestMapping {
         if (request.isUriMatch(REGISTER)) {
             return CONTROLLERS.get(REGISTER);
         }
-        throw new MethodNotAllowedException();
+        throw new NotFoundException(request);
     }
 }

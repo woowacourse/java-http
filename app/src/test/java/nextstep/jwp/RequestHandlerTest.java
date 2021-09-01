@@ -1,15 +1,11 @@
 package nextstep.jwp;
 
-import java.util.Objects;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import nextstep.jwp.utils.FileConverter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestHandlerTest {
 
@@ -153,12 +149,6 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    private String getResponseBody(String path) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource(path);
-        return new String(Files.readAllBytes(
-            new File(Objects.requireNonNull(resource).getFile()).toPath()));
-    }
-
     private String createGetRequest(String url, String accept) {
         return String.join(NEW_LINE,
             "GET /" + url + " HTTP/1.1",
@@ -180,7 +170,7 @@ class RequestHandlerTest {
     }
 
     private String createResponseOK(String fileName, String contentType) throws IOException {
-        final String responseBody = getResponseBody("static/" + fileName);
+        final String responseBody = FileConverter.fileToString("/" + fileName);
 
         return String.join(NEW_LINE, "HTTP/1.1 200 OK",
             "Content-Type: " + contentType + ";charset=utf-8",

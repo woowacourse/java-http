@@ -151,7 +151,7 @@ public class RequestHandler implements Runnable {
             return Response.create200OK(request, responseBody);
         }
         if (request.isUriFile()) {
-            String responseBody = FileConverter.fileToString("static" + uri);
+            String responseBody = FileConverter.fileToString(uri);
             return Response.create200OK(request, responseBody);
         }
         throw new NotFoundException(request);

@@ -11,8 +11,8 @@ public class HttpSessions {
     private HttpSessions() {
     }
 
-    public static HttpSession getSession(String id) {
-        if (SESSIONS.containsKey(id)) {
+    public static HttpSession get(String id) {
+        if (HttpSessions.isValid(id)) {
             return SESSIONS.get(id);
         }
         return createSession();
@@ -28,8 +28,14 @@ public class HttpSessions {
 
     public static HttpSession createSession() {
         String sessionId = createSessionId();
-        HttpSession httpSession = new HttpSession(sessionId);
-        SESSIONS.put(sessionId, httpSession);
-        return httpSession;
+        return new HttpSession(sessionId);
+    }
+
+    public static void putSession(HttpSession httpSession) {
+        SESSIONS.put(httpSession.getId(), httpSession);
+    }
+
+    public static boolean isValid(String sessionId) {
+        return SESSIONS.containsKey(sessionId);
     }
 }

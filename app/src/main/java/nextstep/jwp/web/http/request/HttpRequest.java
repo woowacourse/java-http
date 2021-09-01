@@ -126,7 +126,7 @@ public class HttpRequest {
 
         private HttpSession findOrCreateSession() {
             if (this.cookie.containsSession()) {
-                return HttpSessions.getSession(this.cookie.getSessionId());
+                return HttpSessions.get(this.cookie.getSessionId());
             }
             return HttpSessions.createSession();
         }

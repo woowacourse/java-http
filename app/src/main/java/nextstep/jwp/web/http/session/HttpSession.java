@@ -7,11 +7,9 @@ public class HttpSession {
 
     private final String id;
     private final Map<String, Object> values = new ConcurrentHashMap<>();
-    private boolean isNew;
 
     public HttpSession(String id) {
         this.id = id;
-        this.isNew = true;
     }
 
     public String getId() {
@@ -28,14 +26,6 @@ public class HttpSession {
 
     public void removeAttribute(String name) {
         values.remove(name);
-    }
-
-    public void isNewToFalse() {
-        this.isNew = false;
-    }
-
-    public boolean isNew() {
-        return isNew;
     }
 
     public void invalidate() {

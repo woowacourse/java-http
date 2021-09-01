@@ -20,7 +20,7 @@ public class LoginController extends AbstractController {
         Object user = request.session().getAttribute("user");
         if (!Objects.isNull(user)) {
             response.setStatus(HttpStatus.FOUND);
-            response.headers().add("Location", "/index");
+            response.headers().setLocation("/index");
         }
     }
 

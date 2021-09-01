@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.toMap;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class HttpCookie {
 
@@ -23,7 +24,7 @@ public class HttpCookie {
 
     public HttpCookie(String rawCookie) {
         if (rawCookie.isEmpty()) {
-            this.cookie = new HashMap<>();
+            this.cookie = new ConcurrentHashMap<>();
             return;
         }
         this.cookie = Arrays.stream(rawCookie.split(COOKIE_DELIMITER))
@@ -36,11 +37,11 @@ public class HttpCookie {
     }
 
     public HttpCookie(Map<String, String> cookie) {
-        this.cookie = cookie;
+        this.cookie = new ConcurrentHashMap<>(cookie);
     }
 
     public void setSessionId(String sessionId) {
-        cookie.put(SESSION_ID, sessionId);
+        this.cookie.put(SESSION_ID, sessionId);
     }
 
     public String get(String key) {
@@ -52,7 +53,7 @@ public class HttpCookie {
     }
 
     public String getSessionId() {
-        return cookie.get(SESSION_ID);
+        return cookie.getOrDefault(SESSION_ID, EMPTY);
     }
 
     public String asString() {

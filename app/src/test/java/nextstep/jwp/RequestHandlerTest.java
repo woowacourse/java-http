@@ -7,10 +7,35 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.web.handler.RequestHandler;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
+
+    private String sessionId;
+
+    @BeforeEach
+    void setUp() {
+        final String httpRequest = String.join("\r\n",
+            "GET /index HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "",
+            "");
+
+        final MockSocket socket = createRequestHandlerAndRun(httpRequest);
+        parseSessionId(socket);
+    }
+
+    private void parseSessionId(MockSocket socket) {
+        String[] lines = socket.output().split("\r\n");
+        String cookie = lines[3];
+        String[] cookies = cookie.split(":");
+        String jsessionId = cookies[1];
+        String[] ids = jsessionId.split("=");
+        sessionId = ids[1];
+    }
 
     @DisplayName("인덱스 페이지를 확인")
     @Test
@@ -20,6 +45,7 @@ class RequestHandlerTest {
             "GET /index HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
+            "Cookie: JSESSIONID=" + sessionId + " " +
             "",
             "");
 
@@ -44,6 +70,7 @@ class RequestHandlerTest {
             "GET /index.html HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
+            "Cookie: JSESSIONID=" + sessionId + " " +
             "",
             "");
 
@@ -68,6 +95,7 @@ class RequestHandlerTest {
             "GET /css/styles.css HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
+            "Cookie: JSESSIONID=" + sessionId + " " +
             "",
             "");
 
@@ -91,6 +119,7 @@ class RequestHandlerTest {
             "GET /assets/img/error-404-monochrome.svg HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
+            "Cookie: JSESSIONID=" + sessionId + " " +
             "",
             "");
 

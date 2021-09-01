@@ -24,7 +24,11 @@ public class CustomHttpResponse {
     }
 
     public byte[] getBodyBytes() {
-        return responseBody.bodyBytes();
+        return String.join("\r\n",
+                statusLine.asString(),
+                headers.asString(),
+                "",
+                responseBody.getBody()).getBytes();
     }
 }
 

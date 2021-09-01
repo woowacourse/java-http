@@ -11,4 +11,8 @@ public class StatusLine {
         this.statusCode = statusCode;
         this.statusMessage = statusMessage;
     }
+
+    public String asString() {
+        return versionOfControl + " " + statusCode + " " + statusMessage;
+    }
 }

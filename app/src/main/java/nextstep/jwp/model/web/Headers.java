@@ -16,4 +16,14 @@ public class Headers {
         }
         return 0;
     }
+
+    public String asString() {
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<String, String> kV : headers.entrySet()) {
+            String key = kV.getKey();
+            String value = kV.getValue();
+            builder.append(key + ": " + value + " " + "\r\n");
+        }
+        return builder.toString();
+    }
 }

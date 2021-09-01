@@ -28,10 +28,12 @@ public class RequestHandler implements Runnable {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             CustomHttpRequest request = CustomHttpRequest.from(reader);
             CustomHttpResponse response = new CustomHttpResponse();
+            HandlerMapper.mappingHandler(request.getUri())
+                    .service(request, response);
 
             outputStream.write(response.getBodyBytes());
             outputStream.flush();
-        } catch (IOException exception) {
+        } catch (Exception exception) {
             log.error("Exception stream", exception);
         } finally {
             close();

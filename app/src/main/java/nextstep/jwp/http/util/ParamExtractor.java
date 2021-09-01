@@ -16,6 +16,7 @@ public class ParamExtractor {
 
         return Arrays.stream(splitParams)
             .map(param -> param.split("="))
+            .filter(params -> params.length == 2)
             .collect(Collectors.toMap(param -> param[0], param -> param[1]));
     }
 }

@@ -7,13 +7,11 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-import static nextstep.jwp.http.Header.CONTENT_LENGTH;
-import static nextstep.jwp.http.Header.CONTENT_TYPE;
+import static com.google.common.net.HttpHeaders.CONTENT_LENGTH;
+import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 
 public class  HttpResponse {
     private DataOutputStream dataOutputStream = null;

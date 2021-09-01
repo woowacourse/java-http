@@ -60,14 +60,6 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    public boolean hasHeaderValue(String headerValue) {
-        return header.containsKey(headerValue);
-    }
-
-    public String getHeaderValue(String headerValue) {
-        return header.get(headerValue);
-    }
-
     public HttpCookie getCookies() {
         return HttpCookie.of(header.get("Cookie"));
     }
@@ -82,14 +74,6 @@ public class HttpRequest {
 
     public String getPath() {
         return requestLine.getPath();
-    }
-
-    public Map<String, String> getHeader() {
-        return header;
-    }
-
-    public Map<String, String> getQuery() {
-        return query;
     }
 
     public HttpSession getSession() {

@@ -3,6 +3,7 @@ package nextstep.jwp.http.request;
 import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.session.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileInputStream;
@@ -24,6 +25,7 @@ class HttpRequestTest {
         postRequest = HttpRequest.of(postIn);
     }
 
+    @DisplayName("쿠기값을 얻어온다.")
     @Test
     void getCookies() {
         HttpCookie httpCookie = getRequest.getCookies();
@@ -31,23 +33,27 @@ class HttpRequestTest {
         assertThat(httpCookie.getCookie("tasty_cookie")).isEqualTo("strawberry");
     }
 
+    @DisplayName("HTTP 메소드 값을 얻어온다.")
     @Test
     void checkMethod() {
         assertThat(getRequest.checkMethod("GET")).isTrue();
     }
 
+    @DisplayName("Body의 쿼리 파라미터 값을 얻어온다.")
     @Test
     void getQueryValue() {
         assertThat(postRequest.getQueryValue("userId")).isEqualTo("test");
         assertThat(postRequest.getQueryValue("password")).isEqualTo("test");
     }
 
+    @DisplayName("요청경로를 얻어온다.")
     @Test
     void getPath() {
         String path = getRequest.getPath();
         assertThat(path).isEqualTo("/login");
     }
 
+    @DisplayName("세션을 얻어온다.")
     @Test
     void getSession() {
         HttpCookie httpCookie = getRequest.getCookies();

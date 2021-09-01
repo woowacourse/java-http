@@ -2,6 +2,7 @@ package nextstep.jwp.http.response;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
@@ -21,6 +22,7 @@ class HttpResponseTest {
         outputStream = new FileOutputStream( "src/test/resources/test.txt");
     }
 
+    @DisplayName("200 OK 응답 테스트")
     @Test
     void ok() throws IOException {
         URL resource = getClass().getClassLoader().getResource("static/index.html");
@@ -38,6 +40,7 @@ class HttpResponseTest {
         assertThat(result).isEqualTo(expected);
     }
 
+    @DisplayName("404 Not Found 응답 테스트")
     @Test
     void notfound() throws IOException {
         String expected = "HTTP/1.1 404 Not Found \r\n" +
@@ -51,6 +54,7 @@ class HttpResponseTest {
         assertThat(result).isEqualTo(expected);
     }
 
+    @DisplayName("302 Redirect 응답 테스트")
     @Test
     void redirect() throws IOException {
         String expected = "HTTP/1.1 302 Redirect \r\n" +

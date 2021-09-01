@@ -1,5 +1,9 @@
 package nextstep.jwp.http.response;
 
+import nextstep.jwp.RequestHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +18,7 @@ import static com.google.common.net.HttpHeaders.CONTENT_LENGTH;
 import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 
 public class  HttpResponse {
+    private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
     private DataOutputStream dataOutputStream = null;
     private Map<String, String> headers = new LinkedHashMap<>();
 
@@ -46,7 +51,7 @@ public class  HttpResponse {
             headers.put(CONTENT_LENGTH, body.length + "");
             ok(body);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Exception ok", e);
         }
     }
 
@@ -56,7 +61,7 @@ public class  HttpResponse {
             attachHeaderToResponse();
             attachBodyToResponse(body);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Exception ok", e);
         }
     }
 
@@ -66,7 +71,7 @@ public class  HttpResponse {
             dataOutputStream.writeBytes("Location: " + redirectUrl + " \r\n");
             dataOutputStream.writeBytes("\r\n");
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Exception redirect", e);
         }
     }
 
@@ -75,7 +80,7 @@ public class  HttpResponse {
             dataOutputStream.writeBytes("HTTP/1.1 404 Not Found \r\n");
             dataOutputStream.writeBytes("\r\n");
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Exception notFound", e);
         }
     }
 
@@ -86,7 +91,7 @@ public class  HttpResponse {
             }
             dataOutputStream.writeBytes("\r\n");
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Exception attachHeaderToResponse", e);
         }
 
     }
@@ -95,7 +100,7 @@ public class  HttpResponse {
         try {
             dataOutputStream.write(body, 0, body.length);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Exception attachBodyToResponse", e);
         }
     }
 }

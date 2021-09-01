@@ -1,6 +1,5 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.exception.BaseException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.service.UserService;
@@ -20,12 +19,9 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
-        try {
-            userService.save(httpRequest.getQueryValue("account"), httpRequest.getQueryValue("password"),
-                    httpRequest.getQueryValue("email"));
-            httpResponse.redirect("/index.html");
-        } catch (BaseException e) {
-            httpResponse.redirect("/401.html");
-        }
+
+        userService.save(httpRequest.getQueryValue("account"), httpRequest.getQueryValue("password"),
+                httpRequest.getQueryValue("email"));
+        httpResponse.redirect("/index.html");
     }
 }

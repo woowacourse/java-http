@@ -27,6 +27,10 @@ public class HttpCookie {
     public static Map<String, String> parseCookie(String cookieData) {
         Map<String, String> cookies = new HashMap<>();
 
+        if (cookieData == null) {
+            return cookies;
+        }
+
         String[] data = cookieData.split(";");
         for (String each : data) {
             String[] keyAndValue = each.split("=");

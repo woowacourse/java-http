@@ -77,6 +77,10 @@ public class HttpRequest {
     }
 
     public HttpSession getSession() {
+        if (getCookies().getCookie(JSESSIONID) == null) {
+            return null;
+        }
+
         return HttpSessions.getSession(getCookies().getCookie(JSESSIONID));
     }
 }

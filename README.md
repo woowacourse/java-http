@@ -20,7 +20,7 @@
 ## 2, 3단계 기능 요구사항 및 리팩터링 사항
 - [x] HTTP 요청을 처리하는 클래스 분리
 - [x] HTTP 응답을 처리하는 클래스 분리
-- [ ] Controller 인터페이스 추가
-  - [ ] url 경로에 따른 if절 분기 제거
+- [x] Controller 인터페이스 추가
+  - [x] url 경로에 따른 if절 분기 제거
 - [ ] Cookie에 JSESSIONID 값 저장
 - [ ] Session 구현하기

@@ -1,6 +1,6 @@
 HTTP/1.1 200 OK 
+Content-Type: text/html;charset=utf-8 
 Content-Length: 5670 
-Content-Type: text/html;charset=utf-8
 
 <!DOCTYPE html>
 <html lang="en">
@@ -108,4 +108,3 @@ Content-Type: text/html;charset=utf-8
         <script src="assets/chart-pie.js"></script>
     </body>
 </html>
-

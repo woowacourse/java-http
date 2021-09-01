@@ -1,8 +1,8 @@
 package nextstep.jwp;
 
 import nextstep.jwp.exception.BaseException;
-import nextstep.jwp.http.Request;
-import nextstep.jwp.http.Response;
+import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,15 +37,15 @@ public class RequestHandler implements Runnable {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream()) {
-            Request request = Request.of(inputStream);
+            HttpRequest httpRequest = HttpRequest.of(inputStream);
             byte[] response = new byte[0];
 
-            if (request.checkMethod("GET")) {
-                response = get(request);
+            if (httpRequest.checkMethod("GET")) {
+                response = get(httpRequest);
             }
 
-            if (request.checkMethod("POST")) {
-                response = post(request);
+            if (httpRequest.checkMethod("POST")) {
+                response = post(httpRequest);
             }
 
             outputStream.write(response);
@@ -57,62 +57,62 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private byte[] get(Request request) throws IOException {
-        if (checkCssRequest(request)) {
+    private byte[] get(HttpRequest httpRequest) throws IOException {
+        if (checkCssRequest(httpRequest)) {
             Map<String, String> responseHeader = new HashMap<>();
             responseHeader.put(CONTENT_TYPE, TEXT_CSS);
-            return Response.ok(responseHeader, request.getPath());
+            return HttpResponse.ok(responseHeader, httpRequest.getPath());
         }
 
-        if (request.getPath().equals("/")) {
-            return Response.ok("Hello world!".getBytes());
+        if (httpRequest.getPath().equals("/")) {
+            return HttpResponse.ok("Hello world!".getBytes());
         }
 
-        if (request.isMatchedPath("/login")) {
-            return Response.ok("/login.html");
+        if (httpRequest.isMatchedPath("/login")) {
+            return HttpResponse.ok("/login.html");
         }
 
-        if (request.isMatchedPath("/register")) {
-            return Response.ok("/register.html");
+        if (httpRequest.isMatchedPath("/register")) {
+            return HttpResponse.ok("/register.html");
         }
 
-        return Response.ok(request.getPath());
+        return HttpResponse.ok(httpRequest.getPath());
     }
 
-    private byte[] post(Request request) {
-        if (request.isMatchedPath("/login")) {
-            return login(request);
+    private byte[] post(HttpRequest httpRequest) {
+        if (httpRequest.isMatchedPath("/login")) {
+            return login(httpRequest);
         }
 
-        if (request.isMatchedPath("/register")) {
-            return signUp(request);
+        if (httpRequest.isMatchedPath("/register")) {
+            return signUp(httpRequest);
         }
 
-        return Response.notFound();
+        return HttpResponse.notFound();
     }
 
-    private byte[] login(Request request) {
+    private byte[] login(HttpRequest httpRequest) {
         try {
-            userService.login(request.getQueryValue("account"), request.getQueryValue("password"));
-            return Response.redirect302("/index.html");
+            userService.login(httpRequest.getQueryValue("account"), httpRequest.getQueryValue("password"));
+            return HttpResponse.redirect302("/index.html");
         } catch (BaseException e) {
-            return Response.redirect302("/401.html");
+            return HttpResponse.redirect302("/401.html");
         }
     }
 
-    private byte[] signUp(Request request) {
+    private byte[] signUp(HttpRequest httpRequest) {
         try {
-            userService.save(request.getQueryValue("account"), request.getQueryValue("password"),
-                    request.getQueryValue("email"));
-            return Response.redirect302("/index.html");
+            userService.save(httpRequest.getQueryValue("account"), httpRequest.getQueryValue("password"),
+                    httpRequest.getQueryValue("email"));
+            return HttpResponse.redirect302("/index.html");
         } catch (BaseException e) {
-            return Response.redirect302("/401.html");
+            return HttpResponse.redirect302("/401.html");
         }
     }
 
-    private boolean checkCssRequest(Request request) {
-        if (request.hasHeaderValue(ACCEPT)) {
-            String accept = request.getHeaderValue(ACCEPT);
+    private boolean checkCssRequest(HttpRequest httpRequest) {
+        if (httpRequest.hasHeaderValue(ACCEPT)) {
+            String accept = httpRequest.getHeaderValue(ACCEPT);
             return accept.contains(TEXT_CSS);
         }
         return false;

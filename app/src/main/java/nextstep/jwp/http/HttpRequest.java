@@ -10,20 +10,20 @@ import java.util.Map;
 
 import static com.google.common.net.HttpHeaders.CONTENT_LENGTH;
 
-public class Request {
+public class HttpRequest {
     private final String method;
     private final String path;
     private final Map<String, String> header;
     private final Map<String, String> query;
 
-    private Request(String method, String path, Map<String, String> header, Map<String, String> query) {
+    private HttpRequest(String method, String path, Map<String, String> header, Map<String, String> query) {
         this.method = method;
         this.path = path;
         this.header = header;
         this.query = query;
     }
 
-    public static Request of(InputStream inputStream) throws IOException {
+    public static HttpRequest of(InputStream inputStream) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         String requestLine = br.readLine();
         String[] parsedRequestLine = requestLine.split(" ");
@@ -42,7 +42,7 @@ public class Request {
             url = url.substring(0, queryStartIndex);
         }
 
-        return new Request(method, url, header, query);
+        return new HttpRequest(method, url, header, query);
     }
 
     private static Map<String, String> parseHeader(BufferedReader request) throws IOException {

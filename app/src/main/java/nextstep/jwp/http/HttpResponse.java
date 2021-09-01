@@ -5,16 +5,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static nextstep.jwp.http.Header.CONTENT_LENGTH;
 import static nextstep.jwp.http.Header.CONTENT_TYPE;
 
-public class Response {
+public class HttpResponse {
 
-    private Response() {
+    private HttpResponse() {
     }
 
 
@@ -25,10 +24,10 @@ public class Response {
     }
 
     public static byte[] ok(Map<String, String> header, String resourcePath) throws IOException {
-        URL resource = Response.class.getClassLoader().getResource("static" + resourcePath);
+        URL resource = HttpResponse.class.getClassLoader().getResource("static" + resourcePath);
 
         if (resource == null) {
-            return Response.notFound();
+            return HttpResponse.notFound();
         }
 
         final Path path = new File(resource.getPath()).toPath();

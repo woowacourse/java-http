@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package nextstep.jwp.model.web.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,17 +7,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class CustomHttpRequest {
-    private final String method;
-    private final String path;
-    private final String httpVersion;
+
+    private final RequestLine requestLine;
     private final Map<String, String> headers;
     private final Map<String, String> params;
 
-    public CustomHttpRequest(String method, String path, String httpVersion,
-                             Map<String, String> headers, Map<String, String> params) {
-        this.method = method;
-        this.path = path;
-        this.httpVersion = httpVersion;
+    public CustomHttpRequest(RequestLine requestLine, Map<String, String> headers, Map<String, String> params) {
+        this.requestLine = requestLine;
         this.headers = headers;
         this.params = params;
     }
@@ -26,10 +22,9 @@ public class CustomHttpRequest {
         Map<String, String> headers = new LinkedHashMap<>();
         Map<String, String> params = new LinkedHashMap<>();
 
-        String[] requestInfo = reader.readLine().split(" ");
-        String method = requestInfo[0];
-        String uri = requestInfo[1];
-        String httpVersion = requestInfo[2];
+        RequestLine requestLine = new RequestLine(reader.readLine().split(" "));
+        String method = requestLine.getMethod();
+        String uri = requestLine.getPath();
         String path = uri;
 
         String line = "";
@@ -54,7 +49,7 @@ public class CustomHttpRequest {
             parseParams(params, requestBody);
         }
 
-        return new CustomHttpRequest(method, path, httpVersion, headers, params);
+        return new CustomHttpRequest(requestLine, headers, params);
     }
 
     private static String dividePathFromUri(String uri) {
@@ -84,15 +79,15 @@ public class CustomHttpRequest {
     }
 
     public String getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getPath() {
-        return path;
+        return requestLine.getPath();
     }
 
-    public String getHttpVersion() {
-        return httpVersion;
+    public String getVersionOfProtocol() {
+        return requestLine.getVersionOfProtocol();
     }
 
     public Map<String, String> getHeaders() {

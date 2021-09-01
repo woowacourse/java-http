@@ -163,7 +163,7 @@ class HttpRequestTest {
         expected.put("Connection", "keep-alive");
 
         // when
-        Map<String, String> actual = httpRequest.extractHeaders();
+        Map<String, String> actual = httpRequest.getHeaders();
 
         // then
         expected.forEach((key, value) -> {

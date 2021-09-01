@@ -1,5 +1,6 @@
 package nextstep.jwp.http;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,11 +27,24 @@ public class HttpRequest {
     private final String bodyLine;
     private List<String> headerLines;
     private HttpSession httpSession;
+    private Map<String, String> headers;
 
     public HttpRequest(String statusLine, List<String> headerLines, String bodyLine) {
         this.statusLine = statusLine;
         this.headerLines = headerLines;
         this.bodyLine = bodyLine;
+        this.headers = extractHeaders();
+    }
+
+    private Map<String, String> extractHeaders() {
+        Map<String, String> result = new HashMap<>();
+        for (String headerLine : headerLines) {
+            String[] split = headerLine.split(": ");
+            String key = split[HEADER_KEY_INDEX];
+            String value = split[HEADER_VALUE_INDEX];
+            result.put(key, value);
+        }
+        return result;
     }
 
     public boolean isEmptyLine() {
@@ -83,19 +97,8 @@ public class HttpRequest {
         return result;
     }
 
-    public Map<String, String> extractHeaders() {
-        Map<String, String> result = new HashMap<>();
-        for (String headerLine : headerLines) {
-            String[] split = headerLine.split(": ");
-            String key = split[HEADER_KEY_INDEX];
-            String value = split[HEADER_VALUE_INDEX];
-            result.put(key, value);
-        }
-        return result;
-    }
-
     public Map<String, String> extractCookies() {
-        String rawCookie = extractHeaders().get(HEADER_KEY_OF_COOKIE);
+        String rawCookie = headers.get(HEADER_KEY_OF_COOKIE);
         Map<String, String> result = new HashMap<>();
         if (!Objects.isNull(rawCookie)) {
             String[] cookies = rawCookie.split("; ");
@@ -136,5 +139,9 @@ public class HttpRequest {
 
     public void setSession(HttpSession httpSession) {
         this.httpSession = httpSession;
+    }
+
+    public Map<String, String> getHeaders() {
+        return Collections.unmodifiableMap(headers);
     }
 }

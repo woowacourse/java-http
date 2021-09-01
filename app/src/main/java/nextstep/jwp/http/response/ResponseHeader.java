@@ -1,24 +1,27 @@
 package nextstep.jwp.http.response;
 
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ResponseHeader {
 
-    private final Map<String, String> header;
+    private final ResponseHeaders headers;
+
     private ResponseLine line;
 
     public ResponseHeader() {
-        this.header = new ConcurrentHashMap<>();
+        this(new ResponseHeaders());
+    }
+
+    private ResponseHeader(ResponseHeaders headers) {
+        this.headers = headers;
     }
 
     public void setContentType(String contentType) {
-        header.put("Content-Type", contentType);
+        headers.setContentType(contentType);
     }
 
     public void setContentLength(int contentLength) {
-        header.put("Content-Length", String.valueOf(contentLength));
+        headers.setContentLength(contentLength);
     }
 
     public void setLine(HttpStatus httpStatus) {
@@ -26,15 +29,15 @@ public class ResponseHeader {
     }
 
     public Set<String> getKeySet() {
-        return header.keySet();
+        return headers.getKeySet();
     }
 
     public String getValue(String key) {
-        return header.get(key);
+        return headers.getValue(key);
     }
 
-    public Map<String, String> getHeader() {
-        return header;
+    public ResponseHeaders getHeaders() {
+        return headers;
     }
 
     public ResponseLine getLine() {

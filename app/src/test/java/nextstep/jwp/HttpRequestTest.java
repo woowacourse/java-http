@@ -43,7 +43,7 @@ public class HttpRequestTest {
                 "Content-Type: application/x-www-form-urlencoded",
                 "Accept: */*",
                 "",
-                "account = gugu & password = password & email = hkkang % 40woowahan.com"
+                "account = gugu&password=password&email=hkkang%40woowahan.com"
         );
 
         final MockSocket socket = new MockSocket(request);

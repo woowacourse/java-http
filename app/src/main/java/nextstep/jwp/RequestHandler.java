@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.util.Objects;
 
 import nextstep.jwp.request.HttpRequest;
+import nextstep.jwp.request.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +36,8 @@ public class RequestHandler implements Runnable {
             if (httpRequest.isGet()) {
                 response = GetRequestUri.createResponse(httpRequest.getPath());
             } else if (httpRequest.isPost()) {
-                String requestBody = readRequestBody(bufferedReader, httpRequest);
-                response = PostRequestUri.createResponse(httpRequest.getPath(), requestBody);
+                RequestBody requestBody = httpRequest.getRequestBody();
+                response = PostRequestUri.createResponse(httpRequest.getPath(), requestBody.getBody());
             }
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -48,13 +49,6 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
-    }
-
-    private String readRequestBody(BufferedReader bufferedReader, HttpRequest request) throws IOException {
-        int contentLength = Integer.parseInt(request.getHeader("Content-Length"));
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        return new String(buffer);
     }
 
     private void close() {

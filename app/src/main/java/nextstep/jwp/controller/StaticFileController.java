@@ -2,8 +2,8 @@ package nextstep.jwp.controller;
 
 import java.util.Arrays;
 import java.util.List;
+import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.http.request.HttpMethod;
 import nextstep.jwp.http.request.HttpRequest;
 
 public class StaticFileController extends AbstractController {
@@ -18,10 +18,7 @@ public class StaticFileController extends AbstractController {
 
     @Override
     public HttpResponse doGet(HttpRequest httpRequest) {
-        if (httpRequest.getPath().endsWith(".css")) {
-            return super.applyCSSFile(httpRequest.getPath());
-        }
-        return super.renderPage(httpRequest.getPath());
+        return super.renderPage(httpRequest, ContentType.fromPath(httpRequest.getPath()));
     }
 
     @Override

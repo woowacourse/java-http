@@ -23,7 +23,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest httpRequest) {
-        return super.renderPage(httpRequest.getPath());
+        return super.renderPage(httpRequest);
     }
 
     @Override

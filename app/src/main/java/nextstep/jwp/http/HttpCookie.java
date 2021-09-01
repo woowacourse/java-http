@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
@@ -14,6 +15,7 @@ public class HttpCookie {
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final String SUFFIX = ";";
     private static final String RESPONSE_COOKIE_HEADER = "Set-Cookie";
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final Map<String, String> cookies;
 
@@ -33,6 +35,12 @@ public class HttpCookie {
         return new HttpCookie(new HashMap<>());
     }
 
+    public static HttpCookie ofSessionCookie() {
+        return new HttpCookie(new HashMap<>(Map.of(
+            JSESSIONID, UUID.randomUUID().toString()
+        )));
+    }
+
     public Map<String, String> toHeaderFormat() {
         List<String> keyValues = cookies.entrySet().stream()
             .map(it -> it.getKey() + KEY_VALUE_DELIMITER + it.getValue())
@@ -44,5 +52,9 @@ public class HttpCookie {
 
     public Map<String, String> getAllCookies() {
         return Collections.unmodifiableMap(cookies);
+    }
+
+    public boolean containsSessionId() {
+        return cookies.containsKey(JSESSIONID);
     }
 }

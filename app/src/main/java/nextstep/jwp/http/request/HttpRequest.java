@@ -1,5 +1,6 @@
 package nextstep.jwp.http.request;
 
+import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpHeader;
 import nextstep.jwp.http.Protocol;
 

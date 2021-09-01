@@ -13,10 +13,14 @@ public class HttpCookie {
     public HttpCookie(String cookie) {
         this.values = Stream.of(cookie.split(";"))
                 .map(x -> x.split("="))
-                .collect(Collectors.toMap(key -> key[0], value -> value[1]));
+                .collect(Collectors.toMap(key -> key[0].trim(), value -> value[1].trim()));
     }
 
     public String getSessionId() {
         return values.get(JSESSIONID);
+    }
+
+    public int size() {
+        return values.size();
     }
 }

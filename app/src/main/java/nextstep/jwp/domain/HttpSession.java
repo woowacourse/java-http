@@ -12,10 +12,6 @@ public class HttpSession {
         this.id = id;
     }
 
-    public void removeAttribute(String name) {
-        values.remove(name);
-    }
-
     public void setAttribute(String name, Object value) {
         values.put(name, value);
     }

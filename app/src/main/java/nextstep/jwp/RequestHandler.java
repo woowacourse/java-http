@@ -15,7 +15,7 @@ import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.BadRequestMessageException;
 import nextstep.jwp.exception.NotFoundException;
-import nextstep.jwp.exception.UnAuthorizedException;
+import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.exception.UsernameConflictException;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.Request;
@@ -67,7 +67,7 @@ public class RequestHandler implements Runnable {
             return Response.create302Found("/404.html");
         } catch (UsernameConflictException exception) {
             return Response.create409Conflict(exception.getMessage());
-        } catch (UnAuthorizedException exception) {
+        } catch (UnauthorizedException exception) {
             return Response.create302Found("/401.html");
         } catch (Exception exception) {
             log.error("알수없는 에러가 발생 : {}", exception.getMessage());
@@ -163,12 +163,12 @@ public class RequestHandler implements Runnable {
         if (request.isUriMatch("/login")) {
             User user = InMemoryUserRepository
                 .findByAccount(request.getRequestBody("account"))
-                .orElseThrow(UnAuthorizedException::new);
+                .orElseThrow(UnauthorizedException::new);
             if (user.checkPassword(request.getRequestBody("password"))) {
                 log.info("{} login success", user.getAccount());
                 return Response.create302Found("/index.html");
             }
-            throw new UnAuthorizedException();
+            throw new UnauthorizedException();
         }
         if (request.isUriMatch("/register")) {
             String account = request.getRequestBody("account");

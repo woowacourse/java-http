@@ -24,7 +24,7 @@ public class HttpRequest {
         return requestLine.isPost();
     }
 
-    public String get(String key) {
+    public String getHeader(String key) {
         return requestHeaders.get(key);
     }
 }

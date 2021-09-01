@@ -31,8 +31,8 @@ public class RequestHeadersTest {
 
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new InputStreamReader(socket.getInputStream())));
 
-        assertEquals("localhost:8080", httpRequest.get("Host"));
-        assertEquals("keep-alive", httpRequest.get("Connection"));
-        assertEquals("30", httpRequest.get("Content-Length"));
+        assertEquals("localhost:8080", httpRequest.getHeader("Host"));
+        assertEquals("keep-alive", httpRequest.getHeader("Connection"));
+        assertEquals("30", httpRequest.getHeader("Content-Length"));
     }
 }

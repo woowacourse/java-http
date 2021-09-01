@@ -32,23 +32,26 @@ public class HttpRequestTest {
         assertTrue(httpRequest.isGet());
     }
 
-//    @Test
-//    @DisplayName("HttpRequest 생성 - POST")
-//    void createPostHttpRequest() throws IOException {
-//        final String request = String.join("\r\n",
-//                "POST /login HTTP/1.1 ",
-//                "Host: localhost:8080 ",
-//                "Connection: keep-alive ",
-//                "Content-Length: 30",
-//                "",
-//                "");
-//
-//        final MockSocket socket = new MockSocket(request);
-//        final RequestHandler requestHandler = new RequestHandler(socket);
-//
-//        requestHandler.run();
-//
-//        HttpRequest httpRequest = new HttpRequest(new BufferedReader(new InputStreamReader(socket.getInputStream())));
-//        assertTrue(httpRequest.isPost());
-//    }
+    @Test
+    @DisplayName("HttpRequest 생성 - POST")
+    void createPostHttpRequest() throws IOException {
+        final String request = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 30",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Accept: */*",
+                "",
+                "account = gugu & password = password & email = hkkang % 40woowahan.com"
+        );
+
+        final MockSocket socket = new MockSocket(request);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        requestHandler.run();
+
+        HttpRequest httpRequest = new HttpRequest(new BufferedReader(new InputStreamReader(socket.getInputStream())));
+        assertTrue(httpRequest.isPost());
+    }
 }

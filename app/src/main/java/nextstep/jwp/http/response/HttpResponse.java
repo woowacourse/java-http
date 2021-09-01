@@ -8,14 +8,16 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static nextstep.jwp.http.Header.CONTENT_LENGTH;
 import static nextstep.jwp.http.Header.CONTENT_TYPE;
 
 public class  HttpResponse {
     private DataOutputStream dataOutputStream = null;
-    private Map<String, String> headers = new HashMap<>();
+    private Map<String, String> headers = new LinkedHashMap<>();
 
     public HttpResponse(OutputStream outputStream) {
         dataOutputStream = new DataOutputStream(outputStream);
@@ -27,6 +29,12 @@ public class  HttpResponse {
 
     public void ok(String resourcePath) {
         URL resource = HttpResponse.class.getClassLoader().getResource("static" + resourcePath);
+
+        if (resource == null) {
+            notFound();
+            return;
+        }
+
         try {
             Path path = new File(resource.getPath()).toPath();
             byte[] body = Files.readAllBytes(path);
@@ -39,7 +47,6 @@ public class  HttpResponse {
             }
             headers.put(CONTENT_LENGTH, body.length + "");
             ok(body);
-            dataOutputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -89,7 +96,6 @@ public class  HttpResponse {
     private void attachBodyToResponse(byte[] body) {
         try {
             dataOutputStream.write(body, 0, body.length);
-            dataOutputStream.writeBytes("\r\n");
         } catch (IOException e) {
             e.printStackTrace();
         }

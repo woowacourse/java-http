@@ -40,11 +40,13 @@ public class RequestHandler implements Runnable {
             if (controller == null) {
                 String path = getDefaultPath(httpRequest.getPath());
                 httpResponse.ok(path);
+                outputStream.flush();
                 return;
             }
 
             setCookie(httpRequest, httpResponse);
             controller.service(httpRequest, httpResponse);
+            outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {

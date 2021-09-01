@@ -1,6 +1,6 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.request;
 
-import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.session.HttpSession;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

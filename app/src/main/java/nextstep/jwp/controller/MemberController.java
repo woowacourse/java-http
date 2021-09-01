@@ -44,6 +44,7 @@ public class MemberController extends AbstractController {
             log.info("로그인한 유저 : {}", user);
             return new HttpResponse(HttpStatus.FOUND, "index.html");
         } catch (IllegalArgumentException e) {
+            log.error("에러 발생 : {}", e.getMessage());
             return new HttpResponse(HttpStatus.UNAUTHORIZED, HttpContentType.NOTHING, "401.html");
         }
     }
@@ -55,6 +56,7 @@ public class MemberController extends AbstractController {
             log.info("회원가입된 유저 : {}", user);
             return new HttpResponse(HttpStatus.CREATED, HttpContentType.NOTHING, "index.html");
         } catch (IllegalArgumentException e) {
+            log.error("에러 발생 : {}", e.getMessage());
             return new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, HttpContentType.NOTHING, "500.html");
         }
     }

@@ -49,26 +49,11 @@ public class JwpHttpRequest {
         Map<String, String> headers = extractedHeaders(reader);
 
         if (requestMethod.equals("GET")) {
-            if (!requestUri.contains(QUERY_STRING_SYMBOL)) {
-                return new JwpHttpRequest(requestMethod, requestUri, requestHttpVersion, headers);
-            }
-
-            int index = requestUri.indexOf(QUERY_STRING_SYMBOL);
-            String path = requestUri.substring(0, index);
-            String queryString = requestUri.substring(index + 1);
-            String[] queryParams = queryString.split(PARAM_DELIMITER);
-            Map<String, String> params = parseParams(queryParams);
-            return new JwpHttpRequest(requestMethod, path, requestHttpVersion, headers, params);
+            return get(requestMethod, requestUri, requestHttpVersion, headers);
         }
 
         if (requestMethod.equals("POST")) {
-            int contentLength = Integer.parseInt(headers.get("Content-Length"));
-            char[] buffer = new char[contentLength];
-            reader.read(buffer, 0, contentLength);
-            String requestBody = URLDecoder.decode(new String(buffer), "UTF-8");
-            String[] jsonParams = requestBody.split(PARAM_DELIMITER);
-            Map<String, String> params = parseParams(jsonParams);
-            return new JwpHttpRequest(requestMethod, requestUri, requestHttpVersion, headers, params);
+            return post(reader, requestMethod, requestUri, requestHttpVersion, headers);
         }
 
         return new JwpHttpRequest(requestMethod, requestUri, requestHttpVersion, headers);
@@ -83,6 +68,29 @@ public class JwpHttpRequest {
         }
 
         return headers;
+    }
+
+    private static JwpHttpRequest get(String requestMethod, String requestUri, String requestHttpVersion, Map<String, String> headers) {
+        if (!requestUri.contains(QUERY_STRING_SYMBOL)) {
+            return new JwpHttpRequest(requestMethod, requestUri, requestHttpVersion, headers);
+        }
+
+        int index = requestUri.indexOf(QUERY_STRING_SYMBOL);
+        String path = requestUri.substring(0, index);
+        String queryString = requestUri.substring(index + 1);
+        String[] queryParams = queryString.split(PARAM_DELIMITER);
+        Map<String, String> params = parseParams(queryParams);
+        return new JwpHttpRequest(requestMethod, path, requestHttpVersion, headers, params);
+    }
+
+    private static JwpHttpRequest post(BufferedReader reader, String requestMethod, String requestUri, String requestHttpVersion, Map<String, String> headers) throws IOException {
+        int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        String requestBody = URLDecoder.decode(new String(buffer), "UTF-8");
+        String[] jsonParams = requestBody.split(PARAM_DELIMITER);
+        Map<String, String> params = parseParams(jsonParams);
+        return new JwpHttpRequest(requestMethod, requestUri, requestHttpVersion, headers, params);
     }
 
     private static Map<String, String> parseParams(String[] queryParams) {

@@ -14,7 +14,6 @@ public enum JwpContentType {
     private final Predicate<String> condition;
     private final String resourceType;
 
-
     JwpContentType(Predicate<String> condition, String resourceType) {
         this.condition = condition;
         this.resourceType = resourceType;

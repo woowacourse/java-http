@@ -6,7 +6,6 @@ import static java.util.stream.Collectors.toMap;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class HttpCookie {
 
@@ -40,10 +39,6 @@ public class HttpCookie {
         this.cookie = cookie;
     }
 
-    public String createSessionId() {
-        return UUID.randomUUID().toString();
-    }
-
     public void setSessionId(String sessionId) {
         cookie.put(SESSION_ID, sessionId);
     }
@@ -54,6 +49,10 @@ public class HttpCookie {
 
     public boolean containsSession() {
         return cookie.containsKey(SESSION_ID);
+    }
+
+    public String getSessionId() {
+        return cookie.get(SESSION_ID);
     }
 
     public String asString() {

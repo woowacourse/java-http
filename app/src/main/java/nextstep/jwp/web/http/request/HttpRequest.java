@@ -14,6 +14,8 @@ import nextstep.jwp.web.http.request.body.FormDataHttpRequestBody;
 import nextstep.jwp.web.http.request.body.HttpRequestBody;
 import nextstep.jwp.web.http.request.body.TextHttpRequestBody;
 import nextstep.jwp.web.http.session.HttpCookie;
+import nextstep.jwp.web.http.session.HttpSession;
+import nextstep.jwp.web.http.session.HttpSessions;
 import nextstep.jwp.web.http.util.QueryParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,17 +27,20 @@ public class HttpRequest {
     private final HttpHeaders headers;
     private final HttpProtocol protocol;
     private final HttpCookie cookie;
+    private final HttpSession session;
     private MethodUrl methodUrl;
     private final HttpRequestBody<?> body;
 
     public HttpRequest(HttpHeaders headers,
                        HttpProtocol protocol,
                        HttpCookie cookie,
+                       HttpSession session,
                        MethodUrl methodUrl,
                        HttpRequestBody<?> body) {
         this.headers = headers;
         this.protocol = protocol;
         this.cookie = cookie;
+        this.session = session;
         this.methodUrl = methodUrl;
         this.body = body;
     }
@@ -62,6 +67,9 @@ public class HttpRequest {
         return cookie;
     }
 
+    public HttpSession session() {
+        return session;
+    }
     public HttpRequestHeaderValues header(String key) {
         return this.headers.get(key);
     }
@@ -105,16 +113,25 @@ public class HttpRequest {
         private final HttpHeaders headers = new HttpHeaders();
         private HttpProtocol httpProtocol = null;
         private MethodUrl methodUrl = null;
-        private HttpCookie cookie = null;
+        private final HttpCookie cookie;
+        private HttpSession session;
         private HttpRequestBody<?> body = new TextHttpRequestBody(CRLF);
 
         public InputStreamHttpRequestConverter(InputStream inputStream) {
             parse(inputStream);
             this.cookie = headers.getCookie();
+            this.session = findOrCreateSession();
+        }
+
+        private HttpSession findOrCreateSession() {
+            if (this.cookie.containsSession()) {
+                return HttpSessions.getSession(this.cookie.getSessionId());
+            }
+            return HttpSessions.createSession();
         }
 
         public HttpRequest toRequest() {
-            return new HttpRequest(headers, httpProtocol, cookie, methodUrl, body);
+            return new HttpRequest(headers, httpProtocol, cookie, session, methodUrl, body);
         }
 
         private void parse(InputStream inputStream) {

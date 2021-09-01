@@ -12,6 +12,7 @@ import nextstep.jwp.web.http.response.HttpResponse;
 import nextstep.jwp.web.http.response.HttpResponseImpl.Builder;
 import nextstep.jwp.web.http.response.HttpStatus;
 import nextstep.jwp.web.http.session.HttpCookie;
+import nextstep.jwp.web.http.session.HttpSessions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +25,7 @@ class WelcomeControllerTest {
         HttpRequest request = new HttpRequest(new HttpHeaders(),
             HttpProtocol.HTTP1_1,
             new HttpCookie(""),
+            HttpSessions.createSession(),
             new MethodUrl(GET, "/null"),
             new TextHttpRequestBody(""));
 

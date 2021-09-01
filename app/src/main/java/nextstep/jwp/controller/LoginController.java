@@ -19,19 +19,12 @@ public class LoginController extends AbstractController {
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
         response.setStatus(HttpStatus.OK);
-        request.getSession()
-            .ifPresentOrElse(
-                session -> {
-                    if (Objects.nonNull(session.getAttribute("user"))) {
-                        redirect(response, "index.html");
-                        return;
-                    };
-                    redirect(response, "login.html");
-                },
-                () -> {
-                    redirect(response, "login.html");
-                }
-            );
+        HttpSession session = request.getSession();
+        if (Objects.nonNull(session.getAttribute("user"))) {
+            redirect(response, "index.html");
+            return;
+        }
+        redirect(response, "login.html");
     }
 
     private void redirect(HttpResponse response, String redirectPage) {
@@ -56,15 +49,9 @@ public class LoginController extends AbstractController {
             response.setStatus(HttpStatus.FOUND);
             response.putHeader("Location", "/index.html");
 
-            HttpSession session = request.getSession()
-                .orElseGet(() -> {
-                    String jSessionId = response.createJSessionId();
-                    HttpSession httpSession = new HttpSession(jSessionId);
-                    HttpSessions.put(httpSession);
-                    return httpSession;
-                });
-
+            HttpSession session = request.getSession();
             session.setAttribute("user", user);
+            HttpSessions.put(session);
             return;
         }
         String htmlOf401 = fileReaderInStaticFolder.read("401.html");

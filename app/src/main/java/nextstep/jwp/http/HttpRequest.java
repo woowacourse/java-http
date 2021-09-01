@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.UUID;
 
 public class HttpRequest {
 
@@ -18,8 +18,6 @@ public class HttpRequest {
     private static final int QUERY_PARAMS_VALUE_INDEX = 1;
     private static final int HEADER_KEY_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
-    private static final int COOKIE_KEY_INDEX = 0;
-    private static final int COOKIE_KEY_VALUE = 1;
     private static final String HEADER_KEY_OF_COOKIE = "Cookie";
     private static final String HEADER_KEY_OF_JSESSIONID = "JSESSIONID";
 
@@ -116,15 +114,20 @@ public class HttpRequest {
         return !Objects.isNull(JSessionId);
     }
 
-    public Optional<HttpSession> getSession() {
-        if (!Objects.isNull(httpSession)) {
-            return Optional.of(httpSession);
-        }
+    public HttpSession getSession() {
         String jSessionId = extractCookies().get(HEADER_KEY_OF_JSESSIONID);
         if (Objects.isNull(jSessionId)) {
-            return Optional.empty();
+            String newJSessionId = UUID.randomUUID().toString();
+            HttpSession httpSession = new HttpSession(newJSessionId);
+            HttpSessions.put(httpSession);
+            return httpSession;
         }
-        return Optional.ofNullable(HttpSessions.getSession(jSessionId));
+        HttpSession httpSession = HttpSessions.getSession(jSessionId);
+        if (Objects.isNull(httpSession)) {
+            httpSession = new HttpSession(jSessionId);
+            HttpSessions.put(httpSession);
+        }
+        return httpSession;
     }
 
     public void setSession(HttpSession httpSession) {

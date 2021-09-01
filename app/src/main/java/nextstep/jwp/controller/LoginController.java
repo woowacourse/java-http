@@ -19,7 +19,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        if (isLoginUser(request, response)) {
+        if (loginService.isLoginUser(request, response)) {
             return;
         }
 
@@ -42,21 +42,5 @@ public class LoginController extends AbstractController {
         log.debug("아이디나 비밀번호가 틀립니다.");
         response.exception("/401.html");
 
-    }
-
-    private boolean isLoginUser(HttpRequest request, HttpResponse response) {
-        String jSessionId = request.getId();
-        log.debug("로그인 페이지 jsessionid = {}", jSessionId);
-        HttpSession httpSession = HttpSessions.getSession(jSessionId);
-        User user = getUser(httpSession);
-        if (Objects.nonNull(user)) {
-            response.redirect("/index.html");
-            return true;
-        }
-        return false;
-    }
-
-    private User getUser(HttpSession httpSession) {
-        return (User) httpSession.getAttribute("user");
     }
 }

@@ -6,18 +6,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.HelloController;
-import nextstep.jwp.controller.HomeController;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.RegisterController;
-import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.request.requestHeader;
 import nextstep.jwp.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,15 +17,11 @@ import org.slf4j.LoggerFactory;
 public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
-    private static final Map<String, Controller> controllerMap = new HashMap<>();
 
     private final Socket connection;
 
     public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
-        controllerMap.put("/", new HelloController());
-        controllerMap.put("/login", new LoginController());
-        controllerMap.put("/register", new RegisterController());
     }
 
     @Override
@@ -47,19 +35,11 @@ public class RequestHandler implements Runnable {
             HttpRequest httpRequest = new HttpRequest(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
 
-            requestHeader header = httpRequest.getHttpHeader();
-            HttpCookie httpCookie = header.getCookie();
-            String jSessionId = httpCookie.getAttribute("JSESSIONID");
-            log.debug("JSESSIONID = {}", jSessionId);
-            if (jSessionId == null) {
-                UUID uuid = UUID.randomUUID();
-                jSessionId = uuid.toString();
-                httpResponse.setCookie(jSessionId);
-            }
+            String jSessionId = httpRequest.getSessionId();
+            checkSessionId(jSessionId, httpResponse);
 
             httpRequest.setSession(jSessionId);
-            Controller controller = controllerMap
-                .getOrDefault(httpRequest.getRequestURI(), new HomeController());
+            Controller controller = RequestMapping.getController(httpRequest);
             controller.process(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.getBytes());
@@ -69,6 +49,16 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
+    }
+
+    private void checkSessionId(String jSessionId, HttpResponse httpResponse) {
+        log.debug("JSESSIONID = {}", jSessionId);
+        if (jSessionId == null) {
+            UUID uuid = UUID.randomUUID();
+            jSessionId = uuid.toString();
+            httpResponse.setCookie(jSessionId);
+        }
+
     }
 
     private void close() {

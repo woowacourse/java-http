@@ -100,4 +100,9 @@ public class HttpRequest {
         HttpCookie httpCookie = this.requestHeader.getCookie();
         return httpCookie.getAttribute("JSESSIONID");
     }
+
+    public String getSessionId() {
+        HttpCookie httpCookie = requestHeader.getCookie();
+        return httpCookie.getAttribute("JSESSIONID");
+    }
 }

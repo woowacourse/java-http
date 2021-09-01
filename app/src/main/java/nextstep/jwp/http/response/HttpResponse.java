@@ -3,6 +3,7 @@ package nextstep.jwp.http.response;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,5 +84,10 @@ public class HttpResponse {
         }
         return String.join("\r\n", statusLine.toString(), responseHeader.toString(),
             responseBody.toString());
+    }
+
+    public void setCookie() {
+        UUID uuid = UUID.randomUUID();
+        this.responseHeader.setCookie(uuid);
     }
 }

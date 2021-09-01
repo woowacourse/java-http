@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 public class ResponseHeader {
 
@@ -44,5 +45,9 @@ public class ResponseHeader {
             joiner.add(key + ": " + value);
         }
         return joiner.toString();
+    }
+
+    public void setCookie(UUID uuid) {
+        this.headers.put("Set-Cookie", "JSESSIONID=" + uuid.toString());
     }
 }

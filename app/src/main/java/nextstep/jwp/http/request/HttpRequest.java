@@ -20,7 +20,7 @@ public class HttpRequest {
 
     private HttpMethod httpMethod;
     private RequestURI requestURI;
-    private HttpHeader httpHeader;
+    private requestHeader requestHeader;
     private RequestBody requestBody;
 
     public HttpRequest(BufferedReader bufferedReader) throws IOException {
@@ -29,8 +29,8 @@ public class HttpRequest {
             String[] lines = firstLine.split(DELIMITER);
             this.httpMethod = HttpMethod.of(lines[METHOD_INDEX]);
             this.requestURI = new RequestURI(lines[URI_INDEX]);
-            this.httpHeader = readHeaders(bufferedReader);
-            this.requestBody = readRequestBody(bufferedReader, httpHeader.getContentLength());
+            this.requestHeader = readHeaders(bufferedReader);
+            this.requestBody = readRequestBody(bufferedReader, requestHeader.getContentLength());
         } catch (IOException e) {
             log.error("stream exception");
         } catch (IllegalArgumentException e) {
@@ -50,7 +50,7 @@ public class HttpRequest {
         return requestBody;
     }
 
-    private HttpHeader readHeaders(BufferedReader bufferedReader) throws IOException {
+    private requestHeader readHeaders(BufferedReader bufferedReader) throws IOException {
         Map<String, String> map = new HashMap<>();
         while (bufferedReader.ready()) {
             String line = bufferedReader.readLine();
@@ -60,7 +60,7 @@ public class HttpRequest {
             String[] params = line.split(": ");
             map.put(params[KEY_INDEX], params[VALUE_INDEX].strip());
         }
-        return new HttpHeader(map);
+        return new requestHeader(map);
     }
 
     public HttpMethod getHttpMethod() {
@@ -71,8 +71,8 @@ public class HttpRequest {
         return this.requestURI.getUri();
     }
 
-    public HttpHeader getHttpHeader() {
-        return this.httpHeader;
+    public requestHeader getHttpHeader() {
+        return this.requestHeader;
     }
 
     public boolean isGet() {

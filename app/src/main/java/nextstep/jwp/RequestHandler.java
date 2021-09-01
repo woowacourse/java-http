@@ -14,6 +14,8 @@ import nextstep.jwp.controller.HelloController;
 import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.http.HttpCookie;
+import nextstep.jwp.http.request.requestHeader;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import org.slf4j.Logger;
@@ -43,6 +45,14 @@ public class RequestHandler implements Runnable {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest httpRequest = new HttpRequest(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
+
+            requestHeader header = httpRequest.getHttpHeader();
+            HttpCookie httpCookie = header.getCookie();
+            String jsessionId = httpCookie.getAttribute("JSESSIONID");
+            log.debug("JSESSIONID = {}", jsessionId);
+            if (jsessionId == null) {
+                httpResponse.setCookie();
+            }
 
             Controller controller = controllerMap
                 .getOrDefault(httpRequest.getRequestURI(), new HomeController());

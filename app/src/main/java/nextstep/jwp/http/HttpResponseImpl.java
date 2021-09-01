@@ -1,19 +1,24 @@
 package nextstep.jwp.http;
 
 import java.util.Objects;
+import nextstep.jwp.http.message.HttpCookie;
+import nextstep.jwp.http.message.HttpCookies;
 import nextstep.jwp.http.message.HttpHeaders;
 import nextstep.jwp.http.message.HttpStatus;
 
 public class HttpResponseImpl implements HttpResponse {
     private static final String DEFAULT_VERSION_OF_PROTOCOL = "HTTP/1.1";
+    private static final String SET_COOKIE = "Set-Cookie";
 
     private String content;
     private HttpHeaders headers;
+    private HttpCookies cookies;
     private HttpStatus status;
     private String versionOfProtocol;
 
     public HttpResponseImpl() {
         headers = new HttpHeaders();
+        cookies = new HttpCookies();
     }
 
     @Override
@@ -64,6 +69,17 @@ public class HttpResponseImpl implements HttpResponse {
     @Override
     public void setVersionOfProtocol(String versionOfProtocol) {
         this.versionOfProtocol = versionOfProtocol;
+    }
+
+    @Override
+    public void addCookie(HttpCookie cookie) {
+        this.cookies.addCookie(cookie);
+        this.headers.addHeader(SET_COOKIE, cookies.asString());
+    }
+
+    @Override
+    public HttpCookies getCookies() {
+        return cookies;
     }
 
     @Override

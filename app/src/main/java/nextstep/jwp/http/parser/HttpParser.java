@@ -10,6 +10,7 @@ import java.util.Optional;
 import nextstep.jwp.context.ApplicationContext;
 import nextstep.jwp.exception.InternalServerErrorException;
 import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.message.HttpCookies;
 import nextstep.jwp.http.message.HttpHeaders;
 import nextstep.jwp.http.message.HttpMethod;
 import nextstep.jwp.http.message.HttpRequestLine;
@@ -61,12 +62,22 @@ public class HttpParser {
         private HttpHeaders headers;
         private HttpRequestLine requestLine;
         private String body;
+        private HttpCookies cookies;
         private ApplicationContext applicationContext;
 
         public HttpRequestImpl(HttpHeaders headers, HttpRequestLine requestLine, String body) {
             this.headers = headers;
             this.requestLine = requestLine;
             this.body = body;
+            parseCookieFromHeader(headers);
+        }
+
+        private void parseCookieFromHeader(HttpHeaders headers) {
+            headers.getHeaderByName("Cookie")
+                .ifPresentOrElse(
+                    cookie -> this.cookies = HttpCookies.parseFrom(cookie),
+                    () -> this.cookies = HttpCookies.EMPTY_COOKIES
+                );
         }
 
         @Override
@@ -111,6 +122,11 @@ public class HttpParser {
         public String getHeader(String name) {
             return headers.getHeaderByName(name)
                 .orElseThrow();
+        }
+
+        @Override
+        public HttpCookies getCookies() {
+            return cookies;
         }
 
         @Override

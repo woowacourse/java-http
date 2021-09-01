@@ -19,6 +19,7 @@ class HttpParserTest {
             "GET /index.html HTTP/1.1",
                 "Host: localhost:8080",
                 "Connection: keep-alive",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
                 "Accept: */*",
                 ""
             );

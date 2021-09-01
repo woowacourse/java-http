@@ -1,8 +1,10 @@
 package nextstep.jwp.ui;
 
+import nextstep.jwp.exception.HttpStatusException;
 import nextstep.jwp.ui.controller.Controller;
 import nextstep.jwp.ui.request.HttpRequest;
 import nextstep.jwp.ui.response.HttpResponse;
+import nextstep.jwp.ui.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,10 +33,9 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-            HttpRequest request = new HttpRequest(inputStream);
-            Controller controller = requestMapping.getController(request);
+            HttpResponse response = new HttpResponse();
+            doProcess(inputStream, response);
 
-            HttpResponse response = controller.service(request);
             String responseContent = response.getResponse();
             outputStream.write(responseContent.getBytes());
             outputStream.flush();
@@ -45,7 +46,19 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    //TODO: 예외 다 잡아주기
+    private void doProcess(InputStream inputStream, HttpResponse response) {
+
+        try {
+            HttpRequest request = new HttpRequest(inputStream);
+
+            Controller controller = requestMapping.getController(request);
+            controller.service(request, response);
+        } catch (HttpStatusException e) {
+            response.forward(e.getPath(), e.statusCode());
+        } catch (RuntimeException e) {
+            response.forward(HttpStatus.getPath(HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     private void close() {
         try {

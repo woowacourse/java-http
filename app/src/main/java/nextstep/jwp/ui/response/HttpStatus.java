@@ -1,25 +1,33 @@
 package nextstep.jwp.ui.response;
 
+import nextstep.jwp.exception.NotMatchHttpStatusException;
+
 import java.util.Arrays;
 
 public enum HttpStatus {
-    OK(200),
-    FOUND(302),
-    NOT_FOUND(404),
-    INTERNAL_SERVER_ERROR(500),
-    UNAUTHORIZED(401);
+    OK(200, "OK"),
+    FOUND(302, "Found"),
+    NOT_FOUND(404, "Not Found"),
+    INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
+    UNAUTHORIZED(401, "Unauthorized");
 
-    private int code;
+    private final int code;
+    private final String name;
 
-    HttpStatus(int code) {
+    HttpStatus(int code, String name) {
         this.code = code;
+        this.name = name;
     }
 
-    public static String convert(int code) {
+    public static String convert(HttpStatus httpStatus) {
         return Arrays.stream(values())
-                .filter(httpStatus -> httpStatus.code == code)
-                .map(httpStatus -> code + " " + httpStatus.name())
+                .filter(status -> status.code == httpStatus.code)
+                .map(status -> status.code + " " + status.name)
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("잘못된 상태코드 입니다."));
+                .orElseThrow(NotMatchHttpStatusException::new);
+    }
+
+    public static String getPath(HttpStatus status) {
+        return "/" + status.code + ".html";
     }
 }

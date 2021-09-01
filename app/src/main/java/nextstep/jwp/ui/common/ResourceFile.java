@@ -1,6 +1,10 @@
 package nextstep.jwp.ui.common;
 
+import nextstep.jwp.exception.NotFoundException;
+
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Objects;
 
 public class ResourceFile {
 
@@ -10,8 +14,16 @@ public class ResourceFile {
         this.path = "static" + path;
     }
 
-    public String getContent() throws IOException {
-        return new String(getClass().getClassLoader().getResourceAsStream(path).readAllBytes());
+    public String getContent() {
+        InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(path);
+        if (Objects.isNull(resourceAsStream)) {
+            throw new NotFoundException();
+        }
+        try {
+            return new String(resourceAsStream.readAllBytes());
+        } catch (IOException e) {
+            throw new NotFoundException();
+        }
     }
 
     public String getContentType() {

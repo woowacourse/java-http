@@ -3,20 +3,19 @@ package nextstep.jwp.ui.controller;
 import nextstep.jwp.ui.request.HttpRequest;
 import nextstep.jwp.ui.response.HttpResponse;
 
-import java.io.IOException;
-
 public abstract class AbstractController implements Controller {
 
     @Override
-    public HttpResponse service(HttpRequest request) throws IOException {
+    public void service(HttpRequest request, HttpResponse response) {
         String method = request.getMethod();
         if ("GET".equals(method)) {
-            return doGet(request);
+            doGet(request, response);
+            return;
         }
-        return doPost(request);
+        doPost(request, response);
     }
 
-    protected abstract HttpResponse doGet(HttpRequest request) throws IOException;
+    protected abstract void doGet(HttpRequest request, HttpResponse response);
 
-    protected abstract HttpResponse doPost(HttpRequest request) throws IOException;
+    protected abstract void doPost(HttpRequest request, HttpResponse response);
 }

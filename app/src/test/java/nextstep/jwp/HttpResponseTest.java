@@ -1,6 +1,7 @@
 package nextstep.jwp;
 
 import nextstep.jwp.ui.response.HttpResponse;
+import nextstep.jwp.ui.response.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,7 @@ public class HttpResponseTest {
     @DisplayName("등록한 상태코드대로 ResponseLine이 나온다.")
     void setStatus() {
         // give, when
-        httpResponse.setStatus(200);
+        httpResponse.setStatus(HttpStatus.OK);
 
         // then
         assertThat(httpResponse.getResponseLine()).isEqualTo("HTTP/1.1 200 OK ");
@@ -47,7 +48,7 @@ public class HttpResponseTest {
     @DisplayName("등록한 상태코드, Header, Body대로 Response가 나온다.")
     void write() {
         // given, when
-        httpResponse.setStatus(200);
+        httpResponse.setStatus(HttpStatus.OK);
         httpResponse.addHeader("Content-Type", "text/html;charset=utf-8");
         httpResponse.addHeader("Content-Length", "300");
         httpResponse.write("ResponseBody");

@@ -11,10 +11,6 @@ public class RequestLine {
         return splitRequestLine[0];
     }
 
-    public String getRequestURI() {
-        return splitRequestLine[1];
-    }
-
     public String getQueryString() {
         String requestURI = splitRequestLine[1];
         int index = requestURI.indexOf("?");
@@ -25,7 +21,7 @@ public class RequestLine {
     }
 
     public String getPath() {
-        String requestURI = getRequestURI();
+        String requestURI = splitRequestLine[1];
         int index = requestURI.indexOf("?");
         if (index != -1) {
             return requestURI.substring(0, index);

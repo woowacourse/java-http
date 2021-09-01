@@ -3,7 +3,6 @@ package nextstep.jwp.ui.response;
 import nextstep.jwp.ui.common.HttpHeaders;
 import nextstep.jwp.ui.common.ResourceFile;
 
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -17,8 +16,8 @@ public class HttpResponse {
         this.headers = new HttpHeaders(new LinkedHashMap<>());
     }
 
-    public void setStatus(int code) {
-        responseLine = "HTTP/1.1 " + HttpStatus.convert(code) + " ";
+    public void setStatus(HttpStatus httpStatus) {
+        responseLine = "HTTP/1.1 " + HttpStatus.convert(httpStatus) + " ";
     }
 
     public void addHeader(String name, String value) {
@@ -26,10 +25,6 @@ public class HttpResponse {
     }
 
     public void write(String message) {
-        if (response != null) {
-            response += message;
-            return;
-        }
         response = String.join("\r\n",
                 responseLine,
                 headers.convertToLines(),
@@ -49,29 +44,27 @@ public class HttpResponse {
         return headers.getHeaders();
     }
 
-    public HttpResponse sendRedirect(String url) {
-        return sendRedirect(url, 302);
+    public void sendRedirect(String url) {
+        sendRedirect(url, HttpStatus.FOUND);
     }
 
-    public HttpResponse sendRedirect(String url, int code) {
-        setStatus(code);
+    public void sendRedirect(String url, HttpStatus httpStatus) {
+        setStatus(httpStatus);
         response = String.join("\r\n",
                 responseLine,
                 "Location: " + url);
-        return this;
     }
 
-    public HttpResponse forward(String url, int code) throws IOException {
+    public void forward(String url, HttpStatus httpStatus) {
         ResourceFile resourceFile = new ResourceFile(url);
         String content = resourceFile.getContent();
-        setStatus(code);
+        setStatus(httpStatus);
         addHeader("Content-Type", resourceFile.getContentType());
         addHeader("Content-Length", String.valueOf(content.getBytes().length));
         write(content);
-        return this;
     }
 
-    public HttpResponse forward(String url) throws IOException {
-        return forward(url, 200);
+    public void forward(String url) {
+        forward(url, HttpStatus.OK);
     }
 }

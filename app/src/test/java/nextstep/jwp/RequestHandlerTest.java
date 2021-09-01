@@ -63,8 +63,8 @@ class RequestHandlerTest {
     }
 
     @Test
-    @DisplayName("등록되지 않은 url 요청 시 404.html로 redirect 한다.")
-    void notExistUrl() {
+    @DisplayName("등록되지 않은 url 요청 시 404 에러를 보낸다.")
+    void notExistUrl() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /oz HTTP/1.1 ",
@@ -80,95 +80,15 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: /404.html";
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @Test
-    @DisplayName("GET /404.html 요청 시 404.html 페이지로 이동한다.")
-    void moveNotFoundPage() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /404.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, new RequestMapping());
-
-        // when
-        requestHandler.run();
-
-        // then
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        String expected = "HTTP/1.1 404 NOT_FOUND \r\n" +
+        String expected = "HTTP/1.1 404 Not Found \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: "+ responseBody.getBytes().length +" \r\n" +
                 "\r\n" +
                 responseBody;
         assertThat(socket.output()).isEqualTo(expected);
     }
-
-    @Test
-    @DisplayName("GET /401.html 요청 시 401.html 페이지로 이동한다.")
-    void moveUnauthorizedPage() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /401.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, new RequestMapping());
-
-        // when
-        requestHandler.run();
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/401.html");
-        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        String expected = "HTTP/1.1 401 UNAUTHORIZED \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: "+ responseBody.getBytes().length +" \r\n" +
-                "\r\n" +
-                responseBody;
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @Test
-    @DisplayName("GET /500.html 요청 시 500.html 페이지로 이동한다.")
-    void moveInternalServerErrorPage() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /500.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, new RequestMapping());
-
-        // when
-        requestHandler.run();
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/500.html");
-        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        String expected = "HTTP/1.1 500 INTERNAL_SERVER_ERROR \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: "+ responseBody.getBytes().length +" \r\n" +
-                "\r\n" +
-                responseBody;
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
 
     @Test
     @DisplayName("GET /login 요청 시 로그인 페이지로 이동한다.")
@@ -219,14 +139,14 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
+        String expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: /index.html";
         assertThat(socket.output()).isEqualTo(expected);
     }
 
 
     @Test
-    @DisplayName("POST /login 요청 시 존재하지 않는 account면 401.html로 redirect 된다.")
+    @DisplayName("POST /login 요청 시 존재하지 않는 account면 401 에러를 보낸다.")
     void loginFailWhenNotExistAccount() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
@@ -246,13 +166,18 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: /401.html";
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = "HTTP/1.1 401 Unauthorized \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: "+ responseBody.getBytes().length +" \r\n" +
+                "\r\n" +
+                responseBody;
         assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test
-    @DisplayName("POST /login 요청 시 password가 일치하지 않으면 401.html로 redirect 된다.")
+    @DisplayName("POST /login 요청 시 password가 일치하지 않으면 401 에러를 보낸다.")
     void loginFailWhenNotExistPassword() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
@@ -272,8 +197,13 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: /401.html";
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = "HTTP/1.1 401 Unauthorized \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: "+ responseBody.getBytes().length +" \r\n" +
+                "\r\n" +
+                responseBody;
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -326,15 +256,15 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
+        String expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: /index.html";
         assertThat(socket.output()).isEqualTo(expected);
 
     }
 
     @Test
-    @DisplayName("POST /register 요청 시 회원가입이 실패하면 500.html로 redirect 된다.")
-    void registerFail() {
+    @DisplayName("POST /register 요청 시 회원가입이 실패하면 500 에러를 보낸다.")
+    void registerFail() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "POST /register HTTP/1.1 ",
@@ -353,8 +283,13 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: /500.html";
+        final URL resource = getClass().getClassLoader().getResource("static/500.html");
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = "HTTP/1.1 500 Internal Server Error \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: "+ responseBody.getBytes().length +" \r\n" +
+                "\r\n" +
+                responseBody;
         assertThat(socket.output()).isEqualTo(expected);
     }
 }

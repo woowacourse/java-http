@@ -31,7 +31,7 @@ public class UserRegisterServlet extends Servlet {
         InMemoryUserRepository.save(user);
         log.info("회원 가입 완료! 유저 정보 : {}", user);
 
-        httpResponse.sendRedirect(httpResponse, "index.html");
+        httpResponse.sendRedirect("/index.html");
     }
 
 }

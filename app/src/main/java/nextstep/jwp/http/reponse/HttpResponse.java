@@ -68,10 +68,10 @@ public class HttpResponse {
         setHeader("Set-Cookie", JSESSION_ID + "=" + uuid);
     }
 
-    public void sendRedirect(HttpResponse httpResponse, String location){
-        httpResponse.setStatus(HttpStatus.FOUND);
-        httpResponse.setHeader("Content-Type", "text/html;charset=utf-8");
-        httpResponse.setHeader("Location", location);
+    public void sendRedirect(String location){
+        setStatus(HttpStatus.FOUND);
+        setHeader("Content-Type", "text/html;charset=utf-8");
+        setHeader("Location", location.replace("/", ""));
     }
 
 }

@@ -45,11 +45,11 @@ public class UserLoginServlet extends Servlet {
         if (isCorrectUser(httpRequest, possibleUser)) {
             log.debug("로그인 완료! 유저 정보 : {}", possibleUser);
             httpResponse.createSession(possibleUser.get());
-            httpResponse.sendRedirect(httpResponse, "index.html");
+            httpResponse.sendRedirect("/index.html");
             return;
         }
 
-        httpResponse.sendRedirect(httpResponse, "401.html");
+        httpResponse.sendRedirect("/401.html");
     }
 
     private boolean isCorrectUser(HttpRequest httpRequest, Optional<User> user) {

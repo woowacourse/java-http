@@ -1,12 +1,11 @@
 package nextstep.jwp;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebServer {
 
@@ -15,9 +14,11 @@ public class WebServer {
     private static final int DEFAULT_PORT = 8080;
 
     private final int port;
+    private final ApplicationContext applicationContext;
 
-    public WebServer(int port) {
+    public WebServer(int port, ApplicationContext applicationContext) {
         this.port = checkPort(port);
+        this.applicationContext = applicationContext;
     }
 
     public void run() {
@@ -34,7 +35,7 @@ public class WebServer {
     private void handle(ServerSocket serverSocket) throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection)).start();
+            new Thread(new RequestHandler(connection, applicationContext)).start();
         }
     }
 

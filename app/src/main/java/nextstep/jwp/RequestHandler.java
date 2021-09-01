@@ -1,7 +1,6 @@
 package nextstep.jwp;
 
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.core.HandlerMap;
 import nextstep.jwp.web.HttpRequest;
 import nextstep.jwp.web.HttpRequestParser;
 import nextstep.jwp.web.HttpResponse;
@@ -14,7 +13,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
 
-import static nextstep.jwp.core.HandlerMap.getController;
+import static nextstep.jwp.core.HandlerMapping.getController;
 
 public class RequestHandler implements Runnable {
 

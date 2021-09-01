@@ -4,6 +4,7 @@ import nextstep.joanne.server.handler.HandlerMapping;
 import nextstep.joanne.server.handler.RequestHandler;
 import nextstep.joanne.server.handler.controller.ControllerFactory;
 import nextstep.joanne.server.http.request.HttpRequestParser;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
 
+import static nextstep.Fixture.makeGetRequest;
 import static nextstep.Fixture.makePostRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,18 +27,20 @@ class RequestHandlerTest {
     MockSocket socket;
     RequestHandler requestHandler;
 
-    @BeforeEach
-    void setUp() {
+    @AfterEach
+    void tearDown() throws IOException {
+        socket.close();
+    }
+
+    @Test
+    void run() throws IOException {
         socket = new MockSocket();
         requestHandler = new RequestHandler(
                 socket,
                 new HandlerMapping(ControllerFactory.addControllers()),
                 new HttpRequestParser()
         );
-    }
 
-    @Test
-    void run() throws IOException {
         // when
         requestHandler.run();
 
@@ -50,18 +54,24 @@ class RequestHandlerTest {
     private String to200OkWithHtml(String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html",
+                "Content-Type: text/html ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"/index.html", "/index", "/login", "/login.html", "/register", "/register.html"})
+    @ValueSource(strings = {"/index.html", "/index","/login", "/login.html", "/register", "/register.html"})
     @DisplayName("정적 요청에 응답한다.")
     void preserveStaticResource(String uri) throws IOException {
         // given
         final String httpRequest = makeGetRequest(uri);
+        socket = new MockSocket(httpRequest);
+        requestHandler = new RequestHandler(
+                socket,
+                new HandlerMapping(ControllerFactory.addControllers()),
+                new HttpRequestParser()
+        );
 
         // when
         requestHandler.run();
@@ -82,6 +92,12 @@ class RequestHandlerTest {
         //given
         final String uri = "/css/styles.css";
         final String httpRequest = makeGetRequest(uri);
+        socket = new MockSocket(httpRequest);
+        requestHandler = new RequestHandler(
+                socket,
+                new HandlerMapping(ControllerFactory.addControllers()),
+                new HttpRequestParser()
+        );
 
         //when
         requestHandler.run();
@@ -92,21 +108,11 @@ class RequestHandlerTest {
         assertThat(actual).startsWith(expected);
     }
 
-    private String makeGetRequest(String uri) {
-        return String.join("\r\n",
-                "GET " + uri + " HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-    }
-
     private String to200OkWithCSS() {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/css",
+                "Content-Type: text/css ",
                 "Content-Length: 211991 ",
-                "",
                 "");
     }
 
@@ -115,6 +121,12 @@ class RequestHandlerTest {
     void loginWithQueryString() throws IOException {
         // given
         final String httpRequest = makePostRequest("/login.html", "account=gugu&password=password");
+        socket = new MockSocket(httpRequest);
+        requestHandler = new RequestHandler(
+                socket,
+                new HandlerMapping(ControllerFactory.addControllers()),
+                new HttpRequestParser()
+        );
 
         // when
         requestHandler.run();
@@ -129,10 +141,10 @@ class RequestHandlerTest {
     private String to302FoundWithHtml(String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
+                "Location: /index.html ",
                 "Content-Type: text/html ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
-                responseBody);
+                "");
     }
 
     @Test
@@ -140,7 +152,12 @@ class RequestHandlerTest {
     void loginWithQueryStringWhenWrongAccount() throws IOException {
         // given
         final String httpRequest = makePostRequest("/login", "account=merong&password=merong");
-
+        socket = new MockSocket(httpRequest);
+        requestHandler = new RequestHandler(
+                socket,
+                new HandlerMapping(ControllerFactory.addControllers()),
+                new HttpRequestParser()
+        );
         // when
         requestHandler.run();
 
@@ -165,7 +182,12 @@ class RequestHandlerTest {
         // given
         final String httpRequest = makePostRequest("/register.html",
                 "account=joanne&password=password&email=hkkang%40woowahan.com");
-
+        socket = new MockSocket(httpRequest);
+        requestHandler = new RequestHandler(
+                socket,
+                new HandlerMapping(ControllerFactory.addControllers()),
+                new HttpRequestParser()
+        );
         // when
         requestHandler.run();
 
@@ -181,7 +203,12 @@ class RequestHandlerTest {
     void notFound() throws IOException {
         // given
         final String httpRequest = makeGetRequest("/joanne.html");
-
+        socket = new MockSocket(httpRequest);
+        requestHandler = new RequestHandler(
+                socket,
+                new HandlerMapping(ControllerFactory.addControllers()),
+                new HttpRequestParser()
+        );
         // when
         requestHandler.run();
 
@@ -194,8 +221,8 @@ class RequestHandlerTest {
 
     private String to404NotFoundWithHtml(String responseBody) {
         return String.join("\r\n",
-                "HTTP/1.1 404 Not Found",
-                "Content-Type: text/html",
+                "HTTP/1.1 404 Not Found ",
+                "Content-Type: text/html ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

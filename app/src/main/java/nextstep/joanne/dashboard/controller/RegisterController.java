@@ -21,7 +21,6 @@ public class RegisterController extends AbstractController {
         response.addStatus(HttpStatus.FOUND);
         response.addHeaders("Location", "/index.html");
         response.addHeaders("Content-Type", ContentType.resolve(request.uri()));
-        response.addBody(request.uri());
     }
 
     @Override

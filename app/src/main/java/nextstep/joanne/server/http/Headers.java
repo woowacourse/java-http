@@ -37,7 +37,7 @@ public class Headers {
     public String getHeaders() {
         StringBuilder stringBuilder = new StringBuilder();
         headers.forEach((key, value) -> {
-            stringBuilder.append(key).append(": ").append(value).append("\n");
+            stringBuilder.append(key).append(": ").append(value).append(" \r\n");
         });
         return stringBuilder.toString();
     }

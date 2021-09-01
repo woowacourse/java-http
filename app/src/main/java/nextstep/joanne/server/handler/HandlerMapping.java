@@ -14,6 +14,11 @@ public class HandlerMapping {
     }
 
     public Controller get(HttpRequest httpRequest) {
-        return handlers.getOrDefault(httpRequest.requestLine().uri(), new ResourceController());
+        for (Map.Entry<String, Controller> entry: handlers.entrySet()) {
+            if (httpRequest.uri().startsWith(entry.getKey())) {
+                return entry.getValue();
+            }
+        }
+        return new ResourceController();
     }
 }

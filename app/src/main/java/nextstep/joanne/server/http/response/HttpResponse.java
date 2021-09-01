@@ -3,8 +3,7 @@ package nextstep.joanne.server.http.response;
 import nextstep.joanne.server.http.Headers;
 import nextstep.joanne.server.http.HttpStatus;
 
-import java.util.Arrays;
-import java.util.StringJoiner;
+import java.util.Objects;
 
 public class HttpResponse {
     private StatusLine statusLine;
@@ -33,11 +32,7 @@ public class HttpResponse {
     }
 
     public String getStatusLine() {
-        StringJoiner stringJoiner = new StringJoiner(" ");
-        stringJoiner.add(statusLine.getVersion());
-        stringJoiner.add(statusLine.getStatusCode());
-        stringJoiner.add(statusLine.getStatusMessage());
-        return stringJoiner.toString();
+        return String.format("%s %s %s ", statusLine.getVersion(), statusLine.getStatusCode(), statusLine.getStatusMessage());
     }
 
     public String getHeaders() {
@@ -49,8 +44,10 @@ public class HttpResponse {
     }
 
     public String getBody() {
-        return getStatusLine() + "\n" +
-                getHeaders() + "\n" +
-                body.getBody();
+        String body = "";
+        if (Objects.nonNull(this.body)) {
+            body = this.body.getBody();
+        }
+        return String.format("%s\r\n%s\r\n%s", getStatusLine(), getHeaders(), body);
     }
 }

@@ -14,17 +14,17 @@ public class ControllerAdvice {
         if (httpStatus.equals(HttpStatus.UNAUTHORIZED)) {
             response.addStatus(HttpStatus.UNAUTHORIZED);
             response.addHeaders("Content-Type", ContentType.resolve(httpRequest.uri()));
-            response.addBody(httpRequest.uri());
+            response.addBody("/401.html");
             return;
         }
         if (httpStatus.equals(HttpStatus.NOT_FOUND)) {
             response.addStatus(HttpStatus.NOT_FOUND);
             response.addHeaders("Content-Type", ContentType.resolve(httpRequest.uri()));
-            response.addBody(httpRequest.uri());
+            response.addBody("/404.html");
             return;
         }
         response.addStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         response.addHeaders("Content-Type", ContentType.resolve(httpRequest.uri()));
-        response.addBody(httpRequest.uri());
+        response.addBody("/500.html");
     }
 }

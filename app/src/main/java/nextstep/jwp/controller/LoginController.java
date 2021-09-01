@@ -56,7 +56,7 @@ public class LoginController extends AbstractController {
         final String account = body.get(ACCOUNT);
         final String password = body.get(PASSWORD);
 
-        if (!InMemoryUserRepository.existsByAccountAndPassword(account, password)) {
+        if (!InMemorySessionRepository.hasSession(sessionId) || !InMemoryUserRepository.existsByAccountAndPassword(account, password)) {
             return "/401.html";
         }
         final User user = InMemoryUserRepository.findByAccount(account);

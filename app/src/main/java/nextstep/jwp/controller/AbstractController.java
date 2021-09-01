@@ -1,7 +1,7 @@
 package nextstep.jwp.controller;
 
 import java.nio.charset.Charset;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Locale;
 import java.util.Map;
 import nextstep.jwp.infrastructure.functionalinterface.CheckedBiConsumer;
@@ -21,7 +21,7 @@ public abstract class AbstractController implements Controller {
     private final Map<Method, CheckedBiConsumer<HttpRequest, HttpResponse>> methodMap;
 
     protected AbstractController() {
-        methodMap = new HashMap<>();
+        methodMap = new EnumMap<>(Method.class);
         methodMap.put(Method.GET, this::doGet);
         methodMap.put(Method.POST, this::doPost);
     }

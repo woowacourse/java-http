@@ -7,8 +7,6 @@ import nextstep.jwp.infrastructure.http.response.StatusCode;
 
 public class IndexController extends AbstractController {
 
-    private static final String JSESSIONID = "JSESSIONID";
-
     @Override
     public String uri() {
         return "/index";

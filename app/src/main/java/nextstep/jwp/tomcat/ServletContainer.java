@@ -28,8 +28,12 @@ public class ServletContainer {
             return;
         }
 
-        Servlet servlet = findServletByRequestURI(httpRequest.getRequestURI());
-        servlet.service(httpRequest, httpResponse);
+        try {
+            Servlet servlet = findServletByRequestURI(httpRequest.getRequestURI());
+            servlet.service(httpRequest, httpResponse);
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+        }
     }
 
     private Servlet findServletByRequestURI(String requestMapping) {

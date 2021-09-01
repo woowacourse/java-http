@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -59,7 +61,6 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-
     @DisplayName("\"GET /login\" 요청을 보내면, login.html 파일을 응답한다.")
     @Test
     void login_html() throws IOException {
@@ -90,7 +91,7 @@ class RequestHandlerTest {
 
     @DisplayName("\"POST /login\" 요청을 보내서 로그인이 됐다면, index.html로 리다이렉트한다.")
     @Test
-    void login() throws IOException {
+    void login() {
         // given
         final String httpRequest = String.join("\r\n",
             "POST /login HTTP/1.1 ",
@@ -107,9 +108,45 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = "HTTP/1.1 302 Found \r\n" +
-            "Location: index.html \r\n" +
-            "Content-Type: text/html;charset=utf-8 ";
+        String responseLine = "HTTP/1.1 302 Found";
+        String locationHeader = "Location: index.html";
+        String contentTypeHeader = "Content-Type: text/html;charset=utf-8";
+        String setCookieHeader = "Set-Cookie: ";
+
+        assertThat(socket.output().contains(responseLine)).isTrue();
+        assertThat(socket.output().contains(locationHeader)).isTrue();
+        assertThat(socket.output().contains(contentTypeHeader)).isTrue();
+        assertThat(socket.output().contains(setCookieHeader)).isTrue();
+    }
+
+    @DisplayName("\"GET /login\" 세션으로 로그인을 성공하면, index.html로 리다이렉트 한다.")
+    @Test
+    void login_session() throws IOException {
+        String sessionId = 로그인_성공();
+        MockSocket socket;
+        String httpRequest;
+        RequestHandler requestHandler;
+
+        httpRequest = String.join("\r\n",
+            "GET /login HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "Cookie: JSESSIONID=" + sessionId,
+            "");
+
+        socket = new MockSocket(httpRequest);
+        requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String expected = "HTTP/1.1 200 OK \r\n" +
+            "Content-Length: 5564 \r\n" +
+            "Content-Type: text/html;charset=utf-8 \r\n" +
+            "\r\n" +
+            new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -168,6 +205,30 @@ class RequestHandlerTest {
             "Content-Type: text/html;charset=utf-8 ";
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    private String 로그인_성공() {
+        // given
+        String httpRequest = String.join("\r\n",
+            "POST /login HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "Content-Length: 30",
+            "",
+            "account=gugu&password=password");
+
+        MockSocket socket = new MockSocket(httpRequest);
+        RequestHandler requestHandler = new RequestHandler(socket);
+        requestHandler.run();
+
+        List<String> splits = Arrays.asList(socket.output().split(" "));
+        String sessionCookie = splits.stream()
+            .filter(it -> it.startsWith("JSESSIONID"))
+            .findAny()
+            .get();
+        String sessionId = sessionCookie.split("=")[1];
+
+        return sessionId;
     }
 
 }

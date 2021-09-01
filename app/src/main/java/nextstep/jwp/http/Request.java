@@ -10,7 +10,7 @@ public class Request {
     private final RequestHeader header;
     private final Map<String, String> body;
 
-    public Request(Builder builder) {
+    private Request(Builder builder) {
         this.method = builder.method;
         this.uri = builder.uri;
         this.httpVersion = builder.httpVersion;
@@ -58,7 +58,7 @@ public class Request {
 
         private HttpMethod method;
         private Uri uri;
-        private String httpVersion;
+        private String httpVersion = "";
         private RequestHeader header;
         private Map<String, String> body;
 

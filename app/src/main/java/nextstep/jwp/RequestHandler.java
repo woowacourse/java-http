@@ -1,14 +1,11 @@
 package nextstep.jwp;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -18,9 +15,11 @@ import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.exception.UsernameConflictException;
 import nextstep.jwp.http.HttpMethod;
+import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.http.Request;
 import nextstep.jwp.http.Response;
 import nextstep.jwp.model.User;
+import nextstep.jwp.utils.FileConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +50,7 @@ public class RequestHandler implements Runnable {
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
-        }
-        finally {
+        } finally {
             close();
         }
     }
@@ -62,11 +60,11 @@ public class RequestHandler implements Runnable {
             final Request request = createdRequest(bufferedReader);
             return response(request);
         } catch (BadRequestMessageException exception) {
-            return Response.create400BadRequest(exception.getMessage());
+            return Response.createErrorRequest(exception.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (NotFoundException exception) {
             return Response.create302Found("/404.html");
         } catch (UsernameConflictException exception) {
-            return Response.create409Conflict(exception.getMessage());
+            return Response.createErrorRequest(exception.getMessage(), HttpStatus.CONFLICT);
         } catch (UnauthorizedException exception) {
             return Response.create302Found("/401.html");
         } catch (Exception exception) {
@@ -149,11 +147,11 @@ public class RequestHandler implements Runnable {
         String uri = request.getUri();
 
         if (request.isUriMatch("/login") || request.isUriMatch("/register")) {
-            String responseBody = getResponseBody("static" + uri + ".html");
+            String responseBody = FileConverter.fileToString(uri + ".html");
             return Response.create200OK(request, responseBody);
         }
         if (request.isUriFile()) {
-            String responseBody = getResponseBody("static" + uri);
+            String responseBody = FileConverter.fileToString("static" + uri);
             return Response.create200OK(request, responseBody);
         }
         throw new NotFoundException(request);
@@ -180,13 +178,6 @@ public class RequestHandler implements Runnable {
             return Response.create302Found("/index.html");
         }
         throw new NotFoundException(request);
-    }
-
-    private String getResponseBody(String uri) throws IOException {
-        URL resource = this.getClass().getClassLoader().getResource(uri);
-
-        return new String(Files.readAllBytes(
-            new File(Objects.requireNonNull(resource).getFile()).toPath()));
     }
 
     private void close() {

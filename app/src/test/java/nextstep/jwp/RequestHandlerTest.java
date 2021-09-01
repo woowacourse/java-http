@@ -23,13 +23,10 @@ class RequestHandlerTest {
     @Test
     @DisplayName("index 테스트")
     void index() throws IOException {
-        // given
         final String httpRequest= createGetRequest(INDEX_HTML, "*/*");
 
-        // when
         final MockSocket socket = getMockSocket(httpRequest);
 
-        // then
         String expected = createResponseOK(INDEX_HTML, TEXT_HTML);
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -41,7 +38,6 @@ class RequestHandlerTest {
 
         final MockSocket socket = getMockSocket(httpRequest);
 
-        // then
         String expected = createResponseOK("login.html", TEXT_HTML);
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -64,9 +60,7 @@ class RequestHandlerTest {
 
         final MockSocket socket = getMockSocket(httpRequest);
 
-        // then
         String expected = createResponseOK("register.html", TEXT_HTML);
-
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -74,7 +68,6 @@ class RequestHandlerTest {
     @DisplayName("register Post 테스트")
     void registerPost() {
         String body = "account=test&password=password&email=mungto%40woowahan.com";
-
         final String httpRequest= createPostRequest("register", body);
 
         final MockSocket socket = getMockSocket(httpRequest);
@@ -92,7 +85,6 @@ class RequestHandlerTest {
 
         final MockSocket socket = getMockSocket(httpRequest);
 
-        // then
         String expected = createResponseOK(styleCss, type);
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -102,12 +94,10 @@ class RequestHandlerTest {
     void javascript() throws IOException {
         final String scripts = "js/scripts.js";
         final String type = "application/javascript";
-
         final String httpRequest= createGetRequest(scripts, type);
 
         final MockSocket socket = getMockSocket(httpRequest);
 
-        // then
         String expected = createResponseOK(scripts, type);
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -154,9 +144,7 @@ class RequestHandlerTest {
     @Test
     @DisplayName("login 실패시 401로 리다이랙트한다.")
     void unAuthorized() {
-
         String body = "account=fail&password=password&email=hkkang%40woowahan.com";
-
         final String httpRequest= createPostRequest("login", body);
 
         final MockSocket socket = getMockSocket(httpRequest);

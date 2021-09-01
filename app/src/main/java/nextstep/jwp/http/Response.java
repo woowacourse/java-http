@@ -33,18 +33,11 @@ public class Response {
         return new Response(message, HttpStatus.FOUND);
     }
 
-    public static Response create400BadRequest(String errorMessage) {
+    public static Response createErrorRequest(String errorMessage, HttpStatus httpStatus) {
         String message = String.join(NEW_LINE,
             "",
             errorMessage);
-        return new Response(message, HttpStatus.BAD_REQUEST);
-    }
-
-    public static Response create409Conflict(String errorMessage) {
-        String message = String.join(NEW_LINE,
-            "",
-            errorMessage);
-        return new Response(message, HttpStatus.CONFLICT);
+        return new Response(message, httpStatus);
     }
 
     @Override

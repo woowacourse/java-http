@@ -13,16 +13,16 @@ public class ExceptionController extends AbstractController {
 
     @Override
     byte[] get(HttpRequest httpRequest) throws IOException {
-        return HttpResponse.error(HttpError.NOTFOUND);
+        return HttpResponse.error(HttpError.NOT_FOUND);
     }
 
     @Override
     byte[] post(HttpRequest httpRequest) throws IOException {
-        return HttpResponse.error(HttpError.NOTFOUND);
+        return HttpResponse.error(HttpError.NOT_FOUND);
     }
 
     @Override
     byte[] error(HttpError httpError) throws IOException {
-        return HttpResponse.error(HttpError.NOTFOUND);
+        return HttpResponse.error(HttpError.NOT_FOUND);
     }
 }

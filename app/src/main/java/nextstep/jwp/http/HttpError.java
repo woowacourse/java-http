@@ -6,7 +6,8 @@ public enum HttpError {
 
     UNAUTHORIZED("Unauthorized", 401, "/401.html"),
     FORBIDDEN("Forbidden", 403, "/403.html"),
-    NOTFOUND("Not Found", 404, "/404.html");
+    NOT_FOUND("Not Found", 404, "/404.html"),
+    METHOD_NOT_ALLOWED("Method Not Allowed", 405, "/405.html");
 
     private final String name;
     private final int code;

@@ -31,11 +31,11 @@ public class HomeController extends AbstractController {
 
     @Override
     public byte[] post(HttpRequest httpRequest) throws IOException {
-        return HttpResponse.error(HttpError.FORBIDDEN);
+        return HttpResponse.error(HttpError.METHOD_NOT_ALLOWED);
     }
 
     @Override
     public byte[] error(HttpError httpError) throws IOException {
-        return HttpResponse.error(HttpError.FORBIDDEN);
+        return HttpResponse.error(HttpError.METHOD_NOT_ALLOWED);
     }
 }

@@ -48,6 +48,6 @@ public class RegisterController extends AbstractController {
 
     @Override
     byte[] error(HttpError httpError) throws IOException {
-        return HttpResponse.error(HttpError.FORBIDDEN);
+        return HttpResponse.error(HttpError.METHOD_NOT_ALLOWED);
     }
 }

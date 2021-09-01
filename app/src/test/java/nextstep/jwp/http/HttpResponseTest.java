@@ -10,7 +10,7 @@ import java.io.OutputStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpResponseTest {
-    private String testDirectory = "./src/test/resources/static/";
+    private final String testDirectory = "./src/test/resources/static/";
 
     @Test
     void responseOk() throws FileNotFoundException {

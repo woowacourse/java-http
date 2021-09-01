@@ -52,9 +52,9 @@ public class RequestHandler implements Runnable {
         if (requestBody.size() > 0) {
             String account = httpRequest.getParameter("account");
             String password = httpRequest.getParameter("password");
-            User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
 
-            validateUserPassword(httpResponse, password, user);
+            User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
+            validateUserPassword(httpResponse, user, password);
             httpResponse.redirect("/401.html");
         }
         httpResponse.forward("/login.html");
@@ -72,8 +72,9 @@ public class RequestHandler implements Runnable {
         httpResponse.forward("/register.html");
     }
 
-    private void validateUserPassword(HttpResponse httpResponse, String password, User user) {
+    private void validateUserPassword(HttpResponse httpResponse, User user, String password) {
         if (user.checkPassword(password)) {
+            httpResponse.addHeader("Set-Cookie", "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
             httpResponse.redirect(INDEX_HTML);
         }
     }

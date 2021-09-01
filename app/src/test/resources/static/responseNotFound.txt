@@ -1,6 +1,6 @@
-HTTP/1.1 200 OK
-Content-Type: text/html;charset=utf-8
+HTTP/1.1 200 OK 
 Content-Length: 2477 
+Content-Type: text/html;charset=utf-8
 
 <!DOCTYPE html>
 <html lang="en">
@@ -53,3 +53,4 @@ Content-Length: 2477
         <script src="js/scripts.js"></script>
     </body>
 </html>
+

@@ -6,6 +6,8 @@ import java.util.Map;
 public class Parameters {
 
     private static final String KEY_VALUE_SEPARATOR = "=";
+    private static final int QUERY_STRING_KEY_INDEX = 0;
+    private static final int QUERY_STRING_VALUE_INDEX = 1;
 
     Map<String, String> parameters = new HashMap<>();
 
@@ -39,7 +41,7 @@ public class Parameters {
 
         for (String queryString : splitQueryString) {
             splitQueryString = queryString.split(KEY_VALUE_SEPARATOR);
-            parameters.put(splitQueryString[0], splitQueryString[1]);
+            parameters.put(splitQueryString[QUERY_STRING_KEY_INDEX], splitQueryString[QUERY_STRING_VALUE_INDEX]);
         }
     }
 

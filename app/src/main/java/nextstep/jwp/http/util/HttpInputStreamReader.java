@@ -15,6 +15,8 @@ import nextstep.jwp.http.request.Parameters;
 public class HttpInputStreamReader {
 
     private static final String HEADER_KEY_VALUE_SEPARATOR = ": ";
+    private static final int HEADER_KEY_INDEX = 0;
+    private static final int HEADER_VALUE_INDEX = 1;
 
     private final BufferedReader bufferedReader;
 
@@ -53,7 +55,7 @@ public class HttpInputStreamReader {
                 break;
             }
             String[] splitHeaderLine = line.split(HEADER_KEY_VALUE_SEPARATOR);
-            httpHeaders.put(splitHeaderLine[0], splitHeaderLine[1]);
+            httpHeaders.put(splitHeaderLine[HEADER_KEY_INDEX], splitHeaderLine[HEADER_VALUE_INDEX]);
         }
         return httpHeaders;
     }

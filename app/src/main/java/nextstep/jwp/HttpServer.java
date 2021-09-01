@@ -8,7 +8,7 @@ import java.util.Objects;
 import nextstep.jwp.constants.Header;
 import nextstep.jwp.constants.Http;
 import nextstep.jwp.constants.StatusCode;
-import nextstep.jwp.controller.FrontController;
+import nextstep.jwp.controller.MappingHandler;
 import nextstep.jwp.exception.PageNotFoundException;
 import nextstep.jwp.request.RequestBody;
 import nextstep.jwp.request.RequestHeader;
@@ -19,13 +19,13 @@ public class HttpServer {
     private final BufferedReader reader;
     private final RequestLine requestLine;
     private final RequestHeader headers;
-    private final RequestBody body;
+    private final RequestBody requestBody;
 
     public HttpServer(InputStream inputStream) throws IOException {
         this.reader = new BufferedReader(new InputStreamReader(inputStream));
         this.requestLine = new RequestLine(extractRequestLine());
         this.headers = new RequestHeader(extractHeaders());
-        this.body = new RequestBody(extractRequestBody());
+        this.requestBody = new RequestBody(extractRequestBody());
     }
 
     private String extractRequestLine() throws IOException {
@@ -57,9 +57,9 @@ public class HttpServer {
     }
 
     public String getResponse() throws IOException {
-        final FrontController frontController = new FrontController(this.body, this.requestLine);
+        final MappingHandler mappingHandler = new MappingHandler(this.requestLine, this.requestBody);
         try {
-            return frontController.response();
+            return mappingHandler.response();
         } catch (PageNotFoundException e) {
             return ResponseEntity
                     .statusCode(StatusCode.NOT_FOUND)

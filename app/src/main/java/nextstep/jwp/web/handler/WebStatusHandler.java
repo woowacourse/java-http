@@ -3,8 +3,8 @@ package nextstep.jwp.web.handler;
 import java.util.List;
 import nextstep.jwp.web.http.request.HttpRequest;
 import nextstep.jwp.web.http.response.HttpResponse;
-import nextstep.jwp.web.resolver.UriResolver;
 import nextstep.jwp.web.resolver.StaticResourceResolver;
+import nextstep.jwp.web.resolver.UriResolver;
 import nextstep.jwp.web.resolver.ViewResolver;
 
 public class WebStatusHandler implements WebHandler {

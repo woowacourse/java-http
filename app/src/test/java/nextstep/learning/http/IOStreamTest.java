@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
 import static org.mockito.Mockito.*;
 
 /**
@@ -17,7 +16,7 @@ import static org.mockito.Mockito.*;
  * <b>InputStream</b>은 데이터를 읽고, <b>OutputStream</b>은 데이터를 쓴다.<br>
  * <b>FilterStream</b>은 InputStream이나 OutputStream에 연결될 수 있다.<br>
  * FilterStream은 읽거나 쓰는 데이터를 수정할 때 사용한다. (e.g. 암호화, 압축, 포맷 변환)<br>
- *<br>
+ * <br>
  * <b>Stream</b>은 데이터를 <b>바이트</b>로 읽고 쓴다.<br>
  * 바이트가 아닌 <b>텍스트(문자)</b>를 읽고 쓰려면 <b>Reader와 Writer</b> 클래스를 연결한다.<br>
  * Reader, Writer는 다양한 문자 인코딩(e.g. UTF-8)을 처리할 수 있다.
@@ -94,7 +93,8 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
-            try (outputStream) {}
+            try (outputStream) {
+            }
             verify(outputStream, atLeastOnce()).close();
         }
     }
@@ -134,7 +134,8 @@ class IOStreamTest {
             inputStream.close();
         }
 
-        /**ㄹ소스에서 누수(leak)가 발생한다.
+        /**
+         * ㄹ소스에서 누수(leak)가 발생한다.
          */
         @Test
         void InputStream은_사용하고_나서_close_처리를_해준다() throws IOException {
@@ -145,7 +146,8 @@ class IOStreamTest {
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
-            try (inputStream) {}
+            try (inputStream) {
+            }
             verify(inputStream, atLeastOnce()).close();
         }
     }
@@ -201,7 +203,7 @@ class IOStreamTest {
             final BufferedReader bufferedReader = new BufferedReader(reader);
 
             final StringBuilder actual = new StringBuilder();
-            while(bufferedReader.ready()) {
+            while (bufferedReader.ready()) {
                 actual.append(bufferedReader.readLine()).append("\r\n");
             }
             assertThat(actual).hasToString(emoji);

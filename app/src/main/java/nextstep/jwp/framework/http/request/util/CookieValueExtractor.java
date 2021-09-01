@@ -8,7 +8,7 @@ public class CookieValueExtractor {
     private static final String COOKIE_VALUE_SEPARATOR = ";";
     private static final String KEY_VALUE_SEPARATOR = "=";
 
-    private CookieValueExtractor(){
+    private CookieValueExtractor() {
     }
 
     public static Map<String, String> extract(final String cookieHeader) {

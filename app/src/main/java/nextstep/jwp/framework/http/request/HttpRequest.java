@@ -1,7 +1,10 @@
 package nextstep.jwp.framework.http.request;
 
 import nextstep.jwp.framework.http.common.ProtocolVersion;
-import nextstep.jwp.framework.http.request.details.*;
+import nextstep.jwp.framework.http.request.details.HttpMethod;
+import nextstep.jwp.framework.http.request.details.RequestBody;
+import nextstep.jwp.framework.http.request.details.RequestHttpHeader;
+import nextstep.jwp.framework.http.request.details.RequestUrl;
 
 import java.util.Map;
 import java.util.Objects;

@@ -1,11 +1,11 @@
 package nextstep.jwp.framework.manager;
 
+import nextstep.jwp.framework.http.request.HttpRequest;
+import nextstep.jwp.framework.http.request.details.HttpMethod;
 import nextstep.jwp.framework.manager.annotation.Controller;
 import nextstep.jwp.framework.manager.annotation.GetMapping;
 import nextstep.jwp.framework.manager.annotation.PostMapping;
 import nextstep.jwp.framework.manager.annotation.RequestParameter;
-import nextstep.jwp.framework.http.request.HttpRequest;
-import nextstep.jwp.framework.http.request.details.HttpMethod;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

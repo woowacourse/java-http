@@ -3,7 +3,6 @@ package nextstep.jwp.framework.http.response.details;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class ResponseHttpHeaderTest {
 
@@ -17,8 +16,8 @@ class ResponseHttpHeaderTest {
 
         //when
         final String response = responseHttpHeader.generateResponse();
-        final String expected = "Content-Length: 18\r\n"+
-        "Content-Type: text/html;charset=utf-8\r\n";
+        final String expected = "Content-Length: 18\r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n";
         assertThat(response).isEqualTo(expected);
     }
 

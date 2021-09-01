@@ -91,13 +91,13 @@ class ThreadTest {
                 System.out.println("Thread = " + Thread.currentThread().getName());
             }
         };
-        for (int i=0; i<10; i++) {
+        for (int i = 0; i < 10; i++) {
             final Thread thread = new Thread(task);
             thread.start();
         }
 
         ExecutorService service = Executors.newFixedThreadPool(10);
-        for (int i=0; i<10; i++) {
+        for (int i = 0; i < 10; i++) {
             service.submit(task);
         }
 

@@ -7,7 +7,6 @@ import java.io.File;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class FileUtilTest {
 
@@ -22,14 +21,14 @@ class FileUtilTest {
 
         assertThat(readFile).isEqualTo(
                 "<!DOCTYPE html>\r\n" +
-                "<html lang=\"en\">\r\n" +
-                "<head>\r\n" +
-                "    <meta charset=\"UTF-8\">\r\n" +
-                "    <title>Title</title>\r\n" +
-                "</head>\r\n" +
-                "<body>\r\n" +
-                "\r\n" +
-                "</body>\r\n" +
-                "</html>\r\n");
+                        "<html lang=\"en\">\r\n" +
+                        "<head>\r\n" +
+                        "    <meta charset=\"UTF-8\">\r\n" +
+                        "    <title>Title</title>\r\n" +
+                        "</head>\r\n" +
+                        "<body>\r\n" +
+                        "\r\n" +
+                        "</body>\r\n" +
+                        "</html>\r\n");
     }
 }

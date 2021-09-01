@@ -60,7 +60,7 @@ class ReflectionsLibraryTest {
         assertThat(getMappingMethods).contains("showLoginPage", "showRegisterPage");
         assertThat(postMappingMethods).contains("loginUser", "registerUser");
     }
-    
+
     @DisplayName("특정 메서드에 붙은 RequestParameter 어노테이션을 검사할 수 있다.")
     @Test
     void requestParam() throws NoSuchMethodException {

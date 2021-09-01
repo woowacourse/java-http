@@ -18,7 +18,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected String doPost(HttpRequest httpRequest) {
-        RequestParam params = RequestParam.of(httpRequest.payload());
+        RequestParam params = RequestParam.of(httpRequest.body());
         String account = params.get("account");
         String password = params.get("password");
         String email = params.get("email");

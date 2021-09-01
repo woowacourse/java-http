@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
+import nextstep.jwp.Fixture;
 import nextstep.jwp.exception.MethodNotAllowedException;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.ViewResolver;
@@ -14,7 +15,7 @@ class HomeControllerTest {
 
     @Test
     void get() throws IOException {
-        HttpRequest httpRequest = new HttpRequest("GET", "/");
+        HttpRequest httpRequest = Fixture.httpRequest("GET", "/");
 
         String actual = controller.doService(httpRequest);
         assertThat(actual).isEqualTo(ViewResolver.resolveView("index"));
@@ -22,7 +23,7 @@ class HomeControllerTest {
 
     @Test
     void post() {
-        HttpRequest httpRequest = new HttpRequest("POST", "/");
+        HttpRequest httpRequest = Fixture.httpRequest("POST", "/");
 
         assertThatThrownBy(
                 () -> controller.doService(httpRequest)

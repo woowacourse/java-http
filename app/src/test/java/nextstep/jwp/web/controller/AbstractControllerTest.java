@@ -2,6 +2,7 @@ package nextstep.jwp.web.controller;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import nextstep.jwp.Fixture;
 import nextstep.jwp.exception.MethodNotAllowedException;
 import nextstep.jwp.http.HttpRequest;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,7 +25,7 @@ class AbstractControllerTest {
     @ParameterizedTest
     @CsvSource({"PUT", "DELETE", "PATCH"})
     void notAllowedMethod(String method) {
-        HttpRequest httpRequest = new HttpRequest(method, "");
+        HttpRequest httpRequest = Fixture.httpRequest(method, "");
         assertThatThrownBy(
                 () -> controller.doService(httpRequest)
         ).isInstanceOf(MethodNotAllowedException.class);

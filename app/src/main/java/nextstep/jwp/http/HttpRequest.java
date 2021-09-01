@@ -1,43 +1,50 @@
 package nextstep.jwp.http;
 
-import java.util.HashMap;
-import java.util.Map;
+import nextstep.jwp.http.entity.HttpBody;
+import nextstep.jwp.http.entity.HttpHeaders;
+import nextstep.jwp.http.entity.HttpMethod;
+import nextstep.jwp.http.entity.HttpUri;
+import nextstep.jwp.http.entity.HttpVersion;
+import nextstep.jwp.http.entity.RequestLine;
 
 public class HttpRequest {
-    private final String method;
-    private final String uri;
-    private final Map<String, String> headers = new HashMap<>();
-    private String payload;
+    private final HttpMethod method;
+    private final HttpUri uri;
+    private final HttpVersion httpVersion;
+    private final HttpHeaders headers;
+    private final HttpBody httpBody;
 
-    public HttpRequest(String method, String uri) {
+    public HttpRequest(HttpMethod method, HttpUri uri, HttpVersion httpVersion,
+                       HttpHeaders headers, HttpBody httpBody) {
         this.method = method;
-        if (uri == null) {
-            throw new IllegalStateException("uri is null");
-        }
         this.uri = uri;
+        this.httpVersion = httpVersion;
+        this.headers = headers;
+        this.httpBody = httpBody;
     }
 
-    public void addHeader(String name, String value) {
-        this.headers.put(name, value);
+    public static HttpRequest of(RequestLine requestLine, HttpHeaders httpHeaders, HttpBody httpBody) {
+        return new HttpRequest(requestLine.httpMethod(), requestLine.httpUri(), requestLine.httpVersion(), httpHeaders,
+                httpBody);
     }
 
-    public void setPayload(String payload) {
-        this.payload = payload;
-    }
-
-    public String method() {
+    public HttpMethod method() {
         return method;
     }
 
-    public String uri() {
+    public HttpUri uri() {
         return uri;
     }
 
-    public Map<String, String> headers() {
+    public HttpVersion httpVersion() {
+        return httpVersion;
+    }
+
+    public HttpHeaders headers() {
         return headers;
     }
 
-    public String payload() {
-        return payload;
+    public HttpBody body() {
+        return httpBody;
     }
 }

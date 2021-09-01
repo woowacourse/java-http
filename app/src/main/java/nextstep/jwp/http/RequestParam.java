@@ -2,6 +2,7 @@ package nextstep.jwp.http;
 
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.http.entity.HttpBody;
 
 public class RequestParam {
     private final Map<String, String> params;
@@ -20,6 +21,10 @@ public class RequestParam {
             queryMap.put(token[0], token[1]);
         }
         return new RequestParam(queryMap);
+    }
+
+    public static RequestParam of(HttpBody requestBody) {
+        return of(requestBody.body());
     }
 
     public String get(String key) {

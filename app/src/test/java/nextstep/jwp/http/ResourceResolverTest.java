@@ -11,8 +11,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import nextstep.jwp.Fixture;
 import nextstep.jwp.exception.MethodNotAllowedException;
 import nextstep.jwp.exception.NotFoundException;
+import nextstep.jwp.http.entity.HttpUri;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,8 +24,9 @@ class ResourceResolverTest {
 
     @ParameterizedTest
     @CsvSource({"index.html", "js/scripts.js", "css/style.css"})
-    void checkIfUriHasResourceExtension(String uri) {
-        boolean actual = ResourceResolver.checkIfUriHasResourceExtension(uri);
+    void checkIfUriHasResourceExtension(String uriName) {
+        HttpUri httpUri = HttpUri.of(uriName);
+        boolean actual = ResourceResolver.checkIfUriHasResourceExtension(httpUri);
 
         assertTrue(actual);
     }
@@ -31,7 +34,7 @@ class ResourceResolverTest {
     @Test
     @DisplayName("정의되지 않은 리소스 extension - false")
     void checkIfUriHasResourceExtensionFalse() {
-        boolean actual = ResourceResolver.checkIfUriHasResourceExtension("notExtension.notExtension");
+        boolean actual = ResourceResolver.checkIfUriHasResourceExtension(HttpUri.of("notExtension.notExtension"));
 
         assertFalse(actual);
     }
@@ -40,7 +43,7 @@ class ResourceResolverTest {
     @DisplayName("정상 리소스 요청")
     void resolveResourceRequest() throws IOException {
         String uri = "/index.html";
-        HttpRequest httpRequest = new HttpRequest("GET", uri);
+        HttpRequest httpRequest = Fixture.httpRequest("GET", uri);
 
         final URL resource = ResourceResolver.class.getClassLoader().getResource("static" + uri);
         final Path path = new File(Objects.requireNonNull(resource).getPath()).toPath();
@@ -55,9 +58,9 @@ class ResourceResolverTest {
 
     @Test
     @DisplayName("존재 하지 않는 리소스 요청 - 에러 발생")
-    void resolveResourceRequestNotExisting(){
+    void resolveResourceRequestNotExisting() {
         String uri = "/notExisting.html";
-        HttpRequest httpRequest = new HttpRequest("GET", uri);
+        HttpRequest httpRequest = Fixture.httpRequest("GET", uri);
 
         assertThatThrownBy(
                 () -> ResourceResolver.resolveResourceRequest(httpRequest)
@@ -68,7 +71,7 @@ class ResourceResolverTest {
     @DisplayName("Post 리소스 요청 - 에러 발생")
     void resolveResourceRequestWithPost() {
         String uri = "/index.html";
-        HttpRequest httpRequest = new HttpRequest("POST", uri);
+        HttpRequest httpRequest = Fixture.httpRequest("POST", uri);
 
         assertThatThrownBy(
                 () -> ResourceResolver.resolveResourceRequest(httpRequest)

@@ -3,10 +3,8 @@ package nextstep.jwp.http;
 import static nextstep.jwp.http.ResourceResolver.checkIfUriHasResourceExtension;
 import static nextstep.jwp.http.ResourceResolver.resolveResourceRequest;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
@@ -32,10 +30,9 @@ public class RequestHandler implements Runnable {
                 connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
-                final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                 final OutputStream outputStream = connection.getOutputStream()) {
 
-            HttpRequest httpRequest = extractHttpRequest(reader);
+            HttpRequest httpRequest = HttpRequestReader.read(inputStream);
 
             String response = handle(httpRequest);
 
@@ -63,33 +60,6 @@ public class RequestHandler implements Runnable {
         } catch (Exception exception) {
             return ControllerAdvice.handle(exception);
         }
-    }
-
-    private HttpRequest extractHttpRequest(BufferedReader reader) throws IOException {
-        String requestLine = reader.readLine();
-
-        String[] tokens = requestLine.split(" ");
-        String method = tokens[0];
-        String uri = tokens[1];
-
-        HttpRequest httpRequest = new HttpRequest(method, uri);
-
-        String line = reader.readLine();
-        while (!"".equals(line)) {
-            String[] splits = line.split(": ", 2);
-            String name = splits[0];
-            String value = splits[1];
-            httpRequest.addHeader(name, value);
-            line = reader.readLine();
-        }
-
-        if (httpRequest.headers().containsKey("Content-Length")) {
-            int contentLength = Integer.parseInt(httpRequest.headers().get("Content-Length"));
-            char[] buffer = new char[contentLength];
-            reader.read(buffer, 0, contentLength);
-            httpRequest.setPayload(new String(buffer));
-        }
-        return httpRequest;
     }
 
     private void close() {

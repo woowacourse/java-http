@@ -28,4 +28,12 @@ public class HttpUri {
     public String queryString() {
         return queryString;
     }
+
+    public boolean endsWith(String suffix) {
+        return path.endsWith(suffix);
+    }
+
+    public boolean hasPathOf(String path) {
+        return this.path.equals(path);
+    }
 }

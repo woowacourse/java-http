@@ -3,6 +3,7 @@ package nextstep.jwp.web.controller;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import nextstep.jwp.Fixture;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.ViewResolver;
@@ -16,7 +17,7 @@ class LoginControllerTest {
 
     @Test
     void get() throws IOException {
-        HttpRequest httpRequest = new HttpRequest("GET", "/login");
+        HttpRequest httpRequest = Fixture.httpRequest("GET", "/login");
 
         String actual = controller.doService(httpRequest);
         assertThat(actual).isEqualTo(ViewResolver.resolveView("login"));
@@ -29,8 +30,7 @@ class LoginControllerTest {
 
         InMemoryUserRepository.save(new User(null, account, password, "email@email.com"));
 
-        HttpRequest httpRequest = new HttpRequest("POST", "/login");
-        httpRequest.setPayload("account=" + account + "&password=" + password);
+        HttpRequest httpRequest = Fixture.httpRequest("POST", "/login", "account=" + account + "&password=" + password);
 
         String actual = controller.doService(httpRequest);
         assertThat(actual).isEqualTo(HttpResponse.found("/index.html"));

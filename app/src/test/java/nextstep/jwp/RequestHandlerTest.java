@@ -36,8 +36,8 @@ class RequestHandlerTest {
 
         String expected = String.join("\r\n",
                 "HTTP/1.1 " + "200 OK" + " ",
-                "Content-Type: " + "text/html" + ";charset=utf-8 ",
                 "Content-Length: " + result.getBytes().length + " ",
+                "Content-Type: " + "text/html" + ";charset=utf-8 ",
                 "", result);
 
         assertThat(socket.output()).isEqualTo(expected);
@@ -71,8 +71,8 @@ class RequestHandlerTest {
 
         String expected = String.join("\r\n",
                 "HTTP/1.1 " + "200 OK" + " ",
-                "Content-Type: " + "text/html" + ";charset=utf-8 ",
                 "Content-Length: " + result.getBytes().length + " ",
+                "Content-Type: " + "text/html" + ";charset=utf-8 ",
                 "", result);
 
         assertThat(socket.output()).isEqualTo(expected);

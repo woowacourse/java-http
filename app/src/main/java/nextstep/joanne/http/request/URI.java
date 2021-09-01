@@ -1,8 +1,11 @@
 package nextstep.joanne.http.request;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class URI {
     private final String pathUri;
@@ -40,6 +43,12 @@ public class URI {
         if (index < 0) {
             return null;
         }
+
+        // TODO 이걸로 변경해보기
+//        Stream.of(Arrays.stream(uri.split("&", 2))
+//                .map(x -> x.split("="))
+//                .collect(Collectors.toMap(x -> x[0], x-> x[1])));
+
         String strQueryString = uri.substring(index + 1);
         HashMap<String, String> tempQueryString = new HashMap<>();
         if (!strQueryString.isBlank()) {

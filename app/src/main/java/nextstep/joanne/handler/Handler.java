@@ -16,6 +16,7 @@ public class Handler {
         this.httpRequest = httpRequest;
     }
 
+    // uriContains 대신 uriStartsWith로 변경하기
     public HttpResponse handle() {
         if (httpRequest.uriContains("index")) {
             return ResourceTemplate.doPage(HttpStatus.OK, httpRequest.resourceUri());

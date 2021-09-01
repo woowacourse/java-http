@@ -14,7 +14,6 @@ import nextstep.jwp.util.ParamExtractor;
 
 public class LoginController extends AbstractController {
 
-    private static final String LOGIN_PATH = "/login";
     private static final String LOGIN_RESOURCE_PATH = "/login.html";
 
     @Override
@@ -40,10 +39,5 @@ public class LoginController extends AbstractController {
         } catch (RuntimeException e) {
             return HttpResponse.redirect("/401.html");
         }
-    }
-
-    @Override
-    protected String requestURI() {
-        return LOGIN_PATH;
     }
 }

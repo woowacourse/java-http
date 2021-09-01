@@ -15,9 +15,4 @@ public class StaticResourceController implements Controller {
         final RequestLine requestLine = request.getRequestLine();
         return HttpResponse.of(HttpStatus.OK, requestLine.getRequestURI());
     }
-
-    @Override
-    public boolean matchRequest(HttpRequest request) {
-        return false;
-    }
 }

@@ -11,9 +11,4 @@ public class DefaultController extends AbstractController {
     public HttpResponse process(HttpRequest request) {
         return HttpResponse.of(HttpStatus.OK, new Body("Hello World!"));
     }
-
-    @Override
-    protected String requestURI() {
-        return "/";
-    }
 }

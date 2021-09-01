@@ -13,18 +13,11 @@ public abstract class AbstractController implements Controller {
         return doPost(request);
     }
 
-    @Override
-    public boolean matchRequest(HttpRequest request) {
-        return request.matchURI(requestURI());
-    }
-
     protected HttpResponse doGet(HttpRequest request) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     protected HttpResponse doPost(HttpRequest request) {
-        return null;
+        throw new UnsupportedOperationException();
     }
-
-    protected abstract String requestURI();
 }

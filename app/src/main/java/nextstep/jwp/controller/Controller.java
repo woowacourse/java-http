@@ -8,6 +8,4 @@ public interface Controller {
 
     HttpResponse process(HttpRequest request) throws IOException;
 
-    boolean matchRequest(HttpRequest request);
-
 }

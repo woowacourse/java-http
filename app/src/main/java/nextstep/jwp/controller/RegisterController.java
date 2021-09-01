@@ -16,7 +16,6 @@ import nextstep.jwp.util.ParamExtractor;
 
 public class RegisterController extends AbstractController {
 
-    private static final String REGISTER_PATH = "/register";
     private static final String REGISTER_RESOURCE_PATH = "/register.html";
 
     @Override
@@ -36,10 +35,5 @@ public class RegisterController extends AbstractController {
         InMemoryUserRepository.save(user);
 
         return HttpResponse.redirect(INDEX_RESOURCE_PATH);
-    }
-
-    @Override
-    protected String requestURI() {
-        return REGISTER_PATH;
     }
 }

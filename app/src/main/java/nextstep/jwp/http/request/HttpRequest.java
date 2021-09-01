@@ -20,16 +20,11 @@ public class HttpRequest {
     }
 
     public static HttpRequest parse(BufferedReader bufferedReader) throws IOException {
-
         RequestLine requestLine = RequestLine.parse(bufferedReader.readLine());
         HttpHeaders headers = HttpHeaders.parse(bufferedReader);
         Body body = Body.parse(bufferedReader, headers);
 
         return new HttpRequest(requestLine, headers, body);
-    }
-
-    public boolean matchURI(String uri) {
-        return requestLine.matchURI(uri);
     }
 
     public boolean isGet() {

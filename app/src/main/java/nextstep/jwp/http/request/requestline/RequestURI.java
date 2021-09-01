@@ -2,6 +2,7 @@ package nextstep.jwp.http.request.requestline;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import nextstep.jwp.util.ParamExtractor;
 
 public class RequestURI {
@@ -34,5 +35,22 @@ public class RequestURI {
 
     public String getRequestURI() {
         return requestURI;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        RequestURI that = (RequestURI) o;
+        return Objects.equals(requestURI, that.requestURI);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(requestURI);
     }
 }

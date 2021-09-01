@@ -29,10 +29,6 @@ public class RequestLine {
         return new RequestLine(method, requestURI, httpVersion);
     }
 
-    public boolean matchURI(String uri) {
-        return uri.equals(requestURI.getRequestURI());
-    }
-
     public RequestURI getRequestURI() {
         return requestURI;
     }

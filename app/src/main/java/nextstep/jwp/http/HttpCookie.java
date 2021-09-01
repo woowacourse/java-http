@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpCookie {
+
     private final int KEY_INDEX = 0;
     private final int VALUE_INDEX = 1;
     private final int PARAM_LENGTH = 2;

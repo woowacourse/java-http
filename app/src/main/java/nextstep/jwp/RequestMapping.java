@@ -19,10 +19,10 @@ public class RequestMapping {
         controllerMap.put("/register", new RegisterController());
     }
 
-    public static Controller getController(HttpRequest request) {
-        return controllerMap.getOrDefault(request.getRequestURI(), new HomeController());
+    private RequestMapping() {
     }
 
-    private RequestMapping() {
+    public static Controller getController(HttpRequest request) {
+        return controllerMap.getOrDefault(request.getRequestURI(), new HomeController());
     }
 }

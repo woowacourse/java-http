@@ -12,6 +12,10 @@ public class HttpSessions {
 
     private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
 
+    private HttpSessions() {
+
+    }
+
     public static HttpSession getSession(String id) {
         HttpSession httpSession = SESSIONS.get(id);
         if (Objects.isNull(httpSession)) {
@@ -24,10 +28,6 @@ public class HttpSessions {
 
     public static void remove(String id) {
         SESSIONS.remove(id);
-    }
-
-    private HttpSessions() {
-
     }
 
     public static void setAttribute(String id, HttpSession httpSession) {

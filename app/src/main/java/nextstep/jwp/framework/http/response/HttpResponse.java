@@ -52,4 +52,20 @@ public class HttpResponse {
                 responseHttpHeader.generateResponse(),
                 responseBody.getContent());
     }
+
+    public ProtocolVersion getProtocolVersion() {
+        return protocolVersion;
+    }
+
+    public ResponseStatus getResponseStatus() {
+        return responseStatus;
+    }
+
+    public ResponseHttpHeader getResponseHttpHeader() {
+        return responseHttpHeader;
+    }
+
+    public ResponseBody getResponseBody() {
+        return responseBody;
+    }
 }

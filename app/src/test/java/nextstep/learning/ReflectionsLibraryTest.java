@@ -1,4 +1,4 @@
-package nextstep.jwp.framework.manager;
+package nextstep.learning;
 
 import nextstep.jwp.application.controller.UserController;
 import nextstep.jwp.framework.manager.annotation.Controller;

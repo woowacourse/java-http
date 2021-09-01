@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 public class DynamicWebManager {
 
+    private static final String APPLICATION_PATH = "nextstep.jwp.application";
     private static final Logger log = LoggerFactory.getLogger(DynamicWebManager.class);
 
     private final Set<Object> controllers = new HashSet<>();
@@ -30,7 +31,7 @@ public class DynamicWebManager {
     }
 
     private void initializeControllers() {
-        final Reflections reflections = new Reflections("nextstep.jwp.application");
+        final Reflections reflections = new Reflections(APPLICATION_PATH);
         final Set<Class<?>> annotatedControllers = reflections.getTypesAnnotatedWith(Controller.class);
         for (Class<?> controller : annotatedControllers) {
             registerController(controller);

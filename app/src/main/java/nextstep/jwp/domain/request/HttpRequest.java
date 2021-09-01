@@ -95,8 +95,4 @@ public class HttpRequest {
     public HttpCookie getHttpCookie() {
         return httpCookie;
     }
-
-    public void setSession(HttpSession httpSession) {
-        this.httpSession = httpSession;
-    }
 }

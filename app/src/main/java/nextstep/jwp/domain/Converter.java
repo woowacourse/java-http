@@ -47,7 +47,7 @@ public class Converter {
         Map<String, String> headers = new LinkedHashMap<>();
         for (int i = 1; i < splitRequestHeaders.length; i++) {
             String[] split = splitRequestHeaders[i].split(": ");
-            headers.put(split[0], split[1]);
+            headers.put(split[0].trim(), split[1].trim());
 
         }
         return headers;

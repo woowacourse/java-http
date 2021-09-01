@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.google.common.net.HttpHeaders.CONTENT_LENGTH;
-import static nextstep.jwp.http.HttpCookie.J_SESSION_ID;
+import static nextstep.jwp.http.HttpCookie.JSESSIONID;
 import static nextstep.jwp.http.HttpUtil.parseQuery;
 
 public class HttpRequest {
@@ -93,6 +93,6 @@ public class HttpRequest {
     }
 
     public HttpSession getSession() {
-        return HttpSessions.getSession(getCookies().getCookie(J_SESSION_ID));
+        return HttpSessions.getSession(getCookies().getCookie(JSESSIONID));
     }
 }

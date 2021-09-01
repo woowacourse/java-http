@@ -5,6 +5,9 @@ import nextstep.jwp.service.UserService;
 
 public class ApplicationContext {
 
+    private ApplicationContext() {
+    }
+
     public static UserService userService() {
         return new UserService();
     }

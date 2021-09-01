@@ -2,10 +2,9 @@ package nextstep.jwp.http;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 public class HttpCookie {
-    public static String J_SESSION_ID = "JSESSIONID";
+    public static final String JSESSIONID = "JSESSIONID";
 
     private Map<String, String> cookies;
 

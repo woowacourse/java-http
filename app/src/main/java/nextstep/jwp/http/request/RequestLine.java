@@ -1,8 +1,7 @@
 package nextstep.jwp.http.request;
 
 import nextstep.jwp.http.HttpMethod;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import nextstep.jwp.http.exception.HttpFormatException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +9,6 @@ import java.util.Map;
 import static nextstep.jwp.http.HttpUtil.parseQuery;
 
 public class RequestLine {
-    private static final Logger log = LoggerFactory.getLogger(RequestLine.class);
 
     private HttpMethod httpMethod;
     private String path;
@@ -26,22 +24,24 @@ public class RequestLine {
         String[] tokens = requestLine.split(" ");
 
         if (tokens.length != 3) {
-            throw new RuntimeException();
+            throw new HttpFormatException();
         }
 
         String method = tokens[0];
         HttpMethod httpMethod = HttpMethod.valueOf(method);
-        String path = path = tokens[1];
+        String path = tokens[1];
         if ("POST".equals(method)) {
             return new RequestLine(httpMethod, path, new HashMap<>());
         }
 
         int index = tokens[1].indexOf("?");
         Map<String, String> params = new HashMap<>();
+
         if (index != -1) {
             path = tokens[1].substring(0, index);
             params = parseQuery(tokens[1].substring(index + 1));
         }
+
         return new RequestLine(httpMethod, path, params);
     }
 
@@ -51,5 +51,9 @@ public class RequestLine {
 
     public String getPath() {
         return path;
+    }
+
+    public String getQueryParam(String key) {
+        return params.get(key);
     }
 }

@@ -20,10 +20,11 @@ public class AbstractController implements Controller{
     }
 
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+        throw new UnsupportedOperationException();
     }
 
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
-
+        throw new UnsupportedOperationException();
     }
 
     protected User getUser(HttpSession session) {
@@ -36,9 +37,6 @@ public class AbstractController implements Controller{
 
     protected boolean isLogin(HttpSession httpSession) {
         Object user = getUser(httpSession);
-        if (user == null) {
-            return false;
-        }
-        return true;
+        return user != null;
     }
 }

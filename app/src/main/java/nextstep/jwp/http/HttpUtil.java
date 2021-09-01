@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpUtil {
+    private HttpUtil() {
+    }
+
     public static Map<String, String> parseQuery(String query) {
         Map<String, String> queryMap = new HashMap<>();
 

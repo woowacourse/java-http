@@ -5,7 +5,6 @@ import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.controller.RequestMapping;
-import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +15,7 @@ import java.net.Socket;
 import java.util.Objects;
 import java.util.UUID;
 
-import static nextstep.jwp.http.HttpCookie.J_SESSION_ID;
+import static nextstep.jwp.http.HttpCookie.JSESSIONID;
 
 public class RequestHandler implements Runnable {
 
@@ -24,11 +23,8 @@ public class RequestHandler implements Runnable {
 
     private final Socket connection;
 
-    private final UserService userService;
-
-    public RequestHandler(Socket connection, UserService userService) {
+    public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
-        this.userService = userService;
     }
 
     @Override
@@ -58,12 +54,12 @@ public class RequestHandler implements Runnable {
 
     private void setCookie(HttpRequest httpRequest, HttpResponse httpResponse) {
         HttpCookie httpCookie = httpRequest.getCookies();
-        if (httpCookie.getCookie(J_SESSION_ID) != null) {
-            httpResponse.addHeader("Set-Cookie", J_SESSION_ID+"="+httpCookie.getCookie(J_SESSION_ID));
+        if (httpCookie.getCookie(JSESSIONID) != null) {
+            httpResponse.addHeader("Set-Cookie", JSESSIONID +"="+httpCookie.getCookie(JSESSIONID));
             return;
         }
 
-        httpResponse.addHeader("Set-Cookie", J_SESSION_ID+"="+ UUID.randomUUID());
+        httpResponse.addHeader("Set-Cookie", JSESSIONID +"="+ UUID.randomUUID());
     }
 
     private String getDefaultPath(String path) {

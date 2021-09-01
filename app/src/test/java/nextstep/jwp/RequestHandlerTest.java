@@ -16,7 +16,7 @@ class RequestHandlerTest {
     void run() {
         // given
         final MockSocket socket = new MockSocket();
-        final RequestHandler requestHandler = new RequestHandler(socket, new UserService());
+        final RequestHandler requestHandler = new RequestHandler(socket);
 
         // when
         requestHandler.run();
@@ -42,7 +42,7 @@ class RequestHandlerTest {
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, new UserService());
+        final RequestHandler requestHandler = new RequestHandler(socket);
 
         // when
         requestHandler.run();

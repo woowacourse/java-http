@@ -26,7 +26,6 @@ public class  HttpResponse {
     }
 
     public void ok(String resourcePath) {
-        System.out.println(resourcePath);
         URL resource = HttpResponse.class.getClassLoader().getResource("static" + resourcePath);
         try {
             Path path = new File(resource.getPath()).toPath();

@@ -12,16 +12,14 @@ public class HttpSession {
 
     private final String id;
     private final Map<String, Object> values;
-    private boolean isNew;
 
     public HttpSession() {
-        this(UUID.randomUUID().toString(), new HashMap<>(), true);
+        this(UUID.randomUUID().toString(), new HashMap<>());
     }
 
-    public HttpSession(String id, Map<String, Object> values, boolean isNew) {
+    public HttpSession(String id, Map<String, Object> values) {
         this.id = StringUtils.requireNonBlank(id);
         this.values = new HashMap<>(values);
-        this.isNew = isNew;
     }
 
     public String getId() {
@@ -29,11 +27,7 @@ public class HttpSession {
     }
 
     public void setAttribute(String name, Object value) {
-        if (isNew) {
-            HttpSessions.putSession(id, this);
-        }
-
-        isNew = false;
+        HttpSessions.putIfAbsent(id, this);
         values.put(name, value);
     }
 

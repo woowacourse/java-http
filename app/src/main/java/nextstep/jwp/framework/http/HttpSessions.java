@@ -13,7 +13,7 @@ public class HttpSessions {
         return SESSIONS.getOrDefault(id, httpSession);
     }
 
-    public static void putSession(String id, HttpSession httpSession) {
-        SESSIONS.put(id, httpSession);
+    public static void putIfAbsent(String id, HttpSession httpSession) {
+        SESSIONS.putIfAbsent(id, httpSession);
     }
 }

@@ -74,7 +74,9 @@ public class HttpResponseImpl implements HttpResponse {
     @Override
     public void addCookie(HttpCookie cookie) {
         this.cookies.addCookie(cookie);
-        this.headers.addHeader(SET_COOKIE, cookies.asString());
+        this.headers.getHeaderByName(SET_COOKIE)
+            .ifPresentOrElse(it -> headers.addHeader(SET_COOKIE, it + "; " + cookie.asString()),
+                () -> headers.addHeader(SET_COOKIE, cookies.asString()));
     }
 
     @Override

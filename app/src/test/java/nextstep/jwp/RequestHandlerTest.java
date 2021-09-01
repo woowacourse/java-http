@@ -2,12 +2,11 @@ package nextstep.jwp;
 
 import nextstep.jwp.context.ApplicationContext;
 import nextstep.jwp.context.ApplicationContextImpl;
-import nextstep.jwp.dispatcher.adapter.HandlerAdapter;
 import nextstep.jwp.dispatcher.adapter.HandlerAdapterFactory;
 import nextstep.jwp.dispatcher.mapping.HandlerMappingFactory;
 import nextstep.project.presentation.HelloWorldController;
 import nextstep.project.presentation.RegisterController;
-import nextstep.project.presentation.UserController;
+import nextstep.project.presentation.LoginController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +25,7 @@ class RequestHandlerTest {
     void setUp() {
         applicationContext = new ApplicationContextImpl();
         applicationContext.addHandler("/", new HelloWorldController());
-        applicationContext.addHandler("/login", new UserController());
+        applicationContext.addHandler("/login", new LoginController());
         applicationContext.addHandler("/register", new RegisterController());
     }
 

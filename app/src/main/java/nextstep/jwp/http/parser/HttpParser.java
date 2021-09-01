@@ -6,14 +6,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import nextstep.jwp.context.ApplicationContext;
 import nextstep.jwp.exception.InternalServerErrorException;
 import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.message.HttpCookie;
 import nextstep.jwp.http.message.HttpCookies;
 import nextstep.jwp.http.message.HttpHeaders;
 import nextstep.jwp.http.message.HttpMethod;
 import nextstep.jwp.http.message.HttpRequestLine;
+import nextstep.jwp.http.session.HttpSession;
+import nextstep.jwp.http.session.HttpSessions;
 
 public class HttpParser {
 
@@ -58,6 +62,7 @@ public class HttpParser {
     }
 
     static class HttpRequestImpl implements HttpRequest {
+        private static final String SESSION_ID = "JSESSIONID";
 
         private HttpHeaders headers;
         private HttpRequestLine requestLine;
@@ -127,6 +132,18 @@ public class HttpParser {
         @Override
         public HttpCookies getCookies() {
             return cookies;
+        }
+
+        @Override
+        public Optional<HttpSession> getSession() {
+            HttpCookie cookie = cookies.findByName(SESSION_ID)
+                .orElse(null);
+
+            if (Objects.isNull(cookie)) {
+                return Optional.empty();
+            }
+
+            return Optional.ofNullable(HttpSessions.getSession(cookie.getValue()));
         }
 
         @Override

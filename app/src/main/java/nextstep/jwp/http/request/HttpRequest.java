@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.http.HttpCookie;
+import nextstep.jwp.http.HttpSession;
+import nextstep.jwp.http.HttpSessions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,6 +25,7 @@ public class HttpRequest {
     private RequestURI requestURI;
     private requestHeader requestHeader;
     private RequestBody requestBody;
+    private HttpSession httpSession;
 
     public HttpRequest(BufferedReader bufferedReader) throws IOException {
         try {
@@ -81,5 +85,19 @@ public class HttpRequest {
 
     public boolean isPost() {
         return httpMethod.isPost();
+    }
+
+    public HttpSession getSession() {
+        return httpSession;
+    }
+
+    public void setSession(String id) {
+        this.httpSession = HttpSessions.getSession(id);
+        HttpSessions.setAttribute(id, this.httpSession);
+    }
+
+    public String getId() {
+        HttpCookie httpCookie = this.requestHeader.getCookie();
+        return httpCookie.getAttribute("JSESSIONID");
     }
 }

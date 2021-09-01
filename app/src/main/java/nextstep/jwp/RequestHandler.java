@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.HelloController;
 import nextstep.jwp.controller.HomeController;
@@ -48,12 +49,15 @@ public class RequestHandler implements Runnable {
 
             requestHeader header = httpRequest.getHttpHeader();
             HttpCookie httpCookie = header.getCookie();
-            String jsessionId = httpCookie.getAttribute("JSESSIONID");
-            log.debug("JSESSIONID = {}", jsessionId);
-            if (jsessionId == null) {
-                httpResponse.setCookie();
+            String jSessionId = httpCookie.getAttribute("JSESSIONID");
+            log.debug("JSESSIONID = {}", jSessionId);
+            if (jSessionId == null) {
+                UUID uuid = UUID.randomUUID();
+                jSessionId = uuid.toString();
+                httpResponse.setCookie(jSessionId);
             }
 
+            httpRequest.setSession(jSessionId);
             Controller controller = controllerMap
                 .getOrDefault(httpRequest.getRequestURI(), new HomeController());
             controller.process(httpRequest, httpResponse);

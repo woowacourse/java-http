@@ -47,7 +47,7 @@ public class ResponseHeader {
         return joiner.toString();
     }
 
-    public void setCookie(UUID uuid) {
-        this.headers.put("Set-Cookie", "JSESSIONID=" + uuid.toString());
+    public void setCookie(String jSessionId) {
+        this.headers.put("Set-Cookie", "JSESSIONID=" + jSessionId);
     }
 }

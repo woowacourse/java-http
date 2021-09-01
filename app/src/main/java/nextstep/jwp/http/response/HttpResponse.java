@@ -86,8 +86,7 @@ public class HttpResponse {
             responseBody.toString());
     }
 
-    public void setCookie() {
-        UUID uuid = UUID.randomUUID();
-        this.responseHeader.setCookie(uuid);
+    public void setCookie(String jsessionid) {
+        this.responseHeader.setCookie(jsessionid);
     }
 }

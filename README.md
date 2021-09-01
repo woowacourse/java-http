@@ -22,5 +22,5 @@
 - [x] HTTP 응답을 처리하는 클래스 분리
 - [x] Controller 인터페이스 추가
   - [x] url 경로에 따른 if절 분기 제거
-- [ ] Cookie에 JSESSIONID 값 저장
+- [x] Cookie 구현하기
 - [ ] Session 구현하기

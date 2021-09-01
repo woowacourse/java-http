@@ -16,8 +16,8 @@
 - [x] HttpResponse의 형태로 변환해서 응답한다.
 
 ## 2단계 - 리팩토링 요구사항
-- [ ] RequestLine 클래스를 이용해 HttpRequest 리팩토링
-- [ ] Add Interface Of Controller
+- [x] RequestLine 클래스를 이용해 HttpRequest 리팩토링
+- [x] Add Interface Of Controller
 
 ## 3단계 - 요구사항
 - [ ] Cookie에 JSESSION값 저장하기

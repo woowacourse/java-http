@@ -7,7 +7,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import nextstep.jwp.RequestHandler;
 import nextstep.jwp.http.reponse.HttpResponse;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.servlet.StaticResourceServlet;
@@ -36,9 +35,9 @@ public class ServletContainer {
         try {
             Servlet servlet = findServletByRequestURI(httpRequest.getRequestURI());
             servlet.service(httpRequest, httpResponse);
-        } catch (Exception e){
+        } catch (Exception e) {
             log.error("uri에 매핑되는 서블릿이 존재하지 않습니다. 에러 메세지");
-           httpResponse.sendRedirect("/500.html");
+            httpResponse.sendRedirect("/500.html");
         }
     }
 

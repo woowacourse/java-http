@@ -13,8 +13,12 @@ public class RequestLine {
     }
 
     public static RequestLine createFromBufferedReader(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
         String requestLine = bufferedReader.readLine();
+        return RequestLine.createFromPlainText(requestLine);
+    }
+
+    public static RequestLine createFromPlainText(String requestLine) {
+        Map<String, String> headers = new HashMap<>();
         String[] splitRequestLine = requestLine.split(" ");
         headers.put("httpMethod", splitRequestLine[0]);
         headers.put("uri", splitRequestLine[1]);
@@ -28,5 +32,9 @@ public class RequestLine {
 
     public Boolean isEmpty() {
         return headers.isEmpty();
+    }
+
+    public String getMethod() {
+        return headers.get("httpMethod");
     }
 }

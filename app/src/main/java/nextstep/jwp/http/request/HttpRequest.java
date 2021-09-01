@@ -9,6 +9,7 @@ public class HttpRequest {
     private final RequestLine requestLine;
     private final RequestHeader requestHeader;
     private final RequestBody requestBody;
+    ;
 
     public HttpRequest(RequestLine requestLine, RequestHeader requestHeader, RequestBody requestBody) {
         this.requestLine = requestLine;
@@ -29,11 +30,23 @@ public class HttpRequest {
         return this.requestLine.get(requestLineName);
     }
 
+    public String getBody() {
+        return requestBody.getRequestBody();
+    }
+
+    public String getUri() {
+        return requestLine.get("uri");
+    }
+
     public boolean isEmpty() {
         return requestLine.isEmpty();
     }
 
-    public String getBody() {
-        return requestBody.getRequestBody();
+    public boolean isPost() {
+        return this.requestLine.getMethod().equals("POST");
+    }
+
+    public boolean isGet() {
+        return this.requestLine.getMethod().equals("GET");
     }
 }

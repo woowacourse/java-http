@@ -12,7 +12,6 @@ public class RequestHeader {
         this.headers = headers;
     }
 
-
     public static RequestHeader createFromBufferedReader(BufferedReader bufferedReader) throws IOException {
         final Map<String, String> headers = new HashMap<>();
         while (bufferedReader.ready()) {

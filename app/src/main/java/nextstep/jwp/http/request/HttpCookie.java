@@ -23,6 +23,6 @@ public class HttpCookie {
     }
 
     public Optional<String> valueFromKey(String key) {
-        return Optional.of(cookies.getOrDefault(key, null));
+        return Optional.ofNullable(cookies.getOrDefault(key, null));
     }
 }

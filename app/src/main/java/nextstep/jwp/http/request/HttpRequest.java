@@ -74,4 +74,12 @@ public class HttpRequest {
     public String resourceType() {
         return httpRequestHeader.resourceType();
     }
+
+    public HttpRequestHeader getHttpRequestHeader() {
+        return httpRequestHeader;
+    }
+
+    public HttpRequestBody getHttpRequestBody() {
+        return httpRequestBody;
+    }
 }

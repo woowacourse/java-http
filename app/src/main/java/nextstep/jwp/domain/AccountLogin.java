@@ -5,11 +5,11 @@ import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 
-public class Login {
+public class AccountLogin {
 
     private Map<String, String> query;
 
-    public Login(Map<String, String> query) {
+    public AccountLogin(Map<String, String> query) {
         this.query = query;
     }
 

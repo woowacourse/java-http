@@ -13,4 +13,4 @@
 
 ## 쿠키 및 세션 구현
 - [x] Cookie JSESSIONID 값 저장하기
-- [] Session 구현하기
+- [x] Session 구현하기

@@ -139,8 +139,9 @@ class RequestHandlerTest {
                 HttpStatus.FOUND,
                 "/index.html"
         );
+        final String[] messageByLine = socket.output().split("\r\n");
 
-        assertThat(socket.output()).isEqualTo(expected.toResponseMessage());
+        assertThat(messageByLine[0] + "\r\n" + messageByLine[1] + "\r\n").isEqualTo(expected.toResponseMessage());
     }
 
     @DisplayName("register post 요청이 왔을 때, 요청을 처리한 후 index.html페이지로 리다이렉트 한다")

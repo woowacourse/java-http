@@ -100,7 +100,7 @@ public class HttpResponse {
         );
 
         if (Objects.nonNull(jSession)) {
-            header += String.format(COOKIE_FORMAT, jSession) + "\r\n";
+            header += String.format(COOKIE_FORMAT, jSession);
         }
 
         return header;

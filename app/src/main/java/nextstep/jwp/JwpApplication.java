@@ -4,7 +4,8 @@ public class JwpApplication {
 
     public static void main(String[] args) {
         int port = WebServer.defaultPortIfNull(args);
-        final WebServer webServer = new WebServer(port);
+        final Assembler container = new Assembler();
+        final WebServer webServer = new WebServer(port, container);
         webServer.run();
     }
 }

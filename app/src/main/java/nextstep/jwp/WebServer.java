@@ -12,18 +12,20 @@ public class WebServer {
 
     private static final Logger logger = LoggerFactory.getLogger(WebServer.class);
 
-    private static final int DEFAULT_PORT = 8080;
+    private static final int DEFAULT_PORT = ServerConfig.DEFAULT_PORT;
 
     private final int port;
+    private final Assembler container;
 
-    public WebServer(int port) {
+    public WebServer(int port, Assembler container) {
         this.port = checkPort(port);
+        this.container = container;
     }
 
     public void run() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             logger.info("Web Server started {} port.", serverSocket.getLocalPort());
-            handle(serverSocket);
+            handle(serverSocket, container.dispatcher());
         } catch (IOException exception) {
             logger.error("Exception accepting connection", exception);
         } catch (RuntimeException exception) {
@@ -31,10 +33,11 @@ public class WebServer {
         }
     }
 
-    private void handle(ServerSocket serverSocket) throws IOException {
+    private void handle(ServerSocket serverSocket, Dispatcher dispatcher) throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection)).start();
+            Thread thread = new Thread(new RequestHandler(connection, dispatcher));
+            thread.start();
         }
     }
 

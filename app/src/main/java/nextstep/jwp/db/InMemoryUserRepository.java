@@ -26,7 +26,6 @@ public class InMemoryUserRepository {
 
     public static void save(User user) {
         validateExist(user);
-
         User persistUser = createNewObject(user);
         DATABASE.put(persistUser.getAccount(), persistUser);
         LOG.info("유저 저장됨: {}", persistUser);

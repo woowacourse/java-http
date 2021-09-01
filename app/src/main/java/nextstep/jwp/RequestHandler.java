@@ -1,8 +1,10 @@
 package nextstep.jwp;
 
+import nextstep.jwp.controller.dto.UserRequest;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.httpmessage.*;
 import nextstep.jwp.model.User;
+import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +38,7 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream()) {
             final HttpRequest httpRequest = new HttpRequest(new HttpMessageReader(inputStream));
             final HttpResponse httpResponse = new HttpResponse();
+            final UserService userService = new UserService();
 
             final String extractedUri = httpRequest.getPath();
             final HttpMethod extractedMethod = httpRequest.getHttpMethod();
@@ -79,7 +82,7 @@ public class RequestHandler implements Runnable {
             if ("/login".equals(extractedUri)) {
                 if (HttpMethod.POST.equals(extractedMethod)) {
                     try {
-                        loginRequest(httpRequest);
+                        userService.login(new UserRequest(httpRequest.getParameter("account"), httpRequest.getParameter("password")));
                         writeHttpResponseWithRedirect(httpResponse, getPathWithOrigin(httpRequest, "/index.html"));
                         writeOutputStream(outputStream, httpResponse.getHttpMessage());
                     } catch (RuntimeException exception) {
@@ -96,7 +99,7 @@ public class RequestHandler implements Runnable {
             if ("/register".equals(extractedUri)) {
                 if (HttpMethod.POST.equals(extractedMethod)) {
                     try {
-                        registerRequest(httpRequest);
+                        userService.register(new UserRequest(httpRequest.getParameter("account"), httpRequest.getParameter("password"), httpRequest.getParameter("email")));
                         writeHttpResponseWithRedirect(httpResponse, getPathWithOrigin(httpRequest, "/index.html"));
                         writeOutputStream(outputStream, httpResponse.getHttpMessage());
                     } catch (RuntimeException exception) {
@@ -121,29 +124,6 @@ public class RequestHandler implements Runnable {
 
     private String getPathWithOrigin(HttpRequest httpRequest, String uri) {
         return "http://" + httpRequest.getHeader("Host") + uri;
-    }
-
-    private String loginRequest(HttpRequest httpRequest) {
-        final User user = findUserByAccount(httpRequest.getParameter("account"));
-        if (user.checkPassword(httpRequest.getParameter("password"))) {
-            return user.toString();
-        }
-        LOG.info("옳지 않은 비밀번호입니다.");
-        throw new IllegalArgumentException("옳지 않은 비밀번호입니다.");
-    }
-
-    private User findUserByAccount(String account) {
-        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        if (user.isPresent()) {
-            return user.get();
-        }
-        LOG.info("찾을 수 없는 사용자입니다.");
-        throw new IllegalArgumentException("찾을 수 없는 사용자입니다.");
-    }
-
-    private void registerRequest(HttpRequest httpRequest) {
-        final User user = new User(httpRequest.getParameter("account"), httpRequest.getParameter("password"), httpRequest.getParameter("email"));
-        InMemoryUserRepository.save(user);
     }
 
     private void writeOutputStream(OutputStream outputStream, String response) throws IOException {

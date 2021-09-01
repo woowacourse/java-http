@@ -16,11 +16,15 @@ public class HttpSessions {
         return SESSIONS.put(id, new HttpSession(id));
     }
 
-    static void remove(String id) {
-        SESSIONS.remove(id);
-    }
-
     public static void put(String id, HttpSession httpSession) {
         SESSIONS.put(id, httpSession);
+    }
+
+    public static int size() {
+        return SESSIONS.size();
+    }
+
+    public static void clear() {
+        SESSIONS.clear();
     }
 }

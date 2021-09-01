@@ -16,6 +16,9 @@ public class HttpRequest {
     }
 
     private RequestBody parseRequestBody(BufferedReader reader, String length) throws IOException {
+        if (length == null) {
+            return null;
+        }
         int contentLength = Integer.parseInt(length);
         if (contentLength == 0) {
             return null;
@@ -39,8 +42,9 @@ public class HttpRequest {
         return requestHeaders.get(key);
     }
 
-    public RequestBody getRequestBody() {
+    public String getRequestBody() {
         return Optional.ofNullable(requestBody)
-                       .orElseThrow(() -> new IllegalArgumentException("Request Body가 존재하지 않습니다."));
+                       .orElseThrow(() -> new IllegalArgumentException("Request Body가 존재하지 않습니다."))
+                       .getBody();
     }
 }

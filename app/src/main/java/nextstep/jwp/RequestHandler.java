@@ -4,8 +4,9 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Objects;
 
+import nextstep.jwp.controller.Controller;
 import nextstep.jwp.request.HttpRequest;
-import nextstep.jwp.request.RequestBody;
+import nextstep.jwp.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,17 +31,16 @@ public class RequestHandler implements Runnable {
         ) {
 
             HttpRequest httpRequest = new HttpRequest(bufferedReader);
+            HttpResponse httpResponse = new HttpResponse(outputStream);
 
-            String response = null;
+            Controller controller = RequestMapper.getController(getPath(httpRequest));
 
-            if (httpRequest.isGet()) {
-                response = GetRequestUri.createResponse(httpRequest.getPath());
-            } else if (httpRequest.isPost()) {
-                RequestBody requestBody = httpRequest.getRequestBody();
-                response = PostRequestUri.createResponse(httpRequest.getPath(), requestBody.getBody());
+            if (controller == null) {
+                httpResponse.forward(getPath(httpRequest));
+                return;
             }
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+
+            controller.process(httpRequest, httpResponse);
 
         } catch (IOException exception) {
             LOG.error("Exception stream", exception);
@@ -49,6 +49,13 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
+    }
+
+    private String getPath(HttpRequest httpRequest) {
+        if ("/".equals(httpRequest.getPath())) {
+            return "/index.html";
+        }
+        return httpRequest.getPath();
     }
 
     private void close() {

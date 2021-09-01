@@ -1,6 +1,7 @@
 package nextstep.jwp.http.request;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.HomeController;
@@ -27,10 +28,10 @@ public class RequestHandlerMapping {
         handlerMapping.put("/register", new RegisterController());
     }
 
-    public Controller getHandler(String path) {
+    public Optional<Controller> getHandler(String path) {
         if (path.contains(EXTENSION_MARK)) {
-            return new ResourceController();
+            return Optional.of(new ResourceController());
         }
-        return handlerMapping.get(path);
+        return Optional.ofNullable(handlerMapping.get(path));
     }
 }

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;
 import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.ErrorController;
 import nextstep.jwp.exception.http.request.InvalidHttpRequestException;
 
 public class HttpRequest {
@@ -75,7 +76,8 @@ public class HttpRequest {
     }
 
     public Controller getHandler() {
-        return handlerMapping.getHandler(line.getPath());
+        return handlerMapping.getHandler(line.getPath())
+            .orElseGet(ErrorController::new);
     }
 
     public boolean isGet() {

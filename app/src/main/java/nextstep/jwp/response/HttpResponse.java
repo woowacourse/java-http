@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpResponse {
+    private static final String CONTENT_TYPE = "Content-Type";
+    
     private final OutputStream outputStream;
     private final Map<String, String> headers = new HashMap<>();
 
@@ -27,11 +29,11 @@ public class HttpResponse {
         final List<String> lines = Files.readAllLines(new File(resource.getPath()).toPath());
 
         if (url.endsWith(".js")) {
-            headers.put("Content-Type", "text/javascript");
+            headers.put(CONTENT_TYPE, "text/javascript");
         } else if (url.endsWith(".css")) {
-            headers.put("Content-Type", "text/css");
+            headers.put(CONTENT_TYPE, "text/css");
         } else {
-            headers.put("Content-Type", "text/html;charset=utf-8");
+            headers.put(CONTENT_TYPE, "text/html;charset=utf-8");
         }
 
         String file = lines.stream()

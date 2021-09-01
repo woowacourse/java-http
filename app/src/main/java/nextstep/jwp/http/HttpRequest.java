@@ -99,18 +99,8 @@ public class HttpRequest {
 
     public Map<String, String> extractCookies() {
         String rawCookie = headers.get(HEADER_KEY_OF_COOKIE);
-        Map<String, String> result = new HashMap<>();
-        if (!Objects.isNull(rawCookie)) {
-            String[] cookies = rawCookie.split("; ");
-
-            for (String cookie : cookies) {
-                String[] split = cookie.split("=");
-                String key = split[COOKIE_KEY_INDEX];
-                String value = split[COOKIE_KEY_VALUE];
-                result.put(key, value);
-            }
-        }
-        return result;
+        Cookies cookies = new Cookies(rawCookie);
+        return cookies.getCookies();
     }
 
     public boolean isGet() {

@@ -11,7 +11,7 @@ public class HttpSessions {
         return SESSIONS.computeIfAbsent(id, HttpSession::new);
     }
 
-    static void remove(String id) {
+    public static void remove(String id) {
         SESSIONS.remove(id);
     }
 

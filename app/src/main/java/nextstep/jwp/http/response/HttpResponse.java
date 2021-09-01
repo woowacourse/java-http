@@ -50,7 +50,7 @@ public class  HttpResponse {
         }
     }
 
-    public void ok(byte[] body) {
+    private void ok(byte[] body) {
         try {
             dataOutputStream.writeBytes("HTTP/1.1 200 OK \r\n");
             attachHeaderToResponse();

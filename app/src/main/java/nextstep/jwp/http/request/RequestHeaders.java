@@ -1,5 +1,9 @@
 package nextstep.jwp.http.request;
 
+import static nextstep.jwp.http.common.HttpHeader.CONTENT_LENGTH;
+import static nextstep.jwp.http.common.HttpHeader.COOKIE;
+import static nextstep.jwp.http.common.HttpHeader.TRANSFER_ENCODING;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -14,8 +18,6 @@ public class RequestHeaders {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
     private static final int EXPECT_LINE_LENGTH = 2;
-    private static final String CONTENT_LENGTH = "content-length";
-    private static final String TRANSFER_ENCODING = "transfer-encoding";
     private static final String NEW_LINE = System.getProperty("line.separator");
 
     private final Map<String, String> headers;
@@ -55,12 +57,18 @@ public class RequestHeaders {
         return splitedLine;
     }
 
+    public boolean requestHasCookie() {
+        return headers.containsKey(COOKIE.toLowerString());
+    }
+
     public boolean requestHasBody() {
-        return headers.containsKey(CONTENT_LENGTH) || headers.containsKey(TRANSFER_ENCODING);
+        return headers.containsKey(CONTENT_LENGTH.toLowerString())
+            || headers.containsKey(TRANSFER_ENCODING.toLowerString());
     }
 
     private boolean requestNotHaveBody() {
-        return !headers.containsKey(CONTENT_LENGTH) || headers.containsKey(TRANSFER_ENCODING);
+        return !headers.containsKey(CONTENT_LENGTH.toLowerString())
+            || headers.containsKey(TRANSFER_ENCODING.toLowerString());
     }
 
     public int getContentLength() {
@@ -68,7 +76,7 @@ public class RequestHeaders {
             throw new HttpRequestNotHaveBodyException();
         }
 
-        return Integer.parseInt(headers.get(CONTENT_LENGTH));
+        return Integer.parseInt(headers.get(CONTENT_LENGTH.toLowerString()));
     }
 
     @Override

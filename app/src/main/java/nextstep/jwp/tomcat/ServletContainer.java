@@ -1,5 +1,7 @@
 package nextstep.jwp.tomcat;
 
+import static nextstep.jwp.http.reponse.HttpResponse.STATIC_RESOURCE_PATH;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -13,7 +15,6 @@ import nextstep.jwp.servlet.UserRegisterServlet;
 
 public class ServletContainer {
 
-    public static final String STATIC_RESOURCE_PATH = "/static";
     private static final List<Servlet> SERVLETS = new ArrayList<>();
     private static final StaticResourceServlet STATIC_RESOURCE_SERVLET = new StaticResourceServlet();
 

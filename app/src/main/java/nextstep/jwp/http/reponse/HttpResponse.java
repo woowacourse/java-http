@@ -1,7 +1,6 @@
 package nextstep.jwp.http.reponse;
 
 import static nextstep.jwp.http.stateful.HttpCookie.JSESSION_ID;
-import static nextstep.jwp.tomcat.ServletContainer.STATIC_RESOURCE_PATH;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +16,7 @@ import nextstep.jwp.model.User;
 
 public class HttpResponse {
 
+    public static final String STATIC_RESOURCE_PATH = "/static";
     public static final String NEW_LINE = "\r\n";
 
     private HttpStatusLine httpStatusLine;

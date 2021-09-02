@@ -1,7 +1,9 @@
 package nextstep.jwp.framework.http;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import nextstep.jwp.framework.util.StringUtils;
 
@@ -47,12 +49,11 @@ public class HttpCookies {
         private static final int VALUE_INDEX = 1;
 
         private static Map<String, Cookie> parse(String cookies) {
-            final Map<String, Cookie> cookieMap = new HashMap<>();
-            for (String cookie : separateCookies(cookies)) {
-                final String[] nameAndValue = separateNameAndValue(cookie);
-                cookieMap.put(nameAndValue[NAME_INDEX], new Cookie(nameAndValue[NAME_INDEX], nameAndValue[VALUE_INDEX]));
-            }
-            return cookieMap;
+            return Arrays.stream(separateCookies(cookies))
+                         .map(Parser::separateNameAndValue)
+                         .collect(Collectors.toMap(
+                                 (String[] cookie) -> cookie[NAME_INDEX],
+                                 (String[] cookie) -> new Cookie(cookie[NAME_INDEX], cookie[VALUE_INDEX])));
         }
 
         private static String[] separateNameAndValue(String cookie) {

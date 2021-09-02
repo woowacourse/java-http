@@ -21,7 +21,7 @@ public class Cookies {
         if (!Objects.isNull(rawCookie)) {
             String[] splitCookies = rawCookie.split("; ");
 
-            if (splitCookies.length == 0) {
+            if (splitCookies.length != 0) {
                 for (String cookie : splitCookies) {
                     String[] split = cookie.split("=");
                     if (split.length == 2) {

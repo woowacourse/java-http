@@ -15,11 +15,13 @@ import nextstep.jwp.model.User;
 public class LoginController extends AbstractController {
 
     private static final String LOGIN_URI = "/login";
+    private static final String COOKIE_KEY_OF_JSESSIONID = "JSESSIONID";
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
         response.setStatus(HttpStatus.OK);
         HttpSession session = request.getSession();
+        response.putCookie(COOKIE_KEY_OF_JSESSIONID, session.getId());
         if (Objects.nonNull(session.getAttribute("user"))) {
             redirect(response, "index.html");
             return;

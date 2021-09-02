@@ -114,9 +114,11 @@ public class HttpRequest {
     }
 
     public HttpSession getSession() {
+        if (Objects.nonNull(httpSession)) {
+            return httpSession;
+        }
         String jSessionId = extractCookies().get(HEADER_KEY_OF_JSESSIONID);
-        HttpSession httpSession = HttpSessions.getSession(jSessionId);
-        return httpSession;
+        return HttpSessions.getSession(jSessionId);
     }
 
     public void setSession(HttpSession httpSession) {

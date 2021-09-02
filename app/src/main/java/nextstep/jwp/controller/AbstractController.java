@@ -20,9 +20,11 @@ public abstract class AbstractController implements Controller {
         try {
             if (MethodType.isGet(request.getRequestMethod())) {
                 return doGet(request);
+            } else if (MethodType.isPost(request.getRequestMethod())) {
+                return doPost(request);
             }
-            return doPost(request);
-        } catch (FileNotFoundException exception) {
+            throw new IllegalStateException();
+        } catch (FileNotFoundException | IllegalStateException exception) {
             return redirectMessage(request, PathType.NOT_FOUND.resource());
         } catch (LoginException | RegisterException exception) {
             return redirectMessage(request, PathType.UNAUTHORIZED.resource());
@@ -38,17 +40,19 @@ public abstract class AbstractController implements Controller {
     }
 
     protected Response staticFileMessage(Request request, FileType fileType, String responseBody) {
-        return new Response.Builder(request)
+        return new Response.Builder()
                 .statusCode("200")
                 .statusText("OK")
                 .contentType(fileType.contentType())
                 .contentLength(responseBody.getBytes().length)
+                .setCookie(!request.hasCookie())
+                .session(request.getSession())
                 .body(responseBody)
                 .build();
     }
 
     protected Response redirectMessage(Request request, String location) {
-        return new Response.Builder(request)
+        return new Response.Builder()
                 .redirect(true)
                 .statusCode("302")
                 .statusText("FOUND")

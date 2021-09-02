@@ -1,6 +1,6 @@
 package nextstep.jwp.model.reponse;
 
-import nextstep.jwp.model.request.Request;
+import nextstep.jwp.model.request.Session;
 
 public class Response {
 
@@ -28,7 +28,7 @@ public class Response {
     private final String contentType;
     private final String body;
     private final String location;
-    private final Request request;
+    private final Session session;
     private final int contentLength;
     private final boolean redirect;
     private final boolean setCookie;
@@ -40,16 +40,12 @@ public class Response {
         private String contentType;
         private String body;
         private String location;
-        private Request request;
+        private Session session;
         private int contentLength;
         private boolean redirect;
         private boolean setCookie = true;
 
-        public Builder(Request request) {
-            if (request.hasCookie()) {
-                setCookie = false;
-            }
-            this.request = request;
+        public Builder() {
         }
 
         public Builder statusCode(String statusCode) {
@@ -87,6 +83,16 @@ public class Response {
             return this;
         }
 
+        public Builder setCookie(boolean setCookie) {
+            this.setCookie = setCookie;
+            return this;
+        }
+
+        public Builder session(Session session) {
+            this.session = session;
+            return this;
+        }
+
         public Response build() {
             return new Response(this);
         }
@@ -101,7 +107,7 @@ public class Response {
         this.redirect = builder.redirect;
         this.location = builder.location;
         this.setCookie = builder.setCookie;
-        this.request = builder.request;
+        this.session = builder.session;
     }
 
     public byte[] getBytes() {
@@ -118,7 +124,7 @@ public class Response {
                             statusText,
                             contentType,
                             contentLength,
-                            "JSESSIONID=" + request.getSession().getId(),
+                            "JSESSIONID=" + session.getId(),
                             body)
                     .getBytes();
         }

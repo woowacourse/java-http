@@ -2,12 +2,14 @@ package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.util.Objects;
+import java.util.UUID;
 
 import nextstep.jwp.session.HttpSession;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.request.HttpRequest;
 import nextstep.jwp.response.HttpResponse;
+import nextstep.jwp.session.HttpSessions;
 
 public class LoginController implements Controller {
     @Override
@@ -30,6 +32,12 @@ public class LoginController implements Controller {
             if (!user.checkPassword(password)) {
                 response.redirect("/401.html");
                 return;
+            }
+
+            if (request.hasNoSessionId()) {
+                String sessionId = String.valueOf(UUID.randomUUID());
+                HttpSessions.getSession(sessionId);
+                response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
             }
 
             HttpSession session = request.getSession();

@@ -23,7 +23,7 @@ public class HandlerMapping {
     }
 
     private static Set<Controller> findAllControllers(final String controllerPackage) {
-        final ClassScanner<Controller> classScanner = new ClassScanner<>(controllerPackage);
+        final ClassScanner classScanner = new ClassScanner(controllerPackage);
         return classScanner.scanAs(Controller.class);
     }
 

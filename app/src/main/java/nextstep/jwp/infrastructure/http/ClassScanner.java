@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ClassScanner<T> {
+public class ClassScanner {
 
     private static final String DIRECTORY_DELIMITER = "/";
     private static final String PACKAGE_DELIMITER_REGEX = "[.]";
@@ -24,7 +24,7 @@ public class ClassScanner<T> {
         this.packagePath = packagePath;
     }
 
-    public Set<T> scanAs(final Class<T> typeToScan) {
+    public <T> Set<T> scanAs(final Class<T> typeToScan) {
         final Set<Class<?>> classes = findAllClassesUsingClassLoader(packagePath, typeToScan);
         return classes.stream()
             .filter(this::hasConstructor)
@@ -56,7 +56,7 @@ public class ClassScanner<T> {
             .orElseThrow(() -> new IllegalArgumentException("Cannot find no-argument constructor."));
     }
 
-    private Set<Class<?>> findAllClassesUsingClassLoader(String packageName, Class<T> typeToScan) {
+    private <T> Set<Class<?>> findAllClassesUsingClassLoader(String packageName, Class<T> typeToScan) {
         final InputStream stream = ClassLoader.getSystemClassLoader()
             .getResourceAsStream(packageName.replaceAll(PACKAGE_DELIMITER_REGEX, DIRECTORY_DELIMITER));
         final BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(stream)));

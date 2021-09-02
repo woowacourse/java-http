@@ -14,7 +14,7 @@ public class InterceptorResolver implements HandlerInterceptor {
     }
 
     private static Set<HandlerInterceptor> findAllInterceptors(final String interceptorPackage) {
-        final ClassScanner<HandlerInterceptor> classScanner = new ClassScanner<>(interceptorPackage);
+        final ClassScanner classScanner = new ClassScanner(interceptorPackage);
         return classScanner.scanAs(HandlerInterceptor.class);
     }
 

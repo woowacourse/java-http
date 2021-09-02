@@ -21,6 +21,9 @@ public class HttpRequest {
     private Map<String, String> requestBody = new HashMap<>();
     private RequestLine requestLine;
 
+    private HttpCookie cookie;
+    private HttpSession session;
+
     public HttpRequest(InputStream inputStream) {
         try {
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -35,14 +38,27 @@ public class HttpRequest {
             line = bufferedReader.readLine();
             addHeaders(bufferedReader, line);
             addResponseBody(bufferedReader);
+
+            cookie = initCookie();
         } catch (IOException e) {
             log.error(e.getMessage());
         }
     }
 
+    private HttpCookie initCookie() {
+        if (getHeader("Cookie") == null) {
+            return new HttpCookie();
+        }
+        return new HttpCookie(getHeader("Cookie"));
+    }
+
+    public void setSession(HttpSession session) {
+        this.session = session;
+    }
+
     private void addHeaders(BufferedReader bufferedReader, String line) throws IOException {
-        while (bufferedReader.ready()) {
-            if ("".equals(line)) {
+        while (!"".equals(line)) {
+            if (line == null) {
                 break;
             }
             String[] tokens = line.split(": ");
@@ -88,5 +104,13 @@ public class HttpRequest {
 
     public Map<String, String> getRequestBody() {
         return requestBody;
+    }
+
+    public HttpCookie getCookies() {
+        return cookie;
+    }
+
+    public HttpSession getSession() {
+        return HttpSessions.getOrCreateSession(getCookies().get("JSESSIONID"));
     }
 }

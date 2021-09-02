@@ -3,7 +3,6 @@ package nextstep.jwp.controller;
 import nextstep.jwp.controller.modelview.ModelView;
 import nextstep.jwp.httpmessage.HttpHeaders;
 import nextstep.jwp.httpmessage.HttpSession;
-import nextstep.jwp.httpmessage.HttpSessions;
 import nextstep.jwp.httpmessage.httprequest.HttpRequest;
 import nextstep.jwp.httpmessage.httprequest.Parameters;
 import nextstep.jwp.httpmessage.httprequest.RequestLine;

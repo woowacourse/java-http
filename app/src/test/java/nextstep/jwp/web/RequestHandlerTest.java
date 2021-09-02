@@ -35,7 +35,7 @@ class RequestHandlerTest {
 
     @DisplayName("/index.html 요청에 index.html을 포함하여 응답한다 - 성공")
     @Test
-    void index() throws IOException {
+    void getIndexPage() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
@@ -61,7 +61,7 @@ class RequestHandlerTest {
 
     @DisplayName("GET /login 요청에 login.html 파일을 포함하여 응답한다 - 성공")
     @Test
-    void login() throws IOException {
+    void getLoginPage() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
@@ -82,6 +82,41 @@ class RequestHandlerTest {
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + resourceAsString.getBytes().length + " "
+        );
+    }
+
+    @DisplayName("로그인 한 상태에서 GET /login 요청할 경우 index.html로 리다이렉트한다 - 성공")
+    @Test
+    void getLoginPageWhileLoggedIn() {
+        // given
+        final String jsessionid = "7f1dd9b5-ef54-4706-a07a-aaaa9d76134e";
+        final String httpRequest2 = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=" + jsessionid,
+                "Content-Length: 30",
+                "",
+                "account=gugu&password=password");
+        final MockSocket socket2 = new MockSocket(httpRequest2);
+        final RequestHandler requestHandler2 = new RequestHandler(socket2);
+        requestHandler2.run();
+
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=" + jsessionid,
+                "",
+                "");
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+        requestHandler.run();
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 302 Found ",
+                "Location: /index.html"
         );
     }
 

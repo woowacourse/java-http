@@ -2,7 +2,6 @@ package nextstep.jwp.web.network;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class HttpSessions {
 
@@ -16,7 +15,7 @@ public class HttpSessions {
         return sessions.getOrDefault(id, DEFAULT_SESSION);
     }
 
-    public static void setSession(UUID id) {
+    public static void setSession(String id) {
         final HttpSession session = new HttpSession(id);
         setSession(session);
     }
@@ -27,5 +26,9 @@ public class HttpSessions {
 
     public static void remove(String id) {
         sessions.remove(id);
+    }
+
+    public static boolean doesNotContain(String sessionId) {
+        return !sessions.containsKey(sessionId);
     }
 }

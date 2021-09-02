@@ -25,12 +25,16 @@ public class LoginController extends AbstractController {
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
         final HttpSession session = request.getSession();
-        final User user = (User) session.getAttribute("user");
+        final User user = getUser(session);
         if (user == null) {
             log.info("GET /login");
             final View view = new View(getResource() + ".html");
             response.setStatus(HttpStatus.OK);
             response.setBody(view);
+        } else {
+            log.info("GET /login, user {} already logged in. Redirecting to homepage.", user.getAccount());
+            response.setStatus(HttpStatus.FOUND);
+            response.setHeader("Location", "/index.html");
         }
     }
 
@@ -49,11 +53,12 @@ public class LoginController extends AbstractController {
 
                 final HttpSession session = request.getSession();
                 session.setAttribute("user", user);
+                log.info("saved user {} in session {}", user.getAccount(), session.getId());
 
                 response.setStatus(HttpStatus.FOUND);
                 response.setHeader("Set-Cookie", "JSESSIONID=" + session.getId());
                 response.setHeader("Location", "/index.html");
-                log.info("Sent jsessionid to user {}. jsessionid: {}", user.getAccount(), session.getId());
+                log.info("Connected session {} to user {}", session.getId(), user.getAccount());
             } else {
                 log.info("Login failed");
                 final View view = new View("/401");

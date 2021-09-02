@@ -55,8 +55,11 @@ public class HttpRequest {
         if (sessionId == null) {
             final UUID id = UUID.randomUUID();
             final HttpSession session = new HttpSession(id);
-            HttpSessions.setSession(id);
+            HttpSessions.setSession(session);
             return session;
+        }
+        if (HttpSessions.doesNotContain(sessionId)) {
+            HttpSessions.setSession(sessionId);
         }
         return HttpSessions.getSession(sessionId);
     }

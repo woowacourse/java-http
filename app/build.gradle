@@ -1,6 +1,7 @@
 plugins {
     id 'application'
     id 'org.sonarqube' version '3.3'
+    id 'jacoco'
 }
 
 sourceCompatibility = JavaVersion.VERSION_11
@@ -26,13 +27,21 @@ application {
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy(jacocoTestReport)
 }
 
-sonarqube {
-    properties {
-        property "sonar.sourceEncoding", "UTF-8"
-        property "sonar.projectKey", "woowacourse_be-jwp-http-server"
-        property "sonar.organization", "woowacourse"
-        property "sonar.host.url", "https://sonarcloud.io"
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        xml.destination(new File("jacoco/jacoco.xml"))
+    }
+
+    sonarqube {
+        properties {
+            property "sonar.sourceEncoding", "UTF-8"
+            property "sonar.projectKey", "woowacourse_be-jwp-http-server"
+            property "sonar.organization", "woowacourse"
+            property "sonar.host.url", "https://sonarcloud.io"
+        }
     }
 }

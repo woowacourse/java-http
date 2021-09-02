@@ -37,7 +37,8 @@ public class FileUtils {
     }
 
     public static String getRelativePath(String viewName) {
-        String[] splitView = viewName.split(PREFIX);
-        return splitView[splitView.length - 1];
+        URL resource = FileUtils.class.getClassLoader().getResource(STATIC);
+        String[] splitView = viewName.split(Objects.requireNonNull(resource).getFile());
+        return splitView[1];
     }
 }

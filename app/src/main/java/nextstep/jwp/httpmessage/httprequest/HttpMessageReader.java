@@ -93,8 +93,7 @@ public class HttpMessageReader {
             final int contentLength = Integer.parseInt(contentLengthString);
             final char[] buffer = new char[contentLength];
             bufferedReader.read(buffer, 0, contentLength);
-            String queryParameterString = new String(buffer);
-            return queryParameterString;
+            return new String(buffer);
         } catch (IOException exception) {
             throw new IllegalArgumentException(exception.getMessage());
         }

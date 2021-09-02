@@ -5,6 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Nested;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,7 +96,24 @@ public class RequestHandlerTest {
     }
 
     @Test
-    void registerRequest() {
+    void 유저_로그인_테스트(){
+        //given
+        final String requestUri = "/login";
+        final String requestBody = "account=gugu&password=password";
+        final String httpRequest = toHttpPostRequest(requestUri, requestBody);
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        String expected = toHttp302ResponseWithSession("/index.html");
+        //when
+        requestHandler.run();
+        final String actual = socket.output();
+        // then
+        assertThat(actual).startsWith(expected);
+    }
+
+    @Test
+    void 유저_가입_테스트() {
         // given
         final String requestUri = "/register";
         final String requestBody = "account=gumgum&password=password2&email=ggump%40woowahan.com";
@@ -174,6 +192,12 @@ public class RequestHandlerTest {
                 "",
                 "");
     }
+
+    private String toHttp302ResponseWithSession(String redirectUrl) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: http://localhost:8080" + redirectUrl + " ",
+                "Set-Cookie: JESSIONID=");    }
 
     private String toHttp200TextHtmlResponse(String expectResponseBody) {
         return String.join("\r\n",

@@ -1,10 +1,9 @@
 package nextstep.jwp.controller.modelview;
 
-import nextstep.jwp.httpmessage.*;
+import nextstep.jwp.httpmessage.ContentType;
 import nextstep.jwp.httpmessage.httprequest.HttpRequest;
 import nextstep.jwp.httpmessage.httpresponse.HttpResponse;
 import nextstep.jwp.httpmessage.httpresponse.HttpStatusCode;
-import nextstep.jwp.httpmessage.httpresponse.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +12,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Map;
-import java.util.Objects;
 
 public class View {
 

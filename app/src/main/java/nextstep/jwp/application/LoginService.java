@@ -18,7 +18,8 @@ public class LoginService {
             throw new InvalidUserException();
         }
 
-        logger.debug("Login User !!! - {}", loginUser.toString());
+        String userInfo = loginUser.toString();
+        logger.debug("Login User !!! - {}", userInfo);
 
         return loginUser;
     }

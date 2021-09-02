@@ -5,7 +5,7 @@ import nextstep.jwp.web.exception.NoSuchHttpVersionException;
 import java.util.Arrays;
 
 public enum HttpVersion {
-    ONE_DOT_ONE("HTTP/1.1");
+    DEFAULT_VERSION("HTTP/1.1");
 
     private final String value;
 

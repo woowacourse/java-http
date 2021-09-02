@@ -22,7 +22,7 @@ class LoginControllerTest {
 
     @Test
     void doGet() {
-        RequestLine requestLine = RequestLine.of("GET /register HTTP/1.1");
+        RequestLine requestLine = RequestLine.of("GET /login HTTP/1.1");
         RequestHeaders requestHeaders = RequestHeaders.of(Collections.emptyList());
 
         HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, "");
@@ -30,6 +30,25 @@ class LoginControllerTest {
 
         ModelAndView modelAndView = loginController.doGet(httpRequest, httpResponse);
         assertThat(modelAndView.getHttpStatus()).isEqualTo(HttpStatus.OK);
+    }
+
+    @DisplayName("세션에 로그인 내역이 존재시 index 페이지로 리다이렉트한다")
+    @Test
+    void doGetWithLoginSession() {
+        HttpResponse loginResponse = doLoginSuccessfully();
+        String sessionItem = loginResponse.getHeader("Set-Cookie");
+
+        RequestLine requestLine = RequestLine.of("GET /login HTTP/1.1");
+        RequestHeaders requestHeaders = RequestHeaders.of(
+                Arrays.asList("Cookie: "+ sessionItem)
+        );
+
+        HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, "");
+        HttpResponse httpResponse = new HttpResponse();
+
+        ModelAndView modelAndView = loginController.doGet(httpRequest, httpResponse);
+        assertThat(modelAndView.getHttpStatus()).isEqualTo(HttpStatus.FOUND);
+        assertThat(httpResponse.getHeader("Location")).isEqualTo("index.html");
     }
 
     @DisplayName("로그인 성공 시, 세션에 사용자 정보 저장")
@@ -67,5 +86,18 @@ class LoginControllerTest {
         ModelAndView modelAndView = loginController.doPost(httpRequest, httpResponse);
 
         assertThat(modelAndView.getHttpStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    }
+
+    private HttpResponse doLoginSuccessfully() {
+        final String requestBody = "account=gugu&password=password&email=hkkang%40woowahan.com";
+
+        RequestLine requestLine = RequestLine.of("POST /login HTTP/1.1");
+        RequestHeaders requestHeaders = RequestHeaders.of(Arrays.asList("Content-Length: " + requestBody.length()));
+
+        HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, requestBody);
+        HttpResponse httpResponse = new HttpResponse();
+
+        loginController.doPost(httpRequest, httpResponse);
+        return httpResponse;
     }
 }

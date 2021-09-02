@@ -16,7 +16,12 @@ public class LoginController extends AbstractController {
 
     @Override
     protected ModelAndView doGet(HttpRequest request, HttpResponse response) {
-        return ModelAndView.of("/login.html", HttpStatus.OK);
+        HttpSession session = request.getSession();
+        if(Objects.isNull(session.getAttribute("user"))){
+            return ModelAndView.of("/login.html", HttpStatus.OK);
+        }
+        response.addHeader("Location", "index.html");
+        return ModelAndView.of(HttpStatus.FOUND);
     }
 
     @Override

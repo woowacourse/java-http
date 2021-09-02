@@ -1,5 +1,7 @@
 package nextstep.jwp.framework.http;
 
+import java.util.Arrays;
+
 public enum HttpStatus {
     OK(200, "OK"),
     CREATED(201, "Created"),
@@ -18,6 +20,13 @@ public enum HttpStatus {
     HttpStatus(int code, String reasonPhrase) {
         this.code = code;
         this.reasonPhrase = reasonPhrase;
+    }
+
+    public static HttpStatus resolve(String path) {
+        return Arrays.stream(HttpStatus.values())
+                     .filter(status -> path.contains(Integer.toString(status.code)))
+                     .findAny()
+                     .orElse(null);
     }
 
     public int getCode() {

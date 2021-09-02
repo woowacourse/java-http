@@ -1,7 +1,8 @@
 package nextstep.jwp.framework.http;
 
-import java.util.Map;
 import java.util.Objects;
+
+import nextstep.jwp.framework.http.formatter.RequestLineFormatter;
 
 public class RequestLine {
     private final HttpMethod method;
@@ -34,7 +35,8 @@ public class RequestLine {
         return uri.isSamePath(path);
     }
 
-    public Map<String, String> getQueries() {
-        return uri.getQueries();
+    @Override
+    public String toString() {
+        return new RequestLineFormatter(this).transform();
     }
 }

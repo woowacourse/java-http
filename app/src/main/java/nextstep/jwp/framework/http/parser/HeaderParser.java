@@ -40,6 +40,10 @@ public class HeaderParser extends AbstractHttpParser {
     @Override
     public HttpParser parse() throws IOException {
         String headers = readParsingContent();
+        if (!StringUtils.hasLength(headers)) {
+            return new EndLineParser(reader, builder);
+        }
+
         for (String headerLine : separateHeaders(headers)) {
             final List<String> header = separateNameAndValue(headerLine);
             final String name = header.get(NAME_INDEX).trim();

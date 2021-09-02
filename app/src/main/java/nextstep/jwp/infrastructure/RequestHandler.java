@@ -1,6 +1,5 @@
 package nextstep.jwp.infrastructure;
 
-import nextstep.jwp.infrastructure.controller.LoginController;
 import nextstep.jwp.model.web.request.CustomHttpRequest;
 import nextstep.jwp.model.web.response.CustomHttpResponse;
 import org.slf4j.Logger;
@@ -24,9 +23,9 @@ public class RequestHandler implements Runnable {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
+             final OutputStream outputStream = connection.getOutputStream();
+             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             CustomHttpRequest request = CustomHttpRequest.from(reader);
             CustomHttpResponse response = new CustomHttpResponse();
             HandlerMapper.mappingHandler(request.getUri())

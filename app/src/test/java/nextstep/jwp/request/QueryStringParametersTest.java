@@ -54,6 +54,7 @@ class QueryStringParametersTest {
                 .hasMessage(QueryStringParameters.NON_EXIST_PARAMETER_EXCEPTION_MESSAGE);
     }
 
+    @DisplayName("파라미터가 존재하는지 확인한다.")
     @Test
     void existParameter() {
         // when

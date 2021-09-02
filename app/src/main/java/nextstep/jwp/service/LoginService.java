@@ -8,7 +8,7 @@ import nextstep.jwp.domain.SessionID;
 import nextstep.jwp.domain.SessionIDUUIDStrategy;
 import nextstep.jwp.exception.LoginException;
 import nextstep.jwp.http.request.CookieType;
-import nextstep.jwp.http.request.HttpCookie;
+import nextstep.jwp.http.request.HttpCookies;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.HttpRequestHeader;
 import nextstep.jwp.http.session.HttpSession;
@@ -30,8 +30,8 @@ public class LoginService implements Service {
 
     public boolean isSessionLogin(HttpRequest httpRequest) {
         final HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
-        final HttpCookie httpCookie = httpRequestHeader.cookie();
-        final SessionLogin sessionLogin = new SessionLogin(httpCookie);
+        final HttpCookies httpCookies = httpRequestHeader.cookie();
+        final SessionLogin sessionLogin = new SessionLogin(httpCookies);
         return sessionLogin.isSuccess();
     }
 
@@ -52,8 +52,8 @@ public class LoginService implements Service {
 
     private String extractJSESSIONIDOnRequest(HttpRequest httpRequest) throws LoginException {
         final HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
-        final HttpCookie httpCookie = httpRequestHeader.cookie();
-        final Optional<String> valueFromKey = httpCookie.valueFromKey(
+        final HttpCookies httpCookies = httpRequestHeader.cookie();
+        final Optional<String> valueFromKey = httpCookies.valueFromKey(
             CookieType.JSESSIONID.value());
         return valueFromKey.orElseThrow(() -> (new LoginException("[ERROR] 로그인 관련 오류가 있습니다.")));
     }

@@ -9,23 +9,23 @@ public class HttpRequestHeader {
     private static final int URL_LOCATION = 1;
 
     private final Map<String, String> headerLines;
-    private final HttpCookie httpCookie;
+    private final HttpCookies httpCookies;
 
-    public HttpRequestHeader(Map<String, String> headerLines, HttpCookie httpCookie) {
+    public HttpRequestHeader(Map<String, String> headerLines, HttpCookies httpCookies) {
         this.headerLines = headerLines;
-        this.httpCookie = httpCookie;
+        this.httpCookies = httpCookies;
     }
 
     public static HttpRequestHeader from(Map<String, String> headerLines) {
         if (headerLines.containsKey(HttpHeaderType.COOKIE.value())) {
-            final HttpCookie httpCookie = HttpCookie.from(headerLines);
+            final HttpCookies httpCookies = HttpCookies.from(headerLines);
             headerLines.remove(HttpHeaderType.COOKIE.value());
-            return new HttpRequestHeader(headerLines, httpCookie);
+            return new HttpRequestHeader(headerLines, httpCookies);
         }
 
         final Map<String, String> cookies = new HashMap<>();
-        HttpCookie httpCookie = new HttpCookie(cookies);
-        return new HttpRequestHeader(headerLines, httpCookie);
+        HttpCookies httpCookies = new HttpCookies(cookies);
+        return new HttpRequestHeader(headerLines, httpCookies);
     }
 
     public String method() {
@@ -66,7 +66,7 @@ public class HttpRequestHeader {
         return Integer.parseInt(headerLines.get(HttpHeaderType.CONTENT_LENGTH.value()));
     }
 
-    public HttpCookie cookie() {
-        return this.httpCookie;
+    public HttpCookies cookie() {
+        return this.httpCookies;
     }
 }

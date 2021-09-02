@@ -21,7 +21,7 @@ public class RequestHeadersTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-Length: 30",
+                "Content-Length: 0",
                 "",
                 "");
 
@@ -34,6 +34,6 @@ public class RequestHeadersTest {
 
         assertEquals("localhost:8080", httpRequest.getHeader("Host"));
         assertEquals("keep-alive", httpRequest.getHeader("Connection"));
-        assertEquals("30", httpRequest.getHeader("Content-Length"));
+        assertEquals("0", httpRequest.getHeader("Content-Length"));
     }
 }

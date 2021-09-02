@@ -7,3 +7,4 @@
 - [x] 302 redirect
 - [x] POST 회원가입
 - [x] CSS 지원 
+- [x] 로그인 시 토큰을 이용

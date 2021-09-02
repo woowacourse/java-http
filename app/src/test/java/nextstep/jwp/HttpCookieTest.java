@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import nextstep.jwp.session.HttpCookie;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HttpCookieTest {
     @Test
@@ -15,5 +16,6 @@ class HttpCookieTest {
         assertEquals("choco", cookie.get("yummy_cookie"));
         assertEquals("strawberry", cookie.get("tasty_cookie"));
         assertEquals("656cef62-e3c4-40bc-a8df-94732920ed46", cookie.get("JSESSIONID"));
+        assertTrue(cookie.hasSessionId());
     }
 }

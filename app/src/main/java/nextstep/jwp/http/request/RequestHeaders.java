@@ -6,12 +6,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import nextstep.jwp.http.HttpCookie;
 
 public class RequestHeaders {
 
     private static String CONTENT_LENGTH = "Content-Length";
 
-    private HashMap<String, ArrayList<String>> headers = new HashMap<>();
+    private final HashMap<String, ArrayList<String>> headers = new HashMap<>();
+    private HttpCookie httpCookie;
 
     public RequestHeaders(BufferedReader bufferedReader) throws IOException {
 
@@ -24,7 +26,13 @@ public class RequestHeaders {
 
             String[] headerContent = readLine.split(",|: ");
             String header = headerContent[0];
+
+
             ArrayList<String> contents = new ArrayList<>(Arrays.asList(headerContent).subList(1, headerContent.length));
+
+            if(header.equals("Cookie")) {
+                httpCookie = HttpCookie.create(headerContent[1]);
+            }
 
             headers.put(header, contents);
         }
@@ -43,5 +51,9 @@ public class RequestHeaders {
 
     public int contentLength() {
         return Integer.parseInt(headers.get(CONTENT_LENGTH).get(0));
+    }
+
+    public String getCookie(String name) {
+        return httpCookie.getCookie(name);
     }
 }

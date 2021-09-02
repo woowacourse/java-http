@@ -7,7 +7,6 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.HttpException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.http.response.content.ContentType;
 import nextstep.jwp.http.response.status.HttpStatus;
 import nextstep.jwp.model.User;
 
@@ -17,10 +16,7 @@ public class RegisterController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         String resource = new FileAccess(request.getPath() + ".html").getFile();
 
-        response.setStatusLine(request.getProtocolVersion(), HttpStatus.OK);
-        response.addResponseHeader("Content-Type", ContentType.HTML.getType());
-        response.addResponseHeader("Content-Length", String.valueOf(resource.getBytes().length));
-        response.setResponseBody(resource);
+        renderPage(request, response, resource);
     }
 
     @Override
@@ -35,8 +31,7 @@ public class RegisterController extends AbstractController {
 
         InMemoryUserRepository.save(new User(0L, account, password, email));
 
-        response.setStatusLine(request.getProtocolVersion(), HttpStatus.FOUND);
-        response.addResponseHeader("Location", "/index.html");
+        redirectPage(request, response, HttpStatus.FOUND, "/index.html");
     }
 
     private void checkDuplicatedAccount(String account) {

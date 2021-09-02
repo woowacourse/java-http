@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.http.HttpSession;
+import nextstep.jwp.http.HttpSessions;
 import nextstep.jwp.http.response.status.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -109,9 +111,10 @@ class RequestHandlerTest {
 
         // then
         String expected = "HTTP/1.1 302 Found \r\n" +
+                ".* \r\n" +
                 "Location: /index.html \r\n\r\n";
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).containsPattern(expected);
     }
 
     @DisplayName("로그인 페이지에서 로그인 요청 - 실패")

@@ -23,6 +23,10 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
+    public void setCookie(String cookieName, String cookieValue) {
+        responseHeader.addHeader("Set-Cookie", cookieName + "=" + cookieValue);
+    }
+
     public String responseMessage() {
         return String.join("\r\n",
                 statusLine.asString(),

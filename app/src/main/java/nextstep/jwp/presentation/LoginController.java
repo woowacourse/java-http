@@ -5,9 +5,10 @@ import java.util.HashMap;
 import nextstep.jwp.FileAccess;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnauthorizedException;
+import nextstep.jwp.http.HttpSession;
+import nextstep.jwp.http.HttpSessions;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.http.response.content.ContentType;
 import nextstep.jwp.http.response.status.HttpStatus;
 import nextstep.jwp.model.User;
 
@@ -17,10 +18,27 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         String resource = new FileAccess(request.getPath() + ".html").getFile();
 
-        response.setStatusLine(request.getProtocolVersion(), HttpStatus.OK);
-        response.addResponseHeader("Content-Type", ContentType.HTML.getType());
-        response.addResponseHeader("Content-Length", String.valueOf(resource.getBytes().length));
-        response.setResponseBody(resource);
+        try {
+            String sessionId = request.getCookie("JSESSIONID");
+            HttpSession session = HttpSessions.getSession(sessionId);
+            User user = (User) session.getAttribute("user");
+
+            checkExistUser(request, response, user);
+
+        } catch (IllegalArgumentException e) {
+            renderPage(request, response, resource);
+        }
+    }
+
+    private void checkExistUser(HttpRequest request, HttpResponse response, User user)
+            throws IOException {
+        if (InMemoryUserRepository.existAccount(user.getAccount())) {
+            String resource = new FileAccess("/index.html").getFile();
+            renderPage(request, response, resource);
+            return;
+        }
+
+        throw new IllegalArgumentException();
     }
 
     @Override
@@ -38,8 +56,16 @@ public class LoginController extends AbstractController {
             throw new UnauthorizedException(HttpStatus.UNAUTHORIZED, "올바르지 않은 패스워드입니다.");
         }
 
-        response.setStatusLine(request.getProtocolVersion(), HttpStatus.FOUND);
-        response.addResponseHeader("Location", "/index.html");
+        setCookie(user, response);
+
+        redirectPage(request, response, HttpStatus.FOUND, "/index.html");
+    }
+
+    private void setCookie(User user, HttpResponse response) {
+        HttpSession session = HttpSessions.createSession();
+        session.setAttribute("user", user);
+
+        response.setCookie("JSESSIONID", session.getId());
     }
 
     private HashMap<String, String> parseBody(String requestBody) {

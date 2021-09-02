@@ -31,14 +31,14 @@ public class DispatcherServlet {
                 return;
             }
 
-            sendError(request, response, mv, NOT_FOUND);
+            sendError(response, mv, NOT_FOUND);
             return;
         }
 
         HandlerAdapters handlerAdapters = new HandlerAdapters();
         HandlerAdapter adapter = handlerAdapters.getHandlerAdapter(handler);
         if (adapter == null) {
-            sendError(request, response, new ModelAndView(), NOT_FOUND);
+            sendError(response, new ModelAndView(), NOT_FOUND);
             return;
         }
 
@@ -66,7 +66,7 @@ public class DispatcherServlet {
         }
     }
 
-    private void sendError(HttpRequest request, HttpResponse response, ModelAndView mv, HttpStatus status) throws IOException {
+    private void sendError(HttpResponse response, ModelAndView mv, HttpStatus status) throws IOException {
         ErrorView view = new ErrorView();
         view.sendError(status);
         String absolutePath = resolveView(status.value());

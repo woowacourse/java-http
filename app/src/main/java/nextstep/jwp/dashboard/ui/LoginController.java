@@ -48,6 +48,7 @@ public class LoginController extends AbstractController {
                 log.info("Login successful! user account: {}", user.getAccount());
 
                 final HttpSession session = request.getSession();
+                session.setAttribute("user", user);
 
                 response.setStatus(HttpStatus.FOUND);
                 response.setHeader("Set-Cookie", "JSESSIONID=" + session.getId());

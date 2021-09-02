@@ -18,8 +18,8 @@ public class LoginController extends AbstractController {
     public void doGet(HttpRequest request, HttpResponse response) throws Exception {
         if (loginService.isSessionLogin(request)) {
             final LoginResponse loginResponse = new LoginResponse();
-            final String token = loginService.token(request);
-            response.setResponse(loginResponse.successResponse(token));
+            final String jSessionID = loginService.sessionID(request);
+            response.setResponse(loginResponse.successResponse(jSessionID));
             return;
         }
         final GeneralResponse generalResponse = new GeneralResponse(request);
@@ -35,9 +35,9 @@ public class LoginController extends AbstractController {
 
     private String loginResult(HttpRequest request, boolean isSuccess) throws Exception {
         final LoginResponse loginResponse = new LoginResponse();
-        final String jSESSIONID = loginService.token(request);
+        final String jSessionID = loginService.sessionID(request);
         if (isSuccess) {
-            return loginResponse.successResponse(jSESSIONID);
+            return loginResponse.successResponse(jSessionID);
         }
         return loginResponse.failedResponse();
     }

@@ -1,5 +1,5 @@
 package nextstep.jwp.domain;
 
-public interface TokenStrategy {
+public interface SessionIDStrategy {
     String token();
 }

@@ -1,10 +1,10 @@
 package nextstep.jwp.domain;
 
-public class ManualStrategy implements TokenStrategy {
+public class SessionIDManualStrategy implements SessionIDStrategy {
 
     private final String value;
 
-    public ManualStrategy(String value) {
+    public SessionIDManualStrategy(String value) {
         this.value = value;
     }
 

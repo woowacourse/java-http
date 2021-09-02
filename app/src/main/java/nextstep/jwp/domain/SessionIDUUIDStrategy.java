@@ -2,7 +2,7 @@ package nextstep.jwp.domain;
 
 import java.util.UUID;
 
-public class UUIDStrategy implements TokenStrategy {
+public class SessionIDUUIDStrategy implements SessionIDStrategy {
 
     @Override
     public String token() {

@@ -1,21 +1,20 @@
 package nextstep.jwp.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-class TokenTest {
+class SessionIDTest {
 
     @Test
     void value() {
         //given
         String pureToken = "Token";
-        ManualStrategy manualStrategy = new ManualStrategy("Token");
-        Token token = Token.fromStrategy(manualStrategy);
+        SessionIDManualStrategy sessionIDManualStrategy = new SessionIDManualStrategy("Token");
+        SessionID sessionID = SessionID.fromStrategy(sessionIDManualStrategy);
 
         //when
-        String tokenValue = token.value();
+        String tokenValue = sessionID.value();
 
         //then
         assertThat(tokenValue).isEqualTo(pureToken);

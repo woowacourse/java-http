@@ -4,8 +4,8 @@ import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.domain.AccountLogin;
 import nextstep.jwp.domain.SessionLogin;
-import nextstep.jwp.domain.Token;
-import nextstep.jwp.domain.UUIDStrategy;
+import nextstep.jwp.domain.SessionID;
+import nextstep.jwp.domain.SessionIDUUIDStrategy;
 import nextstep.jwp.exception.LoginException;
 import nextstep.jwp.http.request.CookieType;
 import nextstep.jwp.http.request.HttpCookie;
@@ -35,7 +35,7 @@ public class LoginService implements Service {
         return sessionLogin.isSuccess();
     }
 
-    public String token(HttpRequest httpRequest) throws LoginException {
+    public String sessionID(HttpRequest httpRequest) throws LoginException {
         if (isSessionLogin(httpRequest)) {
             return extractJSESSIONIDOnRequest(httpRequest);
         }
@@ -43,9 +43,9 @@ public class LoginService implements Service {
     }
 
     private String generateJSESSIONID(HttpRequest httpRequest) {
-        final UUIDStrategy uuidStrategy = new UUIDStrategy();
-        final Token token = Token.fromStrategy(uuidStrategy);
-        final String rawJSESSIONID = token.value();
+        final SessionIDUUIDStrategy sessionIDUUIDStrategy = new SessionIDUUIDStrategy();
+        final SessionID sessionID = SessionID.fromStrategy(sessionIDUUIDStrategy);
+        final String rawJSESSIONID = sessionID.value();
         saveOnSession(httpRequest, rawJSESSIONID);
         return rawJSESSIONID;
     }

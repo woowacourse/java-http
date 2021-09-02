@@ -33,4 +33,22 @@ class LoginControllerTest {
         // then
         assertThat(response.body()).hasSize(2426);
     }
+
+    @DisplayName("로그인을 요청한다.")
+    @Test
+    void postPage() throws IOException {
+        // given
+        LoginController loginController = new LoginController();
+        HttpResponse response = new HttpResponse();
+
+        // when
+        loginController.doGet(new HttpRequest(
+            new HttpRequestLine(HttpMethod.POST, new HttpPath("index.html"), new ProtocolVersion("HTTP/1.1")),
+            new HttpHeaders("Content-Type: text/html;charset=utf-8 \r\nContent-Length: 12 \r\nCookie: io=H6Gs8jT7h07lTg94AAAA; JSESSIONID=acbd813f-eb5a-4f8d-87fe-b1737e0871a1"),
+            new HttpBody()
+        ), response);
+
+        // then
+        assertThat(response.body()).hasSize(2426);
+    }
 }

@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class HttpRequest {
     private String method;
@@ -25,15 +26,16 @@ public class HttpRequest {
         method = firstLine[0];
         path = firstLine[1];
 
-        parseParams(extractRequestBody());
-
-        parseHeaders(bufferedReader);
+        parseHeaders();
+        if (headers.containsKey("Content-Length")) {
+            parseParams(extractRequestBody());
+        }
     }
 
-    private void parseHeaders(BufferedReader bufferedReader) throws IOException {
+    private void parseHeaders() throws IOException {
         while (bufferedReader.ready()) {
             String line = bufferedReader.readLine();
-            if (line == null || "".equals(line)) {
+            if (Objects.isNull(line) || line.isEmpty()) {
                 return;
             }
             String[] header = line.split(": ");

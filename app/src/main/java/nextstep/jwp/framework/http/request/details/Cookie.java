@@ -4,6 +4,7 @@ import nextstep.jwp.framework.http.common.HttpSession;
 import nextstep.jwp.framework.http.common.HttpSessions;
 import nextstep.jwp.framework.http.request.util.CookieValueExtractor;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -14,7 +15,11 @@ public class Cookie {
 
     private final Map<String, String> cookieValues;
 
-    private Cookie(final Map<String, String> cookieValues) {
+    public Cookie() {
+        this.cookieValues = new HashMap<>();
+    }
+
+    public Cookie(final Map<String, String> cookieValues) {
         this.cookieValues = cookieValues;
     }
 
@@ -32,10 +37,7 @@ public class Cookie {
         if (Objects.isNull(session)) {
             final String sessionId = UUID.randomUUID().toString();
             cookieValues.put(JSESSIONID, sessionId);
-
-            final HttpSession httpSession = new HttpSession(sessionId);
-            HttpSessions.addSession(sessionId, httpSession);
-            return httpSession;
+            return HttpSession.of(sessionId);
         }
         return session;
     }

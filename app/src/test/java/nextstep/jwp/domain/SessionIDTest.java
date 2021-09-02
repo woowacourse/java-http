@@ -9,14 +9,20 @@ class SessionIDTest {
     @Test
     void value() {
         //given
-        String pureToken = "Token";
-        SessionIDManualStrategy sessionIDManualStrategy = new SessionIDManualStrategy("Token");
+        String pureSessionID = "SessionID";
+        SessionIDUUIDStrategy sessionIDManualStrategy = new SessionIDUUIDStrategy(){
+            private final String value = pureSessionID;
+            @Override
+            public String token() {
+                return this.value;
+            }
+        };
         SessionID sessionID = SessionID.fromStrategy(sessionIDManualStrategy);
 
         //when
         String tokenValue = sessionID.value();
 
         //then
-        assertThat(tokenValue).isEqualTo(pureToken);
+        assertThat(tokenValue).isEqualTo(pureSessionID);
     }
 }

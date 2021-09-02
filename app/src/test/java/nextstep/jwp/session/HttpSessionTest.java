@@ -9,8 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 class HttpSessionTest {
 
-    HttpSession httpSession = new HttpSession("656cef62-e3c4-40bc-a8df-94732920ed46");
-    User user = new User(1, "account", "password", "email@email.com");
+    private final HttpSession httpSession = new HttpSession("656cef62-e3c4-40bc-a8df-94732920ed46");
+    private final User user = new User(1, "account", "password", "email@email.com");
 
     @Test
     void setAndGet() {

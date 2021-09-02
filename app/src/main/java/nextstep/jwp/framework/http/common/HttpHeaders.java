@@ -48,10 +48,6 @@ public class HttpHeaders {
         cookie.addCookies(cookies);
     }
 
-    public void addCookie(String key, String value) {
-        cookie.addCookie(key, value);
-    }
-
     public String cookieToString() {
         return cookie.toString();
     }

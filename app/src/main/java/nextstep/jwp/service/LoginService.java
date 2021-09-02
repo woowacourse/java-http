@@ -14,13 +14,7 @@ public class LoginService {
 
     public void loginByGet(Request request) {
         try {
-            Map<String, String> queries = request.getQueries();
-            String account = queries.get(ACCOUNT);
-            String password = queries.get(PASSWORD);
-            User user = getUser(account);
-            checkPassword(user, password);
-            Session session = request.getSession();
-            session.setAttribute("user", user);
+            login(request.getQueries(), request.getSession());
         } catch (IndexOutOfBoundsException | NullPointerException exception) {
             throw new LoginException();
         }
@@ -28,16 +22,18 @@ public class LoginService {
 
     public void loginByPost(Request request) {
         try {
-            Map<String, String> queries = request.getBody().queries();
-            String account = queries.get(ACCOUNT);
-            String password = queries.get(PASSWORD);
-            User user = getUser(account);
-            checkPassword(user, password);
-            Session session = request.getSession();
-            session.setAttribute("user", user);
+            login(request.getBody().queries(), request.getSession());
         } catch (IndexOutOfBoundsException | NullPointerException exception) {
             throw new LoginException();
         }
+    }
+
+    private void login(Map<String, String> queries, Session session) {
+        String account = queries.get(ACCOUNT);
+        String password = queries.get(PASSWORD);
+        User user = getUser(account);
+        checkPassword(user, password);
+        session.setAttribute("user", user);
     }
 
     private void checkPassword(User user, String password) {

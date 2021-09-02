@@ -13,7 +13,8 @@ public class Http {
     public static final String AND_PERCENT_SEPARATOR = "&";
     public static final String EQUAL_SEPARATOR = "=";
     public static final String COLUMN_SEPARATOR = ":";
-    public static final String SEMI_COLUMN_SEPARATOR = ":";
+    public static final String SEMI_COLUMN_SEPARATOR = ";";
+    public static final String JSESSIONID = "JSESSIONID";
 
     private Http() {
     }

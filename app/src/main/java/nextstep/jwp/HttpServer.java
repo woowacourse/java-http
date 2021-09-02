@@ -13,6 +13,7 @@ import nextstep.jwp.controller.MappingHandler;
 import nextstep.jwp.exception.BadRequestException;
 import nextstep.jwp.exception.PageNotFoundException;
 import nextstep.jwp.exception.UnauthorizedException;
+import nextstep.jwp.request.HttpCookie;
 import nextstep.jwp.request.RequestBody;
 import nextstep.jwp.request.RequestHeader;
 import nextstep.jwp.request.RequestLine;
@@ -31,6 +32,10 @@ public class HttpServer {
         this.reader = new BufferedReader(new InputStreamReader(inputStream));
         final RequestLine requestLine = new RequestLine(extractRequestLine());
         this.headers = new RequestHeader(extractHeaders());
+        if(headers.contains(Header.COOKIE.getKey())){
+            HttpCookie httpCookie = new HttpCookie(headers.get(Header.COOKIE.getKey()));
+            System.out.println(httpCookie.get(Http.JSESSIONID));
+        }
         final RequestBody requestBody = new RequestBody(extractRequestBody());
         this.mappingHandler = new MappingHandler(requestLine, requestBody);
     }

@@ -4,7 +4,8 @@ public enum Header {
     CONTENT_LENGTH("Content-Length"),
     LOCATION("Location"),
     CONTENT_TYPE("Content-Type"),
-    SET_COOKIE("Set-Cookie");
+    SET_COOKIE("Set-Cookie"),
+    COOKIE("Cookie");
 
     private final String key;
 

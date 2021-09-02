@@ -44,7 +44,9 @@ public class ExceptionResolverContainer {
             httpResponse.addStatus(StatusCode.SERVER_ERROR);
             httpResponse.addPage("static/500.html");
             httpResponse.flush();
-            exception.printStackTrace();
+            for (StackTraceElement stackTraceElement : exception.getStackTrace()) {
+                log.error(stackTraceElement.toString());
+            }
         } catch (NoFileExistsException e) {
             throw new IllegalStateException("unknown exception");
         }

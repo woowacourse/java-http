@@ -5,12 +5,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class HttpRequest {
 
     private HttpHeaders httpHeaders = new HttpHeaders();
     private HttpMethod httpMethod;
     private HttpCookie httpCookie = new HttpCookie();
+    private HttpSession httpSession;
     private QueryParams queryParams = new QueryParams();
     private FormBody body = new FormBody();
     private String uri;
@@ -52,7 +54,21 @@ public class HttpRequest {
             lines.add(line);
         }
         httpHeaders = new HttpHeaders(lines);
+
         initCookie();
+        initSession();
+    }
+
+    private void initSession() {
+        httpSession = Objects.requireNonNullElseGet(getSessionById(), () -> {
+            HttpSession session = new HttpSession(UUID.randomUUID().toString());
+            HttpSessions.setSession(session);
+            return session;
+        });
+    }
+
+    private HttpSession getSessionById() {
+        return HttpSessions.getSession(getCookie(HttpSessions.JSESSIONID));
     }
 
     private void initCookie() {
@@ -85,12 +101,16 @@ public class HttpRequest {
         return httpMethod;
     }
 
+    public HttpSession getSession() {
+        return httpSession;
+    }
+
     public String getCookie(String cookie) {
         return httpCookie.get(cookie);
     }
 
     public boolean containsCookie(String cookie) {
-        return Objects.nonNull(httpCookie.get(cookie));
+        return Objects.nonNull(getCookie(cookie));
     }
 
     public String getQueryParam(String param) {

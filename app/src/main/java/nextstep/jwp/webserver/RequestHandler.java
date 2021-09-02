@@ -39,7 +39,7 @@ public class RequestHandler implements Runnable {
             }
 
             final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
-            writer.write(httpResponse.readAsString());
+            writer.write(httpResponse.toHttpMessage());
             writer.flush();
         } catch (IOException ioException) {
             log.error("Exception stream", ioException);

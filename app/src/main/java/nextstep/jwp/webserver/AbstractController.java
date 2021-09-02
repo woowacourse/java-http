@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public abstract class AbstractController implements Controller {
 
@@ -13,10 +14,13 @@ public abstract class AbstractController implements Controller {
         HttpMethod method = request.getHttpMethod();
         if (HttpMethod.GET == method) {
             doGet(request, response);
+            return;
         }
         if (HttpMethod.POST == method) {
             doPost(request, response);
+            return;
         }
+        setSessionIdInCookie(request, response);
     }
 
     protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
@@ -27,12 +31,18 @@ public abstract class AbstractController implements Controller {
         throw new MethodNotAllowedException();
     }
 
-    protected String readStaticFile(String fileName) {
-        URL resource = getClass().getClassLoader().getResource("static/" + fileName);
-
-        if (resource == null) {
-            throw new RuntimeException();
+    private void setSessionIdInCookie(HttpRequest request, HttpResponse response) {
+        if (!request.containsCookie(HttpSessions.JSESSIONID)) {
+            response.addHeaders("Set-Cookie", HttpSessions.JSESSIONID + "=" + request.getSession().getId());
         }
+    }
+
+    protected String readStaticFile(String fileName) {
+        URL resource = Objects.requireNonNullElseGet(
+                FileReader.getStaticFileUrl(fileName), () -> {
+                    throw new RuntimeException();
+                });
+
         Path path = new File(resource.getPath()).toPath();
 
         try {

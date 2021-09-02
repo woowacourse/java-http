@@ -28,14 +28,21 @@ public class HttpResponse {
         return FileReader.readStaticFile("500.html");
     }
 
-    public String readAsString() {
-        setContentLength();
+    public void setBody(String body) {
+        this.body = body;
+    }
 
-        return String.join("\r\n",
-                "HTTP/1.1 " + statusCode.getString(),
-                headers.getString(),
-                "",
-                Objects.requireNonNullElse(body, ""));
+    public void setStatusCode(StatusCode statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void addHeaders(String key, String value) {
+        headers.set(key, value);
+    }
+
+    public String toHttpMessage() {
+        setContentLength();
+        return convertToHttpMessage();
     }
 
     private void setContentLength() {
@@ -48,15 +55,23 @@ public class HttpResponse {
         return Objects.nonNull(body) && body.length() > 0;
     }
 
-    public void setBody(String body) {
-        this.body = body;
+    private String convertToHttpMessage() {
+        return String.join("\r\n",
+                statusLine(),
+                headers(),
+                "",
+                body());
     }
 
-    public void setStatusCode(StatusCode statusCode) {
-        this.statusCode = statusCode;
+    private String statusLine() {
+        return "HTTP/1.1 " + statusCode.getString();
     }
 
-    public void addHeaders(String key, String value) {
-        headers.set(key, value);
+    private String headers() {
+        return headers.getString();
+    }
+
+    private String body() {
+        return Objects.requireNonNullElse(body, "");
     }
 }

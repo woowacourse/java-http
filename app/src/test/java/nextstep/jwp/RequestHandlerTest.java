@@ -151,8 +151,8 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    private String getResponseBody(String path) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource(path);
+    private String getResponseBody(String fileName) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource(fileName);
         return new String(Files.readAllBytes(
                 new File(Objects.requireNonNull(resource).getFile()).toPath()));
     }

@@ -1,6 +1,9 @@
 package nextstep.jwp.application.controller;
 
-import nextstep.jwp.webserver.*;
+import nextstep.jwp.webserver.AbstractController;
+import nextstep.jwp.webserver.HttpRequest;
+import nextstep.jwp.webserver.HttpResponse;
+import nextstep.jwp.webserver.StatusCode;
 
 public class StaticFileController extends AbstractController {
 

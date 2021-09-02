@@ -63,16 +63,8 @@ public class HttpRequest {
         return requestHeaders;
     }
 
-    public String requestBody() {
-        return requestBody;
-    }
-
     public QueryParams requestParam() {
         return QueryParams.of(requestBody);
-    }
-
-    public boolean isGet() {
-        return requestLine.method().isGet();
     }
 
     public SourcePath sourcePath() {
@@ -89,9 +81,8 @@ public class HttpRequest {
 
     public HttpSession getSession() {
         HttpCookie cookie = httpCookie();
-        if(cookie.hasSessionId()){
-            String sessionId = cookie.getSessionId();
-            return HttpSessions.getSession(sessionId);
+        if (cookie.hasSessionId() && HttpSessions.has(cookie.getSessionId())) {
+            return HttpSessions.getSession(cookie.getSessionId());
         }
         return HttpSession.create();
     }

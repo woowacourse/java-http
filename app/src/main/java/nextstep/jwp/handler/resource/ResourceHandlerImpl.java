@@ -2,6 +2,7 @@ package nextstep.jwp.handler.resource;
 
 import nextstep.jwp.ServerConfig;
 import nextstep.jwp.handler.modelandview.ModelAndView;
+import nextstep.jwp.http.request.HttpMethod;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.SourcePath;
 import nextstep.jwp.http.response.HttpResponse;
@@ -15,7 +16,8 @@ public class ResourceHandlerImpl implements ResourceHandler {
     private static final String RESOURCE_BASE_PATH = ServerConfig.RESOURCE_BASE_PATH;
 
     public boolean mapping(HttpRequest httpRequest) {
-        return (httpRequest.isGet() && isExistResource(httpRequest.sourcePath()));
+        HttpMethod httpMethod = httpRequest.httpMethod();
+        return (httpMethod.isGet() && isExistResource(httpRequest.sourcePath()));
     }
 
     @Override

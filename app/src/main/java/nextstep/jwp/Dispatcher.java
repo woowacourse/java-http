@@ -38,10 +38,8 @@ public class Dispatcher {
             Handler handler = handlerMappers.mapping(request);
             return handler.handle(request, response);
         } catch (NotFoundException notFoundException) {
-            log.debug(notFoundException.getMessage());
             return ModelAndView.of("/404.html", HttpStatus.NOT_FOUND);
         } catch (Exception exception) {
-            log.debug(exception.getMessage());
             return ModelAndView.of("/500.html", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

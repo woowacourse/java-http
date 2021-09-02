@@ -18,7 +18,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected ModelAndView doPost(HttpRequest request, HttpResponse response) {
-        QueryParams params = QueryParams.of(request.requestBody());
+        QueryParams params = request.requestParam();
         User user = new User(params.get("account"), params.get("password"), params.get("email"));
 
         if (InMemoryUserRepository.findByAccount(user.getAccount()).isEmpty()) {

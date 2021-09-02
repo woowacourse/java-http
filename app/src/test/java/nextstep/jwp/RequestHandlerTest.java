@@ -70,9 +70,9 @@ public class RequestHandlerTest {
                 Arguments.of("/login", "account=&password=password", "/401.html"),
                 Arguments.of("/login", "account=gugu&password=passwor", "/401.html"),
                 Arguments.of("/login", "account=ggu&password=password", "/401.html"),
-                Arguments.of("/regoster", "account=gugu&password=passwor&email=", "/404.html"),
-                Arguments.of("/regoster", "account=gugu&password=&email=test@test.com", "/404.html"),
-                Arguments.of("/regoster", "account=&password=&email=test@test.com", "/404.html"),
+                Arguments.of("/register", "account=gugu&password=passwor&email=", "/401.html"),
+                Arguments.of("/register", "account=gugu&password=&email=test@test.com", "/401.html"),
+                Arguments.of("/register", "account=&password=&email=test@test.com", "/401.html"),
                 Arguments.of("/ishavePage", "", "/404.html"),
                 Arguments.of("/ishavePage", "account", "/404.html"),
                 Arguments.of("/is.html", "account", "/404.html")

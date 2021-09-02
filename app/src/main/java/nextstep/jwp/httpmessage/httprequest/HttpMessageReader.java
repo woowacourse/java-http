@@ -18,7 +18,6 @@ public class HttpMessageReader {
 
     private static final String HEADER_DELIMITER = ": ";
 
-    private final BufferedReader bufferedReader;
     private final String startLine;
     private final Map<String, String> headers;
     private final Map<String, String> parameters;
@@ -32,10 +31,9 @@ public class HttpMessageReader {
     }
 
     public HttpMessageReader(BufferedReader reader) {
-        this.bufferedReader = reader;
-        this.startLine = initializeStartLine();
-        this.headers = initializeHeaders();
-        this.parameters = initializeParameters();
+        this.startLine = initializeStartLine(reader);
+        this.headers = initializeHeaders(reader);
+        this.parameters = initializeParameters(reader);
     }
 
     public String getStartLine() {
@@ -50,7 +48,7 @@ public class HttpMessageReader {
         return parameters;
     }
 
-    private String initializeStartLine() {
+    private String initializeStartLine(BufferedReader bufferedReader) {
         try {
             final String requestLine = bufferedReader.readLine();
             if (Objects.isNull(requestLine) || requestLine.isEmpty()) {
@@ -62,7 +60,7 @@ public class HttpMessageReader {
         }
     }
 
-    private Map<String, String> initializeHeaders() {
+    private Map<String, String> initializeHeaders(BufferedReader bufferedReader) {
         try {
             Map<String, String> httpRequestHeaders = new HashMap<>();
             while (bufferedReader.ready()) {
@@ -82,12 +80,12 @@ public class HttpMessageReader {
         }
     }
 
-    private Map<String, String> initializeParameters() {
+    private Map<String, String> initializeParameters(BufferedReader bufferedReader) {
         final String contentLengthString = headers.get("Content-Length");
         if (Objects.isNull(contentLengthString)) {
             return Collections.emptyMap();
         }
-        final String extractedQueryString = extractQueryStringString(contentLengthString);
+        final String extractedQueryString = extractQueryStringString(contentLengthString, bufferedReader);
         if (!extractedQueryString.contains("=")) {
             return Collections.emptyMap();
         }
@@ -96,7 +94,7 @@ public class HttpMessageReader {
                 .collect(Collectors.toMap(it -> it[0], it -> it[1]));
     }
 
-    private String extractQueryStringString(String contentLengthString) {
+    private String extractQueryStringString(String contentLengthString, BufferedReader bufferedReader) {
         try {
             final int contentLength = Integer.parseInt(contentLengthString);
             final char[] buffer = new char[contentLength];

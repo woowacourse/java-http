@@ -22,7 +22,7 @@ public class FrontController {
 
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) {
         final String requestPath = httpRequest.getPath();
-        final Controller controller = controllerMap.get(requestPath);
+        final Controller controller = controllerMap.getOrDefault(requestPath, new RedirectController());
 
         try {
             if (ContentType.containValueByUrl(requestPath)) {
@@ -30,13 +30,6 @@ public class FrontController {
                 view.render(httpRequest, httpResponse);
                 return;
             }
-
-            if (Objects.isNull(controller)) {
-                httpResponse.setHttpStatusCode(HttpStatusCode.NOT_FOUND);
-                errorResolver(httpRequest, httpResponse);
-                return;
-            }
-
             ModelView modelView = controller.process(httpRequest, httpResponse);
             View view = new View(modelView.getViewName());
             view.render(httpRequest, httpResponse);

@@ -18,9 +18,10 @@ public class HttpRequestReader {
 
         String line = reader.readLine();
 
-        final String[] request = line.split(" ");
-        final String requestMethod = request[0];
-        final String requestUri = request[1];
+        final String[] requestLine = line.split(" ");
+        final String requestMethod = requestLine[0];
+        final String requestUri = requestLine[1];
+        final String requestProtocol = requestLine[2];
 
         final Map<String, String> requestHeaders = new LinkedHashMap<>();
         int contentLength = 0;
@@ -38,7 +39,7 @@ public class HttpRequestReader {
 
         String requestBody = readRequestBody(reader, contentLength);
 
-        return new HttpRequest(requestMethod, requestUri, requestHeaders, requestBody);
+        return new HttpRequest(requestMethod, requestUri, requestProtocol, requestHeaders, requestBody);
     }
 
     private static String readRequestBody(BufferedReader reader, int contentLength) throws IOException {

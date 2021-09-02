@@ -2,29 +2,39 @@ package nextstep.jwp.http;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class HttpResponse {
 
     private static final String HTTP_LINE_SEPERATOR = "\r\n";
+    private static final int COOKIE_VALUE_INDEX = 1;
+    private static final int COOKIE_KEY_INDEX = 0;
+    private static final String HEADER_KEY_OF_JSESSIONID = "JSESSIONID";
+    private static final String HEADER_KEY_OF_SET_COOKIE = "Set-Cookie";
     private HttpStatus status;
     private String body;
     private Map<String, String> headers = new HashMap<>();
+    private Cookies cookies = new Cookies();
 
     public HttpResponse() {
         this.status = HttpStatus.OK;
     }
 
-    public HttpResponse(HttpStatus status) {
-        this(status, "");
-    }
-
-    public HttpResponse(HttpStatus status, String body) {
-        this.status = status;
-        this.body = body;
-    }
-
     public void putHeader(String key, String value) {
+        if (key.equals(HEADER_KEY_OF_SET_COOKIE)) {
+            String[] split = value.split("=");
+            putCookie(split[COOKIE_KEY_INDEX], split[COOKIE_VALUE_INDEX]);
+            return;
+        }
         headers.put(key, value);
+    }
+
+    public void putCookie(String key, String value) {
+        cookies.putCookie(key, value);
+    }
+
+    private String getCookieAsString() {
+        return cookies.asString();
     }
 
     public byte[] getBytes() {
@@ -61,6 +71,7 @@ public class HttpResponse {
 
     private String makeHeaderLines() {
         StringBuilder sb = new StringBuilder();
+        headers.put(HEADER_KEY_OF_SET_COOKIE, getCookieAsString());
         headers.forEach((key, value) -> {
             sb.append(key);
             sb.append(": ");
@@ -68,5 +79,11 @@ public class HttpResponse {
             sb.append(HTTP_LINE_SEPERATOR);
         });
         return sb.toString();
+    }
+
+    public String createJSessionId() {
+        String jSessionId = UUID.randomUUID().toString();
+        cookies.putCookie(HEADER_KEY_OF_JSESSIONID, jSessionId);
+        return jSessionId;
     }
 }

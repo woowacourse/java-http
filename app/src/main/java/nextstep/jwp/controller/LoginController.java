@@ -4,22 +4,35 @@ import java.util.Map;
 import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.CustomException;
+import nextstep.jwp.http.FileReaderInStaticFolder;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.HttpSession;
+import nextstep.jwp.http.HttpSessions;
 import nextstep.jwp.http.HttpStatus;
-import nextstep.jwp.http.FileReaderInStaticFolder;
 import nextstep.jwp.model.User;
 
 public class LoginController extends AbstractController {
 
     private static final String LOGIN_URI = "/login";
+    private static final String COOKIE_KEY_OF_JSESSIONID = "JSESSIONID";
 
     @Override
     public void doGet(HttpRequest request, HttpResponse response) {
-        FileReaderInStaticFolder fileReaderInStaticFolder = new FileReaderInStaticFolder();
-        String htmlOfLogin = fileReaderInStaticFolder.read("login.html");
         response.setStatus(HttpStatus.OK);
-        response.setBody(htmlOfLogin);
+        HttpSession session = request.getSession();
+        response.putCookie(COOKIE_KEY_OF_JSESSIONID, session.getId());
+        if (Objects.nonNull(session.getAttribute("user"))) {
+            redirect(response, "index.html");
+            return;
+        }
+        redirect(response, "login.html");
+    }
+
+    private void redirect(HttpResponse response, String redirectPage) {
+        FileReaderInStaticFolder fileReaderInStaticFolder = new FileReaderInStaticFolder();
+        String htmlOfIndex = fileReaderInStaticFolder.read(redirectPage);
+        response.setBody(htmlOfIndex);
     }
 
     @Override
@@ -37,6 +50,10 @@ public class LoginController extends AbstractController {
         if (user.checkPassword(password)) {
             response.setStatus(HttpStatus.FOUND);
             response.putHeader("Location", "/index.html");
+
+            HttpSession session = request.getSession();
+            session.setAttribute("user", user);
+            HttpSessions.put(session);
             return;
         }
         String htmlOf401 = fileReaderInStaticFolder.read("401.html");

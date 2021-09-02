@@ -22,15 +22,7 @@ public class HttpRequest {
 
         this.requestLine = RequestLine.of(bufferedReader);
         this.headers = HttpHeaders.of(bufferedReader);
-        this.body = HttpBody.of(bufferedReader, contentLength());
-    }
-
-    private int contentLength() {
-        final String contentLengthAsString = this.headers.get("Content-Length");
-        if (contentLengthAsString == null) {
-            return 0;
-        }
-        return Integer.parseInt(this.headers.get("Content-Length"));
+        this.body = HttpBody.of(bufferedReader, this.headers.getContentLength());
     }
 
     public HttpMethod getHttpMethod() {
@@ -52,16 +44,30 @@ public class HttpRequest {
     public HttpSession getSession() {
         final Cookies cookies = getCookies();
         final String sessionId = cookies.get("JSESSIONID");
-        if (sessionId == null) {
-            final UUID id = UUID.randomUUID();
-            final HttpSession session = new HttpSession(id);
-            HttpSessions.setSession(session);
-            return session;
+        if (doesNotExist(sessionId)) {
+            return createSession();
         }
         if (HttpSessions.doesNotContain(sessionId)) {
-            HttpSessions.setSession(sessionId);
+            return includeSession(sessionId);
         }
         return HttpSessions.getSession(sessionId);
+    }
+
+    private boolean doesNotExist(String sessionId) {
+        return sessionId == null;
+    }
+
+    private HttpSession createSession() {
+        final UUID id = UUID.randomUUID();
+        final HttpSession session = new HttpSession(id);
+        HttpSessions.setSession(session);
+        return session;
+    }
+
+    private HttpSession includeSession(String sessionId) {
+        final HttpSession session = new HttpSession(sessionId);
+        HttpSessions.setSession(session);
+        return session;
     }
 
     public Map<String, String> getBodyAsMap() {

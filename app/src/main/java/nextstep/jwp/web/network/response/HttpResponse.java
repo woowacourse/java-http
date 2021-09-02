@@ -9,26 +9,25 @@ import java.util.stream.Collectors;
 
 public class HttpResponse {
 
-    private static final String RESPONSE_FORMAT = "%s\r\n%s\r\n\r\n%s";
-    private static final String HEADER_FORMAT = "%s: %s ";
+    private static final String DEFAULT_BODY = "";
 
-    private StatusLine statusLine;
+    private final StatusLine statusLine;
     private final Map<String, String> headers;
     private String body;
 
     public HttpResponse() {
         this.statusLine = new StatusLine(HttpStatus.OK);
         this.headers = new LinkedHashMap<>();
-        this.body = "";
+        this.body = DEFAULT_BODY;
     }
 
     public String print() {
-        return String.format(RESPONSE_FORMAT, statusLine.print(), headersFields(), body);
+        return String.format("%s\r%n%s\r%n\r%n%s", statusLine.print(), headersFields(), body);
     }
 
     private String headersFields() {
         return headers.entrySet().stream()
-                .map(entry -> String.format(HEADER_FORMAT, entry.getKey(), entry.getValue()))
+                .map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
                 .collect(Collectors.joining("\r\n"));
 
     }

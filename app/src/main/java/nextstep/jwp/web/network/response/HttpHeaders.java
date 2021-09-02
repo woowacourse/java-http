@@ -11,6 +11,7 @@ import java.util.Map;
 public class HttpHeaders {
 
     private static final String COOKIES = "Cookie";
+    private static final String CONTENT_LENGTH = "Content-Length";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
     private static final String DEFAULT_HEADER_VALUE = null;
@@ -45,6 +46,18 @@ public class HttpHeaders {
 
     public Cookies getCookies() {
         return Cookies.of(headers.getOrDefault(COOKIES, DEFAULT_HEADER_VALUE));
+    }
+
+    public int getContentLength() {
+        final String contentLengthAsString = this.headers.get(CONTENT_LENGTH);
+        if (doesNotExist(contentLengthAsString)) {
+            return 0;
+        }
+        return Integer.parseInt(contentLengthAsString);
+    }
+
+    private boolean doesNotExist(String contentLengthAsString) {
+        return contentLengthAsString == null;
     }
 
     public void setHeader(String key, String value) {

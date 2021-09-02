@@ -1,9 +1,14 @@
 package nextstep.jwp.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.UUID;
 import nextstep.jwp.exception.UnauthorizedException;
+import nextstep.jwp.http.HttpSession;
+import nextstep.jwp.http.HttpSessions;
+import nextstep.jwp.http.Request;
 import nextstep.jwp.model.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,5 +42,38 @@ class LoginServiceTest {
 
         assertThatThrownBy(() -> LOGIN_SERVICE.login(user))
             .isInstanceOf(UnauthorizedException.class);
+    }
+
+    @Test
+    @DisplayName("로그인이 되어있는지 확인있다면 true 를 반환한다..")
+    void isLoginTrue() {
+        // given
+        String uuid = UUID.randomUUID().toString();
+        HttpSession httpSession = new HttpSession(uuid);
+
+        // when
+        HttpSessions.add(uuid, httpSession);
+        Request request = new Request.Builder()
+            .httpSession(httpSession)
+            .build();
+
+        // then
+        assertThat(LOGIN_SERVICE.isLogin(request)).isTrue();
+    }
+
+    @Test
+    @DisplayName("로그인이 되어있는지 확인있다면 false 를 반환한다.")
+    void isLoginFalse() {
+        // given
+        String uuid = UUID.randomUUID().toString();
+        HttpSession httpSession = new HttpSession(uuid);
+
+        // when
+        Request request = new Request.Builder()
+            .httpSession(httpSession)
+            .build();
+
+        // then
+        assertThat(LOGIN_SERVICE.isLogin(request)).isFalse();
     }
 }

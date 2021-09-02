@@ -10,8 +10,8 @@ import java.util.stream.Stream;
 public class RequestBody {
     private static final String REQUEST_BODY_PARAMS_SPLIT_REGEX = "&";
     private static final String REQUEST_BODY_PARAM_KEY_VALUE_SPLIT_REGEX = "=";
-    private static final int KEY_INDEX_OF_SPLIT = 0;
-    private static final int VALUE_INDEX_OF_SPLIT = 1;
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> body;
 
@@ -33,7 +33,7 @@ public class RequestBody {
     private static Map<String, String> extractParameters(String requestBody) {
         return Stream.of(requestBody.split(REQUEST_BODY_PARAMS_SPLIT_REGEX))
                 .map(parameter -> parameter.split(REQUEST_BODY_PARAM_KEY_VALUE_SPLIT_REGEX, 2))
-                .collect(Collectors.toMap(parameter -> parameter[KEY_INDEX_OF_SPLIT], parameter -> parameter[VALUE_INDEX_OF_SPLIT]));
+                .collect(Collectors.toMap(parameter -> parameter[KEY_INDEX], parameter -> parameter[VALUE_INDEX]));
     }
 
     public static RequestBody empty() {

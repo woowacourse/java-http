@@ -13,7 +13,6 @@ class QueryParameterExtractorTest {
     @Test
     void extract() {
         final Map<String, String> extracted = QueryParameterExtractor.extract("key1=value1&key2=value2");
-        assertThat(extracted).containsEntry("key1", "value1");
-        assertThat(extracted).containsEntry("key2", "value2");
+        assertThat(extracted).containsEntry("key1", "value1").containsEntry("key2", "value2");
     }
 }

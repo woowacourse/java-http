@@ -21,6 +21,6 @@ class RequestUrlTest {
     void requestUrl() {
         final RequestUrl requestUrl = RequestUrl.of("/hello");
         assertThat(requestUrl.getUrl()).isEqualTo("/hello");
-        assertThat(requestUrl.getQueryParam()).isEqualTo(null);
+        assertThat(requestUrl.getQueryParam()).isNull();
     }
 }

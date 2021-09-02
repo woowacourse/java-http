@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import static nextstep.jwp.framework.http.common.Constants.HTTP_HEADER_SEPARATOR;
 import static nextstep.jwp.framework.http.common.Constants.NEWLINE;
@@ -28,13 +29,13 @@ public class RequestParser {
     }
 
     public HttpRequest extractHttpRequest() throws IOException {
-        final StringBuilder httpRequestHeader = new StringBuilder();
+        final StringJoiner httpRequestHeader = new StringJoiner(NEWLINE);
         String line;
         while ((line = bufferedReader.readLine()) != null) {
             if (line.length() == 0) {
                 break;
             }
-            httpRequestHeader.append(line).append(NEWLINE);
+            httpRequestHeader.add(line);
         }
         return parseClientRequest(httpRequestHeader.toString());
     }

@@ -3,7 +3,6 @@ package nextstep.jwp.framework.http.request.details;
 import nextstep.jwp.framework.http.request.util.QueryParameterExtractor;
 
 import java.util.Map;
-import java.util.Objects;
 
 import static nextstep.jwp.framework.http.common.Constants.BLANK;
 

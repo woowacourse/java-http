@@ -27,7 +27,7 @@ class HttpRequestTest {
         assertThat(httpRequest.getRequestUrl().getQueryParam().searchValue("key1")).isEqualTo("value1");
         assertThat(httpRequest.getRequestUrl().getQueryParam().searchValue("key2")).isEqualTo("value2");
         assertThat(httpRequest.getProtocolVersion()).isEqualTo(ProtocolVersion.defaultVersion());
-        assertThat(httpRequest.getRequestHttpHeader().getRequestHttpHeaderMap().get("Content-Length")).isEqualTo("9");
+        assertThat(httpRequest.getRequestHttpHeader().getRequestHttpHeaderMap()).containsEntry("Content-Length", "9");
         assertThat(httpRequest.searchRequestBody("key3")).isEqualTo("value3");
     }
 }

@@ -21,8 +21,8 @@ public class HttpCookie {
 
     private static Map<String, String> parseCookie(String cookieString) {
         Map<String, String> cookie = new HashMap<>();
-        for (String queryString : cookieString.split(";")) {
-            putCookie(cookie, queryString.trim());
+        for (String cookieEntity : cookieString.split(";")) {
+            putCookie(cookie, cookieEntity.trim());
         }
         return cookie;
     }

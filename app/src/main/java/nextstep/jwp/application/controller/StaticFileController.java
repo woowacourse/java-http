@@ -6,16 +6,15 @@ public class StaticFileController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        String[] paths = request.getUri().split("\\.");
-        String extension = paths[paths.length - 1];
-
         String body = readStaticFile(request.getUri());
+        response.addHeaders("Content-Type", getContentType(parseExtension(request)) + ";charset=utf-8");
         response.setStatusCode(StatusCode._200_OK);
         response.setBody(body);
+    }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", getContentType(extension) + ";charset=utf-8");
-        response.setHeaders(headers);
+    private String parseExtension(HttpRequest request) {
+        String[] paths = request.getUri().split("\\.");
+        return paths[paths.length - 1];
     }
 
     @Override

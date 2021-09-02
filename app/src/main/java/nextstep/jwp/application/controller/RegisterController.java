@@ -20,9 +20,7 @@ public class RegisterController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String body = readStaticFile("register.html");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", getContentType("html") + ";charset=utf-8");
-        response.setHeaders(headers);
+        response.addHeaders("Content-Type", getContentType("html") + ";charset=utf-8");
         response.setStatusCode(StatusCode._200_OK);
         response.setBody(body);
     }
@@ -36,9 +34,7 @@ public class RegisterController extends AbstractController {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
+        response.addHeaders("Location", "/index.html");
         response.setStatusCode(StatusCode._302_FOUND);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Location", "/index.html");
-        response.setHeaders(headers);
     }
 }

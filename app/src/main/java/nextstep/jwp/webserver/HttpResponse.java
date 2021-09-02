@@ -1,5 +1,7 @@
 package nextstep.jwp.webserver;
 
+import java.util.Objects;
+
 public class HttpResponse {
 
     private StatusCode statusCode = StatusCode._200_OK;
@@ -9,9 +11,7 @@ public class HttpResponse {
     public static void errorPage(BaseException baseException, HttpResponse response) {
         String body = readErrorPage(baseException);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "text/html;charset=utf-8");
-        response.setHeaders(headers);
+        response.addHeaders("Content-Type", "text/html;charset=utf-8");
         response.setStatusCode(StatusCode._302_FOUND);
         response.setBody(body);
     }
@@ -28,23 +28,24 @@ public class HttpResponse {
         return FileReader.readStaticFile("500.html");
     }
 
-    private void setDefaultHeaders() {
-        if (body != null && body.length() > 0) {
+    public String readAsString() {
+        setContentLength();
+
+        return String.join("\r\n",
+                "HTTP/1.1 " + statusCode.getString(),
+                headers.getString(),
+                "",
+                Objects.requireNonNullElse(body, ""));
+    }
+
+    private void setContentLength() {
+        if (hasBody()) {
             headers.set("Content-Length", String.valueOf(body.getBytes().length));
         }
     }
 
-    public String readAsString() {
-        setDefaultHeaders();
-
-        String response = String.join("\r\n",
-                "HTTP/1.1 " + statusCode.getString(),
-                headers.getString());
-
-        if (body != null && body.length() > 0) {
-            response = String.join("\r\n", response, "", body);
-        }
-        return response;
+    private boolean hasBody() {
+        return Objects.nonNull(body) && body.length() > 0;
     }
 
     public void setBody(String body) {
@@ -55,7 +56,7 @@ public class HttpResponse {
         this.statusCode = statusCode;
     }
 
-    public void setHeaders(HttpHeaders headers) {
-        this.headers = headers;
+    public void addHeaders(String key, String value) {
+        headers.set(key, value);
     }
 }

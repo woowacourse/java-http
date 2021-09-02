@@ -23,11 +23,8 @@ public class HttpHeaders {
 
     private static Map<String, String> parseHeaders(List<String> headerList) {
         Map<String, String> headers = new HashMap<>();
-        for (String header : headerList) {
-            if ("".equals(header)) {
-                break;
-            }
-            putHeader(headers, header);
+        for (String headerEntity : headerList) {
+            putHeader(headers, headerEntity);
         }
         return headers;
     }
@@ -43,21 +40,21 @@ public class HttpHeaders {
         return headers.get(name);
     }
 
-    public void set(String name, String value) {
-        headers.put(name, value);
+    public boolean contains(String header) {
+        return headers.containsKey(header);
     }
 
-    public String getString() {
-        return headers.keySet().stream()
-                .map(this::headerToString)
-                .collect(Collectors.joining("\r\n"));
+    public void set(String name, String value) {
+        headers.put(name, value);
     }
 
     private String headerToString(String name) {
         return name + ": " + headers.get(name);
     }
 
-    public boolean contains(String header) {
-        return headers.containsKey(header);
+    public String getString() {
+        return headers.keySet().stream()
+                .map(this::headerToString)
+                .collect(Collectors.joining("\r\n"));
     }
 }

@@ -32,22 +32,18 @@ public class HttpRequest {
     private void parseRequestLine(String requestLine) {
         String[] tokens = requestLine.split(" ");
         httpMethod = HttpMethod.from(tokens[0]);
-        parsePath(tokens[1]);
+        initUriAndQueryParams(tokens[1]);
     }
 
-    private void parsePath(String uriPath) {
-        String[] splitUri = uriPath.split("\\?");
-        uri = splitUri[0];
-
-        initQueryParams(splitUri);
-    }
-
-    private void initQueryParams(String[] splitUri) {
-        if (splitUri.length < 2) {
+    private void initUriAndQueryParams(String uriPath) {
+        int index = uriPath.indexOf("?");
+        if (index == -1) {
+            uri = uriPath;
             queryParams = new QueryParams();
             return;
         }
-        queryParams = new QueryParams(splitUri[1]);
+        uri = uriPath.substring(0, index);
+        queryParams = new QueryParams(uriPath.substring(index + 1));
     }
 
     private void initHeaders(BufferedReader br) throws IOException {
@@ -56,6 +52,10 @@ public class HttpRequest {
             lines.add(line);
         }
         httpHeaders = new HttpHeaders(lines);
+        initCookie();
+    }
+
+    private void initCookie() {
         if (httpHeaders.contains("Cookie")) {
             httpCookie = new HttpCookie(httpHeaders.get("Cookie"));
         }
@@ -87,6 +87,10 @@ public class HttpRequest {
 
     public String getCookie(String cookie) {
         return httpCookie.get(cookie);
+    }
+
+    public boolean containsCookie(String cookie) {
+        return Objects.nonNull(httpCookie.get(cookie));
     }
 
     public String getQueryParam(String param) {

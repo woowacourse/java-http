@@ -21,9 +21,7 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String body = readStaticFile("login.html");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", getContentType("html") + ";charset=utf-8");
-        response.setHeaders(headers);
+        response.addHeaders("Content-Type", getContentType("html") + ";charset=utf-8");
         response.setStatusCode(StatusCode._200_OK);
         response.setBody(body);
     }
@@ -41,9 +39,7 @@ public class LoginController extends AbstractController {
         }
         log.info("user login success : user = " + user);
 
+        response.addHeaders("Location", "/index.html");
         response.setStatusCode(StatusCode._302_FOUND);
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Location", "/index.html");
-        response.setHeaders(headers);
     }
 }

@@ -4,7 +4,6 @@ import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.RegisterException;
 import nextstep.jwp.model.domain.User;
-import nextstep.jwp.model.request.Request;
 
 public class RegisterService {
 
@@ -12,9 +11,8 @@ public class RegisterService {
     private static final String EMAIL = "email";
     private static final String PASSWORD = "password";
 
-    public void register(Request request) {
+    public void register(Map<String, String> queries) {
         try {
-            Map<String, String> queries = request.getBody().queries();
             String account = queries.get(ACCOUNT);
             String email = queries.get(EMAIL);
             String password = queries.get(PASSWORD);

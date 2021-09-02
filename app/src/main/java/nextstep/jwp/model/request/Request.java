@@ -27,10 +27,6 @@ public class Request {
         return requestLine.getMethod();
     }
 
-    public RequestBody getBody() {
-        return body;
-    }
-
     public boolean hasCookie() {
         return headers.hasCookie();
     }
@@ -57,5 +53,9 @@ public class Request {
 
     public ProtocolType getProtocol() {
         return requestLine.getProtocol();
+    }
+
+    public Map<String, String> getBodyQueries() {
+        return body.getQueries();
     }
 }

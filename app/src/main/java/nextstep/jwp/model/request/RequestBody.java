@@ -12,7 +12,7 @@ public class RequestBody {
         this.body = body;
     }
 
-    public Map<String, String> queries() {
+    public Map<String, String> getQueries() {
         return Stream.of(body.split("&"))
                 .map(x -> x.split("="))
                 .collect(Collectors.toMap(x -> x[0], x -> x[1]));

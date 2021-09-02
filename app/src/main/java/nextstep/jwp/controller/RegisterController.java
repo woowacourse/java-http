@@ -23,7 +23,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     public Response doPost(Request request) {
-        registerService.register(request);
+        registerService.register(request.getBodyQueries());
         return redirectMessage(request, PathType.INDEX.resource());
     }
 }

@@ -26,7 +26,7 @@ public class LoginController extends AbstractController {
             return redirectMessage(request, PathType.INDEX.resource());
         }
         if (request.hasQueries()) {
-            loginService.loginByGet(request);
+            loginService.login(request.getQueries(), request.getSession());
             return redirectMessage(request, PathType.INDEX.resource());
         }
         final String responseBody = createResponseBody(request.getPath() + FileType.HTML.extension());
@@ -35,7 +35,7 @@ public class LoginController extends AbstractController {
 
     @Override
     public Response doPost(Request request) {
-        loginService.loginByPost(request);
+        loginService.login(request.getBodyQueries(), request.getSession());
         return redirectMessage(request, PathType.INDEX.resource());
     }
 }

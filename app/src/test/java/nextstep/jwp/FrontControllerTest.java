@@ -10,6 +10,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.exception.controller.DuplicateRegisterException;
 import nextstep.jwp.exception.controller.UnAuthorizationException;
+import nextstep.jwp.exception.http.response.ContentTypeNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -453,6 +454,163 @@ class FrontControllerTest {
 
             // then
             assertThat(socket.output()).contains("Set-Cookie");
+        }
+    }
+
+    @DisplayName("404 예외 페이지를 조회한다. - 유효하지 않은 URI")
+    @Nested
+    class notFound {
+
+        @DisplayName("GET 요청")
+        @Test
+        void get() throws IOException {
+            // given
+            final String httpRequest = String.join("\r\n",
+                "GET /dani HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
+                "",
+                "");
+
+            final MockSocket socket = new MockSocket(httpRequest);
+            final FrontController frontController = new FrontController(socket);
+
+            // when
+            frontController.run();
+
+            // then
+            final URL resource = getClass().getClassLoader().getResource("static/404.html");
+            final byte[] fileBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+
+            String expected = "HTTP/1.1 404 NOT FOUND \r\n" +
+                "Content-Length: " + fileBytes.length + " \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "\r\n" +
+                new String(fileBytes);
+
+            assertThat(socket.output()).isEqualTo(expected);
+        }
+
+        @DisplayName("POST 요청")
+        @Test
+        void post() throws IOException {
+            // given
+            final String httpRequest = String.join("\r\n",
+                "POST /dani HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
+                "",
+                "");
+
+            final MockSocket socket = new MockSocket(httpRequest);
+            final FrontController frontController = new FrontController(socket);
+
+            // when
+            frontController.run();
+
+            // then
+            final URL resource = getClass().getClassLoader().getResource("static/404.html");
+            final byte[] fileBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+
+            String expected = "HTTP/1.1 404 NOT FOUND \r\n" +
+                "Content-Length: " + fileBytes.length + " \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "\r\n" +
+                new String(fileBytes);
+
+            assertThat(socket.output()).isEqualTo(expected);
+        }
+    }
+
+    @DisplayName("정적 파일을 조회한다.")
+    @Nested
+    class Resource {
+
+        @DisplayName("GET 요청")
+        @Test
+        void get() throws IOException {
+            // given
+            final String httpRequest = String.join("\r\n",
+                "GET /500.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
+                "",
+                "");
+
+            final MockSocket socket = new MockSocket(httpRequest);
+            final FrontController frontController = new FrontController(socket);
+
+            // when
+            frontController.run();
+
+            // then
+            final URL resource = getClass().getClassLoader().getResource("static/500.html");
+            final byte[] fileBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+
+            String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Length: " + fileBytes.length + " \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "\r\n" +
+                new String(fileBytes);
+
+            assertThat(socket.output()).isEqualTo(expected);
+        }
+
+        @DisplayName("POST 요청")
+        @Test
+        void post() throws IOException {
+            // given
+            final String httpRequest = String.join("\r\n",
+                "POST /500.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
+                "",
+                "");
+
+            final MockSocket socket = new MockSocket(httpRequest);
+            final FrontController frontController = new FrontController(socket);
+
+            // when
+            frontController.run();
+
+            // then
+            final URL resource = getClass().getClassLoader().getResource("static/400.html");
+            final byte[] fileBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+
+            String expected = "HTTP/1.1 400 BAD REQUEST \r\n" +
+                "Content-Length: " + fileBytes.length + " \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "\r\n" +
+                new String(fileBytes);
+
+            assertThat(socket.output()).isEqualTo(expected);
+        }
+
+        @DisplayName("유효하지 않은 Content Type")
+        @Test
+        void invalidContentType() {
+            // given
+            final String httpRequest = String.join("\r\n",
+                "GET /dani.png HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
+                "",
+                "");
+
+            final MockSocket socket = new MockSocket(httpRequest);
+            final FrontController frontController = new FrontController(socket);
+
+            // when
+            // then
+            assertThatCode(frontController::run)
+                .isInstanceOf(ContentTypeNotFoundException.class)
+                .hasMessage("존재하지 않는 Content-Type입니다.")
+                .hasFieldOrPropertyWithValue("httpStatus", "400");
         }
     }
 }

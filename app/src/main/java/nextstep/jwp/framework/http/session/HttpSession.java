@@ -12,23 +12,11 @@ public class HttpSession {
         this.id = id;
     }
 
-    public void removeAttribute(String name) {
-        values.remove(name);
-    }
-
-    public void invalidate() {
-        return;
-    }
-
     public String getId() {
         return id;
     }
 
     public void setAttribute(String name, Object value) {
         values.put(name, value);
-    }
-
-    public Object getAttribute(String name) {
-        return values.get(name);
     }
 }

@@ -124,10 +124,6 @@ public class HttpRequest {
         return "";
     }
 
-    public HttpMethod getMethod() {
-        return requestLine.getMethod();
-    }
-
     public URL getResource() {
         return requestLine.path().findResourceURL();
     }
@@ -138,6 +134,10 @@ public class HttpRequest {
 
     public void changeIndexPage() {
         path().changeIndexPage();
+    }
+
+    public void cookie(final String id) {
+        headers.setCookie(id);
     }
 
     public HttpRequestLine getRequestLine() {
@@ -162,9 +162,5 @@ public class HttpRequest {
         HttpSessions.putSession(httpSession);
 
         return httpSession;
-    }
-
-    public void cookie(final String id) {
-        headers.setCookie(id);
     }
 }

@@ -30,10 +30,6 @@ public class HttpRequestLine {
         return state.resource();
     }
 
-    public HttpMethod getMethod() {
-        return method;
-    }
-
     public HttpPath path() {
         return path;
     }

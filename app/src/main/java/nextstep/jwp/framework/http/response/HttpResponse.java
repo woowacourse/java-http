@@ -65,8 +65,4 @@ public class HttpResponse {
         final Path path = new File(resourceURL.getPath()).toPath();
         return Files.readString(path);
     }
-
-    public void addCookie(final String key, final String value) {
-        headers.addCookie(key, value);
-    }
 }

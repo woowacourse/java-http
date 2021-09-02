@@ -44,7 +44,7 @@ class FileTest {
      * 읽어온 파일의 내용을 I/O Stream을 사용해서 사용자에게 전달 해야 한다. File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() throws IOException { //TODO jar 에서도 테스트 통과하는지 확인
+    void 파일의_내용을_읽는다() throws IOException {
         final String fileName = "nextstep.txt";
 
         InputStream in = getClass().getResourceAsStream("/" + fileName);

@@ -1,7 +1,9 @@
 package nextstep.jwp.web;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
@@ -32,9 +34,12 @@ public class RequestHandler implements Runnable {
             connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
-            final OutputStream outputStream = connection.getOutputStream()) {
+            final OutputStream outputStream = connection.getOutputStream();
+            final BufferedReader bufferedReader =
+                new BufferedReader(new InputStreamReader(inputStream))
+        ) {
 
-            HttpRequest httpRequest = new HttpRequest(inputStream);
+            HttpRequest httpRequest = new HttpRequest(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
 
             handleRequest(httpRequest, httpResponse);

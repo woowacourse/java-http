@@ -10,7 +10,7 @@ public class LoginService {
 
     private static final Logger logger = LoggerFactory.getLogger(LoginService.class);
 
-    public void login(String account, String password) {
+    public User login(String account, String password) {
         User loginUser = InMemoryUserRepository.findByAccount(account)
             .orElseThrow(InvalidUserException::new);
 
@@ -18,7 +18,8 @@ public class LoginService {
             throw new InvalidUserException();
         }
 
-        String user = loginUser.toString();
-        logger.debug("Login User !!! - {}", user);
+        logger.debug("Login User !!! - {}", loginUser.toString());
+
+        return loginUser;
     }
 }

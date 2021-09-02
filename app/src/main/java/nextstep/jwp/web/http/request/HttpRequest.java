@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.web.http.Headers;
+import nextstep.jwp.web.session.HttpSession;
+import nextstep.jwp.web.session.HttpSessions;
 
 public class HttpRequest {
 
@@ -21,11 +23,11 @@ public class HttpRequest {
     private HttpRequest() {
     }
 
-    public HttpRequest(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+    public HttpRequest(BufferedReader bufferedReader) throws IOException {
         this.startLine = new StartLine(parseHttpRequestStartLine(bufferedReader));
         this.headers = new Headers(parseHttpRequestHeaders(bufferedReader));
         this.body = new RequestBody(parseHttpRequestBody(bufferedReader));
+        this.cookie = initializeCookie();
     }
 
     private String parseHttpRequestStartLine(BufferedReader bufferedReader) throws IOException {
@@ -51,9 +53,19 @@ public class HttpRequest {
 
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
-        bufferedReader.close();
 
         return new String(buffer);
+    }
+
+    private HttpRequestCookie initializeCookie() {
+        if (headers.hasCookie()) {
+            return new HttpRequestCookie(
+                headers.getValue("Cookie")
+                    .get(0)
+            );
+        }
+
+        return new HttpRequestCookie();
     }
 
     public HttpMethod getMethod() {
@@ -69,14 +81,16 @@ public class HttpRequest {
     }
 
     public String getCookieValue(String key) {
-        if (cookie == null) {
-            cookie = new HttpRequestCookie(
-                headers.getValue("Cookie")
-                    .get(0)
-            );
+        return cookie.get(key);
+    }
+
+    public HttpSession getSession() {
+        String sessionId = getCookieValue("JSESSIONID");
+        if (sessionId != null) {
+            return HttpSessions.getSession(sessionId);
         }
 
-        return cookie.get(key);
+        return HttpSessions.getSession();
     }
 
     public String getRequestParams(String key) {

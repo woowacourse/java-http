@@ -36,6 +36,10 @@ public class Headers {
         this.headerValues.put(header, Optional.of(values));
     }
 
+    public boolean hasCookie() {
+        return headerValues.containsKey("Cookie");
+    }
+
     public int getContentLength() {
         List<String> values = this.headerValues.getOrDefault(
             "Content-Length", Optional.of(List.of("0"))

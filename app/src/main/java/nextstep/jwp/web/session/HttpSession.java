@@ -8,7 +8,7 @@ public class HttpSession {
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
-    HttpSession(String id) {
+    public HttpSession(String id) {
         this.id = id;
     }
 
@@ -18,6 +18,7 @@ public class HttpSession {
 
     public void setAttribute(String name, Object value) {
         values.put(name, value);
+        HttpSessions.addSession(this);
     }
 
     public Object getAttribute(String name) {

@@ -39,7 +39,7 @@ class LoginPageControllerTest {
         final RequestLine requestLine = new RequestLine(HttpMethod.GET, "/login", HttpVersion.HTTP_1_1);
         final HttpRequest httpRequest =
                 new HttpRequest.Builder().requestLine(requestLine)
-                                         .cookie(new Cookie(HttpSession.JSESSIONID, httpSession.getId()).toString())
+                                         .httpHeaders(HttpHeaders.COOKIE, new Cookie(HttpSession.JSESSIONID, httpSession.getId()).toString())
                                          .build();
 
         // when

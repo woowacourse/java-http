@@ -89,7 +89,6 @@ public class HttpRequest implements HttpMessage {
     public static class Builder {
         private RequestLine requestLine;
         private HttpHeaders httpHeaders;
-        private String cookie;
         private StringBuilder requestBody;
 
         public Builder() {
@@ -120,12 +119,6 @@ public class HttpRequest implements HttpMessage {
             return this;
         }
 
-        public Builder cookie(String cookie) {
-            httpHeaders(HttpHeaders.COOKIE, cookie);
-            this.cookie = cookie;
-            return this;
-        }
-
         public Builder body(String line) {
             this.requestBody.append(line)
                             .append("\r\n");
@@ -146,11 +139,7 @@ public class HttpRequest implements HttpMessage {
         }
 
         public HttpRequest build() {
-            if (hasHeader(HttpHeaders.COOKIE)) {
-                cookie(getHeaderValue(HttpHeaders.COOKIE));
-            }
-
-            return new HttpRequest(requestLine, httpHeaders, HttpCookies.from(cookie), requestBody.toString());
+            return new HttpRequest(requestLine, httpHeaders, HttpCookies.from(getHeaderValue(HttpHeaders.COOKIE)), requestBody.toString());
         }
 
         public boolean hasHeader(String headerName) {

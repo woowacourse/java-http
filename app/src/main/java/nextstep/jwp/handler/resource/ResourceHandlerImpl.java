@@ -1,5 +1,7 @@
 package nextstep.jwp.handler.resource;
 
+import java.net.URL;
+import java.util.Objects;
 import nextstep.jwp.ServerConfig;
 import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.http.request.HttpMethod;
@@ -7,9 +9,6 @@ import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.SourcePath;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpStatus;
-
-import java.net.URL;
-import java.util.Objects;
 
 public class ResourceHandlerImpl implements ResourceHandler {
 

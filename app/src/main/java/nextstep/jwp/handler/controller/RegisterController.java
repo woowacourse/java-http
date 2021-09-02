@@ -29,6 +29,6 @@ public class RegisterController extends AbstractController {
 
         Model model = new Model();
         model.addAttribute("errorMessage", "가입 실패 :: 이미 존재하는 아이디입니다.");
-        return ModelAndView.of(model,"/400.html", HttpStatus.BAD_REQUEST);
+        return ModelAndView.of(model, "/400.html", HttpStatus.BAD_REQUEST);
     }
 }

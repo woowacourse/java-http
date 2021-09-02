@@ -19,7 +19,7 @@ public class Model {
         this.attributes = new HashMap<>();
     }
 
-    public Set<String> keys(){
+    public Set<String> keys() {
         return attributes.keySet();
     }
 

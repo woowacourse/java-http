@@ -1,5 +1,9 @@
 package nextstep.jwp;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Arrays;
+import java.util.Collections;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestHeaders;
 import nextstep.jwp.http.request.RequestLine;
@@ -7,11 +11,6 @@ import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class DispatcherTest {
 

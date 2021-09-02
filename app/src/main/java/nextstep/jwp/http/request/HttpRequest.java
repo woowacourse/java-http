@@ -1,15 +1,14 @@
 package nextstep.jwp.http.request;
 
-import nextstep.jwp.http.cookie.HttpCookie;
-import nextstep.jwp.http.session.HttpSession;
-import nextstep.jwp.http.session.HttpSessions;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import nextstep.jwp.http.cookie.HttpCookie;
+import nextstep.jwp.http.session.HttpSession;
+import nextstep.jwp.http.session.HttpSessions;
 
 public class HttpRequest {
 
@@ -53,14 +52,6 @@ public class HttpRequest {
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         return new String(buffer);
-    }
-
-    public RequestLine requestLine() {
-        return requestLine;
-    }
-
-    public RequestHeaders requestHeaders() {
-        return requestHeaders;
     }
 
     public QueryParams requestParam() {

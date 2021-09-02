@@ -1,5 +1,9 @@
 package nextstep.jwp.handler.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.Arrays;
+import java.util.Collections;
 import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestHeaders;
@@ -10,11 +14,6 @@ import nextstep.jwp.http.session.HttpSession;
 import nextstep.jwp.http.session.HttpSessions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class LoginControllerTest {
 
@@ -40,7 +39,7 @@ class LoginControllerTest {
 
         RequestLine requestLine = RequestLine.of("GET /login HTTP/1.1");
         RequestHeaders requestHeaders = RequestHeaders.of(
-                Arrays.asList("Cookie: "+ sessionItem)
+                Arrays.asList("Cookie: " + sessionItem)
         );
 
         HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, "");

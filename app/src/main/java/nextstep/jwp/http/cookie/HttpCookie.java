@@ -9,8 +9,6 @@ import java.util.Objects;
 
 public class HttpCookie {
 
-    // TODO :: RESPONSE_FORMAT 에 너무 엮이는 것은 아닐까
-
     public static final HttpCookie EMPTY = new HttpCookie(Collections.emptyMap());
 
     private static final String KEY_SESSION_ID = "JSESSIONID";
@@ -25,7 +23,6 @@ public class HttpCookie {
         if (Objects.isNull(cookieLine) || cookieLine.isEmpty()) {
             return EMPTY;
         }
-
         Map<String, String> items = Arrays.stream(cookieLine.split("; "))
                 .map(line -> line.split("="))
                 .filter(pair -> pair.length == 2)
@@ -43,10 +40,6 @@ public class HttpCookie {
 
     public boolean hasSessionId() {
         return params.containsKey(KEY_SESSION_ID);
-    }
-
-    public boolean isEmpty() {
-        return this.equals(EMPTY);
     }
 
     @Override

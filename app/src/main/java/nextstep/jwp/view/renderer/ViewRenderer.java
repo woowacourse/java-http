@@ -1,4 +1,4 @@
-package nextstep.jwp.view;
+package nextstep.jwp.view.renderer;
 
 import nextstep.jwp.handler.modelandview.Model;
 

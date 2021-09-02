@@ -1,21 +1,17 @@
 package nextstep.jwp.http.request;
 
-import nextstep.jwp.handler.modelandview.ModelAndView;
-import nextstep.jwp.http.cookie.HttpCookie;
-import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.http.response.HttpStatus;
-import nextstep.jwp.http.session.HttpSession;
-import nextstep.jwp.http.session.HttpSessions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import nextstep.jwp.http.cookie.HttpCookie;
+import nextstep.jwp.http.session.HttpSession;
+import nextstep.jwp.http.session.HttpSessions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
 
@@ -28,12 +24,6 @@ class HttpRequestTest {
 
         try (final InputStream inputStream = new ByteArrayInputStream(inputRequest.getBytes())) {
             HttpRequest parsedRequest = HttpRequest.of(inputStream);
-
-            RequestLine requestLine = parsedRequest.requestLine();
-            assertThat(requestLine).isEqualTo(RequestLine.of(expectedRequestLine));
-
-            RequestHeaders requestHeaders = parsedRequest.requestHeaders();
-            assertThat(requestHeaders.contentLength()).isEqualTo(expectedRequestBody.length());
 
             QueryParams params = parsedRequest.requestParam();
             assertThat(params.get("account")).isEqualTo("gugu");
@@ -48,7 +38,8 @@ class HttpRequestTest {
     void cookie() {
         RequestLine requestLine = RequestLine.of("GET / HTTP/1.1");
         RequestHeaders requestHeaders = RequestHeaders.of(
-                Arrays.asList("Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46")
+                Arrays.asList(
+                        "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46")
         );
 
         HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, "");

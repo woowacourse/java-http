@@ -1,10 +1,9 @@
 package nextstep.jwp.mapper;
 
+import java.util.Map;
 import nextstep.jwp.handler.Handler;
 import nextstep.jwp.handler.controller.AbstractController;
 import nextstep.jwp.http.request.HttpRequest;
-
-import java.util.Map;
 
 public class ControllerMapper implements HandlerMapper {
 

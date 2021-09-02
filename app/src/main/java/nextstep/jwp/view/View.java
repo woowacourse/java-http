@@ -4,12 +4,14 @@ import nextstep.jwp.handler.modelandview.Model;
 import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.http.response.ContentType;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.view.renderer.JsoupHtmlRenderer;
+import nextstep.jwp.view.renderer.ViewRenderer;
 
 public class View {
 
     public static final View EMPTY = new View("", ContentType.empty());
 
-    private final ViewRenderer htmlRenderer = new JsoupViewRenderer();
+    private final ViewRenderer htmlRenderer = new JsoupHtmlRenderer();
     private final String content;
     private final ContentType contentType;
 
@@ -32,7 +34,7 @@ public class View {
     }
 
     private String parsing(Model model) {
-        if(contentType.equals(ContentType.HTML_UTF8) && !model.isEmpty()){
+        if (contentType.equals(ContentType.HTML_UTF8) && !model.isEmpty()) {
             return htmlRenderer.render(model, content);
         }
         return content;

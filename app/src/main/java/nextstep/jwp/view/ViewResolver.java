@@ -20,7 +20,7 @@ public class ViewResolver {
     }
 
     public View resolve(String viewName) {
-        if(!viewContainer.containsKey(viewName)){
+        if (!viewContainer.containsKey(viewName)) {
             viewContainer.putIfAbsent(viewName, getView(viewName));
         }
         return viewContainer.get(viewName);

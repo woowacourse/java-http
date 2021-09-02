@@ -9,6 +9,9 @@ import java.util.Map;
 
 public class RequestLine {
     private static final Logger log = LoggerFactory.getLogger(RequestLine.class);
+    public static final int REQUEST_SPLIT_COUNT = 3;
+    public static final int PATH_INDEX = 1;
+    public static final String QUERY_PARAM_DELIMITER = "?";
 
     private final HttpMethod method;
     private final String path;
@@ -17,24 +20,24 @@ public class RequestLine {
     public RequestLine(String requestLine) {
         log.debug("Request line : {}", requestLine);
         String[] tokens = requestLine.split(" ");
-        if (tokens.length != 3) {
+        if (tokens.length != REQUEST_SPLIT_COUNT) {
             throw new IllegalArgumentException("request Line 형식이 올바르지 않습니다.");
         }
 
         method = HttpMethod.valueOf(tokens[0]);
         if (method.isPost()) {
-            path = tokens[1];
+            path = tokens[PATH_INDEX];
             return;
         }
 
-        int index = tokens[1].indexOf("?");
+        int index = tokens[PATH_INDEX].indexOf(QUERY_PARAM_DELIMITER);
         if (index == -1) {
-            path = tokens[1];
+            path = tokens[PATH_INDEX];
             return;
         }
 
-        path = tokens[1].substring(0, index);
-        params = HttpRequestUtils.parseQueryString(tokens[1].substring(index + 1));
+        path = tokens[PATH_INDEX].substring(0, index);
+        params = HttpRequestUtils.parseQueryString(tokens[PATH_INDEX].substring(index + 1));
     }
 
     public HttpMethod getMethod() {

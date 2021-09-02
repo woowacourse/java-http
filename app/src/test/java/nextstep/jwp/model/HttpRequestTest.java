@@ -17,6 +17,7 @@ class HttpRequestTest {
     @DisplayName("메인 페이지를 조회한다.")
     @Test
     void request_GET_INDEXT() throws IOException {
+        // given
         String value = String.join("\r\n",
                 GET + " / HTTP/1.1 ",
                 "Content-Type: text/html;charset=utf-8 ",
@@ -26,8 +27,11 @@ class HttpRequestTest {
 
         MockSocket socket = new MockSocket(value);
         HttpServlet httpServlet = new HttpServlet(socket);
+
+        // when
         httpServlet.run();
 
+        // then
         HttpRequest request = new HttpRequest(socket.getInputStream());
         assertThat(request.getMethod()).isEqualTo(GET);
         assertThat(request.getPath()).isEqualTo("/");
@@ -39,18 +43,21 @@ class HttpRequestTest {
     @DisplayName("index.html 페이지를 조회한다.")
     @Test
     void request_GET_INDEXT_HTML() throws IOException {
+        // given
         String value = String.join("\r\n",
                 GET + " /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "",
                 "");
 
         MockSocket socket = new MockSocket(value);
         HttpServlet httpServlet = new HttpServlet(socket);
-        httpServlet.run();
 
+        // when
+        httpServlet.run();
         HttpRequest request = new HttpRequest(socket.getInputStream());
+
+        // then
         assertThat(request.getMethod()).isEqualTo(GET);
         assertThat(request.getPath()).isEqualTo("/index.html");
         assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
@@ -60,6 +67,7 @@ class HttpRequestTest {
     @DisplayName("login 페이지를 조회한다.")
     @Test
     void request_GET_LOGIN() throws IOException {
+        // given
         String value = String.join("\r\n",
                 GET + " /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -68,8 +76,11 @@ class HttpRequestTest {
         final MockSocket socket = new MockSocket(value);
         final HttpServlet httpServlet = new HttpServlet(socket);
 
+        // when
         httpServlet.run();
         HttpRequest request = new HttpRequest(socket.getInputStream());
+
+        // then
         assertThat(request.getMethod()).isEqualTo(GET);
         assertThat(request.getRequestURI()).isEqualTo("/login");
         assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
@@ -79,6 +90,7 @@ class HttpRequestTest {
     @DisplayName("form 형식의 파라미터로 로그인을 실행한다.")
     @Test
     void request_GET_LOGIN_with_params() throws IOException {
+        // given
         String value = String.join("\r\n",
                 POST + " /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -90,12 +102,16 @@ class HttpRequestTest {
         final MockSocket socket = new MockSocket(value);
         final HttpServlet httpServlet = new HttpServlet(socket);
 
+        // when
         httpServlet.run();
         HttpRequest request = new HttpRequest(socket.getInputStream());
+
+        // then
         assertThat(request.getMethod()).isEqualTo(POST);
         assertThat(request.getRequestURI()).isEqualTo("/login");
         assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
         assertThat(request.getHeader("Connection")).isEqualTo("keep-alive");
+        assertThat(request.getContentLength()).isEqualTo(30);
         assertThat(request.getParameter("account")).isEqualTo("gugu");
         assertThat(request.getParameter("password")).isEqualTo("password");
     }
@@ -103,6 +119,7 @@ class HttpRequestTest {
     @DisplayName("쿼리 파라미터로 로그인을 요청한다.")
     @Test
     void request_GET_LOGIN_with_query_params() throws IOException {
+        // given
         String value = String.join("\r\n",
                 GET + " /login?account=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -111,8 +128,11 @@ class HttpRequestTest {
         final MockSocket socket = new MockSocket(value);
         final HttpServlet httpServlet = new HttpServlet(socket);
 
+        // when
         httpServlet.run();
         HttpRequest request = new HttpRequest(socket.getInputStream());
+
+        // then
         assertThat(request.getMethod()).isEqualTo(GET);
         assertThat(request.getRequestURI()).isEqualTo("/login");
         assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
@@ -124,6 +144,7 @@ class HttpRequestTest {
     @DisplayName("css 파일을 요청한다.")
     @Test
     void request_CSS() throws IOException {
+        // given
         String value = String.join("\r\n",
                 GET + " /css/styles.css HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -132,9 +153,11 @@ class HttpRequestTest {
         final MockSocket socket = new MockSocket(value);
         final HttpServlet httpServlet = new HttpServlet(socket);
 
+        // when
         httpServlet.run();
         HttpRequest request = new HttpRequest(socket.getInputStream());
 
+        // then
         assertThat(request.getMethod()).isEqualTo(GET);
         assertThat(request.getPath()).isEqualTo("/css/styles.css");
         assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");
@@ -144,6 +167,7 @@ class HttpRequestTest {
     @DisplayName("js 파일을 요청한다.")
     @Test
     void request_JS() throws IOException {
+        // given
         String value = String.join("\r\n",
                 GET + " /js/scripts.js HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -152,9 +176,11 @@ class HttpRequestTest {
         final MockSocket socket = new MockSocket(value);
         final HttpServlet httpServlet = new HttpServlet(socket);
 
+        // when
         httpServlet.run();
         HttpRequest request = new HttpRequest(socket.getInputStream());
 
+        // then
         assertThat(request.getMethod()).isEqualTo(GET);
         assertThat(request.getPath()).isEqualTo("/js/scripts.js");
         assertThat(request.getHeader("Host")).isEqualTo("localhost:8080");

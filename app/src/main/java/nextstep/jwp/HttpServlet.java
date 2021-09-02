@@ -34,7 +34,6 @@ public class HttpServlet implements Runnable {
 
             DispatcherServlet dispatcherServlet = new DispatcherServlet();
             dispatcherServlet.service(httpRequest, httpResponse);
-
         } catch (IOException | ServletException exception) {
             log.error("Exception stream", exception);
         } finally {

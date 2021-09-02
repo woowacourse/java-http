@@ -1,14 +1,19 @@
 package nextstep.jwp.model.httpmessage.response;
 
+import nextstep.jwp.model.httpmessage.session.HttpCookie;
+
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+
+import static nextstep.jwp.model.httpmessage.response.ResponseHeaderType.COOKIE;
 
 public class HttpResponse {
 
-    public static final String EMPTY_LINE = "";
-
     private final OutputStream outputStream;
     private final ResponseHeader headers = new ResponseHeader();
+    private final List<HttpCookie> cookies = new ArrayList<>();
     private ResponseLine responseLine;
 
     public HttpResponse(OutputStream outputStream) {
@@ -57,5 +62,10 @@ public class HttpResponse {
 
     public void setStatus(HttpStatus status) {
         responseLine = new ResponseLine(status);
+    }
+
+    public void addCookie(HttpCookie cookie) {
+        cookies.add(cookie);
+        headers.add(COOKIE, cookie.toString());
     }
 }

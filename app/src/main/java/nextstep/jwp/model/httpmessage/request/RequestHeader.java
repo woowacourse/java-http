@@ -21,6 +21,10 @@ public class RequestHeader extends CommonHttpHeader {
         }
     }
 
+    public boolean containsKey(RequestHeaderType type) {
+        return headers.containsKey(type);
+    }
+
     @Override
     public String getHeader(String type) {
         Optional<RequestHeaderType> requestHeaderType = RequestHeaderType.of(type);

@@ -1,7 +1,7 @@
 package nextstep.jwp.model.httpmessage.response;
 
 public enum ResponseHeaderType {
-
+    COOKIE("Set-Cookie"),
     LOCATION("Location");
 
     private final String value;

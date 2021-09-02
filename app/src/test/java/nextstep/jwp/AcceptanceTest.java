@@ -65,7 +65,7 @@ public class AcceptanceTest {
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-Length: 80",
+                "Content-Length: 53",
                 "Content-Type: application/x-www-form-urlencoded",
                 "Accept: */*",
                 "",
@@ -74,7 +74,7 @@ public class AcceptanceTest {
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-Length: 80",
+                "Content-Length: 53",
                 "Content-Type: application/x-www-form-urlencoded",
                 "Accept: */*",
                 "",
@@ -103,7 +103,7 @@ public class AcceptanceTest {
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-Length: 80",
+                "Content-Length: 53",
                 "Content-Type: application/x-www-form-urlencoded",
                 "Accept: */*",
                 "",
@@ -112,7 +112,7 @@ public class AcceptanceTest {
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-Length: 80",
+                "Content-Length: 53",
                 "Content-Type: application/x-www-form-urlencoded",
                 "Accept: */*",
                 "",
@@ -150,7 +150,7 @@ public class AcceptanceTest {
         return firstHeaderLine[1];
     }
 
-    @DisplayName("미션 6번째 요구사항")
+    @DisplayName("미션 6번째 요구사항, 로그인 시 JSessionID 반환")
     @Test
     void loginSuccessWithToken() {
         //given
@@ -158,7 +158,7 @@ public class AcceptanceTest {
             "POST /login HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
-            "Content-Length: 80",
+            "Content-Length: 53",
             "Content-Type: application/x-www-form-urlencoded",
             "Accept: */*",
             "",
@@ -201,7 +201,7 @@ public class AcceptanceTest {
             "GET /login HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
-            "Content-Length: 80",
+            "Content-Length: 53",
             "Content-Type: application/x-www-form-urlencoded",
             "Cookie: JSESSIONID="+JSessionId,
             "Accept: */*",
@@ -227,7 +227,7 @@ public class AcceptanceTest {
             "POST /login HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
-            "Content-Length: 80",
+            "Content-Length: 53",
             "Content-Type: application/x-www-form-urlencoded",
             "Accept: */*",
             "",

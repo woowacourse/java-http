@@ -4,10 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -68,10 +65,7 @@ public class HttpMessageReader {
                 if (Objects.isNull(line) || line.isEmpty()) {
                     break;
                 }
-                final String[] header = line.split(HEADER_DELIMITER);
-                if (header.length == 1) {
-                    continue;
-                }
+                final String[] header = line.split(HEADER_DELIMITER, 2);
                 httpRequestHeaders.put(header[0], header[1].strip());
             }
             return httpRequestHeaders;

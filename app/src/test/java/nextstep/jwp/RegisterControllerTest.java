@@ -1,5 +1,6 @@
 package nextstep.jwp;
 
+import static nextstep.jwp.TestFixture.runRequestHandler;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
@@ -13,8 +14,6 @@ import nextstep.jwp.model.domain.User;
 import org.junit.jupiter.api.Test;
 
 class RegisterControllerTest {
-
-    private final RequestMapping requestMapping = new RequestMapping();
 
     @Test
     void register() throws IOException {
@@ -116,12 +115,5 @@ class RegisterControllerTest {
                 "\r\n" +
                 "";
         assertThat(output).isEqualTo(expected);
-    }
-
-    private String runRequestHandler(String httpRequest) {
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
-        requestHandler.run();
-        return socket.output();
     }
 }

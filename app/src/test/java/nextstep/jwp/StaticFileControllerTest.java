@@ -1,5 +1,6 @@
 package nextstep.jwp;
 
+import static nextstep.jwp.TestFixture.runRequestHandler;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
@@ -10,8 +11,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class StaticFileControllerTest {
-
-    private final RequestMapping requestMapping = new RequestMapping();
 
     @Test
     void index() throws IOException {
@@ -157,12 +156,5 @@ class StaticFileControllerTest {
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "Set-Cookie: JSESSIONID=";
         assertThat(output).startsWith(expected);
-    }
-
-    private String runRequestHandler(String httpRequest) {
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
-        requestHandler.run();
-        return socket.output();
     }
 }

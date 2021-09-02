@@ -1,5 +1,6 @@
 package nextstep.jwp;
 
+import static nextstep.jwp.TestFixture.runRequestHandler;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
@@ -10,8 +11,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 class LoginControllerTest {
-
-    private final RequestMapping requestMapping = new RequestMapping();
 
     @Test
     void login() throws IOException {
@@ -161,12 +160,5 @@ class LoginControllerTest {
                 "\r\n" +
                 "";
         assertThat(output).isEqualTo(expected);
-    }
-
-    private String runRequestHandler(String httpRequest) {
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
-        requestHandler.run();
-        return socket.output();
     }
 }

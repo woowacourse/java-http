@@ -28,9 +28,7 @@ public class HttpCookie {
     }
 
     public boolean containsLogin() {
-        boolean b = cookies.keySet().stream()
-                .anyMatch(key -> key.equals(JSESSIONID));
-        return b;
+        return cookies.containsKey(JSESSIONID);
     }
 
     public void setCookies() {

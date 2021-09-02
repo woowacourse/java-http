@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -63,7 +65,7 @@ class RequestHandlerTest {
     }
 
     @Test
-    @DisplayName("로그인한다.")
+    @DisplayName("로그인한다. 쿠키가 반환된다.")
     void postLogin() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
@@ -80,9 +82,14 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = getRedirectHttpResponse(HttpStatus.FOUND, "index.html");
-        String output = socket.output();
-        assertThat(output).isEqualTo(expected);
+        String expected = getHttpResponse(HttpStatus.FOUND, INDEX_HTML, INDEX_CONTENT_LENGTH);
+        String actual = socket.output();
+        assertThat(actual.contains("Set-Cookie") && actual.contains("JSESSIONID")).isTrue();
+
+        String actualExceptCookie = Arrays.stream(actual.split("\r\n"))
+                .filter(line -> !line.contains("Set-Cookie"))
+                .collect(Collectors.joining("\r\n"));
+        assertThat(actualExceptCookie).isEqualTo(expected);
     }
 
     @Test
@@ -105,6 +112,29 @@ class RequestHandlerTest {
         // then
         String expected = getHttpResponse(HttpStatus.UNAUTHORIZED, "static/401.html", "2426");
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("쿠키를 가지고 있는채로 로그인하면 index 페이지로 리다이렉트한다.")
+    void getLoginWithCookie() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Accept: */*",
+                "Cookie: JSESSIONID=someCookieIsHere",
+                "");
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        String expected = getHttpResponse(HttpStatus.OK, INDEX_HTML, INDEX_CONTENT_LENGTH);
+        String output = socket.output();
+        assertThat(output).isEqualTo(expected);
     }
 
     @Test

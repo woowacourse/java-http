@@ -49,4 +49,8 @@ public class HttpRequest {
     public boolean isGet() {
         return this.requestLine.getMethod().equals("GET");
     }
+
+    public String getCookieSessionId() {
+        return requestHeader.getHttpCookieId();
+    }
 }

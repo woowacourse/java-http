@@ -1,6 +1,5 @@
 package nextstep.jwp.http;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.Objects;
 import nextstep.jwp.exception.NotFoundException;

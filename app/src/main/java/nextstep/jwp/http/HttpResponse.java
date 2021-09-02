@@ -135,4 +135,12 @@ public class HttpResponse {
 
         return String.join("\r\n", output);
     }
+
+    public void addHeader(String name, String value) {
+        httpHeaders.addHeader(name, value);
+    }
+
+    public boolean containsHeader(String headerName) {
+        return httpHeaders.hasHeaderName(headerName);
+    }
 }

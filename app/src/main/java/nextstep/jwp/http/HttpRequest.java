@@ -1,6 +1,7 @@
 package nextstep.jwp.http;
 
 import nextstep.jwp.http.entity.HttpBody;
+import nextstep.jwp.http.entity.HttpCookie;
 import nextstep.jwp.http.entity.HttpHeaders;
 import nextstep.jwp.http.entity.HttpMethod;
 import nextstep.jwp.http.entity.HttpUri;
@@ -13,19 +14,23 @@ public class HttpRequest {
     private final HttpVersion httpVersion;
     private final HttpHeaders headers;
     private final HttpBody httpBody;
+    private final HttpCookie httpCookie;
 
     public HttpRequest(HttpMethod method, HttpUri uri, HttpVersion httpVersion,
-                       HttpHeaders headers, HttpBody httpBody) {
+                       HttpHeaders headers, HttpBody httpBody, HttpCookie httpCookie) {
         this.method = method;
         this.uri = uri;
         this.httpVersion = httpVersion;
         this.headers = headers;
         this.httpBody = httpBody;
+        this.httpCookie = httpCookie;
     }
 
     public static HttpRequest of(RequestLine requestLine, HttpHeaders httpHeaders, HttpBody httpBody) {
+        HttpCookie httpCookie = HttpCookie.of(httpHeaders.get("Cookie"));
+
         return new HttpRequest(requestLine.httpMethod(), requestLine.httpUri(), requestLine.httpVersion(), httpHeaders,
-                httpBody);
+                httpBody, httpCookie);
     }
 
     public HttpMethod method() {
@@ -46,5 +51,13 @@ public class HttpRequest {
 
     public HttpBody body() {
         return httpBody;
+    }
+
+    public HttpCookie httpCookie() {
+        return httpCookie;
+    }
+
+    public boolean containsCookie(String cookieName) {
+        return httpCookie.containsKey(cookieName);
     }
 }

@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
+import java.util.UUID;
 import nextstep.jwp.web.ControllerAdvice;
 import nextstep.jwp.web.RequestMapper;
 import nextstep.jwp.web.controller.Controller;
@@ -53,6 +54,10 @@ public class RequestHandler implements Runnable {
 
     private void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         try {
+            if (!httpRequest.containsCookie("JSESSIONID")) {
+                httpResponse.addHeader("JSESSIONID", String.valueOf(UUID.randomUUID()));
+            }
+
             if (checkIfUriHasResourceExtension(httpRequest.uri())) {
                 resolveResourceRequest(httpRequest, httpResponse);
                 return;

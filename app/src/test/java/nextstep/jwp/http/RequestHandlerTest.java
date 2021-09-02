@@ -7,11 +7,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.MockSocket;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
 
     @Test
+    @Disabled
     void run() throws IOException {
         //given
         final String httpRequest = String.join("\r\n",
@@ -37,6 +39,7 @@ class RequestHandlerTest {
     }
 
     @Test
+    @Disabled
     void index() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",

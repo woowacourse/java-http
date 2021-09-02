@@ -18,7 +18,7 @@ public class UserLoginController extends AbstractController {
 
     @Override
     protected ModelView doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
-        if (httpRequest.hasSession()) {
+        if (!httpRequest.hasDefaultSession()) {
             final User user = getUser(httpRequest.getHttpSession());
             if (Objects.nonNull(user)) {
                 httpResponse.setHttpStatusCode(HttpStatusCode.FOUND);

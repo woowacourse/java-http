@@ -68,15 +68,11 @@ public class HttpRequest {
     }
 
     public HttpSession getHttpSession() {
-        if (Objects.nonNull(httpSession)) {
+        if (httpSession.isDefaultHttpSession()) {
+            this.httpSession = new HttpSession(UUID.randomUUID().toString());
             return httpSession;
         }
-        this.httpSession = new HttpSession(UUID.randomUUID().toString());
-        return this.httpSession;
-    }
-
-    public boolean hasSession() {
-        return Objects.nonNull(httpSession);
+        return httpSession;
     }
 
     public String getHttpSessionId() {
@@ -85,8 +81,12 @@ public class HttpRequest {
 
     private HttpSession initializeSession(HttpSession httpSession) {
         if (Objects.isNull(httpSession)) {
-            return new HttpSession(UUID.randomUUID().toString());
+            return HttpSession.DEFAULT_HTTP_SESSION;
         }
         return httpSession;
+    }
+
+    public boolean hasDefaultSession() {
+        return httpSession.isDefaultHttpSession();
     }
 }

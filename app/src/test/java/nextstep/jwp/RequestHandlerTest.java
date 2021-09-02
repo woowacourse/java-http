@@ -5,7 +5,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.junit.jupiter.params.shadow.com.univocity.parsers.annotations.Nested;
 
 import java.io.File;
 import java.io.IOException;
@@ -76,7 +75,7 @@ public class RequestHandlerTest {
                 Arguments.of("/ishavePage", "", "/404.html"),
                 Arguments.of("/ishavePage", "account", "/404.html"),
                 Arguments.of("/is.html", "account", "/404.html")
-                );
+        );
     }
 
     @ParameterizedTest
@@ -96,7 +95,7 @@ public class RequestHandlerTest {
     }
 
     @Test
-    void 유저_로그인_테스트(){
+    void 유저_로그인_테스트() {
         //given
         final String requestUri = "/login";
         final String requestBody = "account=gugu&password=password";
@@ -197,7 +196,8 @@ public class RequestHandlerTest {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Location: http://localhost:8080" + redirectUrl + " ",
-                "Set-Cookie: JESSIONID=");    }
+                "Set-Cookie: JESSIONID=");
+    }
 
     private String toHttp200TextHtmlResponse(String expectResponseBody) {
         return String.join("\r\n",

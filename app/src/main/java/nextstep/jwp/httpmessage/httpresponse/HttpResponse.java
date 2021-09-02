@@ -13,7 +13,7 @@ import static nextstep.jwp.httpmessage.httprequest.HttpMessageReader.SP;
 public class HttpResponse {
 
     private final HttpHeaders httpHeaders;
-    private HttpRequest httpRequest;
+    private final HttpRequest httpRequest;
     private StatusLine statusLine;
     private Object body;
 
@@ -105,7 +105,7 @@ public class HttpResponse {
     }
 
     private void setCookie() {
-        if (httpRequest.hasSession() && Objects.isNull(HttpSessions.getSession(httpRequest.getHttpSessionId()))) {
+        if (!httpRequest.hasDefaultSession() && Objects.isNull(HttpSessions.getSession(httpRequest.getHttpSessionId()))) {
             HttpSessions.addSession(httpRequest.getHttpSession());
             httpHeaders.setSessionId(httpRequest.getHttpSessionId());
         }

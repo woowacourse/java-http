@@ -7,10 +7,8 @@ import nextstep.jwp.httpmessage.httprequest.HttpRequest;
 import nextstep.jwp.httpmessage.httpresponse.HttpResponse;
 import nextstep.jwp.httpmessage.httpresponse.HttpStatusCode;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class FrontController {
 

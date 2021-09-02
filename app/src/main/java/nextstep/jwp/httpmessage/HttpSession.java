@@ -5,8 +5,13 @@ import java.util.Map;
 
 public class HttpSession {
 
-    private final String id;
+    public static final DefaultHttpSession DEFAULT_HTTP_SESSION = new DefaultHttpSession();
+
+    private String id;
     private final Map<String, Object> values = new HashMap<>();
+
+    protected HttpSession() {
+    }
 
     public HttpSession(String id) {
         this.id = id;
@@ -24,11 +29,14 @@ public class HttpSession {
         return values.get(name);
     }
 
-    public void removeAttribute(String name) {
-        values.remove(name);
+    public boolean isDefaultHttpSession() {
+        return false;
     }
 
-    public void invalidate() {
-        values.clear();
+    private static class DefaultHttpSession extends HttpSession {
+        @Override
+        public boolean isDefaultHttpSession() {
+            return true;
+        }
     }
 }

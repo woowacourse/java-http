@@ -20,8 +20,9 @@ public class MainController extends AbstractController {
         response.setStatus(OK);
         LOG.debug("Response status : {}", OK);
 
-        response.setContentType(HTML.value());
-        LOG.debug("Response content type : {}", HTML.value());
+        String html = HTML.value();
+        response.setContentType(html);
+        LOG.debug("Response content type : {}", html);
 
         String body = "Hello world!";
 

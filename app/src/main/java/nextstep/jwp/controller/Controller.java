@@ -9,7 +9,6 @@ import java.io.IOException;
 
 public interface Controller {
 
-//    void service(HttpRequest request, HttpResponse response) throws IOException, ServletException;
-
     void process(HttpRequest request, HttpResponse response, ModelAndView mv) throws ServletException, IOException;
+
 }

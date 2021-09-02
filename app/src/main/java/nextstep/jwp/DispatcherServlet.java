@@ -8,7 +8,6 @@ import nextstep.jwp.model.httpmessage.response.HttpStatus;
 import nextstep.jwp.util.FileUtils;
 import nextstep.jwp.view.*;
 
-import javax.servlet.ServletException;
 import java.io.IOException;
 
 import static nextstep.jwp.model.httpmessage.response.HttpStatus.NOT_FOUND;
@@ -17,7 +16,7 @@ import static nextstep.jwp.model.httpmessage.response.HttpStatus.REDIRECT;
 
 public class DispatcherServlet {
 
-    public void service(HttpRequest request, HttpResponse response) throws IOException, ServletException {
+    public void service(HttpRequest request, HttpResponse response) throws IOException {
         RequestMapping requestMapping = new RequestMapping();
 
         View view = new View();
@@ -28,7 +27,7 @@ public class DispatcherServlet {
 
             if (FileUtils.isStaticFile(path)) {
                 view = new StaticView(FileUtils.getAbsolutePath(path));
-                view.render(mv, request, response);
+                view.render(mv, response);
                 return;
             }
 
@@ -47,7 +46,7 @@ public class DispatcherServlet {
 
         if (mv.getViewName() == null) {
             if (mv.hasModel()) {
-                view.render(mv, request, response);
+                view.render(mv, response);
                 return;
             }
             throw new IllegalArgumentException("출력할 수 없는 결과입니다.");
@@ -63,7 +62,7 @@ public class DispatcherServlet {
                 return;
             }
 
-            view.render(mv, request, response);
+            view.render(mv, response);
         }
     }
 
@@ -72,7 +71,7 @@ public class DispatcherServlet {
         view.sendError(status);
         String absolutePath = resolveView(status.value());
         mv.setViewName(absolutePath);
-        view.render(mv, request, response);
+        view.render(mv, response);
     }
 
     private String resolveView(String viewName) {

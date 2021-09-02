@@ -1,6 +1,5 @@
 package nextstep.jwp.view;
 
-import nextstep.jwp.model.httpmessage.request.HttpRequest;
 import nextstep.jwp.model.httpmessage.response.HttpResponse;
 import nextstep.jwp.model.httpmessage.response.HttpStatus;
 
@@ -17,7 +16,7 @@ public class ErrorView extends View {
     }
 
     @Override
-    public void render(ModelAndView mv, HttpRequest request, HttpResponse response) throws IOException {
+    public void render(ModelAndView mv, HttpResponse response) throws IOException {
         response.setStatus(status);
         response.setContentType(HTML.value());
 

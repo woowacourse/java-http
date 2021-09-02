@@ -1,6 +1,5 @@
 package nextstep.jwp.view;
 
-import nextstep.jwp.model.httpmessage.request.HttpRequest;
 import nextstep.jwp.model.httpmessage.response.HttpResponse;
 import nextstep.jwp.model.httpmessage.response.ResponseLine;
 import nextstep.jwp.util.FileUtils;
@@ -33,7 +32,7 @@ public class View {
         write(response.getOutputStream(), stringJoiner.toString());
     }
 
-    public void render(ModelAndView mv, HttpRequest request, HttpResponse response) throws IOException {
+    public void render(ModelAndView mv, HttpResponse response) throws IOException {
         String responseBody = (String) mv.getModel().get("body");
         response.setContentLength(responseBody.getBytes().length);
         responseBody = processResponseAndBody(response, responseBody);

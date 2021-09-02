@@ -5,7 +5,6 @@ import nextstep.jwp.model.httpmessage.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -34,7 +33,7 @@ public class HttpServlet implements Runnable {
 
             DispatcherServlet dispatcherServlet = new DispatcherServlet();
             dispatcherServlet.service(httpRequest, httpResponse);
-        } catch (IOException | ServletException exception) {
+        } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();

@@ -19,15 +19,11 @@ public class HttpRequestTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-Length: 30",
+                "Content-Length: 0",
                 "",
                 "");
 
         final MockSocket socket = new MockSocket(request);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        requestHandler.run();
-
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new InputStreamReader(socket.getInputStream())));
         assertTrue(httpRequest.isGet());
     }

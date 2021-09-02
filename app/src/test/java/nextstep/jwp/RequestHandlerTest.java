@@ -18,6 +18,10 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class RequestHandlerTest {
+    private final String jSessionId = "656cef62-e3c4-40bc-a8df-94732920ed46";
+    private final String cookie = "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=" + jSessionId;
+    private final String formData = "account=gugu&password=password&email=hkkang%40woowahan.com";
+
 
     @ParameterizedTest
     @DisplayName("GET /xxx.html 또는 /xxx 형태로 요청할 경우, resources/static/xxx.html을 response로 응답한다.")
@@ -79,7 +83,6 @@ class RequestHandlerTest {
     @DisplayName("POST /login로 요청해서, 로그인 성공하면 응답 헤더에 http status code를 302로 반환한다.")
     void login_redirect() {
         // given
-        String jSessionId = "656cef62-e3c4-40bc-a8df-94732920ed46";
         HttpSessions.put(new HttpSession(jSessionId));
         String formData = "account=gugu&password=password";
 
@@ -102,7 +105,6 @@ class RequestHandlerTest {
     @DisplayName("POST /register로 요청을 할 경우, 회원가입을 완료하면 index.html로 리다이렉트한다.")
     void register_formData() {
         // given
-        String formData = "account=gugu&password=password&email=hkkang%40woowahan.com";
         String httpRequest = createRequestOfPostWithFormData("/register", formData);
 
         final MockSocket socket = new MockSocket(httpRequest);
@@ -122,7 +124,6 @@ class RequestHandlerTest {
     @DisplayName("JSESSIONID가 없으면 Http Response Header에 Set-Cookie를 통해 JSESSIONID를 반환해준다.")
     void JSessionId() {
         // given
-        String formData = "account=gugu&password=password&email=hkkang%40woowahan.com";
         String httpRequest = createRequestOfPostWithFormData("/register", formData);
 
         final MockSocket socket = new MockSocket(httpRequest);
@@ -139,8 +140,6 @@ class RequestHandlerTest {
     @DisplayName("JSESSIONID가 있으면 Http Response Header에 Set-Cookie에 JSESSIONID가 포함되지 않는다.")
     void JSessionId_existing() {
         // given
-        String formData = "account=gugu&password=password&email=hkkang%40woowahan.com";
-        String cookie = "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
         String httpRequest = createRequestOfPostWithFormDataAndCookie("/register", formData, cookie);
 
         final MockSocket socket = new MockSocket(httpRequest);
@@ -157,8 +156,6 @@ class RequestHandlerTest {
     @DisplayName("이미 로그인이 된 경우에 GET /login 요청 시 index.html을 띄워준다.")
     void already_login_redirect() throws IOException {
         // given
-        String jSessionId = "656cef62-e3c4-40bc-a8df-94732920ed46";
-        String cookie = "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=" + jSessionId;
         String httpRequest = createRequestOfGetWithCookie("/login", cookie);
 
         HttpSession httpSession = new HttpSession(jSessionId);

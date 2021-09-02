@@ -2,6 +2,7 @@ package nextstep.jwp.model.request;
 
 import java.util.Map;
 import nextstep.jwp.model.FileType;
+import nextstep.jwp.model.ProtocolType;
 
 public class Request {
 
@@ -52,5 +53,9 @@ public class Request {
 
     public Map<String, String> getQueries() {
         return requestLine.getQueries();
+    }
+
+    public ProtocolType getProtocol() {
+        return requestLine.getProtocol();
     }
 }

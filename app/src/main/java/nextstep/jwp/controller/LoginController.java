@@ -5,9 +5,9 @@ import java.util.Objects;
 import nextstep.jwp.model.FileType;
 import nextstep.jwp.model.PathType;
 import nextstep.jwp.model.domain.User;
-import nextstep.jwp.model.reponse.Response;
 import nextstep.jwp.model.request.Request;
 import nextstep.jwp.model.request.Session;
+import nextstep.jwp.model.response.Response;
 import nextstep.jwp.service.LoginService;
 
 public class LoginController extends AbstractController {

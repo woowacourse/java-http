@@ -9,10 +9,11 @@ import nextstep.jwp.exception.FileNotFoundException;
 import nextstep.jwp.exception.LoginException;
 import nextstep.jwp.exception.RegisterException;
 import nextstep.jwp.model.FileType;
-import nextstep.jwp.model.MethodType;
 import nextstep.jwp.model.PathType;
-import nextstep.jwp.model.reponse.Response;
+import nextstep.jwp.model.request.MethodType;
 import nextstep.jwp.model.request.Request;
+import nextstep.jwp.model.response.Response;
+import nextstep.jwp.model.response.StatusType;
 
 public abstract class AbstractController implements Controller {
 
@@ -41,22 +42,19 @@ public abstract class AbstractController implements Controller {
 
     protected Response staticFileMessage(Request request, FileType fileType, String responseBody) {
         return new Response.Builder()
-                .statusCode("200")
-                .statusText("OK")
+                .statusLine(request.getProtocol(), StatusType.OK)
                 .contentType(fileType.contentType())
                 .contentLength(responseBody.getBytes().length)
-                .setCookie(!request.hasCookie())
-                .session(request.getSession())
+                .setCookie(!request.hasCookie(), request.getSession())
                 .body(responseBody)
                 .build();
     }
 
     protected Response redirectMessage(Request request, String location) {
         return new Response.Builder()
-                .redirect(true)
-                .statusCode("302")
-                .statusText("FOUND")
+                .statusLine(request.getProtocol(), StatusType.FOUND)
                 .location(location)
+                .body("")
                 .build();
     }
 

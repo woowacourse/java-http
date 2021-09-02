@@ -22,6 +22,6 @@ class HttpSessionsTest {
         HttpSession session = new HttpSession(id);
         HttpSessions.put(session);
         HttpSessions.remove(id);
-        assertThat(HttpSessions.getSession(id)).isNull();
+        assertThat(HttpSessions.getSession(id).getId()).isNotEqualTo(id);
     }
 }

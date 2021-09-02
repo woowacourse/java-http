@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 public class HttpRequest {
 
@@ -116,17 +115,7 @@ public class HttpRequest {
 
     public HttpSession getSession() {
         String jSessionId = extractCookies().get(HEADER_KEY_OF_JSESSIONID);
-        if (Objects.isNull(jSessionId)) {
-            String newJSessionId = UUID.randomUUID().toString();
-            HttpSession httpSession = new HttpSession(newJSessionId);
-            HttpSessions.put(httpSession);
-            return httpSession;
-        }
         HttpSession httpSession = HttpSessions.getSession(jSessionId);
-        if (Objects.isNull(httpSession)) {
-            httpSession = new HttpSession(jSessionId);
-            HttpSessions.put(httpSession);
-        }
         return httpSession;
     }
 

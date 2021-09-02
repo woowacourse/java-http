@@ -26,6 +26,22 @@ application {
     mainClass = 'nextstep.jwp.JwpApplication'
 }
 
+jacoco {
+    toolVersion = '0.8.5'
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled(true)
+        xml.destination(new File("jacoco/jacoco.xml"))
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    finalizedBy(jacocoTestReport)
+}
+
 sonarqube {
     properties {
         property "sonar.sourceEncoding", "UTF-8"
@@ -34,20 +50,4 @@ sonarqube {
         property "sonar.host.url", "https://sonarcloud.io"
         property "sonar.coverage.jacoco.xmlReportPaths", "jacoco/jacoco.xml"
     }
-}
-
-jacoco {
-    toolVersion = "0.8.5"
-}
-
-jacocoTestReport {
-    reports {
-        xml.enabled true
-        xml.destination(new File("jacoco/jacoco.xml"))
-    }
-}
-
-tasks.named('test') {
-    useJUnitPlatform()
-    finalizedBy(jacocoTestReport)
 }

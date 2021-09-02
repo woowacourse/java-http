@@ -15,12 +15,12 @@ public class RequestBody {
     private void parseBody(BufferedReader reader, int contentLength) throws IOException {
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
-        String s = new String(buffer);
-        String[] split = s.split("&");
+        String rawParams = new String(buffer);
+        String[] params = rawParams.split("&");
 
-        for (String temp : split) {
-            String[] temp2 = temp.split("=");
-            body.put(temp2[0], temp2[1]);
+        for (String param : params) {
+            String[] keyAndValue = param.split("=");
+            body.put(keyAndValue[0], keyAndValue[1]);
         }
     }
 

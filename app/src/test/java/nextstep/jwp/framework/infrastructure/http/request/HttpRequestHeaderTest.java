@@ -36,8 +36,9 @@ class HttpRequestHeaderTest {
 
                 // then
                 assertThat(header)
-                    .extracting("httpMethod", "url", "protocol", "queryParameters", "contentLength")
-                    .containsExactly(HttpMethod.GET, "/api/post", Protocol.HTTP1_1, new HashMap<>(), 0);
+                    .extracting("requestLine")
+                    .extracting("httpMethod", "url", "protocol", "queryParameters")
+                    .containsExactly(HttpMethod.GET, "/api/post", Protocol.HTTP1_1, new HashMap<>());
             }
         }
 
@@ -54,7 +55,7 @@ class HttpRequestHeaderTest {
                 // when, then
                 assertThatCode(() -> HttpRequestHeader.from(headers))
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("Invalid Http Request Start Line");
+                    .hasMessage("Invalid Http Request Line");
             }
         }
 
@@ -68,7 +69,7 @@ class HttpRequestHeaderTest {
                 // given, when, then
                 assertThatCode(() -> HttpRequestHeader.from(Collections.emptyList()))
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("Invalid Http Request Headers");
+                    .hasMessage("Invalid Http Request Header");
             }
         }
 
@@ -90,7 +91,7 @@ class HttpRequestHeaderTest {
 
                 // then
                 assertThat(header)
-                    .extracting("queryParameters")
+                    .extracting("requestLine.queryParameters")
                     .isEqualTo(expected);
             }
         }
@@ -112,7 +113,7 @@ class HttpRequestHeaderTest {
                 HttpRequestHeader header = HttpRequestHeader.from(headers);
 
                 // then
-                assertThat(header.getContentLength()).isEqualTo(13);
+                assertThat(header.getContentLength()).isEqualTo("13");
             }
         }
 
@@ -131,8 +132,7 @@ class HttpRequestHeaderTest {
 
                 // when, then
                 assertThatCode(() -> HttpRequestHeader.from(headers))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessage("Invalid Content Length");
+                    .isInstanceOf(RuntimeException.class);
             }
         }
     }

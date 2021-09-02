@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import nextstep.jwp.framework.controller.Controller;
-import nextstep.jwp.framework.controller.StaticResourceController;
-import nextstep.jwp.framework.infrastructure.exception.NotFoundException;
+import nextstep.jwp.framework.controller.standard.StaticResourceController;
+import nextstep.jwp.framework.infrastructure.exception.WebServerException;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequestBody;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequestHeader;
@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    public static final StaticResourceController STATIC_RESOURCE_CONTROLLER =
+        new StaticResourceController();
 
     private final Socket connection;
     private final RequestMapping requestMapping;
@@ -62,13 +64,13 @@ public class RequestHandler implements Runnable {
             HttpRequest httpRequest = new HttpRequest(httpRequestHeader, httpRequestBody);
             Controller controller = requestMapping.findController(httpRequest);
             return controller.doService(httpRequest);
-        } catch (NotFoundException e) {
-            HttpRequest errorRequest = HttpRequest.ofStaticFile("/404.html");
-            return new StaticResourceController().doService(errorRequest);
+        } catch (WebServerException e) {
+            HttpRequest errorRequest = HttpRequest.ofStaticFile(e.getHttpStatus());
+            return STATIC_RESOURCE_CONTROLLER.doService(errorRequest);
         } catch (IOException | RuntimeException e) {
             log.error("Exception stream or Parsing error", e);
             HttpRequest errorRequest = HttpRequest.ofStaticFile("/500.html");
-            return new StaticResourceController().doService(errorRequest);
+            return STATIC_RESOURCE_CONTROLLER.doService(errorRequest);
         }
     }
 
@@ -91,7 +93,7 @@ public class RequestHandler implements Runnable {
         HttpRequestHeader httpRequestHeader,
         BufferedReader bufferedReader
     ) {
-        int contentLength = httpRequestHeader.getContentLength();
+        int contentLength = Integer.parseInt(httpRequestHeader.getContentLength());
         if (contentLength == 0) {
             return new HttpRequestBody(null);
         }
@@ -101,8 +103,8 @@ public class RequestHandler implements Runnable {
             return new HttpRequestBody(new String(buffer));
         } catch (IOException exception) {
             log.error("Exception stream", exception);
+            return new HttpRequestBody(null);
         }
-        return new HttpRequestBody(null);
     }
 
     private void close() {

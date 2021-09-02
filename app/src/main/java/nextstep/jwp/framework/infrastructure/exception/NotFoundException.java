@@ -2,15 +2,9 @@ package nextstep.jwp.framework.infrastructure.exception;
 
 import nextstep.jwp.framework.infrastructure.http.status.HttpStatus;
 
-public class NotFoundException extends RuntimeException {
+public class NotFoundException extends WebServerException {
 
-    private final HttpStatus httpStatus;
-
-    public NotFoundException(HttpStatus httpStatus) {
-        this.httpStatus = httpStatus;
-    }
-
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
+    public NotFoundException() {
+        super(HttpStatus.NOT_FOUND);
     }
 }

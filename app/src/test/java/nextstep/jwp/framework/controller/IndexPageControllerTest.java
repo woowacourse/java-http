@@ -1,9 +1,9 @@
 package nextstep.jwp.framework.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import nextstep.common.TestUtil;
+import nextstep.jwp.framework.controller.custom.IndexPageController;
 import nextstep.jwp.framework.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.framework.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.framework.infrastructure.http.status.HttpStatus;

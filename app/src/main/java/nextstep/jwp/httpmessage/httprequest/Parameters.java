@@ -7,17 +7,17 @@ import java.util.Map;
 
 public class Parameters {
 
-    private final Map<String, String> parameters;
+    private final Map<String, String> values;
 
-    public Parameters(Map<String, String> parameters) {
-        this.parameters = new HashMap<>(parameters);
+    public Parameters(Map<String, String> values) {
+        this.values = new HashMap<>(values);
     }
 
     public Enumeration<String> getParameterNames() {
-        return Collections.enumeration(parameters.keySet());
+        return Collections.enumeration(values.keySet());
     }
 
     public String getParameter(String name) {
-        return parameters.get(name);
+        return values.get(name);
     }
 }

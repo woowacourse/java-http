@@ -12,10 +12,10 @@ public class UserService {
 
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
-    public UserService() {
+    private UserService() {
     }
 
-    public User login(UserRequest userRequest) {
+    public static User login(UserRequest userRequest) {
         final User user = findUserByAccount(userRequest.getAccount());
         if (user.checkPassword(userRequest.getPassword())) {
             return user;
@@ -24,11 +24,11 @@ public class UserService {
         throw new IllegalArgumentException("옳지 않은 비밀번호입니다.");
     }
 
-    public void register(UserRequest userRequest) {
+    public static void register(UserRequest userRequest) {
         InMemoryUserRepository.save(userRequest.toEntity());
     }
 
-    private User findUserByAccount(String account) {
+    private static User findUserByAccount(String account) {
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent()) {
             return user.get();

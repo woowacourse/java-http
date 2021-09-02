@@ -27,7 +27,7 @@ public class FrontController {
         try {
             if (ContentType.containValueByUrl(requestPath)) {
                 View view = new View(requestPath);
-                view.render(Collections.emptyMap(), httpRequest, httpResponse);
+                view.render(httpRequest, httpResponse);
                 return;
             }
 
@@ -39,7 +39,7 @@ public class FrontController {
 
             ModelView modelView = controller.process(httpRequest, httpResponse);
             View view = new View(modelView.getViewName());
-            view.render(modelView.getModel(), httpRequest, httpResponse);
+            view.render(httpRequest, httpResponse);
         } catch (UnsupportedOperationException exception) {
             httpResponse.setHttpStatusCode(HttpStatusCode.NOT_FOUND);
             errorResolver(httpRequest, httpResponse);
@@ -52,7 +52,7 @@ public class FrontController {
     public void errorResolver(HttpRequest httpRequest, HttpResponse httpResponse) {
         View view = new View("/" + httpResponse.getHttpStatusCode().getValue() + ".html");
         httpResponse.setHttpStatusCode(HttpStatusCode.FOUND);
-        view.render(Collections.emptyMap(), httpRequest, httpResponse);
+        view.render(httpRequest, httpResponse);
     }
 
     private void initHandlerMapping() {

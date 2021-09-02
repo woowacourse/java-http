@@ -9,10 +9,7 @@ import nextstep.jwp.service.UserService;
 
 public class UserRegisterController extends AbstractController {
 
-    private final UserService userService;
-
-    public UserRegisterController() {
-        this.userService = new UserService();
+    protected UserRegisterController() {
     }
 
     @Override
@@ -22,7 +19,7 @@ public class UserRegisterController extends AbstractController {
 
     @Override
     protected ModelView doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
-        userService.register(new UserRequest(httpRequest.getParameter("account"),
+        UserService.register(new UserRequest(httpRequest.getParameter("account"),
                 httpRequest.getParameter("password"),
                 httpRequest.getParameter("email")));
         httpResponse.setHttpStatusCode(HttpStatusCode.FOUND);

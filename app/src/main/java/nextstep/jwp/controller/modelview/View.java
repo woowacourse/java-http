@@ -24,7 +24,7 @@ public class View {
         this.viewPath = viewPath;
     }
 
-    public void render(Map<String, Object> model, HttpRequest httpRequest, HttpResponse httpResponse) {
+    public void render(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (httpResponse.isSameHttpStatusCode(HttpStatusCode.FOUND)) {
             httpResponse.addHeader("Location", "http://" + httpRequest.getHeader("Host") + viewPath);
             return;

@@ -13,10 +13,7 @@ import java.util.Objects;
 
 public class UserLoginController extends AbstractController {
 
-    private final UserService userService;
-
-    public UserLoginController() {
-        this.userService = new UserService();
+    protected UserLoginController() {
     }
 
     @Override
@@ -33,7 +30,7 @@ public class UserLoginController extends AbstractController {
 
     @Override
     protected ModelView doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
-        final User user = userService.login(new UserRequest(httpRequest.getParameter("account"),
+        final User user = UserService.login(new UserRequest(httpRequest.getParameter("account"),
                 httpRequest.getParameter("password")));
         final HttpSession httpSession = httpRequest.getHttpSession();
         httpSession.setAttribute("user", user);

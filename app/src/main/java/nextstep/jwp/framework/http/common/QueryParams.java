@@ -1,7 +1,6 @@
 package nextstep.jwp.framework.http.common;
 
 import static nextstep.jwp.framework.http.common.HttpHeaders.HEADER_DELIMITER;
-import static nextstep.jwp.framework.http.common.HttpHeaders.SPACE;
 import static nextstep.jwp.framework.http.request.HttpRequest.LINE_DELIMITER;
 
 import java.util.Collections;
@@ -29,7 +28,7 @@ public class QueryParams {
 
         for (String param : params) {
             final String[] element = param.split("=", 2);
-            queryParams.put(element[KEY_INDEX], element[VALUE_INDEX]);
+            queryParams.put(element[KEY_INDEX].trim(), element[VALUE_INDEX].trim());
         }
 
         return queryParams;
@@ -49,7 +48,7 @@ public class QueryParams {
 
         for (final String key : queryParams.keySet()) {
             builder.append(key)
-                .append(HEADER_DELIMITER + SPACE)
+                .append(HEADER_DELIMITER)
                 .append(queryParams.get(key))
                 .append(LINE_DELIMITER);
         }

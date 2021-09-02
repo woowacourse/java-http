@@ -1,16 +1,8 @@
 package nextstep.jwp.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Objects;
-import nextstep.jwp.MockSocket;
-import nextstep.jwp.MockSocketWithBody;
-import nextstep.jwp.framework.RequestHandler;
 import nextstep.jwp.framework.http.common.HttpBody;
 import nextstep.jwp.framework.http.common.HttpHeaders;
 import nextstep.jwp.framework.http.common.HttpMethod;

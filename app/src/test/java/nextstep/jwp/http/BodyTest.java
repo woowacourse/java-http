@@ -1,10 +1,10 @@
 package nextstep.jwp.http;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import nextstep.jwp.http.common.PathUtils;
 import nextstep.jwp.http.message.element.Body;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class BodyTest {
 

@@ -1,11 +1,11 @@
 package nextstep.jwp.web.presentation.controller.login;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import nextstep.jwp.fixture.Fixture;
 import nextstep.jwp.http.message.request.HttpRequest;
 import nextstep.jwp.http.message.response.Response;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class GetRegisterControllerTest {
 

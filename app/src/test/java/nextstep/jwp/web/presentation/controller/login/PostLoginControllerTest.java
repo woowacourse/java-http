@@ -1,14 +1,14 @@
 package nextstep.jwp.web.presentation.controller.login;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import nextstep.jwp.fixture.Fixture;
 import nextstep.jwp.http.exception.UnauthorizedException;
 import nextstep.jwp.http.message.request.HttpRequest;
 import nextstep.jwp.http.message.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PostLoginControllerTest {
 
@@ -22,7 +22,9 @@ class PostLoginControllerTest {
         );
 
         final Response response = postLoginController.doService(httpRequest);
-        assertThat(response.asString()).contains("302");
+        assertThat(response.asString()).contains(
+                "302"
+        );
     }
 
     @DisplayName("로그인에 실패한다.")

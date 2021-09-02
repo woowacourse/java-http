@@ -1,19 +1,23 @@
 package nextstep.jwp.web.presentation.controller.login;
 
 import nextstep.jwp.http.message.element.HttpStatus;
-import nextstep.jwp.web.presentation.controller.CustomController;
 import nextstep.jwp.http.message.request.HttpRequest;
 import nextstep.jwp.http.message.request.request_line.HttpMethod;
 import nextstep.jwp.http.message.response.HttpResponse;
 import nextstep.jwp.http.message.response.Response;
+import nextstep.jwp.web.presentation.controller.CustomController;
 
 public class GetLoginController extends CustomController {
 
     private static final String LOGIN_PATH = "/login";
     private static final String LOGIN_PAGE_RESOURCE_PATH = "/login.html";
-    
+    public static final String INDEX_HTML = "/index.html";
+
     @Override
     public Response doService(HttpRequest httpRequest) {
+        if(httpRequest.getSession().containsKey("isLogged")) {
+            return HttpResponse.redirect(INDEX_HTML);
+        }
         return HttpResponse.status(HttpStatus.OK, LOGIN_PAGE_RESOURCE_PATH);
     }
 

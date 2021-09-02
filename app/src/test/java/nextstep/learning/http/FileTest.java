@@ -1,12 +1,11 @@
 package nextstep.learning.http;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 

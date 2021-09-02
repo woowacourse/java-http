@@ -1,12 +1,12 @@
 package nextstep.jwp.http.message.element;
 
-import static nextstep.jwp.http.Protocol.LINE_SEPARATOR;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Objects;
 import java.util.Optional;
+
+import static nextstep.jwp.http.Protocol.LINE_SEPARATOR;
 
 public class Body {
 

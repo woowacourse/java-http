@@ -1,9 +1,10 @@
 package nextstep.jwp;
 
+import nextstep.jwp.server.WebServer;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Arrays;
-import nextstep.jwp.server.WebServer;
 
 public class JwpApplication {
 

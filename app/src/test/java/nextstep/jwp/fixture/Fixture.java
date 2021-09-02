@@ -1,14 +1,15 @@
 package nextstep.jwp.fixture;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import nextstep.jwp.http.message.element.Body;
 import nextstep.jwp.http.message.element.Headers;
 import nextstep.jwp.http.message.request.HttpRequest;
 import nextstep.jwp.http.message.request.request_line.HttpMethod;
 import nextstep.jwp.http.message.request.request_line.RequestLine;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Fixture {
     private static final String lineSeparator = "\r\n";
@@ -82,12 +83,17 @@ public class Fixture {
     }
 
     public static HttpRequest getHttpRequest(String path) {
-        RequestLine requestLine = new RequestLine(createRequestLine(HttpMethod.GET, path));
         Headers headers = new Headers();
 
         headers.putHeader("Host", "localhost:8080");
         headers.putHeader("Connection", "keep-alive");
         headers.putHeader("Accept", "*/*");
+
+        return getHttpRequest(path, headers);
+    }
+
+    public static HttpRequest getHttpRequest(String path, Headers headers) {
+        RequestLine requestLine = new RequestLine(createRequestLine(HttpMethod.GET, path));
 
         return new HttpRequest(requestLine, headers, Body.empty());
     }

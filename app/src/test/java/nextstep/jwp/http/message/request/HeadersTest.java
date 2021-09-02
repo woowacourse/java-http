@@ -1,9 +1,9 @@
 package nextstep.jwp.http.message.request;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import nextstep.jwp.http.message.element.Headers;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class HeadersTest {
 

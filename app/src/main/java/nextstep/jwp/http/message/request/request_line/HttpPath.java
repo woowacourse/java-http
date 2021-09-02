@@ -1,8 +1,9 @@
 package nextstep.jwp.http.message.request.request_line;
 
+import nextstep.jwp.http.common.ParameterExtractor;
+
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.http.common.ParameterExtractor;
 
 public class HttpPath {
 

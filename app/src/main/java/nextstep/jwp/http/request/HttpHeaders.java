@@ -42,4 +42,8 @@ public class HttpHeaders {
     public boolean hasRequestBody() {
         return headers.containsKey(CONTENT_LENGTH);
     }
+
+    public boolean contains(String value) {
+        return headers.get("Accept").contains(value);
+    }
 }

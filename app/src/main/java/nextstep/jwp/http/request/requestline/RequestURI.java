@@ -31,6 +31,10 @@ public class RequestURI {
         return ParamExtractor.extractParams(uri);
     }
 
+    public boolean containsExtension(String extension) {
+        return requestURI.contains(extension);
+    }
+
     public String getParamValue(String key) {
         return parameters.get(key);
     }

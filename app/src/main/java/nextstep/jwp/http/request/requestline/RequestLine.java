@@ -25,7 +25,6 @@ public class RequestLine {
         HttpMethod method = HttpMethod.matchOf(slicedLine[METHOD_INDEX]);
         RequestURI requestURI = new RequestURI(slicedLine[URI_INDEX]);
         HttpVersion httpVersion = HttpVersion.matchOf(slicedLine[VERSION_INDEX]);
-
         return new RequestLine(method, requestURI, httpVersion);
     }
 

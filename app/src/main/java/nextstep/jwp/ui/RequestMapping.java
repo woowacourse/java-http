@@ -1,5 +1,7 @@
 package nextstep.jwp.ui;
 
+import nextstep.jwp.application.LoginService;
+import nextstep.jwp.application.RegisterService;
 import nextstep.jwp.ui.controller.Controller;
 import nextstep.jwp.ui.controller.DefaultController;
 import nextstep.jwp.ui.controller.LoginController;
@@ -16,8 +18,8 @@ public class RequestMapping {
 
     static {
         CONTROLLERS.put("/", new DefaultController());
-        CONTROLLERS.put("/login", new LoginController());
-        CONTROLLERS.put("/register", new RegisterController());
+        CONTROLLERS.put("/login", new LoginController(new LoginService()));
+        CONTROLLERS.put("/register", new RegisterController(new RegisterService()));
     }
 
     public Controller getController(HttpRequest httpRequest) {

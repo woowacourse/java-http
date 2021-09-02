@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 public class HeaderFields {
 
-    private static final String BLANK = " ";
     private static final String LINE_SEPARATOR = "\r\n";
     private static final String HEADER_FIELD_SEPARATOR = ": ";
 
@@ -21,7 +20,7 @@ public class HeaderFields {
         this.fields = new LinkedHashMap<>();
     }
 
-    public HeaderFields(LinkedHashMap<String, String> fields) {
+    public HeaderFields(Map<String, String> fields) {
         this.fields = fields;
     }
 
@@ -44,7 +43,7 @@ public class HeaderFields {
     }
 
     private String combineField(Map.Entry<String, String> field) {
-        return field.getKey() + HEADER_FIELD_SEPARATOR + field.getValue() + BLANK + LINE_SEPARATOR;
+        return field.getKey() + HEADER_FIELD_SEPARATOR + field.getValue() + LINE_SEPARATOR;
     }
 
     public void put(String key, String value) {

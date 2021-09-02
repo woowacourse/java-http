@@ -39,7 +39,7 @@ public class RequestLine implements StartLine {
         return new RequestLine(words.get(0), words.get(1), words.get(2));
     }
 
-    public String requestLine() {
+    public String asString() {
         return String.join(BLANK,
                 httpMethod.name(),
                 requestUri,
@@ -60,7 +60,7 @@ public class RequestLine implements StartLine {
 
     @Override
     public byte[] toBytes() {
-        String s = requestLine() + NEW_LINE;
+        String s = asString() + NEW_LINE;
         return s.getBytes();
     }
 

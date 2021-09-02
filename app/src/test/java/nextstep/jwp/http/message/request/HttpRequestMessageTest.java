@@ -8,86 +8,59 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpRequestMessageTest {
 
-    @DisplayName("Header는 존재, Body는 없는 HttpRequestMessage 생성")
+    @DisplayName("HttpRequestMessage 생성")
     @Test
-    void createWithNoBody() {
+    void create() {
         // given
-        String headerString = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ");
-
-        String bodyString = "";
-
-        RequestHeader expectedRequestHeader = RequestHeader.from(headerString);
-        MessageBody expectedMessageBody = new MessageBody();
+        RequestLine requestLine = RequestLine.from(requestLineMessage());
+        RequestHeader requestHeader = new RequestHeader(requestHeaderMessage());
+        MessageBody requestBody = new MessageBody(requestBodyMessage());
 
         // when
-        HttpRequestMessage httpRequestMessage = new HttpRequestMessage(headerString, bodyString);
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage(requestLine, requestHeader, requestBody);
 
         // then
-        assertThat(httpRequestMessage.getHeader()).isEqualTo(expectedRequestHeader);
-        assertThat(httpRequestMessage.getBody()).isEqualTo(expectedMessageBody);
+        assertThat(httpRequestMessage.getStartLine()).isEqualTo(requestLine);
+        assertThat(httpRequestMessage.getHeader()).isEqualTo(requestHeader);
+        assertThat(httpRequestMessage.getBody()).isEqualTo(requestBody);
     }
 
-    @DisplayName("Header와 Body가 둘 다 존재하는 HttpRequestMessage 생성")
+    @DisplayName("HttpRequestMessage 를 byte[] 로 변환")
     @Test
-    void createWithBody() {
+    void toBytes() {
         // given
-        String headerString = makePostRequestHeader();
-        String bodyString = makePostRequestBody();
+        String requestMessage = String.join("\r\n",
+                requestLineMessage(),
+                requestHeaderMessage(),
+                "",
+                requestBodyMessage());
 
-        RequestHeader expectedRequestHeader = RequestHeader.from(headerString);
-        MessageBody expectedMessageBody = new MessageBody(bodyString);
+        byte[] expect = requestMessage.getBytes();
+
+        RequestLine requestLine = RequestLine.from(requestLineMessage());
+        RequestHeader requestHeader = new RequestHeader(requestHeaderMessage());
+        MessageBody requestBody = new MessageBody(requestBodyMessage());
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage(requestLine, requestHeader, requestBody);
 
         // when
-        HttpRequestMessage httpRequestMessage = new HttpRequestMessage(headerString, bodyString);
+        byte[] bytes = httpRequestMessage.toBytes();
 
         // then
-        assertThat(httpRequestMessage.getHeader()).isEqualTo(expectedRequestHeader);
-        assertThat(httpRequestMessage.getBody()).isEqualTo(expectedMessageBody);
+        assertThat(bytes).isEqualTo(expect);
     }
 
-    @DisplayName("문자열의 RequestMessage로 HttpRequestMessage 생성")
-    @Test
-    void createWithRequestString() {
-        // given
-        String headerString = makePostRequestHeader();
-        String bodyString = makePostRequestBody();
-        HttpRequestMessage expect = new HttpRequestMessage(headerString, bodyString);
-
-
-        // when
-        HttpRequestMessage httpRequestMessage = new HttpRequestMessage(headerString, bodyString);
-
-        // then
-        assertThat(httpRequestMessage).isEqualTo(expect);
+    private String requestLineMessage() {
+        return "POST /index.html HTTP/1.1";
     }
 
-    @DisplayName("Header의 RequestUri를 변경한다.")
-    @Test
-    void changeRequestUri() {
-        // given
-        String headerString = makePostRequestHeader();
-        String bodyString = makePostRequestBody();
-        HttpRequestMessage httpRequestMessage = new HttpRequestMessage(headerString, bodyString);
-
-        // when
-        httpRequestMessage.changeRequestUri("/hello");
-
-        // then
-        assertThat(httpRequestMessage.requestUri()).isEqualTo("/hello");
-    }
-
-    private String makePostRequestHeader() {
+    private String requestHeaderMessage() {
         return String.join("\r\n",
-                "POST /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: 12 ");
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: 12");
     }
 
-    private String makePostRequestBody() {
+    private String requestBodyMessage() {
         return "hello world!";
     }
 }

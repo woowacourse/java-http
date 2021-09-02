@@ -50,13 +50,13 @@ class RequestLineTest {
 
     @DisplayName("RequestLine을 문자열로 반환한다.")
     @Test
-    void requestLine() {
+    void asSting() {
         // given
         String expect = "POST /login HTTP/1.1";
         RequestLine requestLine = new RequestLine(HttpMethod.POST, "/login", HttpVersion.HTTP_1_1);
 
         // when, then
-        assertThat(requestLine.requestLine()).isEqualTo(expect);
+        assertThat(requestLine.asString()).isEqualTo(expect);
     }
 
     @DisplayName("RequestLine을 바이트 배열로 변환할 때는 마지막에 개행 문자를 포함한다.")

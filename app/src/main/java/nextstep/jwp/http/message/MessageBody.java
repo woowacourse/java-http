@@ -7,7 +7,7 @@ public class MessageBody {
     private final byte[] bytes;
 
     public MessageBody() {
-        this(new byte[]{});
+        this(new byte[0]);
     }
 
     public MessageBody(byte[] bytes) {

@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,8 +7,8 @@ import java.io.InputStreamReader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import nextstep.jwp.request.HttpRequest;
-import nextstep.jwp.request.RequestBody;
+import nextstep.jwp.MockSocket;
+import nextstep.jwp.RequestHandler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

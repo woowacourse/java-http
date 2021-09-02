@@ -1,9 +1,7 @@
-package nextstep.jwp;
+package nextstep.jwp.session;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import nextstep.jwp.session.HttpCookie;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

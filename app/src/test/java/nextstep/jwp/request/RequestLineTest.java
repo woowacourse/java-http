@@ -1,9 +1,7 @@
-package nextstep.jwp;
+package nextstep.jwp.request;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import nextstep.jwp.request.RequestLine;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -24,15 +24,15 @@ public class HttpServer {
     private static final Logger log = LoggerFactory.getLogger(HttpServer.class);
 
     private final BufferedReader reader;
-    private final RequestLine requestLine;
     private final RequestHeader headers;
-    private final RequestBody requestBody;
+    private final MappingHandler mappingHandler;
 
     public HttpServer(InputStream inputStream) throws IOException {
         this.reader = new BufferedReader(new InputStreamReader(inputStream));
-        this.requestLine = new RequestLine(extractRequestLine());
+        final RequestLine requestLine = new RequestLine(extractRequestLine());
         this.headers = new RequestHeader(extractHeaders());
-        this.requestBody = new RequestBody(extractRequestBody());
+        final RequestBody requestBody = new RequestBody(extractRequestBody());
+        this.mappingHandler = new MappingHandler(requestLine, requestBody);
     }
 
     private String extractRequestLine() throws IOException {
@@ -64,7 +64,6 @@ public class HttpServer {
     }
 
     public String getResponse() throws IOException {
-        final MappingHandler mappingHandler = new MappingHandler(this.requestLine, this.requestBody);
         try {
             return mappingHandler.response();
         } catch (InvocationTargetException e) {

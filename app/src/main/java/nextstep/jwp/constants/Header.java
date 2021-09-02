@@ -3,7 +3,8 @@ package nextstep.jwp.constants;
 public enum Header {
     CONTENT_LENGTH("Content-Length"),
     LOCATION("Location"),
-    CONTENT_TYPE("Content-Type");
+    CONTENT_TYPE("Content-Type"),
+    SET_COOKIE("Set-Cookie");
 
     private final String key;
 

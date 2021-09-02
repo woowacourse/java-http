@@ -7,7 +7,8 @@ public enum ContentType {
     HTML("html", "text/html"),
     CSS("css", "text/css"),
     JS("js", "text/js"),
-    SVG("svg", "image/svg+xml");
+    SVG("svg", "image/svg+xml"),
+    ICO("ico", "image/svg+xml");
 
     private final String fileType;
     private final String contentType;

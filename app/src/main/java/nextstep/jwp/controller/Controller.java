@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 import nextstep.jwp.constants.Header;
 import nextstep.jwp.constants.StatusCode;
 import nextstep.jwp.exception.UnauthorizedException;
@@ -56,9 +57,11 @@ public class Controller {
         if (!HttpService.isAuthorized(params)) {
             throw new UnauthorizedException("인증되지 않은 사용자 입니다.");
         }
+        UUID sessionId = UUID.randomUUID();
         return ResponseEntity
                 .statusCode(StatusCode.FOUND)
                 .addHeaders(Header.LOCATION, "/index.html")
+                .addHeaders(Header.SET_COOKIE, "JSESSIONID=" + sessionId)
                 .responseResource("/index.html")
                 .build();
     }

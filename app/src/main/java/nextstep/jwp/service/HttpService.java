@@ -2,6 +2,7 @@ package nextstep.jwp.service;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import nextstep.jwp.constants.UserParams;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -11,6 +12,7 @@ import nextstep.jwp.model.User;
 
 public class HttpService {
     private static final AtomicLong id = new AtomicLong(1L);
+
     private HttpService() {
     }
 
@@ -34,4 +36,5 @@ public class HttpService {
             throw new BadRequestException("이미 등록된 사용자 입니다.");
         }
     }
+
 }

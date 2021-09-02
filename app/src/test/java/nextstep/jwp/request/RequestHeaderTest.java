@@ -24,4 +24,5 @@ class RequestHeaderTest {
         assertThat(requestHeader.get("Connection")).isEqualTo("keep-alive");
         assertThat(requestHeader.contains("localhost")).isFalse();
     }
+
 }

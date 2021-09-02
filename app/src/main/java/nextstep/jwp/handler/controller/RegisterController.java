@@ -1,21 +1,28 @@
 package nextstep.jwp.handler.controller;
 
+import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.handler.modelandview.Model;
 import nextstep.jwp.handler.modelandview.ModelAndView;
+import nextstep.jwp.handler.service.SessionHandler;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.QueryParams;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpStatus;
 import nextstep.jwp.http.session.HttpSession;
-import nextstep.jwp.http.session.HttpSessions;
 import nextstep.jwp.model.User;
 
 public class RegisterController extends AbstractController {
 
     @Override
     protected ModelAndView doGet(HttpRequest request, HttpResponse response) {
-        return ModelAndView.of("/register.html", HttpStatus.OK);
+        String sessionId = request.getSessionId();
+        Object loginUser = SessionHandler.getSessionValueOrNull(sessionId, "user");
+        if (Objects.isNull(loginUser)) {
+            return ModelAndView.of("/register.html", HttpStatus.OK);
+        }
+        response.addHeader("Location", "index.html");
+        return ModelAndView.of(HttpStatus.FOUND);
     }
 
     @Override
@@ -31,11 +38,7 @@ public class RegisterController extends AbstractController {
 
         InMemoryUserRepository.save(user);
 
-        HttpSession session = request.getSession();
-        if(!HttpSessions.contains(session)) {
-            HttpSessions.register(session);
-            response.setCookie(HttpSession.SESSION_TYPE, session.getId());
-        }
+        HttpSession session = SessionHandler.getHttpSession(request, response);
         session.setAttribute("user", user);
 
         response.addHeader("Location", "index.html");

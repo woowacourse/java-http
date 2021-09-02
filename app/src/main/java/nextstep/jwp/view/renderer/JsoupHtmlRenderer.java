@@ -12,6 +12,8 @@ public class JsoupHtmlRenderer implements ViewRenderer {
         for (String key : model.keys()) {
             Element element = parse.select("." + key).first();
             if (!Objects.isNull(element)) {
+                System.out.println(key);
+                System.out.println(model.getAttribute(key));
                 element.html(model.getAttribute(key).toString());
             }
         }

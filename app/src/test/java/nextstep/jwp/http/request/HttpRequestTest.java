@@ -69,26 +69,7 @@ class HttpRequestTest {
         ));
 
         HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, "");
-        assertThat(httpRequest.httpCookie().getSessionId()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
-    }
-
-    @DisplayName("Session 스토리지에는 존재하지 않는 sessionId를 갖고 있는 경우 새로운 세션을 발급한다")
-    @Test
-    void getUnregisteredSession() {
-        RequestLine requestLine = RequestLine.of("GET /index.html HTTP/1.1");
-        RequestHeaders requestHeaders = RequestHeaders.of(Arrays.asList(
-                "Host: localhost:8080",
-                "Connection: keep-alive",
-                "Accept: */*",
-                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46"
-        ));
-
-        HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, "");
-        String oldSessionId = httpRequest.httpCookie().getSessionId();
-        assertThat(HttpSessions.contains(oldSessionId)).isFalse();
-
-        HttpSession session = httpRequest.getSession();
-        assertThat(HttpSessions.contains(session)).isFalse();
+        assertThat(httpRequest.getSessionId()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
     }
 
     private String mockRequest(String expectedRequestLine, String expectedRequestBody) {

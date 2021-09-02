@@ -6,8 +6,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-import nextstep.jwp.http.session.HttpSession;
-import nextstep.jwp.http.session.HttpSessions;
 
 public class HttpCookie {
 
@@ -38,17 +36,6 @@ public class HttpCookie {
 
     public String getSessionId() {
         return params.get(KEY_SESSION_ID);
-    }
-
-    public boolean hasSessionId() {
-        return params.containsKey(KEY_SESSION_ID);
-    }
-
-    public HttpSession getSession(){
-        if (hasSessionId() && HttpSessions.contains(getSessionId())) {
-            return HttpSessions.getSession(getSessionId());
-        }
-        return HttpSession.create();
     }
 
     @Override

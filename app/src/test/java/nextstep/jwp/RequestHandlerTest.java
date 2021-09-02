@@ -1,5 +1,7 @@
 package nextstep.jwp;
 
+import nextstep.jwp.httpmessage.ContentType;
+import nextstep.jwp.httpmessage.httprequest.HttpRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -22,7 +24,7 @@ public class RequestHandlerTest {
         final MockSocket socket = new MockSocket();
         final RequestHandler requestHandler = new RequestHandler(socket);
 
-        String expected = toHttp200TextHtmlResponse("Hello world!");
+        String expected = toHttp200Response("Hello world!", ContentType.HTML);
         // when
         requestHandler.run();
         final String actual = socket.output();
@@ -38,7 +40,7 @@ public class RequestHandlerTest {
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
-        String expected = toHttp200TextHtmlResponse("Hello world!");
+        String expected = toHttp200Response("Hello world!", ContentType.HTML);
         // when
         requestHandler.run();
         final String actual = socket.output();
@@ -56,7 +58,7 @@ public class RequestHandlerTest {
         final RequestHandler requestHandler = new RequestHandler(socket);
 
         final String expectResponseBody = Files.readString(new File(resource.getFile()).toPath());
-        String expected = toHttp200TextHtmlResponse(expectResponseBody);
+        String expected = toHttp200Response(expectResponseBody, ContentType.HTML);
         // when
         requestHandler.run();
         final String actual = socket.output();
@@ -128,40 +130,32 @@ public class RequestHandlerTest {
         assertThat(actual).isEqualTo(expected);
     }
 
-    @Test
-    void cssRequest() {
-        //given
-        final String requestUri = "/css/styles.css";
-        final String httpRequest = toHttpGetRequest(requestUri);
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        String expected = toHttpCssResponse();
-        //when
-        requestHandler.run();
-        final String actual = socket.output();
-        //then
-        assertThat(actual).startsWith(expected);
+    private static Stream<Arguments> JS_및_CSS_요청_테스트() {
+        return Stream.of(
+                Arguments.of("/assets/chart-area.js", ContentType.JAVASCRIPT),
+                Arguments.of("/assets/chart-bar.js", ContentType.JAVASCRIPT),
+                Arguments.of("/assets/chart-pie.js", ContentType.JAVASCRIPT),
+                Arguments.of("/css/styles.css", ContentType.CSS)
+        );
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"/assets/chart-area.js", "/assets/chart-bar.js", "/assets/chart-pie.js"})
-    void jsRequest(String requestUri) throws IOException {
-        //given
+    @MethodSource
+    void JS_및_CSS_요청_테스트(String requestUri, ContentType contentType) throws IOException {
+        //give
         final String httpRequest = toHttpGetRequest(requestUri);
         final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
         final String expectResponseBody = Files.readString(new File(resource.getFile()).toPath());
-        String expected = toHttpJSResponse(expectResponseBody);
+        String expected = toHttp200Response(expectResponseBody, contentType);
         //when
         requestHandler.run();
         final String actual = socket.output();
         //then
-        assertThat(actual).startsWith(expected);
+        assertThat(actual).isEqualTo(expected);
     }
-
 
     public static String toHttpGetRequest(String requestUri) {
         return String.join("\r\n",
@@ -199,28 +193,10 @@ public class RequestHandlerTest {
                 "Set-Cookie: JESSIONID=");
     }
 
-    private String toHttp200TextHtmlResponse(String expectResponseBody) {
+    private String toHttp200Response(String expectResponseBody, ContentType contentType) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + expectResponseBody.getBytes().length + " ",
-                "",
-                expectResponseBody);
-    }
-
-    private String toHttpCssResponse() {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/css ",
-                "Content-Length: 211991 ",
-                "",
-                "");
-    }
-
-    private String toHttpJSResponse(String expectResponseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: application/javascript; charset=UTF-8 ",
+                "Content-Type: " + contentType.getValue() + " ",
                 "Content-Length: " + expectResponseBody.getBytes().length + " ",
                 "",
                 expectResponseBody);

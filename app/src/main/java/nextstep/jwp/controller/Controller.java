@@ -1,12 +1,11 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
-import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
-import nextstep.jwp.infrastructure.http.view.View;
+import nextstep.jwp.infrastructure.http.response.HttpResponse;
 
 public interface Controller {
 
-    HttpRequestLine requestLine();
+    String uri();
 
-    View handle(final HttpRequest request);
+    void service(HttpRequest request, HttpResponse response) throws Exception;
 }

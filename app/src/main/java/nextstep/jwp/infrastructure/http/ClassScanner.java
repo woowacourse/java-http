@@ -5,43 +5,34 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import nextstep.jwp.controller.Controller;
-import nextstep.jwp.infrastructure.http.request.HttpRequest;
-import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
-import nextstep.jwp.infrastructure.http.view.View;
 
-public class ControllerMapping {
+public class ClassScanner {
 
-    private final Map<HttpRequestLine, Controller> controllers;
+    private static final String DIRECTORY_DELIMITER = "/";
+    private static final String PACKAGE_DELIMITER_REGEX = "[.]";
+    private static final String PACKAGE_DELIMITER = ".";
+    private static final String CLASS_FILE_EXTENSION = ".class";
+    private static final char EXTENSION_DELIMITER = '.';
+    private final String packagePath;
 
-    public ControllerMapping(final String controllerPackage) {
-        this.controllers = findAllControllers(controllerPackage).stream()
-            .collect(Collectors.toMap(Controller::requestLine, controller -> controller));
+    public ClassScanner(final String packagePath) {
+        this.packagePath = packagePath;
     }
 
-    public Optional<View> handle(final HttpRequest request) {
-        final HttpRequestLine requestLine = request.getRequestLine();
-        final HttpRequestLine requestLineWithoutQuery = new HttpRequestLine(requestLine.getHttpMethod(), requestLine.getUri().getBaseUri());
-
-        return Optional.ofNullable(controllers.getOrDefault(requestLineWithoutQuery, null))
-            .map(controller -> controller.handle(request));
-    }
-
-    private Set<Controller> findAllControllers(final String controllerPackage) {
-        final Set<Class<?>> classes = findAllClassesUsingClassLoader(controllerPackage);
+    public <T> Set<T> scanAs(final Class<T> typeToScan) {
+        final Set<Class<?>> classes = findAllClassesUsingClassLoader(packagePath, typeToScan);
         return classes.stream()
             .filter(this::hasConstructor)
             .filter(this::hasNoArgumentConstructor)
             .map(this::findNoArgumentConstructor)
             .map(constructor -> {
                 try {
-                    return (Controller) constructor.newInstance();
+                    return typeToScan.cast(constructor.newInstance());
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                     throw new IllegalArgumentException(String.format("Cannot invoke constructor. (%s)", constructor.getName()));
                 }
@@ -55,7 +46,7 @@ public class ControllerMapping {
 
     private boolean hasNoArgumentConstructor(final Class<?> clazz) {
         return Arrays.stream(clazz.getDeclaredConstructors())
-            .anyMatch(constructor -> constructor.getParameterTypes().length == 0);
+            .anyMatch(constructor -> constructor.getParameterTypes().length == 0 && Modifier.isPublic(constructor.getModifiers()));
     }
 
     private Constructor<?> findNoArgumentConstructor(final Class<?> clazz) {
@@ -65,19 +56,20 @@ public class ControllerMapping {
             .orElseThrow(() -> new IllegalArgumentException("Cannot find no-argument constructor."));
     }
 
-    private Set<Class<?>> findAllClassesUsingClassLoader(String packageName) {
+    private <T> Set<Class<?>> findAllClassesUsingClassLoader(String packageName, Class<T> typeToScan) {
         final InputStream stream = ClassLoader.getSystemClassLoader()
-            .getResourceAsStream(packageName.replaceAll("[.]", "/"));
+            .getResourceAsStream(packageName.replaceAll(PACKAGE_DELIMITER_REGEX, DIRECTORY_DELIMITER));
         final BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(stream)));
         return reader.lines()
-            .filter(line -> line.endsWith(".class"))
+            .filter(line -> line.endsWith(CLASS_FILE_EXTENSION))
             .map(line -> getClass(line, packageName))
+            .filter(typeToScan::isAssignableFrom)
             .collect(Collectors.toSet());
     }
 
     private Class<?> getClass(String className, String packageName) {
-        final String classPath = packageName + "."
-            + className.substring(0, className.lastIndexOf('.'));
+        final String classPath = packageName + PACKAGE_DELIMITER
+            + className.substring(0, className.lastIndexOf(EXTENSION_DELIMITER));
         try {
             return Class.forName(classPath);
         } catch (ClassNotFoundException e) {

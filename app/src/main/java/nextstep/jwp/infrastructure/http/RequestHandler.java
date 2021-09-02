@@ -6,30 +6,30 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
+import nextstep.jwp.WebApplicationContext;
+import nextstep.jwp.infrastructure.http.handler.ExceptionHandler;
+import nextstep.jwp.infrastructure.http.interceptor.HandlerInterceptor;
+import nextstep.jwp.infrastructure.http.reader.HttpRequestReader;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
-import nextstep.jwp.infrastructure.http.request.HttpRequestLine;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
-import nextstep.jwp.infrastructure.http.view.ResourceView;
-import nextstep.jwp.infrastructure.http.view.View;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
-    private static final String CONTENT_LENGTH = "Content-Length";
 
     private final Socket connection;
-    private final ControllerMapping controllerMapping;
-    private final ViewResolver viewResolver;
+    private final HandlerMapping handlerMapping;
+    private final HandlerInterceptor interceptor;
+    private final ExceptionHandler exceptionHandler;
 
-    public RequestHandler(final Socket connection, final ControllerMapping controllerMapping) {
+    public RequestHandler(final Socket connection, final WebApplicationContext context) {
         this.connection = Objects.requireNonNull(connection);
-        this.controllerMapping = controllerMapping;
-        this.viewResolver = new ViewResolver("static");
+        this.handlerMapping = context.getHandlerMapping();
+        this.interceptor = context.getInterceptor();
+        this.exceptionHandler = new ExceptionHandler(handlerMapping.getFileHandler());
     }
 
     @Override
@@ -41,62 +41,30 @@ public class RequestHandler implements Runnable {
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            final HttpRequest request = requestFromReader(bufferedReader);
-            final View view = findViewByRequest(request);
-            final HttpResponse httpResponse = viewResolver.resolve(view);
+            final HttpRequestReader httpRequestReader = new HttpRequestReader(bufferedReader);
+            final HttpRequest request = httpRequestReader.readHttpRequest();
+            final HttpResponse response = new HttpResponse();
 
-            outputStream.write(httpResponse.toString().getBytes());
+            handle(request, response);
+
+            outputStream.write(response.toString().getBytes());
             outputStream.flush();
-        } catch (IOException exception) {
+        } catch (Exception exception) {
             log.error("Exception stream", exception);
-        } catch (IllegalArgumentException exception) {
-            log.error("Exception occurs", exception);
         } finally {
             close();
         }
     }
 
-    private HttpRequest requestFromReader(final BufferedReader bufferedReader) throws IOException {
-        final HttpRequestLine requestLine = requestLineFromReader(bufferedReader);
-        final HttpHeaders headers = headerFromReader(bufferedReader);
-        final String body = bodyFromReader(bufferedReader, headers);
-
-        return new HttpRequest(requestLine, headers, body);
-    }
-
-    private HttpRequestLine requestLineFromReader(final BufferedReader bufferedReader) throws IOException {
-        return HttpRequestLine.of(bufferedReader.readLine());
-    }
-
-    private HttpHeaders headerFromReader(final BufferedReader bufferedReader) throws IOException {
-        final List<String> lines = new ArrayList<>();
-        String line;
-
-        while (Objects.nonNull(line = bufferedReader.readLine())) {
-            if ("".equals(line)) {
-                break;
-            }
-            lines.add(line);
+    private void handle(final HttpRequest request, final HttpResponse response) throws Exception {
+        try {
+            interceptor.preHandle(request, response);
+            handlerMapping.getHandler(request).handle(request, response);
+            interceptor.postHandle(request, response);
+        } catch (IllegalArgumentException exception) {
+            log.error("Exception occurs", exception);
+            exceptionHandler.handle(request, response);
         }
-
-        return HttpHeaders.of(lines);
-    }
-
-    private String bodyFromReader(final BufferedReader bufferedReader, final HttpHeaders headers) throws IOException {
-        if (!headers.hasKey(CONTENT_LENGTH)) {
-            return "";
-        }
-
-        int contentLength = Integer.parseInt(headers.getValue(CONTENT_LENGTH).get(0));
-        char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-
-        return new String(buffer);
-    }
-
-    private View findViewByRequest(final HttpRequest request) {
-        return controllerMapping.handle(request)
-            .orElseGet(() -> new ResourceView(request.getRequestLine().getUri().getBaseUri()));
     }
 
     private void close() {

@@ -1,6 +1,6 @@
 package nextstep.jwp.infrastructure.http.request;
 
-public enum HttpMethod {
+public enum Method {
     GET,
     HEAD,
     POST,

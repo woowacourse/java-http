@@ -24,23 +24,26 @@ public class FrontController {
         final String requestPath = httpRequest.getPath();
         final Controller controller = controllerMap.get(requestPath);
 
-        if (ContentType.containValueByUrl(requestPath)) {
-            View view = new View(requestPath);
-            view.render(Collections.emptyMap(), httpRequest, httpResponse);
-            return;
-        }
-
-        if (Objects.isNull(controller)) {
-            httpResponse.setHttpStatusCode(HttpStatusCode.NOT_FOUND);
-            errorResolver(httpRequest, httpResponse);
-            return;
-        }
-
         try {
+            if (ContentType.containValueByUrl(requestPath)) {
+                View view = new View(requestPath);
+                view.render(Collections.emptyMap(), httpRequest, httpResponse);
+                return;
+            }
+
+            if (Objects.isNull(controller)) {
+                httpResponse.setHttpStatusCode(HttpStatusCode.NOT_FOUND);
+                errorResolver(httpRequest, httpResponse);
+                return;
+            }
+
             ModelView modelView = controller.process(httpRequest, httpResponse);
             View view = new View(modelView.getViewName());
             view.render(modelView.getModel(), httpRequest, httpResponse);
-        } catch (RuntimeException illegalArgumentException) {
+        } catch (UnsupportedOperationException exception) {
+            httpResponse.setHttpStatusCode(HttpStatusCode.NOT_FOUND);
+            errorResolver(httpRequest, httpResponse);
+        } catch (RuntimeException exception) {
             httpResponse.setHttpStatusCode(HttpStatusCode.UNAUTHORIZED);
             errorResolver(httpRequest, httpResponse);
         }

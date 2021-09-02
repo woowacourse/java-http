@@ -87,12 +87,16 @@ public class HttpMessageReader {
         if (Objects.isNull(contentLengthString)) {
             return Collections.emptyMap();
         }
-        return Stream.of(extractQueryParameterString(contentLengthString).split("&"))
+        final String extractedQueryString = extractQueryStringString(contentLengthString);
+        if (!extractedQueryString.contains("=")) {
+            return Collections.emptyMap();
+        }
+        return Stream.of(extractedQueryString.split("&"))
                 .map(it -> it.split("=", 2))
                 .collect(Collectors.toMap(it -> it[0], it -> it[1]));
     }
 
-    private String extractQueryParameterString(String contentLengthString) {
+    private String extractQueryStringString(String contentLengthString) {
         try {
             final int contentLength = Integer.parseInt(contentLengthString);
             final char[] buffer = new char[contentLength];

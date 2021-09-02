@@ -13,7 +13,6 @@ public class UserService {
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
     public UserService() {
-
     }
 
     public User login(UserRequest userRequest) {

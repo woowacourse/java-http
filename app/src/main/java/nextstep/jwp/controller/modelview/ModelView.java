@@ -19,8 +19,4 @@ public class ModelView {
     public Map<String, Object> getModel() {
         return model;
     }
-
-    public void setModel(Map<String, Object> model) {
-        this.model = model;
-    }
 }

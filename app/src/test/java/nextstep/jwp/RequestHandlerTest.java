@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class RequestHandlerTest {
 
     @Test
-    void run() {
+    void url_입력하지_않을시_기본_메세지_반환한다() {
         // given
         final MockSocket socket = new MockSocket();
         final RequestHandler requestHandler = new RequestHandler(socket);
@@ -31,7 +31,7 @@ public class RequestHandlerTest {
     }
 
     @Test
-    void mainPage() {
+    void 슬래시를_Path로_둘_때_기본_메세지를_반환한다() {
         // given
         final String requestUri = "/";
         final String httpRequest = toHttpGetRequest(requestUri);
@@ -68,8 +68,14 @@ public class RequestHandlerTest {
         return Stream.of(
                 Arguments.of("/login", "account=&password=password", "/401.html"),
                 Arguments.of("/login", "account=gugu&password=passwor", "/401.html"),
-                Arguments.of("/login", "account=ggu&password=password", "/401.html")
-        );
+                Arguments.of("/login", "account=ggu&password=password", "/401.html"),
+                Arguments.of("/regoster", "account=gugu&password=passwor&email=", "/404.html"),
+                Arguments.of("/regoster", "account=gugu&password=&email=test@test.com", "/404.html"),
+                Arguments.of("/regoster", "account=&password=&email=test@test.com", "/404.html"),
+                Arguments.of("/ishavePage", "", "/404.html"),
+                Arguments.of("/ishavePage", "account", "/404.html"),
+                Arguments.of("/is.html", "account", "/404.html")
+                );
     }
 
     @ParameterizedTest

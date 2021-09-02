@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Map;
+import java.util.Objects;
 
 public class View {
 
@@ -48,7 +49,7 @@ public class View {
             return Files.readString(new File(url.getFile()).toPath());
         } catch (IOException | NullPointerException exception) {
             LOG.info("리소스를 가져오려는 url이 존재하지 않습니다. 입력값: {}", STATIC_PATH + targetUri);
-            throw new IllegalStateException(String.format("리소스를 가져오려는 url이 존재하지 않습니다. 입력값: %s",
+            throw new UnsupportedOperationException(String.format("리소스를 가져오려는 url이 존재하지 않습니다. 입력값: %s",
                     STATIC_PATH + targetUri));
         }
     }

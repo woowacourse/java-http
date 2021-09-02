@@ -3,6 +3,8 @@ package nextstep.jwp.controller;
 import java.io.IOException;
 import java.util.UUID;
 
+import nextstep.jwp.HttpSession;
+import nextstep.jwp.HttpSessions;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.request.HttpRequest;
@@ -19,8 +21,7 @@ public class LoginController implements Controller {
             String account = request.getRequestBodyParam("account");
             String password = request.getRequestBodyParam("password");
 
-            User user = InMemoryUserRepository.findByAccount(account)
-                                              .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+            User user = getUser(response, account);
 
             if (!user.checkPassword(password)) {
                 response.redirect("/401.html");
@@ -33,6 +34,16 @@ public class LoginController implements Controller {
             response.redirect("/index.html");
         }
 
+    }
+
+    private User getUser(HttpResponse response, String account) throws IOException {
+        User user = null;
+        try {
+            user = InMemoryUserRepository.findByAccount(account);
+        } catch (IllegalArgumentException e) {
+            response.redirect("/401.html");
+        }
+        return user;
     }
 }
 

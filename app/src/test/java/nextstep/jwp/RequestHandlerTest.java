@@ -63,7 +63,9 @@ class RequestHandlerTest {
         // then
         String expected = String.join("\r\n",
                 "HTTP/1.1 302 Found",
-                "Location: /index.html"
+                "Location: /index.html",
+                "",
+                ""
         );
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -117,7 +119,9 @@ class RequestHandlerTest {
         // then
         String expected = String.join("\r\n",
                 "HTTP/1.1 302 Found",
-                "Location: /index.html" //http://localhost
+                "Location: /index.html",
+                "",
+                ""
         );
         assertThat(socket.output()).isEqualTo(expected);
     }

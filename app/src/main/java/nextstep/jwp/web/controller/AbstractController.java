@@ -1,6 +1,5 @@
 package nextstep.jwp.web.controller;
 
-import nextstep.jwp.web.network.request.HttpMethod;
 import nextstep.jwp.web.network.request.HttpRequest;
 import nextstep.jwp.web.network.response.HttpResponse;
 
@@ -19,11 +18,13 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public final void service(HttpRequest request, HttpResponse response) {
-        if (HttpMethod.POST.equals(request.getHttpMethod())) {
-            doPost(request, response);
-            return;
+        if (request.isGet()) {
+            doGet(request, response);
         }
-        doGet(request, response);
+        if (request.isPost()) {
+            doPost(request, response);
+        }
+        // BAD REQUEST? NOT FOUND?
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) {

@@ -67,4 +67,12 @@ public class HttpRequest {
     public Map<String, String> getBodyAsMap() {
         return body.asMap();
     }
+
+    public boolean isGet() {
+        return this.requestLine.isGet();
+    }
+
+    public boolean isPost() {
+        return this.requestLine.isPost();
+    }
 }

@@ -1,25 +1,30 @@
 package nextstep.jwp.http;
 
-import java.nio.charset.StandardCharsets;
-
 public class Response {
 
     private static final String NEW_LINE = "\r\n";
     private static final String CONTENT_LENGTH = "Content-Length: ";
 
-    private String message;
+    private String header;
+    private String body;
     private HttpStatus httpStatus;
 
     public Response() {
+        this("", HttpStatus.OK);
     }
 
-    public Response(String message, HttpStatus httpStatus) {
-        this.message = message;
+    public Response(String header, HttpStatus httpStatus) {
+        this(header, "", httpStatus);
+    }
+
+    public Response(String header, String body, HttpStatus httpStatus) {
+        this.header = header;
+        this.body = body;
         this.httpStatus = httpStatus;
     }
 
     public byte[] getBytes() {
-        return this.toString().getBytes(StandardCharsets.UTF_8);
+        return this.toString().getBytes();
     }
 
     public static Response create302Found(String location) {
@@ -28,23 +33,25 @@ public class Response {
     }
 
     public static Response createErrorRequest(String errorMessage, HttpStatus httpStatus) {
-        String message = String.join(NEW_LINE,
-            "",
-            errorMessage);
-        return new Response(message, httpStatus);
+        return new Response("Content-Type: application/json", errorMessage, httpStatus);
     }
 
     public void set200OK(Request request, String responseBody) {
-        message = String.join(NEW_LINE,
+        header = String.join(NEW_LINE,
             "Content-Type: " + request.acceptType() + ";charset=utf-8",
-            CONTENT_LENGTH + responseBody.getBytes().length,
-            "",
-            responseBody);
+            CONTENT_LENGTH + responseBody.getBytes().length);
         httpStatus = HttpStatus.OK;
+        body = responseBody;
+    }
+
+    public void addHeader(String key, String value) {
+        header = String.join(NEW_LINE,
+            header,
+            String.format("%s: %s", key, value));
     }
 
     public void set302Found(String location) {
-        message = "Location: " + location;
+        header = "Location: " + location;
         httpStatus = HttpStatus.FOUND;
     }
 
@@ -52,7 +59,9 @@ public class Response {
     public String toString() {
         return String.join(NEW_LINE,
             String.format("HTTP/1.1 %d %s", httpStatus.getStatus(), httpStatus.getStatusMessage()),
-            message
+            header,
+            "",
+            body
         );
     }
 }

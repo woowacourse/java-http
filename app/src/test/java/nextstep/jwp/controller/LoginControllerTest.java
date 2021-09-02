@@ -6,11 +6,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+import nextstep.jwp.MessageFactory;
 import nextstep.jwp.exception.UnauthorizedException;
-import nextstep.jwp.exception.UsernameConflictException;
 import nextstep.jwp.http.HttpMethod;
+import nextstep.jwp.http.HttpSession;
 import nextstep.jwp.http.Request;
 import nextstep.jwp.http.Response;
+import nextstep.jwp.service.LoginService;
 import nextstep.jwp.utils.FileConverter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +21,7 @@ import org.junit.jupiter.api.Test;
 @DisplayName("LoginControllerTest")
 class LoginControllerTest {
 
-    private static final LoginController LOGIN_CONTROLLER = new LoginController();
+    private static final LoginController LOGIN_CONTROLLER = new LoginController(new LoginService());
     private static final String NEW_LINE = "\r\n";
 
     @Test
@@ -46,11 +49,15 @@ class LoginControllerTest {
         Request request = createRequest(body, HttpMethod.POST);
         Response response = new Response();
 
+        String expected = MessageFactory.createResponseFound("index.html");
+
         // when
         LOGIN_CONTROLLER.doPost(request, response);
 
         // then
-        assertThat(response.toString()).hasToString(createResponseFound());
+        for (String message : expected.split(NEW_LINE)) {
+            assertThat(response.toString()).contains(message);
+        }
     }
 
     @Test
@@ -74,6 +81,7 @@ class LoginControllerTest {
             .httpVersion("HTTP/1.1")
             .method(httpMethod)
             .body(body)
+            .httpSession(new HttpSession(UUID.randomUUID().toString()))
             .build();
     }
 
@@ -85,12 +93,5 @@ class LoginControllerTest {
             "Content-Length: " + responseBody.getBytes().length,
             "",
             responseBody);
-    }
-
-    private String createResponseFound() {
-        return String.join(NEW_LINE,
-            "HTTP/1.1 302 Found",
-            "Location: /index.html"
-        );
     }
 }

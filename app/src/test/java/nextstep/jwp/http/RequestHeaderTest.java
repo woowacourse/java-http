@@ -8,7 +8,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 @DisplayName("RequestHeaderTest")
 class RequestHeaderTest {
@@ -38,7 +37,8 @@ class RequestHeaderTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"html:text/html", "css:text/css", "javascript:application/javascript"}, delimiter = ':')
+    @CsvSource(value = {"html:text/html", "css:text/css",
+        "javascript:application/javascript"}, delimiter = ':')
     @DisplayName("Accept 에 html 이 포함되어 있다면 text/html 을 반환한다.")
     void acceptTypeWhenHtml(String target, String expected) {
         // given

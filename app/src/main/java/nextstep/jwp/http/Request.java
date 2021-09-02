@@ -9,6 +9,8 @@ public class Request {
     private final String httpVersion;
     private final RequestHeader header;
     private final Map<String, String> body;
+    private final HttpCookie httpCookie;
+    private final HttpSession httpSession;
 
     private Request(Builder builder) {
         this.method = builder.method;
@@ -16,6 +18,8 @@ public class Request {
         this.httpVersion = builder.httpVersion;
         this.header = builder.header;
         this.body = builder.body;
+        this.httpCookie = builder.httpCookie;
+        this.httpSession = builder.httpSession;
     }
 
     public String getParameter(String key) {
@@ -24,6 +28,10 @@ public class Request {
 
     public String getRequestBody(String key) {
         return body.get(key);
+    }
+
+    public String getSession() {
+        return httpCookie.jSessionId();
     }
 
     public boolean isUriMatch(String target) {
@@ -50,6 +58,10 @@ public class Request {
         return method;
     }
 
+    public HttpSession getHttpSession() {
+        return httpSession;
+    }
+
     public String getHttpVersion() {
         return httpVersion;
     }
@@ -61,6 +73,8 @@ public class Request {
         private String httpVersion = "";
         private RequestHeader header;
         private Map<String, String> body;
+        private HttpCookie httpCookie;
+        private HttpSession httpSession;
 
         public Builder method(HttpMethod method) {
             this.method = method;
@@ -82,8 +96,18 @@ public class Request {
             return this;
         }
 
+        public Builder cookie(HttpCookie cookie) {
+            this.httpCookie = cookie;
+            return this;
+        }
+
         public Builder body(Map<String, String> body) {
             this.body = body;
+            return this;
+        }
+
+        public Builder httpSession(HttpSession httpSession) {
+            this.httpSession = httpSession;
             return this;
         }
 

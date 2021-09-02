@@ -51,7 +51,7 @@ class RequestMappingTest {
         Request request = createRequest("/error");
 
         assertThatThrownBy(() -> REQUEST_MAPPING.getController(request))
-        .isInstanceOf(NotFoundException.class);
+            .isInstanceOf(NotFoundException.class);
     }
 
     @Test

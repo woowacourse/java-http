@@ -1,6 +1,5 @@
 package nextstep.jwp.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -19,7 +18,7 @@ class LoginServiceTest {
     void loginValidate() {
         User user = new User(0L, "gugu", "password", "");
 
-        assertThatCode(() -> LOGIN_SERVICE.loginValidate(user)).doesNotThrowAnyException();
+        assertThatCode(() -> LOGIN_SERVICE.login(user)).doesNotThrowAnyException();
     }
 
     @Test
@@ -27,7 +26,7 @@ class LoginServiceTest {
     void loginValidateIdException() {
         User user = new User(0L, "error", "password", "");
 
-        assertThatThrownBy(() -> LOGIN_SERVICE.loginValidate(user))
+        assertThatThrownBy(() -> LOGIN_SERVICE.login(user))
             .isInstanceOf(UnauthorizedException.class);
     }
 
@@ -36,7 +35,7 @@ class LoginServiceTest {
     void loginValidatePasswordException() {
         User user = new User(0L, "gugu", "error", "");
 
-        assertThatThrownBy(() -> LOGIN_SERVICE.loginValidate(user))
+        assertThatThrownBy(() -> LOGIN_SERVICE.login(user))
             .isInstanceOf(UnauthorizedException.class);
     }
 }

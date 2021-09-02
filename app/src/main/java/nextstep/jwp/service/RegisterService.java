@@ -7,10 +7,10 @@ import org.slf4j.LoggerFactory;
 
 public class RegisterService {
 
-    private static final Logger log = LoggerFactory.getLogger(RegisterService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RegisterService.class);
 
     public void save(User user) {
         InMemoryUserRepository.save(user);
-        log.info("{} user create success", user.getAccount());
+        LOG.info("{} user create success", user.getAccount());
     }
 }

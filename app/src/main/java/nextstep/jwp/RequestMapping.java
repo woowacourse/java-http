@@ -8,6 +8,8 @@ import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.http.Request;
+import nextstep.jwp.service.LoginService;
+import nextstep.jwp.service.RegisterService;
 
 public class RequestMapping {
 
@@ -17,8 +19,9 @@ public class RequestMapping {
     private static final String FRONT = "front";
 
     static {
-        CONTROLLERS.put(LOGIN, new LoginController());
-        CONTROLLERS.put(REGISTER, new RegisterController());
+        LoginService loginService = new LoginService();
+        CONTROLLERS.put(LOGIN, new LoginController(loginService));
+        CONTROLLERS.put(REGISTER, new RegisterController(new RegisterService(), loginService));
         CONTROLLERS.put(FRONT, new FrontController());
     }
 

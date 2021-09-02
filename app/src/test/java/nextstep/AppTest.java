@@ -1,5 +1,6 @@
 package nextstep;
 
+import static nextstep.jwp.webserver.response.ContentType.CSS;
 import static nextstep.jwp.webserver.response.ContentType.HTML;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -38,6 +39,15 @@ public class AppTest {
         페이지_비교(result.body(), page);
         assertThat(result.statusCode()).isEqualTo(StatusCode.OK);
         assertThat(result.headerValue("Content-Type")).isEqualTo(HTML.contentType());
+    }
+
+    @Test
+    @DisplayName("css 파일 확인")
+    public void resolveCss() throws Exception{
+        final MockResult result = MockRequest.get("/css/styles.css").result();
+        페이지_비교(result.body(), "css/styles.css");
+        assertThat(result.statusCode()).isEqualTo(StatusCode.OK);
+        assertThat(result.headerValue("Content-Type")).isEqualTo(CSS.contentType());
     }
 
     @Test

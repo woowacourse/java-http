@@ -1,9 +1,6 @@
 package nextstep.jwp.server;
 
-import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.RegisterController;
-import nextstep.jwp.controller.StaticResourceController;
+import nextstep.jwp.controller.*;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.request.HttpRequestParser;
 import nextstep.jwp.http.request.RequestHandler;
@@ -13,7 +10,6 @@ import nextstep.jwp.service.RegisterService;
 import nextstep.jwp.staticresource.StaticResourceFinder;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ApplicationContext {
 
@@ -32,23 +28,15 @@ public class ApplicationContext {
         final LoginService loginService = new LoginService(inMemoryUserRepository);
 
         final StaticResourceFinder staticResourceFinder = new StaticResourceFinder();
-
-        final RegisterController registerController = new RegisterController(staticResourceFinder, registerService);
-        final LoginController loginController = new LoginController(staticResourceFinder, loginService);
         final StaticResourceController staticResourceController = new StaticResourceController(staticResourceFinder);
 
-        final Map<String, Controller> controllers = getMappedControllers(registerController, loginController);
+        final Map<String, Controller> controllers = Map.of(
+                "/", new HomeController(staticResourceFinder),
+                "/register", new RegisterController(staticResourceFinder, registerService),
+                "/login", new LoginController(staticResourceFinder, loginService));
 
         return new RequestMapping(controllers, staticResourceController);
     }
-
-    private Map<String, Controller> getMappedControllers(RegisterController registerController, LoginController loginController) {
-        final Map<String, Controller> controllers = new ConcurrentHashMap<>();
-        controllers.put("/register", registerController);
-        controllers.put("/login", loginController);
-        return controllers;
-    }
-
     public RequestHandler getRequestHandler() {
         return requestHandler;
     }

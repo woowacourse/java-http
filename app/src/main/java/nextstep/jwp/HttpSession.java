@@ -14,4 +14,8 @@ public class HttpSession {
     public void setAttribute(String key, Object value) {
         values.put(key, value);
     }
+
+    public Object getAttributes(String key) {
+        return values.get(key);
+    }
 }

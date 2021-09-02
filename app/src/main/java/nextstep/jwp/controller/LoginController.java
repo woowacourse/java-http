@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import nextstep.jwp.HttpSession;
 import nextstep.jwp.HttpSessions;
@@ -13,6 +14,11 @@ public class LoginController implements Controller {
     @Override
     public void process(HttpRequest request, HttpResponse response) throws IOException {
         if (request.isGet()) {
+
+            if (isLoginStatus(request.getSessionId())) {
+                response.redirect("/index.html");
+                return;
+            }
             response.forward("/login.html");
         }
 
@@ -32,7 +38,12 @@ public class LoginController implements Controller {
             session.setAttribute("user", user);
             response.redirect("/index.html");
         }
+    }
 
+    private boolean isLoginStatus(String sessionId) {
+        HttpSession session = HttpSessions.getSession(sessionId);
+        Object user = session.getAttributes("user");
+        return Objects.nonNull(user);
     }
 
     private User getUser(HttpResponse response, String account) throws IOException {

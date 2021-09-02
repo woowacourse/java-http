@@ -5,10 +5,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import nextstep.jwp.HttpCookie;
+
 import static nextstep.jwp.RequestHandler.LOG;
 
 public class RequestHeaders {
     private final Map<String, String> headers = new HashMap<>();
+    private HttpCookie httpCookie;
 
     public RequestHeaders(BufferedReader bufferedReader) throws IOException {
         String header = bufferedReader.readLine();
@@ -19,6 +22,10 @@ public class RequestHeaders {
             LOG.info("header : {}", header);
             header = bufferedReader.readLine();
         }
+
+        if (headers.containsKey("Cookie")) {
+            httpCookie = new HttpCookie(headers.get("Cookie"));
+        }
     }
 
     public String get(String key) {
@@ -26,6 +33,9 @@ public class RequestHeaders {
     }
 
     public boolean hasSessionId() {
-        return headers.containsKey("JSESSIONID");
+        if (httpCookie != null) {
+            return httpCookie.hasSessionId();
+        }
+        return false;
     }
 }

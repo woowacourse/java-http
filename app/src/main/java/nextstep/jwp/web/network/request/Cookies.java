@@ -26,12 +26,16 @@ public class Cookies {
                 Arrays.stream(cookiesAsString.split(";", 0))
                         .map(cookie -> cookie.split("="))
                         .collect(Collectors.toMap(
-                                keyAndValue -> keyAndValue[COOKIE_KEY_INDEX],
-                                keyAndValue -> keyAndValue[COOKIE_VALUE_INDEX]))
+                                keyAndValue -> keyAndValue[COOKIE_KEY_INDEX].trim(),
+                                keyAndValue -> keyAndValue[COOKIE_VALUE_INDEX].trim()))
         );
     }
 
     public String get(String key) {
         return cookies.getOrDefault(key, DEFAULT_COOKIE_VALUE);
+    }
+
+    public boolean isEmpty() {
+        return cookies.isEmpty();
     }
 }

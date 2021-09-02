@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.UUID;
 
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,5 +98,30 @@ class HttpRequestTest {
         // then
         assertThat(actual)
                 .contains(entry("account", "gugu"), entry("password", "password"), entry("email", "hkkang%40woowahan.com"));
+    }
+
+    @Test
+    @DisplayName("HttpRequest 객체로부터 HttpSession을 가지고 온다 - 성공")
+    void getSession() {
+        // given
+        final UUID id = UUID.randomUUID();
+        final String requestAsString = String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=" + id,
+                "Accept: */* ",
+                "",
+                "");
+        final InputStream inputStream = new ByteArrayInputStream(requestAsString.getBytes());
+        final HttpSession session = new HttpSession(id);
+        HttpSessions.setSession(session);
+
+        // when
+        final HttpRequest request = new HttpRequest(inputStream);
+        final HttpSession actual = request.getSession();
+
+        // then
+        assertThat(actual).isEqualTo(session);
     }
 }

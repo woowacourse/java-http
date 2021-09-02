@@ -8,6 +8,8 @@ import java.util.Map;
 
 public class ControllerFactory {
 
+    private ControllerFactory() {}
+
     public static Map<String, Controller> create() {
         final Map<String, Controller> controllers = new HashMap<>();
 

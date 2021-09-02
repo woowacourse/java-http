@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class HttpHeaders {
 
-    private static final String COOKIES = "Cookies";
+    private static final String COOKIES = "Cookie";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
     private static final String DEFAULT_HEADER_VALUE = null;

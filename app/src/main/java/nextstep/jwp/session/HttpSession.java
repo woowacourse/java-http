@@ -18,4 +18,12 @@ public class HttpSession {
     public Object getAttributes(String key) {
         return values.get(key);
     }
+
+    public void removeAttribute(String key) {
+        values.remove(key);
+    }
+
+    public void invalidate() {
+        values.clear();
+    }
 }

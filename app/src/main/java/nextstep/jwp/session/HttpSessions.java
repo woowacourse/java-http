@@ -17,4 +17,8 @@ public class HttpSessions {
         }
         return SESSIONS.get(sessionId);
     }
+
+    static void remove(String sessionId) {
+        SESSIONS.remove(sessionId);
+    }
 }

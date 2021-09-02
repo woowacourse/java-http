@@ -10,9 +10,9 @@ import nextstep.jwp.service.UserService;
 import java.util.Map;
 import java.util.function.Function;
 
-public class MemberController extends AbstractController {
+public class UserController extends AbstractController {
     @Override
-    void doGet(final HttpRequest request, HttpResponse response) {
+    protected void doGet(final HttpRequest request, HttpResponse response) {
         final Map<String, Function<HttpRequest, HttpResponse>> mappedFunction = Map.of(
                 "login", this::getLogin,
                 "register", this::getRegister
@@ -21,7 +21,7 @@ public class MemberController extends AbstractController {
     }
 
     @Override
-    void doPost(final HttpRequest request, HttpResponse response) {
+    protected void doPost(final HttpRequest request, HttpResponse response) {
         final Map<String, Function<HttpRequest, HttpResponse>> mappedFunction = Map.of(
                 "login", this::postLogin,
                 "register", this::postRegister

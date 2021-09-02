@@ -19,11 +19,11 @@ public abstract class AbstractController implements Controller {
         doPost(request, response);
     }
 
-    abstract void doGet(HttpRequest request, HttpResponse response);
+    protected abstract void doGet(HttpRequest request, HttpResponse response);
 
-    abstract void doPost(HttpRequest request, HttpResponse response);
+    protected abstract void doPost(HttpRequest request, HttpResponse response);
 
-    HttpResponse getHttpResponse(HttpRequest request, Map<String, Function<HttpRequest, HttpResponse>> mappedFunction) {
+    protected HttpResponse getHttpResponse(HttpRequest request, Map<String, Function<HttpRequest, HttpResponse>> mappedFunction) {
         return mappedFunction.entrySet().stream()
                 .filter(entry -> request.containsFunctionInUrl(entry.getKey()))
                 .map(entry -> entry.getValue().apply(request))

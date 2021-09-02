@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 public class JwpController extends AbstractController {
     @Override
-    void doGet(final HttpRequest request, HttpResponse response) {
+    protected void doGet(final HttpRequest request, HttpResponse response) {
         final Map<String, Function<HttpRequest, HttpResponse>> mappedFunction = Map.of(
                 "index", this::getBasicPage,
                 "401", this::getBasicPage,
@@ -22,7 +22,8 @@ public class JwpController extends AbstractController {
     }
 
     @Override
-    void doPost(final HttpRequest request, HttpResponse response) {
+    protected void doPost(HttpRequest request, HttpResponse response) {
+
     }
 
     private HttpResponse getBasicPage(final HttpRequest request) {

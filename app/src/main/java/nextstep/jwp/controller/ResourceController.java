@@ -13,13 +13,12 @@ public class ResourceController extends AbstractController {
     }
 
     @Override
-    void doGet(final HttpRequest request, HttpResponse response) {
+    protected void doGet(final HttpRequest request, HttpResponse response) {
         response.setResponse(getHttpContent(request).getResponse());
     }
 
     @Override
-    void doPost(final HttpRequest request, HttpResponse response) {
-
+    protected void doPost(final HttpRequest request, HttpResponse response) {
     }
 
     private HttpResponse getHttpContent(final HttpRequest request) {

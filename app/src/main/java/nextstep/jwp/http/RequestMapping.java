@@ -2,7 +2,7 @@ package nextstep.jwp.http;
 
 import nextstep.jwp.controller.AbstractController;
 import nextstep.jwp.controller.JwpController;
-import nextstep.jwp.controller.MemberController;
+import nextstep.jwp.controller.UserController;
 import nextstep.jwp.controller.ResourceController;
 
 import java.util.Map;
@@ -13,8 +13,8 @@ public class RequestMapping {
             "401", new JwpController(),
             "404", new JwpController(),
             "500", new JwpController(),
-            "login", new MemberController(),
-            "register", new MemberController());
+            "login", new UserController(),
+            "register", new UserController());
 
     public AbstractController getAbstractController(final HttpRequest httpRequest) {
         return mapController(httpRequest);
@@ -26,7 +26,7 @@ public class RequestMapping {
             return new ResourceController(httpContentType);
         }
         return requestMapper.entrySet().stream()
-                .filter(name -> httpRequest.containsFunctionInUrl(name.getKey()))
+                .filter(mapper -> httpRequest.containsFunctionInUrl(mapper.getKey()))
                 .map(Map.Entry::getValue)
                 .findAny()
                 .orElseGet(JwpController::new);

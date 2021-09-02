@@ -1,7 +1,6 @@
 package nextstep.jwp.http.request;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpSession;

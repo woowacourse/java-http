@@ -2,7 +2,6 @@ package nextstep.jwp.http.response;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ResponseHeaders {

@@ -15,9 +15,8 @@ public class LoginController implements Controller {
         }
 
         if (request.isPost()) {
-            String[] splitBody = request.getRequestBody().split("&");
-            String account = splitBody[0].split("=")[1];
-            String password = splitBody[1].split("=")[1];
+            String account = request.getRequestBodyParam("account");
+            String password = request.getRequestBodyParam("password");
 
             User user = InMemoryUserRepository.findByAccount(account)
                                               .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));

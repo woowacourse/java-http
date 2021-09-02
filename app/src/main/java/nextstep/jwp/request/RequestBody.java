@@ -2,21 +2,32 @@ package nextstep.jwp.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RequestBody {
-    private final String body;
+    private final Map<String, String> body = new HashMap<>();
 
     public RequestBody(BufferedReader reader, int contentLength) throws IOException {
-        this.body = parseBody(reader, contentLength);
+        parseBody(reader, contentLength);
     }
 
-    private String parseBody(BufferedReader reader, int contentLength) throws IOException {
+    private void parseBody(BufferedReader reader, int contentLength) throws IOException {
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
-        return new String(buffer);
+        String s = new String(buffer);
+        String[] split = s.split("&");
+
+        for (String temp : split) {
+            String[] temp2 = temp.split("=");
+            body.put(temp2[0], temp2[1]);
+        }
     }
 
-    public String getBody() {
-        return body;
+    public String getParam(String key) {
+        if (body.containsKey(key)) {
+            return body.get(key);
+        }
+        throw new IllegalArgumentException("존재하지 않는 인자입니다.");
     }
 }

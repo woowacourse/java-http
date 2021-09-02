@@ -3,7 +3,7 @@ package nextstep.jwp.controller;
 import java.io.IOException;
 import java.util.Objects;
 
-import nextstep.jwp.HttpSession;
+import nextstep.jwp.session.HttpSession;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.request.HttpRequest;

@@ -3,6 +3,8 @@ package nextstep.jwp;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import nextstep.jwp.session.HttpCookie;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HttpCookieTest {

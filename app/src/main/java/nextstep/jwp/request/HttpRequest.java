@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Optional;
 
-import nextstep.jwp.HttpSession;
+import nextstep.jwp.session.HttpSession;
 
 public class HttpRequest {
     private final RequestLine requestLine;

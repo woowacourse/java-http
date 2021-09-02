@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import nextstep.jwp.HttpCookie;
-import nextstep.jwp.HttpSession;
-import nextstep.jwp.HttpSessions;
+import nextstep.jwp.session.HttpCookie;
+import nextstep.jwp.session.HttpSession;
+import nextstep.jwp.session.HttpSessions;
 
 import static nextstep.jwp.RequestHandler.LOG;
 

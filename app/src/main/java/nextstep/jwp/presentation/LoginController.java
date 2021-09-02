@@ -1,5 +1,6 @@
 package nextstep.jwp.presentation;
 
+import java.awt.print.Pageable;
 import java.io.IOException;
 import nextstep.jwp.application.LoginService;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -21,15 +22,17 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
+        if (request.getCookieValue("JSESSIONID") == null) {
+            showLoginPage(request.getUrl(), response);
+            return;
+        }
+
         User user = (User) request.getSession()
             .getAttribute("user");
 
         if (user != null && InMemoryUserRepository.exist(user)) {
             redirectIndex(response);
-            return;
         }
-
-        showLoginPage(request.getUrl(), response);
     }
 
     private void showLoginPage(String url, HttpResponse response) throws IOException {

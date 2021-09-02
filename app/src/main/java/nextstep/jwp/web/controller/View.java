@@ -14,33 +14,33 @@ public class View {
 
     private static final String ROOT_DIRECTORY = "static";
 
-    private final String path;
+    private final String name;
     private final ContentType contentType;
 
-    public View(String path) {
-        this.path = parsePath(path);
-        this.contentType = parseContentType(path);
+    public View(String name) {
+        this.name = parseName(name);
+        this.contentType = parseContentType(name);
     }
 
-    private String parsePath(String path) {
-        if (path.contains(".")) {
-            final int periodIndex = path.lastIndexOf(".");
-            return path.substring(0, periodIndex);
+    private String parseName(String name) {
+        if (name.contains(".")) {
+            final int periodIndex = name.lastIndexOf(".");
+            return name.substring(0, periodIndex);
         }
-        return path;
+        return name;
     }
 
-    private ContentType parseContentType(String path) {
-        if (path.contains(".")) {
-            final int periodIndex = path.lastIndexOf(".");
-            final String extension = path.substring(periodIndex + 1);
+    private ContentType parseContentType(String name) {
+        if (name.contains(".")) {
+            final int periodIndex = name.lastIndexOf(".");
+            final String extension = name.substring(periodIndex + 1);
             return ContentType.find(extension);
         }
         return ContentType.HTML;
     }
 
     public String render() {
-        return readFile(path + "." + contentType.getExtension());
+        return readFile(name + "." + contentType.getExtension());
     }
 
     private String readFile(String fileName) {

@@ -9,6 +9,9 @@ import java.util.Map;
 
 public class HttpBody {
 
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
+
     private final String body;
 
     private HttpBody(String body) {
@@ -33,7 +36,7 @@ public class HttpBody {
         final String[] params = body.split("&");
         for (String param : params) {
             final String[] keyAndValue = param.split("=", 2);
-            bodyAsMap.put(keyAndValue[0], keyAndValue[1]);
+            bodyAsMap.put(keyAndValue[KEY_INDEX], keyAndValue[VALUE_INDEX]);
         }
         return bodyAsMap;
     }

@@ -51,11 +51,11 @@ class RequestHandlerTest {
 
         // then
         final URL url = getClass().getClassLoader().getResource("static/index.html");
-        final String resourceAsString = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
+        final String content = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
         assertThat(socket.output()).contains(
                 "HTTP/1.1 200 OK",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + resourceAsString.getBytes().length + " "
+                "Content-Length: " + content.getBytes().length + " "
         );
     }
 
@@ -77,11 +77,11 @@ class RequestHandlerTest {
 
         // then
         final URL url = getClass().getClassLoader().getResource("static/login.html");
-        final String resourceAsString = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
+        final String content = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
         assertThat(socket.output()).contains(
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + resourceAsString.getBytes().length + " "
+                "Content-Length: " + content.getBytes().length + " "
         );
     }
 
@@ -164,11 +164,11 @@ class RequestHandlerTest {
 
         // then
         final URL url = getClass().getClassLoader().getResource("static/401.html");
-        final String resourceAsString = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
+        final String content = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
         assertThat(socket.output()).contains(
                 "HTTP/1.1 401 Unauthorized ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + resourceAsString.getBytes().length + " "
+                "Content-Length: " + content.getBytes().length + " "
         );
     }
 
@@ -182,9 +182,6 @@ class RequestHandlerTest {
                 "Connection: keep-alive ",
                 "",
                 "");
-        final URL url = getClass().getClassLoader().getResource("static/register.html");
-        final String resourceAsString = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
-
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
@@ -192,10 +189,12 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
+        final URL url = getClass().getClassLoader().getResource("static/register.html");
+        final String content = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
         assertThat(socket.output()).contains(
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + resourceAsString.getBytes().length + " "
+                "Content-Length: " + content.getBytes().length + " "
         );
     }
 
@@ -243,11 +242,11 @@ class RequestHandlerTest {
 
         // then
         final URL url = getClass().getClassLoader().getResource("static/css/styles.css");
-        final String resourceAsString = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
+        final String content = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
         assertThat(socket.output()).contains(
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/css ",
-                "Content-Length: " + resourceAsString.getBytes().length + " "
+                "Content-Length: " + content.getBytes().length + " "
         );
     }
 }

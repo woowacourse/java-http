@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -17,8 +18,8 @@ class ViewTest {
     @Test
     void createJavascriptView() throws IOException {
         // given
-        final URL resource = getClass().getClassLoader().getResource("static/assets/chart-area.js");
-        final Path path = Paths.get(resource.getPath());
+        final URL url = getClass().getClassLoader().getResource("static/assets/chart-area.js");
+        final Path path = Paths.get(Objects.requireNonNull(url).getPath());
         final byte[] bytes = Files.readAllBytes(path);
 
         // when
@@ -33,8 +34,8 @@ class ViewTest {
     @Test
     void createCSSView() throws IOException {
         // given
-        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        final Path path = Paths.get(resource.getPath());
+        final URL url = getClass().getClassLoader().getResource("static/css/styles.css");
+        final Path path = Paths.get(Objects.requireNonNull(url).getPath());
         final byte[] bytes = Files.readAllBytes(path);
 
         // when

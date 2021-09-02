@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import nextstep.jwp.HttpCookie;
+import nextstep.jwp.HttpSession;
+import nextstep.jwp.HttpSessions;
 
 import static nextstep.jwp.RequestHandler.LOG;
 
@@ -41,5 +43,10 @@ public class RequestHeaders {
 
     public String getSessionId() {
         return httpCookie.get("JSESSIONID");
+    }
+
+    public HttpSession getSession() {
+        String sessionId = httpCookie.get("JSESSIONID");
+        return HttpSessions.getSession(sessionId);
     }
 }

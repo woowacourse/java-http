@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Optional;
 
+import nextstep.jwp.HttpSession;
+
 public class HttpRequest {
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
@@ -52,7 +54,7 @@ public class HttpRequest {
         return !requestHeaders.hasSessionId();
     }
 
-    public String getSessionId() {
-        return requestHeaders.getSessionId();
+    public HttpSession getSession() {
+        return requestHeaders.getSession();
     }
 }

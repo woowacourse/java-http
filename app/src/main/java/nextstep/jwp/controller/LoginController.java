@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Objects;
 
 import nextstep.jwp.HttpSession;
-import nextstep.jwp.HttpSessions;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.request.HttpRequest;
@@ -15,7 +14,7 @@ public class LoginController implements Controller {
     public void process(HttpRequest request, HttpResponse response) throws IOException {
         if (request.isGet()) {
 
-            if (isLoginStatus(request.getSessionId())) {
+            if (isLoginStatus(request.getSession())) {
                 response.redirect("/index.html");
                 return;
             }
@@ -33,15 +32,13 @@ public class LoginController implements Controller {
                 return;
             }
 
-            String sessionId = request.getSessionId();
-            HttpSession session = HttpSessions.getSession(sessionId);
+            HttpSession session = request.getSession();
             session.setAttribute("user", user);
             response.redirect("/index.html");
         }
     }
 
-    private boolean isLoginStatus(String sessionId) {
-        HttpSession session = HttpSessions.getSession(sessionId);
+    private boolean isLoginStatus(HttpSession session) {
         Object user = session.getAttributes("user");
         return Objects.nonNull(user);
     }

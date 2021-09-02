@@ -19,14 +19,6 @@ public class RequestMapping {
         return new RequestMapping(requestLine.getRequestPath(), requestLine.getHttpMethod());
     }
 
-    public String getPath() {
-        return path;
-    }
-
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

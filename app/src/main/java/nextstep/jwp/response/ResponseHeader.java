@@ -9,7 +9,7 @@ public class ResponseHeader {
     private static final String HEADER_FORMAT = "%s: %s ";
     private static final String LINE_SEPARATOR = "\r\n";
 
-    private Map<String, String> responseHeaders = new HashMap<>();
+    private final Map<String, String> responseHeaders = new HashMap<>();
 
     public void addHeader(String name, String value) {
         this.responseHeaders.put(name, value);

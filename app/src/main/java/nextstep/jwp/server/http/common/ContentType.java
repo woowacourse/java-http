@@ -9,17 +9,17 @@ public enum ContentType {
     IMAGE(".svg", "image/svg+xml");
 
     private final String suffix;
-    private final String contentType;
+    private final String type;
 
-    ContentType(String suffix, String contentType) {
+    ContentType(String suffix, String type) {
         this.suffix = suffix;
-        this.contentType = contentType;
+        this.type = type;
     }
 
     public static String findContentType(String input) {
         return Arrays.stream(values())
                 .filter(value -> input.endsWith(value.suffix))
-                .map(value -> value.contentType)
+                .map(value -> value.type)
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 content type 입니다."));
     }

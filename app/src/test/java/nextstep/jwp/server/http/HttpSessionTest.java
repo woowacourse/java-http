@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class HttpSessionTest {
+class HttpSessionTest {
 
     @Test
     @DisplayName("세션에 키와 값을 추가하고 통일한 키로 값을 가져온다.")

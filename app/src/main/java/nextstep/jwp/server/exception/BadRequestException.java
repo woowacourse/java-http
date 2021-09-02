@@ -7,9 +7,4 @@ public class BadRequestException extends RuntimeException {
     public BadRequestException() {
         super(MESSAGE);
     }
-
-    @Override
-    public String getMessage() {
-        return super.getMessage();
-    }
 }

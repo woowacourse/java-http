@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Parameters {
-    private final Map<String, String> parameters;
+    private final Map<String, String> params;
 
     public Parameters() {
-        this.parameters = new HashMap<>();
+        this.params = new HashMap<>();
     }
 
     public void addParameters(String queryString) {
@@ -20,11 +20,11 @@ public class Parameters {
     private void parse(String[] split) {
         for (String data : split) {
             String[] splitData = data.split("=");
-            parameters.put(splitData[0], splitData[1]);
+            params.put(splitData[0], splitData[1]);
         }
     }
 
     public String get(String key) {
-        return parameters.get(key);
+        return params.get(key);
     }
 }

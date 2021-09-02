@@ -6,6 +6,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class HttpSessions {
     private static final Map<String, HttpSession> SESSIONS = new ConcurrentHashMap<>();
 
+    private HttpSessions() {
+    }
+
     public static void addSession(String id, HttpSession httpSession) {
         SESSIONS.put(id, httpSession);
     }

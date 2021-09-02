@@ -19,7 +19,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class HttpRequest {
-    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
     private static final String FORM_TYPE = "application/x-www-form-urlencoded";
 
     private final BufferedReader bufferedReader;
@@ -57,26 +57,26 @@ public class HttpRequest {
 
     private HttpHeaders parseHeaders() throws IOException {
         String line;
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> headerValues = new HashMap<>();
         while ((line = bufferedReader.readLine()) != null && !"".equals(line)) {
             String[] splitHeader = line.split(": ");
-            headers.put(splitHeader[0].trim(), splitHeader[1].trim());
+            headerValues.put(splitHeader[0].trim(), splitHeader[1].trim());
         }
-        return new HttpHeaders(headers);
+        return new HttpHeaders(headerValues);
     }
 
     private Parameters parseParameters() throws IOException {
-        Parameters parameters = new Parameters();
-        parameters.addParameters(getQueryString());
+        Parameters params = new Parameters();
+        params.addParameters(getQueryString());
         String length = getHeaders().get("Content-Length");
         if (!FORM_TYPE.equals(getHeaders().get("Content-Type")) || length == null) {
-            return parameters;
+            return params;
         }
         int contentLength = Integer.parseInt(length);
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
-        parameters.addParameters(new String(buffer));
-        return parameters;
+        params.addParameters(new String(buffer));
+        return params;
     }
 
     public String getMethod() {

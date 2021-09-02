@@ -15,7 +15,7 @@ import java.util.Objects;
 
 public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     private final LoginService loginService;
 

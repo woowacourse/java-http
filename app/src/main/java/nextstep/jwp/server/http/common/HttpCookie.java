@@ -7,14 +7,14 @@ import java.util.stream.Collectors;
 
 public class HttpCookie {
 
-    private final Map<String, String> httpCookie;
+    private final Map<String, String> cookies;
 
     public HttpCookie() {
-        this.httpCookie = new LinkedHashMap<>();
+        this.cookies = new LinkedHashMap<>();
     }
 
     public HttpCookie(String cookies) {
-        this.httpCookie = parseCookies(cookies);
+        this.cookies = parseCookies(cookies);
     }
 
     private Map<String, String> parseCookies(String cookies) {
@@ -26,16 +26,16 @@ public class HttpCookie {
     }
 
     public Map<String, String> getCookie() {
-        return httpCookie;
+        return cookies;
     }
 
     public String convertString() {
-        return httpCookie.entrySet().stream()
+        return cookies.entrySet().stream()
                 .map(entry -> entry.getKey() + "=" + entry.getValue())
                 .collect(Collectors.joining("; "));
     }
 
     public void addCookie(String name, String value) {
-        httpCookie.put(name, value);
+        cookies.put(name, value);
     }
 }

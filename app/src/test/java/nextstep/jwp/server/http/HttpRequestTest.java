@@ -11,7 +11,7 @@ import static nextstep.jwp.Fixture.postFormDataRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
-public class HttpRequestTest {
+class HttpRequestTest {
     private HttpRequest httpRequest;
 
     @Test

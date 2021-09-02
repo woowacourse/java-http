@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 
-public class HttpCookieTest {
+class HttpCookieTest {
 
     @Test
     @DisplayName("여러 개의 쿠키가 들어오면 파싱해서 저장하며 생성된다.")

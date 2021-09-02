@@ -20,9 +20,4 @@ public class HttpStatusException extends RuntimeException {
     public HttpStatus statusCode() {
         return httpStatus;
     }
-
-    @Override
-    public String getMessage() {
-        return super.getMessage();
-    }
 }

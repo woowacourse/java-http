@@ -21,7 +21,7 @@ public class LoginService {
             String sessionId = UUID.randomUUID().toString();
             HttpSession session = new HttpSession(sessionId);
             session.setAttribute(sessionId, user);
-            HttpSessions.addSession(sessionId, session);
+            HttpSessions.addSession("user", session);
             return sessionId;
         }
         throw new RuntimeException("invalid login");

@@ -10,14 +10,20 @@ import nextstep.jwp.response.HttpResponse;
 public class RegisterController implements Controller {
     @Override
     public void process(HttpRequest request, HttpResponse response) throws IOException {
-        String[] splitBody = request.getRequestBody().split("&");
-        String account = splitBody[0].split("=")[1];
-        String password = splitBody[1].split("=")[1];
-        String email = splitBody[2].split("=")[1];
+        if (request.isGet()) {
+            response.forward("/register.html");
+        }
 
-        User user = new User(2, account, password, email);
-        InMemoryUserRepository.save(user);
+        if (request.isPost()) {
+            String[] splitBody = request.getRequestBody().split("&");
+            String account = splitBody[0].split("=")[1];
+            String password = splitBody[1].split("=")[1];
+            String email = splitBody[2].split("=")[1];
 
-        response.redirect("/index.html");
+            User user = new User(2, account, password, email);
+            InMemoryUserRepository.save(user);
+
+            response.redirect("/index.html");
+        }
     }
 }

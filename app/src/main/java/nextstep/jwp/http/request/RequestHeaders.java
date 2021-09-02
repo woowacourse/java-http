@@ -3,9 +3,7 @@ package nextstep.jwp.http.request;
 import nextstep.jwp.http.session.HttpSession;
 import nextstep.jwp.http.session.HttpSessions;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 
 public class RequestHeaders {
 
@@ -15,24 +13,9 @@ public class RequestHeaders {
     private final Map<String, String> headersExceptCookies;
     private final RequestCookie requestCookie;
 
-    public RequestHeaders(Map<String, String> headers) {
-        headersExceptCookies = new ConcurrentHashMap<>();
-        requestCookie = new RequestCookie();
-        saveHeaders(headers);
-    }
-
-    private void saveHeaders(Map<String, String> headers) {
-        for (Map.Entry<String, String> entry : headers.entrySet()) {
-            saveClassifiedHeaders(entry.getKey(), entry.getValue());
-        }
-    }
-
-    private void saveClassifiedHeaders(String key, String value) {
-        if ("Cookie".equals(key)) {
-            requestCookie.add(value);
-            return;
-        }
-        headersExceptCookies.put(key, value);
+    public RequestHeaders(Map<String, String> headersExceptCookies, RequestCookie requestCookie) {
+        this.headersExceptCookies = headersExceptCookies;
+        this.requestCookie = requestCookie;
     }
 
     public int getContentLength() {

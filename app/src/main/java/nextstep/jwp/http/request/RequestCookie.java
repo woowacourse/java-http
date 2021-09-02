@@ -7,18 +7,8 @@ public class RequestCookie {
 
     private final Map<String, String> cookies;
 
-    public RequestCookie() {
-        this.cookies = new ConcurrentHashMap<>();
-    }
-
-    public void add(String cookiesLine) {
-        final String[] splitCookiesValue = cookiesLine.split("; ");
-        for (String cookieValue : splitCookiesValue) {
-            final String[] splitCookieValue = cookieValue.split("=");
-            final String key = splitCookieValue[0];
-            final String value = splitCookieValue[1];
-            cookies.put(key, value);
-        }
+    public RequestCookie(Map<String, String> cookies) {
+        this.cookies = new ConcurrentHashMap<>(cookies);
     }
 
     public boolean containsKey(String key) {

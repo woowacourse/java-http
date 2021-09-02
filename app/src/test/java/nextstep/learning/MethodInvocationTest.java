@@ -22,7 +22,7 @@ public class MethodInvocationTest {
         assertThat((String) result).isEqualTo("String&&1000");
     }
 
-    String textNumberCombine(String text, Integer number) {
+    public String textNumberCombine(String text, Integer number) {
         return text + "&&" + number;
     }
 }

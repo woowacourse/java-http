@@ -14,3 +14,7 @@
 - [x] POST 구현
   - [x] 회원가입 구현
   - [x] login POST로 리팩터링
+  
+
+## 1단계 리팩터링 목록
+- HttpParseUtils 라는 이름이 마음이 안 들기도 하고 딴 데서는 안 쓰일 것 같이 변해가서 객체로 분리하도록 함 (HttpTranslator)

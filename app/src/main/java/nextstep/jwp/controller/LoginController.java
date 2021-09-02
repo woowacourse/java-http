@@ -2,11 +2,11 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnauthorizedException;
+import nextstep.jwp.http.HttpTranslator;
 import nextstep.jwp.http.controller.AbstractController;
 import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
-import nextstep.jwp.http.utils.HttpParseUtils;
 import nextstep.jwp.model.User;
 
 import java.util.Map;
@@ -22,7 +22,7 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(HttpRequestMessage httpRequestMessage, HttpResponseMessage httpResponseMessage) {
         MessageBody messageBody = httpRequestMessage.getBody();
-        Map<String, String> formData = HttpParseUtils.extractFormData(messageBody);
+        Map<String, String> formData = HttpTranslator.extractFormData(messageBody);
         String account = formData.get("account");
         String password = formData.get("password");
         login(account, password);

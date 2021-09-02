@@ -35,7 +35,7 @@ class HttpResponseMessageTest {
 
         // when
         HttpResponseMessage httpResponseMessage = new HttpResponseMessage(
-                HTTP_VERSION, HttpStatusCode.OK, headerFields, bodyString.getBytes()
+                HTTP_VERSION, HttpStatusCode.OK, headerFields, new MessageBody(bodyString)
         );
 
         // then
@@ -55,7 +55,7 @@ class HttpResponseMessageTest {
                 "Hello world!");
 
         HttpResponseMessage httpResponseMessage = new HttpResponseMessage(
-                HTTP_VERSION, HttpStatusCode.OK, headerFields, bodyString.getBytes()
+                HTTP_VERSION, HttpStatusCode.OK, headerFields, new MessageBody(bodyString)
         );
 
         // when, then

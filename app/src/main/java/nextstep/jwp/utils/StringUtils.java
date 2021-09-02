@@ -20,7 +20,7 @@ public class StringUtils {
                 .collect(Collectors.toList());
     }
 
-    public static String decode(String s) {
-        return URLDecoder.decode(s, Charset.defaultCharset());
+    public static String decode(String s, Charset charset) {
+        return URLDecoder.decode(s, charset);
     }
 }

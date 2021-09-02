@@ -19,11 +19,11 @@ public class HttpResponseMessage implements HttpMessage {
     }
 
     public HttpResponseMessage(String httpVersion, HttpStatusCode httpStatusCode, HeaderFields headerFields) {
-        this(httpVersion, httpStatusCode, headerFields, null);
+        this(httpVersion, httpStatusCode, headerFields, new MessageBody());
     }
 
-    public HttpResponseMessage(String httpVersion, HttpStatusCode httpStatusCode, HeaderFields headerFields, byte[] bytes) {
-        this(new ResponseHeader(httpVersion, httpStatusCode, headerFields), new MessageBody(bytes));
+    public HttpResponseMessage(String httpVersion, HttpStatusCode httpStatusCode, HeaderFields headerFields, MessageBody messageBody) {
+        this(new ResponseHeader(httpVersion, httpStatusCode, headerFields), messageBody);
     }
 
     private HttpResponseMessage(ResponseHeader responseHeader, MessageBody responseBody) {

@@ -27,7 +27,7 @@ public class StaticResourceFinder {
         try {
             return getParsedStaticResource(url);
         } catch (URISyntaxException | IOException e) {
-            throw new IllegalStateException("정적 리소스 파싱을 실패했습니다.");
+            throw new NotFoundException("정적 리소스 파싱을 실패했습니다.");
         }
     }
 

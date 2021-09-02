@@ -22,9 +22,12 @@ import org.junit.jupiter.api.Test;
 class LoginControllerTest {
 
     private static final String NEW_LINE = System.getProperty("line.separator");
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
 
     private LoginController loginController;
     private InMemoryUserRepository userRepository;
+    private HttpRequest httpRequest;
 
     @BeforeEach
     void setUp() {
@@ -45,8 +48,6 @@ class LoginControllerTest {
         @DisplayName("GET 요청")
         @Nested
         class Get {
-
-            private HttpRequest httpRequest;
 
             @DisplayName("요청한 파일이 존재하면 관련 response를 반환 받는다.")
             @Test
@@ -70,6 +71,71 @@ class LoginControllerTest {
                 // then
                 assertThat(httpResponse.toBytes()).isEqualTo(
                     expectString.getBytes(StandardCharsets.UTF_8));
+            }
+
+            @DisplayName("이미 로그인 되어 있을 경우 '/index.html' redirect response를 반환 받는다.")
+            @Test
+            void alreadyLogin() throws IOException {
+                // given
+                userRepository.save(new User(ACCOUNT, PASSWORD, "email"));
+
+                getLoginRequest();
+                HttpResponse httpResponse = loginController.service(httpRequest);
+                getReLoginRequest(httpResponse);
+
+                String expectStatusLine = "HTTP/1.1 302 Found \n"
+                    + "Location: /index.html ";
+
+                // when
+                HttpResponse response = loginController.doPost(httpRequest);
+
+                // then
+                assertThat(response.toBytes()).isEqualTo(
+                    expectStatusLine.getBytes(StandardCharsets.UTF_8));
+            }
+
+            private void getLoginRequest() throws IOException {
+                String body = String.format("account=%s&password=%s", ACCOUNT, PASSWORD);
+                int contentLength = body.getBytes(StandardCharsets.UTF_8).length;
+
+                String requestString = String.join(NEW_LINE,
+                    "POST /login HTTP/1.1",
+                    String.format("Content-Length: %d", contentLength),
+                    "",
+                    body
+                );
+
+                try (InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(
+                    StandardCharsets.UTF_8))) {
+                    httpRequest = HttpRequest.parse(inputStream);
+                }
+            }
+
+            private void getReLoginRequest(HttpResponse httpResponse) throws IOException {
+                String cookie = getParsingCookie(httpResponse);
+
+                String body = String.format("account=%s&password=%s", ACCOUNT, PASSWORD);
+                int contentLength = body.getBytes(StandardCharsets.UTF_8).length;
+
+                String requestString = String.join(NEW_LINE,
+                    "GET /login HTTP/1.1",
+                    String.format("Cookie: %s", cookie),
+                    String.format("Content-Length: %d", contentLength),
+                    "",
+                    body
+                );
+
+                try (InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(
+                    StandardCharsets.UTF_8))) {
+                    httpRequest = HttpRequest.parse(inputStream);
+                }
+            }
+
+            private String getParsingCookie(HttpResponse httpResponse) {
+                String CookieHeader = httpResponse.toString().split("\n")[1];
+                String cookieValue = CookieHeader.split(":")[1];
+
+                return cookieValue.trim();
             }
 
             @DisplayName("요청한 파일이 없으면 '404.html' response를 반환 받는다.")
@@ -102,11 +168,6 @@ class LoginControllerTest {
         @Nested
         class Post {
 
-            private static final String ACCOUNT = "account";
-            private static final String PASSWORD = "password";
-
-            private HttpRequest httpRequest;
-
             @BeforeEach
             void setUp() throws IOException {
                 String body = String.format("account=%s&password=%s", ACCOUNT, PASSWORD);
@@ -125,15 +186,18 @@ class LoginControllerTest {
                 }
             }
 
-            @DisplayName("로그인 성공시 쿠키와 함께 '/index.html' redirect response를 반환 받는다.")
+            @DisplayName("로그인 성공시 쿠키와 함께 '/index.html' response를 반환 받는다.")
             @Test
             void loginSuccess() throws IOException {
                 // given
                 userRepository.save(new User(ACCOUNT, PASSWORD, "email"));
 
-                String expectStatusLine = "HTTP/1.1 302 Found";
+                String expectStatusLine = "HTTP/1.1 200 OK ";
                 String expectCookie = "Set-Cookie:";
-                String expectLocation = "Location: /index.html";
+                String expectContentLength = "Content-Length: 11 ";
+                String expectContentType = "Content-Type: text/html; charset=UTF-8 ";
+                String expectEnterLine = "";
+                String expectBody = "hihi hello!";
 
                 // when
                 HttpResponse httpResponse = loginController.service(httpRequest);
@@ -141,9 +205,12 @@ class LoginControllerTest {
                 String[] splitedResponse = response.split("\n");
 
                 // then
-                assertThat(splitedResponse[0].trim()).isEqualTo(expectStatusLine);
+                assertThat(splitedResponse[0]).isEqualTo(expectStatusLine);
                 assertThat(splitedResponse[1].startsWith(expectCookie)).isTrue();
-                assertThat(splitedResponse[2].trim()).isEqualTo(expectLocation);
+                assertThat(splitedResponse[2]).isEqualTo(expectContentLength);
+                assertThat(splitedResponse[3]).isEqualTo(expectContentType);
+                assertThat(splitedResponse[4]).isEqualTo(expectEnterLine);
+                assertThat(splitedResponse[5]).isEqualTo(expectBody);
             }
 
             @DisplayName("이미 로그인 되어 있을 경우 '/index.html' redirect response를 반환 받는다.")
@@ -160,7 +227,7 @@ class LoginControllerTest {
 
                 String requestString = String.join(NEW_LINE,
                     "POST /login HTTP/1.1",
-                    String.format("Cookie: JSESSIONID=%s;", cookie),
+                    String.format("Cookie: %s", cookie),
                     String.format("Content-Length: %d", contentLength),
                     "",
                     body
@@ -189,19 +256,26 @@ class LoginControllerTest {
                 return cookieValue.trim();
             }
 
-            @DisplayName("로그인 실패시 '/401.html' redirect response를 반환 받는다.")
+            @DisplayName("로그인 실패시 '/401.html' response를 반환 받는다.")
             @Test
             void loginFail() throws IOException {
                 // given
-                String expectString = "HTTP/1.1 401 Unauthorized \n"
-                    + "Location: /401.html ";
+                String expectStatusLine = "HTTP/1.1 401 Unauthorized ";
+                String expectContentLength = "Content-Length: 20 ";
+                String expectContentType = "Content-Type: text/html; charset=UTF-8 ";
+                String expectEnterLine = "";
+                String expectBody = "401 is Unauthorized.";
 
                 // when
                 HttpResponse httpResponse = loginController.service(httpRequest);
+                String[] splitedResponse = httpResponse.toString().split("\n");
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(
-                    expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(splitedResponse[0]).isEqualTo(expectStatusLine);
+                assertThat(splitedResponse[1]).isEqualTo(expectContentLength);
+                assertThat(splitedResponse[2]).isEqualTo(expectContentType);
+                assertThat(splitedResponse[3]).isEqualTo(expectEnterLine);
+                assertThat(splitedResponse[4]).isEqualTo(expectBody);
             }
         }
     }

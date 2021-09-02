@@ -90,8 +90,7 @@ class LoginServiceTest {
             userRepository.save(new User(account, password, "email"));
             LoginResponse loginResponse = loginService.login(new LoginRequest(account, password));
 
-            String CookieString = String.format("JSESSIONID=%s;", loginResponse.getSessionId());
-            HttpCookie httpCookie = HttpCookie.parse(CookieString);
+            HttpCookie httpCookie = HttpCookie.parse(loginResponse.toCookieString());
 
             // when
             boolean alreadyLogin = loginService.isAlreadyLogin(httpCookie);

@@ -6,6 +6,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
@@ -90,9 +92,12 @@ class RequestMappingTest {
                     httpRequest = HttpRequest.parse(inputStream);
                 }
 
-                String expectStatusLine = "HTTP/1.1 302 Found";
+                String expectStatusLine = "HTTP/1.1 200 OK ";
                 String expectCookie = "Set-Cookie:";
-                String expectLocation = "Location: /index.html";
+                String expectContentLength = "Content-Length: 11 ";
+                String expectContentType = "Content-Type: text/html; charset=UTF-8 ";
+                String expectEnterLine = "";
+                String expectBody = "hihi hello!";
 
                 // when
                 HttpResponse httpResponse = requestMapping.doService(httpRequest);
@@ -100,9 +105,12 @@ class RequestMappingTest {
                 String[] splitedResponse = response.split("\n");
 
                 // then
-                assertThat(splitedResponse[0].trim()).isEqualTo(expectStatusLine);
+                assertThat(splitedResponse[0]).isEqualTo(expectStatusLine);
                 assertThat(splitedResponse[1].startsWith(expectCookie)).isTrue();
-                assertThat(splitedResponse[2].trim()).isEqualTo(expectLocation);
+                assertThat(splitedResponse[2]).isEqualTo(expectContentLength);
+                assertThat(splitedResponse[3]).isEqualTo(expectContentType);
+                assertThat(splitedResponse[4]).isEqualTo(expectEnterLine);
+                assertThat(splitedResponse[5]).isEqualTo(expectBody);
             }
         }
 

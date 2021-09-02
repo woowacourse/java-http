@@ -5,7 +5,9 @@ import static nextstep.jwp.http.common.HttpStatus.*;
 import java.io.IOException;
 import nextstep.jwp.controller.request.LoginRequest;
 import nextstep.jwp.controller.response.LoginResponse;
+import nextstep.jwp.exception.StaticResourceNotFoundException;
 import nextstep.jwp.exception.UnauthorizedException;
+import nextstep.jwp.http.common.HttpStatus;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.model.StaticResource;
@@ -22,9 +24,28 @@ public class LoginController extends RestController {
     private final StaticResourceService staticResourceService;
 
     public LoginController(LoginService loginService, StaticResourceService staticResourceService) {
-        super(staticResourceService);
         this.loginService = loginService;
         this.staticResourceService = staticResourceService;
+    }
+
+    @Override
+    protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
+        try {
+            if (httpRequest.hasCookie() && loginService.isAlreadyLogin(httpRequest.getCookie())) {
+                return HttpResponse.redirect(FOUND, "/index.html");
+            }
+            
+            StaticResource staticResource = staticResourceService
+                .findByPathWithExtension(httpRequest.getUri(), ".html");
+
+            return HttpResponse.withBody(HttpStatus.OK, staticResource);
+        } catch (StaticResourceNotFoundException e) {
+            StaticResource staticResource = staticResourceService.findByPath("/404.html");
+
+            LOGGER.warn(e.getMessage());
+
+            return HttpResponse.withBody(HttpStatus.NOT_FOUND, staticResource);
+        }
     }
 
     @Override

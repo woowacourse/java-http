@@ -3,6 +3,7 @@ package nextstep.jwp.controller;
 import java.io.IOException;
 import nextstep.jwp.controller.request.RegisterRequest;
 import nextstep.jwp.exception.DuplicateAccountException;
+import nextstep.jwp.exception.StaticResourceNotFoundException;
 import nextstep.jwp.http.common.HttpStatus;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
@@ -19,11 +20,25 @@ public class RegisterController extends RestController {
     private final RegisterService registerService;
     private final StaticResourceService staticResourceService;
 
-    public RegisterController(RegisterService registerService,
-                              StaticResourceService staticResourceService) {
-        super(staticResourceService);
+    public RegisterController(RegisterService registerService, StaticResourceService staticResourceService) {
         this.registerService = registerService;
         this.staticResourceService = staticResourceService;
+    }
+
+    @Override
+    protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
+        try {
+            StaticResource staticResource = staticResourceService
+                .findByPathWithExtension(httpRequest.getUri(), ".html");
+
+            return HttpResponse.withBody(HttpStatus.OK, staticResource);
+        } catch (StaticResourceNotFoundException e) {
+            StaticResource staticResource = staticResourceService.findByPath("/404.html");
+
+            LOGGER.warn(e.getMessage());
+
+            return HttpResponse.withBody(HttpStatus.NOT_FOUND, staticResource);
+        }
     }
 
     @Override

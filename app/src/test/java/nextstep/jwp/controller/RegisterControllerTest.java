@@ -140,14 +140,17 @@ class RegisterControllerTest {
                     expectString.getBytes(StandardCharsets.UTF_8));
             }
 
-            @DisplayName("회원가입 실패시 '/409.html' redirect response를 반환 받는다.")
+            @DisplayName("회원가입 실패시 '/409.html' response를 반환 받는다.")
             @Test
             void registerFail() throws IOException {
                 // given
                 userRepository.save(new User(ACCOUNT, PASSWORD, EMAIL));
 
                 String expectString = "HTTP/1.1 409 Conflict \n"
-                    + "Location: /409.html ";
+                    + "Content-Length: 16 \n"
+                    + "Content-Type: text/html; charset=UTF-8 \n"
+                    + "\n"
+                    + "409 is Conflict.";
 
                 // when
                 HttpResponse httpResponse = registerController.service(httpRequest);

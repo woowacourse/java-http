@@ -13,6 +13,11 @@ import java.util.stream.Collectors;
 
 public class ClassScanner<T> {
 
+    private static final String DIRECTORY_DELIMITER = "/";
+    private static final String PACKAGE_DELIMITER_REGEX = "[.]";
+    private static final String PACKAGE_DELIMITER = ".";
+    private static final String CLASS_FILE_EXTENSION = ".class";
+    private static final char EXTENSION_DELIMITER = '.';
     private final String packagePath;
 
     public ClassScanner(final String packagePath) {
@@ -53,18 +58,18 @@ public class ClassScanner<T> {
 
     private Set<Class<?>> findAllClassesUsingClassLoader(String packageName, Class<T> typeToScan) {
         final InputStream stream = ClassLoader.getSystemClassLoader()
-            .getResourceAsStream(packageName.replaceAll("[.]", "/"));
+            .getResourceAsStream(packageName.replaceAll(PACKAGE_DELIMITER_REGEX, DIRECTORY_DELIMITER));
         final BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(stream)));
         return reader.lines()
-            .filter(line -> line.endsWith(".class"))
+            .filter(line -> line.endsWith(CLASS_FILE_EXTENSION))
             .map(line -> getClass(line, packageName))
             .filter(typeToScan::isAssignableFrom)
             .collect(Collectors.toSet());
     }
 
     private Class<?> getClass(String className, String packageName) {
-        final String classPath = packageName + "."
-            + className.substring(0, className.lastIndexOf('.'));
+        final String classPath = packageName + PACKAGE_DELIMITER
+            + className.substring(0, className.lastIndexOf(EXTENSION_DELIMITER));
         try {
             return Class.forName(classPath);
         } catch (ClassNotFoundException e) {

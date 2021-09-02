@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class RequestLine {
 
-    private static final String BLANK = " ";
+    private static final String SPACE = " ";
     private static final int FIRST_LINE_ELEMENT_SIZE = 3;
     private static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
     private static final int METHOD_INDEX = 0;
@@ -28,7 +28,7 @@ public class RequestLine {
     }
 
     public static RequestLine of(String line) {
-        final List<String> result = Arrays.asList(line.split(BLANK));
+        final List<String> result = Arrays.asList(line.split(SPACE));
 
         if (result.size() != FIRST_LINE_ELEMENT_SIZE) {
             throw new IllegalArgumentException(String.format("Invalid HttpRequest Format.(%s)", line));

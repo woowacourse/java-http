@@ -12,6 +12,7 @@ public class UrlEncodingMapper implements DataMapper {
     private static final String KEY_AND_VALUE_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final String EMPTY = "";
 
     @Override
     public Map<String, String> parse(final String data) {
@@ -30,7 +31,7 @@ public class UrlEncodingMapper implements DataMapper {
     }
 
     private void validateKeyAndValue(final List<String> keyAndValue) {
-        if (keyAndValue.size() != 2 || "".equals(keyAndValue.get(KEY_INDEX))) {
+        if (keyAndValue.size() != 2 || EMPTY.equals(keyAndValue.get(KEY_INDEX))) {
             throw new IllegalArgumentException("Invalid format.");
         }
     }

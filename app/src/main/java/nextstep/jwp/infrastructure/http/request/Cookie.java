@@ -13,6 +13,7 @@ public class Cookie {
     private static final String KEY_AND_VALUE_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final String EMPTY = "";
 
     private final Map<String, String> elements;
 
@@ -43,7 +44,7 @@ public class Cookie {
     }
 
     private static void validateKeyAndValue(final String[] keyAndValue) {
-        if (keyAndValue.length != 2 || "".equals(keyAndValue[KEY_INDEX])) {
+        if (keyAndValue.length != 2 || EMPTY.equals(keyAndValue[KEY_INDEX])) {
             throw new IllegalArgumentException("Invalid format.");
         }
     }

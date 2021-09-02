@@ -22,6 +22,7 @@ public class LoginController extends AbstractController {
     private static final String PASSWORD = "password";
     private static final List<String> REQUIRED_PARAMETERS = Arrays.asList(ACCOUNT, PASSWORD);
     private static final String SESSION_KEY = "JSESSIONID";
+    private static final String USER_KEY = "user";
 
     @Override
     public String uri() {
@@ -61,7 +62,7 @@ public class LoginController extends AbstractController {
         }
         final User user = InMemoryUserRepository.findByAccount(account);
         final Session session = InMemorySessionRepository.getSession(sessionId);
-        session.setAttribute("user", user);
+        session.setAttribute(USER_KEY, user);
 
         return "/index.html";
     }

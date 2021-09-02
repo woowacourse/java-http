@@ -5,6 +5,7 @@ import java.util.Objects;
 public class ResponseLine {
 
     private static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
+    private static final String DELIMITER = " ";
 
     private final String httpVersion;
     private final StatusCode statusCode;
@@ -20,7 +21,7 @@ public class ResponseLine {
 
     @Override
     public String toString() {
-        return String.join(" ", httpVersion, String.valueOf(statusCode.value()), statusCode.getMessage(), "");
+        return String.join(DELIMITER, httpVersion, String.valueOf(statusCode.value()), statusCode.getMessage(), "");
     }
 
     @Override

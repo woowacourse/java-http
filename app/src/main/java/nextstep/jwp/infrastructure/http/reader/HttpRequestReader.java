@@ -12,6 +12,7 @@ import nextstep.jwp.infrastructure.http.request.RequestLine;
 public class HttpRequestReader {
 
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String EMPTY = "";
 
     private final BufferedReader reader;
 
@@ -36,7 +37,7 @@ public class HttpRequestReader {
         String line;
 
         while (Objects.nonNull(line = bufferedReader.readLine())) {
-            if ("".equals(line.trim())) {
+            if (EMPTY.equals(line.trim())) {
                 break;
             }
             lines.add(line.trim());
@@ -47,7 +48,7 @@ public class HttpRequestReader {
 
     private String bodyFromReader(final BufferedReader bufferedReader, final Headers headers) throws IOException {
         if (!headers.hasKey(CONTENT_LENGTH)) {
-            return "";
+            return EMPTY;
         }
 
         int contentLength = Integer.parseInt(headers.getValue(CONTENT_LENGTH));

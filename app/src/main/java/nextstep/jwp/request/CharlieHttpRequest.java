@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public class CharlieHttpRequest implements HttpRequest {
     private static final String CONTENT_LENGTH_HEADER_NAME = "Content-Length";
-    private static final String CONTENT_TYPE_HEADER_NAME = "CONTENT-TYPE";
+    private static final String CONTENT_TYPE_HEADER_NAME = "Content-Type";
     private static final String CONTENT_TYPE_FORM_DATA = "application/x-www-form-urlencoded";
 
     private final RequestLine requestLine;

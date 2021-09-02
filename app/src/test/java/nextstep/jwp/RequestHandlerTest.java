@@ -162,18 +162,18 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expectedResponse);
     }
 
-    @DisplayName("/register path로 POST 요청을 보내서 로그인 유저 정보가 유효하면 /index 로 리다이렉트 한다.")
+    @DisplayName("/register path로 POST 요청을 보내서 로그인 유저 정보가 유효하면 /index.html 로 리다이렉트 한다.")
     @Test
     void register() {
         // given
         final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
+                "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: 80 ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "",
-                "account=gugu&password=password&email=hkkang%40woowahan.com");
+                "account=gugu1&password=password&email=hkkang%40woowahan.com");
 
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket, frontController);

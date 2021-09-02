@@ -22,7 +22,7 @@ public class Headers {
         for (Map.Entry<String, String> kV : headers.entrySet()) {
             String key = kV.getKey();
             String value = kV.getValue();
-            builder.append(key + ": " + value + " " + "\r\n");
+            builder.append(key + ": " + value + "\r\n");
         }
         return builder.toString();
     }

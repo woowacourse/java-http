@@ -52,7 +52,7 @@ public class CustomHttpRequest {
 
         while (!("".equals(line = reader.readLine()))) {
             String[] kV = line.split(": ");
-            headers.put(kV[0], kV[1]);
+            headers.put(kV[0].trim(), kV[1].trim());
         }
 
         return headers;

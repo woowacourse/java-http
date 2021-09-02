@@ -14,8 +14,8 @@ import java.util.Map;
 public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
-    private static final String LOGIN_SUCCESS_URL = "http://localhost:8080/index.html";
-    private static final String LOGIN_FAILURE_URL = "http://localhost:8080/401.html";
+    private static final String LOGIN_SUCCESS_URL = "/index.html";
+    private static final String LOGIN_FAILURE_URL = "/401.html";
 
     @Override
     protected void doGet(CustomHttpRequest request, CustomHttpResponse response) throws Exception {

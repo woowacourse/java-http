@@ -1,14 +1,18 @@
 package nextstep.jwp;
 
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.infrastructure.RequestHandler;
 import nextstep.jwp.model.web.ContentType;
+import nextstep.jwp.model.web.ResourceFinder;
+import nextstep.jwp.model.web.StatusCode;
+import nextstep.jwp.model.web.response.CustomHttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -19,9 +23,9 @@ class RequestHandlerTest {
     void indexHtml() throws Exception {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "",
                 "");
 
@@ -34,35 +38,11 @@ class RequestHandlerTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         byte[] readBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + readBytes.length + " \r\n" +
-                "\r\n" +
+        String expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: " + readBytes.length + "\r\n" +
+                "" + "\r\n" +
                 new String(readBytes);
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @Test
-    @DisplayName("GET /index")
-    void index() throws Exception {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /index HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        byte[] readBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-        String expected = CustomHttpResponse2.ok(ContentType.contentTypeFromUri("/index.html"), new String(readBytes));
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -71,9 +51,9 @@ class RequestHandlerTest {
     void loginHtml() throws Exception {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "GET /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "",
                 "");
 
@@ -84,9 +64,15 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        byte[] readBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-        String expected = CustomHttpResponse2.ok(ContentType.contentTypeFromUri("/login.html"), new String(readBytes));
+        CustomHttpResponse response = new CustomHttpResponse();
+        String resource = ResourceFinder.resource("/login.html");
+        response.setStatusLine(StatusCode.OK, "HTTP/1.1");
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Content-Type", ContentType.HTML.getContentType());
+        headers.put("Content-Length", resource.getBytes().length + "");
+        response.setHeaders(headers);
+        response.setResponseBody(resource);
+        String expected = new String(response.getBodyBytes());
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -96,12 +82,12 @@ class RequestHandlerTest {
         // given
         String body = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "Content-Type: application/x-www-form-urlencoded ",
-                "Accept: */* ",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: " + body.getBytes().length,
+                "Content-Type: application/x-www-form-urlencoded",
+                "Accept: */*",
                 "",
                 body);
 
@@ -112,7 +98,12 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = CustomHttpResponse2.found("index.html");
+        CustomHttpResponse response = new CustomHttpResponse();
+        response.setStatusLine(StatusCode.FOUND, "HTTP/1.1");
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Location", "/index.html");
+        response.setHeaders(headers);
+        String expected = new String(response.getBodyBytes());
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -122,12 +113,12 @@ class RequestHandlerTest {
         // given
         String body = "account=gugu&password=nope";
         final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "Content-Type: application/x-www-form-urlencoded ",
-                "Accept: */* ",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: " + body.getBytes().length,
+                "Content-Type: application/x-www-form-urlencoded",
+                "Accept: */*",
                 "",
                 body);
 
@@ -138,7 +129,12 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = CustomHttpResponse2.found("401.html");
+        CustomHttpResponse response = new CustomHttpResponse();
+        response.setStatusLine(StatusCode.FOUND, "HTTP/1.1");
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Location", "/401.html");
+        response.setHeaders(headers);
+        String expected = new String(response.getBodyBytes());
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -160,9 +156,15 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/register.html");
-        byte[] readBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
-        String expected = CustomHttpResponse2.ok(ContentType.contentTypeFromUri("/register.html"), new String(readBytes));
+        CustomHttpResponse response = new CustomHttpResponse();
+        String resource = ResourceFinder.resource("/register.html");
+        response.setStatusLine(StatusCode.OK, "HTTP/1.1");
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Content-Type", ContentType.HTML.getContentType());
+        headers.put("Content-Length", resource.getBytes().length + "");
+        response.setHeaders(headers);
+        response.setResponseBody(resource);
+        String expected = new String(response.getBodyBytes());
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -188,9 +190,12 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = CustomHttpResponse2.found("login.html");
+        CustomHttpResponse response = new CustomHttpResponse();
+        response.setStatusLine(StatusCode.FOUND, "HTTP/1.1");
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Location", "/login.html");
+        response.setHeaders(headers);
+        String expected = new String(response.getBodyBytes());
         assertThat(socket.output()).isEqualTo(expected);
-
-        assertThat(InMemoryUserRepository.findByAccount("bepoz")).isNotEmpty();
     }
 }

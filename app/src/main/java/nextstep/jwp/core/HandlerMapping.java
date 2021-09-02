@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-public class HandlerMap {
+public class HandlerMapping {
     private static final Map<URI, Controller> HANDLER_MAP = new ConcurrentHashMap<>();
     private static final Controller NOT_FOUND_CONTROLLER = new NotFoundController();
     private static final Controller STATIC_RESOURCE_CONTROLLER = new StaticResourceController();

@@ -1,5 +1,7 @@
 package nextstep.jwp.model;
 
+import java.util.Objects;
+
 public class User {
 
     private final Long id;

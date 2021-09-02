@@ -30,6 +30,11 @@ public class HttpResponse {
         return this;
     }
 
+    public HttpResponse cookie(Cookie cookie) {
+        headers.put("Set-Cookie", String.join("=", cookie.getName(), cookie.getValue()));
+        return this;
+    }
+
     public HttpResponse body(String body) {
         this.body = body;
         this.headers.put("Content-Length", Integer.toString(body.getBytes().length));

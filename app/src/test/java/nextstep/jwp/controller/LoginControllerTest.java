@@ -2,6 +2,8 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.MockSocket;
 import nextstep.jwp.RequestHandler;
+import nextstep.jwp.db.HttpSessions;
+import nextstep.jwp.web.HttpSession;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -55,6 +57,26 @@ class LoginControllerTest {
         // then
         List<String> expectedLines = List.of("HTTP/1.1 302 FOUND", "Location: /index.html");
 
+        assertThat(socket.output()).contains(expectedLines);
+    }
+
+    @Test
+    @DisplayName("로그인 되어 있다면(요청에 세션 아이디가 있고, 세션 저장소에 존재한다면) 로그인 페이지를 요청했을 때 index.html로 리다이렉트한다.")
+    void redirectWhenLoggedIn() {
+        // given
+        HttpSession session = HttpSessions.issueSession();
+
+        final String httpRequest = String.join(LINE_SEPARATOR,
+                "GET /login HTTP/1.1",
+                "Cookie: " + HttpSession.SESSION_NAME + "=" + session.getId());
+
+        // when
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+        requestHandler.run();
+
+        // then
+        List<String> expectedLines = List.of("HTTP/1.1 302 FOUND", "Location: /index.html");
         assertThat(socket.output()).contains(expectedLines);
     }
 }

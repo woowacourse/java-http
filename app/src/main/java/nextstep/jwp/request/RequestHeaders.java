@@ -38,4 +38,8 @@ public class RequestHeaders {
         }
         return false;
     }
+
+    public String getSessionId() {
+        return httpCookie.get("JSESSIONID");
+    }
 }

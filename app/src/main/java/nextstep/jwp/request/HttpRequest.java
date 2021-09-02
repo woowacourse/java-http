@@ -51,4 +51,8 @@ public class HttpRequest {
     public boolean hasNoSessionId() {
         return !requestHeaders.hasSessionId();
     }
+
+    public String getSessionId() {
+        return requestHeaders.getSessionId();
+    }
 }

@@ -1,7 +1,6 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
-import java.util.UUID;
 
 import nextstep.jwp.HttpSession;
 import nextstep.jwp.HttpSessions;
@@ -28,6 +27,9 @@ public class LoginController implements Controller {
                 return;
             }
 
+            String sessionId = request.getSessionId();
+            HttpSession session = HttpSessions.getSession(sessionId);
+            session.setAttribute("user", user);
             response.redirect("/index.html");
         }
 

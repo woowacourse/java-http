@@ -26,9 +26,14 @@ application {
     mainClass = 'nextstep.jwp.JwpApplication'
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
-    finalizedBy(jacocoTestReport)
+sonarqube {
+    properties {
+        property "sonar.sourceEncoding", "UTF-8"
+        property "sonar.projectKey", "woowacourse_be-jwp-http-server"
+        property "sonar.organization", "woowacourse"
+        property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.coverage.jacoco.xmlReportPaths", "jacoco/jacoco.xml"
+    }
 }
 
 jacoco {
@@ -37,17 +42,12 @@ jacoco {
 
 jacocoTestReport {
     reports {
-        html.enabled true
         xml.enabled true
-        csv.enabled false
+        xml.destination(new File("jacoco/jacoco.xml"))
     }
 }
 
-sonarqube {
-    properties {
-        property "sonar.sourceEncoding", "UTF-8"
-        property "sonar.projectKey", "woowacourse_be-jwp-http-server"
-        property "sonar.organization", "woowacourse"
-        property "sonar.host.url", "https://sonarcloud.io"
-    }
+tasks.named('test') {
+    useJUnitPlatform()
+    finalizedBy(jacocoTestReport)
 }

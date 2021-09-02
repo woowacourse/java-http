@@ -115,29 +115,6 @@ class RequestHandlerTest {
     }
 
     @Test
-    @DisplayName("쿠키를 가지고 있는채로 로그인하면 index 페이지로 리다이렉트한다.")
-    void getLoginWithCookie() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Accept: */*",
-                "Cookie: JSESSIONID=someCookieIsHere",
-                "");
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
-
-        // then
-        String expected = getHttpResponse(HttpStatus.OK, INDEX_HTML, INDEX_CONTENT_LENGTH);
-        String output = socket.output();
-        assertThat(output).isEqualTo(expected);
-    }
-
-    @Test
     @DisplayName("회원가입 페이지에 접속한다.")
     void getRegister() throws IOException {
         // given

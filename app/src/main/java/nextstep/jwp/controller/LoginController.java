@@ -32,7 +32,7 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         if (request.isLoggedIn()) {
-            assignRedirectToResponse(response, "http://localhost:8080/index.html");
+            assignRedirectToResponse(response, "http://localhost:8080");
             return;
         }
         assignStaticResourceByUriToResponse(request, response, ".html");
@@ -49,7 +49,7 @@ public class LoginController extends AbstractController {
             final User user = loginService.login(account, password);
             LOG.debug("로그인 성공!!");
             setSession(request, response, user);
-            assignRedirectToResponse(response, "http://localhost:8080/index.html");
+            assignRedirectToResponse(response, "http://localhost:8080/");
         } catch (UnAuthorizedException e) {
             LOG.debug("로그인 실패");
             assignRedirectToResponse(response, "http://localhost:8080/401.html");

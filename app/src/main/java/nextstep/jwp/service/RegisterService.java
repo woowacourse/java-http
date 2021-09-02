@@ -18,7 +18,7 @@ public class RegisterService {
             String account = queries.get(ACCOUNT);
             String email = queries.get(EMAIL);
             String password = queries.get(PASSWORD);
-            validate(account, email);
+            validateDuplicate(account, email);
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
         } catch (IndexOutOfBoundsException | NullPointerException exception) {
@@ -26,7 +26,7 @@ public class RegisterService {
         }
     }
 
-    private void validate(String account, String email) {
+    private void validateDuplicate(String account, String email) {
         if (InMemoryUserRepository.existsByAccount(account)
                 || InMemoryUserRepository.existsByEmail(email)) {
             throw new RegisterException("잘못된 회원가입입니다.");

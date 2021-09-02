@@ -5,13 +5,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Sessions {
 
-    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
+    private static final Map<String, Session> values = new ConcurrentHashMap<>();
 
     private Sessions() {
     }
 
     public static Session getSession(Cookie cookie) {
         String id = cookie.getSessionId();
-        return SESSIONS.computeIfAbsent(id, k -> new Session(id));
+        return values.computeIfAbsent(id, k -> new Session(id));
     }
 }

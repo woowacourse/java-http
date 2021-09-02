@@ -56,7 +56,7 @@ public abstract class AbstractController implements Controller {
                 .build();
     }
 
-    protected String fileByPath(String requestPath) throws IOException {
+    protected String createResponseBody(String requestPath) throws IOException {
         try {
             final URL resource = getClass().getClassLoader().getResource("static" + requestPath);
             final Path path = new File(resource.getPath()).toPath();

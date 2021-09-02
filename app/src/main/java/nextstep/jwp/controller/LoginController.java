@@ -29,7 +29,7 @@ public class LoginController extends AbstractController {
             loginService.loginByGet(request);
             return redirectMessage(request, PathType.INDEX.resource());
         }
-        final String responseBody = fileByPath(request.getPath() + FileType.HTML.extension());
+        final String responseBody = createResponseBody(request.getPath() + FileType.HTML.extension());
         return staticFileMessage(request, FileType.HTML, responseBody);
     }
 

@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpRequestHeader {
+
     private static final int NONE_QUERY = -1;
+    private static final int URL_LOCATION = 1;
 
     private final Map<String, String> headerLines;
     private final HttpCookie httpCookie;
@@ -55,7 +57,7 @@ public class HttpRequestHeader {
     public String resourceType() {
         final String firstLine = headerLines.get(HttpHeaderType.START_LINE.value());
         final String[] splitFirstLine = firstLine.split(" ");
-        final String rawURL = splitFirstLine[1];
+        final String rawURL = splitFirstLine[URL_LOCATION];
         String[] splitURL = rawURL.split("\\.");
         return splitURL[splitURL.length - 1];
     }

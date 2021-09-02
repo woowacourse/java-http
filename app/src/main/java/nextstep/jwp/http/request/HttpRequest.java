@@ -10,6 +10,9 @@ import java.util.Map;
 public class HttpRequest {
 
     private static final String START_LINE = "START_LINE";
+    private static final String HEADERS_KEY_VALUE_SEPARATOR = ": ";
+    private static final int KEY_ON_KEY_VALUE_FORMAT = 0;
+    private static final int VALUE_ON_KEY_VALUE_FORMAT = 1;
 
     private final HttpRequestHeader httpRequestHeader;
     private final HttpRequestBody httpRequestBody;
@@ -38,8 +41,8 @@ public class HttpRequest {
             if ("".equals(oneLine) || oneLine == null) {
                 break;
             }
-            final String[] part = oneLine.split(": ");
-            headerLines.put(part[0], part[1]);
+            final String[] part = oneLine.split(HEADERS_KEY_VALUE_SEPARATOR);
+            headerLines.put(part[KEY_ON_KEY_VALUE_FORMAT], part[VALUE_ON_KEY_VALUE_FORMAT]);
         }
     }
 

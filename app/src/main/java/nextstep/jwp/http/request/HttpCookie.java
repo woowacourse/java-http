@@ -5,6 +5,11 @@ import java.util.Map;
 import java.util.Optional;
 
 public class HttpCookie {
+
+    private static final String COOKIES_SEPARATOR = "; ";
+    private static final String COOKIE_KEY_VALUE_SEPARATOR = "=";
+    private static final int KEY_ON_KEY_VALUE_FORMAT = 0;
+    private static final int VALUE_ON_KEY_VALUE_FORMAT = 1;
     private final Map<String,String> cookies;
 
     public HttpCookie(Map<String, String> cookies) {
@@ -13,16 +18,16 @@ public class HttpCookie {
 
     public static HttpCookie from(Map<String, String> headerLine) {
         final String rawStringCookies = headerLine.get(HttpHeaderType.COOKIE.value());
-        final String[] rawCookies =  rawStringCookies.split("; ");
+        final String[] rawCookies =  rawStringCookies.split(COOKIES_SEPARATOR);
         final Map<String, String> cookies = new HashMap<>();
         for (String rawCookie : rawCookies) {
-            String[] rawCookieParts = rawCookie.split("=");
-            cookies.put(rawCookieParts[0], rawCookieParts[1]);
+            String[] rawCookieParts = rawCookie.split(COOKIE_KEY_VALUE_SEPARATOR);
+            cookies.put(rawCookieParts[KEY_ON_KEY_VALUE_FORMAT], rawCookieParts[VALUE_ON_KEY_VALUE_FORMAT]);
         }
         return new HttpCookie(cookies);
     }
 
     public Optional<String> valueFromKey(String key) {
-        return Optional.ofNullable(cookies.getOrDefault(key, null));
+        return Optional.ofNullable(cookies.get(key));
     }
 }

@@ -16,6 +16,9 @@ import nextstep.jwp.http.session.HttpSessions;
 
 public class LoginService implements Service {
 
+    private static final String ACCOUNT = "account";
+    private static final String USER = "user";
+
     public boolean login(HttpRequest httpRequest) {
         if (isSessionLogin(httpRequest)) {
             return true;
@@ -59,7 +62,7 @@ public class LoginService implements Service {
         HttpSessions.putSession(rawJSESSIONID);
         final HttpSession httpSession = HttpSessions.getSession(rawJSESSIONID);
         final Map<String, String> queryOnURIS = httpRequest.parsedBody();
-        final String user = queryOnURIS.get("account");
-        httpSession.setAttribute("user",user);
+        final String user = queryOnURIS.get(ACCOUNT);
+        httpSession.setAttribute(USER,user);
     }
 }

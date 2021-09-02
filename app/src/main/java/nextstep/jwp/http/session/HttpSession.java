@@ -23,9 +23,5 @@ public class HttpSession {
     public Object getAttribute(String name) {
         return values.get(name);
     }
-
-    public void removeAttribute(String name) {
-        values.remove(name);
-    }
 }
 

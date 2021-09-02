@@ -15,21 +15,18 @@ public class HttpRequest {
     private final Map<String, String> params = new HashMap<>();
     private final BufferedReader bufferedReader;
 
-
     public HttpRequest(InputStream inputStream) throws IOException {
         bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        String firstLineBuffer = bufferedReader.readLine();
-        if (firstLineBuffer == null) {
+        String line = bufferedReader.readLine();
+        if (line == null) {
             return;
         }
-        String[] firstLine = firstLineBuffer.split(" ");
+        String[] firstLine = line.split(" ");
         method = firstLine[0];
         path = firstLine[1];
 
         parseHeaders();
-        if (headers.containsKey("Content-Length")) {
-            parseParams(extractRequestBody());
-        }
+        parseParams();
     }
 
     private void parseHeaders() throws IOException {
@@ -43,13 +40,15 @@ public class HttpRequest {
         }
     }
 
-    private void parseParams(String body) {
-        String[] queries = body.split("&");
-        for (String query : queries) {
-            int equalIndex = query.indexOf("=");
-            String key = query.substring(0, equalIndex);
-            String value = query.substring(equalIndex + 1);
-            params.put(key, value);
+    private void parseParams() throws IOException {
+        if (headers.containsKey("Content-Length")) {
+            String[] queries = extractRequestBody().split("&");
+            for (String query : queries) {
+                int equalIndex = query.indexOf("=");
+                String key = query.substring(0, equalIndex);
+                String value = query.substring(equalIndex + 1);
+                params.put(key, value);
+            }
         }
     }
 

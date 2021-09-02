@@ -53,6 +53,13 @@ public class HttpResponse {
 
     public void sendRedirect(String url, HttpStatus httpStatus) {
         setStatus(httpStatus);
+        if (getHeaders().containsKey("Set-Cookie")) {
+            response = String.join("\r\n",
+                    responseLine,
+                    headers.convertToLines(),
+                    "Location: " + url);
+            return;
+        }
         response = String.join("\r\n",
                 responseLine,
                 "Location: " + url);
@@ -62,9 +69,6 @@ public class HttpResponse {
         ResourceFile resourceFile = new ResourceFile(url);
         String content = resourceFile.getContent();
         setStatus(httpStatus);
-        if (resourceFile.getContentType().equals("text/html;charset=utf-8")) {
-            addHeader("Set-Cookie", httpCookie.convertString());
-        }
         addHeader("Content-Type", resourceFile.getContentType());
         addHeader("Content-Length", String.valueOf(content.getBytes().length));
         write(content);
@@ -76,5 +80,9 @@ public class HttpResponse {
 
     public void addCookie(String name, String value) {
         httpCookie.addCookie(name, value);
+    }
+
+    public String convertCookieToString() {
+        return httpCookie.convertString();
     }
 }

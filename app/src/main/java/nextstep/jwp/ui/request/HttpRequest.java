@@ -4,6 +4,8 @@ import nextstep.jwp.exception.BadRequestException;
 import nextstep.jwp.ui.RequestHandler;
 import nextstep.jwp.ui.common.HttpCookie;
 import nextstep.jwp.ui.common.HttpHeaders;
+import nextstep.jwp.ui.common.HttpSession;
+import nextstep.jwp.ui.common.HttpSessions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +16,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 public class HttpRequest {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
@@ -98,5 +101,16 @@ public class HttpRequest {
 
     public Map<String, String> getCookie() {
         return httpCookie.getCookie();
+    }
+
+    public HttpSession getSession() {
+        String sessionId = getCookie().get("JSESSIONID");
+        if (sessionId == null) {
+            String id = UUID.randomUUID().toString();
+            HttpSession httpSession = new HttpSession(id);
+            HttpSessions.addSession(id, httpSession);
+            return httpSession;
+        }
+        return HttpSessions.findSession(sessionId);
     }
 }

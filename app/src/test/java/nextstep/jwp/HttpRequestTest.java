@@ -31,6 +31,6 @@ public class HttpRequestTest {
         // when
 
         // then
-        assertThat(httpRequest.getCookieSession()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
+        assertThat(httpRequest.getCookie()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
     }
 }

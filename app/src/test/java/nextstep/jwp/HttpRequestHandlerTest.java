@@ -6,8 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.RequestHandler;
+import nextstep.jwp.http.auth.HttpSessions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -185,37 +187,6 @@ class HttpRequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("POST 로그인 성공시 index.html로 리다이렉트된다.")
-    @Test
-    void postLoginSuccess() throws IOException {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: 80 ",
-                "Content-Type: application/x-www-form-urlencoded ",
-                "Accept: */*",
-                "",
-                "account=gugu&password=password&email=hkkang%40woowahan.com");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        String expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: /index.html \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
-                "\r\n" +
-                responseBody;
-        assertThat(socket.output()).isEqualTo(expected);
-    }
 
     @DisplayName("POST 로그인 실패시 401.html로 리다이렉트된다.")
     @Test
@@ -308,17 +279,20 @@ class HttpRequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("세션을 가지고 탐색시 해당 세션을 응답으로 넣어서 보냄")
+    @DisplayName("POST 로그인 성공시 index.html로 리다이렉트된다.")
     @Test
-    void sessionIndex() throws IOException {
+    void postLoginSuccess() throws IOException {
         // given
+        HttpSessions.clear();
         final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */*",
-                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
-                "");
+                "",
+                "account=gugu&password=password&email=hkkang%40woowahan.com");
 
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
@@ -326,16 +300,62 @@ class HttpRequestHandlerTest {
         // when
         requestHandler.run();
 
+        Optional<String> sessionId = HttpSessions.getSessionIds().stream().findFirst();
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        String expected = "HTTP/1.1 200 OK \r\n" +
+        String expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /index.html \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
-                "Set-Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 \r\n" +
+                "Set-Cookie: JSESSIONID=" + sessionId.get() + " \r\n" +
                 "\r\n" +
                 responseBody;
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @DisplayName("세션 정보가 있을 경우 바로 index로 이동한다.")
+    @Test
+    void loginUserRedirect() throws IOException {
+        HttpSessions.clear();
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */*",
+                "",
+                "account=gugu&password=password&email=hkkang%40woowahan.com");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+        requestHandler.run();
+        String sessionId = HttpSessions.getSessionIds().stream().findFirst().get();
+        // when
+        final String cookieHttpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 80 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */*",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=" + sessionId,
+                ""
+        );
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /index.html \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "Set-Cookie: JSESSIONID=" + sessionId + " \r\n" +
+                "\r\n" +
+                responseBody;
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
 }

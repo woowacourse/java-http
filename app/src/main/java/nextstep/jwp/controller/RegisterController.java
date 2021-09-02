@@ -10,7 +10,7 @@ public class RegisterController extends AbstractController {
     protected HttpResponse doPost(HttpRequest request) throws Exception {
         UserService userService = new UserService();
         userService.saveUser(request.getBody());
-        return create302Response(request, "/index.html");
+        return createRedirectResponse(request, "/index.html");
     }
 
     @Override

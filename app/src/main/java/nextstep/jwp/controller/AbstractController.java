@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import java.io.IOException;
 import nextstep.jwp.http.SupportedContentType;
+import nextstep.jwp.http.auth.HttpSession;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.ResponseBody;
@@ -34,7 +35,7 @@ public abstract class AbstractController implements Controller {
     }
 
 
-    protected HttpResponse create302Response(HttpRequest request, String location) throws IOException {
+    protected HttpResponse createRedirectResponse(HttpRequest request, String location) throws IOException {
         String responseBody = ResponseBody.createStaticFileByFileName(location).getResponseBody();
         ResponseStatus responseStatus = ResponseStatus.FOUND;
         return new HttpResponse(
@@ -42,7 +43,20 @@ public abstract class AbstractController implements Controller {
                 new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.HTML,
                         responseBody.getBytes().length).
                         location(location)
-                        .cookie(request.getCookieSession())
+                        .cookie(request.getCookie())
+                        .build(),
+                ResponseBody.createByString(responseBody));
+    }
+
+    protected HttpResponse createSessionRedirectResponse(HttpSession session, String location) throws IOException {
+        String responseBody = ResponseBody.createStaticFileByFileName(location).getResponseBody();
+        ResponseStatus responseStatus = ResponseStatus.FOUND;
+        return new HttpResponse(
+                new ResponseLine(responseStatus.getStatusCode(), responseStatus.getStatusMessage()),
+                new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.HTML,
+                        responseBody.getBytes().length).
+                        location(location)
+                        .cookie(session.getId())
                         .build(),
                 ResponseBody.createByString(responseBody));
     }
@@ -54,7 +68,7 @@ public abstract class AbstractController implements Controller {
                 new ResponseLine(responseStatus.getStatusCode(), responseStatus.getStatusMessage()),
                 new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.HTML,
                         responseBody.getBytes().length)
-                        .cookie(request.getCookieSession())
+                        .cookie(request.getCookie())
                         .build(),
                 ResponseBody.createByString(responseBody));
     }

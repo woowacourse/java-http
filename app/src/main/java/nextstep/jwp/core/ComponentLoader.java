@@ -44,18 +44,28 @@ public class ComponentLoader {
             List<BeanDefinition> beanDefinitions) {
         try {
             for (Constructor<?> constructor : tClass.getConstructors()) {
-                if (constructor.isAnnotationPresent(Autowired.class)) {
-                    Object[] parameterTargets = createParameterTargets(constructor,
-                            beanDefinitions);
-                    final Object target = createTarget(constructor, parameterTargets);
-                    return new BeanDefinition(tClass, target, tClass.getName());
+                BeanDefinition beanWithAnnotation = getBeanWithAnnotation(tClass, beanDefinitions, constructor);
+                if (beanWithAnnotation != null) {
+                    return beanWithAnnotation;
                 }
             }
             final T target = tClass.getConstructor((Class<?>[]) null).newInstance();
-            return new BeanDefinition(tClass, target, tClass.getName());
+            return new BeanDefinition(tClass, target);
         } catch (Exception e) {
             throw new NotFoundBeanException();
         }
+    }
+
+    private static <T> BeanDefinition getBeanWithAnnotation(Class<T> tClass,
+            List<BeanDefinition> beanDefinitions, Constructor<?> constructor)
+            throws IllegalAccessException, InvocationTargetException, InstantiationException {
+        if (constructor.isAnnotationPresent(Autowired.class)) {
+            Object[] parameterTargets = createParameterTargets(constructor,
+                    beanDefinitions);
+            final Object target = createTarget(constructor, parameterTargets);
+            return new BeanDefinition(tClass, target);
+        }
+        return null;
     }
 
     private static Object[] createParameterTargets(Constructor<?> constructor,

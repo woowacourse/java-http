@@ -13,7 +13,7 @@ public class ExceptionResolverContainer {
     private static final Logger log = LoggerFactory.getLogger(ExceptionResolverContainer.class);
 
 
-    private List<ExceptionResolver> exceptionResolvers;
+    private final List<ExceptionResolver> exceptionResolvers;
 
     public ExceptionResolverContainer() {
         this.exceptionResolvers = defaultExceptionResolvers();

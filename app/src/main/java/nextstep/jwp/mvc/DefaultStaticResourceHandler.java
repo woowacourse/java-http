@@ -14,12 +14,6 @@ public class DefaultStaticResourceHandler implements StaticResourceHandler {
 
     private static final String DEFAULT_PATH = "static";
 
-    private final ApplicationContext applicationContext;
-
-    public DefaultStaticResourceHandler(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-    }
-
     @Override
     public void handleResource(HttpRequest httpRequest, HttpResponse httpResponse) {
         try {

@@ -9,7 +9,7 @@ import nextstep.jwp.core.exception.NotFoundBeanException;
 
 public class BeanContainer {
 
-    private Map<String, BeanDefinition> beanContainer;
+    private final Map<String, BeanDefinition> beanContainer;
 
     public BeanContainer() {
         this.beanContainer = new HashMap<>();
@@ -33,13 +33,6 @@ public class BeanContainer {
                 .collect(Collectors.toList());
     }
 
-    public <T> List<T> getBeansByType(Class<T> type) {
-        return beanContainer.values().stream()
-                .filter(bean -> bean.isTypeOf(type))
-                .map(bean -> (T) bean.getTarget())
-                .collect(Collectors.toList());
-    }
-
     public <T> T getBean(Class<T> type) {
         return beanContainer.values().stream()
                 .filter(bean -> bean.isTypeOf(type))
@@ -48,19 +41,4 @@ public class BeanContainer {
                 .orElseThrow(NotFoundBeanException::new);
     }
 
-    public <T> T getBean(String key, Class<T> type) {
-        final BeanDefinition beanDefinition = beanContainer.get(key);
-        if (beanDefinition == null) {
-            throw new NotFoundBeanException();
-        }
-        return (T) beanDefinition.getTarget();
-    }
-
-    public Object getBean(String key) {
-        final BeanDefinition beanDefinition = beanContainer.get(key);
-        if (beanDefinition == null) {
-            throw new NotFoundBeanException();
-        }
-        return beanDefinition.getTarget();
-    }
 }

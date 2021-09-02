@@ -48,7 +48,7 @@ public class DispatcherServlet {
                     applicationContext.getBean(StaticResourceHandler.class);
         } catch (NotFoundBeanException e) {
             this.staticResourceHandler =
-                    new DefaultStaticResourceHandler(applicationContext);
+                    new DefaultStaticResourceHandler();
             applicationContext.insertBean(staticResourceHandler);
         }
     }

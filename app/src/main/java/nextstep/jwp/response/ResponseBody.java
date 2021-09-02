@@ -27,7 +27,7 @@ public class ResponseBody {
     }
 
     public static ResponseBody of(String contentName) {
-        String content = findContent(contentName);
+        final String content = findContent(contentName);
         return new ResponseBody(content, content.getBytes().length);
     }
 
@@ -37,9 +37,9 @@ public class ResponseBody {
 
     private static String findContent(String contentName) {
         try {
-            String requestResourceName = DEFAULT_STATIC_RESOURCE_PATH + contentName;
-            URL resource = ResponseBody.class.getClassLoader().getResource(requestResourceName);
-            Path resourcePath = new File(Objects.requireNonNull(resource).getFile()).toPath();
+            final String requestResourceName = DEFAULT_STATIC_RESOURCE_PATH + contentName;
+            final URL resource = ResponseBody.class.getClassLoader().getResource(requestResourceName);
+            final Path resourcePath = new File(Objects.requireNonNull(resource).getFile()).toPath();
             return new String(Files.readAllBytes(resourcePath));
         } catch (IOException e) {
             logger.error("getContent Error", e);

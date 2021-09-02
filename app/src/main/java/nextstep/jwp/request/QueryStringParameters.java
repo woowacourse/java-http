@@ -38,7 +38,7 @@ public class QueryStringParameters {
     }
 
     public String getParameter(String name) {
-        String value = parameters.get(name);
+        final String value = parameters.get(name);
         if (Objects.isNull(value)) {
             throw new IllegalArgumentException(NON_EXIST_PARAMETER_EXCEPTION_MESSAGE);
         }

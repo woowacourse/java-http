@@ -36,10 +36,10 @@ public class RequestLine {
 
     public static RequestLine createRequestLine(String requestLine) {
         final String[] splitRequestLine = requestLine.split(REQUEST_LINE_DELIMITER);
-        HttpMethod httpMethod = HttpMethod.of(splitRequestLine[HTTP_METHOD_INDEX]);
-        String requestPath = splitRequestLine[REQUEST_PATH_INDEX];
-        String versionOfProtocol = splitRequestLine[VERSION_OF_PROTOCOL_INDEX];
-        QueryStringParameters parameters = QueryStringParameters.getEmptyParameters();
+        final HttpMethod httpMethod = HttpMethod.of(splitRequestLine[HTTP_METHOD_INDEX]);
+        final String requestPath = splitRequestLine[REQUEST_PATH_INDEX];
+        final String versionOfProtocol = splitRequestLine[VERSION_OF_PROTOCOL_INDEX];
+        final QueryStringParameters parameters = QueryStringParameters.getEmptyParameters();
         return new RequestLine(httpMethod, requestPath, parameters, versionOfProtocol);
     }
 

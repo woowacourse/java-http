@@ -1,6 +1,7 @@
 package nextstep.jwp.http.session;
 
 import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.request.RequestCookie;
 import nextstep.jwp.http.request.RequestHeaders;
 import nextstep.jwp.model.User;
 import org.junit.jupiter.api.DisplayName;
@@ -23,8 +24,9 @@ class HttpSessionsTest {
         session.setAttribute("user", user);
 
         //when
-        final Map<String, String> headers = Map.of("Cookie", "JSESSIONID=" + session.getId());
-        final RequestHeaders requestHeaders = new RequestHeaders(headers);
+        final Map<String, String> cookies = Map.of("JSESSIONID", session.getId());
+        final RequestCookie requestCookie = new RequestCookie(cookies);
+        final RequestHeaders requestHeaders = new RequestHeaders(new HashMap<>(), requestCookie);
         final HttpRequest request = new HttpRequest(null, requestHeaders, null);
 
         //then
@@ -36,8 +38,9 @@ class HttpSessionsTest {
     void isNotLoggedInWhenSessionNotExists() {
         //given
         //when
-        final Map<String, String> headers = Map.of("Cookie", "JSESSIONID=" + "1234");
-        final RequestHeaders requestHeaders = new RequestHeaders(headers);
+        final Map<String, String> cookies = Map.of("Cookie", "JSESSIONID=" + "1234");
+        final RequestCookie requestCookie = new RequestCookie(cookies);
+        final RequestHeaders requestHeaders = new RequestHeaders(new HashMap<>(), requestCookie);
         final HttpRequest request = new HttpRequest(null, requestHeaders, null);
 
         //then
@@ -51,8 +54,9 @@ class HttpSessionsTest {
         final HttpSession session = HttpSessions.createSession();
 
         //when
-        final Map<String, String> headers = Map.of("Cookie", "JSESSIONID=" + session.getId());
-        final RequestHeaders requestHeaders = new RequestHeaders(headers);
+        final Map<String, String> cookies = Map.of("Cookie", "JSESSIONID=" + session.getId());
+        final RequestCookie requestCookie = new RequestCookie(cookies);
+        final RequestHeaders requestHeaders = new RequestHeaders(new HashMap<>(), requestCookie);
         final HttpRequest request = new HttpRequest(null, requestHeaders, null);
 
         //then
@@ -64,7 +68,8 @@ class HttpSessionsTest {
     void isNotLoggedInWhenJSESSIONIDNotExistsInCookie() {
         //given
         //when
-        final RequestHeaders requestHeaders = new RequestHeaders(new HashMap<>());
+        final RequestCookie requestCookie = new RequestCookie(new HashMap<>());
+        final RequestHeaders requestHeaders = new RequestHeaders(new HashMap<>(), requestCookie);
         final HttpRequest request = new HttpRequest(null, requestHeaders, null);
 
         //then

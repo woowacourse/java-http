@@ -1,10 +1,7 @@
 package nextstep.jwp.http.session;
 
 import nextstep.jwp.exception.NotFoundException;
-import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.request.RequestBody;
-import nextstep.jwp.http.request.RequestHeaders;
-import nextstep.jwp.http.request.RequestLine;
+import nextstep.jwp.http.request.*;
 import nextstep.jwp.model.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +19,8 @@ class HttpSessionTest {
     void create() {
         //given
         final RequestLine requestLine = new RequestLine("GET /login HTTP/1.1");
-        final RequestHeaders headers = new RequestHeaders(new HashMap<>());
+        final RequestCookie requestCookie = new RequestCookie(new HashMap<>());
+        final RequestHeaders headers = new RequestHeaders(new HashMap<>(), requestCookie);
         final RequestBody requestBody = RequestBody.empty();
         final HttpRequest request = new HttpRequest(requestLine, headers, requestBody);
 
@@ -37,20 +35,23 @@ class HttpSessionTest {
     @Test
     void saveAndFindFromSession() {
         //given
-        final RequestLine beforeLoginRequestLine = new RequestLine("GET /login HTTP/1.1");
-        final RequestHeaders beforeLoginHeaders = new RequestHeaders(new HashMap<>());
-        final RequestBody beforeLoginRequestBody = RequestBody.empty();
-        final HttpRequest beforeLoginRequest = new HttpRequest(beforeLoginRequestLine, beforeLoginHeaders, beforeLoginRequestBody);
+        final RequestLine requestLine = new RequestLine("GET /login HTTP/1.1");
+        final Map<String, String> emptyHeadersExceptCookie = new HashMap<>();
+
+        final RequestCookie beforeLoginEmptyCookie = new RequestCookie(new HashMap<>());
+        final RequestHeaders beforeLoginHeaders = new RequestHeaders(emptyHeadersExceptCookie, beforeLoginEmptyCookie);
+        final HttpRequest beforeLoginRequest = new HttpRequest(requestLine, beforeLoginHeaders, RequestBody.empty());
 
         final HttpSession beforeLoginSession = beforeLoginRequest.getSession();
         final User user = new User(1L, "inbi", "1234", "inbi@email.com");
         beforeLoginSession.setAttribute("user", user);
 
         //when
-        final RequestLine afterLoginRequestLine = new RequestLine("GET /login HTTP/1.1");
-        final RequestHeaders afterLoginHeaders = new RequestHeaders(Map.of("Cookie", "JSESSIONID=" + beforeLoginSession.getId()));
-        final RequestBody afterLoginRequestBody = RequestBody.empty();
-        final HttpRequest afterLoginRequest = new HttpRequest(afterLoginRequestLine, afterLoginHeaders, afterLoginRequestBody);
+        final Map<String, String> cookie = Map.of("JSESSIONID", beforeLoginSession.getId());
+        final RequestCookie afterLoginCookie = new RequestCookie(cookie);
+        final RequestHeaders afterLoginHeaders = new RequestHeaders(emptyHeadersExceptCookie, afterLoginCookie);
+
+        final HttpRequest afterLoginRequest = new HttpRequest(requestLine, afterLoginHeaders, RequestBody.empty());
         final HttpSession afterLoginSession = afterLoginRequest.getSession();
 
         //then

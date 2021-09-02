@@ -1,9 +1,6 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.request.RequestBody;
-import nextstep.jwp.http.request.RequestHeaders;
-import nextstep.jwp.http.request.RequestLine;
+import nextstep.jwp.http.request.*;
 import nextstep.jwp.http.response.ContentType;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.model.User;
@@ -32,7 +29,8 @@ class LoginControllerTest {
     void getLogin() {
         //given
         final RequestLine requestLine = new RequestLine("GET /login HTTP/1.1");
-        final RequestHeaders headers = new RequestHeaders(new HashMap<>());
+        final RequestCookie requestCookie = new RequestCookie(new HashMap<>());
+        final RequestHeaders headers = new RequestHeaders(new HashMap<>(), requestCookie);
         final HttpRequest request = new HttpRequest(requestLine, headers, null);
         final HttpResponse response = new HttpResponse();
         final StaticResource staticResource = new StaticResource(ContentType.HTML, "content");
@@ -51,7 +49,8 @@ class LoginControllerTest {
     void postLogin() {
         //given
         final RequestLine requestLine = new RequestLine("POST /login HTTP/1.1");
-        final RequestHeaders headers = new RequestHeaders(new HashMap<>());
+        final RequestCookie requestCookie = new RequestCookie(new HashMap<>());
+        final RequestHeaders headers = new RequestHeaders(new HashMap<>(), requestCookie);
         final RequestBody requestBody = new RequestBody("account=inbi&password=1234");
         final User user = new User(1L, "inbi", "1234", "inbi@email.com");
         final HttpRequest request = new HttpRequest(requestLine, headers, requestBody);

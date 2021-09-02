@@ -1,15 +1,13 @@
 package nextstep.jwp;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebServer {
-
     private static final Logger logger = LoggerFactory.getLogger(WebServer.class);
 
     private static final int DEFAULT_PORT = 8080;

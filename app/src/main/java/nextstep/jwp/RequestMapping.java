@@ -32,6 +32,6 @@ public class RequestMapping {
         if (request.isUriFile()) {
             return CONTROLLERS.get(FRONT);
         }
-        throw new NotFoundException(request);
+        throw new NotFoundException();
     }
 }

@@ -28,13 +28,24 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() throws IOException {
+        if (body.hasNotBody()) {
+            getResponseAsBytes();
+        }
         return getResponseAsBytesWithBody();
+    }
+
+    private byte[] getResponseAsBytes() {
+        return String.join(LINE_DELIMITER,
+            statusLine(),
+            headers.toString()
+        ).getBytes(StandardCharsets.UTF_8);
     }
 
     private byte[] getResponseAsBytesWithBody() throws IOException {
         return String.join(LINE_DELIMITER,
             statusLine(),
             headers.toString(),
+            "",
             body()
         ).getBytes(StandardCharsets.UTF_8);
     }

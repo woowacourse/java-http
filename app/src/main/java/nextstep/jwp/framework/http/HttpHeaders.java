@@ -37,19 +37,4 @@ public class HttpHeaders {
     public int contentLength() {
         return Integer.parseInt(headers.get("Content-Length"));
     }
-
-    @Override
-    public String toString() {
-        final StringBuilder builder = new StringBuilder();
-
-        for (final String key : headers.keySet()) {
-            builder.append(key)
-                .append(HEADER_DELIMITER)
-                .append(headers.get(key))
-                .append(SPACE)
-                .append(LINE_DELIMITER);
-        }
-
-        return builder.toString();
-    }
 }

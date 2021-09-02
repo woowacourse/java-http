@@ -1,10 +1,11 @@
 package nextstep.learning;
 
 import nextstep.jwp.application.controller.UserController;
+import nextstep.jwp.framework.http.request.HttpRequest;
 import nextstep.jwp.framework.manager.annotation.Controller;
 import nextstep.jwp.framework.manager.annotation.GetMapping;
 import nextstep.jwp.framework.manager.annotation.PostMapping;
-import nextstep.jwp.framework.manager.annotation.RequestParameter;
+import nextstep.jwp.framework.manager.annotation.RequestParam;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
@@ -61,18 +62,18 @@ class ReflectionsLibraryTest {
         assertThat(postMappingMethods).contains("loginUser", "registerUser");
     }
 
-    @DisplayName("특정 메서드에 붙은 RequestParameter 어노테이션을 검사할 수 있다.")
+    @DisplayName("특정 메서드에 붙은 RequestParam 어노테이션을 검사할 수 있다.")
     @Test
     void requestParam() throws NoSuchMethodException {
         final Class<UserController> userControllerClass = UserController.class;
-        final Method loginUserMethod = userControllerClass.getMethod("loginUser", String.class, String.class);
+        final Method loginUserMethod = userControllerClass.getMethod("loginUser", String.class, String.class, HttpRequest.class);
 
         final Parameter[] parameters = loginUserMethod.getParameters();
         List<String> parameterValues = new ArrayList<>();
         for (Parameter parameter : parameters) {
-            final RequestParameter requestParameter = parameter.getAnnotation(RequestParameter.class);
-            if (!Objects.isNull(requestParameter)) {
-                parameterValues.add(requestParameter.value());
+            final RequestParam requestParam = parameter.getAnnotation(RequestParam.class);
+            if (!Objects.isNull(requestParam)) {
+                parameterValues.add(requestParam.value());
             }
         }
 

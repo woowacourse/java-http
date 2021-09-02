@@ -26,6 +26,7 @@ public class RequestManager {
     public void handle(InputStream inputStream, OutputStream outputStream) throws IOException {
         final HttpRequest httpRequest = RequestParser.of(inputStream).extractHttpRequest();
         final HttpResponse httpResponse = handleClientRequest(httpRequest);
+        httpResponse.appendSessionInfo(httpRequest.getSession());
         ResponseSender.of(outputStream).sendResponse(httpResponse);
     }
 

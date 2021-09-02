@@ -5,7 +5,7 @@ import nextstep.jwp.framework.http.request.details.HttpMethod;
 import nextstep.jwp.framework.manager.annotation.Controller;
 import nextstep.jwp.framework.manager.annotation.GetMapping;
 import nextstep.jwp.framework.manager.annotation.PostMapping;
-import nextstep.jwp.framework.manager.annotation.RequestParameter;
+import nextstep.jwp.framework.manager.annotation.RequestParam;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class DynamicWebManager {
 
@@ -84,23 +83,30 @@ public class DynamicWebManager {
         final Map<Object, Method> handler = dynamicWebHandler.get(httpRequest);
         final Object controller = handler.keySet().iterator().next();
         final Method method = handler.get(controller);
-        final List<String> methodParameters = mapMethodParameters(httpRequest, method);
+        final Object[] parameters = mapMethodParameter(httpRequest, method);
 
         try {
-            final Object result = method.invoke(controller, methodParameters.toArray(new String[0]));
+            final Object result = method.invoke(controller, parameters);
             return String.valueOf(result);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalArgumentException("해당 컨트롤러 메서드에서 오류가 발생했습니다.");
         }
     }
 
-    private List<String> mapMethodParameters(final HttpRequest httpRequest, final Method method) {
-        final Parameter[] parameters = method.getParameters();
-        return Arrays.stream(parameters)
-                .map(parameter -> parameter.getAnnotation(RequestParameter.class))
-                .filter(requestParameter -> !Objects.isNull(requestParameter))
-                .map(RequestParameter::value)
-                .map(httpRequest::searchRequestBody)
-                .collect(Collectors.toList());
+    private Object[] mapMethodParameter(final HttpRequest httpRequest, final Method method) {
+        final List<Object> requestParameters = new ArrayList<>();
+
+        for (Parameter parameter : method.getParameters()) {
+            final RequestParam requestParam = parameter.getAnnotation(RequestParam.class);
+            if (requestParam != null) {
+                final String requestParamValue = httpRequest.searchRequestBody(requestParam.value());
+                requestParameters.add(requestParamValue);
+            }
+
+            if (parameter.getType() == HttpRequest.class) {
+                requestParameters.add(httpRequest);
+            }
+        }
+        return requestParameters.toArray(new Object[0]);
     }
 }

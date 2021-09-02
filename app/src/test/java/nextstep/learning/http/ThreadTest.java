@@ -13,26 +13,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ThreadTest {
 
     @Test
-    void testCounterWithConcurrency() throws InterruptedException {
-        int numberOfThreads = 10;
-        ExecutorService service = Executors.newFixedThreadPool(10);
-
-        CountDownLatch latch = new CountDownLatch(numberOfThreads);
-        MyCounter counter = new MyCounter();
-
-        for (int i = 0; i < numberOfThreads; i++) {
-            service.execute(() -> {
-                counter.increment();
-                latch.countDown();
-            });
-        }
-        System.out.println("latch.getCount() = " + latch.getCount());
-        latch.await();
-        System.out.println("latch.getCount() = " + latch.getCount());
-        assertThat(counter.getCount()).isEqualTo(numberOfThreads);
-    }
-
-    @Test
     void testSummationWithConcurrency() throws InterruptedException {
         int numberOfThreads = 2;
         ExecutorService service = Executors.newFixedThreadPool(1);

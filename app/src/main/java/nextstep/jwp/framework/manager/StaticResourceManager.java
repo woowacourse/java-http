@@ -29,7 +29,7 @@ public class StaticResourceManager {
     private static final String STATIC_FILE_PATH = "static";
     private static final String NOT_FOUND_FILE_PATH = "static/404.html";
     private static final String INTERNAL_SERVER_ERROR_FILE_PATH = "static/500.html";
-    private static final String REDIRECT_INDICATOR = "redirect: ";
+    private static final String REDIRECT_INDICATOR = "redirect:";
 
     private final Map<HttpRequest, File> staticResources = new HashMap<>();
     private final File notFoundFile;
@@ -95,7 +95,7 @@ public class StaticResourceManager {
     }
 
     private HttpResponse handleRedirect(String result) {
-        result = result.replace(REDIRECT_INDICATOR, "");
+        result = result.replace(REDIRECT_INDICATOR, "").trim();
         final HttpRequest resultRequest = HttpRequest.of(HttpMethod.GET, result);
         if (canHandle(resultRequest)) {
             final HttpResponse httpResponse = HttpResponse.of(staticResources.get(resultRequest), FOUND);

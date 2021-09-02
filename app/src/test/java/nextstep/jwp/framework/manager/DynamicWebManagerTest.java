@@ -26,9 +26,8 @@ class DynamicWebManagerTest {
     @Test
     void handle() {
         final String indexResult = dynamicWebManager.handle(HttpRequest.of(HttpMethod.GET, "/"));
-        final String loginResult = dynamicWebManager.handle(HttpRequest.of(HttpMethod.GET, "/login"));
-
         assertThat(indexResult).isEqualTo("/index.html");
-        assertThat(loginResult).isEqualTo("/login.html");
+        final String registerResult = dynamicWebManager.handle(HttpRequest.of(HttpMethod.GET, "/register"));
+        assertThat(registerResult).isEqualTo("/register.html");
     }
 }

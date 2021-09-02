@@ -1,5 +1,6 @@
 package nextstep.jwp.framework.http.response;
 
+import nextstep.jwp.framework.http.common.HttpSession;
 import nextstep.jwp.framework.http.common.ProtocolVersion;
 import nextstep.jwp.framework.http.response.details.ResponseBody;
 import nextstep.jwp.framework.http.response.details.ResponseHttpHeader;
@@ -7,6 +8,7 @@ import nextstep.jwp.framework.http.response.details.ResponseStatus;
 import nextstep.jwp.framework.http.response.util.FileUtil;
 
 import java.io.File;
+import java.util.Objects;
 
 import static nextstep.jwp.framework.http.common.Constants.LINE_SEPARATOR;
 import static nextstep.jwp.framework.http.common.Constants.NEWLINE;
@@ -41,6 +43,13 @@ public class HttpResponse {
 
     public void appendRedirectInfo(final String location) {
         responseHttpHeader.appendRedirectInfo(location);
+    }
+
+    public void appendSessionInfo(final HttpSession session) {
+        if (Objects.isNull(session)) {
+            return;
+        }
+        responseHttpHeader.appendSessionInfo(session.getSessionId());
     }
 
     public String generateResponse() {

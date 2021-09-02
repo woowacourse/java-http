@@ -1,5 +1,6 @@
 package nextstep.jwp.framework.http.request;
 
+import nextstep.jwp.framework.http.common.HttpSession;
 import nextstep.jwp.framework.http.common.ProtocolVersion;
 import nextstep.jwp.framework.http.request.details.HttpMethod;
 import nextstep.jwp.framework.http.request.details.RequestBody;
@@ -52,6 +53,10 @@ public class HttpRequest {
         return requestBody.find(key);
     }
 
+    public HttpSession generateSession() {
+        return requestHttpHeader.getCookie().generateSession();
+    }
+
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }
@@ -70,6 +75,10 @@ public class HttpRequest {
 
     public RequestBody getRequestBody() {
         return requestBody;
+    }
+
+    public HttpSession getSession() {
+        return requestHttpHeader.getCookie().getSession();
     }
 
     @Override

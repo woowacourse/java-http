@@ -4,9 +4,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class HttpCookie {
+
+    // TODO :: RESPONSE_FORMAT 에 너무 엮이는 것은 아닐까
+
     public static final HttpCookie EMPTY = new HttpCookie(Collections.emptyMap());
 
     private static final String KEY_SESSION_ID = "JSESSIONID";
@@ -25,10 +27,8 @@ public class HttpCookie {
         }
 
         Map<String, String> map = new HashMap<>();
-        System.out.println(cookieLine);
         for (String item : cookieLine.split(ITEM_SEPARATOR)) {
             String[] pair = item.split(KEY_SEPARATOR);
-            System.out.println(pair[0] + " "+ pair[1]);
             if (pair.length < 2) {
                 break;
             }
@@ -49,10 +49,8 @@ public class HttpCookie {
         return params.containsKey(KEY_SESSION_ID);
     }
 
-    public String asResponseLine() {
-        return params.keySet().stream()
-                .map(key -> key + KEY_SEPARATOR + params.get(key))
-                .collect(Collectors.joining(ITEM_SEPARATOR));
+    public boolean isEmpty() {
+        return this.equals(EMPTY);
     }
 
     @Override

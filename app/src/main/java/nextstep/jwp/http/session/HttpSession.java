@@ -6,11 +6,18 @@ import java.util.UUID;
 
 public class HttpSession {
 
-    private final String id;
-    private final Map<String, Object> sessionTable = new HashMap<>();
+    public static final String SESSION_TYPE = "JSESSIONID";
 
-    public HttpSession() {
-        this.id = UUID.randomUUID().toString();
+    private final String id;
+    private final Map<String, Object> sessionTable;
+
+    private HttpSession(String id, Map<String, Object> sessionTable) {
+        this.id = id;
+        this.sessionTable = sessionTable;
+    }
+
+    public static HttpSession create() {
+        return new HttpSession(UUID.randomUUID().toString(), new HashMap<>());
     }
 
     public String getId() {

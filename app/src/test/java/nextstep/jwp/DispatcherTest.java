@@ -18,15 +18,11 @@ class DispatcherTest {
     private final Assembler container = new Assembler();
     private final Dispatcher dispatcher = container.dispatcher();
 
-    @DisplayName("Controller 요청 처리")
+    @DisplayName("ControllerMapping 후 요청 처리 확인")
     @Test
     void dispatchController() {
         // given
-        final String account = "corgi";
-        final String password = "password";
-        final String email = "hkkang%40woowahan.com";
-
-        final String requestBody = "account=" + account + "&password=" + password + "&email=" + email;
+        final String requestBody = "account=corgi&password=password&email=hkkang%40woowahan.com";
 
         RequestLine requestLine = RequestLine.of("POST /register HTTP/1.1");
         RequestHeaders requestHeaders = RequestHeaders.of(Arrays.asList("Content-Length: " + requestBody.length()));
@@ -38,10 +34,10 @@ class DispatcherTest {
         dispatcher.dispatch(httpRequest, httpResponse);
 
         // then
-        assertThat(httpResponse.httpStatus()).isEqualTo(HttpStatus.FOUND);
+        assertThat(httpResponse.status()).isEqualTo(HttpStatus.FOUND);
     }
 
-    @DisplayName("ResourceHandler 요청 처리")
+    @DisplayName("ResourceHandler 매핑 후, 요청 처리 확인")
     @Test
     void dispatchResourceHandler() {
         // given
@@ -57,7 +53,7 @@ class DispatcherTest {
         dispatcher.dispatch(httpRequest, httpResponse);
 
         // then
-        assertThat(httpResponse.httpStatus()).isEqualTo(HttpStatus.OK);
+        assertThat(httpResponse.status()).isEqualTo(HttpStatus.OK);
     }
 
     @DisplayName("매핑된 handler가 없는 경우 Not found 출력")
@@ -73,7 +69,7 @@ class DispatcherTest {
         dispatcher.dispatch(httpRequest, httpResponse);
 
         // then
-        assertThat(httpResponse.httpStatus()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(httpResponse.status()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
     @DisplayName("로그인 실패에 Unauthorized 출력")
@@ -92,7 +88,7 @@ class DispatcherTest {
         dispatcher.dispatch(httpRequest, httpResponse);
 
         // then
-        assertThat(httpResponse.httpStatus()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(httpResponse.status()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @DisplayName("서버 에러시 INTERNAL SERVER ERROR 출력")
@@ -113,23 +109,25 @@ class DispatcherTest {
         dispatcher.dispatch(httpRequest, httpResponse);
 
         // then
-        assertThat(httpResponse.httpStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(httpResponse.status()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @DisplayName("쿠키에 Session이 존재하지 않는 경우 SessionId를 응답한다")
     @Test
     void responseSessionId() {
         // given
-        RequestLine requestLine = RequestLine.of("GET /login HTTP/1.1");
-        RequestHeaders requestHeaders = RequestHeaders.of(Collections.emptyList());
+        final String requestBody = "account=gugu&password=password&email=hkkang%40woowahan.com";
 
-        HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, "");
+        RequestLine requestLine = RequestLine.of("POST /login HTTP/1.1");
+        RequestHeaders requestHeaders = RequestHeaders.of(Arrays.asList("Content-Length: " + requestBody.length()));
+
+        HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, requestBody);
         HttpResponse httpResponse = new HttpResponse();
 
         // when
         dispatcher.dispatch(httpRequest, httpResponse);
 
         // then
-        assertThat(httpResponse.getHeaderAttribute("Set-Cookie")).isNotNull();
+        assertThat(httpResponse.getHeader("Set-Cookie")).isNotNull();
     }
 }

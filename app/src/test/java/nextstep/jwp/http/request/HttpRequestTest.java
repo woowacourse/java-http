@@ -1,17 +1,20 @@
 package nextstep.jwp.http.request;
 
-import java.util.Arrays;
-import java.util.Collections;
 import nextstep.jwp.http.cookie.HttpCookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpRequestTest {
 
+    @DisplayName("InputStream으로부터 문자열을 읽어 HttpRequest를 파싱한다")
     @Test
     void of() {
         final String expectedRequestLine = "POST /register HTTP/1.1 ";
@@ -34,7 +37,7 @@ class HttpRequestTest {
         }
     }
 
-    @DisplayName("쿠기가 있는 경우, 쿠키 값을 반환한다.")
+    @DisplayName("쿠기가 있는 경우, 쿠키 값을 반환한다")
     @Test
     void cookie() {
         RequestLine requestLine = RequestLine.of("GET / HTTP/1.1");
@@ -48,7 +51,7 @@ class HttpRequestTest {
 
     }
 
-    @DisplayName("쿠기가 없는 경우, 빈 쿠키 객체를 반환한다.")
+    @DisplayName("쿠기가 없는 경우, 빈 쿠키 객체를 반환한다")
     @Test
     void emptyCookie() {
         RequestLine requestLine = RequestLine.of("GET / HTTP/1.1");
@@ -56,6 +59,21 @@ class HttpRequestTest {
 
         HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, "");
         assertThat(httpRequest.httpCookie()).isEqualTo(HttpCookie.EMPTY);
+    }
+
+    @DisplayName("SessionId를 반환한다")
+    @Test
+    void getSession() {
+        RequestLine requestLine = RequestLine.of("GET /index.html HTTP/1.1");
+        RequestHeaders requestHeaders = RequestHeaders.of(Arrays.asList(
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Accept: */*",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46"
+        ));
+
+        HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, "");
+        assertThat(httpRequest.httpCookie().getSessionId()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
     }
 
     private String mockRequest(String expectedRequestLine, String expectedRequestBody) {

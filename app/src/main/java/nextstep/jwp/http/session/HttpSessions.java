@@ -12,4 +12,12 @@ public class HttpSessions {
     }
 
     private HttpSessions() {}
+    
+    public static void register(HttpSession session) {
+        SESSIONS.put(session.getId(), session);
+    }
+
+    public static boolean has(HttpSession session) {
+        return SESSIONS.containsKey(session.getId());
+    }
 }

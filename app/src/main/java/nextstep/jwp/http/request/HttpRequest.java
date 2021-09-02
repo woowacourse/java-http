@@ -1,15 +1,15 @@
 package nextstep.jwp.http.request;
 
+import nextstep.jwp.http.cookie.HttpCookie;
+import nextstep.jwp.http.session.HttpSession;
+import nextstep.jwp.http.session.HttpSessions;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import nextstep.jwp.http.cookie.HttpCookie;
-import nextstep.jwp.http.session.HttpSession;
-import nextstep.jwp.http.session.HttpSessions;
 
 public class HttpRequest {
 
@@ -67,6 +67,10 @@ public class HttpRequest {
         return requestBody;
     }
 
+    public QueryParams requestParam() {
+        return QueryParams.of(requestBody);
+    }
+
     public boolean isGet() {
         return requestLine.method().isGet();
     }
@@ -79,28 +83,16 @@ public class HttpRequest {
         return requestLine.method();
     }
 
-    public HttpCookie httpCookie(){
-        // TODO :: null 체크 방식 수정, 쿠키가 없는 경우
+    public HttpCookie httpCookie() {
         return HttpCookie.of(requestHeaders.cookie());
     }
 
-    public String sessionId() {
-        // TODO :: null 체크 방식 수정, 쿠키가 없는 경우
-        String cookieQueryString = requestLine.queryParams().get("Cookie");
-        if (Objects.isNull(cookieQueryString)) {
-            QueryParams cookie = QueryParams.of(cookieQueryString);
-            return cookie.get("sessionId");
-        }
-        return null;
-    }
-
     public HttpSession getSession() {
-        String sessionId = sessionId();
-        // TODO :: 세션 값이 없거나, 잘못된 경우 어떻게 처리할 것인지.
-
-        if (Objects.isNull(sessionId)) {
-            return null;
+        HttpCookie cookie = httpCookie();
+        if(cookie.hasSessionId()){
+            String sessionId = cookie.getSessionId();
+            return HttpSessions.getSession(sessionId);
         }
-        return HttpSessions.getSession(sessionId);
+        return HttpSession.create();
     }
 }

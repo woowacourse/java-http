@@ -1,12 +1,8 @@
 package nextstep.jwp.http.response;
 
-import nextstep.jwp.http.cookie.HttpCookie;
-import nextstep.jwp.http.session.HttpSession;
-
 public class HttpResponse {
 
-    // TODO :: RESPONSE 에 너무 엮이는 것은 아닐까
-
+    private static final String SESSION_ITEM_FORMAT = "%s=%s";
     private static final String HTTP_STATUS_LINE_FORMAT = "HTTP/1.1 %s %s ";
     private static final String HEADER_FORMAT = "%s: %s ";
     private static final String SEPARATE_LINE = "";
@@ -19,6 +15,10 @@ public class HttpResponse {
         responseHeaders.addAttribute(key, value);
     }
 
+    public String getHeader(String name) {
+        return responseHeaders.getAttribute(name);
+    }
+
     public void setHttpStatus(HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
     }
@@ -28,17 +28,6 @@ public class HttpResponse {
         responseHeaders.addAttribute("Content-Length", content.getBytes().length);
 
         messageBody = content;
-    }
-
-    public void setCookie(HttpCookie cookie) {
-        if (cookie.hasSessionId()) {
-            addHeader("Cookie", cookie.asResponseLine());
-            return;
-        }
-
-        HttpSession newSession = new HttpSession();
-        String id = newSession.getId();
-        addHeader("Set-Cookie", id);
     }
 
     public byte[] responseAsBytes() {
@@ -55,11 +44,12 @@ public class HttpResponse {
                 messageBody);
     }
 
-    public String getHeaderAttribute(String name) {
-        return responseHeaders.getAttribute(name);
+    public HttpStatus status() {
+        return httpStatus;
     }
 
-    public HttpStatus httpStatus() {
-        return httpStatus;
+    public void setCookie(String sessionType, String sessionId) {
+        String sessionItem = String.format(SESSION_ITEM_FORMAT, sessionType, sessionId);
+        responseHeaders.addAttribute("Set-Cookie", sessionItem);
     }
 }

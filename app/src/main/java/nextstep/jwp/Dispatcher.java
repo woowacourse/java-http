@@ -3,14 +3,19 @@ package nextstep.jwp;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.handler.Handler;
 import nextstep.jwp.handler.modelandview.ModelAndView;
+import nextstep.jwp.http.cookie.HttpCookie;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpStatus;
 import nextstep.jwp.mapper.HandlerMappers;
 import nextstep.jwp.view.View;
 import nextstep.jwp.view.ViewResolver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Dispatcher {
+
+    private static final Logger log = LoggerFactory.getLogger(Dispatcher.class);
 
     private final HandlerMappers handlerMappers;
     private final ViewResolver viewResolver;
@@ -33,8 +38,10 @@ public class Dispatcher {
             Handler handler = handlerMappers.mapping(request);
             return handler.handle(request, response);
         } catch (NotFoundException notFoundException) {
+            log.debug(notFoundException.getMessage());
             return ModelAndView.of("/404.html", HttpStatus.NOT_FOUND);
         } catch (Exception exception) {
+            log.debug(exception.getMessage());
             return ModelAndView.of("/500.html", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

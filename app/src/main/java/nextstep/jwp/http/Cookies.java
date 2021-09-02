@@ -11,6 +11,7 @@ public class Cookies {
 
     private static final int COOKIE_KEY_INDEX = 0;
     private static final int COOKIE_KEY_VALUE = 1;
+    private static final int VALID_SPLIT_LENGTH = 2;
 
     private Map<String, String> cookies = new HashMap<>();
 
@@ -20,17 +21,24 @@ public class Cookies {
     public Cookies(String rawCookie) {
         if (!Objects.isNull(rawCookie)) {
             String[] splitCookies = rawCookie.split("; ");
-
             if (splitCookies.length != 0) {
-                for (String cookie : splitCookies) {
-                    String[] split = cookie.split("=");
-                    if (split.length == 2) {
-                        String key = split[COOKIE_KEY_INDEX];
-                        String value = split[COOKIE_KEY_VALUE];
-                        cookies.put(key, value);
-                    }
-                }
+                initCookies(splitCookies);
             }
+        }
+    }
+
+    private void initCookies(String[] splitCookies) {
+        for (String cookie : splitCookies) {
+            String[] split = cookie.split("=");
+            putCookieValueAndKey(split);
+        }
+    }
+
+    private void putCookieValueAndKey(String[] split) {
+        if (split.length == VALID_SPLIT_LENGTH) {
+            String key = split[COOKIE_KEY_INDEX];
+            String value = split[COOKIE_KEY_VALUE];
+            cookies.put(key, value);
         }
     }
 

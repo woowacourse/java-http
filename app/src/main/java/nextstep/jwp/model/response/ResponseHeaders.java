@@ -33,8 +33,8 @@ public class ResponseHeaders {
             return "";
         }
         StringBuilder stringBuilder = new StringBuilder();
-        for (String key : values.keySet()) {
-            stringBuilder.append(key).append(": ").append(values.get(key)).append(" \r\n");
+        for (Map.Entry<String, String> entry : values.entrySet()) {
+            stringBuilder.append(entry.getKey()).append(": ").append(entry.getValue()).append(" \r\n");
         }
         return stringBuilder.toString();
     }

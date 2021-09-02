@@ -15,9 +15,6 @@ public class Response {
         private ResponseHeaders responseHeaders = new ResponseHeaders();
         private ResponseBody responseBody;
 
-        public Builder() {
-        }
-
         public Builder statusLine(ProtocolType protocol, StatusType status) {
             statusLine = new StatusLine(protocol, status);
             return this;

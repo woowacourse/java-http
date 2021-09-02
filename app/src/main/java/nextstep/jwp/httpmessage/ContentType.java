@@ -13,7 +13,7 @@ public enum ContentType {
     IMAGE(".svg", "image/svg+xml"),
     ICON(".cio", "image/x-icon");
 
-    public static Map<String, ContentType> contentTypes = new HashMap<>();
+    private static final Map<String, ContentType> contentTypes = new HashMap<>();
 
     static {
         Arrays.stream(values())

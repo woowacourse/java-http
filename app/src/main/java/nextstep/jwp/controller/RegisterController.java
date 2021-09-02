@@ -35,10 +35,6 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(Request request, Response response) {
-        if (loginService.isLogin(request)) {
-            response.set302Found(INDEX_HTML);
-            return;
-        }
         String account = request.getRequestBody("account");
         String password = request.getRequestBody("password");
         String email = request.getRequestBody("email");

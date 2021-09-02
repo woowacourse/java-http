@@ -13,23 +13,34 @@ public class MessageFactory {
     }
 
     public static String createGetRequest(String url, String accept) {
-        return String.join(NEW_LINE,
+        String header = String.join(NEW_LINE,
+            "GET /" + url + " HTTP/1.1",
+            HOST,
+            CONNECTION,
+            "Accept: " + accept);
+
+        return getJoinMessage(header, "");
+    }
+
+    public static String createGetRequestWithCookie(String url, String accept, String cookie) {
+        String header = String.join(NEW_LINE,
             "GET /" + url + " HTTP/1.1",
             HOST,
             CONNECTION,
             "Accept: " + accept,
-            "",
-            "");
+            "Cookie: " + cookie);
+
+        return getJoinMessage(header, "");
     }
 
     public static String createPostRequest(String url, String body) {
-        return String.join(NEW_LINE,
+        String header = String.join(NEW_LINE,
             "POST /" + url + " HTTP/1.1",
             HOST,
             CONNECTION,
-            "Content-Length: " + body.length(),
-            "",
-            body);
+            "Content-Length: " + body.length());
+
+        return getJoinMessage(header, body);
     }
 
     public static String createResponseOK(String fileName, String contentType) throws IOException {
@@ -49,5 +60,12 @@ public class MessageFactory {
             "",
             ""
         );
+    }
+
+    private static String getJoinMessage(String header, String body) {
+        return String.join(NEW_LINE,
+            header,
+            "",
+            body);
     }
 }

@@ -4,8 +4,8 @@ import java.lang.annotation.Annotation;
 
 public class BeanDefinition {
 
-    private Class<?> clazz;
-    private Object bean;
+    private final Class<?> clazz;
+    private final Object bean;
 
     public BeanDefinition(Class<?> clazz, Object bean) {
         this.clazz = clazz;

@@ -7,14 +7,12 @@ import java.util.Map;
 
 public class MethodParameter {
 
-    private Parameter parameter;
-    private int parameterOrder;
-    private Annotation[] annotations;
-    private ParameterClass parameterClass;
+    private final int parameterOrder;
+    private final Annotation[] annotations;
+    private final ParameterClass parameterClass;
 
     public MethodParameter(Class<?> parameterType, Parameter parameter,
             int parameterOrder) {
-        this.parameter = parameter;
         this.parameterOrder = parameterOrder;
         this.annotations = parameter.getDeclaredAnnotations();
         this.parameterClass = new ParameterClass(parameterType);

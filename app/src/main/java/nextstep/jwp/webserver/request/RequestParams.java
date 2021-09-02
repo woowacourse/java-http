@@ -13,7 +13,7 @@ public class RequestParams {
     private static final String AND_DELIMITER = "&";
     private static final String FORM_DATA = "application/x-www-form-urlencoded";
 
-    private Map<String, String> params;
+    private final Map<String, String> params;
     private String body;
 
     public RequestParams(BufferedReader br, RequestHeader requestHeader, String queryString) throws IOException {

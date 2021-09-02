@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 public class ParameterClass {
 
-    private Class<?> parameterClass;
+    private final Class<?> parameterClass;
     private final List<Method> setters;
 
     public ParameterClass(Class<?> parameter) {

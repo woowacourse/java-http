@@ -20,9 +20,9 @@ public class DefaultHttpResponse implements HttpResponse {
     private static final String ENTER = "\r\n";
     private static final String LOCATION = "Location";
 
-    private OutputStream outputStream;
+    private final OutputStream outputStream;
+    private final Map<String, String> headers;
     private StatusCode statusCode;
-    private Map<String, String> headers;
     private StringBuilder content;
 
     public DefaultHttpResponse(OutputStream outputStream) {

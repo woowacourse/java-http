@@ -10,8 +10,8 @@ public class RequestLine {
     private static final int URL_INDEX = 0;
     private static final int QUERY_INDEX = 1;
 
-    private HttpMethod httpMethod;
-    private String url;
+    private final HttpMethod httpMethod;
+    private final String url;
     private String queryString;
 
     public RequestLine(HttpMethod httpMethod, String url) {

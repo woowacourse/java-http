@@ -8,7 +8,7 @@ import nextstep.jwp.webserver.response.HttpResponse;
 
 public class ArgumentResolverContainer {
 
-    private List<HandlerMethodArgumentResolver> argumentResolvers;
+    private final List<HandlerMethodArgumentResolver> argumentResolvers;
 
     public ArgumentResolverContainer() {
         this.argumentResolvers = defaultArgumentResolvers();

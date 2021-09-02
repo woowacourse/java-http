@@ -8,7 +8,7 @@ public class HttpCookie {
 
     private static final String COOKIE_REGEX = ";";
 
-    private Map<String, String> cookies;
+    private final Map<String, String> cookies;
 
     public HttpCookie(String cookieLine) {
         if(cookieLine == null || cookieLine.isEmpty()) {

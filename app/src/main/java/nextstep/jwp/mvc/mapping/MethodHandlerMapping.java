@@ -16,12 +16,10 @@ import nextstep.jwp.webserver.request.HttpRequest;
 
 public class MethodHandlerMapping implements HandlerMapping {
 
-    private ApplicationContext applicationContext;
     private final List<Handler> methodHandlers;
     private final ArgumentResolverContainer argumentResolverContainer;
 
     public MethodHandlerMapping(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
         this.argumentResolverContainer = new ArgumentResolverContainer();
         final List<Object> controllers =
                 applicationContext.getBeansWithAnnotation(Controller.class);

@@ -10,8 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ExceptionResolverContainer {
-    private static final Logger log = LoggerFactory.getLogger(ExceptionResolverContainer.class);
 
+    private static final Logger log = LoggerFactory.getLogger(ExceptionResolverContainer.class);
 
     private final List<ExceptionResolver> exceptionResolvers;
 

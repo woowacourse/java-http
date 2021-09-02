@@ -21,7 +21,7 @@ public class RequestHandler implements Runnable {
 
     private final Socket connection;
     private final DispatcherServlet dispatcherServlet;
-    private HttpSessions httpSessions;
+    private final HttpSessions httpSessions;
 
     public RequestHandler(Socket connection, DispatcherServlet dispatcherServlet, HttpSessions httpSessions) {
         this.connection = Objects.requireNonNull(connection);

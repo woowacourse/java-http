@@ -13,10 +13,10 @@ public class DefaultHttpRequest implements HttpRequest {
     private static final String UTF_8 = "UTF-8";
     private static final String COOKIE = "Cookie";
 
-    private RequestLine requestLine;
-    private RequestHeader requestHeader;
-    private RequestParams requestParams;
-    private HttpCookie httpCookie;
+    private final RequestLine requestLine;
+    private final RequestHeader requestHeader;
+    private final RequestParams requestParams;
+    private final HttpCookie httpCookie;
     private SessionUtil sessionUtil;
 
     public DefaultHttpRequest(InputStream inputStream) {

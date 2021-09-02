@@ -22,7 +22,8 @@ public class ResourceController extends AbstractController {
             return new HttpResponse(
                     new ResponseLine(responseStatus.getStatusCode(), responseStatus.getStatusMessage()),
                     new ResponseHeader.ResponseHeaderBuilder(contentType,
-                            responseBody.getBytes().length).build(),
+                            responseBody.getBytes().length)
+                            .cookie(request.getCookieSession()).build(),
                     ResponseBody.createByString(responseBody));
         } catch (Exception e) {
             return create404Response();

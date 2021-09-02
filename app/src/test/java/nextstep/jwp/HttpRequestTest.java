@@ -3,7 +3,7 @@ package nextstep.jwp;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashMap;
-import nextstep.jwp.http.cookie.HttpCookie;
+import nextstep.jwp.http.auth.HttpCookie;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestBody;
 import nextstep.jwp.http.request.RequestHeader;
@@ -31,6 +31,6 @@ public class HttpRequestTest {
         // when
 
         // then
-        assertThat(httpRequest.getCookieSessionId()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
+        assertThat(httpRequest.getCookieSession()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
     }
 }

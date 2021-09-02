@@ -1,4 +1,4 @@
-package nextstep.jwp.http.cookie;
+package nextstep.jwp.http.auth;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +25,9 @@ public class HttpCookie {
     }
 
     public String getSessionIdToString() {
+        if (isEmpty()) {
+            return null;
+        }
         return SessionId.toString();
     }
 }

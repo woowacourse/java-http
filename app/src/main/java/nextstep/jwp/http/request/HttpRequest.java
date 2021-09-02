@@ -50,7 +50,7 @@ public class HttpRequest {
         return this.requestLine.getMethod().equals("GET");
     }
 
-    public String getCookieSessionId() {
+    public String getCookieSession() {
         return requestHeader.getHttpCookieId();
     }
 }

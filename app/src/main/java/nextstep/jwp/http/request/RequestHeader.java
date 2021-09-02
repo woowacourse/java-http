@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.http.cookie.HttpCookie;
+import nextstep.jwp.http.auth.HttpCookie;
 
 public class RequestHeader {
     private final Map<String, String> headers;

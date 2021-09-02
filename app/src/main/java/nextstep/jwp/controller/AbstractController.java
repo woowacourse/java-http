@@ -41,7 +41,9 @@ public abstract class AbstractController implements Controller {
                 new ResponseLine(responseStatus.getStatusCode(), responseStatus.getStatusMessage()),
                 new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.HTML,
                         responseBody.getBytes().length).
-                        location(location).build(),
+                        location(location)
+                        .cookie(request.getCookieSession())
+                        .build(),
                 ResponseBody.createByString(responseBody));
     }
 
@@ -51,7 +53,9 @@ public abstract class AbstractController implements Controller {
         return new HttpResponse(
                 new ResponseLine(responseStatus.getStatusCode(), responseStatus.getStatusMessage()),
                 new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.HTML,
-                        responseBody.getBytes().length).build(),
+                        responseBody.getBytes().length)
+                        .cookie(request.getCookieSession())
+                        .build(),
                 ResponseBody.createByString(responseBody));
     }
 

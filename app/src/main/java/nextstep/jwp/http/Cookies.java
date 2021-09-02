@@ -21,12 +21,14 @@ public class Cookies {
         if (!Objects.isNull(rawCookie)) {
             String[] splitCookies = rawCookie.split("; ");
 
-            if (splitCookies.length != 0) {
+            if (splitCookies.length == 0) {
                 for (String cookie : splitCookies) {
                     String[] split = cookie.split("=");
-                    String key = split[COOKIE_KEY_INDEX];
-                    String value = split[COOKIE_KEY_VALUE];
-                    cookies.put(key, value);
+                    if (split.length == 2) {
+                        String key = split[COOKIE_KEY_INDEX];
+                        String value = split[COOKIE_KEY_VALUE];
+                        cookies.put(key, value);
+                    }
                 }
             }
         }

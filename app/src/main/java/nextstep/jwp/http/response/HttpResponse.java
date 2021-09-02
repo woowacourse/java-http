@@ -43,6 +43,10 @@ public class HttpResponse {
         header.setContentLength(body.getLength());
     }
 
+    public void setCookie() {
+        header.setCookie();
+    }
+
     public void write(OutputStream outputStream) {
         try {
             outputStream.write(getResponse().getBytes());

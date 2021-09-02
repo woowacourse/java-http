@@ -43,6 +43,10 @@ public class FrontController implements Runnable {
             HttpRequest request = new HttpRequest(bufferedReader);
             HttpResponse response = new HttpResponse();
 
+            if (!request.isCookie()) {
+                response.setCookie();
+            }
+
             Controller handler = request.getHandler();
             View view = handler.handle(request, response);
 

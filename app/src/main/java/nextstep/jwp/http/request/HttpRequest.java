@@ -10,6 +10,7 @@ import nextstep.jwp.exception.http.request.InvalidHttpRequestException;
 public class HttpRequest {
 
     private static final String SPLIT_DELIMITER = " ";
+    private static final String CONTENT_LENGTH = "Content-Length";
 
     private final RequestHandlerMapping handlerMapping;
     private final RequestLine line;
@@ -56,7 +57,7 @@ public class HttpRequest {
 
     private RequestBody setBody(BufferedReader reader) throws IOException {
         if (header.isContentLength()) {
-            int contentLength = Integer.parseInt(header.getValue("Content-Length"));
+            int contentLength = Integer.parseInt(header.getValue(CONTENT_LENGTH));
             char[] buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);
 
@@ -86,6 +87,10 @@ public class HttpRequest {
 
     public boolean isPost() {
         return getMethod().isPost();
+    }
+
+    public boolean isCookie() {
+        return header.getHttpCookie();
     }
 
     private HttpMethod getMethod() {

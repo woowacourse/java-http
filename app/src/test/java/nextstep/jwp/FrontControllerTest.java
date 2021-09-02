@@ -16,7 +16,7 @@ class FrontControllerTest {
 
     @DisplayName("애플리케이션을 실행한다.")
     @Test
-    void run() throws IOException {
+    void run() {
         // given
         final MockSocket socket = new MockSocket();
         final FrontController frontController = new FrontController(socket);
@@ -25,14 +25,7 @@ class FrontControllerTest {
         frontController.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-            "Content-Length: 5564 \r\n" +
-            "Content-Type: text/html;charset=utf-8 \r\n" +
-            "\r\n" +
-            new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains("Set-Cookie");
     }
 
     @DisplayName("home 페이지를 조회한다.")
@@ -43,6 +36,7 @@ class FrontControllerTest {
             "GET / HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
+            "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
             "",
             "");
 
@@ -75,6 +69,7 @@ class FrontControllerTest {
                 "GET /index HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
                 "",
                 "");
 
@@ -103,6 +98,7 @@ class FrontControllerTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
                 "",
                 "");
 
@@ -136,6 +132,7 @@ class FrontControllerTest {
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
                 "",
                 "");
 
@@ -164,6 +161,7 @@ class FrontControllerTest {
                 "GET /login.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
                 "",
                 "");
 
@@ -201,6 +199,7 @@ class FrontControllerTest {
                 "Content-Length: " + body.getBytes().length,
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
                 "",
                 body);
 
@@ -233,6 +232,7 @@ class FrontControllerTest {
                 "Content-Length: " + body.getBytes().length,
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
                 "",
                 body);
 
@@ -266,6 +266,7 @@ class FrontControllerTest {
                 "GET /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
                 "",
                 "");
 
@@ -277,11 +278,13 @@ class FrontControllerTest {
 
             // then
             final URL resource = getClass().getClassLoader().getResource("static/register.html");
+            final byte[] fileBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+
             String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Length: 4319 \r\n" +
+                "Content-Length: " + fileBytes.length + " \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(fileBytes);
 
             assertThat(socket.output()).isEqualTo(expected);
         }
@@ -294,6 +297,7 @@ class FrontControllerTest {
                 "GET /register.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
                 "",
                 "");
 
@@ -305,11 +309,13 @@ class FrontControllerTest {
 
             // then
             final URL resource = getClass().getClassLoader().getResource("static/register.html");
+            final byte[] fileBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+
             String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Length: 4319 \r\n" +
+                "Content-Length: " + fileBytes.length + " \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(fileBytes);
 
             assertThat(socket.output()).isEqualTo(expected);
         }
@@ -331,6 +337,7 @@ class FrontControllerTest {
                 "Content-Length: " + body.getBytes().length,
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
                 "",
                 body);
 
@@ -342,11 +349,13 @@ class FrontControllerTest {
 
             // then
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
+            final byte[] fileBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+
             String expected = "HTTP/1.1 201 CREATED \r\n" +
-                "Content-Length: 5564 \r\n" +
+                "Content-Length: " + fileBytes.length + " \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(fileBytes);
 
             assertThat(socket.output()).isEqualTo(expected);
         }
@@ -363,6 +372,7 @@ class FrontControllerTest {
                 "Content-Length: " + body.getBytes().length,
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
                 "",
                 body);
 
@@ -374,6 +384,66 @@ class FrontControllerTest {
                 .isInstanceOf(DuplicateRegisterException.class)
                 .hasMessage("이미 회원가입되어 있습니다.")
                 .hasFieldOrPropertyWithValue("httpStatus", "400");
+        }
+    }
+
+    @DisplayName("쿠키를 사용한다.")
+    @Nested
+    class Cookie {
+
+        @DisplayName("HTTP Request Header - Cookie O")
+        @Test
+        void isCookie() throws IOException {
+            // given
+            final String httpRequest = String.join("\r\n",
+                "GET /index HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Accept: */* ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
+                "",
+                "");
+
+            final MockSocket socket = new MockSocket(httpRequest);
+            final FrontController frontController = new FrontController(socket);
+
+            // when
+            frontController.run();
+
+            // then
+            final URL resource = getClass().getClassLoader().getResource("static/index.html");
+            final byte[] fileBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+
+            final String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Length: " + fileBytes.length + " \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "\r\n" +
+                new String(fileBytes);
+
+            assertThat(socket.output()).isEqualTo(expected);
+
+        }
+
+        @DisplayName("HTTP Request Header - Cookie X")
+        @Test
+        void isNoCookie() {
+            // given
+            final String httpRequest = String.join("\r\n",
+                "GET /index HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Accept: */* ",
+                "",
+                "");
+
+            final MockSocket socket = new MockSocket(httpRequest);
+            final FrontController frontController = new FrontController(socket);
+
+            // when
+            frontController.run();
+
+            // then
+            assertThat(socket.output()).contains("Set-Cookie");
         }
     }
 }

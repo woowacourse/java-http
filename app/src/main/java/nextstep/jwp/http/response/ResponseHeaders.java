@@ -2,9 +2,15 @@ package nextstep.jwp.http.response;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ResponseHeaders {
+
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String JSESSIONID_WITH_DELIMITER = "JSESSIONID=";
 
     private final Map<String, String> headers;
 
@@ -17,11 +23,15 @@ public class ResponseHeaders {
     }
 
     public void setContentType(String contentType) {
-        headers.put("Content-Type", contentType);
+        headers.put(CONTENT_TYPE, contentType);
     }
 
     public void setContentLength(int contentLength) {
-        headers.put("Content-Length", String.valueOf(contentLength));
+        headers.put(CONTENT_LENGTH, String.valueOf(contentLength));
+    }
+
+    public void setCookie() {
+        headers.put(SET_COOKIE, JSESSIONID_WITH_DELIMITER + UUID.randomUUID());
     }
 
     public Set<String> getKeySet() {

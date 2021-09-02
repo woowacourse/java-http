@@ -1,8 +1,5 @@
 package nextstep.jwp.model.httpmessage.common;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -12,8 +9,6 @@ import static nextstep.jwp.model.httpmessage.common.HttpHeaderType.CONTENT_TYPE;
 public abstract class CommonHttpHeader implements HttpHeader {
 
     public static final String DELIMITER = "\r\n";
-
-    private static final Logger LOG = LoggerFactory.getLogger(CommonHttpHeader.class);
 
     private final Map<HttpHeaderType, String> commonHeaders = new LinkedHashMap<>();
 
@@ -61,6 +56,5 @@ public abstract class CommonHttpHeader implements HttpHeader {
     @Override
     public void setContentLength(int contentLength) {
         commonHeaders.put(CONTENT_LENGTH, String.valueOf(contentLength));
-        LOG.debug("Response header : content length: {}", contentLength);
     }
 }

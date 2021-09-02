@@ -28,7 +28,10 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    public static boolean existUserByAccountAndPassword(String account, String password) {
-        return database.get(account).checkPassword(password);
+    public static Optional<User> findUserByAccountAndPassword(String account, String password) {
+        if (database.containsKey(account) && database.get(account).checkPassword(password)) {
+            return Optional.of(database.get(account));
+        }
+        return Optional.empty();
     }
 }

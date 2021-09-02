@@ -1,25 +1,24 @@
 package nextstep.jwp;
 
-import nextstep.jwp.controller.Controller;
 import nextstep.jwp.model.httpmessage.request.HttpRequest;
 import nextstep.jwp.model.httpmessage.response.HttpResponse;
-import nextstep.jwp.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
 
-public class RequestHandler implements Runnable {
+public class HttpServlet implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpServlet.class);
 
     private final Socket connection;
 
-    public RequestHandler(Socket connection) {
+    public HttpServlet(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
     }
 
@@ -33,19 +32,9 @@ public class RequestHandler implements Runnable {
             HttpRequest httpRequest = new HttpRequest(inputStream);
             HttpResponse httpResponse = new HttpResponse(outputStream);
 
-            Controller controller = RequestMapping.getController(httpRequest.getPath());
-            if (controller == null) {
-                if (FileUtils.existFile(httpRequest.getPath())) {
-                    httpResponse.forward(httpRequest.getPath());
-                    return;
-                }
-
-                httpResponse.sendError("/404.html");
-                return;
-            }
-
-            controller.service(httpRequest, httpResponse);
-        } catch (IOException exception) {
+            DispatcherServlet dispatcherServlet = new DispatcherServlet();
+            dispatcherServlet.service(httpRequest, httpResponse);
+        } catch (IOException | ServletException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();

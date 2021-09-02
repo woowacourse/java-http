@@ -14,13 +14,15 @@ class ResponseLineTest {
     @Test
     void ok() {
         ResponseLine responseLine = new ResponseLine(OK);
-        assertThat(responseLine.toString()).hasToString("HTTP/1.1 200 OK ");
+        assertThat(responseLine.getProtocol()).isEqualTo("HTTP/1.1");
+        assertThat(responseLine.getStatus()).isEqualTo(OK);
     }
 
     @DisplayName("응답의 첫번째 줄을 읽어온다. (status REDIRECT)")
     @Test
     void redirect() {
         ResponseLine responseLine = new ResponseLine(REDIRECT);
-        assertThat(responseLine.toString()).hasToString("HTTP/1.1 302 Redirect ");
+        assertThat(responseLine.getProtocol()).isEqualTo("HTTP/1.1");
+        assertThat(responseLine.getStatus()).isEqualTo(REDIRECT);
     }
 }

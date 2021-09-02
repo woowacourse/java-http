@@ -16,13 +16,7 @@ public class UserService {
     public static final String EMAIL = "email";
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
-    public boolean isExistUser(HttpRequest request) {
-        return InMemoryUserRepository.existUserByAccountAndPassword(
-                request.getParameter(ACCOUNT),
-                request.getParameter(PASSWORD));
-    }
-
-    public void saveUser(HttpRequest request) throws UserPrincipalNotFoundException {
+    public void save(HttpRequest request) throws UserPrincipalNotFoundException {
         User newUser = new User(request.getParameter(ACCOUNT),
                 request.getParameter(PASSWORD),
                 request.getParameter(EMAIL));
@@ -35,5 +29,11 @@ public class UserService {
 
     public Optional<User> findByAccount(HttpRequest request) {
         return InMemoryUserRepository.findByAccount(request.getParameter(ACCOUNT));
+    }
+
+    public Optional<User> findByAccountAndPassword(HttpRequest request) {
+        return InMemoryUserRepository.findUserByAccountAndPassword(
+                request.getParameter(ACCOUNT),
+                request.getParameter(PASSWORD));
     }
 }

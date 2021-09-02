@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 public class HttpRequestUtils {
 
+    public static final String AND_DELIMITER = "&";
+    public static final String EQUALS_DELIMITER = "=";
     public static final int PAIR_SIZE = 2;
 
     private HttpRequestUtils() {
@@ -20,15 +22,15 @@ public class HttpRequestUtils {
             return Maps.newHashMap();
         }
 
-        String[] elements = queryString.split("&");
+        String[] elements = queryString.split(AND_DELIMITER);
         return Arrays.stream(elements)
-                .map(HttpRequestUtils::split)
+                .map(HttpRequestUtils::splitByEqual)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private static Map.Entry<String, String> split(String element) {
-        String[] pair = element.split("=");
+    public static Map.Entry<String, String> splitByEqual(String element) {
+        String[] pair = element.split(EQUALS_DELIMITER);
 
         if (pair.length != PAIR_SIZE) {
             return null;

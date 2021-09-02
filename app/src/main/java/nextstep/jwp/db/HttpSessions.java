@@ -20,4 +20,8 @@ public class HttpSessions {
         SESSIONS.put(session.getId(), session);
         return session;
     }
+
+    public static boolean isValidSession(HttpSession session) {
+        return SESSIONS.containsKey(session.getId());
+    }
 }

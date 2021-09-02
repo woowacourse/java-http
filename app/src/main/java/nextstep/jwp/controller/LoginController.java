@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import nextstep.jwp.db.HttpSessions;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.web.*;
@@ -15,8 +16,11 @@ public class LoginController extends AbstractController {
     @Override
     public void doGet(HttpRequest request, HttpResponse response) throws Exception {
         if (isLoggedIn(request)) {
-            redirectHomePage(response);
-            return;
+            boolean isValidSession = HttpSessions.isValidSession(request.getSession());
+            if (isValidSession) {
+                redirectHomePage(response);
+                return;
+            }
         }
         if (isLoginProcess(request)) {
             loginProcess(request, response);

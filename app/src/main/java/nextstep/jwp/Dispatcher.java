@@ -2,6 +2,7 @@ package nextstep.jwp;
 
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.handler.Handler;
+import nextstep.jwp.handler.modelandview.Model;
 import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
@@ -35,7 +36,9 @@ public class Dispatcher {
         } catch (NotFoundException notFoundException) {
             return ModelAndView.of("/404.html", HttpStatus.NOT_FOUND);
         } catch (Exception exception) {
-            return ModelAndView.of("/500.html", HttpStatus.INTERNAL_SERVER_ERROR);
+            Model model = new Model();
+            model.addAttribute("errorMessage", exception.getMessage());
+            return ModelAndView.of(model, "/500.html", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

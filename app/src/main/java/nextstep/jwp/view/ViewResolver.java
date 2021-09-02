@@ -15,7 +15,7 @@ public class ViewResolver {
     public ViewResolver(String rootResponse, String resourceBasePath) {
         this.resourceBasePath = resourceBasePath;
 
-        viewContainer.put("", View.empty());
+        viewContainer.put("", View.EMPTY);
         viewContainer.put("/", View.of("rootResponse", rootResponse));
     }
 

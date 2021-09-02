@@ -33,4 +33,8 @@ public class Model {
     public Object getAttribute(String key) {
         return attributes.get(key);
     }
+
+    public boolean isEmpty() {
+        return this.equals(EMPTY);
+    }
 }

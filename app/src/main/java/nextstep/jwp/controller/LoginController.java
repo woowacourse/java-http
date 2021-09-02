@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -25,7 +26,13 @@ public class LoginController implements Controller {
                 response.redirect("/401.html");
                 return;
             }
+
+            if (request.hasNoSessionId()) {
+                response.addHeader("Set-Cookie", "JSESSIONID=" + String.valueOf(UUID.randomUUID()));
+            }
             response.redirect("/index.html");
         }
+
     }
 }
+

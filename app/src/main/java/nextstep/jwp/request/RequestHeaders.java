@@ -24,4 +24,8 @@ public class RequestHeaders {
     public String get(String key) {
         return headers.get(key);
     }
+
+    public boolean hasSessionId() {
+        return headers.containsKey("JSESSIONID");
+    }
 }

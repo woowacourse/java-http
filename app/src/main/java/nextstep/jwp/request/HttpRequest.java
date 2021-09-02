@@ -2,7 +2,6 @@ package nextstep.jwp.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
 
 public class HttpRequest {
@@ -47,5 +46,9 @@ public class HttpRequest {
         return Optional.ofNullable(requestBody)
                        .orElseThrow(() -> new IllegalArgumentException("Request Body가 존재하지 않습니다."))
                        .getParam(key);
+    }
+
+    public boolean hasNoSessionId() {
+        return !requestHeaders.hasSessionId();
     }
 }

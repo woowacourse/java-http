@@ -6,6 +6,9 @@ import java.util.Map;
 
 public class HttpHeader {
 
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+
     private final Map<String, String> httpHeaders;
 
     public HttpHeader(Map<String, String> httpHeaders) {
@@ -14,8 +17,8 @@ public class HttpHeader {
 
     public static HttpHeader getResponseHeader(String responseBody, ContentType contentType, HttpHeader httpHeader) {
         Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", contentType.getHeaderValue());
-        headers.put("Content-Length", responseBody.getBytes().length + "");
+        headers.put(CONTENT_TYPE, contentType.getHeaderValue());
+        headers.put(CONTENT_LENGTH, responseBody.getBytes().length + "");
 
         if (contentType == ContentType.HTML) {
             setSessionIfNotPresent(httpHeader, headers);

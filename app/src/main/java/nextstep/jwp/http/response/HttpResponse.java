@@ -45,8 +45,8 @@ public class HttpResponse {
 
     private String getHeaderLines() {
         Map<String, String> allHeaders = this.httpHeader.getAllHeaders();
-        List<String> headerMessage = allHeaders.keySet().stream()
-            .map(key -> String.join(HEADER_DELIMITER, key, allHeaders.get(key)) + BLANK)
+        List<String> headerMessage = allHeaders.entrySet().stream()
+            .map(it -> String.join(HEADER_DELIMITER, it.getKey(), it.getValue()) + BLANK)
             .collect(Collectors.toList());
 
         return String.join(System.lineSeparator(), headerMessage) + System.lineSeparator();

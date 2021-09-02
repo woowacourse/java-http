@@ -8,6 +8,7 @@ import nextstep.jwp.model.domain.User;
 import nextstep.jwp.model.request.Request;
 import nextstep.jwp.model.request.Session;
 import nextstep.jwp.model.response.Response;
+import nextstep.jwp.model.response.StatusType;
 import nextstep.jwp.service.LoginService;
 
 public class LoginController extends AbstractController {
@@ -30,7 +31,7 @@ public class LoginController extends AbstractController {
             return redirectMessage(request, PathType.INDEX.resource());
         }
         final String responseBody = createResponseBody(request.getPath() + FileType.HTML.extension());
-        return staticFileMessage(request, FileType.HTML, responseBody);
+        return staticFileMessage(request, StatusType.OK, FileType.HTML, responseBody);
     }
 
     @Override

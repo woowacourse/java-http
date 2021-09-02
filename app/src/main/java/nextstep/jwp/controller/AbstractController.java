@@ -26,7 +26,8 @@ public abstract class AbstractController implements Controller {
             }
             throw new IllegalStateException();
         } catch (FileNotFoundException | IllegalStateException exception) {
-            return redirectMessage(request, PathType.NOT_FOUND.resource());
+            final String responseBody = createResponseBody(PathType.NOT_FOUND.value() + FileType.HTML.extension());
+            return staticFileMessage(request, StatusType.NOT_FOUND, FileType.HTML, responseBody);
         } catch (LoginException | RegisterException exception) {
             return redirectMessage(request, PathType.UNAUTHORIZED.resource());
         }
@@ -40,9 +41,9 @@ public abstract class AbstractController implements Controller {
         throw new IllegalStateException();
     }
 
-    protected Response staticFileMessage(Request request, FileType fileType, String responseBody) {
+    protected Response staticFileMessage(Request request, StatusType status, FileType fileType, String responseBody) {
         return new Response.Builder()
-                .statusLine(request.getProtocol(), StatusType.OK)
+                .statusLine(request.getProtocol(), status)
                 .contentType(fileType.contentType())
                 .contentLength(responseBody.getBytes().length)
                 .setCookie(!request.hasCookie(), request.getSession())

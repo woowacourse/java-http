@@ -5,6 +5,7 @@ import nextstep.jwp.model.FileType;
 import nextstep.jwp.model.PathType;
 import nextstep.jwp.model.request.Request;
 import nextstep.jwp.model.response.Response;
+import nextstep.jwp.model.response.StatusType;
 import nextstep.jwp.service.RegisterService;
 
 public class RegisterController extends AbstractController {
@@ -18,7 +19,7 @@ public class RegisterController extends AbstractController {
     @Override
     public Response doGet(Request request) throws IOException {
         final String responseBody = createResponseBody(request.getPath() + FileType.HTML.extension());
-        return staticFileMessage(request, FileType.HTML, responseBody);
+        return staticFileMessage(request, StatusType.OK, FileType.HTML, responseBody);
     }
 
     @Override

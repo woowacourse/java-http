@@ -7,13 +7,14 @@ import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.ResponseBody;
 import nextstep.jwp.http.response.ResponseHeader;
 import nextstep.jwp.http.response.ResponseLine;
+import nextstep.jwp.http.response.ResponseStatus;
 
 public abstract class AbstractController implements Controller {
 
     @Override
     public HttpResponse service(HttpRequest request) throws Exception {
 
-        HttpResponse httpResponse = create404Response(request);
+        HttpResponse httpResponse = create404Response();
         if (request.isPost()) {
             httpResponse = doPost(request);
         }
@@ -25,51 +26,40 @@ public abstract class AbstractController implements Controller {
     }
 
     protected HttpResponse doPost(HttpRequest request) throws Exception {
-        return create404Response(request);
+        return create404Response();
     }
 
     protected HttpResponse doGet(HttpRequest request) throws Exception {
-        return create404Response(request);
+        return create404Response();
     }
 
 
-    protected HttpResponse replyAfterLogin302Response(String responseBody, String location) {
+    protected HttpResponse create302Response(HttpRequest request, String location) throws IOException {
+        String responseBody = ResponseBody.createStaticFileByFileName(location).getResponseBody();
+        ResponseStatus responseStatus = ResponseStatus.FOUND;
         return new HttpResponse(
-                new ResponseLine("302", "Found"),
+                new ResponseLine(responseStatus.getStatusCode(), responseStatus.getStatusMessage()),
                 new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.HTML,
                         responseBody.getBytes().length).
                         location(location).build(),
                 ResponseBody.createByString(responseBody));
     }
 
-    protected HttpResponse replyOkResponse(String responseBody) {
+    protected HttpResponse create200Response(HttpRequest request) throws IOException {
+        String responseBody = ResponseBody.createStaticFileByFileName(request.getUri() + ".html").getResponseBody();
+        ResponseStatus responseStatus = ResponseStatus.OK;
         return new HttpResponse(
-                new ResponseLine("200", "OK"),
+                new ResponseLine(responseStatus.getStatusCode(), responseStatus.getStatusMessage()),
                 new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.HTML,
                         responseBody.getBytes().length).build(),
                 ResponseBody.createByString(responseBody));
     }
 
-    protected HttpResponse replyOkCssResponse(String responseBody) {
+    protected HttpResponse create404Response() throws IOException {
+        String responseBody = ResponseBody.createStaticFileByFileName("/404.html").getResponseBody();
+        ResponseStatus responseStatus = ResponseStatus.NOT_FOUND;
         return new HttpResponse(
-                new ResponseLine("200", "OK"),
-                new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.CSS,
-                        responseBody.getBytes().length).build(),
-                ResponseBody.createByString(responseBody));
-    }
-
-    protected HttpResponse replyOkJsResponse(String responseBody) {
-        return new HttpResponse(
-                new ResponseLine("200", "OK"),
-                new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.JS,
-                        responseBody.getBytes().length).build(),
-                ResponseBody.createByString(responseBody));
-    }
-
-    protected HttpResponse create404Response(HttpRequest httpRequest) throws IOException {
-        String responseBody = ResponseBody.createByPath("/404.html").getResponseBody();
-        return new HttpResponse(
-                new ResponseLine("404", "Not Found"),
+                new ResponseLine(responseStatus.getStatusCode(), responseStatus.getStatusMessage()),
                 new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.HTML,
                         responseBody.getBytes().length).build(),
                 ResponseBody.createByString(responseBody));

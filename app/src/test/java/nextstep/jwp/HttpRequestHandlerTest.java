@@ -31,7 +31,7 @@ class HttpRequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index");
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
 
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
@@ -60,9 +60,10 @@ class HttpRequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login");
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        String expected = "HTTP/1.1 200 OK \r\n" +
+        String expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /login.html \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
@@ -88,7 +89,7 @@ class HttpRequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/register");
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
@@ -143,9 +144,10 @@ class HttpRequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index");
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        String expected = "HTTP/1.1 200 OK \r\n" +
+        String expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /index.html \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +

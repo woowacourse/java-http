@@ -21,7 +21,7 @@ public class ResponseHeader {
     public String getResponseHeader() {
         List<String> allHeaders = getAllHeaders().stream()
                 .filter(it -> !it.isEmpty())
-                .map(ResponseHeaderable::getHttpHeaderToString)
+                .map(ResponseHeaderable::getContentType)
                 .collect(Collectors.toList());
         allHeaders.add("");
         return String.join(" \r\n", allHeaders);

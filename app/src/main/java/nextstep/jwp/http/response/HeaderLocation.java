@@ -13,7 +13,7 @@ public class HeaderLocation implements ResponseHeaderable {
     }
 
     @Override
-    public String getHttpHeaderToString() {
+    public String getContentType() {
         return "Location: " + location;
     }
 }

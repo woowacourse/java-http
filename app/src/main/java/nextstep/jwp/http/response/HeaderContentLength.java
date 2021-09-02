@@ -13,7 +13,7 @@ public class HeaderContentLength implements ResponseHeaderable {
     }
 
     @Override
-    public String getHttpHeaderToString() {
+    public String getContentType() {
         return "Content-Length: " + contentLength;
     }
 }

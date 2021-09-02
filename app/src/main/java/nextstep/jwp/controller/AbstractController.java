@@ -1,14 +1,18 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.*;
+import nextstep.jwp.http.HttpMethod;
+import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.function.Function;
 
+import static nextstep.jwp.controller.JwpController.NOT_FOUND_RESPONSE;
+
 public abstract class AbstractController implements Controller {
-    static final Logger log = LoggerFactory.getLogger(AbstractController.class);
+    protected static final Logger log = LoggerFactory.getLogger(AbstractController.class);
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {
@@ -28,6 +32,6 @@ public abstract class AbstractController implements Controller {
                 .filter(entry -> request.containsFunctionInUrl(entry.getKey()))
                 .map(entry -> entry.getValue().apply(request))
                 .findAny()
-                .orElseGet(() -> new HttpResponse(HttpStatus.NOT_FOUND, HttpContentType.NOTHING, "404.html"));
+                .orElse(NOT_FOUND_RESPONSE);
     }
 }

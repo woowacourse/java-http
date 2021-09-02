@@ -67,7 +67,7 @@ public class HttpRequest {
             if (line.isEmpty()) {
                 break;
             }
-            String[] header = line.split(":");
+            String[] header = line.split(": ");
             headers.put(header[0], header[1]);
         }
         return headers;
@@ -92,7 +92,7 @@ public class HttpRequest {
     }
 
     public Map<String, String> parseRequestBodyParams() {
-        if(requestBody == null) {
+        if (requestBody == null) {
             return new HashMap<>();
         }
         return parseParams(requestBody, -1);
@@ -108,5 +108,9 @@ public class HttpRequest {
 
     public String getUrl() {
         return url;
+    }
+
+    public Map<String, String> getRequestHeaders() {
+        return requestHeaders;
     }
 }

@@ -1,14 +1,13 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.HttpContentType;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
-import nextstep.jwp.http.HttpStatus;
+import nextstep.jwp.http.*;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 
 import java.util.Map;
 import java.util.function.Function;
+
+import static nextstep.jwp.controller.JwpController.*;
 
 public class UserController extends AbstractController {
     @Override
@@ -30,6 +29,10 @@ public class UserController extends AbstractController {
     }
 
     private HttpResponse getLogin(final HttpRequest request) {
+        HttpCookie httpCookie = new HttpCookie(request.getRequestHeaders());
+        if (httpCookie.containsLogin()) {
+            return new HttpResponse(HttpStatus.FOUND, httpCookie, INDEX_PAGE);
+        }
         return new HttpResponse(HttpStatus.OK, HttpContentType.NOTHING, "login.html");
     }
 
@@ -39,13 +42,18 @@ public class UserController extends AbstractController {
 
     private HttpResponse postLogin(final HttpRequest request) {
         try {
+            HttpCookie httpCookie = new HttpCookie(request.getRequestHeaders());
+            if (httpCookie.containsLogin()) {
+                throw new IllegalArgumentException("이미 로그인한 유저입니다.");
+            }
             Map<String, String> requestParams = request.parseRequestBodyParams();
             User user = UserService.findUser(requestParams);
+            httpCookie.setCookies();
             log.info("로그인한 유저 : {}", user);
-            return new HttpResponse(HttpStatus.FOUND, "index.html");
+            return new HttpResponse(HttpStatus.FOUND, httpCookie, INDEX_PAGE);
         } catch (IllegalArgumentException e) {
             log.error("에러 발생 : {}", e.getMessage());
-            return new HttpResponse(HttpStatus.UNAUTHORIZED, HttpContentType.NOTHING, "401.html");
+            return UNAUTHORIZED_RESPONSE;
         }
     }
 
@@ -54,10 +62,10 @@ public class UserController extends AbstractController {
             Map<String, String> params = request.parseRequestBodyParams();
             User user = UserService.registerUser(params);
             log.info("회원가입된 유저 : {}", user);
-            return new HttpResponse(HttpStatus.CREATED, HttpContentType.NOTHING, "index.html");
+            return new HttpResponse(HttpStatus.CREATED, HttpContentType.NOTHING, INDEX_PAGE);
         } catch (IllegalArgumentException e) {
             log.error("에러 발생 : {}", e.getMessage());
-            return new HttpResponse(HttpStatus.INTERNAL_SERVER_ERROR, HttpContentType.NOTHING, "500.html");
+            return INTERNAL_SERVER_RESPONSE;
         }
     }
 }

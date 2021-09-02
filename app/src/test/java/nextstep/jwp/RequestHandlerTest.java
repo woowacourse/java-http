@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import nextstep.jwp.http.HttpSession;
 import nextstep.jwp.http.HttpSessions;
 import nextstep.jwp.http.RequestHandler;
+import nextstep.jwp.model.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -196,5 +197,35 @@ class RequestHandlerTest {
 
         // then
         assertThat(socket.output()).doesNotContain("JSESSIONID");
+    }
+
+    @Test
+    @DisplayName("이미 로그인이 된 경우에 GET /login 요청 시 index.html을 띄워준다.")
+    void already_login_redirect() throws IOException {
+        // given
+        String jSessionId = "656cef62-e3c4-40bc-a8df-94732920ed46";
+        final String httpRequest = String.join("\r\n",
+            "GET /login HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "Content-Length: 80",
+            "Content-Type: application/x-www-form-urlencoded",
+            "Accept: */*",
+            "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=" + jSessionId,
+            "",
+            "account=gugu&password=password&email=hkkang%40woowahan.com");
+        HttpSession httpSession = new HttpSession(jSessionId);
+        httpSession.setAttribute("user", new User("abcd", "password", "email"));
+        HttpSessions.put(httpSession);
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String expected = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertThat(socket.output()).contains(expected);
     }
 }

@@ -214,7 +214,7 @@ class HttpRequestTest {
     }
 
     @Test
-    @DisplayName("JSESSIONID가 있으면 false를 반환한다.")
+    @DisplayName("JSESSIONID가 없으면 false를 반환한다.")
     void containsJSessionId_false() {
         // given
         List<String> headerLines = Arrays.asList(

@@ -2,7 +2,7 @@ package nextstep.jwp;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.ContentTypeMapper;
-import nextstep.jwp.http.HttpRequestHeader;
+import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,12 +35,9 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-            final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-
-            HttpRequestHeader httpRequestHeader = new HttpRequestHeader(br);
-            String method = httpRequestHeader.getMethod();
-            String resource = httpRequestHeader.getResource();
-            Map<String, String> httpRequestHeaders = httpRequestHeader.getHeaders();
+            HttpRequest httpRequest = new HttpRequest(inputStream);
+            String method = httpRequest.getMethod();
+            String resource = httpRequest.getPath();
 
             String responseStatusCode = "";
             String responseBody = "";
@@ -71,11 +68,10 @@ public class RequestHandler implements Runnable {
             }
 
             if (method.equals("POST") && resource.equals("/login")) {
-                String queries = extractRequestBody(br, httpRequestHeaders);
-                Map<String, String> queryMap = createQueryMap(queries);
-                Optional<User> account = InMemoryUserRepository.findByAccount(queryMap.get("account"));
+                Map<String, String> params = httpRequest.getParams();
+                Optional<User> account = InMemoryUserRepository.findByAccount(params.get("account"));
 
-                if (account.isPresent() && account.get().checkPassword(queryMap.get("password"))) {
+                if (account.isPresent() && account.get().checkPassword(params.get("password"))) {
                     responseStatusCode = HTTP_STATUS_302;
                     response = create302Response(responseStatusCode, "/index.html");
                 } else {
@@ -86,14 +82,13 @@ public class RequestHandler implements Runnable {
             }
 
             if (method.equals("POST") && resource.equals("/register")) {
-                String queries = extractRequestBody(br, httpRequestHeaders);
-                Map<String, String> queryMap = createQueryMap(queries);
+                Map<String, String> params = httpRequest.getParams();
                 User user = new User(InMemoryUserRepository.size() + 1L,
-                        queryMap.get("account"),
-                        queryMap.get("password"),
-                        queryMap.get("email"));
+                        params.get("account"),
+                        params.get("password"),
+                        params.get("email"));
 
-                Optional<User> account = InMemoryUserRepository.findByAccount(queryMap.get("account"));
+                Optional<User> account = InMemoryUserRepository.findByAccount(params.get("account"));
                 if (account.isPresent()) {
                     responseStatusCode = HTTP_STATUS_401;
                     responseBody = createStaticFileResponseBody("/401.html");
@@ -112,25 +107,6 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
-    }
-
-    private String extractRequestBody(BufferedReader br, Map<String, String> httpRequestHeaders) throws IOException {
-        int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
-        char[] buffer = new char[contentLength];
-        br.read(buffer, 0, contentLength);
-        return new String(buffer);
-    }
-
-    private Map<String, String> createQueryMap(String queryString) {
-        Map<String, String> queryMap = new HashMap<>();
-        String[] queries = queryString.split("&");
-        for (String query : queries) {
-            int equalIndex = query.indexOf("=");
-            String key = query.substring(0, equalIndex);
-            String value = query.substring(equalIndex + 1);
-            queryMap.put(key, value);
-        }
-        return queryMap;
     }
 
     private String createStaticFileResponseBody(String render) throws IOException {

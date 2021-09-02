@@ -49,7 +49,7 @@ class StringTest {
     @Test
     void convertDoubleBackSlash() {
         String toBeChanged = "G:\\foo:\\bar";
-        String changed = toBeChanged.replaceAll("\\\\+","/");
+        String changed = toBeChanged.replaceAll("\\\\+", "/");
 
         assertThat(changed).isEqualTo("G:/foo:/bar");
     }

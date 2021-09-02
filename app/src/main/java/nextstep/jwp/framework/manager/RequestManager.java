@@ -1,6 +1,9 @@
 package nextstep.jwp.framework.manager;
 
-import nextstep.jwp.framework.request.ClientRequest;
+import nextstep.jwp.framework.http.request.HttpRequest;
+import nextstep.jwp.framework.http.request.RequestParser;
+import nextstep.jwp.framework.http.response.HttpResponse;
+import nextstep.jwp.framework.http.response.ResponseSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,28 +24,27 @@ public class RequestManager {
     }
 
     public void handle(InputStream inputStream, OutputStream outputStream) throws IOException {
-        final ClientRequest clientRequest = new RequestParser(inputStream).extractClientRequest();
-
-        try {
-            handleClientRequest(outputStream, clientRequest);
-        } catch (Exception e) {
-            log.error("@@@@@@@internal server error occurred! = {}@@@@@@@", e.getMessage());
-            staticResourceManager.handleInternalServerError(outputStream);
-        }
+        final HttpRequest httpRequest = RequestParser.of(inputStream).extractHttpRequest();
+        final HttpResponse httpResponse = handleClientRequest(httpRequest);
+        httpResponse.appendSessionInfo(httpRequest.getSession());
+        ResponseSender.of(outputStream).sendResponse(httpResponse);
     }
 
-    private void handleClientRequest(OutputStream outputStream, ClientRequest clientRequest) throws IOException {
-        if (staticResourceManager.canHandle(clientRequest)) {
-            staticResourceManager.handle(clientRequest, outputStream);
-            return;
-        }
+    private HttpResponse handleClientRequest(HttpRequest httpRequest) {
+        try {
+            if (staticResourceManager.canHandle(httpRequest)) {
+                return staticResourceManager.handle(httpRequest);
+            }
 
-        if (dynamicWebManager.canHandle(clientRequest)) {
-            final String dynamicWebProcessResult = dynamicWebManager.handle(clientRequest);
-            staticResourceManager.handleDynamicResult(dynamicWebProcessResult, outputStream);
-            return;
-        }
+            if (dynamicWebManager.canHandle(httpRequest)) {
+                final String dynamicWebProcessResult = dynamicWebManager.handle(httpRequest);
+                return staticResourceManager.handleDynamicResult(dynamicWebProcessResult);
+            }
 
-        staticResourceManager.handleNotFound(outputStream);
+            return staticResourceManager.handleNotFound();
+        } catch (Exception e) {
+            log.error("########## internal server error occurred! = {} ##########", e.getMessage());
+            return staticResourceManager.handleInternalServerError();
+        }
     }
 }

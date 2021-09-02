@@ -7,10 +7,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class HttpSession {
 
     private final String id;
-    private final Map<String, Object> values = new ConcurrentHashMap<>();
+    private final Map<String, Object> values;
 
     HttpSession(String id) {
         this.id = id;
+        this.values = new ConcurrentHashMap<>();
     }
 
     public void setAttribute(String name, Object value) {

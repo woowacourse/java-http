@@ -8,13 +8,16 @@ import nextstep.jwp.controller.UserController;
 import java.util.Map;
 
 public class RequestMapping {
+    private static final AbstractController jwpController = new JwpController();
+    private static final AbstractController userController = new UserController();
+
     private static final Map<String, AbstractController> requestMapper = Map.of(
-            "index", new JwpController(),
-            "401", new JwpController(),
-            "404", new JwpController(),
-            "500", new JwpController(),
-            "login", new UserController(),
-            "register", new UserController());
+            "index", jwpController,
+            "401", jwpController,
+            "404", jwpController,
+            "500", jwpController,
+            "login", userController,
+            "register", userController);
 
     public AbstractController getAbstractController(final HttpRequest httpRequest) {
         return mapController(httpRequest);

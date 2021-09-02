@@ -1,6 +1,9 @@
 package nextstep.jwp.http;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
@@ -27,12 +30,12 @@ public class HttpCookie {
                 .collect(Collectors.toMap(parsedCookie -> parsedCookie[0], parsedCookie -> parsedCookie[1]));
     }
 
-    public boolean containsLogin() {
+    public boolean containsJSession() {
         return cookies.containsKey(JSESSIONID);
     }
 
-    public void setCookies() {
-        this.cookies.put(JSESSIONID, UUID.randomUUID().toString());
+    public void setCookies(String randomId) {
+        this.cookies.put(JSESSIONID, randomId);
     }
 
     @Override
@@ -41,5 +44,12 @@ public class HttpCookie {
                 .stream()
                 .map(entry -> String.join("=", List.of(entry.getKey(), entry.getValue())))
                 .collect(Collectors.joining("; "));
+    }
+
+    public String getJSessionCookie() {
+        if (cookies.containsKey(JSESSIONID)) {
+            return cookies.get(JSESSIONID);
+        }
+        throw new IllegalArgumentException("쿠키가 존재하지 않습니다.");
     }
 }

@@ -29,11 +29,11 @@ public class UserController extends AbstractController {
     }
 
     private HttpResponse getLogin(final HttpRequest request) {
-        HttpCookie httpCookie = new HttpCookie(request.getRequestHeaders());
-        if (httpCookie.containsLogin()) {
-            return new HttpResponse(HttpStatus.FOUND, httpCookie, INDEX_PAGE);
+        try {
+            return new HttpResponse(HttpStatus.FOUND, findJSessionCookie(request), INDEX_PAGE);
+        } catch (IllegalArgumentException e) {
+            return new HttpResponse(HttpStatus.OK, HttpContentType.NOTHING, "login.html");
         }
-        return new HttpResponse(HttpStatus.OK, HttpContentType.NOTHING, "login.html");
     }
 
     private HttpResponse getRegister(final HttpRequest request) {
@@ -42,14 +42,13 @@ public class UserController extends AbstractController {
 
     private HttpResponse postLogin(final HttpRequest request) {
         try {
-            HttpCookie httpCookie = new HttpCookie(request.getRequestHeaders());
-            if (httpCookie.containsLogin()) {
-                throw new IllegalArgumentException("이미 로그인한 유저입니다.");
-            }
             Map<String, String> requestParams = request.parseRequestBodyParams();
             User user = UserService.findUser(requestParams);
-            httpCookie.setCookies();
+
+            HttpCookie httpCookie = addCookie(request, user);
+
             log.info("로그인한 유저 : {}", user);
+            log.info("등록된 쿠키: {}", httpCookie);
             return new HttpResponse(HttpStatus.FOUND, httpCookie, INDEX_PAGE);
         } catch (IllegalArgumentException e) {
             log.error("에러 발생 : {}", e.getMessage());
@@ -61,6 +60,7 @@ public class UserController extends AbstractController {
         try {
             Map<String, String> params = request.parseRequestBodyParams();
             User user = UserService.registerUser(params);
+
             log.info("회원가입된 유저 : {}", user);
             return new HttpResponse(HttpStatus.CREATED, HttpContentType.NOTHING, INDEX_PAGE);
         } catch (IllegalArgumentException e) {

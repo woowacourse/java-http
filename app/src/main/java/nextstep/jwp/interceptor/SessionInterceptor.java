@@ -2,12 +2,12 @@ package nextstep.jwp.interceptor;
 
 import java.util.UUID;
 import nextstep.jwp.db.InMemorySessionRepository;
-import nextstep.jwp.infrastructure.http.interceptor.AbstractInterceptor;
+import nextstep.jwp.infrastructure.http.interceptor.HandlerInterceptor;
 import nextstep.jwp.infrastructure.http.request.HttpRequest;
 import nextstep.jwp.infrastructure.http.response.HttpResponse;
 import nextstep.jwp.model.Session;
 
-public class SessionInterceptor extends AbstractInterceptor {
+public class SessionInterceptor implements HandlerInterceptor {
 
     private static final String SESSION_KEY = "JSESSIONID";
     private static final String COOKIE_KEY = "Cookie";

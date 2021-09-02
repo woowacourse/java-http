@@ -29,6 +29,5 @@ public class MockInterceptorResolver implements HandlerInterceptor {
 
     @Override
     public void postHandle(final HttpRequest request, final HttpResponse response) throws Exception {
-
     }
 }

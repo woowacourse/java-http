@@ -1,8 +1,8 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.model.FileType;
-import nextstep.jwp.model.Request;
-import nextstep.jwp.model.Response;
+import nextstep.jwp.model.reponse.Response;
+import nextstep.jwp.model.request.Request;
 
 public class BaseController extends AbstractController {
 

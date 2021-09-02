@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package nextstep.jwp.model.request;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

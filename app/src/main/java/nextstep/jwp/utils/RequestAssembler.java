@@ -6,10 +6,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.model.Request;
-import nextstep.jwp.model.RequestBody;
-import nextstep.jwp.model.RequestHeaders;
-import nextstep.jwp.model.RequestLine;
+import nextstep.jwp.model.request.Request;
+import nextstep.jwp.model.request.RequestBody;
+import nextstep.jwp.model.request.RequestHeaders;
+import nextstep.jwp.model.request.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

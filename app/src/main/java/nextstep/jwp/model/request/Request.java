@@ -1,6 +1,7 @@
-package nextstep.jwp.model;
+package nextstep.jwp.model.request;
 
 import java.util.Map;
+import nextstep.jwp.model.FileType;
 
 public class Request {
 

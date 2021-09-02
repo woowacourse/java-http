@@ -9,7 +9,7 @@ import java.nio.file.Files;
 import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
+import nextstep.jwp.model.domain.User;
 import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {

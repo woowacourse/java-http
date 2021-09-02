@@ -11,8 +11,8 @@ import nextstep.jwp.exception.RegisterException;
 import nextstep.jwp.model.FileType;
 import nextstep.jwp.model.MethodType;
 import nextstep.jwp.model.PathType;
-import nextstep.jwp.model.Request;
-import nextstep.jwp.model.Response;
+import nextstep.jwp.model.reponse.Response;
+import nextstep.jwp.model.request.Request;
 
 public abstract class AbstractController implements Controller {
 
@@ -62,7 +62,7 @@ public abstract class AbstractController implements Controller {
             final Path path = new File(resource.getPath()).toPath();
             return new String(Files.readAllBytes(path));
         } catch (NullPointerException exception) {
-            throw new FileNotFoundException("파일을 찾을 수 없습니다.");
+            throw new FileNotFoundException();
         }
     }
 }

@@ -1,4 +1,6 @@
-package nextstep.jwp.model;
+package nextstep.jwp.model.reponse;
+
+import nextstep.jwp.model.request.Request;
 
 public class Response {
 

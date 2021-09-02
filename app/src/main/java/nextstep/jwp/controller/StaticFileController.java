@@ -1,8 +1,8 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
-import nextstep.jwp.model.Request;
-import nextstep.jwp.model.Response;
+import nextstep.jwp.model.reponse.Response;
+import nextstep.jwp.model.request.Request;
 
 public class StaticFileController extends AbstractController {
 

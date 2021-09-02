@@ -1,9 +1,10 @@
-package nextstep.jwp.model;
+package nextstep.jwp.model.request;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import nextstep.jwp.model.FileType;
 
 public class RequestLine {
 

@@ -3,8 +3,8 @@ package nextstep.jwp.controller;
 import java.io.IOException;
 import nextstep.jwp.model.FileType;
 import nextstep.jwp.model.PathType;
-import nextstep.jwp.model.Request;
-import nextstep.jwp.model.Response;
+import nextstep.jwp.model.reponse.Response;
+import nextstep.jwp.model.request.Request;
 import nextstep.jwp.service.RegisterService;
 
 public class RegisterController extends AbstractController {

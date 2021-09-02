@@ -9,7 +9,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.controller.Controller;
 import nextstep.jwp.exception.BadRequestMessageException;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.exception.UnauthorizedException;
@@ -18,8 +18,6 @@ import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.http.Request;
 import nextstep.jwp.http.Response;
-import nextstep.jwp.model.User;
-import nextstep.jwp.utils.FileConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +25,7 @@ public class RequestHandler implements Runnable {
 
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final RequestMapping REQUEST_MAPPING = new RequestMapping();
 
     private final Socket connection;
 
@@ -46,7 +45,7 @@ public class RequestHandler implements Runnable {
 
             Response response = messageConvert(bufferedReader);
 
-            outputStream.write(Objects.requireNonNull(response).getBytes());
+            outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
@@ -58,7 +57,10 @@ public class RequestHandler implements Runnable {
     private Response messageConvert(BufferedReader bufferedReader) throws IOException {
         try {
             final Request request = createdRequest(bufferedReader);
-            return response(request);
+            Response response = new Response();
+            Controller controller = REQUEST_MAPPING.getController(request);
+            controller.service(request, response);
+            return response;
         } catch (BadRequestMessageException exception) {
             return Response.createErrorRequest(exception.getMessage(), HttpStatus.BAD_REQUEST);
         } catch (NotFoundException exception) {
@@ -131,53 +133,6 @@ public class RequestHandler implements Runnable {
             }
         }
         return requestBody;
-    }
-
-    private Response response(Request request) throws IOException {
-        if (request.isEqualsHttpMethod(HttpMethod.GET)) {
-            return doGet(request);
-        }
-        if (request.isEqualsHttpMethod(HttpMethod.POST)) {
-            return doPost(request);
-        }
-        throw new NotFoundException(request);
-    }
-
-    private Response doGet(Request request) throws IOException {
-        String uri = request.getUri();
-
-        if (request.isUriMatch("/login") || request.isUriMatch("/register")) {
-            String responseBody = FileConverter.fileToString(uri + ".html");
-            return Response.create200OK(request, responseBody);
-        }
-        if (request.isUriFile()) {
-            String responseBody = FileConverter.fileToString(uri);
-            return Response.create200OK(request, responseBody);
-        }
-        throw new NotFoundException(request);
-    }
-
-    private Response doPost(Request request) {
-        if (request.isUriMatch("/login")) {
-            User user = InMemoryUserRepository
-                .findByAccount(request.getRequestBody("account"))
-                .orElseThrow(UnauthorizedException::new);
-            if (user.checkPassword(request.getRequestBody("password"))) {
-                log.info("{} login success", user.getAccount());
-                return Response.create302Found("/index.html");
-            }
-            throw new UnauthorizedException();
-        }
-        if (request.isUriMatch("/register")) {
-            String account = request.getRequestBody("account");
-            String password = request.getRequestBody("password");
-            String email = request.getRequestBody("email");
-            User user = new User(0, account, password, email);
-            InMemoryUserRepository.save(user);
-            log.info("{} user create success", user.getAccount());
-            return Response.create302Found("/index.html");
-        }
-        throw new NotFoundException(request);
     }
 
     private void close() {

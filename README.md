@@ -8,3 +8,12 @@
 - [x] POST 방식으로 회원가입
     - GET /register, POST /register 둘 다 필요
 - [x] CSS 지원하기
+
+## 2단계
+
+- [ ] HttpRequest
+    - 헤더 읽는 메서드 리팩토링
+- [ ] HttpResponse
+    - 공통 코드 분리
+- [ ] Controller 인터페이스 추가
+    - 메서드 처리 리팩토링

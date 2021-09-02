@@ -1,5 +1,7 @@
 package nextstep.jwp.framework.http.request.details;
 
+import nextstep.jwp.framework.http.common.HttpSession;
+
 import java.util.Map;
 
 public class RequestHttpHeader {
@@ -19,11 +21,19 @@ public class RequestHttpHeader {
             final Cookie cookie = Cookie.of(requestHttpHeader.get(COOKIE_HEADER));
             return new RequestHttpHeader(requestHttpHeader, cookie);
         }
-        return new RequestHttpHeader(requestHttpHeader, null);
+        return new RequestHttpHeader(requestHttpHeader, new Cookie());
     }
 
     public Map<String, String> getRequestHttpHeaderMap() {
         return requestHttpHeaderMap;
+    }
+
+    public HttpSession generateSession() {
+        return cookie.generateSession();
+    }
+
+    public HttpSession getSession() {
+        return cookie.getSession();
     }
 
     public Cookie getCookie() {

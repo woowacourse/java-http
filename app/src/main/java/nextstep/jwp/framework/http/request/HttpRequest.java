@@ -54,7 +54,7 @@ public class HttpRequest {
     }
 
     public HttpSession generateSession() {
-        return requestHttpHeader.getCookie().generateSession();
+        return requestHttpHeader.generateSession();
     }
 
     public HttpMethod getHttpMethod() {
@@ -78,7 +78,7 @@ public class HttpRequest {
     }
 
     public HttpSession getSession() {
-        return requestHttpHeader.getCookie().getSession();
+        return requestHttpHeader.getSession();
     }
 
     @Override

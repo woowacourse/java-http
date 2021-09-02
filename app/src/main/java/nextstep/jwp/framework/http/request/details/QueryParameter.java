@@ -26,17 +26,4 @@ public class QueryParameter {
         }
         return BLANK;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        QueryParameter that = (QueryParameter) o;
-        return Objects.equals(queryParams, that.queryParams);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(queryParams);
-    }
 }

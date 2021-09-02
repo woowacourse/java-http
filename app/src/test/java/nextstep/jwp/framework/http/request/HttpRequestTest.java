@@ -28,6 +28,6 @@ class HttpRequestTest {
         assertThat(httpRequest.getRequestUrl().getQueryParam().searchValue("key2")).isEqualTo("value2");
         assertThat(httpRequest.getProtocolVersion()).isEqualTo(ProtocolVersion.defaultVersion());
         assertThat(httpRequest.getRequestHttpHeader().getRequestHttpHeaderMap().get("Content-Length")).isEqualTo("9");
-        assertThat(httpRequest.getRequestBody().find("key3")).isEqualTo("value3");
+        assertThat(httpRequest.searchRequestBody("key3")).isEqualTo("value3");
     }
 }

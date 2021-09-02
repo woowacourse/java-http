@@ -8,8 +8,14 @@ public class HttpSession {
     private final String sessionId;
     private final Map<String, Object> values = new HashMap<>();
 
-    public HttpSession(final String sessionId) {
+    private HttpSession(final String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public static HttpSession of(String sessionId) {
+        final HttpSession httpSession = new HttpSession(sessionId);
+        HttpSessions.addSession(sessionId, httpSession);
+        return httpSession;
     }
 
     public void setAttribute(final String name, final Object value) {

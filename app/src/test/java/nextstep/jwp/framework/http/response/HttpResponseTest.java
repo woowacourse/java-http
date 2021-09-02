@@ -1,5 +1,6 @@
 package nextstep.jwp.framework.http.response;
 
+import nextstep.jwp.framework.http.common.HttpSession;
 import nextstep.jwp.framework.http.response.details.ResponseStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,12 +23,16 @@ class HttpResponseTest {
 
         //when
         final HttpResponse httpResponse = HttpResponse.of(file, ResponseStatus.OK);
+        httpResponse.appendRedirectInfo("/location");
+        httpResponse.appendSessionInfo(HttpSession.of("session"));
 
         //then
         final String response = httpResponse.generateResponse();
         final String expected = "HTTP/1.1 200 OK\r\n" +
+                "Set-Cookie: JSESSIONID=session\r\n" +
                 "Content-Length: 134\r\n" +
                 "Content-Type: text/html;charset=utf-8\r\n" +
+                "Location: /location\r\n" +
                 "\r\n" +
                 "<!DOCTYPE html>\r\n" +
                 "<html lang=\"en\">\r\n" +

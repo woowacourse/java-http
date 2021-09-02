@@ -16,6 +16,7 @@ import java.util.List;
 
 import static nextstep.jwp.common.LineSeparator.NEW_LINE;
 import static nextstep.jwp.http.response.ContentType.ICO;
+import static nextstep.jwp.http.response.ContentType.SVG;
 
 public class StaticResourceFinder {
 
@@ -51,7 +52,7 @@ public class StaticResourceFinder {
     public static StaticResource getStaticResource(String fileNameExtension, URL url) throws URISyntaxException, IOException {
         final Path filePath = Paths.get(url.toURI());
         final ContentType contentType = ContentType.getContentTypeByFileNameExtension(fileNameExtension);
-        if (ICO == contentType) {
+        if (ICO == contentType || SVG == contentType) {
             return getICOStaticResource(filePath, contentType);
         }
         return getStaticResourceExceptICO(filePath, contentType);

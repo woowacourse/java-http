@@ -1,7 +1,5 @@
 package nextstep.jwp.db;
 
-
-import nextstep.jwp.exception.DuplicatedUserException;
 import nextstep.jwp.model.User;
 
 import java.util.Map;
@@ -16,6 +14,9 @@ public class InMemoryUserRepository {
     static {
         final User user = new User(1L, "gugu", "password", "hkkang@woowahan.com");
         database.put(user.getAccount(), user);
+    }
+
+    private InMemoryUserRepository() {
     }
 
     public static void save(User user) {

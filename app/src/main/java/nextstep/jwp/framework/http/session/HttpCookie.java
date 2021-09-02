@@ -2,7 +2,6 @@ package nextstep.jwp.framework.http.session;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.StringJoiner;
 
 public class HttpCookie {
@@ -41,7 +40,7 @@ public class HttpCookie {
         return "Set-Cookie: " + cookies();
     }
 
-    public Optional<String> get(String key) {
-        return Optional.ofNullable(cookies.get(key));
+    public String get(String key) {
+        return cookies.get(key);
     }
 }

@@ -18,14 +18,17 @@ public class HttpSessions {
     }
 
     public static boolean isLoggedIn(final String id) {
+        Map<String, HttpSession> sessions = SESSIONS;
         final HttpSession httpSession = SESSIONS.get(id);
 
         return Objects.nonNull(httpSession);
     }
 
+    public static void putSession(final HttpSession session) {
+        SESSIONS.put(session.getId(), session);
+    }
+
     public static HttpSession getSession(final String id) {
-        final HttpSession httpSession = new HttpSession(id);
-        SESSIONS.put(id, httpSession);
-        return httpSession;
+        return new HttpSession(id);
     }
 }

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 import nextstep.jwp.framework.http.session.HttpSession;
+import nextstep.jwp.framework.http.session.HttpSessions;
 
 public class HttpRequest {
 
@@ -112,7 +113,7 @@ public class HttpRequest {
     }
 
     public String sessionId() {
-        if (headers.hasSessions()) {
+        if (headers.hasCookie()) {
             return headers.sessions().getId();
         }
         return "";
@@ -151,6 +152,14 @@ public class HttpRequest {
     }
 
     public HttpSession getSession() {
-        return headers.sessions();
+        final HttpSession httpSession = headers.sessions();
+
+        HttpSessions.putSession(httpSession);
+
+        return httpSession;
+    }
+
+    public void cookie(final String id) {
+        headers.setCookie(id);
     }
 }

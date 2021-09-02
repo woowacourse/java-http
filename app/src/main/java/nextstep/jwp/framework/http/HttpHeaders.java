@@ -4,7 +4,7 @@ import static nextstep.jwp.framework.http.HttpRequest.LINE_DELIMITER;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.UUID;
 import nextstep.jwp.framework.http.session.HttpCookie;
 import nextstep.jwp.framework.http.session.HttpSession;
@@ -19,7 +19,7 @@ public class HttpHeaders {
     private static final int VALUE_KEY_INDEX = 1;
 
     private final Map<String, String> headers;
-    private final HttpCookie cookie;
+    private HttpCookie cookie;
 
     public HttpHeaders(final String lines) {
         this.headers = convert(lines);
@@ -56,13 +56,17 @@ public class HttpHeaders {
         return cookie.toString();
     }
 
-    public boolean hasSessions() {
-        return cookie.get(SESSION_ID).isPresent();
+    public boolean hasCookie() {
+        return Objects.nonNull(cookie.get(SESSION_ID)) && HttpSessions.isLoggedIn(cookie.get(SESSION_ID));
     }
 
     public HttpSession sessions() {
-        final Optional<String> sessionId = cookie.get(SESSION_ID);
-        final String id = sessionId.orElse(createId());
+        String id = cookie.get(SESSION_ID);
+
+        if (Objects.isNull(id)) {
+            id = createId();
+        }
+
         return HttpSessions.getSession(id);
     }
 
@@ -72,5 +76,10 @@ public class HttpHeaders {
         cookie.addCookie(SESSION_ID, uuid);
 
         return uuid;
+    }
+
+    public void setCookie(final String id) {
+        headers.remove("Cookie");
+        headers.put("Cookie", id);
     }
 }

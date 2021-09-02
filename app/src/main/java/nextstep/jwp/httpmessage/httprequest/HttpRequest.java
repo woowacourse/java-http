@@ -25,10 +25,14 @@ public class HttpRequest {
     }
 
     public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders, Parameters parameters) {
+        this(requestLine, httpHeaders, parameters, HttpSessions.getSession(httpHeaders.getSessionId()));
+    }
+
+    public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders, Parameters parameters, HttpSession httpSession) {
         this.requestLine = requestLine;
         this.httpHeaders = httpHeaders;
         this.parameters = parameters;
-        this.httpSession = HttpSessions.getSession(httpHeaders.getSessionId());
+        this.httpSession = initializeSession(httpSession);
     }
 
     public String getRequestLine() {
@@ -77,5 +81,12 @@ public class HttpRequest {
 
     public String getHttpSessionId() {
         return httpSession.getId();
+    }
+
+    private HttpSession initializeSession(HttpSession httpSession) {
+        if (Objects.isNull(httpSession)) {
+            return new HttpSession(UUID.randomUUID().toString());
+        }
+        return httpSession;
     }
 }

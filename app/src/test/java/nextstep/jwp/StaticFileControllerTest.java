@@ -90,7 +90,7 @@ class StaticFileControllerTest {
     }
 
     @Test
-    void notFoundPath() {
+    void notFoundPath() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /notfoundpath HTTP/1.1 ",
@@ -105,15 +105,18 @@ class StaticFileControllerTest {
         String output = runRequestHandler(httpRequest);
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: /404.html \r\n" +
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = "HTTP/1.1 404 Not Found \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
-                "";
+                responseBody;
         assertThat(output).isEqualTo(expected);
     }
 
     @Test
-    void notFoundFile() {
+    void notFoundFile() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /notfoundfile.html HTTP/1.1 ",
@@ -128,10 +131,13 @@ class StaticFileControllerTest {
         String output = runRequestHandler(httpRequest);
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: /404.html \r\n" +
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = "HTTP/1.1 404 Not Found \r\n" +
+                "Content-Type: text/html; charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
-                "";
+                responseBody;
         assertThat(output).isEqualTo(expected);
     }
 

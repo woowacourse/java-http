@@ -57,7 +57,7 @@ class RegisterControllerTest {
         String output = runRequestHandler(httpRequest);
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
+        String expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: /index.html \r\n" +
                 "\r\n" +
                 "";
@@ -86,7 +86,7 @@ class RegisterControllerTest {
         String output = runRequestHandler(httpRequest);
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
+        String expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: /401.html \r\n" +
                 "\r\n" +
                 "";
@@ -110,7 +110,7 @@ class RegisterControllerTest {
         String output = runRequestHandler(httpRequest);
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
+        String expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: /401.html \r\n" +
                 "\r\n" +
                 "";

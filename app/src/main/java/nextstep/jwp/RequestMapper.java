@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.ResourceController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 
@@ -19,6 +20,9 @@ public class RequestMapper {
     }
 
     public static Controller getController(String requestUri) {
-        return CONTROLLERS.get(requestUri);
+        if (CONTROLLERS.containsKey(requestUri)) {
+            return CONTROLLERS.get(requestUri);
+        }
+        return new ResourceController();
     }
 }

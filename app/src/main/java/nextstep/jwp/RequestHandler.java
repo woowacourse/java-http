@@ -29,6 +29,15 @@ public class RequestHandler implements Runnable {
 
             final String uri = httpRequest.getUri();
             Controller controller = RequestMapping.getController(uri);
+
+            if (httpRequest.getCookies() != null) {
+                HttpSession session = HttpSessions.getOrCreateSession(httpRequest.getCookies().get("JSESSIONID"));
+                if (!HttpSessions.SESSIONS.containsKey(session.getId())) {
+                    HttpSessions.SESSIONS.put(session.getId(), session);
+                    httpResponse.setSession(session.getId());
+                }
+            }
+
             if (controller == null) {
                 httpResponse.forward(getDefaultPath(uri));
                 return;

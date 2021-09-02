@@ -47,10 +47,11 @@ public class LoginController extends AbstractController{
         String cookie = request.getHeader("Cookie");
         if (cookie == null || request.getCookies().get("JSESSIONID") == null) {
             HttpSession session = HttpSessions.createSession();
+            HttpSessions.SESSIONS.put(session.getId(), session);
             response.setSession(session.getId());
             return session;
         }
         String sessionId = request.getCookies().get("JSESSIONID");
-        return HttpSessions.getSession(sessionId);
+        return HttpSessions.getOrCreateSession(sessionId);
     }
 }

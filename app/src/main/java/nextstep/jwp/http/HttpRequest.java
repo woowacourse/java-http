@@ -111,6 +111,6 @@ public class HttpRequest {
     }
 
     public HttpSession getSession() {
-        return HttpSessions.getSession(getCookies().get("JSESSIONID"));
+        return HttpSessions.getOrCreateSession(getCookies().get("JSESSIONID"));
     }
 }

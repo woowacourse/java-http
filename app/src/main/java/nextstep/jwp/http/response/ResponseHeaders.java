@@ -30,8 +30,8 @@ public class ResponseHeaders {
         headers.put(CONTENT_LENGTH, String.valueOf(contentLength));
     }
 
-    public void setCookie() {
-        headers.put(SET_COOKIE, JSESSIONID_WITH_DELIMITER + UUID.randomUUID());
+    public void setCookie(String id) {
+        headers.put(SET_COOKIE, JSESSIONID_WITH_DELIMITER + id);
     }
 
     public Set<String> getKeySet() {

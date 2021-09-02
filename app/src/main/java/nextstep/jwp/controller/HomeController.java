@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 public class HomeController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(HomeController.class);
-    private static final String PATH = "/400";
+    private static final String BAD_REQUEST_PATH = "/400";
 
     @Override
     protected View doGet(HttpRequest request, HttpResponse response) {
@@ -26,7 +26,7 @@ public class HomeController extends AbstractController {
     protected View doPost(HttpRequest request, HttpResponse response) {
         log.debug("Home - HTTP POST Request");
 
-        response.forward(BAD_REQUEST, PATH);
-        return new View(PATH);
+        response.forward(BAD_REQUEST, BAD_REQUEST_PATH);
+        return new View(BAD_REQUEST_PATH);
     }
 }

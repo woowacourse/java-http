@@ -24,8 +24,8 @@ public class ResponseHeader {
         headers.setContentLength(contentLength);
     }
 
-    public void setCookie() {
-        headers.setCookie();
+    public void setCookie(String id) {
+        headers.setCookie(id);
     }
 
     public void setLine(HttpStatus httpStatus) {

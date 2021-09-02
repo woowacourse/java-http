@@ -97,3 +97,11 @@ Set-Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46
 Content-Length: 5571
 Content-Type: text/html;charset=utf-8;
 ```
+
+<br/>
+
+## Session 구현하기
+
+- [x] 로그인에 성공하면 HttpSession 객체 값으로 User 객체 저장
+- [x] 로그인된 상태에서 HTTP GET 요청으로 `/login` 페이지에 접근하면 `index.html`로 리다이렉트
+    - [x] 쿠키에서 전달받은 `JSESSIONID` 값으로 로그인 여부 체크

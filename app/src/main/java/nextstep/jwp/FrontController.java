@@ -43,17 +43,12 @@ public class FrontController implements Runnable {
             HttpRequest request = new HttpRequest(bufferedReader);
             HttpResponse response = new HttpResponse();
 
-            if (!request.isCookie()) {
-                response.setCookie();
-            }
-
             Controller handler = request.getHandler();
             View view = handler.handle(request, response);
+            ViewResolver viewResolver = view.resolve();
 
-            ViewResolver viewResolver = new ViewResolver(view.getFilePath());
-            String filePath = viewResolver.getFilePath();
-
-            response.setBody(new ResponseBody(Files.readAllBytes(new File(filePath).toPath())));
+            response.setBody(new ResponseBody(
+                Files.readAllBytes(new File(viewResolver.getFilePath()).toPath())));
 
             response.write(outputStream);
         } catch (IOException exception) {

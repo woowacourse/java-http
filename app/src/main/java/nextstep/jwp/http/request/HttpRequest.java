@@ -6,6 +6,7 @@ import java.util.Map;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.ErrorController;
 import nextstep.jwp.exception.http.request.InvalidHttpRequestException;
+import nextstep.jwp.http.HttpSession;
 
 public class HttpRequest {
 
@@ -89,8 +90,8 @@ public class HttpRequest {
         return getMethod().isPost();
     }
 
-    public boolean isCookie() {
-        return header.getHttpCookie();
+    public boolean isJSessionId() {
+        return header.isJSessionId();
     }
 
     private HttpMethod getMethod() {
@@ -107,6 +108,22 @@ public class HttpRequest {
 
     public Map<String, String> getQuery() {
         return body.getQuery();
+    }
+
+    public String getJSessionId() {
+        return header.getJSessionId();
+    }
+
+    public HttpSession getSession() {
+        return header.getSession();
+    }
+
+    public void saveSession(HttpSession httpSession) {
+        header.saveSession(httpSession);
+    }
+
+    public RequestHandlerMapping getHandlerMapping() {
+        return handlerMapping;
     }
 
     public RequestLine getLine() {

@@ -43,8 +43,8 @@ public class HttpResponse {
         header.setContentLength(body.getLength());
     }
 
-    public void setCookie() {
-        header.setCookie();
+    public void setCookie(String id) {
+        header.setCookie(id);
     }
 
     public void write(OutputStream outputStream) {

@@ -3,7 +3,6 @@ package nextstep.jwp.view;
 public class View {
 
     private static final String DEFAULT_DIRECTORY = "static";
-    private static final String DEFAULT_PATH = "/index";
     private static final String HTML_EXTENSION = ".html";
 
     private final String name;
@@ -12,14 +11,14 @@ public class View {
         this.name = name;
     }
 
-    public String getFilePath() {
+    public ViewResolver resolve() {
         if (name.contains(".")) {
-            return DEFAULT_DIRECTORY + name;
+            return new ViewResolver(DEFAULT_DIRECTORY + name);
         }
         if (name.equals("/")) {
-            return DEFAULT_DIRECTORY + DEFAULT_PATH + HTML_EXTENSION;
+            return new ViewResolver(DEFAULT_DIRECTORY + "/index" + HTML_EXTENSION);
         }
-        return DEFAULT_DIRECTORY + name + HTML_EXTENSION;
+        return new ViewResolver(DEFAULT_DIRECTORY + name + HTML_EXTENSION);
     }
 
     public String getName() {

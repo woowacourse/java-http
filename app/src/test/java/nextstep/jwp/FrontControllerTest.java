@@ -1,6 +1,7 @@
 package nextstep.jwp;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.File;
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.exception.controller.DuplicateRegisterException;
+import nextstep.jwp.exception.controller.UnAuthorizationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -16,7 +18,7 @@ class FrontControllerTest {
 
     @DisplayName("애플리케이션을 실행한다.")
     @Test
-    void run() {
+    void run() throws IOException {
         // given
         final MockSocket socket = new MockSocket();
         final FrontController frontController = new FrontController(socket);
@@ -25,7 +27,14 @@ class FrontControllerTest {
         frontController.run();
 
         // then
-        assertThat(socket.output()).contains("Set-Cookie");
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String expected = "HTTP/1.1 200 OK \r\n" +
+            "Content-Length: 5564 \r\n" +
+            "Content-Type: text/html;charset=utf-8 \r\n" +
+            "\r\n" +
+            new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
     }
 
     @DisplayName("home 페이지를 조회한다.")
@@ -240,17 +249,11 @@ class FrontControllerTest {
             final FrontController frontController = new FrontController(socket);
 
             // when
-            frontController.run();
-
             // then
-            final URL resource = getClass().getClassLoader().getResource("static/401.html");
-            String expected = "HTTP/1.1 401 UNAUTHORIZED \r\n" +
-                "Content-Length: 2426 \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThatCode(frontController::run)
+                .isInstanceOf(UnAuthorizationException.class)
+                .hasMessage("접근 권한이 없습니다.")
+                .hasFieldOrPropertyWithValue("httpStatus", "401");
         }
     }
 
@@ -395,14 +398,17 @@ class FrontControllerTest {
         @Test
         void isCookie() throws IOException {
             // given
+            String body = "account=gugu&password=password";
             final String httpRequest = String.join("\r\n",
-                "GET /index HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + body.getBytes().length,
+                "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
                 "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
                 "",
-                "");
+                body);
 
             final MockSocket socket = new MockSocket(httpRequest);
             final FrontController frontController = new FrontController(socket);
@@ -414,7 +420,7 @@ class FrontControllerTest {
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
             final byte[] fileBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-            final String expected = "HTTP/1.1 200 OK \r\n" +
+            final String expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Content-Length: " + fileBytes.length + " \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "\r\n" +
@@ -428,13 +434,16 @@ class FrontControllerTest {
         @Test
         void isNoCookie() {
             // given
+            String body = "account=gugu&password=password";
             final String httpRequest = String.join("\r\n",
-                "GET /index HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + body.getBytes().length,
+                "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
                 "",
-                "");
+                body);
 
             final MockSocket socket = new MockSocket(httpRequest);
             final FrontController frontController = new FrontController(socket);

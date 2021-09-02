@@ -5,21 +5,31 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class HttpCookie {
 
-    private final Map<String, String> cookie;
+    private static final String SESSION_KEY = "JSESSIONID";
+
+    private final Map<String, String> storage;
 
     public HttpCookie() {
         this(new ConcurrentHashMap<>());
     }
 
-    private HttpCookie(Map<String, String> cookie) {
-        this.cookie = cookie;
+    private HttpCookie(Map<String, String> storage) {
+        this.storage = storage;
     }
 
-    public void setCookie(String key, String value) {
-        cookie.put(key, value);
+    public void setStorage(String key, String value) {
+        storage.put(key, value);
     }
 
-    public Map<String, String> getCookie() {
-        return cookie;
+    public boolean isJSessionId() {
+        return storage.containsKey(SESSION_KEY);
+    }
+
+    public String getJSessionId() {
+        return storage.get(SESSION_KEY);
+    }
+
+    public Map<String, String> getStorage() {
+        return storage;
     }
 }

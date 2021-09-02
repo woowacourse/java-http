@@ -32,7 +32,7 @@ public class LoginController extends AbstractController {
         }
 
         HttpSession session = request.getSession();
-        if (!HttpSessions.has(session)) {
+        if (!HttpSessions.contains(session)) {
             HttpSessions.register(session);
             response.setCookie(HttpSession.SESSION_TYPE, session.getId());
         }

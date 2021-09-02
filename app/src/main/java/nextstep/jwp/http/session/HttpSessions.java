@@ -17,11 +17,11 @@ public class HttpSessions {
         SESSIONS.put(session.getId(), session);
     }
 
-    public static boolean has(String sessionId) {
+    public static boolean contains(String sessionId) {
         return SESSIONS.containsKey(sessionId);
     }
 
-    public static boolean has(HttpSession session) {
-        return has(session.getId());
+    public static boolean contains(HttpSession session) {
+        return contains(session.getId());
     }
 }

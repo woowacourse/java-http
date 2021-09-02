@@ -1,6 +1,7 @@
 package nextstep.jwp.http.request;
 
-import java.util.HashMap;
+import static java.util.stream.Collectors.toMap;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,15 +14,10 @@ public class RequestHeaders {
     }
 
     public static RequestHeaders of(List<String> lines) {
-        Map<String, String> headers = new HashMap<>();
-
-        for (String line : lines) {
-            String[] pair = line.split(": ");
-            if (pair.length != 2) {
-                break;
-            }
-            headers.put(pair[0], pair[1]);
-        }
+        Map<String, String> headers = lines.stream()
+                .map(line -> line.split(": "))
+                .filter(pair -> pair.length == 2)
+                .collect(toMap(pair -> pair[0], pair -> pair[1]));
         return new RequestHeaders(headers);
     }
 

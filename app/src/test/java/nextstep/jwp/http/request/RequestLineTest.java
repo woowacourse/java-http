@@ -2,6 +2,8 @@ package nextstep.jwp.http.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Collections;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class RequestLineTest {

@@ -7,20 +7,18 @@ import nextstep.jwp.http.response.HttpResponse;
 
 public class View {
 
-    private static final View EMPTY = new View("", "", ContentType.empty());
+    private static final View EMPTY = new View("", ContentType.empty());
 
-    private final String viewName;
     private final String content;
     private final ContentType contentType;
 
-    private View(String viewName, String content, ContentType contentType) {
-        this.viewName = viewName;
+    private View(String content, ContentType contentType) {
         this.content = content;
         this.contentType = contentType;
     }
 
     public static View of(String viewName, String content) {
-        return new View(viewName, content, ContentType.fromFileName(viewName));
+        return new View(content, ContentType.fromFileName(viewName));
     }
 
     public void render(ModelAndView modelAndView, HttpResponse httpResponse) {

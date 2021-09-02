@@ -1,7 +1,9 @@
 package nextstep.jwp.http.request;
 
+import static java.util.stream.Collectors.toMap;
+
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -22,12 +24,10 @@ public class QueryParams {
     }
 
     private static Map<String, String> parse(String queryString) {
-        Map<String, String> params = new HashMap<>();
-        for (String pair : queryString.split("&")) {
-            String[] keyValue = pair.split("=");
-            params.put(keyValue[0], keyValue[1]);
-        }
-        return params;
+        return Arrays.stream(queryString.split("&"))
+                .map(line -> line.split("="))
+                .filter(pair -> pair.length == 2)
+                .collect(toMap(pair -> pair[0], pair -> pair[1]));
     }
 
     public String get(String key) {
@@ -49,5 +49,12 @@ public class QueryParams {
     @Override
     public int hashCode() {
         return Objects.hash(params);
+    }
+
+    @Override
+    public String toString() {
+        return "QueryParams{" +
+                "params=" + params +
+                '}';
     }
 }

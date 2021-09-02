@@ -1,7 +1,9 @@
 package nextstep.jwp.http.cookie;
 
+import static java.util.stream.Collectors.toMap;
+
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -12,12 +14,10 @@ public class HttpCookie {
     public static final HttpCookie EMPTY = new HttpCookie(Collections.emptyMap());
 
     private static final String KEY_SESSION_ID = "JSESSIONID";
-    private static final String ITEM_SEPARATOR = "; ";
-    private static final String KEY_SEPARATOR = "=";
 
     private final Map<String, String> params;
 
-    public HttpCookie(Map<String, String> params) {
+    private HttpCookie(Map<String, String> params) {
         this.params = params;
     }
 
@@ -26,15 +26,11 @@ public class HttpCookie {
             return EMPTY;
         }
 
-        Map<String, String> map = new HashMap<>();
-        for (String item : cookieLine.split(ITEM_SEPARATOR)) {
-            String[] pair = item.split(KEY_SEPARATOR);
-            if (pair.length < 2) {
-                break;
-            }
-            map.put(pair[0], pair[1]);
-        }
-        return new HttpCookie(map);
+        Map<String, String> items = Arrays.stream(cookieLine.split("; "))
+                .map(line -> line.split("="))
+                .filter(pair -> pair.length == 2)
+                .collect(toMap(pair -> pair[0], pair -> pair[1]));
+        return new HttpCookie(items);
     }
 
     public String getAttributes(String name) {

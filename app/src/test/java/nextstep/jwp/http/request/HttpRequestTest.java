@@ -1,6 +1,9 @@
 package nextstep.jwp.http.request;
 
+import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.http.cookie.HttpCookie;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpStatus;
 import nextstep.jwp.http.session.HttpSession;
 import nextstep.jwp.http.session.HttpSessions;
 import org.junit.jupiter.api.DisplayName;
@@ -51,7 +54,6 @@ class HttpRequestTest {
         HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, "");
         assertThat(httpRequest.httpCookie().getAttributes("yummy_cookie")).isEqualTo("choco");
         assertThat(httpRequest.httpCookie().getAttributes("tasty_cookie")).isEqualTo("strawberry");
-
     }
 
     @DisplayName("쿠기가 없는 경우, 빈 쿠키 객체를 반환한다")
@@ -79,7 +81,7 @@ class HttpRequestTest {
         assertThat(httpRequest.httpCookie().getSessionId()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
     }
 
-    @DisplayName("Session 스토리지에는 존재하지 않는 sessionId를 갖고 있는 경우 새로운 세션을 발급한다.")
+    @DisplayName("Session 스토리지에는 존재하지 않는 sessionId를 갖고 있는 경우 새로운 세션을 발급한다")
     @Test
     void getUnregisteredSession() {
         RequestLine requestLine = RequestLine.of("GET /index.html HTTP/1.1");
@@ -92,10 +94,10 @@ class HttpRequestTest {
 
         HttpRequest httpRequest = new HttpRequest(requestLine, requestHeaders, "");
         String oldSessionId = httpRequest.httpCookie().getSessionId();
-        assertThat(HttpSessions.has(oldSessionId)).isFalse();
+        assertThat(HttpSessions.contains(oldSessionId)).isFalse();
 
         HttpSession session = httpRequest.getSession();
-        assertThat(HttpSessions.has(session)).isFalse();
+        assertThat(HttpSessions.contains(session)).isFalse();
     }
 
     private String mockRequest(String expectedRequestLine, String expectedRequestBody) {

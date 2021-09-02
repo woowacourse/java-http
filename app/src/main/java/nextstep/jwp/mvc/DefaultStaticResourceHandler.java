@@ -1,12 +1,11 @@
 package nextstep.jwp.mvc;
 
-import static nextstep.jwp.webserver.response.ContentType.*;
+import static nextstep.jwp.webserver.response.ContentType.contentType;
+import static nextstep.jwp.webserver.response.ContentType.contentTypeKey;
 
-import nextstep.jwp.core.ApplicationContext;
 import nextstep.jwp.mvc.exception.PageNotFoundException;
 import nextstep.jwp.webserver.exception.NoFileExistsException;
 import nextstep.jwp.webserver.request.HttpRequest;
-import nextstep.jwp.webserver.response.ContentType;
 import nextstep.jwp.webserver.response.HttpResponse;
 import nextstep.jwp.webserver.response.StatusCode;
 

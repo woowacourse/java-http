@@ -6,7 +6,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.webserver.response.HttpResponse;
 import nextstep.jwp.webserver.util.HttpRequestParser;
 
 public class RequestParams {

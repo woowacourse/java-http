@@ -6,9 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import nextstep.jwp.webserver.exception.BadRequestException;
-import nextstep.jwp.webserver.response.HttpResponse;
 
 public class DefaultHttpRequest implements HttpRequest {
 

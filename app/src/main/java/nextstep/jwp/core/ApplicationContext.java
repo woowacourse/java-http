@@ -2,7 +2,6 @@ package nextstep.jwp.core;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
-import nextstep.jwp.mvc.mapping.HandlerMapping;
 
 public interface ApplicationContext {
 

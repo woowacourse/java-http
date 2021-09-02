@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import nextstep.jwp.mvc.exception.PageNotFoundException;
 import nextstep.jwp.webserver.exception.NoFileExistsException;
 
 public class DefaultHttpResponse implements HttpResponse {

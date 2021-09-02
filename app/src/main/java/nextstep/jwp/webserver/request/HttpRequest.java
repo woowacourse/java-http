@@ -1,7 +1,6 @@
 package nextstep.jwp.webserver.request;
 
 import java.util.Map;
-import nextstep.jwp.webserver.response.HttpResponse;
 
 public interface HttpRequest {
 

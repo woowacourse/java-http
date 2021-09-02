@@ -1,14 +1,13 @@
 package nextstep.jwp;
 
-import nextstep.jwp.mvc.DispatcherServlet;
-import nextstep.jwp.webserver.request.HttpSessions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.stream.Stream;
+import nextstep.jwp.mvc.DispatcherServlet;
+import nextstep.jwp.webserver.request.HttpSessions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebServer {
 

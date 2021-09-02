@@ -1,5 +1,10 @@
 package nextstep.jwp;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.util.Objects;
 import nextstep.jwp.mvc.DispatcherServlet;
 import nextstep.jwp.webserver.request.DefaultHttpRequest;
 import nextstep.jwp.webserver.request.HttpRequest;
@@ -9,12 +14,6 @@ import nextstep.jwp.webserver.response.DefaultHttpResponse;
 import nextstep.jwp.webserver.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
-import java.util.Objects;
 
 public class RequestHandler implements Runnable {
 

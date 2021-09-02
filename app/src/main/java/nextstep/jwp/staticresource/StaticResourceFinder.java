@@ -9,14 +9,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-
-import static nextstep.jwp.common.LineSeparator.NEW_LINE;
-import static nextstep.jwp.http.response.ContentType.ICO;
-import static nextstep.jwp.http.response.ContentType.SVG;
 
 public class StaticResourceFinder {
 
@@ -52,7 +48,7 @@ public class StaticResourceFinder {
     public static StaticResource getStaticResource(String fileNameExtension, URL url) throws URISyntaxException, IOException {
         final Path filePath = Paths.get(url.toURI());
         final ContentType contentType = ContentType.getContentTypeByFileNameExtension(fileNameExtension);
-        if (ICO == contentType || SVG == contentType) {
+        if (contentType == ContentType.ICO) {
             return getICOStaticResource(filePath, contentType);
         }
         return getStaticResourceExceptICO(filePath, contentType);
@@ -64,8 +60,7 @@ public class StaticResourceFinder {
     }
 
     private static StaticResource getStaticResourceExceptICO(Path filePath, ContentType contentType) throws IOException {
-        final List<String> fileLines = Files.readAllLines(filePath);
-        final String content = String.join(NEW_LINE, fileLines);
+        final String content = Files.readString(filePath, StandardCharsets.UTF_8);
         return new StaticResource(contentType, content);
     }
 }

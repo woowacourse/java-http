@@ -34,10 +34,11 @@ public class LoginController extends AbstractController {
         }
 
         HttpSession session = request.getSession();
-        if (!HttpSessions.contains(session)) {
+        if(!HttpSessions.contains(session)) {
             HttpSessions.register(session);
             response.setCookie(HttpSession.SESSION_TYPE, session.getId());
         }
+
         session.setAttribute("user", loginUser);
         response.addHeader("Location", "index.html");
         return ModelAndView.of(HttpStatus.FOUND);

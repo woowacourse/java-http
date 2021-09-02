@@ -65,7 +65,7 @@ class LoginControllerTest {
 
         String sessionItem = httpResponse.getHeader("Set-Cookie");
         String sessionId = sessionItem.split("=")[1];
-        HttpSession session = HttpSessions.getSession(sessionId);
+        HttpSession session = HttpSessions.findSessionById(sessionId);
 
         assertThat(modelAndView.getHttpStatus()).isEqualTo(HttpStatus.FOUND);
         assertThat(session.getAttribute("user")).isNotNull();

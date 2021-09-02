@@ -73,7 +73,7 @@ public class HttpRequest {
     public HttpSession getSession() {
         HttpCookie cookie = httpCookie();
         if (cookie.hasSessionId() && HttpSessions.contains(cookie.getSessionId())) {
-            return HttpSessions.getSession(cookie.getSessionId());
+            return HttpSessions.findSessionById(cookie.getSessionId());
         }
         return HttpSession.create();
     }

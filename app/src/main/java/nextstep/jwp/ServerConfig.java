@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.handler.controller.AbstractController;
 import nextstep.jwp.handler.controller.LoginController;
+import nextstep.jwp.handler.controller.MainController;
 import nextstep.jwp.handler.controller.RegisterController;
 
 public class ServerConfig {
@@ -16,6 +17,8 @@ public class ServerConfig {
     static {
         CONTROLLER_MAP.put("/login", LoginController.class);
         CONTROLLER_MAP.put("/register", RegisterController.class);
+        CONTROLLER_MAP.put("/index", MainController.class);
+        CONTROLLER_MAP.put("/index.html", MainController.class);
     }
 
     private ServerConfig() { }

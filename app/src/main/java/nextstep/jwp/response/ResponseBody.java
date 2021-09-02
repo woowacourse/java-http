@@ -2,7 +2,6 @@ package nextstep.jwp.response;
 
 import nextstep.jwp.exception.InternalServerError;
 import nextstep.jwp.exception.PageNotFoundError;
-import nextstep.jwp.mvc.WebServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,12 +10,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class ResponseBody {
 
     private static final String DEFAULT_STATIC_RESOURCE_PATH = "static/";
 
-    private static final Logger logger = LoggerFactory.getLogger(WebServer.class);
+    private static final Logger logger = LoggerFactory.getLogger(ResponseBody.class);
 
     private final String content;
     private final int contentLength;
@@ -39,7 +39,7 @@ public class ResponseBody {
         try {
             String requestResourceName = DEFAULT_STATIC_RESOURCE_PATH + contentName;
             URL resource = ResponseBody.class.getClassLoader().getResource(requestResourceName);
-            Path resourcePath = new File(resource.getFile()).toPath();
+            Path resourcePath = new File(Objects.requireNonNull(resource).getFile()).toPath();
             return new String(Files.readAllBytes(resourcePath));
         } catch (IOException e) {
             logger.error("getContent Error", e);

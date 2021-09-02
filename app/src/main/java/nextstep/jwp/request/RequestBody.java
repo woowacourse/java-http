@@ -32,7 +32,7 @@ public class RequestBody {
 
     private static Map<String, String> extractParameters(String requestBody) {
         return Stream.of(requestBody.split(REQUEST_BODY_PARAMS_SPLIT_REGEX))
-                .map(parameter -> parameter.split(REQUEST_BODY_PARAM_KEY_VALUE_SPLIT_REGEX))
+                .map(parameter -> parameter.split(REQUEST_BODY_PARAM_KEY_VALUE_SPLIT_REGEX, 2))
                 .collect(Collectors.toMap(parameter -> parameter[KEY_INDEX_OF_SPLIT], parameter -> parameter[VALUE_INDEX_OF_SPLIT]));
     }
 

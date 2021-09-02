@@ -1,4 +1,4 @@
-package nextstep.jwp.mvc;
+package nextstep.jwp.web;
 
 import nextstep.jwp.request.CharlieHttpRequest;
 import nextstep.jwp.request.HttpRequest;
@@ -17,9 +17,9 @@ public class RequestHandler implements Runnable {
     private final Socket connection;
     private final FrontController frontController;
 
-    public RequestHandler(Socket connection) {
+    public RequestHandler(Socket connection, FrontController frontController) {
         this.connection = Objects.requireNonNull(connection);
-        this.frontController = FrontController.getInstance();
+        this.frontController = frontController;
     }
 
     @Override

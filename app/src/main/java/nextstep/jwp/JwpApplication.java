@@ -1,6 +1,6 @@
 package nextstep.jwp;
 
-import nextstep.jwp.mvc.WebServer;
+import nextstep.jwp.web.WebServer;
 
 public class JwpApplication {
 

@@ -31,4 +31,8 @@ public class RequestHeader {
     public String getHeader(String name) {
         return requestHeaders.get(name);
     }
+
+    public boolean contains(String name) {
+        return requestHeaders.containsKey(name);
+    }
 }

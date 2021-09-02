@@ -20,10 +20,14 @@ public class CharlieHttpRequest implements HttpRequest {
         RequestLine requestLine = RequestLine.of(bufferedReader.readLine());
         RequestHeader requestHeader = RequestHeader.of(bufferedReader);
         RequestBody requestBody = RequestBody.empty();
-        if (HttpMethod.POST.equals(requestLine.getHttpMethod())) {
+        if (haveRequestBody(requestHeader)) {
             requestBody = RequestBody.of(bufferedReader, requestHeader.getHeader(BODY_LENGTH_HEADER_NAME));
         }
         return new CharlieHttpRequest(requestLine, requestHeader, requestBody);
+    }
+
+    private static boolean haveRequestBody(RequestHeader requestHeader) {
+        return requestHeader.contains(BODY_LENGTH_HEADER_NAME);
     }
 
     @Override

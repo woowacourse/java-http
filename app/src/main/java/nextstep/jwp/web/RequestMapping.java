@@ -1,4 +1,4 @@
-package nextstep.jwp.mvc;
+package nextstep.jwp.web;
 
 import nextstep.jwp.request.HttpMethod;
 import nextstep.jwp.request.RequestLine;

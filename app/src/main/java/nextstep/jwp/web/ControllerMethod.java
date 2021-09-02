@@ -1,4 +1,4 @@
-package nextstep.jwp.mvc;
+package nextstep.jwp.web;
 
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.exception.InternalServerError;
@@ -32,13 +32,5 @@ public class ControllerMethod {
             logger.error("method invoke error", e);
             throw new InternalServerError();
         }
-    }
-
-    public Controller getController() {
-        return controller;
-    }
-
-    public Method getMethod() {
-        return method;
     }
 }

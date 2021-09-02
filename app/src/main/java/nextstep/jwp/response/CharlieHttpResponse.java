@@ -16,19 +16,15 @@ public class CharlieHttpResponse implements HttpResponse {
         this.responseBody = responseBody;
     }
 
-    public static CharlieHttpResponse createResponse(String viewName) {
+    public static CharlieHttpResponse createResponse(String viewName, HttpStatusCode statusCode) {
         if (viewName.startsWith(REDIRECT_FORM)) {
             String redirectLocation = viewName.substring(REDIRECT_FORM.length()).trim();
             return redirectResponse(redirectLocation);
         }
-        return okResponse(viewName);
-    }
-
-    public static CharlieHttpResponse okResponse(String viewName) {
         if (viewName.startsWith("/")) {
             viewName = viewName.substring(1);
         }
-        ResponseLine responseLine = ResponseLine.httpResponseLine(HttpStatusCode.OK);
+        ResponseLine responseLine = ResponseLine.httpResponseLine(statusCode);
         ResponseHeader responseHeader = new ResponseHeader();
         ResponseBody responseBody = ResponseBody.of(viewName);
         responseHeader.addHeader("Content-Type", ContentType.getValue(viewName));

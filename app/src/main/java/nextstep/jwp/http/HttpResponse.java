@@ -7,11 +7,11 @@ import java.nio.file.Files;
 import java.util.Objects;
 
 public class HttpResponse {
-    private String status;
+    private HttpStatus status;
     private String body;
     private String path;
 
-    public HttpResponse(String status, String body, String path) throws IOException {
+    public HttpResponse(HttpStatus status, String body, String path) throws IOException {
         this.status = status;
         this.body = createStaticFileResponseBody(body);
         this.path = path;
@@ -20,7 +20,7 @@ public class HttpResponse {
     public String createResponse() {
         String contentType = ContentTypeMapper.extractContentType(path);
         return String.join("\r\n",
-                "HTTP/1.1 " + status + " ",
+                "HTTP/1.1 " + status.number + " " + status.name + " ",
                 "Content-Type: " + contentType + " ",
                 "Content-Length: " + body.getBytes().length + " ",
                 "",
@@ -29,7 +29,7 @@ public class HttpResponse {
 
     public String createRedirectResponse() {
         return String.join("\r\n",
-                "HTTP/1.1 " + status + " ",
+                "HTTP/1.1 " + status.number + " " + status.name + " ",
                 "Location: http://localhost:8080" + path);
     }
 

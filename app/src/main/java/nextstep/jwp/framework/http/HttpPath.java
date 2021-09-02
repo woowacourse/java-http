@@ -13,8 +13,6 @@ public class HttpPath {
     private static final int PATH_INDEX = 0;
     private static final int FILE_ROOT_INDEX = 1;
     private static final int ROOT_FILE_PATH_COUNT = 1;
-    private static final int QUERY_CONTAINS_COUNT = 2;
-    private static final int QUERY_PARAMETER_INDEX = 1;
     private static final String DEFAULT_PAGE = "index.html";
     private static final String UNAUTHORIZED_PAGE = "401.html";
     private static final String NOT_FOUND_PAGE = "404.html";
@@ -53,6 +51,10 @@ public class HttpPath {
 
     public boolean isNotExistFile() {
         return Objects.isNull(getClass().getClassLoader().getResource(RESOURCE_PATH + path));
+    }
+
+    public void changeIndexPage() {
+        path = DEFAULT_PAGE;
     }
 
     public String getPath() {

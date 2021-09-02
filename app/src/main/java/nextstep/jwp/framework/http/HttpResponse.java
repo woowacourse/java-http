@@ -37,7 +37,8 @@ public class HttpResponse {
     private byte[] getResponseAsBytes() {
         return String.join(LINE_DELIMITER,
             statusLine(),
-            headers.toString()
+            headers.toString(),
+            headers.cookieToString()
         ).getBytes(StandardCharsets.UTF_8);
     }
 
@@ -45,6 +46,7 @@ public class HttpResponse {
         return String.join(LINE_DELIMITER,
             statusLine(),
             headers.toString(),
+            headers.cookieToString(),
             "",
             body()
         ).getBytes(StandardCharsets.UTF_8);
@@ -57,5 +59,9 @@ public class HttpResponse {
     public String body() throws IOException {
         final Path path = new File(resourceURL.getPath()).toPath();
         return Files.readString(path);
+    }
+
+    public void addCookie(final String key, final String value) {
+        headers.addCookie(key, value);
     }
 }

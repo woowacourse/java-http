@@ -6,8 +6,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
+import nextstep.jwp.framework.http.session.HttpSession;
 
 public class HttpRequest {
 
@@ -108,6 +111,13 @@ public class HttpRequest {
         return requestLine.path().getPath();
     }
 
+    public String sessionId() {
+        if (headers.hasSessions()) {
+            return headers.sessions().getId();
+        }
+        return "";
+    }
+
     public HttpMethod getMethod() {
         return requestLine.getMethod();
     }
@@ -120,6 +130,10 @@ public class HttpRequest {
         return requestLine.path();
     }
 
+    public void changeIndexPage() {
+        path().changeIndexPage();
+    }
+
     public HttpRequestLine getRequestLine() {
         return requestLine;
     }
@@ -130,5 +144,13 @@ public class HttpRequest {
 
     public HttpBody getBody() {
         return body;
+    }
+
+    public Map<String, String> getQueryParams() {
+        return Collections.unmodifiableMap(body.getQueryParams());
+    }
+
+    public HttpSession getSession() {
+        return headers.sessions();
     }
 }

@@ -20,7 +20,7 @@ public class LoginService {
         if (user.checkPassword(password)) {
             String sessionId = UUID.randomUUID().toString();
             HttpSession session = new HttpSession(sessionId);
-            session.setAttribute("user", user);
+            session.setAttribute(sessionId, user);
             HttpSessions.addSession(sessionId, session);
             return sessionId;
         }

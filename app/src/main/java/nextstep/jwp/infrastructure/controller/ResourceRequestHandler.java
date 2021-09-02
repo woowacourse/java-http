@@ -8,6 +8,7 @@ import nextstep.jwp.model.web.response.CustomHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -26,15 +27,12 @@ public class ResourceRequestHandler implements HttpRequestHandler {
 
         String resource = ResourceFinder.resource(request.getUri());
         response.setStatusLine(StatusCode.OK, request.getVersionOfProtocol());
-        response.setHeaders(headers(resource.getBytes().length, contentType));
+        headers(response, resource.getBytes().length, contentType);
         response.setResponseBody(resource);
     }
 
-    private Map<String, String> headers(int resourceLength, String contentType) {
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", contentType);
-        headers.put("Content-Length", resourceLength + "");
-
-        return headers;
+    private void headers(CustomHttpResponse response, int resourceLength, String contentType) {
+        response.addHeaders("Content-Type", Collections.singletonList(contentType));
+        response.addHeaders("Content-Length", Collections.singletonList(resourceLength + ""));
     }
 }

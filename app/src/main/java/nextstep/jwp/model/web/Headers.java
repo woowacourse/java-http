@@ -1,6 +1,7 @@
 package nextstep.jwp.model.web;
 
 import nextstep.jwp.model.web.sessions.HttpCookie;
+import nextstep.jwp.model.web.sessions.HttpSessions;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -13,6 +14,10 @@ public class Headers {
     private final HttpCookie httpCookie = new HttpCookie();
 
     public Headers() {
+    }
+
+    public Headers(Map<String, String> headers) {
+        setHeadersAndCookie(headers);
     }
 
     public void setHeadersAndCookie(Map<String, String> headers) {
@@ -58,6 +63,11 @@ public class Headers {
     }
 
     public boolean existsSessionIdCookie() {
-        return httpCookie.containsKey("JSESSIONID");
+        if (httpCookie.containsKey("JSESSIONID")) {
+            return HttpSessions.existsSessionId(
+                    httpCookie.getSessionValue()
+            );
+        }
+        return false;
     }
 }

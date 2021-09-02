@@ -18,6 +18,10 @@ public class HttpSessions {
         SESSIONS.put(sessionId, session);
     }
 
+    public static boolean existsSessionId(String sessionId) {
+        return SESSIONS.containsKey(sessionId);
+    }
+
     public static void remove(String id) {
         SESSIONS.remove(id);
     }

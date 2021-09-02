@@ -24,6 +24,13 @@ public class LoginController extends AbstractController {
         log.debug("Http Request - GET /login");
         String resource = ResourceFinder.resource(request.getUri() + ".html");
 
+        if (existsUserSession(request)) {
+            log.debug("session activated - login passed");
+            response.setStatusLine(StatusCode.FOUND, request.getVersionOfProtocol());
+            response.forward(LOGIN_SUCCESS_URL);
+            return;
+        }
+
         response.setStatusLine(StatusCode.OK, request.getVersionOfProtocol());
         addContentHeader(response, resource.getBytes().length);
         response.setResponseBody(resource);
@@ -35,11 +42,6 @@ public class LoginController extends AbstractController {
         response.setStatusLine(StatusCode.FOUND, request.getVersionOfProtocol());
         String account = request.getBodyValue("account");
         String password = request.getBodyValue("password");
-
-        if (existsUserSession(request)) {
-            response.forward(LOGIN_SUCCESS_URL);
-            return;
-        }
 
         try {
             if (loginService.checkAccountExist(account)) {

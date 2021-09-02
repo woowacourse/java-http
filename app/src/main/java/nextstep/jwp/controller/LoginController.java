@@ -36,7 +36,8 @@ public class LoginController implements Controller {
 
             if (request.hasNoSessionId()) {
                 String sessionId = String.valueOf(UUID.randomUUID());
-                HttpSessions.getSession(sessionId);
+                HttpSession session = HttpSessions.getSession(sessionId);
+                session.setAttribute("user", user);
                 response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
             }
 

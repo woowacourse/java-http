@@ -28,12 +28,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = String.join("\r\n",
-            "HTTP/1.1 200 OK ",
-            "Content-Length: 12 ",
-            "Content-Type: text/html;charset=utf-8 ",
-            "",
-            htmlValue);
+        String expected = String.join("");
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -50,12 +45,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = String.join("\r\n",
-            "HTTP/1.1 302 Found ",
-            "Content-Length: 46 ",
-            "Content-Type: text/html;charset=utf-8 ",
-            "",
-            htmlValue);
+        String expected = String.join("");
         assertThat(socket.output()).isEqualTo(expected);
     }
 

@@ -5,8 +5,7 @@ import nextstep.jwp.model.web.HttpMethod;
 import nextstep.jwp.model.web.request.CustomHttpRequest;
 import nextstep.jwp.model.web.response.CustomHttpResponse;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Collections;
 
 public abstract class AbstractController implements HttpRequestHandler {
 
@@ -27,11 +26,8 @@ public abstract class AbstractController implements HttpRequestHandler {
     protected void doPost(CustomHttpRequest request, CustomHttpResponse response) throws Exception {
     }
 
-    protected Map<String, String> headers(int resourceLength) {
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", ContentType.HTML.getContentType());
-        headers.put("Content-Length", resourceLength + "");
-
-        return headers;
+    protected void addContentHeader(CustomHttpResponse response, int resourceLength) {
+        response.addHeaders("Content-Type", Collections.singletonList(ContentType.HTML.getContentType()));
+        response.addHeaders("Content-Length", Collections.singletonList(resourceLength + ""));
     }
 }

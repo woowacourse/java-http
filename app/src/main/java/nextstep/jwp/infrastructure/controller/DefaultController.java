@@ -19,7 +19,7 @@ public class DefaultController extends AbstractController {
         String resource = ResourceFinder.resource(DEFAULT_URI);
 
         response.setStatusLine(StatusCode.OK, request.getVersionOfProtocol());
-        response.setHeaders(headers(resource.getBytes().length));
+        addContentHeader(response, resource.getBytes().length);
         response.setResponseBody(resource);
     }
 }

@@ -9,9 +9,6 @@ import nextstep.jwp.model.web.response.CustomHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class RegisterController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
@@ -23,7 +20,7 @@ public class RegisterController extends AbstractController {
         String resource = ResourceFinder.resource(request.getUri() + ".html");
 
         response.setStatusLine(StatusCode.OK, request.getVersionOfProtocol());
-        response.setHeaders(headers(resource.getBytes().length));
+        addContentHeader(response, resource.getBytes().length);
         response.setResponseBody(resource);
     }
 
@@ -38,13 +35,6 @@ public class RegisterController extends AbstractController {
         InMemoryUserRepository.save(user);
 
         response.setStatusLine(StatusCode.FOUND, request.getVersionOfProtocol());
-        response.setHeaders(postHeaders(REGISTER_SUCCESS_URI));
-    }
-
-    private Map<String, String> postHeaders(String url) {
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Location", url);
-
-        return headers;
+        response.forward(REGISTER_SUCCESS_URI);
     }
 }

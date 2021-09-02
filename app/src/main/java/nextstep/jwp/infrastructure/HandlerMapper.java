@@ -1,6 +1,7 @@
 package nextstep.jwp.infrastructure;
 
 import nextstep.jwp.infrastructure.controller.*;
+import nextstep.jwp.model.web.service.LoginService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +13,7 @@ public class HandlerMapper {
 
     static {
         MAPPER.put("/", new DefaultController());
-        MAPPER.put("/login", new LoginController());
+        MAPPER.put("/login", new LoginController(loginService()));
         MAPPER.put("/register", new RegisterController());
     }
 
@@ -21,5 +22,9 @@ public class HandlerMapper {
             return new ResourceRequestHandler();
         }
         return MAPPER.get(path);
+    }
+
+    public static LoginService loginService() {
+        return new LoginService();
     }
 }

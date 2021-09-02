@@ -34,15 +34,11 @@ public class InMemoryUserRepository {
         }
     }
 
-    public static boolean login(String account, String password) {
-        if (!database.containsKey(account)) {
-            return false;
-        }
-        User user = database.get(account);
-        return user.checkPassword(password);
+    public static User findByAccount(String account) {
+        return database.get(account);
     }
 
-    public static Optional<User> findByAccount(String account) {
-        return Optional.ofNullable(database.get(account));
+    public static boolean existsAccount(String account) {
+        return database.containsKey(account);
     }
 }

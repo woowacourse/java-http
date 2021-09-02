@@ -58,6 +58,10 @@ public class CustomHttpRequest {
         return headers;
     }
 
+    public boolean existsSessionIdCookie() {
+        return headers.existsSessionIdCookie();
+    }
+
     public HttpMethod getMethod() {
         return requestLine.getMethod();
     }

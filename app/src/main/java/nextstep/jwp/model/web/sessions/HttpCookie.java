@@ -9,4 +9,8 @@ public class HttpCookie {
     public void addCookie(String key, String value) {
         cookies.put(key, value);
     }
+
+    public boolean containsKey(String key) {
+        return cookies.containsKey(key);
+    }
 }

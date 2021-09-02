@@ -33,6 +33,7 @@ public class RequestHandler {
 
             final HttpRequest request = httpRequestParser.parse(inputStream);
             final RequestLine requestLine = request.getRequestLine();
+
             final Controller controller = requestMapping.getController(requestLine.getUri());
             final HttpResponse response = getResponse(request, controller);
 

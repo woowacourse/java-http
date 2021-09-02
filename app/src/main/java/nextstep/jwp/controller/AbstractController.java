@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestLine;
 import nextstep.jwp.http.response.HttpResponse;
@@ -25,11 +26,25 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void assignStaticResourceByUriToResponse(HttpRequest request, HttpResponse response, String fileNameExtension) {
+        final String uri = getUri(request);
+        try {
+            final StaticResource staticResource = staticResourceFinder.findStaticResource(uri + fileNameExtension);
+            response.assignStatus(ResponseStatus.OK);
+            response.addStaticResource(staticResource);
+        } catch (NotFoundException e) {
+            final StaticResource staticResource = staticResourceFinder.findStaticResource("/404.html");
+            response.assignStatus(ResponseStatus.NOT_FOUND);
+            response.addStaticResource(staticResource);
+        }
+    }
+
+    private String getUri(HttpRequest request) {
         final RequestLine requestLine = request.getRequestLine();
         final String uri = requestLine.getUri();
-        final StaticResource staticResource = staticResourceFinder.findStaticResource(uri + fileNameExtension);
-        response.assignStatus(ResponseStatus.OK);
-        response.addStaticResource(staticResource);
+        if ("/".equals(uri)) {
+            return "/index";
+        }
+        return uri;
     }
 
     protected void assignRedirectToResponse(HttpResponse response, String locationHeader) {

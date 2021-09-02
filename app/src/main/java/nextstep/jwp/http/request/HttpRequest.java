@@ -1,6 +1,8 @@
 package nextstep.jwp.http.request;
 
 
+import nextstep.jwp.http.session.HttpSession;
+
 public class HttpRequest {
 
     private final RequestLine requestLine;
@@ -27,5 +29,17 @@ public class HttpRequest {
 
     public RequestBody getBody() {
         return body;
+    }
+
+    public RequestCookie getCookie() {
+        return headers.getHttpCookie();
+    }
+
+    public HttpSession getSession() {
+        return headers.getSession();
+    }
+
+    public boolean isLoggedIn() {
+        return headers.isLoggedIn();
     }
 }

@@ -9,14 +9,20 @@ import static nextstep.jwp.common.LineSeparator.NEW_LINE;
 
 public class ResponseHeaders {
 
-    private final Map<String, String> headers;
+    private final Map<String, String> headersExceptCookie;
+    private final ResponseCookie cookie;
 
     public ResponseHeaders() {
-        this.headers = new ConcurrentHashMap<>();
+        headersExceptCookie = new ConcurrentHashMap<>();
+        cookie = new ResponseCookie();
     }
 
-    public void put(String key, String value) {
-        headers.put(key, value);
+    public void addExceptCookie(String key, String value) {
+        headersExceptCookie.put(key, value);
+    }
+
+    public void addCookie(String key, String value) {
+        cookie.add(key, value);
     }
 
     @Override
@@ -27,10 +33,10 @@ public class ResponseHeaders {
 
     private List<String> getParsedHeaders() {
         List<String> parsedHeaders = new ArrayList<>();
-        for (Map.Entry<String, String> entry : headers.entrySet()) {
+        for (Map.Entry<String, String> entry : headersExceptCookie.entrySet()) {
             parsedHeaders.add(entry.getKey() + ": " + entry.getValue() + " ");
-
         }
+        parsedHeaders.addAll(cookie.getAsSetCookieString());
         return parsedHeaders;
     }
 }

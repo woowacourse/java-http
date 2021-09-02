@@ -12,9 +12,10 @@ public class LoginService {
         this.inMemoryUserRepository = inMemoryUserRepository;
     }
 
-    public void login(String account, String password) {
+    public User login(String account, String password) {
         final User foundUser = inMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new UnAuthorizedException("존재하지 않는 account 입니다."));
         foundUser.validatePassword(password);
+        return foundUser;
     }
 }

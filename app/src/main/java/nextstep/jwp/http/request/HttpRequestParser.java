@@ -31,13 +31,21 @@ public class HttpRequestParser {
 
     private RequestHeaders getParsedHeaders(BufferedReader bufferedReader) throws IOException {
         final Map<String, String> headers = new ConcurrentHashMap<>();
+        final Map<String, String> cookies = new ConcurrentHashMap<>();
+        final Map<String, String> headersExceptCookies = new ConcurrentHashMap<>();
+        parseHeaderLines(bufferedReader, headers);
+        classifyHeaders(headers, cookies, headersExceptCookies);
+        final RequestCookie requestCookie = new RequestCookie(cookies);
+        return new RequestHeaders(headersExceptCookies, requestCookie);
+    }
+
+    private void parseHeaderLines(BufferedReader bufferedReader, Map<String, String> headers) throws IOException {
         String line = null;
         while (!"".equals(line)) {
             line = bufferedReader.readLine();
             validateNonNull(line);
             parseHeader(headers, line);
         }
-        return new RequestHeaders(headers);
     }
 
     private RequestBody getParsedBody(BufferedReader bufferedReader, RequestLine requestLine, RequestHeaders headers) throws IOException {
@@ -57,6 +65,30 @@ public class HttpRequestParser {
             String value = line.split(":")[1];
             value = value.trim();
             headers.put(key, value);
+        }
+    }
+
+    private void classifyHeaders(Map<String, String> headers, Map<String, String> cookies, Map<String, String> headersExceptCookies) {
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            classifyOneHeader(cookies, headersExceptCookies, entry);
+        }
+    }
+
+    private void classifyOneHeader(Map<String, String> cookies, Map<String, String> headersExceptCookies, Map.Entry<String, String> entry) {
+        if ("Cookie".equals(entry.getKey())) {
+            parseCookie(entry.getValue(), cookies);
+            return;
+        }
+        headersExceptCookies.put(entry.getKey(), entry.getValue());
+    }
+
+    private void parseCookie(String cookiesLine, Map<String, String> cookies) {
+        final String[] splitCookiesLine = cookiesLine.split("; ");
+        for (String cookieValue : splitCookiesLine) {
+            final String[] splitCookieValue = cookieValue.split("=");
+            final String key = splitCookieValue[0];
+            final String value = splitCookieValue[1];
+            cookies.put(key, value);
         }
     }
 

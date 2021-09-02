@@ -59,9 +59,9 @@ public class Response {
     }
 
     public byte[] getBytes() {
-        String response = statusLine.toString() + "\r\n"
-                + responseHeaders.toString() + "\r\n"
-                + responseBody.toString();
+        String response = statusLine.toMessage() + "\r\n"
+                + responseHeaders.toMessage() + "\r\n"
+                + responseBody.toMessage();
         return response.getBytes();
     }
 }

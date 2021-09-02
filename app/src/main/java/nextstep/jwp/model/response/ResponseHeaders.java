@@ -27,8 +27,7 @@ public class ResponseHeaders {
         values.put("Set-Cookie", "JSESSIONID=" + id);
     }
 
-    @Override
-    public String toString() {
+    public String toMessage() {
         if (values.isEmpty()) {
             return "";
         }

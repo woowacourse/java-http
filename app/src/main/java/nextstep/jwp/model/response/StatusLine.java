@@ -12,8 +12,7 @@ public class StatusLine {
         this.status = statusCode;
     }
 
-    @Override
-    public String toString() {
+    public String toMessage() {
         return String.format("%s %d %s ", protocol.value(), status.code(), status.text());
     }
 }

@@ -8,8 +8,7 @@ public class ResponseBody {
         this.body = body;
     }
 
-    @Override
-    public String toString() {
+    public String toMessage() {
         return body;
     }
 }

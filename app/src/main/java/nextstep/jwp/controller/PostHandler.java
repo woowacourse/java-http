@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import nextstep.jwp.constants.HttpMethod;
 import nextstep.jwp.exception.HttpException;
 import nextstep.jwp.request.RequestBody;
+import nextstep.jwp.request.RequestHeader;
 
 public class PostHandler implements Handler {
     private final HttpMethod httpMethod = HttpMethod.POST;
@@ -13,14 +14,16 @@ public class PostHandler implements Handler {
         this.requestBody = requestBody;
     }
 
+    @Override
     public boolean matchHttpMethod(HttpMethod httpMethod) {
         return this.httpMethod == httpMethod;
     }
 
-    public String runController(String uri, Controller controller) throws Exception {
+    @Override
+    public String runController(String uri, RequestHeader requestHeader, Controller controller) throws Exception {
         for (Method method : Controller.class.getDeclaredMethods()) {
             if (matchPostMapping(method, uri)) {
-                return (String) method.invoke(controller, requestBody);
+                return (String) method.invoke(controller,requestHeader, requestBody);
             }
         }
         throw new HttpException("잘못된 http post 요청입니다.");

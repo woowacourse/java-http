@@ -2,7 +2,6 @@ package nextstep.jwp.service;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 import nextstep.jwp.constants.UserParams;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -35,6 +34,11 @@ public class HttpService {
         if (account.isPresent()) {
             throw new BadRequestException("이미 등록된 사용자 입니다.");
         }
+    }
+
+    public static User findUser(String account) {
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new UnauthorizedException("해당하는 유저가 없어요"));
     }
 
 }

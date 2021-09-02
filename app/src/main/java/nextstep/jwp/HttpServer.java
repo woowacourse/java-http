@@ -25,19 +25,15 @@ public class HttpServer {
     private static final Logger log = LoggerFactory.getLogger(HttpServer.class);
 
     private final BufferedReader reader;
-    private final RequestHeader headers;
+    private final RequestHeader requestHeader;
     private final MappingHandler mappingHandler;
 
     public HttpServer(InputStream inputStream) throws IOException {
         this.reader = new BufferedReader(new InputStreamReader(inputStream));
         final RequestLine requestLine = new RequestLine(extractRequestLine());
-        this.headers = new RequestHeader(extractHeaders());
-        if(headers.contains(Header.COOKIE.getKey())){
-            HttpCookie httpCookie = new HttpCookie(headers.get(Header.COOKIE.getKey()));
-            System.out.println(httpCookie.get(Http.JSESSIONID));
-        }
+        this.requestHeader = new RequestHeader(extractHeaders());
         final RequestBody requestBody = new RequestBody(extractRequestBody());
-        this.mappingHandler = new MappingHandler(requestLine, requestBody);
+        this.mappingHandler = new MappingHandler(requestLine, requestHeader, requestBody);
     }
 
     private String extractRequestLine() throws IOException {
@@ -59,8 +55,8 @@ public class HttpServer {
     }
 
     private String extractRequestBody() throws IOException {
-        if (headers.contains(Header.CONTENT_LENGTH.getKey())) {
-            int contentLength = Integer.parseInt(headers.get(Header.CONTENT_LENGTH.getKey()));
+        if (requestHeader.contains(Header.CONTENT_LENGTH.getKey())) {
+            int contentLength = Integer.parseInt(requestHeader.get(Header.CONTENT_LENGTH.getKey()));
             char[] buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);
             return new String(buffer);
@@ -72,7 +68,7 @@ public class HttpServer {
         try {
             return mappingHandler.response();
         } catch (InvocationTargetException e) {
-            log.info(e.getMessage());
+            log.info("Reflection related controller  Error {}", e.toString());
             return handleReflectionException(e);
         } catch (PageNotFoundException e) {
             log.info(e.getMessage());

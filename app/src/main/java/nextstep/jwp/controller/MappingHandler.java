@@ -5,15 +5,18 @@ import java.util.List;
 import nextstep.jwp.constants.HttpMethod;
 import nextstep.jwp.exception.HttpException;
 import nextstep.jwp.request.RequestBody;
+import nextstep.jwp.request.RequestHeader;
 import nextstep.jwp.request.RequestLine;
 
 public class MappingHandler {
     private final RequestLine requestLine;
+    private final RequestHeader requestHeader;
     private final RequestBody requestBody;
     private final Controller controller;
 
-    public MappingHandler(RequestLine requestLine, RequestBody requestBody) {
+    public MappingHandler(RequestLine requestLine, RequestHeader requestHeader,RequestBody requestBody) {
         this.requestLine = requestLine;
+        this.requestHeader = requestHeader;
         this.requestBody = requestBody;
         this.controller = new Controller();
     }
@@ -22,7 +25,7 @@ public class MappingHandler {
         final HttpMethod httpMethod = requestLine.getHttpMethod();
         final String uri = requestLine.getUri();
         final Handler handler = findHandler(httpMethod);
-        return handler.runController(uri, controller);
+        return handler.runController(uri, requestHeader, controller);
     }
 
     private Handler findHandler(HttpMethod httpMethod) {

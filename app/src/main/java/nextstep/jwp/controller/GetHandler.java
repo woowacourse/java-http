@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import nextstep.jwp.constants.HttpMethod;
 import nextstep.jwp.exception.HttpException;
+import nextstep.jwp.request.RequestHeader;
 import nextstep.jwp.response.ResponseEntity;
 
 public class GetHandler implements Handler {
@@ -14,14 +15,16 @@ public class GetHandler implements Handler {
     public GetHandler() {
     }
 
+    @Override
     public boolean matchHttpMethod(HttpMethod httpMethod) {
         return this.httpMethod == httpMethod;
     }
 
-    public String runController(String uri, Controller controller) throws Exception {
+    @Override
+    public String runController(String uri, RequestHeader requestHeader, Controller controller) throws Exception {
         for (Method method : Controller.class.getDeclaredMethods()) {
             if (matchGetMapping(method, uri)) {
-                return (String) method.invoke(controller);
+                return (String) method.invoke(controller, requestHeader);
             }
         }
 

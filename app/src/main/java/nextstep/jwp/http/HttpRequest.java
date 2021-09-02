@@ -9,22 +9,14 @@ import java.util.Map;
 import java.util.Objects;
 
 public class HttpRequest {
-    private String method;
-    private String path;
+    private final RequestLine requestLine;
     private final Map<String, String> headers = new HashMap<>();
     private final Map<String, String> params = new HashMap<>();
     private final BufferedReader bufferedReader;
 
     public HttpRequest(InputStream inputStream) throws IOException {
         bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        String line = bufferedReader.readLine();
-        if (line == null) {
-            return;
-        }
-        String[] firstLine = line.split(" ");
-        method = firstLine[0];
-        path = firstLine[1];
-
+        requestLine = new RequestLine(bufferedReader);
         parseHeaders();
         parseParams();
     }
@@ -60,11 +52,11 @@ public class HttpRequest {
     }
 
     public String getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getPath() {
-        return path;
+        return requestLine.getPath();
     }
 
     public Map<String, String> getHeaders() {

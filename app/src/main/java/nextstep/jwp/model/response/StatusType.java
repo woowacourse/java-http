@@ -3,7 +3,7 @@ package nextstep.jwp.model.response;
 public enum StatusType {
 
     OK(200, "OK"),
-    FOUND(302, "FOUND");
+    FOUND(302, "Found");
 
     private final int code;
     private final String text;

@@ -14,7 +14,7 @@ public class MappingHandler {
     private final RequestBody requestBody;
     private final Controller controller;
 
-    public MappingHandler(RequestLine requestLine, RequestHeader requestHeader,RequestBody requestBody) {
+    public MappingHandler(RequestLine requestLine, RequestHeader requestHeader, RequestBody requestBody) {
         this.requestLine = requestLine;
         this.requestHeader = requestHeader;
         this.requestBody = requestBody;

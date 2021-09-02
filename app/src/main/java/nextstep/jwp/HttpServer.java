@@ -13,7 +13,6 @@ import nextstep.jwp.controller.MappingHandler;
 import nextstep.jwp.exception.BadRequestException;
 import nextstep.jwp.exception.PageNotFoundException;
 import nextstep.jwp.exception.UnauthorizedException;
-import nextstep.jwp.request.HttpCookie;
 import nextstep.jwp.request.RequestBody;
 import nextstep.jwp.request.RequestHeader;
 import nextstep.jwp.request.RequestLine;

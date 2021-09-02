@@ -2,10 +2,8 @@ package nextstep.jwp.request;
 
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.model.User;
 
 public class HttpSession {
-
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
@@ -24,12 +22,4 @@ public class HttpSession {
     public Object getAttribute(String name) {
         return values.get(name);
     }
-
-    public void removeAttribute(String name) {
-
-    }
-
-    public void invalidate() {
-    }
-
 }

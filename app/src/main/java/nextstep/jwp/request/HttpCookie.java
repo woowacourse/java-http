@@ -18,11 +18,11 @@ public class HttpCookie {
                 .collect(Collectors.toMap(x -> x[Http.KEY].trim(), x -> x[Http.VALUE].trim()));
     }
 
-    public boolean contains(String key){
+    public boolean contains(String key) {
         return cookies.containsKey(key);
     }
 
-    public String get(String key){
+    public String get(String key) {
         return cookies.get(key);
     }
 }

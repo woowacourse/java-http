@@ -8,10 +8,13 @@ import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,28 +36,36 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             HttpRequest httpRequest = new HttpRequest(inputStream);
+            HttpResponse httpResponse = new HttpResponse(outputStream);
             String method = httpRequest.getMethod();
             String path = httpRequest.getPath();
-            String response = "";
 
             if (path.equals("/")) {
-                HttpResponse httpResponse = new HttpResponse(HttpStatus.OK_200, "Hello world!", path);
-                response = httpResponse.createResponse();
+                httpResponse.setStatus(HttpStatus.OK_200);
+                httpResponse.setBody("Hello world!");
+                httpResponse.setPath(path);
+                httpResponse.forward();
             }
 
             if (path.contains(".")) {
-                HttpResponse httpResponse = new HttpResponse(HttpStatus.OK_200, path, path);
-                response = httpResponse.createResponse();
+                httpResponse.setStatus(HttpStatus.OK_200);
+                httpResponse.setBody(createBody(path));
+                httpResponse.setPath(path);
+                httpResponse.forward();
             }
 
             if (method.equals("GET") && path.equals("/register")) {
-                HttpResponse httpResponse = new HttpResponse(HttpStatus.OK_200, "/register.html", path);
-                response = httpResponse.createResponse();
+                httpResponse.setStatus(HttpStatus.OK_200);
+                httpResponse.setBody(createBody("/register.html"));
+                httpResponse.setPath(path);
+                httpResponse.forward();
             }
 
             if (method.equals("GET") && path.equals("/login")) {
-                HttpResponse httpResponse = new HttpResponse(HttpStatus.OK_200, "/login.html", path);
-                response = httpResponse.createResponse();
+                httpResponse.setStatus(HttpStatus.OK_200);
+                httpResponse.setBody(createBody("/login.html"));
+                httpResponse.setPath(path);
+                httpResponse.forward();
             }
 
             if (method.equals("POST") && path.equals("/login")) {
@@ -62,11 +73,14 @@ public class RequestHandler implements Runnable {
                 Optional<User> account = InMemoryUserRepository.findByAccount(params.get("account"));
 
                 if (account.isPresent() && account.get().checkPassword(params.get("password"))) {
-                    HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND_302, null, "/index.html");
-                    response = httpResponse.createRedirectResponse();
+                    httpResponse.setStatus(HttpStatus.FOUND_302);
+                    httpResponse.setRedirectUrl("/index.html");
+                    httpResponse.redirect();
                 } else {
-                    HttpResponse httpResponse = new HttpResponse(HttpStatus.UNAUTHORIZED_401, "/401.html", path);
-                    response = httpResponse.createResponse();
+                    httpResponse.setStatus(HttpStatus.UNAUTHORIZED_401);
+                    httpResponse.setBody(createBody("/401.html"));
+                    httpResponse.setPath(path);
+                    httpResponse.forward();
                 }
             }
 
@@ -79,22 +93,30 @@ public class RequestHandler implements Runnable {
 
                 Optional<User> account = InMemoryUserRepository.findByAccount(params.get("account"));
                 if (account.isPresent()) {
-                    HttpResponse httpResponse = new HttpResponse(HttpStatus.UNAUTHORIZED_401, "/401.html", path);
-                    response = httpResponse.createResponse();
+                    httpResponse.setStatus(HttpStatus.UNAUTHORIZED_401);
+                    httpResponse.setBody(createBody("/401.html"));
+                    httpResponse.setPath(path);
+                    httpResponse.forward();
 
                 } else {
                     InMemoryUserRepository.save(user);
-                    HttpResponse httpResponse = new HttpResponse(HttpStatus.FOUND_302, null, "/index.html");
-                    response = httpResponse.createRedirectResponse();
+                    httpResponse.setStatus(HttpStatus.FOUND_302);
+                    httpResponse.setRedirectUrl("/index.html");
+                    httpResponse.redirect();
                 }
             }
-            outputStream.write(response.getBytes());
-            outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
         }
+    }
+
+    private String createBody(String filePath) throws IOException {
+        final URL url = getClass().getClassLoader().getResource("static" + filePath);
+        File file = new File(Objects.requireNonNull(url).getFile());
+        byte[] bytes = Files.readAllBytes(file.toPath());
+        return new String(bytes);
     }
 
     private void close() {

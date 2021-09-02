@@ -1,23 +1,44 @@
 package nextstep.jwp.http;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.Objects;
+import java.io.OutputStream;
 
 public class HttpResponse {
+    private final OutputStream outputStream;
     private HttpStatus status;
     private String body;
     private String path;
+    private String redirectUrl;
 
-    public HttpResponse(HttpStatus status, String body, String path) throws IOException {
+    public HttpResponse(OutputStream outputStream) {
+        this.outputStream = outputStream;
+    }
+
+    public void forward() throws IOException {
+        updateOutputStream(createResponse());
+    }
+
+    public void redirect() throws IOException {
+        updateOutputStream(createRedirectResponse());
+    }
+
+    public void setStatus(HttpStatus status) {
         this.status = status;
-        this.body = createStaticFileResponseBody(body);
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public void setPath(String path) {
         this.path = path;
     }
 
-    public String createResponse() {
+    public void setRedirectUrl(String redirectUrl) {
+        this.redirectUrl = redirectUrl;
+    }
+
+    private String createResponse() {
         String contentType = ContentTypeMapper.extractContentType(path);
         return String.join("\r\n",
                 "HTTP/1.1 " + status.number + " " + status.name + " ",
@@ -27,17 +48,14 @@ public class HttpResponse {
                 body);
     }
 
-    public String createRedirectResponse() {
+    private String createRedirectResponse() {
         return String.join("\r\n",
                 "HTTP/1.1 " + status.number + " " + status.name + " ",
-                "Location: http://localhost:8080" + path);
+                "Location: http://localhost:8080" + redirectUrl);
     }
 
-    private String createStaticFileResponseBody(String render) throws IOException {
-        String filePath = "static" + render;
-        final URL url = getClass().getClassLoader().getResource(filePath);
-        File file = new File(Objects.requireNonNull(url).getFile());
-        byte[] bytes = Files.readAllBytes(file.toPath());
-        return new String(bytes);
+    private void updateOutputStream(String response) throws IOException {
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 }

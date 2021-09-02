@@ -42,13 +42,13 @@ class LoginControllerTest {
         HttpResponse response = new HttpResponse();
 
         // when
-        loginController.doGet(new HttpRequest(
+        loginController.doPost(new HttpRequest(
             new HttpRequestLine(HttpMethod.POST, new HttpPath("index.html"), new ProtocolVersion("HTTP/1.1")),
             new HttpHeaders("Content-Type: text/html;charset=utf-8 \r\nContent-Length: 12 \r\nCookie: io=H6Gs8jT7h07lTg94AAAA; JSESSIONID=acbd813f-eb5a-4f8d-87fe-b1737e0871a1"),
-            new HttpBody()
+            new HttpBody("account=gugu&password=password&email=hkkang%40woowahan.com")
         ), response);
 
         // then
-        assertThat(response.body()).hasSize(2426);
+        assertThat(response.getBytes()).hasSize(2571);
     }
 }

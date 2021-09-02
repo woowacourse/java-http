@@ -34,7 +34,7 @@ public class HttpRequestParser {
         final Map<String, String> cookies = new ConcurrentHashMap<>();
         final Map<String, String> headersExceptCookies = new ConcurrentHashMap<>();
         parseHeaderLines(bufferedReader, headers);
-        classifyCookies(headers, cookies, headersExceptCookies);
+        classifyHeaders(headers, cookies, headersExceptCookies);
         final RequestCookie requestCookie = new RequestCookie(cookies);
         return new RequestHeaders(headersExceptCookies, requestCookie);
     }
@@ -68,14 +68,18 @@ public class HttpRequestParser {
         }
     }
 
-    private void classifyCookies(Map<String, String> headers, Map<String, String> cookies, Map<String, String> headersExceptCookies) {
+    private void classifyHeaders(Map<String, String> headers, Map<String, String> cookies, Map<String, String> headersExceptCookies) {
         for (Map.Entry<String, String> entry : headers.entrySet()) {
-            if ("Cookie".equals(entry.getKey())) {
-                parseCookie(entry.getValue(), cookies);
-                return;
-            }
-            headersExceptCookies.put(entry.getKey(), entry.getValue());
+            classifyOneHeader(cookies, headersExceptCookies, entry);
         }
+    }
+
+    private void classifyOneHeader(Map<String, String> cookies, Map<String, String> headersExceptCookies, Map.Entry<String, String> entry) {
+        if ("Cookie".equals(entry.getKey())) {
+            parseCookie(entry.getValue(), cookies);
+            return;
+        }
+        headersExceptCookies.put(entry.getKey(), entry.getValue());
     }
 
     private void parseCookie(String cookiesLine, Map<String, String> cookies) {

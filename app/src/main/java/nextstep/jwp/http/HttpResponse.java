@@ -1,8 +1,6 @@
 package nextstep.jwp.http;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -16,19 +14,10 @@ public class HttpResponse {
     private HttpStatus status;
     private String body;
     private Map<String, String> headers = new HashMap<>();
-    private Map<String, String> cookies = new HashMap<>();
+    private Cookies cookies = new Cookies();
 
     public HttpResponse() {
         this.status = HttpStatus.OK;
-    }
-
-    public HttpResponse(HttpStatus status) {
-        this(status, "");
-    }
-
-    public HttpResponse(HttpStatus status, String body) {
-        this.status = status;
-        this.body = body;
     }
 
     public void putHeader(String key, String value) {
@@ -41,13 +30,11 @@ public class HttpResponse {
     }
 
     public void putCookie(String key, String value) {
-        cookies.put(key, value);
+        cookies.putCookie(key, value);
     }
 
     private String getCookieAsString() {
-        List<String> cookiesAsString = new ArrayList<>();
-        cookies.forEach((key, value) -> cookiesAsString.add(key + "=" + value));
-        return String.join("; ", cookiesAsString);
+        return cookies.asString();
     }
 
     public byte[] getBytes() {
@@ -96,7 +83,7 @@ public class HttpResponse {
 
     public String createJSessionId() {
         String jSessionId = UUID.randomUUID().toString();
-        cookies.put(HEADER_KEY_OF_JSESSIONID, jSessionId);
+        cookies.putCookie(HEADER_KEY_OF_JSESSIONID, jSessionId);
         return jSessionId;
     }
 }

@@ -1,6 +1,6 @@
-package nextstep.jwp.framework.http;
+package nextstep.jwp.framework.http.common;
 
-import static nextstep.jwp.framework.http.HttpRequest.LINE_DELIMITER;
+import static nextstep.jwp.framework.http.request.HttpRequest.LINE_DELIMITER;
 
 import java.util.HashMap;
 import java.util.Map;

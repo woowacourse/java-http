@@ -1,8 +1,8 @@
-package nextstep.jwp.framework.http;
+package nextstep.jwp.framework.http.common;
 
-import static nextstep.jwp.framework.http.HttpHeaders.HEADER_DELIMITER;
-import static nextstep.jwp.framework.http.HttpHeaders.SPACE;
-import static nextstep.jwp.framework.http.HttpRequest.LINE_DELIMITER;
+import static nextstep.jwp.framework.http.common.HttpHeaders.HEADER_DELIMITER;
+import static nextstep.jwp.framework.http.common.HttpHeaders.SPACE;
+import static nextstep.jwp.framework.http.request.HttpRequest.LINE_DELIMITER;
 
 import java.util.Collections;
 import java.util.HashMap;

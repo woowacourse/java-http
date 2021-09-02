@@ -1,8 +1,8 @@
-package nextstep.jwp.framework.http.HttpStatusState;
+package nextstep.jwp.framework.http.httpStatusState;
 
 import java.net.URL;
-import nextstep.jwp.framework.http.HttpPath;
-import nextstep.jwp.framework.http.HttpStatus;
+import nextstep.jwp.framework.http.common.HttpPath;
+import nextstep.jwp.framework.http.common.HttpStatus;
 
 public abstract class HttpStatusState {
 

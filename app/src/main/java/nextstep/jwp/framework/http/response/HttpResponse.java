@@ -1,6 +1,6 @@
-package nextstep.jwp.framework.http;
+package nextstep.jwp.framework.http.response;
 
-import static nextstep.jwp.framework.http.HttpRequest.LINE_DELIMITER;
+import static nextstep.jwp.framework.http.request.HttpRequest.LINE_DELIMITER;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,6 +8,11 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import nextstep.jwp.framework.http.common.HttpBody;
+import nextstep.jwp.framework.http.common.HttpHeaders;
+import nextstep.jwp.framework.http.common.HttpStatus;
+import nextstep.jwp.framework.http.common.ProtocolVersion;
+import nextstep.jwp.framework.http.request.HttpRequestLine;
 
 public class HttpResponse {
 

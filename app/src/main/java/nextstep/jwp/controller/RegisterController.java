@@ -3,10 +3,10 @@ package nextstep.jwp.controller;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.DBNotFoundException;
-import nextstep.jwp.framework.http.HttpBody;
-import nextstep.jwp.framework.http.HttpRequest;
-import nextstep.jwp.framework.http.HttpResponse;
-import nextstep.jwp.framework.http.HttpStatus;
+import nextstep.jwp.framework.http.common.HttpBody;
+import nextstep.jwp.framework.http.common.HttpStatus;
+import nextstep.jwp.framework.http.request.HttpRequest;
+import nextstep.jwp.framework.http.response.HttpResponse;
 import nextstep.jwp.model.User;
 
 public class RegisterController extends AbstractController {

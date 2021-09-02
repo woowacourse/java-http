@@ -6,11 +6,11 @@ import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.DefaultController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
-import nextstep.jwp.framework.http.HttpMethod;
-import nextstep.jwp.framework.http.HttpPath;
-import nextstep.jwp.framework.http.HttpRequest;
-import nextstep.jwp.framework.http.HttpRequestLine;
-import nextstep.jwp.framework.http.ProtocolVersion;
+import nextstep.jwp.framework.http.common.HttpMethod;
+import nextstep.jwp.framework.http.common.HttpPath;
+import nextstep.jwp.framework.http.request.HttpRequest;
+import nextstep.jwp.framework.http.request.HttpRequestLine;
+import nextstep.jwp.framework.http.common.ProtocolVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

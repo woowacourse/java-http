@@ -1,7 +1,7 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.framework.http.HttpRequest;
-import nextstep.jwp.framework.http.HttpResponse;
+import nextstep.jwp.framework.http.request.HttpRequest;
+import nextstep.jwp.framework.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,9 +1,13 @@
-package nextstep.jwp.framework.http;
+package nextstep.jwp.framework.http.request;
 
 import java.net.URL;
-import nextstep.jwp.framework.http.HttpStatusState.HttpNotFoundStatus;
-import nextstep.jwp.framework.http.HttpStatusState.HttpOKStatus;
-import nextstep.jwp.framework.http.HttpStatusState.HttpStatusState;
+import nextstep.jwp.framework.http.common.HttpMethod;
+import nextstep.jwp.framework.http.common.HttpPath;
+import nextstep.jwp.framework.http.common.HttpStatus;
+import nextstep.jwp.framework.http.common.ProtocolVersion;
+import nextstep.jwp.framework.http.httpStatusState.HttpNotFoundStatus;
+import nextstep.jwp.framework.http.httpStatusState.HttpOKStatus;
+import nextstep.jwp.framework.http.httpStatusState.HttpStatusState;
 
 public class HttpRequestLine {
 

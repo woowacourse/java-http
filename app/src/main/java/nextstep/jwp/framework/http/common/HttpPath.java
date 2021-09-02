@@ -1,4 +1,4 @@
-package nextstep.jwp.framework.http;
+package nextstep.jwp.framework.http.common;
 
 import java.net.URL;
 import java.util.Objects;

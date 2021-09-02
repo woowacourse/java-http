@@ -1,10 +1,10 @@
-package nextstep.jwp.framework.http.HttpStatusState;
+package nextstep.jwp.framework.http.httpStatusState;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URL;
-import nextstep.jwp.framework.http.HttpPath;
-import nextstep.jwp.framework.http.HttpStatus;
+import nextstep.jwp.framework.http.common.HttpPath;
+import nextstep.jwp.framework.http.common.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

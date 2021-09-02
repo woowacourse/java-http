@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 import nextstep.jwp.exception.MethodNotAllowedException;
 import nextstep.jwp.exception.NotFoundException;
+import nextstep.jwp.http.entity.HttpStatus;
 import nextstep.jwp.http.entity.HttpUri;
 
 public class ResourceResolver {
@@ -27,7 +28,7 @@ public class ResourceResolver {
         return false;
     }
 
-    public static String resolveResourceRequest(HttpRequest request) throws IOException {
+    public static void resolveResourceRequest(HttpRequest request, HttpResponse httpResponse) throws IOException {
         if (!request.method().isSame("GET")) {
             throw new MethodNotAllowedException("Resource요청은 GET만 가능합니다.");
         }
@@ -41,6 +42,10 @@ public class ResourceResolver {
         String responseBody = Files.readString(path);
         String contentType = Files.probeContentType(path);
 
-        return HttpResponse.ok(contentType, responseBody);
+        httpResponse.setHttpStatus(HttpStatus.OK);
+        if (contentType.equals("text/html")) {
+            contentType = "text/html;charset=utf-8";
+        }
+        httpResponse.setHttpBody(contentType, responseBody);
     }
 }

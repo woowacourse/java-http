@@ -17,3 +17,4 @@
 - ControllerAdvice 의 에러처리는 그 Map에 넣어둔 순서에 따라 영향을 받음.(Exception을 가장 먼저 넣게 되면 모든 Exception의 처리는 그 Map에 정의된 방법으로 진행)
 -> 현재 기능 구현을 LinkedHashMap으로 진행했지만, 실제로 ExceptionHandler에서는 어떻게 처리하는지 알아보고 이를 적용해보기(깊이가 가장 가까운 ExceptionHandling이 되는 것으로 알고 있음.)
 - ViewResolver에서의 에러 처리를 진행한다고 하자. 이게 서버 내부적인 로직의 문제이기 때문에, 500 response를 보내줘야 하나?(나의 View는 사용자에게 직접 노출되지 않는다.)
+- "text/html" 과 같은 파일 형식을 직접 file로 부터 얻어왔었는데, 이는 기존의 테스트가 깨지는 현상 ("text/html;charset=utf-8" 필요)발생. ContentType이라는 클래스를 별도로 분리하여 관리할지 고민

@@ -30,13 +30,11 @@ public class ControllerAdvice {
     private ControllerAdvice() {
     }
 
-    public static String handle(Exception exception) {
+    public static ExceptionHandler findExceptionHandler(Exception exception) {
 
-        ExceptionHandler exceptionHandler = handlers.entrySet().stream()
+        return handlers.entrySet().stream()
                 .filter(e -> e.getKey().isInstance(exception))
                 .map(Entry::getValue)
-                .findFirst().orElse(new InternalServerErrorExceptionHandler());
-
-        return exceptionHandler.handle(exception);
+                .findFirst().orElse(null);
     }
 }

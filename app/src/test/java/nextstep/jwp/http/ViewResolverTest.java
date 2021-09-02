@@ -20,14 +20,15 @@ class ViewResolverTest {
     void resolveView() throws IOException {
         String viewName = "index";
 
-        final URL resource = ViewResolver.class.getClassLoader().getResource("static/" + viewName + ".html");
+        String url = "static/" + viewName + ".html";
+        final URL resource = ViewResolver.class.getClassLoader().getResource(url);
         final Path path = new File(Objects.requireNonNull(resource).getPath()).toPath();
         String html = Files.readString(path);
         String expected = HttpResponse.ok("text/html", html);
 
-        String actual = ViewResolver.resolveView(viewName);
+        View view = ViewResolver.resolveView(viewName);
 
-        assertThat(actual).isEqualTo(expected);
+        assertThat(view).isEqualTo(new View(url));
     }
 
     @Test

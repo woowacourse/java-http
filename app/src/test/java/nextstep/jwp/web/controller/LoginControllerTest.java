@@ -6,7 +6,7 @@ import java.io.IOException;
 import nextstep.jwp.Fixture;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
-import nextstep.jwp.http.ViewResolver;
+import nextstep.jwp.http.entity.HttpStatus;
 import nextstep.jwp.web.db.InMemoryUserRepository;
 import nextstep.jwp.web.model.User;
 import org.junit.jupiter.api.Test;
@@ -18,9 +18,11 @@ class LoginControllerTest {
     @Test
     void get() throws IOException {
         HttpRequest httpRequest = Fixture.httpRequest("GET", "/login");
+        HttpResponse httpResponse = HttpResponse.empty();
 
-        String actual = controller.doService(httpRequest);
-        assertThat(actual).isEqualTo(ViewResolver.resolveView("login"));
+        controller.doService(httpRequest, httpResponse);
+
+        assertThat(httpResponse.httpStatus()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
@@ -31,8 +33,9 @@ class LoginControllerTest {
         InMemoryUserRepository.save(new User(null, account, password, "email@email.com"));
 
         HttpRequest httpRequest = Fixture.httpRequest("POST", "/login", "account=" + account + "&password=" + password);
+        HttpResponse httpResponse = HttpResponse.empty();
 
-        String actual = controller.doService(httpRequest);
-        assertThat(actual).isEqualTo(HttpResponse.found("/index.html"));
+        controller.doService(httpRequest, httpResponse);
+        assertThat(httpResponse.httpStatus()).isEqualTo(HttpStatus.FOUND);
     }
 }

@@ -3,24 +3,27 @@ package nextstep.jwp.web.controller;
 import java.io.IOException;
 import nextstep.jwp.exception.MethodNotAllowedException;
 import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.entity.HttpMethod;
 
 public abstract class AbstractController implements Controller {
 
     @Override
-    public String doService(HttpRequest httpRequest) throws IOException {
+    public void doService(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         HttpMethod method = httpRequest.method();
 
         if (method.isSame("GET")) {
-            return doGet(httpRequest);
+            doGet(httpRequest, httpResponse);
+            return;
         }
         if (method.isSame("POST")) {
-            return doPost(httpRequest);
+            doPost(httpRequest, httpResponse);
+            return;
         }
         throw new MethodNotAllowedException();
     }
 
-    protected abstract String doGet(HttpRequest httpRequest) throws IOException;
+    protected abstract void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException;
 
-    protected abstract String doPost(HttpRequest httpRequest);
+    protected abstract void doPost(HttpRequest httpRequest, HttpResponse httpResponse);
 }

@@ -14,6 +14,7 @@ import java.util.Objects;
 import nextstep.jwp.Fixture;
 import nextstep.jwp.exception.MethodNotAllowedException;
 import nextstep.jwp.exception.NotFoundException;
+import nextstep.jwp.http.entity.HttpStatus;
 import nextstep.jwp.http.entity.HttpUri;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,16 +45,19 @@ class ResourceResolverTest {
     void resolveResourceRequest() throws IOException {
         String uri = "/index.html";
         HttpRequest httpRequest = Fixture.httpRequest("GET", uri);
+        HttpResponse httpResponse = HttpResponse.empty();
 
         final URL resource = ResourceResolver.class.getClassLoader().getResource("static" + uri);
         final Path path = new File(Objects.requireNonNull(resource).getPath()).toPath();
 
         String responseBody = Files.readString(path);
-        String contentType = Files.probeContentType(path);
 
-        String actual = ResourceResolver.resolveResourceRequest(httpRequest);
+        ResourceResolver.resolveResourceRequest(httpRequest, httpResponse);
 
-        assertThat(actual).isEqualTo(HttpResponse.ok(contentType, responseBody));
+        assertThat(httpResponse.httpStatus()).isEqualTo(HttpStatus.OK);
+        assertThat(httpResponse.httpHeaders().get("Content-Type")).isEqualTo("text/html;charset=utf-8");
+        assertThat(httpResponse.httpBody().body()).isEqualTo(responseBody);
+
     }
 
     @Test
@@ -61,9 +65,10 @@ class ResourceResolverTest {
     void resolveResourceRequestNotExisting() {
         String uri = "/notExisting.html";
         HttpRequest httpRequest = Fixture.httpRequest("GET", uri);
+        HttpResponse httpResponse = HttpResponse.empty();
 
         assertThatThrownBy(
-                () -> ResourceResolver.resolveResourceRequest(httpRequest)
+                () -> ResourceResolver.resolveResourceRequest(httpRequest, httpResponse)
         ).isInstanceOf(NotFoundException.class);
     }
 
@@ -72,9 +77,10 @@ class ResourceResolverTest {
     void resolveResourceRequestWithPost() {
         String uri = "/index.html";
         HttpRequest httpRequest = Fixture.httpRequest("POST", uri);
+        HttpResponse httpResponse = HttpResponse.empty();
 
         assertThatThrownBy(
-                () -> ResourceResolver.resolveResourceRequest(httpRequest)
+                () -> ResourceResolver.resolveResourceRequest(httpRequest, httpResponse)
         ).isInstanceOf(MethodNotAllowedException.class);
     }
 }

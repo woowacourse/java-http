@@ -1,13 +1,16 @@
 package nextstep.jwp.http.entity;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class HttpHeaders {
     private final Map<String, String> headers;
 
     public HttpHeaders() {
-        this(new HashMap<>());
+        this(new LinkedHashMap<>());
     }
 
     public HttpHeaders(Map<String, String> headers) {
@@ -29,5 +32,13 @@ public class HttpHeaders {
 
     public String get(String headerName) {
         return headers.get(headerName);
+    }
+
+    public List<String> asString() {
+        List<String> list = new ArrayList<>();
+        for (Entry<String, String> header : headers.entrySet()) {
+            list.add(header.getKey() + ": " + header.getValue() + " ");
+        }
+        return list;
     }
 }

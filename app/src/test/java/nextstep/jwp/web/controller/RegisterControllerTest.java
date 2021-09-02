@@ -6,7 +6,7 @@ import java.io.IOException;
 import nextstep.jwp.Fixture;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
-import nextstep.jwp.http.ViewResolver;
+import nextstep.jwp.http.entity.HttpStatus;
 import nextstep.jwp.web.db.InMemoryUserRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -18,18 +18,20 @@ class RegisterControllerTest {
     @Test
     void get() throws IOException {
         HttpRequest httpRequest = Fixture.httpRequest("GET", "/register");
+        HttpResponse httpResponse = HttpResponse.empty();
 
-        String actual = controller.doService(httpRequest);
-        assertThat(actual).isEqualTo(ViewResolver.resolveView("register"));
+        controller.doService(httpRequest, httpResponse);
+        assertThat(httpResponse.httpStatus()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
     void post() throws IOException {
         HttpRequest httpRequest = Fixture.httpRequest("POST", "/register",
                 "account=wannte&password=password&email=test@test.com");
+        HttpResponse httpResponse = HttpResponse.empty();
 
-        String actual = controller.doService(httpRequest);
-        assertThat(actual).isEqualTo(HttpResponse.redirect("/index.html"));
+        controller.doService(httpRequest, httpResponse);
+        assertThat(httpResponse.httpStatus()).isEqualTo(HttpStatus.FOUND);
     }
 
     @AfterEach

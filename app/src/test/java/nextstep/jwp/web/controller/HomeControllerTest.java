@@ -7,7 +7,8 @@ import java.io.IOException;
 import nextstep.jwp.Fixture;
 import nextstep.jwp.exception.MethodNotAllowedException;
 import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.ViewResolver;
+import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.entity.HttpStatus;
 import org.junit.jupiter.api.Test;
 
 class HomeControllerTest {
@@ -16,17 +17,19 @@ class HomeControllerTest {
     @Test
     void get() throws IOException {
         HttpRequest httpRequest = Fixture.httpRequest("GET", "/");
+        HttpResponse httpResponse = HttpResponse.empty();
+        controller.doService(httpRequest, httpResponse);
 
-        String actual = controller.doService(httpRequest);
-        assertThat(actual).isEqualTo(ViewResolver.resolveView("index"));
+        assertThat(httpResponse.httpStatus()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
     void post() {
         HttpRequest httpRequest = Fixture.httpRequest("POST", "/");
+        HttpResponse httpResponse = HttpResponse.empty();
 
         assertThatThrownBy(
-                () -> controller.doService(httpRequest)
+                () -> controller.doService(httpRequest, httpResponse)
         ).isInstanceOf(MethodNotAllowedException.class);
     }
 }

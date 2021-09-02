@@ -11,6 +11,7 @@ import java.util.Objects;
 import nextstep.jwp.web.ControllerAdvice;
 import nextstep.jwp.web.RequestMapper;
 import nextstep.jwp.web.controller.Controller;
+import nextstep.jwp.web.exceptionhandler.ExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,10 +35,12 @@ public class RequestHandler implements Runnable {
 
             HttpRequest httpRequest = HttpRequestReader.read(inputStream);
 
-            String response = handle(httpRequest);
+            HttpResponse httpResponse = HttpResponse.empty();
 
-            log.debug("outputStream => {}", response);
-            outputStream.write(response.getBytes());
+            handle(httpRequest, httpResponse);
+
+            log.debug("outputStream => {}", httpResponse.asString());
+            outputStream.write(httpResponse.asString().getBytes());
             outputStream.flush();
         } catch (IllegalStateException exception) {
             log.info("IllegalStateException {}", exception.getMessage());
@@ -48,17 +51,19 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private String handle(HttpRequest httpRequest) throws IOException {
+    private void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         try {
             if (checkIfUriHasResourceExtension(httpRequest.uri())) {
-                return resolveResourceRequest(httpRequest);
+                resolveResourceRequest(httpRequest, httpResponse);
+                return;
             }
 
             Controller controller = RequestMapper.findController(httpRequest);
-            return controller.doService(httpRequest);
+            controller.doService(httpRequest, httpResponse);
 
         } catch (Exception exception) {
-            return ControllerAdvice.handle(exception);
+            ExceptionHandler handler = ControllerAdvice.findExceptionHandler(exception);
+            handler.handle(httpRequest, httpResponse);
         }
     }
 

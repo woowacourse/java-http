@@ -12,14 +12,16 @@ import nextstep.jwp.http.SupportedContentType;
 import nextstep.jwp.http.request.HttpRequest;
 
 public class RequestMapper {
+    public static final String NOT_FOUND = "NOT_FOUND";
     private static Map<String, Controller> HANDLER_MAP = new HashMap<>();
     private static Map<String, Controller> RESOURCE_MAP = new HashMap<>();
+
 
     static {
         HANDLER_MAP.put("/index", new IndexController());
         HANDLER_MAP.put("/register", new RegisterController());
         HANDLER_MAP.put("/login", new LoginController());
-        HANDLER_MAP.put("NOT_FOUND", new NotFoundController());
+        HANDLER_MAP.put(NOT_FOUND, new NotFoundController());
 
         RESOURCE_MAP.put(".html", new ResourceController());
         RESOURCE_MAP.put(".css", new ResourceController());
@@ -29,9 +31,9 @@ public class RequestMapper {
     public Controller getController(HttpRequest request) {
         SupportedContentType contentType = SupportedContentType.getContentType(request);
         if (contentType == SupportedContentType.NOTFOUND) {
-            return HANDLER_MAP.getOrDefault(request.getUri(), HANDLER_MAP.get("NOT_FOUND"));
+            return HANDLER_MAP.getOrDefault(request.getUri(), HANDLER_MAP.get(NOT_FOUND));
         }
-        return RESOURCE_MAP.getOrDefault(contentType.getExtention(), HANDLER_MAP.get("NOT_FOUND"));
+        return RESOURCE_MAP.getOrDefault(contentType.getExtention(), HANDLER_MAP.get(NOT_FOUND));
 
     }
 }

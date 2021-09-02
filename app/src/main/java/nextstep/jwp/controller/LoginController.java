@@ -57,7 +57,7 @@ public class LoginController extends AbstractController {
         session.setAttribute("user", foundUser);
 
         Cookie sessionCookie = new Cookie(HttpSession.SESSION_NAME, session.getId());
-        response.setCookie(sessionCookie);
+        response.cookie(sessionCookie);
     }
 
     private void redirectHomePage(HttpResponse response) {

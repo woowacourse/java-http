@@ -30,7 +30,7 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse setCookie(Cookie cookie) {
+    public HttpResponse cookie(Cookie cookie) {
         headers.put("Set-Cookie", String.join("=", cookie.getName(), cookie.getValue()));
         return this;
     }

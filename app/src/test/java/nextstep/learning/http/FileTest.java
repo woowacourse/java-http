@@ -31,7 +31,7 @@ class FileTest {
         URL resource = getClass().getClassLoader().getResource(fileName);
         final String actual = resource.getFile();
         System.out.println(actual);
-        assertThat(actual).endsWith("test/resources/nextstep.txt");
+        assertThat(actual).endsWith("nextstep.txt");
     }
 
     /**

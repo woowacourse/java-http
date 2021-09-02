@@ -1,21 +1,30 @@
 package nextstep;
 
+import static nextstep.jwp.webserver.response.ContentType.CSS;
 import static nextstep.jwp.webserver.response.ContentType.HTML;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.UUID;
 import nextstep.jwp.webserver.response.StatusCode;
+import nextstep.mockweb.option.MockOption;
 import nextstep.mockweb.request.MockRequest;
 import nextstep.mockweb.result.MockResult;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 public class AppTest {
+
+    @BeforeEach
+    void setUp() {
+        MockOption.setSessionId(UUID.randomUUID().toString());
+    }
 
     @DisplayName("페이지 테스트")
     @ParameterizedTest
@@ -33,6 +42,15 @@ public class AppTest {
     }
 
     @Test
+    @DisplayName("css 파일 확인")
+    public void resolveCss() throws Exception{
+        final MockResult result = MockRequest.get("/css/styles.css").result();
+        페이지_비교(result.body(), "css/styles.css");
+        assertThat(result.statusCode()).isEqualTo(StatusCode.OK);
+        assertThat(result.headerValue("Content-Type")).isEqualTo(CSS.contentType());
+    }
+
+    @Test
     @DisplayName("페이지를 찾을 수 없을 때")
     public void notFoundPage() throws Exception{
         // when
@@ -44,11 +62,41 @@ public class AppTest {
     }
 
     @Test
+    @DisplayName("로그인 실패")
+    public void login_fail() throws Exception{
+        final MockResult result = MockRequest.post("/login", null)
+                .addFormData("account", "nabom")
+                .addFormData("password", "nanana")
+                .logAll()
+                .result();
+
+        assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
+        assertThat(result.headerValue("Location")).isEqualTo("/unauthorized");
+    }
+
+    @Test
     @DisplayName("로그인 성공")
     public void login_success() throws Exception{
         final MockResult result = MockRequest.post("/login")
                 .addFormData("account", "nabom")
                 .addFormData("password", "nabom")
+                .logAll()
+                .result();
+
+        assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
+        assertThat(result.headerValue("Location")).isEqualTo("/");
+    }
+
+    @Test
+    @DisplayName("로그인 성공 이후 세션확인")
+    public void login_success_session() throws Exception{
+        MockRequest.post("/login")
+                .addFormData("account", "nabom")
+                .addFormData("password", "nabom")
+                .logAll()
+                .result();
+
+        final MockResult result = MockRequest.get("/login")
                 .logAll()
                 .result();
 
@@ -80,19 +128,6 @@ public class AppTest {
 
         assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
         assertThat(result.headerValue("Location")).isEqualTo("/register");
-    }
-
-    @Test
-    @DisplayName("로그인 실패")
-    public void login_fail() throws Exception{
-        final MockResult result = MockRequest.post("/login", null)
-                .addFormData("account", "nabom")
-                .addFormData("password", "nanana")
-                .logAll()
-                .result();
-
-        assertThat(result.statusCode()).isEqualTo(StatusCode.FOUND);
-        assertThat(result.headerValue("Location")).isEqualTo("/unauthorized");
     }
 
     private void 페이지_비교(String body, String path) {

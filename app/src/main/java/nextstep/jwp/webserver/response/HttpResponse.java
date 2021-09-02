@@ -1,5 +1,7 @@
 package nextstep.jwp.webserver.response;
 
+import nextstep.jwp.webserver.exception.NoFileExistsException;
+
 public interface HttpResponse {
 
     void addStatus(StatusCode statusCode);
@@ -10,7 +12,11 @@ public interface HttpResponse {
 
     String totalResponse();
 
-    void addPage(String path);
+    void addPage(String path) throws NoFileExistsException;
 
     void addRedirectUrl(String url);
+
+    void flush();
+
+    void flushAsRedirect(String redirectUrl);
 }

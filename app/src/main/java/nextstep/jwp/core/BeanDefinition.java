@@ -4,18 +4,16 @@ import java.lang.annotation.Annotation;
 
 public class BeanDefinition {
 
-    private Class<?> clazz;
-    private Object bean;
-    private String beanName;
+    private final Class<?> clazz;
+    private final Object bean;
 
-    public BeanDefinition(Class<?> clazz, Object bean, String beanName) {
+    public BeanDefinition(Class<?> clazz, Object bean) {
         this.clazz = clazz;
         this.bean = bean;
-        this.beanName = beanName;
     }
 
     public <U> boolean isTypeOf(Class<U> tClass) {
-        return clazz.isAssignableFrom(tClass);
+        return tClass.isAssignableFrom(clazz);
     }
 
     public Object getTarget() {

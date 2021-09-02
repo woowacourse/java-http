@@ -1,13 +1,13 @@
 package nextstep.jwp;
 
-import nextstep.jwp.core.mvc.FrontHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.stream.Stream;
+import nextstep.jwp.mvc.DispatcherServlet;
+import nextstep.jwp.webserver.request.HttpSessions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class WebServer {
 
@@ -16,16 +16,20 @@ public class WebServer {
     private static final int DEFAULT_PORT = 8080;
 
     private final int port;
+    private final DispatcherServlet dispatcherServlet;
+    private final HttpSessions httpSessions;
 
-    public WebServer(int port) {
+    public WebServer(int port, DispatcherServlet dispatcherServlet,
+            HttpSessions httpSessions) {
         this.port = checkPort(port);
+        this.dispatcherServlet = dispatcherServlet;
+        this.httpSessions = httpSessions;
     }
 
     public void run() {
-        FrontHandler frontHandler = new FrontHandler("nextstep");
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             logger.info("Web Server started {} port.", serverSocket.getLocalPort());
-            handle(serverSocket, frontHandler);
+            handle(serverSocket);
         } catch (IOException exception) {
             logger.error("Exception accepting connection", exception);
         } catch (RuntimeException exception) {
@@ -33,11 +37,10 @@ public class WebServer {
         }
     }
 
-    private void handle(ServerSocket serverSocket,
-            FrontHandler frontHandler) throws IOException {
+    private void handle(ServerSocket serverSocket) throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection, frontHandler)).start();
+            new Thread(new RequestHandler(connection, dispatcherServlet, httpSessions)).start();
         }
     }
 

@@ -1,12 +1,14 @@
 package nextstep.jwp.webserver.response;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import nextstep.jwp.webserver.exception.PageNotFoundException;
+import nextstep.jwp.webserver.exception.NoFileExistsException;
 
 public class DefaultHttpResponse implements HttpResponse {
 
@@ -18,14 +20,16 @@ public class DefaultHttpResponse implements HttpResponse {
     private static final String ENTER = "\r\n";
     private static final String LOCATION = "Location";
 
+    private final OutputStream outputStream;
+    private final Map<String, String> headers;
     private StatusCode statusCode;
-    private Map<String, String> headers;
     private StringBuilder content;
 
-    public DefaultHttpResponse() {
+    public DefaultHttpResponse(OutputStream outputStream) {
         this.statusCode = StatusCode.OK;
         this.headers = new HashMap<>();
         this.content = new StringBuilder();
+        this.outputStream = outputStream;
     }
 
     @Override
@@ -44,13 +48,13 @@ public class DefaultHttpResponse implements HttpResponse {
     }
 
     @Override
-    public void addPage(String path) {
+    public void addPage(String path) throws NoFileExistsException {
         try {
             final URL url = getClass().getClassLoader().getResource(path);
             byte[] body = Files.readAllBytes(new File(url.toURI()).toPath());
             content = new StringBuilder(new String(body));
         } catch (Exception e) {
-            throw new PageNotFoundException();
+            throw new NoFileExistsException();
         }
     }
 
@@ -58,6 +62,28 @@ public class DefaultHttpResponse implements HttpResponse {
     public void addRedirectUrl(String url) {
         addHeader(LOCATION, url);
         addStatus(StatusCode.FOUND);
+    }
+
+    @Override
+    public void flush() {
+        try {
+            outputStream.write(totalResponse().getBytes());
+            outputStream.flush();
+        } catch (IOException e) {
+            throw new IllegalStateException("error during output stream");
+        }
+    }
+
+    @Override
+    public void flushAsRedirect(String redirectUrl) {
+        addStatus(StatusCode.FOUND);
+        addHeader(LOCATION, redirectUrl);
+        replaceNewContent();
+        flush();
+    }
+
+    private void replaceNewContent() {
+        this.content = new StringBuilder();
     }
 
     @Override

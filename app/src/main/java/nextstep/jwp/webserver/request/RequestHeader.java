@@ -1,5 +1,7 @@
 package nextstep.jwp.webserver.request;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,15 +10,22 @@ public class RequestHeader {
     private static final String HEADER_REGEX = ":";
     private static final String CONTENT_LENGTH = "Content-Length";
 
-    private Map<String, String> headers;
+    private final Map<String, String> headers = new HashMap<>();
 
-    public RequestHeader() {
-        this.headers = new HashMap<>();
+    public RequestHeader(BufferedReader br) throws IOException {
+        parseHeader(br);
+    }
+
+    private void parseHeader(BufferedReader br) throws IOException {
+        String line;
+        while (!(line = br.readLine()).equals("")) {
+            add(line);
+        }
     }
 
     public void add(String header) {
-        String[] splitedHeaders = header.split(HEADER_REGEX);
-        headers.put(splitedHeaders[0], splitedHeaders[1].trim());
+        String[] splitHeaders = header.split(HEADER_REGEX);
+        headers.put(splitHeaders[0], splitHeaders[1].trim());
     }
 
     public int contentLength() {

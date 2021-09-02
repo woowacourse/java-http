@@ -5,13 +5,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import nextstep.jwp.core.exception.NotFoundBeanException;
 
 public class BeanContainer {
 
-    private Map<String, BeanDefinition> beanContainer;
+    private final Map<String, BeanDefinition> beanContainer;
 
     public BeanContainer() {
         this.beanContainer = new HashMap<>();
+    }
+
+    public void addBeans(BeanDefinition beanDefinition) {
+        beanContainer.put(beanDefinition.getTargetClass().getName(), beanDefinition);
     }
 
     public void addBeans(List<BeanDefinition> beanDefinitions) {
@@ -28,25 +33,12 @@ public class BeanContainer {
                 .collect(Collectors.toList());
     }
 
-    public <T> List<T> getBeansByType(Class<T> type) {
+    public <T> T getBean(Class<T> type) {
         return beanContainer.values().stream()
                 .filter(bean -> bean.isTypeOf(type))
                 .map(bean -> (T) bean.getTarget())
-                .collect(Collectors.toList());
-    }
-
-    public <T> T getBean(Class<T> type) {
-        return (T) beanContainer.values().stream()
-                .filter(bean -> bean.isTypeOf(type))
                 .findAny()
-                .orElseThrow();
+                .orElseThrow(NotFoundBeanException::new);
     }
 
-    public <T> T getBean(String key, Class<T> type) {
-        return (T) beanContainer.get(key).getTarget();
-    }
-
-    public Object getBean(String key) {
-        return beanContainer.get(key).getTarget();
-    }
 }

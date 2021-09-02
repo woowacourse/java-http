@@ -1,16 +1,13 @@
-package nextstep.jwp.core.mvc.mapping;
+package nextstep.jwp.mvc.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import nextstep.jwp.webserver.request.HttpMethod;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface RequestMapping {
+@Target(ElementType.PARAMETER)
+public @interface RequestParams {
 
-    String path();
-
-    HttpMethod method();
+    String name();
 }

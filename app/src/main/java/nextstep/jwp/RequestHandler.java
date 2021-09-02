@@ -3,6 +3,7 @@ package nextstep.jwp;
 import java.io.*;
 import java.net.Socket;
 import java.util.Objects;
+import java.util.UUID;
 
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.request.HttpRequest;
@@ -32,6 +33,10 @@ public class RequestHandler implements Runnable {
 
             HttpRequest httpRequest = new HttpRequest(bufferedReader);
             HttpResponse httpResponse = new HttpResponse(outputStream);
+
+            if (httpRequest.hasNoSessionId()) {
+                httpResponse.addHeader("Set-Cookie", "JSESSIONID=" + String.valueOf(UUID.randomUUID()));
+            }
 
             Controller controller = RequestMapper.getController(httpRequest.getPath());
             controller.process(httpRequest, httpResponse);

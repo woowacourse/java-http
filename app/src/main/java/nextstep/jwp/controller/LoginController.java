@@ -28,9 +28,6 @@ public class LoginController implements Controller {
                 return;
             }
 
-            if (request.hasNoSessionId()) {
-                response.addHeader("Set-Cookie", "JSESSIONID=" + String.valueOf(UUID.randomUUID()));
-            }
             response.redirect("/index.html");
         }
 

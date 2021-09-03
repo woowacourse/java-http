@@ -1,6 +1,6 @@
 package nextstep.jwp.controller;
 
-import static nextstep.jwp.controller.IndexController.INDEX_RESOURCE_PATH;
+import static nextstep.jwp.controller.DefaultController.INDEX_RESOURCE_PATH;
 
 import java.net.URLDecoder;
 import java.nio.charset.Charset;

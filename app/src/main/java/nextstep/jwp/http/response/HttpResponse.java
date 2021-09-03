@@ -4,6 +4,7 @@ import java.util.List;
 import nextstep.jwp.http.common.Body;
 import nextstep.jwp.http.common.HttpVersion;
 import nextstep.jwp.http.request.requestline.RequestPath;
+import nextstep.jwp.http.session.HttpCookie;
 
 public class HttpResponse {
 
@@ -54,6 +55,10 @@ public class HttpResponse {
         final ResponseHeaders headers = new ResponseHeaders();
         headers.putHeader("Location", uri);
         return of(HttpStatus.FOUND, headers, Body.empty());
+    }
+
+    public void setCookie(HttpCookie cookie) {
+        responseHeaders.setCookie(cookie);
     }
 
     public String asString() {

@@ -1,4 +1,4 @@
-package nextstep.jwp.http.request.session;
+package nextstep.jwp.http.session;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,7 +6,7 @@ import java.util.Map;
 public class HttpSession {
 
     private final String id;
-    private Map<String, Object> values = new HashMap<>();
+    private final Map<String, Object> values = new HashMap<>();
 
     HttpSession(String id) {
         this.id = id;

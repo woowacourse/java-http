@@ -15,7 +15,6 @@ public class RequestMapping {
         this.controllersMap = Map.of(
             new RequestPath("/login"), new LoginController(),
             new RequestPath("/register"), new RegisterController(),
-            new RequestPath("/index"), new IndexController(),
             new RequestPath("/"), new DefaultController()
         );
     }

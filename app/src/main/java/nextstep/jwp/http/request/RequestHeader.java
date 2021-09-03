@@ -3,11 +3,11 @@ package nextstep.jwp.http.request;
 import java.util.Map;
 import nextstep.jwp.http.HttpCookie;
 
-public class requestHeader {
+public class RequestHeader {
 
     private final Map<String, String> headers;
 
-    public requestHeader(Map<String, String> headers) {
+    public RequestHeader(Map<String, String> headers) {
         this.headers = headers;
     }
 

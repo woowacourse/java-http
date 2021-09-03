@@ -23,7 +23,7 @@ public class HttpRequest {
 
     private HttpMethod httpMethod;
     private RequestURI requestURI;
-    private requestHeader requestHeader;
+    private RequestHeader requestHeader;
     private RequestBody requestBody;
     private HttpSession httpSession;
 
@@ -54,7 +54,7 @@ public class HttpRequest {
         return requestBody;
     }
 
-    private requestHeader readHeaders(BufferedReader bufferedReader) throws IOException {
+    private RequestHeader readHeaders(BufferedReader bufferedReader) throws IOException {
         Map<String, String> map = new HashMap<>();
         while (bufferedReader.ready()) {
             String line = bufferedReader.readLine();
@@ -64,7 +64,7 @@ public class HttpRequest {
             String[] params = line.split(": ");
             map.put(params[KEY_INDEX], params[VALUE_INDEX].strip());
         }
-        return new requestHeader(map);
+        return new RequestHeader(map);
     }
 
     public HttpMethod getHttpMethod() {
@@ -75,7 +75,7 @@ public class HttpRequest {
         return this.requestURI.getUri();
     }
 
-    public requestHeader getHttpHeader() {
+    public RequestHeader getHttpHeader() {
         return this.requestHeader;
     }
 

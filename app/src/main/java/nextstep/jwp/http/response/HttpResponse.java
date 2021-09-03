@@ -40,12 +40,12 @@ public class HttpResponse {
         }
     }
 
-    private void notFound(String uri) {
+    private void notFound() {
         try {
-            ViewResolver viewResolver = new ViewResolver(uri);
+            ViewResolver viewResolver = new ViewResolver("/404.html");
             String content = viewResolver.getContent();
 
-            makeResponse(content, StatusCode.NOT_FOUND, uri);
+            makeResponse(content, StatusCode.NOT_FOUND, "/404.html");
         } catch (IOException e) {
             log.error(STREAM_EXCEPTION);
         }
@@ -54,7 +54,7 @@ public class HttpResponse {
 
     private void makeResponse(String content, StatusCode statusCode, String uri) {
         if (Objects.isNull(content)) {
-            notFound("/404.html");
+            notFound();
             return;
         }
         setStatusLine(statusCode);
@@ -76,6 +76,10 @@ public class HttpResponse {
         return toString().getBytes();
     }
 
+    public void setSessionCookie(String jsessionid) {
+        this.responseHeader.setSessionCookie(jsessionid);
+    }
+
     @Override
     public String toString() {
         if (Objects.isNull(responseBody)) {
@@ -83,9 +87,5 @@ public class HttpResponse {
         }
         return String.join("\r\n", statusLine.toString(), responseHeader.toString(),
             responseBody.toString());
-    }
-
-    public void setCookie(String jsessionid) {
-        this.responseHeader.setCookie(jsessionid);
     }
 }

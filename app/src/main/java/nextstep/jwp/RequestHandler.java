@@ -57,7 +57,7 @@ public class RequestHandler implements Runnable {
         if (jSessionId == null) {
             UUID uuid = UUID.randomUUID();
             jSessionId = uuid.toString();
-            httpResponse.setCookie(jSessionId);
+            httpResponse.setSessionCookie(jSessionId);
         }
 
     }

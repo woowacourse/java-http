@@ -8,7 +8,6 @@ import nextstep.joanne.server.http.request.HttpRequest;
 import nextstep.joanne.server.http.request.MessageBody;
 import nextstep.joanne.server.http.request.RequestLine;
 import nextstep.joanne.server.http.response.HttpResponse;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -16,18 +15,11 @@ import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 class RegisterControllerTest {
 
-    private RegisterController registerController;
-
-    @BeforeEach
-    void setUp() {
-        registerController = new RegisterController(
-                new RegisterService()
-        );
-    }
+    private final RegisterController registerController
+            = new RegisterController(new RegisterService());
 
     @DisplayName("Register에 대한 POST 요청을 한다.")
     @Test

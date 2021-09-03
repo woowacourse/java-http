@@ -3,13 +3,10 @@ package nextstep.joanne.dashboard.controller;
 import nextstep.joanne.dashboard.service.LoginService;
 import nextstep.joanne.server.http.Headers;
 import nextstep.joanne.server.http.HttpMethod;
-import nextstep.joanne.server.http.HttpSessions;
 import nextstep.joanne.server.http.request.HttpRequest;
 import nextstep.joanne.server.http.request.MessageBody;
 import nextstep.joanne.server.http.request.RequestLine;
 import nextstep.joanne.server.http.response.HttpResponse;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -18,14 +15,8 @@ import java.util.HashMap;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LoginControllerTest {
-    private LoginController loginController;
-
-    @BeforeEach
-    void setUp() {
-        loginController = new LoginController(
-                new LoginService()
-        );
-    }
+    private final LoginController loginController
+            = new LoginController(new LoginService());
 
     @DisplayName("Login에 대한 POST 요청을 한다.")
     @Test

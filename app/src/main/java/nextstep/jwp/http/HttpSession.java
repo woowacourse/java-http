@@ -20,14 +20,10 @@ public class HttpSession {
     }
 
     public void removeAttribute(String attribute) {
-        checkContainsAttribute(attribute, "삭제할 요소가 존재하지 않습니다.");
-        values.remove(attribute);
-    }
-
-    private void checkContainsAttribute(String attribute, String errorMessage) {
         if (!containsAttribute(attribute)) {
-            throw new IllegalArgumentException(errorMessage);
+            throw new IllegalArgumentException("삭제할 요소가 존재하지 않습니다.");
         }
+        values.remove(attribute);
     }
 
     public boolean containsAttribute(String attribute) {

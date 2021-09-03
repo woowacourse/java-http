@@ -44,10 +44,10 @@ public class HttpCookie {
         return cookies.get(JSESSIONID);
     }
 
-     public HttpCookie setJSessionCookie(String key, String value) {
+    public HttpCookie setJSessionCookie(String key, String value) {
         cookies.computeIfPresent(key, (k, v) -> cookies.replace(k, value));
         return this;
-     }
+    }
 
     @Override
     public String toString() {

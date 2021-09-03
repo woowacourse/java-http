@@ -4,7 +4,6 @@ import nextstep.jwp.model.User;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class HttpSessions {
     private static final Map<String, HttpSession> SESSIONS = new HashMap<>();

@@ -44,11 +44,7 @@ public class HttpResponse {
     }
 
     public String getBody() {
-        String body = "";
-        if (Objects.nonNull(this.body)) {
-            body = this.body.getBody();
-        }
-        return String.format("%s\r\n%s\r\n%s", getStatusLine(), getHeaders(), body);
+        return String.format("%s\r\n%s\r\n%s", getStatusLine(), getHeaders(), body.getBody());
     }
 
     public void redirect(String uri) {

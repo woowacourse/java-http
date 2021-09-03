@@ -8,10 +8,6 @@ import nextstep.joanne.server.http.response.HttpResponse;
 
 public class ControllerAdvice {
     public static void handle(HttpRequest httpRequest, HttpResponse httpResponse, HttpStatus httpStatus) {
-        mappedByStatusCode(httpRequest, httpResponse, httpStatus);
-    }
-
-    private static void mappedByStatusCode(HttpRequest httpRequest, HttpResponse httpResponse, HttpStatus httpStatus) {
         makeResponse(httpRequest, httpResponse, httpStatus);
     }
 

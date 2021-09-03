@@ -72,7 +72,6 @@ public class LoginController extends AbstractController {
     private JwpHttpResponse requestLoginPage() throws URISyntaxException, IOException {
         String resourceUri = RESOURCE_PREFIX + LOGIN_PAGE_PATH;
         String resourceFile = findResourceFile(resourceUri);
-        JwpHttpResponse response = JwpHttpResponse.ok(resourceUri, resourceFile);
-        return response;
+        return JwpHttpResponse.ok(resourceUri, resourceFile);
     }
 }

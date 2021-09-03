@@ -132,7 +132,6 @@ class RequestHandlerTest {
         // given
         HttpSession httpSession = new HttpSession(UUID.randomUUID().toString());
         httpSession.setAttribute("user", new User("gugu", "password", "hkkang@woowahan.com"));
-        when(HttpSessions.generate()).thenReturn(httpSession);
 
         String request = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
@@ -141,8 +140,12 @@ class RequestHandlerTest {
                 "Connection: keep-alive ",
                 "",
                 "");
+
         final MockSocket socket = new MockSocket(request);
         final RequestHandler requestHandler = new RequestHandler(socket);
+
+        when(HttpSessions.generate()).thenReturn(httpSession);
+        when(HttpSessions.getSession(httpSession.getId())).thenReturn(httpSession);
 
         // when
         requestHandler.run();

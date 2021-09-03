@@ -23,7 +23,6 @@ public class LoginController extends AbstractController {
     public JwpHttpResponse doGet(JwpHttpRequest request) throws URISyntaxException, IOException {
         if (request.hasSession()) {
             HttpSession session = request.getSession();
-            System.out.println("재접속하는 sessionId " + session.getId());
             return requestPageByUserInfo(session);
         }
 
@@ -56,10 +55,9 @@ public class LoginController extends AbstractController {
         if (user.checkPassword(password)) {
             HttpSession httpSession = HttpSessions.generate();
             httpSession.setAttribute("user", user);
-            System.out.println("저장하는 sessionId " + httpSession.getId());
             return new JwpHttpResponse.Builder()
                     .statusCode(StatusCode.FOUND)
-                    .cookie(HttpSessions.generate().getId())
+                    .cookie(httpSession.getId())
                     .location(LOGIN_SUCCESS_PATH)
                     .build();
         }

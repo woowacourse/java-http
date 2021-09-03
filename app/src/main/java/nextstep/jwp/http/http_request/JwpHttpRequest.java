@@ -112,10 +112,6 @@ public class JwpHttpRequest {
         return requestLine.getQueryParam(param);
     }
 
-    public HttpCookie getCookie() {
-        return cookie;
-    }
-
     public HttpSession getSession() {
         String sessionId = cookie.getCookie("JSESSIONID");
         return HttpSessions.getSession(sessionId);

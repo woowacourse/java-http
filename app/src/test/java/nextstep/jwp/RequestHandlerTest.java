@@ -1,5 +1,7 @@
 package nextstep.jwp;
 
+import nextstep.jwp.http.HttpSession;
+import nextstep.jwp.http.HttpSessions;
 import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.http.RequestHandler;
 import org.junit.jupiter.api.DisplayName;
@@ -52,6 +54,27 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
+                "");
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        String expected = getHttpResponse(HttpStatus.OK, LOGIN_HTML, LOGIN_CONTENT_LENGTH);
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("올바르지 않은 쿠키를 가지고 로그인 페이지에 접속한다. 새로운 로그인을 진행한다.")
+    void getLoginWithStrangeCookie() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
                 "");
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);

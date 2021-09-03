@@ -25,7 +25,7 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doPost(CustomHttpRequest request, CustomHttpResponse response) throws Exception {
+    protected void doPost(CustomHttpRequest request, CustomHttpResponse response) {
         log.debug("Http Request - POST /register");
         User user = new User(
                 request.getBodyValue("account"),

@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 public class ErrorController extends AbstractController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ErrorController.class);
-    private static final String NOT_FOUND_PATH = "/404";
 
     @Override
     protected View doGet(HttpRequest request, HttpResponse response) {

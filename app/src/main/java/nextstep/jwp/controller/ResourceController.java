@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 public class ResourceController extends AbstractController {
 
     private static final Logger LOG = LoggerFactory.getLogger(ResourceController.class);
-    private static final String BAD_REQUEST_PATH = "/400";
 
     @Override
     protected View doGet(HttpRequest request, HttpResponse response) {

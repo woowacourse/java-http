@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 public class LoginController extends AbstractController {
 
     private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);
-    private static final String HOME_PATH = "/index";
 
     private final Service service;
 

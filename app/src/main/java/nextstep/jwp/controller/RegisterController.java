@@ -17,8 +17,6 @@ import org.slf4j.LoggerFactory;
 public class RegisterController extends AbstractController {
 
     private static final Logger LOG = LoggerFactory.getLogger(RegisterController.class);
-    private static final String LOGIN_PATH = "/login";
-    private static final String HOME_PATH = "/index";
 
     private final Service service;
 

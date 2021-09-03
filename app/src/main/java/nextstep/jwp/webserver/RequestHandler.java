@@ -33,13 +33,14 @@ public class RequestHandler implements Runnable {
                 httpRequest = getHttpRequest(bufferedReader);
                 Controller controller = getController(httpRequest);
                 controller.service(httpRequest, httpResponse);
-            } catch (BaseException baseException) {
+            } catch (BaseException baseException) { // todo: ExceptionHandler 인터페이스 구현, ExceptionResolver에 등록
                 HttpResponse.errorPage(baseException, httpResponse);
                 log.error("BaseException", baseException);
             }
 
-            outputStream.write(httpResponse.toBytes());
-            outputStream.flush();
+            final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
+            writer.write(httpResponse.toHttpMessage());
+            writer.flush();
         } catch (IOException ioException) {
             log.error("Exception stream", ioException);
         } catch (Exception exception) {
@@ -54,7 +55,7 @@ public class RequestHandler implements Runnable {
     }
 
     private Controller getController(HttpRequest httpRequest) {
-        Controller controller = Router.get(httpRequest.getUri());
+        Controller controller = RequestMapping.get(httpRequest.getUri());
         return Objects.requireNonNullElseGet(controller, StaticFileController::new);
     }
 

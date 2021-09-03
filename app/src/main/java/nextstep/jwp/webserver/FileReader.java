@@ -10,17 +10,21 @@ import java.nio.file.Path;
 
 public class FileReader {
 
-    private static final FileReader fileReader = new FileReader();
+    private static final FileReader FILE_READER = new FileReader();
 
     private FileReader() {
     }
 
     public static String readStaticFile(String fileName) {
-        return fileReader.readFile(fileName);
+        return FILE_READER.readFile(fileName);
+    }
+
+    public static URL getStaticFileUrl(String fileName) {
+        return FILE_READER.getStaticUrl(fileName);
     }
 
     private String readFile(String fileName) {
-        URL resource = getClass().getClassLoader().getResource("static/" + fileName);
+        URL resource = getStaticUrl(fileName);
         if (resource == null) {
             throw new NotFoundException();
         }
@@ -33,4 +37,7 @@ public class FileReader {
         }
     }
 
+    private URL getStaticUrl(String fileName) {
+        return getClass().getClassLoader().getResource("static/" + fileName);
+    }
 }

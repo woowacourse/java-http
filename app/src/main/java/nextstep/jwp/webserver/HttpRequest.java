@@ -5,13 +5,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class HttpRequest {
 
-    private HttpHeaders httpHeaders;
+    private HttpHeaders httpHeaders = new HttpHeaders();
     private HttpMethod httpMethod;
+    private HttpCookie httpCookie = new HttpCookie();
+    private HttpSession httpSession;
     private QueryParams queryParams = new QueryParams();
-    private FormBody body = FormBody.emptyBody();
+    private FormBody body = new FormBody();
     private String uri;
 
     public HttpRequest(BufferedReader bufferedReader) {
@@ -31,22 +34,18 @@ public class HttpRequest {
     private void parseRequestLine(String requestLine) {
         String[] tokens = requestLine.split(" ");
         httpMethod = HttpMethod.from(tokens[0]);
-        parsePath(tokens[1]);
+        initUriAndQueryParams(tokens[1]);
     }
 
-    private void parsePath(String uriPath) {
-        String[] splitUri = uriPath.split("\\?");
-        uri = splitUri[0];
-
-        initQueryParams(splitUri);
-    }
-
-    private void initQueryParams(String[] splitUri) {
-        if (splitUri.length < 2) {
+    private void initUriAndQueryParams(String uriPath) {
+        int index = uriPath.indexOf("?");
+        if (index == -1) {
+            uri = uriPath;
             queryParams = new QueryParams();
             return;
         }
-        queryParams = new QueryParams(splitUri[1]);
+        uri = uriPath.substring(0, index);
+        queryParams = new QueryParams(uriPath.substring(index + 1));
     }
 
     private void initHeaders(BufferedReader br) throws IOException {
@@ -54,8 +53,28 @@ public class HttpRequest {
         for (String line = br.readLine(); !"".equals(line); line = br.readLine()) {
             lines.add(line);
         }
-
         httpHeaders = new HttpHeaders(lines);
+
+        initCookie();
+        initSession();
+    }
+
+    private void initSession() {
+        httpSession = Objects.requireNonNullElseGet(getSessionById(), () -> {
+            HttpSession session = new HttpSession(UUID.randomUUID().toString());
+            HttpSessions.setSession(session);
+            return session;
+        });
+    }
+
+    private HttpSession getSessionById() {
+        return HttpSessions.getSession(getCookie(HttpSessions.JSESSIONID));
+    }
+
+    private void initCookie() {
+        if (httpHeaders.contains("Cookie")) {
+            httpCookie = new HttpCookie(httpHeaders.get("Cookie"));
+        }
     }
 
     private void initBody(BufferedReader bufferedReader) throws IOException {
@@ -80,6 +99,18 @@ public class HttpRequest {
 
     public HttpMethod getHttpMethod() {
         return httpMethod;
+    }
+
+    public HttpSession getSession() {
+        return httpSession;
+    }
+
+    public String getCookie(String cookie) {
+        return httpCookie.get(cookie);
+    }
+
+    public boolean containsCookie(String cookie) {
+        return Objects.nonNull(getCookie(cookie));
     }
 
     public String getQueryParam(String param) {

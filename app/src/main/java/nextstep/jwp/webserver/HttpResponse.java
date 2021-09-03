@@ -1,52 +1,31 @@
 package nextstep.jwp.webserver;
 
+import java.util.Objects;
+
 public class HttpResponse {
 
     private StatusCode statusCode = StatusCode._200_OK;
     private HttpHeaders headers = new HttpHeaders();
     private String body = "";
 
-    public HttpResponse() {
-    }
-
     public static void errorPage(BaseException baseException, HttpResponse response) {
         String body = readErrorPage(baseException);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Content-Type", "text/html;charset=utf-8");
-        response.setHeaders(headers);
+        response.addHeaders("Content-Type", "text/html;charset=utf-8");
         response.setStatusCode(StatusCode._302_FOUND);
         response.setBody(body);
     }
 
     private static String readErrorPage(BaseException baseException) {
-        if (baseException.getStatusCode() == 401) {
+        int statusCode = baseException.getStatusCode();
+
+        if (statusCode == 401) {
             return FileReader.readStaticFile("401.html");
         }
-        if (baseException.getStatusCode() == 404) {
+        if (statusCode == 404 || statusCode == 405) {
             return FileReader.readStaticFile("404.html");
         }
         return FileReader.readStaticFile("500.html");
-    }
-
-    private void setDefaultHeaders() {
-        if (body != null && body.length() > 0) {
-            headers.set("Content-Length", String.valueOf(body.getBytes().length));
-        }
-    }
-
-    public byte[] toBytes() {
-        setDefaultHeaders();
-
-        String response = String.join("\r\n",
-                "HTTP/1.1 " + statusCode.getString(),
-                headers.getString());
-
-        if (body != null && body.length() > 0) {
-            response = String.join("\r\n", response, "", body);
-        }
-
-        return response.getBytes();
     }
 
     public void setBody(String body) {
@@ -57,7 +36,42 @@ public class HttpResponse {
         this.statusCode = statusCode;
     }
 
-    public void setHeaders(HttpHeaders headers) {
-        this.headers = headers;
+    public void addHeaders(String key, String value) {
+        headers.set(key, value);
+    }
+
+    public String toHttpMessage() {
+        setContentLength();
+        return convertToHttpMessage();
+    }
+
+    private void setContentLength() {
+        if (hasBody()) {
+            headers.set("Content-Length", String.valueOf(body.getBytes().length));
+        }
+    }
+
+    private boolean hasBody() {
+        return Objects.nonNull(body) && body.length() > 0;
+    }
+
+    private String convertToHttpMessage() {
+        return String.join("\r\n",
+                statusLine(),
+                headers(),
+                "",
+                body());
+    }
+
+    private String statusLine() {
+        return "HTTP/1.1 " + statusCode.getString();
+    }
+
+    private String headers() {
+        return headers.getString();
+    }
+
+    private String body() {
+        return Objects.requireNonNullElse(body, "");
     }
 }

@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class FormBody {
 
-    private Map<String, String> body;
+    private final Map<String, String> body;
 
     public FormBody() {
         this(new HashMap<>());
@@ -21,15 +21,17 @@ public class FormBody {
 
     private static Map<String, String> parseBody(String bodyString) {
         Map<String, String> body = new HashMap<>();
-        for (String queryString : bodyString.split("&")) {
-            String[] split = queryString.split("=");
-            body.put(split[0], split[1]);
+        for (String bodyEntity : bodyString.split("&")) {
+            putBody(body, bodyEntity.trim());
         }
         return body;
     }
 
-    public static FormBody emptyBody() {
-        return new FormBody();
+    private static void putBody(Map<String, String> body, String bodyString) {
+        int index = bodyString.indexOf("=");
+        String key = bodyString.substring(0, index);
+        String value = bodyString.substring(index + 1).trim();
+        body.put(key, value);
     }
 
     public String get(String name) {

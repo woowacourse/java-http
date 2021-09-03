@@ -38,7 +38,7 @@ public class InMemoryUserRepository {
         return database.get(account);
     }
 
-    public static boolean existsAccount(String account) {
+    public static boolean isExistAccount(String account) {
         return database.containsKey(account);
     }
 }

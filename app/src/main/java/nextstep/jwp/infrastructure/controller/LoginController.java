@@ -44,7 +44,7 @@ public class LoginController extends AbstractController {
         String password = request.getBodyValue("password");
 
         try {
-            if (loginService.checkAccountExist(account)) {
+            if (loginService.isExistAccount(account)) {
                 String sessionId = loginService.login(account, password);
                 response.addSessionCookieHeader(sessionId);
                 response.forward(LOGIN_SUCCESS_URL);

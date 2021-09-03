@@ -22,16 +22,7 @@ public class DispatcherServlet {
         View view = new View();
         Object handler = requestMapping.getHandler(request);
         if (handler == null) {
-            String path = request.getPath();
-            ModelAndView mv = new ModelAndView();
-
-            if (FileUtils.isStaticFile(path)) {
-                view = new StaticView(FileUtils.getAbsolutePath(path));
-                view.render(mv, request, response);
-                return;
-            }
-
-            sendError(request, response, mv, NOT_FOUND);
+            handleStaticView(request, response);
             return;
         }
 
@@ -45,25 +36,49 @@ public class DispatcherServlet {
         ModelAndView mv = adapter.handle(request, response, handler);
 
         if (mv.getViewName() == null) {
-            if (mv.hasModel()) {
-                view.render(mv, request, response);
-                return;
-            }
-            throw new IllegalArgumentException("출력할 수 없는 결과입니다.");
+            handleWithStringBody(request, response, view, mv);
+            return;
         }
 
         String viewName = mv.getViewName();
         if (viewName != null) {
-            view = new HTMLView();
-            mv.setViewName(resolveView(viewName));
-
-            if (response.getStatus() == REDIRECT) {
-                view.redirect(mv, response);
-                return;
-            }
-
-            view.render(mv, request, response);
+            handleDynamicView(request, response, mv, viewName);
         }
+    }
+
+    private void handleDynamicView(HttpRequest request, HttpResponse response, ModelAndView mv, String viewName) throws IOException {
+        View view;
+        view = new HTMLView();
+        mv.setViewName(resolveView(viewName));
+
+        if (response.getStatus() == REDIRECT) {
+            view.redirect(mv, response);
+            return;
+        }
+
+        view.render(mv, request, response);
+    }
+
+    private void handleWithStringBody(HttpRequest request, HttpResponse response, View view, ModelAndView mv) throws IOException {
+        if (mv.hasModel()) {
+            view.render(mv, request, response);
+            return;
+        }
+        throw new IllegalArgumentException("출력할 수 없는 결과입니다.");
+    }
+
+    private void handleStaticView(HttpRequest request, HttpResponse response) throws IOException {
+        View view;
+        String path = request.getPath();
+        ModelAndView mv = new ModelAndView();
+
+        if (FileUtils.isStaticFile(path)) {
+            view = new StaticView(FileUtils.getAbsolutePath(path));
+            view.render(mv, request, response);
+            return;
+        }
+
+        sendError(request, response, mv, NOT_FOUND);
     }
 
     private void sendError(HttpRequest request, HttpResponse response, ModelAndView mv, HttpStatus status) throws IOException {

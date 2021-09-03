@@ -8,7 +8,7 @@ public class NotFoundExceptionHandler implements ExceptionHandler {
 
     @Override
     public void handle(HttpRequest httpRequest, HttpResponse httpResponse) {
-        httpResponse.setHttpStatus(HttpStatus.NOT_FOUND);
+        httpResponse.setHttpStatus(HttpStatus.FOUND);
         httpResponse.setLocation("/404.html");
     }
 }

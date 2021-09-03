@@ -24,6 +24,14 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
+    public static boolean exist(User user) {
+        return findByUser(user).isPresent();
+    }
+
+    private static Optional<User> findByUser(User user) {
+        return findByAccount(user.getAccount());
+    }
+
     public static Optional<User> findByAccount(String account) {
         return Optional.ofNullable(database.get(account));
     }

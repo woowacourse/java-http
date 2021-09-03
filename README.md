@@ -75,6 +75,18 @@
 
 <br>
 
+### 쿠키, 세션 구현 
+- 쿠키
+    - [x] HttpRequest에 포함되는 HttpCookie 구현
+- 세션
+    - [x] 클라이언트 세션들을 관리하는 HttpSessions 구현 
+    - [x] 세션과 해당 세션에 저장된 속성들을 관리하는 HttpSession 구현
+- 동작 기능 
+    - [x] 클라이언트의 요청(현재는 로그인 요청시)에 `Cookie ` 필드에 세션 값이 없다면 
+        - [x] `Set-Cookie`에 `JSESSIONID={}` 값을 추가해서 응답한다.
+    - [x] 로그인 요청 시 세션 아이디가 있다면 로그인 된 상태이므로 바로 `index.html`로 리다이렉트 한다. 
+
+
 ## 추후 리팩토링
 - [x] BufferReader, InputStreamReader `close()`
 - [x] 도메인 ID 관리 로직 변경 
@@ -83,6 +95,8 @@
 - [ ] Header enum으로 관리
 - [ ] ViewResolver 구현
 - [ ] 요청 메세지 파싱 로직 개션
+- [ ] 세션 만료기간 설정 로직 구현
+- [ ] 컬렉션에서 Optional 제거 
 
 
 <br>

@@ -13,7 +13,7 @@ class HttpCookieTest {
         //given
         String cookies = "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
         //when
-        HttpCookie httpCookie = new HttpCookie(cookies);
+        HttpCookie httpCookie = HttpCookie.from(cookies);
         //then
         assertThat(httpCookie.size()).isEqualTo(3);
     }
@@ -24,7 +24,7 @@ class HttpCookieTest {
         //given
         String cookies = "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
         //when
-        HttpCookie httpCookie = new HttpCookie(cookies);
+        HttpCookie httpCookie = HttpCookie.from(cookies);
         //then
         assertThat(httpCookie.getSessionId()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
     }

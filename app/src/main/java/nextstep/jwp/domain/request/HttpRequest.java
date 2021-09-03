@@ -5,6 +5,7 @@ import nextstep.jwp.domain.HttpSession;
 import nextstep.jwp.domain.HttpSessions;
 import nextstep.jwp.domain.Uri;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -46,9 +47,9 @@ public class HttpRequest {
     private static HttpCookie extractCookies(Map<String, String> httpHeaders) {
         if (Objects.nonNull(httpHeaders) && httpHeaders.containsKey("Cookie")) {
             String cookies = httpHeaders.get("Cookie");
-            return new HttpCookie(cookies);
+            return HttpCookie.from(cookies);
         }
-        return null;
+        return new HttpCookie(new HashMap<>());
     }
 
     public String getMethod() {
@@ -91,12 +92,19 @@ public class HttpRequest {
     private HttpSession getHttpSessionByJSessionId() {
         String jSessionId = httpCookie.getSessionId();
         if (Objects.isNull(jSessionId)) {
-            return null;
+            return new HttpSession(UUID.randomUUID().toString());
         }
         return HttpSessions.getSession(jSessionId);
     }
 
     public HttpCookie getHttpCookie() {
+        if (Objects.isNull(httpCookie)) {
+            return new HttpCookie(new HashMap<>());
+        }
         return httpCookie;
+    }
+
+    public void assignSession(HttpSession httpSession) {
+        this.httpSession = httpSession;
     }
 }

@@ -12,23 +12,28 @@ public class HttpCookie {
     private static final int KEY = 0;
     private static final int VALUE = 1;
 
-    private final Map<String, String> values;
+    private final Map<String, String> cookieMap;
 
-    public HttpCookie(String cookie) {
-        this.values = Stream.of(cookie.split(COOKIES_DELIMITER))
+    public HttpCookie(Map<String, String> cookieMap) {
+        this.cookieMap = cookieMap;
+    }
+
+    public static HttpCookie from(String cookies) {
+        Map<String, String> cookieMap = Stream.of(cookies.split(COOKIES_DELIMITER))
                 .map(x -> x.split(COOKIE_VALUE_DELIMITER))
                 .collect(Collectors.toMap(splitCookie -> splitCookie[KEY].trim(), splitCookie -> splitCookie[VALUE].trim()));
+        return new HttpCookie(cookieMap);
     }
 
     public String getSessionId() {
-        return values.get(JSESSIONID);
+        return cookieMap.get(JSESSIONID);
     }
 
     public int size() {
-        return values.size();
+        return cookieMap.size();
     }
 
-    public Map<String, String> getValues() {
-        return values;
+    public Map<String, String> getCookieMap() {
+        return cookieMap;
     }
 }

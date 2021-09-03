@@ -24,7 +24,7 @@ public class LoginController extends AbstractController {
 
     private HttpResponse getRespond(HttpRequest request, HttpResponse response, HttpSession session) throws IOException {
         if (Objects.nonNull(session) && Objects.nonNull(session.getAttribute("user"))) {
-            response.setCookie(request.getHttpCookie());
+            response.setCookie(session, request.getHttpCookie());
             return response.redirect("/index.html");
         }
         return response.respond(request.getUri() + ".html");
@@ -52,7 +52,8 @@ public class LoginController extends AbstractController {
             final HttpSession httpSession = request.getSession();
             httpSession.setAttribute("user", user);
             HttpSessions.put(httpSession.getId(), httpSession);
-            response.setCookie(request.getHttpCookie());
+            request.assignSession(httpSession);
+            response.setCookie(httpSession, request.getHttpCookie());
             return response.redirect("index.html");
         }
         return response.redirect("/index.html");

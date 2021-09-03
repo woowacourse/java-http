@@ -38,7 +38,6 @@ public class RequestHandler implements Runnable {
             Controller matchedController = requestMapper.getController(httpRequest);
             HttpResponse response = matchedController.service(httpRequest);
 
-
             outputStream.write(response.getResponseToString().getBytes());
             outputStream.flush();
 

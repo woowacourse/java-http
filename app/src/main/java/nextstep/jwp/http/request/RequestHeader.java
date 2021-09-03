@@ -19,7 +19,6 @@ public class RequestHeader {
         this(headers, HttpCookie.EMPTY);
     }
 
-
     public static RequestHeader createFromBufferedReader(BufferedReader bufferedReader) throws IOException {
         final Map<String, String> headers = new HashMap<>();
         while (bufferedReader.ready()) {

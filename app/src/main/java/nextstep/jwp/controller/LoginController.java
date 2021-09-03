@@ -24,7 +24,6 @@ public class LoginController extends AbstractController {
         return ResponseReference.createSessionRedirectResponse(request, session, "/index.html");
     }
 
-
     @Override
     protected HttpResponse doGet(HttpRequest request) throws Exception {
         if (loginUserExistsSession(request)) {

@@ -11,8 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -67,10 +66,8 @@ class RequestHandlerTest {
         CustomHttpResponse response = new CustomHttpResponse();
         String resource = ResourceFinder.resource("/login.html");
         response.setStatusLine(StatusCode.OK, "HTTP/1.1");
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", ContentType.HTML.getContentType());
-        headers.put("Content-Length", resource.getBytes().length + "");
-        response.setHeaders(headers);
+        response.addHeaders("Content-Type", Collections.singletonList(ContentType.HTML.getContentType()));
+        response.addHeaders("Content-Length", Collections.singletonList(resource.getBytes().length + ""));
         response.setResponseBody(resource);
         String expected = new String(response.getBodyBytes());
         assertThat(socket.output()).isEqualTo(expected);
@@ -98,13 +95,9 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        CustomHttpResponse response = new CustomHttpResponse();
-        response.setStatusLine(StatusCode.FOUND, "HTTP/1.1");
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Location", "/index.html");
-        response.setHeaders(headers);
-        String expected = new String(response.getBodyBytes());
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains("HTTP/1.1 302 FOUND");
+        assertThat(socket.output()).contains("Location: /index.html");
+        assertThat(socket.output()).contains("Set-Cookie: ");
     }
 
     @Test
@@ -131,9 +124,7 @@ class RequestHandlerTest {
         // then
         CustomHttpResponse response = new CustomHttpResponse();
         response.setStatusLine(StatusCode.FOUND, "HTTP/1.1");
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Location", "/401.html");
-        response.setHeaders(headers);
+        response.forward("/401.html");
         String expected = new String(response.getBodyBytes());
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -159,10 +150,8 @@ class RequestHandlerTest {
         CustomHttpResponse response = new CustomHttpResponse();
         String resource = ResourceFinder.resource("/register.html");
         response.setStatusLine(StatusCode.OK, "HTTP/1.1");
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", ContentType.HTML.getContentType());
-        headers.put("Content-Length", resource.getBytes().length + "");
-        response.setHeaders(headers);
+        response.addHeaders("Content-Type", Collections.singletonList(ContentType.HTML.getContentType()));
+        response.addHeaders("Content-Length", Collections.singletonList(resource.getBytes().length + ""));
         response.setResponseBody(resource);
         String expected = new String(response.getBodyBytes());
         assertThat(socket.output()).isEqualTo(expected);
@@ -192,9 +181,7 @@ class RequestHandlerTest {
         // then
         CustomHttpResponse response = new CustomHttpResponse();
         response.setStatusLine(StatusCode.FOUND, "HTTP/1.1");
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put("Location", "/login.html");
-        response.setHeaders(headers);
+        response.forward("/login.html");
         String expected = new String(response.getBodyBytes());
         assertThat(socket.output()).isEqualTo(expected);
     }

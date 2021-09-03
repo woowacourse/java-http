@@ -15,24 +15,12 @@ public class HttpResponse {
     public HttpResponse() {
     }
 
-    public HttpResponse(final HttpStatus status, final String location) {
-        this.response = makeRedirectResponse(status, location);
-    }
-
     public HttpResponse(final HttpStatus status, final HttpContentType httpContentType, final String location) {
         this.response = makeContentResponse(status, httpContentType, location);
     }
 
     public HttpResponse(final HttpStatus status, final HttpCookie httpCookie, final String location) {
         this.response = makeContentResponseWithCookie(status, httpCookie, location);
-    }
-
-    private String makeRedirectResponse(final HttpStatus status, final String location) {
-        try {
-            return getRedirectHttpResponse(status, location);
-        } catch (RuntimeException e) {
-            return NOT_FOUND_RESPONSE.getResponse();
-        }
     }
 
     private String makeContentResponse(final HttpStatus status, final HttpContentType httpContentType, final String contentUrl) {
@@ -49,13 +37,6 @@ public class HttpResponse {
         } catch (RuntimeException e) {
             return NOT_FOUND_RESPONSE.getResponse();
         }
-    }
-
-    private String getRedirectHttpResponse(final HttpStatus status, final String location) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + status.toString(),
-                "Location: " + location,
-                "");
     }
 
     private String getHttpResponse(final HttpStatus status, final HttpContentType httpContentType, final String responseBody) {

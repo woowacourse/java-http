@@ -1,69 +1,65 @@
 package nextstep.jwp.http.message.response;
 
-import nextstep.jwp.http.common.HttpStatusCode;
-import nextstep.jwp.http.message.HeaderFields;
 import nextstep.jwp.http.message.HttpMessage;
 import nextstep.jwp.http.message.MessageBody;
+import nextstep.jwp.http.message.MessageHeader;
+import nextstep.jwp.http.message.StartLine;
+import nextstep.jwp.utils.BytesUtils;
 
-import java.nio.ByteBuffer;
+import java.util.Objects;
 
 public class HttpResponseMessage implements HttpMessage {
 
-    private static final String LINE_SEPARATOR = "\r\n";
+    private static final String NEW_LINE = "\r\n";
 
-    private final ResponseHeader responseHeader;
-    private MessageBody responseBody;
+    private final StartLine statusLine;
+    private final MessageHeader responseHeader;
+    private final MessageBody responseBody;
 
-    public HttpResponseMessage() {
-        this(new ResponseHeader(), new MessageBody());
-    }
-
-    public HttpResponseMessage(String httpVersion, HttpStatusCode httpStatusCode, HeaderFields headerFields) {
-        this(httpVersion, httpStatusCode, headerFields, new MessageBody());
-    }
-
-    public HttpResponseMessage(String httpVersion, HttpStatusCode httpStatusCode, HeaderFields headerFields, MessageBody messageBody) {
-        this(new ResponseHeader(httpVersion, httpStatusCode, headerFields), messageBody);
-    }
-
-    private HttpResponseMessage(ResponseHeader responseHeader, MessageBody responseBody) {
+    public HttpResponseMessage(StartLine statusLine, MessageHeader responseHeader, MessageBody responseBody) {
+        this.statusLine = statusLine;
         this.responseHeader = responseHeader;
         this.responseBody = responseBody;
     }
 
-    public void putHeader(String key, String value) {
-        this.responseHeader.putHeader(key, value);
-    }
-
-    public void setStatusCode(HttpStatusCode httpStatusCode) {
-        responseHeader.setHttpStatusCode(httpStatusCode);
-    }
-
-    public void setMessageBody(MessageBody messageBody) {
-        this.responseBody = messageBody;
+    @Override
+    public StartLine getStartLine() {
+        return this.statusLine;
     }
 
     @Override
-    public byte[] toBytes() {
-        byte[] headerBytes = responseHeader.toBytes();
-        byte[] separatorBytes = LINE_SEPARATOR.getBytes();
-        byte[] bodyBytes = responseBody.getBytes();
-
-        return ByteBuffer.allocate(headerBytes.length + separatorBytes.length + bodyBytes.length)
-                .put(headerBytes)
-                .put(separatorBytes)
-                .put(bodyBytes)
-                .array();
-    }
-
-    @Override
-    public ResponseHeader getHeader() {
-        return responseHeader;
+    public MessageHeader getHeader() {
+        return this.responseHeader;
     }
 
     @Override
     public MessageBody getBody() {
         return this.responseBody;
+    }
+
+    @Override
+    public byte[] toBytes() {
+        return BytesUtils.concat(
+                statusLine.toBytes(),
+                responseHeader.toBytes(),
+                NEW_LINE.getBytes(),
+                responseBody.getBytes()
+        );
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        HttpResponseMessage that = (HttpResponseMessage) o;
+        return Objects.equals(statusLine, that.statusLine)
+                && Objects.equals(responseHeader, that.responseHeader)
+                && Objects.equals(responseBody, that.responseBody);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(statusLine, responseHeader, responseBody);
     }
 
     @Override

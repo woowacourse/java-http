@@ -34,6 +34,10 @@ public enum HttpStatusCode {
                 );
     }
 
+    public String getCodeAsString() {
+        return String.valueOf(code);
+    }
+
     public int getCode() {
         return code;
     }

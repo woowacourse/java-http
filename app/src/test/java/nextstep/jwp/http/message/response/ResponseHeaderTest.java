@@ -1,34 +1,51 @@
 package nextstep.jwp.http.message.response;
 
-import nextstep.jwp.http.common.HttpStatusCode;
 import nextstep.jwp.http.message.HeaderFields;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ResponseHeaderTest {
 
-    @DisplayName("ResponseHeader를 생성하고 문자열로 변환한다.")
+    @DisplayName("ResponseHeader 를 생성한다.")
     @Test
-    void createAndConvertToString() {
+    void create() {
         // given
-        LinkedHashMap<String, String> fields = new LinkedHashMap<>();
-        fields.put("Content-Type", "text/html;charset=utf-8");
-        fields.put("Content-Length", "5564");
-        HeaderFields headerFields = new HeaderFields(fields);
-
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n";
+        HeaderFields headerFields = headerFields();
 
         // when
-        ResponseHeader responseHeader = new ResponseHeader("HTTP/1.1", HttpStatusCode.OK, headerFields);
-        String headerString = responseHeader.convertToString();
+        ResponseHeader responseHeader = new ResponseHeader(headerFields);
 
         // then
-        assertThat(headerString).isEqualTo(expected);
+        assertThat(responseHeader.getHeaderFields()).isEqualTo(headerFields);
+    }
+
+    @DisplayName("RequestHeader 를 바이트 배열로 변환한다.")
+    @Test
+    void toBytes() {
+        // given
+        String headerMessage = "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: 5564\r\n";
+        byte[] expect = headerMessage.getBytes();
+        ResponseHeader responseHeader = new ResponseHeader(headerFields());
+
+        // when
+        byte[] bytes = responseHeader.toBytes();
+
+        // then
+        AssertionsForClassTypes.assertThat(bytes).isEqualTo(expect);
+    }
+
+    private HeaderFields headerFields() {
+        LinkedHashMap<String, String> headerParams = new LinkedHashMap<>();
+        headerParams.put("Content-Type", "text/html;charset=utf-8");
+        headerParams.put("Content-Length", "5564");
+        HeaderFields headerFields = new HeaderFields(headerParams);
+        return headerFields;
     }
 }

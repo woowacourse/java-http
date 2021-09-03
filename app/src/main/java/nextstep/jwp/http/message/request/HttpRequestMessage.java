@@ -56,7 +56,9 @@ public class HttpRequestMessage implements HttpMessage {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         HttpRequestMessage that = (HttpRequestMessage) o;
-        return Objects.equals(requestLine, that.requestLine) && Objects.equals(requestHeader, that.requestHeader) && Objects.equals(requestBody, that.requestBody);
+        return Objects.equals(requestLine, that.requestLine)
+                && Objects.equals(requestHeader, that.requestHeader)
+                && Objects.equals(requestBody, that.requestBody);
     }
 
     @Override

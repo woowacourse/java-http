@@ -7,7 +7,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,11 +36,12 @@ class RequestHandlerTest {
         String expectedBody = getResponseBody("static/index.html");
         String expected = String.join("\r\n",
                 "HTTP/1.1 200 Ok",
+                "Set-Cookie: JSESSIONID=[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}",
                 "Content-Length: " + expectedBody.getBytes().length,
                 "Content-Type: text/html;charset=utf-8",
                 "",
                 expectedBody);
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).containsPattern(expected);
     }
 
     @Test
@@ -63,11 +67,12 @@ class RequestHandlerTest {
         // then
         String expected = String.join("\r\n",
                 "HTTP/1.1 302 Found",
+                "Set-Cookie: JSESSIONID=[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}",
                 "Location: /index.html",
                 "",
                 ""
         );
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).containsPattern(expected);
     }
 
     @Test
@@ -87,14 +92,18 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
+        String expectedRequestLine = "HTTP/1.1 200 Ok";
         String expectedBody = getResponseBody("static/register.html");
-        String expected = String.join("\r\n",
-                "HTTP/1.1 200 Ok",
+        List<String> headers = Arrays.asList(
                 "Content-Length: " + expectedBody.getBytes().length,
-                "Content-Type: text/html;charset=utf-8",
-                "",
-                expectedBody);
-        assertThat(socket.output()).isEqualTo(expected);
+                "Content-Type: text/html;charset=utf-8"
+        );
+        String setCookieRegex = "Set-Cookie: JSESSIONID=[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}";
+
+        assertThat(socket.output()).startsWith(expectedRequestLine);
+        assertThat(socket.output()).containsPattern(setCookieRegex);
+        assertThat(socket.output()).contains(headers);
+        assertThat(socket.output()).endsWith(expectedBody);
     }
 
     @Test
@@ -119,11 +128,12 @@ class RequestHandlerTest {
         // then
         String expected = String.join("\r\n",
                 "HTTP/1.1 302 Found",
+                "Set-Cookie: JSESSIONID=[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}",
                 "Location: /index.html",
                 "",
                 ""
         );
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).containsPattern(Pattern.compile(expected));
     }
 
     @Test
@@ -145,14 +155,18 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
+        String expectedRequestLine = "HTTP/1.1 200 Ok";
         String expectedBody = getResponseBody("static/css/styles.css");
-        String expected = String.join("\r\n",
-                "HTTP/1.1 200 Ok",
+        List<String> headers = Arrays.asList(
                 "Content-Length: " + expectedBody.getBytes().length,
-                "Content-Type: text/css;charset=utf-8",
-                "",
-                expectedBody);
-        assertThat(socket.output()).isEqualTo(expected);
+                "Content-Type: text/css;charset=utf-8"
+        );
+        String setCookieRegex = "Set-Cookie: JSESSIONID=[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}";
+
+        assertThat(socket.output()).startsWith(expectedRequestLine);
+        assertThat(socket.output()).containsPattern(setCookieRegex);
+        assertThat(socket.output()).contains(headers);
+        assertThat(socket.output()).endsWith(expectedBody);
     }
 
     private String getResponseBody(String fileName) throws IOException {

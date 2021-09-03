@@ -1,6 +1,8 @@
 package nextstep.jwp.framework.http;
 
-import java.util.Map;
+import java.util.Objects;
+
+import nextstep.jwp.framework.http.formatter.RequestLineFormatter;
 
 public class RequestLine {
     private final HttpMethod method;
@@ -8,15 +10,13 @@ public class RequestLine {
     private final HttpVersion version;
 
     public RequestLine(HttpMethod method, String uri, HttpVersion version) {
-        this.method = method;
-        this.uri = new URI(uri);
-        this.version = version;
+        this(method, new URI(uri), version);
     }
 
     public RequestLine(HttpMethod method, URI uri, HttpVersion version) {
-        this.method = method;
-        this.uri = uri;
-        this.version = version;
+        this.method = Objects.requireNonNull(method);
+        this.uri = Objects.requireNonNull(uri);
+        this.version = Objects.requireNonNull(version);
     }
 
     public HttpMethod getMethod() {
@@ -35,7 +35,8 @@ public class RequestLine {
         return uri.isSamePath(path);
     }
 
-    public Map<String, String> getQueries() {
-        return uri.getQueries();
+    @Override
+    public String toString() {
+        return new RequestLineFormatter(this).transform();
     }
 }

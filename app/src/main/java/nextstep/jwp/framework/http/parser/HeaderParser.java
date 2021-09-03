@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import nextstep.jwp.framework.http.HttpRequest;
+import nextstep.jwp.framework.util.StringUtils;
 
 public class HeaderParser extends AbstractHttpParser {
 
@@ -26,22 +27,28 @@ public class HeaderParser extends AbstractHttpParser {
 
     @Override
     public String readParsingContent() throws IOException {
-        String line;
         StringBuilder headers = new StringBuilder();
-        while (hasLength(line = reader.readLine())) {
+
+        String line;
+        while (StringUtils.hasLength(line = reader.readLine())) {
             headers.append(line).append(CRLF);
         }
+
         return headers.toString();
     }
 
     @Override
     public HttpParser parse() throws IOException {
         String headers = readParsingContent();
+        if (!StringUtils.hasLength(headers)) {
+            return new EndLineParser(reader, builder);
+        }
+
         for (String headerLine : separateHeaders(headers)) {
             final List<String> header = separateNameAndValue(headerLine);
             final String name = header.get(NAME_INDEX).trim();
             final String values = header.get(VALUES_INDEX).trim();
-            builder.header(name, values);
+            builder.httpHeaders(name, values);
         }
 
         return new BodyParser(reader, builder);

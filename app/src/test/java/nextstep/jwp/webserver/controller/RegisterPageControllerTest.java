@@ -4,8 +4,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import nextstep.jwp.framework.http.*;
+import nextstep.jwp.framework.http.template.RedirectResponseTemplate;
 import nextstep.jwp.framework.http.template.ResourceResponseTemplate;
-import nextstep.jwp.framework.http.template.StringResponseTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,7 +44,7 @@ class RegisterPageControllerTest {
         final HttpResponse httpResponse = registerPageController.handle(httpRequest);
 
         //then
-        final HttpResponse expected = new StringResponseTemplate().found("/index.html");
+        final HttpResponse expected = new RedirectResponseTemplate().found("/index.html");
         assertThat(httpResponse).usingRecursiveComparison().isEqualTo(expected);
     }
 }

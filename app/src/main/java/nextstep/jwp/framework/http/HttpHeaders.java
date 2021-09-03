@@ -17,11 +17,11 @@ public class HttpHeaders {
     public static final String REFERER = "Referer";
     public static final String ORIGIN = "Origin";
 
-    // Entity Header,
+    // Entity Header
     public static final String CONTENT_LENGTH = "Content-Length";
     public static final String CONTENT_TYPE = "Content-Type";
 
-    // Response Header,
+    // Response Header
     public static final String LOCATION = "Location";
     public static final String SERVER = "Server";
     public static final String SET_COOKIE = "Set-Cookie";
@@ -37,7 +37,11 @@ public class HttpHeaders {
     }
 
     public HttpHeaders(Map<String, String> httpHeaders) {
-        this.headers = httpHeaders;
+        this.headers = new LinkedHashMap<>(httpHeaders);
+    }
+
+    public static HttpHeaders of(String name, String value) {
+        return new HttpHeaders().addHeader(name, value);
     }
 
     public Map<String, String> getHeaders() {
@@ -51,15 +55,6 @@ public class HttpHeaders {
     public HttpHeaders addHeader(String name, String value) {
         headers.put(name, value);
         return this;
-    }
-
-    public HttpHeaders addAll(HttpHeaders headers) {
-        this.headers.putAll(headers.headers);
-        return this;
-    }
-
-    public boolean isEmpty() {
-        return headers.isEmpty();
     }
 
     public boolean contains(String name) {

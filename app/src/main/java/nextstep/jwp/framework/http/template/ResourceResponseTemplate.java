@@ -16,7 +16,7 @@ public class ResourceResponseTemplate extends AbstractResponseTemplate {
         return template(HttpStatus.UNAUTHORIZED, path);
     }
 
-    private HttpResponse template(HttpStatus httpStatus, String path) {
+    public HttpResponse template(HttpStatus httpStatus, String path) {
         return template(httpStatus, new HttpHeaders(), path);
     }
 

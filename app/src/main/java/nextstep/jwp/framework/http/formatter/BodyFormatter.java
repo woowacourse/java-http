@@ -2,19 +2,21 @@ package nextstep.jwp.framework.http.formatter;
 
 import nextstep.jwp.framework.http.HttpMessage;
 
-public class BodyFormatter extends AbstractHttpFormatter {
+public class BodyFormatter implements HttpFormatter {
 
-    public BodyFormatter(HttpMessage httpMessage) {
-        super(httpMessage);
+    private final String body;
+
+    public BodyFormatter(String body) {
+        this.body = body;
     }
 
     @Override
     public String transform() {
-        return httpMessage.getBody();
+        return body;
     }
 
     @Override
-    public HttpFormatter convertNextFormatter() {
-        return new EndLineFormatter(httpMessage);
+    public HttpFormatter convertNextFormatter(HttpMessage httpMessage) {
+        return new EndLineFormatter();
     }
 }

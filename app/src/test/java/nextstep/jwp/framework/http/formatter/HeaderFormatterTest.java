@@ -8,7 +8,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import nextstep.jwp.framework.http.HttpHeaders;
-import nextstep.jwp.framework.http.HttpResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,8 +19,7 @@ class HeaderFormatterTest {
     void transformTest(HttpHeaders httpHeaders, String expected) {
 
         // given
-        final HttpResponse httpResponse = new HttpResponse.Builder().httpHeaders(httpHeaders).build();
-        final HeaderFormatter headerFormatter = new HeaderFormatter(httpResponse);
+        final HeaderFormatter headerFormatter = new HeaderFormatter(httpHeaders);
 
         // when
         final String httpStatusLine = headerFormatter.transform();

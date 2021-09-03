@@ -11,12 +11,8 @@ public abstract class AbstractHttpParser implements HttpParser {
     protected final HttpRequest.Builder builder;
 
     protected AbstractHttpParser(BufferedReader reader, HttpRequest.Builder builder) {
-        this.builder = builder;
-        this.reader = reader;
-    }
-
-    public static boolean hasLength(String line) {
-        return Objects.nonNull(line) && !line.isBlank();
+        this.builder = Objects.requireNonNull(builder);
+        this.reader = Objects.requireNonNull(reader);
     }
 
     @Override

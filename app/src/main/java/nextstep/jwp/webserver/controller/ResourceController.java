@@ -3,11 +3,13 @@ package nextstep.jwp.webserver.controller;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
 
 import nextstep.jwp.framework.context.AbstractController;
 import nextstep.jwp.framework.http.HttpMethod;
 import nextstep.jwp.framework.http.HttpRequest;
 import nextstep.jwp.framework.http.HttpResponse;
+import nextstep.jwp.framework.http.HttpStatus;
 import nextstep.jwp.framework.http.template.ResourceResponseTemplate;
 import nextstep.jwp.framework.util.ResourceUtils;
 
@@ -35,6 +37,11 @@ public class ResourceController extends AbstractController {
 
     @Override
     public HttpResponse doGet(HttpRequest httpRequest) {
-        return new ResourceResponseTemplate().ok(httpRequest.getPath());
+        final HttpStatus httpStatus = HttpStatus.resolve(httpRequest.getPath());
+        if (Objects.isNull(httpStatus)) {
+            return new ResourceResponseTemplate().ok(httpRequest.getPath());
+        }
+
+        return new ResourceResponseTemplate().template(httpStatus, httpRequest.getPath());
     }
 }

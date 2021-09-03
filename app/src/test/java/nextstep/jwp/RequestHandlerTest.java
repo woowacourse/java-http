@@ -78,4 +78,29 @@ class RequestHandlerTest {
                 ResourceUtils.readString("/404.html"));
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void serverError() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        String expected = String.join("\r\n", "HTTP/1.1 500 Internal Server Error",
+                "Content-Type: text/html; charset=utf-8 ",
+                "Content-Length: 2357 ",
+                "",
+                ResourceUtils.readString("/500.html"));
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

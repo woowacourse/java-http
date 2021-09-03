@@ -2,7 +2,7 @@ package nextstep.jwp.framework.http;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
+import java.util.Objects;
 
 import nextstep.jwp.framework.http.formatter.HttpFormatter;
 import nextstep.jwp.framework.http.formatter.RequestLineFormatter;
@@ -14,16 +14,26 @@ public class HttpRequest implements HttpMessage {
 
     private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
+    private final HttpCookies httpCookies;
     private final String requestBody;
 
     public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders, String requestBody) {
-        this.requestLine = requestLine;
-        this.httpHeaders = httpHeaders;
-        this.requestBody = requestBody;
+        this(requestLine, httpHeaders, new HttpCookies(), requestBody);
+    }
+
+    public HttpRequest(RequestLine requestLine, HttpHeaders httpHeaders, HttpCookies httpCookies, String requestBody) {
+        this.requestLine = Objects.requireNonNull(requestLine);
+        this.httpHeaders = Objects.requireNonNull(httpHeaders);
+        this.httpCookies = Objects.requireNonNull(httpCookies);
+        this.requestBody = Objects.requireNonNullElse(requestBody, EMPTY);
     }
 
     public static HttpRequest from(InputStream inputStream) throws IOException {
         return new HttpRequestParser(inputStream).parseRequest();
+    }
+
+    public RequestLine getRequestLine() {
+        return requestLine;
     }
 
     public HttpMethod getMethod() {
@@ -34,24 +44,32 @@ public class HttpRequest implements HttpMessage {
         return requestLine.getPath();
     }
 
-    public String getVersion() {
-        return requestLine.getVersion();
+    @Override
+    public HttpHeaders getHttpHeaders() {
+        return httpHeaders;
     }
 
-    public Map<String, String> getQueries() {
-        return requestLine.getQueries();
+    @Override
+    public String getHeader(String headerName) {
+        return httpHeaders.get(headerName);
     }
 
-    public String getValueFromQuery(String key) {
-        return getQueries().get(key);
-    }
-
-    public RequestLine getRequestLine() {
-        return requestLine;
+    @Override
+    public String getBody() {
+        return requestBody;
     }
 
     public boolean isSamePath(String uri) {
         return requestLine.isSamePath(uri);
+    }
+
+    public HttpSession getSession() {
+        if (!httpCookies.contains(HttpSession.JSESSIONID)) {
+            return new HttpSession();
+        }
+
+        final String sessionId = httpCookies.getValueBy(HttpSession.JSESSIONID);
+        return HttpSessions.getSessionOrDefault(sessionId, new HttpSession());
     }
 
     public String readAfterExceptBody() {
@@ -59,23 +77,13 @@ public class HttpRequest implements HttpMessage {
                                                                  .overwrite(EMPTY)
                                                                  .build();
 
-        HttpFormatter httpFormatter = new RequestLineFormatter(httpRequest);
+        HttpFormatter httpFormatter = new RequestLineFormatter(httpRequest.requestLine);
         StringBuilder stringBuilder = new StringBuilder();
         while (httpFormatter.canRead()) {
             stringBuilder.append(httpFormatter.transform());
-            httpFormatter = httpFormatter.convertNextFormatter();
+            httpFormatter = httpFormatter.convertNextFormatter(httpRequest);
         }
         return stringBuilder.toString();
-    }
-
-    @Override
-    public HttpHeaders getHttpHeaders() {
-        return httpHeaders;
-    }
-
-    @Override
-    public String getBody() {
-        return requestBody;
     }
 
     public static class Builder {
@@ -101,7 +109,7 @@ public class HttpRequest implements HttpMessage {
             return this;
         }
 
-        public Builder header(String name, String value) {
+        public Builder httpHeaders(String name, String value) {
             this.httpHeaders.addHeader(name, value);
             return this;
         }
@@ -131,7 +139,7 @@ public class HttpRequest implements HttpMessage {
         }
 
         public HttpRequest build() {
-            return new HttpRequest(requestLine, httpHeaders, requestBody.toString());
+            return new HttpRequest(requestLine, httpHeaders, HttpCookies.from(getHeaderValue(HttpHeaders.COOKIE)), requestBody.toString());
         }
 
         public boolean hasHeader(String headerName) {

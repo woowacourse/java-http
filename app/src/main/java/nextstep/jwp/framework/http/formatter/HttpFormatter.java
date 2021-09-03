@@ -1,10 +1,14 @@
 package nextstep.jwp.framework.http.formatter;
 
-public interface HttpFormatter {
+import nextstep.jwp.framework.http.HttpMessage;
 
-    boolean canRead();
+public interface HttpFormatter {
 
     String transform();
 
-    HttpFormatter convertNextFormatter();
+    HttpFormatter convertNextFormatter(HttpMessage httpMessage);
+
+    default boolean canRead() {
+        return true;
+    }
 }

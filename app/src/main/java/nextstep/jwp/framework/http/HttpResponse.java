@@ -14,8 +14,8 @@ public class HttpResponse implements HttpMessage {
     private final String responseBody;
 
     public HttpResponse(StatusLine statusLine, HttpHeaders httpHeaders, String responseBody) {
-        this.statusLine = statusLine;
-        this.httpHeaders = httpHeaders;
+        this.statusLine = Objects.requireNonNull(statusLine);
+        this.httpHeaders = Objects.requireNonNull(httpHeaders);
         this.responseBody = Objects.requireNonNullElse(responseBody, EMPTY);
     }
 
@@ -27,10 +27,17 @@ public class HttpResponse implements HttpMessage {
         return statusLine;
     }
 
+    @Override
     public HttpHeaders getHttpHeaders() {
         return httpHeaders;
     }
 
+    @Override
+    public String getHeader(String headerName) {
+        return httpHeaders.get(headerName);
+    }
+
+    @Override
     public String getBody() {
         return responseBody;
     }
@@ -40,11 +47,11 @@ public class HttpResponse implements HttpMessage {
     }
 
     public String readAsString(HttpResponse httpResponse) {
-        HttpFormatter httpFormatter = new StatusLineFormatter(httpResponse);
+        HttpFormatter httpFormatter = new StatusLineFormatter(httpResponse.statusLine);
         StringBuilder stringBuilder = new StringBuilder();
         while (httpFormatter.canRead()) {
             stringBuilder.append(httpFormatter.transform());
-            httpFormatter = httpFormatter.convertNextFormatter();
+            httpFormatter = httpFormatter.convertNextFormatter(httpResponse);
         }
         return stringBuilder.toString();
     }

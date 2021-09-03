@@ -1,10 +1,12 @@
 package nextstep.jwp.framework.context;
 
+import java.util.EnumSet;
 import java.util.Set;
 
 import nextstep.jwp.framework.http.HttpMethod;
 import nextstep.jwp.framework.http.HttpRequest;
 import nextstep.jwp.framework.http.HttpResponse;
+import nextstep.jwp.framework.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,8 +19,8 @@ public abstract class AbstractController implements Controller {
     protected final Set<HttpMethod> handlingMethod;
 
     protected AbstractController(String mappingUri, Set<HttpMethod> handlingMethod) {
-        this.mappingUri = mappingUri;
-        this.handlingMethod = handlingMethod;
+        this.mappingUri = StringUtils.requireNonBlank(mappingUri);
+        this.handlingMethod = EnumSet.copyOf(handlingMethod);
     }
 
     @Override
@@ -40,8 +42,7 @@ public abstract class AbstractController implements Controller {
         throw new IllegalArgumentException("등록되지 않은 HTTP Method 입니다.");
     }
 
-    @Override
-    public HttpResponse doGet(HttpRequest httpRequest) {
+    protected HttpResponse doGet(HttpRequest httpRequest) {
         logUnsupportedRequest(httpRequest);
         throw new UnsupportedOperationException();
     }
@@ -51,8 +52,7 @@ public abstract class AbstractController implements Controller {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public HttpResponse doPost(HttpRequest httpRequest) {
+    protected HttpResponse doPost(HttpRequest httpRequest) {
         logUnsupportedRequest(httpRequest);
         throw new UnsupportedOperationException();
     }

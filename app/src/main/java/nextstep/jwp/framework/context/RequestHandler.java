@@ -4,8 +4,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Objects;
 
-import nextstep.jwp.framework.http.HttpRequest;
-import nextstep.jwp.framework.http.HttpResponse;
+import nextstep.jwp.framework.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,23 +26,37 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-
-            final HttpRequest httpRequest = HttpRequest.from(inputStream);
-            final Controller controller = ControllerMapping.findController(httpRequest);
-            final HttpResponse httpResponse = controller.handle(httpRequest);
-
-            log.info(MESSAGE_LOG_FORMAT, httpRequest.readAfterExceptBody(), httpResponse.readAfterExceptBody());
-
-            final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
-            writer.write(httpResponse.readAsString());
-            writer.flush();
-        } catch (IOException exception) {
-            log.error("Exception stream", exception);
-        } catch (Exception e) {
-            log.error("error : {}", e.getMessage());
+            doService(inputStream, outputStream);
+        } catch (IOException ioException) {
+            log.error("IOException", ioException);
         } finally {
             close();
         }
+    }
+
+    private void doService(InputStream inputStream, OutputStream outputStream) throws IOException {
+        try {
+            doDispatch(inputStream, outputStream);
+        } catch (IOException ioException) {
+            throw ioException;
+        } catch (Exception exception) {
+            log.error("Exception", exception);
+
+            final String requestLine = new RequestLine(HttpMethod.GET, "/500.html", HttpVersion.HTTP_1_1).toString();
+            doDispatch(new ByteArrayInputStream(requestLine.getBytes()), outputStream);
+        }
+    }
+
+    private void doDispatch(InputStream inputStream, OutputStream outputStream) throws IOException {
+        final HttpRequest httpRequest = HttpRequest.from(inputStream);
+        final Controller controller = ControllerMapping.findController(httpRequest);
+        final HttpResponse httpResponse = controller.handle(httpRequest);
+
+        log.info(MESSAGE_LOG_FORMAT, httpRequest.readAfterExceptBody(), httpResponse.readAfterExceptBody());
+
+        final BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(outputStream));
+        writer.write(httpResponse.readAsString());
+        writer.flush();
     }
 
     private void close() {

@@ -8,8 +8,4 @@ public interface Controller {
     boolean canHandle(HttpRequest httpRequest);
 
     HttpResponse handle(HttpRequest httpRequest);
-
-    HttpResponse doGet(HttpRequest httpRequest);
-
-    HttpResponse doPost(HttpRequest httpRequest);
 }

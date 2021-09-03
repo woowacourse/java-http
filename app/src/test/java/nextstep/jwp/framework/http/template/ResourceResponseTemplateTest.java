@@ -1,9 +1,11 @@
-package nextstep.jwp.framework.http;
+package nextstep.jwp.framework.http.template;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import nextstep.jwp.framework.http.template.ResourceResponseTemplate;
+import nextstep.jwp.framework.http.ContentType;
+import nextstep.jwp.framework.http.HttpResponse;
+import nextstep.jwp.framework.http.HttpStatus;
 import nextstep.jwp.framework.util.ResourceUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -7,8 +7,8 @@ import nextstep.jwp.framework.http.HttpMethod;
 import nextstep.jwp.framework.http.HttpRequest;
 import nextstep.jwp.framework.http.HttpResponse;
 import nextstep.jwp.framework.http.Query;
+import nextstep.jwp.framework.http.template.RedirectResponseTemplate;
 import nextstep.jwp.framework.http.template.ResourceResponseTemplate;
-import nextstep.jwp.framework.http.template.StringResponseTemplate;
 import nextstep.jwp.webserver.model.User;
 import nextstep.jwp.webserver.service.UserService;
 import org.slf4j.Logger;
@@ -42,6 +42,6 @@ public class RegisterPageController extends AbstractController {
         final User user = new User(account, email, password);
         userService.register(user);
 
-        return new StringResponseTemplate().found("/index.html");
+        return new RedirectResponseTemplate().found("/index.html");
     }
 }

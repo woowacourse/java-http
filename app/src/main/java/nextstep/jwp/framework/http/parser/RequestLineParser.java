@@ -7,6 +7,7 @@ import nextstep.jwp.framework.http.HttpMethod;
 import nextstep.jwp.framework.http.HttpRequest;
 import nextstep.jwp.framework.http.HttpVersion;
 import nextstep.jwp.framework.http.URI;
+import nextstep.jwp.framework.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,16 +32,7 @@ public class RequestLineParser extends AbstractHttpParser {
 
     @Override
     public String readParsingContent() throws IOException {
-        if (!reader.ready()) {
-            throw new IllegalArgumentException("RequestLine 이 비어있습니다.");
-        }
-
-        String line = reader.readLine();
-        if (!hasLength(line)) {
-            throw new IllegalArgumentException("RequestLine 이 비어있습니다.");
-        }
-
-        return line;
+        return StringUtils.requireNonBlank(reader.readLine());
     }
 
     @Override

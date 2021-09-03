@@ -2,6 +2,7 @@ package nextstep.jwp.framework.http;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Query {
 
@@ -12,11 +13,11 @@ public class Query {
     }
 
     public Query(String queries) {
-        this(Parser.parse(queries));
+        this(Parser.parse(Objects.requireNonNull(queries)));
     }
 
     public Query(Map<String, String> queries) {
-        this.queries = queries;
+        this.queries = new HashMap<>(queries);
     }
 
     public Map<String, String> getQueries() {

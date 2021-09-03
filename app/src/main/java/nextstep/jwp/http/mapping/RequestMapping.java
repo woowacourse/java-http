@@ -1,11 +1,11 @@
 package nextstep.jwp.http.mapping;
 
-import nextstep.jwp.app.ui.Controller;
 import nextstep.jwp.app.ui.DefaultController;
 import nextstep.jwp.app.ui.LoginController;
 import nextstep.jwp.app.ui.RegisterController;
 import nextstep.jwp.app.ui.ResourceController;
 import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.mvc.controller.Controller;
 
 public class RequestMapping {
 

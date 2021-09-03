@@ -3,6 +3,7 @@ package nextstep.jwp.http.response;
 import java.io.IOException;
 import nextstep.jwp.http.common.HttpHeaders;
 import nextstep.jwp.http.common.ResourceFile;
+import nextstep.jwp.http.common.session.HttpCookie;
 
 public class HttpResponse {
 
@@ -30,17 +31,10 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public void setHttpStatus(HttpStatus httpStatus) {
-        this.httpStatus = httpStatus;
-    }
-
     public void addHeader(String key, String value) {
         httpHeaders.addHeader(key, value);
     }
 
-    public void setBody(String body) {
-        this.body = body;
-    }
 
     public HttpStatus getHttpStatus() {
         return httpStatus;
@@ -71,16 +65,24 @@ public class HttpResponse {
     public HttpResponse forward(String uri, HttpStatus httpStatus) throws IOException {
         ResourceFile resourceFile = new ResourceFile(uri);
         String body = resourceFile.getContent();
-        setHttpStatus(httpStatus);
+        this.httpStatus = httpStatus;
         addHeader(CONTENT_TYPE, resourceFile.getContentType());
         addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
-        setBody(body);
+        this.body = body;
         return this;
     }
 
+    public HttpResponse sendRedirect(String uri) {
+        return sendRedirect(uri, HttpStatus.FOUND);
+    }
+
     public HttpResponse sendRedirect(String uri, HttpStatus httpStatus) {
-        setHttpStatus(httpStatus);
+        this.httpStatus = httpStatus;
         httpHeaders.addHeader(LOCATION, uri);
         return this;
+    }
+
+    public void setCookie(HttpCookie cookie) {
+        this.httpHeaders.setCookie(cookie);
     }
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpStatus;
+import nextstep.jwp.mvc.controller.Controller;
 
 public class ResourceController implements Controller {
 
@@ -14,7 +15,7 @@ public class ResourceController implements Controller {
             String path = request.getPath();
             return findHttpResponse(request, response, path);
         } catch (Exception e) {
-            return response.sendRedirect(ERROR_404_HTML, HttpStatus.NOT_FOUND);
+            return response.sendRedirect(ERROR_404_HTML);
         }
     }
 

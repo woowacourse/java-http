@@ -6,12 +6,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Map;
 import java.util.Objects;
-import nextstep.jwp.app.ui.Controller;
+import nextstep.jwp.http.common.session.HttpCookie;
+import nextstep.jwp.http.common.session.HttpSessions;
 import nextstep.jwp.http.mapping.RequestMapping;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.util.RequestConverter;
+import nextstep.jwp.mvc.controller.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,16 +33,17 @@ public class RequestHandler implements Runnable {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
                 connection.getPort());
 
-        try (final InputStream inputStream = connection.getInputStream();
-                final OutputStream outputStream = connection.getOutputStream()) {
+        try (
+                final InputStream inputStream = connection.getInputStream();
+                final OutputStream outputStream = connection.getOutputStream();
+                final BufferedReader bufferedReader = new BufferedReader(
+                        new InputStreamReader(inputStream))
+        ) {
+            final HttpRequest request = RequestConverter.convertToHttpRequest(bufferedReader);
+            final Controller controller = RequestMapping.getController(request);
+            final HttpResponse response = controller.service(request);
 
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-            final HttpRequest httpRequest = RequestConverter.convertToHttpRequest(bufferedReader);
-            final Controller controller = RequestMapping.getController(httpRequest);
-            final HttpResponse httpResponse = controller.service(httpRequest);
-
-            outputStream.write(httpResponse.getResponseByByte());
+            outputStream.write(response.getResponseByByte());
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);

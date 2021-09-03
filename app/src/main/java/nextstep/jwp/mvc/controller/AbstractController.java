@@ -1,4 +1,4 @@
-package nextstep.jwp.app.ui;
+package nextstep.jwp.mvc.controller;
 
 import java.io.IOException;
 import nextstep.jwp.http.common.HttpMethod;

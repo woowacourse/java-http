@@ -42,16 +42,15 @@ public class HttpResponse {
     private byte[] getResponseAsBytes() {
         return String.join(LINE_DELIMITER,
             statusLine(),
-            headers.toString(),
-            headers.cookieToString()
+            headers.convertHeaderToResponse()
         ).getBytes(StandardCharsets.UTF_8);
     }
 
     private byte[] getResponseAsBytesWithBody() throws IOException {
+        headers.setContentLength(body().length());
         return String.join(LINE_DELIMITER,
             statusLine(),
-            headers.toString(),
-            headers.cookieToString(),
+            headers.convertHeaderToResponse(),
             "",
             body()
         ).getBytes(StandardCharsets.UTF_8);

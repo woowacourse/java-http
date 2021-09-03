@@ -4,6 +4,7 @@ import static nextstep.jwp.framework.http.request.HttpRequest.LINE_DELIMITER;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.UUID;
 import nextstep.jwp.framework.http.session.HttpCookie;
@@ -33,10 +34,38 @@ public class HttpHeaders {
 
         for (final String header : headers) {
             final String[] split = header.split(HEADER_DELIMITER);
-            result.put(split[HEADER_KEY_INDEX].trim(), split[VALUE_KEY_INDEX].trim());
+
+            putAcceptHeader(result, split[HEADER_KEY_INDEX].trim(), split[VALUE_KEY_INDEX].trim());
         }
 
         return result;
+    }
+
+    private void putAcceptHeader(final Map<String, String> headers, final String key, final String value) {
+        if (key.equals("Accept")) {
+            final String[] types = value.split(",");
+
+            putContentType(headers, types);
+            return;
+        }
+        headers.put(key, value);
+    }
+
+    private void putContentType(final Map<String, String> headers, final String[] types) {
+        for (String type : types) {
+            putTextType(headers, type);
+        }
+    }
+
+    private void putTextType(final Map<String, String> headers, final String type) {
+        if (type.split("/")[0].equals("text")) {
+            headers.put("Content-Type", type);
+        }
+    }
+
+    public void setContentLength(final int length) {
+        headers.remove("Content-Length");
+        headers.put("Content-Length", "" + length);
     }
 
     public int contentLength() {
@@ -50,10 +79,6 @@ public class HttpHeaders {
             return;
         }
         cookie.addCookies(cookies);
-    }
-
-    public String cookieToString() {
-        return cookie.toString();
     }
 
     public boolean hasCookie() {
@@ -81,5 +106,23 @@ public class HttpHeaders {
     public void setCookie(final String id) {
         headers.remove("Cookie");
         headers.put("Cookie", id);
+    }
+
+    public String convertHeaderToResponse() {
+        final StringBuilder builder = new StringBuilder();
+
+        for (Entry<String, String> pair : headers.entrySet()) {
+            builder.append(pair.getKey())
+                .append(HEADER_DELIMITER)
+                .append(pair.getValue())
+                .append("\r\n");
+        }
+        //builder.append(cookieToString());
+
+        return builder.toString();
+    }
+
+    private String cookieToString() {
+        return cookie.toString();
     }
 }

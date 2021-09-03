@@ -64,8 +64,7 @@ class HttpRequestHandlerTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        String expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: /login.html \r\n" +
+        String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
                 "\r\n" +
@@ -345,6 +344,10 @@ class HttpRequestHandlerTest {
                 ""
         );
 
+        final MockSocket cookieSocket = new MockSocket(cookieHttpRequest);
+        final RequestHandler cookieRequestHandler = new RequestHandler(cookieSocket);
+        cookieRequestHandler.run();
+
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -352,10 +355,9 @@ class HttpRequestHandlerTest {
                 "Location: /index.html \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
-                "Set-Cookie: JSESSIONID=" + sessionId + " \r\n" +
                 "\r\n" +
                 responseBody;
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(cookieSocket.output()).isEqualTo(expected);
     }
 
 }

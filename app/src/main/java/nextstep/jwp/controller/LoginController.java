@@ -21,7 +21,7 @@ public class LoginController extends AbstractController {
         }
         HttpSession session = HttpSessions.createSession();
         session.setAttribute("user", user);
-        return ResponseReference.createSessionRedirectResponse(session, "/index.html");
+        return ResponseReference.createSessionRedirectResponse(request, session, "/index.html");
     }
 
 
@@ -30,11 +30,11 @@ public class LoginController extends AbstractController {
         if (loginUserExistsSession(request)) {
             return ResponseReference.createRedirectResponse(request, "/index.html");
         }
-        return ResponseReference.createRedirectResponse(request, "/login.html");
+        return ResponseReference.create200Response(request);
     }
 
     private boolean loginUserExistsSession(HttpRequest request) {
-        return HttpSessions.getSession(request.getCookie()) != null;
+        return HttpSessions.getSessionId(request.getCookie()) != null;
     }
 
 }

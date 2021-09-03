@@ -4,6 +4,7 @@ import java.io.IOException;
 import nextstep.jwp.http.SupportedContentType;
 import nextstep.jwp.http.auth.HttpSession;
 import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.ResponseHeader.ResponseHeaderBuilder;
 
 public class ResponseReference {
     public static HttpResponse createRedirectResponse(HttpRequest request, String location) throws IOException {
@@ -14,22 +15,32 @@ public class ResponseReference {
                 new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.HTML,
                         responseBody.getBytes().length).
                         location(location)
-                        .cookie(request.getCookie())
                         .build(),
                 ResponseBody.createByString(responseBody));
     }
 
-    public static HttpResponse createSessionRedirectResponse(HttpSession session, String location) throws IOException {
+    public static HttpResponse createSessionRedirectResponse(HttpRequest request, HttpSession session, String location)
+            throws IOException {
         String responseBody = ResponseBody.createStaticFileByFileName(location).getResponseBody();
         ResponseStatus responseStatus = ResponseStatus.FOUND;
-        return new HttpResponse(
-                new ResponseLine(responseStatus.getStatusCode(), responseStatus.getStatusMessage()),
-                new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.HTML,
-                        responseBody.getBytes().length).
-                        location(location)
-                        .cookie(session.getId())
-                        .build(),
-                ResponseBody.createByString(responseBody));
+
+        ResponseLine responseLine = new ResponseLine(responseStatus.getStatusCode(), responseStatus.getStatusMessage());
+        ResponseHeader responseHeader = new ResponseHeaderBuilder(SupportedContentType.HTML,
+                responseBody.getBytes().length).
+                location(location)
+                .build();
+        if (request.getCookie() == null) {
+            responseHeader = new ResponseHeaderBuilder(SupportedContentType.HTML,
+                    responseBody.getBytes().length).
+                    location(location)
+                    .cookie(session.getId())
+                    .build();
+        }
+
+        ResponseBody byString = ResponseBody.createByString(responseBody);
+        return new HttpResponse(responseLine, responseHeader, byString);
+
+
     }
 
     public static HttpResponse create200Response(HttpRequest request) throws IOException {
@@ -39,7 +50,6 @@ public class ResponseReference {
                 new ResponseLine(responseStatus.getStatusCode(), responseStatus.getStatusMessage()),
                 new ResponseHeader.ResponseHeaderBuilder(SupportedContentType.HTML,
                         responseBody.getBytes().length)
-                        .cookie(request.getCookie())
                         .build(),
                 ResponseBody.createByString(responseBody));
     }

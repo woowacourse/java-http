@@ -6,7 +6,7 @@ import nextstep.jwp.FileAccess;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.HttpException;
 import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.response.HttpResponse;\
+import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.status.HttpStatus;
 import nextstep.jwp.model.User;
 

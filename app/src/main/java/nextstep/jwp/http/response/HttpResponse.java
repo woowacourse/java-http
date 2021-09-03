@@ -18,7 +18,7 @@ import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
 
 public class  HttpResponse {
     private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
-    private DataOutputStream dataOutputStream = null;
+    private DataOutputStream dataOutputStream;
     private Map<String, String> headers = new LinkedHashMap<>();
 
     public HttpResponse(OutputStream outputStream) {

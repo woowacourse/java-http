@@ -1,7 +1,6 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.exception.BaseException;
-import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.session.HttpSession;

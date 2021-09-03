@@ -1,26 +1,32 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.session.HttpSession;
-import nextstep.jwp.http.session.HttpSessions;
-import nextstep.jwp.model.User;
+
+import nextstep.jwp.MockSocket;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.service.UserService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.UUID;
 
 class AbstractControllerTest {
 
-/*    @DisplayName("로그인 된 유저인지 확인 한다.")
+    @DisplayName("JSessionId를 셋팅한다.")
     @Test
-    void isLogin() {
-        String uuid = UUID.randomUUID().toString();
-        HttpSession session = HttpSessions.getSession(uuid);
-        session.setAttribute("user", new User("test", "test", "test@test.com"));
+    void setJSessionId() throws IOException {
+        UUID uuid = UUID.randomUUID();
+        MockSocket mockSocket = new MockSocket("GET /login HTTP/1.1 \r\n" +
+                "Cookie: JSESSIONID=" + uuid + "\r\n");
 
-        LoginController loginController = new LoginController(new UserService());
+        LoginController controller = new LoginController(new UserService());
+        HttpResponse httpResponse = new HttpResponse(mockSocket.getOutputStream());
+        controller.setJSessionId(HttpRequest.of(mockSocket.getInputStream()), httpResponse);
+        httpResponse.ok("/index.html");
 
-        Assertions.assertThat(loginController.isLogin(session)).isTrue();
-    }*/
+        String[] splitResponse = mockSocket.output().split("\r\n");
+        Assertions.assertThat(splitResponse).contains("Set-Cookie: JSESSIONID=" + uuid + " ");
+    }
 }

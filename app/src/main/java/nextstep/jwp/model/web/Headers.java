@@ -21,12 +21,12 @@ public class Headers {
     }
 
     public void setHeadersAndCookie(Map<String, String> headers) {
-        for (Map.Entry<String, String> kV : headers.entrySet()) {
-            if (kV.getKey().equals("Cookie")) {
-                setHttpCookie(kV.getValue());
+        for (Map.Entry<String, String> keyValue : headers.entrySet()) {
+            if (keyValue.getKey().equals("Cookie")) {
+                setHttpCookie(keyValue.getValue());
                 continue;
             }
-            this.headers.put(kV.getKey(), Arrays.asList(kV.getValue().split(", ")));
+            this.headers.put(keyValue.getKey(), Arrays.asList(keyValue.getValue().split(", ")));
         }
     }
 

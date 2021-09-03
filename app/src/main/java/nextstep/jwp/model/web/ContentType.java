@@ -1,5 +1,7 @@
 package nextstep.jwp.model.web;
 
+import java.util.Arrays;
+
 public enum ContentType {
     HTML("text/html;charset=utf-8", "html"),
     CSS("text/css;charset=utf-8", "css"),
@@ -20,12 +22,11 @@ public enum ContentType {
     }
 
     public static String findContentType(String resourceSuffix) {
-        for (ContentType type : values()) {
-            if (type.resourceSuffix.equals(resourceSuffix)) {
-                return type.contentType;
-            }
-        }
-        throw new RuntimeException("content-type not found");
+        return Arrays.stream(values())
+                .filter(value -> value.resourceSuffix.equals(resourceSuffix))
+                .map(value -> value.contentType)
+                .findAny()
+                .orElseThrow(() -> new RuntimeException("content-type not found"));
     }
 
     public String getContentType() {

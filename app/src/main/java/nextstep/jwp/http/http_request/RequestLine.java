@@ -16,10 +16,6 @@ public class RequestLine {
         this.httpVersion = httpVersion;
     }
 
-    public String getHttpVersion() {
-        return httpVersion;
-    }
-
     public boolean isGetRequest() {
         return method.isGetRequest();
     }
@@ -32,11 +28,15 @@ public class RequestLine {
         return path.hasQueryStrings();
     }
 
+    public String getQueryParam(String account) {
+        return path.getQueryParam(account);
+    }
+
     public String getUri() {
         return path.getUri();
     }
 
-    public String getQueryParam(String account) {
-        return path.getQueryParam(account);
+    public String getHttpVersion() {
+        return httpVersion;
     }
 }

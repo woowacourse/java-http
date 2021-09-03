@@ -10,7 +10,6 @@ import nextstep.jwp.http.http_response.StatusCode;
 import nextstep.jwp.model.user.domain.User;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 public class LoginController extends AbstractController {
 
@@ -20,7 +19,7 @@ public class LoginController extends AbstractController {
     private static final String LOGIN_FAILURE_PATH = "401.html";
 
     @Override
-    public JwpHttpResponse doGet(JwpHttpRequest request) throws URISyntaxException, IOException {
+    public JwpHttpResponse doGet(JwpHttpRequest request) throws IOException {
         if (request.hasSession()) {
             HttpSession session = request.getSession();
             return requestPageByUserInfo(session);
@@ -66,10 +65,13 @@ public class LoginController extends AbstractController {
     }
 
     private JwpHttpResponse loginFail() {
-        return JwpHttpResponse.found(LOGIN_FAILURE_PATH);
+        return new JwpHttpResponse.Builder()
+                .statusCode(StatusCode.UNAUTHORIZED)
+                .location(LOGIN_FAILURE_PATH)
+                .build();
     }
 
-    private JwpHttpResponse requestLoginPage() throws URISyntaxException, IOException {
+    private JwpHttpResponse requestLoginPage() throws IOException {
         String resourceUri = RESOURCE_PREFIX + LOGIN_PAGE_PATH;
         String resourceFile = findResourceFile(resourceUri);
         return JwpHttpResponse.ok(resourceUri, resourceFile);

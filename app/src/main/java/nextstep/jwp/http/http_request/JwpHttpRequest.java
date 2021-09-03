@@ -5,7 +5,6 @@ import nextstep.jwp.http.common.Headers;
 import nextstep.jwp.http.common.HttpCookie;
 import nextstep.jwp.http.common.HttpSession;
 import nextstep.jwp.http.common.HttpSessions;
-import nextstep.jwp.model.user.domain.User;
 
 import java.io.BufferedReader;
 import java.io.IOException;

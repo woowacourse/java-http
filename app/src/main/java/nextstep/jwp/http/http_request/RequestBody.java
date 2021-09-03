@@ -32,13 +32,13 @@ public class RequestBody {
     private static Map<String, String> parseParams(String[] queryParams) {
         Map<String, String> params = new HashMap<>();
         for (String queryParam : queryParams) {
-            splitKeyAndValue(params, queryParam, PARAM_KEY_AND_VALUE_DELIMITER);
+            splitKeyAndValue(params, queryParam);
         }
         return params;
     }
 
-    private static void splitKeyAndValue(Map<String, String> params, String queryParam, String delimiter) {
-        String[] keyAndValue = queryParam.split(delimiter);
+    private static void splitKeyAndValue(Map<String, String> params, String queryParam) {
+        String[] keyAndValue = queryParam.split(PARAM_KEY_AND_VALUE_DELIMITER);
         params.put(keyAndValue[0].trim(), keyAndValue[1].trim());
     }
 

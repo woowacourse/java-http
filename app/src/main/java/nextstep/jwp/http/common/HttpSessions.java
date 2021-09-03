@@ -6,7 +6,7 @@ import java.util.UUID;
 
 public class HttpSessions {
 
-    private static final Map<String, HttpSession> SESSIONS = new HashMap();
+    private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
 
     private HttpSessions() {
     }

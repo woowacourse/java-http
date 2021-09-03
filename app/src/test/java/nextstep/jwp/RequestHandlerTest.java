@@ -181,7 +181,7 @@ class RequestHandlerTest {
 
         // then
         String expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
+                "HTTP/1.1 401 Unauthorized ",
                 "Location: http://localhost:8080/401.html ",
                 "",
                 "");
@@ -211,7 +211,7 @@ class RequestHandlerTest {
 
         // then
         String expected = String.join("\r\n",
-                "HTTP/1.1 302 Found ",
+                "HTTP/1.1 401 Unauthorized ",
                 "Location: http://localhost:8080/401.html ",
                 "",
                 "");

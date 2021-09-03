@@ -2,7 +2,6 @@ package nextstep.jwp.http.http_response;
 
 import nextstep.jwp.exception.NotValidateHttpResponse;
 import nextstep.jwp.http.common.Headers;
-import nextstep.jwp.http.common.HttpCookie;
 
 public class JwpHttpResponse {
 
@@ -63,7 +62,7 @@ public class JwpHttpResponse {
         private static final String DEFAULT_HOST = "http://localhost:8080/";
 
         private StatusCode statusCode;
-        private Headers headers;
+        private final Headers headers;
         private String body;
 
         public Builder() {

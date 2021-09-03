@@ -5,15 +5,13 @@ import nextstep.jwp.http.http_request.JwpHttpRequest;
 import nextstep.jwp.http.http_response.JwpHttpResponse;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 public class ResourceController extends AbstractController {
 
     @Override
-    public JwpHttpResponse doGet(JwpHttpRequest request) throws URISyntaxException, IOException {
+    public JwpHttpResponse doGet(JwpHttpRequest request) throws IOException {
         String uri = request.getUri();
         String resourceFile = findResourceFile(RESOURCE_PREFIX + uri);
-        JwpHttpResponse ok = JwpHttpResponse.ok(uri, resourceFile);
-        return ok;
+        return JwpHttpResponse.ok(uri, resourceFile);
     }
 }

@@ -7,7 +7,6 @@ import nextstep.jwp.http.http_response.JwpHttpResponse;
 import nextstep.jwp.model.user.domain.User;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 public class RegisterController extends AbstractController {
 
@@ -16,7 +15,7 @@ public class RegisterController extends AbstractController {
     private static final String REGISTER_SUCCESS_PATH = "index.html";
 
     @Override
-    public JwpHttpResponse doGet(JwpHttpRequest request) throws URISyntaxException, IOException {
+    public JwpHttpResponse doGet(JwpHttpRequest request) throws IOException {
         String resourceUri = RESOURCE_PREFIX + REGISTER_PAGE_PATH;
         String resourceFile = findResourceFile(resourceUri);
         return JwpHttpResponse.ok(resourceUri, resourceFile);
@@ -29,7 +28,7 @@ public class RegisterController extends AbstractController {
         return JwpHttpResponse.found(REGISTER_SUCCESS_PATH);
     }
 
-    private User assembleUser(JwpHttpRequest jwpHttpRequest) { //todo UserService의 역할인듯!
+    private User assembleUser(JwpHttpRequest jwpHttpRequest) {
         String account = jwpHttpRequest.getParam("account");
         String password = jwpHttpRequest.getParam("password");
         String email = jwpHttpRequest.getParam("email");

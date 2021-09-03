@@ -14,10 +14,6 @@ public class HttpCookie {
 
     private final Map<String, String> values;
 
-    public HttpCookie() {
-        values = new HashMap<>();
-    }
-
     public HttpCookie(Map<String, String> values) {
         this.values = values;
     }
@@ -33,14 +29,6 @@ public class HttpCookie {
             cookieValues.put(cookieKeyAndValue[0].trim(), cookieKeyAndValue[1].trim());
         }
         return cookieValues;
-    }
-
-    public void addCookie(String key, String value) {
-        values.put(key, value);
-    }
-
-    public boolean isExist() {
-        return !values.isEmpty();
     }
 
     public boolean hasKey(String key) {

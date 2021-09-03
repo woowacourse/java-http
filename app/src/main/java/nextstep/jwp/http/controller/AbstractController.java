@@ -1,5 +1,6 @@
 package nextstep.jwp.http.controller;
 
+import nextstep.jwp.exception.NotFoundResourceException;
 import nextstep.jwp.exception.NotSupportedMethodException;
 import nextstep.jwp.http.http_request.JwpHttpRequest;
 import nextstep.jwp.http.http_response.JwpHttpResponse;
@@ -16,7 +17,7 @@ public abstract class AbstractController implements Controller {
     protected static final String RESOURCE_PREFIX = "static";
 
     @Override
-    public JwpHttpResponse handle(JwpHttpRequest request) throws URISyntaxException, IOException {
+    public JwpHttpResponse handle(JwpHttpRequest request) throws IOException {
         if (request.isGetRequest()) {
             return doGet(request);
         }
@@ -29,7 +30,7 @@ public abstract class AbstractController implements Controller {
     }
 
     @Override
-    public JwpHttpResponse doGet(JwpHttpRequest request) throws URISyntaxException, IOException {
+    public JwpHttpResponse doGet(JwpHttpRequest request) throws IOException {
         return JwpHttpResponse.notFound();
     }
 
@@ -38,9 +39,14 @@ public abstract class AbstractController implements Controller {
         return JwpHttpResponse.notFound();
     }
 
-    protected String findResourceFile(String uri) throws URISyntaxException, IOException {
-        URL resource = getClass().getClassLoader().getResource(uri);
-        final Path path = Paths.get(resource.toURI());
-        return new String(Files.readAllBytes(path));
+    protected String findResourceFile(String uri) throws IOException {
+        try {
+            URL resource = getClass().getClassLoader().getResource(uri);
+            final Path path;
+            path = Paths.get(resource.toURI());
+            return new String(Files.readAllBytes(path));
+        } catch (URISyntaxException | NullPointerException e) {
+            throw new NotFoundResourceException(uri);
+        }
     }
 }

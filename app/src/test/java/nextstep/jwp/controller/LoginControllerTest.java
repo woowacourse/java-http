@@ -94,7 +94,7 @@ class LoginControllerTest extends ControllerTest {
     @Test
     void doPostFail() {
         // given
-        String requestBody = "account=amazzi&password=password";
+        String requestBody = "account=amazzi&password=wrong";
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",

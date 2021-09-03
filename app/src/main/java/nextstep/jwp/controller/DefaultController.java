@@ -9,14 +9,17 @@ import java.io.IOException;
 public class DefaultController extends AbstractController {
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        httpResponse.setStatus(HttpStatus.OK_200);
-        httpResponse.setBody("Hello world!");
-        httpResponse.setPath(httpRequest.getPath());
-        httpResponse.forward();
+        HttpResponse response = new HttpResponse.Builder()
+                .outputStream(httpResponse.getOutputStream())
+                .status(HttpStatus.OK_200)
+                .body("Hello world!")
+                .path(httpRequest.getPath())
+                .build();
+        response.forward();
     }
 
     @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-
+        throw new IllegalArgumentException();
     }
 }

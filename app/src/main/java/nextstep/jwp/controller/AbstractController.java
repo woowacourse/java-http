@@ -9,10 +9,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
 
-public class AbstractController implements Controller{
+public class AbstractController implements Controller {
     @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        if("GET".equals(httpRequest.getMethod())){
+        if ("GET".equals(httpRequest.getMethod())) {
             doGet(httpRequest, httpResponse);
         }
         if ("POST".equals(httpRequest.getMethod())) {
@@ -20,11 +20,11 @@ public class AbstractController implements Controller{
         }
     }
 
-    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
 
     }
 
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
 
     }
 

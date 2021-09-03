@@ -1,8 +1,6 @@
-package nextstep.jwp;
+package nextstep.jwp.http;
 
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +28,7 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = new HttpRequest(inputStream);
-            HttpResponse httpResponse = new HttpResponse(outputStream);
+            HttpResponse httpResponse  = new HttpResponse(outputStream);
 
             Controller controller = RequestMapping.findController(httpRequest.getPath());
             controller.service(httpRequest, httpResponse);

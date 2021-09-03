@@ -16,15 +16,19 @@ public class UserService {
     public static final String EMAIL = "email";
     private static final Logger LOG = LoggerFactory.getLogger(UserService.class);
 
-    public void save(HttpRequest request) throws UserPrincipalNotFoundException {
+    public void save(HttpRequest request) {
         User newUser = new User(request.getParameter(ACCOUNT),
                 request.getParameter(PASSWORD),
                 request.getParameter(EMAIL));
         InMemoryUserRepository.save(newUser);
 
-        User savedUser = findByAccount(request)
-                .orElseThrow(() -> new UserPrincipalNotFoundException("해당 유저가 존재하지 않습니다. (account : " + request.getParameter(ACCOUNT) + ")"));
-        LOG.debug("Saved user : {}", savedUser);
+        try {
+            User savedUser = findByAccount(request)
+                    .orElseThrow(() -> new UserPrincipalNotFoundException("해당 유저가 존재하지 않습니다. (account : " + request.getParameter(ACCOUNT) + ")"));
+            LOG.debug("Saved user : {}", savedUser);
+        } catch (UserPrincipalNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     public Optional<User> findByAccount(HttpRequest request) {

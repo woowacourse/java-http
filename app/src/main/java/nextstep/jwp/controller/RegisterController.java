@@ -5,8 +5,6 @@ import nextstep.jwp.model.httpmessage.request.HttpRequest;
 import nextstep.jwp.model.httpmessage.response.HttpResponse;
 import nextstep.jwp.view.ModelAndView;
 
-import java.io.IOException;
-
 import static nextstep.jwp.model.httpmessage.common.ContentType.HTML;
 import static nextstep.jwp.model.httpmessage.response.HttpStatus.*;
 
@@ -27,16 +25,16 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response, ModelAndView mv) throws IOException {
-        if (userService.findByAccount(request).isPresent()) {
+    protected void doPost(HttpRequest request, HttpResponse response, ModelAndView mv) {
+        userService.findByAccount(request).ifPresentOrElse(user -> {
             response.setResponseLine(UNAUTHORIZED, request.getProtocol());
             mv.setStatus(UNAUTHORIZED);
             mv.setViewName("/401.html");
-            return;
-        }
-        userService.save(request);
-        response.setResponseLine(REDIRECT, request.getProtocol());
-        mv.setStatus(REDIRECT);
-        mv.setViewName("/index.html");
+        }, () -> {
+            userService.save(request);
+            response.setResponseLine(REDIRECT, request.getProtocol());
+            mv.setStatus(REDIRECT);
+            mv.setViewName("/index.html");
+        });
     }
 }

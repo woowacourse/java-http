@@ -2,15 +2,12 @@ package nextstep.jwp.controller;
 
 
 import nextstep.jwp.application.UserService;
-import nextstep.jwp.model.User;
 import nextstep.jwp.model.httpmessage.request.HttpRequest;
 import nextstep.jwp.model.httpmessage.response.HttpResponse;
 import nextstep.jwp.model.httpmessage.session.HttpCookie;
 import nextstep.jwp.model.httpmessage.session.HttpSession;
 import nextstep.jwp.model.httpmessage.session.HttpSessions;
 import nextstep.jwp.view.ModelAndView;
-
-import java.util.Optional;
 
 import static nextstep.jwp.model.httpmessage.common.ContentType.HTML;
 import static nextstep.jwp.model.httpmessage.response.HttpStatus.OK;
@@ -26,8 +23,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response, ModelAndView mv) {
-        Optional<User> findUser = userService.findByAccountAndPassword(request);
-        if (findUser.isPresent()) {
+        userService.findByAccountAndPassword(request).ifPresentOrElse(user -> {
             response.setResponseLine(OK, request.getProtocol());
             mv.setStatus(OK);
             response.setContentType(HTML.value());
@@ -36,13 +32,12 @@ public class LoginController extends AbstractController {
             HttpSession session = new HttpSession();
             HttpSessions.addSession(session);
             response.addCookie(new HttpCookie(session));
-            session.setAttribute("user", findUser.get());
-            return;
-        }
-
-        response.setResponseLine(REDIRECT, request.getProtocol());
-        mv.setStatus(REDIRECT);
-        mv.setViewName("/401.html");
+            session.setAttribute("user", user);
+        }, () -> {
+            response.setResponseLine(REDIRECT, request.getProtocol());
+            mv.setStatus(REDIRECT);
+            mv.setViewName("/401.html");
+        });
     }
 
     @Override

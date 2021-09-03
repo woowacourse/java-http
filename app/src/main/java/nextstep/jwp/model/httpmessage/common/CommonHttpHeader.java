@@ -10,10 +10,10 @@ public abstract class CommonHttpHeader implements HttpHeader {
 
     public static final String DELIMITER = "\r\n";
 
-    private final Map<HttpHeaderType, String> commonHeaders = new LinkedHashMap<>();
+    private final Map<String, String> commonHeaders = new LinkedHashMap<>();
 
     public boolean containsKey(HttpHeaderType type) {
-        return commonHeaders.containsKey(type);
+        return commonHeaders.containsKey(type.value());
     }
 
     public boolean commonHeaderContains(String type) {
@@ -21,40 +21,40 @@ public abstract class CommonHttpHeader implements HttpHeader {
     }
 
     public void add(HttpHeaderType type, String value) {
-        commonHeaders.put(type, value);
+        commonHeaders.put(type.value(), value);
     }
 
-    public Map<HttpHeaderType, String> getCommonHeaders() {
+    public Map<String, String> getCommonHeaders() {
         return commonHeaders;
     }
 
     @Override
     public String getHeader(String type) {
-        return commonHeaders.get(HttpHeaderType.of(type));
+        return commonHeaders.get(HttpHeaderType.of(type).value());
     }
 
     @Override
     public void addHeader(String type, String value) {
-        commonHeaders.put(HttpHeaderType.of(type), value);
+        commonHeaders.put(HttpHeaderType.of(type).value(), value);
     }
 
     @Override
     public String getContentType() {
-        return commonHeaders.get(CONTENT_TYPE);
+        return commonHeaders.get(CONTENT_TYPE.value());
     }
 
     @Override
     public void setContentType(String contentType) {
-        commonHeaders.put(CONTENT_TYPE, contentType);
+        commonHeaders.put(CONTENT_TYPE.value(), contentType);
     }
 
     @Override
     public int getContentLength() {
-        return Integer.parseInt(commonHeaders.get(CONTENT_LENGTH));
+        return Integer.parseInt(commonHeaders.get(CONTENT_LENGTH.value()));
     }
 
     @Override
     public void setContentLength(int contentLength) {
-        commonHeaders.put(CONTENT_LENGTH, String.valueOf(contentLength));
+        commonHeaders.put(CONTENT_LENGTH.value(), String.valueOf(contentLength));
     }
 }

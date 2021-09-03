@@ -11,14 +11,14 @@ public class ResponseHeader extends CommonHttpHeader {
 
     private static final Logger LOG = LoggerFactory.getLogger(ResponseHeader.class);
 
-    private final Map<ResponseHeaderType, String> headers = new LinkedHashMap<>();
+    private final Map<String, String> headers = new LinkedHashMap<>();
 
-    public void add(ResponseHeaderType type, String value) {
+    public void add(String type, String value) {
         headers.put(type, value);
     }
 
-    public Map<Object, String> getAllHeaders() {
-        Map<Object, String> results = new LinkedHashMap<>();
+    public Map<String, String> getAllHeaders() {
+        Map<String, String> results = new LinkedHashMap<>();
         results.putAll(headers);
         results.putAll(getCommonHeaders());
         return results;

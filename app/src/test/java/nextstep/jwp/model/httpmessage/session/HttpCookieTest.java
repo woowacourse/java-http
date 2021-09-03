@@ -18,7 +18,7 @@ class HttpCookieTest {
     @Test
     void testToString() {
         HttpCookie httpCookie = new HttpCookie("yummy_cookie=choco; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
-        assertThat(httpCookie.toString()).hasToString("yummy_cookie=choco; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
+        assertThat(httpCookie.value()).hasToString("yummy_cookie=choco; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
     }
 
     @Test

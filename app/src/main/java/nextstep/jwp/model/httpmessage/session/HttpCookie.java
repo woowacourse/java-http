@@ -40,8 +40,7 @@ public class HttpCookie {
         return cookies.get(key);
     }
 
-    @Override
-    public String toString() {
+    public String value() {
         StringJoiner stringJoiner = new StringJoiner(SEMICOLON_DELIMITER);
         cookies.forEach((key, value) -> stringJoiner.add(key + EQUALS_DELIMITER + value));
         return stringJoiner.toString();

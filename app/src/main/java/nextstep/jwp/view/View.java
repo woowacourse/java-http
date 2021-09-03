@@ -24,7 +24,7 @@ public class View {
     public static final String RESPONSE_HEADER_FORMAT = "%s: %s ";
     private static final Logger LOG = LoggerFactory.getLogger(View.class);
     private static final String EMPTY_LINE = "";
-    private static final String RESPONSE_LINE_FORMAT = "%s %s ";
+    private static final String RESPONSE_LINE_FORMAT = "%s %s %s ";
 
     public void redirect(ModelAndView mv, HttpResponse response) throws IOException {
         response.addHeader(LOCATION, FileUtils.getRelativePath(mv.getViewName()));
@@ -60,12 +60,12 @@ public class View {
 
     private String responseLine(HttpResponse response, ModelAndView mv) {
         ResponseLine responseLine = response.getResponseLine();
-        String firstLine = String.format(RESPONSE_LINE_FORMAT, responseLine.getProtocol(), mv.getStatus());
+        String firstLine = String.format(RESPONSE_LINE_FORMAT, responseLine.getProtocol(), mv.getStatus().value(), mv.getStatus().message());
         LOG.info("Response line : {}", firstLine);
         return firstLine;
     }
 
-    private void headerLine(StringJoiner stringJoiner, Map<Object, String> headers) {
+    private void headerLine(StringJoiner stringJoiner, Map<String, String> headers) {
         headers.forEach((key, value) -> {
             String headerLine = String.format(RESPONSE_HEADER_FORMAT, key, value);
             LOG.info("Response header : {}", headerLine);

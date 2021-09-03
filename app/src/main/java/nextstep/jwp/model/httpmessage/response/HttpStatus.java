@@ -18,12 +18,7 @@ public enum HttpStatus {
         return value;
     }
 
-    public String getProtocol() {
-        return "HTTP/1.1";
-    }
-
-    @Override
-    public String toString() {
-        return value + " " + message;
+    public String message() {
+        return message;
     }
 }

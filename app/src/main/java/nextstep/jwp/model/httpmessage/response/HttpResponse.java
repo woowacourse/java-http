@@ -20,7 +20,7 @@ public class HttpResponse {
         this.outputStream = outputStream;
     }
 
-    public Map<Object, String> getHeaders() {
+    public Map<String, String> getHeaders() {
         return headers.getAllHeaders();
     }
 
@@ -53,7 +53,7 @@ public class HttpResponse {
     }
 
     public void addHeader(ResponseHeaderType type, String value) {
-        headers.add(type, value);
+        headers.add(type.value(), value);
     }
 
     public HttpStatus getStatus() {
@@ -66,6 +66,6 @@ public class HttpResponse {
 
     public void addCookie(HttpCookie cookie) {
         cookies.add(cookie);
-        headers.add(COOKIE, cookie.toString());
+        headers.add(COOKIE.value(), cookie.value());
     }
 }

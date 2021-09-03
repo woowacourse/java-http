@@ -11,9 +11,9 @@
 
 ## 2단계
 
-- [ ] HttpRequest
+- [x] HttpRequest
     - 헤더 읽는 메서드 리팩토링
-- [ ] HttpResponse
+- [x] HttpResponse
     - 공통 코드 분리
-- [ ] Controller 인터페이스 추가
+- [x] Controller 인터페이스 추가
     - 메서드 처리 리팩토링

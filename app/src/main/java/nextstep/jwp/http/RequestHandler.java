@@ -5,7 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
-import nextstep.jwp.controller.AbstractController;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.ExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,19 +29,41 @@ public class RequestHandler implements Runnable {
                 final OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = HttpRequestReader.httpRequest(inputStream);
-            log.debug("Request : {} {}", httpRequest.method(), httpRequest.uri());
-            log.debug("Requested Body : {}", httpRequest.body());
+            log.debug("Request : {} {}", httpRequest.getMethod(), httpRequest.getUri());
+            log.debug("Requested Body : {}", httpRequest.getBody());
 
-            AbstractController abstractController = RequestMapper.map(httpRequest);
-            byte[] response = abstractController.proceed();
+            HttpResponse httpResponse = new HttpResponse(outputStream);
 
-            outputStream.write(response);
-            outputStream.flush();
-        } catch (IOException exception) {
+            ContentType contentType = ContentType.findBy(httpRequest.getUri());
+            if (!contentType.isNone() && !contentType.isHtml()) {
+                log.debug(httpRequest.getUri());
+                responseResource(httpRequest, httpResponse, contentType);
+                return;
+            }
+
+            Controller controller = RequestMapper.map(httpRequest);
+            if (controller == null) {
+                ExceptionHandler.notFound(httpResponse);
+                return;
+            }
+            controller.service(httpRequest, httpResponse);
+
+        } catch (Exception exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
         }
+    }
+
+    private void responseResource(
+            HttpRequest httpRequest,
+            HttpResponse httpResponse,
+            ContentType contentType
+    ) throws IOException {
+        final String resource = httpRequest.getUri();
+        httpResponse.writeStatusLine(HttpStatus.OK);
+        httpResponse.writeHeaders(FileReader.file(resource), contentType);
+        httpResponse.writeBody(FileReader.file(resource));
     }
 
     private void close() {

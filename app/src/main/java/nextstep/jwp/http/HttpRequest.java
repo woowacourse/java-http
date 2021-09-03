@@ -19,15 +19,15 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public String method() {
+    public String getMethod() {
         return method;
     }
 
-    public String uri() {
+    public String getUri() {
         return uri;
     }
 
-    public String body() {
+    public String getBody() {
         return body;
     }
 }

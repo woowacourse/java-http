@@ -1,14 +1,13 @@
 package nextstep.jwp;
 
-import nextstep.jwp.http.RequestHandler;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import nextstep.jwp.http.RequestHandler;
+import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
 
@@ -36,7 +35,7 @@ class RequestHandlerTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -64,7 +63,7 @@ class RequestHandlerTest {
     @Test
     void index_fail() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "POST /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -78,10 +77,10 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/403.html");
+        final URL resource = getClass().getClassLoader().getResource("static/405.html");
         final String file = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expected = String.join("\r\n",
-                "HTTP/1.1 403 Forbidden ",
+                "HTTP/1.1 405 Method Not Allowed ",
                 "Content-Type: text/html; charset=utf-8 ",
                 "Content-Length: " + file.getBytes().length + " ",
                 "",
@@ -92,7 +91,7 @@ class RequestHandlerTest {
     @Test
     void login() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -139,8 +138,7 @@ class RequestHandlerTest {
         // then
         String expected = String.join("\r\n",
                 "HTTP/1.1 302 Found ",
-                "Location: /index.html",
-                "/index.html");
+                "Location: /index.html");
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -178,7 +176,7 @@ class RequestHandlerTest {
     @Test
     void register() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -225,8 +223,7 @@ class RequestHandlerTest {
         // then
         String expected = String.join("\r\n",
                 "HTTP/1.1 302 Found ",
-                "Location: /index.html",
-                "/index.html");
+                "Location: /index.html");
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -263,7 +260,7 @@ class RequestHandlerTest {
 
     @Test
     void notFound() throws IOException {
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /wrong HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",

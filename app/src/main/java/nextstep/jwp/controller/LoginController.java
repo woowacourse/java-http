@@ -1,41 +1,38 @@
 package nextstep.jwp.controller;
 
-import java.io.IOException;
 import java.util.Map;
-import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.FileReader;
-import nextstep.jwp.http.HttpError;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
-import nextstep.jwp.utils.RequestParams;
+import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.model.User;
+import nextstep.jwp.utils.RequestParams;
 
 public class LoginController extends AbstractController {
 
-    public LoginController(HttpRequest httpRequest) {
-        super(httpRequest);
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        String content = FileReader.file("/login.html");
+
+        response.writeStatusLine(HttpStatus.OK);
+        response.writeHeaders(content, ContentType.HTML);
+        response.writeBody(content);
     }
 
     @Override
-    public byte[] get(HttpRequest httpRequest) throws IOException {
-        return HttpResponse.ok(
-                FileReader.file(httpRequest.uri()),
-                ContentType.findBy(httpRequest.uri())
-        );
-    }
-
-    @Override
-    public byte[] post(HttpRequest httpRequest) throws IOException {
-        final String[] body = httpRequest.body().split("&");
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+        final String[] body = request.getBody().split("&");
         final Map<String, String> loginInfo = RequestParams.requestParams(body);
 
         try {
             login(loginInfo);
-            return HttpResponse.found(Controller.INDEX_PAGE);
+            response.writeStatusLine(HttpStatus.FOUND);
+            response.writeRedirect("/index.html");
         } catch (UnauthorizedException e) {
-            return HttpResponse.error(HttpError.UNAUTHORIZED);
+            ExceptionHandler.unauthorized(response);
         }
     }
 
@@ -45,10 +42,5 @@ public class LoginController extends AbstractController {
                 .orElseThrow(() -> new UnauthorizedException("존재하지 않는 사용자입니다."));
 
         user.checkPassword(loginInfo.get("password"));
-    }
-
-    @Override
-    public byte[] error(HttpError httpError) throws IOException {
-        return HttpResponse.error(httpError);
     }
 }

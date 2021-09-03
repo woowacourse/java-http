@@ -2,11 +2,9 @@ package nextstep.jwp.httpserver.domain.request;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
-import nextstep.jwp.httpserver.domain.Body;
-import nextstep.jwp.httpserver.domain.Cookie;
-import nextstep.jwp.httpserver.domain.Headers;
-import nextstep.jwp.httpserver.domain.HttpSession;
+import nextstep.jwp.httpserver.domain.*;
 
 public class HttpRequest {
     private final RequestLine requestLine;
@@ -44,6 +42,21 @@ public class HttpRequest {
                       .anyMatch(Cookie::isSessionId);
     }
 
+    public HttpSession getSession() {
+        if (session == null) {
+            session = new HttpSession(UUID.randomUUID().toString());
+        }
+        return session;
+    }
+
+    public boolean hasSession() {
+        return session != null;
+    }
+
+    public boolean isValidSession(String sessionId) {
+        return HttpSessions.exist(sessionId);
+    }
+
     public String getSessionId() {
         return session.getId();
     }
@@ -74,10 +87,6 @@ public class HttpRequest {
 
     public List<Cookie> getCookies() {
         return cookies;
-    }
-
-    public HttpSession getSession() {
-        return session;
     }
 
     public Body getBody() {

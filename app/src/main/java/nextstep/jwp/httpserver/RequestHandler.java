@@ -76,8 +76,10 @@ public class RequestHandler implements Runnable {
 
     private void doSessionFilter(HttpRequest httpRequest) {
         final String sessionId = httpRequest.sessionIdInCookie();
-        final HttpSession session = HttpSessions.getSession(sessionId);
-        httpRequest.setSession(session);
+        if (!sessionId.isEmpty() && httpRequest.isValidSession(sessionId)) {
+            final HttpSession session = HttpSessions.getSession(sessionId);
+            httpRequest.setSession(session);
+        }
     }
 
     private Object getHandler(HttpRequest httpRequest) {
@@ -108,15 +110,14 @@ public class RequestHandler implements Runnable {
     }
 
     private void commitSession(HttpRequest httpRequest, HttpResponse httpResponse) {
-        final HttpSession originalSession = HttpSessions.getSession(httpRequest.getSessionId());
-        originalSession.invalidate();
-        final HttpSession session = httpRequest.getSession();
-        HttpSessions.save(session);
-
-        addCookie(httpRequest, httpResponse);
+        if (httpRequest.hasSession()) {
+            final HttpSession session = httpRequest.getSession();
+            HttpSessions.save(session);
+            addSessionInCookie(httpRequest, httpResponse);
+        }
     }
 
-    private void addCookie(HttpRequest httpRequest, HttpResponse httpResponse) {
+    private void addSessionInCookie(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (!httpRequest.hasSessionId()) {
             final Cookie cookie = new Cookie("JSESSIONID", httpRequest.getSessionId());
             httpResponse.addCookie(cookie);

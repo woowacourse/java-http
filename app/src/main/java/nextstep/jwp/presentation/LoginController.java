@@ -20,6 +20,12 @@ public class LoginController extends AbstractController {
 
         try {
             String sessionId = request.getCookie("JSESSIONID");
+
+            if(!HttpSessions.existSessionId(sessionId)) {
+                renderPage(request, response, resource);
+                return;
+            }
+
             HttpSession session = HttpSessions.getSession(sessionId);
             User user = (User) session.getAttribute("user");
 

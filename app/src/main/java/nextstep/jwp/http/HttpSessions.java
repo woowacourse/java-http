@@ -11,11 +11,11 @@ public class HttpSessions {
     private HttpSessions() {}
 
     public static HttpSession getSession(String id) {
-        if(SESSIONS.containsKey(id)) {
-            return SESSIONS.get(id);
-        }
+        return SESSIONS.get(id);
+    }
 
-        throw new IllegalArgumentException("해당 세션 ID가 존재하지 않습니다.");
+    public static boolean existSessionId(String id) {
+        return SESSIONS.containsKey(id);
     }
 
     public static void remove(String id) {

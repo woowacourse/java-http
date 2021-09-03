@@ -12,8 +12,8 @@ public class LoginController extends AbstractController {
     private static final String URI_PATH = "/login";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
-    private static final String SUCCESS_REDIRECT_URL = "http://localhost:8080/index.html";
-    private static final String FAIL_REDIRECT_URL = "http://localhost:8080/401.html";
+    private static final String SUCCESS_REDIRECT_URL = "/index.html";
+    private static final String FAIL_REDIRECT_URL = "/401.html";
 
     @Override
     boolean isMatchingUriPath(HttpRequest httpRequest) {

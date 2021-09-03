@@ -9,7 +9,7 @@ import nextstep.jwp.model.User;
 public class RegisterController extends AbstractController {
 
     private static final String URI_PATH = "/register";
-    private static final String SUCCESS_REDIRECT_URL = "http://localhost:8080/index.html";
+    private static final String SUCCESS_REDIRECT_URL = "/index.html";
 
     @Override
     boolean isMatchingUriPath(HttpRequest httpRequest) {

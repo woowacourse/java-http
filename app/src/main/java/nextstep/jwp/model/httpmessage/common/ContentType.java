@@ -40,4 +40,9 @@ public enum ContentType {
     public String suffix() {
         return suffix;
     }
+
+    @Override
+    public String toString() {
+        return value;
+    }
 }

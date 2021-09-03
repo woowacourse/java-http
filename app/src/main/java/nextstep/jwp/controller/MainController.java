@@ -19,9 +19,8 @@ public class MainController extends AbstractController {
         mv.setStatus(OK);
         LOG.debug("Response status : {}", OK);
 
-        String html = HTML.value();
-        response.setContentType(html);
-        LOG.debug("Response content type : {}", html);
+        response.setContentType(HTML.value());
+        LOG.debug("Response content type : {}", HTML);
 
         String body = "Hello world!";
 

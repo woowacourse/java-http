@@ -16,7 +16,6 @@ public class HttpResponse {
     private final List<HttpCookie> cookies = new ArrayList<>();
     private ResponseLine responseLine;
 
-    // FIXME : outputstream을 굳이 받을 필요가 있음?
     public HttpResponse(OutputStream outputStream) {
         this.outputStream = outputStream;
     }

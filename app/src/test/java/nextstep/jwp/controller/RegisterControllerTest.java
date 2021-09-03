@@ -67,7 +67,7 @@ class RegisterControllerTest extends ControllerTest {
     @Test
     void doPostFail() {
         // given
-        String requestBody = "account=gugu&password=password";
+        String requestBody = "account=admin&password=password&email=hkkang%40woowahan.com";
         final String httpRequest = String.join("\r\n",
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",

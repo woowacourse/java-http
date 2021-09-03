@@ -5,7 +5,6 @@ import nextstep.jwp.model.User;
 
 import java.lang.reflect.Field;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryUserRepository {
@@ -34,7 +33,11 @@ public class InMemoryUserRepository {
         }
     }
 
-    public static Optional<User> findByAccount(String account) {
-        return Optional.ofNullable(database.get(account));
+    public static User findByAccount(String account) {
+        return database.get(account);
+    }
+
+    public static boolean isExistAccount(String account) {
+        return database.containsKey(account);
     }
 }

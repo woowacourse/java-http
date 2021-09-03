@@ -1,14 +1,13 @@
 package nextstep.jwp.infrastructure;
 
-import nextstep.jwp.model.CustomHttpRequest;
+import nextstep.jwp.model.web.request.CustomHttpRequest;
+import nextstep.jwp.model.web.response.CustomHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
 import java.util.Objects;
-
-import static nextstep.jwp.infrastructure.RequestMapper.mappingProcessor;
 
 public class RequestHandler implements Runnable {
 
@@ -24,17 +23,17 @@ public class RequestHandler implements Runnable {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
+             final OutputStream outputStream = connection.getOutputStream();
+             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             CustomHttpRequest request = CustomHttpRequest.from(reader);
+            CustomHttpResponse response = new CustomHttpResponse();
+            HandlerMapper.mappingHandler(request.getUri())
+                    .service(request, response);
 
-            String response = mappingProcessor(request.getPath())
-                    .processResponse(request, outputStream);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getBodyBytes());
             outputStream.flush();
-        } catch (IOException exception) {
+        } catch (Exception exception) {
             log.error("Exception stream", exception);
         } finally {
             close();

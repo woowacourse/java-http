@@ -15,12 +15,10 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
-    private final RequestMapping requestMapping;
     private BufferedReader inputStreamReader;
 
-    public RequestHandler(final Socket connection, final RequestMapping requestMapping) {
+    public RequestHandler(final Socket connection) {
         this.connection = Objects.requireNonNull(connection);
-        this.requestMapping = requestMapping;
     }
 
     @Override
@@ -46,14 +44,14 @@ public class RequestHandler implements Runnable {
         inputStreamReader = new BufferedReader(new InputStreamReader(inputStream));
         HttpRequest httpRequest = HttpRequest.parseRequest(inputStreamReader);
         try {
-            Controller controller = requestMapping.findController(httpRequest);
+            Controller controller = RequestMapping.findController(httpRequest);
             return controller.doService(httpRequest);
         } catch (ResourceNotFoundException exception) {
             httpRequest = HttpRequest.ofStaticFile("/404.html");
-            return requestMapping.getStaticResourceController().doService(httpRequest);
+            return RequestMapping.getStaticResourceController().doService(httpRequest);
         } catch (RuntimeException exception) {
             httpRequest = HttpRequest.ofStaticFile("/500.html");
-            return requestMapping.getStaticResourceController().doService(httpRequest);
+            return RequestMapping.getStaticResourceController().doService(httpRequest);
         }
     }
 

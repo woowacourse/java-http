@@ -35,7 +35,7 @@ class RequestHandlerTest {
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
+        final RequestHandler requestHandler = new RequestHandler(socket);
 
         // when
         requestHandler.run();
@@ -66,7 +66,7 @@ class RequestHandlerTest {
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
+        final RequestHandler requestHandler = new RequestHandler(socket);
 
         // when
         requestHandler.run();
@@ -97,7 +97,7 @@ class RequestHandlerTest {
                 "account=gugu&password=password&email=hkkang%40woowahan.com");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
+        final RequestHandler requestHandler = new RequestHandler(socket);
 
         // when
         requestHandler.run();
@@ -133,7 +133,7 @@ class RequestHandlerTest {
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
+        final RequestHandler requestHandler = new RequestHandler(socket);
 
         // when
         requestHandler.run();
@@ -164,7 +164,7 @@ class RequestHandlerTest {
                 requestBody);
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
+        final RequestHandler requestHandler = new RequestHandler(socket);
 
         // when
         requestHandler.run();
@@ -196,7 +196,7 @@ class RequestHandlerTest {
                 requestBody);
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
+        final RequestHandler requestHandler = new RequestHandler(socket);
 
         // when
         requestHandler.run();

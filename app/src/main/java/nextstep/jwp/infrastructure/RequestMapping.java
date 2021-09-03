@@ -22,14 +22,14 @@ public class RequestMapping {
         controllers.add(staticResourceController);
     }
 
-    public Controller findController(final HttpRequest httpRequest) {
+    public static Controller findController(final HttpRequest httpRequest) {
         return controllers.stream()
                 .filter(it -> it.canHandle(httpRequest))
                 .findAny()
                 .orElseThrow(NoMatchingControllerException::new);
     }
 
-    public Controller getStaticResourceController() {
+    public static Controller getStaticResourceController() {
         return staticResourceController;
     }
 }

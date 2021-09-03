@@ -57,6 +57,10 @@ public class Headers {
         return headerValues.get(0);
     }
 
+    public boolean hasThatKey(String key) {
+        return values.containsKey(key);
+    }
+
     public boolean hasNoContent() {
         return !values.containsKey(HttpHeaders.CONTENT_LENGTH)
                 || values.get(HttpHeaders.CONTENT_LENGTH).get(0).equals("0");

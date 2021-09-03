@@ -13,6 +13,7 @@ public class ResourceController extends AbstractController {
     public JwpHttpResponse doGet(JwpHttpRequest request) throws URISyntaxException, IOException {
         String uri = request.getUri();
         String resourceFile = findResourceFile(RESOURCE_PREFIX + uri);
-        return JwpHttpResponse.ok(uri, resourceFile);
+        JwpHttpResponse ok = JwpHttpResponse.ok(uri, resourceFile);
+        return ok;
     }
 }

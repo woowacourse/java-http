@@ -2,6 +2,7 @@ package nextstep.jwp.http.http_response;
 
 import nextstep.jwp.exception.NotValidateHttpResponse;
 import nextstep.jwp.http.common.Headers;
+import nextstep.jwp.http.common.HttpCookie;
 
 public class JwpHttpResponse {
 
@@ -13,7 +14,7 @@ public class JwpHttpResponse {
     private final Headers headers;
     private final String body;
 
-    private JwpHttpResponse(StatusCode statusCode, Headers headers, String body) {
+    public JwpHttpResponse(StatusCode statusCode, Headers headers, String body) {
         this.statusCode = statusCode;
         this.headers = headers;
         this.body = body;
@@ -56,7 +57,7 @@ public class JwpHttpResponse {
                 body).getBytes();
     }
 
-    static class Builder {
+    public static class Builder {
 
         private static final String EMPTY_RESPONSE_BODY = "";
         private static final String DEFAULT_HOST = "http://localhost:8080/";
@@ -86,6 +87,11 @@ public class JwpHttpResponse {
 
         public Builder location(String location) {
             this.headers.addHeader("Location", DEFAULT_HOST + location);
+            return this;
+        }
+
+        public Builder cookie(String value) {
+            this.headers.addHeader("Set-Cookie", "JSESSIONID=" + value);
             return this;
         }
 

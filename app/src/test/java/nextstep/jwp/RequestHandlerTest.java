@@ -1,7 +1,13 @@
 package nextstep.jwp;
 
+import nextstep.jwp.http.common.HttpSession;
+import nextstep.jwp.http.common.HttpSessions;
+import nextstep.jwp.model.user.domain.User;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,10 +16,25 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 class RequestHandlerTest {
+
+    private static MockedStatic<HttpSessions> httpSessions;
+
+    @BeforeAll
+    static void beforeAll() {
+        httpSessions = mockStatic(HttpSessions.class);
+    }
+
+    @AfterAll
+    static void afterAll() {
+        httpSessions.close();
+    }
 
     @DisplayName("[GET] /index.html")
     @Test
@@ -89,6 +110,40 @@ class RequestHandlerTest {
         final MockSocket socket = new MockSocket(request);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
+        HttpSession httpSession = new HttpSession(UUID.randomUUID().toString());
+        when(HttpSessions.generate()).thenReturn(httpSession);
+
+        // when
+        requestHandler.run();
+
+        // then
+        String expected = String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Set-Cookie: JSESSIONID=" + httpSession.getId() + " ",
+                "Location: http://localhost:8080/index.html ",
+                "",
+                "");
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("[GET] /login : 이미 로그인한 상태에서 login page를 요청하면 index.html로 리다이렉트 된다")
+    @Test
+    void loginHtmlIfAlreadyLoginComplete() {
+        // given
+        HttpSession httpSession = new HttpSession(UUID.randomUUID().toString());
+        httpSession.setAttribute("user", new User("gugu", "password", "hkkang@woowahan.com"));
+        when(HttpSessions.generate()).thenReturn(httpSession);
+
+        String request = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Cookie: JSESSIONID=" + httpSession.getId(),
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        final MockSocket socket = new MockSocket(request);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
         // when
         requestHandler.run();
 
@@ -101,7 +156,6 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("[GET] /login - NOT MATCH PASSWORD FAIL")
     @Test
     void loginFailWhenNotMatchPassword() {
         // given

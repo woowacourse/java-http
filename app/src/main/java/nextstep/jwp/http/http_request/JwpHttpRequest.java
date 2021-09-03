@@ -2,29 +2,41 @@ package nextstep.jwp.http.http_request;
 
 import com.google.common.net.HttpHeaders;
 import nextstep.jwp.http.common.Headers;
+import nextstep.jwp.http.common.HttpCookie;
+import nextstep.jwp.http.common.HttpSession;
+import nextstep.jwp.http.common.HttpSessions;
+import nextstep.jwp.model.user.domain.User;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class JwpHttpRequest {
 
     private static final String HEADER_DELIMITER = ": ";
     private static final String REQUEST_DELIMITER = " ";
+    private static final String COOKIE_VALUE = "Cookie";
 
     private final RequestLine requestLine;
     private final Headers headers;
+    private final HttpCookie cookie;
     private final RequestBody requestBody;
 
     public JwpHttpRequest(BufferedReader reader) throws IOException {
         this.requestLine = new RequestLine(parseRequestLine(reader));
         this.headers = new Headers(parseHeaders(reader));
+        this.cookie = parseRequestCookie();
         this.requestBody = new RequestBody(parseRequestBody(reader));
+    }
+
+    private HttpCookie parseRequestCookie() {
+        if (headers.hasThatKey(COOKIE_VALUE)) {
+            return HttpCookie.from(headers.getHeaderValue(COOKIE_VALUE));
+        }
+
+        return new HttpCookie(Collections.emptyMap());
     }
 
     private String[] parseRequestLine(BufferedReader reader) throws IOException {
@@ -51,7 +63,7 @@ public class JwpHttpRequest {
         String headerName = keyAndValue[0];
         String headerValue = keyAndValue[1];
         if (!headers.containsKey(headerName)) {
-            ArrayList<String> headerValues = new ArrayList<>();
+            List<String> headerValues = new ArrayList<>();
             headerValues.add(headerValue.trim());
             headers.put(headerName.trim(), headerValues);
             return;
@@ -92,7 +104,20 @@ public class JwpHttpRequest {
         return requestLine.hasQueryParams();
     }
 
+    public boolean hasSession() {
+        return cookie.hasKey("JSESSIONID");
+    }
+
     public String getQueryParam(String param) {
         return requestLine.getQueryParam(param);
+    }
+
+    public HttpCookie getCookie() {
+        return cookie;
+    }
+
+    public HttpSession getSession() {
+        String sessionId = cookie.getCookie("JSESSIONID");
+        return HttpSessions.getSession(sessionId);
     }
 }

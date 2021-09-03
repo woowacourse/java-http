@@ -45,6 +45,10 @@ public class HttpHeaders {
 
     public void addCookie() {
         final String cookies = headers.get("Cookie");
+
+        if (Objects.isNull(cookies)) {
+            return;
+        }
         cookie.addCookies(cookies);
     }
 

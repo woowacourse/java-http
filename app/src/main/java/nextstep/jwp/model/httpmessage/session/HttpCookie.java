@@ -36,7 +36,7 @@ public class HttpCookie {
         return maps;
     }
 
-    public String getCookie(String key) {
+    public String getCookieValue(String key) {
         return cookies.get(key);
     }
 

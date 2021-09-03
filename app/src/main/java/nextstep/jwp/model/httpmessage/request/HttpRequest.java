@@ -109,7 +109,7 @@ public class HttpRequest {
     }
 
     private String getSessionId() {
-        return getCookies().getCookie(JSESSIONID);
+        return getCookies().getCookieValue(JSESSIONID);
     }
 
     public boolean hasSessionId() {

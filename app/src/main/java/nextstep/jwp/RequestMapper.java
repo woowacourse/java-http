@@ -29,7 +29,7 @@ public class RequestMapper {
     }
 
     public Controller getController(HttpRequest request) {
-        SupportedContentType contentType = SupportedContentType.getContentType(request);
+        SupportedContentType contentType = SupportedContentType.extractContentTypeFromRequest(request);
         if (contentType == SupportedContentType.NOTFOUND) {
             return HANDLER_MAP.getOrDefault(request.getUri(), HANDLER_MAP.get(NOT_FOUND));
         }

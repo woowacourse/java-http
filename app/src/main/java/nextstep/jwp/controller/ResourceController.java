@@ -11,7 +11,7 @@ import nextstep.jwp.http.response.ResponseStatus;
 public class ResourceController extends AbstractController {
     @Override
     protected HttpResponse doGet(HttpRequest request) throws Exception {
-        SupportedContentType contentType = SupportedContentType.getContentType(request);
+        SupportedContentType contentType = SupportedContentType.extractContentTypeFromRequest(request);
         if (contentType == SupportedContentType.NOTFOUND) {
             return create404Response();
         }

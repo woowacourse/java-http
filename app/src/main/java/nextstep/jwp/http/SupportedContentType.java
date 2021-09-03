@@ -19,7 +19,7 @@ public enum SupportedContentType implements ResponseHeaderable {
         this.extention = extention;
     }
 
-    public static SupportedContentType getContentType(HttpRequest request) {
+    public static SupportedContentType extractContentTypeFromRequest(HttpRequest request) {
         String uri = request.getUri();
 
         Optional<SupportedContentType> matchedContentType = Arrays.stream(SupportedContentType.values())

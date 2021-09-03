@@ -57,9 +57,6 @@ public class RequestHandler implements Runnable {
     private void handle(HttpRequest httpRequest, HttpResponse httpResponse, Controller controller) {
         try {
             controller.service(httpRequest, httpResponse);
-            if (httpRequest.hasCookie() && !httpRequest.hasSessionId()) {
-                httpResponse.addHeaders("Set-Cookie", httpRequest.getNewSessionId());
-            }
         } catch (HttpException e) {
             ControllerAdvice.handle(httpRequest, httpResponse, e.httpStatus());
         }

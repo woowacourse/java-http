@@ -12,7 +12,7 @@ class HttpSessionTest {
     @Test
     void setAttribute() {
         // given
-        HttpSession httpSession = new HttpSession("JSESSIONID");
+        HttpSession httpSession = HttpSession.of("JSESSIONID");
 
         // when
         assertThatCode(() -> httpSession.setAttribute("joanne", "1234"))
@@ -23,7 +23,7 @@ class HttpSessionTest {
     @Test
     void getAttribute() {
         // given
-        HttpSession httpSession = new HttpSession("JSESSIONID");
+        HttpSession httpSession = HttpSession.of("JSESSIONID");
 
         // when
         httpSession.setAttribute("joanne", "1234");
@@ -36,7 +36,7 @@ class HttpSessionTest {
     @Test
     void removeAttribute() {
         // given
-        HttpSession httpSession = new HttpSession("JSESSIONID");
+        HttpSession httpSession = HttpSession.of("JSESSIONID");
 
         // when
         httpSession.setAttribute("joanne", "1234");
@@ -51,7 +51,7 @@ class HttpSessionTest {
     @Test
     void expire() {
         /// given
-        HttpSession httpSession = new HttpSession("JSESSIONID");
+        HttpSession httpSession = HttpSession.of("JSESSIONID");
 
         // when
         httpSession.setAttribute("joanne", "1234");

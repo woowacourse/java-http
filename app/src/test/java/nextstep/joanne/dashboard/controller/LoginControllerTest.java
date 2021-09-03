@@ -38,7 +38,7 @@ class LoginControllerTest {
 
         // then
         assertThat(httpResponse.getStatus()).isEqualTo("302");
-        assertThat(httpResponse.getHeaders()).isEqualTo(
+        assertThat(httpResponse.getHeaders()).endsWith(
                 "Location: /index.html " + "\r\n" +
                         "Content-Type: text/html \r\n"
         );
@@ -61,6 +61,6 @@ class LoginControllerTest {
         loginController.doGet(httpRequest, httpResponse);
 
         // then
-        assertThat(httpResponse.getStatus()).isIn("200", "302");
+        assertThat(httpResponse.getStatus()).isEqualTo("200");
     }
 }

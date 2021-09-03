@@ -32,6 +32,10 @@ public class LoginController extends AbstractController {
         HttpSession session = request.getSession();
         session.setAttribute("user", user);
 
+        if (!request.hasSessionId()) {
+            response.addHeaders("Set-Cookie", session.getId());
+        }
+
         response.addStatus(HttpStatus.FOUND);
         response.addHeaders("Location", "/index.html");
         response.addHeaders("Content-Type", ContentType.resolve(request.uri()));
@@ -42,7 +46,7 @@ public class LoginController extends AbstractController {
         log.debug("HTTP GET Login Request from {}", request.uri());
 
         HttpSession session = request.getSession();
-        if (Objects.nonNull(session.getAttribute("user"))) {
+        if (Objects.nonNull(session) && Objects.nonNull(session.getAttribute("user"))) {
             response.redirect("/index.html");
             return;
         }

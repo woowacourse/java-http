@@ -22,7 +22,7 @@ public class Cookie {
     }
 
     public String getSessionId() {
-        return cookies.get(JSESSIONID);
+        return cookies.getOrDefault(JSESSIONID, makeSessionId());
     }
 
     public Map<String, String> getCookies() {

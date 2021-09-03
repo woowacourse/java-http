@@ -1,27 +1,20 @@
 package nextstep.joanne.server.http;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class HttpSessions {
-    private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
+    private static final Map<String, HttpSession> SESSIONS = new ConcurrentHashMap<>();
 
     private HttpSessions() {
     }
 
     public static HttpSession getSession(String id) {
-        HttpSession httpSession = SESSIONS.get(id);
-        if (Objects.isNull(httpSession)) {
-            httpSession = new HttpSession(id);
-            put(httpSession);
-            return httpSession;
-        }
-        return httpSession;
+        return SESSIONS.get(id);
     }
 
-    private static void put(HttpSession httpSession) {
-        SESSIONS.put(httpSession.getId(), httpSession);
+    public static void update(String id, HttpSession httpSession) {
+        SESSIONS.putIfAbsent(id, httpSession);
     }
 
     public static void remove(String id) {
@@ -30,5 +23,9 @@ public class HttpSessions {
 
     public static boolean get(HttpSession session) {
         return SESSIONS.containsKey(session.getId());
+    }
+
+    public static void addSession(String id, HttpSession httpSession) {
+        SESSIONS.put(id, httpSession);
     }
 }

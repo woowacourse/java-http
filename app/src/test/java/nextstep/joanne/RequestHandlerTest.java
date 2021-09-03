@@ -130,16 +130,17 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         String expected = to302FoundWithHtml(new String(
                 Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath())));
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).startsWith(to302FoundStatusLine());
+        assertThat(socket.output()).contains(toLocationHeader());
     }
 
-    private String to302FoundWithHtml(String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /index.html ",
-                "Content-Type: text/html ",
-                "",
-                "");
+    private String toLocationHeader() {
+        return "Location: /index.html \r\n" +
+                "Content-Type: text/html ";
+    }
+
+    private String to302FoundStatusLine() {
+        return "HTTP/1.1 302 Found ";
     }
 
     @Test
@@ -183,6 +184,15 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    private String to302FoundWithHtml(String responseBody) {
+        return String.join("\r\n",
+                to302FoundStatusLine(),
+                "Location: /index.html ",
+                "Content-Type: text/html ",
+                "",
+                "");
+    }
+
     @DisplayName("html을 찾지 못한 경우 404 페이지를 응답한다.")
     @Test
     void notFound() throws IOException {
@@ -208,21 +218,7 @@ class RequestHandlerTest {
                 responseBody);
     }
 
-    @DisplayName("헤더에 Cookie가 있고, JSESSION 아이디가 없는 경우 응답에 JSESSIONID를 포함한다.")
-    @Test
-    void cookie() {
-        // given
-        final String httpRequest = makeGetRequestWithCookieWithoutSessionId("/index.html");
-        init(httpRequest);
-        // when
-        requestHandler.run();
-
-        // then
-        assertThat(socket.output()).contains("Set-Cookie");
-        assertThat(socket.output()).contains("JSESSIONID");
-    }
-
-    @DisplayName("헤더에 Cookie가 있고, JSESSION 아이디가 없는 경우 응답에 JSESSIONID를 포함한다.")
+    @DisplayName("헤더에 Cookie가 있고, JSESSION 아이디가 있는 경우 응답에 JSESSIONID를 포함하지 않는다.")
     @Test
     void cookieWithSessionId() {
         // given

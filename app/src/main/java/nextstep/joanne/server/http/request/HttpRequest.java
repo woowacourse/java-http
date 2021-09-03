@@ -54,4 +54,8 @@ public class HttpRequest {
     public HttpSession getSession() {
         return requestHeaders.getSession();
     }
+
+    public Object getSessionId() {
+        return null;
+    }
 }

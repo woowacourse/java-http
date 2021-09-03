@@ -8,12 +8,19 @@ public class HttpSession {
     private final String id;
     private Map<String, Object> values = new HashMap<>();
 
-    public HttpSession(String id) {
+    private HttpSession(String id) {
         this.id = id;
+    }
+
+    public static HttpSession of(String id) {
+       final HttpSession httpSession = new HttpSession(id);
+       HttpSessions.addSession(id, httpSession);
+       return httpSession;
     }
 
     public void setAttribute(String name, Object value) {
         values.put(name, value);
+        HttpSessions.update(id, this);
     }
 
     public Object getAttribute(String name) {

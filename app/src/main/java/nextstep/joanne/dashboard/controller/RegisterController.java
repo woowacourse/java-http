@@ -48,7 +48,6 @@ public class RegisterController extends AbstractController {
 
         HttpSession session = request.getSession();
         session.removeAttribute("user");
-        session.expire();
 
         response.addStatus(HttpStatus.OK);
         response.addHeaders("Content-Type", ContentType.resolve(request.uri()));

@@ -2,6 +2,7 @@ package nextstep.joanne.server.http;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class Headers {
     private Map<String, String> headers = new LinkedHashMap<>();
@@ -53,6 +54,10 @@ public class Headers {
     }
 
     public HttpSession getSession() {
-        return HttpSessions.getSession(cookie.getSessionId());
+        HttpSession session = HttpSessions.getSession(cookie.getSessionId());
+        if (Objects.isNull(session)) {
+            return HttpSession.of(cookie.getSessionId());
+        }
+        return session;
     }
 }

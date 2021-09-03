@@ -6,9 +6,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.model.Request;
-import nextstep.jwp.model.RequestBody;
-import nextstep.jwp.model.RequestPath;
+import nextstep.jwp.model.request.Request;
+import nextstep.jwp.model.request.RequestBody;
+import nextstep.jwp.model.request.RequestHeaders;
+import nextstep.jwp.model.request.RequestLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,18 +24,16 @@ public class RequestAssembler {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line = reader.readLine();
         LOGGER.debug(line);
-        String[] firstLine = line.split(" ");
-        String requestMethod = firstLine[0];
-        RequestPath requestPath = new RequestPath(firstLine[1]);
-        Map<String, String> headers = headers(reader, line);
+        RequestLine requestLine = new RequestLine(line);
+        RequestHeaders headers = headers(reader, line);
         RequestBody requestBody = requestBody(reader, headers);
-        return new Request(requestMethod, headers, requestPath, requestBody);
+        return new Request(requestLine, headers, requestBody);
     }
 
-    private static RequestBody requestBody(BufferedReader reader, Map<String, String> headers) throws IOException {
+    private static RequestBody requestBody(BufferedReader reader, RequestHeaders headers) throws IOException {
         String body = "";
-        if (headers.containsKey("Content-Length")) {
-            int contentLength = Integer.parseInt(headers.get("Content-Length").trim());
+        if (headers.hasContentLength()) {
+            int contentLength = headers.getContentLength();
             char[] buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);
             body = new String(buffer);
@@ -43,20 +42,16 @@ public class RequestAssembler {
         return new RequestBody(body);
     }
 
-    private static Map<String, String> headers(BufferedReader reader, String line) throws IOException {
+    private static RequestHeaders headers(BufferedReader reader, String line) throws IOException {
         Map<String, String> headers = new HashMap<>();
         while (!"".equals(line)) {
-            if (line == null) {
-                return headers;
-            }
             line = reader.readLine();
             LOGGER.debug(line);
-            String[] parsedLine = line.split(": ");
-            if (parsedLine.length < 2) {
-                break;
+            String[] parsedLine = line.split(":");
+            if (parsedLine.length > 1) {
+                headers.put(parsedLine[0].trim(), parsedLine[1].trim());
             }
-            headers.put(parsedLine[0], parsedLine[1]);
         }
-        return headers;
+        return new RequestHeaders(headers);
     }
 }

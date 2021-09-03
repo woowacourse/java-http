@@ -2,11 +2,12 @@ package nextstep.jwp.model;
 
 public enum PathType {
 
-    BASE_PATH("/"),
-    INDEX_PATH("/index"),
-    LOGIN_PATH("/login"),
-    REGISTER_PATH("/register"),
-    UNAUTHORIZED("/401");
+    BASE("/"),
+    INDEX("/index"),
+    LOGIN("/login"),
+    REGISTER("/register"),
+    UNAUTHORIZED("/401"),
+    NOT_FOUND("/404");
 
     private String value;
 
@@ -16,5 +17,9 @@ public enum PathType {
 
     public String value() {
         return value;
+    }
+
+    public String resource() {
+        return value + FileType.HTML.extension();
     }
 }

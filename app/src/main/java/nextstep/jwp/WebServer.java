@@ -31,8 +31,9 @@ public class WebServer {
 
     private void handle(ServerSocket serverSocket) throws IOException {
         Socket connection;
+        RequestMapping requestMapping = new RequestMapping();
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection)).start();
+            new Thread(new RequestHandler(connection, requestMapping)).start();
         }
     }
 

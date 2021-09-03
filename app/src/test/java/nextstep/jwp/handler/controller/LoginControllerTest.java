@@ -74,7 +74,7 @@ class LoginControllerTest {
     @DisplayName("로그인 실패 시, 401 응답")
     @Test
     void doPostWithInvalidUser() {
-        final String requestBody = "account=corgi&password=password&email=hkkang%40woowahan.com";
+        final String requestBody = "account=hi&password=password&email=hkkang%40woowahan.com";
 
         RequestLine requestLine = RequestLine.of("POST /login HTTP/1.1");
         RequestHeaders requestHeaders = RequestHeaders.of(Arrays.asList("Content-Length: " + requestBody.length()));

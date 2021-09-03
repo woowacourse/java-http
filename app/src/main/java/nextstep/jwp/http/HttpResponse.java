@@ -2,10 +2,7 @@ package nextstep.jwp.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class HttpResponse {
@@ -49,7 +46,7 @@ public class HttpResponse {
         private OutputStream outputStream;
         private HttpStatus status;
         private String body;
-        private final Map<String, String> responseMap = new HashMap<>();
+        private final Map<String, String> responseMap = new LinkedHashMap<>();
 
         public Builder outputStream(OutputStream outputStream) {
             this.outputStream = outputStream;

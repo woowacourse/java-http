@@ -12,8 +12,8 @@ public class DefaultController extends AbstractController {
         HttpResponse response = new HttpResponse.Builder()
                 .outputStream(httpResponse.getOutputStream())
                 .status(HttpStatus.OK_200)
-                .body("Hello world!")
                 .path(httpRequest.getPath())
+                .body("Hello world!")
                 .build();
         response.forward();
     }

@@ -3,6 +3,8 @@ package nextstep.jwp.controller;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class IndexControllerTest extends ControllerTest {
@@ -15,7 +17,7 @@ class IndexControllerTest extends ControllerTest {
                 "GET / HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 "");
 

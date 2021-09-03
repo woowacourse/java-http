@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +21,7 @@ class RegisterControllerTest extends ControllerTest {
                 "GET /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 "");
 
@@ -49,7 +50,7 @@ class RegisterControllerTest extends ControllerTest {
                 "Content-Length: " + requestBody.getBytes().length + " ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
-                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 requestBody);
 
@@ -75,7 +76,7 @@ class RegisterControllerTest extends ControllerTest {
                 "Content-Length: " + requestBody.getBytes().length + " ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
-                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 requestBody);
 

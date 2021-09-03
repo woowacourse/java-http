@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,10 +21,37 @@ class LoginControllerTest extends ControllerTest {
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=유효하지_않은_세션_id ",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 "");
 
+        sendRequest(httpRequest);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 3797 \r\n" +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("GET /login 후 재요청 시 index.html를 응답한다.")
+    @Test
+    void doGetDuplicate() throws IOException {
+        // given
+        final UUID uuid = UUID.randomUUID();
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=" + uuid + " ",
+                "",
+                "");
+        sendRequest(httpRequest);
+
+        // when
         sendRequest(httpRequest);
 
         // then
@@ -48,7 +76,7 @@ class LoginControllerTest extends ControllerTest {
                 "Content-Length: " + requestBody.getBytes().length + " ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
-                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 requestBody);
 
@@ -74,7 +102,7 @@ class LoginControllerTest extends ControllerTest {
                 "Content-Length: " + requestBody.getBytes().length + " ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
-                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=유효하지_않은_세션_id ",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 requestBody);
 
@@ -100,7 +128,7 @@ class LoginControllerTest extends ControllerTest {
                 "Content-Length: " + requestBody.getBytes().length + " ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
-                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 requestBody);
 

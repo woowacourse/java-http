@@ -3,21 +3,17 @@ package nextstep.jwp.web.network.response;
 
 import nextstep.jwp.web.controller.View;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 public class HttpResponse {
 
     private static final String DEFAULT_BODY = "";
 
     private final StatusLine statusLine;
-    private final Map<String, String> headers;
+    private final HttpHeaders headers;
     private String body;
 
     public HttpResponse() {
         this.statusLine = new StatusLine(HttpStatus.OK);
-        this.headers = new LinkedHashMap<>();
+        this.headers = new HttpHeaders();
         this.body = DEFAULT_BODY;
     }
 
@@ -26,9 +22,7 @@ public class HttpResponse {
     }
 
     private String headersFields() {
-        return headers.entrySet().stream()
-                .map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
-                .collect(Collectors.joining("\r\n"));
+        return headers.getAll();
     }
 
     public void setStatus(HttpStatus status) {

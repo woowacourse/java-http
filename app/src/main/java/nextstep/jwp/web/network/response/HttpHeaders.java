@@ -6,7 +6,9 @@ import nextstep.jwp.web.network.request.Cookies;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpHeaders {
 
@@ -18,6 +20,10 @@ public class HttpHeaders {
 
     private final Map<String, String> headers;
 
+    public HttpHeaders() {
+        this(new LinkedHashMap<>());
+    }
+
     public HttpHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
@@ -25,14 +31,10 @@ public class HttpHeaders {
     public static HttpHeaders of(BufferedReader bufferedReader) {
         try {
             final Map<String, String> headers = new HashMap<>();
-            String line = bufferedReader.readLine();
-            while (!"".equals(line)) {
+            String line;
+            while(!"".equals(line = bufferedReader.readLine()) && line != null) {
                 final String[] keyAndValue = line.split(":");
                 headers.put(keyAndValue[KEY_INDEX].trim(), keyAndValue[VALUE_INDEX].trim());
-                line = bufferedReader.readLine();
-                if (line == null) {
-                    break;
-                }
             }
             return new HttpHeaders(headers);
         } catch (IOException exception) {
@@ -42,6 +44,12 @@ public class HttpHeaders {
 
     public String get(String key) {
         return headers.getOrDefault(key, DEFAULT_HEADER_VALUE);
+    }
+
+    public String getAll() {
+        return headers.entrySet().stream()
+                .map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
+                .collect(Collectors.joining("\r\n"));
     }
 
     public Cookies getCookies() {
@@ -60,7 +68,7 @@ public class HttpHeaders {
         return contentLengthAsString == null;
     }
 
-    public void setHeader(String key, String value) {
-        headers.put(key, value);
+    public void put(String key, String value) {
+        headers.putIfAbsent(key, value);
     }
 }

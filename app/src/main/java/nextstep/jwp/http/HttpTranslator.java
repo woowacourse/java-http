@@ -3,6 +3,7 @@ package nextstep.jwp.http;
 import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 import nextstep.jwp.http.message.request.RequestHeader;
+import nextstep.jwp.http.message.request.RequestLine;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
 import nextstep.jwp.utils.StringUtils;
 
@@ -12,10 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.util.AbstractMap;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
+
 
 public class HttpTranslator {
 
@@ -39,10 +37,15 @@ public class HttpTranslator {
 
     public HttpRequestMessage translate() throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        RequestLine requestLine = extractRequestLine(bufferedReader);
         RequestHeader requestHeader = extractHeaderMessage(bufferedReader);
-        int messageBodyLength = requestHeader.takeMessageBodyLength();
+        int messageBodyLength = requestHeader.takeContentLength();
         MessageBody messageBody = extractBodyMessage(bufferedReader, messageBodyLength);
-        return new HttpRequestMessage(requestHeader, messageBody);
+        return new HttpRequestMessage(requestLine, requestHeader, messageBody);
+    }
+
+    private RequestLine extractRequestLine(BufferedReader bufferedReader) throws IOException {
+        return RequestLine.from(bufferedReader.readLine());
     }
 
     private RequestHeader extractHeaderMessage(BufferedReader bufferedReader) throws IOException {
@@ -51,7 +54,7 @@ public class HttpTranslator {
         while (!(line = bufferedReader.readLine()).equals("")) {
             stringBuilder.append(line).append(NEW_LINE);
         }
-        return RequestHeader.from(
+        return new RequestHeader(
                 StringUtils.decode(stringBuilder.toString(), charSet)
         );
     }
@@ -67,21 +70,5 @@ public class HttpTranslator {
     public void respond(HttpResponseMessage httpResponseMessage) throws IOException {
         outputStream.write(httpResponseMessage.toBytes());
         outputStream.flush();
-    }
-
-    // TODO : 추후에 분리
-    public static Map<String, String> extractFormData(MessageBody messageBody) {
-        String formData = messageBody.asString();
-        String[] pieces = formData.split(FORM_DATA_PIECE_SEPARATOR);
-        return Arrays.stream(pieces)
-                .map(HttpTranslator::extractParam)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    private static Map.Entry<String, String> extractParam(String formDataPiece) {
-        int index = formDataPiece.indexOf(FORM_DATE_PARAM_SEPARATOR);
-        String key = formDataPiece.substring(0, index);
-        String value = formDataPiece.substring(index + 1);
-        return new AbstractMap.SimpleEntry<>(key, value);
     }
 }

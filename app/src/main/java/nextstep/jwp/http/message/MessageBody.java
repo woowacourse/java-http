@@ -1,5 +1,7 @@
 package nextstep.jwp.http.message;
 
+import nextstep.jwp.http.message.request.FormData;
+
 import java.util.Arrays;
 
 public class MessageBody {
@@ -16,6 +18,10 @@ public class MessageBody {
 
     public MessageBody(String bodyString) {
         this(bodyString.getBytes());
+    }
+
+    public FormData toFormData() {
+        return FormData.from(this);
     }
 
     public String contentLength() {

@@ -2,6 +2,7 @@ package nextstep.jwp.http.message;
 
 import nextstep.jwp.utils.StringUtils;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,8 +56,8 @@ public class HeaderFields {
         return Optional.ofNullable(fields.get(key));
     }
 
-    public Map<String, String> getFields() {
-        return fields;
+    public Map<String, String> toMap() {
+        return Collections.unmodifiableMap(fields);
     }
 
     @Override
@@ -64,11 +65,11 @@ public class HeaderFields {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         HeaderFields that = (HeaderFields) o;
-        return Objects.equals(getFields(), that.getFields());
+        return Objects.equals(fields, that.fields);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getFields());
+        return Objects.hash(fields);
     }
 }

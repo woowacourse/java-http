@@ -24,7 +24,7 @@ class HeaderFieldsTest {
         HeaderFields headerFields = new HeaderFields(headerParams);
 
         // then
-        assertThat(headerFields.getFields()).isEqualTo(headerParams);
+        assertThat(headerFields.toMap()).isEqualTo(headerParams);
     }
 
     @DisplayName("문자열로 HeaderFields 를 생성한다.")

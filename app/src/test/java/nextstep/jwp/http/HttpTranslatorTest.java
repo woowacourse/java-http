@@ -4,9 +4,14 @@ import nextstep.jwp.http.common.HttpStatusCode;
 import nextstep.jwp.http.common.HttpVersion;
 import nextstep.jwp.http.message.HeaderFields;
 import nextstep.jwp.http.message.MessageBody;
+import nextstep.jwp.http.message.MessageHeader;
+import nextstep.jwp.http.message.StartLine;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 import nextstep.jwp.http.message.request.RequestHeader;
+import nextstep.jwp.http.message.request.RequestLine;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
+import nextstep.jwp.http.message.response.ResponseHeader;
+import nextstep.jwp.http.message.response.StatusLine;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -34,11 +39,15 @@ class HttpTranslatorTest {
         HttpRequestMessage httpRequestMessage = httpTranslator.translate();
 
         // then
-        RequestHeader header = httpRequestMessage.getHeader();
+        StartLine requestLine = httpRequestMessage.getStartLine();
+        MessageHeader header = httpRequestMessage.getHeader();
         MessageBody body = httpRequestMessage.getBody();
 
+        assertThat(requestLine).isEqualTo(
+                RequestLine.from(requestLineMessage())
+        );
         assertThat(header).isEqualTo(
-                RequestHeader.from(requestHeaderMessage())
+                new RequestHeader(requestHeaderMessage())
         );
         assertThat(body).isEqualTo(
                 new MessageBody(requestBodyMessage())
@@ -50,9 +59,9 @@ class HttpTranslatorTest {
     void respond() throws IOException {
         // given
         String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 12",
                 "",
                 "hello world!");
 
@@ -65,23 +74,6 @@ class HttpTranslatorTest {
 
         // then
         assertThat(outputStream.toString()).isEqualTo(expected);
-        System.out.println(outputStream);
-    }
-
-    @DisplayName("FormData 를 Map<String, String> 형식으로 추출한다.")
-    @Test
-    void extractFormData() {
-        // given
-        Map<String, String> expected = Map.of("account", "ggyool", "password", "password", "email", "ggyool@never.com");
-
-        String formData = "account=ggyool&password=password&email=ggyool@never.com";
-        MessageBody messageBody = new MessageBody(formData);
-
-        // when
-        Map<String, String> formParams = HttpTranslator.extractFormData(messageBody);
-
-        // then
-        assertThat(formParams).containsAllEntriesOf(expected);
     }
 
     private InputStream generateInputStream() {
@@ -93,12 +85,15 @@ class HttpTranslatorTest {
         return new ByteArrayInputStream(requestMessage.getBytes());
     }
 
+    private String requestLineMessage() {
+        return "POST /index.html HTTP/1.1 \r\n";
+    }
+
     private String requestHeaderMessage() {
         return String.join("\r\n",
-                "POST /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: 12 ");
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: 12");
     }
 
     private String requestBodyMessage() {
@@ -110,11 +105,15 @@ class HttpTranslatorTest {
     }
 
     private HttpResponseMessage httpResponseMessage() {
+        StatusLine statusLine = new StatusLine(HttpVersion.HTTP_1_1, HttpStatusCode.OK);
+
         LinkedHashMap<String, String> fields = new LinkedHashMap<>();
         fields.put("Content-Type", "text/html;charset=utf-8");
         fields.put("Content-Length", "12");
         HeaderFields headerFields = new HeaderFields(fields);
-        MessageBody messageBody = new MessageBody("hello world!");
-        return new HttpResponseMessage(HttpVersion.HTTP_1_1.getValue(), HttpStatusCode.OK, headerFields, messageBody);
+        ResponseHeader responseHeader = new ResponseHeader(headerFields);
+
+        MessageBody responseBody = new MessageBody("hello world!");
+        return new HttpResponseMessage(statusLine, responseHeader, responseBody);
     }
 }

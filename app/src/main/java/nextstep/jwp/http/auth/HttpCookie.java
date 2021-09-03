@@ -8,11 +8,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
-    public static final HttpCookie EMPTY = new HttpCookie(null);
-    private UUID SessionId;
+    public static final HttpCookie EMPTY = new HttpCookie(new HashMap<>(), null);
+    private final Map<String, String> cookies;
+    private final UUID SessionId;
 
-    public HttpCookie(UUID SessionId) {
-        this.SessionId = SessionId;
+    public HttpCookie(Map<String, String> cookies, UUID sessionId) {
+        this.cookies = cookies;
+        SessionId = sessionId;
     }
 
     public static HttpCookie StringOf(String httpCookieString) {
@@ -23,10 +25,7 @@ public class HttpCookie {
             String[] split = cookieString.split("=");
             cookieContent.put(split[0], split[1]);
         }
-
-//        List<String> sessionIds = Arrays.stream(strings.get(strings.size() - 1).split("="))
-//                .collect(Collectors.toList());
-        return new HttpCookie(UUID.fromString(cookieContent.get("JSESSIONID")));
+        return new HttpCookie(cookieContent, UUID.fromString(cookieContent.get("JSESSIONID")));
     }
 
     public Boolean isEmpty() {

@@ -83,13 +83,17 @@ public class HttpRequest {
             return httpSession;
         }
         if (Objects.nonNull(httpCookie)) {
-            String jSessionId = httpCookie.getSessionId();
-            if (Objects.isNull(jSessionId)) {
-                return null;
-            }
-            return HttpSessions.getSession(jSessionId);
+            return getHttpSessionByJSessionId();
         }
         return new HttpSession(UUID.randomUUID().toString());
+    }
+
+    private HttpSession getHttpSessionByJSessionId() {
+        String jSessionId = httpCookie.getSessionId();
+        if (Objects.isNull(jSessionId)) {
+            return null;
+        }
+        return HttpSessions.getSession(jSessionId);
     }
 
     public HttpCookie getHttpCookie() {

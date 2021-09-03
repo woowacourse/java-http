@@ -1,5 +1,6 @@
 package nextstep.jwp.domain.response;
 
+import nextstep.jwp.domain.HttpCookie;
 import nextstep.jwp.domain.Resource;
 
 import java.io.IOException;
@@ -81,8 +82,12 @@ public class HttpResponse {
         return body;
     }
 
-    public void setCookie(String JSessionId) {
-        headerMap.put("Set-Cookie", "JSESSIONID=" + JSessionId);
+    public void setCookie(HttpCookie cookie) {
+        Map<String, String> cookies = cookie.getValues();
+        cookies.entrySet()
+                .stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .forEach(cookieValue -> headerMap.put("Set-Cookie", cookieValue));
     }
 }
 

@@ -4,7 +4,6 @@ import nextstep.jwp.MockSocket;
 import nextstep.jwp.domain.Converter;
 import nextstep.jwp.domain.HttpCookie;
 import nextstep.jwp.domain.HttpSession;
-import nextstep.jwp.domain.HttpSessions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,6 +18,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpRequestTest {
 
+    private static final String JSESSIONID = "656cef62-e3c4-40bc-a8df-94732920ed46";
     private MockSocket socket;
     private HttpRequest httpRequest;
 
@@ -27,8 +27,8 @@ class HttpRequestTest {
         String request = String.join("\r\n",
                 "GET /index.html HTTP/1.1",
                 "Host: localhost:8080 ",
-                "Accept: */*",
-                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
+                "Accept: */* ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ",
                 "",
                 "");
 
@@ -100,11 +100,10 @@ class HttpRequestTest {
     @Test
     void getSession() {
         //given
-        HttpSessions.put("656cef62-e3c4-40bc-a8df-94732920ed46", new HttpSession("656cef62-e3c4-40bc-a8df-94732920ed46"));
         //when
         HttpSession session = httpRequest.getSession();
         //then
-        assertThat(session.getId()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
+        assertThat(session.getId()).isEqualTo(JSESSIONID);
     }
 
     @DisplayName("HttpCookie를 반환한다.")
@@ -114,6 +113,6 @@ class HttpRequestTest {
         //when
         HttpCookie httpCookie = httpRequest.getHttpCookie();
         //then
-        assertThat(httpCookie.getSessionId()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
+        assertThat(httpCookie.getSessionId()).isEqualTo(JSESSIONID);
     }
 }

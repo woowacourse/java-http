@@ -8,7 +8,6 @@ import nextstep.jwp.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
 import java.util.Map;
 
 import static nextstep.jwp.controller.LoginControllerTest.loginRequest;

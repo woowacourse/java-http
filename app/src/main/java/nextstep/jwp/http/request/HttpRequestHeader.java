@@ -3,7 +3,6 @@ package nextstep.jwp.http.request;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.authentication.HttpCookie;
 
-import java.util.List;
 import java.util.Map;
 
 public class HttpRequestHeader {

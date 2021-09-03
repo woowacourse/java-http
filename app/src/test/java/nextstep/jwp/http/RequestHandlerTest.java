@@ -2,8 +2,6 @@ package nextstep.jwp.http;
 
 import nextstep.jwp.http.authentication.HttpSession;
 import nextstep.jwp.http.authentication.HttpSessions;
-import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.request.HttpRequestHeader;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.infrastructure.RequestHandler;
 import nextstep.jwp.infrastructure.RequestMapping;
@@ -14,7 +12,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;

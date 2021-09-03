@@ -58,15 +58,6 @@ public class HttpResponse {
                         final String jSession,
                         final ContentType contentType,
                         final Integer contentLength,
-                        final String responseBody) {
-        this(protocol, httpStatus, jSession, contentType, contentLength, null, responseBody);
-    }
-
-    public HttpResponse(final String protocol,
-                        final HttpStatus httpStatus,
-                        final String jSession,
-                        final ContentType contentType,
-                        final Integer contentLength,
                         final String location,
                         final String responseBody) {
         this.protocol = protocol;

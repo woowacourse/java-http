@@ -6,7 +6,9 @@ import nextstep.jwp.http.authentication.HttpSessions;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 import static nextstep.jwp.http.request.HttpRequestHeader.REQUEST_LINE;
 

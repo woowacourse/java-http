@@ -1,6 +1,6 @@
 package nextstep.jwp.http.session;
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,7 +21,7 @@ public class HttpCookie {
     }
 
     public HttpCookie() {
-        this.cookies = new LinkedHashMap<>();
+        this.cookies = new HashMap<>();
     }
 
     public HttpCookie(Map<String, String> cookies) {

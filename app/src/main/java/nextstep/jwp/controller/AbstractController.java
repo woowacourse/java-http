@@ -21,11 +21,11 @@ public class AbstractController implements Controller {
     }
 
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-
+        throw new IllegalArgumentException();
     }
 
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-
+        throw new IllegalArgumentException();
     }
 
     protected String createBody(String filePath) throws IOException {

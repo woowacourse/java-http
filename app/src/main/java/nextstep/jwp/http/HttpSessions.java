@@ -10,6 +10,9 @@ public class HttpSessions {
     private static final Logger log = LoggerFactory.getLogger(HttpSessions.class);
     private static final Map<String, HttpSession> sessions = new HashMap<>();
 
+    private HttpSessions() {
+    }
+
     public static void add(String id, HttpSession httpSession) {
         log.debug("session added : {}", id);
         sessions.put(id, httpSession);

@@ -1,5 +1,6 @@
 package nextstep.joanne.server.handler.controller;
 
+import nextstep.joanne.server.handler.ErrorView;
 import nextstep.joanne.server.http.HttpStatus;
 import nextstep.joanne.server.http.request.ContentType;
 import nextstep.joanne.server.http.request.HttpRequest;
@@ -10,21 +11,13 @@ public class ControllerAdvice {
         mappedByStatusCode(httpRequest, httpResponse, httpStatus);
     }
 
-    private static void mappedByStatusCode(HttpRequest httpRequest, HttpResponse response, HttpStatus httpStatus) {
-        if (httpStatus.equals(HttpStatus.UNAUTHORIZED)) {
-            response.addStatus(HttpStatus.UNAUTHORIZED);
-            response.addHeaders("Content-Type", ContentType.resolve(httpRequest.uri()));
-            response.addBody("/401.html");
-            return;
-        }
-        if (httpStatus.equals(HttpStatus.NOT_FOUND)) {
-            response.addStatus(HttpStatus.NOT_FOUND);
-            response.addHeaders("Content-Type", ContentType.resolve(httpRequest.uri()));
-            response.addBody("/404.html");
-            return;
-        }
-        response.addStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+    private static void mappedByStatusCode(HttpRequest httpRequest, HttpResponse httpResponse, HttpStatus httpStatus) {
+        makeResponse(httpRequest, httpResponse, httpStatus);
+    }
+
+    private static void makeResponse(HttpRequest httpRequest, HttpResponse response, HttpStatus httpStatus) {
+        response.addStatus(httpStatus);
         response.addHeaders("Content-Type", ContentType.resolve(httpRequest.uri()));
-        response.addBody("/500.html");
+        response.addBody(ErrorView.viewOf(httpStatus));
     }
 }

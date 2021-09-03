@@ -39,7 +39,7 @@ public class HttpRequestReader {
 
         String requestBody = readRequestBody(reader, contentLength);
 
-        return new HttpRequest(requestMethod, requestUri, requestProtocol, requestHeaders, requestBody);
+        return new HttpRequest(HttpMethod.valueOf(requestMethod), requestUri, requestProtocol, requestHeaders, requestBody);
     }
 
     private static String readRequestBody(BufferedReader reader, int contentLength) throws IOException {

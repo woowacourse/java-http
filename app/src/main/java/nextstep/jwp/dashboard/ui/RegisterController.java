@@ -1,9 +1,9 @@
 package nextstep.jwp.dashboard.ui;
 
-import nextstep.jwp.dashboard.exception.DuplicateUserException;
-import nextstep.jwp.web.controller.AbstractController;
 import nextstep.jwp.dashboard.db.InMemoryUserRepository;
 import nextstep.jwp.dashboard.domain.User;
+import nextstep.jwp.dashboard.exception.DuplicateUserException;
+import nextstep.jwp.web.controller.AbstractController;
 import nextstep.jwp.web.controller.View;
 import nextstep.jwp.web.network.request.HttpRequest;
 import nextstep.jwp.web.network.response.HttpResponse;

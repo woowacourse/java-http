@@ -48,6 +48,7 @@ public class LoginController extends AbstractController {
             final Map<String, String> queryInfo = request.getBodyAsMap();
             final User user = InMemoryUserRepository.findByAccount(queryInfo.get("account"))
                     .orElseThrow(() -> new UserNotFoundException(queryInfo.get("account")));
+
             if (user.checkPassword(queryInfo.get("password"))) {
                 log.info("Login successful! user account: {}", user.getAccount());
 
@@ -58,7 +59,6 @@ public class LoginController extends AbstractController {
                 response.setStatus(HttpStatus.FOUND);
                 response.setHeader("Set-Cookie", "JSESSIONID=" + session.getId());
                 response.setHeader("Location", "/index.html");
-                log.info("Connected session {} to user {}", session.getId(), user.getAccount());
             } else {
                 log.info("Login failed");
                 final View view = new View("/401");

@@ -44,30 +44,19 @@ public class HttpRequest {
     public HttpSession getSession() {
         final Cookies cookies = getCookies();
         final String sessionId = cookies.get("JSESSIONID");
-        if (doesNotExist(sessionId)) {
-            return createSession();
-        }
         if (HttpSessions.doesNotContain(sessionId)) {
-            return includeSession(sessionId);
+            final HttpSession session = createSession(sessionId);
+            HttpSessions.setSession(session);
+            return session;
         }
         return HttpSessions.getSession(sessionId);
     }
 
-    private boolean doesNotExist(String sessionId) {
-        return sessionId == null;
-    }
-
-    private HttpSession createSession() {
-        final UUID id = UUID.randomUUID();
-        final HttpSession session = new HttpSession(id);
-        HttpSessions.setSession(session);
-        return session;
-    }
-
-    private HttpSession includeSession(String sessionId) {
-        final HttpSession session = new HttpSession(sessionId);
-        HttpSessions.setSession(session);
-        return session;
+    private HttpSession createSession(String sessionId) {
+        if (sessionId == null) {
+            return new HttpSession(UUID.randomUUID());
+        }
+        return new HttpSession(sessionId);
     }
 
     public Map<String, String> getBodyAsMap() {

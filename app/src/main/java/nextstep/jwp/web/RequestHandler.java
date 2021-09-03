@@ -34,13 +34,14 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream()) {
             final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
 
-            final HttpRequest httpRequest  = new HttpRequest(inputStream);
-            final HttpResponse httpResponse = new HttpResponse();
-            final ControllerMapping controllerMapping = new ControllerMapping(ControllerFactory.create());
-            final Controller mappedController = controllerMapping.findByResource(httpRequest.getPath());
-            mappedController.service(httpRequest, httpResponse);
+            final HttpRequest request  = new HttpRequest(inputStream);
+            final HttpResponse response = new HttpResponse();
 
-            bufferedWriter.write(httpResponse.print());
+            final ControllerMapping controllerMapping = new ControllerMapping(ControllerFactory.create());
+            final Controller mappedController = controllerMapping.findByResource(request.getPath());
+            mappedController.service(request, response);
+
+            bufferedWriter.write(response.print());
             bufferedWriter.flush();
             bufferedWriter.close();
         } catch (IOException exception) {

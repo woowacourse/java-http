@@ -19,3 +19,6 @@
   - [x] JSESSION 값으로 로그인 여부를 체크한다.
   - [x] 로그인 성공할 경우 HttpSession 객체의 값을 이용하여 User 객체를 저장한다.
   - [x] 로그인 상태에서 /login 에 GET 메서드로 접근하면 index.html로 리다이렉트한다.
+  
+- [x] 소켓 풀 생성 로깅
+- [ ] 디스패쳐 서블릿 생성하여 RequestHandler의 역할 분리

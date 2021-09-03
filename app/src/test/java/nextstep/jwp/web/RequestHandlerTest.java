@@ -25,12 +25,10 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final String expected = String.join("\r\n",
+        assertThat(socket.output()).contains(
                 "HTTP/1.1 302 Found ",
-                "Location: /index.html ",
-                "",
-                "");
-        assertThat(socket.output()).isEqualTo(expected);
+                "Location: /index.html "
+        );
     }
 
     @DisplayName("/index.html 요청에 index.html을 포함하여 응답한다 - 성공")

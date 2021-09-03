@@ -28,6 +28,10 @@ public class HttpSessions {
         sessions.remove(id);
     }
 
+    public static boolean doesNotContain(HttpSession session) {
+        return doesNotContain(session.getId());
+    }
+
     public static boolean doesNotContain(String sessionId) {
         return !sessions.containsKey(sessionId);
     }

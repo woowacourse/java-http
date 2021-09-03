@@ -2,8 +2,10 @@ package nextstep.jwp.controller;
 
 import static nextstep.jwp.http.response.HttpStatus.FOUND;
 import static nextstep.jwp.http.response.HttpStatus.OK;
+import static nextstep.jwp.http.response.HttpStatus.UNAUTHORIZED;
 
 import java.util.Optional;
+import nextstep.jwp.exception.controller.UnAuthorizationException;
 import nextstep.jwp.http.HttpSession;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
@@ -48,11 +50,24 @@ public class LoginController extends AbstractController {
     protected View doPost(HttpRequest request, HttpResponse response) {
         LOG.debug("Login - HTTP POST Request");
 
-        service.doService(request, response);
+        try {
+            service.doService(request, response);
+        } catch (UnAuthorizationException e) {
+            return getUnauthorizedPage(response);
+        }
         return getHomePage(request, response, FOUND);
     }
 
+    private View getUnauthorizedPage(HttpResponse response) {
+        response.forward(UNAUTHORIZED, UNAUTHORIZED_PATH);
+        return new View(UNAUTHORIZED_PATH);
+    }
+
     private View getHomePage(HttpRequest request, HttpResponse response, HttpStatus httpStatus) {
+        if (FOUND.equals(httpStatus)) {
+            response.redirect(FOUND, HOME_PATH);
+            return new View(HOME_PATH);
+        }
         response.forward(httpStatus, request.getUri());
         return new View(HOME_PATH);
     }

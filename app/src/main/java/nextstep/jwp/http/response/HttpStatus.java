@@ -3,15 +3,13 @@ package nextstep.jwp.http.response;
 public enum HttpStatus {
 
     OK(200, "OK"),
-    CREATED(201, "CREATED"),
+    CREATED(201, "Created"),
 
-    FOUND(302, "FOUND"),
+    FOUND(302, "Found"),
 
-    BAD_REQUEST(400, "BAD REQUEST"),
-    UNAUTHORIZED(401, "UNAUTHORIZED"),
-    NOT_FOUND(404, "NOT FOUND"),
-
-    INTERNAL_SERVER_ERROR(500, "INTERNAL SERVER ERROR");
+    BAD_REQUEST(400, "Bad Request"),
+    UNAUTHORIZED(401, "Unauthorized"),
+    NOT_FOUND(404, "Not Found");
 
     private final int code;
     private final String message;

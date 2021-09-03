@@ -8,6 +8,7 @@ public class ResponseHeaders {
 
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String LOCATION = "Location";
     private static final String SET_COOKIE = "Set-Cookie";
     private static final String JSESSIONID_WITH_DELIMITER = "JSESSIONID=";
 
@@ -27,6 +28,10 @@ public class ResponseHeaders {
 
     public void setContentLength(int contentLength) {
         headers.put(CONTENT_LENGTH, String.valueOf(contentLength));
+    }
+
+    public void setLocation(String uri) {
+        headers.put(LOCATION, uri);
     }
 
     public void setCookie(String id) {

@@ -10,6 +10,7 @@ public abstract class AbstractController implements Controller {
     protected static final String HOME_PATH = "/index";
     protected static final String LOGIN_PATH = "/login";
     protected static final String BAD_REQUEST_PATH = "/400";
+    protected static final String UNAUTHORIZED_PATH = "/401";
     protected static final String NOT_FOUND_PATH = "/404";
 
     @Override

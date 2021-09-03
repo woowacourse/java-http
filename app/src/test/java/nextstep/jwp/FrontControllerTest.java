@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.exception.controller.DuplicateRegisterException;
-import nextstep.jwp.exception.controller.UnAuthorizationException;
 import nextstep.jwp.exception.http.response.ContentTypeNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -221,11 +220,14 @@ class FrontControllerTest {
 
             // then
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Content-Length: 5564 \r\n" +
+            final byte[] fileBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+
+            String expected = "HTTP/1.1 302 Found \r\n" +
+                "Content-Length: " + fileBytes.length + " \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Location: /index \r\n" +
                 "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                new String(fileBytes);
 
             assertThat(socket.output()).isEqualTo(expected);
         }
@@ -250,11 +252,19 @@ class FrontControllerTest {
             final FrontController frontController = new FrontController(socket);
 
             // when
+            frontController.run();
+
             // then
-            assertThatCode(frontController::run)
-                .isInstanceOf(UnAuthorizationException.class)
-                .hasMessage("접근 권한이 없습니다.")
-                .hasFieldOrPropertyWithValue("httpStatus", "401");
+            final URL resource = getClass().getClassLoader().getResource("static/401.html");
+            byte[] fileBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+
+            String expected = "HTTP/1.1 401 Unauthorized \r\n" +
+                "Content-Length: " + fileBytes.length + " \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "\r\n" +
+                new String(fileBytes);
+
+            assertThat(socket.output()).isEqualTo(expected);
         }
     }
 
@@ -355,7 +365,7 @@ class FrontControllerTest {
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
             final byte[] fileBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-            String expected = "HTTP/1.1 201 CREATED \r\n" +
+            String expected = "HTTP/1.1 201 Created \r\n" +
                 "Content-Length: " + fileBytes.length + " \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "\r\n" +
@@ -421,9 +431,10 @@ class FrontControllerTest {
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
             final byte[] fileBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-            final String expected = "HTTP/1.1 302 FOUND \r\n" +
+            final String expected = "HTTP/1.1 302 Found \r\n" +
                 "Content-Length: " + fileBytes.length + " \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Location: /index \r\n" +
                 "\r\n" +
                 new String(fileBytes);
 
@@ -483,7 +494,7 @@ class FrontControllerTest {
             final URL resource = getClass().getClassLoader().getResource("static/404.html");
             final byte[] fileBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-            String expected = "HTTP/1.1 404 NOT FOUND \r\n" +
+            String expected = "HTTP/1.1 404 Not Found \r\n" +
                 "Content-Length: " + fileBytes.length + " \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "\r\n" +
@@ -514,7 +525,7 @@ class FrontControllerTest {
             final URL resource = getClass().getClassLoader().getResource("static/404.html");
             final byte[] fileBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-            String expected = "HTTP/1.1 404 NOT FOUND \r\n" +
+            String expected = "HTTP/1.1 404 Not Found \r\n" +
                 "Content-Length: " + fileBytes.length + " \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "\r\n" +
@@ -581,7 +592,7 @@ class FrontControllerTest {
             final URL resource = getClass().getClassLoader().getResource("static/400.html");
             final byte[] fileBytes = Files.readAllBytes(new File(resource.getFile()).toPath());
 
-            String expected = "HTTP/1.1 400 BAD REQUEST \r\n" +
+            String expected = "HTTP/1.1 400 Bad Request \r\n" +
                 "Content-Length: " + fileBytes.length + " \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "\r\n" +

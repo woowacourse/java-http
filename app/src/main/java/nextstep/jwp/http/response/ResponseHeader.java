@@ -24,6 +24,10 @@ public class ResponseHeader {
         headers.setContentLength(contentLength);
     }
 
+    public void setLocation(String uri) {
+        headers.setLocation(uri);
+    }
+
     public void setCookie(String id) {
         headers.setCookie(id);
     }

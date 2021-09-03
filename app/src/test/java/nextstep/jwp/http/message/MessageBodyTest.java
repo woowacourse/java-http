@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class MessageBodyTest {
 
-    @DisplayName("MessageBody를 생성한다.")
+    @DisplayName("MessageBody 를 생성한다.")
     @Test
     void create() {
         String ggyool = "ggyool";
@@ -15,5 +15,15 @@ class MessageBodyTest {
 
         MessageBody messageBody = new MessageBody(ggyool);
         assertThat(messageBody.getBytes()).isEqualTo(bytes);
+    }
+
+    @DisplayName("MessageBody 를 문자열로 변환한다.")
+    @Test
+    void asString() {
+        String expect = "ggyool";
+        byte[] bytes = {103, 103, 121, 111, 111, 108};
+
+        MessageBody messageBody = new MessageBody(bytes);
+        assertThat(messageBody.asString()).isEqualTo(expect);
     }
 }

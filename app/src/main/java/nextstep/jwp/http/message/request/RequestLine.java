@@ -11,8 +11,6 @@ import java.util.Objects;
 
 public class RequestLine implements StartLine {
 
-    private static final String BLANK = " ";
-    private static final String NEW_LINE = "\r\n";
     private static final int REQUEST_LINE_ITEM_COUNT = 3;
 
     private final HttpMethod httpMethod;
@@ -40,10 +38,11 @@ public class RequestLine implements StartLine {
     }
 
     public String asString() {
-        return String.join(BLANK,
-                httpMethod.name(),
-                requestUri,
-                httpVersion.getValue());
+        String httpMethod = this.httpMethod.name();
+        String httpVersion = this.getHttpVersion().getValue();
+        return StringUtils.concatNewLine(
+                StringUtils.joinWithBlank(httpMethod, requestUri, httpVersion)
+        );
     }
 
     public HttpMethod getHttpMethod() {
@@ -60,8 +59,7 @@ public class RequestLine implements StartLine {
 
     @Override
     public byte[] toBytes() {
-        String s = asString() + NEW_LINE;
-        return s.getBytes();
+        return asString().getBytes();
     }
 
     @Override

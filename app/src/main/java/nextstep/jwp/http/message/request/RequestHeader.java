@@ -17,17 +17,18 @@ public class RequestHeader implements MessageHeader {
         this.headerFields = headerFields;
     }
 
-    public byte[] toBytes() {
-        return convertToString().getBytes();
-    }
-
-    public String convertToString() {
-        return headerFields.asString();
-    }
-
     public int takeContentLength() {
         String contentLength = headerFields.take("Content-Length").orElse("0");
         return Integer.parseInt(contentLength);
+    }
+
+    public String asString() {
+        return headerFields.asString();
+    }
+
+    @Override
+    public byte[] toBytes() {
+        return asString().getBytes();
     }
 
     @Override

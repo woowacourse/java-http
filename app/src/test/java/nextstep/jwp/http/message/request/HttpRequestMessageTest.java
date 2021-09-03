@@ -44,7 +44,7 @@ class HttpRequestMessageTest {
 
         // when
         byte[] bytes = httpRequestMessage.toBytes();
-
+        
         // then
         assertThat(bytes).isEqualTo(expect);
     }

@@ -48,18 +48,18 @@ class RequestLineTest {
                 .isInstanceOf(HttpMessageConvertFailureException.class);
     }
 
-    @DisplayName("RequestLine을 문자열로 반환한다.")
+    @DisplayName("RequestLine 을 문자열로 반환한다. (마지막에 NewLine 포함)")
     @Test
     void asSting() {
         // given
-        String expect = "POST /login HTTP/1.1";
+        String expect = "POST /login HTTP/1.1\r\n";
         RequestLine requestLine = new RequestLine(HttpMethod.POST, "/login", HttpVersion.HTTP_1_1);
 
         // when, then
         assertThat(requestLine.asString()).isEqualTo(expect);
     }
 
-    @DisplayName("RequestLine을 바이트 배열로 변환할 때는 마지막에 개행 문자를 포함한다.")
+    @DisplayName("RequestLine 을 바이트 배열로 변환 (마지막에 NewLine 포함)")
     @Test
     void toBytes() {
         // given

@@ -24,4 +24,19 @@ class StringUtilsTest {
         List<String> pieces = StringUtils.splitTwoPiecesWithSeparator(s, "\r\n");
         assertThat(pieces).containsExactly("aaaa", "b\r\ncc\r\n");
     }
+
+    @DisplayName("여러 단어를 공백으로 합쳐준다.")
+    @Test
+    void joinWithBlank() {
+        String s = StringUtils.joinWithBlank("hello", "world", "goodbye", "world");
+        assertThat(s).isEqualTo("hello world goodbye world");
+    }
+
+    @DisplayName("문자열에 뉴라인을 붙인다.")
+    @Test
+    void concatNewLine() {
+        String expect = "hello world\r\n";
+        String s = "hello world";
+        assertThat(StringUtils.concatNewLine(s)).isEqualTo(expect);
+    }
 }

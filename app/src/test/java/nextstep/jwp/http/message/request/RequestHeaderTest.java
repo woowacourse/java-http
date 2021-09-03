@@ -24,25 +24,6 @@ class RequestHeaderTest {
         assertThat(requestHeader.getHeaderFields()).isEqualTo(headerFields);
     }
 
-    @DisplayName("RequestHeader 를 문자열로 변환한다.")
-    @Test
-    void convertToString() {
-        // given
-        String expect = String.join("\r\n",
-                "Host: localhost:8080",
-                "Connection: keep-alive",
-                "Content-Length: 10",
-                "");
-
-        RequestHeader requestHeader = new RequestHeader(headerFieldsWhenExistsBody());
-
-        // when
-        String headerMessage = requestHeader.convertToString();
-        
-        // then
-        assertThat(headerMessage).isEqualTo(expect);
-    }
-
     @DisplayName("Message Body Length 를 알아낸다 - Body 가 있는 경우")
     @Test
     void takeContentLengthWhenExistsBody() {
@@ -69,8 +50,27 @@ class RequestHeaderTest {
         assertThat(contentLength).isEqualTo(0);
     }
 
+    @DisplayName("RequestHeader 를 바이트 배열로 변환한다.")
+    @Test
+    void toBytes() {
+        // given
+        String headerMessage = String.join("\r\n",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: 10",
+                "");
+        byte[] expect = headerMessage.getBytes();
+        RequestHeader requestHeader = new RequestHeader(headerFieldsWhenExistsBody());
+
+        // when
+        byte[] bytes = requestHeader.toBytes();
+
+        // then
+        assertThat(bytes).isEqualTo(expect);
+    }
+
     private HeaderFields headerFieldsWhenExistsBody() {
-        Map<String, String> headerParams = new LinkedHashMap<>();
+        LinkedHashMap<String, String> headerParams = new LinkedHashMap<>();
         headerParams.put("Host", "localhost:8080");
         headerParams.put("Connection", "keep-alive");
         headerParams.put("Content-Length", "10");
@@ -79,7 +79,7 @@ class RequestHeaderTest {
     }
 
     private HeaderFields headerFieldsWhenNoBody() {
-        Map<String, String> headerParams = new LinkedHashMap<>();
+        LinkedHashMap<String, String> headerParams = new LinkedHashMap<>();
         headerParams.put("Host", "localhost:8080");
         headerParams.put("Connection", "keep-alive");
         HeaderFields headerFields = new HeaderFields(headerParams);

@@ -1,7 +1,5 @@
 package nextstep.jwp.server;
 
-import nextstep.jwp.controller.Controller;
-import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import org.slf4j.Logger;
@@ -12,9 +10,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
-import java.util.UUID;
-
-import static nextstep.jwp.http.HttpCookie.JSESSIONID;
 
 public class RequestHandler implements Runnable {
 

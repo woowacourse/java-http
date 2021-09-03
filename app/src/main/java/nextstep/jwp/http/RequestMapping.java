@@ -1,6 +1,5 @@
 package nextstep.jwp.http;
 
-import nextstep.jwp.WebServer;
 import nextstep.jwp.controller.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

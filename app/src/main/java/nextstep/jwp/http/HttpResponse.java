@@ -30,8 +30,7 @@ public class HttpResponse {
     }
 
     public void forward() throws IOException {
-        String response = response();
-        outputStream.write(response.getBytes());
+        outputStream.write(response().getBytes());
         outputStream.flush();
     }
 

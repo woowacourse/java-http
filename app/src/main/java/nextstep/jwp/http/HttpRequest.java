@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 public class HttpRequest {
     private final RequestLine requestLine;
@@ -65,21 +64,14 @@ public class HttpRequest {
     }
 
     public HttpSession getSession() {
-        String cookie = headers.get("Cookie");
-        if (cookie != null) {
+        if (headers.containsKey("Cookie")) {
+            String cookie = headers.get("Cookie");
             HttpCookies httpCookies = new HttpCookies(cookie);
-            String sessionId = httpCookies.getCookies().get("JSESSIONID");
-            if (HttpSessions.find(sessionId) == null) {
-                String id = UUID.randomUUID().toString();
-                HttpSession httpSession = new HttpSession(id);
-                HttpSessions.add(id, httpSession);
-                return httpSession;
+            if (httpCookies.getCookies().containsKey("JSESSIONID")) {
+                String sessionId = httpCookies.getCookies().get("JSESSIONID");
+                return HttpSessions.find(sessionId);
             }
-            return HttpSessions.find(sessionId);
         }
-        String uuid = UUID.randomUUID().toString();
-        HttpSession httpSession = new HttpSession(uuid);
-        HttpSessions.add(uuid, httpSession);
-        return httpSession;
+        return null;
     }
 }

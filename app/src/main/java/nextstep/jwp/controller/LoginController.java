@@ -14,17 +14,18 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         final HttpSession httpSession = httpRequest.getSession();
-        User user = (User) httpSession.getAttribute("user");
-        if (Objects.nonNull(user)) {
-            HttpResponse response = new HttpResponse.Builder()
-                    .outputStream(httpResponse.getOutputStream())
-                    .status(HttpStatus.FOUND_302)
-                    .redirectUrl("/index.html")
-                    .build();
-            response.forward();
-            return;
+        if (httpSession != null) {
+            User user = (User) httpSession.getAttribute("user");
+            if (Objects.nonNull(user)) {
+                HttpResponse response = new HttpResponse.Builder()
+                        .outputStream(httpResponse.getOutputStream())
+                        .status(HttpStatus.FOUND_302)
+                        .redirectUrl("/index.html")
+                        .build();
+                response.forward();
+                return;
+            }
         }
-
         HttpResponse response = new HttpResponse.Builder()
                 .outputStream(httpResponse.getOutputStream())
                 .status(HttpStatus.OK_200)
@@ -32,6 +33,7 @@ public class LoginController extends AbstractController {
                 .path(httpRequest.getPath())
                 .build();
         response.forward();
+
     }
 
     @Override

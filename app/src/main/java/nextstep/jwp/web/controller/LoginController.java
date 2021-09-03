@@ -7,6 +7,7 @@ import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.RequestParam;
 import nextstep.jwp.http.View;
 import nextstep.jwp.http.ViewResolver;
+import nextstep.jwp.http.entity.HttpSession;
 import nextstep.jwp.http.entity.HttpStatus;
 import nextstep.jwp.web.db.InMemoryUserRepository;
 import nextstep.jwp.web.model.User;
@@ -30,6 +31,9 @@ public class LoginController extends AbstractController {
         if (!user.checkPassword(password)) {
             throw new UnauthorizedException("잘못된 패스워드입니다.");
         }
+
+        final HttpSession httpSession = httpRequest.httpSession();
+        httpSession.setAttribute("user", user);
 
         httpResponse.setHttpStatus(HttpStatus.FOUND);
         httpResponse.setLocation("/index.html");

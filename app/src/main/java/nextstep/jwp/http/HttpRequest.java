@@ -1,9 +1,11 @@
 package nextstep.jwp.http;
 
+import java.util.UUID;
 import nextstep.jwp.http.entity.HttpBody;
 import nextstep.jwp.http.entity.HttpCookie;
 import nextstep.jwp.http.entity.HttpHeaders;
 import nextstep.jwp.http.entity.HttpMethod;
+import nextstep.jwp.http.entity.HttpSession;
 import nextstep.jwp.http.entity.HttpUri;
 import nextstep.jwp.http.entity.HttpVersion;
 import nextstep.jwp.http.entity.RequestLine;
@@ -15,27 +17,42 @@ public class HttpRequest {
     private final HttpHeaders headers;
     private final HttpBody httpBody;
     private final HttpCookie httpCookie;
+    private HttpSession httpSession;
 
     public HttpRequest(HttpMethod method, HttpUri uri, HttpVersion httpVersion,
-                       HttpHeaders headers, HttpBody httpBody, HttpCookie httpCookie) {
+                       HttpHeaders headers, HttpBody httpBody, HttpCookie httpCookie,
+                       HttpSession httpSession) {
         this.method = method;
         this.uri = uri;
         this.httpVersion = httpVersion;
         this.headers = headers;
         this.httpBody = httpBody;
         this.httpCookie = httpCookie;
+        this.httpSession = httpSession;
     }
 
     public static HttpRequest of(RequestLine requestLine, HttpHeaders httpHeaders, HttpBody httpBody) {
-        HttpCookie httpCookie = HttpCookie.of(httpHeaders.get("Cookie"));
+        HttpCookie httpCookie = HttpCookie.of(httpHeaders.getCookie());
+        HttpSession httpSession = getHttpSession(httpCookie);
 
         return new HttpRequest(requestLine.httpMethod(), requestLine.httpUri(), requestLine.httpVersion(), httpHeaders,
-                httpBody, httpCookie);
+                httpBody, httpCookie, httpSession);
+    }
+
+    private static HttpSession getHttpSession(HttpCookie httpCookie) {
+        String sessionId = httpCookie.getSession();
+
+        if (sessionId == null) {
+            sessionId = UUID.randomUUID().toString();
+        }
+
+        return HttpSessions.getSession(sessionId);
     }
 
     public HttpMethod method() {
         return method;
     }
+
 
     public HttpUri uri() {
         return uri;
@@ -57,7 +74,7 @@ public class HttpRequest {
         return httpCookie;
     }
 
-    public boolean containsCookie(String cookieName) {
-        return httpCookie.containsKey(cookieName);
+    public HttpSession httpSession() {
+        return httpSession;
     }
 }

@@ -1,5 +1,7 @@
 package nextstep.jwp.http.entity;
 
+import java.util.Objects;
+
 public class HttpUri {
     private final String path;
     private final String queryString;
@@ -35,5 +37,22 @@ public class HttpUri {
 
     public boolean hasPathOf(String path) {
         return this.path.equals(path);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        HttpUri httpUri = (HttpUri) o;
+        return Objects.equals(path, httpUri.path) && Objects.equals(queryString, httpUri.queryString);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path, queryString);
     }
 }

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 public class HttpHeaders {
+    private static final String COOKIE_KEY = "Cookie";
     private final Map<String, String> headers;
 
     public HttpHeaders() {
@@ -32,6 +33,10 @@ public class HttpHeaders {
 
     public String get(String headerName) {
         return headers.get(headerName);
+    }
+
+    public String getCookie() {
+        return headers.get(COOKIE_KEY);
     }
 
     public List<String> asString() {

@@ -3,6 +3,7 @@ package nextstep.jwp.http;
 import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.http.entity.HttpBody;
+import nextstep.jwp.http.entity.HttpCookie;
 import nextstep.jwp.http.entity.HttpHeaders;
 import nextstep.jwp.http.entity.HttpStatus;
 import nextstep.jwp.http.entity.HttpVersion;
@@ -142,5 +143,10 @@ public class HttpResponse {
 
     public boolean containsHeader(String headerName) {
         return httpHeaders.hasHeaderName(headerName);
+    }
+
+    public void setCookie(HttpCookie cookie) {
+        cookie.getCookies().keySet()
+                .forEach(key -> httpHeaders.addHeader("Set-Cookie", cookie.asString(key)));
     }
 }

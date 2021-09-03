@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class HttpCookie {
+    private static final String SESSION_ID = "JSESSIONID";
     private final Map<String, String> cookies;
 
     public HttpCookie(Map<String, String> cookies) {
@@ -24,16 +25,37 @@ public class HttpCookie {
         return new HttpCookie(map);
     }
 
+    public static HttpCookie of(HttpSession httpSession) {
+        return new HttpCookie(Map.of(SESSION_ID, httpSession.getId()));
+    }
+
     public static HttpCookie empty() {
         return new HttpCookie(new HashMap<>());
     }
 
-    public boolean containsKey(String key) {
-        return cookies.containsKey(key);
+    public Map<String, String> getCookies() {
+        return cookies;
+    }
+
+    public String getCookieValue(String key) {
+        return cookies.get(key);
     }
 
     public void addCookie(String name, String value) {
         cookies.put(name, value);
+    }
+
+    public boolean containsSession() {
+        return cookies.containsKey(SESSION_ID);
+    }
+
+    public String getSession() {
+        return cookies.get(SESSION_ID);
+    }
+
+    public String asString(String key) {
+        String value = cookies.get(key);
+        return key + "=" + value;
     }
 
     @Override

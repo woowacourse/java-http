@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.MockSocket;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -63,5 +64,10 @@ class RequestHandlerTest {
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @AfterEach
+    void tearDown() {
+        HttpSessions.clear();
     }
 }

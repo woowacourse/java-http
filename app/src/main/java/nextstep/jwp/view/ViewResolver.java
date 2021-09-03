@@ -1,6 +1,8 @@
 package nextstep.jwp.view;
 
 import java.net.URL;
+import java.util.Optional;
+import nextstep.jwp.exception.view.NoSuchResourceException;
 
 public class ViewResolver {
 
@@ -11,11 +13,16 @@ public class ViewResolver {
     }
 
     public String getFilePath() {
-        return getResource().getPath();
+        Optional<URL> resource = getResource();
+
+        if (resource.isEmpty()) {
+            throw new NoSuchResourceException();
+        }
+        return resource.get().getPath();
     }
 
-    private URL getResource() {
-        return getClassLoader().getResource(view);
+    private Optional<URL> getResource() {
+        return Optional.ofNullable(getClassLoader().getResource(view));
     }
 
     private ClassLoader getClassLoader() {

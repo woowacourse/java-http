@@ -3,6 +3,8 @@ package nextstep.jwp;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +34,18 @@ public class WebServer {
 
     private void handle(ServerSocket serverSocket) throws IOException {
         Socket connection;
+
+        /**
+         * Tomcat
+         * - corePoolSize: (default) 25
+         * - maxPoolSize: (default) 200
+         * - taskQueueSize: (default) Integer.MAX_VALUE
+         */
+        int threadNumbers = 25;
+        ExecutorService executorService = Executors.newFixedThreadPool(threadNumbers);
+
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new FrontController(connection)).start();
+            executorService.submit(new FrontController(connection));
         }
     }
 

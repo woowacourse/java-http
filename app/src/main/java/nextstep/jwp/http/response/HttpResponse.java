@@ -26,6 +26,12 @@ public class HttpResponse {
         setContentType(uri);
     }
 
+    public void redirect(HttpStatus httpStatus, String uri) {
+        setLine(httpStatus);
+        setContentType(uri);
+        setLocation(uri);
+    }
+
     private void setLine(HttpStatus httpStatus) {
         header.setLine(httpStatus);
     }
@@ -38,9 +44,17 @@ public class HttpResponse {
         header.setContentType(HTML.getValue());
     }
 
+    private void setLocation(String uri) {
+        header.setLocation(uri);
+    }
+
     public void setBody(ResponseBody body) {
         this.body = body;
         header.setContentLength(body.getLength());
+    }
+
+    public void setCookie(String id) {
+        header.setCookie(id);
     }
 
     public void write(OutputStream outputStream) {

@@ -67,3 +67,41 @@ Host: localhost:8080
 Accept: text/css,*/*;q=0.1
 Connection: keep-alive
 ```
+
+<br/>
+
+## Cookie에 JSESSIONID 값 저장하기
+
+- 로그인에 성공하면 쿠키와 세션을 사용해서 로그인 상태 유지
+    - HTTP는 stateless
+    - 따라서, 세션을 활용해서 서버에 로그인 여부 저장
+- Java 진영에서 세션 ID를 전달하는 이름으로 `JSESSIONID` 사용
+- 서버에서 HTTP Response를 전달할 때 1. `Set-Cookie`를 추가하고 2. `JSESSION={value}` 형태로 값을 전달하면, 클라이언트의 Request Header의 `Cookie` 필드에 값이 추가 O
+- e.g. 서버로부터 쿠키가 설정된 클라이언트의 HTTP Request Header
+```http request
+GET /index.html HTTP/1.1
+Host: localhost:8080
+Connection: keep-alive
+Accept: */*
+Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46
+```
+<br/>
+
+- [x] Cookie 클래스 추가
+- HTTP Request Header의 `Cookie`에 `JSESSIONID`가 없는 경우
+    - [x] HTTP Response Header에 `Set-Cookie` 필드 추가
+    - [x] 해당 필드에 `JSESSIONID={value}` 형태로 값 설정
+```http request
+HTTP/1.1 200 OK
+Set-Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46
+Content-Length: 5571
+Content-Type: text/html;charset=utf-8;
+```
+
+<br/>
+
+## Session 구현하기
+
+- [x] 로그인에 성공하면 HttpSession 객체 값으로 User 객체 저장
+- [x] 로그인된 상태에서 HTTP GET 요청으로 `/login` 페이지에 접근하면 `index.html`로 리다이렉트
+    - [x] 쿠키에서 전달받은 `JSESSIONID` 값으로 로그인 여부 체크

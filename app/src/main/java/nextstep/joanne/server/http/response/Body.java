@@ -6,8 +6,7 @@ public class Body {
     private final String body;
 
     public Body(String uri) {
-        FileConverter fileConverter = new FileConverter();
-        this.body = fileConverter.getResource(uri);
+        this.body = FileConverter.getResource(uri);
     }
 
     public String getBody() {

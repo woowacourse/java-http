@@ -11,11 +11,11 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 public class FileConverter {
-    public String getResource(String uri) {
+    public static String getResource(String uri) {
         if (!uri.contains(".")) {
             uri += ".html";
         }
-        URL resource = this.getClass().getClassLoader().getResource("static" + uri);
+        URL resource = FileConverter.class.getClassLoader().getResource("static" + uri);
         if (Objects.isNull(resource)) {
             throw new FileNotFoundException();
         }

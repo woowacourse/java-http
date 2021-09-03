@@ -1,6 +1,7 @@
 package nextstep.jwp.http.message;
 
 import java.util.Objects;
+import nextstep.jwp.exception.HttpRequestFormatException;
 
 public class HttpCookie {
 
@@ -9,7 +10,7 @@ public class HttpCookie {
 
     public HttpCookie(String name, String value) {
         if (Objects.isNull(name) || name.length() == 0) {
-            throw new RuntimeException("쿠키 이름은 0글자 이상이어야 합니다.");
+            throw new HttpRequestFormatException();
         }
         this.name = name;
         this.value = value;
@@ -18,17 +19,13 @@ public class HttpCookie {
     public static HttpCookie parseFrom(String cookie) {
         String[] splitted = cookie.split("=");
         if (splitted.length != 2) {
-            throw new RuntimeException("잘못된 쿠키 형식입니다.");
+            throw new HttpRequestFormatException();
         }
         return new HttpCookie(splitted[0], splitted[1].trim());
     }
 
     public boolean isSameName(String name) {
         return this.name.equals(name);
-    }
-
-    public void setValue(String value) {
-        this.value = value;
     }
 
     public String getName() {

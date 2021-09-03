@@ -3,7 +3,6 @@ package nextstep.project.presentation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.dispatcher.handler.HttpHandler;
 import nextstep.jwp.exception.UnauthorizedException;
@@ -25,9 +24,6 @@ public class LoginController extends HttpHandler {
         try {
             HttpSession session = httpRequest.getSession()
                 .orElseThrow();
-
-            // 세션을 가지고 유저를 가져올 수 있음.
-//            User user = (User) session.getAttribute("user");
 
             httpResponse.addCookie(new HttpCookie("JSESSIONID", session.getId()));
 

@@ -15,10 +15,6 @@ public class HttpSessions {
         SESSIONS.putIfAbsent(httpSession.getId(), httpSession);
     }
 
-    static void remove(String id) {
-        SESSIONS.remove(id);
-    }
-
     private HttpSessions() {
     }
 }

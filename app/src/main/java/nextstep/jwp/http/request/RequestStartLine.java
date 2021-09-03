@@ -6,6 +6,10 @@ import java.util.HashMap;
 
 public class RequestStartLine {
 
+    private static final String QUERY_STRING_START = "?";
+    private static final String QUERY_STRING_SPLIT = "&";
+    private static final String KEY_VALUE_SPLIT = "=";
+
     private Method method;
     private String path;
     private HashMap<String, String> queryString;
@@ -27,9 +31,9 @@ public class RequestStartLine {
         String versionOfProtocol = splitLine[2];
         HashMap<String, String> queryString = new HashMap<>();
 
-        if (path.contains("?")) {
+        if (path.contains(QUERY_STRING_START)) {
             String uri = splitLine[1];
-            int index = uri.indexOf("?");
+            int index = uri.indexOf(QUERY_STRING_START);
             path = uri.substring(0, index);
             queryString = queryString(uri.substring(index + 1));
         }
@@ -40,10 +44,10 @@ public class RequestStartLine {
     private static HashMap<String, String> queryString(String uri) {
         HashMap<String, String> hashMap = new HashMap<>();
 
-        String[] queries = uri.split("&");
+        String[] queries = uri.split(QUERY_STRING_SPLIT);
 
         for (String query : queries) {
-            String[] keyValue = query.split("=");
+            String[] keyValue = query.split(KEY_VALUE_SPLIT);
             hashMap.put(keyValue[0], keyValue[1]);
         }
 

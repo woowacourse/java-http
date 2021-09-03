@@ -5,6 +5,9 @@ import java.util.Map;
 
 public class HttpCookie {
 
+    private static final String SPLIT_REGEX = "; ";
+    private static final String KEY_VALUE_SPLIT = "=";
+
     private final Map<String, String> cookies;
 
     private HttpCookie(Map<String, String> cookies) {
@@ -14,10 +17,10 @@ public class HttpCookie {
     public static HttpCookie create(String cookie) {
         Map<String, String> cookies = new HashMap<>();
 
-        String[] splitCookies = cookie.split("; ");
+        String[] splitCookies = cookie.split(SPLIT_REGEX);
 
         for (String splitCookie : splitCookies) {
-            String[] keyValue = splitCookie.split("=");
+            String[] keyValue = splitCookie.split(KEY_VALUE_SPLIT);
             cookies.put(keyValue[0], keyValue[1]);
         }
 

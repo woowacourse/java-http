@@ -10,7 +10,8 @@ import nextstep.jwp.http.HttpCookie;
 
 public class RequestHeaders {
 
-    private static String CONTENT_LENGTH = "Content-Length";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String HEADER_CONTENT_SPLIT_REGEX = ",|: ";
 
     private final HashMap<String, ArrayList<String>> headers = new HashMap<>();
     private HttpCookie httpCookie;
@@ -24,7 +25,7 @@ public class RequestHeaders {
                 break;
             }
 
-            String[] headerContent = readLine.split(",|: ");
+            String[] headerContent = readLine.split(HEADER_CONTENT_SPLIT_REGEX);
             String header = headerContent[0];
 
 

@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 public class HttpRequestHeader {
-    private static final int REQUEST_LINE_INDEX = 0;
-    private static final String CONTENT_LENGTH_HEADER = "Content-Length: ";
-    private static final String COOKIE_HEADER = "Cookie: ";
+    public static final String REQUEST_LINE = "requestLine";
+    public static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    public static final String COOKIE_HEADER = "Cookie";
     private static final String ZERO_STRING = "0";
     private static final String EMPTY_STRING = "";
 
@@ -17,36 +17,17 @@ public class HttpRequestHeader {
     private final HttpCookie httpCookie;
     private final int contentLength;
 
-    public HttpRequestHeader(final List<String> requestHeaders) {
+    public HttpRequestHeader(final Map<String, String> requestHeaders) {
         if (requestHeaders.isEmpty()) {
             throw new IllegalStateException();
         }
 
-        this.requestLine = new RequestLine(requestHeaders.get(REQUEST_LINE_INDEX));
-        this.httpCookie = new HttpCookie(parseHttpCookie(requestHeaders));
-        this.contentLength = parseContentLength(requestHeaders);
-    }
+        final String requestHttpCookie = requestHeaders.getOrDefault(COOKIE_HEADER, EMPTY_STRING);
+        final int requestContentLength = Integer.parseInt(requestHeaders.getOrDefault(CONTENT_LENGTH_HEADER, ZERO_STRING));
 
-    private String parseHttpCookie(final List<String> requestHeaders) {
-        String httpCookieValue = requestHeaders.stream()
-                .filter(header -> header.startsWith(COOKIE_HEADER))
-                .findAny()
-                .orElseGet(() -> EMPTY_STRING);
-        if (!httpCookieValue.isEmpty()) {
-            httpCookieValue = httpCookieValue.substring(COOKIE_HEADER.length());
-        }
-        return httpCookieValue;
-    }
-
-    private int parseContentLength(final List<String> requestHeaders) {
-        String contentLengthHeader = requestHeaders.stream()
-                .filter(header -> header.startsWith(CONTENT_LENGTH_HEADER))
-                .findAny()
-                .orElseGet(() -> ZERO_STRING);
-        if (!contentLengthHeader.equals(ZERO_STRING)) {
-            contentLengthHeader = contentLengthHeader.substring(CONTENT_LENGTH_HEADER.length());
-        }
-        return Integer.parseInt(contentLengthHeader);
+        this.requestLine = new RequestLine(requestHeaders.get(REQUEST_LINE));
+        this.httpCookie = new HttpCookie(requestHttpCookie);
+        this.contentLength = requestContentLength;
     }
 
     public boolean doesNotHaveJSession() {

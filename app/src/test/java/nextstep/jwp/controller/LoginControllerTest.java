@@ -13,14 +13,17 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static nextstep.jwp.controller.StaticResourceControllerTest.staticResourceRequest;
+import static nextstep.jwp.http.request.HttpRequestHeader.COOKIE_HEADER;
+import static nextstep.jwp.http.request.HttpRequestHeader.REQUEST_LINE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LoginControllerTest {
     protected static final HttpRequest loginRequest = new HttpRequest(
-            new HttpRequestHeader(List.of("POST /login HTTP/1.1 ")),
+            new HttpRequestHeader(Map.of(REQUEST_LINE, "POST /login HTTP/1.1 ")),
             new HttpRequestBody("account=gugu&password=password")
     );
 
@@ -37,7 +40,7 @@ class LoginControllerTest {
     @Test
     void doGet_without_cookie() {
         final HttpRequest loginGetRequestWithoutCookie = new HttpRequest(
-                new HttpRequestHeader(List.of("GET /login HTTP/1.1 ")),
+                new HttpRequestHeader(Map.of(REQUEST_LINE, "GET /login HTTP/1.1 ")),
                 null);
 
         final HttpResponse actual = loginController.doGet(loginGetRequestWithoutCookie);
@@ -62,7 +65,7 @@ class LoginControllerTest {
         HttpSessions.addSession(uuid, httpSession);
 
         final HttpRequest loginGetRequestWithCookie = new HttpRequest(
-                new HttpRequestHeader(List.of("GET /login HTTP/1.1 ", "Cookie: JSESSIONID=" + uuid)),
+                new HttpRequestHeader(Map.of(REQUEST_LINE, "GET /login HTTP/1.1 ", COOKIE_HEADER, "JSESSIONID=" + uuid)),
                 null);
 
         final HttpResponse actual = loginController.doGet(loginGetRequestWithCookie);
@@ -111,7 +114,7 @@ class LoginControllerTest {
     @Test
     void doPost_fail() {
         final HttpRequest wrongLoginRequest = new HttpRequest(
-                new HttpRequestHeader(List.of("POST /login HTTP/1.1 ")),
+                new HttpRequestHeader(Map.of(REQUEST_LINE, "POST /login HTTP/1.1 ")),
                 new HttpRequestBody("account=wow&password=password")
         );
 

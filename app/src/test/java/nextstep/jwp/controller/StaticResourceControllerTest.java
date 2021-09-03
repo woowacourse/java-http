@@ -9,14 +9,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static nextstep.jwp.controller.LoginControllerTest.loginRequest;
+import static nextstep.jwp.http.request.HttpRequestHeader.REQUEST_LINE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class StaticResourceControllerTest {
     protected static final HttpRequest staticResourceRequest = new HttpRequest(
-            new HttpRequestHeader(List.of("GET /index.html HTTP/1.1 ")),
+            new HttpRequestHeader(Map.of(REQUEST_LINE, "GET /index.html HTTP/1.1 ")),
             null
     );
 

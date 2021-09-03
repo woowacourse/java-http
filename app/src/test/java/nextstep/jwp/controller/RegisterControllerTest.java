@@ -10,13 +10,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 
 import static nextstep.jwp.controller.StaticResourceControllerTest.staticResourceRequest;
+import static nextstep.jwp.http.request.HttpRequestHeader.REQUEST_LINE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RegisterControllerTest {
     protected static final HttpRequest registerRequest = new HttpRequest(
-            new HttpRequestHeader(List.of("POST /register HTTP/1.1 ")),
+            new HttpRequestHeader(Map.of(REQUEST_LINE, "POST /register HTTP/1.1 ")),
             new HttpRequestBody("account=pobi&password=password&email=pobi%40pobi.com")
     );
 

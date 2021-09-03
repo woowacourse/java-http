@@ -6,12 +6,13 @@ import nextstep.jwp.http.authentication.HttpSessions;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+
+import static nextstep.jwp.http.request.HttpRequestHeader.REQUEST_LINE;
 
 public class HttpRequest {
+    private static final String HEADER_DELIMITER = ": ";
+
     private final HttpRequestHeader header;
     private final HttpRequestBody body;
 
@@ -22,13 +23,13 @@ public class HttpRequest {
 
     public static HttpRequest ofStaticFile(final String url) {
         return new HttpRequest(
-                new HttpRequestHeader(List.of("GET " + url + " HTTP/1.1 ")),
+                new HttpRequestHeader(Map.of("requestLine", "GET " + url + " HTTP/1.1 ")),
                 null
         );
     }
 
     public static HttpRequest parseRequest(final BufferedReader inputStreamReader) throws IOException {
-        final List<String> requestHeaders = parseRequestHeaders(inputStreamReader);
+        final Map<String, String> requestHeaders = parseRequestHeaders(inputStreamReader);
         final HttpRequestHeader httpRequestHeader = new HttpRequestHeader(requestHeaders);
 
         final String requestBody = parseRequestBody(httpRequestHeader.getContentLength(), inputStreamReader);
@@ -37,14 +38,21 @@ public class HttpRequest {
         return new HttpRequest(httpRequestHeader, httpRequestBody);
     }
 
-    private static List<String> parseRequestHeaders(final BufferedReader inputStreamReader) throws IOException {
-        final List<String> requestHeaders = new ArrayList<>();
+    private static Map<String, String> parseRequestHeaders(final BufferedReader inputStreamReader) throws IOException {
+        final Map<String, String> requestHeaders = new HashMap<>();
         String line;
+        int lineNumber = 1;
         while (!"".equals(line = inputStreamReader.readLine())) {
             if (line == null) {
                 break;
             }
-            requestHeaders.add(line);
+            if (lineNumber == 1) {
+                requestHeaders.putIfAbsent(REQUEST_LINE, line);
+            } else {
+                final String[] split = line.split(HEADER_DELIMITER);
+                requestHeaders.putIfAbsent(split[0], split[1]);
+            }
+            lineNumber++;
         }
         return requestHeaders;
     }

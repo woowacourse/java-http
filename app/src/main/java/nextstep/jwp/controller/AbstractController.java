@@ -1,12 +1,12 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.*;
-import nextstep.jwp.model.User;
+import nextstep.jwp.http.HttpMethod;
+import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Function;
 
 import static nextstep.jwp.controller.JwpController.NOT_FOUND_RESPONSE;
@@ -33,33 +33,5 @@ public abstract class AbstractController implements Controller {
                 .map(entry -> entry.getValue().apply(request))
                 .findAny()
                 .orElse(NOT_FOUND_RESPONSE);
-    }
-
-    protected HttpCookie addCookie(HttpRequest request, User user) {
-        HttpCookie httpCookie = new HttpCookie(request.getRequestHeaders());
-        if (!httpCookie.containsJSession()) {
-            String id = makeRandomId();
-            HttpSession httpSession = new HttpSession(id);
-            httpSession.setAttribute("user", user);
-            HttpSessions.addSession(httpSession);
-
-            httpCookie.setCookies(id);
-            return httpCookie;
-        }
-        String existJSessionCookie = httpCookie.getJSessionCookie();
-        HttpSessions.remove(existJSessionCookie);
-        return addCookie(request, user);
-    }
-
-    protected HttpCookie findJSessionCookie(HttpRequest request) {
-        HttpCookie httpCookie = new HttpCookie(request.getRequestHeaders());
-        String jSessionCookieId = httpCookie.getJSessionCookie();
-        Object user = HttpSessions.getSession(jSessionCookieId).getAttribute("user");
-        log.info("로그인 유저: {}", user);
-        return httpCookie;
-    }
-
-    private String makeRandomId() {
-        return UUID.randomUUID().toString();
     }
 }

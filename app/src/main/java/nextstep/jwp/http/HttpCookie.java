@@ -12,30 +12,36 @@ public class HttpCookie {
 
     private final Map<String, String> cookies;
 
-    public HttpCookie(Map<String, String> headers) {
-        this.cookies = getExistCookies(headers);
+    public HttpCookie() {
+        this.cookies = new HashMap<>();
     }
 
-    private Map<String, String> getExistCookies(final Map<String, String> headers) {
+    public void parseExistCookies(final Map<String, String> headers) {
         if (headers.containsKey(COOKIE_HEADER)) {
-            return parseCookies(headers.get(COOKIE_HEADER));
+            parseCookies(headers.get(COOKIE_HEADER));
         }
-        return new HashMap<>();
     }
 
-    private Map<String, String> parseCookies(final String cookie) {
+    private void parseCookies(final String cookie) {
         String[] split = cookie.split("; ", 2);
-        return Arrays.stream(split)
+        cookies.putAll(Arrays.stream(split)
                 .map(cookieSet -> cookieSet.split("=", 2))
-                .collect(Collectors.toMap(parsedCookie -> parsedCookie[0], parsedCookie -> parsedCookie[1]));
+                .collect(Collectors.toMap(parsedCookie -> parsedCookie[0], parsedCookie -> parsedCookie[1])));
     }
 
     public boolean containsJSession() {
         return cookies.containsKey(JSESSIONID);
     }
 
-    public void setCookies(String randomId) {
-        this.cookies.put(JSESSIONID, randomId);
+    public void addJSessionCookie(String id) {
+        this.cookies.put(JSESSIONID, id);
+    }
+
+    public String getJSessionCookie() {
+        if (!cookies.containsKey(JSESSIONID)) {
+            throw new IllegalArgumentException("쿠키가 존재하지 않습니다.");
+        }
+        return cookies.get(JSESSIONID);
     }
 
     @Override
@@ -44,12 +50,5 @@ public class HttpCookie {
                 .stream()
                 .map(entry -> String.join("=", List.of(entry.getKey(), entry.getValue())))
                 .collect(Collectors.joining("; "));
-    }
-
-    public String getJSessionCookie() {
-        if (!cookies.containsKey(JSESSIONID)) {
-            throw new IllegalArgumentException("쿠키가 존재하지 않습니다.");
-        }
-        return cookies.get(JSESSIONID);
     }
 }

@@ -14,10 +14,13 @@ public class HttpSessions {
     }
 
     public static HttpSession getSession(String id) {
-        if (SESSIONS.containsKey(id)) {
-            return SESSIONS.get(id);
+        if (!SESSIONS.containsKey(id)) {
+            HttpSession httpSession = new HttpSession(id);
+            httpSession.setAttribute("user", id);
+            addSession(httpSession);
+            return httpSession;
         }
-        throw new IllegalArgumentException("세션이 존재하지 않습니다.");
+        return SESSIONS.get(id);
     }
 
     public static void remove(String id) {
@@ -27,5 +30,9 @@ public class HttpSessions {
         } catch (RuntimeException e) {
             throw new IllegalArgumentException("삭제할 세션이 존재하지 않습니다.");
         }
+    }
+
+    public static boolean contains(String id) {
+        return SESSIONS.containsKey(id);
     }
 }

@@ -1,10 +1,10 @@
 package nextstep.jwp.model;
 
 public class User {
+    private final long id;
     private final String account;
     private final String password;
     private final String email;
-    private long id;
 
     public User(Long id, String account, String password, String email) {
         this.id = id;

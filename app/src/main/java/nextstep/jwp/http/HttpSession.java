@@ -30,9 +30,13 @@ public class HttpSession {
     }
 
     private void checkContainsAttribute(String attribute, String errorMessage) {
-        if (!values.containsKey(attribute)) {
+        if (!containsAttribute(attribute)) {
             throw new IllegalArgumentException(errorMessage);
         }
+    }
+
+    public boolean containsAttribute(String attribute) {
+        return values.containsKey(attribute);
     }
 
     public void invalidate() {

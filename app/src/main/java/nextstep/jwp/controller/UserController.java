@@ -5,6 +5,7 @@ import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 import static nextstep.jwp.controller.JwpController.*;
@@ -67,5 +68,49 @@ public class UserController extends AbstractController {
             log.error("에러 발생 : {}", e.getMessage());
             return INTERNAL_SERVER_RESPONSE;
         }
+    }
+
+    private HttpCookie addCookie(HttpRequest request, User user) {
+        HttpCookie httpCookie = new HttpCookie();
+        httpCookie.parseExistCookies(request.getRequestHeaders());
+        if (!httpCookie.containsJSession()) {
+            return addNewCookie(user, httpCookie);
+        }
+        String existJSessionCookie = httpCookie.getJSessionCookie();
+        try {
+            HttpSessions.getSession(existJSessionCookie).containsAttribute("user");
+            return httpCookie;
+        } catch (RuntimeException e) {
+            HttpSessions.addSession(new HttpSession(existJSessionCookie));
+            return httpCookie;
+        }
+    }
+
+    private HttpCookie addNewCookie(User user, HttpCookie httpCookie) {
+        String id = makeRandomId();
+        addSession(user, id);
+        httpCookie.addJSessionCookie(id);
+        return httpCookie;
+    }
+
+    private void addSession(User user, String id) {
+        HttpSession httpSession = new HttpSession(id);
+        httpSession.setAttribute("user", user);
+        HttpSessions.addSession(httpSession);
+    }
+
+    private HttpCookie findJSessionCookie(HttpRequest request) {
+        HttpCookie httpCookie = new HttpCookie();
+        httpCookie.parseExistCookies(request.getRequestHeaders());
+        String jSessionCookieId = httpCookie.getJSessionCookie();
+
+        if(!HttpSessions.contains(jSessionCookieId)) {
+            throw new IllegalArgumentException("올바르지 않은 쿠키가 존재합니다.");
+        }
+        return httpCookie;
+    }
+
+    private String makeRandomId() {
+        return UUID.randomUUID().toString();
     }
 }

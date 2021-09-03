@@ -34,7 +34,7 @@ public class RegisterController extends AbstractController {
         );
         InMemoryUserRepository.save(user);
 
-        response.setStatusLine(StatusCode.FOUND, request.getVersionOfProtocol());
+        response.setStatusLine(StatusCode.CREATED, request.getVersionOfProtocol());
         response.forward(REGISTER_SUCCESS_URI);
     }
 }

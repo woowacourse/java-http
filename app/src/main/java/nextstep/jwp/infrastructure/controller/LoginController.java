@@ -54,7 +54,8 @@ public class LoginController extends AbstractController {
             HttpSession session = new HttpSession(sessionId);
             session.setAttribute(sessionId, user);
             HttpSessions.addSession(sessionId, session);
-
+            response.addSessionCookieHeader(sessionId);
+            response.forward(LOGIN_SUCCESS_URL);
         } catch (Exception e) {
             response.forward(LOGIN_FAILURE_URL);
         }

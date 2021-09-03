@@ -1,10 +1,9 @@
-package nextstep.jwp;
+package nextstep.jwp.server;
 
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.controller.RequestMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,9 +21,11 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
+    private final ControllerDispatcher controllerDispatcher;
 
-    public RequestHandler(Socket connection) {
+    public RequestHandler(Socket connection, ControllerDispatcher controllerDispatcher) {
         this.connection = Objects.requireNonNull(connection);
+        this.controllerDispatcher = controllerDispatcher;
     }
 
     @Override
@@ -35,40 +36,13 @@ public class RequestHandler implements Runnable {
 
             HttpRequest httpRequest = HttpRequest.of(inputStream);
             HttpResponse httpResponse = new HttpResponse(outputStream);
-            Controller controller = RequestMapping.getController(httpRequest.getPath());
-
-            if (controller == null) {
-                String path = getDefaultPath(httpRequest.getPath());
-                httpResponse.ok(path);
-                outputStream.flush();
-                return;
-            }
-
-            setCookie(httpRequest, httpResponse);
-            controller.service(httpRequest, httpResponse);
+            controllerDispatcher.execute(httpRequest, httpResponse);
             outputStream.flush();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
         }
-    }
-
-    private void setCookie(HttpRequest httpRequest, HttpResponse httpResponse) {
-        HttpCookie httpCookie = httpRequest.getCookies();
-        if (httpCookie.getCookie(JSESSIONID) != null) {
-            httpResponse.addHeader("Set-Cookie", JSESSIONID +"="+httpCookie.getCookie(JSESSIONID));
-            return;
-        }
-
-        httpResponse.addHeader("Set-Cookie", JSESSIONID +"="+ UUID.randomUUID());
-    }
-
-    private String getDefaultPath(String path) {
-        if ("/".equals(path)) {
-            return "/index.html";
-        }
-        return path;
     }
 
     private void close() {

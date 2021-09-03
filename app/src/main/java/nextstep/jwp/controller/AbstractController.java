@@ -1,10 +1,15 @@
 package nextstep.jwp.controller;
 
 
+import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.session.HttpSession;
 import nextstep.jwp.model.User;
+
+import java.util.UUID;
+
+import static nextstep.jwp.http.HttpCookie.JSESSIONID;
 
 public class AbstractController implements Controller{
 
@@ -27,16 +32,13 @@ public class AbstractController implements Controller{
         throw new UnsupportedOperationException();
     }
 
-    protected User getUser(HttpSession session) {
-        if (session == null) {
-            return null;
+    protected void setJSessionId(HttpRequest httpRequest, HttpResponse httpResponse) {
+        HttpCookie httpCookie = httpRequest.getCookies();
+        if (httpCookie.getCookie(JSESSIONID) != null) {
+            httpResponse.addHeader("Set-Cookie", JSESSIONID +"="+httpCookie.getCookie(JSESSIONID));
+            return;
         }
 
-        return (User) session.getAttribute("user");
-    }
-
-    protected boolean isLogin(HttpSession httpSession) {
-        Object user = getUser(httpSession);
-        return user != null;
+        httpResponse.addHeader("Set-Cookie", JSESSIONID +"="+ UUID.randomUUID());
     }
 }

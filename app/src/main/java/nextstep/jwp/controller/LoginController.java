@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.exception.BaseException;
+import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.session.HttpSession;
@@ -29,11 +30,29 @@ public class LoginController extends AbstractController{
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         try {
             User loginUser = userService.login(httpRequest.getQueryValue("account"), httpRequest.getQueryValue("password"));
-            HttpSession session = httpRequest.getSession();
-            session.setAttribute("user", loginUser);
+            createSession(httpRequest, httpResponse, loginUser);
             httpResponse.redirect("/index.html");
         } catch (BaseException e) {
             httpResponse.redirect("/401.html");
         }
+    }
+
+    private void createSession(HttpRequest httpRequest, HttpResponse httpResponse, User loginUser) {
+        setJSessionId(httpRequest, httpResponse);
+        HttpSession session = httpRequest.getSession();
+        session.setAttribute("user", loginUser);
+    }
+
+    private User getUser(HttpSession session) {
+        if (session == null) {
+            return null;
+        }
+
+        return (User) session.getAttribute("user");
+    }
+
+    private boolean isLogin(HttpSession httpSession) {
+        Object user = getUser(httpSession);
+        return user != null;
     }
 }

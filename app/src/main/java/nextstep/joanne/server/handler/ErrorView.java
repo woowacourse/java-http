@@ -24,7 +24,7 @@ public enum ErrorView {
         return Arrays.stream(values())
                 .filter(v -> Objects.equals(v.status, httpStatus))
                 .findAny()
-                .get()
+                .orElseGet(() -> INTERNAL_SERVER_ERROR)
                 .view;
     }
 }

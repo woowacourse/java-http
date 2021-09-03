@@ -10,8 +10,8 @@ public class UserService {
     }
 
     public static User findUser(final Map<String, String> params) {
-        String account = getAccount(params);
-        String password = getPassword(params);
+        String account = getParamByName(params, "account", "계정이 존재하지 않습니다.");
+        String password = getParamByName(params, "password", "비밀번호가 존재하지 않습니다.");
         User userByAccount = findUserByAccount(account);
         if (!userByAccount.checkPassword(password)) {
             throw new IllegalArgumentException("비밀번호가 올바르지 않습니다.");
@@ -20,9 +20,9 @@ public class UserService {
     }
 
     public static User registerUser(final Map<String, String> params) {
-        String account = getAccount(params);
-        String password = getPassword(params);
-        String email = getEmail(params);
+        String account = getParamByName(params, "account", "계정이 존재하지 않습니다.");
+        String password = getParamByName(params, "password", "비밀번호가 존재하지 않습니다.");
+        String email = getParamByName(params, "email", "이메일이 존재하지 않습니다.");
         User user = new User(0L, account, password, email);
         InMemoryUserRepository.save(user);
         return user;
@@ -33,27 +33,11 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
     }
 
-    private static String getAccount(final Map<String, String> params) {
+    private static String getParamByName(Map<String, String> params, String name, String message) {
         return params.entrySet().stream()
-                .filter(param -> param.getKey().equals("account"))
+                .filter(param -> param.getKey().equals(name))
                 .map(Map.Entry::getValue)
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("계정이 존재하지 않습니다."));
-    }
-
-    private static String getPassword(final Map<String, String> params) {
-        return params.entrySet().stream()
-                .filter(param -> param.getKey().equals("password"))
-                .map(Map.Entry::getValue)
-                .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("비밀번호가 존재하지 않습니다."));
-    }
-
-    private static String getEmail(final Map<String, String> params) {
-        return params.entrySet().stream()
-                .filter(param -> param.getKey().equals("email"))
-                .map(Map.Entry::getValue)
-                .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("이메일이 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException(message));
     }
 }

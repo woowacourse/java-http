@@ -3,10 +3,10 @@ package nextstep.jwp.http;
 import java.util.Arrays;
 
 public enum HttpContentType {
-    JS("text/js "),
+    JS("application/js "),
     SVG("image/svg+xml "),
     CSS("text/css "),
-    FAVICON("*/* "),
+    FAVICON("image/x-icon "),
     NOTHING("text/html;charset=utf-8 ");
 
     private final String contentTypeResponse;

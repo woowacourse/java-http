@@ -14,8 +14,11 @@ public class InMemoryUserRepository {
     private static long index = 0L;
 
     static {
-        final User user = new User(index++,"gugu", "password", "hkkang@woowahan.com");
+        final User user = new User(++index, "gugu", "password", "hkkang@woowahan.com");
         database.put(user.getAccount(), user);
+    }
+
+    private InMemoryUserRepository() {
     }
 
     public static void save(User user) {

@@ -20,6 +20,7 @@ public abstract class AbstractController implements Controller {
             doGet(request, response, mv);
         }
 
+        // TODO : GET, POST 메서드 외의 경우 예외 처리
 //        response.sendError(NOT_IMPLEMENTED);
     }
 

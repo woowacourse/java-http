@@ -17,6 +17,7 @@ class ControllerFactoryTest {
     void addControllers() {
         // given
         Map<String, Controller> controllers = ControllerFactory.addControllers();
+        System.out.println(controllers.getClass());
 
         // when - then
         assertAll(

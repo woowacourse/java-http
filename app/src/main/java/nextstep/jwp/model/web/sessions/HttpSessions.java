@@ -10,19 +10,11 @@ public class HttpSessions {
     private HttpSessions() {
     }
 
-    public static HttpSession getSession(String id) {
-        return SESSIONS.get(id);
-    }
-
     public static void addSession(String sessionId, HttpSession session) {
         SESSIONS.put(sessionId, session);
     }
 
     public static boolean existsSessionId(String sessionId) {
         return SESSIONS.containsKey(sessionId);
-    }
-
-    public static void remove(String id) {
-        SESSIONS.remove(id);
     }
 }

@@ -10,8 +10,4 @@ public class RequestParams {
     public void add(String key, String value) {
         params.put(key, value);
     }
-
-    public Map<String, String> getParams() {
-        return params;
-    }
 }

@@ -3,8 +3,10 @@ package nextstep.jwp.controller;
 import nextstep.jwp.application.UserService;
 import nextstep.jwp.model.httpmessage.request.HttpRequest;
 import nextstep.jwp.model.httpmessage.response.HttpResponse;
+import nextstep.jwp.view.ModelAndView;
 
-import java.io.IOException;
+import static nextstep.jwp.model.httpmessage.common.ContentType.HTML;
+import static nextstep.jwp.model.httpmessage.response.HttpStatus.*;
 
 public class RegisterController extends AbstractController {
 
@@ -15,13 +17,24 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        response.forward("/register.html");
+    protected void doGet(HttpRequest request, HttpResponse response, ModelAndView mv) {
+        response.setResponseLine(OK, request.getProtocol());
+        mv.setStatus(OK);
+        response.setContentType(HTML.value());
+        mv.setViewName("/register");
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
-        userService.saveUser(request);
-        response.redirect("/index.html");
+    protected void doPost(HttpRequest request, HttpResponse response, ModelAndView mv) {
+        userService.findByAccount(request).ifPresentOrElse(user -> {
+            response.setResponseLine(UNAUTHORIZED, request.getProtocol());
+            mv.setStatus(UNAUTHORIZED);
+            mv.setViewName("/401.html");
+        }, () -> {
+            userService.save(request);
+            response.setResponseLine(REDIRECT, request.getProtocol());
+            mv.setStatus(REDIRECT);
+            mv.setViewName("/index.html");
+        });
     }
 }

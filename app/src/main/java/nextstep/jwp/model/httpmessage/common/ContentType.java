@@ -9,9 +9,10 @@ public enum ContentType {
     JS("application/javascript", ".js"),
     ICON("image/x-icon", ".ico"),
     SVG("image/svg+xml", ".svg"),
-    FORM("application/x-www-form-urlencoded", "");
+    FORM("application/x-www-form-urlencoded", ""),
+    PLAIN_TEXT("text/plain", "");
 
-    public static final String CONTENT_TYPE = "Content-Type";
+    public static final String CONTENT_TYPE_HEADER = "Content-Type";
     private final String value;
     private final String suffix;
 
@@ -34,5 +35,9 @@ public enum ContentType {
 
     public String value() {
         return value;
+    }
+
+    public String suffix() {
+        return suffix;
     }
 }

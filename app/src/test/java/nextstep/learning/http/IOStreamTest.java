@@ -50,7 +50,6 @@ class IOStreamTest {
             final OutputStream outputStream = new ByteArrayOutputStream(bytes.length);
 
             /**
-             * todo
              * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
              */
             outputStream.write(bytes);
@@ -73,7 +72,6 @@ class IOStreamTest {
             final OutputStream outputStream = mock(BufferedOutputStream.class);
 
             /**
-             * todo
              * flush를 사용해서 테스트를 통과시킨다.
              * ByteArrayOutputStream과 어떤 차이가 있을까?
              */
@@ -91,7 +89,6 @@ class IOStreamTest {
             final OutputStream outputStream = mock(OutputStream.class);
 
             /**
-             * todo
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
@@ -125,7 +122,6 @@ class IOStreamTest {
             final InputStream inputStream = new ByteArrayInputStream(bytes);
 
             /**
-             * todo
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
             final String actual = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))
@@ -146,7 +142,6 @@ class IOStreamTest {
             final InputStream inputStream = mock(InputStream.class);
 
             /**
-             * todo
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */

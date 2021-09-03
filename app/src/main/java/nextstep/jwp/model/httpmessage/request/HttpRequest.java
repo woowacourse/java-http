@@ -1,5 +1,8 @@
 package nextstep.jwp.model.httpmessage.request;
 
+import nextstep.jwp.model.httpmessage.common.ContentType;
+import nextstep.jwp.model.httpmessage.session.HttpCookie;
+import nextstep.jwp.model.httpmessage.session.HttpSessions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thymeleaf.util.StringUtils;
@@ -13,9 +16,15 @@ import java.util.Objects;
 
 import static nextstep.jwp.model.httpmessage.common.ContentType.FORM;
 import static nextstep.jwp.model.httpmessage.common.HttpHeaderType.CONTENT_LENGTH;
+import static nextstep.jwp.model.httpmessage.request.RequestHeaderType.COOKIE;
+import static nextstep.jwp.model.httpmessage.session.HttpCookie.JSESSIONID;
 
 public class HttpRequest {
-    private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpRequest.class);
+
+    public static final String HEADER_DELIMITER = ": ";
+    public static final int HEADER_TYPE_INDEX = 0;
+    public static final int HEADER_VALUE_INDEX = 1;
 
     private final RequestLine requestLine;
     private final RequestHeader headers;
@@ -31,15 +40,15 @@ public class HttpRequest {
         while (!StringUtils.isEmpty(line)) {
             line = br.readLine();
             if (!StringUtils.isEmptyOrWhitespace(line)) {
-                log.debug("Request header : {}", line);
-                String[] split = line.split(": ");
-                headers.add(split[0].trim(), split[1].trim());
+                LOG.debug("Request header : {}", line);
+                String[] split = line.split(HEADER_DELIMITER);
+                headers.add(split[HEADER_TYPE_INDEX].trim(), split[HEADER_VALUE_INDEX].trim());
             }
         }
 
         if (headers.containsKey(CONTENT_LENGTH)) {
             int length = headers.getContentLength();
-            log.debug("Request content-length : {}", length);
+            LOG.debug("Request content-length : {}", length);
 
             char[] buffer = readBody(br, length);
             requestBody = new RequestBody(new String(buffer));
@@ -54,6 +63,13 @@ public class HttpRequest {
 
     public String getQueryParam(String param) {
         return requestLine.getParameter(param);
+    }
+
+    public String getRequestURI() {
+        String path = requestLine.getPath();
+        return ContentType.of(path)
+                .map(type -> path.replace(type.suffix(), ""))
+                .orElseGet(requestLine::getPath);
     }
 
     public String getPath() {
@@ -86,5 +102,25 @@ public class HttpRequest {
 
     public int getContentLength() {
         return headers.getContentLength();
+    }
+
+    public HttpCookie getCookies() {
+        return new HttpCookie(headers.getHeader(COOKIE.value()));
+    }
+
+    private String getSessionId() {
+        return getCookies().getCookieValue(JSESSIONID);
+    }
+
+    public boolean hasSessionId() {
+        return headers.containsKey(COOKIE) && getCookies().contains(JSESSIONID);
+    }
+
+    public boolean isValidSession() {
+        return HttpSessions.contains(getSessionId());
+    }
+
+    public String getProtocol() {
+        return requestLine.getProtocol();
     }
 }

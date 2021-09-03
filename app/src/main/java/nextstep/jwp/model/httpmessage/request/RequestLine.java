@@ -10,31 +10,39 @@ import java.util.Map;
 public class RequestLine {
     private static final Logger log = LoggerFactory.getLogger(RequestLine.class);
 
+    public static final int METHOD_INDEX = 0;
+    public static final int PATH_INDEX = 1;
+    public static final int PROTOCOL_INDEX = 2;
+    public static final int REQUEST_SPLIT_COUNT = 3;
+    public static final String QUERY_PARAM_DELIMITER = "?";
+
     private final HttpMethod method;
     private final String path;
+    private final String protocol;
     private Map<String, String> params = new HashMap<>();
 
     public RequestLine(String requestLine) {
         log.debug("Request line : {}", requestLine);
         String[] tokens = requestLine.split(" ");
-        if (tokens.length != 3) {
+        if (tokens.length != REQUEST_SPLIT_COUNT) {
             throw new IllegalArgumentException("request Line 형식이 올바르지 않습니다.");
         }
 
-        method = HttpMethod.valueOf(tokens[0]);
+        method = HttpMethod.valueOf(tokens[METHOD_INDEX]);
+        protocol = tokens[PROTOCOL_INDEX];
         if (method.isPost()) {
-            path = tokens[1];
+            path = tokens[PATH_INDEX];
             return;
         }
 
-        int index = tokens[1].indexOf("?");
+        int index = tokens[PATH_INDEX].indexOf(QUERY_PARAM_DELIMITER);
         if (index == -1) {
-            path = tokens[1];
+            path = tokens[PATH_INDEX];
             return;
         }
 
-        path = tokens[1].substring(0, index);
-        params = HttpRequestUtils.parseQueryString(tokens[1].substring(index + 1));
+        path = tokens[PATH_INDEX].substring(0, index);
+        params = HttpRequestUtils.parseQueryString(tokens[PATH_INDEX].substring(index + 1));
     }
 
     public HttpMethod getMethod() {
@@ -43,6 +51,10 @@ public class RequestLine {
 
     public String getPath() {
         return path;
+    }
+
+    public String getProtocol() {
+        return protocol;
     }
 
     public Map<String, String> getParams() {

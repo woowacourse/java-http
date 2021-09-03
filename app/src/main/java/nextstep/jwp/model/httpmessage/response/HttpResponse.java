@@ -1,78 +1,71 @@
 package nextstep.jwp.model.httpmessage.response;
 
-import nextstep.jwp.model.httpmessage.common.ContentType;
-import nextstep.jwp.model.httpmessage.common.HttpHeaderType;
-import nextstep.jwp.util.FileUtils;
+import nextstep.jwp.model.httpmessage.session.HttpCookie;
 
-import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
-import static nextstep.jwp.model.httpmessage.common.CommonHttpHeader.DELIMITER;
-import static nextstep.jwp.model.httpmessage.common.ContentType.HTML;
-import static nextstep.jwp.model.httpmessage.common.HttpHeaderType.CONTENT_TYPE;
-import static nextstep.jwp.model.httpmessage.response.HttpStatus.*;
-import static nextstep.jwp.model.httpmessage.response.ResponseHeaderType.LOCATION;
+import static nextstep.jwp.model.httpmessage.response.ResponseHeaderType.COOKIE;
 
 public class HttpResponse {
 
-    public static final String EMPTY_LINE = "";
-
     private final OutputStream outputStream;
     private final ResponseHeader headers = new ResponseHeader();
+    private final List<HttpCookie> cookies = new ArrayList<>();
     private ResponseLine responseLine;
 
     public HttpResponse(OutputStream outputStream) {
         this.outputStream = outputStream;
     }
 
-    public void forward(String url) throws IOException {
-        responseLine = new ResponseLine(OK);
-        ContentType.of(url).ifPresent(type -> headers.add(CONTENT_TYPE, type.value()));
-        String body = FileUtils.readFileOfUrl(url);
-        headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
-        writeBody(outputStream, processResponseLineAndHeader(body));
+    public Map<String, String> getHeaders() {
+        return headers.getAllHeaders();
     }
 
-    public void forwardBody(String body) throws IOException {
-        responseLine = new ResponseLine(OK);
-        headers.add(CONTENT_TYPE, HTML.value());
-        headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
-        writeBody(outputStream, processResponseLineAndHeader(body));
+    public OutputStream getOutputStream() {
+        return outputStream;
     }
 
-    public void redirect(String path) throws IOException {
-        responseLine = new ResponseLine(REDIRECT);
-        headers.add(LOCATION, path);
-        writeBody(outputStream, processResponseLineAndHeader());
+    public ResponseLine getResponseLine() {
+        return responseLine;
     }
 
-    private String processResponseLineAndHeader(String... body) {
-        StringJoiner stringJoiner = new StringJoiner(DELIMITER);
-        stringJoiner.add(responseLine.toString());
-        stringJoiner.add(headers.toString());
-        stringJoiner.add(EMPTY_LINE);
-        if (body.length > 0) {
-            stringJoiner.add(body[0]);
-        }
-        return stringJoiner.toString();
+    public String getHeader(String value) {
+        return headers.getHeader(value);
     }
 
-    private void writeBody(OutputStream outputStream, String response) throws IOException {
-        outputStream.write(response.getBytes());
-        outputStream.flush();
+    public String getContentType() {
+        return headers.getContentType();
     }
 
-    public void addHeader(HttpHeaderType type, String value) {
-        headers.add(type, value);
+    public void setContentType(String value) {
+        headers.setContentType(value);
     }
 
-    public void sendError(String url) throws IOException {
-        responseLine = new ResponseLine(NOT_FOUND);
-        headers.setContentType(HTML.value());
-        String body = FileUtils.readFileOfUrl(url);
-        headers.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
-        writeBody(outputStream, processResponseLineAndHeader(body));
+    public int getContentLength() {
+        return headers.getContentLength();
+    }
+
+    public void setContentLength(int length) {
+        headers.setContentLength(length);
+    }
+
+    public void addHeader(ResponseHeaderType type, String value) {
+        headers.add(type.value(), value);
+    }
+
+    public HttpStatus getStatus() {
+        return responseLine.getStatus();
+    }
+
+    public void setResponseLine(HttpStatus status, String protocol) {
+        responseLine = new ResponseLine(status, protocol);
+    }
+
+    public void addCookie(HttpCookie cookie) {
+        cookies.add(cookie);
+        headers.add(COOKIE.value(), cookie.value());
     }
 }

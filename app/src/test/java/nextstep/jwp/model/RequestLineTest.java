@@ -33,5 +33,7 @@ class RequestLineTest {
         assertThat(requestLine.getMethod()).isEqualTo(GET);
         assertThat(requestLine.getPath()).isEqualTo("/login");
         assertThat(requestLine.getParams()).hasSize(2);
+        assertThat(requestLine.getParams()).containsEntry("account", "gugu");
+        assertThat(requestLine.getParams()).containsEntry("password", "password");
     }
 }

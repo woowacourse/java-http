@@ -62,3 +62,13 @@ log.debug("request line : {}", line);
 
 - [x] css 파일 정상 작동
 - [x] js 정상 작동
+
+
+### ViewResolver
+
+- ViewName이 없는 경우
+  - Body가 있는 경우 : StringMessageConverter
+  - Body가 없는 경우 : pass (redirect)
+- ViewName이 있는 경우
+  - Body가 없는 경우 : exception
+  - Body가 있는 경우 : resolve

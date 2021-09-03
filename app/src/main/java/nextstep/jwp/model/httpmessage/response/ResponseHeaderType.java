@@ -1,7 +1,7 @@
 package nextstep.jwp.model.httpmessage.response;
 
 public enum ResponseHeaderType {
-
+    COOKIE("Set-Cookie"),
     LOCATION("Location");
 
     private final String value;
@@ -10,8 +10,7 @@ public enum ResponseHeaderType {
         this.value = value;
     }
 
-    @Override
-    public String toString() {
+    public String value() {
         return value;
     }
 }

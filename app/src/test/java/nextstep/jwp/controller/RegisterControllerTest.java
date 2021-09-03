@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,11 +31,13 @@ class RegisterControllerTest extends ControllerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        Objects.requireNonNull(resource);
         String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 4319 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
         assertThat(socket.output()).isEqualTo(expected);
     }
 

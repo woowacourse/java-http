@@ -30,8 +30,7 @@ public class LoginController extends AbstractController {
     }
 
     public static LoginController getInstance() {
-        assert (loginController != null) : "생성된 객체가 없습니다.";
-        return loginController;
+        return Objects.requireNonNull(loginController);
     }
 
     @Override

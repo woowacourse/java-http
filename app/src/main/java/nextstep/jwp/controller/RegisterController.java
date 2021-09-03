@@ -27,8 +27,7 @@ public class RegisterController extends AbstractController {
     }
 
     public static RegisterController getInstance() {
-        assert (registerController != null) : "생성된 객체가 없습니다.";
-        return registerController;
+        return Objects.requireNonNull(registerController);
     }
 
 

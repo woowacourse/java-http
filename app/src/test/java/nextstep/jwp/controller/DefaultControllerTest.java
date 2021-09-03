@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,11 +30,13 @@ class DefaultControllerTest extends ControllerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        Objects.requireNonNull(resource);
         String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/css \r\n" +
                 "Content-Length: 211991 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -54,11 +57,13 @@ class DefaultControllerTest extends ControllerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        Objects.requireNonNull(resource);
         String expected = "HTTP/1.1 404 Not Found \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 2426 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
         assertThat(socket.output()).isEqualTo(expected);
     }
 }

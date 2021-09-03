@@ -55,7 +55,7 @@ public class HttpResponse {
         try {
             URL resource = findResource(NOT_FOUND_URI);
             String content = readContent(resource);
-            assert content != null;
+            Objects.requireNonNull(content);
 
             this.setStatusLine(StatusCode.NOT_FOUND);
             this.headers.setContentType(ContentType.HTML);

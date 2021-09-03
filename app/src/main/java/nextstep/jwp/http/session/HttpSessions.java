@@ -28,8 +28,4 @@ public class HttpSessions {
     public static void put(HttpSession session) {
         SESSIONS.put(session.getId(), session);
     }
-
-    public static boolean contains(HttpSession session) {
-        return SESSIONS.containsKey(session.getId());
-    }
 }

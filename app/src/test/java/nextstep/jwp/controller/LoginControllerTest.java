@@ -18,7 +18,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.*;
 
 class LoginControllerTest {
-    LoginController loginController;
+    private LoginController loginController;
 
     @BeforeEach
     private void setUp() {

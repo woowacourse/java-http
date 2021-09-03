@@ -29,8 +29,8 @@ public class LoginController extends AbstractController {
         HttpResponse response = new HttpResponse.Builder()
                 .outputStream(httpResponse.getOutputStream())
                 .status(HttpStatus.OK_200)
-                .body(createBody("/login.html"))
                 .path(httpRequest.getPath())
+                .body(createBody("/login.html"))
                 .build();
         response.forward();
 
@@ -59,8 +59,8 @@ public class LoginController extends AbstractController {
         HttpResponse response = new HttpResponse.Builder()
                 .outputStream(httpResponse.getOutputStream())
                 .status(HttpStatus.UNAUTHORIZED_401)
-                .body(createBody("/401.html"))
                 .path(httpRequest.getPath())
+                .body(createBody("/401.html"))
                 .build();
         response.forward();
     }

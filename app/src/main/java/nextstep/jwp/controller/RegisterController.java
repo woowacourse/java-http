@@ -16,8 +16,8 @@ public class RegisterController extends AbstractController {
         HttpResponse response = new HttpResponse.Builder()
                 .outputStream(httpResponse.getOutputStream())
                 .status(HttpStatus.OK_200)
-                .body(createBody("/register.html"))
                 .path(httpRequest.getPath())
+                .body(createBody("/register.html"))
                 .build();
         response.forward();
     }
@@ -35,8 +35,8 @@ public class RegisterController extends AbstractController {
             HttpResponse response = new HttpResponse.Builder()
                     .outputStream(httpResponse.getOutputStream())
                     .status(HttpStatus.UNAUTHORIZED_401)
-                    .body(createBody("/401.html"))
                     .path(httpRequest.getPath())
+                    .body(createBody("/401.html"))
                     .build();
             response.forward();
             return;

@@ -47,6 +47,10 @@ public class RequestHandler implements Runnable {
 
             handle(httpRequest, httpResponse);
 
+            HttpResponse httpResponse = new HttpResponse();
+
+            handle(httpRequest, httpResponse);
+
             String response = httpResponse.responseMessage();
 
             outputStream.write(response.getBytes());

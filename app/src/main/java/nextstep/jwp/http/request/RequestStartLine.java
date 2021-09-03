@@ -33,7 +33,7 @@ public class RequestStartLine {
 
         if (path.contains(QUERY_STRING_START)) {
             String uri = splitLine[1];
-            int index = uri.indexOf(QUERY_STRING_START);
+            int index = uri.indexOf(QUERY_STRING_START);\
             path = uri.substring(0, index);
             queryString = queryString(uri.substring(index + 1));
         }

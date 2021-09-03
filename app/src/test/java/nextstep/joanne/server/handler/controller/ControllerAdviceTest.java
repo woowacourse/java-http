@@ -21,27 +21,31 @@ class ControllerAdviceTest {
                 null);
     }
 
+    private void handleError(HttpStatus httpStatus) {
+        HttpResponse httpResponse = new HttpResponse();
+        handle(httpResponse, httpStatus);
+        assertThat(httpResponse.getStatus()).isEqualTo(httpStatus.value());
+    }
+
+    private void handle(HttpResponse httpResponse, HttpStatus unauthorized) {
+        ControllerAdvice.handle(httpRequest, httpResponse, unauthorized);
+    }
+
     @Test
     @DisplayName("HttpStatus가 UnAuthorized")
     void handleWith401() {
-        HttpResponse httpResponse = new HttpResponse();
-        ControllerAdvice.handle(httpRequest, httpResponse, HttpStatus.UNAUTHORIZED);
-        assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.UNAUTHORIZED.value());
+        handleError(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
     @DisplayName("HttpStatus가 InternalServerError")
     void handleWith500() {
-        HttpResponse httpResponse = new HttpResponse();
-        ControllerAdvice.handle(httpRequest, httpResponse, HttpStatus.INTERNAL_SERVER_ERROR);
-        assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        handleError(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Test
     @DisplayName("HttpStatus가 NotFound")
     void handleWith404() {
-        HttpResponse httpResponse = new HttpResponse();
-        ControllerAdvice.handle(httpRequest, httpResponse, HttpStatus.NOT_FOUND);
-        assertThat(httpResponse.getStatus()).isEqualTo(HttpStatus.NOT_FOUND.value());
+        handleError(HttpStatus.NOT_FOUND);
     }
 }

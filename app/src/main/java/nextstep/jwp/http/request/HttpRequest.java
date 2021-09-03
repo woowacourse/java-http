@@ -1,6 +1,9 @@
 package nextstep.jwp.http.request;
 
+import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpHeader;
+import nextstep.jwp.http.HttpSession;
+import nextstep.jwp.http.HttpSessions;
 import nextstep.jwp.http.Protocol;
 
 public class HttpRequest {
@@ -49,5 +52,18 @@ public class HttpRequest {
 
     public RequestBody getRequestBody() {
         return this.requestBody;
+    }
+
+    public HttpSession getSession() {
+        HttpCookie httpCookie = HttpCookie.fromHeader(httpHeader);
+        return HttpSessions.getSession(httpCookie.getSessionId());
+    }
+
+    public boolean isGetRequest() {
+        return this.httpMethod == HttpMethod.GET;
+    }
+
+    public boolean isPostRequest() {
+        return this.httpMethod == HttpMethod.POST;
     }
 }

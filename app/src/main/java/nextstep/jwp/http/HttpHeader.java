@@ -6,29 +6,37 @@ import java.util.Map;
 
 public class HttpHeader {
 
-    private static final String HTML_HEADER_VALUE = "text/html;charset=utf-8";
-    private static final String CSS_HEADER_VALUE = "text/css";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
 
-    private Map<String, String> httpHeaders;
+    private final Map<String, String> httpHeaders;
 
     public HttpHeader(Map<String, String> httpHeaders) {
         this.httpHeaders = new HashMap<>(httpHeaders);
     }
 
-    public static HttpHeader getHTMLResponseHeader(String responseBody) {
-        return getHeader(responseBody, HTML_HEADER_VALUE);
-    }
-
-    public static HttpHeader getCSSResponseHeader(String responseBody) {
-        return getHeader(responseBody, CSS_HEADER_VALUE);
-    }
-
-    private static HttpHeader getHeader(String responseBody, String contentType) {
+    public static HttpHeader getResponseHeader(String responseBody, ContentType contentType, HttpHeader httpHeader) {
         Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", contentType);
-        headers.put("Content-Length", responseBody.getBytes().length + "");
+        headers.put(CONTENT_TYPE, contentType.getHeaderValue());
+        headers.put(CONTENT_LENGTH, responseBody.getBytes().length + "");
+
+        if (contentType == ContentType.HTML) {
+            setSessionIfNotPresent(httpHeader, headers);
+        }
 
         return new HttpHeader(headers);
+    }
+
+    private static void setSessionIfNotPresent(HttpHeader httpHeader, Map<String, String> headers) {
+        HttpCookie httpCookie = HttpCookie.fromHeader(httpHeader);
+
+        if (!httpCookie.containsSessionId()) {
+            headers.putAll(HttpCookie.ofSessionCookie().toHeaderFormat());
+        }
+    }
+
+    public void addAttribute(String key, String value) {
+        this.httpHeaders.put(key, value);
     }
 
     public Map<String, String> getAllHeaders() {

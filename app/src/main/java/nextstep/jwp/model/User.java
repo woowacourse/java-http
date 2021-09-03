@@ -1,8 +1,10 @@
 package nextstep.jwp.model;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 public class User {
 
-    private static long CURRENT_ID = 0;
+    private static final AtomicLong CURRENT_ID = new AtomicLong();
 
     private final long id;
     private final String account;
@@ -18,11 +20,15 @@ public class User {
     }
 
     public User(String account, String password, String email) {
-        this(++CURRENT_ID, account, password, email);
+        this(getNextId(), account, password, email);
+    }
+
+    private static long getNextId() {
+        return CURRENT_ID.incrementAndGet();
     }
 
     private void validateInputs(long id, String account, String password, String email) {
-        if (id < CURRENT_ID || account == null || password == null || email == null ||
+        if (id < CURRENT_ID.get() || account == null || password == null || email == null ||
             account.isBlank() || password.isBlank() || email.isBlank()) {
             throw new IllegalArgumentException();
         }

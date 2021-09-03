@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import nextstep.TestUtil;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.ResponseStatus;
-import nextstep.jwp.http.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

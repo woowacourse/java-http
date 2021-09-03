@@ -2,19 +2,13 @@ package nextstep.jwp.controller;
 
 import java.util.Arrays;
 import java.util.List;
-import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.http.request.HttpMethod;
+import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.HttpResponse;
 
 public class StaticFileController extends AbstractController {
 
-    private static final HttpMethod HTTP_METHOD = HttpMethod.GET;
     private static final List<String> URI_PATHS = Arrays.asList("/assets", "/js", "/css");
-
-    @Override
-    boolean isMatchingHttpMethod(HttpRequest httpRequest) {
-        return HTTP_METHOD == httpRequest.getHttpMethod();
-    }
 
     @Override
     boolean isMatchingUriPath(HttpRequest httpRequest) {
@@ -23,10 +17,12 @@ public class StaticFileController extends AbstractController {
     }
 
     @Override
-    public HttpResponse run(HttpRequest httpRequest) {
-        if (httpRequest.getPath().endsWith(".css")) {
-            return super.applyCSSFile(httpRequest.getPath());
-        }
-        return super.renderPage(httpRequest.getPath());
+    public HttpResponse doGet(HttpRequest httpRequest) {
+        return super.renderPage(httpRequest, ContentType.fromPath(httpRequest.getPath()));
+    }
+
+    @Override
+    protected HttpResponse doPost(HttpRequest httpRequest) {
+        return super.redirect(getNotFoundErrorRedirectUrl());
     }
 }

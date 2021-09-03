@@ -6,6 +6,7 @@ import nextstep.jwp.http.auth.HttpSession;
 import nextstep.jwp.http.auth.HttpSessions;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.ResponseReference;
 import nextstep.jwp.model.User;
 
 public class LoginController extends AbstractController {
@@ -16,20 +17,20 @@ public class LoginController extends AbstractController {
         String requestBody = request.getBody();
         Optional<User> user = userService.findUserFromBody(requestBody);
         if (user.isEmpty()) {
-            return createRedirectResponse(request, "/401.html");
+            return ResponseReference.createRedirectResponse(request, "/401.html");
         }
         HttpSession session = HttpSessions.createSession();
         session.setAttribute("user", user);
-        return createSessionRedirectResponse(session, "/index.html");
+        return ResponseReference.createSessionRedirectResponse(session, "/index.html");
     }
 
 
     @Override
     protected HttpResponse doGet(HttpRequest request) throws Exception {
         if (loginUserExistsSession(request)) {
-            return createRedirectResponse(request, "/index.html");
+            return ResponseReference.createRedirectResponse(request, "/index.html");
         }
-        return createRedirectResponse(request, "/login.html");
+        return ResponseReference.createRedirectResponse(request, "/login.html");
     }
 
     private boolean loginUserExistsSession(HttpRequest request) {

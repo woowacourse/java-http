@@ -6,6 +6,7 @@ import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.ResponseBody;
 import nextstep.jwp.http.response.ResponseHeader;
 import nextstep.jwp.http.response.ResponseLine;
+import nextstep.jwp.http.response.ResponseReference;
 import nextstep.jwp.http.response.ResponseStatus;
 
 public class ResourceController extends AbstractController {
@@ -13,7 +14,7 @@ public class ResourceController extends AbstractController {
     protected HttpResponse doGet(HttpRequest request) throws Exception {
         SupportedContentType contentType = SupportedContentType.extractContentTypeFromRequest(request);
         if (contentType == SupportedContentType.NOTFOUND) {
-            return create404Response();
+            return ResponseReference.create404Response();
         }
 
         try {
@@ -26,7 +27,7 @@ public class ResourceController extends AbstractController {
                             .cookie(request.getCookie()).build(),
                     ResponseBody.createByString(responseBody));
         } catch (Exception e) {
-            return create404Response();
+            return ResponseReference.create404Response();
         }
 
     }

@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractController implements Controller {
 
-    private static final String INTERNAL_SERVER_ERROR_REDIRECT_URL = "http://localhost:8080/500.html";
-    private static final String NOT_FOUND_ERROR_REDIRECT_URL = "http://localhost:8080/404.html";
+    private static final String INTERNAL_SERVER_ERROR_REDIRECT_URL = "/500.html";
+    private static final String NOT_FOUND_ERROR_REDIRECT_URL = "/404.html";
 
     private Logger logger = LoggerFactory.getLogger(AbstractController.class);
 
@@ -48,10 +48,10 @@ public abstract class AbstractController implements Controller {
     @Override
     public HttpResponse doService(HttpRequest httpRequest) {
         try {
-            if (httpRequest.getHttpMethod() == HttpMethod.GET) {
+            if (httpRequest.isGetRequest()) {
                 return doGet(httpRequest);
             }
-            if (httpRequest.getHttpMethod() == HttpMethod.POST) {
+            if (httpRequest.isPostRequest()) {
                 return doPost(httpRequest);
             }
             return redirect(NOT_FOUND_ERROR_REDIRECT_URL);

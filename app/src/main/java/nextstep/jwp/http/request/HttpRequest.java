@@ -58,4 +58,12 @@ public class HttpRequest {
         HttpCookie httpCookie = HttpCookie.fromHeader(httpHeader);
         return HttpSessions.getSession(httpCookie.getSessionId());
     }
+
+    public boolean isGetRequest() {
+        return this.httpMethod == HttpMethod.GET;
+    }
+
+    public boolean isPostRequest() {
+        return this.httpMethod == HttpMethod.POST;
+    }
 }

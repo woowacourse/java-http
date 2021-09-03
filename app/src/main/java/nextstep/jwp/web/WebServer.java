@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 public class WebServer {
@@ -22,8 +24,9 @@ public class WebServer {
 
     public void run() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
+            FrontController frontController = WebApplicationConfig.frontController();
             logger.info("Web Server started {} port.", serverSocket.getLocalPort());
-            handle(serverSocket);
+            handle(serverSocket, frontController);
         } catch (IOException exception) {
             logger.error("Exception accepting connection", exception);
         } catch (RuntimeException exception) {
@@ -31,10 +34,11 @@ public class WebServer {
         }
     }
 
-    private void handle(ServerSocket serverSocket) throws IOException {
+    private void handle(ServerSocket serverSocket, FrontController frontController) throws IOException {
+        ExecutorService service = Executors.newFixedThreadPool(15);
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection)).start();
+            service.submit(new RequestHandler(connection, frontController));
         }
     }
 

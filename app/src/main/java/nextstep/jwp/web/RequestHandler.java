@@ -1,11 +1,12 @@
-package nextstep.jwp;
+package nextstep.jwp.web;
 
+import nextstep.jwp.request.CharlieHttpRequest;
+import nextstep.jwp.request.HttpRequest;
+import nextstep.jwp.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.Objects;
 
@@ -14,9 +15,11 @@ public class RequestHandler implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final Socket connection;
+    private final FrontController frontController;
 
-    public RequestHandler(Socket connection) {
+    public RequestHandler(Socket connection, FrontController frontController) {
         this.connection = Objects.requireNonNull(connection);
+        this.frontController = frontController;
     }
 
     @Override
@@ -24,17 +27,13 @@ public class RequestHandler implements Runnable {
         log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
+             final OutputStream outputStream = connection.getOutputStream();
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final String responseBody = "Hello world!";
+            HttpRequest httpRequest = CharlieHttpRequest.of(bufferedReader);
+            HttpResponse httpResponse = frontController.getResponse(httpRequest);
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
+            String response = httpResponse.toHttpResponseMessage();
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException exception) {

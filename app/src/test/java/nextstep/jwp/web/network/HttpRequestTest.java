@@ -2,15 +2,16 @@ package nextstep.jwp.web.network;
 
 import nextstep.jwp.web.network.request.HttpMethod;
 import nextstep.jwp.web.network.request.HttpRequest;
+import nextstep.jwp.web.network.response.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Map.entry;
+import static nextstep.jwp.web.network.HttpUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
@@ -20,14 +21,12 @@ class HttpRequestTest {
     @Test
     void create() {
         // given
-        final String requestAsString = String.join("\r\n",
-                "GET /register HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Accept: */* ",
-                "",
-                "");
-        final InputStream inputStream = new ByteArrayInputStream(requestAsString.getBytes());
+        final InputStream inputStream = RequestBuilder
+                .builder(HttpMethod.GET, "/register")
+                .localHost8080()
+                .connectionKeepAlive()
+                .acceptAll()
+                .buildInputStream();
 
         // when // then
         assertThatCode(() -> new HttpRequest(inputStream))
@@ -38,18 +37,15 @@ class HttpRequestTest {
     @Test
     void getHttpMethod() {
         // given
-        final String requestAsString = String.join("\r\n",
-                "GET /register HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Accept: */* ",
-                "",
-                "");
-        final InputStream inputStream = new ByteArrayInputStream(requestAsString.getBytes());
+        final HttpRequest request = RequestBuilder
+                .builder(HttpMethod.GET, "/register")
+                .localHost8080()
+                .connectionKeepAlive()
+                .acceptAll()
+                .buildRequest();
 
         // when
-        final HttpRequest httpRequest = new HttpRequest(inputStream);
-        final HttpMethod actual = httpRequest.getHttpMethod();
+        final HttpMethod actual = request.getHttpMethod();
 
         // then
         assertThat(actual).isEqualTo(HttpMethod.GET);
@@ -59,18 +55,15 @@ class HttpRequestTest {
     @Test
     void getURI() {
         // given
-        final String requestAsString = String.join("\r\n",
-                "GET /register HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Accept: */* ",
-                "",
-                "");
-        final InputStream inputStream = new ByteArrayInputStream(requestAsString.getBytes());
+        final HttpRequest request = RequestBuilder
+                .builder(HttpMethod.GET, "/register")
+                .localHost8080()
+                .connectionKeepAlive()
+                .acceptAll()
+                .buildRequest();
 
         // when
-        final HttpRequest httpRequest = new HttpRequest(inputStream);
-        final URI actual = httpRequest.getURI();
+        final URI actual = request.getURI();
 
         // then
         assertThat(actual).isEqualTo(new URI("/register"));
@@ -80,20 +73,19 @@ class HttpRequestTest {
     @Test
     void getBody() {
         // given
-        final String requestAsString = String.join("\r\n",
-                "POST /register HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: 58 ",
-                "Content-Type: application/x-www-form-urlencoded ",
-                "Accept: */* ",
-                "",
-                "account=gugu&password=password&email=hkkang%40woowahan.com");
-        final InputStream inputStream = new ByteArrayInputStream(requestAsString.getBytes());
+        final String requestBody = "account=gugu&password=password&email=hkkang%40woowahan.com";
+        final HttpRequest request = RequestBuilder
+                .builder(HttpMethod.POST, "/register")
+                .localHost8080()
+                .connectionKeepAlive()
+                .contentType(ContentType.FORM)
+                .contentLength(58)
+                .acceptAll()
+                .body(requestBody)
+                .buildRequest();
 
         // when
-        final HttpRequest httpRequest = new HttpRequest(inputStream);
-        final Map<String, String> actual = httpRequest.getBodyAsMap();
+        final Map<String, String> actual = request.getBodyAsMap();
 
         // then
         assertThat(actual)
@@ -105,20 +97,17 @@ class HttpRequestTest {
     void getSession() {
         // given
         final UUID id = UUID.randomUUID();
-        final String requestAsString = String.join("\r\n",
-                "GET /register HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Cookie: JSESSIONID=" + id,
-                "Accept: */* ",
-                "",
-                "");
-        final InputStream inputStream = new ByteArrayInputStream(requestAsString.getBytes());
+        final HttpRequest request = RequestBuilder
+                .builder(HttpMethod.GET, "/register")
+                .localHost8080()
+                .connectionKeepAlive()
+                .jsessionid(id)
+                .acceptAll()
+                .buildRequest();
         final HttpSession session = new HttpSession(id);
         HttpSessions.setSession(session);
 
         // when
-        final HttpRequest request = new HttpRequest(inputStream);
         final HttpSession actual = request.getSession();
 
         // then

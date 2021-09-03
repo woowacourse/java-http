@@ -25,6 +25,14 @@ public class HttpRequest {
         this.body = HttpBody.of(bufferedReader, this.headers.getContentLength());
     }
 
+    public boolean isGet() {
+        return this.requestLine.isGet();
+    }
+
+    public boolean isPost() {
+        return this.requestLine.isPost();
+    }
+
     public HttpMethod getHttpMethod() {
         return requestLine.getHttpMethod();
     }
@@ -61,13 +69,5 @@ public class HttpRequest {
 
     public Map<String, String> getBodyAsMap() {
         return body.asMap();
-    }
-
-    public boolean isGet() {
-        return this.requestLine.isGet();
-    }
-
-    public boolean isPost() {
-        return this.requestLine.isPost();
     }
 }

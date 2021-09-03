@@ -1,5 +1,6 @@
 package nextstep.jwp.http.response;
 
+import nextstep.jwp.http.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,13 +41,9 @@ public class  HttpResponse {
         try {
             Path path = new File(resource.getPath()).toPath();
             byte[] body = Files.readAllBytes(path);
-            if (resourcePath.endsWith(".css")) {
-                headers.put(CONTENT_TYPE, "text/css");
-            } else if (resourcePath.endsWith(".js")) {
-                headers.put(CONTENT_TYPE, "application/javascript");
-            } else {
-                headers.put(CONTENT_TYPE, "text/html;charset=utf-8");
-            }
+            String extension = resourcePath.substring(resourcePath.lastIndexOf("."));
+            headers.put(CONTENT_TYPE, ContentType.findContentType(extension).getType());
+            System.out.println(resourcePath);
             headers.put(CONTENT_LENGTH, body.length + "");
             ok(body);
         } catch (IOException e) {

@@ -19,7 +19,7 @@ public class DefaultController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         throw new IllegalArgumentException();
     }
 }

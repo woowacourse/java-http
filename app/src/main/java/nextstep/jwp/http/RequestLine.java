@@ -12,9 +12,9 @@ public class RequestLine {
         if (line == null) {
             return;
         }
-        String[] firstLine = line.split(" ");
-        method = firstLine[0];
-        path = firstLine[1];
+        String[] requestLine = line.split(" ");
+        method = requestLine[0];
+        path = requestLine[1];
     }
 
     public String getMethod() {

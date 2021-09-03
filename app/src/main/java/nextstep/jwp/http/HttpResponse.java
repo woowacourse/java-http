@@ -2,16 +2,16 @@ package nextstep.jwp.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpResponse {
     private final OutputStream outputStream;
     private HttpStatus status;
     private String body;
-    private String path;
-    private String redirectUrl;
-    private HttpSession session;
     private Map<String, String> responseMap;
 
     public HttpResponse(OutputStream outputStream) {
@@ -22,9 +22,6 @@ public class HttpResponse {
         this.outputStream = builder.outputStream;
         this.status = builder.status;
         this.body = builder.body;
-        this.path = builder.path;
-        this.redirectUrl = builder.redirectUrl;
-        this.session = builder.session;
         this.responseMap = builder.responseMap;
     }
 
@@ -53,9 +50,6 @@ public class HttpResponse {
         private OutputStream outputStream;
         private HttpStatus status;
         private String body;
-        private String path;
-        private String redirectUrl;
-        private HttpSession session;
         private final Map<String, String> responseMap = new HashMap<>();
 
         public Builder outputStream(OutputStream outputStream) {
@@ -75,19 +69,16 @@ public class HttpResponse {
         }
 
         public Builder path(String path) {
-            this.path = path;
             responseMap.put("Content-Type", ContentTypeMapper.extractContentType(path));
             return this;
         }
 
         public Builder redirectUrl(String url) {
-            this.redirectUrl = url;
-            responseMap.put("Location", "http://localhost:8080" + redirectUrl);
+            responseMap.put("Location", "http://localhost:8080" + url);
             return this;
         }
 
         public Builder session(HttpSession session) {
-            this.session = session;
             responseMap.put("Set-Cookie", "JSESSIONID=" + session.getId());
             return this;
         }

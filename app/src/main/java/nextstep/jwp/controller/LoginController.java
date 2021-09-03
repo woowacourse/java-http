@@ -7,7 +7,8 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.common.Body;
 import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.request.requestline.RequestURI;
+import nextstep.jwp.http.request.requestline.RequestPath;
+import nextstep.jwp.http.request.session.HttpSession;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpStatus;
 import nextstep.jwp.http.util.ParamExtractor;
@@ -20,7 +21,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) {
-        return HttpResponse.of(HttpStatus.OK, new RequestURI(LOGIN_RESOURCE_PATH));
+        return HttpResponse.of(HttpStatus.OK, new RequestPath(LOGIN_RESOURCE_PATH));
     }
 
     @Override
@@ -34,10 +35,13 @@ public class LoginController extends AbstractController {
             final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(UnauthorizedException::new);
 
-            if (!user.checkPassword(password)) {
-                throw new UnauthorizedException();
+            if(user.checkPassword(password)) {
+                final HttpSession httpSession = request.getSession();
+                httpSession.setAttribute("user", user);
+                return HttpResponse.redirect(INDEX_RESOURCE_PATH);
             }
-            return HttpResponse.redirect(INDEX_RESOURCE_PATH);
+
+            throw new UnauthorizedException();
         } catch (UnauthorizedException e) {
             return HttpResponse.redirect(UNAUTHORIZED_PATH);
         }

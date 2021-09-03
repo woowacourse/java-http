@@ -5,6 +5,7 @@ import java.io.IOException;
 import nextstep.jwp.http.common.Body;
 import nextstep.jwp.http.request.requestline.HttpMethod;
 import nextstep.jwp.http.request.requestline.RequestLine;
+import nextstep.jwp.http.request.session.HttpSession;
 
 public class HttpRequest {
 
@@ -45,5 +46,9 @@ public class HttpRequest {
 
     public Body getBody() {
         return body;
+    }
+
+    public HttpSession getSession() {
+        return null;
     }
 }

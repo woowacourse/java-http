@@ -8,7 +8,7 @@ import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.common.Body;
 import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.request.requestline.RequestURI;
+import nextstep.jwp.http.request.requestline.RequestPath;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpStatus;
 import nextstep.jwp.http.util.ParamExtractor;
@@ -20,7 +20,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponse doGet(HttpRequest request) {
-        return HttpResponse.of(HttpStatus.OK, new RequestURI(REGISTER_RESOURCE_PATH));
+        return HttpResponse.of(HttpStatus.OK, new RequestPath(REGISTER_RESOURCE_PATH));
     }
 
     @Override

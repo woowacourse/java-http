@@ -7,9 +7,6 @@ import nextstep.jwp.http.response.HttpStatus;
 
 public class StaticResourceController implements Controller {
 
-    public StaticResourceController() {
-    }
-
     @Override
     public HttpResponse process(HttpRequest request) {
         final RequestLine requestLine = request.getRequestLine();

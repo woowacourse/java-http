@@ -4,10 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.http.request.session.HttpCookie;
 
 public class HttpHeaders {
 
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String ACCEPT = "Accept";
     private final Map<String, String> headers;
 
     private HttpHeaders(Map<String, String> headers) {
@@ -39,11 +41,16 @@ public class HttpHeaders {
         return Integer.parseInt(headers.get(CONTENT_LENGTH).trim());
     }
 
+    public HttpCookie getCookie() {
+        String cookie = headers.get("Cookie");
+        return new HttpCookie(cookie);
+    }
+
     public boolean hasRequestBody() {
         return headers.containsKey(CONTENT_LENGTH);
     }
 
     public boolean contains(String value) {
-        return headers.get("Accept").contains(value);
+        return headers.get(ACCEPT).contains(value);
     }
 }

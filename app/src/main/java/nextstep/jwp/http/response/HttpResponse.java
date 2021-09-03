@@ -3,7 +3,7 @@ package nextstep.jwp.http.response;
 import java.util.List;
 import nextstep.jwp.http.common.Body;
 import nextstep.jwp.http.common.HttpVersion;
-import nextstep.jwp.http.request.requestline.RequestURI;
+import nextstep.jwp.http.request.requestline.RequestPath;
 
 public class HttpResponse {
 
@@ -30,9 +30,9 @@ public class HttpResponse {
         return new HttpResponse(statusLine, headers, body);
     }
 
-    public static HttpResponse of(HttpStatus httpStatus, RequestURI uri) {
+    public static HttpResponse of(HttpStatus httpStatus, RequestPath uri) {
         final ResponseHeaders headers = new ResponseHeaders();
-        String path = setPrefix(uri.getRequestURI());
+        String path = setPrefix(uri.getPath());
         Body body = Body.parse(path);
         putContentTypeAndLength(body, headers, ContentType.of(uri));
         return of(httpStatus, headers, body);

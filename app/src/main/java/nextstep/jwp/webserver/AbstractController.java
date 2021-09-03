@@ -14,11 +14,9 @@ public abstract class AbstractController implements Controller {
         HttpMethod method = request.getHttpMethod();
         if (HttpMethod.GET == method) {
             doGet(request, response);
-            return;
         }
         if (HttpMethod.POST == method) {
             doPost(request, response);
-            return;
         }
         setSessionIdInCookie(request, response);
     }

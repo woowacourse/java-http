@@ -17,6 +17,6 @@ public class ControllerContainer {
         return controllers.stream()
             .filter(it -> it.isMatchingController(httpRequest))
             .findAny()
-            .orElseThrow(IllegalArgumentException::new);
+            .orElseGet(StaticFileController::new);
     }
 }

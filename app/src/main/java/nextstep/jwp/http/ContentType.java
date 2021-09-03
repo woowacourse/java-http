@@ -5,9 +5,9 @@ import java.util.Arrays;
 public enum ContentType {
     HTML(".html", "text/html;charset=utf-8"),
     JAVA_SCRIPT(".js", "application/js"),
-    CSS(".css", "text/css");
-
-    private static final String CONTENT_TYPE_DELIMITER = "\\.";
+    CSS(".css", "text/css"),
+    IMAGE(".svg", "image/svg+xml"),
+    FAVICON(".ico", "image/x-cion");
 
     private final String contentTypeValue;
     private final String headerValue;

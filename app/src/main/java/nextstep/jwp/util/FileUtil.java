@@ -6,11 +6,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import nextstep.jwp.http.ContentType;
 
 public class FileUtil {
 
-    private static final List<String> STATIC_FILE_FORMATS = Arrays.asList(".html", ".js", ".css");
-    private static final String HTML_FILE_FORMAT = ".html";
+    private static final List<String> STATIC_FILE_FORMATS = Arrays.stream(ContentType.values())
+        .map(ContentType::getContentTypeValue)
+        .collect(Collectors.toList());
+    private static final String HTML_FILE_FORMAT = ContentType.HTML.getContentTypeValue();
     private static final String PATH_PREFIX = "static";
 
     public static String readStaticFileByUriPath(String uriPath) {
@@ -30,7 +34,7 @@ public class FileUtil {
         if (isFileFormat(uriPath)) {
             return String.format(PATH_PREFIX + "%s", uriPath);
         }
-        return String.format(PATH_PREFIX + "%s" + HTML_FILE_FORMAT, uriPath);
+        return String.format(String.format("%s%%s%s", PATH_PREFIX, HTML_FILE_FORMAT), uriPath);
     }
 
     private static boolean isFileFormat(String uriPath) {

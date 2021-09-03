@@ -46,7 +46,7 @@ public class LoginController extends AbstractController {
         final User user = InMemoryUserRepository.findByAccount(account).orElseThrow(DBNotFoundException::new);
 
         if (user.checkPassword(password)) {
-            logger.debug(account + "님이 접속했습니다.");
+            logger.debug("{}님이 접속했습니다.", account);
             final HttpSession httpSession = request.getSession();
             httpSession.setAttribute("user", user);
             request.cookie(httpSession.getId());

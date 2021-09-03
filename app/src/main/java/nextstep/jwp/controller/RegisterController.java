@@ -38,6 +38,6 @@ public class RegisterController extends AbstractController {
         final String email = queryParams.get("email");
 
         InMemoryUserRepository.save(new User(2L, account, password, email));
-        logger.debug(account + "님의 새로운 계정이 생성 되었습니다.");
+        logger.debug("{}님의 새로운 계정이 생성 되었습니다.", account);
     }
 }

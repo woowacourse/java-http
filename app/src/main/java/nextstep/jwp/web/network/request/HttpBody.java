@@ -27,7 +27,7 @@ public class HttpBody {
             }
             return new HttpBody("");
         } catch (IOException exception) {
-            throw new InputException("Exception while reading body from http request.");
+            throw new InputException("body in http request");
         }
     }
 

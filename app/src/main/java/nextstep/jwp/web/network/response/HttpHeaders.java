@@ -36,7 +36,7 @@ public class HttpHeaders {
             }
             return new HttpHeaders(headers);
         } catch (IOException exception) {
-            throw new InputException("Exception while reading headers from http request.");
+            throw new InputException("headers in http request.");
         }
     }
 

@@ -29,7 +29,6 @@ public class HttpResponse {
         return headers.entrySet().stream()
                 .map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
                 .collect(Collectors.joining("\r\n"));
-
     }
 
     public void setStatus(HttpStatus status) {

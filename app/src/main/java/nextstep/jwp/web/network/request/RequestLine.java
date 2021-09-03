@@ -35,7 +35,7 @@ public class RequestLine {
 
             return new RequestLine(httpMethod, uri, protocolVersion);
         } catch (IOException exception) {
-            throw new InputException("Exception while reading request line from http request");
+            throw new InputException("request line in http request");
         }
     }
 

@@ -13,7 +13,7 @@ import java.util.Objects;
 
 public class HttpServlet implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpServlet.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpServlet.class);
 
     private final Socket connection;
 
@@ -23,7 +23,7 @@ public class HttpServlet implements Runnable {
 
     @Override
     public void run() {
-        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
+        LOG.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
@@ -34,7 +34,7 @@ public class HttpServlet implements Runnable {
             DispatcherServlet dispatcherServlet = new DispatcherServlet();
             dispatcherServlet.service(httpRequest, httpResponse);
         } catch (IOException exception) {
-            log.error("Exception stream", exception);
+            LOG.error("Exception stream", exception);
         } finally {
             close();
         }
@@ -44,7 +44,7 @@ public class HttpServlet implements Runnable {
         try {
             connection.close();
         } catch (IOException exception) {
-            log.error("Exception closing socket", exception);
+            LOG.error("Exception closing socket", exception);
         }
     }
 }

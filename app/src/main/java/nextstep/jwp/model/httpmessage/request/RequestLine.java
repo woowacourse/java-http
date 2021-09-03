@@ -9,12 +9,16 @@ import java.util.Map;
 
 public class RequestLine {
     private static final Logger log = LoggerFactory.getLogger(RequestLine.class);
-    public static final int REQUEST_SPLIT_COUNT = 3;
+
+    public static final int METHOD_INDEX = 0;
     public static final int PATH_INDEX = 1;
+    public static final int PROTOCOL_INDEX = 2;
+    public static final int REQUEST_SPLIT_COUNT = 3;
     public static final String QUERY_PARAM_DELIMITER = "?";
 
     private final HttpMethod method;
     private final String path;
+    private final String protocol;
     private Map<String, String> params = new HashMap<>();
 
     public RequestLine(String requestLine) {
@@ -24,7 +28,8 @@ public class RequestLine {
             throw new IllegalArgumentException("request Line 형식이 올바르지 않습니다.");
         }
 
-        method = HttpMethod.valueOf(tokens[0]);
+        method = HttpMethod.valueOf(tokens[METHOD_INDEX]);
+        protocol = tokens[PROTOCOL_INDEX];
         if (method.isPost()) {
             path = tokens[PATH_INDEX];
             return;
@@ -46,6 +51,10 @@ public class RequestLine {
 
     public String getPath() {
         return path;
+    }
+
+    public String getProtocol() {
+        return protocol;
     }
 
     public Map<String, String> getParams() {

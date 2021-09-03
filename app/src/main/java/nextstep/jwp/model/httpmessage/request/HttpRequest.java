@@ -104,10 +104,6 @@ public class HttpRequest {
         return headers.getContentLength();
     }
 
-    public boolean hasSessionId() {
-        return headers.containsKey(COOKIE) && getCookies().contains(JSESSIONID);
-    }
-
     public HttpCookie getCookies() {
         return new HttpCookie(headers.getHeader(COOKIE.value()));
     }
@@ -116,7 +112,15 @@ public class HttpRequest {
         return getCookies().getCookie(JSESSIONID);
     }
 
+    public boolean hasSessionId() {
+        return headers.containsKey(COOKIE) && getCookies().contains(JSESSIONID);
+    }
+
     public boolean isValidSession() {
         return HttpSessions.contains(getSessionId());
+    }
+
+    public String getProtocol() {
+        return requestLine.getProtocol();
     }
 }

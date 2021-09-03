@@ -13,7 +13,8 @@ public class IndexController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response, ModelAndView mv) throws IOException {
-        response.setStatus(OK);
+        response.setResponseLine(OK, request.getProtocol());
+        mv.setStatus(OK);
         response.setContentType(HTML.value());
         mv.setViewName("/index");
     }

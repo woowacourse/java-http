@@ -6,8 +6,6 @@ import nextstep.jwp.view.ModelAndView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-
 import static nextstep.jwp.model.httpmessage.common.ContentType.HTML;
 import static nextstep.jwp.model.httpmessage.response.HttpStatus.OK;
 
@@ -16,8 +14,9 @@ public class MainController extends AbstractController {
     private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response, ModelAndView mv) throws IOException {
-        response.setStatus(OK);
+    protected void doGet(HttpRequest request, HttpResponse response, ModelAndView mv) {
+        response.setResponseLine(OK, request.getProtocol());
+        mv.setStatus(OK);
         LOG.debug("Response status : {}", OK);
 
         String html = HTML.value();

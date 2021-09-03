@@ -27,18 +27,18 @@ public class DispatcherServlet {
 
             if (FileUtils.isStaticFile(path)) {
                 view = new StaticView(FileUtils.getAbsolutePath(path));
-                view.render(mv, response);
+                view.render(mv, request, response);
                 return;
             }
 
-            sendError(response, mv, NOT_FOUND);
+            sendError(request, response, mv, NOT_FOUND);
             return;
         }
 
         HandlerAdapters handlerAdapters = new HandlerAdapters();
         HandlerAdapter adapter = handlerAdapters.getHandlerAdapter(handler);
         if (adapter == null) {
-            sendError(response, new ModelAndView(), NOT_FOUND);
+            sendError(request, response, new ModelAndView(), NOT_FOUND);
             return;
         }
 
@@ -46,7 +46,7 @@ public class DispatcherServlet {
 
         if (mv.getViewName() == null) {
             if (mv.hasModel()) {
-                view.render(mv, response);
+                view.render(mv, request, response);
                 return;
             }
             throw new IllegalArgumentException("출력할 수 없는 결과입니다.");
@@ -62,16 +62,16 @@ public class DispatcherServlet {
                 return;
             }
 
-            view.render(mv, response);
+            view.render(mv, request, response);
         }
     }
 
-    private void sendError(HttpResponse response, ModelAndView mv, HttpStatus status) throws IOException {
+    private void sendError(HttpRequest request, HttpResponse response, ModelAndView mv, HttpStatus status) throws IOException {
         ErrorView view = new ErrorView();
         view.sendError(status);
         String absolutePath = resolveView(status.value());
         mv.setViewName(absolutePath);
-        view.render(mv, response);
+        view.render(mv, request, response);
     }
 
     private String resolveView(String viewName) {

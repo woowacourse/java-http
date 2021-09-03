@@ -1,5 +1,6 @@
 package nextstep.jwp.view;
 
+import nextstep.jwp.model.httpmessage.request.HttpRequest;
 import nextstep.jwp.model.httpmessage.response.HttpResponse;
 import nextstep.jwp.model.httpmessage.response.ResponseLine;
 import nextstep.jwp.util.FileUtils;
@@ -28,19 +29,19 @@ public class View {
     public void redirect(ModelAndView mv, HttpResponse response) throws IOException {
         response.addHeader(LOCATION, FileUtils.getRelativePath(mv.getViewName()));
 
-        StringJoiner stringJoiner = mergeHeader(response);
+        StringJoiner stringJoiner = mergeHeader(response, mv);
         write(response.getOutputStream(), stringJoiner.toString());
     }
 
-    public void render(ModelAndView mv, HttpResponse response) throws IOException {
+    public void render(ModelAndView mv, HttpRequest request, HttpResponse response) throws IOException {
         String responseBody = (String) mv.getModel().get("body");
         response.setContentLength(responseBody.getBytes().length);
-        responseBody = processResponseAndBody(response, responseBody);
+        responseBody = processResponseAndBody(response, mv, responseBody);
         write(response.getOutputStream(), responseBody);
     }
 
-    protected String processResponseAndBody(HttpResponse response, String... body) {
-        StringJoiner stringJoiner = mergeHeader(response);
+    protected String processResponseAndBody(HttpResponse response, ModelAndView mv, String... body) {
+        StringJoiner stringJoiner = mergeHeader(response, mv);
 
         if (body.length > 0) {
             stringJoiner.add(body[0]);
@@ -49,17 +50,17 @@ public class View {
         return stringJoiner.toString();
     }
 
-    private StringJoiner mergeHeader(HttpResponse response) {
+    private StringJoiner mergeHeader(HttpResponse response, ModelAndView mv) {
         StringJoiner stringJoiner = new StringJoiner(DELIMITER);
-        stringJoiner.add(responseLine(response));
+        stringJoiner.add(responseLine(response, mv));
         headerLine(stringJoiner, response.getHeaders());
         stringJoiner.add(EMPTY_LINE);
         return stringJoiner;
     }
 
-    private String responseLine(HttpResponse response) {
+    private String responseLine(HttpResponse response, ModelAndView mv) {
         ResponseLine responseLine = response.getResponseLine();
-        String firstLine = String.format(RESPONSE_LINE_FORMAT, responseLine.getProtocol(), responseLine.getStatus());
+        String firstLine = String.format(RESPONSE_LINE_FORMAT, responseLine.getProtocol(), mv.getStatus());
         LOG.info("Response line : {}", firstLine);
         return firstLine;
     }

@@ -1,6 +1,7 @@
 package nextstep.jwp.view;
 
 import nextstep.jwp.model.httpmessage.common.ContentType;
+import nextstep.jwp.model.httpmessage.request.HttpRequest;
 import nextstep.jwp.model.httpmessage.response.HttpResponse;
 
 import java.io.IOException;
@@ -16,8 +17,9 @@ public class StaticView extends View {
     }
 
     @Override
-    public void render(ModelAndView mv, HttpResponse response) throws IOException {
-        response.setStatus(OK);
+    public void render(ModelAndView mv, HttpRequest request, HttpResponse response) throws IOException {
+        response.setResponseLine(OK, request.getProtocol());
+        mv.setStatus(OK);
         ContentType contentType = ContentType.of(viewPath)
                 .orElseThrow(() -> new IllegalArgumentException("처리할 수 없는 정적 파일입니다. (url : " + viewPath + ")"));
         response.setContentType(contentType.value());
@@ -25,7 +27,7 @@ public class StaticView extends View {
         String responseBody = resolveResponseBody(viewPath);
         response.setContentLength(responseBody.getBytes().length);
 
-        responseBody = processResponseAndBody(response, responseBody);
+        responseBody = processResponseAndBody(response, mv, responseBody);
         write(response.getOutputStream(), responseBody);
     }
 }

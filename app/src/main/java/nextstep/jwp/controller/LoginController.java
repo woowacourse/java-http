@@ -28,7 +28,8 @@ public class LoginController extends AbstractController {
     protected void doPost(HttpRequest request, HttpResponse response, ModelAndView mv) {
         Optional<User> findUser = userService.findByAccountAndPassword(request);
         if (findUser.isPresent()) {
-            response.setStatus(OK);
+            response.setResponseLine(OK, request.getProtocol());
+            mv.setStatus(OK);
             response.setContentType(HTML.value());
             mv.setViewName("/index.html");
 
@@ -39,19 +40,22 @@ public class LoginController extends AbstractController {
             return;
         }
 
-        response.setStatus(REDIRECT);
+        response.setResponseLine(REDIRECT, request.getProtocol());
+        mv.setStatus(REDIRECT);
         mv.setViewName("/401.html");
     }
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response, ModelAndView mv) {
         if (request.hasSessionId() && request.isValidSession()) {
-            response.setStatus(REDIRECT);
+            response.setResponseLine(REDIRECT, request.getProtocol());
+            mv.setStatus(REDIRECT);
             mv.setViewName("/index.html");
             return;
         }
 
-        response.setStatus(OK);
+        response.setResponseLine(OK, request.getProtocol());
+        mv.setStatus(OK);
         response.setContentType(HTML.value());
         mv.setViewName("/login.html");
     }

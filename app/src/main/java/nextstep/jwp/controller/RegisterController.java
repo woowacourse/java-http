@@ -19,8 +19,9 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response, ModelAndView mv) throws IOException {
-        response.setStatus(OK);
+    protected void doGet(HttpRequest request, HttpResponse response, ModelAndView mv) {
+        response.setResponseLine(OK, request.getProtocol());
+        mv.setStatus(OK);
         response.setContentType(HTML.value());
         mv.setViewName("/register");
     }
@@ -28,12 +29,14 @@ public class RegisterController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response, ModelAndView mv) throws IOException {
         if (userService.findByAccount(request).isPresent()) {
-            response.setStatus(UNAUTHORIZED);
+            response.setResponseLine(UNAUTHORIZED, request.getProtocol());
+            mv.setStatus(UNAUTHORIZED);
             mv.setViewName("/401.html");
             return;
         }
         userService.save(request);
-        response.setStatus(REDIRECT);
+        response.setResponseLine(REDIRECT, request.getProtocol());
+        mv.setStatus(REDIRECT);
         mv.setViewName("/index.html");
     }
 }

@@ -16,6 +16,7 @@ public class HttpResponse {
     private final List<HttpCookie> cookies = new ArrayList<>();
     private ResponseLine responseLine;
 
+    // FIXME : outputstream을 굳이 받을 필요가 있음?
     public HttpResponse(OutputStream outputStream) {
         this.outputStream = outputStream;
     }
@@ -60,8 +61,8 @@ public class HttpResponse {
         return responseLine.getStatus();
     }
 
-    public void setStatus(HttpStatus status) {
-        responseLine = new ResponseLine(status);
+    public void setResponseLine(HttpStatus status, String protocol) {
+        responseLine = new ResponseLine(status, protocol);
     }
 
     public void addCookie(HttpCookie cookie) {

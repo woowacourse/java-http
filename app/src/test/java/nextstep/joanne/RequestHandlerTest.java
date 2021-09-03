@@ -3,6 +3,7 @@ package nextstep.joanne;
 import nextstep.joanne.server.handler.HandlerMapping;
 import nextstep.joanne.server.handler.RequestHandler;
 import nextstep.joanne.server.handler.controller.ControllerFactory;
+import nextstep.joanne.server.http.request.HttpRequest;
 import nextstep.joanne.server.http.request.HttpRequestParser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -67,12 +68,7 @@ class RequestHandlerTest {
     void preserveStaticResource(String uri) throws IOException {
         // given
         final String httpRequest = makeGetRequestWithCookie(uri);
-        socket = new MockSocket(httpRequest);
-        requestHandler = new RequestHandler(
-                socket,
-                new HandlerMapping(ControllerFactory.addControllers()),
-                new HttpRequestParser()
-        );
+        init(httpRequest);
 
         // when
         requestHandler.run();
@@ -87,18 +83,22 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @Test
-    @DisplayName("css 파일 요청 시 응답한다.")
-    void cssRequest() {
-        //given
-        final String uri = "/css/styles.css";
-        final String httpRequest = makeGetRequest(uri);
+    private void init(String httpRequest) {
         socket = new MockSocket(httpRequest);
         requestHandler = new RequestHandler(
                 socket,
                 new HandlerMapping(ControllerFactory.addControllers()),
                 new HttpRequestParser()
         );
+    }
+
+    @Test
+    @DisplayName("css 파일 요청 시 응답한다.")
+    void cssRequest() {
+        //given
+        final String uri = "/css/styles.css";
+        final String httpRequest = makeGetRequest(uri);
+        init(httpRequest);
 
         //when
         requestHandler.run();
@@ -122,12 +122,7 @@ class RequestHandlerTest {
     void loginWithQueryString() throws IOException {
         // given
         final String httpRequest = makePostRequest("/login.html", "account=gugu&password=password");
-        socket = new MockSocket(httpRequest);
-        requestHandler = new RequestHandler(
-                socket,
-                new HandlerMapping(ControllerFactory.addControllers()),
-                new HttpRequestParser()
-        );
+        init(httpRequest);
 
         // when
         requestHandler.run();
@@ -153,12 +148,7 @@ class RequestHandlerTest {
     void loginWithQueryStringWhenWrongAccount() throws IOException {
         // given
         final String httpRequest = makePostRequest("/login", "account=merong&password=merong");
-        socket = new MockSocket(httpRequest);
-        requestHandler = new RequestHandler(
-                socket,
-                new HandlerMapping(ControllerFactory.addControllers()),
-                new HttpRequestParser()
-        );
+        init(httpRequest);
         // when
         requestHandler.run();
 
@@ -183,12 +173,7 @@ class RequestHandlerTest {
         // given
         final String httpRequest = makePostRequest("/register.html",
                 "account=joanne&password=password&email=hkkang%40woowahan.com");
-        socket = new MockSocket(httpRequest);
-        requestHandler = new RequestHandler(
-                socket,
-                new HandlerMapping(ControllerFactory.addControllers()),
-                new HttpRequestParser()
-        );
+        init(httpRequest);
         // when
         requestHandler.run();
 
@@ -204,12 +189,7 @@ class RequestHandlerTest {
     void notFound() throws IOException {
         // given
         final String httpRequest = makeGetRequest("/joanne.html");
-        socket = new MockSocket(httpRequest);
-        requestHandler = new RequestHandler(
-                socket,
-                new HandlerMapping(ControllerFactory.addControllers()),
-                new HttpRequestParser()
-        );
+        init(httpRequest);
         // when
         requestHandler.run();
 
@@ -234,12 +214,7 @@ class RequestHandlerTest {
     void cookie() {
         // given
         final String httpRequest = makeGetRequestWithCookieWithoutSessionId("/index.html");
-        socket = new MockSocket(httpRequest);
-        requestHandler = new RequestHandler(
-                socket,
-                new HandlerMapping(ControllerFactory.addControllers()),
-                new HttpRequestParser()
-        );
+        init(httpRequest);
         // when
         requestHandler.run();
 
@@ -253,12 +228,7 @@ class RequestHandlerTest {
     void cookieWithSessionId() {
         // given
         final String httpRequest = makeGetRequestWithCookie("/index.html");
-        socket = new MockSocket(httpRequest);
-        requestHandler = new RequestHandler(
-                socket,
-                new HandlerMapping(ControllerFactory.addControllers()),
-                new HttpRequestParser()
-        );
+        init(httpRequest);
         // when
         requestHandler.run();
 

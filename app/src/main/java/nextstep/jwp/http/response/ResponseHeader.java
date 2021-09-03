@@ -31,11 +31,6 @@ public class ResponseHeader {
         this.headers.put("Location", url);
     }
 
-    @Override
-    public String toString() {
-        return headersToString();
-    }
-
     private String headersToString() {
         StringJoiner joiner = new StringJoiner(" \r\n", "", " \r\n");
         for (Map.Entry<String, String> entry : headers.entrySet()) {
@@ -44,5 +39,14 @@ public class ResponseHeader {
             joiner.add(key + ": " + value);
         }
         return joiner.toString();
+    }
+
+    public void setSessionCookie(String jSessionId) {
+        this.headers.put("Set-Cookie", "JSESSIONID=" + jSessionId);
+    }
+
+    @Override
+    public String toString() {
+        return headersToString();
     }
 }

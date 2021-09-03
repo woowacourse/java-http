@@ -16,12 +16,19 @@ public class ViewResolver {
     }
 
     public String getContent() throws IOException {
-        URL resource = getClass().getClassLoader().getResource("static/" + uri);
-
+        URL resource = getResource();
         if (Objects.isNull(resource)) {
             return null;
         }
         Path path = new File(resource.getPath()).toPath();
         return Files.readString(path);
+    }
+
+    private URL getResource() {
+        URL resource = getClass().getClassLoader().getResource("static/" + uri);
+        if (Objects.isNull(resource)) {
+            resource = getClass().getClassLoader().getResource("static/" + uri + ".html");
+        }
+        return resource;
     }
 }

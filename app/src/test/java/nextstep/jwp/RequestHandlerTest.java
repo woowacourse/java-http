@@ -1,7 +1,10 @@
 package nextstep.jwp;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.http.HttpSession;
+import nextstep.jwp.http.HttpSessions;
 import nextstep.jwp.model.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +17,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RequestHandlerTest {
+
+    @BeforeEach
+    void setUp() {
+        HttpSession httpSession = HttpSessions.getSession("1234");
+        httpSession.removeAttribute("user");
+    }
 
     @DisplayName("GET /index.html 요청시 파일 불러오기")
     @Test
@@ -35,7 +44,7 @@ class RequestHandlerTest {
     @Test
     void getLogin() throws IOException {
         // given
-        final MockSocket socket = getMockSocket("/login.html");
+        final MockSocket socket = getMockSocket("/login");
         final RequestHandler requestHandler = new RequestHandler(socket);
 
         // when
@@ -94,6 +103,24 @@ class RequestHandlerTest {
         assertThat("younge").isEqualTo(newUser.getAccount());
     }
 
+    @DisplayName("GET /login 요청시 이미 로그인 된 경우 /index.html로 리다이렉트")
+    @Test
+    void loginCheck() throws IOException {
+        // given
+        HttpSession httpSession = HttpSessions.getSession("1234");
+        User user = InMemoryUserRepository.findByAccount("gugu").orElseThrow();
+        httpSession.setAttribute("user", user);
+
+        final MockSocket socket = getMockSocket("/login");
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        assertThat(socket.output()).isEqualTo(redirectExpected());
+    }
+
     private MockSocket postMockSocket(String requestUri, String body) {
         final String httpRequest = String.join("\r\n",
             "POST "+ requestUri +" HTTP/1.1 ",
@@ -102,6 +129,7 @@ class RequestHandlerTest {
             "Content-Length: " + body.length() +" ",
             "Content-Type: application/x-www-form-urlencoded ",
             "Accept: */* ",
+            "Cookie: JSESSIONID=1234",
             "",
             body
         );
@@ -114,6 +142,7 @@ class RequestHandlerTest {
             "GET " + url + " HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
+            "Cookie: JSESSIONID=1234",
             "",
             "");
 
@@ -126,5 +155,11 @@ class RequestHandlerTest {
             "Content-Length: " + length + " \r\n" +
             "\r\n"+
             new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    }
+
+    private String redirectExpected() {
+        return "HTTP/1.1 302 Found \r\n" +
+        "Location: /index.html \r\n" +
+            "";
     }
 }

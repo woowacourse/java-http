@@ -80,7 +80,6 @@ public class UserController extends AbstractController {
         if (!httpCookie.containsJSession()) {
             return addNewCookie(user, httpCookie);
         }
-
         return getCookie(user, httpCookie);
     }
 

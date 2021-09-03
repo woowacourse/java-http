@@ -39,7 +39,7 @@ public class HttpCookie {
 
     public String getJSessionCookie() {
         if (!cookies.containsKey(JSESSIONID)) {
-            throw new IllegalArgumentException("쿠키가 존재하지 않습니다.");
+            return "";
         }
         return cookies.get(JSESSIONID);
     }

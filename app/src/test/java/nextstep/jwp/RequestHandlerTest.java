@@ -63,7 +63,8 @@ class RequestHandlerTest {
 
         // then
         String expected = getHttpResponse(HttpStatus.OK, LOGIN_HTML, LOGIN_CONTENT_LENGTH);
-        assertThat(socket.output()).isEqualTo(expected);
+        String output = socket.output();
+        assertThat(output).isEqualTo(expected);
     }
 
     @Test

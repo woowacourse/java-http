@@ -1,9 +1,9 @@
 package nextstep.jwp.http;
 
 public enum HttpStatus {
-    OK_200("200", "Ok"),
-    FOUND_302("302", "Found"),
-    UNAUTHORIZED_401("401", "Authorized");
+    OK_200("200", "OK"),
+    FOUND_302("302", "FOUND"),
+    UNAUTHORIZED_401("401", "UNAUTHORIZED");
 
     String number;
     String name;

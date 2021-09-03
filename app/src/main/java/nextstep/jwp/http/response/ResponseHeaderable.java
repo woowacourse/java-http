@@ -2,7 +2,7 @@ package nextstep.jwp.http.response;
 
 public interface ResponseHeaderable {
 
-    public Boolean isEmpty();
+    Boolean isEmpty();
 
-    public String getContentType();
+    String getContentType();
 }

@@ -29,11 +29,11 @@ public class HttpRequest {
 
     public static HttpRequest of(RequestLine requestLine, Map<String, String> httpHeaders, RequestBody requestBody) {
         HttpCookie httpCookie = extractCookies(httpHeaders);
-        HttpSession httpSession = initSession(httpCookie);
+        HttpSession httpSession = loadSession(httpCookie);
         return new HttpRequest(requestLine.getMethod(), requestLine.getUri(), httpHeaders, httpCookie, requestBody, httpSession);
     }
 
-    private static HttpSession initSession(HttpCookie httpCookie) {
+    private static HttpSession loadSession(HttpCookie httpCookie) {
         if (Objects.isNull(httpCookie)) {
             return null;
         }

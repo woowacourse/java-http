@@ -23,15 +23,6 @@ public class HttpSessions {
         return SESSIONS.get(id);
     }
 
-    public static void remove(String id) {
-        try {
-            HttpSession httpSession = SESSIONS.remove(id);
-            httpSession.invalidate();
-        } catch (RuntimeException e) {
-            throw new IllegalArgumentException("삭제할 세션이 존재하지 않습니다.");
-        }
-    }
-
     public static boolean contains(String id) {
         return SESSIONS.containsKey(id);
     }

@@ -12,7 +12,7 @@ public class DefaultController extends AbstractController {
         HttpResponse response = new HttpResponse.Builder()
                 .outputStream(httpResponse.getOutputStream())
                 .status(HttpStatus.OK_200)
-                .path(httpRequest.getPath())
+                .resource(httpRequest.getResource())
                 .body("Hello world!")
                 .build();
         response.forward();

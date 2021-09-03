@@ -12,8 +12,8 @@ public class ResourceController extends AbstractController {
         HttpResponse response = new HttpResponse.Builder()
                 .outputStream(httpResponse.getOutputStream())
                 .status(HttpStatus.OK_200)
-                .path(httpRequest.getPath())
-                .body(createBody(httpRequest.getPath()))
+                .resource(httpRequest.getResource())
+                .body(httpRequest.getResource())
                 .build();
         response.forward();
     }

@@ -10,7 +10,7 @@ public class RequestLine {
     private static final Logger logger = LoggerFactory.getLogger(RequestLine.class);
 
     private String method;
-    private String path;
+    private String resource;
 
     public RequestLine(BufferedReader bufferedReader) throws IOException {
         String line = bufferedReader.readLine();
@@ -19,15 +19,15 @@ public class RequestLine {
         }
         String[] requestLine = line.split(" ");
         method = requestLine[0];
-        path = requestLine[1];
-        logger.info("requestline parsing finished {}, {}.", method, path);
+        resource = requestLine[1];
+        logger.info("requestline parsing finished {}, {}.", method, resource);
     }
 
     public String getMethod() {
         return method;
     }
 
-    public String getPath() {
-        return path;
+    public String getResource() {
+        return resource;
     }
 }

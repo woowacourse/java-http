@@ -1,7 +1,10 @@
 package nextstep.jwp.http;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URL;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -58,14 +61,15 @@ public class HttpResponse {
             return this;
         }
 
-        public Builder body(String body) {
+        public Builder body(String body) throws IOException {
+            body = createBody(body);
             this.body = body;
             this.responseMap.put("Content-Length", String.valueOf(body.getBytes().length));
             return this;
         }
 
-        public Builder path(String path) {
-            responseMap.put("Content-Type", ContentTypeMapper.extractContentType(path));
+        public Builder resource(String resource) {
+            responseMap.put("Content-Type", ContentTypeMapper.extractContentType(resource));
             return this;
         }
 
@@ -81,6 +85,16 @@ public class HttpResponse {
 
         public HttpResponse build() {
             return new HttpResponse(this);
+        }
+
+        private String createBody(String resource) throws IOException {
+            if (resource.contains(".")) {
+                final URL url = getClass().getClassLoader().getResource("static" + resource);
+                File file = new File(Objects.requireNonNull(url).getFile());
+                byte[] bytes = Files.readAllBytes(file.toPath());
+                return new String(bytes);
+            }
+            return resource;
         }
     }
 }

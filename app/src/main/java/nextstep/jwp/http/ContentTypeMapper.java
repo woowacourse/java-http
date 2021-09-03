@@ -16,9 +16,9 @@ public enum ContentTypeMapper {
         this.contentType = contentType;
     }
 
-    public static String extractContentType(String path) {
+    public static String extractContentType(String resource) {
         return Arrays.stream(values())
-                .filter(contentType -> path.endsWith(contentType.extension))
+                .filter(contentType -> resource.endsWith(contentType.extension))
                 .findAny()
                 .map(contentType -> contentType.contentType)
                 .orElse(HTML.contentType);

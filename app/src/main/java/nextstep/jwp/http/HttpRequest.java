@@ -55,8 +55,8 @@ public class HttpRequest {
         return requestLine.getMethod();
     }
 
-    public String getPath() {
-        return requestLine.getPath();
+    public String getResource() {
+        return requestLine.getResource();
     }
 
     public Map<String, String> getParams() {

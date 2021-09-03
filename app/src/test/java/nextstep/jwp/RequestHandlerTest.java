@@ -3,8 +3,12 @@ package nextstep.jwp;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import nextstep.jwp.dashboard.controller.dto.UserDto;
+import nextstep.jwp.dashboard.domain.User;
 import nextstep.jwp.httpserver.BeanFactory;
 import nextstep.jwp.httpserver.RequestHandler;
+import nextstep.jwp.httpserver.domain.HttpSession;
+import nextstep.jwp.httpserver.domain.HttpSessions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -247,7 +251,7 @@ class RequestHandlerTest {
     void noJSESSIONID() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
+                "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Accept: */* ",
@@ -264,7 +268,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).contains(
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 5670",
+                "Content-Length: 3863",
                 "Set-Cookie: JSESSIONID="
         );
     }
@@ -293,6 +297,38 @@ class RequestHandlerTest {
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 5670 "
+        );
+    }
+
+    @Test
+    @DisplayName("세션 정보가 존재하면 GET /login 요청시 index.html로 리다이렉트 된다.")
+    void sessionRedirect() {
+        // given
+        final String sessionId = "656cef62-e3c4-40bc-a8df-94732920ed46";
+        final User user = new User(1L, "gugu", "password", "gugu@woowahon.com");
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Accept: */* ",
+                "Cookie: JSESSIONID=" + sessionId,
+                "");
+
+        BeanFactory.init();
+        HttpSession httpSession = new HttpSession(sessionId);
+        httpSession.setAttribute("user", UserDto.from(user));
+        HttpSessions.save(httpSession);
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 302 Found ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 3863 "
         );
     }
 

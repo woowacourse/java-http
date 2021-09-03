@@ -1,6 +1,7 @@
 package nextstep.jwp.http.response.type;
 
 public enum StatusCode {
+
     OK("OK", "200"),
     FOUND("Found", "302"),
     NOT_FOUND("Not Found", "404"),

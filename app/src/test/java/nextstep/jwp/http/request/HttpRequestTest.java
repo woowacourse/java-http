@@ -41,7 +41,7 @@ class HttpRequestTest {
         String requestAsString = String.join("\r\n",
                 "POST /register HTTP/1.1",
                 "Host: localhost:8080",
-                "Content-Length: 80",
+                "Content-Length: 56",
                 "Content-Type: application/x-www-form-urlencoded",
                 "Accept: */*",
                 "",
@@ -56,7 +56,8 @@ class HttpRequestTest {
                 () -> assertThat(actualRequest.isPost()).isTrue(),
                 () -> assertThat(actualRequest.getPath()).isEqualTo("/register"),
                 () -> assertThat(actualRequest.getParameter("account")).isEqualTo("gugu"),
-                () -> assertThat(actualRequest.getParameter("password")).isEqualTo("password")
+                () -> assertThat(actualRequest.getParameter("password")).isEqualTo("password"),
+                () -> assertThat(actualRequest.getParameter("email")).isEqualTo("hkkang@woowahan.com")
         );
     }
 }

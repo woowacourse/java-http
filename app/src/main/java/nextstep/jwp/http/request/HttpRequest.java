@@ -1,5 +1,6 @@
 package nextstep.jwp.http.request;
 
+import nextstep.jwp.http.session.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,7 +9,7 @@ import java.io.IOException;
 
 public class HttpRequest {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpRequest.class);
 
     private RequestLine requestLine;
     private RequestHeaders headers;
@@ -20,9 +21,9 @@ public class HttpRequest {
             this.headers = readHeaders(reader);
             this.body = readBody(reader, headers.getContentLength());
         } catch (IllegalStateException exception) {
-            log.error("Exception invalid http request", exception);
+            LOG.error("Exception invalid http request", exception);
         } catch (IOException exception) {
-            log.error("Exception stream", exception);
+            LOG.error("Exception stream", exception);
         }
     }
 
@@ -63,5 +64,13 @@ public class HttpRequest {
 
     public boolean isPost() {
         return this.requestLine.isPost();
+    }
+
+    public boolean hasSessionId() {
+        return this.headers.hasSessionId();
+    }
+
+    public HttpSession getSession() {
+        return headers.getSession();
     }
 }

@@ -3,6 +3,7 @@ package nextstep.jwp.http.response.type;
 import java.util.Arrays;
 
 public enum ContentType {
+
     HTML("html", "text/html;charset=utf-8"),
     CSS("css", "text/css"),
     JS("js", "application/javascript"),

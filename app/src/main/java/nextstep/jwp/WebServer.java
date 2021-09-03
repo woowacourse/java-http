@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 
 public class WebServer {
 
-    private static final Logger logger = LoggerFactory.getLogger(WebServer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(WebServer.class);
 
     private static final int DEFAULT_PORT = 8080;
 
@@ -22,12 +22,12 @@ public class WebServer {
 
     public void run() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            logger.info("Web Server started {} port.", serverSocket.getLocalPort());
+            LOG.info("Web Server started {} port.", serverSocket.getLocalPort());
             handle(serverSocket);
         } catch (IOException exception) {
-            logger.error("Exception accepting connection", exception);
+            LOG.error("Exception accepting connection", exception);
         } catch (RuntimeException exception) {
-            logger.error("Unexpected error", exception);
+            LOG.error("Unexpected error", exception);
         }
     }
 

@@ -1,35 +1,29 @@
 package nextstep.jwp;
 
-import nextstep.jwp.controller.*;
+import nextstep.jwp.controller.Controller;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 public class FrontController implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(FrontController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FrontController.class);
 
     private final Socket connection;
-    private final Map<String, Controller> controllerMap = new HashMap<>();
 
     public FrontController(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
-        controllerMap.put("/", new IndexController());
-        controllerMap.put("/login", new LoginController(new UserService()));
-        controllerMap.put("/register", new RegisterController(new UserService()));
     }
 
     @Override
     public void run() {
-        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
+        LOG.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -37,14 +31,17 @@ public class FrontController implements Runnable {
 
             HttpRequest request = new HttpRequest(reader);
             HttpResponse response = new HttpResponse();
+            if (!request.hasSessionId()) {
+                response.setCookie(UUID.randomUUID().toString());
+            }
 
             String uri = request.getPath();
-            Controller controller = controllerMap.getOrDefault(uri, new DefaultController());
+            Controller controller = RequestMapping.getController(uri);
             controller.process(request, response);
 
             response.write(outputStream);
         } catch (IOException exception) {
-            log.error("Exception stream", exception);
+            LOG.error("Exception stream", exception);
         } finally {
             close();
         }
@@ -54,7 +51,7 @@ public class FrontController implements Runnable {
         try {
             connection.close();
         } catch (IOException exception) {
-            log.error("Exception closing socket", exception);
+            LOG.error("Exception closing socket", exception);
         }
     }
 }

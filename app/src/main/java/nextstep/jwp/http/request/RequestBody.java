@@ -7,6 +7,9 @@ import java.util.Map;
 
 public class RequestBody {
 
+    private static final String KEY_VALUE_DELIMITER = "=";
+    private static final String PARAM_DELIMITER = "&";
+
     private final Map<String, String> params = new HashMap<>();
 
     public RequestBody(String content) {
@@ -14,12 +17,12 @@ public class RequestBody {
     }
 
     private void addParams(String content) {
-        String[] tokens = content.split("&");
+        String[] tokens = content.split(PARAM_DELIMITER);
         for (String token : tokens) {
             if (Strings.isNullOrEmpty(token)) {
                 continue;
             }
-            String[] tmp = token.split("=");
+            String[] tmp = token.split(KEY_VALUE_DELIMITER);
             if (tmp.length == 2) {
                 this.params.put(tmp[0], tmp[1]);
             }

@@ -5,6 +5,7 @@ import nextstep.jwp.http.response.type.StatusCode;
 import java.nio.charset.StandardCharsets;
 
 public class StatusLine {
+
     private final String protocol;
     private final String statusCode;
     private final String statusMessage;

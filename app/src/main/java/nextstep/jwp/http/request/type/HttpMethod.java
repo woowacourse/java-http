@@ -3,6 +3,7 @@ package nextstep.jwp.http.request.type;
 import java.util.Arrays;
 
 public enum HttpMethod {
+
     GET, HEAD, POST, PUT, DELETE, CONNECT, OPTIONS, PATCH;
 
     public static HttpMethod of(String method) throws IllegalStateException {

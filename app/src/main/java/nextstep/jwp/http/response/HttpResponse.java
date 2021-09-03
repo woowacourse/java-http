@@ -12,11 +12,14 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class HttpResponse {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpResponse.class);
     private static final String NOT_FOUND_URI = "/404.html";
+    private static final String EMPTY_LINE = "\r\n";
+    private static final String STATIC = "static";
 
     private final ResponseHeaders headers;
     private StatusLine statusLine;
@@ -44,7 +47,7 @@ public class HttpResponse {
             this.headers.setContentLength(content.getBytes(StandardCharsets.UTF_8).length);
             this.body = new ResponseBody(content);
         } catch (IOException exception) {
-            log.error("Exception input stream", exception);
+            LOG.error("Exception input stream", exception);
         }
     }
 
@@ -52,14 +55,14 @@ public class HttpResponse {
         try {
             URL resource = findResource(NOT_FOUND_URI);
             String content = readContent(resource);
-            assert content != null;
+            Objects.requireNonNull(content);
 
             this.setStatusLine(StatusCode.NOT_FOUND);
             this.headers.setContentType(ContentType.HTML);
             this.headers.setContentLength(content.length());
             this.body = new ResponseBody(content);
         } catch (IOException exception) {
-            log.error("Exception input stream", exception);
+            LOG.error("Exception input stream", exception);
         }
     }
 
@@ -70,12 +73,12 @@ public class HttpResponse {
     }
 
     private URL findResource(String uri) {
-        return getClass().getClassLoader().getResource("static" + uri);
+        return getClass().getClassLoader().getResource(STATIC + uri);
     }
 
     private String readContent(URL resource) throws IOException {
         if (resource == null) {
-            log.debug("Resource is not found!");
+            LOG.debug("Resource is not found!");
             return null;
         }
         final Path resourcePath = new File(resource.getPath()).toPath();
@@ -102,20 +105,20 @@ public class HttpResponse {
 
     public void write(OutputStream outputStream) {
         try {
-            if (body == null) {
+            if (Objects.isNull(body)) {
                 writeWithoutBody(outputStream);
-            } else {
-                writeWithBody(outputStream);
+                return;
             }
+            writeWithBody(outputStream);
         } catch (IOException exception) {
-            log.error("Exception output stream", exception);
+            LOG.error("Exception output stream", exception);
         }
     }
 
     private void writeWithBody(OutputStream outputStream) throws IOException {
         outputStream.write(statusLine.getByte());
         outputStream.write(headers.getByte());
-        outputStream.write("\r\n".getBytes(StandardCharsets.UTF_8));
+        outputStream.write(EMPTY_LINE.getBytes(StandardCharsets.UTF_8));
         outputStream.write(body.getByte());
         outputStream.flush();
     }
@@ -124,5 +127,9 @@ public class HttpResponse {
         outputStream.write(statusLine.getByte());
         outputStream.write(headers.getByte());
         outputStream.flush();
+    }
+
+    public void setCookie(String cookie) {
+        this.headers.setCookie(cookie);
     }
 }

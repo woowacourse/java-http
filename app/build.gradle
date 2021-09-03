@@ -19,6 +19,7 @@ dependencies {
     testImplementation 'org.assertj:assertj-core:3.20.2'
     testImplementation "org.mockito:mockito-core:3.+"
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.7.0'
 }
 
 application {
@@ -30,16 +31,6 @@ tasks.named('test') {
     finalizedBy(jacocoTestReport)
 }
 
-sonarqube {
-    properties {
-        property "sonar.sourceEncoding", "UTF-8"
-        property "sonar.projectKey", "woowacourse_be-jwp-http-server"
-        property "sonar.organization", "woowacourse"
-        property "sonar.host.url", "https://sonarcloud.io"
-        property "sonar.coverage.jacoco.xmlReportPaths", "jacoco/jacoco.xml"
-    }
-}
-
 jacoco {
     toolVersion = "0.8.5"
 }
@@ -48,5 +39,15 @@ jacocoTestReport {
     reports {
         xml.enabled true
         xml.destination(new File("jacoco/jacoco.xml"))
+    }
+}
+
+sonarqube {
+    properties {
+        property "sonar.sourceEncoding", "UTF-8"
+        property "sonar.projectKey", "woowacourse_be-jwp-http-server"
+        property "sonar.organization", "woowacourse"
+        property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.coverage.jacoco.xmlReportPaths", "jacoco/jacoco.xml"
     }
 }

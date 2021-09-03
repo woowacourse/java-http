@@ -7,6 +7,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Objects;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,6 +22,7 @@ class LoginControllerTest extends ControllerTest {
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 "");
 
@@ -27,11 +30,42 @@ class LoginControllerTest extends ControllerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        Objects.requireNonNull(resource);
         String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 3797 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("GET /login 후 재요청 시 index.html를 응답한다.")
+    @Test
+    void doGetDuplicate() throws IOException {
+        // given
+        final UUID uuid = UUID.randomUUID();
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=" + uuid + " ",
+                "",
+                "");
+        sendRequest(httpRequest);
+
+        // when
+        sendRequest(httpRequest);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        Objects.requireNonNull(resource);
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 3797 \r\n" +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -39,7 +73,7 @@ class LoginControllerTest extends ControllerTest {
     @Test
     void doPost() {
         // given
-        String requestBody = "account=gugu&password=password";
+        String requestBody = "account=admin&password=1234";
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -47,16 +81,15 @@ class LoginControllerTest extends ControllerTest {
                 "Content-Length: " + requestBody.getBytes().length + " ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 requestBody);
 
         sendRequest(httpRequest);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
         String expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: http://localhost:8080/index.html \r\n" ;
-
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -64,7 +97,7 @@ class LoginControllerTest extends ControllerTest {
     @Test
     void doPostFail() {
         // given
-        String requestBody = "account=amazzi&password=password";
+        String requestBody = "account=amazzi&password=wrong";
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
@@ -72,6 +105,7 @@ class LoginControllerTest extends ControllerTest {
                 "Content-Length: " + requestBody.getBytes().length + " ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 requestBody);
 
@@ -97,6 +131,7 @@ class LoginControllerTest extends ControllerTest {
                 "Content-Length: " + requestBody.getBytes().length + " ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
+                "Cookie: JSESSIONID=" + UUID.randomUUID() + " ",
                 "",
                 requestBody);
 

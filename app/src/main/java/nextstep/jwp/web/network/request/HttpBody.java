@@ -9,6 +9,8 @@ import java.util.Map;
 
 public class HttpBody {
 
+    private static final String DEFAULT_HTTP_BODY = "";
+    private static final int SPLIT_INTO_TWO = 2;
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
@@ -25,7 +27,7 @@ public class HttpBody {
                 bufferedReader.read(buffer, 0, contentLength);
                 return new HttpBody(new String(buffer));
             }
-            return new HttpBody("");
+            return new HttpBody(DEFAULT_HTTP_BODY);
         } catch (IOException exception) {
             throw new InputException("body in http request");
         }
@@ -35,7 +37,7 @@ public class HttpBody {
         final Map<String, String> bodyAsMap = new HashMap<>();
         final String[] params = body.split("&");
         for (String param : params) {
-            final String[] keyAndValue = param.split("=", 2);
+            final String[] keyAndValue = param.split("=", SPLIT_INTO_TWO);
             bodyAsMap.put(keyAndValue[KEY_INDEX], keyAndValue[VALUE_INDEX]);
         }
         return bodyAsMap;

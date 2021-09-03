@@ -2,7 +2,6 @@ package nextstep.joanne.server.handler;
 
 import nextstep.joanne.dashboard.controller.LoginController;
 import nextstep.joanne.dashboard.controller.RegisterController;
-import nextstep.joanne.dashboard.service.RegisterService;
 import nextstep.joanne.server.handler.controller.Controller;
 import nextstep.joanne.server.handler.controller.ControllerFactory;
 import nextstep.joanne.server.handler.controller.ResourceController;
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 class HandlerMappingTest {
 

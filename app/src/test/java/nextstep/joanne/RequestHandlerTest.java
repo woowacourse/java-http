@@ -3,7 +3,6 @@ package nextstep.joanne;
 import nextstep.joanne.server.handler.HandlerMapping;
 import nextstep.joanne.server.handler.RequestHandler;
 import nextstep.joanne.server.handler.controller.ControllerFactory;
-import nextstep.joanne.server.http.request.HttpRequest;
 import nextstep.joanne.server.http.request.HttpRequestParser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -63,7 +62,7 @@ class RequestHandlerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"/index.html", "/index","/login", "/login.html", "/register", "/register.html"})
+    @ValueSource(strings = {"/index.html", "/index", "/login", "/login.html", "/register", "/register.html"})
     @DisplayName("정적 요청에 응답한다.")
     void preserveStaticResource(String uri) throws IOException {
         // given

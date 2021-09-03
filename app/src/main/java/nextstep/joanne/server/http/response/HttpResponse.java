@@ -7,7 +7,7 @@ import java.util.Objects;
 
 public class HttpResponse {
     private StatusLine statusLine;
-    private Headers headers;
+    private final Headers headers;
     private Body body;
 
     public HttpResponse() {

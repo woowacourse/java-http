@@ -14,7 +14,7 @@ public class HandlerMapping {
     }
 
     public Controller get(HttpRequest httpRequest) {
-        for (Map.Entry<String, Controller> entry: handlers.entrySet()) {
+        for (Map.Entry<String, Controller> entry : handlers.entrySet()) {
             if (httpRequest.uri().startsWith(entry.getKey())) {
                 return entry.getValue();
             }

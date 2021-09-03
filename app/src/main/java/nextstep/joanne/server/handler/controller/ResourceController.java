@@ -5,7 +5,7 @@ import nextstep.joanne.server.http.request.ContentType;
 import nextstep.joanne.server.http.request.HttpRequest;
 import nextstep.joanne.server.http.response.HttpResponse;
 
-public class ResourceController extends AbstractController{
+public class ResourceController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {

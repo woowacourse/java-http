@@ -15,7 +15,7 @@ import java.io.InputStreamReader;
 import static nextstep.Fixture.makeGetRequest;
 import static nextstep.Fixture.makePostRequest;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class HttpRequestParserTest {
 
@@ -93,7 +93,7 @@ class HttpRequestParserTest {
 
     @Test
     @DisplayName("Body가 포함된 요청을 파싱해서 HttpRequest로 만든다.")
-    void parseWithBody() throws IOException{
+    void parseWithBody() throws IOException {
         // given
         String request = makePostRequest("/index", "id=joanne&password=hi");
         MockSocket connection = new MockSocket(request);

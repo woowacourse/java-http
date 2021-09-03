@@ -20,7 +20,7 @@ class FileConverterTest {
     @Test
     void getResource() {
         String uri = "/index.html";
-        String resource = fileConverter.getResource(uri);
+        String resource = FileConverter.getResource(uri);
         assertThat(resource).isNotNull();
     }
 
@@ -28,7 +28,7 @@ class FileConverterTest {
     @DisplayName("File Not Found")
     void getResourceFileIOError() {
         String uri = ".joanne";
-        assertThatThrownBy(() -> fileConverter.getResource(uri))
+        assertThatThrownBy(() -> FileConverter.getResource(uri))
                 .isInstanceOf(FileNotFoundException.class);
     }
 }

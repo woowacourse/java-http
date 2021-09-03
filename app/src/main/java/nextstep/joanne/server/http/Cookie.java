@@ -31,7 +31,7 @@ public class Cookie {
 
     public String makeSessionId() {
         UUID uuid = UUID.randomUUID();
-        return JSESSIONID + "=" + uuid.toString();
+        return JSESSIONID + "=" + uuid;
     }
 
     public boolean hasSessionId() {

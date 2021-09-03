@@ -20,7 +20,7 @@ public class HttpRequestParser {
         final String[] requests = stringBuilder.toString().split("\n");
 
         final RequestLine requestLine = parseRequestLine(requests[0]);
-        final Headers requestHeaders = parseRequestHeaders(1,":",requests);
+        final Headers requestHeaders = parseRequestHeaders(1, ":", requests);
         final MessageBody messageBody = parseMessageBody(requestHeaders, br);
 
         return new HttpRequest(requestLine, requestHeaders, messageBody);
@@ -42,8 +42,8 @@ public class HttpRequestParser {
 
     private Map<String, String> parseExtraMessage(String uri) {
         return Stream.of(uri.split("&"))
-            .map(x -> x.split("="))
-            .collect(Collectors.toMap(x -> x[0], x-> x[1]));
+                .map(x -> x.split("="))
+                .collect(Collectors.toMap(x -> x[0], x -> x[1]));
     }
 
     private Headers parseRequestHeaders(int index, String regex, String[] requests) {

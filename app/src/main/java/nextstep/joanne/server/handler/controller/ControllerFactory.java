@@ -2,8 +2,8 @@ package nextstep.joanne.server.handler.controller;
 
 import nextstep.joanne.dashboard.controller.LoginController;
 import nextstep.joanne.dashboard.controller.RegisterController;
-import nextstep.joanne.dashboard.service.RegisterService;
 import nextstep.joanne.dashboard.service.LoginService;
+import nextstep.joanne.dashboard.service.RegisterService;
 
 import java.util.HashMap;
 import java.util.Map;

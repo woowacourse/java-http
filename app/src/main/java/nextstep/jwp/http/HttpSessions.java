@@ -19,7 +19,7 @@ public class HttpSessions {
     }
 
     public static HttpSession find(String sessionId) {
-        log.debug("session added : {}", sessionId);
+        log.debug("session found : {}", sessionId);
         return sessions.get(sessionId);
     }
 }

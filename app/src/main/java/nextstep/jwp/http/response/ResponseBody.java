@@ -1,5 +1,11 @@
 package nextstep.jwp.http.response;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import nextstep.jwp.exception.http.response.CannotCreateResponseBodyException;
+import nextstep.jwp.view.ViewResolver;
+
 public class ResponseBody {
 
     private final String body;
@@ -10,6 +16,15 @@ public class ResponseBody {
 
     public ResponseBody(String body) {
         this.body = body;
+    }
+
+    public static ResponseBody from(ViewResolver viewResolver) {
+        try {
+            Path filePath = new File(viewResolver.getFilePath()).toPath();
+            return new ResponseBody(Files.readAllBytes(filePath));
+        } catch (Exception e) {
+            throw new CannotCreateResponseBodyException();
+        }
     }
 
     public int getLength() {

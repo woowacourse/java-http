@@ -1,13 +1,11 @@
 package nextstep.jwp;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.file.Files;
 import java.util.Objects;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.http.request.HttpRequest;
@@ -47,9 +45,7 @@ public class FrontController implements Runnable {
             View view = handler.handle(request, response);
             ViewResolver viewResolver = view.resolve();
 
-            response.setBody(new ResponseBody(
-                Files.readAllBytes(new File(viewResolver.getFilePath()).toPath())));
-
+            response.setBody(ResponseBody.from(viewResolver));
             response.write(outputStream);
         } catch (IOException exception) {
             log.error("Exception stream", exception);

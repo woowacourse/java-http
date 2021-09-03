@@ -9,7 +9,7 @@ import nextstep.jwp.dashboard.repository.InMemoryUserRepository;
 import nextstep.jwp.dashboard.service.UserService;
 import nextstep.jwp.httpserver.adapter.ControllerHandlerAdapter;
 import nextstep.jwp.httpserver.adapter.StaticResourceHandlerAdapter;
-import nextstep.jwp.httpserver.controller.StaticResourceController;
+import nextstep.jwp.httpserver.handler.controller.StaticResourceController;
 import nextstep.jwp.httpserver.mapping.StaticResourceHandlerMapping;
 import nextstep.jwp.httpserver.mapping.UrlMappingHandlerMapping;
 

@@ -11,7 +11,7 @@ import nextstep.jwp.dashboard.domain.User;
 import nextstep.jwp.dashboard.repository.InMemoryUserRepository;
 import nextstep.jwp.httpserver.exception.AuthorizationException;
 import nextstep.jwp.httpserver.exception.DuplicatedException;
-import nextstep.jwp.httpserver.exception.NotFoundException;
+import nextstep.jwp.httpserver.exception.EntityNotFoundException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -65,7 +65,7 @@ class UserServiceTest {
         // when
         // then
         assertThatThrownBy(() -> userService.login(account, password))
-                .isInstanceOf(NotFoundException.class);
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test

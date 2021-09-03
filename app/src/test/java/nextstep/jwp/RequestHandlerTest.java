@@ -3,8 +3,12 @@ package nextstep.jwp;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import nextstep.jwp.dashboard.controller.dto.UserDto;
+import nextstep.jwp.dashboard.domain.User;
 import nextstep.jwp.httpserver.BeanFactory;
 import nextstep.jwp.httpserver.RequestHandler;
+import nextstep.jwp.httpserver.domain.HttpSession;
+import nextstep.jwp.httpserver.domain.HttpSessions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -86,16 +90,7 @@ class RequestHandlerTest {
     @DisplayName("POST /login 요청 시 index.html 반환")
     void login() {
         // given
-        String body = "account=gugu&password=password";
-        final String httpRequest = String.join("\r\n",
-                "POST /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + body.getBytes().length,
-                "Content-Type: application/x-www-form-urlencoded ",
-                "Accept: */* ",
-                "",
-                body);
+        final String httpRequest = 로그인_요청("gugu", "password");
 
         BeanFactory.init();
         final MockSocket socket = new MockSocket(httpRequest);
@@ -246,8 +241,107 @@ class RequestHandlerTest {
         // then
         assertThat(socket.output()).contains(
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/js;charset=utf-8 ",
+                "javascript",
                 "Content-Length: 1002"
         );
+    }
+
+    @Test
+    @DisplayName("request의 Cookie에 JSESSIONID가 없는 경우 response에 JSESSIONID를 넘겨준다.")
+    void noJSESSIONID() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Accept: */* ",
+                "");
+
+        BeanFactory.init();
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 3863",
+                "Set-Cookie: JSESSIONID="
+        );
+    }
+
+    @Test
+    @DisplayName("request의 Cookie에 JSESSIONID가 있는 경우 response에 JSESSIONID가 담겨있지 않는다.")
+    void cookieJSESSIONID() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Accept: */* ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
+                "");
+
+        BeanFactory.init();
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 5670 "
+        );
+    }
+
+    @Test
+    @DisplayName("세션 정보가 존재하면 GET /login 요청시 index.html로 리다이렉트 된다.")
+    void sessionRedirect() {
+        // given
+        final String sessionId = "656cef62-e3c4-40bc-a8df-94732920ed46";
+        final User user = new User(1L, "gugu", "password", "gugu@woowahon.com");
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Accept: */* ",
+                "Cookie: JSESSIONID=" + sessionId,
+                "");
+
+        BeanFactory.init();
+        HttpSession httpSession = new HttpSession(sessionId);
+        httpSession.setAttribute("user", UserDto.from(user));
+        HttpSessions.save(httpSession);
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 302 Found ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: 3863 "
+        );
+    }
+
+    private String 로그인_요청(String account, String password) {
+        String body = "account=" + account + "&password=" + password;
+        return String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + body.getBytes().length,
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
+                "",
+                body);
     }
 }

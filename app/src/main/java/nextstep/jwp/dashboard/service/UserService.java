@@ -4,7 +4,7 @@ import nextstep.jwp.dashboard.controller.dto.UserDto;
 import nextstep.jwp.dashboard.domain.User;
 import nextstep.jwp.dashboard.repository.InMemoryUserRepository;
 import nextstep.jwp.httpserver.exception.DuplicatedException;
-import nextstep.jwp.httpserver.exception.NotFoundException;
+import nextstep.jwp.httpserver.exception.EntityNotFoundException;
 
 public class UserService {
 
@@ -16,10 +16,10 @@ public class UserService {
 
     public UserDto login(String account, String password) {
         User user = inMemoryUserRepository.findByAccount(account)
-                                          .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+                                          .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 유저입니다."));
 
         user.checkPassword(password);
-        return new UserDto(user);
+        return UserDto.from(user);
     }
 
     public void join(String account, String password, String email) {

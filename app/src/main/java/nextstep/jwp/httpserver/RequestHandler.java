@@ -11,8 +11,13 @@ import java.util.Map;
 import java.util.Objects;
 
 import nextstep.jwp.httpserver.adapter.HandlerAdapter;
-import nextstep.jwp.httpserver.domain.View;
+import nextstep.jwp.httpserver.domain.Cookie;
+import nextstep.jwp.httpserver.domain.HttpSession;
+import nextstep.jwp.httpserver.domain.HttpSessions;
 import nextstep.jwp.httpserver.domain.request.HttpRequest;
+import nextstep.jwp.httpserver.domain.response.HttpResponse;
+import nextstep.jwp.httpserver.domain.view.ModelAndView;
+import nextstep.jwp.httpserver.domain.view.View;
 import nextstep.jwp.httpserver.mapping.HandlerMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,16 +54,31 @@ public class RequestHandler implements Runnable {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             final HttpRequest httpRequest = HttpRequestParser.parse(inputStream);
-            Object handler = getHandler(httpRequest);
-            HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
-            View view = handlerAdapter.handle(httpRequest, handler);
+            final HttpResponse httpResponse = new HttpResponse();
 
-            outputStream.write(view.getContent().getBytes());
+            doSessionFilter(httpRequest);
+
+            final Object handler = getHandler(httpRequest);
+            final HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
+
+            final ModelAndView mv = handlerAdapter.handle(httpRequest, httpResponse, handler);
+            render(mv, httpResponse);
+            commitSession(httpRequest, httpResponse);
+
+            outputStream.write(httpResponse.getResult().getBytes());
             outputStream.flush();
-        } catch (IOException | URISyntaxException exception) {
+        } catch (Exception exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
+        }
+    }
+
+    private void doSessionFilter(HttpRequest httpRequest) {
+        final String sessionId = httpRequest.sessionIdInCookie();
+        if (!sessionId.isEmpty() && httpRequest.isValidSession(sessionId)) {
+            final HttpSession session = HttpSessions.getSession(sessionId);
+            httpRequest.setSession(session);
         }
     }
 
@@ -75,6 +95,33 @@ public class RequestHandler implements Runnable {
                               .filter(adapter -> adapter.supports(handler))
                               .findFirst()
                               .orElseThrow(() -> new IllegalArgumentException("처리할 수 있는 어댑터가 없습니다."));
+    }
+
+    private void render(ModelAndView mv, HttpResponse httpResponse) throws IOException, URISyntaxException {
+        final View view = resolve(mv);
+        view.render(httpResponse);
+    }
+
+    private View resolve(ModelAndView mv) {
+        if (mv.isResourceFile()) {
+            return new View("static" + mv.getViewName());
+        }
+        return new View("static" + mv.getViewName() + ".html");
+    }
+
+    private void commitSession(HttpRequest httpRequest, HttpResponse httpResponse) {
+        if (httpRequest.hasSession()) {
+            final HttpSession session = httpRequest.getSession();
+            HttpSessions.save(session);
+            addSessionInCookie(httpRequest, httpResponse);
+        }
+    }
+
+    private void addSessionInCookie(HttpRequest httpRequest, HttpResponse httpResponse) {
+        if (!httpRequest.hasSessionId()) {
+            final Cookie cookie = new Cookie("JSESSIONID", httpRequest.getSessionId());
+            httpResponse.addCookie(cookie);
+        }
     }
 
     private void close() {

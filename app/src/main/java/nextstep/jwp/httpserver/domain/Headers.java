@@ -2,6 +2,7 @@ package nextstep.jwp.httpserver.domain;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Headers {
     private final Map<String, String> headers;
@@ -23,6 +24,19 @@ public class Headers {
             return "0";
         }
         return headers.get("Content-Length");
+    }
+
+    public String responseFormat() {
+        return headers.keySet().stream()
+                      .map(key -> key + ": " + headers.get(key) + " ")
+                      .collect(Collectors.joining("\r\n"));
+    }
+
+    public String getCookie() {
+        if (!headers.containsKey("Cookie")) {
+            return "";
+        }
+        return headers.get("Cookie");
     }
 
     public Map<String, String> getHeaders() {

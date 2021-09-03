@@ -3,7 +3,6 @@ package nextstep.jwp.httpserver.mapping;
 import java.util.HashMap;
 import java.util.Map;
 
-import nextstep.jwp.httpserver.domain.HttpMethod;
 import nextstep.jwp.httpserver.domain.request.HttpRequest;
 
 public class UrlMappingHandlerMapping implements HandlerMapping {
@@ -24,7 +23,7 @@ public class UrlMappingHandlerMapping implements HandlerMapping {
     public Object getHandler(HttpRequest httpRequest) {
         String requestUri = httpRequest.getRequestUri();
 
-        if (HttpMethod.GET == httpRequest.getHttpMethod()) {
+        if (httpRequest.isGet()) {
             requestUri = removeQueryString(requestUri);
         }
 

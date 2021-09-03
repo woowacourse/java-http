@@ -8,15 +8,15 @@ public class UserDto {
     private final String password;
     private final String email;
 
-    public UserDto(User user) {
-        this(user.getId(), user.getAccount(), user.getPassword(), user.getEmail());
-    }
-
-    public UserDto(Long id, String account, String password, String email) {
+    private UserDto(Long id, String account, String password, String email) {
         this.id = id;
         this.account = account;
         this.password = password;
         this.email = email;
+    }
+
+    public static UserDto from(User user) {
+        return new UserDto(user.getId(), user.getAccount(), user.getPassword(), user.getEmail());
     }
 
     public long getId() {

@@ -7,8 +7,8 @@ import java.io.InputStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import nextstep.jwp.httpserver.domain.HttpMethod;
 import nextstep.jwp.httpserver.domain.HttpVersion;
+import nextstep.jwp.httpserver.domain.request.HttpMethod;
 import nextstep.jwp.httpserver.domain.request.HttpRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,7 +35,7 @@ class HttpRequestParserTest {
         // then
         assertThat(request.getHttpMethod()).isEqualTo(HttpMethod.GET);
         assertThat(request.getRequestUri()).isEqualTo("/index.html");
-        assertThat(request.getStartLine().getHttpVersion()).isEqualTo(HttpVersion.HTTP_1_1);
+        assertThat(request.getRequestLine().getHttpVersion()).isEqualTo(HttpVersion.HTTP_1_1);
         assertTrue(request.getHeaders().getHeaders().containsKey("Host"));
         assertTrue(request.getHeaders().getHeaders().containsKey("Connection"));
     }

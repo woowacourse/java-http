@@ -36,7 +36,7 @@ public abstract class AbstractController implements Controller {
 
     protected HttpResponse doGet(final HttpRequest httpRequest) {
         String path = httpRequest.getPath();
-        if (!ContentType.findByUrl(path).hasFileExtension() && httpRequest.doesNotHaveQueryParameters()) {
+        if (isStaticPageRequest(httpRequest, path)) {
             path += ".html";
         }
         final String responseBody = readFile(path);
@@ -49,6 +49,10 @@ public abstract class AbstractController implements Controller {
                 contentType,
                 responseBody.getBytes().length,
                 responseBody);
+    }
+
+    private boolean isStaticPageRequest(final HttpRequest httpRequest, final String path) {
+        return !ContentType.findByUrl(path).hasFileExtension() && httpRequest.doesNotHaveQueryParameters();
     }
 
     public abstract HttpResponse doPost(final HttpRequest httpRequest);

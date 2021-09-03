@@ -29,7 +29,7 @@ public class RequestMapping {
             return new ResourceController(httpContentType);
         }
         return requestMapper.entrySet().stream()
-                .filter(mapper -> httpRequest.containsFunctionInUrl(mapper.getKey()))
+                .filter(mapper -> httpRequest.isSameUrl(mapper.getKey()))
                 .map(Map.Entry::getValue)
                 .findAny()
                 .orElseGet(JwpController::new);

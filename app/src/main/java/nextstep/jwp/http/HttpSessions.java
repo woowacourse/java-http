@@ -1,7 +1,10 @@
 package nextstep.jwp.http;
 
+import nextstep.jwp.model.User;
+
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class HttpSessions {
     private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
@@ -13,10 +16,10 @@ public class HttpSessions {
         SESSIONS.put(httpSession.getId(), httpSession);
     }
 
-    public static HttpSession getSession(String id) {
+    public static HttpSession getSession(String id, User user) {
         if (!SESSIONS.containsKey(id)) {
             HttpSession httpSession = new HttpSession(id);
-            httpSession.setAttribute("user", id);
+            httpSession.setAttribute("user", user);
             addSession(httpSession);
             return httpSession;
         }

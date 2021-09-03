@@ -98,8 +98,8 @@ public class HttpRequest {
         return parseParams(requestBody, -1);
     }
 
-    public boolean containsFunctionInUrl(final String functionNames) {
-        return url.contains(functionNames);
+    public boolean isSameUrl(final String functionNames) {
+        return url.equals(functionNames);
     }
 
     public HttpMethod getHttpMethod() {

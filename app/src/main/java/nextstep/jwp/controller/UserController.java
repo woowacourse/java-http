@@ -30,11 +30,15 @@ public class UserController extends AbstractController {
     }
 
     private HttpResponse getLogin(final HttpRequest request) {
-        try {
-            return new HttpResponse(HttpStatus.FOUND, findJSessionCookie(request), INDEX_PAGE);
-        } catch (IllegalArgumentException e) {
-            return new HttpResponse(HttpStatus.OK, HttpContentType.NOTHING, "login.html");
+
+        HttpCookie jSessionCookie = findJSessionCookie(request);
+        if (jSessionCookie.containsJSession()) {
+            log.info("사용된 쿠키 : {}", jSessionCookie);
+            return new HttpResponse(HttpStatus.FOUND, jSessionCookie, INDEX_PAGE);
         }
+
+        log.info("로그인으로 리다이렉트");
+        return new HttpResponse(HttpStatus.OK, HttpContentType.NOTHING, "login.html");
     }
 
     private HttpResponse getRegister(final HttpRequest request) {
@@ -76,14 +80,8 @@ public class UserController extends AbstractController {
         if (!httpCookie.containsJSession()) {
             return addNewCookie(user, httpCookie);
         }
-        String existJSessionCookie = httpCookie.getJSessionCookie();
-        try {
-            HttpSessions.getSession(existJSessionCookie).containsAttribute("user");
-            return httpCookie;
-        } catch (RuntimeException e) {
-            HttpSessions.addSession(new HttpSession(existJSessionCookie));
-            return httpCookie;
-        }
+
+        return getCookie(user, httpCookie);
     }
 
     private HttpCookie addNewCookie(User user, HttpCookie httpCookie) {
@@ -99,13 +97,23 @@ public class UserController extends AbstractController {
         HttpSessions.addSession(httpSession);
     }
 
+    private HttpCookie getCookie(User user, HttpCookie httpCookie) {
+        String existJSessionCookie = httpCookie.getJSessionCookie();
+        HttpSession httpSession = HttpSessions.getSession(existJSessionCookie, user);
+        if (httpSession.containsAttribute("user")) {
+            return httpCookie.setJSessionCookie(HttpCookie.JSESSIONID, httpSession.getId());
+        }
+        HttpSessions.addSession(new HttpSession(existJSessionCookie));
+        return httpCookie;
+    }
+
     private HttpCookie findJSessionCookie(HttpRequest request) {
         HttpCookie httpCookie = new HttpCookie();
         httpCookie.parseExistCookies(request.getRequestHeaders());
         String jSessionCookieId = httpCookie.getJSessionCookie();
 
-        if(!HttpSessions.contains(jSessionCookieId)) {
-            throw new IllegalArgumentException("올바르지 않은 쿠키가 존재합니다.");
+        if (!HttpSessions.contains(jSessionCookieId)) {
+            httpCookie.removeJSessionCookie();
         }
         return httpCookie;
     }

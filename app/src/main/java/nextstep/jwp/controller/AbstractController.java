@@ -29,7 +29,7 @@ public abstract class AbstractController implements Controller {
 
     protected HttpResponse getHttpResponse(HttpRequest request, Map<String, Function<HttpRequest, HttpResponse>> mappedFunction) {
         return mappedFunction.entrySet().stream()
-                .filter(entry -> request.containsFunctionInUrl(entry.getKey()))
+                .filter(entry -> request.isSameUrl(entry.getKey()))
                 .map(entry -> entry.getValue().apply(request))
                 .findAny()
                 .orElse(NOT_FOUND_RESPONSE);

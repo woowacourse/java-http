@@ -23,7 +23,7 @@ public class JwpController extends AbstractController {
                 "500", INTERNAL_SERVER_RESPONSE
         );
         HttpResponse httpResponse = mappedResponse.entrySet().stream()
-                .filter(entry -> request.containsFunctionInUrl(entry.getKey()))
+                .filter(entry -> request.isSameUrl(entry.getKey()))
                 .map(Map.Entry::getValue)
                 .findAny()
                 .orElse(NOT_FOUND_RESPONSE);

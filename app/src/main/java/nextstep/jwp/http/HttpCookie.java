@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
-    private static final String JSESSIONID = "JSESSIONID";
+    public static final String JSESSIONID = "JSESSIONID";
     private static final String COOKIE_HEADER = "Cookie";
 
     private final Map<String, String> cookies;
@@ -44,11 +44,20 @@ public class HttpCookie {
         return cookies.get(JSESSIONID);
     }
 
+     public HttpCookie setJSessionCookie(String key, String value) {
+        cookies.computeIfPresent(key, (k, v) -> cookies.replace(k, value));
+        return this;
+     }
+
     @Override
     public String toString() {
         return cookies.entrySet()
                 .stream()
                 .map(entry -> String.join("=", List.of(entry.getKey(), entry.getValue())))
                 .collect(Collectors.joining("; "));
+    }
+
+    public void removeJSessionCookie() {
+        cookies.remove(JSESSIONID);
     }
 }

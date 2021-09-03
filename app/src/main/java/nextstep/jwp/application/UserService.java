@@ -27,7 +27,7 @@ public class UserService {
                     .orElseThrow(() -> new UserPrincipalNotFoundException("해당 유저가 존재하지 않습니다. (account : " + request.getParameter(ACCOUNT) + ")"));
             LOG.debug("Saved user : {}", savedUser);
         } catch (UserPrincipalNotFoundException e) {
-            e.printStackTrace();
+            LOG.debug("user not found!");
         }
     }
 

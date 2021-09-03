@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public class RegisterController extends AbstractController {
     @Override
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         HttpResponse response = new HttpResponse.Builder()
                 .outputStream(httpResponse.getOutputStream())
                 .status(HttpStatus.OK_200)
@@ -23,7 +23,7 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         Map<String, String> params = httpRequest.getParams();
         User user = new User(InMemoryUserRepository.size() + 1L,
                 params.get("account"),

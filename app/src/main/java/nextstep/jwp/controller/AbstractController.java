@@ -16,11 +16,11 @@ public class AbstractController implements Controller {
         }
     }
 
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         throw new IllegalArgumentException();
     }
 
-    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         throw new IllegalArgumentException();
     }
 }

@@ -8,7 +8,7 @@ import java.io.IOException;
 
 public class ResourceController extends AbstractController {
     @Override
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         HttpResponse response = new HttpResponse.Builder()
                 .outputStream(httpResponse.getOutputStream())
                 .status(HttpStatus.OK_200)
@@ -19,7 +19,7 @@ public class ResourceController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+    void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         throw new IllegalArgumentException();
     }
 }

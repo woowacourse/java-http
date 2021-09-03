@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class RequestMapping {
     private static final Logger logger = LoggerFactory.getLogger(RequestMapping.class);
-    protected static final Map<String, Controller> controllers = new HashMap<>();
+    private static final Map<String, Controller> controllers = new HashMap<>();
 
     static {
         controllers.put("/", new DefaultController());

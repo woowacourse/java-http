@@ -8,8 +8,8 @@ public enum ContentTypeMapper {
     JAVASCRIPT(".js", "application/javascript; charset=UTF-8"),
     ICON(".ico", "image/x-icon");
 
-    String extension;
-    String contentType;
+    private final String extension;
+    private final String contentType;
 
     ContentTypeMapper(String extension, String contentType) {
         this.extension = extension;

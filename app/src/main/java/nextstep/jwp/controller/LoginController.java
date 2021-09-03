@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public class LoginController extends AbstractController {
     @Override
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         final HttpSession httpSession = httpRequest.getSession();
         if (httpSession != null) {
             User user = (User) httpSession.getAttribute("user");
@@ -37,7 +37,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+    void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         Map<String, String> params = httpRequest.getParams();
         Optional<User> optionalUser = InMemoryUserRepository.findByAccount(params.get("account"));
 

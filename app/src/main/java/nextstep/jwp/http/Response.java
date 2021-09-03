@@ -1,53 +1,67 @@
 package nextstep.jwp.http;
 
-import java.nio.charset.StandardCharsets;
-
 public class Response {
 
     private static final String NEW_LINE = "\r\n";
     private static final String CONTENT_LENGTH = "Content-Length: ";
 
-    private final String message;
+    private String header;
+    private String body;
+    private HttpStatus httpStatus;
 
-    private Response(String message) {
-        this.message = message;
+    public Response() {
+        this("", HttpStatus.OK);
+    }
+
+    public Response(String header, HttpStatus httpStatus) {
+        this(header, "", httpStatus);
+    }
+
+    public Response(String header, String body, HttpStatus httpStatus) {
+        this.header = header;
+        this.body = body;
+        this.httpStatus = httpStatus;
     }
 
     public byte[] getBytes() {
-        return message.getBytes(StandardCharsets.UTF_8);
-    }
-
-    public static Response create200OK(Request request, String responseBody) {
-        String message = String.join(NEW_LINE,
-            "HTTP/1.1 200 OK ",
-            "Content-Type: " + request.acceptType() + ";charset=utf-8 ",
-            CONTENT_LENGTH + responseBody.getBytes().length + " ",
-            "",
-            responseBody);
-        return new Response(message);
+        return this.toString().getBytes();
     }
 
     public static Response create302Found(String location) {
-        String message = String.join(NEW_LINE,
-            "HTTP/1.1 302 Found ",
-            "Location: " + location
+        String message = "Location: " + location;
+        return new Response(message, HttpStatus.FOUND);
+    }
+
+    public static Response createErrorRequest(String errorMessage, HttpStatus httpStatus) {
+        return new Response("Content-Type: application/json", errorMessage, httpStatus);
+    }
+
+    public void set200OK(Request request, String responseBody) {
+        header = String.join(NEW_LINE,
+            "Content-Type: " + request.acceptType() + ";charset=utf-8",
+            CONTENT_LENGTH + responseBody.getBytes().length);
+        httpStatus = HttpStatus.OK;
+        body = responseBody;
+    }
+
+    public void addHeader(String key, String value) {
+        header = String.join(NEW_LINE,
+            header,
+            String.format("%s: %s", key, value));
+    }
+
+    public void set302Found(String location) {
+        header = "Location: " + location;
+        httpStatus = HttpStatus.FOUND;
+    }
+
+    @Override
+    public String toString() {
+        return String.join(NEW_LINE,
+            String.format("HTTP/1.1 %d %s", httpStatus.getStatus(), httpStatus.getStatusMessage()),
+            header,
+            "",
+            body
         );
-        return new Response(message);
-    }
-
-    public static Response create400BadRequest(String errorMessage) {
-        String message = String.join(NEW_LINE,
-            "HTTP/1.1 400 Bad Request ",
-            "",
-            errorMessage);
-        return new Response(message);
-    }
-
-    public static Response create409Conflict(String errorMessage) {
-        String message = String.join(NEW_LINE,
-            "HTTP/1.1 409 Conflict ",
-            "",
-            errorMessage);
-        return new Response(message);
     }
 }

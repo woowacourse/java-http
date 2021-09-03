@@ -7,6 +7,10 @@ public class User {
     private final String password;
     private final String email;
 
+    public User(String account, String password) {
+        this(0L, account, password, "");
+    }
+
     public User(long id, String account, String password, String email) {
         this.id = id;
         this.account = account;
@@ -24,6 +28,10 @@ public class User {
 
     public String getAccount() {
         return account;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public void setId(long id) {

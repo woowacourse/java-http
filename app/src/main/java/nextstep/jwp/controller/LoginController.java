@@ -12,7 +12,7 @@ import java.util.Objects;
 
 public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LoginController.class);
     public static final String HTTP = "http://";
     private static LoginController loginController = null;
 
@@ -35,7 +35,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        log.debug("HTTP GET Login Request: {}", request.getPath());
+        LOG.debug("HTTP GET Login Request: {}", request.getPath());
         HttpSession session = request.getSession();
         if (Objects.nonNull(session.getAttribute("user"))) {
             response.responseRedirect(HTTP + request.getHeader("Host") + "/index.html");
@@ -46,7 +46,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        log.debug("HTTP POST Login Request: {}", request.getPath());
+        LOG.debug("HTTP POST Login Request: {}", request.getPath());
         try {
             User loginUser = userService.login(request);
 

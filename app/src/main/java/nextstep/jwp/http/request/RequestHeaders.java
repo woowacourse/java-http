@@ -13,6 +13,7 @@ import static nextstep.jwp.http.session.HttpCookie.COOKIE_NAME;
 public class RequestHeaders {
 
     private static final String DELIMITER = ": ";
+
     private final Map<String, String> headers = new HashMap<>();
     private HttpCookie cookie = new HttpCookie();
 

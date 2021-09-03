@@ -10,11 +10,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class InMemoryUserRepository {
 
     private static Long seq = 0L;
-    private static final Map<String, User> database = new ConcurrentHashMap<>();
+    private static final Map<String, User> DATABASE = new ConcurrentHashMap<>();
 
     static {
         final User user = new User(seq++, "admin", "1234", "hkkang@woowahan.com");
-        database.put(user.getAccount(), user);
+        DATABASE.put(user.getAccount(), user);
     }
 
     private InMemoryUserRepository() {
@@ -22,11 +22,11 @@ public class InMemoryUserRepository {
 
     public static User save(User user) {
         User newToSave = user.createNewToSave(seq++);
-        database.put(user.getAccount(), newToSave);
+        DATABASE.put(user.getAccount(), newToSave);
         return newToSave;
     }
 
     public static Optional<User> findByAccount(String account) {
-        return Optional.ofNullable(database.get(account));
+        return Optional.ofNullable(DATABASE.get(account));
     }
 }

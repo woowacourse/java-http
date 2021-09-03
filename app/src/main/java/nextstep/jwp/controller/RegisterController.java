@@ -10,7 +10,7 @@ import java.util.Objects;
 
 public class RegisterController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(RegisterController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RegisterController.class);
     private static RegisterController registerController = null;
 
     private final UserService userService;
@@ -33,13 +33,13 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        log.debug("HTTP GET Register Request: {}", request.getPath());
+        LOG.debug("HTTP GET Register Request: {}", request.getPath());
         response.responseOk("/register.html");
     }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
-        log.debug("HTTP POST Register Request: {}", request.getPath());
+        LOG.debug("HTTP POST Register Request: {}", request.getPath());
         try {
             userService.signUp(request);
             response.responseRedirect("http://" + request.getHeader("Host") + "/index.html");

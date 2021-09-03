@@ -13,6 +13,7 @@ public class ResponseHeaders {
 
     private static final String DELIMITER = ": ";
     private static final String ENTER_LINE = " \r\n";
+
     private final Map<String, String> headers = new LinkedHashMap<>();
 
     public void setContentType(ContentType contentType) {

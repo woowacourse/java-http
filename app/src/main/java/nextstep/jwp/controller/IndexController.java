@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 
 public class IndexController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(IndexController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(IndexController.class);
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        log.debug("HTTP GET Index Request: {}", request.getPath());
+        LOG.debug("HTTP GET Index Request: {}", request.getPath());
         response.setStatusLine(StatusCode.OK);
         response.responseMessage("Hello world!");
     }

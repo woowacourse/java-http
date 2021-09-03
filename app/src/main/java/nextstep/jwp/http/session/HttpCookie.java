@@ -8,7 +8,9 @@ import java.util.stream.Stream;
 import static nextstep.jwp.http.session.HttpSession.SESSION_NAME;
 
 public class HttpCookie {
+
     public static final String COOKIE_NAME = "Cookie";
+
     private final Map<String, String> cookies;
 
     public static HttpCookie of(String line) {

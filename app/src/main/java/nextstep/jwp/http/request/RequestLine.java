@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class RequestLine {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestLine.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RequestLine.class);
     private static final String QUERY_STRING_DELIMITER = "?";
     private static final String BLANK = " ";
     private static final String KEY_VALUE_DELIMITER = "=";
@@ -35,7 +35,7 @@ public class RequestLine {
             }
             this.protocol = tokens[2];
         } catch (IllegalStateException exception) {
-            log.error("Exception invalid http request", exception);
+            LOG.error("Exception invalid http request", exception);
         }
     }
 

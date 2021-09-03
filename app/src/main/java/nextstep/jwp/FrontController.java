@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public class FrontController implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(FrontController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(FrontController.class);
 
     private final Socket connection;
 
@@ -23,7 +23,7 @@ public class FrontController implements Runnable {
 
     @Override
     public void run() {
-        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
+        LOG.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -41,7 +41,7 @@ public class FrontController implements Runnable {
 
             response.write(outputStream);
         } catch (IOException exception) {
-            log.error("Exception stream", exception);
+            LOG.error("Exception stream", exception);
         } finally {
             close();
         }
@@ -51,7 +51,7 @@ public class FrontController implements Runnable {
         try {
             connection.close();
         } catch (IOException exception) {
-            log.error("Exception closing socket", exception);
+            LOG.error("Exception closing socket", exception);
         }
     }
 }

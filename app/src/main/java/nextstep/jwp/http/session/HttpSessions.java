@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class HttpSessions {
+
     private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
 
     private HttpSessions() {

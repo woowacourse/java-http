@@ -16,7 +16,7 @@ import java.util.Objects;
 
 public class HttpResponse {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpResponse.class);
     private static final String NOT_FOUND_URI = "/404.html";
     private static final String EMPTY_LINE = "\r\n";
     private static final String STATIC = "static";
@@ -47,7 +47,7 @@ public class HttpResponse {
             this.headers.setContentLength(content.getBytes(StandardCharsets.UTF_8).length);
             this.body = new ResponseBody(content);
         } catch (IOException exception) {
-            log.error("Exception input stream", exception);
+            LOG.error("Exception input stream", exception);
         }
     }
 
@@ -62,7 +62,7 @@ public class HttpResponse {
             this.headers.setContentLength(content.length());
             this.body = new ResponseBody(content);
         } catch (IOException exception) {
-            log.error("Exception input stream", exception);
+            LOG.error("Exception input stream", exception);
         }
     }
 
@@ -78,7 +78,7 @@ public class HttpResponse {
 
     private String readContent(URL resource) throws IOException {
         if (resource == null) {
-            log.debug("Resource is not found!");
+            LOG.debug("Resource is not found!");
             return null;
         }
         final Path resourcePath = new File(resource.getPath()).toPath();
@@ -111,7 +111,7 @@ public class HttpResponse {
             }
             writeWithBody(outputStream);
         } catch (IOException exception) {
-            log.error("Exception output stream", exception);
+            LOG.error("Exception output stream", exception);
         }
     }
 

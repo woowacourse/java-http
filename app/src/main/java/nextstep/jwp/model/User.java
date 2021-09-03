@@ -18,8 +18,11 @@ public class User {
         this.email = email;
     }
 
-    public boolean checkPassword(String password) {
-        return this.password.equals(password);
+    public void checkPassword(String password) {
+        if (this.password.equals(password)) {
+            return;
+        }
+        throw new RuntimeException("Invalid Password !!");
     }
 
     public String getAccount() {

@@ -1,12 +1,17 @@
 package nextstep.jwp.infrastructure.controller;
 
+import nextstep.jwp.model.User;
 import nextstep.jwp.model.web.ResourceFinder;
 import nextstep.jwp.model.web.StatusCode;
 import nextstep.jwp.model.web.request.CustomHttpRequest;
 import nextstep.jwp.model.web.response.CustomHttpResponse;
 import nextstep.jwp.model.web.service.LoginService;
+import nextstep.jwp.model.web.sessions.HttpSession;
+import nextstep.jwp.model.web.sessions.HttpSessions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.UUID;
 
 public class LoginController extends AbstractController {
 
@@ -37,18 +42,19 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(CustomHttpRequest request, CustomHttpResponse response) throws Exception {
+    protected void doPost(CustomHttpRequest request, CustomHttpResponse response) {
         log.debug("Http Request - POST /login");
         response.setStatusLine(StatusCode.FOUND, request.getVersionOfProtocol());
         String account = request.getBodyValue("account");
         String password = request.getBodyValue("password");
 
         try {
-            if (loginService.isExistAccount(account)) {
-                String sessionId = loginService.login(account, password);
-                response.addSessionCookieHeader(sessionId);
-                response.forward(LOGIN_SUCCESS_URL);
-            }
+            User user = loginService.login(account, password);
+            String sessionId = UUID.randomUUID().toString();
+            HttpSession session = new HttpSession(sessionId);
+            session.setAttribute(sessionId, user);
+            HttpSessions.addSession(sessionId, session);
+
         } catch (Exception e) {
             response.forward(LOGIN_FAILURE_URL);
         }

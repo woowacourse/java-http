@@ -25,7 +25,7 @@ public class HttpSessions {
             HttpSession httpSession = SESSIONS.remove(id);
             httpSession.invalidate();
         } catch (RuntimeException e) {
-            throw new IllegalArgumentException("검색sdf할 요소가 존재하지 않습니다.");
+            throw new IllegalArgumentException("삭제할 세션이 존재하지 않습니다.");
         }
     }
 }

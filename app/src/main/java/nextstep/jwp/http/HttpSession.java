@@ -19,19 +19,19 @@ public class HttpSession {
         values.put(name, value);
     }
 
-    public Object getAttribute(String name) {
-        try {
-            return values.get(name);
-        } catch (RuntimeException e) {
-            throw new IllegalArgumentException("검색할 요소가 존재하지 않습니다.");
-        }
+    public Object getAttribute(String attribute) {
+        checkContainsAttribute(attribute, "검색할 요소가 존재하지 않습니다.");
+        return values.get(attribute);
     }
 
-    public void removeAttribute(String name) {
-        try {
-            values.remove(name);
-        } catch (RuntimeException e) {
-            throw new IllegalArgumentException("검색할 요소가 존재하지 않습니다.");
+    public void removeAttribute(String attribute) {
+        checkContainsAttribute(attribute, "삭제할 요소가 존재하지 않습니다.");
+        values.remove(attribute);
+    }
+
+    private void checkContainsAttribute(String attribute, String errorMessage) {
+        if (!values.containsKey(attribute)) {
+            throw new IllegalArgumentException(errorMessage);
         }
     }
 

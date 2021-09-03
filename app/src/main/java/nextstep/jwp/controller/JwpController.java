@@ -16,6 +16,7 @@ public class JwpController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, HttpResponse response) {
         final Map<String, HttpResponse> mappedResponse = Map.of(
+                "index.html", getIndex(),
                 "index", getIndex(),
                 "401", UNAUTHORIZED_RESPONSE,
                 "404", NOT_FOUND_RESPONSE,

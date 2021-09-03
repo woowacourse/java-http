@@ -10,11 +10,11 @@ public class ResponseBody {
 
     private final String body;
 
-    public ResponseBody(byte[] bytes) {
+    private ResponseBody(byte[] bytes) {
         this(new String(bytes));
     }
 
-    public ResponseBody(String body) {
+    private ResponseBody(String body) {
         this.body = body;
     }
 

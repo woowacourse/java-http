@@ -36,6 +36,8 @@ class LoginControllerTest {
         HttpResponse httpResponse = HttpResponse.empty();
 
         controller.doService(httpRequest, httpResponse);
+
+        assertThat(httpRequest.httpSession().getAttribute("user")).isNotNull();
         assertThat(httpResponse.httpStatus()).isEqualTo(HttpStatus.FOUND);
     }
 }

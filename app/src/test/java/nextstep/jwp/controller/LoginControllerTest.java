@@ -35,14 +35,19 @@ class LoginControllerTest {
 
     @DisplayName("POST 요청 테스트")
     @Test
-    void doPost() throws IOException {
+    void doPost() {
         //given
         Map<String, String> bodyParamMap = new HashMap<>();
         bodyParamMap.put("account", "gugu");
         bodyParamMap.put("password", "password");
 
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Host", "localhost:8080 ");
+        headers.put("Accept", "*/* ");
+        headers.put("Cookie", "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ");
+
         RequestBody requestBody = RequestBody.of(bodyParamMap);
-        HttpRequest request = HttpRequest.of(postLoginRequestLine, null, requestBody);
+        HttpRequest request = HttpRequest.of(postLoginRequestLine, headers, requestBody);
         //when
         LoginController controller = new LoginController();
         HttpResponse httpResponse = controller.doPost(request);

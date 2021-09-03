@@ -18,12 +18,12 @@
 - [X] jacoco 이용한 테스트 커버리지 검사
 
 ## 2,3단계 요구사항
-- [ ] 로그인에 성공하면 쿠키와 세션을 활용해서 로그인 상태를 유지해야 한다.
-- [ ] Cookie 클래스를 추가한다.
-  - [ ] HTTP Request Header의 Cookie에 JSESSIONID가 없으면 HTTP Response Header에 Set-Cookie를 반환해주는 기능을 구현한다.
+- [X] 로그인에 성공하면 쿠키와 세션을 활용해서 로그인 상태를 유지해야 한다.
+- [X] Cookie 클래스를 추가한다.
+  - [X] HTTP Request Header의 Cookie에 JSESSIONID가 없으면 HTTP Response Header에 Set-Cookie를 반환해주는 기능을 구현한다.
   
-- [ ] Session 을 구현한다. 
-  - [ ] 쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부를 체크할 수 있어야 한다.
-  - [ ] 로그인에 성공하면 HttpSession 객체의 값으로 User 객체를 저장해보자.
-  - [ ] 로그인된 상태에서 /login 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 index.html 페이지로 리다이렉트 처리한다.
-  - [ ] 클라이언트별 세션 데이터를 관리하는 세션 클래스를 추가한다.
+- [X] Session 을 구현한다. 
+  - [X] 쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부를 체크할 수 있어야 한다.
+  - [X] 로그인에 성공하면 HttpSession 객체의 값으로 User 객체를 저장해보자.
+  - [X] 로그인된 상태에서 /login 페이지에 HTTP GET method로 접근하면 이미 로그인한 상태니 index.html 페이지로 리다이렉트 처리한다.
+  - [X] 클라이언트별 세션 데이터를 관리하는 세션 클래스를 추가한다.

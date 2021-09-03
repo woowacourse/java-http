@@ -10,7 +10,7 @@ public class LoginResponse {
     private static final String SUCCESS = "/index";
     private static final String FAIL = "/401";
 
-    public String successResponse() throws IOException {
+    public String successResponse(String token) throws IOException {
         final ViewResolver viewResolver = new ViewResolver(SUCCESS);
         final StaticResources staticResource = StaticResources.basicType();
         final String responseBody = viewResolver.staticValue(staticResource.resource());
@@ -18,8 +18,9 @@ public class LoginResponse {
             HttpStatus.FOUND.method());
         return String.join("\r\n",
             firstLine,
+            "Set-Cookie: JSESSIONID=" + token,
             "Location: /index",
-            "Content-Type:" + staticResource.type(),
+            "Content-Type: " + staticResource.type(),
             "Content-Length: " + responseBody.getBytes().length + " ",
             "",
             responseBody);

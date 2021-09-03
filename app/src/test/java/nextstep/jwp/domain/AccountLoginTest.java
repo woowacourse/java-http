@@ -4,10 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.domain.Login;
 import org.junit.jupiter.api.Test;
 
-class LoginTest {
+class AccountLoginTest {
 
     @Test
     void isSuccess() {
@@ -17,10 +16,10 @@ class LoginTest {
         final Map<String, String> map = new HashMap<>();
         map.put("account", id);
         map.put("password", password);
-        final Login login = new Login(map);
+        final AccountLogin accountLogin = new AccountLogin(map);
 
         //when
-        final boolean isSuccess = login.isSuccess();
+        final boolean isSuccess = accountLogin.isSuccess();
 
         //then
         assertThat(isSuccess).isTrue();
@@ -31,10 +30,10 @@ class LoginTest {
         final String id = "pigeon";
         final Map<String, String> map = new HashMap<>();
         map.put("account", id);
-        final Login login = new Login(map);
+        final AccountLogin accountLogin = new AccountLogin(map);
 
         //when
-        final boolean isSuccess = login.isSuccess();
+        final boolean isSuccess = accountLogin.isSuccess();
 
         //then
         assertThat(isSuccess).isFalse();

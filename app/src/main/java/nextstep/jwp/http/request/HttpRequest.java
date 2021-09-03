@@ -10,6 +10,9 @@ import java.util.Map;
 public class HttpRequest {
 
     private static final String START_LINE = "START_LINE";
+    private static final String HEADERS_KEY_VALUE_SEPARATOR = ": ";
+    private static final int KEY_ON_KEY_VALUE_FORMAT = 0;
+    private static final int VALUE_ON_KEY_VALUE_FORMAT = 1;
 
     private final HttpRequestHeader httpRequestHeader;
     private final HttpRequestBody httpRequestBody;
@@ -22,8 +25,8 @@ public class HttpRequest {
     public static HttpRequest readFromInputStream(InputStream inputStream) throws IOException {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         final Map<String, String> headerLines = new HashMap<>();
-        final HttpRequestHeader httpRequestHeader = new HttpRequestHeader(headerLines);
         fillHeaderPart(reader, headerLines);
+        final HttpRequestHeader httpRequestHeader = HttpRequestHeader.from(headerLines);
         final String body = extractBody(reader, httpRequestHeader);
         final HttpRequestBody httpRequestBody = new HttpRequestBody(body);
         return new HttpRequest(httpRequestHeader, httpRequestBody);
@@ -38,8 +41,8 @@ public class HttpRequest {
             if ("".equals(oneLine) || oneLine == null) {
                 break;
             }
-            final String[] part = oneLine.split(": ");
-            headerLines.put(part[0], part[1]);
+            final String[] part = oneLine.split(HEADERS_KEY_VALUE_SEPARATOR);
+            headerLines.put(part[KEY_ON_KEY_VALUE_FORMAT], part[VALUE_ON_KEY_VALUE_FORMAT]);
         }
     }
 
@@ -73,5 +76,13 @@ public class HttpRequest {
 
     public String resourceType() {
         return httpRequestHeader.resourceType();
+    }
+
+    public HttpRequestHeader getHttpRequestHeader() {
+        return httpRequestHeader;
+    }
+
+    public HttpRequestBody getHttpRequestBody() {
+        return httpRequestBody;
     }
 }

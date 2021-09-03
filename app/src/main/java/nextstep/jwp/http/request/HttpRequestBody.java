@@ -6,6 +6,11 @@ import java.util.Arrays;
 import java.util.Map;
 
 public class HttpRequestBody {
+
+    private static final String BODY_SEPARATOR = "&";
+    private static final String KEY_VALUE_SEPARATOR = "=";
+    private static final int KEY_ON_KEY_VALUE_FORMAT = 0;
+    private static final int VALUE_ON_KEY_VALUE_FORMAT = 1;
     private final String value;
 
     public HttpRequestBody(String value) {
@@ -13,8 +18,9 @@ public class HttpRequestBody {
     }
 
     public Map<String, String> parsedBody() {
-        return Arrays.stream(value.split("&"))
-            .map(singleBody -> singleBody.split("="))
-            .collect(toMap(unitBody -> unitBody[0], unitBody -> unitBody[1]));
+        return Arrays.stream(value.split(BODY_SEPARATOR))
+            .map(singleBody -> singleBody.split(KEY_VALUE_SEPARATOR))
+            .collect(toMap(unitBody -> unitBody[KEY_ON_KEY_VALUE_FORMAT],
+                unitBody -> unitBody[VALUE_ON_KEY_VALUE_FORMAT]));
     }
 }

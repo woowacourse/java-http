@@ -10,3 +10,7 @@
 - [x] POST 방식으로 회원 가입
 - [x] POST 방식으로 로그인
 - [x] CSS 지원하기 
+
+## 쿠키 및 세션 구현
+- [x] Cookie JSESSIONID 값 저장하기
+- [x] Session 구현하기

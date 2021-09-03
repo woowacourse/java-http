@@ -125,7 +125,7 @@ public class RequestHandlerTest {
 
     @Test
     void registerPost() {
-        final String account = "corgi";
+        final String account = "account";
         final String password = "password";
         final String email = "hkkang%40woowahan.com";
 

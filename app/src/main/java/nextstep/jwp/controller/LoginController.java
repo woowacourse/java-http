@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import nextstep.jwp.exception.InvalidLoingInfoException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.session.HttpSession;
@@ -53,7 +54,7 @@ public class LoginController extends AbstractController {
             HttpSession session = request.getSession();
             session.setAttribute("user", loginUser);
             response.responseRedirect(HTTP + request.getHeader("Host") + "/index.html");
-        } catch (IllegalArgumentException exception) {
+        } catch (InvalidLoingInfoException exception) {
             response.responseRedirect(HTTP + request.getHeader("Host") + "/401.html");
         }
     }

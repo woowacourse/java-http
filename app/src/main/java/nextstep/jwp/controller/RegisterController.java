@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import nextstep.jwp.exception.AlreadyExistUserException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.service.UserService;
@@ -43,7 +44,7 @@ public class RegisterController extends AbstractController {
         try {
             userService.signUp(request);
             response.responseRedirect("http://" + request.getHeader("Host") + "/index.html");
-        } catch (IllegalArgumentException exception) {
+        } catch (AlreadyExistUserException exception) {
             response.responseRedirect("http://" + request.getHeader("Host") + "/register.html");
         }
     }

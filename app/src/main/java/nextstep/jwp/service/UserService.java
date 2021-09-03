@@ -1,6 +1,8 @@
 package nextstep.jwp.service;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.AlreadyExistUserException;
+import nextstep.jwp.exception.InvalidLoingInfoException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.model.User;
 import org.slf4j.Logger;
@@ -29,7 +31,7 @@ public class UserService {
             return user.get();
         }
         LOG.debug("User Login Fail!");
-        throw new IllegalArgumentException("로그인에 실패하였습니다.");
+        throw new InvalidLoingInfoException("로그인에 실패하였습니다.");
     }
 
     public void signUp(HttpRequest request) {
@@ -39,7 +41,7 @@ public class UserService {
         User user = new User(account, password, email);
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             LOG.debug("User Signup Fail! account: {}", account);
-            throw new IllegalArgumentException("이미 존재하는 계정입니다.");
+            throw new AlreadyExistUserException("이미 존재하는 계정입니다.");
         }
         User savedUser = InMemoryUserRepository.save(user);
         LOG.debug("User Signup Success! account: {}", savedUser);

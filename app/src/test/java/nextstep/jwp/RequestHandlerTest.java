@@ -8,8 +8,6 @@ import nextstep.jwp.web.WebApplicationConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestHandlerTest {
@@ -33,7 +31,8 @@ class RequestHandlerTest {
         // when
         requestHandler.run();
 
-        CharlieHttpResponse httpResponse = CharlieHttpResponse.createResponse("index.html", HttpStatusCode.OK);
+        CharlieHttpResponse httpResponse = new CharlieHttpResponse();
+        httpResponse.setView("index.html", HttpStatusCode.OK);
         String expectedResponse = httpResponse.toHttpResponseMessage();
 
         // then
@@ -57,7 +56,8 @@ class RequestHandlerTest {
         // when
         requestHandler.run();
 
-        CharlieHttpResponse httpResponse = CharlieHttpResponse.createResponse("/index.html", HttpStatusCode.OK);
+        CharlieHttpResponse httpResponse = new CharlieHttpResponse();
+        httpResponse.setView("/index.html", HttpStatusCode.OK);
         String expectedResponse = httpResponse.toHttpResponseMessage();
 
         // then
@@ -80,7 +80,8 @@ class RequestHandlerTest {
         // when
         requestHandler.run();
 
-        CharlieHttpResponse httpResponse = CharlieHttpResponse.createResponse("login.html", HttpStatusCode.OK);
+        CharlieHttpResponse httpResponse = new CharlieHttpResponse();
+        httpResponse.setView("login.html", HttpStatusCode.OK);
         String expectedResponse = httpResponse.toHttpResponseMessage();
 
         // then
@@ -107,7 +108,8 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        CharlieHttpResponse httpResponse = CharlieHttpResponse.redirectResponse("/index.html");
+        CharlieHttpResponse httpResponse = new CharlieHttpResponse();
+        httpResponse.redirectResponse("/index.html");
         String expectedResponse = httpResponse.toHttpResponseMessage();
 
         assertThat(socket.output()).isEqualTo(expectedResponse);
@@ -133,7 +135,8 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        CharlieHttpResponse httpResponse = CharlieHttpResponse.redirectResponse("/401.html");
+        CharlieHttpResponse httpResponse = new CharlieHttpResponse();
+        httpResponse.redirectResponse("/401.html");
         String expectedResponse = httpResponse.toHttpResponseMessage();
 
         assertThat(socket.output()).isEqualTo(expectedResponse);
@@ -156,7 +159,8 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        CharlieHttpResponse httpResponse = CharlieHttpResponse.createResponse("register.html", HttpStatusCode.OK);
+        CharlieHttpResponse httpResponse = new CharlieHttpResponse();
+        httpResponse.setView("register.html", HttpStatusCode.OK);
         String expectedResponse = httpResponse.toHttpResponseMessage();
 
         assertThat(socket.output()).isEqualTo(expectedResponse);
@@ -182,7 +186,8 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        CharlieHttpResponse httpResponse = CharlieHttpResponse.redirectResponse("/index.html");
+        CharlieHttpResponse httpResponse = new CharlieHttpResponse();
+        httpResponse.redirectResponse("/index.html");
         String expectedResponse = httpResponse.toHttpResponseMessage();
 
         assertThat(socket.output()).isEqualTo(expectedResponse);
@@ -208,7 +213,8 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        CharlieHttpResponse httpResponse = CharlieHttpResponse.redirectResponse("/409.html");
+        CharlieHttpResponse httpResponse = new CharlieHttpResponse();
+        httpResponse.redirectResponse("/409.html");
         String expectedResponse = httpResponse.toHttpResponseMessage();
 
         assertThat(socket.output()).isEqualTo(expectedResponse);

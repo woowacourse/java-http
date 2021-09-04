@@ -1,11 +1,15 @@
 package nextstep.jwp.web;
 
 import nextstep.jwp.exception.InternalServerError;
+import nextstep.jwp.exception.InvalidHttpSessionException;
 import nextstep.jwp.exception.PageNotFoundError;
 import nextstep.jwp.request.HttpRequest;
-import nextstep.jwp.response.CharlieHttpResponse;
 import nextstep.jwp.response.HttpResponse;
 import nextstep.jwp.response.HttpStatusCode;
+import nextstep.jwp.web.model.Cookie;
+import nextstep.jwp.web.model.HttpCookie;
+import nextstep.jwp.web.model.HttpSession;
+import nextstep.jwp.web.model.HttpSessions;
 
 import java.util.Optional;
 
@@ -19,19 +23,42 @@ public class FrontController {
         this.requestMapping = requestMapping;
     }
 
-    public HttpResponse getResponse(HttpRequest httpRequest) {
+    public void getResponse(HttpRequest httpRequest, HttpResponse httpResponse) {
         try {
             Optional<ControllerMethod> optionalControllerMethod = requestMapping.getControllerMethod(httpRequest);
             if (optionalControllerMethod.isPresent()) {
                 ControllerMethod controllerMethod = optionalControllerMethod.orElseThrow(PageNotFoundError::new);
-                String viewName = (String) controllerMethod.invoke(httpRequest);
-                return CharlieHttpResponse.createResponse(viewName, HttpStatusCode.OK);
+                HttpSession httpSession = this.httpSession(httpRequest, httpResponse);
+                String viewName = (String) controllerMethod.invoke(httpRequest, httpSession);
+                httpResponse.setView(viewName, HttpStatusCode.OK);
+                return;
             }
-            return CharlieHttpResponse.createResponse(httpRequest.getResourceName(), HttpStatusCode.OK);
+            httpResponse.setView(httpRequest.getResourceName(), HttpStatusCode.OK);
         } catch (InternalServerError e) {
-            return CharlieHttpResponse.createResponse(INTERNAL_SERVER_ERROR_PAGE, HttpStatusCode.INTERNAL_SERVER_ERROR);
+            httpResponse.setView(INTERNAL_SERVER_ERROR_PAGE, HttpStatusCode.INTERNAL_SERVER_ERROR);
         } catch (PageNotFoundError e) {
-            return CharlieHttpResponse.createResponse(NOT_FOUND_ERROR_PAGE, HttpStatusCode.NOTFOUND);
+            httpResponse.setView(NOT_FOUND_ERROR_PAGE, HttpStatusCode.NOTFOUND);
         }
     }
+
+    private HttpSession httpSession(HttpRequest httpRequest, HttpResponse httpResponse) {
+        HttpCookie httpCookie = httpRequest.getCookies();
+        if (hasValidJSessionId(httpCookie)) {
+            return HttpSessions.getSession(httpCookie.getJSessionId())
+                    .orElseThrow(() -> new InvalidHttpSessionException("세션이 존재하지 않습니다."));
+        }
+
+        HttpSession httpSession = HttpSession.create();
+        httpResponse.addCookie(new Cookie("JSESSIONID", httpSession.getId()));
+        return HttpSessions.save(httpSession);
+    }
+
+    private boolean hasValidJSessionId(HttpCookie httpCookie) {
+        if (httpCookie.hasJSessionId()) {
+            String jSessionId = httpCookie.getJSessionId();
+            return HttpSessions.isExistsId(jSessionId);
+        }
+        return false;
+    }
+
 }

@@ -4,7 +4,6 @@ import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.handler.modelandview.Model;
 import nextstep.jwp.handler.modelandview.ModelAndView;
-import nextstep.jwp.handler.service.SessionHandler;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.QueryParams;
 import nextstep.jwp.http.response.HttpResponse;
@@ -16,13 +15,12 @@ public class LoginController extends AbstractController {
 
     @Override
     protected ModelAndView doGet(HttpRequest request, HttpResponse response) {
-        String sessionId = request.getSessionId();
-        Object loginUser = SessionHandler.getSessionValueOrNull(sessionId, "user");
-        if (Objects.isNull(loginUser)) {
-            return ModelAndView.of("/login.html", HttpStatus.OK);
+        HttpSession session = request.getSession();
+        if(session.contains("user")){
+            response.addHeader("Location", "index.html");
+            return ModelAndView.of(HttpStatus.FOUND);
         }
-        response.addHeader("Location", "index.html");
-        return ModelAndView.of(HttpStatus.FOUND);
+        return ModelAndView.of("/login.html", HttpStatus.OK);
     }
 
     @Override
@@ -34,10 +32,12 @@ public class LoginController extends AbstractController {
             return ModelAndView.of(model, "/401.html", HttpStatus.UNAUTHORIZED);
         }
 
-        HttpSession session = SessionHandler.getHttpSession(request, response);
+        HttpSession session = request.getSession();
         session.setAttribute("user", loginUser);
 
+        response.addSession(session);
         response.addHeader("Location", "index.html");
+
         return ModelAndView.of(HttpStatus.FOUND);
     }
 

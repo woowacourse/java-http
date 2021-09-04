@@ -1,5 +1,8 @@
 package nextstep.jwp.http.response;
 
+import nextstep.jwp.http.session.HttpSession;
+import nextstep.jwp.http.session.HttpSessions;
+
 public class HttpResponse {
 
     private static final String SESSION_ITEM_FORMAT = "%s=%s";
@@ -48,8 +51,11 @@ public class HttpResponse {
         return httpStatus;
     }
 
-    public void setCookie(String sessionType, String sessionId) {
-        String sessionItem = String.format(SESSION_ITEM_FORMAT, sessionType, sessionId);
-        responseHeaders.addAttribute("Set-Cookie", sessionItem);
+    public void addSession(HttpSession session) {
+        if(!HttpSessions.contains(session.getId())){
+            HttpSessions.addSession(session);
+            String sessionItem = String.format(SESSION_ITEM_FORMAT, session.getType(), session.getId());
+            responseHeaders.addAttribute("Set-Cookie", sessionItem);
+        }
     }
 }

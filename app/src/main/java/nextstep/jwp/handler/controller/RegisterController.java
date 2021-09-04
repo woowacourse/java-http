@@ -1,10 +1,9 @@
 package nextstep.jwp.handler.controller;
 
-import java.util.Objects;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.handler.modelandview.Model;
 import nextstep.jwp.handler.modelandview.ModelAndView;
-import nextstep.jwp.handler.service.SessionHandler;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.QueryParams;
 import nextstep.jwp.http.response.HttpResponse;
@@ -16,32 +15,34 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected ModelAndView doGet(HttpRequest request, HttpResponse response) {
-        String sessionId = request.getSessionId();
-        Object loginUser = SessionHandler.getSessionValueOrNull(sessionId, "user");
-        if (Objects.isNull(loginUser)) {
-            return ModelAndView.of("/register.html", HttpStatus.OK);
+        HttpSession session = request.getSession();
+        if (session.contains("user")) {
+            response.addHeader("Location", "index.html");
+            return ModelAndView.of(HttpStatus.FOUND);
         }
-        response.addHeader("Location", "index.html");
-        return ModelAndView.of(HttpStatus.FOUND);
+        return ModelAndView.of("/register.html", HttpStatus.OK);
     }
 
     @Override
     protected ModelAndView doPost(HttpRequest request, HttpResponse response) {
         QueryParams params = request.requestParam();
-        User user = new User(params.get("account"), params.get("password"), params.get("email"));
 
-        if (!InMemoryUserRepository.findByAccount(user.getAccount()).isEmpty()) {
+        Optional<User> byAccount = InMemoryUserRepository.findByAccount(params.get("account"));
+        if (byAccount.isPresent()) {
             Model model = new Model();
             model.addAttribute("errorMessage", "가입 실패 :: 이미 존재하는 아이디입니다.");
             return ModelAndView.of(model, "/400.html", HttpStatus.BAD_REQUEST);
         }
 
+        User user = new User(params.get("account"), params.get("password"), params.get("email"));
         InMemoryUserRepository.save(user);
 
-        HttpSession session = SessionHandler.getHttpSession(request, response);
+        HttpSession session = request.getSession();
         session.setAttribute("user", user);
 
+        response.addSession(session);
         response.addHeader("Location", "index.html");
+
         return ModelAndView.of(HttpStatus.FOUND);
     }
 }

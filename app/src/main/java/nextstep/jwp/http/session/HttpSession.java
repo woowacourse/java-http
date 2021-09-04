@@ -39,4 +39,12 @@ public class HttpSession {
     public void invalidate() {
         sessionTable.clear();
     }
+
+    public boolean contains(String user) {
+        return sessionTable.containsKey(user);
+    }
+
+    public String getType() {
+        return SESSION_TYPE;
+    }
 }

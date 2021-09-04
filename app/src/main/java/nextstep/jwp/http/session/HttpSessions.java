@@ -13,15 +13,11 @@ public class HttpSessions {
 
     private HttpSessions() {}
 
-    public static void register(HttpSession session) {
+    public static void addSession(HttpSession session) {
         SESSIONS.put(session.getId(), session);
     }
 
     public static boolean contains(String sessionId) {
         return SESSIONS.containsKey(sessionId);
-    }
-
-    public static boolean contains(HttpSession session) {
-        return contains(session.getId());
     }
 }

@@ -1,8 +1,8 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.exception.BaseException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpResponseStatus;
 import nextstep.jwp.http.session.HttpSession;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
@@ -18,22 +18,21 @@ public class LoginController extends AbstractController{
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
         if (isLogin(httpRequest.getSession())) {
-            httpResponse.redirect("/index.html");
+            httpResponse.status(HttpResponseStatus.FOUND);
+            httpResponse.location("/index.html");
             return;
         }
 
-        httpResponse.ok("/login.html");
+        httpResponse.status(HttpResponseStatus.OK);
+        httpResponse.resource("/login.html");
     }
 
     @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
-        try {
-            User loginUser = userService.login(httpRequest.getQueryValue("account"), httpRequest.getQueryValue("password"));
-            createSession(httpRequest, httpResponse, loginUser);
-            httpResponse.redirect("/index.html");
-        } catch (BaseException e) {
-            httpResponse.redirect("/401.html");
-        }
+        User loginUser = userService.login(httpRequest.getQueryValue("account"), httpRequest.getQueryValue("password"));
+        createSession(httpRequest, httpResponse, loginUser);
+        httpResponse.status(HttpResponseStatus.FOUND);
+        httpResponse.location("/index.html");
     }
 
     private void createSession(HttpRequest httpRequest, HttpResponse httpResponse, User loginUser) {

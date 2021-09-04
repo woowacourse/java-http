@@ -26,14 +26,16 @@ class HttpResponseTest {
     @Test
     void ok() throws IOException {
         URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
+        String expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: 5564\r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         HttpResponse httpResponse = new HttpResponse(outputStream);
-        httpResponse.ok("/index.html");
+        httpResponse.status(HttpResponseStatus.OK);
+        httpResponse.resource("/index.html");
+        httpResponse.write();
 
         String result = new String(Files.readAllBytes(Path.of("src/test/resources/test.txt")));
 
@@ -43,11 +45,12 @@ class HttpResponseTest {
     @DisplayName("404 Not Found 응답 테스트")
     @Test
     void notfound() throws IOException {
-        String expected = "HTTP/1.1 404 Not Found \r\n" +
+        String expected = "HTTP/1.1 404 Not Found\r\n" +
                 "\r\n";
 
         HttpResponse httpResponse = new HttpResponse(outputStream);
-        httpResponse.notFound();
+        httpResponse.status(HttpResponseStatus.NOT_FOUND);
+        httpResponse.write();
 
         String result = new String(Files.readAllBytes(Path.of("src/test/resources/test.txt")));
 
@@ -57,12 +60,14 @@ class HttpResponseTest {
     @DisplayName("302 Redirect 응답 테스트")
     @Test
     void redirect() throws IOException {
-        String expected = "HTTP/1.1 302 Redirect \r\n" +
-                "Location: /index.html \r\n" +
+        String expected = "HTTP/1.1 302 Found\r\n" +
+                "Location: /index.html\r\n" +
                 "\r\n";
 
         HttpResponse httpResponse = new HttpResponse(outputStream);
-        httpResponse.redirect("/index.html");
+        httpResponse.status(HttpResponseStatus.FOUND);
+        httpResponse.location("/index.html");
+        httpResponse.write();
 
         String result = new String(Files.readAllBytes(Path.of("src/test/resources/test.txt")));
 

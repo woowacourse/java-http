@@ -13,9 +13,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestHandlerTest {
 
-    private static final String HEADER_RESPONSE = "HTTP/1.1 200 OK \r\n" +
-            "Content-Type: text/html;charset=utf-8 \r\n" +
-            "Content-Length: 5564 \r\n" +
+    private static final String HEADER_RESPONSE = "HTTP/1.1 200 OK\r\n" +
+            "Content-Type: text/html;charset=utf-8\r\n" +
+            "Content-Length: 5564\r\n" +
             "\r\n";
 
 
@@ -38,9 +38,9 @@ class RequestHandlerTest {
     void index() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "",
                 "");
 

@@ -1,6 +1,7 @@
 package nextstep.jwp.http.request;
 
 import nextstep.jwp.http.HttpMethod;
+import nextstep.jwp.http.HttpVersion;
 import nextstep.jwp.http.exception.HttpFormatException;
 
 import java.util.HashMap;
@@ -10,11 +11,13 @@ import static nextstep.jwp.http.HttpUtil.parseQuery;
 
 public class RequestLine {
 
+    private String httpVersion;
     private HttpMethod httpMethod;
     private String path;
     private Map<String, String> params;
 
-    private RequestLine(HttpMethod method, String path, Map<String, String> params) {
+    private RequestLine(String httpVersion, HttpMethod method, String path, Map<String, String> params) {
+        this.httpVersion = httpVersion;
         this.httpMethod = method;
         this.path = path;
         this.params = params;
@@ -30,8 +33,11 @@ public class RequestLine {
         String method = tokens[0];
         HttpMethod httpMethod = HttpMethod.valueOf(method);
         String path = tokens[1];
+        String httpVersion = tokens[2];
+
+        HttpVersion.checkHttpVersion(httpVersion);
         if ("POST".equals(method)) {
-            return new RequestLine(httpMethod, path, new HashMap<>());
+            return new RequestLine(httpVersion, httpMethod, path, new HashMap<>());
         }
 
         int index = tokens[1].indexOf("?");
@@ -42,7 +48,7 @@ public class RequestLine {
             params = parseQuery(tokens[1].substring(index + 1));
         }
 
-        return new RequestLine(httpMethod, path, params);
+        return new RequestLine(httpVersion, httpMethod, path, params);
     }
 
     public boolean checkMethod(String method) {
@@ -55,5 +61,9 @@ public class RequestLine {
 
     public String getQueryParam(String key) {
         return params.get(key);
+    }
+
+    public String getHttpVersion() {
+        return httpVersion;
     }
 }

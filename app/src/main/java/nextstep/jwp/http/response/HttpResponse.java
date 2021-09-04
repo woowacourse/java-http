@@ -1,6 +1,7 @@
 package nextstep.jwp.http.response;
 
 import nextstep.jwp.http.ContentType;
+import nextstep.jwp.http.HttpVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,13 +15,15 @@ import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static com.google.common.net.HttpHeaders.CONTENT_LENGTH;
-import static com.google.common.net.HttpHeaders.CONTENT_TYPE;
+import static com.google.common.net.HttpHeaders.*;
 
 public class  HttpResponse {
     private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
+
     private DataOutputStream dataOutputStream;
     private Map<String, String> headers = new LinkedHashMap<>();
+    private HttpResponseStatus httpResponseStatus;
+    private String resource;
 
     public HttpResponse(OutputStream outputStream) {
         dataOutputStream = new DataOutputStream(outputStream);
@@ -30,20 +33,41 @@ public class  HttpResponse {
         headers.put(key, value);
     }
 
-    public void ok(String resourcePath) {
-        URL resource = HttpResponse.class.getClassLoader().getResource("static" + resourcePath);
+    public void status(HttpResponseStatus httpResponseStatus) {
+        this.httpResponseStatus = httpResponseStatus;
+    }
 
-        if (resource == null) {
-            notFound();
+    public void resource(String resource) {
+        System.out.println("resource : " + resource);
+        this.resource = resource;
+    }
+
+    public void write() throws IOException {
+        if (httpResponseStatus == null) {
+            throw new RuntimeException();
+        }
+
+        dataOutputStream.writeBytes(HttpVersion.HTTP_VERSION_1_1 + " " + httpResponseStatus.getLine() + "\r\n");
+        if (HttpResponseStatus.OK.equals(httpResponseStatus)) {
+            ok();
             return;
         }
 
+        attachHeaderToResponse();
+    }
+
+    private void ok() {
+        URL url = HttpResponse.class.getClassLoader().getResource("static" + resource);
+
+        if (resource == null) {
+            throw new RuntimeException();
+        }
+
         try {
-            Path path = new File(resource.getPath()).toPath();
+            Path path = new File(url.getPath()).toPath();
             byte[] body = Files.readAllBytes(path);
-            String extension = resourcePath.substring(resourcePath.lastIndexOf("."));
+            String extension = resource.substring(resource.lastIndexOf("."));
             headers.put(CONTENT_TYPE, ContentType.findContentType(extension).getType());
-            System.out.println(resourcePath);
             headers.put(CONTENT_LENGTH, body.length + "");
             ok(body);
         } catch (IOException e) {
@@ -52,38 +76,18 @@ public class  HttpResponse {
     }
 
     private void ok(byte[] body) {
-        try {
-            dataOutputStream.writeBytes("HTTP/1.1 200 OK \r\n");
-            attachHeaderToResponse();
-            attachBodyToResponse(body);
-        } catch (IOException e) {
-            log.error("Exception ok", e);
-        }
+        attachHeaderToResponse();
+        attachBodyToResponse(body);
     }
 
-    public void redirect(String redirectUrl) {
-        try {
-            dataOutputStream.writeBytes("HTTP/1.1 302 Redirect \r\n");
-            dataOutputStream.writeBytes("Location: " + redirectUrl + " \r\n");
-            dataOutputStream.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error("Exception redirect", e);
-        }
-    }
-
-    public void notFound() {
-        try {
-            dataOutputStream.writeBytes("HTTP/1.1 404 Not Found \r\n");
-            dataOutputStream.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error("Exception notFound", e);
-        }
+    public void location(String location) {
+        headers.put(LOCATION, location);
     }
 
     private void attachHeaderToResponse() {
         try {
             for (Map.Entry<String, String> entry : headers.entrySet()) {
-                dataOutputStream.writeBytes(entry.getKey() + ": " + entry.getValue() + " \r\n");
+                dataOutputStream.writeBytes(entry.getKey() + ": " + entry.getValue() + "\r\n");
             }
             dataOutputStream.writeBytes("\r\n");
         } catch (IOException e) {

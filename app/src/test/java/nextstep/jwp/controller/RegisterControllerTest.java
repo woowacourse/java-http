@@ -32,9 +32,11 @@ class RegisterControllerTest {
     @Test
     void doGet() throws IOException {
         MockSocket mockSocket = new MockSocket("GET /login HTTP/1.1 \r\n");
-        registerController.doGet(HttpRequest.of(mockSocket.getInputStream()), new HttpResponse(mockSocket.getOutputStream()));
+        HttpResponse response = new HttpResponse(mockSocket.getOutputStream());
+        registerController.doGet(HttpRequest.of(mockSocket.getInputStream()), response);
+        response.write();
 
-        assertThat(mockSocket.output().split("\r\n")[0]).isEqualTo("HTTP/1.1 200 OK ");
+        assertThat(mockSocket.output().split("\r\n")[0]).isEqualTo("HTTP/1.1 200 OK");
     }
 
     @DisplayName("회원가입 성공 시 index.html로 Redirect 한다.")
@@ -50,9 +52,12 @@ class RegisterControllerTest {
                 "\r\n" +
                 "account=test&password=test&email=test@test.com");
 
-        registerController.doPost(HttpRequest.of(mockSocket.getInputStream()), new HttpResponse(mockSocket.getOutputStream()));
-        assertThat(mockSocket.output().split("\r\n")[0]).isEqualTo("HTTP/1.1 302 Redirect ");
-        assertThat(mockSocket.output().split("\r\n")[1]).isEqualTo("Location: /index.html ");
+        HttpResponse httpResponse = new HttpResponse(mockSocket.getOutputStream());
+        registerController.doPost(HttpRequest.of(mockSocket.getInputStream()), httpResponse);
+        httpResponse.write();
+        String[] response = mockSocket.output().split("\r\n");
+        assertThat(response[0]).isEqualTo("HTTP/1.1 302 Found");
+        assertThat(response).contains("Location: /index.html");
     }
 
 }

@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpResponseStatus;
 import nextstep.jwp.service.UserService;
 
 public class RegisterController extends AbstractController {
@@ -13,7 +14,8 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
-        httpResponse.ok("/register.html");
+        httpResponse.status(HttpResponseStatus.OK);
+        httpResponse.resource("/register.html");
     }
 
 
@@ -22,6 +24,8 @@ public class RegisterController extends AbstractController {
 
         userService.save(httpRequest.getQueryValue("account"), httpRequest.getQueryValue("password"),
                 httpRequest.getQueryValue("email"));
-        httpResponse.redirect("/index.html");
+
+        httpResponse.status(HttpResponseStatus.FOUND);
+        httpResponse.location("/index.html");
     }
 }

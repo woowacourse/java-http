@@ -3,6 +3,7 @@ package nextstep.jwp.server;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpResponseStatus;
 
 public class ControllerDispatcher {
 
@@ -22,7 +23,8 @@ public class ControllerDispatcher {
         Controller controller = RequestMapping.getController(httpRequest.getPath());
         if (controller == null) {
             String path = getDefaultPath(httpRequest.getPath());
-            httpResponse.ok(path);
+            httpResponse.status(HttpResponseStatus.OK);
+            httpResponse.resource(path);
             return;
         }
 

@@ -32,8 +32,9 @@ public class RequestHandler implements Runnable {
             HttpRequest httpRequest = HttpRequest.of(inputStream);
             HttpResponse httpResponse = new HttpResponse(outputStream);
             controllerDispatcher.execute(httpRequest, httpResponse);
+            httpResponse.write();
             outputStream.flush();
-        } catch (IOException exception) {
+        } catch (Exception exception) {
             log.error("Exception stream", exception);
         } finally {
             close();

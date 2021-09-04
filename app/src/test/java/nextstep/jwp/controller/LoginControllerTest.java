@@ -30,9 +30,11 @@ class LoginControllerTest {
     @Test
     void doGet() throws IOException {
         MockSocket mockSocket = new MockSocket("GET /login HTTP/1.1 \r\n");
-        loginController.doGet(HttpRequest.of(mockSocket.getInputStream()), new HttpResponse(mockSocket.getOutputStream()));
+        HttpResponse response = new HttpResponse(mockSocket.getOutputStream());
+        loginController.doGet(HttpRequest.of(mockSocket.getInputStream()), response);
+        response.write();
 
-        assertThat(mockSocket.output().split("\r\n")[0]).isEqualTo("HTTP/1.1 200 OK ");
+        assertThat(mockSocket.output().split("\r\n")[0]).isEqualTo("HTTP/1.1 200 OK");
     }
 
     @DisplayName("/login GET매핑 로그인이 되어있다면, index.html로 Redirect한다.")
@@ -45,9 +47,11 @@ class LoginControllerTest {
         MockSocket mockSocket = new MockSocket("GET /login HTTP/1.1 \r\n" +
                 "Cookie: JSESSIONID=" + uuid + "\r\n");
 
-        loginController.doGet(HttpRequest.of(mockSocket.getInputStream()), new HttpResponse(mockSocket.getOutputStream()));
+        HttpResponse response = new HttpResponse(mockSocket.getOutputStream());
+        loginController.doGet(HttpRequest.of(mockSocket.getInputStream()), response);
+        response.write();
 
-        assertThat302Response(mockSocket, "HTTP/1.1 302 Redirect ", "Location: /index.html ");
+        assertThat302Response(mockSocket, "HTTP/1.1 302 Found", "Location: /index.html");
     }
 
     @DisplayName("로그인 성공 시 index.html로 Redirect 한다.")
@@ -58,8 +62,10 @@ class LoginControllerTest {
                 generatePostRequestHeaderWithSession(uuid) +
                 "account=test&password=test");
 
-        loginController.doPost(HttpRequest.of(mockSocket.getInputStream()), new HttpResponse(mockSocket.getOutputStream()));
-        assertThat302Response(mockSocket, "HTTP/1.1 302 Redirect ", "Location: /index.html ");
+        HttpResponse response = new HttpResponse(mockSocket.getOutputStream());
+        loginController.doPost(HttpRequest.of(mockSocket.getInputStream()), response);
+        response.write();
+        assertThat302Response(mockSocket, "HTTP/1.1 302 Found", "Location: /index.html");
     }
 
     @DisplayName("로그인 실패 시 401.html로 Redirect 한다.")
@@ -70,23 +76,25 @@ class LoginControllerTest {
                 generatePostRequestHeaderWithSession(uuid) +
                 "account=test&password=tost");
 
-        loginController.doPost(HttpRequest.of(mockSocket.getInputStream()), new HttpResponse(mockSocket.getOutputStream()));
+        HttpResponse response = new HttpResponse(mockSocket.getOutputStream());
+        loginController.doPost(HttpRequest.of(mockSocket.getInputStream()),response);
 
-        assertThat302Response(mockSocket, "HTTP/1.1 302 Redirect ", "Location: /401.html ");
+        assertThat302Response(mockSocket, "HTTP/1.1 302 Found", "Location: /401.html");
     }
 
 
     private void assertThat302Response(MockSocket mockSocket, String responseLine, String header) {
-        assertThat(mockSocket.output().split("\r\n")[0]).isEqualTo(responseLine);
-        assertThat(mockSocket.output().split("\r\n")[1]).isEqualTo(header);
+        String[] response = mockSocket.output().split("\r\n");
+        assertThat(response[0]).isEqualTo(responseLine);
+        assertThat(response).contains(header);
     }
 
 
     private String generatePostRequestHeaderWithSession(String uuid) {
-        return "POST /login HTTP/1.1 \r\n" +
-                "Host: localhost:8080 \r\n" +
-                "Content-Length: 26 \r\n" +
-                "Connection-Type: application/x-www-form-urlencoded \r\n" +
+        return "POST /login HTTP/1.1\r\n" +
+                "Host: localhost:8080\r\n" +
+                "Content-Length: 26\r\n" +
+                "Connection-Type: application/x-www-form-urlencoded\r\n" +
                 "Cookie: JSESSIONID=" + uuid + "\r\n" +
                 "Accept: */* \r\n" +
                 "\r\n";

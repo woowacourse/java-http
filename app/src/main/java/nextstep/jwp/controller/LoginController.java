@@ -3,7 +3,8 @@ package nextstep.jwp.controller;
 import static nextstep.jwp.controller.StaticResourcePath.INDEX_PAGE;
 import static nextstep.jwp.controller.StaticResourcePath.NOT_FOUND_PAGE;
 import static nextstep.jwp.controller.StaticResourcePath.UNAUTHORIZED_PAGE;
-import static nextstep.jwp.http.common.HttpStatus.*;
+import static nextstep.jwp.http.common.HttpStatus.FOUND;
+import static nextstep.jwp.http.common.HttpStatus.OK;
 
 import java.io.IOException;
 import nextstep.jwp.controller.request.LoginRequest;
@@ -37,9 +38,8 @@ public class LoginController extends RestController {
             if (httpRequest.hasCookie() && loginService.isAlreadyLogin(httpRequest.getCookie())) {
                 return HttpResponse.redirect(FOUND, INDEX_PAGE.getValue());
             }
-            
-            StaticResource staticResource = staticResourceService
-                .findByPathWithExtension(httpRequest.getUri(), ".html");
+
+            StaticResource staticResource = staticResourceService.findByPathWithExtension(httpRequest.getUri(), ".html");
 
             return HttpResponse.withBody(HttpStatus.OK, staticResource);
         } catch (StaticResourceNotFoundException e) {

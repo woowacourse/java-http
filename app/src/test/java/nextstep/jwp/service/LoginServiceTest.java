@@ -13,7 +13,6 @@ import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.common.HttpCookie;
 import nextstep.jwp.model.User;
 import nextstep.jwp.server.HttpSessions;
-import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

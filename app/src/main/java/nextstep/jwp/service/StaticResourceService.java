@@ -21,8 +21,7 @@ public class StaticResourceService {
         }
     }
 
-    public StaticResource findByPathWithExtension(String path, String extension)
-        throws IOException {
+    public StaticResource findByPathWithExtension(String path, String extension) throws IOException {
         return findByPath(path + extension);
     }
 }

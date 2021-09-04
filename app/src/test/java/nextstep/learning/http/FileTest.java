@@ -18,8 +18,7 @@ import org.junit.jupiter.api.Test;
 class FileTest {
 
     /**
-     * File 객체를 생성하려면 파일의 경로를 알아야 한다.<br> 자바 애플리케이션은 resource 디렉터리에 정적 파일을 저장한다.<br> resource 디렉터리의
-     * 경로는 어떻게 알아낼 수 있을까?
+     * File 객체를 생성하려면 파일의 경로를 알아야 한다.<br> 자바 애플리케이션은 resource 디렉터리에 정적 파일을 저장한다.<br> resource 디렉터리의 경로는 어떻게 알아낼 수 있을까?
      */
     @Test
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {

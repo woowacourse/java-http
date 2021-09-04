@@ -3,7 +3,6 @@ package nextstep.jwp.http.response;
 import java.nio.charset.StandardCharsets;
 import nextstep.jwp.http.common.HttpStatus;
 import nextstep.jwp.model.StaticResource;
-import nextstep.jwp.server.HttpSession;
 
 public class HttpResponse {
 

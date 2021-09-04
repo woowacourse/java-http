@@ -32,8 +32,7 @@ public class RegisterController extends RestController {
     @Override
     protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
         try {
-            StaticResource staticResource = staticResourceService
-                .findByPathWithExtension(httpRequest.getUri(), ".html");
+            StaticResource staticResource = staticResourceService.findByPathWithExtension(httpRequest.getUri(), ".html");
 
             return HttpResponse.withBody(HttpStatus.OK, staticResource);
         } catch (StaticResourceNotFoundException e) {

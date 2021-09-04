@@ -46,9 +46,13 @@ public class HttpHeaders {
             final String[] types = value.split(",");
 
             putContentType(headers, types);
-            return;
         }
-        headers.put(key, value);
+        if (key.equals("Content-Length")) {
+            headers.put(key, value);
+        }
+        if (key.equals("Cookie")) {
+            headers.put(key, value);
+        }
     }
 
     private void putContentType(final Map<String, String> headers, final String[] types) {
@@ -104,28 +108,30 @@ public class HttpHeaders {
     }
 
     public void setCookie(final String id) {
-        headers.remove("Cookie");
-        headers.put("Cookie", id);
+        headers.put("Set-Cookie", createNewCookie(id));
+    }
+
+    private String createNewCookie(final String value) {
+        return SESSION_ID + "=" + value + "; ";
     }
 
     public String convertHeaderToResponse() {
         final StringBuilder builder = new StringBuilder();
 
         for (Entry<String, String> pair : headers.entrySet()) {
-            builder.append(pair.getKey())
-                .append(HEADER_DELIMITER)
-                .append(pair.getValue())
-                .append("\r\n");
+            createResponseHeaders(builder, pair);
         }
-        createNewCookie(builder);
 
         return builder.toString();
     }
 
-    private void createNewCookie(final StringBuilder builder) {
-        if (cookie.hasNotCookie()) {
+    private void createResponseHeaders(final StringBuilder builder, final Entry<String, String> pair) {
+        if (pair.getKey().equals("Cookie")) {
             return;
         }
-        builder.append(cookie.toString());
+        builder.append(pair.getKey())
+            .append(HEADER_DELIMITER)
+            .append(pair.getValue())
+            .append("\r\n");
     }
 }

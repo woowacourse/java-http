@@ -24,27 +24,7 @@ public class HttpCookie {
         cookies.put(key, value);
     }
 
-    public String cookies() {
-        final StringJoiner line = new StringJoiner("; ");
-
-        for (String key : cookies.keySet()) {
-            line.add(key + "=" + cookies.get(key));
-        }
-        line.add("\r\n");
-
-        return line.toString();
-    }
-
     public String get(String key) {
         return cookies.get(key);
-    }
-
-    public boolean hasNotCookie() {
-        return cookies.size() == 0;
-    }
-
-    @Override
-    public String toString() {
-        return "Set-Cookie: " + cookies();
     }
 }

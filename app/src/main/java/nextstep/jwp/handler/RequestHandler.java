@@ -2,12 +2,13 @@ package nextstep.jwp.handler;
 
 import java.io.*;
 import java.net.Socket;
-import java.net.URISyntaxException;
 import java.util.Objects;
 
 import nextstep.jwp.controller.Controller;
+import nextstep.jwp.exception.handler.BadRequestException;
 import nextstep.jwp.exception.handler.DefaultFileNotFoundException;
 import nextstep.jwp.exception.handler.HttpMessageException;
+import nextstep.jwp.exception.handler.NotFoundException;
 import nextstep.jwp.handler.request.HttpRequest;
 import nextstep.jwp.handler.response.HttpResponse;
 import org.slf4j.Logger;
@@ -68,13 +69,13 @@ public class RequestHandler implements Runnable {
             controller.handle(httpRequest, httpResponse);
             return httpResponse.makeHttpMessage();
 
-        } catch (HttpMessageException | URISyntaxException e) {
+        } catch (HttpMessageException | BadRequestException e) {
             log.error(ERROR_PREFIX, e);
             HttpResponse httpResponse = new HttpResponse(HTTP_VERSION);
             httpResponse.badRequest("/400.html");
             return httpResponse.makeHttpMessage();
 
-        } catch (FileNotFoundException e) {
+        } catch (NotFoundException e) {
             log.error(ERROR_PREFIX, e);
             HttpResponse httpResponse = new HttpResponse(HTTP_VERSION);
             httpResponse.notFound("/404.html");

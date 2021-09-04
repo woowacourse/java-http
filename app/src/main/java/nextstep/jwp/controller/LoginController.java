@@ -1,7 +1,5 @@
 package nextstep.jwp.controller;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -21,7 +19,7 @@ public class LoginController extends AbstractController {
     public static final String INDEX_HTML = "/index.html";
 
     @Override
-    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException, URISyntaxException {
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
         try {
             HttpSession session = httpRequest.getSession();
             if (session.containsAttribute("user")) {
@@ -43,7 +41,7 @@ public class LoginController extends AbstractController {
     private void doGetWithQuery(HttpRequest httpRequest, HttpResponse httpResponse) {}
 
     @Override
-    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException, URISyntaxException {
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
         HttpBody httpBody = httpRequest.getBody();
         String account = httpBody.getBodyParams("account");
         String password = httpBody.getBodyParams("password");

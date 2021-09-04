@@ -7,24 +7,33 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import nextstep.jwp.exception.handler.BadRequestException;
 import nextstep.jwp.exception.handler.DefaultFileNotFoundException;
+import nextstep.jwp.exception.handler.InternalServerException;
+import nextstep.jwp.exception.handler.NotFoundException;
 
 public class FileReader {
 
     public static final String STATIC_FILE_URL_PREFIX = "static";
 
-    public static File readFile(String fileUri) throws IOException, URISyntaxException {
-        URL resourceUrl = getFileUri(STATIC_FILE_URL_PREFIX + fileUri);
-
-        String content = Files.readString(Paths.get(resourceUrl.toURI()));
-        ContentType type = ContentType.findType(resourceUrl);
-        return new File(type, content);
+    public static File readFile(String fileUri) {
+        try {
+            URL resourceUrl = getFileUri(STATIC_FILE_URL_PREFIX + fileUri);
+            String content = Files.readString(Paths.get(resourceUrl.toURI()));
+            ContentType type = ContentType.findType(resourceUrl);
+            return new File(type, content);
+        } catch (FileNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        } catch (URISyntaxException e) {
+            throw new BadRequestException(e.getMessage());
+        } catch (IOException e) {
+            throw new InternalServerException(e.getMessage());
+        }
     }
 
     public static File readErrorFile(String fileUri) {
         try {
             URL resourceUrl = getFileUri(STATIC_FILE_URL_PREFIX + fileUri);
-
             String content = Files.readString(Paths.get(resourceUrl.toURI()));
             ContentType type = ContentType.findType(resourceUrl);
             return new File(type, content);

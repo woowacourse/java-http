@@ -1,10 +1,7 @@
 package nextstep.jwp.handler.response;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 
-import nextstep.jwp.exception.handler.DefaultFileNotFoundException;
 import nextstep.jwp.handler.Cookie;
 import nextstep.jwp.handler.HttpBody;
 import nextstep.jwp.handler.HttpCookie;
@@ -28,14 +25,14 @@ public class HttpResponse {
         this.cookies = new HttpCookie();
     }
 
-    public void ok(String url) throws IOException, URISyntaxException {
+    public void ok(String url) {
         responseLine.setHttpStatus(HttpStatus.OK);
 
         File file = FileReader.readFile(url);
         body(file.getContent(), file.getContentType());
     }
 
-    public void redirect(String url) throws IOException, URISyntaxException {
+    public void redirect(String url) {
         responseLine.setHttpStatus(HttpStatus.FOUND);
         addHttpHeader(LOCATION_HEADER, url);
 
@@ -43,7 +40,7 @@ public class HttpResponse {
         body(file.getContent(), file.getContentType());
     }
 
-    public void badRequest(String url) throws DefaultFileNotFoundException {
+    public void badRequest(String url) {
         responseLine.setHttpStatus(HttpStatus.BAD_REQUEST);
         addHttpHeader(LOCATION_HEADER, url);
 
@@ -51,7 +48,7 @@ public class HttpResponse {
         body(file.getContent(), file.getContentType());
     }
 
-    public void unauthorized(String url) throws DefaultFileNotFoundException {
+    public void unauthorized(String url) {
         responseLine.setHttpStatus(HttpStatus.UNAUTHORIZED);
         addHttpHeader(LOCATION_HEADER, url);
 
@@ -59,7 +56,7 @@ public class HttpResponse {
         body(file.getContent(), file.getContentType());
     }
 
-    public void notFound(String url) throws DefaultFileNotFoundException {
+    public void notFound(String url) {
         responseLine.setHttpStatus(HttpStatus.NOT_FOUND);
         addHttpHeader(LOCATION_HEADER, url);
 
@@ -67,7 +64,7 @@ public class HttpResponse {
         body(file.getContent(), file.getContentType());
     }
 
-    public void internalServerError(String url) throws DefaultFileNotFoundException {
+    public void internalServerError(String url) {
         responseLine.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         addHttpHeader(LOCATION_HEADER, url);
 

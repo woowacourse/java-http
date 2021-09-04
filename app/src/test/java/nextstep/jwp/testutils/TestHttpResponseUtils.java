@@ -1,8 +1,8 @@
 package nextstep.jwp.testutils;
 
-import nextstep.jwp.http.common.HttpStatusCode;
-import nextstep.jwp.http.message.MessageBody;
-import nextstep.jwp.http.message.response.HttpResponseMessage;
+import nextstep.jwp.framework.common.HttpStatusCode;
+import nextstep.jwp.framework.message.MessageBody;
+import nextstep.jwp.framework.message.response.HttpResponseMessage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

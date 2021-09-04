@@ -1,7 +1,7 @@
 package nextstep.jwp.testutils;
 
-import nextstep.jwp.http.HttpTranslator;
-import nextstep.jwp.http.message.request.HttpRequestMessage;
+import nextstep.jwp.framework.HttpTranslator;
+import nextstep.jwp.framework.message.request.HttpRequestMessage;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

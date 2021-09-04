@@ -1,5 +1,7 @@
 package nextstep.jwp.controller;
 
+import static nextstep.jwp.controller.StaticResourcePath.NOT_FOUND_PAGE;
+
 import java.io.IOException;
 import nextstep.jwp.exception.StaticResourceNotFoundException;
 import nextstep.jwp.http.common.HttpStatus;
@@ -26,7 +28,7 @@ public class StaticResourceController implements Controller {
 
             return HttpResponse.withBody(HttpStatus.OK, staticResource);
         } catch (StaticResourceNotFoundException e) {
-            StaticResource staticResource = staticResourceService.findByPath("/404.html");
+            StaticResource staticResource = staticResourceService.findByPath(NOT_FOUND_PAGE.getValue());
 
             LOGGER.warn(e.getMessage());
 
@@ -35,12 +37,7 @@ public class StaticResourceController implements Controller {
     }
 
     @Override
-    public HttpResponse doService(HttpRequest httpRequest) throws IOException {
+    public HttpResponse service(HttpRequest httpRequest) throws IOException {
         return doGet(httpRequest);
-    }
-
-    @Override
-    public boolean matchUri(String uri) {
-        return false;
     }
 }

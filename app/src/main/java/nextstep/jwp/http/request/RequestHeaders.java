@@ -1,5 +1,9 @@
 package nextstep.jwp.http.request;
 
+import static nextstep.jwp.http.common.HttpHeader.CONTENT_LENGTH;
+import static nextstep.jwp.http.common.HttpHeader.COOKIE;
+import static nextstep.jwp.http.common.HttpHeader.TRANSFER_ENCODING;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -8,14 +12,14 @@ import java.util.Map.Entry;
 import java.util.StringJoiner;
 import nextstep.jwp.exception.HttpRequestNotHaveBodyException;
 import nextstep.jwp.exception.InvalidRequestHeader;
+import nextstep.jwp.exception.QueryParameterNotFoundException;
+import nextstep.jwp.http.common.HttpCookie;
 
 public class RequestHeaders {
 
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
     private static final int EXPECT_LINE_LENGTH = 2;
-    private static final String CONTENT_LENGTH = "content-length";
-    private static final String TRANSFER_ENCODING = "transfer-encoding";
     private static final String NEW_LINE = System.getProperty("line.separator");
 
     private final Map<String, String> headers;
@@ -55,20 +59,30 @@ public class RequestHeaders {
         return splitedLine;
     }
 
-    public boolean requestHasBody() {
-        return headers.containsKey(CONTENT_LENGTH) || headers.containsKey(TRANSFER_ENCODING);
+    public boolean hasCookie() {
+        return headers.containsKey(COOKIE.toLowerString());
     }
 
-    private boolean requestNotHaveBody() {
-        return !headers.containsKey(CONTENT_LENGTH) || headers.containsKey(TRANSFER_ENCODING);
+    public boolean requestHasBody() {
+        return headers.containsKey(CONTENT_LENGTH.toLowerString())
+            || headers.containsKey(TRANSFER_ENCODING.toLowerString());
+    }
+
+    public HttpCookie getCookie() {
+        if (hasCookie()) {
+            String cookieHeader = headers.get(COOKIE.toLowerString());
+            return HttpCookie.parse(cookieHeader);
+        }
+
+        throw new QueryParameterNotFoundException();
     }
 
     public int getContentLength() {
-        if (requestNotHaveBody()) {
-            throw new HttpRequestNotHaveBodyException();
+        if (requestHasBody()) {
+            return Integer.parseInt(headers.get(CONTENT_LENGTH.toLowerString()));
         }
 
-        return Integer.parseInt(headers.get(CONTENT_LENGTH));
+        throw new HttpRequestNotHaveBodyException();
     }
 
     @Override

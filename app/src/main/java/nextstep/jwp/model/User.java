@@ -31,22 +31,22 @@ public class User {
         }
     }
 
-    public String getAccount() {
-        return account;
-    }
-
     public Long getId() {
         return id;
+    }
+
+    public String getAccount() {
+        return account;
     }
 
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
-                ", account='" + account + '\'' +
-                ", email='" + email + '\'' +
-                ", password='" + password + '\'' +
-                '}';
+            "id=" + id +
+            ", account='" + account + '\'' +
+            ", email='" + email + '\'' +
+            ", password='" + password + '\'' +
+            '}';
     }
 
     @Override

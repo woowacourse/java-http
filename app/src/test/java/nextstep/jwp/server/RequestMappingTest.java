@@ -1,4 +1,4 @@
-package nextstep.jwp.controller;
+package nextstep.jwp.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,17 +12,33 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
-class ControllersTest {
+class RequestMappingTest {
 
     private static final String NEW_LINE = System.getProperty("line.separator");
 
-    private Controllers controllers;
+    private RequestMapping requestMapping;
     private HttpRequest httpRequest;
 
     @BeforeEach
     void setUp() {
-        controllers = Controllers.loadContext();
+        requestMapping = RequestMapping.loadContext();
+    }
+
+    @DisplayName("split 메서드를 이용해 URI을 파싱한다.")
+    @ParameterizedTest
+    @ValueSource(strings = {"/login", "/login/abc/f", "/login/"})
+    void splitUri(String requestUri) {
+        // given
+        String expectResult = "login";
+
+        // when
+        String[] splitedUri = requestUri.split("/");
+
+        // then
+        assertThat(splitedUri[1]).isEqualTo(expectResult);
     }
 
     @DisplayName("URI에 따라 컨트롤러를 찾아 요청을 수행한다.")
@@ -53,10 +69,11 @@ class ControllersTest {
                     + "login is good";
 
                 // when
-                HttpResponse httpResponse = controllers.doService(httpRequest);
+                HttpResponse httpResponse = requestMapping.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
 
             @DisplayName("POST 요청")
@@ -73,14 +90,25 @@ class ControllersTest {
                     httpRequest = HttpRequest.parse(inputStream);
                 }
 
-                String expectString = "HTTP/1.1 302 Found \n"
-                    + "Location: /index.html ";
+                String expectStatusLine = "HTTP/1.1 200 OK ";
+                String expectCookie = "Set-Cookie:";
+                String expectContentLength = "Content-Length: 11 ";
+                String expectContentType = "Content-Type: text/html; charset=UTF-8 ";
+                String expectEnterLine = "";
+                String expectBody = "hihi hello!";
 
                 // when
-                HttpResponse httpResponse = controllers.doService(httpRequest);
+                HttpResponse httpResponse = requestMapping.doService(httpRequest);
+                String response = new String(httpResponse.toBytes());
+                String[] splitedResponse = response.split("\n");
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(splitedResponse[0]).isEqualTo(expectStatusLine);
+                assertThat(splitedResponse[1].startsWith(expectCookie)).isTrue();
+                assertThat(splitedResponse[2]).isEqualTo(expectContentLength);
+                assertThat(splitedResponse[3]).isEqualTo(expectContentType);
+                assertThat(splitedResponse[4]).isEqualTo(expectEnterLine);
+                assertThat(splitedResponse[5]).isEqualTo(expectBody);
             }
         }
 
@@ -108,10 +136,11 @@ class ControllersTest {
                     + "register is good";
 
                 // when
-                HttpResponse httpResponse = controllers.doService(httpRequest);
+                HttpResponse httpResponse = requestMapping.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
 
             @DisplayName("POST 요청")
@@ -132,10 +161,11 @@ class ControllersTest {
                     + "Location: /index.html ";
 
                 // when
-                HttpResponse httpResponse = controllers.doService(httpRequest);
+                HttpResponse httpResponse = requestMapping.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
         }
 
@@ -147,7 +177,8 @@ class ControllersTest {
             @Test
             void get() throws IOException {
                 // given
-                String requestString = String.join(NEW_LINE, "GET /static-page.html HTTP/1.1", "", "");
+                String requestString = String.join(NEW_LINE, "GET /static-page.html HTTP/1.1", "",
+                    "");
                 try (InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(
                     StandardCharsets.UTF_8))) {
                     httpRequest = HttpRequest.parse(inputStream);
@@ -160,17 +191,19 @@ class ControllersTest {
                     + "static page is good!";
 
                 // when
-                HttpResponse httpResponse = controllers.doService(httpRequest);
+                HttpResponse httpResponse = requestMapping.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
 
             @DisplayName("POST 요청")
             @Test
             void post() throws IOException {
                 // given
-                String requestString = String.join(NEW_LINE, "POST /static-page.html HTTP/1.1", "", "");
+                String requestString = String.join(NEW_LINE, "POST /static-page.html HTTP/1.1", "",
+                    "");
                 try (InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(
                     StandardCharsets.UTF_8))) {
                     httpRequest = HttpRequest.parse(inputStream);
@@ -183,10 +216,11 @@ class ControllersTest {
                     + "static page is good!";
 
                 // when
-                HttpResponse httpResponse = controllers.doService(httpRequest);
+                HttpResponse httpResponse = requestMapping.doService(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
         }
     }

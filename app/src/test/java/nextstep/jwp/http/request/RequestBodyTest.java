@@ -18,7 +18,8 @@ class RequestBodyTest {
         private final static String QUERY = "aaa";
         private final static String PARAMETER = "bbb";
 
-        private final RequestBody body = RequestBody.parse(String.format("%s=%s", QUERY, PARAMETER));
+        private final RequestBody body = RequestBody.parse(
+            String.format("%s=%s", QUERY, PARAMETER));
 
         @DisplayName("parameter 요청시 결과를 반환한다.")
         @Test

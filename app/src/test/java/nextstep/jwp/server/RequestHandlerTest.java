@@ -1,10 +1,9 @@
-package nextstep.jwp;
-
-import nextstep.jwp.controller.Controllers;
-import nextstep.jwp.server.RequestHandler;
-import org.junit.jupiter.api.Test;
+package nextstep.jwp.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import nextstep.jwp.MockSocket;
+import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
 
@@ -12,8 +11,8 @@ class RequestHandlerTest {
     void run() {
         // given
         final MockSocket socket = new MockSocket();
-        final Controllers controllers = Controllers.loadContext();
-        final RequestHandler requestHandler = new RequestHandler(socket, controllers);
+        final RequestMapping requestMapping = RequestMapping.loadContext();
+        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
 
         // when
         requestHandler.run();
@@ -31,16 +30,16 @@ class RequestHandlerTest {
     @Test
     void index() {
         // given
-        final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        final String httpRequest = String.join("\r\n",
+            "GET /index.html HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "",
+            "");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final Controllers controllers = Controllers.loadContext();
-        final RequestHandler requestHandler = new RequestHandler(socket, controllers);
+        final RequestMapping requestMapping = RequestMapping.loadContext();
+        final RequestHandler requestHandler = new RequestHandler(socket, requestMapping);
 
         // when
         requestHandler.run();

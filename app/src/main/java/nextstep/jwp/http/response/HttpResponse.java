@@ -13,7 +13,8 @@ public class HttpResponse {
     private final ResponseHeaders responseHeaders;
     private final ResponseBody responseBody;
 
-    public HttpResponse(StatusLine statusLine, ResponseHeaders responseHeaders, ResponseBody responseBody) {
+    public HttpResponse(StatusLine statusLine, ResponseHeaders responseHeaders,
+                        ResponseBody responseBody) {
         this.statusLine = statusLine;
         this.responseHeaders = responseHeaders;
         this.responseBody = responseBody;
@@ -22,6 +23,14 @@ public class HttpResponse {
     public static HttpResponse withBody(HttpStatus httpStatus, StaticResource staticResource) {
         StatusLine statusLine = StatusLine.from(httpStatus);
         ResponseHeaders responseHeaders = ResponseHeaders.ofBody(staticResource);
+        ResponseBody responseBody = new ResponseBody(staticResource.getContent());
+
+        return new HttpResponse(statusLine, responseHeaders, responseBody);
+    }
+
+    public static HttpResponse withBodyAndCookie(HttpStatus httpStatus, StaticResource staticResource, String cookie) {
+        StatusLine statusLine = StatusLine.from(httpStatus);
+        ResponseHeaders responseHeaders = ResponseHeaders.ofBodyAndSetCookie(staticResource, cookie);
         ResponseBody responseBody = new ResponseBody(staticResource.getContent());
 
         return new HttpResponse(statusLine, responseHeaders, responseBody);
@@ -37,6 +46,14 @@ public class HttpResponse {
 
     public byte[] toBytes() {
         return toString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    public String getStatusLine() {
+        return statusLine.toString();
+    }
+
+    public String getResponseHeaders() {
+        return responseHeaders.toString();
     }
 
     @Override

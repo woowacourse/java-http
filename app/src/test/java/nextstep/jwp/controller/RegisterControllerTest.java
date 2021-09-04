@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
@@ -17,8 +18,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 class RegisterControllerTest {
 
@@ -30,19 +29,12 @@ class RegisterControllerTest {
     @BeforeEach
     void setUp() {
         HashMap<String, User> database = new HashMap<>();
-        userRepository = new InMemoryUserRepository(database, 1L);
+        userRepository = new InMemoryUserRepository(database, new AtomicLong(1));
 
         RegisterService registerService = new RegisterService(userRepository);
         StaticResourceService staticResourceService = new StaticResourceService();
 
         registerController = new RegisterController(registerService, staticResourceService);
-    }
-
-    @DisplayName("'/register'으로 시작되는 Uri와 매칭된다.")
-    @ParameterizedTest
-    @ValueSource(strings = {"/register", "/register/wow", "/register?abc=def"})
-    void matchUri(String uri) {
-        assertThat(registerController.matchUri(uri)).isTrue();
     }
 
     @DisplayName("HttpRequest Method에 따라 Service 분기")
@@ -72,10 +64,11 @@ class RegisterControllerTest {
                     + "register is good";
 
                 // when
-                HttpResponse httpResponse = registerController.doService(httpRequest);
+                HttpResponse httpResponse = registerController.service(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
 
             @DisplayName("요청한 파일이 없으면 '404.html' response를 반환 받는다.")
@@ -96,10 +89,11 @@ class RegisterControllerTest {
                     + "NOT FOUND";
 
                 // when
-                HttpResponse httpResponse = registerController.doService(httpRequest);
+                HttpResponse httpResponse = registerController.service(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
         }
 
@@ -140,26 +134,31 @@ class RegisterControllerTest {
                     + "Location: /index.html ";
 
                 // when
-                HttpResponse httpResponse = registerController.doService(httpRequest);
+                HttpResponse httpResponse = registerController.service(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
 
-            @DisplayName("회원가입 실패시 '/409.html' redirect response를 반환 받는다.")
+            @DisplayName("회원가입 실패시 '/409.html' response를 반환 받는다.")
             @Test
             void registerFail() throws IOException {
                 // given
                 userRepository.save(new User(ACCOUNT, PASSWORD, EMAIL));
 
                 String expectString = "HTTP/1.1 409 Conflict \n"
-                    + "Location: /409.html ";
+                    + "Content-Length: 16 \n"
+                    + "Content-Type: text/html; charset=UTF-8 \n"
+                    + "\n"
+                    + "409 is Conflict.";
 
                 // when
-                HttpResponse httpResponse = registerController.doService(httpRequest);
+                HttpResponse httpResponse = registerController.service(httpRequest);
 
                 // then
-                assertThat(httpResponse.toBytes()).isEqualTo(expectString.getBytes(StandardCharsets.UTF_8));
+                assertThat(httpResponse.toBytes()).isEqualTo(
+                    expectString.getBytes(StandardCharsets.UTF_8));
             }
         }
     }

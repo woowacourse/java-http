@@ -6,7 +6,5 @@ import nextstep.jwp.http.response.HttpResponse;
 
 public interface Controller {
 
-    boolean matchUri(String uri);
-
-    HttpResponse doService(HttpRequest httpRequest) throws IOException;
+    HttpResponse service(HttpRequest httpRequest) throws IOException;
 }

@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import nextstep.jwp.exception.HttpRequestNotHaveBodyException;
 import nextstep.jwp.exception.InvalidRequestHeader;
+import nextstep.jwp.exception.QueryParameterNotFoundException;
+import nextstep.jwp.http.common.HttpCookie;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -49,12 +51,62 @@ class RequestHeadersTest {
             .isExactlyInstanceOf(InvalidRequestHeader.class);
     }
 
+    @DisplayName("Cookie 헤더 요청시")
+    @Nested
+    class includeCookie {
+
+        @DisplayName("Cookie 헤더가 있다면 값을 반환 받는다.")
+        @Test
+        void getCookie() throws IOException {
+            // given
+            String cookieKey = "JSESSIONID";
+            String cookieValue = "1234";
+            String cookieHeader = String.format("Cookie: %s=%s;", cookieKey, cookieValue);
+
+            String inputHeaders = String.join(NEW_LINE, cookieHeader, "", "");
+
+            RequestHeaders requestHeaders;
+
+            try (InputStream inputStream = new ByteArrayInputStream(inputHeaders.getBytes())) {
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                requestHeaders = RequestHeaders.parse(bufferedReader);
+            }
+
+            // when
+            HttpCookie cookie = requestHeaders.getCookie();
+
+            // then
+            assertThat(requestHeaders.hasCookie()).isTrue();
+            assertThat(cookie.getParameter(cookieKey)).isEqualTo(cookieValue);
+        }
+
+        @DisplayName("Cookie 헤더가 없다면 예외가 발생한다.")
+        @Test
+        void getCookieException() throws IOException {
+            // given
+            String inputHeaders = String.join(NEW_LINE, "Content-length: wow", "", "");
+
+            RequestHeaders requestHeaders;
+
+            try (InputStream inputStream = new ByteArrayInputStream(inputHeaders.getBytes())) {
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                requestHeaders = RequestHeaders.parse(bufferedReader);
+            }
+
+            // then
+            assertThat(requestHeaders.hasCookie()).isFalse();
+            assertThatThrownBy(requestHeaders::getCookie)
+                .isExactlyInstanceOf(QueryParameterNotFoundException.class);
+        }
+    }
+
     @DisplayName("Content-Length 헤더가 포함되었다면")
     @Nested
     class includeContentLength {
 
         private final int contentLengthValue = 100;
-        private final String contentLength = String.format("Content-Length: %d", contentLengthValue);
+        private final String contentLength = String.format("Content-Length: %d",
+            contentLengthValue);
         private final String inputHeaders = String.join(NEW_LINE, contentLength, "", "");
 
         @DisplayName("Content-Length 헤더로 Request-Body 가 있음을 판단한다.")
@@ -63,7 +115,8 @@ class RequestHeadersTest {
             RequestHeaders requestHeaders;
 
             try (InputStream inputStream = new ByteArrayInputStream(inputHeaders.getBytes())) {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(inputStream));
                 requestHeaders = RequestHeaders.parse(bufferedReader);
             }
 
@@ -76,7 +129,8 @@ class RequestHeadersTest {
             RequestHeaders requestHeaders;
 
             try (InputStream inputStream = new ByteArrayInputStream(inputHeaders.getBytes())) {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(inputStream));
                 requestHeaders = RequestHeaders.parse(bufferedReader);
             }
 
@@ -96,7 +150,8 @@ class RequestHeadersTest {
             RequestHeaders requestHeaders;
 
             try (InputStream inputStream = new ByteArrayInputStream(inputHeaders.getBytes())) {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(inputStream));
                 requestHeaders = RequestHeaders.parse(bufferedReader);
             }
 
@@ -109,7 +164,8 @@ class RequestHeadersTest {
             RequestHeaders requestHeaders;
 
             try (InputStream inputStream = new ByteArrayInputStream(inputHeaders.getBytes())) {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(inputStream));
                 requestHeaders = RequestHeaders.parse(bufferedReader);
             }
 

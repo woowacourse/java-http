@@ -1,42 +1,43 @@
 package nextstep.jwp.server;
 
 import java.io.BufferedOutputStream;
-import nextstep.jwp.controller.Controllers;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.util.Objects;
 import nextstep.jwp.exception.InvalidHttpRequestException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
-import java.util.Objects;
-
 public class RequestHandler implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
+    private static final String REQUEST_LOG_FORMAT = "Parsed HTTP Request!!!\n\n{}\n\n";
+    private static final String RESPONSE_LOG_FORMAT = "Return HTTP Response!!!\n\n{}\n{}\n\n";
 
     private final Socket connection;
-    private final Controllers controllers;
+    private final RequestMapping requestMapping;
 
-    public RequestHandler(Socket connection, Controllers controllers) {
+    public RequestHandler(Socket connection, RequestMapping requestMapping) {
         this.connection = Objects.requireNonNull(connection);
-        this.controllers = controllers;
+        this.requestMapping = requestMapping;
     }
 
     @Override
     public void run() {
-        LOGGER.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
+        LOGGER.debug("New Client Connect! Connected IP : {}, Port : {}",
+            connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
-             final OutputStream outputStream = connection.getOutputStream()) {
+            final OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = HttpRequest.parse(inputStream);
-            LOGGER.info("Parsed HTTP Request!!!\n\n{}\n\n", httpRequest);
-            HttpResponse httpResponse = controllers.doService(httpRequest);
-            LOGGER.info("Return HTTP Response!!!\n\n{}\n\n", httpResponse);
+            LOGGER.info(REQUEST_LOG_FORMAT, httpRequest);
+            HttpResponse httpResponse = requestMapping.doService(httpRequest);
+            LOGGER.info(RESPONSE_LOG_FORMAT, httpResponse.getStatusLine(), httpResponse.getResponseHeaders());
 
             flushBytes(outputStream, httpResponse);
         } catch (IOException | InvalidHttpRequestException exception) {

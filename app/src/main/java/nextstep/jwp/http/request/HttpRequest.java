@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import nextstep.jwp.http.common.HttpCookie;
 
 public class HttpRequest {
 
@@ -14,7 +15,8 @@ public class HttpRequest {
     private final RequestHeaders requestHeaders;
     private final RequestBody requestBody;
 
-    private HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders, RequestBody requestBody) {
+    private HttpRequest(RequestLine requestLine, RequestHeaders requestHeaders,
+                        RequestBody requestBody) {
         this.requestLine = requestLine;
         this.requestHeaders = requestHeaders;
         this.requestBody = requestBody;
@@ -30,7 +32,8 @@ public class HttpRequest {
         return new HttpRequest(requestLine, requestHeaders, requestBody);
     }
 
-    private static RequestBody extractBody(BufferedReader bufferedReader, RequestHeaders requestHeaders) throws IOException {
+    private static RequestBody extractBody(BufferedReader bufferedReader,
+                                           RequestHeaders requestHeaders) throws IOException {
         if (requestHeaders.requestHasBody()) {
             int contentLength = requestHeaders.getContentLength();
             char[] buffer = new char[contentLength];
@@ -50,12 +53,20 @@ public class HttpRequest {
         return requestLine.hasQueryParam();
     }
 
+    public boolean hasCookie() {
+        return requestHeaders.hasCookie();
+    }
+
     public String getUri() {
         return requestLine.getUri();
     }
 
     public String getUriParameter(String parameter) {
         return requestLine.getUriParameter(parameter);
+    }
+
+    public HttpCookie getCookie() {
+        return requestHeaders.getCookie();
     }
 
     public String getBodyParameter(String parameter) {

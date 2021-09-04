@@ -77,7 +77,8 @@ class RequestLineTest {
     @Nested
     class RequestLineWithOutQueryParam {
 
-        private final RequestLine requestLine = RequestLine.parse(String.format("GET %s HTTP/1.1", URI));
+        private final RequestLine requestLine = RequestLine.parse(
+            String.format("GET %s HTTP/1.1", URI));
 
         @DisplayName("QueryParameter를 포함하고 있지 않다.")
         @Test

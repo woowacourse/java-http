@@ -1,5 +1,10 @@
 package nextstep.jwp.http.response;
 
+import static nextstep.jwp.http.common.HttpHeader.CONTENT_LENGTH;
+import static nextstep.jwp.http.common.HttpHeader.CONTENT_TYPE;
+import static nextstep.jwp.http.common.HttpHeader.LOCATION;
+import static nextstep.jwp.http.common.HttpHeader.SET_COOKIE;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,8 +24,18 @@ public class ResponseHeaders {
     public static ResponseHeaders ofBody(StaticResource staticResource) {
         Map<String, String> headers = new HashMap<>();
 
-        headers.put("Content-Type", staticResource.getContentType());
-        headers.put("Content-Length", staticResource.getContentLength());
+        headers.put(CONTENT_TYPE.toRawString(), staticResource.getContentType());
+        headers.put(CONTENT_LENGTH.toRawString(), staticResource.getContentLength());
+
+        return new ResponseHeaders(headers);
+    }
+
+    public static ResponseHeaders ofBodyAndSetCookie(StaticResource staticResource, String cookie) {
+        Map<String, String> headers = new HashMap<>();
+
+        headers.put(CONTENT_TYPE.toRawString(), staticResource.getContentType());
+        headers.put(CONTENT_LENGTH.toRawString(), staticResource.getContentLength());
+        headers.put(SET_COOKIE.toRawString(), cookie);
 
         return new ResponseHeaders(headers);
     }
@@ -28,7 +43,7 @@ public class ResponseHeaders {
     public static ResponseHeaders ofRedirect(String location) {
         Map<String, String> headers = new HashMap<>();
 
-        headers.put("Location", location);
+        headers.put(LOCATION.toRawString(), location);
 
         return new ResponseHeaders(headers);
     }

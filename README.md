@@ -1,3 +1,9 @@
+# 쿠키 세션 구현하기
+- [x] HttpCookie에 JSESSION 값 저장하기
+  - [x] HttpCookie 테스트 코드 작성
+- [x] HttpSession 구현하기
+- [x] HttpCookie, HttpSession으로 변경된 객체 테스트 코드 작성
+
 # HTTP 서버 구현하기
 
 - [x] 서버를 실행시켜서 브라우저로 서버(`http://localhost:8080/index.html`)에 접속하면 index.html 페이지를 보여준다.

@@ -1,10 +1,20 @@
 package nextstep.jwp.controller;
 
+import static nextstep.jwp.controller.StaticResourcePath.INDEX_PAGE;
+import static nextstep.jwp.controller.StaticResourcePath.NOT_FOUND_PAGE;
+import static nextstep.jwp.controller.StaticResourcePath.UNAUTHORIZED_PAGE;
+import static nextstep.jwp.http.common.HttpStatus.FOUND;
+import static nextstep.jwp.http.common.HttpStatus.OK;
+
+import java.io.IOException;
 import nextstep.jwp.controller.request.LoginRequest;
+import nextstep.jwp.controller.response.LoginResponse;
+import nextstep.jwp.exception.StaticResourceNotFoundException;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.common.HttpStatus;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.model.StaticResource;
 import nextstep.jwp.service.LoginService;
 import nextstep.jwp.service.StaticResourceService;
 import org.slf4j.Logger;
@@ -15,25 +25,51 @@ public class LoginController extends RestController {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
 
     private final LoginService loginService;
+    private final StaticResourceService staticResourceService;
 
     public LoginController(LoginService loginService, StaticResourceService staticResourceService) {
-        super(staticResourceService);
         this.loginService = loginService;
+        this.staticResourceService = staticResourceService;
     }
 
     @Override
-    protected HttpResponse doPost(HttpRequest httpRequest) {
+    protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
         try {
+            if (httpRequest.hasCookie() && loginService.isAlreadyLogin(httpRequest.getCookie())) {
+                return HttpResponse.redirect(FOUND, INDEX_PAGE.getValue());
+            }
+
+            StaticResource staticResource = staticResourceService.findByPathWithExtension(httpRequest.getUri(), ".html");
+
+            return HttpResponse.withBody(HttpStatus.OK, staticResource);
+        } catch (StaticResourceNotFoundException e) {
+            StaticResource staticResource = staticResourceService.findByPath(NOT_FOUND_PAGE.getValue());
+
+            LOGGER.warn(e.getMessage());
+
+            return HttpResponse.withBody(HttpStatus.NOT_FOUND, staticResource);
+        }
+    }
+
+    @Override
+    protected HttpResponse doPost(HttpRequest httpRequest) throws IOException {
+        try {
+            if (httpRequest.hasCookie() && loginService.isAlreadyLogin(httpRequest.getCookie())) {
+                return HttpResponse.redirect(FOUND, INDEX_PAGE.getValue());
+            }
+
             LoginRequest loginRequest = getLoginRequest(httpRequest);
-            loginService.login(loginRequest);
+            LoginResponse loginResponse = loginService.login(loginRequest);
 
             LOGGER.debug("Login Success.");
 
-            return HttpResponse.redirect(HttpStatus.FOUND, "/index.html");
+            StaticResource resource = staticResourceService.findByPath(INDEX_PAGE.getValue());
+            return HttpResponse.withBodyAndCookie(OK, resource, loginResponse.toCookieString());
         } catch (UnauthorizedException e) {
             LOGGER.debug("Login Failed.");
 
-            return HttpResponse.redirect(HttpStatus.UNAUTHORIZED, "/401.html");
+            StaticResource resource = staticResourceService.findByPath(UNAUTHORIZED_PAGE.getValue());
+            return HttpResponse.withBody(HttpStatus.UNAUTHORIZED, resource);
         }
     }
 
@@ -44,10 +80,5 @@ public class LoginController extends RestController {
         LOGGER.debug("Login Request => account: {}", account);
 
         return new LoginRequest(account, password);
-    }
-
-    @Override
-    public boolean matchUri(String uri) {
-        return uri.startsWith("/login");
     }
 }

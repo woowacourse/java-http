@@ -17,6 +17,8 @@ public enum Exception {
     UNAUTHORIZED(401, "Unauthorized.", UnauthorizedException.class),
     QUERY_PARAMETER_NOT_FOUND(404, "Query Parameter Not Found.", QueryParameterNotFoundException.class),
     STATIC_RESOURCE_NOT_FOUND(404, "Static Resource Not Found.", StaticResourceNotFoundException.class),
+    SESSION_NOT_FOUND(404, "Session Not Found.", SessionNotFoundException.class),
+    SESSION_ATTRIBUTE_NOT_FOUND(404, "Session Attribute Not Found.", SessionAttributeNotFoundException.class),
     DUPLICATE_ACCOUNT(409, "Duplicate Account.", DuplicateAccountException.class),
 
     NO_RESPONSE_BODY(500, "No Response Body.", NoResponseBodyException.class),

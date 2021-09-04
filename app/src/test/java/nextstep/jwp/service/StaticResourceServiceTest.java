@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 
 class StaticResourceServiceTest {
 
-    private StaticResourceService staticResourceService = new StaticResourceService();
+    private final StaticResourceService staticResourceService = new StaticResourceService();
 
     @DisplayName("Uri 경로를 이용한 파일 탐색시")
     @Nested

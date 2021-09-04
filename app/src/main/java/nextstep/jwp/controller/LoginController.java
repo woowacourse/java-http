@@ -10,10 +10,14 @@ import nextstep.jwp.request.HttpRequest;
 import nextstep.jwp.response.HttpResponse;
 import nextstep.jwp.session.HttpSession;
 import nextstep.jwp.session.HttpSessions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static nextstep.jwp.PageUrl.*;
 
 public class LoginController extends AbstractController {
+    public static final Logger LOG = LoggerFactory.getLogger(LoginController.class);
+
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         if (isLoginStatus(request.getSession())) {
@@ -47,19 +51,20 @@ public class LoginController extends AbstractController {
         response.redirect(INDEX_PAGE.getPath());
     }
 
+    private User getUser(HttpResponse response, String account) {
+        return InMemoryUserRepository.findByAccount(account).orElseGet(() -> {
+            try {
+                response.redirect(INDEX_PAGE.getPath());
+            } catch (IOException e) {
+                LOG.error(e.getMessage());
+            }
+            throw new IllegalArgumentException("존재하지 않는 회원입니다.");
+        });
+    }
+
     private boolean isLoginStatus(HttpSession session) {
         Object user = session.getAttributes("user");
         return Objects.nonNull(user);
-    }
-
-    private User getUser(HttpResponse response, String account) throws IOException {
-        User user = null;
-        try {
-            user = InMemoryUserRepository.findByAccount(account);
-        } catch (IllegalArgumentException e) {
-            response.redirect(UNAUTHORIZED_PAGE.getPath());
-        }
-        return user;
     }
 }
 

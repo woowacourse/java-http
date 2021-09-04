@@ -20,8 +20,7 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
-    public static User findByAccount(String account) {
-        return Optional.ofNullable(database.get(account))
-                       .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+    public static Optional<User> findByAccount(String account) {
+        return Optional.ofNullable(database.get(account));
     }
 }

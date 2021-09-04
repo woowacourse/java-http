@@ -50,7 +50,7 @@ public abstract class AbstractController implements Controller {
     }
 
     protected final void redirectWithSessionCookie(HttpResponse response, String location, HttpSession session) {
-        response.setHeader("Set-Cookie", "JSESSIONID=" + session.getId());
+        response.setHeader("Set-Cookie", session.asCookieString());
         redirect(response, location);
     }
 

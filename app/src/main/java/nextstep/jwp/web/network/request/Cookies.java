@@ -8,14 +8,15 @@ import java.util.stream.Collectors;
 public class Cookies {
 
     private static final Cookies EMPTY_COOKIES = new Cookies(new HashMap<>());
-    private static final String DEFAULT_COOKIE_VALUE = null;
+    private static final int GET_ALL_COOKIES = 0;
     private static final int COOKIE_KEY_INDEX = 0;
     private static final int COOKIE_VALUE_INDEX = 1;
+    private static final String DEFAULT_COOKIE_VALUE = null;
 
-    private final Map<String, String> cookies;
+    private final Map<String, String> data;
 
-    private Cookies(Map<String, String> cookies) {
-        this.cookies = cookies;
+    private Cookies(Map<String, String> data) {
+        this.data = data;
     }
 
     public static Cookies of(String cookiesAsString) {
@@ -23,7 +24,7 @@ public class Cookies {
             return EMPTY_COOKIES;
         }
         return new Cookies(
-                Arrays.stream(cookiesAsString.split(";", 0))
+                Arrays.stream(cookiesAsString.split(";", GET_ALL_COOKIES))
                         .map(cookie -> cookie.split("="))
                         .collect(Collectors.toMap(
                                 keyAndValue -> keyAndValue[COOKIE_KEY_INDEX].trim(),
@@ -32,10 +33,10 @@ public class Cookies {
     }
 
     public String get(String key) {
-        return cookies.getOrDefault(key, DEFAULT_COOKIE_VALUE);
+        return data.getOrDefault(key, DEFAULT_COOKIE_VALUE);
     }
 
     public boolean isEmpty() {
-        return cookies.isEmpty();
+        return data.isEmpty();
     }
 }

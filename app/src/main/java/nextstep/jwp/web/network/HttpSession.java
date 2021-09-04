@@ -7,6 +7,8 @@ import java.util.UUID;
 
 public class HttpSession {
 
+    public static final String JSESSIONID = "JSESSIONID=";
+
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
@@ -16,6 +18,10 @@ public class HttpSession {
 
     public HttpSession(String id) {
         this.id = id;
+    }
+
+    public String asCookieString() {
+        return String.format("%s%s", JSESSIONID, id);
     }
 
     public String getId() {

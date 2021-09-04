@@ -2,10 +2,8 @@ package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import nextstep.jwp.constants.HeaderType;
-import nextstep.jwp.constants.HttpTerms;
 import nextstep.jwp.constants.StatusCode;
 import nextstep.jwp.constants.UserParams;
 import nextstep.jwp.exception.UnauthorizedException;
@@ -32,7 +30,7 @@ public class Controller {
     public String login(HttpRequest request) throws IOException {
         RequestHeader header = request.getRequestHeader();
         if (header.contains(HeaderType.COOKIE.getValue())) {
-            checkCookieSessionId(header);
+            header.checkValidSessionId();
             return HttpResponse
                     .redirectTo("/index.html");
         }
@@ -57,12 +55,14 @@ public class Controller {
 
     @PostMapping(path = "/register")
     public String postRegister(HttpRequest request) throws IOException {
-        RequestHeader header = request.getRequestHeader();
         RequestBody body = request.getRequestBody();
         Map<String, String> params = body.getParams();
         HttpService.register(params);
         return HttpResponse
                 .redirectTo("/index.html");
+    }
+
+    public Controller() {
     }
 
     @PostMapping(path = "/login")
@@ -71,38 +71,26 @@ public class Controller {
         RequestHeader header = request.getRequestHeader();
         Map<String, String> params = body.getParams();
         if (header.contains(HeaderType.COOKIE.getValue())) {
+            header.checkValidSessionId();
             return HttpResponse
                     .redirectTo("/index.html");
         }
-        if (!HttpService.isAuthorized(params)) {
-            throw new UnauthorizedException("인증되지 않은 사용자 입니다.");
-        }
-        final UUID sessionId = UUID.randomUUID();
-        setSession(params, sessionId);
+        validateAuthorization(params);
+        final String sessionId = UUID.randomUUID().toString();
+        HttpSession httpSession = new HttpSession(sessionId);
+        HttpSessions.addSession(httpSession);
+        User user = HttpService.findUser(params.get(UserParams.ACCOUNT));
+        httpSession.setAttribute("user", user);
         return HttpResponse
                 .statusCode(StatusCode.FOUND)
                 .addHeaders(HeaderType.LOCATION, "/index.html")
-                .addHeaders(HeaderType.SET_COOKIE, HttpTerms.JSESSIONID + HttpTerms.EQUAL_SEPARATOR + sessionId)
+                .addHeaders(HeaderType.SET_COOKIE, HttpCookie.toSetCookieValue(sessionId))
                 .responseResource("/index.html")
                 .build();
     }
 
-    private void setSession(Map<String, String> params, UUID sessionId) {
-        HttpSessions.addSession(sessionId.toString());
-        HttpSession session = HttpSessions.getSession(sessionId.toString());
-        User user = HttpService.findUser(params.get(UserParams.ACCOUNT));
-        session.setAttribute("user", user);
-    }
-
-    private void checkCookieSessionId(RequestHeader header) {
-        HttpCookie cookie = header.getCookie();
-        if (!cookie.contains(HttpTerms.JSESSIONID)) {
-            throw new UnauthorizedException("인증되지 않은 사용자 입니다.");
-        }
-        String sessionId = cookie.get(HttpTerms.JSESSIONID);
-        HttpSession session = HttpSessions.getSession(sessionId);
-        Object user = session.getAttribute("user");
-        if (Objects.isNull(user)) {
+    private void validateAuthorization(Map<String, String> params) {
+        if (!HttpService.isAuthorized(params)) {
             throw new UnauthorizedException("인증되지 않은 사용자 입니다.");
         }
     }

@@ -28,7 +28,7 @@ class FileExtensionTest {
                 .hasMessageContaining("지원하는 확장자가 아닙니다");
     }
 
-    @DisplayName("FileExtension 추출한다.")
+    @DisplayName("FileExtension 을 추출한다.")
     @Test
     void extractExtension() {
         String path = "/css/style.css";

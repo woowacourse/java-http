@@ -9,7 +9,8 @@ public enum MediaType {
     TEXT_HTML_CHARSET_UTF8("text/html;charset=utf-8", FileExtension.HTML),
     TEXT_CSS_CHARSET_UTF8("text/css;charset=utf-8", FileExtension.CSS),
     TEXT_JS_CHARSET_UTF8("text/javascript;charset=utf-8", FileExtension.JS),
-    IMAGE_ICO("image/x-icon", FileExtension.ICO);
+    IMAGE_ICO("image/x-icon", FileExtension.ICO),
+    IMAGE_SVG("image/svg+xml", FileExtension.SVG);
 
     private final String value;
     private final FileExtension fileExtension;

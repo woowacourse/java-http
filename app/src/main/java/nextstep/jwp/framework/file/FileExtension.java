@@ -7,7 +7,8 @@ public enum FileExtension {
     HTML("html"),
     CSS("css"),
     JS("js"),
-    ICO("ico");
+    ICO("ico"),
+    SVG("svg");
 
     private static final String DOT = ".";
 

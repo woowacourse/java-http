@@ -2,11 +2,14 @@ package nextstep.jwp.http.message.builder;
 
 import nextstep.jwp.http.common.HttpStatusCode;
 import nextstep.jwp.http.common.MediaType;
-import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static nextstep.jwp.testutils.TestHttpResponseUtils.assertContainsBodyString;
+import static nextstep.jwp.testutils.TestHttpResponseUtils.assertEmptyBody;
+import static nextstep.jwp.testutils.TestHttpResponseUtils.assertHeaderIncludes;
+import static nextstep.jwp.testutils.TestHttpResponseUtils.assertStatusCode;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpResponseBuilderTest {
@@ -33,7 +36,7 @@ class HttpResponseBuilderTest {
         String body = "hell world";
         HttpResponseMessage httpResponse = HttpResponseBuilder.ok(body).build();
         assertStatusCode(httpResponse, HttpStatusCode.OK);
-        assertBodyString(httpResponse, body);
+        assertContainsBodyString(httpResponse, body);
     }
 
     @DisplayName("FOUND 상태 코드의 HttpResponse 생성")
@@ -68,32 +71,12 @@ class HttpResponseBuilderTest {
 
     @DisplayName("특정 Header 를 추가하여 HttpResponse 생성")
     @Test
-    void specificHader() {
+    void specificHeader() {
         HttpResponseMessage httpResponse = HttpResponseBuilder.ok()
                 .contentType(MediaType.TEXT_HTML_CHARSET_UTF8)
                 .contentLength(100)
                 .build();
         assertHeaderIncludes(httpResponse, "Content-Type", MediaType.TEXT_HTML_CHARSET_UTF8.getValue());
         assertHeaderIncludes(httpResponse, "Content-Length", "100");
-    }
-
-    private void assertStatusCode(HttpResponseMessage httpResponse, HttpStatusCode httpStatusCode) {
-        assertThat(httpResponse.statusCode()).isEqualTo(httpStatusCode);
-    }
-
-    private void assertEmptyBody(HttpResponseMessage httpResponse) {
-        MessageBody messageBody = httpResponse.getBody();
-        assertThat(messageBody.isEmpty()).isTrue();
-    }
-
-    private void assertHeaderIncludes(HttpResponseMessage httpResponse, String key, String value) {
-        assertThat(httpResponse.takeHeaderValue(key))
-                .get()
-                .isEqualTo(value);
-    }
-
-    private void assertBodyString(HttpResponseMessage httpResponse, String body) {
-        MessageBody messageBody = httpResponse.getBody();
-        assertThat(messageBody.asString()).isEqualTo(body);
     }
 }

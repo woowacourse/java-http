@@ -1,66 +1,48 @@
 package nextstep.jwp.http.common;
 
+import nextstep.jwp.http.file.FileExtension;
+
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class HttpPath {
+public class HttpUri {
 
-    private static final String HTML_SUFFIX = ".html";
-    private static final String CSS_SUFFIX = ".css";
-    private static final String JAVASCRIPT_SUFFIX = ".js";
-    private static final String REDIRECT_PREFIX = "redirect:";
     private static final String QUERY_STRING_SEPARATOR = "?";
     private static final String QUERY_STRING_PIECE_SEPARATOR = "&";
     private static final String QUERY_STRING_PARAM_SEPARATOR = "=";
-    private static final String EMPTY_STRING = "";
 
-    private final String path;
+    private final String value;
 
-    public HttpPath(String path) {
-        this.path = path;
+    public HttpUri(String value) {
+        this.value = value;
     }
 
-    public boolean isHtmlPath() {
-        return removeQueryString().endsWith(HTML_SUFFIX);
+    public boolean isStaticFilePath() {
+        String path = removedQueryStringPath();
+        return FileExtension.supports(path);
     }
 
-    public boolean isJavaScriptPath() {
-        return path.endsWith(JAVASCRIPT_SUFFIX);
-    }
-
-    public boolean isCssPath() {
-        return path.endsWith(CSS_SUFFIX);
-    }
-
-    public boolean isRedirectPath() {
-        return path.startsWith(REDIRECT_PREFIX);
-    }
-
-    public String removeRedirectPrefix() {
-        return path.replace(REDIRECT_PREFIX, EMPTY_STRING);
-    }
-
-    public String removeQueryString() {
+    public String removedQueryStringPath() {
         if (!hasQueryString()) {
-            return path;
+            return value;
         }
-        int index = path.indexOf(QUERY_STRING_SEPARATOR);
-        return path.substring(0, index);
+        int index = value.indexOf(QUERY_STRING_SEPARATOR);
+        return value.substring(0, index);
     }
 
-    public boolean hasQueryString() {
-        return path.contains(QUERY_STRING_SEPARATOR);
+    private boolean hasQueryString() {
+        return value.contains(QUERY_STRING_SEPARATOR);
     }
 
     public String extractQueryString() {
         if (!hasQueryString()) {
             throw new IllegalStateException("QueryString이 존재하지 않습니다.");
         }
-        int index = path.indexOf(QUERY_STRING_SEPARATOR);
-        return path.substring(index + 1);
+        int index = value.indexOf(QUERY_STRING_SEPARATOR);
+        return value.substring(index + 1);
     }
 
     public Map<String, String> extractQueryParams() {
@@ -85,20 +67,20 @@ public class HttpPath {
         return new AbstractMap.SimpleEntry<>(key, value);
     }
 
-    public String getPath() {
-        return path;
+    public String getValue() {
+        return value;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        HttpPath httpPath = (HttpPath) o;
-        return Objects.equals(getPath(), httpPath.getPath());
+        HttpUri httpUri = (HttpUri) o;
+        return Objects.equals(getValue(), httpUri.getValue());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPath());
+        return Objects.hash(getValue());
     }
 }

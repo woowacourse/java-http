@@ -41,10 +41,6 @@ public class RequestHeaders {
         return false;
     }
 
-    public String getSessionId() {
-        return httpCookie.get("JSESSIONID");
-    }
-
     public HttpSession getSession() {
         String sessionId = httpCookie.get("JSESSIONID");
         return HttpSessions.getSession(sessionId);

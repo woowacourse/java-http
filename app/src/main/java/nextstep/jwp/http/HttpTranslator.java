@@ -17,8 +17,6 @@ import java.nio.charset.Charset;
 
 public class HttpTranslator {
 
-    private static final String FORM_DATA_PIECE_SEPARATOR = "&";
-    private static final String FORM_DATE_PARAM_SEPARATOR = "=";
     private static final String NEW_LINE = "\r\n";
 
     private final InputStream inputStream;

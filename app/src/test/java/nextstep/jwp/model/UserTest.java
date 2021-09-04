@@ -57,8 +57,6 @@ class UserTest {
     @Test
     void createWithNoEmailMap() {
         map.remove("email");
-        System.out.println(map);
-        System.out.println("asd");
         assertThatThrownBy(() -> User.createWithMap(map))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("필수값이 없어서 User 생성에 실패했습니다")

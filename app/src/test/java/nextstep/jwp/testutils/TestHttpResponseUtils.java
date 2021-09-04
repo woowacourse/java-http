@@ -28,7 +28,7 @@ public class TestHttpResponseUtils {
                 .isEqualTo(value);
     }
 
-    public static  void assertContainsBodyString(HttpResponseMessage httpResponse, String body) {
+    public static void assertContainsBodyString(HttpResponseMessage httpResponse, String body) {
         MessageBody messageBody = httpResponse.getBody();
         assertThat(messageBody.asString()).contains(body);
     }

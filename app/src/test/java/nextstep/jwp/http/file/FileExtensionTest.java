@@ -8,7 +8,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class FileExtensionTest {

@@ -1,6 +1,6 @@
 package nextstep.jwp.web.exception;
 
-public class NotFoundException extends DashboardException {
+public class NotFoundException extends RuntimeException {
 
     public NotFoundException(String message) {
         super(message);

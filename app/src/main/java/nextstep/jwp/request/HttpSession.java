@@ -2,6 +2,7 @@ package nextstep.jwp.request;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import nextstep.jwp.constants.HttpTerms;
 
 public class HttpSession {

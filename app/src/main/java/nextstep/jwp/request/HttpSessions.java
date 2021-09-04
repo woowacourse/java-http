@@ -14,6 +14,10 @@ public class HttpSessions {
         return SESSIONS.get(id);
     }
 
+    public static void removeSession(HttpSession httpSession){
+        SESSIONS.remove(httpSession.getId());
+    }
+
     private HttpSessions() {
     }
 }

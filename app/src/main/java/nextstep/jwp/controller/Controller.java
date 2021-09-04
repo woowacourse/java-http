@@ -2,8 +2,10 @@ package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import nextstep.jwp.constants.HeaderType;
+import nextstep.jwp.constants.HttpTerms;
 import nextstep.jwp.constants.StatusCode;
 import nextstep.jwp.constants.UserParams;
 import nextstep.jwp.exception.UnauthorizedException;
@@ -30,7 +32,7 @@ public class Controller {
     public String login(HttpRequest request) throws IOException {
         RequestHeader header = request.getRequestHeader();
         if (header.contains(HeaderType.COOKIE.getValue())) {
-            header.checkValidSessionId();
+            checkValidSessionId(header.getCookie());
             return HttpResponse
                     .redirectTo("/index.html");
         }
@@ -68,13 +70,7 @@ public class Controller {
     @PostMapping(path = "/login")
     public String postLogin(HttpRequest request) throws IOException {
         RequestBody body = request.getRequestBody();
-        RequestHeader header = request.getRequestHeader();
         Map<String, String> params = body.getParams();
-        if (header.contains(HeaderType.COOKIE.getValue())) {
-            header.checkValidSessionId();
-            return HttpResponse
-                    .redirectTo("/index.html");
-        }
         validateAuthorization(params);
         final String sessionId = UUID.randomUUID().toString();
         HttpSession httpSession = new HttpSession(sessionId);
@@ -91,6 +87,23 @@ public class Controller {
 
     private void validateAuthorization(Map<String, String> params) {
         if (!HttpService.isAuthorized(params)) {
+            throw new UnauthorizedException("인증되지 않은 사용자 입니다.");
+        }
+    }
+
+    private void checkValidSessionId(HttpCookie cookie) {
+        if (!cookie.contains(HttpTerms.JSESSIONID)) {
+            throw new UnauthorizedException("인증되지 않은 사용자 입니다.");
+        }
+        String sessionId = cookie.get(HttpTerms.JSESSIONID);
+        Object user;
+        try {
+            HttpSession session = HttpSessions.getSession(sessionId);
+            user = session.getAttribute("user");
+        } catch (NullPointerException e) {
+            throw new UnauthorizedException("인증되지 않은 사용자 입니다.");
+        }
+        if (Objects.isNull(user)) {
             throw new UnauthorizedException("인증되지 않은 사용자 입니다.");
         }
     }

@@ -25,7 +25,6 @@ class HttpResponseTest {
         //when
         response.create(new HttpRequestLine(HttpMethod.GET, new HttpPath("index.html"), new ProtocolVersion("HTTP/1.1")),
             new HttpHeaders("Content-Type: text/html;charset=utf-8 \r\nContent-Length: 12 \r\nCookie: io=H6Gs8jT7h07lTg94AAAA; JSESSIONID=acbd813f-eb5a-4f8d-87fe-b1737e0871a1"),
-            new HttpBody(),
             HttpStatus.OK);
 
         //then
@@ -47,7 +46,6 @@ class HttpResponseTest {
         //when
         response.create(new HttpRequestLine(HttpMethod.POST, new HttpPath("index.html"), new ProtocolVersion("HTTP/1.1")),
             new HttpHeaders("Content-Type: text/html;charset=utf-8 \r\nContent-Length: 12 \r\nCookie: io=H6Gs8jT7h07lTg94AAAA; JSESSIONID=acbd813f-eb5a-4f8d-87fe-b1737e0871a1 \r\n\r\n"),
-            new HttpBody("account=gugu&password=password&email=hkkang%40woowahan.com"),
             HttpStatus.OK);
 
         //then

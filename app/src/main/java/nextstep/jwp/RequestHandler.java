@@ -38,8 +38,8 @@ public class RequestHandler implements Runnable {
             );
 
             HttpResponse httpResponse = new HttpResponse(outputStream);
-            Controller controller = ControllerMapper.getControllerByUrl(httpRequest.getUrl());
             cookieCheck(httpRequest, httpResponse);
+            Controller controller = ControllerMapper.getControllerByUrl(httpRequest.getUrl());
 
             if (controller == null) {
                 httpResponse.transfer(httpRequest.getUrl());
@@ -58,14 +58,14 @@ public class RequestHandler implements Runnable {
         try {
             HttpCookie httpCookie = httpRequest.getCookie();
             if (!httpCookie.containsKey("JSESSIONID")) {
-                setJessionId(httpResponse);
+                setJsessionid(httpResponse);
             }
         } catch (IllegalArgumentException e) {
-            setJessionId(httpResponse);
+            setJsessionid(httpResponse);
         }
     }
 
-    private void setJessionId(final HttpResponse httpResponse) {
+    private void setJsessionid(final HttpResponse httpResponse) {
         httpResponse.addHeader("Set-Cookie", String.format("JSESSIONID=%s", UUID.randomUUID()));
     }
 

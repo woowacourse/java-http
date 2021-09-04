@@ -1,6 +1,7 @@
 package nextstep.jwp.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,5 +29,13 @@ class HttpCookieTest {
     void getCookieValueByKey() {
         assertThat(httpCookie.getCookieValueByKey("fortune")).isEqualTo("yoonsung");
         assertThat(httpCookie.getCookieValueByKey("JSESSIONID")).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
+    }
+
+    @DisplayName("쿠키에 없는 키값을 통해서 데이터를 얻으려고하면, 예외가 발생한다.")
+    @Test
+    void getCookieValueByKeyExceptionTest() {
+        assertThatThrownBy(()->{
+            httpCookie.getCookieValueByKey("hahahaahaha");
+        }).isInstanceOf(IllegalArgumentException.class);
     }
 }

@@ -17,4 +17,8 @@ public class RegisterService {
         InMemoryUserRepository.save(user);
         httpResponse.redirectWithStatusCode("/index.html", "200");
     }
+
+    public void doGet(final HttpResponse httpResponse) throws IOException {
+        httpResponse.transfer("/register.html");
+    }
 }

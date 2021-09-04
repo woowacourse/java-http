@@ -388,5 +388,49 @@ class RequestHandlerTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             assertThat(socket.output()).isEqualTo(expected);
         }
+
+        @DisplayName("로그인을 한뒤 login페이지에 재접근시, index.html을 보여준다.")
+        @Test
+        void sessionLoginTest() {
+            try (MockedStatic<UUID> uuidMockedStatic = mockStatic(UUID.class)) {
+                UUID uuid = new UUID(1L, 2L);
+                given(UUID.randomUUID()).willReturn(uuid);
+                String expectedJSESSIONID = "JSESSIONID=00000000-0000-0001-0000-000000000002";
+                // given
+                String httpRequest = String.join("\r\n",
+                    "POST /login HTTP/1.1",
+                    "Host: localhost:8080",
+                    "Connection: keep-alive",
+                    "Content-Length: 30",
+                    "Cookie: " + expectedJSESSIONID,
+                    "",
+                    "account=gugu&password=password"
+                );
+
+                MockSocket socket = new MockSocket(httpRequest);
+                RequestHandler requestHandler = new RequestHandler(socket);
+                requestHandler.run();
+                socket.output();
+
+                // when
+                httpRequest = String.join("\r\n",
+                    "GET /login HTTP/1.1",
+                    "Host: localhost:8080",
+                    "Connection: keep-alive",
+                    "Cookie: " + expectedJSESSIONID,
+                    "",
+                    "");
+
+                socket = new MockSocket(httpRequest);
+                requestHandler = new RequestHandler(socket);
+                requestHandler.run();
+
+                // then
+                String expected = "HTTP/1.1 302 Found\r\n" +
+                    "Location: /index.html\r\n" +
+                    "\r\n";
+                assertThat(socket.output()).isEqualTo(expected);
+            }
+        }
     }
 }

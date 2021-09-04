@@ -6,8 +6,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import nextstep.jwp.constants.HttpMethod;
 import nextstep.jwp.exception.HttpException;
+import nextstep.jwp.request.HttpRequest;
 import nextstep.jwp.request.RequestHeader;
-import nextstep.jwp.response.ResponseEntity;
+import nextstep.jwp.response.HttpResponse;
 
 public class GetHandler implements Handler {
     private final HttpMethod httpMethod = HttpMethod.GET;
@@ -21,16 +22,17 @@ public class GetHandler implements Handler {
     }
 
     @Override
-    public String runController(String uri, RequestHeader requestHeader, Controller controller) throws Exception {
+    public String runController(HttpRequest httpRequest, Controller controller) throws Exception {
+        String uri = httpRequest.getRequestLine().getUri();
         for (Method method : Controller.class.getDeclaredMethods()) {
             if (matchGetMapping(method, uri)) {
-                return (String) method.invoke(controller, requestHeader);
+                return (String) method.invoke(controller, httpRequest);
             }
         }
 
         Set<String> declaredGetMappings = collectDeclaredGetMappings();
         if (!declaredGetMappings.contains(uri)) {
-            return ResponseEntity
+            return HttpResponse
                     .responseResource(uri)
                     .build();
         }

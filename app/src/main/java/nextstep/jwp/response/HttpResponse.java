@@ -13,7 +13,7 @@ import nextstep.jwp.constants.Http;
 import nextstep.jwp.constants.StatusCode;
 import nextstep.jwp.exception.PageNotFoundException;
 
-public class ResponseEntity {
+public class HttpResponse {
     private final StatusCode statusCode;
     private final String responseBody;
     private final ContentType contentType;
@@ -101,7 +101,7 @@ public class ResponseEntity {
         }
     }
 
-    private ResponseEntity(Builder builder) {
+    private HttpResponse(Builder builder) {
         this.statusCode = builder.statusCode;
         this.responseBody = builder.responseBody;
         this.contentType = builder.contentType;

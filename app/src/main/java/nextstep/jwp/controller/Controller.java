@@ -11,69 +11,71 @@ import nextstep.jwp.constants.UserParams;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.request.HttpCookie;
+import nextstep.jwp.request.HttpRequest;
 import nextstep.jwp.request.HttpSession;
 import nextstep.jwp.request.HttpSessions;
 import nextstep.jwp.request.RequestBody;
 import nextstep.jwp.request.RequestHeader;
-import nextstep.jwp.response.ResponseEntity;
+import nextstep.jwp.response.HttpResponse;
 import nextstep.jwp.service.HttpService;
 
 public class Controller {
 
     @GetMapping(path = "/")
-    public String basic(RequestHeader header) {
-        return ResponseEntity
+    public String basic(HttpRequest request) {
+        return HttpResponse
                 .responseBody("Hello world!")
                 .build();
     }
 
     @GetMapping(path = "/login")
-    public String login(RequestHeader header) throws IOException {
+    public String login(HttpRequest request) throws IOException {
+        RequestHeader header = request.getRequestHeader();
         if (header.contains(Header.COOKIE.getKey())) {
-            return redirectToIndex(header);
+            return redirectTo(header, "/index.html");
         }
-        return ResponseEntity
+        return HttpResponse
                 .responseResource("/login.html")
                 .build();
     }
 
     @GetMapping(path = "/register")
-    public String register(RequestHeader header) throws IOException {
-        return ResponseEntity
+    public String register(HttpRequest request) throws IOException {
+        return HttpResponse
                 .responseResource("/register.html")
                 .build();
     }
 
     @GetMapping(path = "/index")
-    public String index(RequestHeader header) throws IOException {
-        return ResponseEntity
+    public String index(HttpRequest request) throws IOException {
+        return HttpResponse
                 .responseResource("/index.html")
                 .build();
     }
 
     @PostMapping(path = "/register")
-    public String register(RequestHeader header, RequestBody body) throws IOException {
+    public String postRegister(HttpRequest request) throws IOException {
+        RequestHeader header = request.getRequestHeader();
+        RequestBody body = request.getRequestBody();
         Map<String, String> params = body.getParams();
         HttpService.register(params);
-        return ResponseEntity
-                .statusCode(StatusCode.FOUND)
-                .addHeaders(Header.LOCATION, "/index.html")
-                .responseResource("/index.html")
-                .build();
+        return redirectTo(header, "/index.html");
     }
 
     @PostMapping(path = "/login")
-    public String login(RequestHeader header, RequestBody body) throws IOException {
+    public String postLogin(HttpRequest request) throws IOException {
+        RequestBody body = request.getRequestBody();
+        RequestHeader header = request.getRequestHeader();
         Map<String, String> params = body.getParams();
         if (header.contains(Header.COOKIE.getKey())) {
-            return redirectToIndex(header);
+            return redirectTo(header, "/index.html");
         }
         if (!HttpService.isAuthorized(params)) {
             throw new UnauthorizedException("인증되지 않은 사용자 입니다.");
         }
         final UUID sessionId = UUID.randomUUID();
         setSession(params, sessionId);
-        return ResponseEntity
+        return HttpResponse
                 .statusCode(StatusCode.FOUND)
                 .addHeaders(Header.LOCATION, "/index.html")
                 .addHeaders(Header.SET_COOKIE, Http.JSESSIONID + Http.EQUAL_SEPARATOR + sessionId)
@@ -101,12 +103,12 @@ public class Controller {
         }
     }
 
-    private String redirectToIndex(RequestHeader header) throws IOException {
+    private String redirectTo(RequestHeader header, String uri) throws IOException {
         checkCookieSessionId(header);
-        return ResponseEntity
+        return HttpResponse
                 .statusCode(StatusCode.FOUND)
-                .addHeaders(Header.LOCATION, "/index.html")
-                .responseResource("/index.html")
+                .addHeaders(Header.LOCATION, uri)
+                .responseResource(uri)
                 .build();
     }
 }

@@ -23,13 +23,19 @@ class HttpResponseTest {
         HttpResponse response = new HttpResponse();
 
         //when
-        response.create(new HttpRequestLine(HttpMethod.POST, new HttpPath("index.html"), new ProtocolVersion("HTTP/1.1")),
+        response.create(new HttpRequestLine(HttpMethod.GET, new HttpPath("index.html"), new ProtocolVersion("HTTP/1.1")),
             new HttpHeaders("Content-Type: text/html;charset=utf-8 \r\nContent-Length: 12 \r\nCookie: io=H6Gs8jT7h07lTg94AAAA; JSESSIONID=acbd813f-eb5a-4f8d-87fe-b1737e0871a1"),
             new HttpBody(),
             HttpStatus.OK);
 
         //then
-        assertThat(response.getBytes()).hasSize(2568);
+        String content = new String(response.getBytes());
+        assertThat(content).contains(
+            "HTTP/1.1 200 OK ",
+            "Cookie: io=H6Gs8jT7h07lTg94AAAA; JSESSIONID=acbd813f-eb5a-4f8d-87fe-b1737e0871a1",
+            "Set-Cookie: JSESSIONID=acbd813f-eb5a-4f8d-87fe-b1737e0871a1; ",
+            "Content-Type: text/html;charset=utf-8"
+        );
     }
 
     @DisplayName("바디 포함 응답 바이트를 확인한다.")
@@ -45,7 +51,14 @@ class HttpResponseTest {
             HttpStatus.OK);
 
         //then
-        assertThat(response.getBytes()).hasSize(2568);
+        String content = new String(response.getBytes());
+        assertThat(content).contains(
+            "HTTP/1.1 200 OK ",
+            "Cookie: io=H6Gs8jT7h07lTg94AAAA; JSESSIONID=acbd813f-eb5a-4f8d-87fe-b1737e0871a1",
+            "Set-Cookie: JSESSIONID=acbd813f-eb5a-4f8d-87fe-b1737e0871a1; ",
+            "Content-Type: text/html;charset=utf-8",
+            "Content-Length: 2426"
+        );
     }
 
 }

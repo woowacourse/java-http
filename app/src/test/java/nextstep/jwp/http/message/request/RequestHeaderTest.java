@@ -73,15 +73,13 @@ class RequestHeaderTest {
         headerParams.put("Host", "localhost:8080");
         headerParams.put("Connection", "keep-alive");
         headerParams.put("Content-Length", "10");
-        HeaderFields headerFields = new HeaderFields(headerParams);
-        return headerFields;
+        return new HeaderFields(headerParams);
     }
 
     private HeaderFields headerFieldsWhenNoBody() {
         LinkedHashMap<String, String> headerParams = new LinkedHashMap<>();
         headerParams.put("Host", "localhost:8080");
         headerParams.put("Connection", "keep-alive");
-        HeaderFields headerFields = new HeaderFields(headerParams);
-        return headerFields;
+        return new HeaderFields(headerParams);
     }
 }

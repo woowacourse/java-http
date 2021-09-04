@@ -1,7 +1,6 @@
 package nextstep.jwp.http.mapper;
 
 import nextstep.jwp.http.exception.ExceptionHandler;
-import nextstep.jwp.http.message.response.HttpResponseMessage;
 import nextstep.jwp.mapping.ExceptionHandlerMappings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

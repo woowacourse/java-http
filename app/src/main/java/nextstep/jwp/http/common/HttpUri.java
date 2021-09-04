@@ -26,19 +26,19 @@ public class HttpUri {
     }
 
     public String removedQueryStringPath() {
-        if (!hasQueryString()) {
+        if (notExistsQueryString()) {
             return value;
         }
         int index = value.indexOf(QUERY_STRING_SEPARATOR);
         return value.substring(0, index);
     }
 
-    private boolean hasQueryString() {
-        return value.contains(QUERY_STRING_SEPARATOR);
+    private boolean notExistsQueryString() {
+        return !value.contains(QUERY_STRING_SEPARATOR);
     }
 
     public String extractQueryString() {
-        if (!hasQueryString()) {
+        if (notExistsQueryString()) {
             throw new IllegalStateException("QueryString이 존재하지 않습니다.");
         }
         int index = value.indexOf(QUERY_STRING_SEPARATOR);

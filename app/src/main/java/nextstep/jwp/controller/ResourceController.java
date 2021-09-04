@@ -1,15 +1,13 @@
 package nextstep.jwp.controller;
 
-import java.io.IOException;
-
 import nextstep.jwp.request.HttpRequest;
 import nextstep.jwp.response.HttpResponse;
 
 import static nextstep.jwp.PageUrl.INDEX_PAGE;
 
-public class ResourceController implements Controller {
+public class ResourceController extends AbstractController {
     @Override
-    public void process(HttpRequest request, HttpResponse response) throws IOException {
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         response.forward(getPath(request));
     }
 

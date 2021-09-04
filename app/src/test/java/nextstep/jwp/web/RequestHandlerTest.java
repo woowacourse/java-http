@@ -31,6 +31,32 @@ class RequestHandlerTest {
         );
     }
 
+    @DisplayName("존재하지 않는 path에 NOT FOUND로 응답한다 - 성공")
+    @Test
+    void whenWrongPath_thenRespondWithNotFound() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /abcdefghijklmnopqrstuvwxyz HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL url = getClass().getClassLoader().getResource("static/404.html");
+        final String content = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 404 Not Found ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + content.getBytes().length + " "
+        );
+    }
+
     @DisplayName("/index.html 요청에 index.html을 포함하여 응답한다 - 성공")
     @Test
     void getIndexPage() throws IOException {
@@ -193,7 +219,7 @@ class RequestHandlerTest {
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + content.getBytes().length + " "
-        );
+                );
     }
 
     @DisplayName("POST /register 요청이 성공적으로 처리되면 /index.html로 리다이렉트한다 - 성공")
@@ -219,6 +245,36 @@ class RequestHandlerTest {
         assertThat(socket.output()).contains(
                 "HTTP/1.1 302 Found ",
                 "Location: /index.html "
+        );
+    }
+
+    @DisplayName("POST /register 요청에 가입된 유저 정보가 있을 경우 400 Bad Request를 반환한다 - 성공")
+    @Test
+    void givenExistingUserInfo_whenLogin_thenRespondWith400() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 58 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
+                "",
+                "account=gugu&password=password&email=gugu%40woowahan.com");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL url = getClass().getClassLoader().getResource("static/400.html");
+        final String content = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 400 Bad Request ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + content.getBytes().length + " "
         );
     }
 

@@ -49,7 +49,7 @@ public class LoginController extends AbstractController {
             logger.debug("{}님이 접속했습니다.", account);
             final HttpSession httpSession = request.getSession();
             httpSession.setAttribute("user", user);
-            request.cookie(httpSession.getId());
+            request.createCookie(httpSession.getId());
             return HttpStatus.FOUND;
         }
         throw new PasswordMismatchException();

@@ -136,7 +136,7 @@ public class HttpRequest {
         path().changeIndexPage();
     }
 
-    public void cookie(final String id) {
+    public void createCookie(final String id) {
         headers.setCookie(id);
     }
 

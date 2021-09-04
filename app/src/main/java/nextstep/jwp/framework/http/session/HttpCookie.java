@@ -35,12 +35,16 @@ public class HttpCookie {
         return line.toString();
     }
 
+    public String get(String key) {
+        return cookies.get(key);
+    }
+
+    public boolean hasNotCookie() {
+        return cookies.size() == 0;
+    }
+
     @Override
     public String toString() {
         return "Set-Cookie: " + cookies();
-    }
-
-    public String get(String key) {
-        return cookies.get(key);
     }
 }

@@ -117,12 +117,15 @@ public class HttpHeaders {
                 .append(pair.getValue())
                 .append("\r\n");
         }
-        //builder.append(cookieToString());
+        createNewCookie(builder);
 
         return builder.toString();
     }
 
-    private String cookieToString() {
-        return cookie.toString();
+    private void createNewCookie(final StringBuilder builder) {
+        if (cookie.hasNotCookie()) {
+            return;
+        }
+        builder.append(cookie.toString());
     }
 }

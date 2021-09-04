@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.jwp.constants.Header;
+import nextstep.jwp.constants.HeaderType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -192,7 +192,7 @@ class RequestHandlerTest {
             // then
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
             String indexHtml = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            assertThat(socket.output()).contains(Header.SET_COOKIE.getKey(), indexHtml);
+            assertThat(socket.output()).contains(HeaderType.SET_COOKIE.getValue(), indexHtml);
         }
 
         @Test

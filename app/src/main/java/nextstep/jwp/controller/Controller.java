@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import nextstep.jwp.constants.Header;
-import nextstep.jwp.constants.Http;
+import nextstep.jwp.constants.HeaderType;
+import nextstep.jwp.constants.HttpTerms;
 import nextstep.jwp.constants.StatusCode;
 import nextstep.jwp.constants.UserParams;
 import nextstep.jwp.exception.UnauthorizedException;
@@ -31,7 +31,7 @@ public class Controller {
     @GetMapping(path = "/login")
     public String login(HttpRequest request) throws IOException {
         RequestHeader header = request.getRequestHeader();
-        if (header.contains(Header.COOKIE.getKey())) {
+        if (header.contains(HeaderType.COOKIE.getValue())) {
             return redirectTo(header, "/index.html");
         }
         return HttpResponse
@@ -67,7 +67,7 @@ public class Controller {
         RequestBody body = request.getRequestBody();
         RequestHeader header = request.getRequestHeader();
         Map<String, String> params = body.getParams();
-        if (header.contains(Header.COOKIE.getKey())) {
+        if (header.contains(HeaderType.COOKIE.getValue())) {
             return redirectTo(header, "/index.html");
         }
         if (!HttpService.isAuthorized(params)) {
@@ -77,8 +77,8 @@ public class Controller {
         setSession(params, sessionId);
         return HttpResponse
                 .statusCode(StatusCode.FOUND)
-                .addHeaders(Header.LOCATION, "/index.html")
-                .addHeaders(Header.SET_COOKIE, Http.JSESSIONID + Http.EQUAL_SEPARATOR + sessionId)
+                .addHeaders(HeaderType.LOCATION, "/index.html")
+                .addHeaders(HeaderType.SET_COOKIE, HttpTerms.JSESSIONID + HttpTerms.EQUAL_SEPARATOR + sessionId)
                 .responseResource("/index.html")
                 .build();
     }
@@ -92,10 +92,10 @@ public class Controller {
 
     private void checkCookieSessionId(RequestHeader header) {
         HttpCookie cookie = header.getCookie();
-        if (!cookie.contains(Http.JSESSIONID)) {
+        if (!cookie.contains(HttpTerms.JSESSIONID)) {
             throw new UnauthorizedException("인증되지 않은 사용자 입니다.");
         }
-        String sessionId = cookie.get(Http.JSESSIONID);
+        String sessionId = cookie.get(HttpTerms.JSESSIONID);
         HttpSession session = HttpSessions.getSession(sessionId);
         Object user = session.getAttribute("user");
         if (Objects.isNull(user)) {
@@ -107,7 +107,7 @@ public class Controller {
         checkCookieSessionId(header);
         return HttpResponse
                 .statusCode(StatusCode.FOUND)
-                .addHeaders(Header.LOCATION, uri)
+                .addHeaders(HeaderType.LOCATION, uri)
                 .responseResource(uri)
                 .build();
     }

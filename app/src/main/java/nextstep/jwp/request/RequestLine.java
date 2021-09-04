@@ -1,6 +1,6 @@
 package nextstep.jwp.request;
 
-import nextstep.jwp.constants.Http;
+import nextstep.jwp.constants.HttpTerms;
 import nextstep.jwp.constants.HttpMethod;
 import nextstep.jwp.exception.HttpException;
 
@@ -19,7 +19,7 @@ public class RequestLine {
     }
 
     private String[] splitRequestLine(String requestLine) {
-        String[] requests = requestLine.split(Http.EMPTY_SPACE_SEPARATOR);
+        String[] requests = requestLine.split(HttpTerms.EMPTY_SPACE_SEPARATOR);
         if (requests.length < REQUEST_LINE_SIZE) {
             throw new HttpException("올바르지 않은 http 요청이 들어왔습니다.");
         }

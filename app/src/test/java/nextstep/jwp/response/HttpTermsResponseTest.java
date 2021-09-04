@@ -6,12 +6,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.jwp.constants.Header;
+import nextstep.jwp.constants.HeaderType;
 import nextstep.jwp.constants.StatusCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class HttpResponseTest {
+class HttpTermsResponseTest {
 
     @Test
     @DisplayName("기본설정과 statusCode 응답을 확인한다.")
@@ -35,7 +35,7 @@ class HttpResponseTest {
     void buildAddHeaders() {
         String actual = HttpResponse
                 .statusCode(StatusCode.FOUND)
-                .addHeaders(Header.LOCATION, "/index.html")
+                .addHeaders(HeaderType.LOCATION, "/index.html")
                 .build();
 
         String expected = String.join("\r\n",
@@ -54,7 +54,7 @@ class HttpResponseTest {
     void buildBody() {
         String actual = HttpResponse
                 .statusCode(StatusCode.FOUND)
-                .addHeaders(Header.LOCATION, "/index.html")
+                .addHeaders(HeaderType.LOCATION, "/index.html")
                 .responseBody("hello")
                 .build();
 
@@ -74,7 +74,7 @@ class HttpResponseTest {
     void buildResourceBody() throws IOException {
         String actual = HttpResponse
                 .statusCode(StatusCode.FOUND)
-                .addHeaders(Header.LOCATION, "/index.html")
+                .addHeaders(HeaderType.LOCATION, "/index.html")
                 .responseResource("/index.html")
                 .build();
 

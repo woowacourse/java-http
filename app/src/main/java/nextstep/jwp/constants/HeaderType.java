@@ -1,19 +1,19 @@
 package nextstep.jwp.constants;
 
-public enum Header {
+public enum HeaderType {
     CONTENT_LENGTH("Content-Length"),
     LOCATION("Location"),
     CONTENT_TYPE("Content-Type"),
     SET_COOKIE("Set-Cookie"),
     COOKIE("Cookie");
 
-    private final String key;
+    private final String value;
 
-    Header(String key) {
-        this.key = key;
+    HeaderType(String value) {
+        this.value = value;
     }
 
-    public String getKey() {
-        return this.key;
+    public String getValue() {
+        return this.value;
     }
 }

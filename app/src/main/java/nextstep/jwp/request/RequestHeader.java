@@ -3,8 +3,8 @@ package nextstep.jwp.request;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import nextstep.jwp.constants.Header;
-import nextstep.jwp.constants.Http;
+import nextstep.jwp.constants.HeaderType;
+import nextstep.jwp.constants.HttpTerms;
 import nextstep.jwp.exception.HttpException;
 
 public class RequestHeader {
@@ -15,9 +15,9 @@ public class RequestHeader {
     }
 
     private Map<String, String> parseHeaders(String lines) {
-        return Stream.of(lines.split(Http.NEW_LINE))
-                .map(line -> line.split(Http.COLUMN_SEPARATOR))
-                .collect(Collectors.toMap(x -> x[Http.KEY].trim(), x -> x[Http.VALUE].trim()));
+        return Stream.of(lines.split(HttpTerms.NEW_LINE))
+                .map(line -> line.split(HttpTerms.COLUMN_SEPARATOR))
+                .collect(Collectors.toMap(x -> x[HttpTerms.KEY].trim(), x -> x[HttpTerms.VALUE].trim()));
     }
 
     public boolean contains(String key) {
@@ -29,8 +29,8 @@ public class RequestHeader {
     }
 
     public HttpCookie getCookie() {
-        if (headers.containsKey(Header.COOKIE.getKey())) {
-            return new HttpCookie(headers.get(Header.COOKIE.getKey()));
+        if (headers.containsKey(HeaderType.COOKIE.getValue())) {
+            return new HttpCookie(headers.get(HeaderType.COOKIE.getValue()));
         }
         throw new HttpException("쿠키헤더가 없습니다.");
     }

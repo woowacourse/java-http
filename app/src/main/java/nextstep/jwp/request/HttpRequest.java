@@ -3,8 +3,8 @@ package nextstep.jwp.request;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Objects;
-import nextstep.jwp.constants.Header;
-import nextstep.jwp.constants.Http;
+import nextstep.jwp.constants.HeaderType;
+import nextstep.jwp.constants.HttpTerms;
 
 public class HttpRequest {
     private final BufferedReader reader;
@@ -23,25 +23,25 @@ public class HttpRequest {
     private String extractHeaders() throws IOException {
         final StringBuilder headerLines = new StringBuilder();
         String header = null;
-        while (!Http.EMPTY_LINE.equals(header)) {
+        while (!HttpTerms.EMPTY_LINE.equals(header)) {
             header = reader.readLine();
             if (Objects.isNull(header)) {
                 break;
             }
             headerLines.append(header)
-                    .append(Http.NEW_LINE);
+                    .append(HttpTerms.NEW_LINE);
         }
         return headerLines.toString();
     }
 
     private String extractRequestBody() throws IOException {
-        if (requestHeader.contains(Header.CONTENT_LENGTH.getKey())) {
-            int contentLength = Integer.parseInt(requestHeader.get(Header.CONTENT_LENGTH.getKey()));
+        if (requestHeader.contains(HeaderType.CONTENT_LENGTH.getValue())) {
+            int contentLength = Integer.parseInt(requestHeader.get(HeaderType.CONTENT_LENGTH.getValue()));
             char[] buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);
             return new String(buffer);
         }
-        return Http.EMPTY_LINE;
+        return HttpTerms.EMPTY_LINE;
     }
 
     public RequestLine getRequestLine() {

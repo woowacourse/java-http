@@ -118,4 +118,12 @@ public class HttpResponse {
     public static Builder responseResource(String uri) throws IOException {
         return new Builder().responseResource(uri);
     }
+
+    public static String redirectTo(String uri) throws IOException {
+        return HttpResponse
+                .statusCode(StatusCode.FOUND)
+                .addHeaders(HeaderType.LOCATION, uri)
+                .responseResource(uri)
+                .build();
+    }
 }

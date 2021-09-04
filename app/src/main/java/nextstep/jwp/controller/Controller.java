@@ -32,7 +32,9 @@ public class Controller {
     public String login(HttpRequest request) throws IOException {
         RequestHeader header = request.getRequestHeader();
         if (header.contains(HeaderType.COOKIE.getValue())) {
-            return redirectTo(header, "/index.html");
+            checkCookieSessionId(header);
+            return HttpResponse
+                    .redirectTo("/index.html");
         }
         return HttpResponse
                 .responseResource("/login.html")
@@ -59,7 +61,8 @@ public class Controller {
         RequestBody body = request.getRequestBody();
         Map<String, String> params = body.getParams();
         HttpService.register(params);
-        return redirectTo(header, "/index.html");
+        return HttpResponse
+                .redirectTo("/index.html");
     }
 
     @PostMapping(path = "/login")
@@ -68,7 +71,8 @@ public class Controller {
         RequestHeader header = request.getRequestHeader();
         Map<String, String> params = body.getParams();
         if (header.contains(HeaderType.COOKIE.getValue())) {
-            return redirectTo(header, "/index.html");
+            return HttpResponse
+                    .redirectTo("/index.html");
         }
         if (!HttpService.isAuthorized(params)) {
             throw new UnauthorizedException("인증되지 않은 사용자 입니다.");
@@ -101,14 +105,5 @@ public class Controller {
         if (Objects.isNull(user)) {
             throw new UnauthorizedException("인증되지 않은 사용자 입니다.");
         }
-    }
-
-    private String redirectTo(RequestHeader header, String uri) throws IOException {
-        checkCookieSessionId(header);
-        return HttpResponse
-                .statusCode(StatusCode.FOUND)
-                .addHeaders(HeaderType.LOCATION, uri)
-                .responseResource(uri)
-                .build();
     }
 }

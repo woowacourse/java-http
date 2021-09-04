@@ -20,7 +20,7 @@ public class HttpHeaders {
     private static final int HEADER_KEY_INDEX = 0;
     private static final int VALUE_KEY_INDEX = 1;
     public static final String CONTENT_LENGTH = "Content-Length";
-    public static final String COOKIE = "Cookie";
+    public static final String COOKIE_KEY = "Cookie";
     public static final String CONTENT_TYPE = "Content-Type";
 
     private final Map<String, String> headers;
@@ -49,7 +49,7 @@ public class HttpHeaders {
         if (key.equals(CONTENT_LENGTH)) {
             headers.put(key, value);
         }
-        if (key.equals(COOKIE)) {
+        if (key.equals(COOKIE_KEY)) {
             headers.put(key, value);
         }
     }
@@ -69,7 +69,7 @@ public class HttpHeaders {
     }
 
     public void addCookie() {
-        final String cookies = headers.get(COOKIE);
+        final String cookies = headers.get(COOKIE_KEY);
 
         if (Objects.isNull(cookies)) {
             return;
@@ -118,7 +118,7 @@ public class HttpHeaders {
     }
 
     private void createResponseHeaders(final StringBuilder builder, final Entry<String, String> pair) {
-        if (pair.getKey().equals(COOKIE)) {
+        if (pair.getKey().equals(COOKIE_KEY)) {
             return;
         }
         builder.append(pair.getKey())

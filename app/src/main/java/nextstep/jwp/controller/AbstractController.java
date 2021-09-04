@@ -20,8 +20,10 @@ public class AbstractController implements Controller {
     }
 
     protected void doGet(final HttpRequest request, final HttpResponse response) throws IOException {
+        throw new UnsupportedOperationException();
     }
 
     protected void doPost(final HttpRequest request, final HttpResponse response) throws IOException {
+        throw new UnsupportedOperationException();
     }
 }

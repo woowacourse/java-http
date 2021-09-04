@@ -7,7 +7,6 @@ import java.util.Objects;
 public class HttpCookie {
 
     private static final String JSESSION_ID_NAME = "JSESSIONID";
-
     private static final HttpCookie EMPTY_HTTP_COOKIE = new HttpCookie(Collections.emptyMap());
 
     private final Map<String, Cookie> values;

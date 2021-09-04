@@ -28,7 +28,7 @@ public class FrontController {
             Optional<ControllerMethod> optionalControllerMethod = requestMapping.getControllerMethod(httpRequest);
             if (optionalControllerMethod.isPresent()) {
                 ControllerMethod controllerMethod = optionalControllerMethod.orElseThrow(PageNotFoundError::new);
-                HttpSession httpSession = this.httpSession(httpRequest, httpResponse);
+                HttpSession httpSession = this.getHttpSession(httpRequest, httpResponse);
                 String viewName = (String) controllerMethod.invoke(httpRequest, httpSession);
                 httpResponse.setView(viewName, HttpStatusCode.OK);
                 return;
@@ -41,7 +41,7 @@ public class FrontController {
         }
     }
 
-    private HttpSession httpSession(HttpRequest httpRequest, HttpResponse httpResponse) {
+    private HttpSession getHttpSession(HttpRequest httpRequest, HttpResponse httpResponse) {
         HttpCookie httpCookie = httpRequest.getCookies();
         if (hasValidJSessionId(httpCookie)) {
             return HttpSessions.getSession(httpCookie.getJSessionId())

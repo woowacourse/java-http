@@ -5,6 +5,9 @@ import nextstep.jwp.response.HttpStatusCode;
 import nextstep.jwp.web.FrontController;
 import nextstep.jwp.web.RequestHandler;
 import nextstep.jwp.web.WebApplicationConfig;
+import nextstep.jwp.web.model.HttpSession;
+import nextstep.jwp.web.model.HttpSessions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -14,6 +17,11 @@ class RequestHandlerTest {
 
     private final FrontController frontController = WebApplicationConfig.frontController();
 
+    @BeforeEach
+    void setUp() {
+        HttpSessions.save(new HttpSession("09a083d4-025d-4caa-aee9-3ec1e2c73a91"));
+    }
+
     @DisplayName("/index path로 index.html 리소스에 대한 응답을 한다.")
     @Test
     void index() {
@@ -22,6 +30,7 @@ class RequestHandlerTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=09a083d4-025d-4caa-aee9-3ec1e2c73a91",
                 "",
                 "");
 
@@ -47,6 +56,7 @@ class RequestHandlerTest {
                 "GET /index HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=09a083d4-025d-4caa-aee9-3ec1e2c73a91",
                 "",
                 "");
 
@@ -72,6 +82,7 @@ class RequestHandlerTest {
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=09a083d4-025d-4caa-aee9-3ec1e2c73a91",
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
@@ -98,6 +109,7 @@ class RequestHandlerTest {
                 "Connection: keep-alive ",
                 "Content-Length: 30 ",
                 "Content-Type: application/x-www-form-urlencoded ",
+                "Cookie: JSESSIONID=09a083d4-025d-4caa-aee9-3ec1e2c73a91",
                 "",
                 "account=gugu&password=password");
 
@@ -125,6 +137,7 @@ class RequestHandlerTest {
                 "Connection: keep-alive ",
                 "Content-Length: 30 ",
                 "Content-Type: application/x-www-form-urlencoded ",
+                "Cookie: JSESSIONID=09a083d4-025d-4caa-aee9-3ec1e2c73a91",
                 "",
                 "account=gugu&password=1234");
 
@@ -150,6 +163,7 @@ class RequestHandlerTest {
                 "GET /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=09a083d4-025d-4caa-aee9-3ec1e2c73a91",
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
@@ -176,6 +190,7 @@ class RequestHandlerTest {
                 "Connection: keep-alive ",
                 "Content-Length: 80 ",
                 "Content-Type: application/x-www-form-urlencoded ",
+                "Cookie: JSESSIONID=09a083d4-025d-4caa-aee9-3ec1e2c73a91",
                 "",
                 "account=gugu1&password=password&email=hkkang%40woowahan.com");
 
@@ -203,6 +218,7 @@ class RequestHandlerTest {
                 "Connection: keep-alive ",
                 "Content-Length: 48 ",
                 "Content-Type: application/x-www-form-urlencoded ",
+                "Cookie: JSESSIONID=09a083d4-025d-4caa-aee9-3ec1e2c73a91",
                 "",
                 "account=gugu&password=1234&email=gugu%40test.com");
 

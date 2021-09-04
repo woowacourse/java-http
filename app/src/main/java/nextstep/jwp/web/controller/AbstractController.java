@@ -10,7 +10,7 @@ import nextstep.jwp.web.network.response.HttpStatus;
 public abstract class AbstractController implements Controller {
 
     protected static final String HTML_EXTENSION = ".html";
-    protected static final String HOME_PAGE = "/index";
+    protected static final String HOME_PAGE = "/index" + HTML_EXTENSION;
     protected static final String BAD_REQUEST_PAGE = "/400";
     protected static final String UNAUTHORIZED_PAGE = "/401";
     protected static final String NOT_FOUND_PAGE = "/404";

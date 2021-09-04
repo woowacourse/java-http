@@ -1,5 +1,6 @@
 package nextstep.jwp.web.controller;
 
+import nextstep.jwp.web.exception.ResourceNotFoundException;
 import nextstep.jwp.web.exception.InputException;
 import nextstep.jwp.web.network.response.ContentType;
 
@@ -40,7 +41,11 @@ public class View {
     }
 
     public String render() {
-        return readFile(name + "." + contentType.getExtension());
+        try {
+            return readFile(name + "." + contentType.getExtension());
+        } catch (NullPointerException exception) {
+            throw new ResourceNotFoundException(name);
+        }
     }
 
     private String readFile(String fileName) {

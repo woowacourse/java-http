@@ -21,4 +21,6 @@
   - [x] 로그인 상태에서 /login 에 GET 메서드로 접근하면 index.html로 리다이렉트한다.
   
 - [x] 소켓 풀 생성 로깅
-- [x] 빌더 이용해서 테스트 리팩토링- [x] Not Found, Bad Request, Internal Server Error 에 대한 예외를 처리한다.
+- [x] 빌더 이용해서 테스트 리팩토링
+- [x] 존재하지 않는 경로로 접근했을 때 404 페이지를 반환한다.
+- [x] Not Found, Bad Request, Internal Server Error 에 대한 예외를 처리한다.

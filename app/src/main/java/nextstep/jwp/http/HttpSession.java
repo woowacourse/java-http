@@ -17,7 +17,7 @@ public class HttpSession {
         values.put(name, value);
     }
 
-    public Object getAttribute(final String name){
+    public Object getAttribute(final String name) {
         return values.get(name);
     }
 

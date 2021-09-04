@@ -34,7 +34,7 @@ class HttpCookieTest {
     @DisplayName("쿠키에 없는 키값을 통해서 데이터를 얻으려고하면, 예외가 발생한다.")
     @Test
     void getCookieValueByKeyExceptionTest() {
-        assertThatThrownBy(()->{
+        assertThatThrownBy(() -> {
             httpCookie.getCookieValueByKey("hahahaahaha");
         }).isInstanceOf(IllegalArgumentException.class);
     }

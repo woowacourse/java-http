@@ -4,15 +4,11 @@ import nextstep.jwp.dashboard.db.InMemoryUserRepository;
 import nextstep.jwp.dashboard.domain.User;
 import nextstep.jwp.dashboard.exception.UserNotFoundException;
 import nextstep.jwp.web.controller.AbstractController;
-import nextstep.jwp.web.controller.View;
 import nextstep.jwp.web.network.HttpSession;
 import nextstep.jwp.web.network.request.HttpRequest;
 import nextstep.jwp.web.network.response.HttpResponse;
-import nextstep.jwp.web.network.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Map;
 
 public class LoginController extends AbstractController {
 
@@ -28,13 +24,10 @@ public class LoginController extends AbstractController {
         final User user = getUser(session);
         if (user == null) {
             log.info("GET /login");
-            final View view = new View(getResource() + ".html");
-            response.setStatus(HttpStatus.OK);
-            response.setBody(view);
+            okWithResource(response);
         } else {
             log.info("GET /login, user {} already logged in. Redirecting to homepage.", user.getAccount());
-            response.setStatus(HttpStatus.FOUND);
-            response.setHeader("Location", "/index.html");
+            redirect(response, HOMEPAGE);
         }
     }
 
@@ -45,31 +38,38 @@ public class LoginController extends AbstractController {
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         try {
-            final Map<String, String> queryInfo = request.getBodyAsMap();
-            final User user = InMemoryUserRepository.findByAccount(queryInfo.get("account"))
-                    .orElseThrow(() -> new UserNotFoundException(queryInfo.get("account")));
+            final String account = request.getAttribute("account");
+            final String password = request.getAttribute("password");
+            final User user = findUser(account);
 
-            if (user.checkPassword(queryInfo.get("password"))) {
-                log.info("Login successful! user account: {}", user.getAccount());
-
-                final HttpSession session = request.getSession();
-                session.setAttribute("user", user);
-                log.info("saved user {} in session {}", user.getAccount(), session.getId());
-
-                response.setStatus(HttpStatus.FOUND);
-                response.setHeader("Set-Cookie", "JSESSIONID=" + session.getId());
-                response.setHeader("Location", "/index.html");
-            } else {
+            if (isWrongPassword(user, password)) {
                 log.info("Login failed");
-                final View view = new View("/401");
-                response.setStatus(HttpStatus.UNAUTHORIZED);
-                response.setBody(view);
+                unauthorized(response);
+                return;
             }
+
+            log.info("Login successful! user account: {}", user.getAccount());
+            final HttpSession session = addUserToSession(request, user);
+            redirectWithSessionCookie(response, HOMEPAGE, session);
         } catch (UserNotFoundException e) {
             log.info(e.getMessage());
-            final View view = new View("/401");
-            response.setStatus(HttpStatus.UNAUTHORIZED);
-            response.setBody(view);
+            unauthorized(response);
         }
+    }
+
+    private User findUser(String account) {
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new UserNotFoundException(account));
+    }
+
+    private boolean isWrongPassword(User user, String password) {
+        return !user.checkPassword(password);
+    }
+
+    private HttpSession addUserToSession(HttpRequest request, User user) {
+        final HttpSession session = request.getSession();
+        session.setAttribute("user", user);
+        log.info("saved user {} in session {}", user.getAccount(), session.getId());
+        return session;
     }
 }

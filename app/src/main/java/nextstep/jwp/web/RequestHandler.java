@@ -3,6 +3,7 @@ package nextstep.jwp.web;
 import nextstep.jwp.web.controller.Controller;
 import nextstep.jwp.web.controller.ControllerFactory;
 import nextstep.jwp.web.controller.ControllerMapping;
+import nextstep.jwp.web.exception.InputException;
 import nextstep.jwp.web.network.request.HttpRequest;
 import nextstep.jwp.web.network.response.HttpResponse;
 import org.slf4j.Logger;
@@ -46,6 +47,8 @@ public class RequestHandler implements Runnable {
             bufferedWriter.close();
         } catch (IOException exception) {
             log.error("Exception stream", exception);
+        } catch (InputException exception) {
+            log.info(exception.getMessage());
         } finally {
             close();
         }

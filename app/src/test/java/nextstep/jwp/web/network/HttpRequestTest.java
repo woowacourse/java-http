@@ -85,11 +85,14 @@ class HttpRequestTest {
                 .buildRequest();
 
         // when
-        final Map<String, String> actual = request.getBodyAsMap();
+        final String actualAccount = request.getAttribute("account");
+        final String actualPassword = request.getAttribute("password");
+        final String actualEmail = request.getAttribute("email");
 
         // then
-        assertThat(actual)
-                .contains(entry("account", "gugu"), entry("password", "password"), entry("email", "hkkang%40woowahan.com"));
+        assertThat(actualAccount).isEqualTo("gugu");
+        assertThat(actualPassword).isEqualTo("password");
+        assertThat(actualEmail).isEqualTo("hkkang%40woowahan.com");
     }
 
     @Test

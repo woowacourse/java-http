@@ -1,14 +1,14 @@
 package nextstep.jwp.web.network.request;
 
+import nextstep.jwp.web.network.response.ContentType;
+import nextstep.jwp.web.network.response.HttpHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
-import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
 class HttpBodyTest {
@@ -17,29 +17,14 @@ class HttpBodyTest {
     @Test
     void create() {
         // given
-        final byte[] httpBodyAsByte = "this is body".getBytes();
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(httpBodyAsByte)));
+        final byte[] httpBodyAsByte = "account=pobi&password=password&email=pobi%40woowahan.com".getBytes();
+        final byte[] httpHeadersAsByte = String.format("Content-Type: %s \r\nContent-Length: %d", ContentType.FORM, httpBodyAsByte.length).getBytes();
+        final BufferedReader headersBufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(httpHeadersAsByte)));
+        final BufferedReader bodyBufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(httpBodyAsByte)));
+        final HttpHeaders headers = HttpHeaders.of(headersBufferedReader);
 
         // when // then
-        assertThatCode(() -> HttpBody.of(bufferedReader, httpBodyAsByte.length))
+        assertThatCode(() -> HttpBody.of(bodyBufferedReader, headers))
                 .doesNotThrowAnyException();
-    }
-
-    @DisplayName("HttpBody에서 쿼리 파라미터를 읽어 map으로 반환한다 - 성공")
-    @Test
-    void name() {
-        // given
-        final byte[] httpBodyAsByte = "account=pobi&password=password&email=pobi%40woowahan.com".getBytes();
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(httpBodyAsByte)));
-        final HttpBody body = HttpBody.of(bufferedReader, httpBodyAsByte.length);
-
-        // when
-        final Map<String, String> bodyAsMap = body.asMap();
-
-        // then
-        assertThat(bodyAsMap)
-                .containsEntry("account", "pobi")
-                .containsEntry("password", "password")
-                .containsEntry("email", "pobi%40woowahan.com");
     }
 }

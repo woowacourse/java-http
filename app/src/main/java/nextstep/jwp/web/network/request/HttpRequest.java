@@ -8,7 +8,6 @@ import nextstep.jwp.web.network.response.HttpHeaders;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Map;
 import java.util.UUID;
 
 public class HttpRequest {
@@ -22,7 +21,7 @@ public class HttpRequest {
 
         this.requestLine = RequestLine.of(bufferedReader);
         this.headers = HttpHeaders.of(bufferedReader);
-        this.body = HttpBody.of(bufferedReader, this.headers.getContentLength());
+        this.body = HttpBody.of(bufferedReader, this.headers);
     }
 
     public boolean isGet() {
@@ -67,7 +66,7 @@ public class HttpRequest {
         return new HttpSession(sessionId);
     }
 
-    public Map<String, String> getBodyAsMap() {
-        return body.asMap();
+    public String getAttribute(String key) {
+        return body.getAttribute(key);
     }
 }

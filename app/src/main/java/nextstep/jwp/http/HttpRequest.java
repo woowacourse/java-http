@@ -17,7 +17,7 @@ public class HttpRequest {
     private final HttpHeaders headers;
     private final HttpBody httpBody;
     private final HttpCookie httpCookie;
-    private HttpSession httpSession;
+    private final HttpSession httpSession;
 
     public HttpRequest(HttpMethod method, HttpUri uri, HttpVersion httpVersion,
                        HttpHeaders headers, HttpBody httpBody, HttpCookie httpCookie,
@@ -52,7 +52,6 @@ public class HttpRequest {
     public HttpMethod method() {
         return method;
     }
-
 
     public HttpUri uri() {
         return uri;

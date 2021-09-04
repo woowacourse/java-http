@@ -28,3 +28,5 @@
 - HttpRequest에서 HttpSessions에 쿠기에 있는 Session이 존재하지 않는 경우 새로 발급. 새로 발급 받은 토큰과 관계없이 httpSession의 값으로
   setCookie 진행. containSession()의 값이 true인 경우에도 setCookie를 진행해줘야할 때가 있음. SessionHandler의 if 문으로 분기
   처리로 우선 진행
+- HttpSessions에 등록되지 않은 JSESSIONID로 요청이 들어 왔을 때, 새로운 JSESSIONID를 발급해줘야하는지, 아니면 요청에서 들어온 JSESSIONID로
+  HttpSessions에 등록을 해야하는지

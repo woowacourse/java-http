@@ -31,7 +31,7 @@ public class HttpResponse {
 
     public void setBody(View view) {
         this.body = view.render();
-        headers.put("Content-Type", view.getContentType().getType());
+        headers.put("Content-Type", view.getContentType());
         headers.put("Content-Length", String.valueOf(this.body.getBytes().length));
     }
 

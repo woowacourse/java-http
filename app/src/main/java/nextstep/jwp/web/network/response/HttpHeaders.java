@@ -49,7 +49,7 @@ public class HttpHeaders {
     public String getAll() {
         return headers.entrySet().stream()
                 .map(entry -> String.format("%s: %s ", entry.getKey(), entry.getValue()))
-                .collect(Collectors.joining("\r\n"));
+                .collect(Collectors.joining(System.lineSeparator()));
     }
 
     public Cookies getCookies() {

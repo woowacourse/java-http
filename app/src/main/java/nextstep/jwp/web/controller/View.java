@@ -58,7 +58,7 @@ public class View {
         }
     }
 
-    public ContentType getContentType() {
-        return contentType;
+    public String getContentType() {
+        return contentType.getType();
     }
 }

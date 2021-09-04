@@ -17,9 +17,13 @@ public enum HttpMethod {
 
     public static HttpMethod of(String name) {
         return Arrays.stream(values())
-                .filter(httpMethod -> name.equals(httpMethod.name()))
+                .filter(httpMethod -> httpMethod.is(name))
                 .findFirst()
                 .orElseThrow(() -> new InvalidHttpMethodException(name));
+    }
+
+    private boolean is(String name) {
+        return this.name().equals(name);
     }
 
     public boolean isGet() {

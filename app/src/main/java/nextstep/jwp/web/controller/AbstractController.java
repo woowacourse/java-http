@@ -57,7 +57,11 @@ public abstract class AbstractController implements Controller {
     }
 
     protected final void okWithResource(HttpResponse response) {
-        final View view = new View(getResource() + HTML_EXTENSION);
+        okWithPath(response, getResource() + HTML_EXTENSION);
+    }
+
+    protected void okWithPath(HttpResponse response, String path) {
+        final View view = new View(path);
         response.setStatus(HttpStatus.OK);
         response.setBody(view);
     }

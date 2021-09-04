@@ -4,21 +4,27 @@ package nextstep.jwp.db;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+import nextstep.jwp.exception.DuplicateAccountException;
 import nextstep.jwp.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InMemoryUserRepository {
 
-    private final Map<String, User> database;
-    private long autoIncrementId;
+    private static final Logger LOGGER = LoggerFactory.getLogger(InMemoryUserRepository.class);
 
-    public InMemoryUserRepository(Map<String, User> database, long autoIncrementId) {
+    private final Map<String, User> database;
+    private final AtomicLong autoIncrementId;
+
+    public InMemoryUserRepository(Map<String, User> database, AtomicLong autoIncrementId) {
         this.database = database;
         this.autoIncrementId = autoIncrementId;
     }
 
     public static InMemoryUserRepository initialize() {
-        long id = 1L;
-        User user = new User(id++, "gugu", "password", "hkkang@woowahan.com");
+        AtomicLong id = new AtomicLong(1);
+        User user = new User(id.getAndIncrement(), "gugu", "password", "hkkang@woowahan.com");
 
         Map<String, User> database = new ConcurrentHashMap<>();
         database.put(user.getAccount(), user);
@@ -27,7 +33,12 @@ public class InMemoryUserRepository {
     }
 
     public void save(User user) {
-        User newUser = User.withId(autoIncrementId++, user);
+        if (database.containsKey(user.getAccount())) {
+            LOGGER.debug("Duplicate account already exist => {}", user.getAccount());
+            throw new DuplicateAccountException();
+        }
+
+        User newUser = User.withId(autoIncrementId.getAndIncrement(), user);
         database.put(newUser.getAccount(), newUser);
     }
 

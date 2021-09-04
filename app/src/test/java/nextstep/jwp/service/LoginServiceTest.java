@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import nextstep.jwp.controller.request.LoginRequest;
 import nextstep.jwp.controller.response.LoginResponse;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -12,6 +13,7 @@ import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.common.HttpCookie;
 import nextstep.jwp.model.User;
 import nextstep.jwp.server.HttpSessions;
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -25,7 +27,7 @@ class LoginServiceTest {
     @BeforeEach
     void setUp() {
         Map<String, User> database = new HashMap<>();
-        userRepository = new InMemoryUserRepository(database, 1L);
+        userRepository = new InMemoryUserRepository(database, new AtomicLong(1));
 
         HttpSessions httpSessions = new HttpSessions();
         loginService = new LoginService(userRepository, httpSessions);

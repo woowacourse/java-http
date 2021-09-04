@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import nextstep.jwp.controller.request.RegisterRequest;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.DuplicateAccountException;
@@ -20,7 +21,7 @@ class RegisterServiceTest {
     @BeforeEach
     void setUp() {
         Map<String, User> database = new HashMap<>();
-        userRepository = new InMemoryUserRepository(database, 1L);
+        userRepository = new InMemoryUserRepository(database, new AtomicLong(1));
 
         registerService = new RegisterService(userRepository);
     }

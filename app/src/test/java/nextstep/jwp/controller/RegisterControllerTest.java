@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
@@ -28,7 +29,7 @@ class RegisterControllerTest {
     @BeforeEach
     void setUp() {
         HashMap<String, User> database = new HashMap<>();
-        userRepository = new InMemoryUserRepository(database, 1L);
+        userRepository = new InMemoryUserRepository(database, new AtomicLong(1));
 
         RegisterService registerService = new RegisterService(userRepository);
         StaticResourceService staticResourceService = new StaticResourceService();

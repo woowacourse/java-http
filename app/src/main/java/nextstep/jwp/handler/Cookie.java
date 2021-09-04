@@ -8,11 +8,15 @@ public class Cookie {
     private final boolean httpOnly;
 
     public Cookie(String name, String value) {
+        this(name, value, "/", false, false);
+    }
+
+    public Cookie(String name, String value, String path, boolean secure, boolean httpOnly) {
         this.name = name;
         this.value = value;
-        this.path = "/";
-        this.secure = false;
-        this.httpOnly = false;
+        this.path = path;
+        this.secure = secure;
+        this.httpOnly = httpOnly;
     }
 
     public String makeSetCookieHttpMessage() {

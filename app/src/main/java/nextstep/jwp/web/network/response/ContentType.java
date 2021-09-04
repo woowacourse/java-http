@@ -34,7 +34,7 @@ public enum ContentType {
         return type;
     }
 
-    public boolean is(String path) {
-        return this.name().equalsIgnoreCase(path);
+    public boolean is(String type) {
+        return this.type.equalsIgnoreCase(type);
     }
 }

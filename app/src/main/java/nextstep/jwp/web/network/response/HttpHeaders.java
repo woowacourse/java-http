@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 public class HttpHeaders {
 
     private static final String COOKIES = "Cookie";
+    private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
@@ -42,6 +43,15 @@ public class HttpHeaders {
         }
     }
 
+    public void put(String key, String value) {
+        headers.putIfAbsent(key, value);
+    }
+
+    public boolean isContentType(ContentType contentType) {
+        final String contentTypeAsString = headers.get(CONTENT_TYPE);
+        return contentType.is(contentTypeAsString);
+    }
+
     public String get(String key) {
         return headers.getOrDefault(key, DEFAULT_HEADER_VALUE);
     }
@@ -66,9 +76,5 @@ public class HttpHeaders {
 
     private boolean doesNotExist(String contentLengthAsString) {
         return contentLengthAsString == null;
-    }
-
-    public void put(String key, String value) {
-        headers.putIfAbsent(key, value);
     }
 }

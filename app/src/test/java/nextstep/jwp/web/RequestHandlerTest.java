@@ -119,6 +119,7 @@ class RequestHandlerTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Cookie: JSESSIONID=" + jsessionid,
+                "Content-Type: application/x-www-form-urlencoded ",
                 "Content-Length: 30",
                 "",
                 "account=gugu&password=password");
@@ -152,6 +153,7 @@ class RequestHandlerTest {
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Type: application/x-www-form-urlencoded ",
                 "Content-Length: 30",
                 "",
                 "account=gugu&password=password");
@@ -177,6 +179,7 @@ class RequestHandlerTest {
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Type: application/x-www-form-urlencoded ",
                 "Content-Length: 26 ",
                 "",
                 "account=gugu&password=1234");

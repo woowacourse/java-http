@@ -1,12 +1,16 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.handler.HttpBody;
 import nextstep.jwp.handler.request.HttpRequest;
 import nextstep.jwp.handler.response.HttpResponse;
-import nextstep.jwp.model.User;
+import nextstep.jwp.service.RegisterService;
 
 public class RegisterController extends AbstractController {
+
+    private final RegisterService registerService;
+
+    public RegisterController() {
+        this.registerService = new RegisterService();
+    }
 
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
@@ -15,13 +19,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
-        HttpBody httpBody = httpRequest.getBody();
-        String account = httpBody.getBodyParams("account");
-        String email = httpBody.getBodyParams("email");
-        String password = httpBody.getBodyParams("password");
-        User user = new User(InMemoryUserRepository.assignId(), account, password, email);
-        InMemoryUserRepository.save(user);
-
+        registerService.register(httpRequest);
         httpResponse.redirect("/index.html");
     }
 }

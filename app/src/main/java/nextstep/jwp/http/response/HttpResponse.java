@@ -42,6 +42,10 @@ public class  HttpResponse {
         this.resource = resource;
     }
 
+    public void flush() throws IOException {
+        dataOutputStream.flush();
+    }
+
     public void write() throws IOException {
         if (httpResponseStatus == null) {
             throw new RuntimeException();

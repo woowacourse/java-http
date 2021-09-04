@@ -7,6 +7,7 @@ import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.session.HttpSession;
 import nextstep.jwp.http.session.HttpSessions;
 import nextstep.jwp.model.User;
+import nextstep.jwp.server.ControllerDispatcher;
 import nextstep.jwp.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -77,8 +78,8 @@ class LoginControllerTest {
                 "account=test&password=tost");
 
         HttpResponse response = new HttpResponse(mockSocket.getOutputStream());
-        loginController.doPost(HttpRequest.of(mockSocket.getInputStream()),response);
-
+        ControllerDispatcher.getInstance().execute(HttpRequest.of(mockSocket.getInputStream()),response);
+        response.write();
         assertThat302Response(mockSocket, "HTTP/1.1 302 Found", "Location: /401.html");
     }
 

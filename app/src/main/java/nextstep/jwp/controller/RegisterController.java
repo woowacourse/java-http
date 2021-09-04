@@ -1,9 +1,12 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.*;
+import nextstep.jwp.http.HttpMethod;
+import nextstep.jwp.http.HttpStatus;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.service.UserService;
 
-public class RegisterController extends Controller {
+public class RegisterController extends AbstractController {
     private final UserService userService;
 
     public RegisterController(final UserService userService) {
@@ -12,14 +15,9 @@ public class RegisterController extends Controller {
 
     @Override
     public boolean canHandle(final HttpRequest httpRequest) {
-        final String httpMethod = httpRequest.getHttpMethod();
+        final HttpMethod httpMethod = httpRequest.getHttpMethod();
         final String path = httpRequest.getPath();
-        return HttpMethod.isPost(httpMethod) && "/register".equals(path);
-    }
-
-    @Override
-    public HttpResponse doGet(HttpRequest httpRequest) {
-        throw new UnsupportedOperationException();
+        return (httpMethod.isGet() || httpMethod.isPost()) && "/register".equals(path);
     }
 
     @Override

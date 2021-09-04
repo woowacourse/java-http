@@ -1,6 +1,10 @@
 package nextstep.jwp.http;
 
-import nextstep.jwp.exception.NoMatchingControllerException;
+import nextstep.jwp.http.authentication.HttpSession;
+import nextstep.jwp.http.authentication.HttpSessions;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.infrastructure.RequestHandler;
+import nextstep.jwp.infrastructure.RequestMapping;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -8,18 +12,19 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RequestHandlerTest {
     private final String protocol = "HTTP/1.1";
+    private final RequestMapping requestMapping = new RequestMapping();
 
     @DisplayName("index 페이지를 요청하면 index 페이지와 함께 올바른 형식으로 응답을 반환한다")
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -46,12 +51,12 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected.toResponseMessage());
     }
 
-    @DisplayName("존재하지 않는 페이지를 요청하면 404 페이지를 반환한다")
+    @DisplayName("요청을 처리할 수 있는 handler가 없을 때, 500 페이지를 반환한다")
     @Test
-    void not_found() throws IOException {
+    void no_matching_controller() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
-                "GET /sakjung HTTP/1.1 ",
+        final String httpRequest = String.join("\r\n",
+                "PUT /sakjung HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -64,11 +69,11 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        final URL resource = getClass().getClassLoader().getResource("static/500.html");
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         final HttpResponse expected = new HttpResponse(
                 protocol,
-                HttpStatus.NOT_FOUND,
+                HttpStatus.INTERNAL_SERVER_ERROR,
                 ContentType.HTML,
                 responseBody.getBytes().length,
                 responseBody
@@ -81,7 +86,7 @@ class RequestHandlerTest {
     @Test
     void internal_server_error() throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -108,12 +113,44 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected.toResponseMessage());
     }
 
+    @DisplayName("login get 요청이 왔을 때, cookie가 있다면 index.html페이지를 출력한다")
+    @Test
+    void login_get_with_cookie() throws IOException {
+        // given
+        final String uuid = UUID.randomUUID().toString();
+        final HttpSession httpSession = new HttpSession(uuid);
+        HttpSessions.addSession(uuid, httpSession);
+
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=" + uuid,
+                "",
+                "");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final HttpResponse expected = new HttpResponse(
+                protocol,
+                HttpStatus.FOUND,
+                "/index.html"
+        );
+
+        assertThat(socket.output()).isEqualTo(expected.toResponseMessage());
+    }
+
     @DisplayName("login post 요청이 왔을 때, 요청을 처리한 후 index.html페이지로 리다이렉트 한다")
     @Test
     void login_post() throws IOException {
         // given
         final String requestBody = "account=gugu&password=password";
-        final String httpRequest= String.join("\r\n",
+        final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
@@ -135,8 +172,9 @@ class RequestHandlerTest {
                 HttpStatus.FOUND,
                 "/index.html"
         );
+        final String[] messageByLine = socket.output().split("\r\n");
 
-        assertThat(socket.output()).isEqualTo(expected.toResponseMessage());
+        assertThat(messageByLine[0] + "\r\n" + messageByLine[1] + "\r\n").isEqualTo(expected.toResponseMessage());
     }
 
     @DisplayName("register post 요청이 왔을 때, 요청을 처리한 후 index.html페이지로 리다이렉트 한다")
@@ -168,22 +206,5 @@ class RequestHandlerTest {
         );
 
         assertThat(socket.output()).isEqualTo(expected.toResponseMessage());
-    }
-
-    @DisplayName("요청을 처리할 수 없는 handler가 없을 때, 에러를 반환한다")
-    @Test
-    void no_matching_controller_exception() {
-        final String httpRequest= String.join("\r\n",
-                "PUT /sakjung HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        assertThatThrownBy(requestHandler::run)
-                .isInstanceOf(NoMatchingControllerException.class);
     }
 }

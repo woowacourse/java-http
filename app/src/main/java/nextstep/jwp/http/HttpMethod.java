@@ -1,16 +1,16 @@
 package nextstep.jwp.http;
 
 public enum HttpMethod {
-    GET, POST;
+    GET, POST, PUT, DELETE;
 
     HttpMethod() {
     }
 
-    public static boolean isGet(final String httpMethod) {
-        return GET.name().equals(httpMethod.toUpperCase());
+    public boolean isGet() {
+        return GET.name().equals(this.name());
     }
 
-    public static boolean isPost(final String httpMethod) {
-        return POST.name().equals(httpMethod.toUpperCase());
+    public boolean isPost() {
+        return POST.name().equals(this.name());
     }
 }

@@ -8,27 +8,26 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
-public class ExceptionResponseMapper implements Mapper<HttpResponseMessage, RuntimeException> {
+public class ExceptionHandlerMapper implements Mapper<ExceptionHandler, RuntimeException> {
 
-    private static final Logger log = LoggerFactory.getLogger(ExceptionResponseMapper.class);
+    private static final Logger log = LoggerFactory.getLogger(ExceptionHandlerMapper.class);
 
-    private static final ExceptionResponseMapper instance = new ExceptionResponseMapper();
+    private static final ExceptionHandlerMapper instance = new ExceptionHandlerMapper();
 
-    private ExceptionResponseMapper() {
+    private ExceptionHandlerMapper() {
     }
 
-    public static ExceptionResponseMapper getInstance() {
+    public static ExceptionHandlerMapper getInstance() {
         return instance;
     }
 
     @Override
-    public HttpResponseMessage resolve(RuntimeException exception) {
+    public ExceptionHandler resolve(RuntimeException exception) {
         Map<Class<? extends RuntimeException>, ExceptionHandler> mappings =
                 ExceptionHandlerMappings.getInstance().getMappings();
         Class<? extends RuntimeException> exceptionType = exception.getClass();
         if (mappings.containsKey(exceptionType)) {
-            log.debug("예외 핸들링 성공 {}", exception.getMessage());
-            return mappings.get(exceptionType).run(exception);
+            return mappings.get(exceptionType);
         }
         throw exception;
     }

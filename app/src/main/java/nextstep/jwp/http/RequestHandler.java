@@ -1,8 +1,9 @@
 package nextstep.jwp.http;
 
 import nextstep.jwp.http.controller.Controller;
+import nextstep.jwp.http.exception.ExceptionHandler;
 import nextstep.jwp.http.mapper.ControllerMapper;
-import nextstep.jwp.http.mapper.ExceptionResponseMapper;
+import nextstep.jwp.http.mapper.ExceptionHandlerMapper;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
 import org.slf4j.Logger;
@@ -51,10 +52,12 @@ public class RequestHandler implements Runnable {
         try {
             String requestUri = httpRequestMessage.requestUri();
             Controller controller = ControllerMapper.getInstance().resolve(requestUri);
-            log.debug("{} 서비스 시작", controller.getClass().getName());
+            log.debug("서비스 시작 {}", controller.getClass().getName());
             return controller.service(httpRequestMessage);
         } catch (RuntimeException exception) {
-            return ExceptionResponseMapper.getInstance().resolve(exception);
+            ExceptionHandler exceptionHandler = ExceptionHandlerMapper.getInstance().resolve(exception);
+            log.debug("예외 핸들링 {}", exception.getMessage());
+            return exceptionHandler.run(exception);
         }
     }
 

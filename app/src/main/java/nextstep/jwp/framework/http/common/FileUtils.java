@@ -6,6 +6,9 @@ import java.nio.file.Path;
 
 public class FileUtils {
 
+    private FileUtils() {
+    }
+
     public static String probeContentType(final Path path) throws IOException {
         return Files.probeContentType(path);
     }

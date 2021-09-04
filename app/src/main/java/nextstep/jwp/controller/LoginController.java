@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import java.io.IOException;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.DBNotFoundException;
@@ -14,13 +15,13 @@ import nextstep.jwp.model.User;
 public class LoginController extends AbstractController {
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) {
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         checkAlreadyLogin(request);
         response.create(request.getRequestLine(), request.getHeaders(), HttpStatus.OK);
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) {
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
         final HttpStatus status = login(request);
         response.create(request.getRequestLine(), request.getHeaders(), status);
     }

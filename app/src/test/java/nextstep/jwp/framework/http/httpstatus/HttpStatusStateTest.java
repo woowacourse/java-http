@@ -1,4 +1,4 @@
-package nextstep.jwp.framework.http.httpStatusState;
+package nextstep.jwp.framework.http.httpstatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

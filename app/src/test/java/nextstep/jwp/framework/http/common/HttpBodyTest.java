@@ -34,6 +34,6 @@ class HttpBodyTest {
         HttpBody body = new HttpBody(new QueryParams("account=hi&password=bye"));
 
         //then
-        assertThat(body.toString()).isEqualTo("password: bye\r\naccount: hi\r\n");
+        assertThat(body.toString()).hasToString("password: bye\r\naccount: hi\r\n");
     }
 }

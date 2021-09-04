@@ -1,4 +1,4 @@
-package nextstep.jwp.framework.http.httpStatusState;
+package nextstep.jwp.framework.http.httpstatus;
 
 import java.net.URL;
 import nextstep.jwp.framework.http.common.HttpPath;
@@ -9,7 +9,7 @@ public abstract class HttpStatusState {
     private final HttpStatus status;
     private final HttpPath path;
 
-    public HttpStatusState(final HttpStatus status, final HttpPath path) {
+    protected HttpStatusState(final HttpStatus status, final HttpPath path) {
         this.status = status;
         this.path = path;
     }

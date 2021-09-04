@@ -19,7 +19,7 @@ public class HttpBody {
     }
 
     public boolean hasBody() {
-        return !(queryParams.count() == 0);
+        return queryParams.count() != 0;
     }
 
     public boolean hasNotBody() {
@@ -27,7 +27,7 @@ public class HttpBody {
     }
 
     public Map<String, String> getQueryParams() {
-        return queryParams.getQueryParams();
+        return queryParams.getValue();
     }
 
     @Override

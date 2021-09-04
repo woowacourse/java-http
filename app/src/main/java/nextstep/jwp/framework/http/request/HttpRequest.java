@@ -87,11 +87,11 @@ public class HttpRequest {
     }
 
     private HttpHeaders createHeader(final String lines) {
-        final String[] headers = lines.split(BODY_DELIMITER)[HTTP_HEADER_INDEX].split(LINE_DELIMITER);
+        final String[] splitLines = lines.split(BODY_DELIMITER)[HTTP_HEADER_INDEX].split(LINE_DELIMITER);
         final StringJoiner headerLines = new StringJoiner(LINE_DELIMITER);
 
-        for (int i = 1; i < headers.length; i++) {
-            headerLines.add(headers[i]);
+        for (int i = 1; i < splitLines.length; i++) {
+            headerLines.add(splitLines[i]);
         }
 
         return new HttpHeaders(headerLines.toString());

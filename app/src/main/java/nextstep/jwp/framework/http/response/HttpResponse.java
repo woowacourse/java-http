@@ -22,16 +22,12 @@ public class HttpResponse {
     private HttpHeaders headers;
     private URL resourceURL;
 
-    public void create(HttpRequestLine requestLine, HttpHeaders headers, HttpStatus status) {
+    public void create(HttpRequestLine requestLine, HttpHeaders headers, HttpStatus status) throws IOException {
         this.protocolVersion = requestLine.getProtocolVersion();
         this.headers = headers;
         this.resourceURL = requestLine.url(status);
         this.status = requestLine.status(status);
-        try {
-            headers.putContentType(new File(resourceURL.getPath()).toPath());
-        } catch (IOException e) {
-
-        }
+        headers.putContentType(new File(resourceURL.getPath()).toPath());
     }
 
     public byte[] getBytes() throws IOException {
@@ -45,7 +41,7 @@ public class HttpResponse {
     }
 
     private String statusLine() {
-        return protocolVersion.getProtocolVersion() + SPACE + status.value() + SPACE + status.getReasonPhrase() + SPACE;
+        return protocolVersion.getValue() + SPACE + status.value() + SPACE + status.getReasonPhrase() + SPACE;
     }
 
     public String resource() throws IOException {

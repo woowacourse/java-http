@@ -19,9 +19,12 @@ public class HttpHeaders {
     private static final String SESSION_ID = "JSESSIONID";
     private static final int HEADER_KEY_INDEX = 0;
     private static final int VALUE_KEY_INDEX = 1;
+    public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String COOKIE = "Cookie";
+    public static final String CONTENT_TYPE = "Content-Type";
 
     private final Map<String, String> headers;
-    private HttpCookie cookie;
+    private final HttpCookie cookie;
 
     public HttpHeaders(final String lines) {
         this.headers = convert(lines);
@@ -31,9 +34,9 @@ public class HttpHeaders {
 
     private Map<String, String> convert(final String lines) {
         final Map<String, String> result = new HashMap<>();
-        final String[] headers = lines.split(LINE_DELIMITER);
+        final String[] headerLines = lines.split(LINE_DELIMITER);
 
-        for (final String header : headers) {
+        for (final String header : headerLines) {
             final String[] split = header.split(HEADER_DELIMITER);
 
             putHeaders(result, split[HEADER_KEY_INDEX].trim(), split[VALUE_KEY_INDEX].trim());
@@ -43,30 +46,30 @@ public class HttpHeaders {
     }
 
     private void putHeaders(final Map<String, String> headers, final String key, final String value) {
-        if (key.equals("Content-Length")) {
+        if (key.equals(CONTENT_LENGTH)) {
             headers.put(key, value);
         }
-        if (key.equals("Cookie")) {
+        if (key.equals(COOKIE)) {
             headers.put(key, value);
         }
     }
 
     public void putContentType(final Path path) throws IOException {
         String type = FileUtils.probeContentType(path);
-        headers.put("Content-Type", type);
+        headers.put(CONTENT_TYPE, type);
     }
 
     public void setContentLength(final int length) {
-        headers.remove("Content-Length");
-        headers.put("Content-Length", "" + length);
+        headers.remove(CONTENT_LENGTH);
+        headers.put(CONTENT_LENGTH, "" + length);
     }
 
     public int contentLength() {
-        return Integer.parseInt(headers.get("Content-Length"));
+        return Integer.parseInt(headers.get(CONTENT_LENGTH));
     }
 
     public void addCookie() {
-        final String cookies = headers.get("Cookie");
+        final String cookies = headers.get(COOKIE);
 
         if (Objects.isNull(cookies)) {
             return;
@@ -115,7 +118,7 @@ public class HttpHeaders {
     }
 
     private void createResponseHeaders(final StringBuilder builder, final Entry<String, String> pair) {
-        if (pair.getKey().equals("Cookie")) {
+        if (pair.getKey().equals(COOKIE)) {
             return;
         }
         builder.append(pair.getKey())

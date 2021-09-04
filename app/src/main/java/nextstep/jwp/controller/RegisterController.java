@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import java.io.IOException;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.DBNotFoundException;
@@ -12,12 +13,12 @@ import nextstep.jwp.model.User;
 public class RegisterController extends AbstractController {
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) {
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         response.create(request.getRequestLine(), request.getHeaders(), HttpStatus.OK);
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) {
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
         final HttpStatus status = register(request.getBody());
         response.create(request.getRequestLine(), request.getHeaders(), status);
     }

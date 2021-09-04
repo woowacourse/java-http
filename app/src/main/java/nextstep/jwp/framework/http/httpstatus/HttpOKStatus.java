@@ -1,4 +1,4 @@
-package nextstep.jwp.framework.http.httpStatusState;
+package nextstep.jwp.framework.http.httpstatus;
 
 import java.net.URL;
 import nextstep.jwp.framework.http.common.HttpPath;

@@ -14,7 +14,6 @@ import nextstep.jwp.framework.http.session.HttpSessions;
 public class HttpHeaders {
 
     public static final String HEADER_DELIMITER = ": ";
-    public static final String SPACE = " ";
     private static final String SESSION_ID = "JSESSIONID";
     private static final int HEADER_KEY_INDEX = 0;
     private static final int VALUE_KEY_INDEX = 1;
@@ -35,18 +34,13 @@ public class HttpHeaders {
         for (final String header : headers) {
             final String[] split = header.split(HEADER_DELIMITER);
 
-            putAcceptHeader(result, split[HEADER_KEY_INDEX].trim(), split[VALUE_KEY_INDEX].trim());
+            putHeaders(result, split[HEADER_KEY_INDEX].trim(), split[VALUE_KEY_INDEX].trim());
         }
 
         return result;
     }
 
-    private void putAcceptHeader(final Map<String, String> headers, final String key, final String value) {
-        if (key.equals("Accept")) {
-            final String[] types = value.split(",");
-
-            putContentType(headers, types);
-        }
+    private void putHeaders(final Map<String, String> headers, final String key, final String value) {
         if (key.equals("Content-Length")) {
             headers.put(key, value);
         }
@@ -55,16 +49,9 @@ public class HttpHeaders {
         }
     }
 
-    private void putContentType(final Map<String, String> headers, final String[] types) {
-        for (String type : types) {
-            putTextType(headers, type);
-        }
-    }
-
-    private void putTextType(final Map<String, String> headers, final String type) {
-        if (type.split("/")[0].equals("text")) {
-            headers.put("Content-Type", type);
-        }
+    public void putContentType(final String fileExtension) {
+        final String type = FileExtensionHeader.value(fileExtension).getHeader();
+        headers.put("Content-Type", type);
     }
 
     public void setContentLength(final int length) {

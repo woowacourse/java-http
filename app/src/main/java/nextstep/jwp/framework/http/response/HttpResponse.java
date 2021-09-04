@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import nextstep.jwp.framework.http.common.FileUtils;
 import nextstep.jwp.framework.http.common.HttpHeaders;
 import nextstep.jwp.framework.http.common.HttpStatus;
 import nextstep.jwp.framework.http.common.ProtocolVersion;
@@ -27,6 +28,7 @@ public class HttpResponse {
         this.headers = headers;
         this.status = status;
         this.resourceURL = requestLine.url(status);
+        headers.putContentType(FileUtils.fileExtension(new File(resourceURL.getPath())));
     }
 
     public byte[] getBytes() throws IOException {

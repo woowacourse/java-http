@@ -13,13 +13,13 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
-        response.create(request.getRequestLine(), request.getHeaders(), request.getBody(), HttpStatus.OK);
+        response.create(request.getRequestLine(), request.getHeaders(), HttpStatus.OK);
     }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         final HttpStatus status = register(request.getBody());
-        response.create(request.getRequestLine(), request.getHeaders(), request.getBody(), status);
+        response.create(request.getRequestLine(), request.getHeaders(), status);
     }
 
     private HttpStatus register(final HttpBody body) {

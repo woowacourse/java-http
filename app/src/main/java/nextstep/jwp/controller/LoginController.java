@@ -16,13 +16,13 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) {
         checkAlreadyLogin(request);
-        response.create(request.getRequestLine(), request.getHeaders(), request.getBody(), HttpStatus.OK);
+        response.create(request.getRequestLine(), request.getHeaders(), HttpStatus.OK);
     }
 
     @Override
     protected void doPost(HttpRequest request, HttpResponse response) {
         final HttpStatus status = login(request);
-        response.create(request.getRequestLine(), request.getHeaders(), request.getBody(), status);
+        response.create(request.getRequestLine(), request.getHeaders(), status);
     }
 
     private HttpStatus login(final HttpRequest request) {

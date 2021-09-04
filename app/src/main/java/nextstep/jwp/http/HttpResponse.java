@@ -110,4 +110,8 @@ public class HttpResponse {
     private void send() throws IOException {
         outputStream.flush();
     }
+
+    public void addHeader(final String headerKey, final String headerValue) {
+        headers.put(headerKey + ": " + headerValue);
+    }
 }

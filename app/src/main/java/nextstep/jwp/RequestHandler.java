@@ -8,8 +8,10 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.UUID;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.ControllerMapper;
+import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import org.slf4j.Logger;
@@ -37,23 +39,34 @@ public class RequestHandler implements Runnable {
 
             HttpResponse httpResponse = new HttpResponse(outputStream);
             Controller controller = ControllerMapper.getControllerByUrl(httpRequest.getUrl());
+            cookieCheck(httpRequest, httpResponse);
 
             if (controller == null) {
                 httpResponse.transfer(httpRequest.getUrl());
             } else {
                 controller.service(httpRequest, httpResponse);
             }
-//            } else if (httpRequest.getHttpMethod().equals(HttpMethod.GET)) {
-//                controller.get(httpRequest, httpResponse);
-//            } else if (httpRequest.getHttpMethod().equals(HttpMethod.POST)) {
-//                controller.post(httpRequest, httpResponse);
-//            }
 
         } catch (IOException exception) {
             LOG.error("Exception stream", exception);
         } finally {
             close();
         }
+    }
+
+    private void cookieCheck(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        try {
+            HttpCookie httpCookie = httpRequest.getCookie();
+            if (!httpCookie.containsKey("JSESSIONID")) {
+                setJessionId(httpResponse);
+            }
+        } catch (IllegalArgumentException e) {
+            setJessionId(httpResponse);
+        }
+    }
+
+    private void setJessionId(final HttpResponse httpResponse) {
+        httpResponse.addHeader("Set-Cookie", String.format("JSESSIONID=%s", UUID.randomUUID()));
     }
 
     private void close() {

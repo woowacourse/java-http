@@ -13,4 +13,9 @@ public class RegisterController extends AbstractController {
     public void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         registerService.registerUser(httpRequest, httpResponse);
     }
+
+    @Override
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        registerService.doGet(httpResponse);
+    }
 }

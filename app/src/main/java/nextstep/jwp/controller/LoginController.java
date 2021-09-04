@@ -10,6 +10,11 @@ public class LoginController extends AbstractController {
     private final LoginService loginService = new LoginService();
 
     @Override
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        loginService.doGet(httpResponse, httpRequest);
+    }
+
+    @Override
     public void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         loginService.login(httpRequest, httpResponse);
     }

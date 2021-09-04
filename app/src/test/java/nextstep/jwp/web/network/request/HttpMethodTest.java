@@ -1,7 +1,6 @@
-package nextstep.jwp.web.network;
+package nextstep.jwp.web.network.request;
 
 import nextstep.jwp.web.exception.InvalidHttpMethodException;
-import nextstep.jwp.web.network.request.HttpMethod;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

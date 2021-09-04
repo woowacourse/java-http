@@ -1,4 +1,4 @@
-package nextstep.jwp.dashboard.exception;
+package nextstep.jwp.web.exception;
 
 public class ResourceNotFoundException extends NotFoundException {
 

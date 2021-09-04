@@ -1,7 +1,7 @@
 package nextstep.jwp.web.controller;
 
-import nextstep.jwp.dashboard.exception.BadRequestException;
-import nextstep.jwp.dashboard.exception.NotFoundException;
+import nextstep.jwp.web.exception.BadRequestException;
+import nextstep.jwp.web.exception.NotFoundException;
 import nextstep.jwp.web.network.HttpSession;
 import nextstep.jwp.web.network.request.HttpRequest;
 import nextstep.jwp.web.network.response.HttpResponse;

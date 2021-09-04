@@ -1,17 +1,16 @@
-package nextstep.jwp.web.network;
+package nextstep.jwp.web.network.request;
 
-import nextstep.jwp.web.network.request.HttpMethod;
-import nextstep.jwp.web.network.request.HttpRequest;
+import nextstep.jwp.web.network.HttpSession;
+import nextstep.jwp.web.network.HttpSessions;
+import nextstep.jwp.web.network.URI;
 import nextstep.jwp.web.network.response.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
-import java.util.Map;
 import java.util.UUID;
 
-import static java.util.Map.entry;
-import static nextstep.jwp.web.network.HttpUtils.*;
+import static nextstep.jwp.web.network.HttpUtils.RequestBuilder;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 

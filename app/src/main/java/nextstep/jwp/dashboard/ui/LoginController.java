@@ -27,7 +27,7 @@ public class LoginController extends AbstractController {
             okWithResource(response);
         } else {
             log.info("GET /login, user {} already logged in. Redirecting to homepage.", user.getAccount());
-            redirect(response, HOMEPAGE);
+            redirect(response, HOME_PAGE);
         }
     }
 
@@ -50,7 +50,7 @@ public class LoginController extends AbstractController {
 
             log.info("Login successful! user account: {}", user.getAccount());
             final HttpSession session = addUserToSession(request, user);
-            redirectWithSessionCookie(response, HOMEPAGE, session);
+            redirectWithSessionCookie(response, HOME_PAGE, session);
         } catch (UserNotFoundException e) {
             log.info(e.getMessage());
             unauthorized(response);

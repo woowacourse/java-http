@@ -26,10 +26,15 @@ class RequestHandlerTest {
 
         // when
         requestHandler.run();
+        String content = socket.output();
 
         // then
-        String expected = String.join("");
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(content).contains(
+            "HTTP/1.1 200 OK ",
+            "Content-Type: text/html;charset=utf-8",
+            "Content-Length: 2426",
+            htmlValue
+        );
     }
 
     @DisplayName("POST 요청")
@@ -43,10 +48,15 @@ class RequestHandlerTest {
 
         // when
         requestHandler.run();
+        String content = socket.output();
 
         // then
-        String expected = String.join("");
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(content).contains(
+            "HTTP/1.1 302 Found ",
+            "Content-Type: text/html;charset=utf-8",
+            "Content-Length: 5518",
+            htmlValue
+        );
     }
 
     @Disabled

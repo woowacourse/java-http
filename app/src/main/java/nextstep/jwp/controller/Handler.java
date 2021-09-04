@@ -8,5 +8,5 @@ public interface Handler {
 
     boolean matchHttpMethod(HttpMethod httpMethod);
 
-    String runController(HttpRequest httpRequest, Controller controller) throws Exception;
+    String handle(HttpRequest httpRequest, Controller controller) throws Exception;
 }

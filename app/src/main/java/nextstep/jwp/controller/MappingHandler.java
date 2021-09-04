@@ -1,13 +1,10 @@
 package nextstep.jwp.controller;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import nextstep.jwp.constants.HttpMethod;
 import nextstep.jwp.exception.HttpException;
 import nextstep.jwp.request.HttpRequest;
-import nextstep.jwp.request.RequestBody;
-import nextstep.jwp.request.RequestHeader;
 import nextstep.jwp.request.RequestLine;
 
 public class MappingHandler {
@@ -26,7 +23,7 @@ public class MappingHandler {
     public String response() throws Exception {
         final HttpMethod httpMethod = requestLine.getHttpMethod();
         final Handler handler = findHandler(httpMethod);
-        return handler.runController(httpRequest, controller);
+        return handler.handle(httpRequest, controller);
     }
 
     private Handler findHandler(HttpMethod httpMethod) {

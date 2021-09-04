@@ -4,22 +4,18 @@ import java.lang.reflect.Method;
 import nextstep.jwp.constants.HttpMethod;
 import nextstep.jwp.exception.HttpException;
 import nextstep.jwp.request.HttpRequest;
-import nextstep.jwp.request.RequestBody;
-import nextstep.jwp.request.RequestHeader;
 
 public class PostHandler implements Handler {
-    private final HttpMethod httpMethod = HttpMethod.POST;
-
     public PostHandler() {
     }
 
     @Override
     public boolean matchHttpMethod(HttpMethod httpMethod) {
-        return this.httpMethod == httpMethod;
+        return HttpMethod.POST == httpMethod;
     }
 
     @Override
-    public String runController(HttpRequest httpRequest, Controller controller) throws Exception {
+    public String handle(HttpRequest httpRequest, Controller controller) throws Exception {
         String uri = httpRequest.getRequestLine().getUri();
         for (Method method : Controller.class.getDeclaredMethods()) {
             if (matchPostMapping(method, uri)) {

@@ -3,7 +3,6 @@ package nextstep.jwp;
 import java.io.*;
 import java.net.Socket;
 import java.util.Objects;
-import java.util.UUID;
 
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.request.HttpRequest;
@@ -40,8 +39,6 @@ public class RequestHandler implements Runnable {
         } catch (IOException exception) {
             LOG.error("Exception stream", exception);
         } catch (IllegalArgumentException e) {
-            LOG.error(e.getMessage());
-        } catch (Exception e) {
             LOG.error(e.getMessage());
         } finally {
             close();

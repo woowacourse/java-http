@@ -1,5 +1,7 @@
 package nextstep.jwp.controller;
 
+import java.io.IOException;
+
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.request.HttpRequest;
@@ -10,12 +12,12 @@ import static nextstep.jwp.PageUrl.REGISTER_PAGE;
 
 public class RegisterController extends AbstractController {
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         response.forward(REGISTER_PAGE.getPath());
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
         String account = request.getRequestBodyParam("account");
         String password = request.getRequestBodyParam("password");
         String email = request.getRequestBodyParam("email");

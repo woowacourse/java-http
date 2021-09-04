@@ -15,7 +15,7 @@ import static nextstep.jwp.PageUrl.*;
 
 public class LoginController extends AbstractController {
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
         if (isLoginStatus(request.getSession())) {
             response.redirect(INDEX_PAGE.getPath());
             return;
@@ -24,7 +24,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
         String account = request.getRequestBodyParam("account");
         String password = request.getRequestBodyParam("password");
 

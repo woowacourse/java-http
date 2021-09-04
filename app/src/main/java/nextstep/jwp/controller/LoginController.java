@@ -11,16 +11,18 @@ import nextstep.jwp.response.HttpResponse;
 import nextstep.jwp.session.HttpSession;
 import nextstep.jwp.session.HttpSessions;
 
+import static nextstep.jwp.PageUrl.*;
+
 public class LoginController implements Controller {
     @Override
     public void process(HttpRequest request, HttpResponse response) throws IOException {
         if (request.isGet()) {
 
             if (isLoginStatus(request.getSession())) {
-                response.redirect("/index.html");
+                response.redirect(INDEX_PAGE.getPath());
                 return;
             }
-            response.forward("/login.html");
+            response.forward(LOGIN_PAGE.getPath());
         }
 
         if (request.isPost()) {
@@ -30,7 +32,7 @@ public class LoginController implements Controller {
             User user = getUser(response, account);
 
             if (!user.checkPassword(password)) {
-                response.redirect("/401.html");
+                response.redirect(UNAUTHORIZED_PAGE.getPath());
                 return;
             }
 
@@ -43,7 +45,7 @@ public class LoginController implements Controller {
                 HttpSession session = request.getSession();
                 session.setAttribute("user", user);
             }
-            response.redirect("/index.html");
+            response.redirect(INDEX_PAGE.getPath());
         }
     }
 
@@ -57,7 +59,7 @@ public class LoginController implements Controller {
         try {
             user = InMemoryUserRepository.findByAccount(account);
         } catch (IllegalArgumentException e) {
-            response.redirect("/401.html");
+            response.redirect(UNAUTHORIZED_PAGE.getPath());
         }
         return user;
     }

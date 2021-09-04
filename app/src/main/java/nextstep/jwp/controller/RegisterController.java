@@ -1,18 +1,20 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
-import java.util.Map;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.request.HttpRequest;
 import nextstep.jwp.response.HttpResponse;
 
+import static nextstep.jwp.PageUrl.INDEX_PAGE;
+import static nextstep.jwp.PageUrl.REGISTER_PAGE;
+
 public class RegisterController implements Controller {
     @Override
     public void process(HttpRequest request, HttpResponse response) throws IOException {
         if (request.isGet()) {
-            response.forward("/register.html");
+            response.forward(REGISTER_PAGE.getPath());
         }
 
         if (request.isPost()) {
@@ -23,7 +25,7 @@ public class RegisterController implements Controller {
             User user = new User(2, account, password, email);
             InMemoryUserRepository.save(user);
 
-            response.redirect("/index.html");
+            response.redirect(INDEX_PAGE.getPath());
         }
     }
 }

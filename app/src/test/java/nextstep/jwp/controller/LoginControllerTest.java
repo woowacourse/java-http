@@ -25,8 +25,8 @@ class LoginControllerTest {
 
         // when
         loginController.doGet(new HttpRequest(
-            new HttpRequestLine(HttpMethod.GET, new HttpPath("login.html"), new ProtocolVersion("HTTP/1.1")),
-            new HttpHeaders("Content-Type: text/html;charset=utf-8 \r\nContent-Length: 12 \r\nCookie: io=H6Gs8jT7h07lTg94AAAA; JSESSIONID=acbd813f-eb5a-4f8d-87fe-b1737e0871a1"),
+            new HttpRequestLine(HttpMethod.GET, new HttpPath("/login.html"), new ProtocolVersion("HTTP/1.1")),
+            new HttpHeaders("Content-Type: text/html;charset=utf-8 \r\nContent-Length: 12 "),
             new HttpBody()
         ), response);
 
@@ -35,8 +35,7 @@ class LoginControllerTest {
         assertThat(content).contains(
             "HTTP/1.1 200 OK",
             "Content-Type: text/html",
-            "Cookie: io=H6Gs8jT7h07lTg94AAAA; JSESSIONID=acbd813f-eb5a-4f8d-87fe-b1737e0871a1",
-            "Content-Length: 2426"
+            "Content-Length: 3717"
         );
     }
 
@@ -49,8 +48,8 @@ class LoginControllerTest {
 
         // when
         loginController.doPost(new HttpRequest(
-            new HttpRequestLine(HttpMethod.POST, new HttpPath("index.html"), new ProtocolVersion("HTTP/1.1")),
-            new HttpHeaders("Content-Type: text/html;charset=utf-8 \r\nContent-Length: 12 \r\nCookie: io=H6Gs8jT7h07lTg94AAAA; JSESSIONID=acbd813f-eb5a-4f8d-87fe-b1737e0871a1"),
+            new HttpRequestLine(HttpMethod.POST, new HttpPath("/index.html"), new ProtocolVersion("HTTP/1.1")),
+            new HttpHeaders("Content-Type: text/html;charset=utf-8 \r\nContent-Length: 12 "),
             new HttpBody("account=gugu&password=password&email=hkkang%40woowahan.com")
         ), response);
 
@@ -58,9 +57,8 @@ class LoginControllerTest {
         String content = new String(response.getBytes());
         assertThat(content).contains(
             "HTTP/1.1 302 Found ",
-            "Content-Type: text/html;charset=utf-8",
-            "Cookie: acbd813f-eb5a-4f8d-87fe-b1737e0871a1",
-            "Content-Length: 2426"
+            "Content-Type: text/html",
+            "Content-Length: 5518"
         );
     }
 }

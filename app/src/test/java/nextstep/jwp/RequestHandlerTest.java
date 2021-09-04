@@ -30,8 +30,8 @@ class RequestHandlerTest {
 
         // then
         assertThat(content).contains(
-            "HTTP/1.1 200 OK ",
-            "Content-Type: text/html;charset=utf-8",
+            "HTTP/1.1 404 Not Found ",
+            "Content-Type: text/html",
             "Content-Length: 2426",
             htmlValue
         );
@@ -53,7 +53,7 @@ class RequestHandlerTest {
         // then
         assertThat(content).contains(
             "HTTP/1.1 302 Found ",
-            "Content-Type: text/html;charset=utf-8",
+            "Content-Type: text/html",
             "Content-Length: 5518",
             htmlValue
         );

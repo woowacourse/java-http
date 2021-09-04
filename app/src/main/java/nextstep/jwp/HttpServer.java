@@ -23,7 +23,7 @@ public class HttpServer {
 
     public HttpServer(InputStream inputStream) throws IOException {
         this.httpRequest = new HttpRequest(new BufferedReader(new InputStreamReader(inputStream)));
-         this.mappingHandler = new MappingHandler(httpRequest);
+        this.mappingHandler = new MappingHandler(httpRequest);
     }
 
     public String getResponse() throws IOException {

@@ -1,7 +1,7 @@
 package nextstep.jwp.request;
 
-import nextstep.jwp.constants.HttpTerms;
 import nextstep.jwp.constants.HttpMethod;
+import nextstep.jwp.constants.HttpTerms;
 import nextstep.jwp.exception.HttpException;
 
 public class RequestLine {

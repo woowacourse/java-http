@@ -2,7 +2,6 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.constants.HttpMethod;
 import nextstep.jwp.request.HttpRequest;
-import nextstep.jwp.request.RequestHeader;
 
 public interface Handler {
 

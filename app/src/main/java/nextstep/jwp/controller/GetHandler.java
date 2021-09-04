@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 import nextstep.jwp.constants.HttpMethod;
 import nextstep.jwp.exception.HttpException;
 import nextstep.jwp.request.HttpRequest;
-import nextstep.jwp.request.RequestHeader;
 import nextstep.jwp.response.HttpResponse;
 
 public class GetHandler implements Handler {

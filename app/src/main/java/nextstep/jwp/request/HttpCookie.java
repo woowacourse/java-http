@@ -1,11 +1,9 @@
 package nextstep.jwp.request;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nextstep.jwp.constants.HttpTerms;
-import nextstep.jwp.exception.UnauthorizedException;
 
 public class HttpCookie {
     private final Map<String, String> cookies;

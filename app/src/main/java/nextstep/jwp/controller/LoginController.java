@@ -2,32 +2,34 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnauthorizedException;
-import nextstep.jwp.http.HttpTranslator;
 import nextstep.jwp.http.controller.AbstractController;
 import nextstep.jwp.http.message.MessageBody;
+import nextstep.jwp.http.message.builder.HttpResponseBuilder;
+import nextstep.jwp.http.message.request.FormData;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
 import nextstep.jwp.model.User;
 
-import java.util.Map;
 import java.util.Objects;
 
 public class LoginController extends AbstractController {
 
     @Override
-    protected void doGet(HttpRequestMessage httpRequestMessage, HttpResponseMessage httpResponseMessage) {
-        httpRequestMessage.changeRequestUri("/login.html");
+    protected HttpResponseMessage doGet(HttpRequestMessage httpRequestMessage) {
+        return HttpResponseBuilder.forward("/login.html")
+                .build();
     }
 
     @Override
-    protected void doPost(HttpRequestMessage httpRequestMessage, HttpResponseMessage httpResponseMessage) {
+    protected HttpResponseMessage doPost(HttpRequestMessage httpRequestMessage) {
         MessageBody messageBody = httpRequestMessage.getBody();
-        Map<String, String> formData = HttpTranslator.extractFormData(messageBody);
-        String account = formData.get("account");
-        String password = formData.get("password");
-        login(account, password);
-
-        httpRequestMessage.changeRequestUri("redirect:/index.html");
+        FormData formData = messageBody.toFormData();
+        login(
+                formData.take("account"),
+                formData.take("password")
+        );
+        return HttpResponseBuilder.redirectTemporarily("/index.html")
+                .build();
     }
 
     private void login(String account, String password) {

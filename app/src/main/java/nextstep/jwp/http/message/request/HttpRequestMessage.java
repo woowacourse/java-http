@@ -1,5 +1,6 @@
 package nextstep.jwp.http.message.request;
 
+import nextstep.jwp.http.common.HttpMethod;
 import nextstep.jwp.http.message.HttpMessage;
 import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.http.message.MessageHeader;
@@ -24,6 +25,14 @@ public class HttpRequestMessage implements HttpMessage {
         this.requestLine = requestLine;
         this.requestHeader = requestHeader;
         this.requestBody = requestBody;
+    }
+
+    public HttpMethod httpMethod() {
+        return ((RequestLine) requestLine).getHttpMethod();
+    }
+
+    public String requestUri() {
+        return ((RequestLine) requestLine).getRequestUri();
     }
 
     @Override

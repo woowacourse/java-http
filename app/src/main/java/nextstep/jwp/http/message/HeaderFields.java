@@ -1,5 +1,6 @@
 package nextstep.jwp.http.message;
 
+import nextstep.jwp.http.common.MediaType;
 import nextstep.jwp.utils.StringUtils;
 
 import java.util.Collections;
@@ -15,6 +16,10 @@ public class HeaderFields {
     private static final String BLANK = " ";
     private static final String NEW_LINE = "\r\n";
     private static final String HEADER_FIELD_SEPARATOR = ":";
+
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String LOCATION = "Location";
 
     private final Map<String, String> fields;
 
@@ -58,6 +63,18 @@ public class HeaderFields {
 
     public Map<String, String> toMap() {
         return Collections.unmodifiableMap(fields);
+    }
+
+    public void putLocation(String uri) {
+        put(LOCATION, uri);
+    }
+
+    public void putContentType(MediaType contentType) {
+        put(CONTENT_TYPE, contentType.getValue());
+    }
+
+    public void putContentLength(int contentLength) {
+        put(CONTENT_LENGTH, String.valueOf(contentLength));
     }
 
     @Override

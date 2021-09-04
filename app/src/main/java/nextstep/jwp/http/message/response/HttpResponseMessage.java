@@ -1,5 +1,6 @@
 package nextstep.jwp.http.message.response;
 
+import nextstep.jwp.http.common.HttpStatusCode;
 import nextstep.jwp.http.message.HttpMessage;
 import nextstep.jwp.http.message.MessageBody;
 import nextstep.jwp.http.message.MessageHeader;
@@ -7,6 +8,7 @@ import nextstep.jwp.http.message.StartLine;
 import nextstep.jwp.utils.BytesUtils;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class HttpResponseMessage implements HttpMessage {
 
@@ -20,6 +22,14 @@ public class HttpResponseMessage implements HttpMessage {
         this.statusLine = statusLine;
         this.responseHeader = responseHeader;
         this.responseBody = responseBody;
+    }
+
+    public HttpStatusCode statusCode() {
+        return ((StatusLine) statusLine).getHttpStatusCode();
+    }
+
+    public Optional<String> takeHeaderValue(String key) {
+        return ((ResponseHeader) responseHeader).take(key);
     }
 
     @Override

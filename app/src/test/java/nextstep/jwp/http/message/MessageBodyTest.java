@@ -17,6 +17,21 @@ class MessageBodyTest {
         assertThat(messageBody.getBytes()).isEqualTo(bytes);
     }
 
+    @DisplayName("비어있는 MessageBody 를 생성한다.")
+    @Test
+    void createEmpty() {
+        MessageBody messageBody = MessageBody.empty();
+        assertThat(messageBody.getBytes()).isEqualTo(new byte[0]);
+        assertThat(messageBody).isSameAs(MessageBody.empty());
+    }
+
+    @DisplayName("비어있는 MessageBody 이면 참을 반환한다.")
+    @Test
+    void isEmpty() {
+        MessageBody messageBody = MessageBody.empty();
+        assertThat(messageBody.isEmpty()).isTrue();
+    }
+
     @DisplayName("MessageBody 를 문자열로 변환한다.")
     @Test
     void asString() {

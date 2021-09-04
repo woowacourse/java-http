@@ -17,7 +17,7 @@ public class HttpRequestMessage implements HttpMessage {
     private final MessageBody requestBody;
 
     public HttpRequestMessage(StartLine requestLine, MessageHeader requestHeader) {
-        this(requestLine, requestHeader, new MessageBody());
+        this(requestLine, requestHeader, MessageBody.empty());
     }
 
     public HttpRequestMessage(StartLine requestLine, MessageHeader requestHeader, MessageBody requestBody) {

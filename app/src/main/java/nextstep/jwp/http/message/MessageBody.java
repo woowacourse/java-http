@@ -6,9 +6,11 @@ import java.util.Arrays;
 
 public class MessageBody {
 
+    private static final MessageBody EMPTY_BODY = new MessageBody();
+
     private final byte[] bytes;
 
-    public MessageBody() {
+    private MessageBody() {
         this(new byte[0]);
     }
 
@@ -20,12 +22,20 @@ public class MessageBody {
         this(bodyString.getBytes());
     }
 
+    public static MessageBody empty() {
+        return EMPTY_BODY;
+    }
+
+    public boolean isEmpty() {
+        return this == EMPTY_BODY;
+    }
+
     public FormData toFormData() {
         return FormData.from(this);
     }
 
-    public String contentLength() {
-        return String.valueOf(bytes.length);
+    public int bodyLength() {
+        return bytes.length;
     }
 
     public byte[] getBytes() {

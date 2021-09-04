@@ -14,7 +14,6 @@ import nextstep.jwp.service.LoginService;
 
 public class LoginController extends AbstractController {
 
-
     public static final String INDEX_HTML = "/index.html";
 
     private final LoginService loginService;
@@ -66,13 +65,13 @@ public class LoginController extends AbstractController {
         }
     }
 
-    private void saveUserInSession(HttpSession session, User user) {
-        session.setAttribute("user", user);
-    }
-
     private String saveSession() {
         String sessionId = UUID.randomUUID().toString();
         HttpSessions.add(sessionId);
         return sessionId;
+    }
+
+    private void saveUserInSession(HttpSession session, User user) {
+        session.setAttribute("user", user);
     }
 }

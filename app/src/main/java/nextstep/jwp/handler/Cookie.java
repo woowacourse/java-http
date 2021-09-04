@@ -1,11 +1,11 @@
 package nextstep.jwp.handler;
 
 public class Cookie {
-    private String name;
-    private String value;
-    private String path;
-    private boolean secure;
-    private boolean httpOnly;
+    private final String name;
+    private final String value;
+    private final String path;
+    private final boolean secure;
+    private final boolean httpOnly;
 
     public Cookie(String name, String value) {
         this.name = name;
@@ -38,17 +38,5 @@ public class Cookie {
 
     public String getValue() {
         return value;
-    }
-
-    public String getPath() {
-        return path;
-    }
-
-    public boolean isSecure() {
-        return secure;
-    }
-
-    public boolean isHttpOnly() {
-        return httpOnly;
     }
 }

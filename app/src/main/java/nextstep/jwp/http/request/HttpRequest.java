@@ -64,4 +64,8 @@ public class HttpRequest {
         return body;
     }
 
+    public String getCookie(String name) {
+        return requestHeaders.getCookie(name);
+    }
+  
 }

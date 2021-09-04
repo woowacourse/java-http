@@ -40,6 +40,9 @@ public class RequestHandler implements Runnable {
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             HttpRequest httpRequest = httpRequestParser(bufferedReader);
+
+            log.debug("http path: " + httpRequest.getPath());
+
             HttpResponse httpResponse = new HttpResponse();
 
             handle(httpRequest, httpResponse);

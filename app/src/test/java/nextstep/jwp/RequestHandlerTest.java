@@ -107,9 +107,58 @@ class RequestHandlerTest {
         // when
         requestHandler.run();
 
+        String output = socket.output();
+        String sessionId = parseSessionIdFromOutput(output);
+
         // then
         String expected = "HTTP/1.1 302 Found \r\n" +
+                "Set-Cookie: JSESSIONID=" + sessionId + " \r\n" +
                 "Location: /index.html \r\n\r\n";
+
+        assertThat(socket.output()).containsPattern(expected);
+    }
+
+    @DisplayName("로그인 쿠키가 존재할 때 로그인 페이지 클릭시 index.html로 리다이렉션")
+    @Test
+    void loginWithCookie() throws IOException {
+        // given
+        String requestBody = "account=gugu&password=password";
+        final String loginHttpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Content-Length: " + requestBody.getBytes().length,
+                "",
+                requestBody);
+
+        MockSocket socket = new MockSocket(loginHttpRequest);
+        ApplicationContext applicationContext = ApplicationContextFactory.create();
+        RequestHandler requestHandler = new RequestHandler(socket, applicationContext);
+        requestHandler.run();
+
+        String sessionId = parseSessionIdFromOutput(socket.output());
+
+        final String getLoginHttpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=" + sessionId,
+                "",
+                "");
+
+        socket = new MockSocket(getLoginHttpRequest);
+        applicationContext = ApplicationContextFactory.create();
+        requestHandler = new RequestHandler(socket, applicationContext);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        FileAccess file = new FileAccess("/index.html");
+
+        String expected = expectedFileAccessResponse(HttpStatus.OK, resource, file);
 
         assertThat(socket.output()).isEqualTo(expected);
     }
@@ -238,5 +287,23 @@ class RequestHandlerTest {
                 "Content-Length: " + file.getFile().getBytes().length + " \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    }
+
+    private String parseSessionIdFromOutput(String output) {
+
+        String[] split = output.split(" ");
+
+        String parse = "";
+
+        for(int i=0;i<split.length;i++){
+            if(split[i].startsWith("JSESSIONID")) {
+                parse = split[i];
+                break;
+            }
+        }
+
+        String[] keyValue = parse.split("=");
+
+        return keyValue[1];
     }
 }

@@ -42,7 +42,7 @@ public class RequestHandler implements Runnable {
         } catch (IllegalArgumentException e) {
             LOG.error(e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage());
         } finally {
             close();
         }

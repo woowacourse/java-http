@@ -51,22 +51,23 @@ public class LoginController extends AbstractController {
             User user = loginService.login(httpRequest);
 
             if (httpRequest.containsCookie("JSESSIONID")) {
-                final HttpSession session = httpRequest.getSession();
-                session.setAttribute("user", user);
-
+                saveUserInSession(httpRequest.getSession(), user);
                 httpResponse.redirect(INDEX_HTML);
                 return;
             }
 
             String sessionId = saveSession();
-            HttpSession session = HttpSessions.getSession(sessionId);
-            session.setAttribute("user", user);
+            saveUserInSession(HttpSessions.getSession(sessionId), user);
 
             httpResponse.setCookie(new Cookie("JSESSIONID", sessionId));
             httpResponse.redirect(INDEX_HTML);
         } catch (LoginException | NoSuchElementException e) {
             httpResponse.unauthorized("/401.html");
         }
+    }
+
+    private void saveUserInSession(HttpSession session, User user) {
+        session.setAttribute("user", user);
     }
 
     private String saveSession() {

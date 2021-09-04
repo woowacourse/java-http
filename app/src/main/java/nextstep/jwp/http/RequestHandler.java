@@ -1,5 +1,8 @@
 package nextstep.jwp.http;
 
+import nextstep.jwp.http.controller.Controller;
+import nextstep.jwp.http.mapper.ControllerMapper;
+import nextstep.jwp.http.mapper.ExceptionResponseMapper;
 import nextstep.jwp.http.message.request.HttpRequestMessage;
 import nextstep.jwp.http.message.response.HttpResponseMessage;
 import org.slf4j.Logger;
@@ -31,17 +34,27 @@ public class RequestHandler implements Runnable {
             HttpTranslator httpTranslator = new HttpTranslator(inputStream, outputStream);
             HttpRequestMessage httpRequestMessage = httpTranslator.translate();
 
-            log.debug(httpRequestMessage.toString());
+            log.debug("요청 Uri: {}", httpRequestMessage.requestUri());
 
-            HttpResponseBuilder httpResponseBuilder = new HttpResponseBuilder(httpRequestMessage);
-            HttpResponseMessage httpResponseMessage = httpResponseBuilder.build();
+            HttpResponseMessage httpResponseMessage = handle(httpRequestMessage);
             httpTranslator.respond(httpResponseMessage);
         } catch (IOException exception) {
             log.error("Exception stream", exception);
-        } catch (Exception e) {
-            log.error("Exception", e.getMessage());
+        } catch (Exception exception) {
+            log.error("Exception", exception);
         } finally {
             close();
+        }
+    }
+
+    private HttpResponseMessage handle(HttpRequestMessage httpRequestMessage) {
+        try {
+            String requestUri = httpRequestMessage.requestUri();
+            Controller controller = ControllerMapper.getInstance().resolve(requestUri);
+            log.debug("{} 서비스 시작", controller.getClass().getName());
+            return controller.service(httpRequestMessage);
+        } catch (RuntimeException exception) {
+            return ExceptionResponseMapper.getInstance().resolve(exception);
         }
     }
 

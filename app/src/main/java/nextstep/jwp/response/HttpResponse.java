@@ -25,6 +25,10 @@ public class HttpResponse {
     }
 
     public void forward(String url) throws IOException {
+        if (url.endsWith(".ico")) {
+            return;
+        }
+
         final URL resource = getClass().getClassLoader().getResource("static" + url);
         final List<String> lines = Files.readAllLines(new File(resource.getPath()).toPath());
 

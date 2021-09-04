@@ -41,6 +41,8 @@ public class RequestHandler implements Runnable {
             LOG.error("Exception stream", exception);
         } catch (IllegalArgumentException e) {
             LOG.error(e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
         } finally {
             close();
         }

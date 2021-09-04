@@ -1,7 +1,7 @@
 package nextstep.jwp.http.file;
 
 import nextstep.jwp.http.exception.HtmlNotFoundException;
-import nextstep.jwp.http.exception.StaticFileNotFoundException;
+import nextstep.jwp.http.exception.StaticResourceNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +31,7 @@ class StaticFileFinderTest {
     void findNonExistentStaticFile() {
         StaticFileFinder staticFileReader = new StaticFileFinder("ggyool.css");
         assertThatThrownBy(staticFileReader::find)
-                .isInstanceOf(StaticFileNotFoundException.class)
+                .isInstanceOf(StaticResourceNotFoundException.class)
                 .hasMessageContaining("정적 파일을 찾지 못했습니다");
     }
 }

@@ -1,5 +1,8 @@
 package nextstep.jwp.controller;
 
+import static nextstep.jwp.controller.StaticResourcePath.INDEX_PAGE;
+import static nextstep.jwp.controller.StaticResourcePath.NOT_FOUND_PAGE;
+import static nextstep.jwp.controller.StaticResourcePath.UNAUTHORIZED_PAGE;
 import static nextstep.jwp.http.common.HttpStatus.*;
 
 import java.io.IOException;
@@ -32,7 +35,7 @@ public class LoginController extends RestController {
     protected HttpResponse doGet(HttpRequest httpRequest) throws IOException {
         try {
             if (httpRequest.hasCookie() && loginService.isAlreadyLogin(httpRequest.getCookie())) {
-                return HttpResponse.redirect(FOUND, "/index.html");
+                return HttpResponse.redirect(FOUND, INDEX_PAGE.getValue());
             }
             
             StaticResource staticResource = staticResourceService
@@ -40,7 +43,7 @@ public class LoginController extends RestController {
 
             return HttpResponse.withBody(HttpStatus.OK, staticResource);
         } catch (StaticResourceNotFoundException e) {
-            StaticResource staticResource = staticResourceService.findByPath("/404.html");
+            StaticResource staticResource = staticResourceService.findByPath(NOT_FOUND_PAGE.getValue());
 
             LOGGER.warn(e.getMessage());
 
@@ -52,7 +55,7 @@ public class LoginController extends RestController {
     protected HttpResponse doPost(HttpRequest httpRequest) throws IOException {
         try {
             if (httpRequest.hasCookie() && loginService.isAlreadyLogin(httpRequest.getCookie())) {
-                return HttpResponse.redirect(FOUND, "/index.html");
+                return HttpResponse.redirect(FOUND, INDEX_PAGE.getValue());
             }
 
             LoginRequest loginRequest = getLoginRequest(httpRequest);
@@ -60,13 +63,13 @@ public class LoginController extends RestController {
 
             LOGGER.debug("Login Success.");
 
-            StaticResource resource = staticResourceService.findByPath("/index.html");
+            StaticResource resource = staticResourceService.findByPath(INDEX_PAGE.getValue());
             return HttpResponse.withBodyAndCookie(OK, resource, loginResponse.toCookieString());
         } catch (UnauthorizedException e) {
             LOGGER.debug("Login Failed.");
 
-            StaticResource resource = staticResourceService.findByPath("/401.html");
-            return HttpResponse.withBody(UNAUTHORIZED, resource);
+            StaticResource resource = staticResourceService.findByPath(UNAUTHORIZED_PAGE.getValue());
+            return HttpResponse.withBody(HttpStatus.UNAUTHORIZED, resource);
         }
     }
 

@@ -18,6 +18,32 @@ class HttpSessionTest {
         httpSession = new HttpSession("1L");
     }
 
+    @DisplayName("Attribute를 가지고 있는지 물어봤을 때")
+    @Nested
+    class hasAttribute {
+
+        @DisplayName("가지고 있다면 true를 반환한다.")
+        @Test
+        void hasAttributeTrue() {
+            // given
+            String name = "attribute-name";
+            httpSession.setAttribute(name, "value");
+
+            // when, then
+            assertThat(httpSession.hasAttribute(name)).isTrue();
+        }
+
+        @DisplayName("가지고 있지 않다면 false를 반환한다.")
+        @Test
+        void hasAttributeFalse() {
+            // given
+            String name = "attribute-name";
+
+            // when, then
+            assertThat(httpSession.hasAttribute(name)).isFalse();
+        }
+    }
+
     @DisplayName("Attribute를 요청했을 때")
     @Nested
     class GetAttribute {

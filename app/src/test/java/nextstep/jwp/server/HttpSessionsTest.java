@@ -27,6 +27,37 @@ class HttpSessionsTest {
         httpSessions.addSession(httpSession);
     }
 
+    @DisplayName("sessionId와 attributeName을 통해 Object가 있는지 질문시")
+    @Nested
+    class hasObject {
+        @DisplayName("해당하는 session이 있을 때")
+        @Nested
+        class hasSession {
+            @DisplayName("해당하는 attribute가 있다면 true를 반환한다.")
+            @Test
+            void returnTrue() {
+                assertThat(httpSessions.hasObject(SESSION_ID, ATTRIBUTE_NAME)).isTrue();
+            }
+
+            @DisplayName("해당하는 attribute가 없다면 false를 반환한다.")
+            @Test
+            void returnFalse() {
+                assertThat(httpSessions.hasObject(SESSION_ID, "noAttribute")).isFalse();
+            }
+        }
+
+        @DisplayName("해당되는 session이 없을 때")
+        @Nested
+        class haveNotSession {
+
+            @DisplayName("false를 반환한다.")
+            @Test
+            void returnFalse() {
+                assertThat(httpSessions.hasObject("noSession", "noName")).isFalse();
+            }
+        }
+    }
+
     @DisplayName("sessionId와 attributeName을 통해 Object 조회 요청시")
     @Nested
     class FindObject {

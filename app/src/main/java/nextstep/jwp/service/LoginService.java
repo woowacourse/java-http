@@ -4,9 +4,6 @@ import java.util.UUID;
 import nextstep.jwp.controller.request.LoginRequest;
 import nextstep.jwp.controller.response.LoginResponse;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.QueryParameterNotFoundException;
-import nextstep.jwp.exception.SessionAttributeNotFoundException;
-import nextstep.jwp.exception.SessionNotFoundException;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.common.HttpCookie;
 import nextstep.jwp.model.User;
@@ -43,12 +40,8 @@ public class LoginService {
     }
 
     public boolean isAlreadyLogin(HttpCookie httpCookie) {
-        try {
-            httpSessions.findObject(httpCookie.getParameter(SESSION_PARAMETER), "user");
+        String sessionId = httpCookie.getParameter(SESSION_PARAMETER);
 
-            return true;
-        } catch (SessionNotFoundException | SessionAttributeNotFoundException | QueryParameterNotFoundException e) {
-            return false;
-        }
+        return httpSessions.hasObject(sessionId, "user");
     }
 }

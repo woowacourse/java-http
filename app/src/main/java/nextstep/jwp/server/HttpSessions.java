@@ -21,6 +21,15 @@ public class HttpSessions {
         sessions.put(httpSession.getId(), httpSession);
     }
 
+    public boolean hasObject(String sessionId, String attributeName) {
+        if (sessions.containsKey(sessionId)) {
+            HttpSession httpSession = sessions.get(sessionId);
+            return httpSession.hasAttribute(attributeName);
+        }
+
+        return false;
+    }
+
     public Object findObject(String sessionId, String attributeName) {
         if (sessions.containsKey(sessionId)) {
             HttpSession httpSession = sessions.get(sessionId);

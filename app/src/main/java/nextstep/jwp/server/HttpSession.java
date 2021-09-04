@@ -18,6 +18,10 @@ public class HttpSession {
         return id;
     }
 
+    public boolean hasAttribute(String name) {
+        return values.containsKey(name);
+    }
+
     public void setAttribute(String name, Object value) {
         values.put(name, value);
     }

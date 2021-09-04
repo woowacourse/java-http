@@ -48,12 +48,12 @@ public class RequestMapping {
         String requestUri = httpRequest.getUri();
         String rootUri = requestUri.split("/")[ROOT_PATH_INDEX];
 
-        Controller controller = findByUri(rootUri);
+        Controller controller = findControllerByUri(rootUri);
 
         return controller.service(httpRequest);
     }
 
-    private Controller findByUri(String rootUri) {
+    private Controller findControllerByUri(String rootUri) {
         if (restControllers.containsKey(rootUri)) {
             return restControllers.get(rootUri);
         }

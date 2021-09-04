@@ -26,7 +26,7 @@ public class LoginService {
     }
 
     public LoginResponse login(LoginRequest loginRequest) {
-        User user = findByUserAccount(loginRequest.getAccount());
+        User user = findUserByAccount(loginRequest.getAccount());
         user.checkPassword(loginRequest.getPassword());
 
         UUID uuid = UUID.randomUUID();
@@ -37,7 +37,7 @@ public class LoginService {
         return new LoginResponse(SESSION_PARAMETER, httpSession.getId());
     }
 
-    private User findByUserAccount(String account) {
+    private User findUserByAccount(String account) {
         return userRepository.findByAccount(account)
             .orElseThrow(UnauthorizedException::new);
     }

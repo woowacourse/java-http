@@ -6,29 +6,23 @@ import nextstep.jwp.model.User;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class InMemoryUserRepository {
 
     private static final Map<String, User> database = new ConcurrentHashMap<>();
+    private static final AtomicLong atomicLong = new AtomicLong();
 
     static {
-        final User user = new User(1, "gugu", "password", "hkkang@woowahan.com");
-        database.put(user.getAccount(), user);
+        User gugu = new User(atomicLong.incrementAndGet(), "gugu", "password", "hkkang@woowahan.com");
+        save(gugu);
     }
 
     public static void save(User user) {
         database.put(
                 user.getAccount(),
-                new User(autoIncrement(), user.getAccount(), user.getPassword(), user.getEmail())
+                new User(atomicLong.incrementAndGet(), user.getAccount(), user.getPassword(), user.getEmail())
         );
-    }
-
-    private synchronized static long autoIncrement() {
-        long maxId = database.values().stream()
-                .mapToLong(User::getId)
-                .max()
-                .orElse(0L);
-        return maxId + 1;
     }
 
     public static Optional<User> findByAccount(String account) {

@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 public class RequestHandler implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestHandler.class);
+    private static final String REQUEST_LOG_FORMAT = "Parsed HTTP Request!!!\n\n{}\n\n";
+    private static final String RESPONSE_LOG_FORMAT = "Return HTTP Response!!!\n\n{}\n{}\n\n";
 
     private final Socket connection;
     private final RequestMapping requestMapping;
@@ -33,9 +35,9 @@ public class RequestHandler implements Runnable {
             final OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = HttpRequest.parse(inputStream);
-            LOGGER.info("Parsed HTTP Request!!!\n\n{}\n\n", httpRequest);
+            LOGGER.info(REQUEST_LOG_FORMAT, httpRequest);
             HttpResponse httpResponse = requestMapping.doService(httpRequest);
-            LOGGER.info("Return HTTP Response!!!\n\n{}\n\n", httpResponse);
+            LOGGER.info(RESPONSE_LOG_FORMAT, httpResponse.getStatusLine(), httpResponse.getResponseHeaders());
 
             flushBytes(outputStream, httpResponse);
         } catch (IOException | InvalidHttpRequestException exception) {
@@ -45,8 +47,7 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private void flushBytes(OutputStream outputStream, HttpResponse httpResponse)
-        throws IOException {
+    private void flushBytes(OutputStream outputStream, HttpResponse httpResponse) throws IOException {
         BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
         bufferedOutputStream.write(httpResponse.toBytes());
         bufferedOutputStream.flush();

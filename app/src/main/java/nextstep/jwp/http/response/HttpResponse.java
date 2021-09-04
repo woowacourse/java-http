@@ -49,6 +49,14 @@ public class HttpResponse {
         return toString().getBytes(StandardCharsets.UTF_8);
     }
 
+    public String getStatusLine() {
+        return statusLine.toString();
+    }
+
+    public String getResponseHeaders() {
+        return responseHeaders.toString();
+    }
+
     @Override
     public String toString() {
         if (responseBody.isEmpty()) {

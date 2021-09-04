@@ -5,29 +5,29 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 public class HttpCookie {
-    private final Map<String, Cookie> cookieMap;
+    private final Map<String, Cookie> cookies;
 
     public HttpCookie() {
-        this.cookieMap = new HashMap<>();
+        this.cookies = new HashMap<>();
     }
 
     public boolean contains(String name) {
-        return cookieMap.containsKey(name);
+        return cookies.containsKey(name);
     }
 
     public Cookie getCookie(String name) {
-        if (cookieMap.containsKey(name)) {
-            return cookieMap.get(name);
+        if (cookies.containsKey(name)) {
+            return cookies.get(name);
         }
 
         throw new NoSuchElementException("[" + name + "]을/를 name으로 가지는 Cookie가 존재하지 않습니다.");
     }
 
     public void setCookie(Cookie cookie) {
-        cookieMap.put(cookie.getName(), cookie);
+        cookies.put(cookie.getName(), cookie);
     }
 
-    public Map<String, Cookie> getCookieMap() {
-        return cookieMap;
+    public Map<String, Cookie> getCookies() {
+        return cookies;
     }
 }

@@ -39,7 +39,7 @@ public class HttpHeader {
             headers.add(join);
         }
 
-        Map<String, Cookie> cookieMap = cookies.getCookieMap();
+        Map<String, Cookie> cookieMap = cookies.getCookies();
         for (Cookie cookie : cookieMap.values()) {
             headers.add("Set-Cookie: " + cookie.makeSetCookieHttpMessage() + " ");
         }

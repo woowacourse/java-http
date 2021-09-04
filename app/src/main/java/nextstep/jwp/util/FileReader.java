@@ -7,48 +7,38 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import nextstep.jwp.exception.handler.BadRequestException;
+import nextstep.jwp.exception.handler.DefaultFileNotFoundException;
+import nextstep.jwp.exception.handler.InternalServerException;
+import nextstep.jwp.exception.handler.NotFoundException;
+
 public class FileReader {
 
-    // todo FileReader 추상화 또는 메소드 압축 및 얘외 처리 학습 이후 개선
-    public static File readFile(String fileUri) throws FileNotFoundException {
-        URL resourceUrl = getFileUri("static" + fileUri);
+    public static final String STATIC_FILE_URL_PREFIX = "static";
 
+    public static File readFile(String fileUri) {
         try {
+            URL resourceUrl = getFileUri(STATIC_FILE_URL_PREFIX + fileUri);
             String content = Files.readString(Paths.get(resourceUrl.toURI()));
             ContentType type = ContentType.findType(resourceUrl);
             return new File(type, content);
-        } catch (URISyntaxException | IOException e) {
-            throw new IllegalArgumentException(e.getMessage());
-        }
-    }
-
-    public static File readHtmlFile(String fileUri) throws FileNotFoundException {
-        URL resourceUrl = getFileUri("static" + fileUri + ".html");
-
-        try {
-            String content = Files.readString(Paths.get(resourceUrl.toURI()));
-            ContentType type = ContentType.findType(resourceUrl);
-            return new File(type, content);
-        } catch (URISyntaxException | IOException e) {
-            throw new IllegalArgumentException(e.getMessage());
+        } catch (FileNotFoundException e) {
+            throw new NotFoundException(e.getMessage());
+        } catch (URISyntaxException e) {
+            throw new BadRequestException(e.getMessage());
+        } catch (IOException e) {
+            throw new InternalServerException(e.getMessage());
         }
     }
 
     public static File readErrorFile(String fileUri) {
-        URL resourceUrl = Thread.currentThread()
-                                .getContextClassLoader()
-                                .getResource("static" + fileUri);
-
-        if (resourceUrl == null) {
-            throw new IllegalArgumentException("경로에 파일이 존재하지 않습니다.");
-        }
-
         try {
+            URL resourceUrl = getFileUri(STATIC_FILE_URL_PREFIX + fileUri);
             String content = Files.readString(Paths.get(resourceUrl.toURI()));
             ContentType type = ContentType.findType(resourceUrl);
             return new File(type, content);
         } catch (URISyntaxException | IOException e) {
-            throw new IllegalArgumentException(e.getMessage());
+            throw new DefaultFileNotFoundException(e.getMessage());
         }
     }
 

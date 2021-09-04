@@ -1,4 +1,6 @@
-package nextstep.jwp.handler;
+package nextstep.jwp.handler.constant;
+
+import nextstep.jwp.exception.handler.HttpMessageException;
 
 public enum HttpMethod {
 
@@ -25,10 +27,14 @@ public enum HttpMethod {
             }
         }
 
-        throw new IllegalArgumentException("적절한 Http 메소드가 존재하지 않습니다.");
+        throw new HttpMessageException("존재하지 않는 HTTP Method 입니다.");
     }
 
     public boolean isSameAs(String methodName) {
         return this.methodName.equals(methodName);
+    }
+
+    public String getMethodName() {
+        return methodName;
     }
 }

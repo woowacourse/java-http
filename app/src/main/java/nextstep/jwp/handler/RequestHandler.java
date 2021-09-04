@@ -2,16 +2,15 @@ package nextstep.jwp.handler;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.ErrorController;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.RegisterController;
-import nextstep.jwp.util.File;
-import nextstep.jwp.util.FileReader;
+import nextstep.jwp.exception.handler.BadRequestException;
+import nextstep.jwp.exception.handler.DefaultFileNotFoundException;
+import nextstep.jwp.exception.handler.HttpMessageException;
+import nextstep.jwp.exception.handler.NotFoundException;
+import nextstep.jwp.handler.request.HttpRequest;
+import nextstep.jwp.handler.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,13 +19,15 @@ public class RequestHandler implements Runnable {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
+    public static final String HTTP_VERSION = "HTTP/1.1";
+    public static final String ERROR_PREFIX = "[ERROR] ";
+
     private final Socket connection;
-    private final Map<String, Controller> controllerMap = new HashMap<>();
+    private final RequestMapping requestMapping;
 
     public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
-        controllerMap.put("/login", new LoginController());
-        controllerMap.put("/register", new RegisterController());
+        this.requestMapping = new RequestMapping();
     }
 
     @Override
@@ -36,37 +37,54 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            HttpRequest request = HttpRequest.from(reader);
 
-            final String response = handleRequest(request);
+            final String response = handleRequest(reader);
 
             final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
             bufferedWriter.write(response);
             bufferedWriter.flush();
-        } catch (IOException exception) {
-            log.error("Exception stream", exception);
+        } catch (DefaultFileNotFoundException e) {
+            log.error(ERROR_PREFIX, e);
+            throw e;
+        } catch (IOException e) {
+            log.error(ERROR_PREFIX + "Exception In Stream", e);
         } catch (Exception e) {
-            log.error("unknown", e);
+            log.error(ERROR_PREFIX + "Unknown Exception", e);
         } finally {
             close();
         }
     }
 
-    public String handleRequest(HttpRequest httpRequest) {
-        HttpResponse httpResponse = new HttpResponse(httpRequest);
+    public String handleRequest(BufferedReader reader) {
         try {
+            HttpRequest httpRequest = HttpRequest.from(reader);
+            HttpResponse httpResponse = new HttpResponse(httpRequest.getHttpVersion());
+
             if (httpRequest.isRequestStaticFile()) {
-                nextstep.jwp.util.File file = FileReader.readFile(httpRequest.getHttpUri());
-                httpResponse.ok(file);
+                httpResponse.ok(httpRequest.getRequestUrl());
                 return httpResponse.makeHttpMessage();
             }
 
-            Controller controller = controllerMap.getOrDefault(httpRequest.getHttpUri(), new ErrorController());
+            Controller controller = requestMapping.findController(httpRequest);
             controller.handle(httpRequest, httpResponse);
             return httpResponse.makeHttpMessage();
-        } catch (FileNotFoundException fileNotFoundException) {
-            File file = FileReader.readErrorFile("/404.html");
-            httpResponse.notFound("/404.html", file);
+
+        } catch (HttpMessageException | BadRequestException e) {
+            log.error(ERROR_PREFIX, e);
+            HttpResponse httpResponse = new HttpResponse(HTTP_VERSION);
+            httpResponse.badRequest("/400.html");
+            return httpResponse.makeHttpMessage();
+
+        } catch (NotFoundException e) {
+            log.error(ERROR_PREFIX, e);
+            HttpResponse httpResponse = new HttpResponse(HTTP_VERSION);
+            httpResponse.notFound("/404.html");
+            return httpResponse.makeHttpMessage();
+
+        } catch (IOException e) {
+            log.error(ERROR_PREFIX + "Exception reading socket", e);
+            HttpResponse httpResponse = new HttpResponse(HTTP_VERSION);
+            httpResponse.internalServerError("/500.html");
             return httpResponse.makeHttpMessage();
         }
     }
@@ -74,8 +92,8 @@ public class RequestHandler implements Runnable {
     private void close() {
         try {
             connection.close();
-        } catch (IOException exception) {
-            log.error("Exception closing socket", exception);
+        } catch (IOException e) {
+            log.error(ERROR_PREFIX + "Exception closing socket", e);
         }
     }
 }

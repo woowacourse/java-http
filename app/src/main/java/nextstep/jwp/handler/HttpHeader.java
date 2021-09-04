@@ -20,12 +20,30 @@ public class HttpHeader {
         this.headerMap.put(key, value);
     }
 
-    public String makeHttpMessage() {
+    public HttpCookie getCookie() {
+        HttpCookie httpCookie = new HttpCookie();
+        if (headerMap.containsKey("Cookie")) {
+            String[] cookies = headerMap.get("Cookie").split("; ");
+            for (String cookie : cookies) {
+                String[] cookieKeyValue = cookie.split("=");
+                httpCookie.setCookie(new Cookie(cookieKeyValue[0], cookieKeyValue[1]));
+            }
+        }
+        return httpCookie;
+    }
+
+    public String makeHttpMessage(HttpCookie cookies) {
         List<String> headers = new ArrayList<>();
-        for (String key : headerMap.keySet()) {
-            String join = String.join(": ", key, headerMap.get(key) + " ");
+        for (Map.Entry<String, String> entry: headerMap.entrySet()) {
+            String join = String.join(": ", entry.getKey(), entry.getValue() + " ");
             headers.add(join);
         }
+
+        Map<String, Cookie> cookieMap = cookies.getCookies();
+        for (Cookie cookie : cookieMap.values()) {
+            headers.add("Set-Cookie: " + cookie.makeSetCookieHttpMessage() + " ");
+        }
+
         return String.join("\r\n", headers);
     }
 }

@@ -2,8 +2,12 @@ package nextstep.jwp.http;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpCookie {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpCookie.class);
 
     private static final int COOKIE_KEY = 0;
     private static final int COOKIE_VALUE = 1;
@@ -29,6 +33,10 @@ public class HttpCookie {
     }
 
     public String getCookieValueByKey(final String cookieKey) {
+        if (!cookie.containsKey(cookieKey)) {
+            LOGGER.error("없는 key의 쿠키정보를 찾으려고 했습니다. key = {}", cookieKey);
+            throw new IllegalArgumentException(String.format("없는 key의 쿠키정보를 찾으려고 했습니다. key = {%s}", cookieKey));
+        }
         return cookie.get(cookieKey);
     }
 }

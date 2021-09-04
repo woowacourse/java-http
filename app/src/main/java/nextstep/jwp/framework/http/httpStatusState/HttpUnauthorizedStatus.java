@@ -22,4 +22,9 @@ public class HttpUnauthorizedStatus extends HttpStatusState {
     public URL resource() {
         return HttpPath.unAuthorized();
     }
+
+    @Override
+    public HttpStatus status() {
+        return HttpStatus.UNAUTHORIZED;
+    }
 }

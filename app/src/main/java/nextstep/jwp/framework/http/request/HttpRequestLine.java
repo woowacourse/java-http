@@ -21,8 +21,9 @@ public class HttpRequestLine {
         this.protocolVersion = protocolVersion;
     }
 
-    public URL url(final HttpStatus status) {
+    public URL url(HttpStatus status) {
         if (path.isNotExistFile()) {
+            status = HttpStatus.NOT_FOUND;
             return new HttpNotFoundStatus(status, path).resource();
         }
 
@@ -48,5 +49,14 @@ public class HttpRequestLine {
 
     public boolean isNotPost() {
         return !method.isPost();
+    }
+
+    public HttpStatus status(HttpStatus status) {
+        if (path.isNotExistFile()) {
+            return HttpStatus.NOT_FOUND;
+        }
+
+        final HttpStatusState state = new HttpOKStatus(status, path).state();
+        return state.status();
     }
 }

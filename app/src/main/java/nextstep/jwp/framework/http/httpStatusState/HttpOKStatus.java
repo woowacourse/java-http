@@ -23,4 +23,9 @@ public class HttpOKStatus extends HttpStatusState {
     public URL resource() {
         return getPath().findResourceURL();
     }
+
+    @Override
+    public HttpStatus status() {
+        return HttpStatus.OK;
+    }
 }

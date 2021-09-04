@@ -6,7 +6,7 @@ import nextstep.jwp.framework.http.common.HttpStatus;
 
 public class HttpNotFoundStatus extends HttpStatusState {
 
-    public HttpNotFoundStatus(final HttpStatus status, final HttpPath path) {
+    public HttpNotFoundStatus(HttpStatus status, final HttpPath path) {
         super(status, path);
     }
 
@@ -18,5 +18,10 @@ public class HttpNotFoundStatus extends HttpStatusState {
     @Override
     public URL resource() {
         return HttpPath.notFound();
+    }
+
+    @Override
+    public HttpStatus status() {
+        return HttpStatus.NOT_FOUND;
     }
 }

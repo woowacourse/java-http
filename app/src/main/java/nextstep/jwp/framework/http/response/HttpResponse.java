@@ -26,8 +26,8 @@ public class HttpResponse {
     public void create(HttpRequestLine requestLine, HttpHeaders headers, HttpStatus status) {
         this.protocolVersion = requestLine.getProtocolVersion();
         this.headers = headers;
-        this.status = status;
         this.resourceURL = requestLine.url(status);
+        this.status = requestLine.status(status);
         headers.putContentType(FileUtils.fileExtension(new File(resourceURL.getPath())));
     }
 

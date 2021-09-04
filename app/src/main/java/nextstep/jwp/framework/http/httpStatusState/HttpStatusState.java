@@ -27,4 +27,6 @@ public abstract class HttpStatusState {
     protected HttpPath getPath() {
         return path;
     }
+
+    public abstract HttpStatus status();
 }

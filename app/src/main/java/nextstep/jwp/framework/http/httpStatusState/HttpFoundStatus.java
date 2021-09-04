@@ -23,4 +23,9 @@ public class HttpFoundStatus extends HttpStatusState {
     public URL resource() {
         return HttpPath.index();
     }
+
+    @Override
+    public HttpStatus status() {
+        return HttpStatus.FOUND;
+    }
 }

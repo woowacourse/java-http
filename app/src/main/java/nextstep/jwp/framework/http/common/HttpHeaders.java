@@ -2,6 +2,8 @@ package nextstep.jwp.framework.http.common;
 
 import static nextstep.jwp.framework.http.request.HttpRequest.LINE_DELIMITER;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -49,8 +51,8 @@ public class HttpHeaders {
         }
     }
 
-    public void putContentType(final String fileExtension) {
-        final String type = FileExtensionHeader.value(fileExtension).getHeader();
+    public void putContentType(final Path path) throws IOException {
+        String type = FileUtils.probeContentType(path);
         headers.put("Content-Type", type);
     }
 

@@ -1,11 +1,12 @@
 package nextstep.jwp.framework.http.common;
 
-import java.io.File;
-import org.apache.commons.io.FilenameUtils;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class FileUtils {
 
-    public static String fileExtension(final File file) {
-        return FilenameUtils.getExtension(file.getName());
+    public static String probeContentType(final Path path) throws IOException {
+        return Files.probeContentType(path);
     }
 }

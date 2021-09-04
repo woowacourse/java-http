@@ -14,7 +14,6 @@ repositories {
 dependencies {
     implementation 'ch.qos.logback:logback-classic:1.2.3'
     implementation 'com.google.guava:guava:29.0-jre'
-    implementation 'commons-io:commons-io:2.6'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
     testImplementation 'org.assertj:assertj-core:3.20.2'

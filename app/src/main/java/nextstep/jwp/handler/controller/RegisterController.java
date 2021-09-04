@@ -1,6 +1,5 @@
 package nextstep.jwp.handler.controller;
 
-import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.handler.modelandview.Model;
 import nextstep.jwp.handler.modelandview.ModelAndView;
@@ -26,15 +25,14 @@ public class RegisterController extends AbstractController {
     @Override
     protected ModelAndView doPost(HttpRequest request, HttpResponse response) {
         QueryParams params = request.requestParam();
+        User user = new User(params.get("account"), params.get("password"), params.get("email"));
 
-        Optional<User> byAccount = InMemoryUserRepository.findByAccount(params.get("account"));
-        if (byAccount.isPresent()) {
+        if (InMemoryUserRepository.findByAccount(user.getAccount()).isPresent()) {
             Model model = new Model();
             model.addAttribute("errorMessage", "가입 실패 :: 이미 존재하는 아이디입니다.");
             return ModelAndView.of(model, "/400.html", HttpStatus.BAD_REQUEST);
         }
 
-        User user = new User(params.get("account"), params.get("password"), params.get("email"));
         InMemoryUserRepository.save(user);
 
         HttpSession session = request.getSession();

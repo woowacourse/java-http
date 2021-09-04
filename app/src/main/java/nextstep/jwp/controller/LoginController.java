@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
 
-import nextstep.jwp.session.HttpSession;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.request.HttpRequest;
 import nextstep.jwp.response.HttpResponse;
+import nextstep.jwp.session.HttpSession;
 import nextstep.jwp.session.HttpSessions;
 
 public class LoginController implements Controller {
@@ -39,10 +39,10 @@ public class LoginController implements Controller {
                 HttpSession session = HttpSessions.getSession(sessionId);
                 session.setAttribute("user", user);
                 response.addHeader("Set-Cookie", "JSESSIONID=" + sessionId);
+            } else {
+                HttpSession session = request.getSession();
+                session.setAttribute("user", user);
             }
-
-            HttpSession session = request.getSession();
-            session.setAttribute("user", user);
             response.redirect("/index.html");
         }
     }

@@ -10,6 +10,7 @@ public enum FileExtension {
     ICO("ico");
 
     private static final String DOT = ".";
+
     private final String value;
 
     FileExtension(String value) {

@@ -16,7 +16,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponseMessage doGet(HttpRequestMessage httpRequestMessage) {
-        return HttpResponseBuilder.forward("/login.html")
+        return HttpResponseBuilder.staticResource("/login.html")
                 .build();
     }
 

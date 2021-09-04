@@ -10,7 +10,6 @@ import static nextstep.jwp.testutils.TestHttpResponseUtils.assertContainsBodyStr
 import static nextstep.jwp.testutils.TestHttpResponseUtils.assertEmptyBody;
 import static nextstep.jwp.testutils.TestHttpResponseUtils.assertHeaderIncludes;
 import static nextstep.jwp.testutils.TestHttpResponseUtils.assertStatusCode;
-import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpResponseBuilderTest {
 
@@ -48,14 +47,26 @@ class HttpResponseBuilderTest {
         assertHeaderIncludes(httpResponse, "Location", redirectUri);
     }
 
-    @DisplayName("지정한 path 로 포워드 하여 HttpResponse 생성")
+    @DisplayName("지정한 html 로 포워드 하여 HttpResponse 생성")
     @Test
-    void forward() {
+    void staticHtmlResource() {
         String path = "/test.html";
-        HttpResponseMessage httpResponse = HttpResponseBuilder.forward(path).build();
-        String body = httpResponse.getBody().asString();
+        HttpResponseMessage httpResponse = HttpResponseBuilder.staticResource(path).build();
+
         assertStatusCode(httpResponse, HttpStatusCode.OK);
-        assertThat(body).contains("test body");
+        assertHeaderIncludes(httpResponse, "Content-Type", MediaType.TEXT_HTML_CHARSET_UTF8.getValue());
+        assertContainsBodyString(httpResponse, "test body");
+    }
+
+    @DisplayName("정적 리소스로 HttpResponse 생성")
+    @Test
+    void staticResource() {
+        String path = "/test.js";
+        HttpResponseMessage httpResponse = HttpResponseBuilder.staticResource(path).build();
+
+        assertStatusCode(httpResponse, HttpStatusCode.OK);
+        assertHeaderIncludes(httpResponse, "Content-Type", MediaType.TEXT_JS_CHARSET_UTF8.getValue());
+        assertContainsBodyString(httpResponse, "test javascript");
     }
 
     @DisplayName("Header 를 추가하여 HttpResponse 생성")

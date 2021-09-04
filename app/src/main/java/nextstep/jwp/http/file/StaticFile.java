@@ -23,4 +23,12 @@ public class StaticFile {
             throw new FileReadFailureException(String.format("File 을 읽는데 실패했습니다. (%s)", path));
         }
     }
+
+    public int byteLength() {
+        return toBytes().length;
+    }
+
+    public final FileExtension fileExtension() {
+        return FileExtension.extractExtension(file.getPath());
+    }
 }

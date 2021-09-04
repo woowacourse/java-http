@@ -9,7 +9,7 @@ public class StaticResourceController extends AbstractController {
     @Override
     protected HttpResponseMessage doGet(HttpRequestMessage httpRequestMessage) {
         String path = httpRequestMessage.requestUri();
-        return HttpResponseBuilder.forward(path)
+        return HttpResponseBuilder.staticResource(path)
                 .build();
     }
 }

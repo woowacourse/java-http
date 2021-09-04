@@ -13,7 +13,7 @@ public class RegisterController extends AbstractController {
 
     @Override
     protected HttpResponseMessage doGet(HttpRequestMessage httpRequestMessage) {
-        return HttpResponseBuilder.forward("/register.html")
+        return HttpResponseBuilder.staticResource("/register.html")
                 .build();
     }
 

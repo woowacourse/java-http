@@ -17,11 +17,6 @@ public class TestHttpResponseUtils {
         assertThat(messageBody.isEmpty()).isTrue();
     }
 
-    public static void assertExistentBody(HttpResponseMessage httpResponse) {
-        MessageBody messageBody = httpResponse.getBody();
-        assertThat(messageBody.bodyLength()).isPositive();
-    }
-
     public static void assertHeaderIncludes(HttpResponseMessage httpResponse, String key, String value) {
         assertThat(httpResponse.takeHeaderValue(key))
                 .get()

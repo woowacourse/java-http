@@ -23,9 +23,9 @@ class RequestHandlerTest {
 
         // then
         String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 12",
                 "",
                 "Hello world!");
         assertThat(socket.output()).isEqualTo(expected);
@@ -49,9 +49,9 @@ class RequestHandlerTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
+        String expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: 5564\r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).isEqualTo(expected);

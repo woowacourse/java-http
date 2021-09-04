@@ -77,6 +77,7 @@ class HttpTranslatorTest {
 
     private InputStream generateInputStream() {
         String requestMessage = String.join("\r\n",
+                requestLineMessage(),
                 requestHeaderMessage(),
                 "",
                 requestBodyMessage());
@@ -85,7 +86,7 @@ class HttpTranslatorTest {
     }
 
     private String requestLineMessage() {
-        return "POST /index.html HTTP/1.1 \r\n";
+        return "POST /index.html HTTP/1.1";
     }
 
     private String requestHeaderMessage() {

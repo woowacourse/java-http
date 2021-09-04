@@ -4,6 +4,7 @@ import nextstep.jwp.http.common.HttpStatusCode;
 import nextstep.jwp.http.common.HttpUri;
 import nextstep.jwp.http.common.HttpVersion;
 import nextstep.jwp.http.common.MediaType;
+import nextstep.jwp.http.file.FileExtension;
 import nextstep.jwp.http.file.StaticFile;
 import nextstep.jwp.http.file.StaticFileFinder;
 import nextstep.jwp.http.message.MessageBody;
@@ -51,11 +52,14 @@ public class HttpResponseBuilder {
         ).location(redirectUrl);
     }
 
-    public static HttpResponseBuilder forward(String path) {
+    public static HttpResponseBuilder staticResource(String path) {
         HttpUri httpUri = new HttpUri(path);
         StaticFileFinder staticFileFinder = new StaticFileFinder(httpUri.removedQueryStringPath());
         StaticFile staticFile = staticFileFinder.find();
-        return ok().body(staticFile.toBytes());
+        FileExtension fileExtension = staticFile.fileExtension();
+        return ok().contentType(MediaType.from(fileExtension))
+                .contentLength(staticFile.byteLength())
+                .body(staticFile.toBytes());
     }
 
     public HttpResponseMessage build() {

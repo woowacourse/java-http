@@ -31,7 +31,13 @@ class LoginControllerTest {
         ), response);
 
         // then
-        assertThat(response.body()).hasSize(2426);
+        String content = new String(response.getBytes());
+        assertThat(content).contains(
+            "HTTP/1.1 200 OK",
+            "Content-Type: text/html",
+            "Cookie: io=H6Gs8jT7h07lTg94AAAA; JSESSIONID=acbd813f-eb5a-4f8d-87fe-b1737e0871a1",
+            "Content-Length: 2426"
+        );
     }
 
     @DisplayName("로그인을 요청한다.")
@@ -49,6 +55,12 @@ class LoginControllerTest {
         ), response);
 
         // then
-        assertThat(response.getBytes()).hasSize(2571);
+        String content = new String(response.getBytes());
+        assertThat(content).contains(
+            "HTTP/1.1 302 Found ",
+            "Content-Type: text/html;charset=utf-8",
+            "Cookie: acbd813f-eb5a-4f8d-87fe-b1737e0871a1",
+            "Content-Length: 2426"
+        );
     }
 }

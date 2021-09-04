@@ -1,11 +1,11 @@
 package nextstep.jwp.application.controller;
 
 import nextstep.jwp.application.db.InMemoryUserRepository;
+import nextstep.jwp.application.model.User;
 import nextstep.jwp.framework.common.HttpStatusCode;
 import nextstep.jwp.framework.mapper.ControllerMapper;
 import nextstep.jwp.framework.message.request.HttpRequestMessage;
 import nextstep.jwp.framework.message.response.HttpResponseMessage;
-import nextstep.jwp.application.model.User;
 import nextstep.jwp.testutils.TestHttpRequestUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

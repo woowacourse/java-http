@@ -62,9 +62,9 @@ public class HttpUri {
 
     private Map.Entry<String, String> extractParam(String queryStringPiece) {
         int index = queryStringPiece.indexOf(QUERY_STRING_PARAM_SEPARATOR);
-        String key = queryStringPiece.substring(0, index);
-        String value = queryStringPiece.substring(index + 1);
-        return new AbstractMap.SimpleEntry<>(key, value);
+        String k = queryStringPiece.substring(0, index);
+        String v = queryStringPiece.substring(index + 1);
+        return new AbstractMap.SimpleEntry<>(k, v);
     }
 
     public String getValue() {

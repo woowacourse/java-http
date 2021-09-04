@@ -20,15 +20,12 @@ public class ExceptionHandlerMappings {
 
     private final Map<Class<? extends RuntimeException>, ExceptionHandler> mappings = new LinkedHashMap<>();
 
-    {
+    private ExceptionHandlerMappings() {
         mappings.put(UnauthorizedException.class, new UnauthorizedExceptionHandler());
         mappings.put(UriMappingNotFoundException.class, new UriMappingNotFoundExceptionHandler());
         mappings.put(HtmlNotFoundException.class, new HtmlNotFoundExceptionHandler());
         mappings.put(StaticResourceNotFoundException.class, new StaticResourceNotFoundExceptionHandler());
         mappings.put(RuntimeException.class, new RuntimeExceptionHandler());
-    }
-
-    private ExceptionHandlerMappings() {
     }
 
     public static ExceptionHandlerMappings getInstance() {

@@ -35,7 +35,7 @@ public class RequestHandler implements Runnable {
             HttpTranslator httpTranslator = new HttpTranslator(inputStream, outputStream);
             HttpRequestMessage httpRequestMessage = httpTranslator.translate();
 
-            log.debug("요청 Uri: {}", httpRequestMessage.requestUri());
+            log.info("요청 Uri: {}", httpRequestMessage.requestUri());
 
             HttpResponseMessage httpResponseMessage = handle(httpRequestMessage);
             httpTranslator.respond(httpResponseMessage);

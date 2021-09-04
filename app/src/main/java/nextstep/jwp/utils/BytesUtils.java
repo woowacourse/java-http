@@ -4,6 +4,9 @@ import java.nio.ByteBuffer;
 
 public class BytesUtils {
 
+    private BytesUtils() {
+    }
+
     public static byte[] concat(byte[]... bytesArr) {
         int flatSize = calculateFlatSize(bytesArr);
         ByteBuffer byteBuffer = ByteBuffer.allocate(flatSize);

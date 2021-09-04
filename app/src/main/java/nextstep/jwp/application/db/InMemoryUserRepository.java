@@ -18,6 +18,9 @@ public class InMemoryUserRepository {
         save(gugu);
     }
 
+    private InMemoryUserRepository() {
+    }
+
     public static void save(User user) {
         database.put(
                 user.getAccount(),

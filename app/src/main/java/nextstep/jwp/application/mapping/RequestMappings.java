@@ -14,13 +14,10 @@ public class RequestMappings {
 
     private final Map<String, Controller> mappings = new HashMap<>();
 
-    {
+    private RequestMappings() {
         mappings.put("/", new HelloController());
         mappings.put("/login", new LoginController());
         mappings.put("/register", new RegisterController());
-    }
-
-    private RequestMappings() {
     }
 
     public static RequestMappings getInstance() {

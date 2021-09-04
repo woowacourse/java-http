@@ -46,7 +46,7 @@ class RequestHeaderTest {
         int contentLength = requestHeader.takeContentLength();
 
         // then
-        assertThat(contentLength).isEqualTo(0);
+        assertThat(contentLength).isZero();
     }
 
     @DisplayName("RequestHeader 를 바이트 배열로 변환한다.")

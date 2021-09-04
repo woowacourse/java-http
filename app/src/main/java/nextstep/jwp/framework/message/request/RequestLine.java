@@ -38,10 +38,10 @@ public class RequestLine implements StartLine {
     }
 
     public String asString() {
-        String httpMethod = this.httpMethod.name();
-        String httpVersion = this.getHttpVersion().getValue();
+        String httpMethodValue = this.httpMethod.name();
+        String httpVersionValue = this.getHttpVersion().getValue();
         return StringUtils.concatNewLine(
-                StringUtils.joinWithBlank(httpMethod, requestUri, httpVersion)
+                StringUtils.joinWithBlank(httpMethodValue, requestUri, httpVersionValue)
         );
     }
 

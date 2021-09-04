@@ -11,11 +11,11 @@ public abstract class AbstractController implements Controller {
     @Override
     public final HttpResponseMessage service(HttpRequestMessage httpRequestMessage) {
         HttpMethod httpMethod = httpRequestMessage.httpMethod();
-        switch (httpMethod) {
-            case GET:
-                return doGet(httpRequestMessage);
-            case POST:
-                return doPost(httpRequestMessage);
+        if (httpMethod == HttpMethod.GET) {
+            return doGet(httpRequestMessage);
+        }
+        if (httpMethod == HttpMethod.POST) {
+            return doPost(httpRequestMessage);
         }
         throw new IllegalStateException("Controller의 Service 메서드에 문제가 있습니다.");
     }

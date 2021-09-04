@@ -11,6 +11,9 @@ public class StringUtils {
     private static final String BLANK = " ";
     private static final String NEW_LINE = "\r\n";
 
+    private StringUtils() {
+    }
+
     public static List<String> splitWithSeparator(String s, String separator) {
         return Arrays
                 .stream(s.split(separator))

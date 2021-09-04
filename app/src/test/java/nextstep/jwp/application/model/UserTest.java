@@ -27,7 +27,7 @@ class UserTest {
     void createWithMap() {
         User user = User.createWithMap(map);
 
-        assertThat(user.getId()).isEqualTo(0);
+        assertThat(user.getId()).isZero();
         assertThat(user.getAccount()).isEqualTo("ggyool");
         assertThat(user.getPassword()).isEqualTo("password");
         assertThat(user.getEmail()).isEqualTo("ggyool@never.com");

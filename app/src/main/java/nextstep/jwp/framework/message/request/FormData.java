@@ -14,10 +14,10 @@ public class FormData {
     private static final String FORM_DATA_PIECE_SEPARATOR = "&";
     private static final String FORM_DATE_PARAM_SEPARATOR = "=";
 
-    private final Map<String, String> formData;
+    private final Map<String, String> fields;
 
     public FormData(Map<String, String> formData) {
-        this.formData = formData;
+        this.fields = formData;
     }
 
     public static FormData from(MessageBody messageBody) {
@@ -40,11 +40,11 @@ public class FormData {
     }
 
     public String take(String key) {
-        return formData.get(key);
+        return fields.get(key);
     }
 
     public Map<String, String> toMap() {
-        return Collections.unmodifiableMap(formData);
+        return Collections.unmodifiableMap(fields);
     }
 
     @Override
@@ -52,11 +52,11 @@ public class FormData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FormData formData1 = (FormData) o;
-        return Objects.equals(formData, formData1.formData);
+        return Objects.equals(fields, formData1.fields);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(formData);
+        return Objects.hash(fields);
     }
 }

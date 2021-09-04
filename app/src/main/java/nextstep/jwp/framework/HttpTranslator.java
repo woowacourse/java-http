@@ -57,9 +57,9 @@ public class HttpTranslator {
         );
     }
 
-    private MessageBody extractBodyMessage(BufferedReader bufferedReader, int BodyLength) throws IOException {
-        char[] buffer = new char[BodyLength];
-        bufferedReader.read(buffer, 0, BodyLength);
+    private MessageBody extractBodyMessage(BufferedReader bufferedReader, int bodyLength) throws IOException {
+        char[] buffer = new char[bodyLength];
+        bufferedReader.read(buffer, 0, bodyLength);
         String bodyString = new String(buffer);
         return new MessageBody(StringUtils.decode(bodyString, charSet));
     }

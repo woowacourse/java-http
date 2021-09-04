@@ -1,10 +1,10 @@
 package nextstep.jwp.framework.mapper;
 
+import nextstep.jwp.application.mapping.RequestMappings;
 import nextstep.jwp.framework.common.HttpUri;
 import nextstep.jwp.framework.controller.Controller;
 import nextstep.jwp.framework.controller.StaticResourceController;
 import nextstep.jwp.framework.exception.UriMappingNotFoundException;
-import nextstep.jwp.application.mapping.RequestMappings;
 
 import java.util.Map;
 

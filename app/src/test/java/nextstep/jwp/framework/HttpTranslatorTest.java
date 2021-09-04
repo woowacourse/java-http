@@ -72,7 +72,7 @@ class HttpTranslatorTest {
         httpTranslator.respond(httpResponseMessage());
 
         // then
-        assertThat(outputStream.toString()).isEqualTo(expected);
+        assertThat(outputStream.toString()).hasToString(expected);
     }
 
     private InputStream generateInputStream() {

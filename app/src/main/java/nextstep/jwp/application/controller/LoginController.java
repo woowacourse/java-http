@@ -2,13 +2,13 @@ package nextstep.jwp.application.controller;
 
 import nextstep.jwp.application.db.InMemoryUserRepository;
 import nextstep.jwp.application.exception.UnauthorizedException;
+import nextstep.jwp.application.model.User;
 import nextstep.jwp.framework.controller.AbstractController;
 import nextstep.jwp.framework.message.MessageBody;
 import nextstep.jwp.framework.message.builder.HttpResponseBuilder;
 import nextstep.jwp.framework.message.request.FormData;
 import nextstep.jwp.framework.message.request.HttpRequestMessage;
 import nextstep.jwp.framework.message.response.HttpResponseMessage;
-import nextstep.jwp.application.model.User;
 
 import java.util.Objects;
 

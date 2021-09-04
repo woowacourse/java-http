@@ -18,11 +18,11 @@ public class StatusLine implements StartLine {
     }
 
     public String asString() {
-        String httpVersion = this.httpVersion.getValue();
+        String httpVersionValue = this.httpVersion.getValue();
         String code = httpStatusCode.getCodeAsString();
         String description = httpStatusCode.getDescription();
         return StringUtils.concatNewLine(
-                StringUtils.joinWithBlank(httpVersion, code, description)
+                StringUtils.joinWithBlank(httpVersionValue, code, description)
         );
     }
 

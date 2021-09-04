@@ -9,7 +9,8 @@ public enum ContentType {
     CSS("css", "text/css"),
     JAVASCRIPT("js", "application/x-javascript"),
     FORM("", "application/x-www-form-urlencoded"),
-    IMAGE("ico", "image/x-icon");
+    IMAGE("svg", "image/svg+xml"),
+    ICON("ico", "image/x-icon");
 
     private final String extension;
     private final String type;

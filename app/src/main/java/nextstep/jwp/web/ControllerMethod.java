@@ -1,6 +1,7 @@
 package nextstep.jwp.web;
 
 import nextstep.jwp.controller.Controller;
+import nextstep.jwp.exception.ConfigurationException;
 import nextstep.jwp.exception.InternalServerError;
 import nextstep.jwp.request.HttpRequest;
 import org.slf4j.Logger;
@@ -21,8 +22,17 @@ public class ControllerMethod {
         this.method = method;
     }
 
-    public static ControllerMethod of(Controller controller, String methodName) throws NoSuchMethodException {
-        return new ControllerMethod(controller, controller.getClass().getMethod(methodName, HttpRequest.class));
+    public static ControllerMethod of(Controller controller, String methodName) {
+        return new ControllerMethod(controller, extractMethod(controller, methodName));
+    }
+
+    private static Method extractMethod(Controller controller, String methodName) {
+        try {
+            return controller.getClass().getMethod(methodName, HttpRequest.class);
+        } catch (NoSuchMethodException e) {
+            logger.error("Cannot Request Mapping By No Such Method", e);
+            throw new ConfigurationException();
+        }
     }
 
     public Object invoke(HttpRequest httpRequest) {

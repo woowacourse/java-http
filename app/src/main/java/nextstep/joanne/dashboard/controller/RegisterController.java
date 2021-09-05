@@ -46,8 +46,7 @@ public class RegisterController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) {
         log.debug("HTTP GET Register Request from {}", request.uri());
 
-        HttpSession session = request.getSession();
-        session.removeAttribute("user");
+        if (alreadyLogin(response, request.getSession())) return;
 
         response.addStatus(HttpStatus.OK);
         response.addHeaders("Content-Type", ContentType.resolve(request.uri()));

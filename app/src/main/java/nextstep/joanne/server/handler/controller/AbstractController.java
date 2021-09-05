@@ -1,8 +1,11 @@
 package nextstep.joanne.server.handler.controller;
 
 import nextstep.joanne.server.http.HttpMethod;
+import nextstep.joanne.server.http.HttpSession;
 import nextstep.joanne.server.http.request.HttpRequest;
 import nextstep.joanne.server.http.response.HttpResponse;
+
+import java.util.Objects;
 
 public abstract class AbstractController implements Controller {
 
@@ -20,6 +23,14 @@ public abstract class AbstractController implements Controller {
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) {
+    }
+
+    protected boolean alreadyLogin(HttpResponse response, HttpSession session) {
+        if (Objects.nonNull(session) && Objects.nonNull(session.getAttribute("user"))) {
+            response.redirect("/index.html");
+            return true;
+        }
+        return false;
     }
 }
 

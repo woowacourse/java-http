@@ -45,11 +45,7 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) {
         log.debug("HTTP GET Login Request from {}", request.uri());
 
-        HttpSession session = request.getSession();
-        if (Objects.nonNull(session) && Objects.nonNull(session.getAttribute("user"))) {
-            response.redirect("/index.html");
-            return;
-        }
+        if (alreadyLogin(response, request.getSession())) return;
 
         response.addStatus(HttpStatus.OK);
         response.addHeaders("Content-Type", ContentType.resolve(request.uri()));

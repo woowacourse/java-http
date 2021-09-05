@@ -1,6 +1,7 @@
 package nextstep.jwp;
 
-import nextstep.jwp.service.UserService;
+import nextstep.jwp.server.ControllerDispatcher;
+import nextstep.jwp.server.RequestHandler;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -12,22 +13,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestHandlerTest {
 
+    private static final String HEADER_RESPONSE = "HTTP/1.1 200 OK\r\n" +
+            "Content-Type: text/html;charset=utf-8\r\n" +
+            "Content-Length: 5564\r\n" +
+            "\r\n";
+
+
     @Test
-    void run() {
+    void run() throws IOException {
         // given
         final MockSocket socket = new MockSocket();
-        final RequestHandler requestHandler = new RequestHandler(socket, new UserService());
+        final RequestHandler requestHandler = new RequestHandler(socket, ControllerDispatcher.getInstance());
 
         // when
         requestHandler.run();
 
         // then
-        String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String expected = HEADER_RESPONSE + new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -35,25 +38,21 @@ class RequestHandlerTest {
     void index() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "",
                 "");
 
         final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket, new UserService());
+        final RequestHandler requestHandler = new RequestHandler(socket, ControllerDispatcher.getInstance());
 
         // when
         requestHandler.run();
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expected = HEADER_RESPONSE + new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).isEqualTo(expected);
     }
 }

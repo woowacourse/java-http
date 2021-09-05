@@ -19,9 +19,9 @@ public class RequestMapping {
         CONTROLLERS.put("/register", new RegisterController());
     }
 
-    public static Controller getController(HttpRequest httpRequest) {
-        String path = httpRequest.getPath();
-        if(CONTROLLERS.containsKey(path)){
+    public static Controller getController(HttpRequest request) {
+        String path = request.getPath();
+        if (CONTROLLERS.containsKey(path)) {
             return CONTROLLERS.get(path);
         }
         return new ResourceController();

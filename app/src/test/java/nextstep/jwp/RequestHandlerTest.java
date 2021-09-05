@@ -13,6 +13,32 @@ import org.junit.jupiter.api.Test;
 class RequestHandlerTest {
 
     @Test
+    @DisplayName("GET / 요청 시 index.html 페이지로 이동한다.")
+    void defaultPage() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 5668 \r\n" +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertThat(socket.output()).containsIgnoringWhitespaces(expected);
+    }
+
+    @Test
     @DisplayName("GET /index.html 요청 시 index.html 페이지로 이동한다.")
     void index() throws IOException {
         // given

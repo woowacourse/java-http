@@ -32,8 +32,6 @@ public class LoginController extends AbstractController {
         HttpResponse response = new HttpResponse();
 
         login(request, response, account, password);
-        handleSession(request, response);
-
         return response;
     }
 
@@ -50,16 +48,5 @@ public class LoginController extends AbstractController {
             }
         }
         response.sendRedirect(ERROR_401_HTML);
-    }
-
-    private void handleSession(HttpRequest request, HttpResponse response) {
-        String sessionId = request.getSession().getId();
-        if (!HttpSessions.isValid(sessionId)) {
-            HttpCookie cookie = new HttpCookie(Map.of("JSESSIONID", sessionId));
-            cookie.addCookie(sessionId);
-            response.setCookie(cookie);
-
-            HttpSessions.putSession(request.getSession());
-        }
     }
 }

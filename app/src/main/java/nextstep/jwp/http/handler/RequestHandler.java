@@ -7,7 +7,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
+import nextstep.jwp.http.handler.session.SessionHandler;
 import nextstep.jwp.http.mapping.RequestMapping;
+import nextstep.jwp.http.mapping.SessionMapping;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.util.RequestConverter;
@@ -39,6 +41,9 @@ public class RequestHandler implements Runnable {
             final HttpRequest request = RequestConverter.convertToHttpRequest(bufferedReader);
             final Controller controller = RequestMapping.getController(request);
             final HttpResponse response = controller.service(request);
+            final SessionHandler sessionHandler = SessionMapping.getSessionHandler(request);
+
+            sessionHandler.handle(request, response);
 
             outputStream.write(response.getResponseByByte());
             outputStream.flush();

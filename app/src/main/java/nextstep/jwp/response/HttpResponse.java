@@ -14,9 +14,8 @@ import nextstep.jwp.constants.StatusCode;
 import nextstep.jwp.exception.PageNotFoundException;
 
 public class HttpResponse {
-    private final StatusCode statusCode;
-    private final String responseBody;
-    private final ContentType contentType;
+    private HttpResponse(){
+    }
 
     public static class Builder {
         private final Map<String, String> headers;
@@ -66,11 +65,9 @@ public class HttpResponse {
 
         private String assembleHeaders() {
             updateDefaultHeaders();
-            String headers = this.headers.entrySet().stream()
+            return this.headers.entrySet().stream()
                     .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
-                    .collect(Collectors.joining(HttpTerms.NEW_LINE));
-            headers += HttpTerms.NEW_LINE;
-            return headers;
+                    .collect(Collectors.joining(HttpTerms.NEW_LINE)) + HttpTerms.NEW_LINE;
         }
 
         private void updateDefaultHeaders() {
@@ -99,12 +96,6 @@ public class HttpResponse {
                 throw new PageNotFoundException("해당하는 정적 리소스 페이지가 없어요");
             }
         }
-    }
-
-    private HttpResponse(Builder builder) {
-        this.statusCode = builder.statusCode;
-        this.responseBody = builder.responseBody;
-        this.contentType = builder.contentType;
     }
 
     public static Builder statusCode(StatusCode statusCode) {

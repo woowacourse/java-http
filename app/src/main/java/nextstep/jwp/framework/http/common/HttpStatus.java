@@ -1,10 +1,11 @@
-package nextstep.jwp.framework.http;
+package nextstep.jwp.framework.http.common;
 
 public enum HttpStatus {
 
     OK(200, "OK"),
     CREATED(201, "Created"),
 
+    MOVED_PERMANENTLY(301, "Moved Permanently"),
     FOUND(302, "Found"),
 
     BAD_REQUEST(400, "Bad Request"),

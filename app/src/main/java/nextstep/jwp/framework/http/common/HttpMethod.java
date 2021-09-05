@@ -1,4 +1,4 @@
-package nextstep.jwp.framework.http;
+package nextstep.jwp.framework.http.common;
 
 import java.util.Arrays;
 

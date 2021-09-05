@@ -1,9 +1,13 @@
-package nextstep.jwp.framework.http;
+package nextstep.jwp.framework.http.request;
 
 import java.net.URL;
-import nextstep.jwp.framework.http.HttpStatusState.HttpNotFoundStatus;
-import nextstep.jwp.framework.http.HttpStatusState.HttpOKStatus;
-import nextstep.jwp.framework.http.HttpStatusState.HttpStatusState;
+import nextstep.jwp.framework.http.common.HttpMethod;
+import nextstep.jwp.framework.http.common.HttpPath;
+import nextstep.jwp.framework.http.common.HttpStatus;
+import nextstep.jwp.framework.http.common.ProtocolVersion;
+import nextstep.jwp.framework.http.httpstatus.HttpNotFoundStatus;
+import nextstep.jwp.framework.http.httpstatus.HttpOKStatus;
+import nextstep.jwp.framework.http.httpstatus.HttpStatusState;
 
 public class HttpRequestLine {
 
@@ -17,17 +21,14 @@ public class HttpRequestLine {
         this.protocolVersion = protocolVersion;
     }
 
-    public URL url(final HttpStatus status) {
+    public URL url(HttpStatus status) {
         if (path.isNotExistFile()) {
+            status = HttpStatus.NOT_FOUND;
             return new HttpNotFoundStatus(status, path).resource();
         }
 
         final HttpStatusState state = new HttpOKStatus(status, path).state();
         return state.resource();
-    }
-
-    public HttpMethod getMethod() {
-        return method;
     }
 
     public HttpPath path() {
@@ -48,5 +49,14 @@ public class HttpRequestLine {
 
     public boolean isNotPost() {
         return !method.isPost();
+    }
+
+    public HttpStatus status(HttpStatus status) {
+        if (path.isNotExistFile()) {
+            return HttpStatus.NOT_FOUND;
+        }
+
+        final HttpStatusState state = new HttpOKStatus(status, path).state();
+        return state.status();
     }
 }

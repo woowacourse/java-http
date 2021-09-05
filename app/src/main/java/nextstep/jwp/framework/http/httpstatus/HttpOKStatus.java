@@ -1,8 +1,8 @@
-package nextstep.jwp.framework.http.HttpStatusState;
+package nextstep.jwp.framework.http.httpstatus;
 
 import java.net.URL;
-import nextstep.jwp.framework.http.HttpPath;
-import nextstep.jwp.framework.http.HttpStatus;
+import nextstep.jwp.framework.http.common.HttpPath;
+import nextstep.jwp.framework.http.common.HttpStatus;
 
 public class HttpOKStatus extends HttpStatusState {
 
@@ -22,5 +22,10 @@ public class HttpOKStatus extends HttpStatusState {
     @Override
     public URL resource() {
         return getPath().findResourceURL();
+    }
+
+    @Override
+    public HttpStatus status() {
+        return HttpStatus.OK;
     }
 }

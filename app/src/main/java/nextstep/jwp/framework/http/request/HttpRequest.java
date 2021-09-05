@@ -1,4 +1,4 @@
-package nextstep.jwp.framework.http;
+package nextstep.jwp.framework.http.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,8 +6,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
+import nextstep.jwp.framework.http.common.HttpBody;
+import nextstep.jwp.framework.http.common.HttpHeaders;
+import nextstep.jwp.framework.http.common.HttpMethod;
+import nextstep.jwp.framework.http.common.HttpPath;
+import nextstep.jwp.framework.http.common.ProtocolVersion;
+import nextstep.jwp.framework.http.session.HttpSession;
+import nextstep.jwp.framework.http.session.HttpSessions;
 
 public class HttpRequest {
 
@@ -78,11 +87,11 @@ public class HttpRequest {
     }
 
     private HttpHeaders createHeader(final String lines) {
-        final String[] headers = lines.split(BODY_DELIMITER)[HTTP_HEADER_INDEX].split(LINE_DELIMITER);
+        final String[] splitLines = lines.split(BODY_DELIMITER)[HTTP_HEADER_INDEX].split(LINE_DELIMITER);
         final StringJoiner headerLines = new StringJoiner(LINE_DELIMITER);
 
-        for (int i = 1; i < headers.length; i++) {
-            headerLines.add(headers[i]);
+        for (int i = 1; i < splitLines.length; i++) {
+            headerLines.add(splitLines[i]);
         }
 
         return new HttpHeaders(headerLines.toString());
@@ -108,8 +117,11 @@ public class HttpRequest {
         return requestLine.path().getPath();
     }
 
-    public HttpMethod getMethod() {
-        return requestLine.getMethod();
+    public String sessionId() {
+        if (headers.hasCookie()) {
+            return headers.sessions().getId();
+        }
+        return "";
     }
 
     public URL getResource() {
@@ -118,6 +130,14 @@ public class HttpRequest {
 
     public HttpPath path() {
         return requestLine.path();
+    }
+
+    public void changeIndexPage() {
+        path().changeIndexPage();
+    }
+
+    public void createCookie(final String id) {
+        headers.setCookie(id);
     }
 
     public HttpRequestLine getRequestLine() {
@@ -130,5 +150,17 @@ public class HttpRequest {
 
     public HttpBody getBody() {
         return body;
+    }
+
+    public Map<String, String> getQueryParams() {
+        return Collections.unmodifiableMap(body.getQueryParams());
+    }
+
+    public HttpSession getSession() {
+        final HttpSession httpSession = headers.sessions();
+
+        HttpSessions.putSession(httpSession);
+
+        return httpSession;
     }
 }

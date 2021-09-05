@@ -6,8 +6,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.framework.http.HttpRequest;
-import nextstep.jwp.framework.http.HttpResponse;
+import nextstep.jwp.framework.http.request.HttpRequest;
+import nextstep.jwp.framework.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +23,7 @@ public class RequestHandler implements Runnable {
 
     @Override
     public void run() {
-        // log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
+        log.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(), connection.getPort());
 
         try (final InputStream inputStream = connection.getInputStream();
             final OutputStream outputStream = connection.getOutputStream()) {

@@ -1,18 +1,19 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.framework.http.HttpRequest;
-import nextstep.jwp.framework.http.HttpResponse;
-import nextstep.jwp.framework.http.HttpStatus;
+import java.io.IOException;
+import nextstep.jwp.framework.http.common.HttpStatus;
+import nextstep.jwp.framework.http.request.HttpRequest;
+import nextstep.jwp.framework.http.response.HttpResponse;
 
 public class DefaultController extends AbstractController {
 
     @Override
-    protected void doPost(HttpRequest request, HttpResponse response) {
-        response.create(request.getRequestLine(), request.getHeaders(), request.getBody(), HttpStatus.OK);
+    protected void doPost(HttpRequest request, HttpResponse response) throws IOException {
+        response.create(request.getRequestLine(), request.getHeaders(), HttpStatus.OK);
     }
 
     @Override
-    protected void doGet(HttpRequest request, HttpResponse response) {
-        response.create(request.getRequestLine(), request.getHeaders(), request.getBody(), HttpStatus.OK);
+    protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
+        response.create(request.getRequestLine(), request.getHeaders(), HttpStatus.OK);
     }
 }

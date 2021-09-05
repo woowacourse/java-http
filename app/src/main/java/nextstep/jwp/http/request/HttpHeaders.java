@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.http.response.ContentType;
 import nextstep.jwp.http.session.HttpCookie;
 
 public class HttpHeaders {
@@ -52,7 +53,9 @@ public class HttpHeaders {
         return headers.containsKey(CONTENT_LENGTH);
     }
 
-    public boolean acceptHtmlType(String value) {
-        return headers.containsKey(ACCEPT) && headers.get(ACCEPT).contains(value);
+    public boolean acceptHtmlType() {
+        return headers.containsKey(ACCEPT) && (
+            headers.get(ACCEPT).contains(ContentType.HTML.getValue())
+                || headers.get(ACCEPT).contains(ContentType.HTML_UTF8.getValue()));
     }
 }

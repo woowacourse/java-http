@@ -5,7 +5,8 @@ import nextstep.jwp.http.request.requestline.RequestPath;
 
 public enum ContentType {
     TEXT("txt", "text/plain"),
-    HTML("html", "text/html; charset=utf-8"),
+    HTML_UTF8("html", "text/html; charset=utf-8"),
+    HTML("html", "text/html"),
     ICO("ico", "image/x-icon"),
     CSS("css", "text/css"),
     JS("js", "application/javascript"),

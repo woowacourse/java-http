@@ -3,7 +3,6 @@ package nextstep.jwp.controller;
 import java.util.Map;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.requestline.RequestPath;
-import nextstep.jwp.http.response.ContentType;
 
 public class RequestMapping {
 
@@ -26,7 +25,7 @@ public class RequestMapping {
     }
 
     private Controller findResourceController(HttpRequest httpRequest) {
-        if (!httpRequest.getHeader().acceptHtmlType(ContentType.HTML.getValue()) ||
+        if (!httpRequest.getHeader().acceptHtmlType() ||
             httpRequest.getRequestLine().getRequestURI().containsExtension(".html")) {
             return STATIC_RESOURCE_CONTROLLER;
         }

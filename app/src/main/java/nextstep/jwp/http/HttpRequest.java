@@ -68,6 +68,10 @@ public class HttpRequest {
         return bodyParams.get(key);
     }
 
+    public boolean contains(final String key){
+        return headers.contains(key);
+    }
+
     public HttpCookie getCookie() {
         return new HttpCookie(headers.getHeaderDataByKey("Cookie"));
     }

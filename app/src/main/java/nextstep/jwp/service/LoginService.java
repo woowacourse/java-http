@@ -3,6 +3,7 @@ package nextstep.jwp.service;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpRequest;
@@ -24,19 +25,38 @@ public class LoginService {
 
     private void userLogin(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         if (isValidateUser(httpRequest)) {
-            HttpCookie cookie = httpRequest.getCookie();
-            sessionMappingClient(httpRequest, cookie);
+            String jsessionId = String.valueOf(UUID.randomUUID());
+
+            sessionCheck(httpRequest, httpResponse, jsessionId);
+            sessionMappingClient(httpRequest, jsessionId);
             httpResponse.redirect302Transfer("/index.html");
         } else {
             httpResponse.redirectWithStatusCode("/401.html", "401");
         }
     }
 
-    private void sessionMappingClient(final HttpRequest httpRequest, final HttpCookie cookie) {
-        if (cookie.containsKey(JSESSIONID)) {
-            HttpSession httpSession = getHttpSessionByCookie(cookie);
-            httpSession.setAttribute("user", getUser(httpRequest));
+    private void sessionCheck(final HttpRequest httpRequest, final HttpResponse httpResponse, final String jsessionId) throws IOException {
+        if (cookieCheck(httpRequest)) {
+            jsessionIdCheck(httpRequest, httpResponse, jsessionId);
+            return;
         }
+        setJsessionid(httpResponse, jsessionId);
+    }
+
+    private void jsessionIdCheck(final HttpRequest httpRequest, final HttpResponse httpResponse, final String jsessionId) {
+        HttpCookie httpCookie = httpRequest.getCookie();
+        if (!httpCookie.containsKey("JSESSIONID")) {
+            setJsessionid(httpResponse, jsessionId);
+        }
+    }
+
+    private void setJsessionid(final HttpResponse httpResponse, final String jsessionId) {
+        httpResponse.addHeader("Set-Cookie", String.format("JSESSIONID=%s", jsessionId));
+    }
+
+    private void sessionMappingClient(final HttpRequest httpRequest, final String jsessionId) {
+        HttpSession httpSession = HttpSessions.getSession(jsessionId);
+        httpSession.setAttribute("user", getUser(httpRequest));
     }
 
     private HttpSession getHttpSessionByCookie(final HttpCookie cookie) {
@@ -70,12 +90,21 @@ public class LoginService {
     }
 
     public void doGet(final HttpResponse httpResponse, final HttpRequest httpRequest) throws IOException {
+        if (!cookieCheck(httpRequest)) {
+            httpResponse.transfer("/login.html");
+            return;
+        }
+
         HttpCookie cookie = httpRequest.getCookie();
         if (cookie.containsKey(JSESSIONID) && isLoggedIn(getHttpSessionByCookie(cookie))) {
             httpResponse.redirect302Transfer("/index.html");
             return;
         }
         httpResponse.transfer("/login.html");
+    }
+
+    private boolean cookieCheck(final HttpRequest httpRequest) {
+        return httpRequest.contains("Cookie");
     }
 
     private boolean isLoggedIn(final HttpSession httpSession) {

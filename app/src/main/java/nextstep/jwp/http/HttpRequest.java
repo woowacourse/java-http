@@ -1,5 +1,7 @@
 package nextstep.jwp.http;
 
+import com.google.common.base.Strings;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +26,7 @@ public class HttpRequest {
     private void parseHeaders() throws IOException {
         while (bufferedReader.ready()) {
             String line = bufferedReader.readLine();
-            if (Objects.isNull(line) || line.isEmpty()) {
+            if (Strings.isNullOrEmpty(line)) {
                 return;
             }
             String[] header = line.split(": ");
@@ -71,8 +73,8 @@ public class HttpRequest {
         if (headers.containsKey("Cookie")) {
             String cookie = headers.get("Cookie");
             HttpCookies httpCookies = new HttpCookies(cookie);
-            if (httpCookies.getCookies().containsKey("JSESSIONID")) {
-                String sessionId = httpCookies.getCookies().get("JSESSIONID");
+            if (httpCookies.hasKey("JSESSIONID")) {
+                String sessionId = httpCookies.getCookie("JSESSIONID");
                 return HttpSessions.find(sessionId);
             }
         }

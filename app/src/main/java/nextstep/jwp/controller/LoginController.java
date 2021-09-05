@@ -14,7 +14,6 @@ public class LoginController extends AbstractController {
     void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         final HttpSession httpSession = httpRequest.getSession();
         if (httpSession != null && httpSession.hasAttribute("user")) {
-            User user = (User) httpSession.getAttribute("user");
             HttpResponse response = new HttpResponse.Builder()
                     .outputStream(httpResponse.getOutputStream())
                     .status(HttpStatus.FOUND_302)

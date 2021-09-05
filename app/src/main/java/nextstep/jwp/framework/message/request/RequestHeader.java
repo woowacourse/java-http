@@ -8,6 +8,7 @@ import java.util.Objects;
 public class RequestHeader implements MessageHeader {
 
     private static final String COOKIE = "Cookie";
+    private static final String CONTENT_LENGTH = "Content-Length";
 
     private final HeaderFields headerFields;
 
@@ -28,7 +29,7 @@ public class RequestHeader implements MessageHeader {
     }
 
     public int takeContentLength() {
-        String contentLength = headerFields.take("Content-Length").orElse("0");
+        String contentLength = headerFields.take(CONTENT_LENGTH).orElse("0");
         return Integer.parseInt(contentLength);
     }
 

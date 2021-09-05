@@ -24,4 +24,6 @@
 - [x] key-value 구조 맵으로 파싱할 일이 많아서 유틸에 만들어서 사용하고 기존 코드 변경
 - [x] 원랜 주 생성자를 열어두고 싶었지만, 비어있는 객체를 캐싱한 경우 주 생성자를 닫을 수 밖에 없었음 
   일관성을 위해 팩토리 메서드가 존재하는 클래스는 생성자를 닫음
-- [ ] 요청에 쓰는 헤더 상수는 RequestHeader 쪽에 응답에 쓰는 필드는 ResponseHeader 쪽으로 옮김 
+- [x] 헤더 상수는 RequestHeader 와 ResponseHeader 쪽으로 옮기고 HeaderFields 는 컬렉션의 역할에 집중하도록 함
+      구조상 헤더를 읽는 메서드는 RequestHeader 에 헤더에 값을 추가하는 메서드는 ResponseHeader 에 있기 때문에 분리를 생각함
+

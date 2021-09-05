@@ -9,6 +9,10 @@ import java.util.Optional;
 
 public class ResponseHeader implements MessageHeader {
 
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String LOCATION = "Location";
+
     private final HeaderFields headerFields;
 
     public ResponseHeader(HeaderFields headerFields) {
@@ -28,15 +32,15 @@ public class ResponseHeader implements MessageHeader {
     }
 
     public void putLocation(String uri) {
-        headerFields.putLocation(uri);
+        put(LOCATION, uri);
     }
 
     public void putContentType(MediaType contentType) {
-        headerFields.putContentType(contentType);
+        put(CONTENT_TYPE, contentType.getValue());
     }
 
     public void putContentLength(int contentLength) {
-        headerFields.putContentLength(contentLength);
+        put(CONTENT_LENGTH, String.valueOf(contentLength));
     }
 
     public Optional<String> take(String key) {

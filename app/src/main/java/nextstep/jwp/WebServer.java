@@ -3,8 +3,10 @@ package nextstep.jwp;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
-import nextstep.jwp.http.RequestHandler;
+import nextstep.jwp.http.handler.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +34,11 @@ public class WebServer {
     }
 
     private void handle(ServerSocket serverSocket) throws IOException {
+        ExecutorService service = Executors.newFixedThreadPool(200);
+
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection)).start();
+            service.submit(new RequestHandler(connection));
         }
     }
 

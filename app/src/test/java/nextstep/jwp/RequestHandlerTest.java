@@ -6,29 +6,35 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.jwp.http.RequestHandler;
+import nextstep.jwp.http.handler.RequestHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
 
     @Test
-    @DisplayName("/ 로 요청 시 Hello world를 응답 body로 보낸다.")
-    void run() {
+    @DisplayName("GET / 요청 시 index.html 페이지로 이동한다.")
+    void defaultPage() throws IOException {
         // given
-        final MockSocket socket = new MockSocket();
+        final String httpRequest = String.join("\r\n",
+                "GET / HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
         // when
         requestHandler.run();
 
         // then
-        String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 5668 \r\n" +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).containsIgnoringWhitespaces(expected);
     }
 
@@ -75,7 +81,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = "HTTP/1.1 404 Not Found \r\n" +
+        String expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: /404.html";
         assertThat(socket.output()).containsIgnoringWhitespaces(expected);
     }
@@ -211,6 +217,31 @@ class RequestHandlerTest {
         assertThat(socket.output()).containsIgnoringWhitespaces(expected);
     }
 
+    @Test
+    @DisplayName("POST /login 요청 시 password= 이면 /401.html으로 redirect 된다.")
+    void loginFailWithEmptyPassword() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 30",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Accept: */*",
+                "",
+                "account=gugu&password=");
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        String expected = "HTTP/1.1 302  Found \r\n" +
+                "Location: /401.html \r\n" +
+                "\r\n";
+        assertThat(socket.output()).containsIgnoringWhitespaces(expected);
+    }
 
     @Test
     @DisplayName("POST /login 요청 시 존재하지 않는 account면 401.html로 redirect 된다.")
@@ -232,7 +263,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = "HTTP/1.1 401 Unauthorized \r\n" +
+        String expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: /401.html";
         assertThat(socket.output()).containsIgnoringWhitespaces(expected);
     }
@@ -257,7 +288,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = "HTTP/1.1 401 Unauthorized \r\n" +
+        String expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: /401.html";
         assertThat(socket.output()).containsIgnoringWhitespaces(expected);
     }
@@ -335,7 +366,7 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = "HTTP/1.1 500 Internal Server Error \r\n" +
+        String expected = "HTTP/1.1 302 Found \r\n" +
                 "Location: /500.html";
         assertThat(socket.output()).containsIgnoringWhitespaces(expected);
     }

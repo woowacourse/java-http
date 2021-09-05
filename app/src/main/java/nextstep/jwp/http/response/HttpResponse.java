@@ -3,21 +3,22 @@ package nextstep.jwp.http.response;
 import java.io.IOException;
 import nextstep.jwp.http.common.HttpHeaders;
 import nextstep.jwp.http.common.ResourceFile;
+import nextstep.jwp.http.common.session.HttpCookie;
 
 public class HttpResponse {
 
-    private static final String NEWLINE = "\r\n";
+    private static final String CRLF = "\r\n";
     private static final String HTTP_VERSION = "HTTP/1.1 ";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
-
+    private static final String LOCATION = "Location";
 
     private HttpStatus httpStatus;
     private HttpHeaders httpHeaders;
-    private String body = "";
+    private String body;
 
     public HttpResponse() {
-        this.httpHeaders = HttpHeaders.of();
+        this(null, HttpHeaders.of(), null);
     }
 
     public HttpResponse(HttpStatus httpStatus, HttpHeaders httpHeaders, String body) {
@@ -26,17 +27,10 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public void setHttpStatus(HttpStatus httpStatus) {
-        this.httpStatus = httpStatus;
-    }
-
     public void addHeader(String key, String value) {
         httpHeaders.addHeader(key, value);
     }
 
-    public void setBody(String body) {
-        this.body = body;
-    }
 
     public HttpStatus getHttpStatus() {
         return httpStatus;
@@ -47,7 +41,7 @@ public class HttpResponse {
     }
 
     public byte[] getResponseByByte() {
-        return String.join(NEWLINE,
+        return String.join(CRLF,
                 getHttpLine(),
                 httpHeaders.convertToLines(),
                 "",
@@ -56,7 +50,8 @@ public class HttpResponse {
     }
 
     private String getHttpLine() {
-        return HTTP_VERSION + httpStatus.value() + " " + httpStatus.responsePhrase() + " ";
+        return String
+                .format("%s %s %s ", HTTP_VERSION, httpStatus.value(), httpStatus.responsePhrase());
     }
 
     public HttpResponse forward(String uri) throws IOException {
@@ -66,10 +61,10 @@ public class HttpResponse {
     public HttpResponse forward(String uri, HttpStatus httpStatus) throws IOException {
         ResourceFile resourceFile = new ResourceFile(uri);
         String body = resourceFile.getContent();
-        setHttpStatus(httpStatus);
-        addHeader("Content-Type", resourceFile.getContentType());
-        addHeader("Content-Length", String.valueOf(body.getBytes().length));
-        setBody(body);
+        this.httpStatus = httpStatus;
+        addHeader(CONTENT_TYPE, resourceFile.getContentType());
+        addHeader(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+        this.body = body;
         return this;
     }
 
@@ -78,8 +73,12 @@ public class HttpResponse {
     }
 
     public HttpResponse sendRedirect(String uri, HttpStatus httpStatus) {
-        setHttpStatus(httpStatus);
-        httpHeaders.addHeader("Location", uri);
+        this.httpStatus = httpStatus;
+        httpHeaders.addHeader(LOCATION, uri);
         return this;
+    }
+
+    public void setCookie(HttpCookie cookie) {
+        this.httpHeaders.setCookie(cookie);
     }
 }

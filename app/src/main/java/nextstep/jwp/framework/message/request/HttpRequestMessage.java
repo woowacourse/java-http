@@ -27,12 +27,12 @@ public class HttpRequestMessage implements HttpMessage {
         this.requestBody = requestBody;
     }
 
-    public HttpMethod httpMethod() {
-        return ((RequestLine) requestLine).getHttpMethod();
+    public String requestUri() {
+        return ((RequestLine) requestLine).requestUri();
     }
 
-    public String requestUri() {
-        return ((RequestLine) requestLine).getRequestUri();
+    public HttpMethod httpMethod() {
+        return ((RequestLine) requestLine).getHttpMethod();
     }
 
     @Override

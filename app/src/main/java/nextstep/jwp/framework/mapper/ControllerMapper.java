@@ -22,16 +22,16 @@ public class ControllerMapper implements Mapper<Controller, String> {
     }
 
     @Override
-    public Controller resolve(String uri) {
-        HttpUri httpUri = new HttpUri(uri);
+    public Controller resolve(String requestUri) {
+        HttpUri httpUri = new HttpUri(requestUri);
         if (httpUri.isStaticFilePath()) {
             return staticResourceController;
         }
 
         Map<String, Controller> requestMappings = RequestMappings.getInstance().getMappings();
-        if (requestMappings.containsKey(uri)) {
-            return requestMappings.get(uri);
+        if (requestMappings.containsKey(requestUri)) {
+            return requestMappings.get(requestUri);
         }
-        throw new UriMappingNotFoundException(String.format("해당 uri의 매핑을 찾을 수 없습니다.(%s)", uri));
+        throw new UriMappingNotFoundException(String.format("해당 uri의 매핑을 찾을 수 없습니다.(%s)", requestUri));
     }
 }

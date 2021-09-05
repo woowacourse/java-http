@@ -1,6 +1,7 @@
 package nextstep.jwp.framework.message.request;
 
 import nextstep.jwp.framework.common.HttpMethod;
+import nextstep.jwp.framework.common.HttpUri;
 import nextstep.jwp.framework.common.HttpVersion;
 import nextstep.jwp.framework.exception.HttpMessageConvertFailureException;
 import nextstep.jwp.framework.message.StartLine;
@@ -14,16 +15,16 @@ public class RequestLine implements StartLine {
     private static final int REQUEST_LINE_ITEM_COUNT = 3;
 
     private final HttpMethod httpMethod;
-    private final String requestUri;
+    private final HttpUri httpUri;
     private final HttpVersion httpVersion;
 
-    private RequestLine(String httpMethod, String requestUri, String httpVersion) {
-        this(HttpMethod.valueOf(httpMethod), requestUri, HttpVersion.from(httpVersion));
+    private RequestLine(String httpMethod, String httpUri, String httpVersion) {
+        this(HttpMethod.valueOf(httpMethod), new HttpUri(httpUri), HttpVersion.from(httpVersion));
     }
 
-    public RequestLine(HttpMethod httpMethod, String requestUri, HttpVersion httpVersion) {
+    public RequestLine(HttpMethod httpMethod, HttpUri httpUri, HttpVersion httpVersion) {
         this.httpMethod = httpMethod;
-        this.requestUri = requestUri;
+        this.httpUri = httpUri;
         this.httpVersion = httpVersion;
     }
 
@@ -39,18 +40,23 @@ public class RequestLine implements StartLine {
 
     public String asString() {
         String httpMethodValue = this.httpMethod.name();
+        String requestUri = this.httpUri.getValue();
         String httpVersionValue = this.getHttpVersion().getValue();
         return StringUtils.concatNewLine(
                 StringUtils.joinWithBlank(httpMethodValue, requestUri, httpVersionValue)
         );
     }
 
+    public String requestUri() {
+        return this.httpUri.getValue();
+    }
+
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }
 
-    public String getRequestUri() {
-        return requestUri;
+    public HttpUri getHttpUri() {
+        return httpUri;
     }
 
     public HttpVersion getHttpVersion() {
@@ -67,11 +73,11 @@ public class RequestLine implements StartLine {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RequestLine that = (RequestLine) o;
-        return Objects.equals(httpMethod, that.httpMethod) && Objects.equals(requestUri, that.requestUri) && Objects.equals(httpVersion, that.httpVersion);
+        return getHttpMethod() == that.getHttpMethod() && Objects.equals(getHttpUri(), that.getHttpUri()) && getHttpVersion() == that.getHttpVersion();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(httpMethod, requestUri, httpVersion);
+        return Objects.hash(getHttpMethod(), getHttpUri(), getHttpVersion());
     }
 }

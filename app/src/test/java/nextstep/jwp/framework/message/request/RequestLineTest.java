@@ -1,6 +1,7 @@
 package nextstep.jwp.framework.message.request;
 
 import nextstep.jwp.framework.common.HttpMethod;
+import nextstep.jwp.framework.common.HttpUri;
 import nextstep.jwp.framework.common.HttpVersion;
 import nextstep.jwp.framework.exception.HttpMessageConvertFailureException;
 import org.junit.jupiter.api.DisplayName;
@@ -16,15 +17,15 @@ class RequestLineTest {
     void create() {
         // given
         HttpMethod httpMethod = HttpMethod.POST;
-        String requestUri = "/login";
+        HttpUri httpUri = new HttpUri("/login");
         HttpVersion httpVersion = HttpVersion.HTTP_1_1;
 
         // when
-        RequestLine requestLine = new RequestLine(httpMethod, requestUri, httpVersion);
+        RequestLine requestLine = new RequestLine(httpMethod, httpUri, httpVersion);
 
         // then
         assertThat(requestLine.getHttpMethod()).isEqualTo(httpMethod);
-        assertThat(requestLine.getRequestUri()).isEqualTo(requestUri);
+        assertThat(requestLine.getHttpUri()).isEqualTo(httpUri);
         assertThat(requestLine.getHttpVersion()).isEqualTo(httpVersion);
     }
 
@@ -36,7 +37,7 @@ class RequestLineTest {
 
         // then
         assertThat(requestLine.getHttpMethod()).isEqualTo(HttpMethod.POST);
-        assertThat(requestLine.getRequestUri()).isEqualTo("/login");
+        assertThat(requestLine.getHttpUri()).isEqualTo(new HttpUri("/login"));
         assertThat(requestLine.getHttpVersion()).isEqualTo(HttpVersion.HTTP_1_1);
     }
 
@@ -53,7 +54,7 @@ class RequestLineTest {
     void asSting() {
         // given
         String expect = "POST /login HTTP/1.1\r\n";
-        RequestLine requestLine = new RequestLine(HttpMethod.POST, "/login", HttpVersion.HTTP_1_1);
+        RequestLine requestLine = new RequestLine(HttpMethod.POST, new HttpUri("/login"), HttpVersion.HTTP_1_1);
 
         // when, then
         assertThat(requestLine.asString()).isEqualTo(expect);
@@ -64,7 +65,7 @@ class RequestLineTest {
     void toBytes() {
         // given
         byte[] expect = "POST /login HTTP/1.1\r\n".getBytes();
-        RequestLine requestLine = new RequestLine(HttpMethod.POST, "/login", HttpVersion.HTTP_1_1);
+        RequestLine requestLine = new RequestLine(HttpMethod.POST, new HttpUri("/login"), HttpVersion.HTTP_1_1);
 
         // when, then
         assertThat(requestLine.toBytes()).isEqualTo(expect);

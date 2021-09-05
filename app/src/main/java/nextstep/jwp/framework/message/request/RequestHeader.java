@@ -4,8 +4,11 @@ import nextstep.jwp.framework.message.HeaderFields;
 import nextstep.jwp.framework.message.MessageHeader;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class RequestHeader implements MessageHeader {
+
+    private static final String COOKIE = "Cookie";
 
     private final HeaderFields headerFields;
 
@@ -20,6 +23,12 @@ public class RequestHeader implements MessageHeader {
     public int takeContentLength() {
         String contentLength = headerFields.take("Content-Length").orElse("0");
         return Integer.parseInt(contentLength);
+    }
+
+    public HttpCookies extractHttpCookies() {
+        return headerFields.take(COOKIE)
+                .map(HttpCookies::from)
+                .orElseGet(HttpCookies::empty);
     }
 
     public String asString() {

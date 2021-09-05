@@ -50,6 +50,47 @@ class RequestHeaderTest {
         assertThat(contentLength).isZero();
     }
 
+    @DisplayName("헤더에서 쿠키를 추출한다.")
+    @Test
+    void extractHttpCookies() {
+        // given
+        String cookieString =
+                "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
+        HttpCookies expect = HttpCookies.from(cookieString);
+
+        String headerMessage = String.join("\r\n",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: 10",
+                "Cookie: " + cookieString,
+                "");
+        RequestHeader requestHeader = new RequestHeader(headerMessage);
+
+        // when
+        HttpCookies httpCookies = requestHeader.extractHttpCookies();
+
+        // then
+        assertThat(httpCookies).isEqualTo(expect);
+    }
+
+    @DisplayName("Cookie 헤더가 없는 경우 비어 있는 쿠키가 추출된다.")
+    @Test
+    void extractHttpCookiesWithNoHeader() {
+        // given
+        String headerMessage = String.join("\r\n",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: 10",
+                "");
+        RequestHeader requestHeader = new RequestHeader(headerMessage);
+
+        // when
+        HttpCookies httpCookies = requestHeader.extractHttpCookies();
+
+        // then
+        assertThat(httpCookies).isSameAs(HttpCookies.empty());
+    }
+
     @DisplayName("RequestHeader 를 바이트 배열로 변환한다.")
     @Test
     void toBytes() {

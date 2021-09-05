@@ -35,7 +35,7 @@ class LoginControllerTest {
         assertThat(content).contains(
             "HTTP/1.1 200 OK",
             "Content-Type: text/html",
-            "Content-Length: 3717"
+            "Content-Length: 3797"
         );
     }
 
@@ -58,7 +58,7 @@ class LoginControllerTest {
         assertThat(content).contains(
             "HTTP/1.1 302 Found ",
             "Content-Type: text/html",
-            "Content-Length: 5518"
+            "Content-Length: 5564"
         );
     }
 }

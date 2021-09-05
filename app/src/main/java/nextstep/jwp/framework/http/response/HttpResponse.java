@@ -31,7 +31,7 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() throws IOException {
-        headers.setContentLength(resource().length());
+        headers.setContentLength(resource().getBytes(StandardCharsets.UTF_8).length);
         return String.join(LINE_DELIMITER,
             statusLine(),
             headers.convertHeaderToResponse(),

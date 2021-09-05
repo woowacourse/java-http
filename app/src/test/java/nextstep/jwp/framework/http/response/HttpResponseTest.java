@@ -30,7 +30,7 @@ class HttpResponseTest {
         assertThat(content).contains(
             "HTTP/1.1 200 OK ",
             "Content-Type: text/html",
-            "Content-Length: 5518"
+            "Content-Length: 5564"
         );
     }
 }

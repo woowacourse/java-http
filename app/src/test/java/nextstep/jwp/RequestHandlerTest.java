@@ -54,7 +54,7 @@ class RequestHandlerTest {
         assertThat(content).contains(
             "HTTP/1.1 302 Found ",
             "Content-Type: text/html",
-            "Content-Length: 5518",
+            "Content-Length: 5564",
             htmlValue
         );
     }

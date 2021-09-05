@@ -60,7 +60,7 @@ public class LoginController extends AbstractController {
     private HttpSession generateSession(Optional<User> optionalUser) {
         String uuid = UUID.randomUUID().toString();
         final HttpSession httpSession = new HttpSession(uuid);
-        httpSession.setAttribute("user", optionalUser.get());
+        optionalUser.ifPresent(user -> httpSession.setAttribute("user", user));
         HttpSessions.add(uuid, httpSession);
         return httpSession;
     }

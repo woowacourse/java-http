@@ -8,10 +8,10 @@ import java.io.IOException;
 public class AbstractController implements Controller {
     @Override
     public void service(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
-        if ("GET".equals(httpRequest.getMethod())) {
+        if (httpRequest.isGet()) {
             doGet(httpRequest, httpResponse);
         }
-        if ("POST".equals(httpRequest.getMethod())) {
+        if (httpRequest.isPost()) {
             doPost(httpRequest, httpResponse);
         }
     }

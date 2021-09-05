@@ -9,7 +9,7 @@ import java.io.IOException;
 public class RequestLine {
     private static final Logger logger = LoggerFactory.getLogger(RequestLine.class);
 
-    private String method;
+    private Method method;
     private String resource;
 
     public RequestLine(BufferedReader bufferedReader) throws IOException {
@@ -18,13 +18,21 @@ public class RequestLine {
             return;
         }
         String[] requestLine = line.split(" ");
-        method = requestLine[0];
+        method = Method.toMethod(requestLine[0]);
         resource = requestLine[1];
         logger.info("requestline parsing finished {}, {}.", method, resource);
     }
 
-    public String getMethod() {
+    public Method getMethod() {
         return method;
+    }
+
+    public boolean isGet(){
+        return Method.GET == method;
+    }
+
+    public boolean isPost(){
+        return Method.POST == method;
     }
 
     public String getResource() {

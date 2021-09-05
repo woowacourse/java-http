@@ -51,8 +51,12 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    public String getMethod() {
-        return requestLine.getMethod();
+    public boolean isGet(){
+        return requestLine.isGet();
+    }
+
+    public boolean isPost(){
+        return requestLine.isPost();
     }
 
     public String getResource() {

@@ -17,9 +17,10 @@ import static nextstep.jwp.http.HttpCookie.JSESSIONID;
 import static nextstep.jwp.http.HttpUtil.parseQuery;
 
 public class HttpRequest {
+    private final RequestLine requestLine;
     private final Map<String, String> header;
     private final Map<String, String> query;
-    private final RequestLine requestLine;
+
 
     private HttpRequest(RequestLine requestLine, Map<String, String> header, Map<String, String> query) {
         this.header = header;
@@ -82,5 +83,9 @@ public class HttpRequest {
         }
 
         return HttpSessions.getSession(getCookies().getCookie(JSESSIONID));
+    }
+
+    public String getHttpVersion() {
+        return requestLine.getHttpVersion();
     }
 }

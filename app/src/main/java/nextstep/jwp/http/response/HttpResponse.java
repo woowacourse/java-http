@@ -1,9 +1,7 @@
 package nextstep.jwp.http.response;
 
 import nextstep.jwp.http.ContentType;
-import nextstep.jwp.http.HttpVersion;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import nextstep.jwp.http.exception.HttpFormatException;
 
 import java.io.DataOutputStream;
 import java.io.File;
@@ -18,15 +16,15 @@ import java.util.Map;
 import static com.google.common.net.HttpHeaders.*;
 
 public class  HttpResponse {
-    private static final Logger log = LoggerFactory.getLogger(HttpResponse.class);
-
-    private DataOutputStream dataOutputStream;
-    private Map<String, String> headers = new LinkedHashMap<>();
-    private HttpResponseStatus httpResponseStatus;
+    private final DataOutputStream dataOutputStream;
+    private final Map<String, String> headers;
+    private final ResponseLine responseLine;
     private String resource;
 
-    public HttpResponse(OutputStream outputStream) {
-        dataOutputStream = new DataOutputStream(outputStream);
+    public HttpResponse(OutputStream outputStream, String httpVersion) {
+        this.dataOutputStream = new DataOutputStream(outputStream);
+        this.responseLine = new ResponseLine(httpVersion);
+        this.headers = new LinkedHashMap<>();
     }
 
     public void addHeader(String key, String value) {
@@ -34,11 +32,10 @@ public class  HttpResponse {
     }
 
     public void status(HttpResponseStatus httpResponseStatus) {
-        this.httpResponseStatus = httpResponseStatus;
+        this.responseLine.status(httpResponseStatus);
     }
 
     public void resource(String resource) {
-        System.out.println("resource : " + resource);
         this.resource = resource;
     }
 
@@ -47,12 +44,12 @@ public class  HttpResponse {
     }
 
     public void write() throws IOException {
-        if (httpResponseStatus == null) {
-            throw new RuntimeException();
+        if (responseLine.isStatusEmpty()) {
+            throw new HttpFormatException();
         }
 
-        dataOutputStream.writeBytes(HttpVersion.HTTP_VERSION_1_1 + " " + httpResponseStatus.getLine() + "\r\n");
-        if (HttpResponseStatus.OK.equals(httpResponseStatus)) {
+        dataOutputStream.writeBytes(responseLine.asLine());
+        if (responseLine.isOk()) {
             ok();
             return;
         }
@@ -60,26 +57,25 @@ public class  HttpResponse {
         attachHeaderToResponse();
     }
 
-    private void ok() {
+    private void ok() throws IOException {
         URL url = HttpResponse.class.getClassLoader().getResource("static" + resource);
 
-        if (resource == null) {
-            throw new RuntimeException();
+        if (url == null) {
+            dataOutputStream.flush();
+            status(HttpResponseStatus.NOT_FOUND);
+            return;
         }
 
-        try {
-            Path path = new File(url.getPath()).toPath();
-            byte[] body = Files.readAllBytes(path);
-            String extension = resource.substring(resource.lastIndexOf("."));
-            headers.put(CONTENT_TYPE, ContentType.findContentType(extension).getType());
-            headers.put(CONTENT_LENGTH, body.length + "");
-            ok(body);
-        } catch (IOException e) {
-            log.error("Exception ok", e);
-        }
+        Path path = new File(url.getPath()).toPath();
+        byte[] body = Files.readAllBytes(path);
+        String extension = resource.substring(resource.lastIndexOf("."));
+        headers.put(CONTENT_TYPE, ContentType.findContentType(extension).getType());
+        headers.put(CONTENT_LENGTH, body.length + "");
+
+        ok(body);
     }
 
-    private void ok(byte[] body) {
+    private void ok(byte[] body) throws IOException {
         attachHeaderToResponse();
         attachBodyToResponse(body);
     }
@@ -88,23 +84,15 @@ public class  HttpResponse {
         headers.put(LOCATION, location);
     }
 
-    private void attachHeaderToResponse() {
-        try {
-            for (Map.Entry<String, String> entry : headers.entrySet()) {
-                dataOutputStream.writeBytes(entry.getKey() + ": " + entry.getValue() + "\r\n");
-            }
-            dataOutputStream.writeBytes("\r\n");
-        } catch (IOException e) {
-            log.error("Exception attachHeaderToResponse", e);
+    private void attachHeaderToResponse() throws IOException {
+        for (Map.Entry<String, String> entry : headers.entrySet()) {
+            dataOutputStream.writeBytes(entry.getKey() + ": " + entry.getValue() + "\r\n");
         }
+        dataOutputStream.writeBytes("\r\n");
 
     }
 
-    private void attachBodyToResponse(byte[] body) {
-        try {
-            dataOutputStream.write(body, 0, body.length);
-        } catch (IOException e) {
-            log.error("Exception attachBodyToResponse", e);
-        }
+    private void attachBodyToResponse(byte[] body) throws IOException {
+        dataOutputStream.write(body, 0, body.length);
     }
 }

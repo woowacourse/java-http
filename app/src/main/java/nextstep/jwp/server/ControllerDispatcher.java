@@ -6,7 +6,6 @@ import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpResponseStatus;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 public class ControllerDispatcher {
 

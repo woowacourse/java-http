@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 public class FileConverter {
+    private FileConverter() {}
     public static String getResource(String uri) {
         if (!uri.contains(".")) {
             uri += ".html";

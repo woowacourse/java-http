@@ -10,13 +10,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class FileConverterTest {
 
-    FileConverter fileConverter;
-
-    @BeforeEach
-    void setUp() {
-        fileConverter = new FileConverter();
-    }
-
     @Test
     void getResource() {
         String uri = "/index.html";

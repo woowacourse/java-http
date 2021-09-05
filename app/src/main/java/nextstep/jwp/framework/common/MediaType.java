@@ -2,9 +2,9 @@ package nextstep.jwp.framework.common;
 
 import nextstep.jwp.framework.file.FileExtension;
 
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.function.Predicate;
 
 public enum MediaType {
     TEXT_HTML_CHARSET_UTF8("text/html;charset=utf-8", FileExtension.HTML),
@@ -12,6 +12,16 @@ public enum MediaType {
     TEXT_JS_CHARSET_UTF8("text/javascript;charset=utf-8", FileExtension.JS),
     IMAGE_ICO("image/x-icon", FileExtension.ICO),
     IMAGE_SVG("image/svg+xml", FileExtension.SVG);
+
+    private static final Map<String, MediaType> valueMappings = new HashMap<>();
+    private static final Map<FileExtension, MediaType> fileExtensionMappings = new HashMap<>();
+
+    static {
+        for (MediaType mediaType : values()) {
+            valueMappings.put(mediaType.value, mediaType);
+            fileExtensionMappings.put(mediaType.fileExtension, mediaType);
+        }
+    }
 
     private final String value;
     private final FileExtension fileExtension;
@@ -22,24 +32,21 @@ public enum MediaType {
     }
 
     public static MediaType from(String mediaTypeValue) {
-        return resolve(
-                mediaType -> mediaType.value.equals(mediaTypeValue),
-                String.format("존재하지 않는 값의 미디어 타입입니다.(%s)", mediaTypeValue)
+        return valueMappings.computeIfAbsent(
+                mediaTypeValue,
+                key -> {
+                    throw new NoSuchElementException(String.format("존재하지 않는 값의 미디어 타입입니다.(%s)", mediaTypeValue));
+                }
         );
     }
 
     public static MediaType from(FileExtension fileExtension) {
-        return resolve(
-                mediaType -> mediaType.fileExtension.equals(fileExtension),
-                String.format("존재하지 않는 확장자의 미디어 타입입니다.(%s)", fileExtension)
+        return fileExtensionMappings.computeIfAbsent(
+                fileExtension,
+                key -> {
+                    throw new NoSuchElementException(String.format("존재하지 않는 확장자의 미디어 타입입니다.(%s)", fileExtension));
+                }
         );
-    }
-
-    private static MediaType resolve(Predicate<MediaType> predicate, String errorMessage) {
-        return Arrays.stream(values())
-                .filter(predicate)
-                .findAny()
-                .orElseThrow(() -> new NoSuchElementException(errorMessage));
     }
 
     public String getValue() {

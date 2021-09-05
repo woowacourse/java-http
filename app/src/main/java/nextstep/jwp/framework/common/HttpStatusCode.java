@@ -1,6 +1,7 @@
 package nextstep.jwp.framework.common;
 
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 public enum HttpStatusCode {
@@ -17,6 +18,14 @@ public enum HttpStatusCode {
     CONFLICT(409, "Conflict"),
     INTERNAL_SERVER_ERROR(500, "Internal Server Error");
 
+    private static final Map<Integer, HttpStatusCode> mappings = new HashMap<>();
+
+    static {
+        for (HttpStatusCode httpStatusCode : values()) {
+            mappings.put(httpStatusCode.code, httpStatusCode);
+        }
+    }
+
     private final int code;
     private final String description;
 
@@ -26,12 +35,12 @@ public enum HttpStatusCode {
     }
 
     public static HttpStatusCode from(int code) {
-        return Arrays.stream(values())
-                .filter(httpStatusCode -> httpStatusCode.code == code)
-                .findAny()
-                .orElseThrow(() -> new NoSuchElementException(
-                        String.format("서버에서 지원하는 HttpStatusCode가 아닙니다.(%s)", code))
-                );
+        return mappings.computeIfAbsent(
+                code,
+                key -> {
+                    throw new NoSuchElementException(String.format("서버에서 지원하는 HttpStatusCode 가 아닙니다.(%s)", key));
+                }
+        );
     }
 
     public String getCodeAsString() {

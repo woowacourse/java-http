@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
 
@@ -26,7 +28,10 @@ public class HttpRequestReader {
         final String requestProtocol = requestLine[2];
 
         final Map<String, String> requestHeaders = new LinkedHashMap<>();
+
         int contentLength = 0;
+        HttpCookie httpCookie = new HttpCookie();
+
         while (!"".equals(line = reader.readLine())) {
             if (line == null) {
                 break;
@@ -34,17 +39,39 @@ public class HttpRequestReader {
             final String[] fields = line.split(": ");
             requestHeaders.put(fields[0], fields[1]);
 
-            if (line.contains("Content-Type")) {
-                contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
-            }
+            contentLength = getContentLength(line, requestHeaders, contentLength);
+            httpCookie = getHttpCookie(line, requestHeaders, httpCookie);
         }
 
-        String requestBody = readRequestBody(reader, contentLength);
+        String requestBody = getRequestBody(reader, contentLength);
 
-        return new HttpRequest(HttpMethod.valueOf(requestMethod), requestUri, requestProtocol, requestHeaders, requestBody);
+        return new HttpRequest(
+                HttpMethod.valueOf(requestMethod),
+                requestUri,
+                requestProtocol,
+                requestHeaders,
+                requestBody,
+                httpCookie
+        );
     }
 
-    private static String readRequestBody(BufferedReader reader, int contentLength) throws IOException {
+    private static HttpCookie getHttpCookie(String line, Map<String, String> requestHeaders,
+            HttpCookie httpCookie) {
+        if (line.contains("Cookie")) {
+                httpCookie = new HttpCookie(requestHeaders.get("Cookie"));
+        }
+        return httpCookie;
+    }
+
+    private static int getContentLength(String line, Map<String, String> requestHeaders,
+            int contentLength) {
+        if (line.contains("Content-Type")) {
+            contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
+        }
+        return contentLength;
+    }
+
+    private static String getRequestBody(BufferedReader reader, int contentLength) throws IOException {
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         return new String(buffer);

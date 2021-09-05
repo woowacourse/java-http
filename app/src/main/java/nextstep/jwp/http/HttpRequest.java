@@ -9,14 +9,16 @@ public class HttpRequest {
     private final String protocol;
     private final Map<String, String> headers;
     private final String body;
+    private final HttpCookie httpCookie;
 
     public HttpRequest(HttpMethod method, String uri, String protocol,
-            Map<String, String> headers, String body) {
+            Map<String, String> headers, String body, HttpCookie httpCookie) {
         this.method = method;
         this.uri = uri;
         this.protocol = protocol;
         this.headers = headers;
         this.body = body;
+        this.httpCookie = httpCookie;
     }
 
     public HttpMethod getMethod() {
@@ -29,5 +31,9 @@ public class HttpRequest {
 
     public String getBody() {
         return body;
+    }
+
+    public HttpCookie getCookie() {
+        return httpCookie;
     }
 }

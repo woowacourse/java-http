@@ -31,7 +31,7 @@ public class ExceptionHandler {
 
     private static void writeHeadersAndBody(HttpResponse response, String content)
             throws IOException {
-        response.writeHeaders(content, ContentType.HTML);
+        response.writeHeaders();
         response.writeBody(content);
     }
 }

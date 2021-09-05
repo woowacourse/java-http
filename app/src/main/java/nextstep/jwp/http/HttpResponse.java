@@ -2,6 +2,8 @@ package nextstep.jwp.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import nextstep.jwp.utils.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,9 +12,15 @@ public class HttpResponse {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
     private final OutputStream outputStream;
+    private final ResponseHeaders responseHeaders;
 
     public HttpResponse(OutputStream outputStream) {
         this.outputStream = outputStream;
+        this.responseHeaders = new ResponseHeaders();
+    }
+
+    public void addHeaders(String key, String value) {
+        responseHeaders.addHeaders(key, value);
     }
 
     public void writeStatusLine(HttpStatus status) throws IOException {
@@ -23,14 +31,13 @@ public class HttpResponse {
         outputStream.write(line.getBytes());
     }
 
-    public void writeHeaders(String content, ContentType contentType) throws IOException {
-        final String type = String.format("Content-Type: %s \r\n", contentType.getContentType());
-        final String length = String.format("Content-Length: %d \r\n", content.getBytes().length);
+    public void writeHeaders() throws IOException {
+        String headers = responseHeaders.getHeaders()
+                .keySet().stream()
+                .map(key -> String.format("%s: %s", key, responseHeaders.getHeaders().get(key)))
+                .collect(Collectors.joining("\r\n"));
 
-        log.debug(type);
-        log.debug(length);
-        outputStream.write(type.getBytes());
-        outputStream.write(length.getBytes());
+        outputStream.write(headers.getBytes());
         outputStream.write("\r\n".getBytes());
     }
 

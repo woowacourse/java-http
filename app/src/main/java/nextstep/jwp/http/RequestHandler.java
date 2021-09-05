@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
+import java.util.UUID;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.ExceptionHandler;
 import nextstep.jwp.utils.ContentType;
@@ -37,6 +38,10 @@ public class RequestHandler implements Runnable {
 
             HttpResponse httpResponse = new HttpResponse(outputStream);
 
+            if (httpRequest.getCookie().getCookies("JSESSIONID") == null) {
+                httpResponse.addHeaders("Set-Cookie", String.format("JSESSIONID=%s", UUID.randomUUID()));
+            }
+
             ContentType contentType = ContentType.findBy(httpRequest.getUri());
             if (!contentType.isNone() && !contentType.isHtml()) {
                 log.debug(httpRequest.getUri());
@@ -64,8 +69,11 @@ public class RequestHandler implements Runnable {
             ContentType contentType
     ) throws IOException {
         final String resource = httpRequest.getUri();
+        httpResponse.addHeaders("Content-Type", contentType.getContentType());
+        httpResponse.addHeaders("Content-Length", String.valueOf(resource.getBytes().length));
+
         httpResponse.writeStatusLine(HttpStatus.OK);
-        httpResponse.writeHeaders(FileReader.file(resource), contentType);
+        httpResponse.writeHeaders();
         httpResponse.writeBody(FileReader.file(resource));
     }
 

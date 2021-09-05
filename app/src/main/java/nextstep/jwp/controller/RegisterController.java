@@ -16,8 +16,11 @@ public class RegisterController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String content = FileReader.file("/register.html");
 
+        response.addHeaders("Content-Type", ContentType.HTML.getContentType());
+        response.addHeaders("Content-Length", String.valueOf(content.getBytes().length));
+
         response.writeStatusLine(HttpStatus.OK);
-        response.writeHeaders(content, ContentType.HTML);
+        response.writeHeaders();
         response.writeBody(content);
     }
 
@@ -33,8 +36,11 @@ public class RegisterController extends AbstractController {
         final String content = FileReader.file(request.getUri());
 
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            response.addHeaders("Content-Type", ContentType.HTML.getContentType());
+            response.addHeaders("Content-Length", String.valueOf(content.getBytes().length));
+
             response.writeStatusLine(HttpStatus.OK);
-            response.writeHeaders(content, ContentType.HTML);
+            response.writeHeaders();
             response.writeBody(content);
             return;
         }

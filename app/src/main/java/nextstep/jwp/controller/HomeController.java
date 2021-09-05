@@ -12,8 +12,11 @@ public class HomeController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String content = FileReader.file("/index.html");
 
+        response.addHeaders("Content-Type", ContentType.HTML.getContentType());
+        response.addHeaders("Content-Length", String.valueOf(content.getBytes().length));
+
         response.writeStatusLine(HttpStatus.OK);
-        response.writeHeaders(content, ContentType.HTML);
+        response.writeHeaders();
         response.writeBody(content);
     }
 }

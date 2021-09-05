@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RegisterControllerTest {
 
-    RegisterController registerController;
+    private RegisterController registerController;
 
     @BeforeEach
     private void setUp() {

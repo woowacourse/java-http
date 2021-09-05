@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class RequestLineTest {
-    RequestLine requestLine;
+    private RequestLine requestLine;
 
     @BeforeEach
     private void setUp() {

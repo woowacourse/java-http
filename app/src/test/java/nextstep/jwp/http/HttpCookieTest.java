@@ -5,8 +5,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-
-
 class HttpCookieTest {
     private HttpCookie httpCookie = HttpCookie.of("yummy_cookie=choco; tasty_cookie=strawberry;");
 

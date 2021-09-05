@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.framework;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Stream;
 
 public class WebServer {
@@ -32,9 +34,11 @@ public class WebServer {
     }
 
     private void handle(ServerSocket serverSocket) throws IOException {
+        final int numberOfThreads = 10;
+        ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection)).start();
+            executorService.execute(new RequestHandler(connection));
         }
     }
 

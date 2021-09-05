@@ -8,11 +8,13 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 class HttpSessionTest {
 
+    public static final String JSESSIONID = "JSESSIONID";
+
     @DisplayName("Attribute 삽입한다.")
     @Test
     void setAttribute() {
         // given
-        HttpSession httpSession = HttpSession.of("JSESSIONID");
+        HttpSession httpSession = HttpSession.of(JSESSIONID);
 
         // when
         assertThatCode(() -> httpSession.setAttribute("joanne", "1234"))
@@ -23,7 +25,7 @@ class HttpSessionTest {
     @Test
     void getAttribute() {
         // given
-        HttpSession httpSession = HttpSession.of("JSESSIONID");
+        HttpSession httpSession = HttpSession.of(JSESSIONID);
 
         // when
         httpSession.setAttribute("joanne", "1234");
@@ -36,7 +38,7 @@ class HttpSessionTest {
     @Test
     void removeAttribute() {
         // given
-        HttpSession httpSession = HttpSession.of("JSESSIONID");
+        HttpSession httpSession = HttpSession.of(JSESSIONID);
 
         // when
         httpSession.setAttribute("joanne", "1234");
@@ -51,7 +53,7 @@ class HttpSessionTest {
     @Test
     void expire() {
         /// given
-        HttpSession httpSession = HttpSession.of("JSESSIONID");
+        HttpSession httpSession = HttpSession.of(JSESSIONID);
 
         // when
         httpSession.setAttribute("joanne", "1234");

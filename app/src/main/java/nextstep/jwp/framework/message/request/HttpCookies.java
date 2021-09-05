@@ -20,9 +20,13 @@ public class HttpCookies {
         this.params = params;
     }
 
+    public static HttpCookies empty() {
+        return EMPTY_COOKIES;
+    }
+
     public static HttpCookies from(Map<String, String> params) {
         if (params.isEmpty()) {
-            return EMPTY_COOKIES;
+            return empty();
         }
         return new HttpCookies(params);
     }
@@ -31,10 +35,6 @@ public class HttpCookies {
         return HttpCookies.from(
                 StringUtils.extractMap(cookieString, COOKIE_PIECE_SEPARATOR, COOKIE_PARAM_SEPARATOR)
         );
-    }
-
-    public static HttpCookies empty() {
-        return EMPTY_COOKIES;
     }
 
     public Optional<String> take(String key) {

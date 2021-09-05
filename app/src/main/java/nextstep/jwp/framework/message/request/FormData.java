@@ -3,34 +3,39 @@ package nextstep.jwp.framework.message.request;
 import nextstep.jwp.framework.message.MessageBody;
 import nextstep.jwp.utils.StringUtils;
 
-import java.util.AbstractMap;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class FormData {
 
     private static final String FORM_DATA_PIECE_SEPARATOR = "&";
     private static final String FORM_DATE_PARAM_SEPARATOR = "=";
 
+    private static final FormData EMPTY_FORM_DATA = new FormData(Collections.emptyMap());
+
     private final Map<String, String> params;
 
-    private FormData() {
-        this(new LinkedHashMap<>());
+    private FormData(Map<String, String> params) {
+        this.params = params;
     }
 
-    public FormData(Map<String, String> params) {
-        this.params = params;
+    public static FormData empty() {
+        return EMPTY_FORM_DATA;
+    }
+
+    public static FormData from(Map<String, String> params) {
+        if (params.isEmpty()) {
+            return empty();
+        }
+        return new FormData(params);
     }
 
     public static FormData from(MessageBody messageBody) {
         if (messageBody.isEmpty()) {
-            return new FormData();
+            return empty();
         }
-        return new FormData(extractFormData(messageBody));
+        return from(extractFormData(messageBody));
     }
 
     private static Map<String, String> extractFormData(MessageBody messageBody) {

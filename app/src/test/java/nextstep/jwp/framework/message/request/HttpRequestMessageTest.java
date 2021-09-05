@@ -13,7 +13,7 @@ class HttpRequestMessageTest {
     void create() {
         // given
         RequestLine requestLine = RequestLine.from(requestLineMessage());
-        RequestHeader requestHeader = new RequestHeader(requestHeaderMessage());
+        RequestHeader requestHeader = RequestHeader.from(requestHeaderMessage());
         MessageBody requestBody = MessageBody.from(requestBodyMessage());
 
         // when
@@ -38,7 +38,7 @@ class HttpRequestMessageTest {
         byte[] expect = requestMessage.getBytes();
 
         RequestLine requestLine = RequestLine.from(requestLineMessage());
-        RequestHeader requestHeader = new RequestHeader(requestHeaderMessage());
+        RequestHeader requestHeader = RequestHeader.from(requestHeaderMessage());
         MessageBody requestBody = MessageBody.from(requestBodyMessage());
         HttpRequestMessage httpRequestMessage = new HttpRequestMessage(requestLine, requestHeader, requestBody);
 
@@ -54,7 +54,7 @@ class HttpRequestMessageTest {
     void equalsAndHashCode() {
         // given
         RequestLine requestLine = RequestLine.from(requestLineMessage());
-        RequestHeader requestHeader = new RequestHeader(requestHeaderMessage());
+        RequestHeader requestHeader = RequestHeader.from(requestHeaderMessage());
         MessageBody requestBody = MessageBody.from(requestBodyMessage());
 
         HttpRequestMessage httpRequestMessage = new HttpRequestMessage(requestLine, requestHeader, requestBody);

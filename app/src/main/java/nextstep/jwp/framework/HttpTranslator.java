@@ -52,7 +52,7 @@ public class HttpTranslator {
         while (!(line = bufferedReader.readLine()).equals("")) {
             stringBuilder.append(line).append(NEW_LINE);
         }
-        return new RequestHeader(
+        return RequestHeader.from(
                 StringUtils.decode(stringBuilder.toString(), charSet)
         );
     }

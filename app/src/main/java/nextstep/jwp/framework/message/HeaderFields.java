@@ -21,12 +21,12 @@ public class HeaderFields {
 
     private final Map<String, String> params;
 
-    private HeaderFields() {
-        this(new LinkedHashMap<>());
-    }
-
     private HeaderFields(Map<String, String> params) {
         this.params = params;
+    }
+
+    private HeaderFields() {
+        this(new LinkedHashMap<>());
     }
 
     public static HeaderFields empty() {

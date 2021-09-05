@@ -4,7 +4,6 @@ import nextstep.jwp.framework.message.HeaderFields;
 import nextstep.jwp.framework.message.MessageHeader;
 
 import java.util.Objects;
-import java.util.Optional;
 
 public class RequestHeader implements MessageHeader {
 
@@ -12,12 +11,20 @@ public class RequestHeader implements MessageHeader {
 
     private final HeaderFields headerFields;
 
-    public RequestHeader(String headerFields) {
+    private RequestHeader(HeaderFields headerFields) {
+        this.headerFields = headerFields;
+    }
+
+    private RequestHeader(String headerFields) {
         this(HeaderFields.from(headerFields));
     }
 
-    public RequestHeader(HeaderFields headerFields) {
-        this.headerFields = headerFields;
+    public static RequestHeader from(HeaderFields headerFields) {
+        return new RequestHeader(headerFields);
+    }
+
+    public static RequestHeader from(String headerFields) {
+        return new RequestHeader(headerFields);
     }
 
     public int takeContentLength() {

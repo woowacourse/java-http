@@ -11,12 +11,12 @@ public class ResponseHeader implements MessageHeader {
 
     private final HeaderFields headerFields;
 
-    public ResponseHeader() {
-        this(HeaderFields.empty());
-    }
-
     public ResponseHeader(HeaderFields headerFields) {
         this.headerFields = headerFields;
+    }
+
+    public ResponseHeader() {
+        this(HeaderFields.empty());
     }
 
     public String asString() {

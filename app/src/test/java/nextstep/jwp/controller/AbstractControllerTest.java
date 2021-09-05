@@ -25,8 +25,9 @@ class AbstractControllerTest {
                 "Cookie: JSESSIONID=" + uuid + "\r\n");
 
         LoginController controller = new LoginController(new UserService());
-        HttpResponse httpResponse = new HttpResponse(mockSocket.getOutputStream());
-        controller.setJSessionId(HttpRequest.of(mockSocket.getInputStream()), httpResponse);
+        HttpRequest httpRequest = HttpRequest.of(mockSocket.getInputStream());
+        HttpResponse httpResponse = new HttpResponse(mockSocket.getOutputStream(), httpRequest.getHttpVersion());
+        controller.setJSessionId(httpRequest, httpResponse);
         httpResponse.status(HttpResponseStatus.OK);
         httpResponse.resource("/index.html");
         httpResponse.write();

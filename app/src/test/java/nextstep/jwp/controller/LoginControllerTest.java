@@ -31,8 +31,9 @@ class LoginControllerTest {
     @Test
     void doGet() throws IOException {
         MockSocket mockSocket = new MockSocket("GET /login HTTP/1.1 \r\n");
-        HttpResponse response = new HttpResponse(mockSocket.getOutputStream());
-        loginController.doGet(HttpRequest.of(mockSocket.getInputStream()), response);
+        HttpRequest request = HttpRequest.of(mockSocket.getInputStream());
+        HttpResponse response = new HttpResponse(mockSocket.getOutputStream(), request.getHttpVersion());
+        loginController.doGet(request, response);
         response.write();
 
         assertThat(mockSocket.output().split("\r\n")[0]).isEqualTo("HTTP/1.1 200 OK");
@@ -48,8 +49,9 @@ class LoginControllerTest {
         MockSocket mockSocket = new MockSocket("GET /login HTTP/1.1 \r\n" +
                 "Cookie: JSESSIONID=" + uuid + "\r\n");
 
-        HttpResponse response = new HttpResponse(mockSocket.getOutputStream());
-        loginController.doGet(HttpRequest.of(mockSocket.getInputStream()), response);
+        HttpRequest request = HttpRequest.of(mockSocket.getInputStream());
+        HttpResponse response = new HttpResponse(mockSocket.getOutputStream(),  request.getHttpVersion());
+        loginController.doGet(request, response);
         response.write();
 
         assertThat302Response(mockSocket, "HTTP/1.1 302 Found", "Location: /index.html");
@@ -63,8 +65,9 @@ class LoginControllerTest {
                 generatePostRequestHeaderWithSession(uuid) +
                 "account=test&password=test");
 
-        HttpResponse response = new HttpResponse(mockSocket.getOutputStream());
-        loginController.doPost(HttpRequest.of(mockSocket.getInputStream()), response);
+        HttpRequest request = HttpRequest.of(mockSocket.getInputStream());
+        HttpResponse response = new HttpResponse(mockSocket.getOutputStream(), request.getHttpVersion());
+        loginController.doPost(request, response);
         response.write();
         assertThat302Response(mockSocket, "HTTP/1.1 302 Found", "Location: /index.html");
     }
@@ -77,8 +80,9 @@ class LoginControllerTest {
                 generatePostRequestHeaderWithSession(uuid) +
                 "account=test&password=tost");
 
-        HttpResponse response = new HttpResponse(mockSocket.getOutputStream());
-        ControllerDispatcher.getInstance().execute(HttpRequest.of(mockSocket.getInputStream()),response);
+        HttpRequest request = HttpRequest.of(mockSocket.getInputStream());
+        HttpResponse response = new HttpResponse(mockSocket.getOutputStream(), request.getHttpVersion());
+        ControllerDispatcher.getInstance().execute(request,response);
         response.write();
         assertThat302Response(mockSocket, "HTTP/1.1 302 Found", "Location: /401.html");
     }

@@ -1,5 +1,6 @@
 package nextstep.jwp.http.response;
 
+import nextstep.jwp.http.exception.UnsupportedExtensionException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -11,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 
 class HttpResponseTest {
@@ -32,7 +34,8 @@ class HttpResponseTest {
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        HttpResponse httpResponse = new HttpResponse(outputStream);
+
+        HttpResponse httpResponse = new HttpResponse(outputStream, "HTTP/1.1");
         httpResponse.status(HttpResponseStatus.OK);
         httpResponse.resource("/index.html");
         httpResponse.write();
@@ -48,7 +51,7 @@ class HttpResponseTest {
         String expected = "HTTP/1.1 404 Not Found\r\n" +
                 "\r\n";
 
-        HttpResponse httpResponse = new HttpResponse(outputStream);
+        HttpResponse httpResponse = new HttpResponse(outputStream, "HTTP/1.1");
         httpResponse.status(HttpResponseStatus.NOT_FOUND);
         httpResponse.write();
 
@@ -64,7 +67,7 @@ class HttpResponseTest {
                 "Location: /index.html\r\n" +
                 "\r\n";
 
-        HttpResponse httpResponse = new HttpResponse(outputStream);
+        HttpResponse httpResponse = new HttpResponse(outputStream, "HTTP/1.1");
         httpResponse.status(HttpResponseStatus.FOUND);
         httpResponse.location("/index.html");
         httpResponse.write();

@@ -32,8 +32,9 @@ class RegisterControllerTest {
     @Test
     void doGet() throws IOException {
         MockSocket mockSocket = new MockSocket("GET /login HTTP/1.1 \r\n");
-        HttpResponse response = new HttpResponse(mockSocket.getOutputStream());
-        registerController.doGet(HttpRequest.of(mockSocket.getInputStream()), response);
+        HttpRequest request = HttpRequest.of(mockSocket.getInputStream());
+        HttpResponse response = new HttpResponse(mockSocket.getOutputStream(), request.getHttpVersion());
+        registerController.doGet(request, response);
         response.write();
 
         assertThat(mockSocket.output().split("\r\n")[0]).isEqualTo("HTTP/1.1 200 OK");
@@ -52,8 +53,9 @@ class RegisterControllerTest {
                 "\r\n" +
                 "account=test&password=test&email=test@test.com");
 
-        HttpResponse httpResponse = new HttpResponse(mockSocket.getOutputStream());
-        registerController.doPost(HttpRequest.of(mockSocket.getInputStream()), httpResponse);
+        HttpRequest request = HttpRequest.of(mockSocket.getInputStream());
+        HttpResponse httpResponse = new HttpResponse(mockSocket.getOutputStream(), request.getHttpVersion());
+        registerController.doPost(request, httpResponse);
         httpResponse.write();
         String[] response = mockSocket.output().split("\r\n");
         assertThat(response[0]).isEqualTo("HTTP/1.1 302 Found");

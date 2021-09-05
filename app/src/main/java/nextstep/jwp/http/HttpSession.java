@@ -1,5 +1,7 @@
 package nextstep.jwp.http;
 
+import nextstep.jwp.model.User;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,4 +26,7 @@ public class HttpSession {
         return values.get(name);
     }
 
+    public boolean hasAttribute(String name) {
+        return this.getAttribute("user") != null;
+    }
 }

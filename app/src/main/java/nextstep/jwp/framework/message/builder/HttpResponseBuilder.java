@@ -64,12 +64,12 @@ public class HttpResponseBuilder {
     }
 
     public HttpResponseBuilder body(byte[] bytes) {
-        this.responseBody = new MessageBody(bytes);
+        this.responseBody = MessageBody.from(bytes);
         return this;
     }
 
     public HttpResponseBuilder body(String body) {
-        this.responseBody = new MessageBody(body);
+        this.responseBody = MessageBody.from(body);
         return this;
     }
 
@@ -89,7 +89,7 @@ public class HttpResponseBuilder {
     }
 
     public HttpResponseBuilder contentLength(String body) {
-        int length = new MessageBody(body).bodyLength();
+        int length = MessageBody.from(body).bodyLength();
         return contentLength(length);
     }
 

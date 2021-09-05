@@ -66,4 +66,17 @@ class HttpUriTest {
         assertThatThrownBy(httpUri::extractQueryParams)
                 .isInstanceOf(IllegalStateException.class);
     }
+
+    @DisplayName("equals 와 hashCode 검증")
+    @Test
+    void equalsAndHashCode() {
+        // given
+        String path = "/";
+        HttpUri httpUri = new HttpUri(path);
+        HttpUri otherHttpUri = new HttpUri(path);
+
+        // then
+        assertThat(httpUri).isEqualTo(otherHttpUri)
+                .hasSameHashCodeAs(otherHttpUri);
+    }
 }

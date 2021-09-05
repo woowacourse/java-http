@@ -2,6 +2,7 @@ package nextstep.jwp.framework.common;
 
 import nextstep.jwp.framework.file.FileExtension;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -14,7 +15,7 @@ public enum MediaType {
     IMAGE_SVG("image/svg+xml", FileExtension.SVG);
 
     private static final Map<String, MediaType> valueMappings = new HashMap<>();
-    private static final Map<FileExtension, MediaType> fileExtensionMappings = new HashMap<>();
+    private static final Map<FileExtension, MediaType> fileExtensionMappings = new EnumMap<>(FileExtension.class);
 
     static {
         for (MediaType mediaType : values()) {

@@ -41,8 +41,9 @@ class LoginControllerTest {
         assertContainsBodyString(httpResponseMessage, "로그인");
     }
 
+    @DisplayName("POST 요청의 동작을 확인한다.")
     @Test
-    void doPostWithValidLoginInfo() throws IOException {
+    void doPost() throws IOException {
         // given
         String requestMessage = String.join("\r\n",
                 "POST /login HTTP/1.1",
@@ -62,6 +63,7 @@ class LoginControllerTest {
         assertHeaderIncludes(httpResponseMessage, "Location", "/index.html");
     }
 
+    @DisplayName("비밀번호가 틀린 경우 POST 요청을 확인한다.")
     @Test
     void doPostWithInValidPassword() throws IOException {
         // given
@@ -75,12 +77,13 @@ class LoginControllerTest {
 
         HttpRequestMessage httpRequestMessage = TestHttpRequestUtils.makeRequest(requestMessage);
 
-        // when
+        // when, then
         assertThatThrownBy(() -> loginController.doPost(httpRequestMessage))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("로그인에 싪패했습니다");
     }
 
+    @DisplayName("아이디가 없는 경우 POST 요청을 확인한다.")
     @Test
     void doPostWithNonexistentId() throws IOException {
         // given
@@ -94,9 +97,28 @@ class LoginControllerTest {
 
         HttpRequestMessage httpRequestMessage = TestHttpRequestUtils.makeRequest(requestMessage);
 
-        // when
+        // when, then
         assertThatThrownBy(() -> loginController.doPost(httpRequestMessage))
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessageContaining("해당 아이디가 없습니다");
+    }
+
+    @DisplayName("필요한 값이 없는 경우 POST 요청을 확인한다.")
+    @Test
+    void doPostWithRequiredNull() throws IOException {
+        // given
+        String requestMessage = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "",
+                "");
+
+        HttpRequestMessage httpRequestMessage = TestHttpRequestUtils.makeRequest(requestMessage);
+
+        // when, then
+        assertThatThrownBy(() -> loginController.doPost(httpRequestMessage))
+                .isInstanceOf(UnauthorizedException.class)
+                .hasMessageContaining("아이디 또는 비밀번호를 입력하지 않았습니다");
     }
 }

@@ -14,7 +14,7 @@ class HttpRequestMessageTest {
         // given
         RequestLine requestLine = RequestLine.from(requestLineMessage());
         RequestHeader requestHeader = new RequestHeader(requestHeaderMessage());
-        MessageBody requestBody = new MessageBody(requestBodyMessage());
+        MessageBody requestBody = MessageBody.from(requestBodyMessage());
 
         // when
         HttpRequestMessage httpRequestMessage = new HttpRequestMessage(requestLine, requestHeader, requestBody);
@@ -39,7 +39,7 @@ class HttpRequestMessageTest {
 
         RequestLine requestLine = RequestLine.from(requestLineMessage());
         RequestHeader requestHeader = new RequestHeader(requestHeaderMessage());
-        MessageBody requestBody = new MessageBody(requestBodyMessage());
+        MessageBody requestBody = MessageBody.from(requestBodyMessage());
         HttpRequestMessage httpRequestMessage = new HttpRequestMessage(requestLine, requestHeader, requestBody);
 
         // when
@@ -55,14 +55,14 @@ class HttpRequestMessageTest {
         // given
         RequestLine requestLine = RequestLine.from(requestLineMessage());
         RequestHeader requestHeader = new RequestHeader(requestHeaderMessage());
-        MessageBody requestBody = new MessageBody(requestBodyMessage());
+        MessageBody requestBody = MessageBody.from(requestBodyMessage());
 
         HttpRequestMessage httpRequestMessage = new HttpRequestMessage(requestLine, requestHeader, requestBody);
         HttpRequestMessage otherHttpRequestMessage = new HttpRequestMessage(requestLine, requestHeader, requestBody);
 
         // when, then
-        assertThat(httpRequestMessage).isEqualTo(otherHttpRequestMessage);
-        assertThat(httpRequestMessage.hashCode()).isEqualTo(otherHttpRequestMessage.hashCode());
+        assertThat(httpRequestMessage).isEqualTo(otherHttpRequestMessage)
+                .hasSameHashCodeAs(otherHttpRequestMessage);
     }
 
     private String requestLineMessage() {

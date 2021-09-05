@@ -83,7 +83,7 @@ class RequestLineTest {
         RequestLine otherRequestLine = new RequestLine(httpMethod, httpUri, httpVersion);
 
         // then
-        assertThat(requestLine).isEqualTo(otherRequestLine);
-        assertThat(requestLine.hashCode()).isEqualTo(otherRequestLine.hashCode());
+        assertThat(requestLine).isEqualTo(otherRequestLine)
+                .hasSameHashCodeAs(otherRequestLine);
     }
 }

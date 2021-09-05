@@ -42,6 +42,7 @@ class RegisterControllerTest {
         assertContainsBodyString(httpResponseMessage, "회원 가입");
     }
 
+    @DisplayName("POST 요청의 동작을 확인한다.")
     @Test
     void doPost() throws IOException {
         // given
@@ -71,5 +72,4 @@ class RegisterControllerTest {
         assertThat(user.getPassword()).isEqualTo("123");
         assertThat(user.getEmail()).isEqualTo("ggyool@naver.com");
     }
-
 }

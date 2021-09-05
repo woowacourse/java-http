@@ -36,8 +36,9 @@ class HeaderFieldsTest {
 
         // then
         assertThat(emptyHeaderFields.asString()).isEmpty();
-        assertThat(emptyHeaderFields).isEqualTo(emptyHeaderFieldsFromMap);
-        assertThat(emptyHeaderFields).isEqualTo(emptyHeaderFieldsFromString);
+        assertThat(emptyHeaderFields)
+                .isEqualTo(emptyHeaderFieldsFromMap)
+                .isEqualTo(emptyHeaderFieldsFromString);
     }
 
     @DisplayName("문자열로 HeaderFields 를 생성한다.")
@@ -88,5 +89,23 @@ class HeaderFieldsTest {
 
         // then
         assertThat(headerMesssage).isEqualTo(expected);
+    }
+
+    @DisplayName("equals 와 hashCode 검증")
+    @Test
+    void equalsAndHashCode() {
+        // given
+        LinkedHashMap<String, String> headerParams = new LinkedHashMap<>();
+        headerParams.put("Date", "Mon, 10 Jul 2000 01:40:10 GMT");
+        headerParams.put("Server", "Apache");
+        headerParams.put("Content-Type", "text/html;charset=utf-8");
+        headerParams.put("Content-Length", "12");
+
+        HeaderFields headerFields = HeaderFields.from(headerParams);
+        HeaderFields otherHeaderFields = HeaderFields.from(headerParams);
+
+        // then
+        assertThat(headerFields).isEqualTo(otherHeaderFields)
+                .hasSameHashCodeAs(otherHeaderFields);
     }
 }

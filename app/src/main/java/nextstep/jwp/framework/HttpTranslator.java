@@ -61,7 +61,7 @@ public class HttpTranslator {
         char[] buffer = new char[bodyLength];
         bufferedReader.read(buffer, 0, bodyLength);
         String bodyString = new String(buffer);
-        return new MessageBody(StringUtils.decode(bodyString, charSet));
+        return MessageBody.from(StringUtils.decode(bodyString, charSet));
     }
 
 

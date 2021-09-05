@@ -6,24 +6,30 @@ import java.util.Arrays;
 
 public class MessageBody {
 
-    private static final MessageBody EMPTY_BODY = new MessageBody();
+    private static final MessageBody EMPTY_BODY = new MessageBody(new byte[0]);
 
     private final byte[] bytes;
 
-    private MessageBody() {
-        this(new byte[0]);
-    }
-
-    public MessageBody(byte[] bytes) {
+    private MessageBody(byte[] bytes) {
         this.bytes = bytes;
-    }
-
-    public MessageBody(String bodyString) {
-        this(bodyString.getBytes());
     }
 
     public static MessageBody empty() {
         return EMPTY_BODY;
+    }
+
+    public static MessageBody from(byte[] bytes) {
+        if (bytes.length == 0) {
+            return EMPTY_BODY;
+        }
+        return new MessageBody(bytes);
+    }
+
+    public static MessageBody from(String bodyString) {
+        if (bodyString.isEmpty()) {
+            return EMPTY_BODY;
+        }
+        return new MessageBody(bodyString.getBytes());
     }
 
     public boolean isEmpty() {

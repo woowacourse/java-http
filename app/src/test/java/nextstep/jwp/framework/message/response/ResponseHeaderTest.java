@@ -49,8 +49,8 @@ class ResponseHeaderTest {
         ResponseHeader otherResponseHeader = new ResponseHeader(headerFields);
 
         // then
-        assertThat(responseHeader).isEqualTo(otherResponseHeader);
-        assertThat(responseHeader.hashCode()).isEqualTo(otherResponseHeader.hashCode());
+        assertThat(responseHeader).isEqualTo(otherResponseHeader)
+                .hasSameHashCodeAs(otherResponseHeader);
     }
 
     private HeaderFields headerFields() {

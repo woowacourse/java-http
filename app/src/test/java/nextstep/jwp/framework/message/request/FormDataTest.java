@@ -37,13 +37,28 @@ class FormDataTest {
         params.put("email", "ggyool@never.com");
 
         String formDataMessage = "account=ggyool&password=password&email=ggyool@never.com";
-        MessageBody messageBody = new MessageBody(formDataMessage);
+        MessageBody messageBody = MessageBody.from(formDataMessage);
 
         // when
         FormData formData = FormData.from(messageBody);
 
         // then
         assertThat(formData.toMap()).containsExactlyEntriesOf(params);
+    }
+
+    @DisplayName("비어있는 FormData 를 생성한다.")
+    @Test
+    void createEmptyFormData() {
+        // given
+        Map<String, String> params = new LinkedHashMap<>();
+
+        // when
+        FormData emptyFormData = new FormData(params);
+        FormData emptyFormDataFromBody = FormData.from(MessageBody.empty());
+
+        // then
+        assertThat(emptyFormData.toMap()).isEmpty();
+        assertThat(emptyFormData).isEqualTo(emptyFormDataFromBody);
     }
 
     @DisplayName("equals 와 hashCode 검증")
@@ -59,7 +74,7 @@ class FormDataTest {
         FormData otherFormData = new FormData(params);
 
         // then
-        assertThat(formData).isEqualTo(otherFormData);
-        assertThat(formData.hashCode()).isEqualTo(otherFormData.hashCode());
+        assertThat(formData).isEqualTo(otherFormData)
+                .hasSameHashCodeAs(otherFormData);
     }
 }

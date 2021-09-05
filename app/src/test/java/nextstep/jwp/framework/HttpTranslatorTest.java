@@ -49,7 +49,7 @@ class HttpTranslatorTest {
                 new RequestHeader(requestHeaderMessage())
         );
         assertThat(body).isEqualTo(
-                new MessageBody(requestBodyMessage())
+                MessageBody.from(requestBodyMessage())
         );
     }
 
@@ -113,7 +113,7 @@ class HttpTranslatorTest {
         HeaderFields headerFields = HeaderFields.from(fields);
         ResponseHeader responseHeader = new ResponseHeader(headerFields);
 
-        MessageBody responseBody = new MessageBody("hello world!");
+        MessageBody responseBody = MessageBody.from("hello world!");
         return new HttpResponseMessage(statusLine, responseHeader, responseBody);
     }
 }

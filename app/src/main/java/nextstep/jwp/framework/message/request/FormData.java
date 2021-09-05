@@ -17,11 +17,18 @@ public class FormData {
 
     private final Map<String, String> fields;
 
+    private FormData() {
+        this(new LinkedHashMap<>());
+    }
+
     public FormData(Map<String, String> formData) {
         this.fields = formData;
     }
 
     public static FormData from(MessageBody messageBody) {
+        if (messageBody.isEmpty()) {
+            return new FormData();
+        }
         return new FormData(extractFormData(messageBody));
     }
 

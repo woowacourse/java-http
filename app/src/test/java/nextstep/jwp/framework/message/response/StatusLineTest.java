@@ -57,7 +57,7 @@ class StatusLineTest {
         StatusLine statusLine = new StatusLine(httpVersion, httpStatusCode);
         StatusLine otherStatusLine = new StatusLine(httpVersion, httpStatusCode);
 
-        assertThat(statusLine).isEqualTo(otherStatusLine);
-        assertThat(statusLine.hashCode()).isEqualTo(otherStatusLine.hashCode());
+        assertThat(statusLine).isEqualTo(otherStatusLine)
+                .hasSameHashCodeAs(otherStatusLine);
     }
 }

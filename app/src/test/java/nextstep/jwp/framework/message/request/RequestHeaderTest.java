@@ -78,8 +78,8 @@ class RequestHeaderTest {
         RequestHeader otherRequestHeader = new RequestHeader(headerFields);
 
         // then
-        Assertions.assertThat(requestHeader).isEqualTo(otherRequestHeader);
-        Assertions.assertThat(requestHeader.hashCode()).isEqualTo(otherRequestHeader.hashCode());
+        Assertions.assertThat(requestHeader).isEqualTo(otherRequestHeader)
+                .hasSameHashCodeAs(otherRequestHeader);
     }
 
     private HeaderFields headerFieldsWhenExistsBody() {

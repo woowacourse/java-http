@@ -13,16 +13,21 @@ class MessageBodyTest {
         String ggyool = "ggyool";
         byte[] bytes = {103, 103, 121, 111, 111, 108};
 
-        MessageBody messageBody = new MessageBody(ggyool);
+        MessageBody messageBody = MessageBody.from(ggyool);
         assertThat(messageBody.getBytes()).isEqualTo(bytes);
     }
 
     @DisplayName("비어있는 MessageBody 를 생성한다.")
     @Test
     void createEmpty() {
-        MessageBody messageBody = MessageBody.empty();
-        assertThat(messageBody.getBytes()).isEqualTo(new byte[0]);
-        assertThat(messageBody).isSameAs(MessageBody.empty());
+        MessageBody emptyBody = MessageBody.empty();
+        MessageBody emptyBodyFromBytes = MessageBody.from(new byte[0]);
+        MessageBody emptyBodyFromString = MessageBody.from("");
+
+        assertThat(emptyBody.getBytes()).isEqualTo(new byte[0]);
+        assertThat(emptyBody)
+                .isSameAs(emptyBodyFromBytes)
+                .isSameAs(emptyBodyFromString);
     }
 
     @DisplayName("비어있는 MessageBody 이면 참을 반환한다.")
@@ -38,7 +43,7 @@ class MessageBodyTest {
         String expect = "ggyool";
         byte[] bytes = {103, 103, 121, 111, 111, 108};
 
-        MessageBody messageBody = new MessageBody(bytes);
+        MessageBody messageBody = MessageBody.from(bytes);
         assertThat(messageBody.asString()).isEqualTo(expect);
     }
 
@@ -47,11 +52,11 @@ class MessageBodyTest {
     void equalsAndHashCode() {
         // given
         byte[] bytes = {103, 103, 121, 111, 111, 108};
-        final MessageBody messageBody = new MessageBody(bytes);
-        final MessageBody otherMessageBody = new MessageBody(bytes);
+        final MessageBody messageBody = MessageBody.from(bytes);
+        final MessageBody otherMessageBody = MessageBody.from(bytes);
 
         // then
-        assertThat(messageBody).isEqualTo(otherMessageBody);
-        assertThat(messageBody.hashCode()).isEqualTo(otherMessageBody.hashCode());
+        assertThat(messageBody).isEqualTo(otherMessageBody)
+                .hasSameHashCodeAs(otherMessageBody);
     }
 }

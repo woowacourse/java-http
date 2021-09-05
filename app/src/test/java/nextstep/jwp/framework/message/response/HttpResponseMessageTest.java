@@ -62,8 +62,8 @@ class HttpResponseMessageTest {
         HttpResponseMessage otherHttpResponseMessage = new HttpResponseMessage(statusLine, responseHeader, responseBody);
 
         // when, then
-        assertThat(httpResponseMessage).isEqualTo(otherHttpResponseMessage);
-        assertThat(httpResponseMessage.hashCode()).isEqualTo(otherHttpResponseMessage.hashCode());
+        assertThat(httpResponseMessage).isEqualTo(otherHttpResponseMessage)
+                .hasSameHashCodeAs(otherHttpResponseMessage);
     }
 
     private StatusLine statusLine() {
@@ -80,6 +80,6 @@ class HttpResponseMessageTest {
 
 
     private MessageBody responseBody() {
-        return new MessageBody("hello world!");
+        return MessageBody.from("hello world!");
     }
 }

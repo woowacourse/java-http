@@ -36,6 +36,15 @@ class FileExtensionTest {
         assertThat(fileExtension).isSameAs(FileExtension.CSS);
     }
 
+    @DisplayName("점이 없거나 위치가 적절하지 않으면 예외가 발생한다.")
+    @ParameterizedTest
+    @ValueSource(strings = {".html", "index.html.", "html"})
+    void extractExtensionWithInvalidDotPath(String path) {
+        assertThatThrownBy(() -> FileExtension.extractExtension(path))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("확장자를 분리할 수 없습니다");
+    }
+
     @DisplayName("경로의 파일이 지원하는 FileExtension 이면 참, 아니면 거짓을 반환한다.")
     @Test
     void supports() {

@@ -29,6 +29,6 @@ public class LoginService {
 
     public boolean isLogin(Request request) {
         HttpSession session = request.getHttpSession();
-        return !Objects.isNull(HttpSessions.getSession(session.getId()));
+        return Objects.nonNull(HttpSessions.getSession(session.getId()));
     }
 }

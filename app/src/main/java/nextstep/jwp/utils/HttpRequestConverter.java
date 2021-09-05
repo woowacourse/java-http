@@ -53,7 +53,7 @@ public class HttpRequestConverter {
         Map<String, String> header = new HashMap<>();
 
         String line = bufferedReader.readLine();
-        while (!"".equals(line) && !Objects.isNull(line)) {
+        while (!"".equals(line) && Objects.nonNull(line)) {
             int index = line.indexOf(":");
             String key = line.substring(0, index);
             String value = line.substring(index + 2);
@@ -88,7 +88,7 @@ public class HttpRequestConverter {
 
     private static HttpCookie getCookie(String cookie) {
         Map<String, String> cookies = new HashMap<>();
-        if (!Objects.isNull(cookie)) {
+        if (Objects.nonNull(cookie)) {
             for (String date : cookie.split(";")) {
                 String[] keyValue = date.split("=");
                 cookies.put(keyValue[0].trim(), keyValue[1].trim());
@@ -100,7 +100,7 @@ public class HttpRequestConverter {
     private static HttpSession getHttpSession(HttpCookie httpCookie) {
         String sessionId = httpCookie.jSessionId();
         HttpSession session = HttpSessions.getSession(sessionId);
-        if (!Objects.isNull(session)) {
+        if (Objects.nonNull(session)) {
             return session;
         }
         return new HttpSession(sessionId);

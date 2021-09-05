@@ -35,7 +35,6 @@ public class HttpResponse {
         return String.join(LINE_DELIMITER,
             statusLine(),
             headers.convertHeaderToResponse(),
-            "",
             resource()
         ).getBytes(StandardCharsets.UTF_8);
     }

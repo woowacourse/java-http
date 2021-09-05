@@ -6,30 +6,17 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.http.HttpSession;
+import nextstep.jwp.http.HttpSessions;
 import nextstep.jwp.http.RequestHandler;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
 
-    @Test
-    void run() throws IOException {
-        // given
-        final MockSocket socket = new MockSocket();
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
-        // when
-        requestHandler.run();
-
-        // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final String file = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html; charset=utf-8 ",
-                "Content-Length: " + file.getBytes().length + " ",
-                "",
-                file);
-        assertThat(socket.output()).isEqualTo(expected);
+    @BeforeEach
+    void setHttpSession() {
+        HttpSession httpSession = HttpSessions.getSession("123");
     }
 
     @Test
@@ -39,6 +26,7 @@ class RequestHandlerTest {
                 "GET /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=123",
                 "",
                 "");
 
@@ -67,6 +55,7 @@ class RequestHandlerTest {
                 "POST /index.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=123",
                 "",
                 "");
 
@@ -89,12 +78,13 @@ class RequestHandlerTest {
     }
 
     @Test
-    void login() throws IOException {
+    void login_with_Cookie() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=123",
                 "",
                 "");
 
@@ -123,6 +113,7 @@ class RequestHandlerTest {
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=123",
                 "Content-Length: " + requestBody.getBytes().length,
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
@@ -149,6 +140,7 @@ class RequestHandlerTest {
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=123",
                 "Content-Length: " + requestBody.getBytes().length,
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
@@ -180,6 +172,7 @@ class RequestHandlerTest {
                 "GET /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=123",
                 "",
                 "");
 
@@ -208,6 +201,7 @@ class RequestHandlerTest {
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=123",
                 "Content-Length: " + requestBody.getBytes().length,
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
@@ -234,6 +228,7 @@ class RequestHandlerTest {
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=123",
                 "Content-Length: " + requestBody.getBytes().length,
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
@@ -264,6 +259,7 @@ class RequestHandlerTest {
                 "GET /wrong HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=123",
                 "",
                 "");
 

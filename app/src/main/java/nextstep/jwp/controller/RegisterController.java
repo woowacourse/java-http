@@ -2,12 +2,12 @@ package nextstep.jwp.controller;
 
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.utils.ContentType;
-import nextstep.jwp.utils.FileReader;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.model.User;
+import nextstep.jwp.utils.ContentType;
+import nextstep.jwp.utils.FileReader;
 import nextstep.jwp.utils.RequestParams;
 
 public class RegisterController extends AbstractController {

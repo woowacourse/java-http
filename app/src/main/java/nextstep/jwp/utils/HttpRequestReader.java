@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import nextstep.jwp.http.HttpCookie;
@@ -58,7 +57,7 @@ public class HttpRequestReader {
     private static HttpCookie getHttpCookie(String line, Map<String, String> requestHeaders,
             HttpCookie httpCookie) {
         if (line.contains("Cookie")) {
-                httpCookie = new HttpCookie(requestHeaders.get("Cookie"));
+            httpCookie = new HttpCookie(requestHeaders.get("Cookie"));
         }
         return httpCookie;
     }
@@ -71,7 +70,8 @@ public class HttpRequestReader {
         return contentLength;
     }
 
-    private static String getRequestBody(BufferedReader reader, int contentLength) throws IOException {
+    private static String getRequestBody(BufferedReader reader, int contentLength)
+            throws IOException {
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         return new String(buffer);

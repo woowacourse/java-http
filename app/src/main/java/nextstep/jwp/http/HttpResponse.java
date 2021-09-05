@@ -2,9 +2,7 @@ package nextstep.jwp.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.UUID;
 import java.util.stream.Collectors;
-import nextstep.jwp.utils.ContentType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +32,7 @@ public class HttpResponse {
     public void writeHeaders() throws IOException {
         String headers = responseHeaders.getHeaders()
                 .keySet().stream()
-                .map(key -> String.format("%s: %s", key, responseHeaders.getHeaders().get(key)))
+                .map(key -> String.format("%s: %s ", key, responseHeaders.getHeaders().get(key)))
                 .collect(Collectors.joining("\r\n"));
 
         outputStream.write(headers.getBytes());

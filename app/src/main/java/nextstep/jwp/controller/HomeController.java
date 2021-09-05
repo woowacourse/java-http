@@ -1,10 +1,10 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.utils.ContentType;
-import nextstep.jwp.utils.FileReader;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpStatus;
+import nextstep.jwp.utils.ContentType;
+import nextstep.jwp.utils.FileReader;
 
 public class HomeController extends AbstractController {
 

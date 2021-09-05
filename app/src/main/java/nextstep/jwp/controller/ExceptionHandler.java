@@ -1,10 +1,10 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
-import nextstep.jwp.utils.ContentType;
-import nextstep.jwp.utils.FileReader;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpStatus;
+import nextstep.jwp.utils.ContentType;
+import nextstep.jwp.utils.FileReader;
 
 public class ExceptionHandler {
 
@@ -17,14 +17,14 @@ public class ExceptionHandler {
 
     public static void notFound(HttpResponse response) throws Exception {
         String content = FileReader.file("/404.html");
-
+        addHeaders(response, content);
         response.writeStatusLine(HttpStatus.NOT_FOUND);
         writeHeadersAndBody(response, content);
     }
 
     public static void methodNotAllowed(HttpResponse response) throws Exception {
         String content = FileReader.file("/405.html");
-
+        addHeaders(response, content);
         response.writeStatusLine(HttpStatus.METHOD_NOT_ALLOWED);
         writeHeadersAndBody(response, content);
     }

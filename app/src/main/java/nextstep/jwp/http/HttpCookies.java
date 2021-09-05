@@ -20,10 +20,6 @@ public class HttpCookies {
         }
     }
 
-    public Map<String, String> getCookies() {
-        return cookies;
-    }
-
     public boolean hasKey(String key) {
         return cookies.containsKey(key);
     }

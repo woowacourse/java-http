@@ -27,11 +27,11 @@ public class RequestLine {
         return method;
     }
 
-    public boolean isGet(){
+    public boolean isGet() {
         return Method.GET == method;
     }
 
-    public boolean isPost(){
+    public boolean isPost() {
         return Method.POST == method;
     }
 

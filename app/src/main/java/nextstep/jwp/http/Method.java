@@ -8,7 +8,7 @@ public enum Method {
     GET,
     POST;
 
-    public static Method toMethod(String method){
+    public static Method toMethod(String method) {
         return Arrays.stream(values())
                 .filter(it -> it.toString().equals(method))
                 .findAny()

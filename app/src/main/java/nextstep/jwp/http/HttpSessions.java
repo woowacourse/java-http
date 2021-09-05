@@ -18,6 +18,10 @@ public class HttpSessions {
         sessions.put(id, httpSession);
     }
 
+    public static boolean contains(String id) {
+        return sessions.containsKey(id);
+    }
+
     public static HttpSession find(String sessionId) {
         log.debug("session found : {}", sessionId);
         return sessions.get(sessionId);

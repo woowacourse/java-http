@@ -8,7 +8,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class HttpRequest {
     private final RequestLine requestLine;
@@ -53,11 +52,11 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    public boolean isGet(){
+    public boolean isGet() {
         return requestLine.isGet();
     }
 
-    public boolean isPost(){
+    public boolean isPost() {
         return requestLine.isPost();
     }
 

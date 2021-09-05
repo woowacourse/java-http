@@ -3,7 +3,7 @@ package nextstep.joanne.server.http.request;
 import nextstep.joanne.MockSocket;
 import nextstep.joanne.server.http.Headers;
 import nextstep.joanne.server.http.HttpMethod;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -22,14 +22,25 @@ class HttpRequestParserTest {
     private static final HttpRequestParser httpRequestParser
             = new HttpRequestParser();
 
+    private MockSocket connection;
+    private InputStream inputStream;
+    private BufferedReader bufferedReader;
+
+    @AfterEach
+    void tearDown() throws IOException {
+        connection.close();
+        inputStream.close();
+        bufferedReader.close();
+    }
+
     @Test
     @DisplayName("요청을 파싱해서 HttpRequest로 만든다.")
     void parse() throws IOException {
         // given
         String request = makeGetRequest("/index");
-        MockSocket connection = new MockSocket(request);
-        InputStream inputStream = connection.getInputStream();
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        connection = new MockSocket(request);
+        inputStream = connection.getInputStream();
+        bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         // when
         HttpRequest httpRequest = httpRequestParser.parse(bufferedReader);
@@ -59,9 +70,9 @@ class HttpRequestParserTest {
     void parseWithQueryString() throws IOException {
         // given
         String request = makeGetRequest("/index?id=joanne&password=hi");
-        MockSocket connection = new MockSocket(request);
-        InputStream inputStream = connection.getInputStream();
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        connection = new MockSocket(request);
+        inputStream = connection.getInputStream();
+        bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         // when
         HttpRequest httpRequest = httpRequestParser.parse(bufferedReader);
@@ -92,9 +103,9 @@ class HttpRequestParserTest {
     void parseWithBody() throws IOException {
         // given
         String request = makePostRequest("/index", "id=joanne&password=hi");
-        MockSocket connection = new MockSocket(request);
-        InputStream inputStream = connection.getInputStream();
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        connection = new MockSocket(request);
+        inputStream = connection.getInputStream();
+        bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         // when
         HttpRequest httpRequest = httpRequestParser.parse(bufferedReader);

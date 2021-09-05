@@ -31,12 +31,12 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public JwpHttpResponse doGet(JwpHttpRequest request) throws IOException {
-        return JwpHttpResponse.notFound();
+        throw new NotSupportedMethodException();
     }
 
     @Override
     public JwpHttpResponse doPost(JwpHttpRequest request) {
-        return JwpHttpResponse.notFound();
+        throw new NotSupportedMethodException();
     }
 
     protected String findResourceFile(String uri) throws IOException {

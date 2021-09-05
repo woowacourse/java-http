@@ -92,7 +92,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("[GET] /login - SUCCESS")
+    @DisplayName("[POST] /login - SUCCESS")
     @Test
     void loginSuccess() {
         // given
@@ -100,7 +100,7 @@ class RequestHandlerTest {
         String password = "password";
         String queryParams = "?account=" + account + "&password=" + password;
         String request = String.join("\r\n",
-                "GET /login" + queryParams + " HTTP/1.1 ",
+                "POST /login" + queryParams + " HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Type: application/x-www-form-urlencoded",
@@ -159,6 +159,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("[POST] /login - FAIL account의 비밀번호가 틀린경우 ")
     @Test
     void loginFailWhenNotMatchPassword() {
         // given
@@ -166,7 +167,7 @@ class RequestHandlerTest {
         String password = "password1";
         String queryParams = "?account=" + account + "&password=" + password;
         String request = String.join("\r\n",
-                "GET /login" + queryParams + " HTTP/1.1 ",
+                "POST /login" + queryParams + " HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Type: application/x-www-form-urlencoded",
@@ -188,7 +189,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("[GET] /login - NOT REGISTERED ACCOUNT FAIL")
+    @DisplayName("[POST] /login - NOT REGISTERED ACCOUNT FAIL")
     @Test
     void loginFailWhenNotRegisteredAccount() {
         // given
@@ -196,7 +197,7 @@ class RequestHandlerTest {
         String password = "password1";
         String queryParams = "?account=" + account + "&password=" + password;
         String request = String.join("\r\n",
-                "GET /login" + queryParams + " HTTP/1.1 ",
+                "POST /login" + queryParams + " HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Type: application/x-www-form-urlencoded",

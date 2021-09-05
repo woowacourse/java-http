@@ -1,5 +1,6 @@
 package nextstep.jwp;
 
+import nextstep.jwp.exception.NotSupportedMethodException;
 import nextstep.jwp.http.controller.Controller;
 import nextstep.jwp.http.controller.RequestMapping;
 import nextstep.jwp.http.http_request.JwpHttpRequest;
@@ -44,7 +45,7 @@ public class RequestHandler implements Runnable {
             JwpHttpRequest request = new JwpHttpRequest(reader);
             Controller handler = RequestMapping.getController(request.getUri());
             return handler.handle(request);
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException | URISyntaxException | NotSupportedMethodException e) {
             log.error(e.getMessage());
             return JwpHttpResponse.notFound();
         } catch (Exception e) {

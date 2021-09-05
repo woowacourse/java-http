@@ -25,10 +25,6 @@ public class LoginController extends AbstractController {
             return requestPageByUserInfo(session);
         }
 
-        if (request.hasQueryParams()) {
-            return requestLogin(request);
-        }
-
         return requestLoginPage();
     }
 
@@ -36,10 +32,19 @@ public class LoginController extends AbstractController {
         User user = (User) session.getAttribute("user");
         if (user == null || !InMemoryUserRepository.isExistAccount(user.getAccount())) {
             session.removeAttribute("user");
-            return JwpHttpResponse.found(LOGIN_PAGE_PATH);
+            return JwpHttpResponse.found(LOGIN_FAILURE_PATH);
         }
 
         return JwpHttpResponse.found(LOGIN_SUCCESS_PATH);
+    }
+
+    @Override
+    public JwpHttpResponse doPost(JwpHttpRequest request) {
+        if (request.hasQueryParams()) {
+            return requestLogin(request);
+        }
+
+        return loginFail();
     }
 
     private JwpHttpResponse requestLogin(JwpHttpRequest request) {

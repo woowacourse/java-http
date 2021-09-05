@@ -4,13 +4,11 @@ import nextstep.jwp.exception.NotfoundCookieException;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class HttpCookie {
 
     private static final String COOKIE_DELIMITER = "; ";
     private static final String COOKIE_KEY_AND_VALUE_DELIMITER = "=";
-    private static final String PREFIX_COOKIE_RESPONSE = "Set-Cookie:";
 
     private final Map<String, String> values;
 
@@ -41,13 +39,5 @@ public class HttpCookie {
         }
 
         return values.get(cookieKey);
-    }
-
-    @Override
-    public String toString() {
-        String response = values.entrySet().stream()
-                .map(entrySet -> entrySet.getKey() + "=" + entrySet.getValue())
-                .collect(Collectors.joining("; "));
-        return PREFIX_COOKIE_RESPONSE + response;
     }
 }

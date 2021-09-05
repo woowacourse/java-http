@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 
 public class RequestConverter {
 
+    private static final String EMPTY = "";
+
     private static final Logger logger = LoggerFactory.getLogger(WebServer.class);
 
     private RequestConverter() {
@@ -18,7 +20,7 @@ public class RequestConverter {
             throws IOException {
         StringBuilder requestHeaders = new StringBuilder();
         String line = bufferedReader.readLine();
-        while (!"".equals(line)) {
+        while (!EMPTY.equals(line)) {
             if (line == null) {
                 break;
             }

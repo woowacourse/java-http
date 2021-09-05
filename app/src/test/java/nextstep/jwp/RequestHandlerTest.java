@@ -6,9 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Arrays;
-import nextstep.jwp.http.RequestHandler;
-import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.handler.RequestHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -193,6 +191,31 @@ class RequestHandlerTest {
         assertThat(socket.output()).containsIgnoringWhitespaces(expected);
     }
 
+    @Test
+    @DisplayName("POST /login 요청 시 password= 이면 /401.html으로 redirect 된다.")
+    void loginFailWithEmptyPassword() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 30",
+                "Content-Type: application/x-www-form-urlencoded",
+                "Accept: */*",
+                "",
+                "account=gugu&password=");
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        String expected = "HTTP/1.1 302  Found \r\n" +
+                "Location: /401.html \r\n" +
+                "\r\n";
+        assertThat(socket.output()).containsIgnoringWhitespaces(expected);
+    }
 
     @Test
     @DisplayName("POST /login 요청 시 존재하지 않는 account면 401.html로 redirect 된다.")

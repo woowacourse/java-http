@@ -21,10 +21,6 @@ public class HttpResponse {
         this(null, HttpHeaders.of(), null);
     }
 
-    public HttpResponse(HttpStatus httpStatus, String body) {
-        this(httpStatus, HttpHeaders.of(), body);
-    }
-
     public HttpResponse(HttpStatus httpStatus, HttpHeaders httpHeaders, String body) {
         this.httpStatus = httpStatus;
         this.httpHeaders = httpHeaders;

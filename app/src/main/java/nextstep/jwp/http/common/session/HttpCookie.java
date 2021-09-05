@@ -7,6 +7,10 @@ import java.util.stream.Collectors;
 public class HttpCookie {
 
     private static final String SESSION_ID = "JSESSIONID";
+    private static final String AND = "=";
+    private static final String SEMICOLON = ";";
+    private static final int LIMIT_OF_SPLIT = 2;
+    private static final String EMPTY = "";
 
     private Map<String, String> cookie;
 
@@ -16,9 +20,9 @@ public class HttpCookie {
             return;
         }
 
-        String[] cookies = rawCookie.split(";");
+        String[] cookies = rawCookie.split(SEMICOLON);
         for (String splitCookie : cookies) {
-            String[] splitCookieKeyAndValue = splitCookie.split("=", 2);
+            String[] splitCookieKeyAndValue = splitCookie.split(AND, LIMIT_OF_SPLIT);
             cookie.put(splitCookieKeyAndValue[0].trim(), splitCookieKeyAndValue[1].trim());
         }
     }
@@ -32,7 +36,7 @@ public class HttpCookie {
     }
 
     public String getSessionId() {
-        return cookie.getOrDefault(SESSION_ID, "");
+        return cookie.getOrDefault(SESSION_ID, EMPTY);
     }
 
     public void addCookie(String sessionId) {
@@ -42,7 +46,7 @@ public class HttpCookie {
     public String asString() {
         return cookie.entrySet()
                 .stream()
-                .map(entry -> String.format("%s%s%s", entry.getKey(), "=", entry.getValue()))
-                .collect(Collectors.joining(String.format("%s ", ";")));
+                .map(entry -> String.format("%s%s%s", entry.getKey(), AND, entry.getValue()))
+                .collect(Collectors.joining(String.format("%s ", SEMICOLON)));
     }
 }

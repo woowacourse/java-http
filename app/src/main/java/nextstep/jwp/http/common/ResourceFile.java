@@ -9,10 +9,11 @@ import java.util.List;
 
 public class ResourceFile {
 
+    private static final String STATIC = "static";
     private final String path;
 
     public ResourceFile(String path) {
-        this.path = "static" + path;
+        this.path = STATIC + path;
     }
 
     public String getContent() throws IOException {

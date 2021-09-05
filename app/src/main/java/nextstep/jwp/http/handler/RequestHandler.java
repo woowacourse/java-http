@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.handler;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,10 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Map;
 import java.util.Objects;
-import nextstep.jwp.http.common.session.HttpCookie;
-import nextstep.jwp.http.common.session.HttpSessions;
 import nextstep.jwp.http.mapping.RequestMapping;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;

@@ -23,7 +23,7 @@ public class RequestLine {
         String[] splitRequestLine = requestLine.split(" ");
         if (splitRequestLine.length != 3) {
             for (String s : splitRequestLine) {
-                logger.info("스플릿 : {}", s);
+                logger.debug("스플릿 : {}", s);
             }
             throw new IllegalArgumentException("잘못된 RequestLine 입니다.");
         }

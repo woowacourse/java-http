@@ -1,5 +1,7 @@
 package nextstep.jwp.http;
 
+import nextstep.jwp.exception.NotFoundException;
+
 import java.util.Arrays;
 
 public enum Method {
@@ -10,6 +12,6 @@ public enum Method {
         return Arrays.stream(values())
                 .filter(it -> it.toString().equals(method))
                 .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("Does not have proper method"));
+                .orElseThrow(() -> new NotFoundException("매칭되는 메서드가 없습니다."));
     }
 }

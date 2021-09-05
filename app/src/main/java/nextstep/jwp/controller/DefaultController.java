@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import nextstep.jwp.exception.UnAuthorizedOperationException;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpStatus;
@@ -20,6 +21,6 @@ public class DefaultController extends AbstractController {
 
     @Override
     void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
-        throw new IllegalArgumentException();
+        throw new UnAuthorizedOperationException("사용할수 없는 메서드입니다.");
     }
 }

@@ -40,6 +40,19 @@ class ResponseHeaderTest {
         AssertionsForClassTypes.assertThat(bytes).isEqualTo(expect);
     }
 
+    @DisplayName("equals 와 hashCode 검증")
+    @Test
+    void equalsAndHashCode() {
+        // given
+        HeaderFields headerFields = headerFields();
+        ResponseHeader responseHeader = new ResponseHeader(headerFields);
+        ResponseHeader otherResponseHeader = new ResponseHeader(headerFields);
+
+        // then
+        assertThat(responseHeader).isEqualTo(otherResponseHeader);
+        assertThat(responseHeader.hashCode()).isEqualTo(otherResponseHeader.hashCode());
+    }
+
     private HeaderFields headerFields() {
         LinkedHashMap<String, String> headerParams = new LinkedHashMap<>();
         headerParams.put("Content-Type", "text/html;charset=utf-8");

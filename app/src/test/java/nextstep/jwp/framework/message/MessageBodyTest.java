@@ -41,4 +41,17 @@ class MessageBodyTest {
         MessageBody messageBody = new MessageBody(bytes);
         assertThat(messageBody.asString()).isEqualTo(expect);
     }
+
+    @DisplayName("equals 와 hashCode 검증")
+    @Test
+    void equalsAndHashCode() {
+        // given
+        byte[] bytes = {103, 103, 121, 111, 111, 108};
+        final MessageBody messageBody = new MessageBody(bytes);
+        final MessageBody otherMessageBody = new MessageBody(bytes);
+
+        // then
+        assertThat(messageBody).isEqualTo(otherMessageBody);
+        assertThat(messageBody.hashCode()).isEqualTo(otherMessageBody.hashCode());
+    }
 }

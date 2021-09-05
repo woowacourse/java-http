@@ -1,6 +1,7 @@
 package nextstep.jwp.framework.message.request;
 
 import nextstep.jwp.framework.message.HeaderFields;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -66,6 +67,19 @@ class RequestHeaderTest {
 
         // then
         assertThat(bytes).isEqualTo(expect);
+    }
+
+    @DisplayName("equals 와 hashCode 검증")
+    @Test
+    void equalsAndHashCode() {
+        // given
+        HeaderFields headerFields = headerFieldsWhenExistsBody();
+        RequestHeader requestHeader = new RequestHeader(headerFields);
+        RequestHeader otherRequestHeader = new RequestHeader(headerFields);
+
+        // then
+        Assertions.assertThat(requestHeader).isEqualTo(otherRequestHeader);
+        Assertions.assertThat(requestHeader.hashCode()).isEqualTo(otherRequestHeader.hashCode());
     }
 
     private HeaderFields headerFieldsWhenExistsBody() {

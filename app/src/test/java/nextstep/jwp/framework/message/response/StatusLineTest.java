@@ -45,4 +45,19 @@ class StatusLineTest {
         // when, then
         assertThat(statusLine.toBytes()).isEqualTo(expect);
     }
+
+    @DisplayName("equals 와 hashCode 검증")
+    @Test
+    void equalsAndHashCode() {
+        // given
+        HttpVersion httpVersion = HttpVersion.HTTP_1_1;
+        HttpStatusCode httpStatusCode = HttpStatusCode.OK;
+
+        //when
+        StatusLine statusLine = new StatusLine(httpVersion, httpStatusCode);
+        StatusLine otherStatusLine = new StatusLine(httpVersion, httpStatusCode);
+
+        assertThat(statusLine).isEqualTo(otherStatusLine);
+        assertThat(statusLine.hashCode()).isEqualTo(otherStatusLine.hashCode());
+    }
 }

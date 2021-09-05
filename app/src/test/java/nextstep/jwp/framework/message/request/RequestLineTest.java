@@ -70,4 +70,20 @@ class RequestLineTest {
         // when, then
         assertThat(requestLine.toBytes()).isEqualTo(expect);
     }
+
+    @DisplayName("equals 와 hashCode 검증")
+    @Test
+    void equalsAndHashCode() {
+        // given
+        HttpMethod httpMethod = HttpMethod.POST;
+        HttpUri httpUri = new HttpUri("/login");
+        HttpVersion httpVersion = HttpVersion.HTTP_1_1;
+
+        RequestLine requestLine = new RequestLine(httpMethod, httpUri, httpVersion);
+        RequestLine otherRequestLine = new RequestLine(httpMethod, httpUri, httpVersion);
+
+        // then
+        assertThat(requestLine).isEqualTo(otherRequestLine);
+        assertThat(requestLine.hashCode()).isEqualTo(otherRequestLine.hashCode());
+    }
 }

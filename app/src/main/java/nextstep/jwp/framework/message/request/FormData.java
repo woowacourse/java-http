@@ -5,6 +5,7 @@ import nextstep.jwp.framework.message.MessageBody;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -29,7 +30,7 @@ public class FormData {
         String[] pieces = formData.split(FORM_DATA_PIECE_SEPARATOR);
         return Arrays.stream(pieces)
                 .map(FormData::extractParam)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (k, v) -> k, LinkedHashMap::new));
     }
 
     private static Map.Entry<String, String> extractParam(String formDataPiece) {

@@ -50,6 +50,22 @@ class HttpResponseMessageTest {
         assertThat(bytes).isEqualTo(expect);
     }
 
+    @DisplayName("equals 와 hashCode 검증")
+    @Test
+    void equalsAndHashCode() {
+        // given
+        StatusLine statusLine = statusLine();
+        ResponseHeader responseHeader = responseHeader();
+        MessageBody responseBody = responseBody();
+
+        HttpResponseMessage httpResponseMessage = new HttpResponseMessage(statusLine, responseHeader, responseBody);
+        HttpResponseMessage otherHttpResponseMessage = new HttpResponseMessage(statusLine, responseHeader, responseBody);
+
+        // when, then
+        assertThat(httpResponseMessage).isEqualTo(otherHttpResponseMessage);
+        assertThat(httpResponseMessage.hashCode()).isEqualTo(otherHttpResponseMessage.hashCode());
+    }
+
     private StatusLine statusLine() {
         return new StatusLine(HttpVersion.HTTP_1_1, HttpStatusCode.OK);
     }

@@ -49,6 +49,22 @@ class HttpRequestMessageTest {
         assertThat(bytes).isEqualTo(expect);
     }
 
+    @DisplayName("equals 와 hashCode 검증")
+    @Test
+    void equalsAndHashCode() {
+        // given
+        RequestLine requestLine = RequestLine.from(requestLineMessage());
+        RequestHeader requestHeader = new RequestHeader(requestHeaderMessage());
+        MessageBody requestBody = new MessageBody(requestBodyMessage());
+
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage(requestLine, requestHeader, requestBody);
+        HttpRequestMessage otherHttpRequestMessage = new HttpRequestMessage(requestLine, requestHeader, requestBody);
+
+        // when, then
+        assertThat(httpRequestMessage).isEqualTo(otherHttpRequestMessage);
+        assertThat(httpRequestMessage.hashCode()).isEqualTo(otherHttpRequestMessage.hashCode());
+    }
+
     private String requestLineMessage() {
         return "POST /index.html HTTP/1.1";
     }

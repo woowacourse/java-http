@@ -44,7 +44,7 @@ public class HttpHeaders {
     }
 
     public HttpCookie getCookie() {
-        String cookie = headers.get(COOKIE);
+        String cookie = headers.getOrDefault(COOKIE, "");
         return new HttpCookie(cookie);
     }
 
@@ -52,7 +52,7 @@ public class HttpHeaders {
         return headers.containsKey(CONTENT_LENGTH);
     }
 
-    public boolean contains(String value) {
-        return headers.get(ACCEPT).contains(value);
+    public boolean acceptHtmlType(String value) {
+        return headers.containsKey(ACCEPT) && headers.get(ACCEPT).contains(value);
     }
 }

@@ -14,7 +14,6 @@ public class HttpCookie {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
-
     private final Map<String, String> cookie;
 
     public HttpCookie(String rawCookie) {

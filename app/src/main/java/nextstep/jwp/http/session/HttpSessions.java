@@ -12,10 +12,7 @@ public class HttpSessions {
     }
 
     public static HttpSession getSession(String id) {
-        if (isValid(id)) {
-            return SESSIONS.get(id);
-        }
-        return createSession();
+        return SESSIONS.getOrDefault(id, HttpSession.empty());
     }
 
     public static void putSession(HttpSession session) {

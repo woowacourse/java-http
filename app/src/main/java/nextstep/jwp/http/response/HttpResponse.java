@@ -20,12 +20,6 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse of(HttpStatus httpStatus, Body body) {
-        final ResponseHeaders headers = new ResponseHeaders();
-        putContentTypeAndLength(body, headers, ContentType.HTML.getValue());
-        return of(httpStatus, headers, body);
-    }
-
     private static HttpResponse of(HttpStatus httpStatus, ResponseHeaders headers, Body body) {
         StatusLine statusLine = new StatusLine(HttpVersion.HTTP_1_1, httpStatus);
         return new HttpResponse(statusLine, headers, body);

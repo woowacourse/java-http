@@ -38,15 +38,19 @@ public class HttpRequest {
         if (this.cookie.containSession()) {
             return HttpSessions.getSession(this.cookie.getSessionId());
         }
-        return HttpSessions.createSession();
+        return HttpSession.empty();
     }
 
     public boolean isGet() {
         return requestLine.getMethod().equals(HttpMethod.GET);
     }
 
-    public boolean isPost() {
-        return requestLine.getMethod().equals(HttpMethod.POST);
+    public HttpSession getOrMakeSession() {
+        if (session.equals(HttpSession.empty())) {
+            HttpSession newSession = HttpSessions.createSession();
+            session.setId(newSession.getId());
+        }
+        return session;
     }
 
     public RequestLine getRequestLine() {

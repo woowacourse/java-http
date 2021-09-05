@@ -11,8 +11,9 @@ import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
 
+    @DisplayName("GET / 요청시 /index.html 페이지 불러오기")
     @Test
-    void run() {
+    void run() throws IOException {
         // given
         final MockSocket socket = new MockSocket();
         final RequestHandler requestHandler = new RequestHandler(socket);
@@ -21,12 +22,12 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        String expected = String.join("\r\n",
-            "HTTP/1.1 200 OK ",
-            "Content-Length: 12",
-            "Content-Type: text/html;charset=utf-8",
-            "",
-            "Hello World!");
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        String expected = "HTTP/1.1 200 OK \r\n" +
+            "Content-Length: 5564\r\n" +
+            "Content-Type: text/html; charset=utf-8\r\n" +
+            "\r\n" +
+            new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -51,7 +52,7 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         String expected = "HTTP/1.1 200 OK \r\n" +
             "Content-Length: 5564\r\n" +
-            "Content-Type: text/html;charset=utf-8\r\n" +
+            "Content-Type: text/html; charset=utf-8\r\n" +
             "\r\n" +
             new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).isEqualTo(expected);

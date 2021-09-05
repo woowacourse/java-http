@@ -47,7 +47,7 @@ public class LoginController extends AbstractController {
             User presentUser = user.get();
 
             if (presentUser.checkPassword(password)) {
-                final HttpSession httpSession = request.getSession();
+                final HttpSession httpSession = request.getOrMakeSession();
                 httpSession.setAttribute("user", user);
                 return handleSession(request);
             }

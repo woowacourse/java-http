@@ -1,6 +1,9 @@
 package nextstep.joanne;
 
-import nextstep.joanne.handler.RequestHandler;
+import nextstep.joanne.server.handler.HandlerMapping;
+import nextstep.joanne.server.handler.RequestHandler;
+import nextstep.joanne.server.handler.controller.ControllerFactory;
+import nextstep.joanne.server.http.request.HttpRequestParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +27,11 @@ public class WebServer {
     public void run() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             logger.info("Web Server started {} port.", serverSocket.getLocalPort());
-            handle(serverSocket);
+
+            HttpRequestParser httpRequestParser = new HttpRequestParser();
+            HandlerMapping handlerMapping = new HandlerMapping(ControllerFactory.addControllers());
+
+            handle(serverSocket, handlerMapping, httpRequestParser);
         } catch (IOException exception) {
             logger.error("Exception accepting connection", exception);
         } catch (RuntimeException exception) {
@@ -32,10 +39,11 @@ public class WebServer {
         }
     }
 
-    private void handle(ServerSocket serverSocket) throws IOException {
+    private void handle(ServerSocket serverSocket, HandlerMapping handlerMapping, HttpRequestParser httpRequestParser)
+            throws IOException {
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
-            new Thread(new RequestHandler(connection)).start();
+            new Thread(new RequestHandler(connection, handlerMapping, httpRequestParser)).start();
         }
     }
 

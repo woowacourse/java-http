@@ -1,6 +1,10 @@
 package nextstep.joanne;
 
-import nextstep.joanne.handler.RequestHandler;
+import nextstep.joanne.server.handler.HandlerMapping;
+import nextstep.joanne.server.handler.RequestHandler;
+import nextstep.joanne.server.handler.controller.ControllerFactory;
+import nextstep.joanne.server.http.request.HttpRequestParser;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,15 +16,31 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
 
+import static nextstep.Fixture.makeGetRequest;
+import static nextstep.Fixture.makeGetRequestWithCookie;
+import static nextstep.Fixture.makeGetRequestWithCookieWithoutSessionId;
+import static nextstep.Fixture.makePostRequest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestHandlerTest {
 
+    // given
+    MockSocket socket;
+    RequestHandler requestHandler;
+
+    @AfterEach
+    void tearDown() throws IOException {
+        socket.close();
+    }
+
     @Test
     void run() throws IOException {
-        // given
-        final MockSocket socket = new MockSocket();
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        socket = new MockSocket();
+        requestHandler = new RequestHandler(
+                socket,
+                new HandlerMapping(ControllerFactory.addControllers()),
+                new HttpRequestParser()
+        );
 
         // when
         requestHandler.run();
@@ -35,7 +55,7 @@ class RequestHandlerTest {
     private String to200OkWithHtml(String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/html ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
@@ -46,10 +66,8 @@ class RequestHandlerTest {
     @DisplayName("정적 요청에 응답한다.")
     void preserveStaticResource(String uri) throws IOException {
         // given
-        final String httpRequest = makeGetRequest(uri);
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        final String httpRequest = makeGetRequestWithCookie(uri);
+        init(httpRequest);
 
         // when
         requestHandler.run();
@@ -64,14 +82,22 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    private void init(String httpRequest) {
+        socket = new MockSocket(httpRequest);
+        requestHandler = new RequestHandler(
+                socket,
+                new HandlerMapping(ControllerFactory.addControllers()),
+                new HttpRequestParser()
+        );
+    }
+
     @Test
     @DisplayName("css 파일 요청 시 응답한다.")
     void cssRequest() {
         //given
         final String uri = "/css/styles.css";
         final String httpRequest = makeGetRequest(uri);
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        init(httpRequest);
 
         //when
         requestHandler.run();
@@ -82,21 +108,11 @@ class RequestHandlerTest {
         assertThat(actual).startsWith(expected);
     }
 
-    private String makeGetRequest(String uri) {
-        return String.join("\r\n",
-                "GET " + uri + " HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-    }
-
     private String to200OkWithCSS() {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/css;charset=utf-8 ",
+                "Content-Type: text/css ",
                 "Content-Length: 211991 ",
-                "",
                 "");
     }
 
@@ -105,9 +121,7 @@ class RequestHandlerTest {
     void loginWithQueryString() throws IOException {
         // given
         final String httpRequest = makePostRequest("/login.html", "account=gugu&password=password");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
+        init(httpRequest);
 
         // when
         requestHandler.run();
@@ -116,28 +130,17 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         String expected = to302FoundWithHtml(new String(
                 Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath())));
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).startsWith(to302FoundStatusLine());
+        assertThat(socket.output()).contains(toLocationHeader());
     }
 
-    private String to302FoundWithHtml(String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    private String toLocationHeader() {
+        return "Location: /index.html \r\n" +
+                "Content-Type: text/html ";
     }
 
-    private String makePostRequest(String uri, String body) {
-        return String.join("\r\n",
-                "POST " + uri + " HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Content-Length: " + body.getBytes().length,
-                "",
-                body,
-                "",
-                "");
+    private String to302FoundStatusLine() {
+        return "HTTP/1.1 302 Found ";
     }
 
     @Test
@@ -145,10 +148,7 @@ class RequestHandlerTest {
     void loginWithQueryStringWhenWrongAccount() throws IOException {
         // given
         final String httpRequest = makePostRequest("/login", "account=merong&password=merong");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
+        init(httpRequest);
         // when
         requestHandler.run();
 
@@ -161,7 +161,7 @@ class RequestHandlerTest {
     private String to401UnauthorizedWithHtml(String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 401 Unauthorized ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/html ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
@@ -173,10 +173,7 @@ class RequestHandlerTest {
         // given
         final String httpRequest = makePostRequest("/register.html",
                 "account=joanne&password=password&email=hkkang%40woowahan.com");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
+        init(httpRequest);
         // when
         requestHandler.run();
 
@@ -187,15 +184,21 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    private String to302FoundWithHtml(String responseBody) {
+        return String.join("\r\n",
+                to302FoundStatusLine(),
+                "Location: /index.html ",
+                "Content-Type: text/html ",
+                "",
+                "");
+    }
+
     @DisplayName("html을 찾지 못한 경우 404 페이지를 응답한다.")
     @Test
     void notFound() throws IOException {
         // given
         final String httpRequest = makeGetRequest("/joanne.html");
-
-        final MockSocket socket = new MockSocket(httpRequest);
-        final RequestHandler requestHandler = new RequestHandler(socket);
-
+        init(httpRequest);
         // when
         requestHandler.run();
 
@@ -209,9 +212,23 @@ class RequestHandlerTest {
     private String to404NotFoundWithHtml(String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 404 Not Found ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/html ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    @DisplayName("헤더에 Cookie가 있고, JSESSION 아이디가 있는 경우 응답에 JSESSIONID를 포함하지 않는다.")
+    @Test
+    void cookieWithSessionId() {
+        // given
+        final String httpRequest = makeGetRequestWithCookie("/index.html");
+        init(httpRequest);
+        // when
+        requestHandler.run();
+
+        // then
+        assertThat(socket.output()).doesNotContain("Set-Cookie");
+        assertThat(socket.output()).doesNotContain("JSESSIONID");
     }
 }

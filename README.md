@@ -1,6 +1,6 @@
 # HTTP 서버 구현하기
 
-## 요구 사항
+## 1단계 - 요구 사항
 - [x] GET /index.html 응답하기
 - [x] Query String 파싱
 - [x] 로그인에 성공하면 index.html로 리다이렉트
@@ -14,6 +14,14 @@
 - [x] Body와 QueryString을 분리한다.
 - [x] ContentType을 지정한다.
 - [x] HttpResponse의 형태로 변환해서 응답한다.
+
+## 2단계 - 리팩토링 요구사항
+- [x] RequestLine 클래스를 이용해 HttpRequest 리팩토링
+- [x] Add Interface Of Controller
+
+## 3단계 - 요구사항
+- [x] Cookie에 JSESSION값 저장하기
+- [x] SESSION 구현하기
 
 ## 참고 자료
 ### Http Request

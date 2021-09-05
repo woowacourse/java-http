@@ -8,7 +8,9 @@ public enum ContentType {
     HTML("html", "text/html;charset=utf-8"),
     CSS("css", "text/css"),
     JAVASCRIPT("js", "application/x-javascript"),
-    IMAGE("ico", "image/x-icon");
+    FORM("", "application/x-www-form-urlencoded"),
+    IMAGE("svg", "image/svg+xml"),
+    ICON("ico", "image/x-icon");
 
     private final String extension;
     private final String type;
@@ -33,7 +35,7 @@ public enum ContentType {
         return type;
     }
 
-    public boolean is(String path) {
-        return this.name().equalsIgnoreCase(path);
+    public boolean is(String type) {
+        return this.type.equalsIgnoreCase(type);
     }
 }

@@ -1,8 +1,6 @@
-package nextstep.jwp.web.network;
+package nextstep.jwp.web.network.response;
 
 import nextstep.jwp.web.controller.View;
-import nextstep.jwp.web.network.response.HttpResponse;
-import nextstep.jwp.web.network.response.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

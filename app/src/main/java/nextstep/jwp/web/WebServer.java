@@ -41,7 +41,9 @@ public class WebServer {
     }
 
     private void handle(ServerSocket serverSocket) throws IOException {
-        final ExecutorService executorService = Executors.newFixedThreadPool(50);
+        final int threadPoolSize = 50;
+        final ExecutorService executorService = Executors.newFixedThreadPool(threadPoolSize);
+        log.info("Created thread pool with size {}", threadPoolSize);
         Socket connection;
         while ((connection = serverSocket.accept()) != null) {
             executorService.submit(new RequestHandler(connection));

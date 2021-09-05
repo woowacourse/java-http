@@ -3,6 +3,7 @@ package nextstep.jwp.web;
 import nextstep.jwp.web.controller.Controller;
 import nextstep.jwp.web.controller.ControllerFactory;
 import nextstep.jwp.web.controller.ControllerMapping;
+import nextstep.jwp.web.exception.InputException;
 import nextstep.jwp.web.network.request.HttpRequest;
 import nextstep.jwp.web.network.response.HttpResponse;
 import org.slf4j.Logger;
@@ -32,22 +33,29 @@ public class RequestHandler implements Runnable {
 
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-            final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
 
-            final HttpRequest httpRequest  = new HttpRequest(inputStream);
-            final HttpResponse httpResponse = new HttpResponse();
+            final HttpRequest request  = new HttpRequest(inputStream);
+            final HttpResponse response = new HttpResponse();
+
             final ControllerMapping controllerMapping = new ControllerMapping(ControllerFactory.create());
-            final Controller mappedController = controllerMapping.findByResource(httpRequest.getPath());
-            mappedController.service(httpRequest, httpResponse);
+            final Controller controller = controllerMapping.findByResource(request.getPath());
+            controller.service(request, response);
 
-            bufferedWriter.write(httpResponse.print());
-            bufferedWriter.flush();
-            bufferedWriter.close();
+            deliverResponse(outputStream, response);
         } catch (IOException exception) {
             log.error("Exception stream", exception);
+        } catch (InputException exception) {
+            log.info(exception.getMessage());
         } finally {
             close();
         }
+    }
+
+    private void deliverResponse(OutputStream outputStream, HttpResponse response) throws IOException {
+        final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
+        bufferedWriter.write(response.print());
+        bufferedWriter.flush();
+        bufferedWriter.close();
     }
 
     private void close() {

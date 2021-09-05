@@ -1,8 +1,16 @@
 package nextstep.jwp.web.network.request;
 
+import nextstep.jwp.web.exception.InputException;
 import nextstep.jwp.web.network.URI;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+
 public class RequestLine {
+
+    private static final int HTTP_METHOD_INDEX = 0;
+    private static final int URI_INDEX = 1;
+    private static final int PROTOCOL_VERSION_INDEX = 2;
 
     private final HttpMethod httpMethod;
     private final URI uri;
@@ -18,13 +26,25 @@ public class RequestLine {
         this.protocolVersion = protocolVersion;
     }
 
-    public static RequestLine of(String line) {
-        final String[] firstLineElements = line.split(" ");
-        final String httpMethod = firstLineElements[0];
-        final URI uri = new URI(firstLineElements[1]);
-        final String protocolVersion = firstLineElements[2];
+    public static RequestLine of(BufferedReader bufferedReader) {
+        try {
+            final String[] requestLineElements = bufferedReader.readLine().split(" ");
+            final String httpMethod = requestLineElements[HTTP_METHOD_INDEX];
+            final URI uri = new URI(requestLineElements[URI_INDEX]);
+            final String protocolVersion = requestLineElements[PROTOCOL_VERSION_INDEX];
 
-        return new RequestLine(httpMethod, uri, protocolVersion);
+            return new RequestLine(httpMethod, uri, protocolVersion);
+        } catch (IOException exception) {
+            throw new InputException("request line in http request");
+        }
+    }
+
+    public boolean isGet() {
+        return httpMethod.isGet();
+    }
+
+    public boolean isPost() {
+        return httpMethod.isPost();
     }
 
     public HttpMethod getHttpMethod() {

@@ -2,7 +2,6 @@ package nextstep.jwp.web.controller;
 
 import nextstep.jwp.web.network.request.HttpRequest;
 import nextstep.jwp.web.network.response.HttpResponse;
-import nextstep.jwp.web.network.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,12 +18,9 @@ public class DefaultController extends AbstractController {
         final String path = request.getPath();
         log.info("GET {}", path);
         if (getResource().equals(path)) {
-            response.setStatus(HttpStatus.FOUND);
-            response.setHeader("Location", "/index.html");
+            redirect(response, HOME_PAGE);
             return;
         }
-        final View view = new View(path);
-        response.setStatus(HttpStatus.OK);
-        response.setBody(view);
+        okWithPath(response, path);
     }
 }

@@ -25,17 +25,41 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final String expected = String.join("\r\n",
+        assertThat(socket.output()).contains(
                 "HTTP/1.1 302 Found ",
-                "Location: /index.html ",
+                "Location: /index.html "
+        );
+    }
+
+    @DisplayName("존재하지 않는 path에 NOT FOUND로 응답한다 - 성공")
+    @Test
+    void whenWrongPath_thenRespondWithNotFound() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /abcdefghijklmnopqrstuvwxyz HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
                 "",
                 "");
-        assertThat(socket.output()).isEqualTo(expected);
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL url = getClass().getClassLoader().getResource("static/404.html");
+        final String content = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 404 Not Found ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + content.getBytes().length + " "
+        );
     }
 
     @DisplayName("/index.html 요청에 index.html을 포함하여 응답한다 - 성공")
     @Test
-    void index() throws IOException {
+    void getIndexPage() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
@@ -51,17 +75,17 @@ class RequestHandlerTest {
 
         // then
         final URL url = getClass().getClassLoader().getResource("static/index.html");
-        final String resourceAsString = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
+        final String content = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
         assertThat(socket.output()).contains(
                 "HTTP/1.1 200 OK",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + resourceAsString.getBytes().length + " "
+                "Content-Length: " + content.getBytes().length + " "
         );
     }
 
     @DisplayName("GET /login 요청에 login.html 파일을 포함하여 응답한다 - 성공")
     @Test
-    void login() throws IOException {
+    void getLoginPage() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
@@ -77,11 +101,47 @@ class RequestHandlerTest {
 
         // then
         final URL url = getClass().getClassLoader().getResource("static/login.html");
-        final String resourceAsString = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
+        final String content = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
         assertThat(socket.output()).contains(
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + resourceAsString.getBytes().length + " "
+                "Content-Length: " + content.getBytes().length + " "
+        );
+    }
+
+    @DisplayName("로그인 한 상태에서 GET /login 요청할 경우 index.html로 리다이렉트한다 - 성공")
+    @Test
+    void getLoginPageWhileLoggedIn() {
+        // given
+        final String jsessionid = "7f1dd9b5-ef54-4706-a07a-aaaa9d76134e";
+        final String httpRequest2 = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=" + jsessionid,
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Content-Length: 30",
+                "",
+                "account=gugu&password=password");
+        final MockSocket socket2 = new MockSocket(httpRequest2);
+        final RequestHandler requestHandler2 = new RequestHandler(socket2);
+        requestHandler2.run();
+
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Cookie: JSESSIONID=" + jsessionid,
+                "",
+                "");
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+        requestHandler.run();
+
+        // then
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 302 Found ",
+                "Location: /index.html"
         );
     }
 
@@ -93,6 +153,7 @@ class RequestHandlerTest {
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Type: application/x-www-form-urlencoded ",
                 "Content-Length: 30",
                 "",
                 "account=gugu&password=password");
@@ -105,6 +166,7 @@ class RequestHandlerTest {
         // then
         assertThat(socket.output()).contains(
                 "HTTP/1.1 302 Found ",
+                "Set-Cookie: JSESSIONID=",
                 "Location: /index.html "
         );
     }
@@ -117,6 +179,7 @@ class RequestHandlerTest {
                 "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Type: application/x-www-form-urlencoded ",
                 "Content-Length: 26 ",
                 "",
                 "account=gugu&password=1234");
@@ -128,11 +191,11 @@ class RequestHandlerTest {
 
         // then
         final URL url = getClass().getClassLoader().getResource("static/401.html");
-        final String resourceAsString = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
+        final String content = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
         assertThat(socket.output()).contains(
                 "HTTP/1.1 401 Unauthorized ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + resourceAsString.getBytes().length + " "
+                "Content-Length: " + content.getBytes().length + " "
         );
     }
 
@@ -146,9 +209,6 @@ class RequestHandlerTest {
                 "Connection: keep-alive ",
                 "",
                 "");
-        final URL url = getClass().getClassLoader().getResource("static/register.html");
-        final String resourceAsString = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
-
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(socket);
 
@@ -156,11 +216,13 @@ class RequestHandlerTest {
         requestHandler.run();
 
         // then
+        final URL url = getClass().getClassLoader().getResource("static/register.html");
+        final String content = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
         assertThat(socket.output()).contains(
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + resourceAsString.getBytes().length + " "
-        );
+                "Content-Length: " + content.getBytes().length + " "
+                );
     }
 
     @DisplayName("POST /register 요청이 성공적으로 처리되면 /index.html로 리다이렉트한다 - 성공")
@@ -189,6 +251,36 @@ class RequestHandlerTest {
         );
     }
 
+    @DisplayName("POST /register 요청에 가입된 유저 정보가 있을 경우 400 Bad Request를 반환한다 - 성공")
+    @Test
+    void givenExistingUserInfo_whenLogin_thenRespondWith400() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 58 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
+                "",
+                "account=gugu&password=password&email=gugu%40woowahan.com");
+
+        final MockSocket socket = new MockSocket(httpRequest);
+        final RequestHandler requestHandler = new RequestHandler(socket);
+
+        // when
+        requestHandler.run();
+
+        // then
+        final URL url = getClass().getClassLoader().getResource("static/400.html");
+        final String content = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
+        assertThat(socket.output()).contains(
+                "HTTP/1.1 400 Bad Request ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + content.getBytes().length + " "
+        );
+    }
+
     @DisplayName("GET /css/styles.css 요청에 styles.css 파일을 포함하여 응답한다 - 성공")
     @Test
     void getCSS() throws IOException {
@@ -207,11 +299,11 @@ class RequestHandlerTest {
 
         // then
         final URL url = getClass().getClassLoader().getResource("static/css/styles.css");
-        final String resourceAsString = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
+        final String content = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(url).getPath())));
         assertThat(socket.output()).contains(
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/css ",
-                "Content-Length: " + resourceAsString.getBytes().length + " "
+                "Content-Length: " + content.getBytes().length + " "
         );
     }
 }

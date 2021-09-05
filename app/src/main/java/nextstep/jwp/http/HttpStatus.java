@@ -12,4 +12,9 @@ public enum HttpStatus {
         this.number = number;
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return number + " " + name + " ";
+    }
 }

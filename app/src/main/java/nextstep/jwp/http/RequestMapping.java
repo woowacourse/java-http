@@ -15,6 +15,7 @@ public class RequestMapping {
         controllers.put("/", new DefaultController());
         controllers.put("/register", new RegisterController());
         controllers.put("/login", new LoginController());
+        controllers.put("RESOURCE", new ResourceController());
     }
 
     private RequestMapping() {
@@ -25,7 +26,7 @@ public class RequestMapping {
                 .filter(path -> path.equals(inputPath))
                 .findAny()
                 .map(controllers::get)
-                .orElseGet(ResourceController::new);
+                .orElseGet(NotFoundController::new);
         logger.info("Found {}", controller.getClass());
         return controller;
     }

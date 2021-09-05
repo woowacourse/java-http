@@ -29,7 +29,11 @@ public class RequestHandler implements Runnable {
             HttpRequest httpRequest = new HttpRequest(inputStream);
             HttpResponse httpResponse = new HttpResponse(outputStream);
 
-            Controller controller = RequestMapping.findController(httpRequest.getResource());
+            String resource = httpRequest.getResource();
+            if(resource.contains(".")){
+                resource = "RESOURCE";
+            }
+            Controller controller = RequestMapping.findController(resource);
             controller.service(httpRequest, httpResponse);
         } catch (IOException exception) {
             log.error("Exception stream", exception);

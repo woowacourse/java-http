@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package nextstep.jwp.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import nextstep.jwp.http.HttpMethod;
+import nextstep.jwp.http.HttpRequest;
 
 public class HttpRequestReader {
 

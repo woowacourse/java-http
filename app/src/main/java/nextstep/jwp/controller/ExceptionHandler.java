@@ -1,8 +1,8 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
-import nextstep.jwp.http.ContentType;
-import nextstep.jwp.http.FileReader;
+import nextstep.jwp.utils.ContentType;
+import nextstep.jwp.utils.FileReader;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpStatus;
 

@@ -7,6 +7,8 @@ import nextstep.jwp.http.session.HttpSession;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 
+import java.util.Optional;
+
 public class LoginController extends AbstractController{
 
     private final UserService userService;
@@ -17,14 +19,10 @@ public class LoginController extends AbstractController{
 
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
-        if (isLogin(httpRequest.getSession())) {
-            httpResponse.status(HttpResponseStatus.FOUND);
-            httpResponse.location("/index.html");
-            return;
-        }
-
-        httpResponse.status(HttpResponseStatus.OK);
-        httpResponse.resource("/login.html");
+        httpRequest.getSession().ifPresentOrElse(httpSession -> handleLoginWhenHaveSession(httpSession, httpResponse), () -> {
+            httpResponse.status(HttpResponseStatus.OK);
+            httpResponse.resource("/login.html");
+        });
     }
 
     @Override
@@ -35,22 +33,28 @@ public class LoginController extends AbstractController{
         httpResponse.location("/index.html");
     }
 
-    private void createSession(HttpRequest httpRequest, HttpResponse httpResponse, User loginUser) {
-        setJSessionId(httpRequest, httpResponse);
-        HttpSession session = httpRequest.getSession();
-        session.setAttribute("user", loginUser);
+    private void handleLoginWhenHaveSession(HttpSession httpSession, HttpResponse httpResponse) {
+        if (isLogin(httpSession)) {
+            httpResponse.status(HttpResponseStatus.FOUND);
+            httpResponse.location("/index.html");
+        } else {
+            httpResponse.status(HttpResponseStatus.OK);
+            httpResponse.resource("/login.html");
+        }
     }
 
-    private User getUser(HttpSession session) {
-        if (session == null) {
-            return null;
-        }
+    private void createSession(HttpRequest httpRequest, HttpResponse httpResponse, User loginUser) {
+        setJSessionId(httpRequest, httpResponse);
+        httpRequest.getSession().ifPresent(httpSession -> httpSession.setAttribute("user", loginUser));
+    }
 
-        return (User) session.getAttribute("user");
+    private Optional<User> getUser(HttpSession session) {
+        User user = (User) session.getAttribute("user");
+        return Optional.ofNullable(user);
     }
 
     private boolean isLogin(HttpSession httpSession) {
-        Object user = getUser(httpSession);
-        return user != null;
+        Optional<User> user = getUser(httpSession);
+        return user.isPresent();
     }
 }

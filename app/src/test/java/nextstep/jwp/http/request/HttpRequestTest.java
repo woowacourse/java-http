@@ -57,7 +57,7 @@ class HttpRequestTest {
     @Test
     void getSession() {
         HttpCookie httpCookie = getRequest.getCookies();
-        HttpSession httpSession = getRequest.getSession();
+        HttpSession httpSession = getRequest.getSession().get();
         assertThat(httpSession.getId()).isEqualTo(httpCookie.getCookie("JSESSIONID"));
     }
 }

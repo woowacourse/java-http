@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.net.HttpHeaders.CONTENT_LENGTH;
 import static nextstep.jwp.http.HttpCookie.JSESSIONID;
@@ -77,12 +78,14 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public HttpSession getSession() {
-        if (getCookies().getCookie(JSESSIONID) == null) {
-            return null;
+    public Optional<HttpSession> getSession() {
+        HttpCookie httpCookies = getCookies();
+
+        if (httpCookies.hasCookie(JSESSIONID)) {
+            return Optional.of(HttpSessions.getSession(httpCookies.getCookie(JSESSIONID)));
         }
 
-        return HttpSessions.getSession(getCookies().getCookie(JSESSIONID));
+        return Optional.empty();
     }
 
     public String getHttpVersion() {

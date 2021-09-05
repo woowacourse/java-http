@@ -17,6 +17,5 @@
 
 ## 🍪 3단계 쿠키, 세션 구현하기
 - [ ] 요청에 쿠키가 들어오면 HttpRequest 에서 쿠키를 얻어내는 기능 구현하기
-  - [ ] HttpCookies 객체 만들기
+  - [x] HttpCookies 객체 만들기
   - [ ] RequestHeader 에 쿠키를 추출하는 메서드 만들기
-  

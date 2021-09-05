@@ -1,33 +1,38 @@
 package nextstep.jwp.controller;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 import nextstep.jwp.constants.HttpMethod;
 import nextstep.jwp.exception.HttpException;
-import nextstep.jwp.response.ResponseEntity;
+import nextstep.jwp.request.HttpRequest;
+import nextstep.jwp.response.HttpResponse;
 
 public class GetHandler implements Handler {
-    private final HttpMethod httpMethod = HttpMethod.GET;
-
     public GetHandler() {
     }
 
+    @Override
     public boolean matchHttpMethod(HttpMethod httpMethod) {
-        return this.httpMethod == httpMethod;
+        return HttpMethod.GET == httpMethod;
     }
 
-    public String runController(String uri, Controller controller) throws Exception {
+    @Override
+    public String handle(HttpRequest httpRequest, Controller controller)
+            throws InvocationTargetException, IllegalAccessException, IOException {
+        String uri = httpRequest.getRequestLine().getUri();
         for (Method method : Controller.class.getDeclaredMethods()) {
             if (matchGetMapping(method, uri)) {
-                return (String) method.invoke(controller);
+                return (String) method.invoke(controller, httpRequest);
             }
         }
 
         Set<String> declaredGetMappings = collectDeclaredGetMappings();
         if (!declaredGetMappings.contains(uri)) {
-            return ResponseEntity
+            return HttpResponse
                     .responseResource(uri)
                     .build();
         }

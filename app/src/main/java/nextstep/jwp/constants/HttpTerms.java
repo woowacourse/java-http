@@ -1,6 +1,6 @@
 package nextstep.jwp.constants;
 
-public class Http {
+public class HttpTerms {
     public static final String EMPTY_SPACE_SEPARATOR = " ";
     public static final String NEW_LINE = "\r\n";
     public static final String EMPTY_LINE = "";
@@ -13,7 +13,9 @@ public class Http {
     public static final String AND_PERCENT_SEPARATOR = "&";
     public static final String EQUAL_SEPARATOR = "=";
     public static final String COLUMN_SEPARATOR = ":";
+    public static final String SEMI_COLUMN_SEPARATOR = ";";
+    public static final String JSESSIONID = "JSESSIONID";
 
-    private Http() {
+    private HttpTerms() {
     }
 }

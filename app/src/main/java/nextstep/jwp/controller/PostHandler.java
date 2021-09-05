@@ -1,26 +1,28 @@
 package nextstep.jwp.controller;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import nextstep.jwp.constants.HttpMethod;
 import nextstep.jwp.exception.HttpException;
-import nextstep.jwp.request.RequestBody;
+import nextstep.jwp.request.HttpRequest;
 
 public class PostHandler implements Handler {
-    private final HttpMethod httpMethod = HttpMethod.POST;
-    private final RequestBody requestBody;
-
-    public PostHandler(RequestBody requestBody) {
-        this.requestBody = requestBody;
+    public PostHandler() {
     }
 
+    @Override
     public boolean matchHttpMethod(HttpMethod httpMethod) {
-        return this.httpMethod == httpMethod;
+        return HttpMethod.POST == httpMethod;
     }
 
-    public String runController(String uri, Controller controller) throws Exception {
+    @Override
+    public String handle(HttpRequest httpRequest, Controller controller)
+            throws InvocationTargetException, IllegalAccessException, IOException {
+        String uri = httpRequest.getRequestLine().getUri();
         for (Method method : Controller.class.getDeclaredMethods()) {
             if (matchPostMapping(method, uri)) {
-                return (String) method.invoke(controller, requestBody);
+                return (String) method.invoke(controller, httpRequest);
             }
         }
         throw new HttpException("잘못된 http post 요청입니다.");

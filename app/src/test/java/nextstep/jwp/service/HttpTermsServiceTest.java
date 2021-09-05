@@ -10,7 +10,7 @@ import nextstep.jwp.model.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class HttpServiceTest {
+class HttpTermsServiceTest {
     @Test
     @DisplayName("중복된 account 등록시 예외가 발생한다.")
     void register() {

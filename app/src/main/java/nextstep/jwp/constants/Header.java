@@ -1,17 +1,29 @@
 package nextstep.jwp.constants;
 
 public enum Header {
-    CONTENT_LENGTH("Content-Length"),
+    CONTENT_LENGTH("Content-Length", "0"),
     LOCATION("Location"),
-    CONTENT_TYPE("Content-Type");
+    CONTENT_TYPE("Content-Type", "text/html;charset=utf-8"),
+    SET_COOKIE("Set-Cookie"),
+    COOKIE("Cookie");
 
-    private final String key;
+    private final String type;
+    private String value;
 
-    Header(String key) {
-        this.key = key;
+    Header(String type) {
+        this.type = type;
     }
 
-    public String getKey() {
-        return this.key;
+    Header(String type, String value) {
+        this.type = type;
+        this.value = value;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+
+    public String getValue() {
+        return this.value;
     }
 }

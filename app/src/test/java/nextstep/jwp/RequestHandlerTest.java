@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import org.junit.jupiter.api.Disabled;
+import nextstep.jwp.constants.Header;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -190,7 +190,9 @@ class RequestHandlerTest {
             requestHandler.run();
 
             // then
-            assertThat(socket.output()).isEqualTo(response302IndexPage());
+            final URL resource = getClass().getClassLoader().getResource("static/index.html");
+            String indexHtml = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            assertThat(socket.output()).contains(Header.SET_COOKIE.getType(), indexHtml);
         }
 
         @Test

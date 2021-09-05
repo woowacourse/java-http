@@ -11,6 +11,7 @@ import nextstep.jwp.model.User;
 
 public class HttpService {
     private static final AtomicLong id = new AtomicLong(1L);
+
     private HttpService() {
     }
 
@@ -34,4 +35,10 @@ public class HttpService {
             throw new BadRequestException("이미 등록된 사용자 입니다.");
         }
     }
+
+    public static User findUser(String account) {
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new UnauthorizedException("해당하는 유저가 없어요"));
+    }
+
 }

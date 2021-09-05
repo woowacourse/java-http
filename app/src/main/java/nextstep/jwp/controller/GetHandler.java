@@ -1,5 +1,7 @@
 package nextstep.jwp.controller;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Set;
@@ -19,7 +21,8 @@ public class GetHandler implements Handler {
     }
 
     @Override
-    public String handle(HttpRequest httpRequest, Controller controller) throws Exception {
+    public String handle(HttpRequest httpRequest, Controller controller)
+            throws InvocationTargetException, IllegalAccessException, IOException {
         String uri = httpRequest.getRequestLine().getUri();
         for (Method method : Controller.class.getDeclaredMethods()) {
             if (matchGetMapping(method, uri)) {

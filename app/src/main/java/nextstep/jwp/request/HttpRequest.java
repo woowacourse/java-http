@@ -3,7 +3,7 @@ package nextstep.jwp.request;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Objects;
-import nextstep.jwp.constants.HeaderType;
+import nextstep.jwp.constants.Header;
 import nextstep.jwp.constants.HttpTerms;
 
 public class HttpRequest {
@@ -35,8 +35,8 @@ public class HttpRequest {
     }
 
     private String extractRequestBody() throws IOException {
-        if (requestHeader.contains(HeaderType.CONTENT_LENGTH.getValue())) {
-            int contentLength = Integer.parseInt(requestHeader.get(HeaderType.CONTENT_LENGTH.getValue()));
+        if (requestHeader.contains(Header.CONTENT_LENGTH.getType())) {
+            int contentLength = Integer.parseInt(requestHeader.get(Header.CONTENT_LENGTH.getType()));
             char[] buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);
             return new String(buffer);

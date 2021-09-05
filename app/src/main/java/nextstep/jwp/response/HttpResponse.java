@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import nextstep.jwp.constants.ContentType;
-import nextstep.jwp.constants.HeaderType;
+import nextstep.jwp.constants.Header;
 import nextstep.jwp.constants.HttpTerms;
 import nextstep.jwp.constants.StatusCode;
 import nextstep.jwp.exception.PageNotFoundException;
@@ -30,8 +30,8 @@ public class HttpResponse {
         }
 
         private void setDefaultHeaders() {
-            headers.put(HeaderType.CONTENT_TYPE.getValue(), HeaderType.CONTENT_TYPE.getDefaultValue());
-            headers.put(HeaderType.CONTENT_LENGTH.getValue(), HeaderType.CONTENT_LENGTH.getDefaultValue());
+            headers.put(Header.CONTENT_TYPE.getType(), Header.CONTENT_TYPE.getValue());
+            headers.put(Header.CONTENT_LENGTH.getType(), Header.CONTENT_LENGTH.getValue());
         }
 
         public Builder statusCode(StatusCode statusCode) {
@@ -44,8 +44,8 @@ public class HttpResponse {
             return this;
         }
 
-        public Builder addHeaders(HeaderType headerType, String value) {
-            headers.put(headerType.getValue(), value);
+        public Builder addHeaders(Header header, String value) {
+            headers.put(header.getType(), value);
             return this;
         }
 
@@ -71,8 +71,8 @@ public class HttpResponse {
         }
 
         private void updateDefaultHeaders() {
-            headers.put(HeaderType.CONTENT_TYPE.getValue(), contentType.getContentType() + ";charset=utf-8");
-            headers.put(HeaderType.CONTENT_LENGTH.getValue(), String.valueOf(responseBody.getBytes().length));
+            headers.put(Header.CONTENT_TYPE.getType(), contentType.getContentType() + ";charset=utf-8");
+            headers.put(Header.CONTENT_LENGTH.getType(), String.valueOf(responseBody.getBytes().length));
         }
 
         private ContentType extractContentType(String uri) {
@@ -113,7 +113,7 @@ public class HttpResponse {
     public static String redirectTo(String uri) throws IOException {
         return HttpResponse
                 .statusCode(StatusCode.FOUND)
-                .addHeaders(HeaderType.LOCATION, uri)
+                .addHeaders(Header.LOCATION, uri)
                 .responseResource(uri)
                 .build();
     }

@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import nextstep.jwp.constants.HeaderType;
+import nextstep.jwp.constants.Header;
 import nextstep.jwp.constants.HttpTerms;
 import nextstep.jwp.constants.StatusCode;
 import nextstep.jwp.constants.UserParams;
@@ -31,7 +31,7 @@ public class Controller {
     @GetMapping(path = "/login")
     public String login(HttpRequest request) throws IOException {
         RequestHeader header = request.getRequestHeader();
-        if (header.contains(HeaderType.COOKIE.getValue())) {
+        if (header.contains(Header.COOKIE.getType())) {
             checkValidSessionId(header.getCookie());
             return HttpResponse
                     .redirectTo("/index.html");
@@ -79,8 +79,8 @@ public class Controller {
         httpSession.setAttribute("user", user);
         return HttpResponse
                 .statusCode(StatusCode.FOUND)
-                .addHeaders(HeaderType.LOCATION, "/index.html")
-                .addHeaders(HeaderType.SET_COOKIE, HttpCookie.toSetCookieValue(sessionId))
+                .addHeaders(Header.LOCATION, "/index.html")
+                .addHeaders(Header.SET_COOKIE, HttpCookie.toSetCookieValue(sessionId))
                 .responseResource("/index.html")
                 .build();
     }

@@ -6,7 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.jwp.constants.HeaderType;
+import nextstep.jwp.constants.Header;
 import nextstep.jwp.constants.StatusCode;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ class HttpTermsResponseTest {
     void buildAddHeaders() {
         String actual = HttpResponse
                 .statusCode(StatusCode.FOUND)
-                .addHeaders(HeaderType.LOCATION, "/index.html")
+                .addHeaders(Header.LOCATION, "/index.html")
                 .build();
 
         String expected = String.join("\r\n",
@@ -54,7 +54,7 @@ class HttpTermsResponseTest {
     void buildBody() {
         String actual = HttpResponse
                 .statusCode(StatusCode.FOUND)
-                .addHeaders(HeaderType.LOCATION, "/index.html")
+                .addHeaders(Header.LOCATION, "/index.html")
                 .responseBody("hello")
                 .build();
 
@@ -74,7 +74,7 @@ class HttpTermsResponseTest {
     void buildResourceBody() throws IOException {
         String actual = HttpResponse
                 .statusCode(StatusCode.FOUND)
-                .addHeaders(HeaderType.LOCATION, "/index.html")
+                .addHeaders(Header.LOCATION, "/index.html")
                 .responseResource("/index.html")
                 .build();
 

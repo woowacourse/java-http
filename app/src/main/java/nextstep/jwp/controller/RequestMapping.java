@@ -2,21 +2,20 @@ package nextstep.jwp.controller;
 
 import java.util.Map;
 import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.request.requestline.RequestURI;
-import nextstep.jwp.http.response.ContentType;
+import nextstep.jwp.http.request.requestline.RequestPath;
 
-public class Controllers {
+public class RequestMapping {
 
     private static final StaticResourceController STATIC_RESOURCE_CONTROLLER = new StaticResourceController();
     private static final NotFoundController NOT_FOUND_CONTROLLER = new NotFoundController();
-    private final Map<RequestURI, Controller> controllersMap;
 
-    public Controllers() {
+    private final Map<RequestPath, Controller> controllersMap;
+
+    public RequestMapping() {
         this.controllersMap = Map.of(
-            new RequestURI("/login"), new LoginController(),
-            new RequestURI("/register"), new RegisterController(),
-            new RequestURI("/index"), new IndexController(),
-            new RequestURI("/"), new DefaultController()
+            new RequestPath("/login"), new LoginController(),
+            new RequestPath("/register"), new RegisterController(),
+            new RequestPath("/"), new DefaultController()
         );
     }
 
@@ -26,7 +25,7 @@ public class Controllers {
     }
 
     private Controller findResourceController(HttpRequest httpRequest) {
-        if (!httpRequest.getHeader().contains(ContentType.HTML.getValue()) ||
+        if (!httpRequest.getHeader().acceptHtmlType() ||
             httpRequest.getRequestLine().getRequestURI().containsExtension(".html")) {
             return STATIC_RESOURCE_CONTROLLER;
         }

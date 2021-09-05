@@ -6,5 +6,4 @@ import nextstep.jwp.http.response.HttpResponse;
 public interface Controller {
 
     HttpResponse process(HttpRequest request);
-
 }

@@ -11,7 +11,7 @@ import nextstep.jwp.http.request.HttpHeaders;
 
 public class Body {
 
-    private static final Body EMPTY_BODY = new Body(null);
+    private static final Body EMPTY_BODY = new Body("");
 
     private final String value;
 

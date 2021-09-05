@@ -1,10 +1,11 @@
 package nextstep.jwp.http.response;
 
 import java.util.Arrays;
-import nextstep.jwp.http.request.requestline.RequestURI;
+import nextstep.jwp.http.request.requestline.RequestPath;
 
 public enum ContentType {
     TEXT("txt", "text/plain"),
+    HTML_UTF8("html", "text/html; charset=utf-8"),
     HTML("html", "text/html"),
     ICO("ico", "image/x-icon"),
     CSS("css", "text/css"),
@@ -19,8 +20,8 @@ public enum ContentType {
         this.value = value;
     }
 
-    public static String of(RequestURI uri) {
-        String suffix = uri.getRequestURI().split("\\.")[1];
+    public static String of(RequestPath uri) {
+        String suffix = uri.getPath().split("\\.")[1];
         return Arrays.stream(ContentType.values())
             .filter(contentType -> contentType.getSuffix().equals(suffix))
             .findAny()

@@ -9,13 +9,13 @@ public class RequestLine {
     private static final int VERSION_INDEX = 2;
 
     private final HttpMethod method;
-    private final RequestURI requestURI;
+    private final RequestPath requestPath;
     private final HttpVersion httpVersion;
 
-    private RequestLine(HttpMethod method, RequestURI requestURI,
+    private RequestLine(HttpMethod method, RequestPath requestPath,
         HttpVersion httpVersion) {
         this.method = method;
-        this.requestURI = requestURI;
+        this.requestPath = requestPath;
         this.httpVersion = httpVersion;
     }
 
@@ -23,16 +23,20 @@ public class RequestLine {
         String[] slicedLine = requestLine.split(" ");
 
         HttpMethod method = HttpMethod.matchOf(slicedLine[METHOD_INDEX]);
-        RequestURI requestURI = new RequestURI(slicedLine[URI_INDEX]);
+        RequestPath requestPath = new RequestPath(slicedLine[URI_INDEX]);
         HttpVersion httpVersion = HttpVersion.matchOf(slicedLine[VERSION_INDEX]);
-        return new RequestLine(method, requestURI, httpVersion);
+        return new RequestLine(method, requestPath, httpVersion);
     }
 
-    public RequestURI getRequestURI() {
-        return requestURI;
+    public RequestPath getRequestURI() {
+        return requestPath;
     }
 
     public HttpMethod getMethod() {
         return method;
+    }
+
+    public HttpVersion getHttpVersion() {
+        return httpVersion;
     }
 }

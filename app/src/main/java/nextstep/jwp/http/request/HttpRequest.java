@@ -5,17 +5,24 @@ import java.io.IOException;
 import nextstep.jwp.http.common.Body;
 import nextstep.jwp.http.request.requestline.HttpMethod;
 import nextstep.jwp.http.request.requestline.RequestLine;
+import nextstep.jwp.http.session.HttpCookie;
+import nextstep.jwp.http.session.HttpSession;
+import nextstep.jwp.http.session.HttpSessions;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
     private final HttpHeaders header;
+    private final HttpCookie cookie;
+    private final HttpSession session;
     private final Body body;
 
     private HttpRequest(RequestLine requestLine, HttpHeaders headers,
         Body body) {
         this.requestLine = requestLine;
         this.header = headers;
+        this.cookie = headers.getCookie();
+        this.session = loadSession();
         this.body = body;
     }
 
@@ -27,12 +34,23 @@ public class HttpRequest {
         return new HttpRequest(requestLine, headers, body);
     }
 
+    private HttpSession loadSession() {
+        if (this.cookie.containSession()) {
+            return HttpSessions.getSession(this.cookie.getSessionId());
+        }
+        return HttpSession.empty();
+    }
+
     public boolean isGet() {
         return requestLine.getMethod().equals(HttpMethod.GET);
     }
 
-    public boolean isPost() {
-        return requestLine.getMethod().equals(HttpMethod.POST);
+    public HttpSession getOrMakeSession() {
+        if (session.equals(HttpSession.empty())) {
+            HttpSession newSession = HttpSessions.createSession();
+            session.setId(newSession.getId());
+        }
+        return session;
     }
 
     public RequestLine getRequestLine() {
@@ -45,5 +63,9 @@ public class HttpRequest {
 
     public Body getBody() {
         return body;
+    }
+
+    public HttpSession getSession() {
+        return session;
     }
 }

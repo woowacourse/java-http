@@ -5,16 +5,16 @@ import java.util.Map;
 import java.util.Objects;
 import nextstep.jwp.http.util.ParamExtractor;
 
-public class RequestURI {
+public class RequestPath {
 
     private static final String QUERY_STRING_DENOTE_PREFIX = "?";
 
-    private final String requestURI;
+    private final String path;
     private final Map<String, String> parameters;
 
-    public RequestURI(String requestURI) {
-        this.requestURI = extractURI(requestURI);
-        this.parameters = extractParams(requestURI);
+    public RequestPath(String path) {
+        this.path = extractURI(path);
+        this.parameters = extractParams(path);
     }
 
     private String extractURI(String uri) {
@@ -32,15 +32,15 @@ public class RequestURI {
     }
 
     public boolean containsExtension(String extension) {
-        return requestURI.contains(extension);
+        return path.contains(extension);
     }
 
     public String getParamValue(String key) {
         return parameters.get(key);
     }
 
-    public String getRequestURI() {
-        return requestURI;
+    public String getPath() {
+        return path;
     }
 
     @Override
@@ -51,12 +51,12 @@ public class RequestURI {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        RequestURI that = (RequestURI) o;
-        return Objects.equals(requestURI, that.requestURI);
+        RequestPath that = (RequestPath) o;
+        return Objects.equals(path, that.path);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(requestURI);
+        return Objects.hash(path);
     }
 }

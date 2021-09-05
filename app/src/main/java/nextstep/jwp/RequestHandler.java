@@ -8,7 +8,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.Controllers;
+import nextstep.jwp.controller.RequestMapping;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import org.slf4j.Logger;
@@ -20,11 +20,11 @@ public class RequestHandler implements Runnable {
     private static final String INTERNAL_SERVER_ERROR_PATH = "/500.html";
 
     private final Socket connection;
-    private final Controllers controllers;
+    private final RequestMapping requestMapping;
 
     public RequestHandler(Socket connection) {
         this.connection = Objects.requireNonNull(connection);
-        this.controllers = new Controllers();
+        this.requestMapping = new RequestMapping();
     }
 
     @Override
@@ -50,7 +50,7 @@ public class RequestHandler implements Runnable {
 
     private HttpResponse service(HttpRequest httpRequest) {
         try {
-            Controller controller = controllers.findController(httpRequest);
+            Controller controller = requestMapping.findController(httpRequest);
             return controller.process(httpRequest);
         } catch (RuntimeException exception) {
             log.error("Internal server error", exception);

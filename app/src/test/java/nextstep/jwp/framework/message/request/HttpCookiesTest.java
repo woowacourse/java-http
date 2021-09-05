@@ -19,7 +19,7 @@ class HttpCookiesTest {
         params.put("rice", "cake");
 
         // when
-        HttpCookies httpCookies = new HttpCookies(params);
+        HttpCookies httpCookies = HttpCookies.from(params);
 
         // then
         assertThat(httpCookies.toMap()).isEqualTo(params);
@@ -41,13 +41,31 @@ class HttpCookiesTest {
         assertThat(httpCookies.toMap()).isEqualTo(params);
     }
 
+    @DisplayName("비어있는 HttpCookies 를 생성한다.")
+    @Test
+    void createWithEmpty() {
+        // given
+        LinkedHashMap<String, String> params = new LinkedHashMap<>();
+
+        // when
+        HttpCookies emptyCookies = HttpCookies.empty();
+        HttpCookies emptyCookiesFromMap = HttpCookies.from(params);
+        HttpCookies emptyCookiesFromString = HttpCookies.from(" ");
+
+        // then
+        assertThat(emptyCookies.toMap()).isEmpty();
+        assertThat(emptyCookies)
+                .isSameAs(emptyCookiesFromMap)
+                .isSameAs(emptyCookiesFromString);
+    }
+
     @DisplayName("쿠키에서 키로 값을 가져온다.")
     @Test
     void take() {
         // given
         LinkedHashMap<String, String> params = new LinkedHashMap<>();
         params.put("choco", "cookie");
-        HttpCookies httpCookies = new HttpCookies(params);
+        HttpCookies httpCookies = HttpCookies.from(params);
 
         // when, then
         assertThat(httpCookies.take("choco")).get().isEqualTo("cookie");
@@ -63,8 +81,8 @@ class HttpCookiesTest {
         params.put("mint", "toothpaste");
         params.put("rice", "cake");
 
-        HttpCookies httpCookies = new HttpCookies(params);
-        HttpCookies otherHttpCookies = new HttpCookies(params);
+        HttpCookies httpCookies = HttpCookies.from(params);
+        HttpCookies otherHttpCookies = HttpCookies.from(params);
 
         // when, then
         assertThat(httpCookies).isEqualTo(otherHttpCookies)

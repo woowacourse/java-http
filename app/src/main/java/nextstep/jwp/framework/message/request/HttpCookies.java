@@ -12,16 +12,29 @@ public class HttpCookies {
     private static final String COOKIE_PIECE_SEPARATOR = ";";
     private static final String COOKIE_PARAM_SEPARATOR = "=";
 
+    private static final HttpCookies EMPTY_COOKIES = new HttpCookies(Collections.emptyMap());
+
     private final Map<String, String> params;
 
-    public HttpCookies(Map<String, String> params) {
+    private HttpCookies(Map<String, String> params) {
         this.params = params;
     }
 
+    public static HttpCookies from(Map<String, String> params) {
+        if (params.isEmpty()) {
+            return EMPTY_COOKIES;
+        }
+        return new HttpCookies(params);
+    }
+
     public static HttpCookies from(String cookieString) {
-        return new HttpCookies(
+        return HttpCookies.from(
                 StringUtils.extractMap(cookieString, COOKIE_PIECE_SEPARATOR, COOKIE_PARAM_SEPARATOR)
         );
+    }
+
+    public static HttpCookies empty() {
+        return EMPTY_COOKIES;
     }
 
     public Optional<String> take(String key) {

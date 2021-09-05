@@ -31,8 +31,8 @@ public class HttpResponse {
         }
 
         private void setDefaultHeaders() {
-            headers.put(HeaderType.CONTENT_TYPE.getValue(), "text/html;charset=utf-8");
-            headers.put(HeaderType.CONTENT_LENGTH.getValue(), "0");
+            headers.put(HeaderType.CONTENT_TYPE.getValue(), HeaderType.CONTENT_TYPE.getDefaultValue());
+            headers.put(HeaderType.CONTENT_LENGTH.getValue(), HeaderType.CONTENT_LENGTH.getDefaultValue());
         }
 
         public Builder statusCode(StatusCode statusCode) {

@@ -3,48 +3,35 @@ package nextstep.project.presentation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.UUID;
 import nextstep.jwp.dispatcher.handler.HttpHandler;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.message.HttpCookie;
 import nextstep.jwp.http.message.HttpStatus;
+import nextstep.jwp.http.session.HttpSession;
+import nextstep.jwp.http.session.HttpSessions;
 import nextstep.project.db.InMemoryUserRepository;
 import nextstep.project.model.User;
 
-public class UserController extends HttpHandler {
+public class LoginController extends HttpHandler {
 
     @Override
     public void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
         super.doGet(httpRequest, httpResponse);
 
         try {
-            Map<String, String> queryString = httpRequest.getQueryStringAsMap();
+            HttpSession session = httpRequest.getSession()
+                .orElseThrow();
 
-            if (queryString.isEmpty()) {
-                throw new NoSuchElementException();
-            }
-
-            String requestAccount = queryString.get("account");
-            String requestPassword = queryString.get("password");
-
-            User findUser = InMemoryUserRepository.findByAccount(requestAccount)
-                .orElseThrow(UnauthorizedException::new);
-
-            if (!findUser.checkPassword(requestPassword)) {
-                throw new UnauthorizedException();
-            }
+            httpResponse.addCookie(new HttpCookie("JSESSIONID", session.getId()));
 
             redirectTo("./index.html", httpResponse);
         } catch (NoSuchElementException e) {
             renderPage(
                 "./static/login.html",
                 HttpStatus.OK,
-                httpResponse
-            );
-        } catch (UnauthorizedException e) {
-            renderPage(
-                "./static/401.html",
-                HttpStatus.UNAUTHORIZED,
                 httpResponse
             );
         }
@@ -56,18 +43,21 @@ public class UserController extends HttpHandler {
         try {
             Map<String, String> body = parseFormData(httpRequest.getBody());
 
-            String requestAccount = body.get("account");
-            String requestPassword = body.get("password");
-
-            User findUser = InMemoryUserRepository.findByAccount(requestAccount)
+            User findUser = InMemoryUserRepository.findByAccount(body.get("account"))
                 .orElseThrow(UnauthorizedException::new);
 
-            if (!findUser.checkPassword(requestPassword)) {
+            if (!findUser.checkPassword(body.get("password"))) {
                 throw new UnauthorizedException();
             }
 
-            redirectTo("./index.html", httpResponse);
+            HttpSession session = httpRequest.getSession()
+                .orElse(new HttpSession(UUID.randomUUID().toString()));
+            session.setAttribute("user", findUser);
+            HttpSessions.addSession(session);
 
+            httpResponse.addCookie(new HttpCookie("JSESSIONID", session.getId()));
+
+            redirectTo("./index.html", httpResponse);
         } catch (NoSuchElementException e) {
             renderPage(
                 "./static/login.html",

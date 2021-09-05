@@ -2,12 +2,11 @@ package nextstep.jwp;
 
 import nextstep.jwp.context.ApplicationContext;
 import nextstep.jwp.context.ApplicationContextImpl;
-import nextstep.jwp.dispatcher.adapter.HandlerAdapter;
 import nextstep.jwp.dispatcher.adapter.HandlerAdapterFactory;
 import nextstep.jwp.dispatcher.mapping.HandlerMappingFactory;
 import nextstep.project.presentation.HelloWorldController;
 import nextstep.project.presentation.RegisterController;
-import nextstep.project.presentation.UserController;
+import nextstep.project.presentation.LoginController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +25,7 @@ class RequestHandlerTest {
     void setUp() {
         applicationContext = new ApplicationContextImpl();
         applicationContext.addHandler("/", new HelloWorldController());
-        applicationContext.addHandler("/login", new UserController());
+        applicationContext.addHandler("/login", new LoginController());
         applicationContext.addHandler("/register", new RegisterController());
     }
 
@@ -86,15 +85,19 @@ class RequestHandlerTest {
     }
 
     @Test
-    void login_with_query() {
+    void login_with_body() {
         // given
         final String httpRequest = String.join("\r\n",
-            "GET /login?account=gugu&password=password HTTP/1.1 ",
+            "POST /login HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
+            "Content-Length: 30 ",
+            "Content-Type: application/x-www-form-urlencoded ",
+            "Accept: */* ",
             "",
-            ""
+            "account=gugu&password=password"
             );
+
 
         final MockSocket socket = new MockSocket(httpRequest);
         final RequestHandler requestHandler = new RequestHandler(
@@ -111,21 +114,24 @@ class RequestHandlerTest {
         String expected = String.join("\r\n",
             "HTTP/1.1 302 Found ",
             "Location: ./index.html ",
-            "",
             ""
             );
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output())
+            .contains("Location: ./index.html", "Set-Cookie: JSESSIONID=");
     }
 
     @Test
     void login_password_fail() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-            "GET /login?account=gugu&password=wrong HTTP/1.1 ",
+            "POST /login HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
+            "Content-Length: 30 ",
+            "Content-Type: application/x-www-form-urlencoded ",
+            "Accept: */* ",
             "",
-            ""
+            "account=gugu&password=wrong"
         );
 
         final MockSocket socket = new MockSocket(httpRequest);
@@ -153,11 +159,14 @@ class RequestHandlerTest {
     void login_not_exists_account_fail() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-            "GET /login?account=binghe&password=password HTTP/1.1 ",
+            "POST /login HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
+            "Content-Length: 30 ",
+            "Content-Type: application/x-www-form-urlencoded ",
+            "Accept: */* ",
             "",
-            ""
+            "account=binghe&password=password"
         );
 
         final MockSocket socket = new MockSocket(httpRequest);

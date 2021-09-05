@@ -14,7 +14,7 @@ import nextstep.jwp.dispatcher.mapping.HandlerMappingFactory;
 import nextstep.project.presentation.HelloWorldController;
 import nextstep.project.presentation.IndexController;
 import nextstep.project.presentation.RegisterController;
-import nextstep.project.presentation.UserController;
+import nextstep.project.presentation.LoginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public class WebServer {
         applicationContext = new ApplicationContextImpl();
         applicationContext.addHandler("/", new HelloWorldController());
         applicationContext.addHandler("/index", new IndexController());
-        applicationContext.addHandler("/login", new UserController());
+        applicationContext.addHandler("/login", new LoginController());
         applicationContext.addHandler("/register", new RegisterController());
     }
 

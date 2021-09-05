@@ -57,7 +57,7 @@ public abstract class HttpHandler implements Handler {
     }
 
     protected void redirectTo(String redirectUrl, HttpResponse response) {
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = response.getHeaders();
         headers.addHeader("Location", redirectUrl);
 
         response.setHeaders(headers);

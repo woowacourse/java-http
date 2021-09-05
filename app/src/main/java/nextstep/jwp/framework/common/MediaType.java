@@ -4,6 +4,7 @@ import nextstep.jwp.framework.file.FileExtension;
 
 import java.util.Arrays;
 import java.util.NoSuchElementException;
+import java.util.function.Predicate;
 
 public enum MediaType {
     TEXT_HTML_CHARSET_UTF8("text/html;charset=utf-8", FileExtension.HTML),
@@ -21,21 +22,24 @@ public enum MediaType {
     }
 
     public static MediaType from(String mediaTypeValue) {
-        return Arrays.stream(values())
-                .filter(mediaType -> mediaType.value.equals(mediaTypeValue))
-                .findAny()
-                .orElseThrow(() -> new NoSuchElementException(
-                        String.format("존재하지 않는 값의 미디어 타입입니다.(%s)", mediaTypeValue))
-                );
+        return resolve(
+                mediaType -> mediaType.value.equals(mediaTypeValue),
+                String.format("존재하지 않는 값의 미디어 타입입니다.(%s)", mediaTypeValue)
+        );
     }
 
     public static MediaType from(FileExtension fileExtension) {
+        return resolve(
+                mediaType -> mediaType.fileExtension.equals(fileExtension),
+                String.format("존재하지 않는 확장자의 미디어 타입입니다.(%s)", fileExtension)
+        );
+    }
+
+    private static MediaType resolve(Predicate<MediaType> predicate, String errorMessage) {
         return Arrays.stream(values())
-                .filter(mediaType -> mediaType.fileExtension.equals(fileExtension))
+                .filter(predicate)
                 .findAny()
-                .orElseThrow(() -> new NoSuchElementException(
-                        String.format("존재하지 않는 확장자의 미디어 타입입니다.(%s)", fileExtension))
-                );
+                .orElseThrow(() -> new NoSuchElementException(errorMessage));
     }
 
     public String getValue() {

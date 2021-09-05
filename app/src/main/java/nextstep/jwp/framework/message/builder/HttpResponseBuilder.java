@@ -37,9 +37,7 @@ public class HttpResponseBuilder {
     }
 
     public static HttpResponseBuilder ok() {
-        return new HttpResponseBuilder(
-                new StatusLine(DEFAULT_HTTP_VERSION, HttpStatusCode.OK)
-        );
+        return status(HttpStatusCode.OK);
     }
 
     public static HttpResponseBuilder ok(String body) {
@@ -47,9 +45,8 @@ public class HttpResponseBuilder {
     }
 
     public static HttpResponseBuilder redirectTemporarily(String redirectUrl) {
-        return new HttpResponseBuilder(
-                new StatusLine(DEFAULT_HTTP_VERSION, HttpStatusCode.FOUND)
-        ).location(redirectUrl);
+        return status(HttpStatusCode.FOUND)
+                .location(redirectUrl);
     }
 
     public static HttpResponseBuilder staticResource(String path) {

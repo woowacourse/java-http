@@ -9,7 +9,7 @@ class HttpCookieTest {
 
     @DisplayName("raw한 쿠키값을 쿠키에 저장한다.")
     @Test
-    public void createCookie() {
+    void createCookie() {
         String cookieKey1 = "crew";
         String cookieValue1 = "choonsik";
         String cookieKey2 = "JSESSIONID";
@@ -26,7 +26,7 @@ class HttpCookieTest {
 
     @DisplayName("쿠키는 비어있을 수 있다.")
     @Test
-    public void emptyCookie() {
+    void emptyCookie() {
         String rawCookie = "";
         HttpCookie cookie = new HttpCookie(rawCookie);
 

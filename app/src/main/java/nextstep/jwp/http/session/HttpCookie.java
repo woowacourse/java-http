@@ -21,16 +21,21 @@ public class HttpCookie {
             this.cookie = new HashMap<>();
             return;
         }
-        this.cookie = Arrays.stream(rawCookie.split(COOKIE_DELIMITER))
-            .map(cookie -> cookie.split(COOKIE_VALUE_DELIMITER))
-            .peek(cookieArr -> {
-                cookieArr[KEY_INDEX] = cookieArr[KEY_INDEX].trim();
-                cookieArr[VALUE_INDEX] = cookieArr[VALUE_INDEX].trim();
-            }).collect(Collectors.toMap(arr -> arr[KEY_INDEX], arr -> arr[VALUE_INDEX]));
+        this.cookie = makeCookie(rawCookie);
     }
 
     public HttpCookie(Map<String, String> cookie) {
         this.cookie = new ConcurrentHashMap<>(cookie);
+    }
+
+    private Map<String, String> makeCookie(String rawCookie) {
+        return Arrays.stream(rawCookie.split(COOKIE_DELIMITER))
+            .map(cookies -> {
+                String[] splitCookies = cookies.split(COOKIE_VALUE_DELIMITER, 2);
+                splitCookies[KEY_INDEX] = splitCookies[KEY_INDEX].trim();
+                splitCookies[VALUE_INDEX] = splitCookies[VALUE_INDEX].trim();
+                return splitCookies;
+            }).collect(Collectors.toMap(arr -> arr[KEY_INDEX], arr -> arr[VALUE_INDEX]));
     }
 
     public String getSessionId() {

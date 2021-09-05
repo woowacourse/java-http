@@ -14,7 +14,7 @@ import nextstep.jwp.constants.StatusCode;
 import nextstep.jwp.exception.PageNotFoundException;
 
 public class HttpResponse {
-    private HttpResponse(){
+    private HttpResponse() {
     }
 
     public static class Builder {

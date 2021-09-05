@@ -14,7 +14,7 @@ public enum Header {
         this.type = type;
     }
 
-    Header(String type, String value){
+    Header(String type, String value) {
         this.type = type;
         this.value = value;
     }
@@ -23,7 +23,7 @@ public enum Header {
         return this.type;
     }
 
-    public String getValue(){
+    public String getValue() {
         return this.value;
     }
 }

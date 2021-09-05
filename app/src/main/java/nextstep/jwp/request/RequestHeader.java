@@ -16,13 +16,13 @@ public class RequestHeader {
     }
 
     private Map<String, String> parseHeaders(String lines) {
-        Map<String, String> headers = Stream.of(lines.split(HttpTerms.NEW_LINE))
+        Map<String, String> parsedHeaders = Stream.of(lines.split(HttpTerms.NEW_LINE))
                 .map(line -> line.split(HttpTerms.COLUMN_SEPARATOR))
                 .collect(Collectors.toMap(x -> x[HttpTerms.KEY].trim(), x -> x[HttpTerms.VALUE].trim()));
         if (lines.contains(Header.COOKIE.getType())) {
-            this.cookie = new HttpCookie(headers.get(Header.COOKIE.getType()));
+            this.cookie = new HttpCookie(parsedHeaders.get(Header.COOKIE.getType()));
         }
-        return headers;
+        return parsedHeaders;
     }
 
     public boolean contains(String key) {

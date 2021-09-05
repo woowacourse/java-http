@@ -19,7 +19,8 @@ public class HttpRequestConverter {
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final Logger LOG = LoggerFactory.getLogger(HttpRequestConverter.class);
 
-    private HttpRequestConverter() {}
+    private HttpRequestConverter() {
+    }
 
     public static Request createdRequest(BufferedReader bufferedReader) {
         try {

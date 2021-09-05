@@ -34,6 +34,7 @@ public class RequestHandler implements Runnable {
     public void run() {
         LOG.debug("New Client Connect! Connected IP : {}, Port : {}", connection.getInetAddress(),
             connection.getPort());
+        LOG.debug("쓰레드 이름 : {}", Thread.currentThread().getName());
 
         try (final InputStream inputStream = connection.getInputStream();
             final OutputStream outputStream = connection.getOutputStream();

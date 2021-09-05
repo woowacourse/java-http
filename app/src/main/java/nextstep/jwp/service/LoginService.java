@@ -6,7 +6,6 @@ import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.HttpSession;
 import nextstep.jwp.http.HttpSessions;
 import nextstep.jwp.http.Request;
-import nextstep.jwp.http.Response;
 import nextstep.jwp.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

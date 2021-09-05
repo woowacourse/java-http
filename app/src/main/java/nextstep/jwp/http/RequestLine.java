@@ -69,10 +69,6 @@ public class RequestLine {
         return httpVersion;
     }
 
-    public boolean isQueryParamsEmpty() {
-        return queryParams.isEmpty();
-    }
-
     public boolean isPost() {
         return httpMethod.equals(HttpMethod.POST);
     }

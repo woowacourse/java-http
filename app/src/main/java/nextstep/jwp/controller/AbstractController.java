@@ -1,7 +1,6 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
-import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 
@@ -9,10 +8,10 @@ public abstract class AbstractController implements Controller {
 
     @Override
     public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        if (httpRequest.getHttpMethod().equals(HttpMethod.GET)) {
-            doGet(httpRequest, httpResponse);
-        } else if (httpRequest.getHttpMethod().equals(HttpMethod.POST)) {
+        if (httpRequest.isPost()) {
             doPost(httpRequest, httpResponse);
+        } else {
+            doGet(httpRequest, httpResponse);
         }
     }
 

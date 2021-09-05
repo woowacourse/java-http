@@ -35,7 +35,7 @@ public class LoginService {
         }
     }
 
-    private void sessionCheck(final HttpRequest httpRequest, final HttpResponse httpResponse, final String jsessionId) throws IOException {
+    private void sessionCheck(final HttpRequest httpRequest, final HttpResponse httpResponse, final String jsessionId) {
         if (cookieCheck(httpRequest)) {
             jsessionIdCheck(httpRequest, httpResponse, jsessionId);
             return;
@@ -45,13 +45,13 @@ public class LoginService {
 
     private void jsessionIdCheck(final HttpRequest httpRequest, final HttpResponse httpResponse, final String jsessionId) {
         HttpCookie httpCookie = httpRequest.getCookie();
-        if (!httpCookie.containsKey("JSESSIONID")) {
+        if (!httpCookie.containsKey(JSESSIONID)) {
             setJsessionid(httpResponse, jsessionId);
         }
     }
 
     private void setJsessionid(final HttpResponse httpResponse, final String jsessionId) {
-        httpResponse.addHeader("Set-Cookie", String.format("JSESSIONID=%s", jsessionId));
+        httpResponse.addHeader("Set-Cookie", String.format("%s=%s", JSESSIONID, jsessionId));
     }
 
     private void sessionMappingClient(final HttpRequest httpRequest, final String jsessionId) {

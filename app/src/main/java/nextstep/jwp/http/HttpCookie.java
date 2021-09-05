@@ -16,4 +16,8 @@ public class HttpCookie {
     public String jSessionId() {
         return cookie.computeIfAbsent(JSESSIONID, key -> UUID.randomUUID().toString());
     }
+
+    public String getCookie(String key) {
+        return cookie.get(key);
+    }
 }

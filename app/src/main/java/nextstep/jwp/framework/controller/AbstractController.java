@@ -17,7 +17,7 @@ public abstract class AbstractController implements Controller {
         if (httpMethod == HttpMethod.POST) {
             return doPost(httpRequestMessage);
         }
-        throw new IllegalStateException("Controller의 Service 메서드에 문제가 있습니다.");
+        throw new IllegalStateException("Controller 의 Service 메서드에 문제가 있습니다.");
     }
 
     protected HttpResponseMessage doGet(HttpRequestMessage httpRequestMessage) {

@@ -11,6 +11,14 @@ import java.io.OutputStream;
 
 public class TestHttpRequestUtils {
 
+    public static HttpRequestMessage makeDummyRequest() throws IOException {
+        String requestMessage = String.join("\r\n",
+                "GET / HTTP/1.1",
+                "",
+                "");
+        return makeRequest(requestMessage);
+    }
+
     public static HttpRequestMessage makeRequest(String requestMessage) throws IOException {
         HttpTranslator httpTranslator = new HttpTranslator(
                 generateInputStream(requestMessage), generateOutputStream()

@@ -6,6 +6,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import nextstep.jwp.http.cookie.HttpCookie;
+import nextstep.jwp.http.session.HttpSession;
+import nextstep.jwp.http.session.HttpSessions;
 
 public class HttpRequest {
 
@@ -51,20 +55,8 @@ public class HttpRequest {
         return new String(buffer);
     }
 
-    public RequestLine requestLine() {
-        return requestLine;
-    }
-
-    public RequestHeaders requestHeaders() {
-        return requestHeaders;
-    }
-
-    public String requestBody() {
-        return requestBody;
-    }
-
-    public boolean isGet() {
-        return requestLine.method().isGet();
+    public QueryParams requestParam() {
+        return QueryParams.of(requestBody);
     }
 
     public SourcePath sourcePath() {
@@ -73,5 +65,21 @@ public class HttpRequest {
 
     public HttpMethod httpMethod() {
         return requestLine.method();
+    }
+
+    public HttpCookie httpCookie() {
+        return HttpCookie.of(requestHeaders.cookie());
+    }
+
+    public String getSessionId() {
+        return httpCookie().getSessionId();
+    }
+
+    public HttpSession getSession() {
+        String sessionId = getSessionId();
+        if (Objects.isNull(sessionId) || !HttpSessions.contains(sessionId)) {
+            return HttpSession.create();
+        }
+        return HttpSessions.getSession(sessionId);
     }
 }

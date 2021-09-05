@@ -1,9 +1,11 @@
 package nextstep.jwp;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import nextstep.jwp.handler.controller.AbstractController;
-import nextstep.jwp.handler.resource.ResourceHandler;
+import nextstep.jwp.handler.resource.ResourceHandlerImpl;
 import nextstep.jwp.mapper.ControllerMapper;
 import nextstep.jwp.mapper.HandlerMapper;
 import nextstep.jwp.mapper.HandlerMappers;
@@ -12,33 +14,31 @@ import nextstep.jwp.view.ViewResolver;
 
 public class Assembler {
 
-    private final HandlerMapper handlerMapper;
     private final ViewResolver viewResolver;
     private final Dispatcher dispatcher;
 
-    private final ResourceHandlerMapper resourceHandlerMapper;
-    private final ControllerMapper controllerMapper;
-
     public Assembler() {
-        controllerMapper = controllerMapper();
-        resourceHandlerMapper = resourceHandlerMapper();
+        ControllerMapper controllerMapper = controllerMapper();
+        ResourceHandlerMapper resourceHandlerMapper = resourceHandlerMapper();
 
-        handlerMapper = handlerMapper(controllerMapper, resourceHandlerMapper);
+        HandlerMappers handlerMappers = handlerMappers(controllerMapper, resourceHandlerMapper);
         viewResolver = viewResolver();
 
-        dispatcher = new Dispatcher(handlerMapper, viewResolver);
+        dispatcher = new Dispatcher(handlerMappers, viewResolver);
     }
 
     private ViewResolver viewResolver() {
         return new ViewResolver(ServerConfig.ROOT_RESPONSE, ServerConfig.RESOURCE_BASE_PATH);
     }
 
-    private HandlerMappers handlerMapper(HandlerMapper... handlerMappers) {
-        return new HandlerMappers(handlerMappers);
+    private HandlerMappers handlerMappers(HandlerMapper... handlerMappers) {
+        List<HandlerMapper> handlerMapperBeans = Arrays.asList(handlerMappers);
+        return new HandlerMappers(handlerMapperBeans);
     }
 
     private ResourceHandlerMapper resourceHandlerMapper() {
-        return new ResourceHandlerMapper(new ResourceHandler());
+        List<ResourceHandlerImpl> handlerBeans = Arrays.asList(new ResourceHandlerImpl());
+        return new ResourceHandlerMapper(handlerBeans);
     }
 
     private ControllerMapper controllerMapper() {

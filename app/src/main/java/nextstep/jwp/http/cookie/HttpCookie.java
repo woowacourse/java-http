@@ -1,4 +1,4 @@
-package nextstep.jwp.http.request;
+package nextstep.jwp.http.cookie;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -7,31 +7,35 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
-public class QueryParams {
+public class HttpCookie {
+
+    public static final HttpCookie EMPTY = new HttpCookie(Collections.emptyMap());
+
+    private static final String KEY_SESSION_ID = "JSESSIONID";
+
     private final Map<String, String> params;
 
-    public QueryParams(Map<String, String> params) {
+    private HttpCookie(Map<String, String> params) {
         this.params = params;
     }
 
-    public static QueryParams of(String queryString) {
-        try {
-            Map<String, String> params = parse(queryString);
-            return new QueryParams(params);
-        } catch (Exception e) {
-            return new QueryParams(Collections.emptyMap());
+    public static HttpCookie of(String cookieLine) {
+        if (Objects.isNull(cookieLine) || cookieLine.isEmpty()) {
+            return EMPTY;
         }
-    }
-
-    private static Map<String, String> parse(String queryString) {
-        return Arrays.stream(queryString.split("&"))
+        Map<String, String> items = Arrays.stream(cookieLine.split("; "))
                 .map(line -> line.split("="))
                 .filter(pair -> pair.length == 2)
                 .collect(toMap(pair -> pair[0], pair -> pair[1]));
+        return new HttpCookie(items);
     }
 
-    public String get(String key) {
-        return params.get(key);
+    public String getAttributes(String name) {
+        return params.get(name);
+    }
+
+    public String getSessionId() {
+        return params.get(KEY_SESSION_ID);
     }
 
     @Override
@@ -42,19 +46,12 @@ public class QueryParams {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        QueryParams that = (QueryParams) o;
+        HttpCookie that = (HttpCookie) o;
         return Objects.equals(params, that.params);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(params);
-    }
-
-    @Override
-    public String toString() {
-        return "QueryParams{" +
-                "params=" + params +
-                '}';
     }
 }

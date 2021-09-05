@@ -1,13 +1,9 @@
 package nextstep.jwp.mapper;
 
-import nextstep.jwp.handler.controller.AbstractController;
-import nextstep.jwp.handler.Handler;
-import nextstep.jwp.handler.controller.LoginController;
-import nextstep.jwp.handler.controller.RegisterController;
-import nextstep.jwp.http.request.HttpRequest;
-
-import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.handler.Handler;
+import nextstep.jwp.handler.controller.AbstractController;
+import nextstep.jwp.http.request.HttpRequest;
 
 public class ControllerMapper implements HandlerMapper {
 

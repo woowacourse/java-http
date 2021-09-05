@@ -19,7 +19,7 @@ public class Model {
         this.attributes = new HashMap<>();
     }
 
-    public Set<String> keys(){
+    public Set<String> keys() {
         return attributes.keySet();
     }
 
@@ -32,5 +32,9 @@ public class Model {
 
     public Object getAttribute(String key) {
         return attributes.get(key);
+    }
+
+    public boolean isEmpty() {
+        return this.equals(EMPTY);
     }
 }

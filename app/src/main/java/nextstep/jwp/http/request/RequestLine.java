@@ -27,7 +27,7 @@ public class RequestLine {
         return uriPath.getSourcePath();
     }
 
-    public QueryParams queryParams(){
+    public QueryParams queryParams() {
         return uriPath.getQueryParams();
     }
 

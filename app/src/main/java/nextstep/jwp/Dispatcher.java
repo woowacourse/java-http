@@ -6,17 +6,17 @@ import nextstep.jwp.handler.modelandview.ModelAndView;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpStatus;
-import nextstep.jwp.mapper.HandlerMapper;
+import nextstep.jwp.mapper.HandlerMappers;
 import nextstep.jwp.view.View;
 import nextstep.jwp.view.ViewResolver;
 
 public class Dispatcher {
 
-    private final HandlerMapper handlerMapper;
+    private final HandlerMappers handlerMappers;
     private final ViewResolver viewResolver;
 
-    public Dispatcher(HandlerMapper handlerMapper, ViewResolver viewResolver) {
-        this.handlerMapper = handlerMapper;
+    public Dispatcher(HandlerMappers handlerMappers, ViewResolver viewResolver) {
+        this.handlerMappers = handlerMappers;
         this.viewResolver = viewResolver;
     }
 
@@ -30,7 +30,7 @@ public class Dispatcher {
 
     public ModelAndView service(HttpRequest request, HttpResponse response) {
         try {
-            Handler handler = handlerMapper.mapping(request);
+            Handler handler = handlerMappers.mapping(request);
             return handler.handle(request, response);
         } catch (NotFoundException notFoundException) {
             return ModelAndView.of("/404.html", HttpStatus.NOT_FOUND);

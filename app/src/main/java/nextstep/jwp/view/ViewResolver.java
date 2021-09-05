@@ -15,12 +15,12 @@ public class ViewResolver {
     public ViewResolver(String rootResponse, String resourceBasePath) {
         this.resourceBasePath = resourceBasePath;
 
-        viewContainer.put("", View.empty());
+        viewContainer.put("", View.EMPTY);
         viewContainer.put("/", View.of("rootResponse", rootResponse));
     }
 
     public View resolve(String viewName) {
-        if(!viewContainer.containsKey(viewName)){
+        if (!viewContainer.containsKey(viewName)) {
             viewContainer.putIfAbsent(viewName, getView(viewName));
         }
         return viewContainer.get(viewName);

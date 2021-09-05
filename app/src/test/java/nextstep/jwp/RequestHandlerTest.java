@@ -2,12 +2,7 @@ package nextstep.jwp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.http.response.HttpStatus;
 import nextstep.jwp.model.User;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +30,7 @@ public class RequestHandlerTest {
     }
 
     @Test
-    void notFound() throws IOException {
+    void notFound() {
         // given
         final String httpRequest = get("/invalid.html");
         final MockSocket socket = new MockSocket(httpRequest);
@@ -45,13 +40,12 @@ public class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/404.html");
-        final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertResponse(socket.output(), HttpStatus.NOT_FOUND, body);
+        String responseStatusLine = socket.output().split("\r\n")[0];
+        assertThat(responseStatusLine).isEqualTo("HTTP/1.1 404 Not Found ");
     }
 
     @Test
-    void index() throws IOException {
+    void index() {
         // given
         final String httpRequest = get("/index.html");
         final MockSocket socket = new MockSocket(httpRequest);
@@ -61,13 +55,12 @@ public class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertResponse(socket.output(), HttpStatus.OK, body);
+        String responseStatusLine = socket.output().split("\r\n")[0];
+        assertThat(responseStatusLine).isEqualTo("HTTP/1.1 200 OK ");
     }
 
     @Test
-    void loginPage() throws IOException {
+    void loginPage() {
         // given
         final String httpRequest = get("/login");
         final MockSocket socket = new MockSocket(httpRequest);
@@ -77,9 +70,8 @@ public class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertResponse(socket.output(), HttpStatus.OK, body);
+        String responseStatusLine = socket.output().split("\r\n")[0];
+        assertThat(responseStatusLine).isEqualTo("HTTP/1.1 200 OK ");
     }
 
     @Test
@@ -95,15 +87,12 @@ public class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final String expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: index.html \r\n" +
-                "\r\n";
-
-        assertThat(socket.output()).isEqualTo(expected);
+        String responseStatusLine = socket.output().split("\r\n")[0];
+        assertThat(responseStatusLine).isEqualTo("HTTP/1.1 302 Found ");
     }
 
     @Test
-    void loginWithUnauthorized() throws IOException {
+    void loginWithUnauthorized() {
         // given
         final String requestBody = "account=invalidAccount&password=password";
         final String httpRequest = post("/login", requestBody);
@@ -115,14 +104,12 @@ public class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/401.html");
-        final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertResponse(socket.output(), HttpStatus.UNAUTHORIZED, body);
+        String responseStatusLine = socket.output().split("\r\n")[0];
+        assertThat(responseStatusLine).isEqualTo("HTTP/1.1 401 Unauthorized ");
     }
 
-
     @Test
-    void register() throws IOException {
+    void register() {
         // given
         final String httpRequest = get("/register");
         final MockSocket socket = new MockSocket(httpRequest);
@@ -132,14 +119,13 @@ public class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/register.html");
-        final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        assertResponse(socket.output(), HttpStatus.OK, body);
+        String responseStatusLine = socket.output().split("\r\n")[0];
+        assertThat(responseStatusLine).isEqualTo("HTTP/1.1 200 OK ");
     }
 
     @Test
     void registerPost() {
-        final String account = "corgi";
+        final String account = "account";
         final String password = "password";
         final String email = "hkkang%40woowahan.com";
 
@@ -154,22 +140,9 @@ public class RequestHandlerTest {
         requestHandler.run();
 
         // then
-        final String expected = "HTTP/1.1 302 Found \r\n" +
-                "Location: index.html \r\n" +
-                "\r\n";
-
-        assertThat(socket.output()).isEqualTo(expected);
+        String responseStatusLine = socket.output().split("\r\n")[0];
+        assertThat(responseStatusLine).isEqualTo("HTTP/1.1 302 Found ");
         InMemoryUserRepository.delete(new User(account, password, email));
-    }
-
-    public static void assertResponse(String output, HttpStatus httpStatus, String body) {
-        String expected = "HTTP/1.1 " + httpStatus.code() + " " + httpStatus.status() + " \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + body.getBytes().length + " \r\n" +
-                "\r\n" +
-                body;
-
-        assertThat(output).isEqualTo(expected);
     }
 
     private static String get(String url) {

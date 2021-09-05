@@ -1,5 +1,4 @@
 ## 🚀 1단계 - HTTP 서버 구현하기
-### ✏️ GET /index.html 응답하기
 - [x] http request 를 파싱하기
   - [x] StringUtils 만들기
 - [x] http response 만들기
@@ -16,5 +15,8 @@
   - [x] login POST로 리팩터링
   
 
-## 1단계 리팩터링 목록
-- HttpParseUtils 라는 이름이 마음이 안 들기도 하고 딴 데서는 안 쓰일 것 같이 변해가서 객체로 분리하도록 함 (HttpTranslator)
+## 🍪 3단계 쿠키, 세션 구현하기
+- [ ] 요청에 쿠키가 들어오면 HttpRequest 에서 쿠키를 얻어내는 기능 구현하기
+  - [ ] HttpCookies 객체 만들기
+  - [ ] RequestHeader 에 쿠키를 추출하는 메서드 만들기
+  

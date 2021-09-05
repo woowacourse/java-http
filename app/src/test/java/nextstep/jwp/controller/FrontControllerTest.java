@@ -32,7 +32,7 @@ class FrontControllerTest {
         FRONT_CONTROLLER.doGet(request, response);
 
         // then
-        assertThat(response.toString()).hasToString(expectedResponse.toString());
+        assertThat(response.message()).isEqualTo(expectedResponse.message());
     }
 
     @Test

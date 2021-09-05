@@ -36,7 +36,7 @@ class LoginControllerTest {
         LOGIN_CONTROLLER.doGet(request, response);
 
         // then
-        assertThat(response.toString()).hasToString(createResponseOK());
+        assertThat(response.message()).isEqualTo(createResponseOK());
     }
 
     @Test
@@ -49,7 +49,7 @@ class LoginControllerTest {
 
         // then
         for (String message : expected.split(NEW_LINE)) {
-            assertThat(response.toString()).contains(message);
+            assertThat(response.message()).contains(message);
         }
     }
 
@@ -63,7 +63,7 @@ class LoginControllerTest {
         Response response = getPostSuccessResponse();
 
         // then
-        assertThat(response.toString()).contains(expected);
+        assertThat(response.message()).contains(expected);
     }
 
     @Test
@@ -80,14 +80,14 @@ class LoginControllerTest {
         LOGIN_CONTROLLER.doGet(request, response);
 
         // then
-        assertThat(response.toString())
-            .hasToString(MessageFactory.createResponseFound("index.html"));
+        assertThat(response.message())
+            .isEqualTo(MessageFactory.createResponseFound("index.html"));
     }
 
     private String getSessionId() {
         Response response = getPostSuccessResponse();
-        String[] messages = response.toString().split(NEW_LINE);
-        String[] cookie = messages[2].split(":");
+        String[] messages = response.message().split(NEW_LINE);
+        String[] cookie = messages[1].split(":");
         String[] cookieValue = cookie[1].trim().split("=");
         return cookieValue[1];
     }

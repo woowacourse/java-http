@@ -38,8 +38,9 @@ public class LoginController extends AbstractController {
         HttpSession httpSession = request.getHttpSession();
         httpSession.setAttribute(httpSession.getId(), user);
         HttpSessions.add(httpSession.getId(), httpSession);
+        response.addHeader("Set-Cookie", "JSESSIONID=" + httpSession.getId());
 
         response.set302Found(INDEX_HTML);
-        response.addHeader("Set-Cookie", "JSESSIONID=" + httpSession.getId());
+        response.addHeader("Location", INDEX_HTML);
     }
 }

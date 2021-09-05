@@ -37,7 +37,7 @@ class RegisterControllerTest {
         REGISTER_CONTROLLER.doGet(request, response);
 
         // then
-        assertThat(response.toString()).hasToString(
+        assertThat(response.message()).isEqualTo(
             MessageFactory.createResponseOK("register.html", "text/html"));
     }
 
@@ -55,7 +55,7 @@ class RegisterControllerTest {
         REGISTER_CONTROLLER.doGet(request, response);
 
         // then
-        assertThat(response.toString()).hasToString(
+        assertThat(response.message()).isEqualTo(
             MessageFactory.createResponseFound("index.html"));
     }
 
@@ -69,7 +69,7 @@ class RegisterControllerTest {
 
         // then
         for (String message : expected.split(NEW_LINE)) {
-            assertThat(response.toString()).contains(message);
+            assertThat(response.message()).contains(message);
         }
     }
 
@@ -83,7 +83,7 @@ class RegisterControllerTest {
         Response response = getPostResponse("test3");
 
         // then
-        assertThat(response.toString()).contains(expected);
+        assertThat(response.message()).contains(expected);
     }
 
     @Test
@@ -125,7 +125,7 @@ class RegisterControllerTest {
 
     private String getSessionId(String id) {
         Response response = getPostResponse(id);
-        String[] messages = response.toString().split(NEW_LINE);
+        String[] messages = response.message().split(NEW_LINE);
         String[] cookie = messages[2].split(":");
         String[] cookieValue = cookie[1].trim().split("=");
         return cookieValue[1];

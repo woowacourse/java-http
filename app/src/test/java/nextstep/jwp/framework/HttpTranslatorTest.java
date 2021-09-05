@@ -110,7 +110,7 @@ class HttpTranslatorTest {
         LinkedHashMap<String, String> fields = new LinkedHashMap<>();
         fields.put("Content-Type", "text/html;charset=utf-8");
         fields.put("Content-Length", "12");
-        HeaderFields headerFields = new HeaderFields(fields);
+        HeaderFields headerFields = HeaderFields.from(fields);
         ResponseHeader responseHeader = new ResponseHeader(headerFields);
 
         MessageBody responseBody = new MessageBody("hello world!");

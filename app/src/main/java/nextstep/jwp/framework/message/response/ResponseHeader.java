@@ -12,7 +12,7 @@ public class ResponseHeader implements MessageHeader {
     private final HeaderFields headerFields;
 
     public ResponseHeader() {
-        this(new HeaderFields());
+        this(HeaderFields.empty());
     }
 
     public ResponseHeader(HeaderFields headerFields) {

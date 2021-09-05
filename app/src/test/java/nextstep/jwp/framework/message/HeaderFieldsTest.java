@@ -20,10 +20,24 @@ class HeaderFieldsTest {
         headerParams.put("Content-Length", "12");
 
         // when
-        HeaderFields headerFields = new HeaderFields(headerParams);
+        HeaderFields headerFields = HeaderFields.from(headerParams);
 
         // then
         assertThat(headerFields.toMap()).isEqualTo(headerParams);
+    }
+
+    @DisplayName("비어있는 HeaderFields 를 생성한다.")
+    @Test
+    void createEmpty() {
+        // given, when
+        HeaderFields emptyHeaderFields = HeaderFields.empty();
+        HeaderFields emptyHeaderFieldsFromMap = HeaderFields.from(new LinkedHashMap<>());
+        HeaderFields emptyHeaderFieldsFromString = HeaderFields.from("");
+
+        // then
+        assertThat(emptyHeaderFields.asString()).isEmpty();
+        assertThat(emptyHeaderFields).isEqualTo(emptyHeaderFieldsFromMap);
+        assertThat(emptyHeaderFields).isEqualTo(emptyHeaderFieldsFromString);
     }
 
     @DisplayName("문자열로 HeaderFields 를 생성한다.")
@@ -43,7 +57,7 @@ class HeaderFieldsTest {
         headerParams.put("Content-Type", "text/html;charset=utf-8");
         headerParams.put("Content-Length", "12");
 
-        HeaderFields expect = new HeaderFields(headerParams);
+        HeaderFields expect = HeaderFields.from(headerParams);
 
         // when
         HeaderFields headerFields = HeaderFields.from(headerMessage);
@@ -67,7 +81,7 @@ class HeaderFieldsTest {
                 "Content-Type: text/html;charset=utf-8\r\n" +
                 "Content-Length: 12\r\n";
 
-        HeaderFields headerFields = new HeaderFields(headerParams);
+        HeaderFields headerFields = HeaderFields.from(headerParams);
 
         // when
         String headerMesssage = headerFields.asString();

@@ -16,22 +16,32 @@ public class HeaderFields {
     private static final String BLANK = " ";
     private static final String NEW_LINE = "\r\n";
     private static final String HEADER_FIELD_SEPARATOR = ":";
-
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String LOCATION = "Location";
 
     private final Map<String, String> fields;
 
-    public HeaderFields() {
-        this.fields = new LinkedHashMap<>();
+    private HeaderFields() {
+        this(new LinkedHashMap<>());
     }
 
-    public HeaderFields(LinkedHashMap<String, String> fields) {
+    private HeaderFields(Map<String, String> fields) {
         this.fields = fields;
     }
 
+    public static HeaderFields empty() {
+        return new HeaderFields();
+    }
+
+    public static HeaderFields from(LinkedHashMap<String, String> fields) {
+        return new HeaderFields(fields);
+    }
+
     public static HeaderFields from(String headerFieldLines) {
+        if (headerFieldLines.isEmpty()) {
+            return empty();
+        }
         LinkedHashMap<String, String> headerFields = new LinkedHashMap<>();
         List<String> lines = StringUtils.splitWithSeparator(headerFieldLines, NEW_LINE);
         for (String line : lines) {

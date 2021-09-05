@@ -44,6 +44,6 @@ class ResponseHeaderTest {
         LinkedHashMap<String, String> headerParams = new LinkedHashMap<>();
         headerParams.put("Content-Type", "text/html;charset=utf-8");
         headerParams.put("Content-Length", "5564");
-        return new HeaderFields(headerParams);
+        return HeaderFields.from(headerParams);
     }
 }

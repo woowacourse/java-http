@@ -58,7 +58,7 @@ class HttpResponseMessageTest {
         LinkedHashMap<String, String> headerParams = new LinkedHashMap<>();
         headerParams.put("Content-Type", "text/html;charset=utf-8");
         headerParams.put("Content-Length", "12");
-        HeaderFields headerFields = new HeaderFields(headerParams);
+        HeaderFields headerFields = HeaderFields.from(headerParams);
         return new ResponseHeader(headerFields);
     }
 

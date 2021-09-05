@@ -19,12 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 class HttpRequestParserTest {
 
-    private HttpRequestParser httpRequestParser;
-
-    @BeforeEach
-    void setUp() {
-        httpRequestParser = new HttpRequestParser();
-    }
+    private static final HttpRequestParser httpRequestParser
+            = new HttpRequestParser();
 
     @Test
     @DisplayName("요청을 파싱해서 HttpRequest로 만든다.")

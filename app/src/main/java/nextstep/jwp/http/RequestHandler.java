@@ -68,13 +68,13 @@ public class RequestHandler implements Runnable {
             HttpResponse httpResponse,
             ContentType contentType
     ) throws IOException {
-        final String resource = httpRequest.getUri();
+        final String resource = FileReader.file(httpRequest.getUri());
         httpResponse.addHeaders("Content-Type", contentType.getContentType());
         httpResponse.addHeaders("Content-Length", String.valueOf(resource.getBytes().length));
 
         httpResponse.writeStatusLine(HttpStatus.OK);
         httpResponse.writeHeaders();
-        httpResponse.writeBody(FileReader.file(resource));
+        httpResponse.writeBody(resource);
     }
 
     private void close() {

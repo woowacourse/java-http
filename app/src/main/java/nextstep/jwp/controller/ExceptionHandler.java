@@ -10,7 +10,7 @@ public class ExceptionHandler {
 
     public static void unauthorized(HttpResponse response) throws Exception {
         String content = FileReader.file("/401.html");
-
+        addHeaders(response, content);
         response.writeStatusLine(HttpStatus.UNAUTHORIZED);
         writeHeadersAndBody(response, content);
     }
@@ -33,5 +33,10 @@ public class ExceptionHandler {
             throws IOException {
         response.writeHeaders();
         response.writeBody(content);
+    }
+
+    private static void addHeaders(HttpResponse response, String content) {
+        response.addHeaders("Content-Type", ContentType.HTML.getContentType());
+        response.addHeaders("Content-Length", String.valueOf(content.getBytes().length));
     }
 }

@@ -1,11 +1,11 @@
 package nextstep.jwp.http;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class ResponseHeaders {
 
-    Map<String, String> headers = new HashMap<>();
+    Map<String, String> headers = new LinkedHashMap<>();
 
     public Map<String, String> getHeaders() {
         return headers;

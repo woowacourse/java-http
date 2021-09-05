@@ -39,6 +39,7 @@ public class HttpResponse {
 
         outputStream.write(headers.getBytes());
         outputStream.write("\r\n".getBytes());
+        outputStream.write("\r\n".getBytes());
     }
 
     public void writeBody(String body) throws IOException {

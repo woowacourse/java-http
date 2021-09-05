@@ -17,3 +17,8 @@
     - 공통 코드 분리
 - [x] Controller 인터페이스 추가
     - 메서드 처리 리팩토링
+  
+## 3단계
+
+- [x] Cookie에 JSESSIONID 값 저장하기
+- [x] Session 구현하기

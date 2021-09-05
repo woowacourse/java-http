@@ -5,7 +5,6 @@ import nextstep.jwp.utils.StringUtils;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -14,65 +13,56 @@ import java.util.stream.Collectors;
 public class HeaderFields {
 
     private static final String BLANK = " ";
-    private static final String NEW_LINE = "\r\n";
-    private static final String HEADER_FIELD_SEPARATOR = ":";
+    private static final String HEADER_PIECE_SEPARATOR = "\r\n";
+    private static final String HEADER_PARAM_SEPARATOR = ":";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String LOCATION = "Location";
 
-    private final Map<String, String> fields;
+    private final Map<String, String> params;
 
     private HeaderFields() {
         this(new LinkedHashMap<>());
     }
 
-    private HeaderFields(Map<String, String> fields) {
-        this.fields = fields;
+    private HeaderFields(Map<String, String> params) {
+        this.params = params;
     }
 
     public static HeaderFields empty() {
         return new HeaderFields();
     }
 
-    public static HeaderFields from(LinkedHashMap<String, String> fields) {
+    public static HeaderFields from(Map<String, String> fields) {
         return new HeaderFields(fields);
     }
 
-    public static HeaderFields from(String headerFieldLines) {
-        if (headerFieldLines.isEmpty()) {
-            return empty();
-        }
-        LinkedHashMap<String, String> headerFields = new LinkedHashMap<>();
-        List<String> lines = StringUtils.splitWithSeparator(headerFieldLines, NEW_LINE);
-        for (String line : lines) {
-            List<String> pieces = StringUtils.splitTwoPiecesWithSeparator(line, HEADER_FIELD_SEPARATOR);
-            String key = pieces.get(0).trim();
-            String value = pieces.get(1).trim();
-            headerFields.put(key, value);
-        }
-        return new HeaderFields(headerFields);
+    public static HeaderFields from(String headerString) {
+        return from(
+                StringUtils.extractMap(headerString, HEADER_PIECE_SEPARATOR, HEADER_PARAM_SEPARATOR)
+        );
     }
 
     public String asString() {
-        return fields.entrySet().stream()
+        return params.entrySet().stream()
                 .map(this::combineField)
                 .collect(Collectors.joining());
     }
 
     private String combineField(Map.Entry<String, String> field) {
-        return field.getKey() + HEADER_FIELD_SEPARATOR + BLANK + field.getValue() + NEW_LINE;
+        return field.getKey() + HEADER_PARAM_SEPARATOR + BLANK + field.getValue() + HEADER_PIECE_SEPARATOR;
     }
 
     public void put(String key, String value) {
-        this.fields.put(key, value);
+        this.params.put(key, value);
     }
 
     public Optional<String> take(String key) {
-        return Optional.ofNullable(fields.get(key));
+        return Optional.ofNullable(params.get(key));
     }
 
     public Map<String, String> toMap() {
-        return Collections.unmodifiableMap(fields);
+        return Collections.unmodifiableMap(params);
     }
 
     public void putLocation(String uri) {
@@ -92,11 +82,11 @@ public class HeaderFields {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         HeaderFields that = (HeaderFields) o;
-        return Objects.equals(fields, that.fields);
+        return Objects.equals(params, that.params);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fields);
+        return Objects.hash(params);
     }
 }

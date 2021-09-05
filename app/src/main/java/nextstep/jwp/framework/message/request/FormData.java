@@ -1,6 +1,7 @@
 package nextstep.jwp.framework.message.request;
 
 import nextstep.jwp.framework.message.MessageBody;
+import nextstep.jwp.utils.StringUtils;
 
 import java.util.AbstractMap;
 import java.util.Arrays;
@@ -15,14 +16,14 @@ public class FormData {
     private static final String FORM_DATA_PIECE_SEPARATOR = "&";
     private static final String FORM_DATE_PARAM_SEPARATOR = "=";
 
-    private final Map<String, String> fields;
+    private final Map<String, String> params;
 
     private FormData() {
         this(new LinkedHashMap<>());
     }
 
-    public FormData(Map<String, String> formData) {
-        this.fields = formData;
+    public FormData(Map<String, String> params) {
+        this.params = params;
     }
 
     public static FormData from(MessageBody messageBody) {
@@ -34,25 +35,15 @@ public class FormData {
 
     private static Map<String, String> extractFormData(MessageBody messageBody) {
         String formData = messageBody.asString();
-        String[] pieces = formData.split(FORM_DATA_PIECE_SEPARATOR);
-        return Arrays.stream(pieces)
-                .map(FormData::extractParam)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (k, v) -> k, LinkedHashMap::new));
-    }
-
-    private static Map.Entry<String, String> extractParam(String formDataPiece) {
-        int index = formDataPiece.indexOf(FORM_DATE_PARAM_SEPARATOR);
-        String key = formDataPiece.substring(0, index);
-        String value = formDataPiece.substring(index + 1);
-        return new AbstractMap.SimpleEntry<>(key, value);
+        return StringUtils.extractMap(formData, FORM_DATA_PIECE_SEPARATOR, FORM_DATE_PARAM_SEPARATOR);
     }
 
     public String take(String key) {
-        return fields.get(key);
+        return params.get(key);
     }
 
     public Map<String, String> toMap() {
-        return Collections.unmodifiableMap(fields);
+        return Collections.unmodifiableMap(params);
     }
 
     @Override
@@ -60,11 +51,11 @@ public class FormData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         FormData formData1 = (FormData) o;
-        return Objects.equals(fields, formData1.fields);
+        return Objects.equals(params, formData1.params);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fields);
+        return Objects.hash(params);
     }
 }

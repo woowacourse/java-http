@@ -26,6 +26,14 @@ class HttpSessionTest {
         assertThat(httpSession.getAccessTime()).isLessThan(System.currentTimeMillis());
     }
 
+    @DisplayName("유효하지 않은 HttpSession 을 객체를 생성한다. 옵셔널 사용시 객체가 없을 때 만드는 용도")
+    @Test
+    void createInvalid() {
+        // when, then
+        HttpSession invalidHttpSession = HttpSession.invalid();
+        assertThat(invalidHttpSession.isInvalid()).isTrue();
+    }
+
     @DisplayName("HttpSession 에 값을 넣고 가져온다.")
     @Test
     void putAndTake() {

@@ -1,26 +1,36 @@
 package nextstep.jwp.framework.session;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class HttpSession {
 
+    private static final HttpSession INVALID_SESSION = new HttpSession("", -1, Collections.emptyMap());
     private static final long DEFAULT_EXPIRATION_PERIOD = 1000 * 60 * 30;
 
     private final String id;
     private long accessTime = System.currentTimeMillis();
     private final long expirationPeriod;
-    private final Map<String, Object> params = new ConcurrentHashMap<>();
+    private final Map<String, Object> params;
 
-
-    public HttpSession(String id, long expirationPeriod) {
+    private HttpSession(String id, long expirationPeriod, Map<String, Object> params) {
         this.id = id;
         this.expirationPeriod = expirationPeriod;
+        this.params = params;
+    }
+
+    public HttpSession(String id, long expirationPeriod) {
+        this(id, expirationPeriod, new ConcurrentHashMap<>());
     }
 
     public HttpSession(String id) {
         this(id, DEFAULT_EXPIRATION_PERIOD);
+    }
+
+    public static HttpSession invalid() {
+        return INVALID_SESSION;
     }
 
     public void put(String name, Object value) {
@@ -41,6 +51,10 @@ public class HttpSession {
 
     public void refreshAccessTime() {
         this.accessTime = System.currentTimeMillis();
+    }
+
+    public boolean isInvalid() {
+        return this == INVALID_SESSION;
     }
 
     public boolean isExpired() {

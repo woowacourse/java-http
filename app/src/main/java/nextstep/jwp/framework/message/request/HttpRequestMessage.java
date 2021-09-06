@@ -5,6 +5,8 @@ import nextstep.jwp.framework.message.HttpMessage;
 import nextstep.jwp.framework.message.MessageBody;
 import nextstep.jwp.framework.message.MessageHeader;
 import nextstep.jwp.framework.message.StartLine;
+import nextstep.jwp.framework.session.HttpSession;
+import nextstep.jwp.framework.session.HttpSessions;
 import nextstep.jwp.utils.BytesUtils;
 
 import java.util.Objects;
@@ -21,6 +23,31 @@ public class HttpRequestMessage implements HttpMessage {
         this.requestLine = requestLine;
         this.requestHeader = requestHeader;
         this.requestBody = requestBody;
+    }
+
+    private HttpCookies extractHttpCookies() {
+        return ((RequestHeader) requestHeader).extractHttpCookies();
+    }
+
+    public HttpSession takeSession() {
+        HttpCookies httpCookies = extractHttpCookies();
+        HttpSession httpSession = httpCookies.takeBySessionId()
+                .flatMap(HttpSessions::find)
+                .orElseGet(HttpSession::invalid);
+
+        if (httpSession.isInvalid()) {
+            return httpSession;
+        }
+        return takeSessionInHttpSessions(httpSession);
+    }
+
+    private HttpSession takeSessionInHttpSessions(HttpSession httpSession) {
+        if (httpSession.isExpired()) {
+            httpSession.invalidate();
+            return HttpSession.invalid();
+        }
+        httpSession.refreshAccessTime();
+        return httpSession;
     }
 
     public String requestUri() {

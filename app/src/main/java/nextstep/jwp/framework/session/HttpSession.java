@@ -11,7 +11,7 @@ public class HttpSession {
     private static final long DEFAULT_EXPIRATION_PERIOD = 10000;
 
     private final String id;
-    private long accessTime = System.currentTimeMillis();
+    private long accessTime = System.currentTimeMillis() - 1;
     private final long expirationPeriod;
     private final Map<String, Object> params;
 

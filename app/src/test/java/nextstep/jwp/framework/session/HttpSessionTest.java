@@ -21,7 +21,6 @@ class HttpSessionTest {
         HttpSession httpSession = new HttpSession(sessionId);
 
         // then
-        Thread.sleep(1);
         assertThat(httpSession.getId()).isEqualTo(sessionId);
         assertThat(httpSession.getAccessTime()).isLessThan(System.currentTimeMillis());
     }
@@ -115,7 +114,6 @@ class HttpSessionTest {
         // given
         HttpSession httpSession = new HttpSession("sessionId");
         long beforeTime = httpSession.getAccessTime();
-        Thread.sleep(1);
 
         // when
         httpSession.refreshAccessTime();
@@ -129,7 +127,6 @@ class HttpSessionTest {
     void isExpiredTrue() throws InterruptedException {
         // given
         HttpSession httpSession = new HttpSession("sessionId", 0);
-        Thread.sleep(1);
 
         // when, then
         assertThat(httpSession.isExpired()).isTrue();

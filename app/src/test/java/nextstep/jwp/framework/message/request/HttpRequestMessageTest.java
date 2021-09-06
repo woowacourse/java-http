@@ -35,7 +35,6 @@ class HttpRequestMessageTest {
         HttpSession savedHttpSession = new HttpSession(sessionId);
         HttpSessions.add(sessionId, savedHttpSession);
         long beforeAccessTime = savedHttpSession.getAccessTime();
-        Thread.sleep(1);
 
         RequestLine requestLine = RequestLine.from(requestLineMessage());
         RequestHeader requestHeader = RequestHeader.from(requestHeaderMessageWithSessionId());

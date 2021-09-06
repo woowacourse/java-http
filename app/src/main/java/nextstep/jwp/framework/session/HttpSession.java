@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class HttpSession {
 
     private static final HttpSession INVALID_SESSION = new HttpSession("", -1, Collections.emptyMap());
-    private static final long DEFAULT_EXPIRATION_PERIOD = 1000 * 60 * 30;
+    private static final long DEFAULT_EXPIRATION_PERIOD = 10000;
 
     private final String id;
     private long accessTime = System.currentTimeMillis();

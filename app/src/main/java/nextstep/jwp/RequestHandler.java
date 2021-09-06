@@ -33,13 +33,7 @@ public class RequestHandler implements Runnable {
             HttpRequest httpRequest = new HttpRequest(bufferedReader);
             HttpResponse httpResponse = new HttpResponse(outputStream);
 
-            Controller controller = RequestMapper.getController(getPath(httpRequest));
-
-            if (controller == null) {
-                httpResponse.forward(getPath(httpRequest));
-                return;
-            }
-
+            Controller controller = RequestMapper.getController(httpRequest.getPath());
             controller.process(httpRequest, httpResponse);
 
         } catch (IOException exception) {
@@ -49,13 +43,6 @@ public class RequestHandler implements Runnable {
         } finally {
             close();
         }
-    }
-
-    private String getPath(HttpRequest httpRequest) {
-        if ("/".equals(httpRequest.getPath())) {
-            return "/index.html";
-        }
-        return httpRequest.getPath();
     }
 
     private void close() {

@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Optional;
 
+import nextstep.jwp.session.HttpSession;
+
 public class HttpRequest {
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
@@ -42,9 +44,21 @@ public class HttpRequest {
         return requestHeaders.get(key);
     }
 
-    public String getRequestBody() {
+    public String getRequestBodyParam(String key) {
         return Optional.ofNullable(requestBody)
                        .orElseThrow(() -> new IllegalArgumentException("Request Body가 존재하지 않습니다."))
-                       .getBody();
+                       .getParam(key);
+    }
+
+    public boolean hasNoSessionId() {
+        return !requestHeaders.hasSessionId();
+    }
+
+    public HttpSession getSession() {
+        return requestHeaders.getSession();
+    }
+
+    public boolean hasCookie() {
+        return requestHeaders.hasCookie();
     }
 }

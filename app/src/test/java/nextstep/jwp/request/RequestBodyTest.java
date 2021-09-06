@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,8 +7,8 @@ import java.io.InputStreamReader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import nextstep.jwp.request.HttpRequest;
-import nextstep.jwp.request.RequestBody;
+import nextstep.jwp.MockSocket;
+import nextstep.jwp.RequestHandler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,7 +20,8 @@ public class RequestBodyTest {
         final String body = "account=gugu&password=password&email=hkkang%40woowahan.com\r\n";
         final MockSocket socket = new MockSocket(body);
         RequestBody requestBody = new RequestBody(new BufferedReader(new InputStreamReader(socket.getInputStream())), 58);
-        assertEquals("account=gugu&password=password&email=hkkang%40woowahan.com", requestBody.getBody());
+        assertEquals("gugu", requestBody.getParam("account"));
+        assertEquals("password", requestBody.getParam("password"));
     }
 
     @Test
@@ -42,6 +43,6 @@ public class RequestBodyTest {
         requestHandler.run();
 
         HttpRequest httpRequest = new HttpRequest(new BufferedReader(new InputStreamReader(socket.getInputStream())));
-        assertThrows(IllegalArgumentException.class, httpRequest::getRequestBody);
+        assertThrows(IllegalArgumentException.class, () -> httpRequest.getRequestBodyParam("invalid"));
     }
 }

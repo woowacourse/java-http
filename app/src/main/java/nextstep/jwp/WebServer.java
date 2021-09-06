@@ -40,7 +40,7 @@ public class WebServer {
 
     public static int defaultPortIfNull(String[] args) {
         return Stream.of(args)
-                .findFirst()
+                .findAny()
                 .map(Integer::parseInt)
                 .orElse(WebServer.DEFAULT_PORT);
     }

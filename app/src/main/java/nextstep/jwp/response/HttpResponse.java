@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class HttpResponse {
     private static final String CONTENT_TYPE = "Content-Type";
-    
+
     private final OutputStream outputStream;
     private final Map<String, String> headers = new HashMap<>();
 
@@ -25,20 +25,18 @@ public class HttpResponse {
     }
 
     public void forward(String url) throws IOException {
+        if (url.endsWith(".ico")) {
+            return;
+        }
+
         final URL resource = getClass().getClassLoader().getResource("static" + url);
         final List<String> lines = Files.readAllLines(new File(resource.getPath()).toPath());
 
-        if (url.endsWith(".js")) {
-            headers.put(CONTENT_TYPE, "text/javascript");
-        } else if (url.endsWith(".css")) {
-            headers.put(CONTENT_TYPE, "text/css");
-        } else {
-            headers.put(CONTENT_TYPE, "text/html;charset=utf-8");
-        }
+        headers.put(CONTENT_TYPE, ContentType.findContentType(url));
 
         String file = lines.stream()
                            .map(String::valueOf)
-                           .collect(Collectors.joining());
+                           .collect(Collectors.joining("\r\n"));
 
         headers.put("Content-Length", Integer.toString(file.getBytes().length));
 

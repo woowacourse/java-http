@@ -4,11 +4,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
+
+import nextstep.jwp.session.HttpCookie;
+import nextstep.jwp.session.HttpSession;
+import nextstep.jwp.session.HttpSessions;
 
 import static nextstep.jwp.RequestHandler.LOG;
 
 public class RequestHeaders {
     private final Map<String, String> headers = new HashMap<>();
+    private HttpCookie httpCookie;
 
     public RequestHeaders(BufferedReader bufferedReader) throws IOException {
         String header = bufferedReader.readLine();
@@ -19,9 +25,29 @@ public class RequestHeaders {
             LOG.info("header : {}", header);
             header = bufferedReader.readLine();
         }
+
+        if (headers.containsKey("Cookie")) {
+            httpCookie = new HttpCookie(headers.get("Cookie"));
+        }
     }
 
     public String get(String key) {
         return headers.get(key);
+    }
+
+    public boolean hasSessionId() {
+        if (httpCookie != null) {
+            return httpCookie.hasSessionId();
+        }
+        return false;
+    }
+
+    public HttpSession getSession() {
+        String sessionId = httpCookie.get("JSESSIONID");
+        return HttpSessions.getSession(sessionId);
+    }
+
+    public boolean hasCookie() {
+        return Objects.nonNull(httpCookie);
     }
 }

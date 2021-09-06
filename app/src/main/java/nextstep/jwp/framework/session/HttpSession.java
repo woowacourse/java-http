@@ -53,6 +53,10 @@ public class HttpSession {
         this.accessTime = System.currentTimeMillis();
     }
 
+    public boolean isValid() {
+        return !isInvalid();
+    }
+
     public boolean isInvalid() {
         return this == INVALID_SESSION;
     }
@@ -60,6 +64,10 @@ public class HttpSession {
     public boolean isExpired() {
         long currentTime = System.currentTimeMillis();
         return currentTime - accessTime > expirationPeriod;
+    }
+
+    public boolean contains(String name) {
+        return params.containsKey(name);
     }
 
     public String getId() {

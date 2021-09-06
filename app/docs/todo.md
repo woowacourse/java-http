@@ -36,7 +36,10 @@
     - 쿠키에 JSESSIONID 가 없는 경우
     - 쿠키에 JSESSIONID 는 있지만 세션 저장소에 없는 경우 - 클라이언트에게 max-age 설정 해줘야 할까?
     - 만료된 세션의 JSESSIONID 를 가지고 있는 경우
-  - 있으면 /index.html 로 리다이렉팅한다.
+  - 있으면 
+    - 세션에 User가 있는지 확인하여
+      - 있으면 /index.html 로 리다이렉팅한다.
+      - 없으면 /login.html 로 포워딩
 
 ### POST /login 요청
 2. 세션을 가져오는데, 없으면 새로 만든다. 

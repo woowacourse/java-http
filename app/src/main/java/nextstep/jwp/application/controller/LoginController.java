@@ -9,13 +9,21 @@ import nextstep.jwp.framework.message.builder.HttpResponseBuilder;
 import nextstep.jwp.framework.message.request.FormData;
 import nextstep.jwp.framework.message.request.HttpRequestMessage;
 import nextstep.jwp.framework.message.response.HttpResponseMessage;
+import nextstep.jwp.framework.session.HttpSession;
 
 import java.util.Objects;
 
 public class LoginController extends AbstractController {
 
+    private static final String USER_SESSION_NAME = "user";
+
     @Override
     protected HttpResponseMessage doGet(HttpRequestMessage httpRequestMessage) {
+        HttpSession httpSession = httpRequestMessage.takeSession();
+        if (httpSession.isValid() && httpSession.contains(USER_SESSION_NAME)) {
+            return HttpResponseBuilder.redirectTemporarily("/index.html")
+                    .build();
+        }
         return HttpResponseBuilder.staticResource("/login.html")
                 .build();
     }

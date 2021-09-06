@@ -91,14 +91,14 @@ class HttpSessionTest {
         String sessionId = "sessionId";
         HttpSession httpSession = new HttpSession(sessionId);
 
-        HttpSessions.put(sessionId, httpSession);
-        assertThat(HttpSessions.take(sessionId)).isNotEmpty();
+        HttpSessions.add(sessionId, httpSession);
+        assertThat(HttpSessions.find(sessionId)).isNotEmpty();
 
         // when
         httpSession.invalidate();
 
         // then
-        assertThat(HttpSessions.take(sessionId)).isEmpty();
+        assertThat(HttpSessions.find(sessionId)).isEmpty();
     }
 
     @DisplayName("Access Time 을 새로고침 한다.")

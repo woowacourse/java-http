@@ -1,8 +1,10 @@
 package nextstep.jwp;
 
-import nextstep.jwp.model.handler.CustomHandler;
-import nextstep.jwp.model.handler.HandlerMapper;
-import nextstep.jwp.model.http_request.JwpHttpRequest;
+import nextstep.jwp.exception.NotSupportedMethodException;
+import nextstep.jwp.http.controller.Controller;
+import nextstep.jwp.http.controller.RequestMapping;
+import nextstep.jwp.http.http_request.JwpHttpRequest;
+import nextstep.jwp.http.http_response.JwpHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,14 +30,27 @@ public class RequestHandler implements Runnable {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
-            JwpHttpRequest request = JwpHttpRequest.of(reader);
-            CustomHandler handler = HandlerMapper.from(request.getUri());
-            handler.handle(request, outputStream);
+            JwpHttpResponse response = handleRequest(reader);
+            outputStream.write(response.toBytes());
             outputStream.flush();
-        } catch (IOException | URISyntaxException exception) {
+        } catch (IOException exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
+        }
+    }
+
+    private JwpHttpResponse handleRequest(BufferedReader reader) {
+        try {
+            JwpHttpRequest request = new JwpHttpRequest(reader);
+            Controller handler = RequestMapping.getController(request.getUri());
+            return handler.handle(request);
+        } catch (IOException | URISyntaxException | NotSupportedMethodException e) {
+            log.error(e.getMessage());
+            return JwpHttpResponse.notFound();
+        } catch (Exception e) {
+            log.error("RuntimeException: {}", e.getMessage());
+            return JwpHttpResponse.internalServerError();
         }
     }
 

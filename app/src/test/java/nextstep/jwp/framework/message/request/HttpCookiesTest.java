@@ -71,21 +71,4 @@ class HttpCookiesTest {
         assertThat(httpCookies.take("choco")).get().isEqualTo("cookie");
         assertThat(httpCookies.take("bobo")).isEmpty();
     }
-
-    @DisplayName("equals 와 hashCode 검증")
-    @Test
-    void equalsAndHashCode() {
-        // given
-        LinkedHashMap<String, String> params = new LinkedHashMap<>();
-        params.put("choco", "cookie");
-        params.put("mint", "toothpaste");
-        params.put("rice", "cake");
-
-        HttpCookies httpCookies = HttpCookies.from(params);
-        HttpCookies otherHttpCookies = HttpCookies.from(params);
-
-        // when, then
-        assertThat(httpCookies).isEqualTo(otherHttpCookies)
-                .hasSameHashCodeAs(otherHttpCookies);
-    }
 }

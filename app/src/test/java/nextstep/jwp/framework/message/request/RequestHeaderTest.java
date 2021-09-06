@@ -88,7 +88,7 @@ class RequestHeaderTest {
         HttpCookies httpCookies = requestHeader.extractHttpCookies();
 
         // then
-        assertThat(httpCookies).isEqualTo(expect);
+        assertThat(httpCookies.toMap()).isEqualTo(expect.toMap());
     }
 
     @DisplayName("Cookie 헤더가 없는 경우 비어 있는 쿠키가 추출된다.")

@@ -4,7 +4,6 @@ import nextstep.jwp.utils.StringUtils;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 public class HttpCookies {
@@ -43,18 +42,5 @@ public class HttpCookies {
 
     public Map<String, String> toMap() {
         return Collections.unmodifiableMap(params);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        HttpCookies that = (HttpCookies) o;
-        return Objects.equals(params, that.params);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(params);
     }
 }

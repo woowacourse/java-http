@@ -15,6 +15,7 @@ import java.util.UUID;
 public class HttpRequestMessage implements HttpMessage {
 
     private static final String NEW_LINE = "\r\n";
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final StartLine requestLine;
     private final MessageHeader requestHeader;
@@ -32,7 +33,7 @@ public class HttpRequestMessage implements HttpMessage {
 
     public HttpSession takeSession() {
         HttpCookies httpCookies = extractHttpCookies();
-        HttpSession httpSession = httpCookies.takeBySessionId()
+        HttpSession httpSession = httpCookies.take(JSESSIONID)
                 .flatMap(HttpSessions::find)
                 .orElseGet(HttpSession::invalid);
 

@@ -11,7 +11,6 @@ public class HttpCookies {
 
     private static final String COOKIE_PIECE_SEPARATOR = ";";
     private static final String COOKIE_PARAM_SEPARATOR = "=";
-    private static final String JSESSIONID = "JSESSIONID";
 
     private static final HttpCookies EMPTY_COOKIES = new HttpCookies(Collections.emptyMap());
 
@@ -40,10 +39,6 @@ public class HttpCookies {
 
     public Optional<String> take(String key) {
         return Optional.ofNullable(params.get(key));
-    }
-
-    public Optional<String> takeBySessionId() {
-        return take(JSESSIONID);
     }
 
     public Map<String, String> toMap() {

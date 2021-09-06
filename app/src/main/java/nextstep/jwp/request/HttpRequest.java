@@ -57,4 +57,8 @@ public class HttpRequest {
     public HttpSession getSession() {
         return requestHeaders.getSession();
     }
+
+    public boolean hasCookie() {
+        return requestHeaders.hasCookie();
+    }
 }

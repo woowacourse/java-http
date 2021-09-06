@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import nextstep.jwp.session.HttpCookie;
 import nextstep.jwp.session.HttpSession;
@@ -44,5 +45,9 @@ public class RequestHeaders {
     public HttpSession getSession() {
         String sessionId = httpCookie.get("JSESSIONID");
         return HttpSessions.getSession(sessionId);
+    }
+
+    public boolean hasCookie() {
+        return Objects.nonNull(httpCookie);
     }
 }

@@ -20,7 +20,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws IOException {
-        if (isLoginStatus(request.getSession())) {
+        if (request.hasCookie() && isLoginStatus(request.getSession())) {
             response.redirect(INDEX_PAGE.getPath());
             return;
         }

@@ -25,7 +25,8 @@ class ResponseTest {
     @DisplayName("문제발생시 에러메시지를 반환한다.")
     void createErrorRequest() {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-        Response response = Response.createErrorRequest("error", httpStatus);
+        Response response = new Response();
+        response.setErrorResponse("error", httpStatus);
         List<String> expected = new ArrayList<>();
         expected.add(String.format("HTTP/1.1 %d %s", httpStatus.getStatus(), httpStatus.getStatusMessage()));
         expected.add("error");

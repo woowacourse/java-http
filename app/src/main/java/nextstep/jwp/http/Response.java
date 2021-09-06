@@ -22,12 +22,10 @@ public class Response {
         return response;
     }
 
-    public static Response createErrorRequest(String errorMessage, HttpStatus httpStatus) {
-        Response response = new Response();
-        response.addHeader("Content-Type", "application/json");
-        response.body = errorMessage;
-        response.httpStatus = httpStatus;
-        return response;
+    public void setErrorResponse(String errorMessage, HttpStatus httpStatus) {
+        addHeader("Content-Type", "application/json");
+        body = errorMessage;
+        this.httpStatus = httpStatus;
     }
 
     public void set200OK(Request request, String responseBody) {

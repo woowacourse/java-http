@@ -21,17 +21,18 @@ class HttpCookieTest {
         assertThat(httpCookie.getValues()).isEmpty();
     }
 
+    @DisplayName("JSESSIONID라는 세션ID의 쿠키가 존재하는지 확인한다.")
     @Test
     void hasJSessionId() {
         // given
         Map<String, Cookie> values = new HashMap<>();
         values.put("JSESSIONID", new Cookie("JSESSIONID", "value"));
-        HttpCookie httpCookie = new HttpCookie(values);
-        HttpCookie httpCookie2 = new HttpCookie(new HashMap<>());
+        HttpCookie httpCookieWithSessionCookie = new HttpCookie(values);
+        HttpCookie httpCookieWithoutSessionCookie = new HttpCookie(new HashMap<>());
 
         // when
-        boolean result = httpCookie.hasJSessionId();
-        boolean result2 = httpCookie2.hasJSessionId();
+        boolean result = httpCookieWithSessionCookie.hasJSessionId();
+        boolean result2 = httpCookieWithoutSessionCookie.hasJSessionId();
 
         // then
         assertThat(result).isTrue();

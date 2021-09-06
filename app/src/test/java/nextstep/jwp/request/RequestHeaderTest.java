@@ -12,7 +12,7 @@ class RequestHeaderTest {
 
     String request = "GET /index HTTP/1.1\r\n" +
             "HOST: localhost:8080\r\n" +
-            "Accept-Language: kr";
+            "Accept-Language: kr\r\n";
 
     @Test
     void of() {

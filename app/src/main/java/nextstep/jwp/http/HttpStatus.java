@@ -26,7 +26,7 @@ public enum HttpStatus {
         return statusMessage;
     }
 
-    public boolean equals(HttpStatus httpStatus) {
+    public boolean equalsStatus(HttpStatus httpStatus) {
         return this == httpStatus;
     }
 }

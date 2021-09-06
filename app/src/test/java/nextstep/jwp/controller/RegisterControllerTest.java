@@ -95,7 +95,7 @@ class RegisterControllerTest {
         Response response = new Response();
 
         assertThatThrownBy(() -> REGISTER_CONTROLLER.doPost(request, response))
-            .isInstanceOf(UsernameConflictException.class);
+            .isExactlyInstanceOf(UsernameConflictException.class);
     }
 
     private Builder createRequest(Map<String, String> body, HttpMethod httpMethod) {

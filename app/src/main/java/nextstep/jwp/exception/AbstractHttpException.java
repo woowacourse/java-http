@@ -4,10 +4,10 @@ import nextstep.jwp.http.HttpStatus;
 
 public abstract class AbstractHttpException extends RuntimeException implements HttpException {
 
-    public AbstractHttpException() {
+    protected AbstractHttpException() {
     }
 
-    public AbstractHttpException(String message) {
+    protected AbstractHttpException(String message) {
         super(message);
     }
 

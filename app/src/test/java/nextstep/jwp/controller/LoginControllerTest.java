@@ -90,7 +90,7 @@ class LoginControllerTest {
         Response response = new Response();
 
         assertThatThrownBy(() -> LOGIN_CONTROLLER.doPost(request, response))
-            .isInstanceOf(UnauthorizedException.class);
+            .isExactlyInstanceOf(UnauthorizedException.class);
     }
 
     private Builder createRequest(Map<String, String> body, HttpMethod httpMethod) {

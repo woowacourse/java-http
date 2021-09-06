@@ -35,7 +35,7 @@ class HttpRequestConverterTest {
     void createdRequestException() throws IOException {
         BufferedReader bufferedReader = createBufferedReader("");
         assertThatThrownBy(() -> HttpRequestConverter.createdRequest(bufferedReader))
-            .isInstanceOf(BadRequestException.class);
+            .isExactlyInstanceOf(BadRequestException.class);
     }
 
     private BufferedReader createBufferedReader(String message) throws IOException {

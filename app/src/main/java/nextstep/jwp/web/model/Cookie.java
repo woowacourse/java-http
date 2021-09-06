@@ -33,4 +33,17 @@ public class Cookie {
     public String getValue() {
         return this.value;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Cookie cookie = (Cookie) o;
+        return Objects.equals(name, cookie.name) && Objects.equals(value, cookie.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, value);
+    }
 }

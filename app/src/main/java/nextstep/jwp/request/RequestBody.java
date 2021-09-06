@@ -19,7 +19,7 @@ public class RequestBody {
         String[] params = rawParams.split("&");
 
         for (String param : params) {
-            String[] keyAndValue = param.split("=");
+            String[] keyAndValue = param.split("=", 2);
             body.put(keyAndValue[0], keyAndValue[1]);
         }
     }

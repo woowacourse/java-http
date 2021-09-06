@@ -19,7 +19,7 @@ public enum ContentType {
     public static String findContentType(String url) {
         return Arrays.stream(ContentType.values())
                      .filter(contentType -> url.endsWith(contentType.endPath))
-                     .findFirst()
+                     .findAny()
                      .orElse(HTML).mime;
     }
 }

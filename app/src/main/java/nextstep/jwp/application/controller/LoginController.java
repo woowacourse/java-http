@@ -30,23 +30,34 @@ public class LoginController extends AbstractController {
 
     @Override
     protected HttpResponseMessage doPost(HttpRequestMessage httpRequestMessage) {
-        MessageBody messageBody = httpRequestMessage.getBody();
-        FormData formData = messageBody.toFormData();
-        login(
-                formData.take("account"),
-                formData.take("password")
-        );
+        User user = loginWithFormBody(httpRequestMessage.getBody());
+
+        HttpSession httpSession = httpRequestMessage.takeSession();
+        if (httpSession.isInvalid()) {
+            httpSession = httpRequestMessage.takeNewSession();
+        }
+        httpSession.put(USER_SESSION_NAME, user);
         return HttpResponseBuilder.redirectTemporarily("/index.html")
+                .setCookie(httpSession.getId())
                 .build();
     }
 
-    private void login(String account, String password) {
+    private User loginWithFormBody(MessageBody messageBody) {
+        FormData formData = messageBody.toFormData();
+        return login(
+                formData.take("account"),
+                formData.take("password")
+        );
+    }
+
+    private User login(String account, String password) {
         validateRequiredValue(account, password);
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new UnauthorizedException(String.format("해당 아이디가 없습니다.(%s)", account)));
         if (!user.checkPassword(password)) {
             throw new UnauthorizedException("로그인에 싪패했습니다.");
         }
+        return user;
     }
 
     void validateRequiredValue(String account, String password) {

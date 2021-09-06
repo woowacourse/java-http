@@ -86,8 +86,10 @@ class HttpResponseBuilderTest {
         HttpResponseMessage httpResponse = HttpResponseBuilder.ok()
                 .contentType(MediaType.TEXT_HTML_CHARSET_UTF8)
                 .contentLength(100)
+                .setCookie("sessionId")
                 .build();
         assertHeaderIncludes(httpResponse, "Content-Type", MediaType.TEXT_HTML_CHARSET_UTF8.getValue());
         assertHeaderIncludes(httpResponse, "Content-Length", "100");
+        assertHeaderIncludes(httpResponse, "Set-Cookie", "JSESSIONID=sessionId");
     }
 }

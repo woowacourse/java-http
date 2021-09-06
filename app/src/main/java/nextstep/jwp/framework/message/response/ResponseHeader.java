@@ -11,6 +11,7 @@ public class ResponseHeader implements MessageHeader {
 
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String SET_COOKIE = "Set-Cookie";
     private static final String LOCATION = "Location";
 
     private final HeaderFields headerFields;
@@ -41,6 +42,10 @@ public class ResponseHeader implements MessageHeader {
 
     public void putContentLength(int contentLength) {
         put(CONTENT_LENGTH, String.valueOf(contentLength));
+    }
+
+    public void putSetCookie(String name, String value) {
+        put(SET_COOKIE, String.format("%s=%s", name, value));
     }
 
     public Optional<String> take(String key) {

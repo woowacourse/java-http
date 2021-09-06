@@ -106,6 +106,24 @@ class HttpRequestMessageTest {
         assertThat(HttpSessions.find(sessionId)).isEmpty();
     }
 
+    @DisplayName("새로운 세션을 생성한다.")
+    @Test
+    void takeNewSession() {
+        // given
+        RequestLine requestLine = RequestLine.from(requestLineMessage());
+        RequestHeader requestHeader = RequestHeader.from(requestHeaderMessage());
+        MessageBody requestBody = MessageBody.from(requestBodyMessage());
+        HttpRequestMessage httpRequestMessage = new HttpRequestMessage(requestLine, requestHeader, requestBody);
+
+        // when
+        HttpSession httpSession = httpRequestMessage.takeNewSession();
+
+        // then
+        assertThat(HttpSessions.find(httpSession.getId()))
+                .get()
+                .isSameAs(httpSession);
+    }
+
     @DisplayName("HttpRequestMessage 를 byte[] 로 변환")
     @Test
     void toBytes() {

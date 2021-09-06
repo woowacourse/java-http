@@ -167,6 +167,7 @@ class LoginControllerTest {
         // then
         assertStatusCode(httpResponseMessage, HttpStatusCode.FOUND);
         assertHeaderIncludes(httpResponseMessage, "Location", "/index.html");
+        assertThat(httpResponseMessage.takeHeaderValue("Set-Cookie")).isNotEmpty();
     }
 
     @DisplayName("비밀번호가 틀린 경우 POST 요청을 확인한다.")

@@ -10,6 +10,7 @@ import nextstep.jwp.framework.session.HttpSessions;
 import nextstep.jwp.utils.BytesUtils;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class HttpRequestMessage implements HttpMessage {
 
@@ -38,15 +39,22 @@ public class HttpRequestMessage implements HttpMessage {
         if (httpSession.isInvalid()) {
             return httpSession;
         }
-        return takeSessionInHttpSessions(httpSession);
+        return takeSessionWhenExistsInStorage(httpSession);
     }
 
-    private HttpSession takeSessionInHttpSessions(HttpSession httpSession) {
+    private HttpSession takeSessionWhenExistsInStorage(HttpSession httpSession) {
         if (httpSession.isExpired()) {
             httpSession.invalidate();
             return HttpSession.invalid();
         }
         httpSession.refreshAccessTime();
+        return httpSession;
+    }
+
+    public HttpSession takeNewSession() {
+        String sessionId = UUID.randomUUID().toString();
+        HttpSession httpSession = new HttpSession(sessionId);
+        HttpSessions.add(sessionId, httpSession);
         return httpSession;
     }
 

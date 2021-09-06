@@ -147,6 +147,37 @@ class LoginControllerTest {
         HttpSessions.remove(sessionId);
     }
 
+    @DisplayName("유효한 세션은 있지만 세션에 User가 없는 경우 POST 요청의 동작을 확인한다.")
+    @Test
+    void doPostWithNoUserSession() throws IOException {
+        // given
+        String sessionId = "656cef62-e3c4-40bc-a8df-94732920ed46";
+        HttpSession httpSession = new HttpSession(sessionId);
+        HttpSessions.add(sessionId, httpSession);
+
+        String requestMessage = String.join("\r\n",
+                "POST /login HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: 30",
+                "Cookie: JSESSIONID=" + sessionId,
+                "",
+                "account=gugu&password=password");
+
+        HttpRequestMessage httpRequestMessage = TestHttpRequestUtils.makeRequest(requestMessage);
+
+        // when
+        HttpResponseMessage httpResponseMessage = loginController.doPost(httpRequestMessage);
+
+        // then
+        assertStatusCode(httpResponseMessage, HttpStatusCode.FOUND);
+        assertHeaderIncludes(httpResponseMessage, "Location", "/index.html");
+        assertThat(httpResponseMessage.takeHeaderValue("Set-Cookie")).isNotEmpty();
+
+        // tearDown
+        HttpSessions.remove(sessionId);
+    }
+
     @DisplayName("POST 요청의 동작을 확인한다.")
     @Test
     void doPost() throws IOException {

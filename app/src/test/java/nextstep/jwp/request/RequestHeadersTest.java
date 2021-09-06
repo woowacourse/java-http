@@ -11,6 +11,7 @@ import nextstep.jwp.MockSocket;
 import nextstep.jwp.RequestHandler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class RequestHeadersTest {
     @DisplayName("RequestHeaders 생성")
@@ -35,5 +36,6 @@ public class RequestHeadersTest {
         assertEquals("localhost:8080", httpRequest.getHeader("Host"));
         assertEquals("keep-alive", httpRequest.getHeader("Connection"));
         assertEquals("0", httpRequest.getHeader("Content-Length"));
+        assertFalse(httpRequest.hasCookie());
     }
 }

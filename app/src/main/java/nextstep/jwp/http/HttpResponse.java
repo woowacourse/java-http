@@ -38,8 +38,6 @@ public class HttpResponse {
         try {
             if (url.equals("/")) {
                 responseBody = DEFAULT_MESSAGE;
-            } else if (url.equals("/login") || url.equals("/register")) {
-                responseBody = getBodyByUrl(DEFAULT_RESOURCE_PATH + url + ".html");
             } else {
                 responseBody = getBodyByUrl(DEFAULT_RESOURCE_PATH + url);
             }
@@ -75,14 +73,14 @@ public class HttpResponse {
 
     private void response200(final String responseBody) throws IOException {
         headers.put("Content-Length: " + responseBody.getBytes().length);
-        String okResponse = HttpStatusCodes._200.getStatusCodeHeader();
+        String okResponse = HttpStatusCodes.HTTP_200.getStatusCodeHeader();
         outputStream.write(okResponse.getBytes(StandardCharsets.UTF_8));
         responseHeaderBody(responseBody);
         send();
     }
 
     public void redirect302Transfer(final String redirectUrl) throws IOException {
-        String foundResponse = HttpStatusCodes._302.getStatusCodeHeader();
+        String foundResponse = HttpStatusCodes.HTTP_302.getStatusCodeHeader();
         outputStream.write(foundResponse.getBytes(StandardCharsets.UTF_8));
         headers.put("Location: " + redirectUrl);
         responseHeader();
@@ -90,7 +88,7 @@ public class HttpResponse {
     }
 
     public void redirectWithStatusCode(final String redirectUrl, final String statusCode) throws IOException {
-        HttpStatusCodes httpStatusCodes = HttpStatusCodes.valueOf("_" + statusCode);
+        HttpStatusCodes httpStatusCodes = HttpStatusCodes.valueOf("HTTP_" + statusCode);
         outputStream.write(httpStatusCodes.getStatusCodeHeader().getBytes(StandardCharsets.UTF_8));
         String responseBody = getBodyByUrl(DEFAULT_RESOURCE_PATH + redirectUrl);
         responseHeaderBody(responseBody);
@@ -109,5 +107,9 @@ public class HttpResponse {
 
     private void send() throws IOException {
         outputStream.flush();
+    }
+
+    public void addHeader(final String headerKey, final String headerValue) {
+        headers.put(headerKey + ": " + headerValue);
     }
 }

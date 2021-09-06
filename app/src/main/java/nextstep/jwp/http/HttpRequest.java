@@ -59,12 +59,24 @@ public class HttpRequest {
     public String getQueryParam(final String key) {
         return requestLine.getQueryParam(key);
     }
-    
+
     public String getHttpVersion() {
         return requestLine.getHttpVersion();
     }
 
     public String getBodyDataByKey(final String key) {
         return bodyParams.get(key);
+    }
+
+    public boolean contains(final String key) {
+        return headers.contains(key);
+    }
+
+    public HttpCookie getCookie() {
+        return new HttpCookie(headers.getHeaderDataByKey("Cookie"));
+    }
+
+    public boolean isPost() {
+        return requestLine.isPost();
     }
 }

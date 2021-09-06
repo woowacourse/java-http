@@ -10,7 +10,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.ControllerMapper;
-import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import org.slf4j.Logger;
@@ -41,10 +40,8 @@ public class RequestHandler implements Runnable {
 
             if (controller == null) {
                 httpResponse.transfer(httpRequest.getUrl());
-            } else if (httpRequest.getHttpMethod().equals(HttpMethod.GET)) {
-                controller.get(httpRequest, httpResponse);
-            } else if (httpRequest.getHttpMethod().equals(HttpMethod.POST)) {
-                controller.post(httpRequest, httpResponse);
+            } else {
+                controller.service(httpRequest, httpResponse);
             }
 
         } catch (IOException exception) {

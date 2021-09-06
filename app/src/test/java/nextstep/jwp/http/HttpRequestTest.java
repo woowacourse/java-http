@@ -73,4 +73,25 @@ class HttpRequestTest {
 
         assertThat(httpRequest.getBodyDataByKey("account")).isEqualTo("gugu");
     }
+
+    @DisplayName("Cookie가 담겨있으면, 쿠키 정보를 보관한다.")
+    @Test
+    void httpCookieCheckTest() throws IOException {
+        final String text = String.join("\r\n",
+            "GET /index.html HTTP/1.1",
+            "Host: localhost:8080",
+            "Connection: keep-alive",
+            "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46",
+            ""
+        );
+
+        final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+        HttpRequest httpRequest = new HttpRequest(bufferedReader);
+        inputStream.close();
+
+        assertThat(httpRequest.getCookie()).isNotNull();
+        assertThat(httpRequest.getCookie().getCookieValueByKey("yummy_cookie")).isEqualTo("choco");
+    }
 }

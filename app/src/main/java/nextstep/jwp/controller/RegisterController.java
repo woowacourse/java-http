@@ -5,17 +5,17 @@ import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.service.RegisterService;
 
-public class RegisterController implements Controller {
+public class RegisterController extends AbstractController {
 
     private final RegisterService registerService = new RegisterService();
 
     @Override
-    public void get(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        httpResponse.transfer(httpRequest.getUrl());
+    public void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        registerService.registerUser(httpRequest, httpResponse);
     }
 
     @Override
-    public void post(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-        registerService.registerUser(httpRequest, httpResponse);
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        registerService.doGet(httpResponse);
     }
 }

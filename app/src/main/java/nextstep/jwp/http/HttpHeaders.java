@@ -49,4 +49,8 @@ public class HttpHeaders {
         }
         return headerSet.toString();
     }
+
+    public boolean contains(final String key) {
+        return headers.containsKey(key);
+    }
 }

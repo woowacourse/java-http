@@ -201,7 +201,7 @@ class IOStreamTest {
 
             final StringBuilder actual = new StringBuilder();
 
-            while(br.ready()){
+            while (br.ready()) {
                 actual.append(br.readLine()).append("\r\n");
             }
 

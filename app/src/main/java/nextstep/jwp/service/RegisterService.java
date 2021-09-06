@@ -15,6 +15,10 @@ public class RegisterService {
         }
         User user = new User(httpRequest.getBodyDataByKey("account"), httpRequest.getBodyDataByKey("password"), httpRequest.getBodyDataByKey("email"));
         InMemoryUserRepository.save(user);
-        httpResponse.transfer("/index.html");
+        httpResponse.redirectWithStatusCode("/index.html", "200");
+    }
+
+    public void doGet(final HttpResponse httpResponse) throws IOException {
+        httpResponse.transfer("/register.html");
     }
 }

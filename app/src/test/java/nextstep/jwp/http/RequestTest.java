@@ -2,7 +2,6 @@ package nextstep.jwp.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.net.http.HttpHeaders;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;

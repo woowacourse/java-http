@@ -6,7 +6,8 @@ import nextstep.jwp.http.Response;
 
 public class ControllerAdvice {
 
-    private ControllerAdvice() {}
+    private ControllerAdvice() {
+    }
 
     public static void errorHandle(AbstractHttpException exception, Response response) {
         HttpStatus httpStatus = exception.httpStatus();

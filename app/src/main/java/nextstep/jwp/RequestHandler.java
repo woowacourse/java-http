@@ -53,6 +53,7 @@ public class RequestHandler implements Runnable {
         Response response = new Response();
         try {
             final Request request = HttpRequestConverter.createdRequest(bufferedReader);
+            response.addCookie(request);
             Controller controller = REQUEST_MAPPING.getController(request);
             controller.service(request, response);
             return response;

@@ -19,7 +19,8 @@ class HttpStatusTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"OK:OK", "FOUND:Found", "BAD_REQUEST:Bad Request", "CONFLICT:Conflict"}, delimiter = ':')
+    @CsvSource(value = {"OK:OK", "FOUND:Found", "BAD_REQUEST:Bad Request",
+        "CONFLICT:Conflict"}, delimiter = ':')
     @DisplayName("message 를 반환한다.")
     void getStatusMessage(String type, String message) {
         HttpStatus httpStatus = HttpStatus.valueOf(type);

@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import nextstep.jwp.exception.BadRequestMessageException;
+import java.util.UUID;
+import nextstep.jwp.exception.BadRequestException;
 import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpSession;
@@ -46,7 +47,7 @@ public class HttpRequestConverter {
                 .build();
         } catch (Exception e) {
             LOG.error("Request Error : {}", e.getMessage());
-            throw new BadRequestMessageException();
+            throw new BadRequestException();
         }
     }
 
@@ -99,7 +100,10 @@ public class HttpRequestConverter {
     }
 
     private static HttpSession getHttpSession(HttpCookie httpCookie) {
-        String sessionId = httpCookie.jSessionId();
+        String sessionId = httpCookie.getCookie("JSESSIONID");
+        if (Objects.isNull(sessionId)) {
+            sessionId = UUID.randomUUID().toString();
+        }
         HttpSession session = HttpSessions.getSession(sessionId);
         if (Objects.nonNull(session)) {
             return session;

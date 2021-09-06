@@ -11,6 +11,7 @@ import nextstep.jwp.MessageFactory;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpSession;
+import nextstep.jwp.http.HttpSessions;
 import nextstep.jwp.http.Request;
 import nextstep.jwp.http.Request.Builder;
 import nextstep.jwp.http.Response;
@@ -24,6 +25,11 @@ class LoginControllerTest {
 
     private static final LoginController LOGIN_CONTROLLER = new LoginController(new LoginService());
     private static final String NEW_LINE = "\r\n";
+
+    static {
+        HttpSessions.add(MessageFactory.LOGIN_UUID.toString(),
+            new HttpSession(MessageFactory.LOGIN_UUID.toString()));
+    }
 
     @Test
     @DisplayName("login page 반환 테스트")
@@ -54,25 +60,14 @@ class LoginControllerTest {
     }
 
     @Test
-    @DisplayName("로그인을 성공하면 cookie 를 반환한다.")
-    void doPostCookie() {
-        // given
-        String expected = "Set-Cookie: JSESSIONID=";
-
-        // when
-        Response response = getPostSuccessResponse();
-
-        // then
-        assertThat(response.message()).contains(expected);
-    }
-
-    @Test
     @DisplayName("로그인이 된 상태에서 페이지를 요청하면 index.html 로 리다이렉트 한다.")
     void doGetCookie() throws IOException {
         // given
-        String sessionId = getSessionId();
+        Map<String, String> header = new HashMap<>();
+        header.put("Cookie", "JSESSIONID=" + MessageFactory.LOGIN_UUID);
         Request request = createRequest(new HashMap<>(), HttpMethod.GET)
-            .httpSession(new HttpSession(sessionId))
+            .header(header)
+            .httpSession(HttpSessions.getSession(MessageFactory.LOGIN_UUID.toString()))
             .build();
         Response response = new Response();
 
@@ -82,14 +77,6 @@ class LoginControllerTest {
         // then
         assertThat(response.message())
             .isEqualTo(MessageFactory.createResponseFound("index.html"));
-    }
-
-    private String getSessionId() {
-        Response response = getPostSuccessResponse();
-        String[] messages = response.message().split(NEW_LINE);
-        String[] cookie = messages[1].split(":");
-        String[] cookieValue = cookie[1].trim().split("=");
-        return cookieValue[1];
     }
 
     @Test

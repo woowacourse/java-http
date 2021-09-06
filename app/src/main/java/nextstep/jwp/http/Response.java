@@ -2,11 +2,13 @@ package nextstep.jwp.http;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Response {
 
     private static final String NEW_LINE = "\r\n";
     private static final String CONTENT_LENGTH = "Content-Length: ";
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final List<String> header = new ArrayList<>();
     private String body = "";
@@ -42,6 +44,12 @@ public class Response {
     public void set302Found(String location) {
         header.add("Location: " + location);
         httpStatus = HttpStatus.FOUND;
+    }
+
+    public void addCookie(Request request) {
+        if (Objects.isNull(request.getCookie(JSESSIONID))) {
+            addHeader("Set-Cookie", "JSESSIONID=" + request.getHttpSession().getId());
+        }
     }
 
     public String message() {

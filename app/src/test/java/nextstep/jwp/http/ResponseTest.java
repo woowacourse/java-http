@@ -28,7 +28,8 @@ class ResponseTest {
         Response response = new Response();
         response.setErrorResponse("error", httpStatus);
         List<String> expected = new ArrayList<>();
-        expected.add(String.format("HTTP/1.1 %d %s", httpStatus.getStatus(), httpStatus.getStatusMessage()));
+        expected.add(
+            String.format("HTTP/1.1 %d %s", httpStatus.getStatus(), httpStatus.getStatusMessage()));
         expected.add("error");
 
         testCheck(response, expected);
@@ -46,7 +47,8 @@ class ResponseTest {
             .build();
         List<String> expected = new ArrayList<>();
         HttpStatus httpStatus = HttpStatus.OK;
-        expected.add(String.format("HTTP/1.1 %d %s", httpStatus.getStatus(), httpStatus.getStatusMessage()));
+        expected.add(
+            String.format("HTTP/1.1 %d %s", httpStatus.getStatus(), httpStatus.getStatusMessage()));
         expected.add("Content-Type: application/javascript;charset=utf-8");
         expected.add("Content-Length: 4");
         expected.add("body");

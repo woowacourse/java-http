@@ -36,7 +36,7 @@ public class HttpResponse {
 
         String file = lines.stream()
                            .map(String::valueOf)
-                           .collect(Collectors.joining());
+                           .collect(Collectors.joining("\r\n"));
 
         headers.put("Content-Length", Integer.toString(file.getBytes().length));
 

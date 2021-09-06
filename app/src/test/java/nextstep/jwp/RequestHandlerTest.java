@@ -33,7 +33,7 @@ class RequestHandlerTest {
 
         String result = lines.stream()
                              .map(String::valueOf)
-                             .collect(Collectors.joining());
+                             .collect(Collectors.joining("\r\n"));
 
         String expected = String.join("\r\n",
                 "HTTP/1.1 " + "200 OK" + " ",
@@ -68,7 +68,7 @@ class RequestHandlerTest {
 
         String result = lines.stream()
                              .map(String::valueOf)
-                             .collect(Collectors.joining());
+                             .collect(Collectors.joining("\r\n"));
 
         String expected = String.join("\r\n",
                 "HTTP/1.1 " + "200 OK" + " ",
@@ -103,7 +103,7 @@ class RequestHandlerTest {
 
         String result = lines.stream()
                              .map(String::valueOf)
-                             .collect(Collectors.joining());
+                             .collect(Collectors.joining("\r\n"));
 
         String expected = String.join("\r\n",
                 "HTTP/1.1 " + "200 OK" + " ",

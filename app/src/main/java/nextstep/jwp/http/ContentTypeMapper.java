@@ -8,17 +8,17 @@ public enum ContentTypeMapper {
     JAVASCRIPT(".js", "application/javascript; charset=UTF-8"),
     ICON(".ico", "image/x-icon");
 
-    String extension;
-    String contentType;
+    private final String extension;
+    private final String contentType;
 
     ContentTypeMapper(String extension, String contentType) {
         this.extension = extension;
         this.contentType = contentType;
     }
 
-    public static String extractContentType(String path) {
+    public static String extractContentType(String resource) {
         return Arrays.stream(values())
-                .filter(contentType -> path.endsWith(contentType.extension))
+                .filter(contentType -> resource.endsWith(contentType.extension))
                 .findAny()
                 .map(contentType -> contentType.contentType)
                 .orElse(HTML.contentType);

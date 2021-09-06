@@ -1,7 +1,11 @@
 package nextstep.jwp.request;
 
+import nextstep.jwp.exception.InvalidHttpSessionException;
+import nextstep.jwp.response.HttpResponse;
 import nextstep.jwp.web.model.Cookie;
 import nextstep.jwp.web.model.HttpCookie;
+import nextstep.jwp.web.model.HttpSession;
+import nextstep.jwp.web.model.HttpSessions;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,6 +22,7 @@ public class CharlieHttpRequest implements HttpRequest {
     private static final String COOKIE_KEY_VALUE_BOUNDARY = "=";
     private static final int INDEX_OF_COOKIE_KEY = 0;
     private static final int INDEX_OF_COOKIE_VALUE = 1;
+    private static final String SESSION_ID = "JSESSIONID";
 
     private final RequestLine requestLine;
     private final RequestHeader requestHeader;
@@ -52,6 +57,27 @@ public class CharlieHttpRequest implements HttpRequest {
         return new HttpCookie(Arrays.stream(splitCookies).map(cookie -> cookie.split(COOKIE_KEY_VALUE_BOUNDARY, 2))
                 .collect(Collectors.toMap(cookie -> cookie[INDEX_OF_COOKIE_KEY], cookie ->
                         new Cookie(cookie[INDEX_OF_COOKIE_KEY], cookie[INDEX_OF_COOKIE_VALUE]))));
+    }
+
+    @Override
+    public HttpSession getSession(HttpResponse httpResponse) {
+        HttpCookie httpCookie = this.getCookies();
+        if (hasValidJSessionId(httpCookie)) {
+            return HttpSessions.getSession(httpCookie.getJSessionId())
+                    .orElseThrow(() -> new InvalidHttpSessionException("세션이 존재하지 않습니다."));
+        }
+
+        HttpSession httpSession = HttpSession.create();
+        httpResponse.addCookie(new Cookie(SESSION_ID, httpSession.getId()));
+        return HttpSessions.save(httpSession);
+    }
+
+    private boolean hasValidJSessionId(HttpCookie httpCookie) {
+        if (httpCookie.hasJSessionId()) {
+            String jSessionId = httpCookie.getJSessionId();
+            return HttpSessions.isExistsId(jSessionId);
+        }
+        return false;
     }
 
     @Override

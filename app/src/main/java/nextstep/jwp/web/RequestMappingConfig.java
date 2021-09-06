@@ -12,10 +12,13 @@ import java.util.Map;
 
 public class RequestMappingConfig {
 
+    private static final Logger logger = LoggerFactory.getLogger(RequestMappingConfig.class);
+
     private RequestMappingConfig() {
     }
 
     public static Map<RequestMappingInfo, ControllerMethod> config() {
+        logger.info("RequestMapping config start!!");
         final Map<RequestMappingInfo, ControllerMethod> requestMapping = new HashMap<>();
 
         final IndexController indexController = new IndexController();
@@ -27,6 +30,8 @@ public class RequestMappingConfig {
         requestMapping.put(new RequestMappingInfo("/login", HttpMethod.POST), ControllerMethod.of(loginController, "login"));
         requestMapping.put(new RequestMappingInfo("/register", HttpMethod.GET), ControllerMethod.of(registerController, "registerPage"));
         requestMapping.put(new RequestMappingInfo("/register", HttpMethod.POST), ControllerMethod.of(registerController, "register"));
+
+        logger.info("RequestMapping config finish!!");
 
         return requestMapping;
     }

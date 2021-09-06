@@ -33,7 +33,7 @@ public class RequestHandler implements Runnable {
 
             HttpRequest httpRequest = CharlieHttpRequest.of(bufferedReader);
             HttpResponse httpResponse = new CharlieHttpResponse();
-            frontController.getResponse(httpRequest, httpResponse);
+            frontController.handle(httpRequest, httpResponse);
 
             String response = httpResponse.toHttpResponseMessage();
             outputStream.write(response.getBytes());

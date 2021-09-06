@@ -18,7 +18,7 @@ public class FrontController {
         this.requestMapping = requestMapping;
     }
 
-    public void getResponse(HttpRequest httpRequest, HttpResponse httpResponse) {
+    public void handle(HttpRequest httpRequest, HttpResponse httpResponse) {
         try {
             Optional<ControllerMethod> optionalControllerMethod = requestMapping.getControllerMethod(httpRequest);
             if (optionalControllerMethod.isPresent()) {

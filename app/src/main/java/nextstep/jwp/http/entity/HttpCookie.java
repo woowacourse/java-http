@@ -37,18 +37,6 @@ public class HttpCookie {
         return cookies;
     }
 
-    public String getCookieValue(String key) {
-        return cookies.get(key);
-    }
-
-    public void addCookie(String name, String value) {
-        cookies.put(name, value);
-    }
-
-    public boolean containsSession() {
-        return cookies.containsKey(SESSION_ID);
-    }
-
     public String getSessionId() {
         return cookies.get(SESSION_ID);
     }

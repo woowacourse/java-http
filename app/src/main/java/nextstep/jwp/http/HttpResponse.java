@@ -92,10 +92,6 @@ public class HttpResponse {
         return String.join("\r\n", output);
     }
 
-    public boolean containsHeader(String headerName) {
-        return httpHeaders.hasHeaderName(headerName);
-    }
-
     public void redirect(String path) {
         setHttpStatus(HttpStatus.FOUND);
         setLocation(path);

@@ -25,14 +25,6 @@ public class HttpSession {
         return values.get(name);
     }
 
-    public void removeAttribute(String name) {
-        values.remove(name);
-    }
-
-    public void invalidate() {
-        values.clear();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {

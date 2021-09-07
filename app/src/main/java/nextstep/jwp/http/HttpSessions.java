@@ -36,10 +36,6 @@ public class HttpSessions {
         SESSIONS.remove(id);
     }
 
-    public static boolean containsKey(String sessionId) {
-        return SESSIONS.containsKey(sessionId);
-    }
-
     public static void clear() {
         SESSIONS.clear();
     }

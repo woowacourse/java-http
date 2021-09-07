@@ -55,7 +55,7 @@ class ResourceResolverTest {
         ResourceResolver.resolveResourceRequest(httpRequest, httpResponse);
 
         assertThat(httpResponse.httpStatus()).isEqualTo(HttpStatus.OK);
-        assertThat(httpResponse.httpHeaders().get("Content-Type")).isEqualTo("text/html;charset=utf-8");
+        assertThat(httpResponse.httpHeaders().get("Content-Type")).isEqualTo("text/html");
         assertThat(httpResponse.httpBody().body()).isEqualTo(responseBody);
 
     }

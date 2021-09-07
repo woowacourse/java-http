@@ -22,7 +22,7 @@ public class View {
         String html = Files.readString(path);
 
         httpResponse.setHttpStatus(HttpStatus.OK);
-        httpResponse.setHttpBody("text/html;charset=utf-8", html);
+        httpResponse.setHttpBody("text/html", html);
     }
 
     @Override

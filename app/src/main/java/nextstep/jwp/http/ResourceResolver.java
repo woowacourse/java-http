@@ -43,9 +43,6 @@ public class ResourceResolver {
         String contentType = Files.probeContentType(path);
 
         httpResponse.setHttpStatus(HttpStatus.OK);
-        if (contentType.equals("text/html")) {
-            contentType = "text/html;charset=utf-8";
-        }
         httpResponse.setHttpBody(contentType, responseBody);
     }
 }

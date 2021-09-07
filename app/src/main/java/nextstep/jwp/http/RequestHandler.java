@@ -39,8 +39,9 @@ public class RequestHandler implements Runnable {
 
             handle(httpRequest, httpResponse);
 
-            log.debug("outputStream => {}", httpResponse.asString());
-            outputStream.write(httpResponse.asString().getBytes());
+            String output = httpResponse.asString();
+            log.debug("outputStream => {}", output);
+            outputStream.write(output.getBytes());
             outputStream.flush();
         } catch (IllegalStateException exception) {
             log.info("IllegalStateException {}", exception.getMessage());

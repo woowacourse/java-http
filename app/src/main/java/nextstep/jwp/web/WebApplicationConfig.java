@@ -9,7 +9,7 @@ public class WebApplicationConfig {
         return new FrontController(requestMappingHandler());
     }
 
-    public static RequestMappingHandler requestMappingHandler() {
-        return new RequestMappingHandler(RequestMappingHandlerConfig.config());
+    public static RequestMapping requestMappingHandler() {
+        return new RequestMapping(RequestMappingConfig.config());
     }
 }

@@ -1,8 +1,10 @@
 package nextstep.jwp.web;
 
 import nextstep.jwp.controller.Controller;
+import nextstep.jwp.exception.ConfigurationException;
 import nextstep.jwp.exception.InternalServerError;
 import nextstep.jwp.request.HttpRequest;
+import nextstep.jwp.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,13 +23,22 @@ public class ControllerMethod {
         this.method = method;
     }
 
-    public static ControllerMethod of(Controller controller, String methodName) throws NoSuchMethodException {
-        return new ControllerMethod(controller, controller.getClass().getMethod(methodName, HttpRequest.class));
+    public static ControllerMethod of(Controller controller, String methodName) {
+        return new ControllerMethod(controller, extractMethod(controller, methodName));
     }
 
-    public Object invoke(HttpRequest httpRequest) {
+    private static Method extractMethod(Controller controller, String methodName) {
         try {
-            return method.invoke(this.controller, httpRequest);
+            return controller.getClass().getMethod(methodName, HttpRequest.class, HttpResponse.class);
+        } catch (NoSuchMethodException e) {
+            logger.error("Cannot Request Mapping By No Such Method", e);
+            throw new ConfigurationException();
+        }
+    }
+
+    public Object invoke(HttpRequest httpRequest, HttpResponse httpResponse) {
+        try {
+            return method.invoke(this.controller, httpRequest, httpResponse);
         } catch (IllegalAccessException | InvocationTargetException e) {
             logger.error("method invoke error", e);
             throw new InternalServerError();

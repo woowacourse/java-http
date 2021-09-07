@@ -3,7 +3,6 @@ package nextstep.jwp.web;
 import nextstep.jwp.exception.InternalServerError;
 import nextstep.jwp.exception.PageNotFoundError;
 import nextstep.jwp.request.HttpRequest;
-import nextstep.jwp.response.CharlieHttpResponse;
 import nextstep.jwp.response.HttpResponse;
 import nextstep.jwp.response.HttpStatusCode;
 
@@ -13,25 +12,26 @@ public class FrontController {
     private static final String INTERNAL_SERVER_ERROR_PAGE = "/500.html";
     private static final String NOT_FOUND_ERROR_PAGE = "/404.html";
 
-    private final RequestMappingHandler requestMappingHandler;
+    private final RequestMapping requestMapping;
 
-    public FrontController(RequestMappingHandler requestMappingHandler) {
-        this.requestMappingHandler = requestMappingHandler;
+    public FrontController(RequestMapping requestMapping) {
+        this.requestMapping = requestMapping;
     }
 
-    public HttpResponse getResponse(HttpRequest httpRequest) {
+    public void handle(HttpRequest httpRequest, HttpResponse httpResponse) {
         try {
-            Optional<ControllerMethod> optionalControllerMethod = requestMappingHandler.getControllerMethod(httpRequest);
+            Optional<ControllerMethod> optionalControllerMethod = requestMapping.getControllerMethod(httpRequest);
             if (optionalControllerMethod.isPresent()) {
                 ControllerMethod controllerMethod = optionalControllerMethod.orElseThrow(PageNotFoundError::new);
-                String viewName = (String) controllerMethod.invoke(httpRequest);
-                return CharlieHttpResponse.createResponse(viewName, HttpStatusCode.OK);
+                String viewName = (String) controllerMethod.invoke(httpRequest, httpResponse);
+                httpResponse.setView(viewName, HttpStatusCode.OK);
+                return;
             }
-            return CharlieHttpResponse.createResponse(httpRequest.getResourceName(), HttpStatusCode.OK);
+            httpResponse.setView(httpRequest.getResourceName(), HttpStatusCode.OK);
         } catch (InternalServerError e) {
-            return CharlieHttpResponse.createResponse(INTERNAL_SERVER_ERROR_PAGE, HttpStatusCode.INTERNAL_SERVER_ERROR);
+            httpResponse.setView(INTERNAL_SERVER_ERROR_PAGE, HttpStatusCode.INTERNAL_SERVER_ERROR);
         } catch (PageNotFoundError e) {
-            return CharlieHttpResponse.createResponse(NOT_FOUND_ERROR_PAGE, HttpStatusCode.NOTFOUND);
+            httpResponse.setView(NOT_FOUND_ERROR_PAGE, HttpStatusCode.NOTFOUND);
         }
     }
 }

@@ -2,6 +2,7 @@ package nextstep.jwp.web;
 
 import nextstep.jwp.request.CharlieHttpRequest;
 import nextstep.jwp.request.HttpRequest;
+import nextstep.jwp.response.CharlieHttpResponse;
 import nextstep.jwp.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,8 @@ public class RequestHandler implements Runnable {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             HttpRequest httpRequest = CharlieHttpRequest.of(bufferedReader);
-            HttpResponse httpResponse = frontController.getResponse(httpRequest);
+            HttpResponse httpResponse = new CharlieHttpResponse();
+            frontController.handle(httpRequest, httpResponse);
 
             String response = httpResponse.toHttpResponseMessage();
             outputStream.write(response.getBytes());

@@ -1,23 +1,38 @@
 package nextstep.jwp.web.controller;
 
 import java.io.IOException;
+import java.util.Objects;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.RequestParam;
 import nextstep.jwp.http.View;
 import nextstep.jwp.http.ViewResolver;
+import nextstep.jwp.http.entity.HttpCookie;
 import nextstep.jwp.http.entity.HttpSession;
-import nextstep.jwp.http.entity.HttpStatus;
 import nextstep.jwp.web.db.InMemoryUserRepository;
 import nextstep.jwp.web.model.User;
 
 public class LoginController extends AbstractController {
 
+    private static final String SESSION_USER = "user";
+
     @Override
     protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+        if (isLoggedIn(httpRequest)) {
+            httpResponse.redirect("/index.html");
+            return;
+        }
+
         View view = ViewResolver.resolveView("login");
         view.render(httpRequest, httpResponse);
+    }
+
+    private boolean isLoggedIn(HttpRequest httpRequest) {
+        final HttpSession httpSession = httpRequest.getSession();
+        User user = (User) httpSession.getAttribute(SESSION_USER);
+
+        return !Objects.isNull(user);
     }
 
     @Override
@@ -32,10 +47,10 @@ public class LoginController extends AbstractController {
             throw new UnauthorizedException("잘못된 패스워드입니다.");
         }
 
-        final HttpSession httpSession = httpRequest.httpSession();
-        httpSession.setAttribute("user", user);
+        final HttpSession httpSession = httpRequest.getSession();
+        httpSession.setAttribute(SESSION_USER, user);
 
-        httpResponse.setHttpStatus(HttpStatus.FOUND);
-        httpResponse.setLocation("/index.html");
+        httpResponse.setCookie(HttpCookie.of(httpSession));
+        httpResponse.redirect("/index.html");
     }
 }

@@ -1,7 +1,6 @@
 package nextstep.jwp.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Map;
 import nextstep.jwp.http.entity.HttpBody;
@@ -11,7 +10,6 @@ import nextstep.jwp.http.entity.HttpMethod;
 import nextstep.jwp.http.entity.HttpUri;
 import nextstep.jwp.http.entity.HttpVersion;
 import nextstep.jwp.http.entity.RequestLine;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
@@ -29,11 +27,10 @@ class HttpRequestTest {
         assertThat(request.headers()).isEqualTo(httpHeaders);
         assertThat(request.body()).isEqualTo(httpBody);
         assertThat(request.httpCookie()).isEqualTo(HttpCookie.empty());
-        assertThat(request.httpSession()).isNotNull();
     }
 
     @Test
-    void creationWithSessionHeader() {
+    void creationWithCookie() {
         RequestLine requestLine = RequestLine.of("GET /login HTTP/1.1");
         HttpHeaders httpHeaders = new HttpHeaders(Map.of("Cookie", "JSESSIONID=testId"));
         HttpBody httpBody = HttpBody.empty();
@@ -46,11 +43,5 @@ class HttpRequestTest {
         assertThat(request.headers()).isEqualTo(httpHeaders);
         assertThat(request.body()).isEqualTo(httpBody);
         assertThat(request.httpCookie()).isEqualTo(HttpCookie.of("JSESSIONID=testId"));
-        assertThat(request.httpSession()).isEqualTo(HttpSessions.getSession("testId"));
-    }
-
-    @AfterEach
-    void tearDown() {
-        HttpSessions.clear();
     }
 }

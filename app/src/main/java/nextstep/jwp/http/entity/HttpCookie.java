@@ -49,7 +49,7 @@ public class HttpCookie {
         return cookies.containsKey(SESSION_ID);
     }
 
-    public String getSession() {
+    public String getSessionId() {
         return cookies.get(SESSION_ID);
     }
 

@@ -1,6 +1,6 @@
 package nextstep.jwp.http;
 
-import java.util.UUID;
+import java.util.Objects;
 import nextstep.jwp.http.entity.HttpBody;
 import nextstep.jwp.http.entity.HttpCookie;
 import nextstep.jwp.http.entity.HttpHeaders;
@@ -17,35 +17,29 @@ public class HttpRequest {
     private final HttpHeaders headers;
     private final HttpBody httpBody;
     private final HttpCookie httpCookie;
-    private final HttpSession httpSession;
 
     public HttpRequest(HttpMethod method, HttpUri uri, HttpVersion httpVersion,
-                       HttpHeaders headers, HttpBody httpBody, HttpCookie httpCookie,
-                       HttpSession httpSession) {
+                       HttpHeaders headers, HttpBody httpBody, HttpCookie httpCookie) {
         this.method = method;
         this.uri = uri;
         this.httpVersion = httpVersion;
         this.headers = headers;
         this.httpBody = httpBody;
         this.httpCookie = httpCookie;
-        this.httpSession = httpSession;
     }
 
     public static HttpRequest of(RequestLine requestLine, HttpHeaders httpHeaders, HttpBody httpBody) {
         HttpCookie httpCookie = HttpCookie.of(httpHeaders.getCookie());
-        HttpSession httpSession = getHttpSession(httpCookie);
 
         return new HttpRequest(requestLine.httpMethod(), requestLine.httpUri(), requestLine.httpVersion(), httpHeaders,
-                httpBody, httpCookie, httpSession);
+                httpBody, httpCookie);
     }
 
-    private static HttpSession getHttpSession(HttpCookie httpCookie) {
-        String sessionId = httpCookie.getSession();
-
-        if (sessionId == null) {
-            sessionId = UUID.randomUUID().toString();
+    public HttpSession getSession() {
+        String sessionId = this.httpCookie.getSessionId();
+        if (Objects.isNull(sessionId)) {
+            return HttpSessions.createSession();
         }
-
         return HttpSessions.getSession(sessionId);
     }
 
@@ -71,9 +65,5 @@ public class HttpRequest {
 
     public HttpCookie httpCookie() {
         return httpCookie;
-    }
-
-    public HttpSession httpSession() {
-        return httpSession;
     }
 }

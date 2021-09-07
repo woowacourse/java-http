@@ -12,11 +12,16 @@ import nextstep.jwp.http.entity.HttpVersion;
 public class Fixture {
     public static HttpRequest httpRequest(String method, String uri) {
         return new HttpRequest(HttpMethod.of(method), HttpUri.of(uri), HttpVersion.HTTP_1_1, new HttpHeaders(),
-                HttpBody.empty(), HttpCookie.empty(), new HttpSession(""));
+                HttpBody.empty(), HttpCookie.empty());
     }
 
     public static HttpRequest httpRequest(String method, String uri, String body) {
         return new HttpRequest(HttpMethod.of(method), HttpUri.of(uri), HttpVersion.HTTP_1_1, new HttpHeaders(),
-                HttpBody.of(body), HttpCookie.empty(),  new HttpSession(""));
+                HttpBody.of(body), HttpCookie.empty());
+    }
+
+    public static HttpRequest httpRequest(String method, String uri, HttpSession httpSession) {
+        return new HttpRequest(HttpMethod.of(method), HttpUri.of(uri), HttpVersion.HTTP_1_1, new HttpHeaders(),
+                HttpBody.empty(), HttpCookie.of(httpSession));
     }
 }

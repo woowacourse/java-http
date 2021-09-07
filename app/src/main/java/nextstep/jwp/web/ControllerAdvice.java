@@ -35,6 +35,6 @@ public class ControllerAdvice {
         return handlers.entrySet().stream()
                 .filter(e -> e.getKey().isInstance(exception))
                 .map(Entry::getValue)
-                .findFirst().orElse(null);
+                .findFirst().orElse(new InternalServerErrorExceptionHandler());
     }
 }

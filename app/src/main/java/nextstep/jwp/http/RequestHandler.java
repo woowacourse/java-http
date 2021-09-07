@@ -53,8 +53,6 @@ public class RequestHandler implements Runnable {
 
     private void handle(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
         try {
-            SessionHandler.handle(httpRequest, httpResponse);
-
             if (checkIfUriHasResourceExtension(httpRequest.uri())) {
                 resolveResourceRequest(httpRequest, httpResponse);
                 return;

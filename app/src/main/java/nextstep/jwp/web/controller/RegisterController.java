@@ -7,7 +7,6 @@ import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.RequestParam;
 import nextstep.jwp.http.View;
 import nextstep.jwp.http.ViewResolver;
-import nextstep.jwp.http.entity.HttpStatus;
 import nextstep.jwp.web.db.InMemoryUserRepository;
 import nextstep.jwp.web.model.User;
 
@@ -33,7 +32,6 @@ public class RegisterController extends AbstractController {
         User user = new User(null, account, password, email);
         InMemoryUserRepository.save(user);
 
-        httpResponse.setHttpStatus(HttpStatus.FOUND);
-        httpResponse.setLocation("/index.html");
+        httpResponse.redirect("/index.html");
     }
 }

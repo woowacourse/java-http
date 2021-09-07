@@ -17,7 +17,7 @@ class HomeControllerTest {
     @Test
     void get() throws IOException {
         HttpRequest httpRequest = Fixture.httpRequest("GET", "/");
-        HttpResponse httpResponse = HttpResponse.empty();
+        HttpResponse httpResponse = new HttpResponse();
         controller.doService(httpRequest, httpResponse);
 
         assertThat(httpResponse.httpStatus()).isEqualTo(HttpStatus.OK);
@@ -26,7 +26,7 @@ class HomeControllerTest {
     @Test
     void post() {
         HttpRequest httpRequest = Fixture.httpRequest("POST", "/");
-        HttpResponse httpResponse = HttpResponse.empty();
+        HttpResponse httpResponse = new HttpResponse();
 
         assertThatThrownBy(
                 () -> controller.doService(httpRequest, httpResponse)

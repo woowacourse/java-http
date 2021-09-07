@@ -45,7 +45,7 @@ class ResourceResolverTest {
     void resolveResourceRequest() throws IOException {
         String uri = "/index.html";
         HttpRequest httpRequest = Fixture.httpRequest("GET", uri);
-        HttpResponse httpResponse = HttpResponse.empty();
+        HttpResponse httpResponse = new HttpResponse();
 
         final URL resource = ResourceResolver.class.getClassLoader().getResource("static" + uri);
         final Path path = new File(Objects.requireNonNull(resource).getPath()).toPath();
@@ -65,7 +65,7 @@ class ResourceResolverTest {
     void resolveResourceRequestNotExisting() {
         String uri = "/notExisting.html";
         HttpRequest httpRequest = Fixture.httpRequest("GET", uri);
-        HttpResponse httpResponse = HttpResponse.empty();
+        HttpResponse httpResponse = new HttpResponse();
 
         assertThatThrownBy(
                 () -> ResourceResolver.resolveResourceRequest(httpRequest, httpResponse)
@@ -77,7 +77,7 @@ class ResourceResolverTest {
     void resolveResourceRequestWithPost() {
         String uri = "/index.html";
         HttpRequest httpRequest = Fixture.httpRequest("POST", uri);
-        HttpResponse httpResponse = HttpResponse.empty();
+        HttpResponse httpResponse = new HttpResponse();
 
         assertThatThrownBy(
                 () -> ResourceResolver.resolveResourceRequest(httpRequest, httpResponse)

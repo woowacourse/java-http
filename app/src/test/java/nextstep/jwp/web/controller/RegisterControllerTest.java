@@ -18,7 +18,7 @@ class RegisterControllerTest {
     @Test
     void get() throws IOException {
         HttpRequest httpRequest = Fixture.httpRequest("GET", "/register");
-        HttpResponse httpResponse = HttpResponse.empty();
+        HttpResponse httpResponse = new HttpResponse();
 
         controller.doService(httpRequest, httpResponse);
         assertThat(httpResponse.httpStatus()).isEqualTo(HttpStatus.OK);
@@ -28,7 +28,7 @@ class RegisterControllerTest {
     void post() throws IOException {
         HttpRequest httpRequest = Fixture.httpRequest("POST", "/register",
                 "account=wannte&password=password&email=test@test.com");
-        HttpResponse httpResponse = HttpResponse.empty();
+        HttpResponse httpResponse = new HttpResponse();
 
         controller.doService(httpRequest, httpResponse);
         assertThat(httpResponse.httpStatus()).isEqualTo(HttpStatus.FOUND);

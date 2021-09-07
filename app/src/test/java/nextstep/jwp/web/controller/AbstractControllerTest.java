@@ -25,7 +25,7 @@ class AbstractControllerTest {
     @CsvSource({"PUT", "DELETE", "PATCH"})
     void notAllowedMethod(String method) {
         HttpRequest httpRequest = Fixture.httpRequest(method, "");
-        HttpResponse httpResponse = HttpResponse.empty();
+        HttpResponse httpResponse = new HttpResponse();
         assertThatThrownBy(
                 () -> controller.doService(httpRequest, httpResponse)
         ).isInstanceOf(MethodNotAllowedException.class);

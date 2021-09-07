@@ -35,7 +35,7 @@ public class RequestHandler implements Runnable {
 
             HttpRequest httpRequest = HttpRequestReader.read(inputStream);
 
-            HttpResponse httpResponse = HttpResponse.empty();
+            HttpResponse httpResponse = new HttpResponse();
 
             handle(httpRequest, httpResponse);
 

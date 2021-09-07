@@ -15,7 +15,7 @@ class SessionHandlerTest {
     @DisplayName("Set-Cookie 설정")
     void setCookie() {
         HttpRequest httpRequest = Fixture.httpRequest("GET", "/login");
-        HttpResponse httpResponse = HttpResponse.empty();
+        HttpResponse httpResponse = new HttpResponse();
 
         SessionHandler.handle(httpRequest, httpResponse);
         assertTrue(httpResponse.containsHeader("Set-Cookie"));
@@ -26,7 +26,7 @@ class SessionHandlerTest {
     void UnregisteredSessionsRequest() {
         HttpRequest httpRequest = Fixture.httpRequest("GET", "/login");
         httpRequest.httpCookie().addCookie("JSESSIONID", "sessionId");
-        HttpResponse httpResponse = HttpResponse.empty();
+        HttpResponse httpResponse = new HttpResponse();
 
         SessionHandler.handle(httpRequest, httpResponse);
         assertTrue(httpResponse.containsHeader("Set-Cookie"));
@@ -40,7 +40,7 @@ class SessionHandlerTest {
 
         HttpRequest httpRequest = Fixture.httpRequest("GET", "/login");
         httpRequest.httpCookie().addCookie("JSESSIONID", sessionId);
-        HttpResponse httpResponse = HttpResponse.empty();
+        HttpResponse httpResponse = new HttpResponse();
 
         SessionHandler.handle(httpRequest, httpResponse);
         assertFalse(httpResponse.containsHeader("Set-Cookie"));

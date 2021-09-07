@@ -18,7 +18,7 @@ class LoginControllerTest {
     @Test
     void get() throws IOException {
         HttpRequest httpRequest = Fixture.httpRequest("GET", "/login");
-        HttpResponse httpResponse = HttpResponse.empty();
+        HttpResponse httpResponse = new HttpResponse();
 
         controller.doService(httpRequest, httpResponse);
 
@@ -33,7 +33,7 @@ class LoginControllerTest {
         InMemoryUserRepository.save(new User(null, account, password, "email@email.com"));
 
         HttpRequest httpRequest = Fixture.httpRequest("POST", "/login", "account=" + account + "&password=" + password);
-        HttpResponse httpResponse = HttpResponse.empty();
+        HttpResponse httpResponse = new HttpResponse();
 
         controller.doService(httpRequest, httpResponse);
 

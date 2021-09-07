@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 class HttpResponseTest {
     @Test
     void name() {
-        HttpResponse httpResponse = HttpResponse.empty();
+        HttpResponse httpResponse = new HttpResponse();
         httpResponse.setHttpStatus(HttpStatus.FOUND);
         httpResponse.setLocation("/index.html");
     }

@@ -14,6 +14,10 @@ public class HttpResponse {
     private HttpHeaders httpHeaders;
     private HttpBody httpBody;
 
+    public HttpResponse() {
+        this(HttpVersion.HTTP_1_1, HttpStatus.OK, new HttpHeaders(), HttpBody.empty());
+    }
+
     public HttpResponse(HttpStatus httpStatus, HttpHeaders httpHeaders, HttpBody httpBody) {
         this(HttpVersion.HTTP_1_1, httpStatus, httpHeaders, httpBody);
     }
@@ -24,10 +28,6 @@ public class HttpResponse {
         this.httpStatus = httpStatus;
         this.httpHeaders = httpHeaders;
         this.httpBody = httpBody;
-    }
-
-    public static HttpResponse empty() {
-        return new HttpResponse(HttpStatus.OK, new HttpHeaders(), HttpBody.empty());
     }
 
     public HttpVersion httpVersion() {
@@ -62,14 +62,6 @@ public class HttpResponse {
         this.httpBody = httpBody;
     }
 
-    public byte[] getBytes() {
-        return new byte[3];
-    }
-
-    public void setHttpBody(String body) {
-        setHttpBody("*/*", body);
-    }
-
     public void setHttpBody(String contentType, String body) {
         httpHeaders.addHeader("Content-Type", contentType);
         httpHeaders.addHeader("Content-Length", String.valueOf(body.getBytes().length));
@@ -78,6 +70,15 @@ public class HttpResponse {
 
     public void setLocation(String location) {
         httpHeaders.addHeader("Location", location);
+    }
+
+    public void setCookie(HttpCookie cookie) {
+        cookie.getCookies().keySet()
+                .forEach(key -> addHeader("Set-Cookie", cookie.asString(key)));
+    }
+
+    public void addHeader(String name, String value) {
+        httpHeaders.addHeader(name, value);
     }
 
     public String asString() {
@@ -91,16 +92,7 @@ public class HttpResponse {
         return String.join("\r\n", output);
     }
 
-    public void addHeader(String name, String value) {
-        httpHeaders.addHeader(name, value);
-    }
-
     public boolean containsHeader(String headerName) {
         return httpHeaders.hasHeaderName(headerName);
-    }
-
-    public void setCookie(HttpCookie cookie) {
-        cookie.getCookies().keySet()
-                .forEach(key -> httpHeaders.addHeader("Set-Cookie", cookie.asString(key)));
     }
 }

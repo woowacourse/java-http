@@ -20,10 +20,10 @@ class HttpResponseTest {
         String path = "/index.html";
         httpResponse.redirect(path);
         String actual = httpResponse.asString();
-        System.out.println(actual);
 
-        assertThat(actual).contains("HTTP/1.1 302 Found");
-        assertThat(actual).contains("Location: " + path);
+        assertThat(actual)
+                .contains("HTTP/1.1 302 Found")
+                .contains("Location: " + path);
     }
 
     @Test
@@ -35,9 +35,8 @@ class HttpResponseTest {
         httpResponse.setCookie(httpCookie);
         String actual = httpResponse.asString();
 
-        System.out.println(actual);
-
-        assertThat(actual).contains("HTTP/1.1 200 OK");
-        assertThat(actual).contains("Set-Cookie: " + cookieLine);
+        assertThat(actual)
+                .contains("HTTP/1.1 200 OK")
+                .contains("Set-Cookie: " + cookieLine);
     }
 }

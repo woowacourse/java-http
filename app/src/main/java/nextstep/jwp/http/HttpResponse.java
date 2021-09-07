@@ -46,20 +46,8 @@ public class HttpResponse {
         return httpBody;
     }
 
-    public void setHttpVersion(HttpVersion httpVersion) {
-        this.httpVersion = httpVersion;
-    }
-
     public void setHttpStatus(HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
-    }
-
-    public void setHttpHeaders(HttpHeaders httpHeaders) {
-        this.httpHeaders = httpHeaders;
-    }
-
-    public void setHttpBody(HttpBody httpBody) {
-        this.httpBody = httpBody;
     }
 
     public void setHttpBody(String contentType, String body) {
@@ -68,7 +56,7 @@ public class HttpResponse {
         httpBody = HttpBody.of(body);
     }
 
-    public void setLocation(String location) {
+    private void setLocation(String location) {
         httpHeaders.addHeader("Location", location);
     }
 

@@ -28,5 +28,7 @@
 - HttpRequest에서 HttpSessions에 쿠기에 있는 Session이 존재하지 않는 경우 새로 발급. 새로 발급 받은 토큰과 관계없이 httpSession의 값으로
   setCookie 진행. containSession()의 값이 true인 경우에도 setCookie를 진행해줘야할 때가 있음. SessionHandler의 if 문으로 분기
   처리로 우선 진행
-- HttpSessions에 등록되지 않은 JSESSIONID로 요청이 들어 왔을 때, 새로운 JSESSIONID를 발급해줘야하는지, 아니면 요청에서 들어온 JSESSIONID로
-  HttpSessions에 등록을 해야하는지
+- [x] HttpSessions에 등록되지 않은 JSESSIONID로 요청이 들어 왔을 때, 새로운 JSESSIONID를 발급해줘야하는지, 아니면 요청에서 들어온 JSESSIONID로
+  HttpSessions에 등록을 해야하는지 -> domain별로 Cookie가 관리되어 외부에서 마든 JSESSIONID가 요청되는 경우는 매우 드물고, 오히려 만료된 Session인 경우를 핸들링하는 경우가 많은 듯. 기존의 JSESSIONID를 없애고 새로운 JSESSIONID Set-Cookie하도록 구현.
+- HttpResponse로 n개의 Set-Cookie가 가능해야함. -> HttpHeaders가 Map<String,String> 구조가 아닌 Map<String, List<String>> (또는 MultiValueMap<String, String>)의 구조를 가져야 할듯 -> [Springframework.http.Httpheaders](https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/http/HttpHeaders.html) -> 이번 구현에서는 기존의 것을 유지하고, 한개의 Set-Cookie만을 허용.
+

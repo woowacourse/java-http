@@ -20,7 +20,7 @@ public class HttpHeaders {
 
     public void addHeader(String line) {
         String[] splits = line.split(": ", 2);
-        addHeader(splits[0], splits[1]);
+        addHeader(splits[0].trim(), splits[1].trim());
     }
 
     public void addHeader(String name, String value) {

@@ -99,8 +99,13 @@ public class HttpResponseBuilder {
         return this;
     }
 
-    public HttpResponseBuilder setCookie(String sessionId) {
-        this.responseHeader.putSetCookie(JSESSIONID, sessionId);
+    public HttpResponseBuilder setCookie(String name, String value) {
+        this.responseHeader.putSetCookie(name, value);
+        return this;
+    }
+
+    public HttpResponseBuilder setSessionCookie(String sessionId) {
+        setCookie(JSESSIONID, sessionId);
         return this;
     }
 }

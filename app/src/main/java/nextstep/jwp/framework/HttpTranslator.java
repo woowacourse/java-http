@@ -64,7 +64,6 @@ public class HttpTranslator {
         return MessageBody.from(StringUtils.decode(bodyString, charSet));
     }
 
-
     public void respond(HttpResponseMessage httpResponseMessage) throws IOException {
         outputStream.write(httpResponseMessage.toBytes());
         outputStream.flush();

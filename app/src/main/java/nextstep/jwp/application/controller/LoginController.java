@@ -38,7 +38,7 @@ public class LoginController extends AbstractController {
         }
         httpSession.put(USER_SESSION_NAME, user);
         return HttpResponseBuilder.redirectTemporarily("/index.html")
-                .setCookie(httpSession.getId())
+                .setSessionCookie(httpSession.getId())
                 .build();
     }
 

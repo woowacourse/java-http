@@ -16,16 +16,12 @@ public class RequestHeader implements MessageHeader {
         this.headerFields = headerFields;
     }
 
-    private RequestHeader(String headerFields) {
-        this(HeaderFields.from(headerFields));
-    }
-
     public static RequestHeader from(HeaderFields headerFields) {
         return new RequestHeader(headerFields);
     }
 
-    public static RequestHeader from(String headerFields) {
-        return new RequestHeader(headerFields);
+    public static RequestHeader from(String headerMessage) {
+        return from(HeaderFields.from(headerMessage));
     }
 
     public int takeContentLength() {

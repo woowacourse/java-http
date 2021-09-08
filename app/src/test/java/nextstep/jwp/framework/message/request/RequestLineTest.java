@@ -21,7 +21,7 @@ class RequestLineTest {
         HttpVersion httpVersion = HttpVersion.HTTP_1_1;
 
         // when
-        RequestLine requestLine = new RequestLine(httpMethod, httpUri, httpVersion);
+        RequestLine requestLine = RequestLine.of(httpMethod, httpUri, httpVersion);
 
         // then
         assertThat(requestLine.getHttpMethod()).isEqualTo(httpMethod);
@@ -54,7 +54,7 @@ class RequestLineTest {
     void asSting() {
         // given
         String expect = "POST /login HTTP/1.1\r\n";
-        RequestLine requestLine = new RequestLine(HttpMethod.POST, new HttpUri("/login"), HttpVersion.HTTP_1_1);
+        RequestLine requestLine = RequestLine.of(HttpMethod.POST, new HttpUri("/login"), HttpVersion.HTTP_1_1);
 
         // when, then
         assertThat(requestLine.asString()).isEqualTo(expect);
@@ -65,7 +65,7 @@ class RequestLineTest {
     void toBytes() {
         // given
         byte[] expect = "POST /login HTTP/1.1\r\n".getBytes();
-        RequestLine requestLine = new RequestLine(HttpMethod.POST, new HttpUri("/login"), HttpVersion.HTTP_1_1);
+        RequestLine requestLine = RequestLine.of(HttpMethod.POST, new HttpUri("/login"), HttpVersion.HTTP_1_1);
 
         // when, then
         assertThat(requestLine.toBytes()).isEqualTo(expect);
@@ -79,8 +79,8 @@ class RequestLineTest {
         HttpUri httpUri = new HttpUri("/login");
         HttpVersion httpVersion = HttpVersion.HTTP_1_1;
 
-        RequestLine requestLine = new RequestLine(httpMethod, httpUri, httpVersion);
-        RequestLine otherRequestLine = new RequestLine(httpMethod, httpUri, httpVersion);
+        RequestLine requestLine = RequestLine.of(httpMethod, httpUri, httpVersion);
+        RequestLine otherRequestLine = RequestLine.of(httpMethod, httpUri, httpVersion);
 
         // then
         assertThat(requestLine).isEqualTo(otherRequestLine)

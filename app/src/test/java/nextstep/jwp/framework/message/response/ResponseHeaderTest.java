@@ -24,6 +24,20 @@ class ResponseHeaderTest {
         assertThat(responseHeader.getHeaderFields()).isEqualTo(headerFields);
     }
 
+    @DisplayName("비어있는 ResponseHeader 를 생성한다.")
+    @Test
+    void createEmpty() {
+        // given
+        HeaderFields headerFields = HeaderFields.empty();
+        ResponseHeader expect = new ResponseHeader(headerFields);
+
+        // when
+        ResponseHeader responseHeader = new ResponseHeader();
+
+        // then
+        assertThat(responseHeader).isEqualTo(expect);
+    }
+
     @DisplayName("RequestHeader 를 바이트 배열로 변환한다.")
     @Test
     void toBytes() {

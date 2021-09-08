@@ -9,14 +9,19 @@ import java.util.Optional;
 
 public class ResponseHeader implements MessageHeader {
 
-    private final HeaderFields headerFields;
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String LOCATION = "Location";
 
-    public ResponseHeader() {
-        this(HeaderFields.empty());
-    }
+    private final HeaderFields headerFields;
 
     public ResponseHeader(HeaderFields headerFields) {
         this.headerFields = headerFields;
+    }
+
+    public ResponseHeader() {
+        this(HeaderFields.empty());
     }
 
     public String asString() {
@@ -28,15 +33,19 @@ public class ResponseHeader implements MessageHeader {
     }
 
     public void putLocation(String uri) {
-        headerFields.putLocation(uri);
+        put(LOCATION, uri);
     }
 
     public void putContentType(MediaType contentType) {
-        headerFields.putContentType(contentType);
+        put(CONTENT_TYPE, contentType.getValue());
     }
 
     public void putContentLength(int contentLength) {
-        headerFields.putContentLength(contentLength);
+        put(CONTENT_LENGTH, String.valueOf(contentLength));
+    }
+
+    public void putSetCookie(String name, String value) {
+        put(SET_COOKIE, String.format("%s=%s", name, value));
     }
 
     public Optional<String> take(String key) {

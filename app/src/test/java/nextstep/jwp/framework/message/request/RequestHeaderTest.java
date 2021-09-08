@@ -18,17 +18,35 @@ class RequestHeaderTest {
         HeaderFields headerFields = headerFieldsWhenExistsBody();
 
         // when
-        RequestHeader requestHeader = new RequestHeader(headerFields);
+        RequestHeader requestHeader = RequestHeader.from(headerFields);
 
         // then
         assertThat(requestHeader.getHeaderFields()).isEqualTo(headerFields);
+    }
+
+    @DisplayName("문자열로 RequestHeader 를 생성한다.")
+    @Test
+    void createWithString() {
+        // given
+        String headerMessage = String.join("\r\n",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: 10",
+                "");
+        RequestHeader expect = RequestHeader.from(headerFieldsWhenExistsBody());
+
+        // when
+        RequestHeader requestHeader = RequestHeader.from(headerMessage);
+
+        // then
+        assertThat(requestHeader).isEqualTo(expect);
     }
 
     @DisplayName("Message Body Length 를 알아낸다 - Body 가 있는 경우")
     @Test
     void takeContentLengthWhenExistsBody() {
         // given
-        RequestHeader requestHeader = new RequestHeader(headerFieldsWhenExistsBody());
+        RequestHeader requestHeader = RequestHeader.from(headerFieldsWhenExistsBody());
 
         // when
         int contentLength = requestHeader.takeContentLength();
@@ -41,13 +59,54 @@ class RequestHeaderTest {
     @Test
     void takeContentLengthWhenNoBody() {
         // given
-        RequestHeader requestHeader = new RequestHeader(headerFieldsWhenNoBody());
+        RequestHeader requestHeader = RequestHeader.from(headerFieldsWhenNoBody());
 
         // when
         int contentLength = requestHeader.takeContentLength();
 
         // then
         assertThat(contentLength).isZero();
+    }
+
+    @DisplayName("헤더에서 쿠키를 추출한다.")
+    @Test
+    void extractHttpCookies() {
+        // given
+        String cookieString =
+                "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
+        HttpCookies expect = HttpCookies.from(cookieString);
+
+        String headerMessage = String.join("\r\n",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: 10",
+                "Cookie: " + cookieString,
+                "");
+        RequestHeader requestHeader = RequestHeader.from(headerMessage);
+
+        // when
+        HttpCookies httpCookies = requestHeader.extractHttpCookies();
+
+        // then
+        assertThat(httpCookies.toMap()).isEqualTo(expect.toMap());
+    }
+
+    @DisplayName("Cookie 헤더가 없는 경우 비어 있는 쿠키가 추출된다.")
+    @Test
+    void extractHttpCookiesWithNoHeader() {
+        // given
+        String headerMessage = String.join("\r\n",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
+                "Content-Length: 10",
+                "");
+        RequestHeader requestHeader = RequestHeader.from(headerMessage);
+
+        // when
+        HttpCookies httpCookies = requestHeader.extractHttpCookies();
+
+        // then
+        assertThat(httpCookies).isSameAs(HttpCookies.empty());
     }
 
     @DisplayName("RequestHeader 를 바이트 배열로 변환한다.")
@@ -60,7 +119,7 @@ class RequestHeaderTest {
                 "Content-Length: 10",
                 "");
         byte[] expect = headerMessage.getBytes();
-        RequestHeader requestHeader = new RequestHeader(headerFieldsWhenExistsBody());
+        RequestHeader requestHeader = RequestHeader.from(headerFieldsWhenExistsBody());
 
         // when
         byte[] bytes = requestHeader.toBytes();
@@ -74,8 +133,8 @@ class RequestHeaderTest {
     void equalsAndHashCode() {
         // given
         HeaderFields headerFields = headerFieldsWhenExistsBody();
-        RequestHeader requestHeader = new RequestHeader(headerFields);
-        RequestHeader otherRequestHeader = new RequestHeader(headerFields);
+        RequestHeader requestHeader = RequestHeader.from(headerFields);
+        RequestHeader otherRequestHeader = RequestHeader.from(headerFields);
 
         // then
         Assertions.assertThat(requestHeader).isEqualTo(otherRequestHeader)

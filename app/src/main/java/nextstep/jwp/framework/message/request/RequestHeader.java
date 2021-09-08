@@ -7,19 +7,32 @@ import java.util.Objects;
 
 public class RequestHeader implements MessageHeader {
 
+    private static final String COOKIE = "Cookie";
+    private static final String CONTENT_LENGTH = "Content-Length";
+
     private final HeaderFields headerFields;
 
-    public RequestHeader(String headerFields) {
-        this(HeaderFields.from(headerFields));
-    }
-
-    public RequestHeader(HeaderFields headerFields) {
+    private RequestHeader(HeaderFields headerFields) {
         this.headerFields = headerFields;
     }
 
+    public static RequestHeader from(HeaderFields headerFields) {
+        return new RequestHeader(headerFields);
+    }
+
+    public static RequestHeader from(String headerMessage) {
+        return from(HeaderFields.from(headerMessage));
+    }
+
     public int takeContentLength() {
-        String contentLength = headerFields.take("Content-Length").orElse("0");
+        String contentLength = headerFields.take(CONTENT_LENGTH).orElse("0");
         return Integer.parseInt(contentLength);
+    }
+
+    public HttpCookies extractHttpCookies() {
+        return headerFields.take(COOKIE)
+                .map(HttpCookies::from)
+                .orElseGet(HttpCookies::empty);
     }
 
     public String asString() {

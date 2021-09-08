@@ -15,6 +15,7 @@ import nextstep.jwp.framework.message.response.StatusLine;
 public class HttpResponseBuilder {
 
     private static final HttpVersion DEFAULT_HTTP_VERSION = HttpVersion.HTTP_1_1;
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final StatusLine statusLine;
     private final ResponseHeader responseHeader;
@@ -95,6 +96,16 @@ public class HttpResponseBuilder {
 
     public HttpResponseBuilder contentLength(int contentLength) {
         this.responseHeader.putContentLength(contentLength);
+        return this;
+    }
+
+    public HttpResponseBuilder setCookie(String name, String value) {
+        this.responseHeader.putSetCookie(name, value);
+        return this;
+    }
+
+    public HttpResponseBuilder setSessionCookie(String sessionId) {
+        setCookie(JSESSIONID, sessionId);
         return this;
     }
 }

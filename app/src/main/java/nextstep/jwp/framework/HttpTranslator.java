@@ -52,7 +52,7 @@ public class HttpTranslator {
         while (!(line = bufferedReader.readLine()).equals("")) {
             stringBuilder.append(line).append(NEW_LINE);
         }
-        return new RequestHeader(
+        return RequestHeader.from(
                 StringUtils.decode(stringBuilder.toString(), charSet)
         );
     }
@@ -63,7 +63,6 @@ public class HttpTranslator {
         String bodyString = new String(buffer);
         return MessageBody.from(StringUtils.decode(bodyString, charSet));
     }
-
 
     public void respond(HttpResponseMessage httpResponseMessage) throws IOException {
         outputStream.write(httpResponseMessage.toBytes());

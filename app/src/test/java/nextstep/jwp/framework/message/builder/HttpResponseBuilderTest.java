@@ -86,8 +86,29 @@ class HttpResponseBuilderTest {
         HttpResponseMessage httpResponse = HttpResponseBuilder.ok()
                 .contentType(MediaType.TEXT_HTML_CHARSET_UTF8)
                 .contentLength(100)
+                .setSessionCookie("sessionId")
                 .build();
         assertHeaderIncludes(httpResponse, "Content-Type", MediaType.TEXT_HTML_CHARSET_UTF8.getValue());
         assertHeaderIncludes(httpResponse, "Content-Length", "100");
+    }
+
+    @DisplayName("Header 에 JSESSIONID 를 Set-Cookie 추가하여 HttpResponse 생성")
+    @Test
+    void setSessionCookie() {
+        HttpResponseMessage httpResponse = HttpResponseBuilder.ok()
+                .setSessionCookie("sessionId")
+                .build();
+
+        assertHeaderIncludes(httpResponse, "Set-Cookie", "JSESSIONID=sessionId");
+    }
+
+    @DisplayName("Header 에 기타 쿠키를 Set-Cookie 추가하여 HttpResponse 생성")
+    @Test
+    void setCookie() {
+        HttpResponseMessage httpResponse = HttpResponseBuilder.ok()
+                .setCookie("choco", "cookie")
+                .build();
+
+        assertHeaderIncludes(httpResponse, "Set-Cookie", "choco=cookie");
     }
 }

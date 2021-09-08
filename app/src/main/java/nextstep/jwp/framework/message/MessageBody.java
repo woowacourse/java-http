@@ -20,16 +20,13 @@ public class MessageBody {
 
     public static MessageBody from(byte[] bytes) {
         if (bytes.length == 0) {
-            return EMPTY_BODY;
+            return empty();
         }
         return new MessageBody(bytes);
     }
 
     public static MessageBody from(String bodyString) {
-        if (bodyString.isEmpty()) {
-            return EMPTY_BODY;
-        }
-        return new MessageBody(bodyString.getBytes());
+        return from(bodyString.getBytes());
     }
 
     public boolean isEmpty() {

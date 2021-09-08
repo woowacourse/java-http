@@ -18,14 +18,18 @@ public class RequestLine implements StartLine {
     private final HttpUri httpUri;
     private final HttpVersion httpVersion;
 
+    private RequestLine(HttpMethod httpMethod, HttpUri httpUri, HttpVersion httpVersion) {
+        this.httpMethod = httpMethod;
+        this.httpUri = httpUri;
+        this.httpVersion = httpVersion;
+    }
+
     private RequestLine(String httpMethod, String httpUri, String httpVersion) {
         this(HttpMethod.valueOf(httpMethod), new HttpUri(httpUri), HttpVersion.from(httpVersion));
     }
 
-    public RequestLine(HttpMethod httpMethod, HttpUri httpUri, HttpVersion httpVersion) {
-        this.httpMethod = httpMethod;
-        this.httpUri = httpUri;
-        this.httpVersion = httpVersion;
+    public static RequestLine of(HttpMethod httpMethod, HttpUri httpUri, HttpVersion httpVersion) {
+        return new RequestLine(httpMethod, httpUri, httpVersion);
     }
 
     public static RequestLine from(String requestLine) {

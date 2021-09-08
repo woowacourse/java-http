@@ -46,7 +46,7 @@ class HttpTranslatorTest {
                 RequestLine.from(requestLineMessage())
         );
         assertThat(header).isEqualTo(
-                new RequestHeader(requestHeaderMessage())
+                RequestHeader.from(requestHeaderMessage())
         );
         assertThat(body).isEqualTo(
                 MessageBody.from(requestBodyMessage())

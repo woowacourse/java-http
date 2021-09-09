@@ -5,6 +5,7 @@ import nextstep.jwp.exception.BadRequestException;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.RequestParam;
+import nextstep.jwp.http.View;
 import nextstep.jwp.http.ViewResolver;
 import nextstep.jwp.web.db.InMemoryUserRepository;
 import nextstep.jwp.web.model.User;
@@ -12,13 +13,14 @@ import nextstep.jwp.web.model.User;
 public class RegisterController extends AbstractController {
 
     @Override
-    protected String doGet(HttpRequest httpRequest) throws IOException {
-        return ViewResolver.resolveView("register");
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) throws IOException {
+        View view = ViewResolver.resolveView("register");
+        view.render(httpRequest, httpResponse);
     }
 
     @Override
-    protected String doPost(HttpRequest httpRequest) {
-        RequestParam params = RequestParam.of(httpRequest.payload());
+    protected void doPost(HttpRequest httpRequest, HttpResponse httpResponse) {
+        RequestParam params = RequestParam.of(httpRequest.body());
         String account = params.get("account");
         String password = params.get("password");
         String email = params.get("email");
@@ -30,6 +32,6 @@ public class RegisterController extends AbstractController {
         User user = new User(null, account, password, email);
         InMemoryUserRepository.save(user);
 
-        return HttpResponse.redirect("/index.html");
+        httpResponse.redirect("/index.html");
     }
 }

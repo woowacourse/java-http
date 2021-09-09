@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Objects;
 import nextstep.jwp.exception.MethodNotAllowedException;
 import nextstep.jwp.exception.NotFoundException;
+import nextstep.jwp.http.entity.HttpStatus;
+import nextstep.jwp.http.entity.HttpUri;
 
 public class ResourceResolver {
     private static final String RESOURCE_PREFIX = "static";
@@ -17,7 +19,7 @@ public class ResourceResolver {
     private ResourceResolver() {
     }
 
-    public static boolean checkIfUriHasResourceExtension(String uri) {
+    public static boolean checkIfUriHasResourceExtension(HttpUri uri) {
         for (String suffix : RESOURCE_SUFFIXES) {
             if (uri.endsWith(suffix)) {
                 return true;
@@ -26,12 +28,13 @@ public class ResourceResolver {
         return false;
     }
 
-    public static String resolveResourceRequest(HttpRequest request) throws IOException {
-        if (!"GET".equals(request.method())) {
+    public static void resolveResourceRequest(HttpRequest request, HttpResponse httpResponse) throws IOException {
+        if (!request.method().isSame("GET")) {
             throw new MethodNotAllowedException("Resource요청은 GET만 가능합니다.");
         }
 
-        final URL resource = ResourceResolver.class.getClassLoader().getResource(RESOURCE_PREFIX + request.uri());
+        final URL resource = ResourceResolver.class.getClassLoader()
+                .getResource(RESOURCE_PREFIX + request.uri().path());
         if (Objects.isNull(resource)) {
             throw new NotFoundException("존재하지 않는 자원입니다.");
         }
@@ -39,6 +42,7 @@ public class ResourceResolver {
         String responseBody = Files.readString(path);
         String contentType = Files.probeContentType(path);
 
-        return HttpResponse.ok(contentType, responseBody);
+        httpResponse.setHttpStatus(HttpStatus.OK);
+        httpResponse.setHttpBody(contentType, responseBody);
     }
 }

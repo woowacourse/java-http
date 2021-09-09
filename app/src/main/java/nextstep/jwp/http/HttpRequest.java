@@ -1,43 +1,69 @@
 package nextstep.jwp.http;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
+import nextstep.jwp.http.entity.HttpBody;
+import nextstep.jwp.http.entity.HttpCookie;
+import nextstep.jwp.http.entity.HttpHeaders;
+import nextstep.jwp.http.entity.HttpMethod;
+import nextstep.jwp.http.entity.HttpSession;
+import nextstep.jwp.http.entity.HttpUri;
+import nextstep.jwp.http.entity.HttpVersion;
+import nextstep.jwp.http.entity.RequestLine;
 
 public class HttpRequest {
-    private final String method;
-    private final String uri;
-    private final Map<String, String> headers = new HashMap<>();
-    private String payload;
+    private final HttpMethod method;
+    private final HttpUri uri;
+    private final HttpVersion httpVersion;
+    private final HttpHeaders headers;
+    private final HttpBody httpBody;
+    private final HttpCookie httpCookie;
 
-    public HttpRequest(String method, String uri) {
+    public HttpRequest(HttpMethod method, HttpUri uri, HttpVersion httpVersion,
+                       HttpHeaders headers, HttpBody httpBody, HttpCookie httpCookie) {
         this.method = method;
-        if (uri == null) {
-            throw new IllegalStateException("uri is null");
-        }
         this.uri = uri;
+        this.httpVersion = httpVersion;
+        this.headers = headers;
+        this.httpBody = httpBody;
+        this.httpCookie = httpCookie;
     }
 
-    public void addHeader(String name, String value) {
-        this.headers.put(name, value);
+    public static HttpRequest of(RequestLine requestLine, HttpHeaders httpHeaders, HttpBody httpBody) {
+        HttpCookie httpCookie = HttpCookie.of(httpHeaders.getCookie());
+
+        return new HttpRequest(requestLine.httpMethod(), requestLine.httpUri(), requestLine.httpVersion(), httpHeaders,
+                httpBody, httpCookie);
     }
 
-    public void setPayload(String payload) {
-        this.payload = payload;
+    public HttpSession getSession() {
+        String sessionId = this.httpCookie.getSessionId();
+        if (Objects.isNull(sessionId)) {
+            return HttpSessions.createSession();
+        }
+        return HttpSessions.getSession(sessionId);
     }
 
-    public String method() {
+    public HttpMethod method() {
         return method;
     }
 
-    public String uri() {
+    public HttpUri uri() {
         return uri;
     }
 
-    public Map<String, String> headers() {
+    public HttpVersion httpVersion() {
+        return httpVersion;
+    }
+
+    public HttpHeaders headers() {
         return headers;
     }
 
-    public String payload() {
-        return payload;
+    public HttpBody body() {
+        return httpBody;
+    }
+
+    public HttpCookie httpCookie() {
+        return httpCookie;
     }
 }

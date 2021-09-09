@@ -24,7 +24,7 @@ public class RequestMapper {
     }
 
     private static Predicate<HttpRequest> isAcceptable(String uri) {
-        return httpRequest -> httpRequest.uri().equals(uri);
+        return httpRequest -> httpRequest.uri().hasPathOf(uri);
     }
 
     public static Controller findController(HttpRequest request) {

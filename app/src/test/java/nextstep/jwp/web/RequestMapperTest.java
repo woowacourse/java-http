@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.stream.Stream;
+import nextstep.jwp.Fixture;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.web.controller.Controller;
@@ -28,7 +29,7 @@ class RequestMapperTest {
     @ParameterizedTest
     @MethodSource("controllerMapping")
     void findController(String method, String uri, Class<? extends Controller> controllerClass) {
-        HttpRequest httpRequest = new HttpRequest(method, uri);
+        HttpRequest httpRequest = Fixture.httpRequest(method, uri);
 
         Controller controller = RequestMapper.findController(httpRequest);
 
@@ -37,7 +38,7 @@ class RequestMapperTest {
 
     @Test
     void findNotExistingController() {
-        HttpRequest httpRequest = new HttpRequest("GET", "/notExistUri");
+        HttpRequest httpRequest = Fixture.httpRequest("GET", "/notExistUri");
 
         assertThatThrownBy(
                 () -> RequestMapper.findController(httpRequest)

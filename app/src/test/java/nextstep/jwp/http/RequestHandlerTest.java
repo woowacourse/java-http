@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.MockSocket;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
@@ -29,7 +30,7 @@ class RequestHandlerTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -55,10 +56,15 @@ class RequestHandlerTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @AfterEach
+    void tearDown() {
+        HttpSessions.clear();
     }
 }

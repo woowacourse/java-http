@@ -38,11 +38,6 @@ public class RequestHandler implements Runnable {
 
             HttpResponse httpResponse = new HttpResponse(outputStream);
 
-            if (httpRequest.getCookie().getCookies("JSESSIONID") == null) {
-                httpResponse.addHeaders("Set-Cookie",
-                        String.format("JSESSIONID=%s", UUID.randomUUID()));
-            }
-
             ContentType contentType = ContentType.findBy(httpRequest.getUri());
             if (!contentType.isNone() && !contentType.isHtml()) {
                 log.debug(httpRequest.getUri());

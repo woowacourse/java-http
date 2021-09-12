@@ -1,6 +1,7 @@
 package nextstep.jwp.controller;
 
 import java.util.Map;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
@@ -48,6 +49,11 @@ public class RegisterController extends AbstractController {
         final User user = new User(InMemoryUserRepository.findCurrentId(), account, password,
                 email);
         InMemoryUserRepository.save(user);
+
+        if (request.getCookie().getCookies("JSESSIONID") == null) {
+            response.addHeaders("Set-Cookie",
+                    String.format("JSESSIONID=%s", UUID.randomUUID()));
+        }
 
         response.writeStatusLine(HttpStatus.FOUND);
         response.writeRedirect("/index.html");

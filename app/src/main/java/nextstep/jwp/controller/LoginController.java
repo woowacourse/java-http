@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.HttpRequest;
@@ -26,7 +27,7 @@ public class LoginController extends AbstractController {
     }
 
     private boolean isLogin(HttpSession httpSession) {
-        final Object user = (User) httpSession.getAttribute("user");
+        final Object user = httpSession.getAttribute("user");
         return user != null;
     }
 
@@ -46,6 +47,12 @@ public class LoginController extends AbstractController {
 
         try {
             final User user = login(loginInfo);
+
+            if (request.getCookie().getCookies("JSESSIONID") == null) {
+                response.addHeaders("Set-Cookie",
+                        String.format("JSESSIONID=%s", UUID.randomUUID()));
+            }
+
             HttpSession httpSession = request.getSession();
             httpSession.setAttribute("user", user);
 

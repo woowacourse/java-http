@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import nextstep.jwp.http.HttpCookie;
+import nextstep.jwp.http.HttpHeaders;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
 
@@ -24,33 +25,48 @@ public class HttpRequestReader {
         final String requestUri = requestLine[1];
         final String requestProtocol = requestLine[2];
 
+        final HttpHeaders httpHeaders = getHttpHeaders(reader);
+
+        if (httpHeaders.hasBody()) {
+            final String requestBody = getRequestBody(
+                    reader,
+                    Integer.parseInt(httpHeaders.getHeaderBy("Content-Length")
+                    ));
+            return new HttpRequest(
+                    HttpMethod.valueOf(requestMethod),
+                    requestUri,
+                    requestProtocol,
+                    httpHeaders,
+                    requestBody
+            );
+        }
+
+        return new HttpRequest(
+                HttpMethod.valueOf(requestMethod),
+                requestUri,
+                requestProtocol,
+                httpHeaders
+        );
+    }
+
+    private static boolean exist(String line) {
+        return !"".equals(line) && !Objects.isNull(line);
+    }
+
+    private static HttpHeaders getHttpHeaders(BufferedReader reader)
+            throws IOException {
         final Map<String, String> requestHeaders = new LinkedHashMap<>();
 
-        int contentLength = 0;
+        String line;
         HttpCookie httpCookie = new HttpCookie();
 
         while (exist(line = reader.readLine())) {
             final String[] fields = line.split(": ");
             requestHeaders.put(fields[0], fields[1]);
 
-            contentLength = getContentLength(line, requestHeaders, contentLength);
             httpCookie = getHttpCookie(line, requestHeaders, httpCookie);
         }
-
-        String requestBody = getRequestBody(reader, contentLength);
-
-        return new HttpRequest(
-                HttpMethod.valueOf(requestMethod),
-                requestUri,
-                requestProtocol,
-                requestHeaders,
-                requestBody,
-                httpCookie
-        );
-    }
-
-    private static boolean exist(String line) {
-        return !"".equals(line) && !Objects.isNull(line);
+        return new HttpHeaders(requestHeaders, httpCookie);
     }
 
     private static HttpCookie getHttpCookie(String line, Map<String, String> requestHeaders,
@@ -59,14 +75,6 @@ public class HttpRequestReader {
             httpCookie = new HttpCookie(requestHeaders.get("Cookie"));
         }
         return httpCookie;
-    }
-
-    private static int getContentLength(String line, Map<String, String> requestHeaders,
-            int contentLength) {
-        if (line.contains("Content-Type")) {
-            contentLength = Integer.parseInt(requestHeaders.get("Content-Length"));
-        }
-        return contentLength;
     }
 
     private static String getRequestBody(BufferedReader reader, int contentLength)

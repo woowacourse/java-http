@@ -33,12 +33,12 @@ public class RegisterController extends AbstractController {
         final String password = registerInfo.get("password");
         final String email = registerInfo.get("email");
 
-        final String content = FileReader.file(request.getUri());
 
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
+            final String content = FileReader.file(request.getUri());
+
             response.addHeaders("Content-Type", ContentType.HTML.getContentType());
             response.addHeaders("Content-Length", String.valueOf(content.getBytes().length));
-
             response.writeStatusLine(HttpStatus.OK);
             response.writeHeaders();
             response.writeBody(content);

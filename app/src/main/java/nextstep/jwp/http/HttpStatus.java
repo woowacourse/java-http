@@ -4,6 +4,7 @@ public enum HttpStatus {
 
     OK("OK", 200),
     FOUND("Found", 302),
+    BAD_REQUEST("Bad Request", 400),
     UNAUTHORIZED("Unauthorized", 401),
     NOT_FOUND("Not Found", 404),
     METHOD_NOT_ALLOWED("Method Not Allowed", 405);

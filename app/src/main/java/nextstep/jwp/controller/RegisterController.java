@@ -39,7 +39,7 @@ public class RegisterController extends AbstractController {
 
             response.addHeaders("Content-Type", ContentType.HTML.getContentType());
             response.addHeaders("Content-Length", String.valueOf(content.getBytes().length));
-            response.writeStatusLine(HttpStatus.OK);
+            response.writeStatusLine(HttpStatus.BAD_REQUEST);
             response.writeHeaders();
             response.writeBody(content);
             return;

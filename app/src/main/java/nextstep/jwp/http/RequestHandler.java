@@ -68,7 +68,7 @@ public class RequestHandler implements Runnable {
             HttpRequest httpRequest,
             HttpResponse httpResponse,
             ContentType contentType
-    ) throws IOException {
+    ) throws Exception {
         final String resource = FileReader.file(httpRequest.getUri());
         httpResponse.addHeaders("Content-Type", contentType.getContentType());
         httpResponse.addHeaders("Content-Length", String.valueOf(resource.getBytes().length));

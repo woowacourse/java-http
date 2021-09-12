@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
@@ -28,10 +29,7 @@ public class HttpRequestReader {
         int contentLength = 0;
         HttpCookie httpCookie = new HttpCookie();
 
-        while (!"".equals(line = reader.readLine())) {
-            if (line == null) {
-                break;
-            }
+        while (exist(line = reader.readLine())) {
             final String[] fields = line.split(": ");
             requestHeaders.put(fields[0], fields[1]);
 
@@ -49,6 +47,10 @@ public class HttpRequestReader {
                 requestBody,
                 httpCookie
         );
+    }
+
+    private static boolean exist(String line) {
+        return !"".equals(line) && !Objects.isNull(line);
     }
 
     private static HttpCookie getHttpCookie(String line, Map<String, String> requestHeaders,

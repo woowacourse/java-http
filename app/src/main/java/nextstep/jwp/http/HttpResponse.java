@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 public class HttpResponse {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+
     private final OutputStream outputStream;
     private final ResponseHeaders responseHeaders;
 

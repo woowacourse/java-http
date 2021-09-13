@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.request.HttpHeaders;
 import nextstep.jwp.http.request.HttpMethod;
@@ -50,7 +49,7 @@ public class HttpRequestReader {
     }
 
     private static boolean exist(String line) {
-        return !"".equals(line) && !Objects.isNull(line);
+        return !"".equals(line) && line != null;
     }
 
     private static HttpHeaders getHttpHeaders(BufferedReader reader)

@@ -4,7 +4,6 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
 import nextstep.jwp.exception.ResourceNotFoundException;
 
 public class FileReader {
@@ -24,7 +23,7 @@ public class FileReader {
     }
 
     private static void checkResourceNotExist(URL resource) throws ResourceNotFoundException {
-        if (Objects.isNull(resource)) {
+        if (resource == null) {
             throw new ResourceNotFoundException("해당하는 파일을 찾을 수 없습니다.");
         }
     }

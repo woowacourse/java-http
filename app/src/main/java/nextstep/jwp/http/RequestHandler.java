@@ -64,7 +64,7 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private HttpResponse responseResource(
+    private void responseResource(
             HttpRequest httpRequest,
             HttpResponse httpResponse,
             ContentType contentType
@@ -76,7 +76,6 @@ public class RequestHandler implements Runnable {
         httpResponse.addHeaders("Content-Length", String.valueOf(resource.getBytes().length));
 
         httpResponse.setBody(resource);
-        return httpResponse;
     }
 
     private void close() {

@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UnauthorizedException;
+import nextstep.jwp.http.HttpSession;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.http.HttpSession;
 import nextstep.jwp.http.response.HttpStatus;
 import nextstep.jwp.model.User;
 import nextstep.jwp.utils.ContentType;
@@ -31,12 +31,12 @@ public class LoginController extends AbstractController {
     }
 
     private void redirect(HttpResponse response, String content) throws IOException {
+        response.setHttpStatus(HttpStatus.OK);
+
         response.addHeaders("Content-Type", ContentType.HTML.getContentType());
         response.addHeaders("Content-Length", String.valueOf(content.getBytes().length));
 
-        response.writeStatusLine(HttpStatus.OK);
-        response.writeHeaders();
-        response.writeBody(content);
+        response.setBody(content);
     }
 
     @Override
@@ -55,8 +55,8 @@ public class LoginController extends AbstractController {
             HttpSession httpSession = request.getSession();
             httpSession.setAttribute("user", user);
 
-            response.writeStatusLine(HttpStatus.FOUND);
-            response.writeRedirect(Resources.LOGIN.getResource());
+            response.setHttpStatus(HttpStatus.FOUND);
+            response.setBody(Resources.INDEX.getResource());
         } catch (UnauthorizedException e) {
             ExceptionHandler.unauthorized(response);
         }

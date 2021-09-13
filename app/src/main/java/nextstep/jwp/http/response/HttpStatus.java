@@ -17,6 +17,10 @@ public enum HttpStatus {
         this.code = code;
     }
 
+    public boolean isRedirect() {
+        return this.equals(FOUND);
+    }
+
     public String getMessage() {
         return message;
     }

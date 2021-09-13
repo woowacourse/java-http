@@ -18,12 +18,12 @@ public class RegisterController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         String content = FileReader.file(Resources.REGISTER.getResource());
 
+        response.setHttpStatus(HttpStatus.OK);
+
         response.addHeaders("Content-Type", ContentType.HTML.getContentType());
         response.addHeaders("Content-Length", String.valueOf(content.getBytes().length));
 
-        response.writeStatusLine(HttpStatus.OK);
-        response.writeHeaders();
-        response.writeBody(content);
+        response.setBody(content);
     }
 
     @Override
@@ -38,11 +38,12 @@ public class RegisterController extends AbstractController {
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             final String content = FileReader.file(request.getUri());
 
+            response.setHttpStatus(HttpStatus.BAD_REQUEST);
+
             response.addHeaders("Content-Type", ContentType.HTML.getContentType());
             response.addHeaders("Content-Length", String.valueOf(content.getBytes().length));
-            response.writeStatusLine(HttpStatus.BAD_REQUEST);
-            response.writeHeaders();
-            response.writeBody(content);
+
+            response.setBody(content);
             return;
         }
 
@@ -54,7 +55,7 @@ public class RegisterController extends AbstractController {
                     String.format("JSESSIONID=%s", UUID.randomUUID()));
         }
 
-        response.writeStatusLine(HttpStatus.FOUND);
-        response.writeRedirect(Resources.INDEX.getResource());
+        response.setHttpStatus(HttpStatus.FOUND);
+        response.setBody(Resources.INDEX.getResource());
     }
 }

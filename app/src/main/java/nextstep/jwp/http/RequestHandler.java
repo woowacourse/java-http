@@ -13,6 +13,7 @@ import nextstep.jwp.http.response.HttpStatus;
 import nextstep.jwp.utils.ContentType;
 import nextstep.jwp.utils.FileReader;
 import nextstep.jwp.utils.HttpRequestReader;
+import nextstep.jwp.utils.HttpResponseWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,12 +39,14 @@ public class RequestHandler implements Runnable {
             log.debug("Request : {} {}", httpRequest.getMethod(), httpRequest.getUri());
             log.debug("Requested Body : {}", httpRequest.getBody());
 
-            HttpResponse httpResponse = new HttpResponse(outputStream);
+            HttpResponse httpResponse = new HttpResponse(new ResponseHeaders());
+            final HttpResponseWriter httpResponseWriter = new HttpResponseWriter(outputStream);
 
             ContentType contentType = ContentType.findBy(httpRequest.getUri());
             if (!contentType.isNone() && !contentType.isHtml()) {
                 log.debug(httpRequest.getUri());
                 responseResource(httpRequest, httpResponse, contentType);
+                httpResponseWriter.writeHttpResponse(httpResponse);
                 return;
             }
 
@@ -53,7 +56,7 @@ public class RequestHandler implements Runnable {
                 return;
             }
             controller.service(httpRequest, httpResponse);
-
+            httpResponseWriter.writeHttpResponse(httpResponse);
         } catch (Exception exception) {
             log.error("Exception stream", exception);
         } finally {
@@ -61,18 +64,19 @@ public class RequestHandler implements Runnable {
         }
     }
 
-    private void responseResource(
+    private HttpResponse responseResource(
             HttpRequest httpRequest,
             HttpResponse httpResponse,
             ContentType contentType
     ) throws Exception {
         final String resource = FileReader.file(httpRequest.getUri());
+        httpResponse.setHttpStatus(HttpStatus.OK);
+
         httpResponse.addHeaders("Content-Type", contentType.getContentType());
         httpResponse.addHeaders("Content-Length", String.valueOf(resource.getBytes().length));
 
-        httpResponse.writeStatusLine(HttpStatus.OK);
-        httpResponse.writeHeaders();
-        httpResponse.writeBody(resource);
+        httpResponse.setBody(resource);
+        return httpResponse;
     }
 
     private void close() {

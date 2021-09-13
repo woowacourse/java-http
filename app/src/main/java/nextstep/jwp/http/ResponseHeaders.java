@@ -7,6 +7,9 @@ public class ResponseHeaders {
 
     Map<String, String> headers = new LinkedHashMap<>();
 
+    public ResponseHeaders() {
+    }
+
     public Map<String, String> getHeaders() {
         return headers;
     }

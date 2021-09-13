@@ -20,7 +20,7 @@ public class HttpHeaders {
 
     public boolean hasBody() {
         final String content = headers.get("Content-Length");
-        return Strings.isNullOrEmpty(content);
+        return !Strings.isNullOrEmpty(content);
     }
 
     public String getHeaderBy(String headerKey) {

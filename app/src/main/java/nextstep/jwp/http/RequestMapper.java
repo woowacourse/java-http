@@ -6,6 +6,7 @@ import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.http.request.HttpRequest;
 
 public class RequestMapper {
 

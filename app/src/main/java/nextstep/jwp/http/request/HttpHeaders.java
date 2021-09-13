@@ -1,7 +1,8 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.request;
 
 import com.google.common.base.Strings;
 import java.util.Map;
+import nextstep.jwp.http.HttpCookie;
 
 public class HttpHeaders {
 

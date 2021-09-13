@@ -1,8 +1,10 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.response;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.stream.Collectors;
+import nextstep.jwp.http.RequestHandler;
+import nextstep.jwp.http.ResponseHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

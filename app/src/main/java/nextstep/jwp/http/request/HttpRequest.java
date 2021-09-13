@@ -1,4 +1,8 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.request;
+
+import nextstep.jwp.http.HttpCookie;
+import nextstep.jwp.http.HttpSession;
+import nextstep.jwp.http.HttpSessions;
 
 public class HttpRequest {
 

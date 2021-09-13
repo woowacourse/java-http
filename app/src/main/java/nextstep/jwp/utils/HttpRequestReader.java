@@ -8,9 +8,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import nextstep.jwp.http.HttpCookie;
-import nextstep.jwp.http.HttpHeaders;
-import nextstep.jwp.http.HttpMethod;
-import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.request.HttpHeaders;
+import nextstep.jwp.http.request.HttpMethod;
+import nextstep.jwp.http.request.HttpRequest;
 
 public class HttpRequestReader {
 

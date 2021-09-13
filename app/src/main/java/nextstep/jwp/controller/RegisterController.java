@@ -46,8 +46,7 @@ public class RegisterController extends AbstractController {
             return;
         }
 
-        final User user = new User(InMemoryUserRepository.findCurrentId(), account, password,
-                email);
+        final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
         if (request.getCookie().getCookies("JSESSIONID") == null) {

@@ -4,7 +4,7 @@ import nextstep.jwp.exception.UnauthorizedException;
 
 public class User {
 
-    private final long id;
+    private long id;
     private final String account;
     private final String password;
     private final String email;
@@ -16,9 +16,13 @@ public class User {
         this.email = email;
     }
 
-    public boolean checkPassword(String password) {
+    public User(String account, String password, String email) {
+        this(0, account, password, email);
+    }
+
+    public void checkPassword(String password) {
         if (this.password.equals(password)) {
-            return true;
+            return;
         }
         throw new UnauthorizedException("비밀번호가 일치하지 않습니다.");
     }
@@ -29,6 +33,10 @@ public class User {
 
     public long getId() {
         return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     @Override

@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
-import java.util.UUID;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.ExceptionHandler;
 import nextstep.jwp.utils.ContentType;

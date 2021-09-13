@@ -10,12 +10,13 @@ import nextstep.jwp.model.User;
 import nextstep.jwp.utils.ContentType;
 import nextstep.jwp.utils.FileReader;
 import nextstep.jwp.utils.RequestParams;
+import nextstep.jwp.utils.Resources;
 
 public class RegisterController extends AbstractController {
 
     @Override
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        String content = FileReader.file("/register.html");
+        String content = FileReader.file(Resources.REGISTER.getResource());
 
         response.addHeaders("Content-Type", ContentType.HTML.getContentType());
         response.addHeaders("Content-Length", String.valueOf(content.getBytes().length));
@@ -33,7 +34,6 @@ public class RegisterController extends AbstractController {
         final String account = registerInfo.get("account");
         final String password = registerInfo.get("password");
         final String email = registerInfo.get("email");
-
 
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
             final String content = FileReader.file(request.getUri());
@@ -56,6 +56,6 @@ public class RegisterController extends AbstractController {
         }
 
         response.writeStatusLine(HttpStatus.FOUND);
-        response.writeRedirect("/index.html");
+        response.writeRedirect(Resources.INDEX.getResource());
     }
 }

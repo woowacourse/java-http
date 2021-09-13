@@ -13,6 +13,7 @@ import nextstep.jwp.model.User;
 import nextstep.jwp.utils.ContentType;
 import nextstep.jwp.utils.FileReader;
 import nextstep.jwp.utils.RequestParams;
+import nextstep.jwp.utils.Resources;
 
 public class LoginController extends AbstractController {
 
@@ -20,15 +21,13 @@ public class LoginController extends AbstractController {
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
         final HttpSession httpSession = request.getSession();
         if (isLogin(httpSession)) {
-            redirect(response, FileReader.file("/index.html"));
-
+            redirect(response, FileReader.file(Resources.INDEX.getResource()));
         }
-        redirect(response, FileReader.file("/login.html"));
+        redirect(response, FileReader.file(Resources.LOGIN.getResource()));
     }
 
     private boolean isLogin(HttpSession httpSession) {
-        final Object user = httpSession.getAttribute("user");
-        return user != null;
+        return httpSession.hasAttribute("user");
     }
 
     private void redirect(HttpResponse response, String content) throws IOException {
@@ -57,7 +56,7 @@ public class LoginController extends AbstractController {
             httpSession.setAttribute("user", user);
 
             response.writeStatusLine(HttpStatus.FOUND);
-            response.writeRedirect("/index.html");
+            response.writeRedirect(Resources.LOGIN.getResource());
         } catch (UnauthorizedException e) {
             ExceptionHandler.unauthorized(response);
         }

@@ -2,6 +2,7 @@ package nextstep.jwp.http;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class HttpSession {
 
@@ -18,6 +19,11 @@ public class HttpSession {
 
     public void setAttribute(String name, Object value) {
         values.put(name, value);
+    }
+
+    public boolean hasAttribute(String name) {
+        final Object attribute = values.get(name);
+        return !Objects.isNull(attribute);
     }
 
     public Object getAttribute(String name) {

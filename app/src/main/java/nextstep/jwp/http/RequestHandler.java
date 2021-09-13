@@ -7,6 +7,9 @@ import java.net.Socket;
 import java.util.Objects;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.ExceptionHandler;
+import nextstep.jwp.exception.MethodNotAllowedException;
+import nextstep.jwp.exception.NotFoundException;
+import nextstep.jwp.exception.PageNotFoundException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpStatus;
@@ -50,17 +53,28 @@ public class RequestHandler implements Runnable {
                 return;
             }
 
-            Controller controller = RequestMapper.map(httpRequest);
-            if (controller == null) {
-                ExceptionHandler.notFound(httpResponse);
-                return;
-            }
-            controller.service(httpRequest, httpResponse);
+            proceed(httpRequest, httpResponse);
             httpResponseWriter.writeHttpResponse(httpResponse);
         } catch (Exception exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
+        }
+    }
+
+    private void proceed(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+        Controller controller = RequestMapper.map(httpRequest);
+        try {
+            if (controller == null) {
+                throw new PageNotFoundException("페이지를 찾을 수 없습니다.");
+            }
+            controller.service(httpRequest, httpResponse);
+        } catch (MethodNotAllowedException e) {
+            ExceptionHandler.methodNotAllowed(httpResponse);
+        } catch (NotFoundException e) {
+            ExceptionHandler.notFound(httpResponse);
+        } catch (Exception e) {
+            ExceptionHandler.internalServerError(httpResponse);
         }
     }
 

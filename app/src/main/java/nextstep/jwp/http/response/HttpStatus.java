@@ -7,7 +7,8 @@ public enum HttpStatus {
     BAD_REQUEST("Bad Request", 400),
     UNAUTHORIZED("Unauthorized", 401),
     NOT_FOUND("Not Found", 404),
-    METHOD_NOT_ALLOWED("Method Not Allowed", 405);
+    METHOD_NOT_ALLOWED("Method Not Allowed", 405),
+    INTERNAL_SERVER_ERROR("Internal Server Error", 500);
 
     private final String message;
     private final int code;

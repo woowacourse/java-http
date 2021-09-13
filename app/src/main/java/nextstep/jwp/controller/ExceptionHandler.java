@@ -29,6 +29,13 @@ public class ExceptionHandler {
         response.setBody(content);
     }
 
+    public static void internalServerError(HttpResponse response) throws Exception {
+        String content = FileReader.file(Resources.INTERNAL_SERVER_ERROR.getResource());
+        addHeaders(response, content);
+        response.setHttpStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        response.setBody(content);
+    }
+
     private static void addHeaders(HttpResponse response, String content) {
         response.addHeaders("Content-Type", ContentType.HTML.getContentType());
         response.addHeaders("Content-Length", String.valueOf(content.getBytes().length));

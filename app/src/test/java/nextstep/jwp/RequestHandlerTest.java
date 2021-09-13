@@ -245,7 +245,7 @@ class RequestHandlerTest {
         final URL resource = getClass().getClassLoader().getResource("static/register.html");
         final String file = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 400 Bad Request ",
                 "Content-Type: text/html; charset=utf-8 ",
                 "Content-Length: " + file.getBytes().length + " ",
                 "",

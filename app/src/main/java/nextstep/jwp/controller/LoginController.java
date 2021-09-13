@@ -22,6 +22,7 @@ public class LoginController extends AbstractController {
         final HttpSession httpSession = request.getSession();
         if (isLogin(httpSession)) {
             redirect(response, FileReader.file(Resources.INDEX.getResource()));
+            return;
         }
         redirect(response, FileReader.file(Resources.LOGIN.getResource()));
     }

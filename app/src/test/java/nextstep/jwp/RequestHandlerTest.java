@@ -6,18 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.jwp.http.HttpSession;
-import nextstep.jwp.http.HttpSessions;
 import nextstep.jwp.http.RequestHandler;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
-
-    @BeforeEach
-    void setHttpSession() {
-        HttpSession httpSession = HttpSessions.getSession("123");
-    }
 
     @Test
     void index() throws IOException {

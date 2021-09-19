@@ -45,9 +45,8 @@ class LoginControllerTest {
     @Test
     public void doGet_isLoggedIn() throws Exception {
         //given
-        final HttpCookie httpCookie = new HttpCookie("JSESSIONID=1234");
         final HttpRequest httpRequest = TestFixture
-                .getHttpRequest(HttpMethod.GET, "login", httpCookie);
+                .getHttpRequest(HttpMethod.GET, "login", new HttpCookie());
         HttpSession httpSession = httpRequest.getSession();
         httpSession.setAttribute("user", new User("solong", "1234", "1234@mail"));
         final HttpResponse httpResponse = new HttpResponse(new ResponseHeaders());

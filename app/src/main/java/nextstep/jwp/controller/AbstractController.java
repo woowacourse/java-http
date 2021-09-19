@@ -16,15 +16,15 @@ public abstract class AbstractController implements Controller {
             doPost(request, response);
             return;
         }
-        throw new MethodNotAllowedException("잘못된 요청 방식입니다.");
+        throw new MethodNotAllowedException();
     }
 
     protected void doPost(HttpRequest request, HttpResponse response)
             throws Exception {
-        throw new MethodNotAllowedException("잘못된 요청 방식입니다.");
+        throw new MethodNotAllowedException();
     }
 
     protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
-        throw new MethodNotAllowedException("잘못된 요청 방식입니다.");
+        throw new MethodNotAllowedException();
     }
 }

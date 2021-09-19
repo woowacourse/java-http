@@ -24,7 +24,7 @@ class LoginControllerTest {
 
     @DisplayName("로그인 페이지 - 응답 성공")
     @Test
-    public void doGet() throws Exception {
+    void doGet() throws Exception {
         //given
         final HttpRequest httpRequest = TestFixture.getHttpRequest(HttpMethod.GET, "login");
         final HttpResponse httpResponse = new HttpResponse(new ResponseHeaders());
@@ -43,7 +43,7 @@ class LoginControllerTest {
 
     @DisplayName("로그인 페이지 - 이미 로그인이 되어있을 때 index 로")
     @Test
-    public void doGet_isLoggedIn() throws Exception {
+    void doGet_isLoggedIn() throws Exception {
         //given
         final HttpRequest httpRequest = TestFixture
                 .getHttpRequest(HttpMethod.GET, "login", new HttpCookie());
@@ -62,7 +62,7 @@ class LoginControllerTest {
 
     @DisplayName("로그인 성공 - index 로 리다이렉트")
     @Test
-    public void doPost() throws Exception {
+    void doPost() throws Exception {
         //given
         final User user = new User("solong", "1234", "solong@email");
         InMemoryUserRepository.save(user);
@@ -81,7 +81,7 @@ class LoginControllerTest {
 
     @DisplayName("로그인 실패 - 잘못된 비밀번호")
     @Test
-    public void doPost_fail() throws Exception {
+    void doPost_fail() throws Exception {
         //given
         final User user = new User("solong", "1234", "solong@email");
         InMemoryUserRepository.save(user);

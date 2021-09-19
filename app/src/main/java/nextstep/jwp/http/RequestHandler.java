@@ -86,7 +86,7 @@ public class RequestHandler implements Runnable {
         final String resource = FileReader.file(httpRequest.getUri());
         httpResponse.setHttpStatus(HttpStatus.OK);
 
-        httpResponse.addHeaders("Content-Type", contentType.getContentType());
+        httpResponse.addHeaders("Content-Type", contentType.getType());
         httpResponse.addHeaders("Content-Length", String.valueOf(resource.getBytes().length));
 
         httpResponse.setBody(resource);

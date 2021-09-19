@@ -16,13 +16,13 @@ import nextstep.jwp.model.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class RegisterControllerTest {
+class RegisterControllerTest {
 
     private final Controller controller = new RegisterController();
 
     @DisplayName("회원가입 페이지 - 응답 성공")
     @Test
-    public void doGet() throws Exception {
+    void doGet() throws Exception {
         //given
         final HttpRequest httpRequest = TestFixture.getHttpRequest(HttpMethod.GET, "register");
         final HttpResponse httpResponse = new HttpResponse(new ResponseHeaders());
@@ -38,7 +38,7 @@ public class RegisterControllerTest {
 
     @DisplayName("회원가입 성공 - index 로 리다이렉트")
     @Test
-    public void doPost() throws Exception {
+    void doPost() throws Exception {
         //given
         final HttpRequest httpRequest = TestFixture.getHttpRequest(HttpMethod.POST, "register",
                 "account=soso&password=1234&email=solong@email");
@@ -54,7 +54,7 @@ public class RegisterControllerTest {
 
     @DisplayName("회원가입 실패 - 이미 존재하는 유저")
     @Test
-    public void doPost_fail() throws Exception {
+    void doPost_fail() throws Exception {
         //given
         final User user = new User("solong", "1234", "solong@email");
         InMemoryUserRepository.save(user);

@@ -13,6 +13,9 @@ import nextstep.jwp.http.request.HttpRequest;
 
 public class HttpRequestReader {
 
+    private HttpRequestReader() {
+    }
+
     public static HttpRequest httpRequest(InputStream inputStream) throws IOException {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         final BufferedReader reader = new BufferedReader(inputStreamReader);

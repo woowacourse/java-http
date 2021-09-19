@@ -14,7 +14,7 @@ import nextstep.jwp.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class AbstractControllerTest {
+class AbstractControllerTest {
 
     private final Controller controller = new AbstractController() {
         @Override

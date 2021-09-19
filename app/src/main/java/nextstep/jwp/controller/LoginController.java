@@ -34,7 +34,7 @@ public class LoginController extends AbstractController {
     private void redirect(HttpResponse response, String content) throws IOException {
         response.setHttpStatus(HttpStatus.OK);
 
-        response.addHeaders("Content-Type", ContentType.HTML.getContentType());
+        response.addHeaders("Content-Type", ContentType.HTML.getType());
         response.addHeaders("Content-Length", String.valueOf(content.getBytes().length));
 
         response.setBody(content);

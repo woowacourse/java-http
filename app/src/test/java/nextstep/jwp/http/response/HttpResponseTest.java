@@ -18,7 +18,7 @@ class HttpResponseTest {
 
         final ResponseHeaders actual = httpResponse.getHeaders();
         assertThat(actual).isEqualTo(responseHeaders);
-        assertThat(actual.getHeaders().get("test"))
-                .isEqualTo(responseHeaders.getHeaders().get("test"));
+        assertThat(actual.getHeaders())
+                .containsEntry("test", "test-value");
     }
 }

@@ -12,11 +12,11 @@ public enum ContentType {
     NONE("none", "text/html");
 
     private final String fileExtension;
-    private final String contentType;
+    private final String type;
 
-    ContentType(String fileExtension, String contentType) {
+    ContentType(String fileExtension, String type) {
         this.fileExtension = fileExtension;
-        this.contentType = contentType;
+        this.type = type;
     }
 
     public static ContentType findBy(String resource) {
@@ -34,7 +34,7 @@ public enum ContentType {
         return HTML.equals(this);
     }
 
-    public String getContentType() {
-        return contentType;
+    public String getType() {
+        return type;
     }
 }

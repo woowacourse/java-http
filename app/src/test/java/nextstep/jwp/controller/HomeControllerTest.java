@@ -20,13 +20,13 @@ import nextstep.jwp.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class HomeControllerTest {
+class HomeControllerTest {
 
     private final Controller controller = new HomeController();
 
     @DisplayName("인덱스 페이지 - 응답 성공1")
     @Test
-    public void doGet() throws Exception {
+    void doGet() throws Exception {
         //given
         final HttpRequest httpRequest = TestFixture.getHttpRequest(HttpMethod.GET, "/");
         final HttpResponse httpResponse = new HttpResponse(new ResponseHeaders());
@@ -45,7 +45,7 @@ public class HomeControllerTest {
 
     @DisplayName("인덱스 페이지 - 응답 성공2")
     @Test
-    public void doGet2() throws Exception {
+    void doGet2() throws Exception {
         //given
         final HttpRequest httpRequest = TestFixture.getHttpRequest(HttpMethod.GET, "/index.html");
         final HttpResponse httpResponse = new HttpResponse(new ResponseHeaders());

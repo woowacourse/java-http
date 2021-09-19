@@ -13,7 +13,6 @@ public class HttpCookie {
     public HttpCookie(String requestCookie) {
         String[] cookie = requestCookie.split("; ");
         for (String c : cookie) {
-            Map<String, String> cookies = new HashMap<>();
             final String[] split = c.split("=");
             this.cookies.put(split[0], split[1]);
         }

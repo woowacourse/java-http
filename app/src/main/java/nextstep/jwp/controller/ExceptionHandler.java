@@ -8,6 +8,9 @@ import nextstep.jwp.utils.Resources;
 
 public class ExceptionHandler {
 
+    private ExceptionHandler() {
+    }
+
     public static void unauthorized(HttpResponse response) throws Exception {
         String content = FileReader.file(Resources.UNAUTHORIZED.getResource());
         addHeaders(response, content);
@@ -37,7 +40,7 @@ public class ExceptionHandler {
     }
 
     private static void addHeaders(HttpResponse response, String content) {
-        response.addHeaders("Content-Type", ContentType.HTML.getContentType());
+        response.addHeaders("Content-Type", ContentType.HTML.getType());
         response.addHeaders("Content-Length", String.valueOf(content.getBytes().length));
     }
 }

@@ -12,9 +12,10 @@ public class FileReader {
 
     public static String file(String uri) throws Exception {
         ContentType contentType = ContentType.findBy(uri);
+        final String s = STATIC_RESOURCE + withExtension(contentType, uri);
         final URL resource = FileReader.class
                 .getClassLoader()
-                .getResource(STATIC_RESOURCE + withExtension(contentType, uri));
+                .getResource(s);
 
         checkResourceNotExist(resource);
 
@@ -30,7 +31,7 @@ public class FileReader {
 
     private static String withExtension(ContentType contentType, String uri) {
         if (contentType.isNone()) {
-            return uri + ".html";
+            return "/" + uri + ".html";
         }
         return uri;
     }

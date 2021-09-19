@@ -7,10 +7,12 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.http.RequestHandler;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class RequestHandlerTest {
 
+    @DisplayName("인덱스 페이지 응답 성공")
     @Test
     void index() throws IOException {
         // given
@@ -40,6 +42,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("인덱스 페이지 응답 실패 - http method 오류")
     @Test
     void index_fail() throws IOException {
         // given
@@ -69,14 +72,14 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("로그인 페이지 응답 성공")
     @Test
-    void login_with_Cookie() throws IOException {
+    void login() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Cookie: JSESSIONID=123",
                 "",
                 "");
 
@@ -98,6 +101,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("로그인 성공 - 인덱스 페이지로 리다이렉트")
     @Test
     void login_success() {
         final String requestBody = "account=gugu&password=password";
@@ -125,6 +129,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("로그인 실패 - 비밀번호 오류")
     @Test
     void login_fail() throws IOException {
         final String requestBody = "account=gugu&password=wrongpassword";
@@ -157,6 +162,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("회원가입 페이지 응답 성공")
     @Test
     void register() throws IOException {
         // given
@@ -186,6 +192,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("회원가입 성공")
     @Test
     void register_success() {
         final String requestBody = "account=solong&email=email@email.com&password=password";
@@ -213,6 +220,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("회원가입 실패 - 이미 가입한 유저")
     @Test
     void register_fail() throws IOException {
         final String requestBody = "account=gugu&email=email@email.com&password=wrongpassword";
@@ -245,6 +253,7 @@ class RequestHandlerTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("페이지 로드 실패 - 없는 페이지로 접근")
     @Test
     void notFound() throws IOException {
         final String httpRequest = String.join("\r\n",

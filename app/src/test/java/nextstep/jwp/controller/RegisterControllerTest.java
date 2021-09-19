@@ -41,7 +41,7 @@ public class RegisterControllerTest {
     public void doPost() throws Exception {
         //given
         final HttpRequest httpRequest = TestFixture.getHttpRequest(HttpMethod.POST, "register",
-                "account=solong&password=1234&email=solong@email");
+                "account=soso&password=1234&email=solong@email");
         final HttpResponse httpResponse = new HttpResponse(new ResponseHeaders());
 
         // when

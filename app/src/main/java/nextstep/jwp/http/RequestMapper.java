@@ -2,10 +2,12 @@ package nextstep.jwp.http;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
+import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.http.request.HttpRequest;
 
 public class RequestMapper {
@@ -19,7 +21,9 @@ public class RequestMapper {
         mapper.put("/register", new RegisterController());
     }
 
-    public static Controller map(HttpRequest httpRequest) {
-        return mapper.get(httpRequest.getUri());
+    public static Controller map(HttpRequest httpRequest) throws Exception {
+        return Optional.ofNullable(mapper.get(httpRequest.getUri()))
+                .orElseThrow(() -> new NotFoundException("페이지를 찾을 수 없습니다."));
     }
+
 }

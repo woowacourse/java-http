@@ -63,11 +63,8 @@ public class RequestHandler implements Runnable {
     }
 
     private void proceed(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
-        Controller controller = RequestMapper.map(httpRequest);
         try {
-            if (controller == null) {
-                throw new PageNotFoundException("페이지를 찾을 수 없습니다.");
-            }
+            Controller controller = RequestMapper.map(httpRequest);
             controller.service(httpRequest, httpResponse);
         } catch (MethodNotAllowedException e) {
             ExceptionHandler.methodNotAllowed(httpResponse);

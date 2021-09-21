@@ -45,4 +45,8 @@ public class HttpRequest {
     public HttpSession getSession() {
         return HttpSessions.getSession(getCookie().getCookies("JSESSIONID"));
     }
+
+    public boolean hasSession() {
+        return headers.getCookie().hasSession();
+    }
 }

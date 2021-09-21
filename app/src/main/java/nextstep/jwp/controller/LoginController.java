@@ -48,7 +48,7 @@ public class LoginController extends AbstractController {
         try {
             final User user = login(loginInfo);
 
-            if (request.getCookie().getCookies("JSESSIONID") == null) {
+            if (request.hasSession()) {
                 response.addHeaders("Set-Cookie",
                         String.format("JSESSIONID=%s", UUID.randomUUID()));
             }

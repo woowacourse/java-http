@@ -1,41 +1,23 @@
 package nextstep.jwp.controller;
 
-import java.io.IOException;
-import nextstep.jwp.http.ContentType;
-import nextstep.jwp.http.FileReader;
-import nextstep.jwp.http.HttpError;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpStatus;
+import nextstep.jwp.utils.ContentType;
+import nextstep.jwp.utils.FileReader;
+import nextstep.jwp.utils.Resources;
 
 public class HomeController extends AbstractController {
 
-    private static final String ROOT_PAGE = "/";
-
-    public HomeController(HttpRequest httpRequest) {
-        super(httpRequest);
-    }
-
     @Override
-    public byte[] get(HttpRequest httpRequest) throws IOException {
-        if (ROOT_PAGE.equals(httpRequest.uri())) {
-            return HttpResponse.ok(
-                    FileReader.file(Controller.INDEX_PAGE),
-                    ContentType.findBy(Controller.INDEX_PAGE)
-            );
-        }
-        return HttpResponse.ok(
-                FileReader.file(httpRequest.uri()),
-                ContentType.findBy(httpRequest.uri())
-        );
-    }
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        String content = FileReader.file(Resources.INDEX.getResource());
 
-    @Override
-    public byte[] post(HttpRequest httpRequest) throws IOException {
-        return HttpResponse.error(HttpError.FORBIDDEN);
-    }
+        response.setHttpStatus(HttpStatus.OK);
 
-    @Override
-    public byte[] error(HttpError httpError) throws IOException {
-        return HttpResponse.error(HttpError.FORBIDDEN);
+        response.addHeaders("Content-Type", ContentType.HTML.getType());
+        response.addHeaders("Content-Length", String.valueOf(content.getBytes().length));
+
+        response.setBody(content);
     }
 }

@@ -1,30 +1,30 @@
 package nextstep.jwp.controller;
 
-import java.io.IOException;
-import nextstep.jwp.http.HttpError;
-import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.exception.MethodNotAllowedException;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.HttpResponse;
 
-public abstract class AbstractController {
+public abstract class AbstractController implements Controller {
 
-    private final HttpRequest httpRequest;
-
-    public AbstractController(HttpRequest httpRequest) {
-        this.httpRequest = httpRequest;
+    @Override
+    public void service(HttpRequest request, HttpResponse response) throws Exception {
+        if (request.getMethod().isGet()) {
+            doGet(request, response);
+            return;
+        }
+        if (request.getMethod().isPost()) {
+            doPost(request, response);
+            return;
+        }
+        throw new MethodNotAllowedException();
     }
 
-    abstract byte[] get(HttpRequest httpRequest) throws IOException;
+    protected void doPost(HttpRequest request, HttpResponse response)
+            throws Exception {
+        throw new MethodNotAllowedException();
+    }
 
-    abstract byte[] post(HttpRequest httpRequest) throws IOException;
-
-    abstract byte[] error(HttpError httpError) throws IOException;
-
-    public byte[] proceed() throws IOException {
-        if ("GET".equals(httpRequest.method())) {
-            return get(httpRequest);
-        }
-        if ("POST".equals(httpRequest.method())) {
-            return post(httpRequest);
-        }
-        return error(HttpError.FORBIDDEN);
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        throw new MethodNotAllowedException();
     }
 }

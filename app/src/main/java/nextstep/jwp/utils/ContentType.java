@@ -1,10 +1,10 @@
-package nextstep.jwp.http;
+package nextstep.jwp.utils;
 
 import java.util.Arrays;
 
 public enum ContentType {
 
-    HTML("html", "text/html"),
+    HTML("html", "text/html; charset=utf-8"),
     CSS("css", "text/css"),
     JS("js", "text/javascript"),
     ICO("ico", "image/x-icon"),
@@ -12,11 +12,11 @@ public enum ContentType {
     NONE("none", "text/html");
 
     private final String fileExtension;
-    private final String contentType;
+    private final String type;
 
-    ContentType(String fileExtension, String contentType) {
+    ContentType(String fileExtension, String type) {
         this.fileExtension = fileExtension;
-        this.contentType = contentType;
+        this.type = type;
     }
 
     public static ContentType findBy(String resource) {
@@ -30,7 +30,11 @@ public enum ContentType {
         return NONE.equals(this);
     }
 
-    public String getContentType() {
-        return contentType;
+    public boolean isHtml() {
+        return HTML.equals(this);
+    }
+
+    public String getType() {
+        return type;
     }
 }

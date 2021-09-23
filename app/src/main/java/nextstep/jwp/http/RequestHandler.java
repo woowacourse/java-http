@@ -5,7 +5,18 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Objects;
-import nextstep.jwp.controller.AbstractController;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.ExceptionHandler;
+import nextstep.jwp.exception.MethodNotAllowedException;
+import nextstep.jwp.exception.NotFoundException;
+import nextstep.jwp.exception.PageNotFoundException;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpStatus;
+import nextstep.jwp.utils.ContentType;
+import nextstep.jwp.utils.FileReader;
+import nextstep.jwp.utils.HttpRequestReader;
+import nextstep.jwp.utils.HttpResponseWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,19 +39,51 @@ public class RequestHandler implements Runnable {
                 final OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = HttpRequestReader.httpRequest(inputStream);
-            log.debug("Request : {} {}", httpRequest.method(), httpRequest.uri());
-            log.debug("Requested Body : {}", httpRequest.body());
+            log.debug("Request : {} {}", httpRequest.getMethod(), httpRequest.getUri());
+            log.debug("Requested Body : {}", httpRequest.getBody());
 
-            AbstractController abstractController = RequestMapper.map(httpRequest);
-            byte[] response = abstractController.proceed();
+            HttpResponse httpResponse = new HttpResponse(new ResponseHeaders());
+            final HttpResponseWriter httpResponseWriter = new HttpResponseWriter(outputStream);
 
-            outputStream.write(response);
-            outputStream.flush();
-        } catch (IOException exception) {
+            proceed(httpRequest, httpResponse);
+            httpResponseWriter.writeHttpResponse(httpResponse);
+        } catch (Exception exception) {
             log.error("Exception stream", exception);
         } finally {
             close();
         }
+    }
+
+    private void proceed(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
+        try {
+            final ContentType contentType = ContentType.findBy(httpRequest.getUri());
+            if (!contentType.isNone() && !contentType.isHtml()) {
+                responseResource(httpRequest, httpResponse, contentType);
+                return;
+            }
+            Controller controller = RequestMapper.map(httpRequest);
+            controller.service(httpRequest, httpResponse);
+        } catch (MethodNotAllowedException e) {
+            ExceptionHandler.methodNotAllowed(httpResponse);
+        } catch (NotFoundException e) {
+            ExceptionHandler.notFound(httpResponse);
+        } catch (Exception e) {
+            ExceptionHandler.internalServerError(httpResponse);
+        }
+    }
+
+    private void responseResource(
+            HttpRequest httpRequest,
+            HttpResponse httpResponse,
+            ContentType contentType
+    ) throws Exception {
+            final String resource = FileReader.file(httpRequest.getUri());
+            httpResponse.setHttpStatus(HttpStatus.OK);
+
+            httpResponse.addHeaders("Content-Type", contentType.getType());
+            httpResponse.addHeaders("Content-Length", String.valueOf(resource.getBytes().length));
+
+            httpResponse.setBody(resource);
     }
 
     private void close() {

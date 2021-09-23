@@ -1,53 +1,61 @@
 package nextstep.jwp.controller;
 
-import java.io.IOException;
 import java.util.Map;
-import nextstep.jwp.http.ContentType;
-import nextstep.jwp.http.FileReader;
+import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.http.HttpError;
-import nextstep.jwp.http.HttpRequest;
-import nextstep.jwp.http.HttpResponse;
-import nextstep.jwp.utils.RequestParams;
+import nextstep.jwp.http.request.HttpRequest;
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpStatus;
 import nextstep.jwp.model.User;
+import nextstep.jwp.utils.ContentType;
+import nextstep.jwp.utils.FileReader;
+import nextstep.jwp.utils.RequestParams;
+import nextstep.jwp.utils.Resources;
 
 public class RegisterController extends AbstractController {
 
-    public RegisterController(HttpRequest httpRequest) {
-        super(httpRequest);
+    @Override
+    protected void doGet(HttpRequest request, HttpResponse response) throws Exception {
+        String content = FileReader.file(Resources.REGISTER.getResource());
+
+        response.setHttpStatus(HttpStatus.OK);
+
+        response.addHeaders("Content-Type", ContentType.HTML.getType());
+        response.addHeaders("Content-Length", String.valueOf(content.getBytes().length));
+
+        response.setBody(content);
     }
 
     @Override
-    byte[] get(HttpRequest httpRequest) throws IOException {
-        return HttpResponse
-                .ok(FileReader.file(httpRequest.uri()), ContentType.findBy(httpRequest.uri()));
-    }
-
-    @Override
-    byte[] post(HttpRequest httpRequest) throws IOException {
-        final String[] body = httpRequest.body().split("&");
-        final Map<String, String> registerInfo =  RequestParams.requestParams(body);
+    protected void doPost(HttpRequest request, HttpResponse response) throws Exception {
+        final String[] body = request.getBody().split("&");
+        final Map<String, String> registerInfo = RequestParams.requestParams(body);
 
         final String account = registerInfo.get("account");
         final String password = registerInfo.get("password");
         final String email = registerInfo.get("email");
 
-        final String responseBody = FileReader.file(httpRequest.uri());
-        final ContentType contentType = ContentType.findBy(httpRequest.uri());
-
         if (InMemoryUserRepository.findByAccount(account).isPresent()) {
-            return HttpResponse.ok(responseBody, contentType);
+            final String content = FileReader.file(request.getUri());
+
+            response.setHttpStatus(HttpStatus.BAD_REQUEST);
+
+            response.addHeaders("Content-Type", ContentType.HTML.getType());
+            response.addHeaders("Content-Length", String.valueOf(content.getBytes().length));
+
+            response.setBody(content);
+            return;
         }
 
-        final User user = new User(InMemoryUserRepository.findCurrentId(), account, password,
-                email);
+        final User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
 
-        return HttpResponse.found(Controller.INDEX_PAGE);
-    }
+        if (request.hasSession()) {
+            response.addHeaders("Set-Cookie",
+                    String.format("JSESSIONID=%s", UUID.randomUUID()));
+        }
 
-    @Override
-    byte[] error(HttpError httpError) throws IOException {
-        return HttpResponse.error(HttpError.FORBIDDEN);
+        response.setHttpStatus(HttpStatus.FOUND);
+        response.setBody(Resources.INDEX.getResource());
     }
 }

@@ -8,3 +8,17 @@
 - [x] POST 방식으로 회원가입
     - GET /register, POST /register 둘 다 필요
 - [x] CSS 지원하기
+
+## 2단계
+
+- [x] HttpRequest
+    - 헤더 읽는 메서드 리팩토링
+- [x] HttpResponse
+    - 공통 코드 분리
+- [x] Controller 인터페이스 추가
+    - 메서드 처리 리팩토링
+  
+## 3단계
+
+- [x] Cookie에 JSESSIONID 값 저장하기
+- [x] Session 구현하기

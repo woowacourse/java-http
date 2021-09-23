@@ -45,14 +45,6 @@ public class RequestHandler implements Runnable {
             HttpResponse httpResponse = new HttpResponse(new ResponseHeaders());
             final HttpResponseWriter httpResponseWriter = new HttpResponseWriter(outputStream);
 
-            ContentType contentType = ContentType.findBy(httpRequest.getUri());
-            if (!contentType.isNone() && !contentType.isHtml()) {
-                log.debug(httpRequest.getUri());
-                responseResource(httpRequest, httpResponse, contentType);
-                httpResponseWriter.writeHttpResponse(httpResponse);
-                return;
-            }
-
             proceed(httpRequest, httpResponse);
             httpResponseWriter.writeHttpResponse(httpResponse);
         } catch (Exception exception) {
@@ -64,6 +56,11 @@ public class RequestHandler implements Runnable {
 
     private void proceed(HttpRequest httpRequest, HttpResponse httpResponse) throws Exception {
         try {
+            final ContentType contentType = ContentType.findBy(httpRequest.getUri());
+            if (!contentType.isNone() && !contentType.isHtml()) {
+                responseResource(httpRequest, httpResponse, contentType);
+                return;
+            }
             Controller controller = RequestMapper.map(httpRequest);
             controller.service(httpRequest, httpResponse);
         } catch (MethodNotAllowedException e) {
@@ -80,13 +77,13 @@ public class RequestHandler implements Runnable {
             HttpResponse httpResponse,
             ContentType contentType
     ) throws Exception {
-        final String resource = FileReader.file(httpRequest.getUri());
-        httpResponse.setHttpStatus(HttpStatus.OK);
+            final String resource = FileReader.file(httpRequest.getUri());
+            httpResponse.setHttpStatus(HttpStatus.OK);
 
-        httpResponse.addHeaders("Content-Type", contentType.getType());
-        httpResponse.addHeaders("Content-Length", String.valueOf(resource.getBytes().length));
+            httpResponse.addHeaders("Content-Type", contentType.getType());
+            httpResponse.addHeaders("Content-Length", String.valueOf(resource.getBytes().length));
 
-        httpResponse.setBody(resource);
+            httpResponse.setBody(resource);
     }
 
     private void close() {

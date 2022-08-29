@@ -1,2 +1,2 @@
-rootProject.name = 'building-tomcat-spring'
-include('app')
+rootProject.name = 'jwp'
+include 'tomcat'

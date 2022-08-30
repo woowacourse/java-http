@@ -49,13 +49,24 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String generateResponse(String resource) throws IOException {
-        var responseBody = generateResponseBody(resource);
+        String responseBody = generateResponseBody(resource);
+        String contentType = getContentType(resource);
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                contentType,
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private String getContentType(String resource) {
+        if (resource.contains("/css")) {
+            return "Content-Type: text/css;charset=utf-8 ";
+        }
+        if (resource.contains("/js")) {
+            return "Content-Type: text/js;charset=utf-8 ";
+        }
+        return "Content-Type: text/html;charset=utf-8 ";
     }
 
     private String generateResponseBody(String resource) throws IOException {

@@ -3,34 +3,29 @@ package org.apache.coyote;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
 class RequestTest {
 
     @Test
-    void createRequest() {
-        String httpRequest = "GET /index.html HTTP/1.1 \n"
-                + "Host: localhost:8080 \n"
-                + "Connection: keep-alive ";
-
-        Request request = null;
-        try (InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes(StandardCharsets.UTF_8));
-             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            request = Request.from(bufferedReader.readLine());
-        } catch (IOException e) {
-        }
-
-        Request createdRequest = request;
+    void from() {
+        Request request = Request.from("GET /index.html HTTP/1.1");
         assertAll(
-                () -> assertThat(createdRequest.getMethod()).isEqualTo("GET"),
-                () -> assertThat(createdRequest.getRequestUrl()).isEqualTo("/index.html"),
-                () -> assertThat(createdRequest.getVersion()).isEqualTo("HTTP/1.1")
+                () -> assertThat(request.getMethod()).isEqualTo("GET"),
+                () -> assertThat(request.getRequestUrl()).isEqualTo("/index.html"),
+                () -> assertThat(request.getVersion()).isEqualTo("HTTP/1.1")
         );
+    }
+
+    @Test
+    void getRequestExtension() {
+        Request request = Request.from("GET /index.html HTTP/1.1");
+        assertThat(request.getRequestExtension().get()).isEqualTo("html");
+    }
+
+    @Test
+    void getEmptyRequestExtension() {
+        Request request = Request.from("GET /api/login HTTP/1.1");
+        assertThat(request.getRequestExtension().isEmpty()).isTrue();
     }
 }

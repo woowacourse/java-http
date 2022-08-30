@@ -5,10 +5,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.ContentTypeNotSupportedException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.Request;
+import org.apache.coyote.Response;
 import org.apache.coyote.file.DefaultFileHandler;
 import org.apache.coyote.file.FileHandler;
+import org.apache.coyote.support.ContentType;
+import org.apache.coyote.support.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,17 +42,15 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+
             Request request = Request.from(bufferedReader.readLine());
             String responseBody = fileHandler.getFileLines(request.getRequestUrl());
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String extension = request.getRequestExtension()
+                    .orElseThrow(ContentTypeNotSupportedException::new);
+            Response response = new Response("HTTP/1.1", HttpStatus.OK, ContentType.from(extension), responseBody);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.createHttpResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

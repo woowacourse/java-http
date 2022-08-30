@@ -8,6 +8,7 @@ public enum ContentType {
     TEXT_HTML_CHARSET_UTF_8("html", "text/html;charset=utf-8"),
     TEXT_CSS("css", "text/css"),
     APPLICATION_JAVASCRIPT("js", "application/javascript"),
+    STRINGS("strings", "text/strings")
     ;
 
     private final String key;

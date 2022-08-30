@@ -46,8 +46,7 @@ public class Http11Processor implements Runnable, Processor {
             Request request = Request.from(bufferedReader.readLine());
             String responseBody = fileHandler.getFileLines(request.getRequestUrl());
 
-            String extension = request.getRequestExtension()
-                    .orElseThrow(ContentTypeNotSupportedException::new);
+            String extension = request.getRequestExtension();
             Response response = new Response("HTTP/1.1", HttpStatus.OK, ContentType.from(extension), responseBody);
 
             outputStream.write(response.createHttpResponse().getBytes());

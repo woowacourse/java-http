@@ -8,6 +8,7 @@ public class Request {
     private static final String EXTENSION_DELIMITER = "\\.";
     private static final int FIRST_LINE_LENGTH = 3;
     private static final int NO_EXTENSION_STANDARD = 1;
+    private static final String DEFAULT_REQUEST_EXTENSION = "strings";
 
     private String method;
     private String requestUrl;
@@ -27,12 +28,12 @@ public class Request {
         return new Request(line[0], line[1], line[2]);
     }
 
-    public Optional<String> getRequestExtension() {
+    public String getRequestExtension() {
         String[] nameExtension = requestUrl.split(EXTENSION_DELIMITER);
         if (nameExtension.length == NO_EXTENSION_STANDARD) {
-            return Optional.empty();
+            return DEFAULT_REQUEST_EXTENSION;
         }
-        return Optional.of(nameExtension[1]);
+        return nameExtension[1];
     }
 
     public String getMethod() {

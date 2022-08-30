@@ -20,12 +20,12 @@ class RequestTest {
     @Test
     void getRequestExtension() {
         Request request = Request.from("GET /index.html HTTP/1.1");
-        assertThat(request.getRequestExtension().get()).isEqualTo("html");
+        assertThat(request.getRequestExtension()).isEqualTo("html");
     }
 
     @Test
-    void getEmptyRequestExtension() {
+    void getDefaultRequestExtension() {
         Request request = Request.from("GET /api/login HTTP/1.1");
-        assertThat(request.getRequestExtension().isEmpty()).isTrue();
+        assertThat(request.getRequestExtension()).isEqualTo("strings");
     }
 }

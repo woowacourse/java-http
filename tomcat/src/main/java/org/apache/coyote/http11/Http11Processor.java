@@ -1,12 +1,14 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -26,7 +28,11 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+
+            String line = reader.readLine();
+            checkNullRequest(line);
 
             final var responseBody = "Hello world!";
 
@@ -41,6 +47,12 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void checkNullRequest(final String line) {
+        if (line == null) {
+            throw new UncheckedServletException("요청이 정상적으로 들어오지 않았습니다.");
         }
     }
 }

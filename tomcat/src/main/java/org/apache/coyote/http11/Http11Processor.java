@@ -1,12 +1,16 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -27,8 +31,9 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
-            final var responseBody = "Hello world!";
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            String fileName = bufferedReader.readLine().split(" ")[1];
+            String responseBody = getResponseBody(fileName);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -42,5 +47,14 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getResponseBody(String fileName) throws IOException {
+        if (fileName.equals("/")) {
+            return "Hello world!";
+        }
+        Path path = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + fileName))
+                .getFile());
+        return Files.readString(path);
     }
 }

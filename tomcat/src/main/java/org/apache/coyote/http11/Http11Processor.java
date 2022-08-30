@@ -14,6 +14,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private static final String BLANK = " ";
+    private static final int REQUEST_LINE_COUNT = 3;
+    private static final int REQUEST_LINE_URI_INDEX = 1;
+
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -33,6 +37,7 @@ public class Http11Processor implements Runnable, Processor {
 
             String line = reader.readLine();
             checkNullRequest(line);
+            String uri = getUriByRequestLine(line);
 
             final var responseBody = "Hello world!";
 
@@ -54,5 +59,13 @@ public class Http11Processor implements Runnable, Processor {
         if (line == null) {
             throw new UncheckedServletException("요청이 정상적으로 들어오지 않았습니다.");
         }
+    }
+    
+    private String getUriByRequestLine(final String line) {
+        String[] requests = line.split(BLANK);
+        if (requests.length != REQUEST_LINE_COUNT) {
+            throw new UncheckedServletException("요청의 포맷이 잘못되었습니다.");
+        }
+        return requests[REQUEST_LINE_URI_INDEX];
     }
 }

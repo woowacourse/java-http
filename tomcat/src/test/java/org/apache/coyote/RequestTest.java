@@ -22,7 +22,7 @@ class RequestTest {
         Request request = null;
         try (InputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes(StandardCharsets.UTF_8));
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            request = new Request(bufferedReader);
+            request = Request.from(bufferedReader.readLine());
         } catch (IOException e) {
         }
 

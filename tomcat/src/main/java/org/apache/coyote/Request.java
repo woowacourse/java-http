@@ -1,9 +1,5 @@
 package org.apache.coyote;
 
-import java.io.BufferedReader;
-import java.util.List;
-import java.util.stream.Collectors;
-
 public class Request {
 
     private static final String START_LINE_DELIMITER = " ";
@@ -11,32 +7,19 @@ public class Request {
     private String method;
     private String requestUrl;
     private String version;
-    private Headers headers;
 
-    public Request(final BufferedReader bufferedReader) {
-        List<String> requestLines = bufferedReader.lines()
-                .collect(Collectors.toList());
-
-        setStartLine(requestLines.remove(0));
-        setHeaders(requestLines);
-    }
-
-    public Request(final String method, final String requestUrl, final String version, final Headers headers) {
+    public Request(final String method, final String requestUrl, final String version) {
         this.method = method;
         this.requestUrl = requestUrl;
         this.version = version;
-        this.headers = headers;
     }
 
-    public void setStartLine(final String startLine) {
-        String[] start = startLine.split(START_LINE_DELIMITER);
-        method = start[0];
-        requestUrl = start[1];
-        version = start[2];
-    }
-
-    public void setHeaders(final List<String> rowHeaders) {
-        headers = Headers.from(rowHeaders);
+    public static Request from(final String startLine) {
+        String[] line = startLine.split(START_LINE_DELIMITER);
+        if (line.length != 3) {
+            throw new HttpRequestStartLineNotValidException();
+        }
+        return new Request(line[0], line[1], line[2]);
     }
 
     public String getMethod() {
@@ -49,9 +32,5 @@ public class Request {
 
     public String getVersion() {
         return version;
-    }
-
-    public Headers getHeaders() {
-        return headers;
     }
 }

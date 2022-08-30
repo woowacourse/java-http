@@ -5,6 +5,7 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -177,12 +178,12 @@ class IOStreamTest {
          * 버퍼 크기를 지정하지 않으면 버퍼의 기본 사이즈는 얼마일까?
          */
         @Test
-        void 필터인_BufferedInputStream를_사용해보자() {
+        void 필터인_BufferedInputStream를_사용해보자() throws IOException {
             final String text = "필터에 연결해보자.";
             final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
-            final InputStream bufferedInputStream = null;
+            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
-            final byte[] actual = new byte[0];
+            final byte[] actual = bufferedInputStream.readAllBytes();
 
             assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
             assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());

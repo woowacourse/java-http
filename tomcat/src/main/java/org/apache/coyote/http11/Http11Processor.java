@@ -33,14 +33,8 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             String fileName = bufferedReader.readLine().split(" ")[1];
-            String responseBody = getResponseBody(fileName);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final var response = makeResponse(fileName);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -49,10 +43,32 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private String makeResponse(String fileName) throws IOException {
+        String responseBody = getResponseBody(fileName);
+        String contentType = "text/html";
+        if (isCss(fileName)) {
+            contentType = "text/css";
+        }
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private boolean isCss(String fileName) {
+        return fileName.contains("/css/");
+    }
+
     private String getResponseBody(String fileName) throws IOException {
-        if (fileName.equals("/")) {
+        if (fileName.equals("/") || fileName.isEmpty()) {
             return "Hello world!";
         }
+        return getContent(fileName);
+    }
+
+    private String getContent(String fileName) throws IOException {
         Path path = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + fileName))
                 .getFile());
         return Files.readString(path);

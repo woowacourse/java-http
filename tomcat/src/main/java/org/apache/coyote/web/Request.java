@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.exception.HttpRequestStartLineNotValidException;
+import org.apache.coyote.support.HttpMethod;
 
 public class Request {
 
@@ -15,12 +16,12 @@ public class Request {
     private static final String DEFAULT_REQUEST_EXTENSION = "strings";
     private static final String QUERY_PARAMETER_DELIMITER = "\\?";
 
-    private String method;
+    private HttpMethod method;
     private String requestUrl;
     private String version;
 
     public Request(final String method, final String requestUrl, final String version) {
-        this.method = method;
+        this.method = HttpMethod.of(method);
         this.requestUrl = requestUrl;
         this.version = version;
     }
@@ -68,7 +69,7 @@ public class Request {
         return requestUrl.split(delimiter);
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

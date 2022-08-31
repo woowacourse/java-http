@@ -42,6 +42,10 @@ public class RequestPath {
         return queryParameters;
     }
 
+    public boolean isStaticFile(String extension) {
+        return this.path.endsWith(extension);
+    }
+
     public String getPath() {
         return path;
     }
@@ -50,7 +54,11 @@ public class RequestPath {
         return queryParameters;
     }
 
-    public boolean isStaticFile(String extension) {
-        return this.path.endsWith(extension);
+    @Override
+    public String toString() {
+        return "RequestPath{" +
+                "path='" + path + '\'' +
+                ", queryParameters=" + queryParameters +
+                '}';
     }
 }

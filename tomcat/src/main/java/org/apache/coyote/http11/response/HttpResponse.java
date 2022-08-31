@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.message.response;
+package org.apache.coyote.http11.response;
 
 import java.io.BufferedReader;
 import java.io.File;

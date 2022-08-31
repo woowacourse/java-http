@@ -48,4 +48,13 @@ public class RequestGeneral {
     public HttpVersion getHttpVersion() {
         return httpVersion;
     }
+
+    @Override
+    public String toString() {
+        return "RequestGeneral{" +
+                "method=" + method +
+                ", path=" + path +
+                ", httpVersion=" + httpVersion +
+                '}';
+    }
 }

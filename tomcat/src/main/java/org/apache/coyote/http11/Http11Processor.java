@@ -57,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
             return helloResponse();
         }
         String responseBody = ResourcesUtil.readResource(httpRequest.getFilePath(), this.getClass());
-        return okResponse(httpRequest.getContentType().getType(), responseBody.length(), responseBody);
+        return okResponse(httpRequest.getContentType().getType(), responseBody.getBytes().length, responseBody);
     }
 
     private String helloResponse() {

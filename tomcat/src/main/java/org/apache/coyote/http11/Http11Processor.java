@@ -8,10 +8,9 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -42,19 +41,30 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
             HttpRequest httpRequest = new HttpRequest(bufferedReader);
-            String uri = httpRequest.get("request URI");
+            String statusCode = "200 OK";
 
-            String path = getPath(uri);
-            Map<String, String> querys = getQueryParams(uri);
-            Optional<User> user = InMemoryUserRepository.findByAccount(querys.getOrDefault("account", ""));
-            user.ifPresent(value -> log.info(value.getAccount()));
+            String path = httpRequest.getPath();
+
+            if (path.equals("/login") && httpRequest.hasParam()) {
+                Map<String, String> queryParams = httpRequest.getQueryParams();
+                Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.getOrDefault("account", ""));
+
+                HttpResponse httpResponse = getHttpResponse(queryParams, user);
+
+                outputStream.write(httpResponse.getBytes());
+                outputStream.flush();
+                return;
+            }
 
             String responseBody = getResponseBody(path);
-            String contentType = getContentType(path);
+            String contentLength = Integer.toString(responseBody.getBytes().length);
 
-            HttpResponse httpResponse = HttpResponse.from("HTTP/1.1", "200 OK", contentType, responseBody);
+            Map<String, String> responseHeader = new LinkedHashMap<>();
+            responseHeader.put("Content-Type", getContentType(path));
+            responseHeader.put("Content-Length", contentLength);
+
+            HttpResponse httpResponse = HttpResponse.from("HTTP/1.1", statusCode, responseHeader, responseBody);
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
@@ -63,32 +73,23 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getPath(String uri) {
-        int index = uri.indexOf("?");
+    private HttpResponse getHttpResponse(Map<String, String> queryParams, Optional<User> user) {
+        String password = queryParams.getOrDefault("password", "");
 
-        if (index != -1) {
-            return uri.substring(0, index);
+        if (user.isPresent() && user.get().checkPassword(password)) {
+            Map<String, String> responseHeader = Map.of("Location", "/index.html");
+            return HttpResponse.from("HTTP/1.1", "302 FOUND", responseHeader);
         }
-        return uri;
-    }
 
-    private Map<String, String> getQueryParams(String uri) {
-        int index = uri.indexOf("?");
-        if (index != -1) {
-            String queryString = uri.substring(index + 1);
-
-            return Arrays.stream(queryString.split("&"))
-                .map(query -> query.split("="))
-                .collect(Collectors.toMap(query -> query[0], query -> query[1]));
-        }
-        return Map.of();
+        Map<String, String> responseHeader = Map.of("Location", "/401.html");
+        return HttpResponse.from("HTTP/1.1", "302 FOUND", responseHeader);
     }
 
     private String getResponseBody(String input) throws URISyntaxException, IOException {
         String responseBody = "Hello world!";
 
         if (!input.equals("/")) {
-            if (!input.endsWith("css") && !input.endsWith("html") && !input.endsWith("js")) {
+            if (input.equals("/login")) {
                 input = input + ".html";
             }
             Path path = Paths.get(getClass()

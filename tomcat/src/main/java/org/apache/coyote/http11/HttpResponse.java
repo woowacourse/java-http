@@ -1,33 +1,43 @@
 package org.apache.coyote.http11;
 
+import java.util.Map;
+
 public class HttpResponse {
     private final String httpMethod;
     private final String statusCode;
-    private final String contentType;
-    private final int contentLength;
+    private final Map<String, String> headers;
     private final String responseBody;
 
-    private HttpResponse(String httpMethod, String statusCode, String contentType, int contentLength,
+    public HttpResponse(String httpMethod, String statusCode, Map<String, String> headers,
         String responseBody) {
         this.httpMethod = httpMethod;
         this.statusCode = statusCode;
-        this.contentType = contentType;
-        this.contentLength = contentLength;
+        this.headers = headers;
         this.responseBody = responseBody;
     }
 
-    public static HttpResponse from(String httpMethod, String statusCode, String contentType, String responseBody) {
-        return new HttpResponse(httpMethod, statusCode, contentType, responseBody.getBytes().length, responseBody);
+    public static HttpResponse from(String httpMethod, String statusCode, Map<String, String> headers,
+        String responseBody) {
+        return new HttpResponse(httpMethod, statusCode, headers, responseBody);
+    }
+
+    public static HttpResponse from(String httpMethod, String statusCode, Map<String, String> headers) {
+        return new HttpResponse(httpMethod, statusCode, headers, "");
     }
 
     public byte[] getBytes() {
-        String response = String.join("\r\n",
-            httpMethod + " " + statusCode + " ",
-            "Content-Type: " + contentType + " ",
-            "Content-Length: " + contentLength + " ",
-            "",
-            responseBody);
+        StringBuilder stringBuilder = new StringBuilder();
 
-        return response.getBytes();
+        stringBuilder.append(httpMethod + " " + statusCode + " ")
+            .append(System.lineSeparator());
+
+        for (Map.Entry<String, String> header : headers.entrySet()) {
+            stringBuilder.append(header.getKey() + ": " + header.getValue() + " ")
+                .append(System.lineSeparator());
+        }
+
+        stringBuilder.append(System.lineSeparator()).append(responseBody);
+
+        return stringBuilder.toString().getBytes();
     }
 }

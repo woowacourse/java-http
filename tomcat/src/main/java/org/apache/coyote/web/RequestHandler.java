@@ -10,7 +10,6 @@ import org.apache.coyote.support.HttpHeader;
 import org.apache.coyote.support.HttpHeaderFactory;
 import org.apache.coyote.support.HttpHeaderFactory.Pair;
 import org.apache.coyote.support.HttpHeaders;
-import org.apache.coyote.support.HttpMethod;
 import org.apache.coyote.support.HttpStatus;
 
 public class RequestHandler {
@@ -22,15 +21,15 @@ public class RequestHandler {
             ResponseEntity<String> response = new UserLoginController().doGet(userLoginRequest);
 
             HttpHeaders httpHeaders = HttpHeaderFactory.create(
-                    new Pair(CONTENT_TYPE, ContentType.TEXT_HTML_CHARSET_UTF_8.getValue()),
-                    new Pair(HttpHeader.LOCATION, response.getResponse())
+                    new Pair(CONTENT_TYPE.getValue(), ContentType.TEXT_HTML_CHARSET_UTF_8.getValue()),
+                    new Pair(HttpHeader.LOCATION.getValue(), response.getResponse())
             );
 
             return new NoBodyResponse(response.getHttpStatus(), httpHeaders);
         }
 
         HttpHeaders httpHeaders = HttpHeaderFactory.create(
-                new Pair(CONTENT_TYPE, ContentType.STRINGS.getValue())
+                new Pair(CONTENT_TYPE.getValue(), ContentType.STRINGS.getValue())
         );
         return new BodyResponse(HttpStatus.OK, httpHeaders, "Hello world!");
     }

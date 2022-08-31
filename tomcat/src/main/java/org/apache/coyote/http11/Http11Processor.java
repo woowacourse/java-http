@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.file.DefaultFileHandler;
@@ -52,7 +51,13 @@ public class Http11Processor implements Runnable, Processor {
                      new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
              final OutputStream bufferedOutputStream = new BufferedOutputStream(connection.getOutputStream())) {
 
-            Request request = Request.from(bufferedReader.readLine());
+            String requestLine = bufferedReader.readLine();
+            Request request = Request.from(requestLine);
+
+            while (!"".equals(requestLine)) {
+                requestLine = bufferedReader.readLine();
+                System.out.println(requestLine);
+            }
             Response response = branchRequest(request);
 
             bufferedOutputStream.write(response.createHttpResponse().getBytes());
@@ -67,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
             String responseBody = fileHandler.getFileLines(request.getRequestUrl());
             String extension = request.getRequestExtension();
             HttpHeaders httpHeaders = HttpHeaderFactory.create(
-                    new Pair(HttpHeader.CONTENT_TYPE, ContentType.from(extension).getValue())
+                    new Pair(HttpHeader.CONTENT_TYPE.getValue(), ContentType.from(extension).getValue())
             );
             return new BodyResponse(HttpStatus.OK, httpHeaders, responseBody);
         }

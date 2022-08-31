@@ -12,7 +12,7 @@ public class BodyResponse extends Response {
     public BodyResponse(final HttpStatus httpStatus, final HttpHeaders httpHeaders, final String responseBody) {
         super(httpStatus, httpHeaders);
         this.responseBody = responseBody;
-        httpHeaders.add(HttpHeader.CONTENT_LENGTH,
+        httpHeaders.add(HttpHeader.CONTENT_LENGTH.getValue(),
                 String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
     }
 
@@ -20,7 +20,7 @@ public class BodyResponse extends Response {
                         final String responseBody) {
         super(version, httpStatus, httpHeaders);
         this.responseBody = responseBody;
-        httpHeaders.add(HttpHeader.CONTENT_LENGTH,
+        httpHeaders.add(HttpHeader.CONTENT_LENGTH.getValue(),
                 String.valueOf(responseBody.getBytes(StandardCharsets.UTF_8).length));
     }
 
@@ -29,7 +29,7 @@ public class BodyResponse extends Response {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(getRequestLine());
         getHttpHeaders().getHeaders()
-                .forEach((key, value) -> stringBuilder.append(String.format(HEADER_TEMPLATE, key.getValue(), value)));
+                .forEach((key, value) -> stringBuilder.append(String.format(HEADER_TEMPLATE, key, value)));
         stringBuilder.append("\r\n")
                 .append(responseBody);
         return stringBuilder.toString();

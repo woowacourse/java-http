@@ -11,14 +11,14 @@ class HttpHeaderFactoryTest {
     @Test
     void create() {
         HttpHeaders httpHeaders = HttpHeaderFactory.create(
-                new Pair(HttpHeader.CONTENT_TYPE, ContentType.STRINGS.getValue()),
-                new Pair(HttpHeader.LOCATION, "/index.html")
+                new Pair(HttpHeader.CONTENT_TYPE.getValue(), ContentType.STRINGS.getValue()),
+                new Pair(HttpHeader.LOCATION.getValue(), "/index.html")
         );
 
         assertThat(httpHeaders.getHeaders())
                 .containsAllEntriesOf(Map.of(
-                                HttpHeader.CONTENT_TYPE, ContentType.STRINGS.getValue(),
-                                HttpHeader.LOCATION, "/index.html"
+                                HttpHeader.CONTENT_TYPE.getValue(), ContentType.STRINGS.getValue(),
+                                HttpHeader.LOCATION.getValue(), "/index.html"
                         )
                 );
     }

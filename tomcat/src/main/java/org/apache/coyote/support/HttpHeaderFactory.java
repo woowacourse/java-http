@@ -13,15 +13,15 @@ public class HttpHeaderFactory {
 
     public static class Pair {
 
-        private final HttpHeader key;
+        private final String key;
         private final String value;
 
-        public Pair(final HttpHeader key, final String value) {
+        public Pair(final String key, final String value) {
             this.key = key;
             this.value = value;
         }
 
-        public HttpHeader getKey() {
+        public String getKey() {
             return key;
         }
 

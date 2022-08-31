@@ -123,10 +123,30 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 없는_파일은_호출할_수_없다() {
+    void 잘못된_파일_형식은_호출할_수_없다() {
         //given
         final String httpRequest= String.join("\r\n",
                 "GET /index.hi HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: */*;q=0.1 ",
+                "Connection: keep-alive",
+                "",
+                "");
+
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when & then
+        assertThatThrownBy(() -> processor.process(socket))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void 없는_파일은_호출할_수_없다() {
+        //given
+        final String httpRequest= String.join("\r\n",
+                "GET /invalidFile.html HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: */*;q=0.1 ",
                 "Connection: keep-alive",
@@ -174,7 +194,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 없는_아이디로_로그인_시_로그인에_실패한다() throws IOException {
+    void 없는_아이디로_로그인_시_로그인에_실패한다() {
         //given
         final String httpRequest= String.join("\r\n",
                 "GET /login?account=gogo&password=password HTTP/1.1 ",
@@ -194,10 +214,50 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 잘못된_비밀번호로_로그인_시_로그인에_실패한다() throws IOException {
+    void 잘못된_비밀번호로_로그인_시_로그인에_실패한다() {
         //given
         final String httpRequest= String.join("\r\n",
                 "GET /login?account=gugu&password=집가고싶다 HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/html;q=0.1 ",
+                "Connection: keep-alive",
+                "",
+                "");
+
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when & then
+        assertThatThrownBy(() -> processor.process(socket))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void 로그인_요청_시_account를_보내지_않으면_로그인에_실패한다() {
+        //given
+        final String httpRequest= String.join("\r\n",
+                "GET /login?id=gugu&password=집가고싶다 HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/html;q=0.1 ",
+                "Connection: keep-alive",
+                "",
+                "");
+
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when & then
+        assertThatThrownBy(() -> processor.process(socket))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void 로그인_요청_시_password를_보내지_않으면_로그인에_실패한다() {
+        //given
+        final String httpRequest= String.join("\r\n",
+                "GET /login?account=gugu&비밀번호=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/html;q=0.1 ",
                 "Connection: keep-alive",

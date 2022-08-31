@@ -14,9 +14,6 @@ public abstract class FileHandler {
     }
 
     public String getFileLines(final String path) throws IOException {
-        if (path.equals("/")) {
-            return "Hello world!";
-        }
         URL resource = getClass().getResource(prefix + path);
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }

@@ -14,6 +14,8 @@ public class UserController {
                     .orElseThrow(UserNotFoundException::new);
 
             return user.toString();
+        } else if (request.isSameRequestUrl("/")) {
+            return "Hello world!";
         }
         return null;
     }

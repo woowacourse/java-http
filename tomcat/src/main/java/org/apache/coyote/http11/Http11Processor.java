@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import nextstep.jwp.controller.UserController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
@@ -41,7 +42,8 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+             final BufferedReader bufferedReader =
+                     new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
             Request request = Request.from(bufferedReader.readLine());
             Response response = branchRequest(request);

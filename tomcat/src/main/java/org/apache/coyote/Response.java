@@ -20,7 +20,7 @@ public class Response {
         this.responseBody = responseBody;
     }
 
-    public String createHttpResponse() {
+    public String createHttpResponse() {;
         return String.join("\r\n",
                 String.format("%s %d %s ", version, httpStatus.getStatusCode(), httpStatus.getMessage()),
                 String.format("Content-Type: %s ", contentType.getValue()),

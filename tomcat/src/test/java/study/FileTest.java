@@ -1,5 +1,13 @@
 package study;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
+import java.util.LinkedList;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -25,8 +33,7 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final String actual = "";
+        final String actual = new File(getClass().getClassLoader().getResource(fileName).getFile()).getName();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -36,14 +43,16 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws URISyntaxException, FileNotFoundException {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final Path path = null;
+        final Path path = Paths.get(getClass().getClassLoader().getResource(fileName).toURI());
+        final File file = path.toFile();
+
+        final BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
 
         // todo
-        final List<String> actual = Collections.emptyList();
+        final List<String> actual = bufferedReader.lines().collect(Collectors.toCollection(LinkedList::new));
 
         assertThat(actual).containsOnly("nextstep");
     }

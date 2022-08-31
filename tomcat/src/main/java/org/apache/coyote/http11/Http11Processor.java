@@ -8,13 +8,17 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -39,25 +43,75 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader input = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest request = HttpRequest.from(input);
 
+            HttpResponse response = null;
+
             String uri = request.getUri();
-
-            var responseBody = "Hello world!";
-            if (!uri.equals("/")) {
-                responseBody = readFile(uri);
+            if (uri.equals("/")) {
+                response = main(request);
+            } else if (uri.contains(".")) {
+                response = getResource(request);
+            } else if (uri.contains("/login")) {
+                response = login(request);
             }
-
-            HttpResponse response = new HttpResponse(
-                request.getVersion(),
-                "200 OK",
-                uri,
-                responseBody
-            );
 
             outputStream.write(response.toResponseString().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse main(HttpRequest request) {
+        return new HttpResponse(
+            request.getVersion(),
+            "200 OK",
+            request.getUri(),
+            "Hello world!"
+        );
+    }
+
+    private HttpResponse getResource(HttpRequest request) {
+        return new HttpResponse(
+            request.getVersion(),
+            "200 OK",
+            request.getUri(),
+            readFile(request.getUri())
+        );
+    }
+
+    private HttpResponse login(HttpRequest request) {
+        String uri = request.getUri();
+        String queryString = uri.substring(uri.indexOf('?') + 1);
+        Map<String, String> parsedQuery = parseQueryString(queryString);
+
+        String account = parsedQuery.get("account");
+        String password = parsedQuery.get("password");
+
+        User user = InMemoryUserRepository.findByAccount(account).get();
+
+        if (user.checkPassword(password)) {
+            System.out.println(user);
+        } else {
+            System.out.println("비밀번호가 일치하지 않습니다.");
+        }
+
+        return new HttpResponse(
+            request.getVersion(),
+            "200 OK",
+            request.getUri(),
+            readFile("/login.html")
+        );
+    }
+
+    private Map<String, String> parseQueryString(String query) {
+        Map<String, String> queryMap = new HashMap<>();
+
+        for (String q : query.split("&")) {
+            String[] parsedQuery = q.split("=");
+            queryMap.put(parsedQuery[0], parsedQuery[1]);
+        }
+
+        return queryMap;
     }
 
     private String readFile(String uri) {

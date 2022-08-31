@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.util.ResourcesUtil;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
             checkNullRequest(line);
             String uri = getUriByRequestLine(line);
 
-            final var responseBody = "Hello world!";
+            final var responseBody = ResourcesUtil.readStaticResource(uri, this.getClass());
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

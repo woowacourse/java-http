@@ -40,10 +40,16 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final String responseBody = getStaticResource(inputStream);
+            final String requestStartLine = getRequestUrl(inputStream);
+            final String responseBody = getStaticResource(requestStartLine);
+
+            MediaType mediaType = MediaType.TEXT_HTML;
+            if (requestStartLine.contains(".css")) {
+                mediaType = MediaType.TEXT_CSS;
+            }
 
             final String response = new Response.ResponseBuilder(HttpVersion.HTTP11, Status.OK)
-                    .setContentType(MediaType.TEXT_HTML, Charset.UTF8)
+                    .setContentType(mediaType, Charset.UTF8)
                     .setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
                     .setBody(responseBody)
                     .build()
@@ -56,10 +62,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getStaticResource(final InputStream inputStream) throws IOException {
-        final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-        final String requestLine = new BufferedReader(inputStreamReader).readLine();
-        final String requestUrl = RequestLineParser.getStaticResourcePath(requestLine);
+    private String getStaticResource(final String requestStartLine) throws IOException {
+        final String requestUrl = RequestLineParser.getStaticResourcePath(requestStartLine);
         if (requestUrl.equals(RequestLineParser.INDEX_PAGE_URL)) {
             return "Hello world!";
         }
@@ -69,5 +73,11 @@ public class Http11Processor implements Runnable, Processor {
                 .getResource(requestUrl);
         assert url != null;
         return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
+    }
+
+    private String getRequestUrl(final InputStream inputStream) throws IOException {
+        final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        return bufferedReader.readLine();
     }
 }

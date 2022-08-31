@@ -1,17 +1,16 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.nio.file.FileSystems;
+import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -96,11 +95,8 @@ public class Http11Processor implements Runnable, Processor {
             return "Hello world!";
         }
 
-        Path path = FileSystems.getDefault().getPath("src/main/resources/static", requestURI);
+        final URL resource = getClass().getClassLoader().getResource("static/" + requestURI);
 
-        return Files.readAllLines(path)
-            .stream()
-            .map(string -> string + "\n")
-            .collect(Collectors.joining());
+        return new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
     }
 }

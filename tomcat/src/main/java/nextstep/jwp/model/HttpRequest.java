@@ -44,7 +44,7 @@ public class HttpRequest {
         String uri = requestLineValues[REQUEST_LINE_URI_INDEX];
         String path = getPath(uri);
         Map<String, String> queryParams = getQueryParam(getQueryParameter(uri));
-        ContentType contentType = ContentType.fromExtension(FileNameUtil.getExtension(path));
+        ContentType contentType = getContentType(path);
         HttpMethod httpMethod = HttpMethod.from(requestLineValues[REQUEST_LINE_HTTP_METHOD_INDEX]);
 
         return new HttpRequest(uri, path, queryParams, contentType, httpMethod);
@@ -71,17 +71,9 @@ public class HttpRequest {
 
     private static String getPath(final String uri) {
         if (uri.contains(URI_QUERY_PARAM_DELIMITER)) {
-            String path = uri.substring(0, uri.lastIndexOf(URI_QUERY_PARAM_DELIMITER));
-            return addDefaultExtensionInPath(path);
+            return uri.substring(0, uri.lastIndexOf(URI_QUERY_PARAM_DELIMITER));
         }
-        return addDefaultExtensionInPath(uri);
-    }
-
-    private static String addDefaultExtensionInPath(final String path) {
-        if (path.contains(STATIC_EXTENTION_DOT)) {
-            return path;
-        }
-        return path + DEFAULT_STATIC_EXTENSION;
+        return uri;
     }
 
     private static String getQueryParameter(final String uri) {
@@ -102,6 +94,24 @@ public class HttpRequest {
             queryParams.put(param[0], param[1]);
         }
         return queryParams;
+    }
+
+    private static ContentType getContentType(final String path) {
+        if (isResource(path)) {
+            return ContentType.fromExtension(FileNameUtil.getExtension(path));
+        }
+        return ContentType.TEXT_HTML;
+    }
+
+    private static boolean isResource(final String path) {
+        return path.contains(STATIC_EXTENTION_DOT);
+    }
+
+    public String getFilePath() {
+        if (path.contains(STATIC_EXTENTION_DOT)) {
+            return path;
+        }
+        return path + DEFAULT_STATIC_EXTENSION;
     }
 
     public String getUri() {

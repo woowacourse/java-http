@@ -9,6 +9,7 @@ import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundUserException;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.ContentType;
 import nextstep.jwp.model.HttpRequest;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.ResourcesUtil;
@@ -42,20 +43,35 @@ public class Http11Processor implements Runnable, Processor {
 
             printLoginUser(httpRequest);
 
-            final var responseBody = ResourcesUtil.readResource(httpRequest.getPath(), this.getClass());
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + httpRequest.getContentType().getType() + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final var response = createResponseBody(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String createResponseBody(final HttpRequest httpRequest) {
+        if (httpRequest.getPath().equals("/")) {
+            return helloResponse();
+        }
+        String responseBody = ResourcesUtil.readResource(httpRequest.getFilePath(), this.getClass());
+        return okResponse(httpRequest.getContentType().getType(), responseBody.length(), responseBody);
+    }
+
+    private String helloResponse() {
+        var responseBody = "Hello world!";
+        return okResponse(ContentType.TEXT_HTML.getType(), responseBody.getBytes().length, responseBody);
+    }
+
+    private String okResponse(final String contentType, final int contentLength, final String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + contentLength + " ",
+                "",
+                responseBody);
     }
 
     private void printLoginUser(final HttpRequest httpRequest) {

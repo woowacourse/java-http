@@ -18,15 +18,6 @@ class HttpRequestTest {
     }
 
     @Test
-    void path에_파일확장자가_없는_경우_html을_붙인다() {
-        String requestLine = "GET /index HTTP/1.1";
-        String expected = "/index.html";
-        HttpRequest actual = HttpRequest.from(requestLine);
-
-        assertThat(actual.getPath()).isEqualTo(expected);
-    }
-
-    @Test
     void query_parameter가_없는_경우_빈값이_들어간다() {
         String requestLine = "GET /index HTTP/1.1";
         HttpRequest actual = HttpRequest.from(requestLine);

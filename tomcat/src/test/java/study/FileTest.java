@@ -6,8 +6,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -56,6 +60,24 @@ class FileTest {
         final FileReader fileReader = new FileReader(file);
 
         final List<String> actual = new BufferedReader(fileReader).lines()
+                .collect(Collectors.toList());
+
+        // then
+        assertThat(actual).containsOnly("nextstep");
+    }
+
+    @Test
+    void BufferedReader_없이_파일의_내용을_읽는다() throws IOException, URISyntaxException {
+        // given
+        final String fileName = "nextstep.txt";
+
+        // when
+        final URL url = Objects.requireNonNull(FileTest.class
+                .getClassLoader()
+                .getResource(fileName));
+
+        final byte[] bytes = Files.readAllBytes(Paths.get(url.toURI()));
+        final List<String> actual = Arrays.stream(new String(bytes).split("\r\n"))
                 .collect(Collectors.toList());
 
         // then

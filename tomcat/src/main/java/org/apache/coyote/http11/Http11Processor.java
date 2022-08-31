@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -36,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
 			 final var outputStream = connection.getOutputStream()) {
 
 			final var request = parseHttpRequest(inputStream);
-			final var response = makeHttpResponse(request);
+			final var response = handleStaticResource(request);
 
 			outputStream.write(response.getBytes());
 			outputStream.flush();
@@ -47,18 +49,21 @@ public class Http11Processor implements Runnable, Processor {
 
 	private String parseHttpRequest(InputStream inputStream) throws IOException {
 		BufferedReader requestReader = new BufferedReader(new InputStreamReader(inputStream));
-		return requestReader.readLine();
+		List<String> requestLines = new ArrayList<>();
+		while (requestReader.ready()) {
+			requestLines.add(requestReader.readLine());
+		}
+		log.info("\r\n" + String.join("\r\n", requestLines));
+		return requestLines.get(0);
 	}
 
-	private String makeHttpResponse(String request) throws IOException {
+	private HttpResponse handleStaticResource(String request) throws IOException {
 		String requestUri = extractRequestUri(request);
 		if (requestUri.equals("/")) {
-			return constructHttpMessage("Hello world!", 200);
+			return new HttpResponse(StatusCode.OK, "Hello world!", ContentType.HTML);
 		}
-		if (requestUri.equals("/index.html")) {
-			return constructHttpMessage(getHtml("static/index.html"), 200);
-		}
-		return constructHttpMessage(getHtml("static/404.html"), 404);
+		ContentType contentType = ContentType.from(extractExtension(requestUri));
+		return handleNotFoundHtml("static/" + requestUri, contentType);
 	}
 
 	private String extractRequestUri(String request) {
@@ -67,24 +72,24 @@ public class Http11Processor implements Runnable, Processor {
 			.split(" ")[1];
 	}
 
-	private String getHtml(String path) throws IOException {
-		final URL resource = getClass().getClassLoader().getResource(path);
-		return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+	private String extractExtension(String requestUri) {
+		if (requestUri.contains(".")) {
+			return requestUri.split("\\.")[1];
+		}
+		return "";
 	}
 
-	private String constructHttpMessage(String responseBody, int statusCode) {
-		String status = "";
-		if (statusCode == 200) {
-			status = " OK ";
+	private HttpResponse handleNotFoundHtml(String path, ContentType contentType) throws IOException {
+		try {
+			return makeHttpResponseWithHtml(path, 200, contentType);
+		} catch (NullPointerException e) {
+			return makeHttpResponseWithHtml("static/404.html", 404, ContentType.HTML);
 		}
-		if (statusCode == 404) {
-			status = " Not Found ";
-		}
-		return String.join("\r\n",
-			"HTTP/1.1 " + statusCode + status,
-			"Content-Type: text/html;charset=utf-8 ",
-			"Content-Length: " + responseBody.getBytes().length + " ",
-			"",
-			responseBody);
+	}
+
+	private HttpResponse makeHttpResponseWithHtml(String htmlPath, int statusCode, ContentType contentType) throws IOException {
+		final URL resource = getClass().getClassLoader().getResource(htmlPath);
+		String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+		return new HttpResponse(StatusCode.from(statusCode), responseBody, contentType);
 	}
 }

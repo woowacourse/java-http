@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -18,8 +19,6 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 
 public class Http11Processor implements Runnable, Processor {
-    private static final int HTTP_STATUS_REDIRECTED = 302;
-    private static final int HTTP_STATUS_UNAUTHORIZED = 401;
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
@@ -40,15 +39,15 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String line = bufferedReader.readLine();
 
-            if (line == null) {
-                return;
+            HttpRequest request = new HttpRequest(bufferedReader);
+
+            if (request.isValidRegisterRequest()) {
+                request = registerUser(request);
             }
 
-            Request request = new Request(line.split(" ")[1]);
             if (request.isValidLoginRequest()) {
-                request = redirectAfterLogin(request);
+                request = loginUser(request);
             }
 
             final var response = createResponse(request);
@@ -60,25 +59,35 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Request redirectAfterLogin(Request request) {
-        Optional<User> user = InMemoryUserRepository.findByAccount(request.getQueryParam("account"));
+    private HttpRequest registerUser(HttpRequest request) {
+        InMemoryUserRepository.save(new User(request.getQueryParam("account"),
+            request.getQueryParam("password"), request.getQueryParam("email")));
 
-        if(user.isPresent() && user.get().checkPassword(request.getQueryParam("password"))){
-            log.info("user : " + user);
-            return new Request("/index", HttpStatusCode.HTTP_STATUS_REDIRECTED);
-        }
-        return new Request("/401", HttpStatusCode.HTTP_STATUS_UNAUTHORIZED);
+        return HttpRequest.of(HttpMethod.GET, "/index", HttpStatusCode.HTTP_STATUS_REDIRECTED);
     }
 
-    private String createResponse(Request request) throws IOException {
+    private HttpRequest loginUser(HttpRequest request) {
+        Optional<User> user = InMemoryUserRepository.findByAccount(request.getQueryParam("account"));
+
+        if (user.isPresent() && user.get().checkPassword(request.getQueryParam("password"))) {
+            log.info("user : " + user);
+            HttpRequest redirectRequest =  HttpRequest.of(HttpMethod.GET, "/index", HttpStatusCode.HTTP_STATUS_REDIRECTED);
+            redirectRequest.addCookie("JSESSIONID", String.valueOf(UUID.randomUUID()));
+            return redirectRequest;
+        }
+        return HttpRequest.of(HttpMethod.GET, "/401", HttpStatusCode.HTTP_STATUS_UNAUTHORIZED);
+    }
+
+    private String createResponse(HttpRequest request) throws IOException {
 
         final URL resource = getClass().getClassLoader().getResource(request.getStaticPath());
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         return String.join("\r\n",
-            "HTTP/1.1 "+ request.getHttpStatusCode(),
+            "HTTP/1.1 " + request.getHttpStatusCode(),
             "Content-Type: " + request.getContentType() + ";charset=utf-8 ",
             "Content-Length: " + responseBody.getBytes().length + " ",
+            "Set-Cookie: " + request.getCookie(),
             "",
             responseBody);
     }

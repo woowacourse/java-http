@@ -2,11 +2,15 @@ package study;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -39,15 +43,22 @@ class FileTest {
      * 읽어온 파일의 내용을 I/O Stream을 사용해서 사용자에게 전달 해야 한다. File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws FileNotFoundException {
+        // given
         final String fileName = "nextstep.txt";
 
-        // todo
-        final Path path = null;
+        // when
+        final URL url = Objects.requireNonNull(FileTest.class
+                .getClassLoader()
+                .getResource(fileName));
 
-        // todo
-        final List<String> actual = Collections.emptyList();
+        final File file = new File(url.getPath());
+        final FileReader fileReader = new FileReader(file);
 
+        final List<String> actual = new BufferedReader(fileReader).lines()
+                .collect(Collectors.toList());
+
+        // then
         assertThat(actual).containsOnly("nextstep");
     }
 }

@@ -51,6 +51,8 @@ public class Http11Processor implements Runnable, Processor {
             String queryParameter = getQueryParameter(uri);
 
             final Map<String, String> queryParams = getQueryParam(queryParameter);
+            log.info("request uri : {}. query param : {}", uri, queryParams);
+
             final var responseBody = ResourcesUtil.readResource(path, this.getClass());
             final var contentType = ContentType.fromExtension(FileNameUtil.getExtension(path));
 

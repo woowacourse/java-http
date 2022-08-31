@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.coyote.exception;
 
 public class HttpRequestStartLineNotValidException extends RuntimeException {
 

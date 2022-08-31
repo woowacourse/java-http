@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.coyote.web;
 
 import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;

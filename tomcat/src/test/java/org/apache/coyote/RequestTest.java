@@ -3,6 +3,7 @@ package org.apache.coyote;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import org.apache.coyote.web.Request;
 import org.junit.jupiter.api.Test;
 
 class RequestTest {

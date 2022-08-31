@@ -4,10 +4,6 @@ import static org.apache.coyote.support.HttpHeader.CONTENT_TYPE;
 
 import nextstep.jwp.controller.UserLoginController;
 import nextstep.jwp.controller.dto.UserLoginRequest;
-import org.apache.coyote.BodyResponse;
-import org.apache.coyote.NoBodyResponse;
-import org.apache.coyote.Request;
-import org.apache.coyote.Response;
 import org.apache.coyote.support.ContentType;
 import org.apache.coyote.support.HttpHeader;
 import org.apache.coyote.support.HttpHeaderFactory;

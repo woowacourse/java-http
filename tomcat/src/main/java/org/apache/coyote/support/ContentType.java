@@ -1,7 +1,7 @@
 package org.apache.coyote.support;
 
 import java.util.Arrays;
-import org.apache.coyote.ContentTypeNotSupportedException;
+import org.apache.coyote.exception.ContentTypeNotSupportedException;
 
 public enum ContentType {
 

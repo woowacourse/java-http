@@ -1,9 +1,10 @@
-package org.apache.coyote;
+package org.apache.coyote.web;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.exception.HttpRequestStartLineNotValidException;
 
 public class Request {
 

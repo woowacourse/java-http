@@ -3,7 +3,7 @@ package org.apache.coyote.support;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.apache.coyote.ContentTypeNotSupportedException;
+import org.apache.coyote.exception.ContentTypeNotSupportedException;
 import org.junit.jupiter.api.Test;
 
 class ContentTypeTest {

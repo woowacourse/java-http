@@ -1,10 +1,17 @@
 package org.apache.coyote.web;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.exception.HttpRequestStartLineNotValidException;
+import org.apache.coyote.support.HttpHeader;
+import org.apache.coyote.support.HttpHeaderFactory;
+import org.apache.coyote.support.HttpHeaderFactory.Pair;
+import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpMethod;
 
 public class Request {
@@ -15,23 +22,42 @@ public class Request {
     private static final int NO_SPLIT_SIGN = 1;
     private static final String DEFAULT_REQUEST_EXTENSION = "strings";
     private static final String QUERY_PARAMETER_DELIMITER = "\\?";
+    private static final String HEADER_DELIMITER = ": ";
 
-    private HttpMethod method;
-    private String requestUrl;
-    private String version;
+    private final HttpMethod method;
+    private final String requestUrl;
+    private final String version;
+    private final HttpHeaders httpHeaders;
+    private final String requestBody;
 
-    public Request(final String method, final String requestUrl, final String version) {
+    public Request(final String method,
+                   final String requestUrl,
+                   final String version,
+                   final HttpHeaders httpHeaders,
+                   final String requestBody) {
         this.method = HttpMethod.of(method);
         this.requestUrl = requestUrl;
         this.version = version;
+        this.httpHeaders = httpHeaders;
+        this.requestBody = requestBody;
     }
 
-    public static Request from(final String requestLine) {
-        String[] line = requestLine.split(START_LINE_DELIMITER);
-        if (line.length != REQUEST_LINE_LENGTH) {
+    public static Request parse(final BufferedReader bufferedReader) throws IOException {
+        String[] requestLine = bufferedReader.readLine().split(START_LINE_DELIMITER);
+        if (requestLine.length != REQUEST_LINE_LENGTH) {
             throw new HttpRequestStartLineNotValidException();
         }
-        return new Request(line[0], line[1], line[2]);
+
+        List<Pair> pairs = bufferedReader.lines()
+                .takeWhile(line -> !"".equals(line))
+                .map(line -> Pair.splitBy(line, HEADER_DELIMITER))
+                .collect(Collectors.toList());
+        HttpHeaders httpHeaders = HttpHeaderFactory.create(pairs.toArray(Pair[]::new));
+
+        int contentLength = Integer.parseInt(httpHeaders.getValueOrDefault(HttpHeader.CONTENT_LENGTH.getValue(), "0"));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return new Request(requestLine[0], requestLine[1], requestLine[2], httpHeaders, new String(buffer));
     }
 
     public String getRequestExtension() {
@@ -79,5 +105,13 @@ public class Request {
 
     public String getVersion() {
         return version;
+    }
+
+    public HttpHeaders getHttpHeaders() {
+        return httpHeaders;
+    }
+
+    public String getRequestBody() {
+        return requestBody;
     }
 }

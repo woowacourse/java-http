@@ -14,7 +14,11 @@ public class HttpHeaders {
         return headers;
     }
 
-    public void add(final String key, final String value) {
+    public void put(final String key, final String value) {
         headers.put(key, value);
+    }
+
+    public String getValueOrDefault(final String key, final String defaultValue) {
+        return headers.getOrDefault(key, defaultValue);
     }
 }

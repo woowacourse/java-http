@@ -21,6 +21,14 @@ public class HttpHeaderFactory {
             this.value = value;
         }
 
+        public static Pair splitBy(final String content, final String delimiter) {
+            String[] header = content.split(delimiter);
+            if (header.length != 2) {
+                throw new IllegalArgumentException();
+            }
+            return new Pair(header[0].strip(), header[1].strip());
+        }
+
         public String getKey() {
             return key;
         }

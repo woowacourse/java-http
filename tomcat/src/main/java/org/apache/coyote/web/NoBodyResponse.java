@@ -19,7 +19,7 @@ public class NoBodyResponse extends Response {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(getRequestLine());
         getHttpHeaders().getHeaders()
-                .forEach((key, value) -> stringBuilder.append(String.format(HEADER_TEMPLATE, key.getValue(), value)));
+                .forEach((key, value) -> stringBuilder.append(String.format(HEADER_TEMPLATE, key, value)));
         return stringBuilder.toString();
     }
 }

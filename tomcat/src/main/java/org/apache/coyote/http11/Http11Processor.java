@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.common.Charset;
+import org.apache.coyote.common.FileExtension;
 import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.MediaType;
 import org.apache.coyote.common.Status;
@@ -40,13 +41,9 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final String requestStartLine = getRequestUrl(inputStream);
+            final String requestStartLine = getRequestStartLine(inputStream);
             final String responseBody = getStaticResource(requestStartLine);
-
-            MediaType mediaType = MediaType.TEXT_HTML;
-            if (requestStartLine.contains(".css")) {
-                mediaType = MediaType.TEXT_CSS;
-            }
+            final MediaType mediaType = MediaType.of(FileExtension.of(requestStartLine));
 
             final String response = new Response.ResponseBuilder(HttpVersion.HTTP11, Status.OK)
                     .setContentType(mediaType, Charset.UTF8)
@@ -75,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
         return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
     }
 
-    private String getRequestUrl(final InputStream inputStream) throws IOException {
+    private String getRequestStartLine(final InputStream inputStream) throws IOException {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
         return bufferedReader.readLine();

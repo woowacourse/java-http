@@ -37,7 +37,7 @@ public class Response {
         private static final String HEADER_VALUE_DELIMITER = ";";
 
         private final String startLine;
-        private Map<String, String> headers;
+        private final Map<String, String> headers;
         private String body;
 
         public ResponseBuilder(final HttpVersion httpVersion, final Status status) {
@@ -65,17 +65,9 @@ public class Response {
         }
 
         public ResponseBuilder setHeader(final Header header, final String headerValue) {
-//            headers = String.join(RESPONSE_MESSAGE_DELIMITER,
-//                    headers,
-//                    makeHeader(header, headerValue),
-//                    HEADER_BODY_DELIMITER);
             headers.put(header.getValue(), headerValue);
             return this;
         }
-
-//        private String makeHeader(final Header header, final String headerValue) {
-//            return header.getValue() + HEADER_KEY_VALUE_DELIMITER + headerValue + " ";
-//        }
 
         public ResponseBuilder setBody(final String body) {
             this.body = body;

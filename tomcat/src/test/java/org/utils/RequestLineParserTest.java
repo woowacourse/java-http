@@ -13,7 +13,7 @@ class RequestLineParserTest {
     void getUrlFromRequestLine() {
         final String requestLine = "GET /index.html HTTP/1.1";
 
-        final String actual = RequestLineParser.getStaticResourceUrl(requestLine);
+        final String actual = RequestLineParser.getStaticResourcePath(requestLine);
 
         assertThat(actual).isEqualTo("/index.html");
     }

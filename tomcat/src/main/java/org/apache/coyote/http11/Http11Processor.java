@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -36,19 +37,11 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-            final String requestLine = new BufferedReader(inputStreamReader).readLine();
-            final String requestUrl = RequestLineParser.getStaticResourceUrl(requestLine);
-
-            final URL url = Thread.currentThread()
-                    .getContextClassLoader()
-                    .getResource(requestUrl);
-            assert url != null;
-            final Path path = Path.of(url.getPath());
-            final var responseBody = Files.lines(path)
+            final Path path = getPath(inputStream);
+            final String responseBody = Files.lines(path)
                     .collect(Collectors.joining("\r\n", "", "\r\n"));
 
-            final var response = String.join("\r\n",
+            final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
@@ -60,5 +53,17 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Path getPath(final InputStream inputStream) throws IOException {
+        final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+        final String requestLine = new BufferedReader(inputStreamReader).readLine();
+        final String requestUrl = RequestLineParser.getStaticResourcePath(requestLine);
+
+        final URL url = Thread.currentThread()
+                .getContextClassLoader()
+                .getResource(requestUrl);
+        assert url != null;
+        return Path.of(url.getPath());
     }
 }

@@ -1,13 +1,13 @@
 package org.apache.coyote.http11;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
-import java.nio.file.Files;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.StaticResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,25 +44,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private String makeResponse(final Request request) throws IOException {
         if (request.getMethod().equals(HttpMethod.GET)) {
-            final var responseBody = makeResponseBody(request);
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final var path = request.getPath();
+            final var staticResource = StaticResource.path(path);
+
+            return HttpResponse.withStaticResource(staticResource)
+                    .toString();
         }
         throw new UncheckedServletException("지원하지 않는 Http Method 입니다.");
-    }
-
-    private String makeResponseBody(final Request request) throws IOException {
-        final var path = request.getPath();
-
-        if (path.equals("/")) {
-            return "Hello world!";
-        }
-
-        final var resource = getClass().getClassLoader().getResource("static" + path);
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 }

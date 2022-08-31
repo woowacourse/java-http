@@ -1,12 +1,16 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -28,7 +32,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final String responseBody = convertStaticResourceToString(inputStream);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -37,10 +41,25 @@ public class Http11Processor implements Runnable, Processor {
                     "",
                     responseBody);
 
+            log.info("HTTP Response Message\n" + response.split("\r\n")[0]);
+
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String convertStaticResourceToString(final InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        String headerFirstLine = bufferedReader.readLine();
+        String staticResourceLocation = headerFirstLine.split(" ")[1];
+
+        log.info("HTTP Request Message\n" + headerFirstLine);
+
+        if (staticResourceLocation.equals("/")) {
+            return "Hello world!";
+        }
+        return Files.readString(Paths.get("./tomcat/src/main/resources/static" + staticResourceLocation));
     }
 }

@@ -14,7 +14,7 @@ public abstract class FileHandler {
     }
 
     public String getFileLines(final String path) throws IOException {
-        URL resource = getClass().getResource(prefix + path);
+        URL resource = Thread.currentThread().getContextClassLoader().getResource(prefix + path);
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 }

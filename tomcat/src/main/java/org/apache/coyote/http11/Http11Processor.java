@@ -1,8 +1,10 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import nextstep.jwp.controller.UserController;
@@ -40,16 +42,15 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final BufferedReader bufferedReader =
-                     new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+        try (final BufferedReader bufferedReader =
+                     new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+             final OutputStream bufferedOutputStream = new BufferedOutputStream(connection.getOutputStream())) {
 
             Request request = Request.from(bufferedReader.readLine());
             Response response = branchRequest(request);
 
-            outputStream.write(response.createHttpResponse().getBytes());
-            outputStream.flush();
+            bufferedOutputStream.write(response.createHttpResponse().getBytes());
+            bufferedOutputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

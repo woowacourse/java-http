@@ -41,6 +41,11 @@ public class Http11Processor implements Runnable, Processor {
 
             final String requestUrl = readRequestUrl(bufferedReader);
 
+            if (requestUrl.equals("/")) {
+                contentType = makeContentType(contentType, requestUrl);
+                responseBody = new String(readDefaultFile(requestUrl), StandardCharsets.UTF_8);
+            }
+
             if (requestUrl.contains(".html") || requestUrl.contains(".css") || requestUrl.contains(".js")) {
                 contentType = makeContentType(contentType, requestUrl);
                 responseBody = new String(readAllFile(requestUrl), StandardCharsets.UTF_8);
@@ -77,6 +82,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private static byte[] readAllFile(final String requestUrl) throws IOException {
         final URL resourceUrl = ClassLoader.getSystemResource("static" + requestUrl);
+        final Path path = new File(resourceUrl.getPath()).toPath();
+        return Files.readAllBytes(path);
+    }
+
+    private static byte[] readDefaultFile(final String requestUrl) throws IOException {
+        final URL resourceUrl = ClassLoader.getSystemResource("static/index.html");
         final Path path = new File(resourceUrl.getPath()).toPath();
         return Files.readAllBytes(path);
     }

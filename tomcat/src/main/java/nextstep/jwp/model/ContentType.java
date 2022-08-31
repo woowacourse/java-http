@@ -6,8 +6,8 @@ import nextstep.jwp.exception.NotFoundContentTypeException;
 
 public enum ContentType {
 
-    TEXT_HTML(".html", "text/html"),
-    TEXT_CSS(".css", "text/css"),
+    TEXT_HTML("html", "text/html"),
+    TEXT_CSS("css", "text/css"),
     ;
 
     private final String extension;

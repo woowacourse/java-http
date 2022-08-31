@@ -5,8 +5,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.NotFoundUserException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.HttpRequest;
+import nextstep.jwp.model.User;
 import nextstep.jwp.util.ResourcesUtil;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -36,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
             String line = reader.readLine();
             HttpRequest httpRequest = HttpRequest.from(line);
 
-            log.info("request uri : {}. query param : {}", httpRequest.getUri(), httpRequest.getQueryParams());
+            printLoginUser(httpRequest);
 
             final var responseBody = ResourcesUtil.readResource(httpRequest.getPath(), this.getClass());
 
@@ -51,6 +55,19 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void printLoginUser(final HttpRequest httpRequest) {
+        if (httpRequest.getPath().equals("/login.html")) {
+            Map<String, String> queryParams = httpRequest.getQueryParams();
+            String account = queryParams.get("account");
+            String password = queryParams.get("password");
+            User user = InMemoryUserRepository.findByAccount(account)
+                    .orElseThrow(NotFoundUserException::new);
+            if (user.checkPassword(password)) {
+                log.info("user : {}", user);
+            }
         }
     }
 }

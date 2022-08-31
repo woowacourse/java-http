@@ -1,12 +1,13 @@
 package org.apache.coyote.http11;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -43,25 +44,25 @@ public class Http11Processor implements Runnable, Processor {
             if (httpStartLine == null) {
                 return;
             }
-            final String requestUrl =  httpStartLine.split(" ")[1];
+            String requestUrl =  httpStartLine.split(" ")[1];
 
             if (requestUrl.equals("/")) {
                 contentType = makeContentType(contentType, requestUrl);
-                responseBody = new String(readDefaultFile(requestUrl), StandardCharsets.UTF_8);
+                responseBody = new String(readDefaultFile(requestUrl), UTF_8);
             }
 
             if (requestUrl.contains(".html") || requestUrl.contains(".css") || requestUrl.contains(".js")) {
                 contentType = makeContentType(contentType, requestUrl);
-                responseBody = new String(readAllFile(requestUrl), StandardCharsets.UTF_8);
+                responseBody = new String(readAllFile(requestUrl), UTF_8);
             }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            if (!requestUrl.contains(".")) {
+                requestUrl = requestUrl + ".html";
+                contentType = makeContentType(contentType, requestUrl);
+                responseBody = new String(readAllFile(requestUrl), UTF_8);
+            }
 
+            final String response = makeResponse(responseBody, contentType);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -89,5 +90,14 @@ public class Http11Processor implements Runnable, Processor {
         final URL resourceUrl = ClassLoader.getSystemResource("static/index.html");
         final Path path = new File(resourceUrl.getPath()).toPath();
         return Files.readAllBytes(path);
+    }
+
+    private static String makeResponse(final String responseBody, final String contentType) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

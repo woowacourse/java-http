@@ -1,7 +1,10 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
-import nextstep.jwp.exception.UncheckedServletException;
 
 public class Request {
 
@@ -11,16 +14,10 @@ public class Request {
         this.startLine = startLine;
     }
 
-    public static Request from(final String input) {
-        checkBlank(input);
-        final var lines = extractLines(input);
-        return new Request(RequestStartLine.from(lines.get(0)));
-    }
+    public static Request from(final InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-    private static void checkBlank(final String input) {
-        if (input.isBlank()) {
-            throw new UncheckedServletException("Http Request가 비어있습니다.");
-        }
+        return new Request(RequestStartLine.from(bufferedReader.readLine()));
     }
 
     private static List<String> extractLines(final String input) {

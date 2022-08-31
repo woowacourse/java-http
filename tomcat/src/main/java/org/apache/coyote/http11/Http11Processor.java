@@ -36,35 +36,35 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            BufferedReader request = new BufferedReader(new InputStreamReader(inputStream));
+            BufferedReader input = new BufferedReader(new InputStreamReader(inputStream));
+            HttpRequest request = HttpRequest.from(input);
 
-            String inputUri = request.readLine().split(" ")[1];
+            String uri = request.getUri();
 
             var responseBody = "Hello world!";
-
-            if (!inputUri.equals("/")) {
-                responseBody = readFile(inputUri);
+            if (!uri.equals("/")) {
+                responseBody = readFile(uri);
             }
 
-            final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+            HttpResponse response = new HttpResponse(
+                request.getVersion(),
+                "200 OK",
+                uri,
+                responseBody
+            );
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toResponseString().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String readFile(String inputUri) {
+    private String readFile(String uri) {
         try {
             final Path path = Paths.get(getClass()
                 .getClassLoader()
-                .getResource("static" + inputUri)
+                .getResource("static" + uri)
                 .toURI());
 
             final List<String> contents = Files.readAllLines(path);

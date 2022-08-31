@@ -1,15 +1,18 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.common.Charset;
+import org.apache.coyote.common.HttpVersion;
+import org.apache.coyote.common.MediaType;
+import org.apache.coyote.common.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,16 +40,14 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final Path path = getPath(inputStream);
-            final String responseBody = Files.lines(path)
-                    .collect(Collectors.joining("\r\n", "", "\r\n"));
+            final String responseBody = getStaticResource(inputStream);
 
-            final String response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final String response = new Response.ResponseBuilder(HttpVersion.HTTP11, Status.OK)
+                    .setContentType(MediaType.TEXT_HTML, Charset.UTF8)
+                    .setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
+                    .setBody(responseBody)
+                    .build()
+                    .getResponse();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -55,15 +56,18 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Path getPath(final InputStream inputStream) throws IOException {
+    private String getStaticResource(final InputStream inputStream) throws IOException {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
         final String requestLine = new BufferedReader(inputStreamReader).readLine();
         final String requestUrl = RequestLineParser.getStaticResourcePath(requestLine);
+        if (requestUrl.equals(RequestLineParser.INDEX_PAGE_URL)) {
+            return "Hello world!";
+        }
 
         final URL url = Thread.currentThread()
                 .getContextClassLoader()
                 .getResource(requestUrl);
         assert url != null;
-        return Path.of(url.getPath());
+        return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
     }
 }

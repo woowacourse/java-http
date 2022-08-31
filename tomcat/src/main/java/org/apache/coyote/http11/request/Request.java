@@ -1,10 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.List;
 
 public class Request {
 
@@ -15,13 +14,9 @@ public class Request {
     }
 
     public static Request from(final InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         return new Request(RequestStartLine.from(bufferedReader.readLine()));
-    }
-
-    private static List<String> extractLines(final String input) {
-        return List.of(input.trim().split("\n"));
     }
 
     public RequestStartLine getStartLine() {

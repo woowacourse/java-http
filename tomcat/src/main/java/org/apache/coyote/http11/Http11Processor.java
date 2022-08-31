@@ -6,6 +6,8 @@ import java.net.Socket;
 import java.nio.file.Files;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.request.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

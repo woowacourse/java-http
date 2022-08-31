@@ -57,4 +57,28 @@ public class HttpRequest {
     private String requestStartLine() {
         return httpRequest.split("\n")[0];
     }
+
+    public String getRequestParam(String paramName) {
+        final String queryString = getQueryString();
+
+        if (queryString.isBlank()) {
+            return null;
+        }
+
+        for (String param : queryString.split("&")) {
+            final String key = param.split("=")[0];
+            final String value = param.split("=")[1];
+
+            if (key.equals(paramName)) {
+                return value;
+            }
+        }
+
+        return null;
+    }
+
+    private String getQueryString() {
+        final int index = getUri().indexOf("?");
+        return index == -1 ? "" : getUri().substring(index + 1);
+    }
 }

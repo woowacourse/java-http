@@ -10,7 +10,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +22,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private final ContentTypeExtractor contentTypeExtractor = new ContentTypeExtractor();
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -36,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final HttpRequest httpRequest = createHttpRequest(inputStream);
-            final String response = createResponseBy(httpRequest);
+            final HttpResponse response = createResponseBy(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -63,21 +67,50 @@ public class Http11Processor implements Runnable, Processor {
         return lines;
     }
 
-    private String createResponseBy(HttpRequest httpRequest) throws IOException {
-        final String contentType = new ContentTypeExtractor().extract(httpRequest);
-        final String responseBody = getResponseBodyBy(httpRequest);
+    private HttpResponse createResponseBy(HttpRequest httpRequest) throws IOException {
+        final String contentType = contentTypeExtractor.extract(httpRequest);
 
-        return "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: " + contentType + ";charset=utf-8 \r\n" +
-                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
-                "\r\n" + responseBody;
-    }
-
-    private String getResponseBodyBy(final HttpRequest request) throws IOException {
-        if (request.getUri().equals("/")) {
-            return "Hello world!";
+        if (httpRequest.getUri().equals("/")) {
+            final HttpResponse response = HttpResponse.ok();
+            response.addHeader("Content-Type", contentType);
+            response.addBody("Hello world!");
+            return response;
         }
-        final URL resource = getClass().getClassLoader().getResource("static" + request.getUri());
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        if (httpRequest.getUri().startsWith("/login")) {
+            String account = httpRequest.getRequestParam("account");
+
+            if (account != null) {
+                final Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
+
+                if (userOptional.isPresent()) {
+                    final User user = userOptional.get();
+
+                    if (user.checkPassword(httpRequest.getRequestParam("password"))) {
+                        final HttpResponse response = HttpResponse.redirect();
+                        response.addHeader("Location", "/index.html");
+                        return response;
+                    }
+                }
+
+                final HttpResponse response = HttpResponse.redirect();
+                response.addHeader("Location", "/401.html");
+                return response;
+            }
+
+            final URL resource = getClass().getClassLoader().getResource("static/login.html");
+            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            final HttpResponse response = HttpResponse.ok();
+            response.addHeader("Content-Type", contentType);
+            response.addBody(responseBody);
+            return response;
+        }
+
+        final URL resource = getClass().getClassLoader().getResource("static" + httpRequest.getUri());
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final HttpResponse response = HttpResponse.ok();
+        response.addHeader("Content-Type", contentType);
+        response.addBody(responseBody);
+        return response;
     }
 }

@@ -1,12 +1,17 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.URISyntaxException;
+import java.util.Map;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -27,20 +32,35 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            final var responseBody = "Hello world!";
+            String uri = bufferedReader.readLine().split(" ")[1];
+            ResponseProcessor responseProcessor = new ResponseProcessor(uri);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            if (responseProcessor.existQueryParameter()) {
+                checkUser(responseProcessor.getQueryParameterMap());
+            }
+
+            final var response = responseProcessor.getResponse();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+            bufferedReader.close();
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void checkUser(Map<String, String> queryParameterMap) {
+        String account = queryParameterMap.get("account");
+        String password = queryParameterMap.get("password");
+        if (account == null || password == null) {
+            return;
+        }
+
+        User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
+        if (user.checkPassword(queryParameterMap.get(password))) {
+            System.out.println(user);
         }
     }
 }

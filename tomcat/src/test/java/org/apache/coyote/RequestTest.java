@@ -28,4 +28,34 @@ class RequestTest {
         Request request = Request.from("GET /api/login HTTP/1.1");
         assertThat(request.getRequestExtension()).isEqualTo("strings");
     }
+
+    @Test
+    void isFileRequest() {
+        Request request = Request.from("GET /index.html HTTP/1.1");
+        assertThat(request.isFileRequest()).isTrue();
+    }
+
+    @Test
+    void isNotFileRequest() {
+        Request request = Request.from("GET /api/login HTTP/1.1");
+        assertThat(request.isFileRequest()).isFalse();
+    }
+
+    @Test
+    void getQueryParameters() {
+        Request request = Request.from("GET /login?account=gugu&password=password HTTP/1.1");
+        assertThat(request.getQueryParameters()).containsKeys("account", "password");
+    }
+
+    @Test
+    void getEmptyQueryParameters() {
+        Request request = Request.from("GET /login HTTP/1.1");
+        assertThat(request.getQueryParameters()).isEmpty();
+    }
+
+    @Test
+    void isSameRequestUrl() {
+        Request request = Request.from("GET /login?account=gugu&password=password HTTP/1.1");
+        assertThat(request.isSameRequestUrl("/login")).isTrue();
+    }
 }

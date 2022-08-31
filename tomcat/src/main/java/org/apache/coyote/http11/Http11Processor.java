@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import nextstep.jwp.controller.UserController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.Request;
@@ -43,15 +44,22 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             Request request = Request.from(bufferedReader.readLine());
-            String responseBody = fileHandler.getFileLines(request.getRequestUrl());
-
-            String extension = request.getRequestExtension();
-            Response response = new Response("HTTP/1.1", HttpStatus.OK, ContentType.from(extension), responseBody);
+            Response response = branchRequest(request);
 
             outputStream.write(response.createHttpResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Response branchRequest(final Request request) throws IOException {
+        if (request.isFileRequest()) {
+            String responseBody = fileHandler.getFileLines(request.getRequestUrl());
+            String extension = request.getRequestExtension();
+            return new Response("HTTP/1.1", HttpStatus.OK, ContentType.from(extension), responseBody);
+        }
+        String responseBody = new UserController().doGet(request);
+        return new Response("HTTP/1.1", HttpStatus.OK, ContentType.STRINGS, responseBody);
     }
 }

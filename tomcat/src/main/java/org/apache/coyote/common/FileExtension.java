@@ -21,4 +21,16 @@ public enum FileExtension {
                 .findFirst()
                 .orElse(NONE);
     }
+
+    public String getValue() {
+        return value;
+    }
+
+    public static boolean hasExtension(final String target) {
+        return target.contains(".");
+    }
+
+    public static String addHtmlExtension(final String target) {
+        return target + HTML.value;
+    }
 }

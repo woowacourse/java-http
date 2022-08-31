@@ -29,19 +29,9 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var lines = new String(inputStream.readAllBytes()).split("\n");
+            final var request = Request.from(new String(inputStream.readAllBytes()));
 
-            final var firstLine = lines[0];
-            final var uri = firstLine.split(" ")[1];
-
-            final var responseBody = makeResponseBody(uri);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final var response = makeResponse(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -50,12 +40,27 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String makeResponseBody(final String uri) throws IOException {
-        if (uri.equals("/")) {
+    private String makeResponse(final Request request) throws IOException {
+        if (request.getMethod().equals(HttpMethod.GET)) {
+            final var responseBody = makeResponseBody(request);
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+        throw new UncheckedServletException("지원하지 않는 Http Method 입니다.");
+    }
+
+    private String makeResponseBody(final Request request) throws IOException {
+        final var path = request.getPath();
+
+        if (path.equals("/")) {
             return "Hello world!";
         }
 
-        final var resource = getClass().getClassLoader().getResource("static" + uri);
+        final var resource = getClass().getClassLoader().getResource("static" + path);
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 }

@@ -39,7 +39,11 @@ public class Http11Processor implements Runnable, Processor {
             String responseBody = "Hello world!";
             String contentType = "text/html";
 
-            final String requestUrl = readRequestUrl(bufferedReader);
+            final String httpStartLine = bufferedReader.readLine();
+            if (httpStartLine == null) {
+                return;
+            }
+            final String requestUrl =  httpStartLine.split(" ")[1];
 
             if (requestUrl.equals("/")) {
                 contentType = makeContentType(contentType, requestUrl);
@@ -73,11 +77,6 @@ public class Http11Processor implements Runnable, Processor {
             contentType = "application/javascript";
         }
         return contentType;
-    }
-
-    private static String readRequestUrl(final BufferedReader bufferedReader) throws IOException {
-        final String httpStartLine = bufferedReader.readLine();
-        return httpStartLine.split(" ")[1];
     }
 
     private static byte[] readAllFile(final String requestUrl) throws IOException {

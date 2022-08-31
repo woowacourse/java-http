@@ -11,9 +11,6 @@ public class FileNameUtil {
 
     public static String getExtension(final String path) {
         Objects.requireNonNull(path);
-        if (path.contains(EXTENTION_DOT)) {
-            return path.substring(path.lastIndexOf(EXTENTION_DOT) + 1);
-        }
-        return "html";
+        return path.substring(path.lastIndexOf(EXTENTION_DOT) + 1);
     }
 }

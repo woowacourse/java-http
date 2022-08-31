@@ -26,6 +26,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String QUERY_PARAM_DELIMITER = "&";
     private static final String QUERY_PARAM_VALUE_DELIMITER = "=";
     private static final String EMPTY_QUERY_PARAMETER = "";
+    private static final String DEFAULT_STATIC_EXTENSION = ".html";
+    private static final String STATIC_EXTENTION_DOT = ".";
 
     private final Socket connection;
 
@@ -72,9 +74,17 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getPath(final String uri) {
         if (uri.contains(URI_QUERY_PARAM_DELIMITER)) {
-            return uri.substring(0, uri.lastIndexOf(URI_QUERY_PARAM_DELIMITER));
+            String path = uri.substring(0, uri.lastIndexOf(URI_QUERY_PARAM_DELIMITER));
+            return addDefaultExtensionInPath(path);
         }
-        return uri;
+        return addDefaultExtensionInPath(uri);
+    }
+
+    private String addDefaultExtensionInPath(final String path) {
+        if (path.contains(STATIC_EXTENTION_DOT)) {
+            return path;
+        }
+        return path + DEFAULT_STATIC_EXTENSION;
     }
 
     private String getQueryParameter(final String uri) {

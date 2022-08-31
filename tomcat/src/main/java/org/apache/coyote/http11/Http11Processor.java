@@ -61,9 +61,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getStaticResource(final String requestStartLine) throws IOException {
         final String requestUrl = RequestLineParser.getStaticResourcePath(requestStartLine);
-        if (requestUrl.equals(RequestLineParser.INDEX_PAGE_URL)) {
-            return "Hello world!";
-        }
 
         final URL url = Thread.currentThread()
                 .getContextClassLoader()

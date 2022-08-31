@@ -11,7 +11,7 @@ public class RequestLineParser {
     public static String getStaticResourcePath(final String requestLine) {
         final String requestUrl = requestLine.split(" ")[URL];
         if (requestUrl.equals(INDEX_PAGE_URL)) {
-            return INDEX_PAGE_URL;
+            return INDEX_PAGE_PATH;
         }
         return STATIC_RESOURCE_PATH_PREFIX + requestUrl;
     }

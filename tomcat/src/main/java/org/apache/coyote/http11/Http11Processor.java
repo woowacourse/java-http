@@ -7,11 +7,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.web.BodyResponse;
 import org.apache.coyote.Processor;
-import org.apache.coyote.web.Request;
-import org.apache.coyote.web.Response;
 import org.apache.coyote.file.DefaultFileHandler;
 import org.apache.coyote.file.FileHandler;
 import org.apache.coyote.support.ContentType;
@@ -20,7 +18,10 @@ import org.apache.coyote.support.HttpHeaderFactory;
 import org.apache.coyote.support.HttpHeaderFactory.Pair;
 import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;
+import org.apache.coyote.web.BodyResponse;
+import org.apache.coyote.web.Request;
 import org.apache.coyote.web.RequestHandler;
+import org.apache.coyote.web.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
 
             bufferedOutputStream.write(response.createHttpResponse().getBytes());
             bufferedOutputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | NullPointerException e) {
             log.error(e.getMessage(), e);
         }
     }

@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.ContentType;
 import nextstep.jwp.util.FileNameUtil;
@@ -20,6 +22,10 @@ public class Http11Processor implements Runnable, Processor {
     private static final String BLANK = " ";
     private static final int REQUEST_LINE_COUNT = 3;
     private static final int REQUEST_LINE_URI_INDEX = 1;
+    private static final String URI_QUERY_PARAM_DELIMITER = "?";
+    private static final String QUERY_PARAM_DELIMITER = "&";
+    private static final String QUERY_PARAM_VALUE_DELIMITER = "=";
+    private static final String EMPTY_QUERY_PARAMETER = "";
 
     private final Socket connection;
 
@@ -41,9 +47,12 @@ public class Http11Processor implements Runnable, Processor {
             String line = reader.readLine();
             checkNullRequest(line);
             String uri = getUriByRequestLine(line);
+            String path = getPath(uri);
+            String queryParameter = getQueryParameter(uri);
 
-            final var responseBody = ResourcesUtil.readStaticResource(uri, this.getClass());
-            final var contentType = ContentType.fromExtension(FileNameUtil.getExtension(uri));
+            final Map<String, String> queryParams = getQueryParam(queryParameter);
+            final var responseBody = ResourcesUtil.readResource(path, this.getClass());
+            final var contentType = ContentType.fromExtension(FileNameUtil.getExtension(path));
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -59,6 +68,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private String getPath(final String uri) {
+        if (uri.contains(URI_QUERY_PARAM_DELIMITER)) {
+            return uri.substring(0, uri.lastIndexOf(URI_QUERY_PARAM_DELIMITER));
+        }
+        return uri;
+    }
+
+    private String getQueryParameter(final String uri) {
+        if (uri.contains(URI_QUERY_PARAM_DELIMITER)) {
+            return uri.substring(uri.lastIndexOf(URI_QUERY_PARAM_DELIMITER) + 1);
+        }
+        return EMPTY_QUERY_PARAMETER;
+    }
+
     private void checkNullRequest(final String line) {
         if (line == null) {
             throw new UncheckedServletException("요청이 정상적으로 들어오지 않았습니다.");
@@ -71,5 +94,18 @@ public class Http11Processor implements Runnable, Processor {
             throw new UncheckedServletException("요청의 포맷이 잘못되었습니다.");
         }
         return requests[REQUEST_LINE_URI_INDEX];
+    }
+
+    private Map<String, String> getQueryParam(final String queryParameter) {
+        Map<String, String> queryParams = new ConcurrentHashMap<>();
+        if (queryParameter.equals(EMPTY_QUERY_PARAMETER)) {
+            return queryParams;
+        }
+        String[] queryParamUris = queryParameter.split(QUERY_PARAM_DELIMITER);
+        for (String queryParamUri : queryParamUris) {
+            String[] param = queryParamUri.split(QUERY_PARAM_VALUE_DELIMITER);
+            queryParams.put(param[0], param[1]);
+        }
+        return queryParams;
     }
 }

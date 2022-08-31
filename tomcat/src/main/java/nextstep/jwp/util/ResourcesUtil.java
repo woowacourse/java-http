@@ -12,18 +12,35 @@ import nextstep.jwp.exception.ResourceNotFoundException;
 public class ResourcesUtil {
 
     private static final String STATIC_RESOURCES_PATH = "/static/%s";
+    private static final String STATIC_EXTENTION_DOT = ".";
+    private static final String DEFAULT_STATIC_EXTENSION = ".html";
 
     private ResourcesUtil() {
     }
 
-    public static String readStaticResource(final String fileName, final Class<?> classes) {
+    public static String readResource(final String path, final Class<?> classes) {
         try {
-            URL url = classes.getResource(String.format(STATIC_RESOURCES_PATH, fileName));
+            URL url = calculateStaticUri(path, classes);
             Objects.requireNonNull(url);
-            Path path = Paths.get(url.toURI());
-            return Files.readString(path);
+            Path filePath = Paths.get(url.toURI());
+            return Files.readString(filePath);
         } catch (URISyntaxException | IOException | NullPointerException e) {
             throw new ResourceNotFoundException("파일을 찾을 수 없습니다.");
         }
+    }
+
+    private static URL calculateStaticUri(final String uri, final Class<?> classes) {
+        if (!isStaticUri(uri)) {
+            return getURL(String.format(STATIC_RESOURCES_PATH, uri + DEFAULT_STATIC_EXTENSION), classes);
+        }
+        return getURL(String.format(STATIC_RESOURCES_PATH, uri), classes);
+    }
+
+    private static boolean isStaticUri(final String uri) {
+        return uri.contains(STATIC_EXTENTION_DOT);
+    }
+
+    private static URL getURL(final String path, final Class<?> classes) {
+        return classes.getResource(path);
     }
 }

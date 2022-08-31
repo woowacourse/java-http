@@ -9,8 +9,11 @@ public class FileNameUtil {
     private FileNameUtil() {
     }
 
-    public static final String getExtension(final String path) {
+    public static String getExtension(final String path) {
         Objects.requireNonNull(path);
-        return path.substring(path.lastIndexOf(EXTENTION_DOT) + 1);
+        if (path.contains(EXTENTION_DOT)) {
+            return path.substring(path.lastIndexOf(EXTENTION_DOT) + 1);
+        }
+        return "html";
     }
 }

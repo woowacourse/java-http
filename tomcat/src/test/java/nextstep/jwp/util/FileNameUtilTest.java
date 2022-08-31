@@ -13,4 +13,12 @@ class FileNameUtilTest {
 
         assertThat(actual).isEqualTo(expected);
     }
+
+    @Test
+    void 확장자가_없는_경우_html을_반환한다() {
+        String expected = "html";
+        String actual = FileNameUtil.getExtension("resources/static/index");
+
+        assertThat(actual).isEqualTo(expected);
+    }
 }

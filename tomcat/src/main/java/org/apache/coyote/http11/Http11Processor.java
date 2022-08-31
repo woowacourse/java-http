@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.ContentType;
+import nextstep.jwp.util.FileNameUtil;
 import nextstep.jwp.util.ResourcesUtil;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -41,10 +43,11 @@ public class Http11Processor implements Runnable, Processor {
             String uri = getUriByRequestLine(line);
 
             final var responseBody = ResourcesUtil.readStaticResource(uri, this.getClass());
+            final var contentType = ContentType.fromExtension(FileNameUtil.getExtension(uri));
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType.getType() + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

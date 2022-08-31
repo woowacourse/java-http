@@ -47,7 +47,7 @@ class Http11ProcessorTest {
         final Http11Processor processor = new Http11Processor(socket);
 
         // when
-        processor.process(socket);
+        processor.process(socket); // processor.run(); 현재 같은 소켓을 사용하므로 같은 결과
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");

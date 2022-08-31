@@ -1,12 +1,22 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
+import nextstep.jwp.exception.UncheckedServletException;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -28,19 +38,45 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            HttpRequest httpRequest = new HttpRequest(bufferedReader);
+            String uri = httpRequest.get("request URI");
 
-            outputStream.write(response.getBytes());
+            String responseBody = getResponseBody(uri);
+            String contentType = getContentType(uri);
+
+            HttpResponse httpResponse = HttpResponse.from("HTTP/1.1", "200 OK",
+                contentType, responseBody);
+
+            outputStream.write(httpResponse.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getResponseBody(String uri) throws URISyntaxException, IOException {
+        String responseBody = "Hello world!";
+
+        if (!uri.equals("/")) {
+            Path path = Paths.get(getClass()
+                .getClassLoader()
+                .getResource("static" + uri)
+                .toURI());
+
+            responseBody = new String(Files.readAllBytes(path));
+        }
+
+        return responseBody;
+    }
+
+    private String getContentType(String uri) {
+        String contentType = "text/html;charset=utf-8";
+
+        if(uri.endsWith("css")){
+            contentType = "text/css,*/*;q=0.1";
+        }
+        return contentType;
     }
 }

@@ -1,17 +1,19 @@
 package study;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
- * 웹서버는 사용자가 요청한 html 파일을 제공 할 수 있어야 한다.
- * File 클래스를 사용해서 파일을 읽어오고, 사용자에게 전달한다.
+ * 웹서버는 사용자가 요청한 html 파일을 제공 할 수 있어야 한다. File 클래스를 사용해서 파일을 읽어오고, 사용자에게 전달한다.
  */
 @DisplayName("File 클래스 학습 테스트")
 class FileTest {
@@ -24,9 +26,16 @@ class FileTest {
     @Test
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
+        final URL resourceURL = getClass().getClassLoader().getResource(fileName);
+        final File file;
 
-        // todo
-        final String actual = "";
+        try {
+            file = new File(resourceURL.toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+
+        final String actual = file.getAbsolutePath();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -38,12 +47,23 @@ class FileTest {
     @Test
     void 파일의_내용을_읽는다() {
         final String fileName = "nextstep.txt";
+        final URL resourceURL = getClass().getClassLoader().getResource(fileName);
+        final File file;
 
-        // todo
-        final Path path = null;
+        try {
+            file = new File(resourceURL.toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
 
-        // todo
-        final List<String> actual = Collections.emptyList();
+        final Path path = file.getAbsoluteFile().toPath();
+        final List<String> actual;
+
+        try {
+            actual = Files.readAllLines(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         assertThat(actual).containsOnly("nextstep");
     }

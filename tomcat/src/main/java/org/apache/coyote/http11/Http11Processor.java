@@ -42,18 +42,28 @@ public class Http11Processor implements Runnable, Processor {
 
             final var responseBody = getResponseBody(requestHeaders.get("REQUEST URI"));
 
-            final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+            final var response = getResponse(requestHeaders, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getResponse(Map<String, String> requestHeaders, String responseBody) {
+        String contentType = "Content-Type: text/html;charset=utf-8 ";
+        if (requestHeaders.get("Accept").contains("text/css")) {
+            contentType = "Content-Type: text/css;";
+        }
+
+        return String.join("\r\n",
+            "HTTP/1.1 200 OK ",
+            contentType
+            ,
+            "Content-Length: " + responseBody.getBytes().length + " ",
+            "",
+            responseBody);
     }
 
     private Map<String, String> getRequestHeaders(InputStream inputStream) throws IOException {

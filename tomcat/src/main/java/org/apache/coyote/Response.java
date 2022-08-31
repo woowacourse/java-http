@@ -1,31 +1,42 @@
 package org.apache.coyote;
 
-import org.apache.coyote.support.ContentType;
+import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;
 
-public class Response {
+public abstract class Response {
+
+    private static final String DEFAULT_VERSION = "HTTP/1.1";
+    protected static final String HEADER_TEMPLATE = "%s: %s \r\n";
 
     private final String version;
     private final HttpStatus httpStatus;
-    private final ContentType contentType;
-    private final String responseBody;
+    private final HttpHeaders httpHeaders;
 
-    public Response(final String version,
-                    final HttpStatus httpStatus,
-                    final ContentType contentType,
-                    final String responseBody) {
-        this.version = version;
-        this.httpStatus = httpStatus;
-        this.contentType = contentType;
-        this.responseBody = responseBody;
+    public Response(final HttpStatus httpStatus, final HttpHeaders httpHeaders) {
+        this(DEFAULT_VERSION, httpStatus, httpHeaders);
     }
 
-    public String createHttpResponse() {;
-        return String.join("\r\n",
-                String.format("%s %d %s ", version, httpStatus.getStatusCode(), httpStatus.getMessage()),
-                String.format("Content-Type: %s ", contentType.getValue()),
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    public Response(final String version, final HttpStatus httpStatus, final HttpHeaders httpHeaders) {
+        this.version = version;
+        this.httpStatus = httpStatus;
+        this.httpHeaders = httpHeaders;
+    }
+
+    public abstract String createHttpResponse();
+
+    protected String getRequestLine() {
+        return String.format("%s %d %s \r\n", version, httpStatus.getStatusCode(), httpStatus.getMessage());
+    }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
+    }
+
+    public HttpHeaders getHttpHeaders() {
+        return httpHeaders;
     }
 }

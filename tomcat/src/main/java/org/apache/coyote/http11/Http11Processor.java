@@ -7,15 +7,20 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import nextstep.jwp.controller.UserController;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.BodyResponse;
 import org.apache.coyote.Processor;
 import org.apache.coyote.Request;
 import org.apache.coyote.Response;
 import org.apache.coyote.file.DefaultFileHandler;
 import org.apache.coyote.file.FileHandler;
 import org.apache.coyote.support.ContentType;
+import org.apache.coyote.support.HttpHeader;
+import org.apache.coyote.support.HttpHeaderFactory;
+import org.apache.coyote.support.HttpHeaderFactory.Pair;
+import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;
+import org.apache.coyote.web.RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,9 +65,11 @@ public class Http11Processor implements Runnable, Processor {
         if (request.isFileRequest()) {
             String responseBody = fileHandler.getFileLines(request.getRequestUrl());
             String extension = request.getRequestExtension();
-            return new Response("HTTP/1.1", HttpStatus.OK, ContentType.from(extension), responseBody);
+            HttpHeaders httpHeaders = HttpHeaderFactory.create(
+                    new Pair(HttpHeader.CONTENT_TYPE, ContentType.from(extension).getValue())
+            );
+            return new BodyResponse(HttpStatus.OK, httpHeaders, responseBody);
         }
-        String responseBody = new UserController().doGet(request);
-        return new Response("HTTP/1.1", HttpStatus.OK, ContentType.STRINGS, responseBody);
+        return new RequestHandler().handle(request);
     }
 }

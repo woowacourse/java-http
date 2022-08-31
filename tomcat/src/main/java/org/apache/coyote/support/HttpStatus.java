@@ -2,7 +2,9 @@ package org.apache.coyote.support;
 
 public enum HttpStatus {
 
-    OK(200, "OK");
+    OK(200, "OK"),
+    FOUND(302, "FOUND"),
+    UNAUTHORIZED(401, "UNAUTHORIZED");
 
     private final int statusCode;
     private final String message;

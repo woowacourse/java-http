@@ -1,13 +1,24 @@
 package study;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.io.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 /**
  * 입출력(I/O)은 하나의 시스템에서 다른 시스템으로 데이터를 이동 시킬 때 사용한다.
@@ -48,9 +59,10 @@ class IOStreamTest {
             final OutputStream outputStream = new ByteArrayOutputStream(bytes.length);
 
             /**
-             * todo
+             * done
              * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
              */
+            outputStream.write(bytes);
 
             final String actual = outputStream.toString();
 
@@ -71,10 +83,11 @@ class IOStreamTest {
             final OutputStream outputStream = mock(BufferedOutputStream.class);
 
             /**
-             * todo
+             * done
              * flush를 사용해서 테스트를 통과시킨다.
              * ByteArrayOutputStream과 어떤 차이가 있을까?
              */
+            outputStream.flush();
 
             verify(outputStream, atLeastOnce()).flush();
             outputStream.close();
@@ -89,10 +102,16 @@ class IOStreamTest {
             final OutputStream outputStream = mock(OutputStream.class);
 
             /**
-             * todo
+             * done
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+
+            try (outputStream) {
+                outputStream.flush();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
 
             verify(outputStream, atLeastOnce()).close();
         }
@@ -120,10 +139,10 @@ class IOStreamTest {
             final InputStream inputStream = new ByteArrayInputStream(bytes);
 
             /**
-             * todo
+             * done
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
-            final String actual = "";
+            final String actual = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
 
             assertThat(actual).isEqualTo("🤩");
             assertThat(inputStream.read()).isEqualTo(-1);
@@ -139,10 +158,15 @@ class IOStreamTest {
             final InputStream inputStream = mock(InputStream.class);
 
             /**
-             * todo
+             * done
              * try-with-resources를 사용한다.
              * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
              */
+            try (inputStream) {
+                inputStream.read();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
 
             verify(inputStream, atLeastOnce()).close();
         }
@@ -165,9 +189,14 @@ class IOStreamTest {
         void 필터인_BufferedInputStream를_사용해보자() {
             final String text = "필터에 연결해보자.";
             final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
-            final InputStream bufferedInputStream = null;
+            final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
-            final byte[] actual = new byte[0];
+            byte[] actual = new byte[0];
+            try (inputStream; bufferedInputStream) {
+                actual = bufferedInputStream.readAllBytes();
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
 
             assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
             assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
@@ -195,8 +224,17 @@ class IOStreamTest {
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
             final StringBuilder actual = new StringBuilder();
+
+            try (inputStream) {
+                actual.append(bufferedReader.readLine()).append("\r\n")
+                        .append(bufferedReader.readLine()).append("\r\n")
+                        .append(bufferedReader.readLine()).append("\r\n");
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
 
             assertThat(actual).hasToString(emoji);
         }

@@ -12,7 +12,6 @@ public class UserLoginController {
     public ResponseEntity<String> doGet(final UserLoginRequest request) {
         User user = InMemoryUserRepository.findByAccount(request.getAccount())
                 .orElseThrow(UserNotFoundException::new);
-
         if (user.checkPassword(request.getPassword())) {
             return new ResponseEntity<>(HttpStatus.FOUND, "/index.html");
         }

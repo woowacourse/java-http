@@ -22,6 +22,14 @@ public class User {
         return this.password.equals(password);
     }
 
+    public User setAutoIncrementId(final Long id) {
+        return new User(id, account, password, email);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
     public String getAccount() {
         return account;
     }

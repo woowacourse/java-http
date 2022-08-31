@@ -23,6 +23,8 @@ public class Request {
     private static final String DEFAULT_REQUEST_EXTENSION = "strings";
     private static final String QUERY_PARAMETER_DELIMITER = "\\?";
     private static final String HEADER_DELIMITER = ": ";
+    private static final String CONNECT_DELIMITER = "&";
+    private static final String ASSIGN_DELIMITER = "=";
 
     private final HttpMethod method;
     private final String requestUrl;
@@ -74,9 +76,7 @@ public class Request {
             return Collections.emptyMap();
         }
         String queryParameters = requestSplit[1];
-        return Arrays.stream(queryParameters.split("&"))
-                .collect(Collectors.toMap(parameter -> getSplitValue(parameter, "=", 0),
-                        parameter -> getSplitValue(parameter, "=", 1)));
+        return doParse(queryParameters);
     }
 
     private String getSplitValue(final String content, final String delimiter, final int index) {
@@ -93,6 +93,16 @@ public class Request {
 
     private String[] splitRequestUrlWith(final String delimiter) {
         return requestUrl.split(delimiter);
+    }
+
+    public Map<String, String> parseBody() {
+        return doParse(requestBody);
+    }
+
+    private Map<String, String> doParse(final String content) {
+        return Arrays.stream(content.split(CONNECT_DELIMITER))
+                .collect(Collectors.toMap(parameter -> getSplitValue(parameter, ASSIGN_DELIMITER, 0),
+                        parameter -> getSplitValue(parameter, ASSIGN_DELIMITER, 1)));
     }
 
     public HttpMethod getMethod() {

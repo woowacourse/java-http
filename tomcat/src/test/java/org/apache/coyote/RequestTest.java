@@ -8,6 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import org.apache.coyote.support.HttpMethod;
 import org.apache.coyote.web.Request;
 import org.junit.jupiter.api.Test;
@@ -43,9 +44,16 @@ class RequestTest {
     }
 
     @Test
-    void parseBody() throws IOException {
+    void parseRawBody() throws IOException {
         Request request = Request.parse(createBufferedReader(HTTP_POST_REQUEST));
         assertThat(request.getRequestBody()).isEqualTo("account=gugu&password=password&email=hkkang%40woowahan.com");
+    }
+
+    @Test
+    void parseBody() throws IOException {
+        Request request = Request.parse(createBufferedReader(HTTP_POST_REQUEST));
+        Map<String, String> requestBody = request.parseBody();
+        assertThat(requestBody).containsOnlyKeys("account", "password", "email");
     }
 
     @Test

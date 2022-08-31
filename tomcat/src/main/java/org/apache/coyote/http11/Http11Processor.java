@@ -8,8 +8,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -36,13 +39,15 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
              final var outputStream = connection.getOutputStream()) {
 
-            final String requestUrl = parseUrl(reader);
-            log.info("request url : {}", requestUrl);
+            final String requestUri = parseUri(reader);
+            log.info("request uri : {}", requestUri);
+
             if (reader.readLine() == null) {
                 return;
             }
+
             final Map<String, String> header = parseHeader(reader);
-            final String responseBody = getResourceFromUrl(requestUrl);
+            final String responseBody = getBody(requestUri);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -58,7 +63,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseUrl(final BufferedReader reader) throws IOException {
+    private String parseUri(final BufferedReader reader) throws IOException {
         return reader.readLine().split(" ")[1];
     }
 
@@ -79,14 +84,60 @@ public class Http11Processor implements Runnable, Processor {
                 .split(",")[0];
     }
 
-    private String getResourceFromUrl(final String requestUrl) throws URISyntaxException, IOException {
-        if (!requestUrl.equals("/")) {
-            final URI uri = getClass()
-                    .getClassLoader()
-                    .getResource("static" + requestUrl)
-                    .toURI();
-            return new String(Files.readAllBytes(Path.of(uri)));
+    private String getBody(final String requestUri) throws URISyntaxException, IOException {
+        final String path = parsePath(requestUri);
+        final Map<String, String> queryParams = parseQueryParams(requestUri);
+
+        if (path.equals("/login")) {
+            login(queryParams.getOrDefault("account", ""), queryParams.getOrDefault("password", ""));
+            return getResource("static/login.html");
         }
+
+        if (path.contains(".")) {
+            return getResource("static" + path);
+        }
+
         return "Hello world!";
+    }
+
+    private String parsePath(final String requestUri) {
+        final int queryStartIndex = requestUri.indexOf("?");
+        if (queryStartIndex < 0) {
+            return requestUri;
+        }
+        return requestUri.substring(0, queryStartIndex);
+    }
+
+    private Map<String, String> parseQueryParams(final String requestUri) {
+        final int queryStartIndex = requestUri.indexOf("?");
+        if (queryStartIndex < 0) {
+            return new HashMap<>();
+        }
+
+        final String queryString = requestUri.substring(queryStartIndex + 1);
+        return Arrays.stream(queryString.split("&"))
+                .map(param -> param.split("="))
+                .collect(Collectors.toMap(
+                        param -> param[0],
+                        param -> param[1]
+                ));
+
+    }
+
+    private String getResource(final String resourcePath) throws URISyntaxException, IOException {
+        final URI resource = getClass()
+                .getClassLoader()
+                .getResource(resourcePath)
+                .toURI();
+        return new String(Files.readAllBytes(Path.of(resource)));
+    }
+
+    private void login(final String account, final String password) {
+        InMemoryUserRepository.findByAccount(account)
+                .ifPresent((user) -> {
+                    if (user.checkPassword(password)) {
+                        System.out.println(user);
+                    }
+                });
     }
 }

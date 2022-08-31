@@ -15,6 +15,9 @@ import java.util.stream.Collectors;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.header.ContentType;
+import org.apache.coyote.header.StatusCode;
+import org.apache.coyote.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,14 +50,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final Map<String, String> header = parseHeader(reader);
-            final String responseBody = getBody(requestUri);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + parseContentType(header) + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final String response = getResponse(requestUri, header).toText();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -84,20 +80,25 @@ public class Http11Processor implements Runnable, Processor {
                 .split(",")[0];
     }
 
-    private String getBody(final String requestUri) throws URISyntaxException, IOException {
+    private Response getResponse(final String requestUri, final Map<String, String> header)
+            throws URISyntaxException, IOException {
         final String path = parsePath(requestUri);
         final Map<String, String> queryParams = parseQueryParams(requestUri);
 
-        if (path.equals("/login")) {
-            login(queryParams.getOrDefault("account", ""), queryParams.getOrDefault("password", ""));
-            return getResource("static/login.html");
+        if (path.equals("/")) {
+            return new Response(ContentType.HTML, StatusCode.OK, "Hello world!");
         }
 
         if (path.contains(".")) {
-            return getResource("static" + path);
+            return new Response(ContentType.of(parseContentType(header)), StatusCode.OK, getResource("static" + path));
         }
 
-        return "Hello world!";
+        if (path.equals("/login")) {
+            login(queryParams.getOrDefault("account", ""), queryParams.getOrDefault("password", ""));
+            return new Response(ContentType.HTML, StatusCode.OK, getResource("static/login.html"));
+        }
+
+        return new Response(ContentType.HTML, StatusCode.NOT_FOUND, getResource("static/404.html"));
     }
 
     private String parsePath(final String requestUri) {

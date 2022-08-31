@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -33,20 +34,24 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             String responseBody;
+            String contentType;
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            String url = bufferedReader.readLine().split(" ")[1];
-            if ("/".equals(url)) {
+            String url = Objects.requireNonNull(bufferedReader.readLine()).split(" ")[1];
+            if (url.equals("/")) {
                 responseBody = "Hello world!";
+                contentType = ContentType.HTML.getValue();
             } else {
                 final URL resource = getClass().getClassLoader().getResource("static" + url);
-                responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                String file = Objects.requireNonNull(resource).getFile();
+                responseBody = new String(Files.readAllBytes(new File(file).toPath()));
+                contentType = ContentType.of(url.split("\\.")[1]);
             }
 
             String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

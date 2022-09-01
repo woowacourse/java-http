@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.handler.LoginHandler;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.model.Uri;
 import org.slf4j.Logger;
@@ -33,8 +34,7 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             final Uri uri = new Uri(extractURI(bufferedReader.readLine()));
-            final String responseBody = uri.findFilePath()
-                    .generateFile();
+            final String responseBody = generateResponseBody(uri);
 
             final String response = generateResponse(uri, responseBody);
 
@@ -49,7 +49,16 @@ public class Http11Processor implements Runnable, Processor {
         return text.split(" ")[1];
     }
 
-    private String generateResponse(final Uri uri, final String responseBody) {
+    private String generateResponseBody(final Uri uri) throws IOException {
+        if (uri.isCallApi()) {
+            LoginHandler loginHandler = new LoginHandler();
+            loginHandler.login(uri.findQueryString("account"), uri.findQueryString("password"));
+        }
+        return uri.findFilePath()
+                .generateFile();
+    }
+
+    private String generateResponse(final Uri uri, final String responseBody) throws IOException {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + uri.findContentType().getValue() + ";charset=utf-8 ",

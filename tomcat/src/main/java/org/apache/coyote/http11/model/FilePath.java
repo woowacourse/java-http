@@ -15,21 +15,34 @@ public enum FilePath {
     INDEX_ASSETS_BAR("/assets/chart-bar.js"),
     INDEX_ASSETS_PIE("/assets/chart-pie.js"),
     INDEX_JS("/js/scripts.js"),
+    LOGIN_PAGE("/login.html"),
     ;
 
     private static final String ERROR_MESSAGE = "존재하지 않는 파일을 요청하였습니다. -> path: %s";
 
-    private final String path;
+    private final String value;
 
-    FilePath(final String path) {
-        this.path = path;
+    FilePath(final String value) {
+        this.value = value;
     }
 
     public static FilePath of(final String path) {
         return Arrays.stream(FilePath.values())
-                .filter(responseBody -> path.equals(responseBody.path))
+                .filter(filePath -> filePath.value.contains(path))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException(String.format(ERROR_MESSAGE, path)));
+    }
+
+    public boolean isNotFilePath(final String path) {
+        return !path.equals(value);
+    }
+
+    public String findFileExtension() {
+        if (this == DEFAULT_PAGE) {
+            return "";
+        }
+        int index = value.lastIndexOf('.') + 1;
+        return value.substring(index);
     }
 
     public String generateFile() throws IOException {
@@ -39,7 +52,7 @@ public enum FilePath {
 
         final File file = new File(Objects.requireNonNull(getClass()
                         .getClassLoader()
-                        .getResource("static" + path))
+                        .getResource("static" + value))
                 .getFile());
 
         return new String(Files.readAllBytes(file.toPath()));

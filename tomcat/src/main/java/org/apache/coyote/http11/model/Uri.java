@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.model;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,7 +8,6 @@ public class Uri {
     private static final char QUERY_STRING_STANDARD = '?';
     private static final String QUERY_STRINGS_BOUNDARY = "&";
     private static final String KEY_VALUE_BOUNDARY = "=";
-    private static final String PATH_REGEX = "\\.";
     private static final int INDEX_NOT_FOUND = -1;
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
@@ -48,13 +46,21 @@ public class Uri {
         return result;
     }
 
-    public ContentType findContentType() {
-        final String[] pathInfos = this.url.split(PATH_REGEX);
-        final String fileExtension = pathInfos[pathInfos.length - 1];
-        return ContentType.of(fileExtension);
+    public boolean isCallApi() {
+        return findFilePath().isNotFilePath(url);
     }
 
-    public FilePath findFilePath() throws IOException {
-        return FilePath.of(this.url);
+    public ContentType findContentType() {
+        return ContentType.of(
+                findFilePath().findFileExtension()
+        );
+    }
+
+    public FilePath findFilePath() {
+        return FilePath.of(url);
+    }
+
+    public String findQueryString(final String key) {
+        return queryString.get(key);
     }
 }

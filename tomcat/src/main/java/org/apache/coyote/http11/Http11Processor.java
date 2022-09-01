@@ -34,8 +34,8 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            final String requestUrl =
-                    Objects.requireNonNull(bufferedReader.readLine()).split(" ")[REQUEST_URL_INDEX];
+            final String url = Objects.requireNonNull(bufferedReader.readLine());
+            final String requestUrl = url.split(" ")[REQUEST_URL_INDEX];
             final ResponseMaker responseMaker = ResponseMakerFactory.findResponseMaker(requestUrl);
             final String response = responseMaker.createResponse(requestUrl);
             outputStream.write(response.getBytes());

@@ -1,6 +1,7 @@
 package nextstep.jwp.utils;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.http.ContentType;
@@ -23,12 +24,16 @@ public class FileUtils {
     }
 
     public static String readFile(URL resource){
+        String EMPTY_FILE = "";
+        if (resource == null) {
+            return EMPTY_FILE;
+        }
         try {
             return new String(Files.readAllBytes(new File(resource.getFile())
                 .toPath()));
-        } catch (Exception e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
-        return "";
+        return EMPTY_FILE;
     }
 }

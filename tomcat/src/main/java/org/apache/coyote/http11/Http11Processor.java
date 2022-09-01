@@ -9,6 +9,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.ContentType;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ public class Http11Processor implements Runnable, Processor {
     public static final int URL_INDEX = 1;
     public static final String LANDING_PAGE_URL = "/";
     public static final String STATIC_PATH = "static";
+    public static final String EXTENSION_DELIMITER = ".";
 
     private final Socket connection;
 
@@ -39,14 +41,20 @@ public class Http11Processor implements Runnable, Processor {
 
             String uri = parseUri(bufferedReader);
             String responseBody = accessUri(uri);
+            ContentType contentType = parseContentType(uri);
 
-            String response = toResponse(responseBody);
+            String response = toResponse(contentType, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private ContentType parseContentType(final String uri) {
+        String extension = uri.substring(uri.lastIndexOf(EXTENSION_DELIMITER) + 1);
+        return ContentType.fromExtension(extension);
     }
 
     private String parseUri(final BufferedReader bufferedReader) throws IOException {
@@ -67,10 +75,10 @@ public class Http11Processor implements Runnable, Processor {
         return new String(Files.readAllBytes(path));
     }
 
-    private String toResponse(final String responseBody) {
+    private String toResponse(final ContentType contentType, final String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

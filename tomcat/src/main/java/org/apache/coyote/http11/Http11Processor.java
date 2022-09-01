@@ -4,8 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.StaticFile;
@@ -28,17 +31,17 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            final var responseBody = getBody(inputStream);
+    public void process(Socket connection) {
+        try (InputStream inputStream = connection.getInputStream();
+             OutputStream outputStream = connection.getOutputStream()) {
+            List<String> httpRequestLines = getHttpRequestLines(inputStream);
+            HttpRequest request = HttpRequest.from(httpRequestLines);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String uri = request.getUri();
+            ContentType contentType = ContentType.from(uri);
+            String responseBody = getBody(request.getUri());
+
+            String response = getResponse(contentType, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -47,12 +50,25 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getBody(InputStream inputStream) throws IOException {
+    private List<String> getHttpRequestLines(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        String staticFilePath = bufferedReader.readLine().split(" ")[1].substring(1);
-        if (staticFilePath.isBlank()) {
-            return "Hello world!";
+        List<String> collect = new ArrayList<>();
+        while (bufferedReader.ready()) {
+            collect.add(bufferedReader.readLine());
         }
-        return new String(Files.readAllBytes(StaticFile.findByUrl(staticFilePath).toPath()));
+        return collect;
+    }
+
+    private String getBody(String uri) throws IOException {
+        return new String(Files.readAllBytes(StaticFile.findByUrl(uri).toPath()));
+    }
+
+    private String getResponse(ContentType contentType, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType.value() + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

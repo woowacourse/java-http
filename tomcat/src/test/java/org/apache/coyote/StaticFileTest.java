@@ -11,7 +11,12 @@ public class StaticFileTest {
 
     @DisplayName("입력된 url의 정적 파일을 반환한다.")
     @ParameterizedTest
-    @CsvSource({"index.html,index.html", "notFoundUrl.html,404.html"})
+    @CsvSource({
+            "/index.html,index.html",
+            "/css/styles.css, styles.css",
+            "/js/scripts.js,scripts.js",
+            "notFoundUrl.html,404.html"
+    })
     void findByUrl(String url, String expected) {
         // when
         File file = StaticFile.findByUrl(url);

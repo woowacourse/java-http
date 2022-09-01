@@ -22,6 +22,12 @@ public class Headers {
         return new Headers(headers);
     }
 
+    public static Headers withLocation(final String location) {
+        final var headers = new LinkedHashMap<String, String>();
+        headers.put("Location", location);
+        return new Headers(headers);
+    }
+
     @Override
     public String toString() {
         return value.entrySet()

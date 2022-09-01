@@ -55,9 +55,12 @@ public class Http11Processor implements Runnable, Processor {
         if (path.equals("/")) {
             return controller.showIndex();
         }
-        if (path.equals("/login")) {
-            return controller.showLogin(httpRequest);
+        if (path.equals("/login") && httpRequest.getQueryString() != null) {
+            return controller.login(httpRequest.parseQueryString());
         }
-        return controller.show(httpRequest);
+        if (path.equals("/login")) {
+            return controller.showLogin();
+        }
+        return controller.show(path);
     }
 }

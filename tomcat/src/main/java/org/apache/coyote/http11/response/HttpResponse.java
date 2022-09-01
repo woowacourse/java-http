@@ -15,11 +15,19 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse withStaticResource(final StaticResource staticResource) {
+    public static HttpResponse ok(final StaticResource staticResource) {
         return new HttpResponse(
-                new StatusLine(HttpStatus.OK), // TODO: 2022/09/01 파라미터로 받으면 좋을 것 같다.
+                new StatusLine(HttpStatus.OK),
                 Headers.withStaticResource(staticResource),
                 staticResource.getContent()
+        );
+    }
+
+    public static HttpResponse found(final String location) {
+        return new HttpResponse(
+                new StatusLine(HttpStatus.FOUND),
+                Headers.withLocation(location),
+                ""
         );
     }
 

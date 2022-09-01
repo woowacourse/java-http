@@ -1,38 +1,40 @@
 package nextstep.jwp.controller;
 
 import java.io.IOException;
-import nextstep.jwp.db.InMemoryUserRepository;
+import java.util.Map;
+import nextstep.jwp.exception.AuthenticationException;
 import nextstep.jwp.exception.NotFoundException;
+import nextstep.jwp.service.Service;
 import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.StaticResource;
-import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class Controller {
 
-    public  HttpResponse showIndex() {
-        return HttpResponse.withStaticResource(new StaticResource("Hello world!", ContentType.TEXT_HTML));
+    private final Service service;
+
+    public Controller() {
+        service = new Service();
     }
 
-    public  HttpResponse showLogin(final HttpRequest httpRequest) throws IOException {
-        if (httpRequest.getQueryString() != null) {
-            final var parameters = httpRequest.parseQueryString();
+    public HttpResponse showIndex() {
+        return HttpResponse.ok(new StaticResource("Hello world!", ContentType.TEXT_HTML));
+    }
 
-            final var account = parameters.get("account");
-            final var user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
-
-            final var password = parameters.get("password");
-            if (user.checkPassword(password)) {
-                System.out.println("user = " + user);
-            }
+    public HttpResponse login(final Map<String, String> parameters) {
+        try {
+            service.login(parameters);
+            return HttpResponse.found("/index.html");
+        } catch (NotFoundException | AuthenticationException e) {
+            return HttpResponse.found("/401.html");
         }
-
-        return HttpResponse.withStaticResource(StaticResource.path("/login.html"));
     }
 
-    public  HttpResponse show(final HttpRequest httpRequest) throws IOException {
-        final var path = httpRequest.getPath();
-        return HttpResponse.withStaticResource(StaticResource.path(path));
+    public HttpResponse showLogin() throws IOException {
+        return HttpResponse.ok(StaticResource.path("/login.html"));
+    }
+
+    public HttpResponse show(final String path) throws IOException {
+        return HttpResponse.ok(StaticResource.path(path));
     }
 }

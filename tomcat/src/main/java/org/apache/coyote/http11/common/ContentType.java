@@ -6,6 +6,7 @@ import org.apache.coyote.http11.exception.UnsupportedContentTypeException;
 
 public enum ContentType {
 
+    IMAGE_SVG("image/svg+xml", List.of("svg")),
     APPLICATION_JS("application/javascript", List.of("js")),
     TEXT_CSS("text/css", List.of("css")),
     TEXT_HTML("text/html;charset=utf-8", List.of("html"))

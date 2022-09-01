@@ -38,8 +38,14 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             String uri = bufferedReader.readLine().split(" ")[1];
+            String resourcePath = uri;
 
-            if (uri.equals("/")) {
+            if (uri.contains("?")) {
+                int index = uri.indexOf("?");
+                resourcePath = uri.substring(0, index);
+            }
+
+            if (resourcePath.equals("/")) {
                 final var defaultBody = "Hello world!";
 
                 final var defaultResponse = String.join("\r\n",
@@ -55,8 +61,9 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            final Path path = Path.of(getClass().getClassLoader().getResource("static/" + uri).getPath());
+            final Path path = Path.of(getClass().getClassLoader().getResource("static/" + resourcePath).getPath());
             final List<String> file = Files.readAllLines(path);
+            String mimeType = Files.probeContentType(path);
 
             StringBuilder stringBuilder = new StringBuilder();
             for (String body : file) {
@@ -66,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + mimeType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

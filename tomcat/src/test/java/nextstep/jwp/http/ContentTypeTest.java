@@ -12,7 +12,7 @@ class ContentTypeTest {
     void of_success() {
         String extension = "html";
 
-        ContentType actual = ContentType.of(extension);
+        ContentType actual = ContentType.from(extension);
 
         assertThat(actual).isEqualTo(ContentType.TEXT_HTML);
     }
@@ -24,7 +24,7 @@ class ContentTypeTest {
 
         String actual = contentType.getMediaType();
 
-        String expect = "application/javascript";
-        assertThat(actual).isEqualTo(expect);
+        String expected = "application/javascript";
+        assertThat(actual).isEqualTo(expected);
     }
 }

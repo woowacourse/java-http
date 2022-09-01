@@ -82,10 +82,11 @@ public class HttpRequest {
         return requestMap.get(req);
     }
 
+    public boolean haveParam(){
+        return !paramMap.isEmpty();
+    }
+
     public String getParam(final String param) {
-        if (!paramMap.containsKey(param)) {
-            throw new IllegalArgumentException("존재하지 않는 쿼리 파라미터입니다.");
-        }
         return paramMap.get(param);
     }
 }

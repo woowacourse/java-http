@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -111,23 +112,23 @@ public class Http11Processor implements Runnable, Processor {
 
     }
 
-    private String getResponseWithQueryString(String uri) {
+    private String getResponseWithQueryString(String uri) throws IOException {
         if (uri.contains("/login")) {
 
             Map<String, String> queryStrings = extractQueryStrings(uri);
 
-            User user = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
-                    .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+            Optional<User> user = InMemoryUserRepository.findByAccount(queryStrings.get("account"));
 
-            final var responseBody = "존재하는 유저입니다." + user;
-            log.info(responseBody);
-
+            if (user.isPresent() && user.get().checkPassword(queryStrings.get("password"))) {
+                return String.join("\r\n",
+                        "HTTP/1.1 302 ",
+                        "Location: http://localhost:8080/index.html ",
+                        "Content-Type: text/html;charset=utf-8 ");
+            }
             return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+                    "HTTP/1.1 302 ",
+                    "Location: http://localhost:8080/401.html ",
+                    "Content-Type: text/html;charset=utf-8 ");
         }
         return "";
     }

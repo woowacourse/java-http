@@ -28,6 +28,6 @@ public enum KindOfContent {
 			.filter(value -> value.extension.equals(extension))
 			.map(value -> value.contentType)
 			.findFirst()
-			.orElseThrow(() -> new IllegalArgumentException("올바른 파일 형식이 아닙니다."));
+			.orElseGet(() -> DEFAULT.contentType);
 	}
 }

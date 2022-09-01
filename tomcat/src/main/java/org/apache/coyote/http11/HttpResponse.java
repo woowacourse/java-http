@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Map;
 
 public class HttpResponse {
 
@@ -12,18 +13,18 @@ public class HttpResponse {
 	private static final int RESOURCE_LOCATION = 1;
 	private static final String STATIC_PATH = "static";
 	private static final String DEFAULT_CONTENT = "Hello world!";
-	private static final int FILE_FORMAT = 1;
 	private static final int EXTENSION_LOCATION = 1;
 	private static final String FILE_REGEX = "\\.";
+	private static final String ROOT_URI = "/";
 
+	private final UrlParser urlParser;
 	private final String contentType;
 	private final String responseBody;
 
 	public HttpResponse(final BufferedReader bufferedReader) throws IOException {
-		final String recourse = parseRequestResource(bufferedReader);
-
-		contentType = selectContentType(recourse);
-		responseBody = loadResourceContent(recourse);
+		urlParser = parseRequestResource(bufferedReader);
+		contentType = selectContentType(urlParser.getResource());
+		responseBody = loadResourceContent(urlParser.getResource());
 	}
 
 	public String createResponseMessage() {
@@ -35,10 +36,15 @@ public class HttpResponse {
 			responseBody);
 	}
 
-	private String parseRequestResource(final BufferedReader bufferedReader) throws IOException {
-		final String firstLine = bufferedReader.readLine();
+	public Map<String, String> getQueries() {
+		return urlParser.getQueries();
+	}
 
-		return firstLine.split(HTTP_MESSAGE_DELIMITER)[RESOURCE_LOCATION];
+	private UrlParser parseRequestResource(final BufferedReader bufferedReader) throws IOException {
+		final String firstLine = bufferedReader.readLine();
+		final String uri = firstLine.split(HTTP_MESSAGE_DELIMITER)[RESOURCE_LOCATION];
+
+		return new UrlParser(uri);
 	}
 
 	private String loadResourceContent(final String resource) {
@@ -54,10 +60,10 @@ public class HttpResponse {
 	}
 
 	private String selectContentType(final String resource) {
-		final String[] fileElements = resource.split(FILE_REGEX);
-		if (fileElements.length > FILE_FORMAT) {
-			return KindOfContent.getContentType(fileElements[EXTENSION_LOCATION]);
+		if (resource.equals(ROOT_URI)) {
+			return KindOfContent.getDefaultContentType();
 		}
-		return KindOfContent.getDefaultContentType();
+		final String[] fileElements = resource.split(FILE_REGEX);
+		return KindOfContent.getContentType(fileElements[EXTENSION_LOCATION]);
 	}
 }

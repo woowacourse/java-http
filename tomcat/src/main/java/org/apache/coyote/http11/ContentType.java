@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package org.apache.coyote.http11;
 
 import java.util.Arrays;
 
@@ -20,10 +20,6 @@ public enum ContentType {
                 .filter(value -> value.extension.equals(extension))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("적절한 확장자가 아닙니다."));
-    }
-
-    public String getExtension() {
-        return extension;
     }
 
     public String getContentType() {

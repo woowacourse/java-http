@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -39,10 +41,9 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            String request = bufferedReader.readLine();
-            validateEmptyHeader(request);
+            HttpRequest httpRequest = createHttpRequest(bufferedReader);
 
-            final var response = createResponse(request);
+            final var response = createResponse(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -51,18 +52,24 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void validateEmptyHeader(String request) {
-        if (request == null) {
-            throw new IllegalArgumentException("Http request header가 비어있습니다.");
+    private HttpRequest createHttpRequest(BufferedReader bufferedReader) throws IOException {
+        String requestLine = bufferedReader.readLine();
+        List<String> requestHeader = new ArrayList<>();
+        while (bufferedReader.ready()) {
+            String line = bufferedReader.readLine();
+            if (line.equals("")) {
+                break;
+            }
+            requestHeader.add(line);
         }
+        return new HttpRequest(requestLine, requestHeader);
     }
 
-    private String createResponse(String request) throws IOException {
-        String[] requestUrlInfo = request.split(" ");
-        if (requestUrlInfo[1].equals("/")) {
+    private String createResponse(HttpRequest httpRequest) throws IOException {
+        if (httpRequest.getUri().equals("/")) {
             return createOkResponse("text/html;charset=utf-8", "Hello world!");
         }
-        return createOkResponseWithContent(requestUrlInfo);
+        return createOkResponseWithContent(httpRequest.getUri());
     }
 
     private String createOkResponse(String contentType, String responseBody) {
@@ -74,17 +81,16 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private String createOkResponseWithContent(String[] requestUrlInfo) throws IOException {
-        String uri = requestUrlInfo[1];
-        if (FileExtension.hasFileExtension(uri)) {
-            Path filePath = findFilePath(uri);
+    private String createOkResponseWithContent(String httpRequestUri) throws IOException {
+        if (FileExtension.hasFileExtension(httpRequestUri)) {
+            Path filePath = findFilePath(httpRequestUri);
             String content = new String(Files.readAllBytes(filePath));
 
-            String contentType = FileExtension.findContentType(uri);
+            String contentType = FileExtension.findContentType(httpRequestUri);
             return createOkResponse(contentType, content);
         }
-        if (uri.startsWith("/login")) {
-            Map<String, String> queryValues = UriParser.parseUri(uri);
+        if (httpRequestUri.startsWith("/login")) {
+            Map<String, String> queryValues = UriParser.parseUri(httpRequestUri);
             LoginHandler loginHandler = new LoginHandler();
             User user = loginHandler.login(queryValues);
 

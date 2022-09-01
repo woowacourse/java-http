@@ -35,22 +35,57 @@ public class Http11Processor implements Runnable, Processor {
 
             String[] lines = reader.readLine().split("\r\n");
             String[] get = lines[0].split(" ");
+            String fileName = get[1];
 
-            var responseBody = "Hello world!";
+            if (fileName.equals("/")) {
+                final var responseBody = "Hello world!";
 
-            if (!get[1].equals("/")) {
-                responseBody = Files.readString(
-                        Path.of(this.getClass().getResource("/static" + get[1]).getPath()));
+                final var response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+
+                outputStream.write(response.getBytes());
+            } else if (fileName.equals("/index.html")) {
+                final var responseBody = Files.readString(
+                        Path.of(this.getClass().getResource("/static" + fileName).getPath()));
+
+                final var response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+
+                outputStream.write(response.getBytes());
+            } else if (fileName.equals("/css/styles.css")) {
+                final var responseBody = Files.readString(
+                        Path.of(this.getClass().getResource("/static" + fileName).getPath()));
+
+                final var response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/css;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+
+                outputStream.write(response.getBytes());
+            } else {
+                final var responseBody = Files.readString(
+                        Path.of(this.getClass().getResource("/static" + fileName).getPath()));
+
+                final var response = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/javascript;charset=utf-8 ",
+                        "Content-Length: " + responseBody.getBytes().length + " ",
+                        "",
+                        responseBody);
+
+                outputStream.write(response.getBytes());
             }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

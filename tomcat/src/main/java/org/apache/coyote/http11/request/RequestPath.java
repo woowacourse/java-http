@@ -56,9 +56,9 @@ public class RequestPath {
 
     @Override
     public String toString() {
-        return "RequestPath{" +
+        return "RequestPath{\n" +
                 "path='" + path + '\'' +
                 ", queryParameters=" + queryParameters +
-                '}';
+                "\n}";
     }
 }

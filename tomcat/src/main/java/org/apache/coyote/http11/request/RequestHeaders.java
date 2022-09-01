@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -37,8 +38,12 @@ public class RequestHeaders {
 
     @Override
     public String toString() {
-        return "RequestHeaders{" +
-                "headers=" + headers +
-                '}';
+        StringBuilder entryBuilder = new StringBuilder("\n");
+        for (Entry<String, String> entry : headers.entrySet()) {
+            entryBuilder.append(entry.getKey()).append("->").append(entry.getValue()).append("\n");
+        }
+        return "RequestHeaders{\n" +
+                "headers={" + entryBuilder +
+                "\n}\n}";
     }
 }

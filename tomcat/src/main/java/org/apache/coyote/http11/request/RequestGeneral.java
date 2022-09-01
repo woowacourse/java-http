@@ -51,10 +51,10 @@ public class RequestGeneral {
 
     @Override
     public String toString() {
-        return "RequestGeneral{" +
+        return "RequestGeneral{\n" +
                 "method=" + method +
                 ", path=" + path +
                 ", httpVersion=" + httpVersion +
-                '}';
+                "\n}";
     }
 }

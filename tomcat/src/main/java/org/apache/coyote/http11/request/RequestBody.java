@@ -20,8 +20,8 @@ public class RequestBody {
 
     @Override
     public String toString() {
-        return "RequestBody{" +
+        return "RequestBody{\n" +
                 "body='" + body + '\'' +
-                '}';
+                "\n}";
     }
 }

@@ -1,7 +1,8 @@
-package nextstep.jwp.http;
+package org.apache.coyote.http11.request;
 
 import java.util.List;
 import java.util.Objects;
+import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
 

@@ -34,6 +34,10 @@ public class Controller {
         return HttpResponse.ok(StaticResource.path("/login.html"));
     }
 
+    public HttpResponse showRegister() throws IOException {
+        return HttpResponse.ok(StaticResource.path("/register.html"));
+    }
+
     public HttpResponse show(final String path) throws IOException {
         return HttpResponse.ok(StaticResource.path(path));
     }

@@ -21,7 +21,7 @@
   - [X] 상태 응답 코드를 302로 반환한다. 
   - [X] 로그인에 성공하면 /index.html로 리다이렉트한다.
   - [X] 로그인에 실패하면 401.html로 리아디렉트한다.
-- [ ] http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)를 보여준다.
+- [X] http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)를 보여준다.
 - [ ] POST 방식으로 회원가입을 할 수 있다. 
   - [ ] 회원가입을 완료하면 /index.html로 리다이렉트한다.
 - [ ] 로그인을 POST 방식으로 변경한다.

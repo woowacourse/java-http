@@ -22,6 +22,10 @@ public class HttpRequestMessage {
         this.headers.put(key, value);
     }
 
+    public String getRequestLine() {
+        return requestLine.getHttpMethod() + " " + requestLine.getRequestTarget() + " " + requestLine.getHttpVersion();
+    }
+
     public String getRequestTarget() {
         return requestLine.getRequestTarget();
     }

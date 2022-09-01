@@ -178,7 +178,7 @@ class IOStreamTest {
          * 필터인 BufferedReader를 사용하면 readLine 메서드를 사용해서 문자열(String)을 한 줄 씩 읽어올 수 있다.
          */
         @Test
-        void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
+        void BufferedReader를_사용하여_문자열을_읽어온다__readLine() throws IOException {
             final String emoji = String.join("\r\n",
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
@@ -200,7 +200,23 @@ class IOStreamTest {
         }
 
         @Test
-        void InputStream은_데이터를_바이트로_읽는다_readLine() throws IOException {
+        void lines_메서드는_빈_문자열을_누락시킨다() throws IOException {
+            final String emoji = String.join("\r\n",
+                    "😀😃😄😁😆😅😂🤣🥲☺️😊",
+                    "😇🙂🙃😉😌😍🥰😘😗😙😚",
+                    "😋😛😝😜🤪🤨🧐🤓😎🥸🤩");
+
+            try (final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+                 final InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+                 final BufferedReader reader = new BufferedReader(streamReader)) {
+                String actual = reader.lines()
+                        .collect(Collectors.joining("\r\n"));
+                assertThat(actual).isEqualTo(emoji);
+            }
+        }
+
+        @Test
+        void InputStream의_바이트_데이터를_문자열로_변환한다() throws IOException {
             byte[] bytes = {-16, -97, -92, -87};
             try (final InputStream inputStream = new ByteArrayInputStream(bytes);
                  final InputStreamReader streamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
@@ -215,7 +231,7 @@ class IOStreamTest {
          * inputStream.read()는 개별 바이트의 int 값 반환 => char로 변환 => 문자열로 합치기
          */
         @Test
-        void InputStream은_데이터를_바이트로_읽는다_read() throws IOException {
+        void 단계별_과정() throws IOException {
             byte[] bytes = {-16, -97, -92, -87};
             final InputStream inputStream = new ByteArrayInputStream(bytes);
 

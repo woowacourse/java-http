@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,6 +24,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String LOGIN_PAGE = "/login";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
+    private static final String DEFAULT_CONTENT_TYPE = "text/html";
 
     private final Socket connection;
 
@@ -45,8 +47,8 @@ public class Http11Processor implements Runnable, Processor {
             final String path = getPath(uri);
             final Map<String, String> queries = getQueries(uri);
             final var responseBody = getResponseBody(path, queries);
-
             final String contentType = getContentType(path);
+
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: " + contentType + ";charset=utf-8 ",
@@ -116,10 +118,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getContentType(final String path) {
-        if (path.endsWith(".css")) {
-            return "text/css";
+    private String getContentType(final String path) throws IOException {
+        final String contentType = Files.probeContentType(Path.of(path));
+        if (contentType == null) {
+            return DEFAULT_CONTENT_TYPE;
         }
-        return "text/html";
+        return contentType;
     }
 }

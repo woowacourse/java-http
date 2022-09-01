@@ -13,6 +13,18 @@ import org.junit.jupiter.api.Test;
 class ResourcesUtilTest {
 
     @Test
+    void 확장자_가져오기_테스트() {
+        // given
+        String fileName = "nextstep.txt";
+
+        // when
+        String actual = ResourcesUtil.parseExtension(fileName);
+
+        // then
+        assertThat(actual).isEqualTo("txt");
+    }
+
+    @Test
     void resource_읽기_테스트() throws IOException {
         // given
         String fileName = "nextstep.txt";

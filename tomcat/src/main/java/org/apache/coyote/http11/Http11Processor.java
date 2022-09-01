@@ -49,11 +49,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private ContentType parseContentType(final String uri) {
-        String extension = uri.substring(uri.lastIndexOf(EXTENSION_DELIMITER) + 1);
-        return ContentType.fromExtension(extension);
-    }
-
     private String parseUri(final BufferedReader bufferedReader) throws IOException {
         return bufferedReader.readLine().split(" ", -1)[URL_INDEX];
     }
@@ -63,6 +58,11 @@ public class Http11Processor implements Runnable, Processor {
             return "Hello world!";
         }
         return ResourcesUtil.readResource(STATIC_PATH + uri);
+    }
+
+    private ContentType parseContentType(final String uri) {
+        String extension = ResourcesUtil.parseExtension(uri);
+        return ContentType.fromExtension(extension);
     }
 
     private String toResponse(final ContentType contentType, final String responseBody) {

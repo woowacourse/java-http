@@ -11,15 +11,29 @@ import org.apache.coyote.http11.common.HttpMethod;
 public class HttpRequest {
 
     private final RequestStartLine startLine;
+    private final RequestHeader header;
 
-    public HttpRequest(final RequestStartLine startLine) {
+    public HttpRequest(final RequestStartLine startLine, final RequestHeader header) {
         this.startLine = startLine;
+        this.header = header;
     }
 
     public static HttpRequest from(final InputStream inputStream) throws IOException {
         final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-        return new HttpRequest(RequestStartLine.from(bufferedReader.readLine()));
+        final var startLine = RequestStartLine.from(bufferedReader.readLine());
+        final var header = RequestHeader.from(readHeader(bufferedReader));
+
+        return new HttpRequest(startLine, header);
+    }
+
+    private static String readHeader(final BufferedReader bufferedReader) throws IOException {
+        final var stringBuilder = new StringBuilder();
+        var line = "";
+        while (!(line = bufferedReader.readLine()).isBlank()) {
+            stringBuilder.append(line).append("\r\n");
+        }
+        return stringBuilder.toString();
     }
 
     public Map<String, String> parseQueryString() {

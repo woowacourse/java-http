@@ -2,7 +2,7 @@
 
 ## 요구사항
 ### 1. GET /index.html 응답하기
-- [ ] http://localhost:8080/index.html 페이지에 접근 가능하다.
+- [x] http://localhost:8080/index.html 페이지에 접근 가능하다.
 
 ```
 GET /index.html HTTP/1.1

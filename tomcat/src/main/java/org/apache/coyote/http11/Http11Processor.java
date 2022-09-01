@@ -8,9 +8,10 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
@@ -37,18 +38,9 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final List<String> httpRequestHeaderInformation = readInputStream(inputStream);
-            if (httpRequestHeaderInformation == null) {
-                return;
-            }
-
-            // 저장한 header 정보에서 첫 째줄 가져오고 uri를 파싱한다.
-            List<String> httpRequestMethodInformation = Arrays.stream(httpRequestHeaderInformation.get(0)
-                    .split(" "))
-                    .collect(Collectors.toList());
-            String requestUri = httpRequestMethodInformation.get(1);
-
-            final String response = getResponse(requestUri);
+            HttpRequestHeader httpRequestHeader = getHttpRequestHeader(inputStream);
+            assert httpRequestHeader != null;
+            final String response = getResponse(httpRequestHeader);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -57,33 +49,84 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponse(String requestUri) throws IOException {
+    private String getResponse(HttpRequestHeader httpRequestHeader) throws IOException {
+        final String requestUri = httpRequestHeader.getRequestUri();
+        System.out.println("requestUri = " + requestUri);
         final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
         assert resource != null;
         final Path path = new File(resource.getPath()).toPath();
         byte[] bytes = Files.readAllBytes(path);
         final String responseBody = new String(bytes);
 
+        String responseContentType = "text/html";
+        if (httpRequestHeader.isAcceptValueCss()) {
+            responseContentType = httpRequestHeader.getAcceptHeaderValue();
+        }
+
         final String response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + responseContentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
         return response;
     }
 
-    private List<String> readInputStream(java.io.InputStream inputStream) throws IOException {
-        final List<String> httpRequestHeaderInformation = new ArrayList<>();
+    private HttpRequestHeader getHttpRequestHeader(java.io.InputStream inputStream) throws IOException {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        Map<String, String> headerFields = new HashMap<>();
+        final String HttpMethodInformation = reader.readLine();
         String line = reader.readLine();
         while (!"".equals(line)) {
-            httpRequestHeaderInformation.add(line);
+            String[] parsedHeaderField = line.split(": ");
+            if (parsedHeaderField.length != 2) {
+                throw new IllegalArgumentException("헤더는 속성과 정보 두 가지로 이루어 집니다.");
+            }
+            headerFields.put(parsedHeaderField[0], parsedHeaderField[1]);
             line = reader.readLine();
             if (line == null) {
                 return null;
             }
         }
-        return httpRequestHeaderInformation;
+        return new HttpRequestHeader(HttpMethodInformation, headerFields);
+    }
+
+    private class HttpRequestHeader {
+        private static final String ACCEPT = "Accept";
+
+        private final String requestLine;
+        private final Map<String, String> requestHeaders;
+
+        public HttpRequestHeader(String requestLine, Map<String, String> headers) {
+            this.requestLine = requestLine;
+            this.requestHeaders = headers;
+        }
+
+        public String getRequestUri() {
+            List<String> httpRequestMethodInformation = Arrays.stream(requestLine
+                    .split(" "))
+                    .collect(Collectors.toList());
+            return httpRequestMethodInformation.get(1);
+        }
+
+        public String getAcceptHeaderValue() {
+            return requestHeaders.get(ACCEPT);
+        }
+
+        public boolean isAcceptValueCss() {
+            return isExistAccept() && (requestHeaders.get(ACCEPT).contains("text/css"));
+        }
+
+        private boolean isExistAccept() {
+            return requestHeaders.containsKey(ACCEPT);
+        }
+
+        public String getRequestLine() {
+            return requestLine;
+        }
+
+        public Map<String, String> getRequestHeaders() {
+            return requestHeaders;
+        }
     }
 }

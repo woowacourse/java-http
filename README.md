@@ -22,7 +22,7 @@
   - [X] 로그인에 성공하면 /index.html로 리다이렉트한다.
   - [X] 로그인에 실패하면 401.html로 리아디렉트한다.
 - [X] http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)를 보여준다.
-- [ ] POST 방식으로 회원가입을 할 수 있다. 
+- [X] POST 방식으로 회원가입을 할 수 있다. 
   - [X] request header를 읽는다.
   - [X] request body를 읽는다.
   - [X] request body를 Content-Type에 맞게 파싱한다. 

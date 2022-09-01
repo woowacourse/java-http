@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.common.response;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,7 +7,6 @@ import org.apache.coyote.common.Charset;
 import org.apache.coyote.common.Header;
 import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.MediaType;
-import org.apache.coyote.common.Status;
 
 public class Response {
 

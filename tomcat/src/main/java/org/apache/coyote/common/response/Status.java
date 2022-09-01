@@ -1,4 +1,4 @@
-package org.apache.coyote.common;
+package org.apache.coyote.common.response;
 
 public enum Status {
 

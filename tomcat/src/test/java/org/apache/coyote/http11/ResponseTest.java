@@ -1,11 +1,11 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.MediaType;
-import org.apache.coyote.common.Status;
+import org.apache.coyote.common.response.Response;
+import org.apache.coyote.common.response.Status;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -7,14 +7,16 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.view.UserOutput;
 import org.apache.coyote.Processor;
 import org.apache.coyote.common.Charset;
 import org.apache.coyote.common.FileExtension;
 import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.MediaType;
-import org.apache.coyote.common.Status;
+import org.apache.coyote.common.request.Request;
+import org.apache.coyote.common.response.Response;
+import org.apache.coyote.common.response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,9 +45,12 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final String requestStartLine = getRequestStartLine(inputStream);
-            final String responseBody = getStaticResource(requestStartLine);
-            final MediaType mediaType = MediaType.of(FileExtension.of(requestStartLine));
+            final Request request = new Request(requestStartLine);
+            final String responseBody = getStaticResource(request.getPath());
 
+            UserOutput.outputUserInformation(request);
+
+            final MediaType mediaType = MediaType.of(FileExtension.of(requestStartLine));
             final String response = new Response.ResponseBuilder(HttpVersion.HTTP11, Status.OK)
                     .setContentType(mediaType, Charset.UTF8)
                     .setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
@@ -60,12 +65,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getStaticResource(final String requestStartLine) throws IOException {
-        final String requestUrl = RequestLineParser.getStaticResourcePath(requestStartLine);
+    private String getStaticResource(final String requestUrl) throws IOException {
+        final String resourcePath = RequestLineParser.getStaticResourcePath(requestUrl);
 
         final URL url = Thread.currentThread()
                 .getContextClassLoader()
-                .getResource(requestUrl);
+                .getResource(resourcePath);
         assert url != null;
         return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
     }

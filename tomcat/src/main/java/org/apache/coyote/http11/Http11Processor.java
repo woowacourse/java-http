@@ -6,6 +6,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
@@ -34,14 +36,23 @@ public class Http11Processor implements Runnable, Processor {
              final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            final String[] startLine = bufferedReader.readLine()
-                    .split(" ");
+            final String requestStartLine = bufferedReader.readLine();
+            final String[] splitRequestStartLine = requestStartLine.split(" ");
+            final String requestUri = splitRequestStartLine[1];
+
+            final Map<String, String> headers = new HashMap<>();
+            String header;
+            while (!"".equals((header = bufferedReader.readLine()))) {
+                final String[] splitHeader = header.split(": ");
+                headers.put(splitHeader[0], splitHeader[1]);
+            }
+
             String responseBody;
-            if (startLine[1].equals("/")) {
+            if (requestUri.equals("/")) {
                 responseBody = "Hello world!";
             } else {
                 final String resource = getClass().getClassLoader()
-                        .getResource("static" + startLine[1])
+                        .getResource("static" + requestUri)
                         .getPath();
                 final File file = new File(resource);
                 try (final BufferedReader fileReader = new BufferedReader(new FileReader(file))) {

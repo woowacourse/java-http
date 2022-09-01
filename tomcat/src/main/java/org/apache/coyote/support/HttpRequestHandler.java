@@ -73,7 +73,7 @@ public class HttpRequestHandler {
     }
 
     private void checkLoginAccount() {
-        if (uri.equals("/login.html")) {
+        if (uri.startsWith("/login") && parameters.containsKey("account")) {
             Optional<User> account = InMemoryUserRepository.findByAccount(parameters.get("account"));
             if (account.isEmpty()) {
                 return;

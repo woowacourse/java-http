@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
+    private static final String BLANK = " ";
+    private static final int URI_INDEX = 1;
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -55,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String extractURI(final String text) {
-        return text.split(" ")[1];
+        return text.split(BLANK)[URI_INDEX];
     }
 
     private String generateResponse(final Uri uri, final String responseBody) throws IOException {

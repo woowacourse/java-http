@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 public class LoginHandler {
 
     private static final String ACCOUNT = "account";
-    private static final String PASSWORD = "account";
+    private static final String PASSWORD = "password";
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     public void login(Map<String, String> request) {

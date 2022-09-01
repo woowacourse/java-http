@@ -29,8 +29,6 @@ public class HttpRequest {
         // header 처리
         extractHeader(rawHttpRequest, requestMap);
 
-        // body 처리
-
         return new HttpRequest(requestMap, paramMap);
     }
 
@@ -74,16 +72,12 @@ public class HttpRequest {
         }
     }
 
+    public boolean haveParam(final String param) {
+        return paramMap.containsKey(param);
+    }
+
     public String getPath() {
         return requestMap.get(REQUEST_URI);
-    }
-
-    public String getHeader(final String req) {
-        return requestMap.get(req);
-    }
-
-    public boolean haveParam(){
-        return !paramMap.isEmpty();
     }
 
     public String getParam(final String param) {

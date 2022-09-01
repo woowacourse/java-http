@@ -19,11 +19,7 @@ public class HttpException extends RuntimeException {
         return new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    public boolean hasErrorStatus(HttpStatus status) {
-        return this.status.equals(status);
-    }
-
-    public String toErrorStatus() {
-        return status.toResponse();
+    public HttpStatus getStatus() {
+        return status;
     }
 }

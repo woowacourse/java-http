@@ -10,23 +10,18 @@ public class HttpRequestHandler {
 
     private static final Logger log = LoggerFactory.getLogger(HttpRequestHandler.class);
 
+    private final ResourceView resourceView = new ResourceView();
+
     public String handle(HttpRequest request) {
         try {
             if (request.isGet()) {
                 logAccount(request);
-                return new ResourceResponse(request.getUri()).toHttpResponseMessage();
+                return resourceView.findStaticResource(request.getUri());
             }
             throw new UnsupportedOperationException("Not implemented");
         } catch (HttpException e) {
-            return handle(e);
+            return resourceView.findErrorPage(e);
         }
-    }
-
-    private String handle(HttpException e) {
-        if (e.hasErrorStatus(HttpStatus.NOT_FOUND)) {
-            return ResourceResponse.ofNotFound().toHttpResponseMessage();
-        }
-        return ResourceResponse.ofInternalServerError().toHttpResponseMessage();
     }
 
     private void logAccount(HttpRequest request) {

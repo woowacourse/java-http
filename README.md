@@ -2,7 +2,7 @@
 
 ## 요구사항
 
-- [ ] GET /index.html 응답하기
+- [x] GET /index.html 응답하기
 ```text
 인덱스 페이지(http://localhost:8080/index.html)에 접근할 수 있도록 만들자.
 Http11ProcessorTest 테스트 클래스의 모든 테스트를 통과하면 된다.

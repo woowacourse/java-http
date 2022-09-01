@@ -1,12 +1,14 @@
 package org.apache.coyote.http11;
 
+import java.io.IOException;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -28,7 +30,15 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            String[] lines = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8).split("\r\n");
+            String[] get = lines[0].split(" ");
+
+            var responseBody = "Hello world!";
+
+            if (!get[1].equals("/")) {
+                responseBody = Files.readString(
+                                Path.of(this.getClass().getResource("/static" + get[1]).getPath()));
+            }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

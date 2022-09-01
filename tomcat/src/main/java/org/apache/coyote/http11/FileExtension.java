@@ -16,13 +16,18 @@ public enum FileExtension {
         this.contentType = contentType;
     }
 
-    public static String findContentType(String fileName) {
-        String fileExtension = fileName.split("\\.")[1];
+    public static String findContentType(String uri) {
+        String fileExtension = uri.split("\\.")[1];
 
         return Stream.of(FileExtension.values())
                 .filter(f -> f.extension.equals(fileExtension))
                 .map(f -> f.contentType)
                 .findFirst()
                 .orElse("text/html");
+    }
+
+    public static boolean hasFileExtension(String url) {
+        return Stream.of(FileExtension.values())
+                .anyMatch(f -> url.endsWith(f.extension));
     }
 }

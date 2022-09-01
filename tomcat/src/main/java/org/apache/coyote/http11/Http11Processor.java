@@ -59,7 +59,7 @@ public class Http11Processor implements Runnable, Processor {
         HttpRequestMessage requestMessage = new HttpRequestMessage(Objects.requireNonNull(bufferedReader.readLine()));
 
         String line;
-        while (!(line = Objects.requireNonNull(bufferedReader.readLine())).equals("")) {
+        while (!(line = Objects.requireNonNull(bufferedReader.readLine())).isBlank()) {
             String[] splitHeader = line.split(": ");
             requestMessage.addHeader(splitHeader[0], splitHeader[1]);
         }
@@ -71,18 +71,18 @@ public class Http11Processor implements Runnable, Processor {
         String statusLine = "HTTP/1.1 200 OK";
 
         LinkedHashMap<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", "text/html;charset=utf-8");
-
-        String responseBody = "Hello world!";
 
         if (fileName.isBlank()) {
-            headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
-            return new HttpResponseMessage(statusLine, headers, responseBody);
+            return HttpResponseMessage.DEFAULT_HTTP_RESPONSE;
         }
 
         URL resourceUrl = getClass().getClassLoader().getResource("static/" + fileName);
-        responseBody = new String(Files.readAllBytes(new File(resourceUrl.getFile()).toPath()));
+        String responseBody = new String(Files.readAllBytes(new File(resourceUrl.getFile()).toPath()));
 
+        String contentType = ContentType.parse(fileName.split("\\.")[1])
+                .getValue();
+
+        headers.put("Content-Type", contentType);
         headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
 
         return new HttpResponseMessage(statusLine, headers, responseBody);

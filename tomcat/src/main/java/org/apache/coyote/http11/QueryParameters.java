@@ -17,10 +17,7 @@ public class QueryParameters {
         if (queryParameterIndex != NOT_EXIST_QUERY_PARAMETER_CHARACTER) {
             String queryParameters = uri.substring(queryParameterIndex + 1);
             String[] eachQueryParameters = queryParameters.split("&");
-            for (String queryParameter : eachQueryParameters) {
-                String[] keyValues = queryParameter.split("=");
-                values.put(keyValues[KEY_INDEX], keyValues[VALUE_INDEX]);
-            }
+            putKeyValues(eachQueryParameters);
         }
     }
 
@@ -34,5 +31,12 @@ public class QueryParameters {
 
     public String getPassword() {
         return values.get("password");
+    }
+
+    private void putKeyValues(String[] eachQueryParameters) {
+        for (String queryParameter : eachQueryParameters) {
+            String[] keyValues = queryParameter.split("=");
+            values.put(keyValues[KEY_INDEX], keyValues[VALUE_INDEX]);
+        }
     }
 }

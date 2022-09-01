@@ -98,7 +98,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void login으로_요청이_올_경우_login_html을_반환한다() throws URISyntaxException, IOException {
+    void login으로_요청이_올_경우_login_html을_반환한다() throws IOException, URISyntaxException {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
@@ -127,7 +127,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void query_parameter로_들어온_계정_정보가_일치할_경우_print한다() throws URISyntaxException, IOException {
+    void query_parameter로_들어온_계정_정보가_일치할_경우_print한다() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -150,7 +150,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void query_parameter로_들어온_계정_정보가_없을_경우_예외를_반환한다() throws URISyntaxException, IOException {
+    void query_parameter로_들어온_계정_정보가_없을_경우_예외를_반환한다() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=eden&password=password HTTP/1.1 ",
@@ -168,7 +168,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void query_parameter로_들어온_계정_정보가_일치하지_않을_경우_예외를_반환한다() throws URISyntaxException, IOException {
+    void query_parameter로_들어온_계정_정보가_일치하지_않을_경우_예외를_반환한다() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=gugugugu HTTP/1.1 ",

@@ -1,9 +1,15 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URISyntaxException;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.AuthenticationException;
+import nextstep.jwp.exception.UserNotFoundException;
 import org.junit.jupiter.api.Test;
 
 class ResponseProcessorTest {
@@ -27,24 +33,39 @@ class ResponseProcessorTest {
                 fileContent);
         assertThat(response).isEqualTo(expected);
     }
-    
-    @Test
-    void query_parameter가_있을_경우_true를_반환한다() throws URISyntaxException, IOException {
-        // given
-        String fileUri = "/nextstep.txt?name=eden";
-        ResponseProcessor responseProcessor = new ResponseProcessor(fileUri);
 
-        // when & then
-        assertThat(responseProcessor.existQueryParameter()).isTrue();
+    @Test
+    void query_parameter로_올바른_계정_정보가_들어오면_print한다() throws URISyntaxException, IOException {
+        // given
+        String uri = "/login?account=gugu&password=password";
+        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outContent));
+
+        // when
+        new ResponseProcessor(uri);
+
+        // then
+        String expected = InMemoryUserRepository.findByAccount("gugu").orElseThrow().toString().concat("\n");
+        assertThat(outContent.toString()).isEqualTo(expected);
     }
 
     @Test
-    void query_parameter가_없을_경우_false를_반환한다() throws URISyntaxException, IOException {
+    void query_parameter로_들어온_계정_정보가_없을_경우_예외를_반환한다() {
         // given
-        String fileUri = "/nextstep.txt";
-        ResponseProcessor responseProcessor = new ResponseProcessor(fileUri);
+        String uri = "/login?account=eden&password=password";
 
         // when & then
-        assertThat(responseProcessor.existQueryParameter()).isFalse();
+        assertThatThrownBy(() -> new ResponseProcessor(uri))
+                .isInstanceOf(UserNotFoundException.class);
+    }
+
+    @Test
+    void query_parameter로_들어온_계정_정보가_일치하지_않을_경우_예외를_반환한다() {
+        // given
+        String uri = "/login?account=gugu&password=gugugugu";
+
+        // when & then
+        assertThatThrownBy(() -> new ResponseProcessor(uri))
+                .isInstanceOf(AuthenticationException.class);
     }
 }

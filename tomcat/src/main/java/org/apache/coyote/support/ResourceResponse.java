@@ -2,7 +2,6 @@ package org.apache.coyote.support;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.exception.NotFoundException;
@@ -27,19 +26,23 @@ public class ResourceResponse {
 
     private Path toResourcePath(String uri) {
         try {
-            File file = new File(findUrl(uri).getFile());
+            final var classLoader = getClass().getClassLoader();
+            final var url = classLoader.getResource("static" + toDefaultUri(uri));
+            File file = new File(url.getFile());
             return file.toPath();
         } catch (NullPointerException e) {
             throw new NotFoundException();
         }
     }
 
-    private URL findUrl(String uri) {
-        final var classLoader = getClass().getClassLoader();
+    private static String toDefaultUri(String uri) {
         if (uri.equals("/")) {
-            return classLoader.getResource("static/index.html");
+            return "/index.html";
         }
-        return classLoader.getResource("static" + uri);
+        if (!uri.contains(".")) {
+            return uri + ".html";
+        }
+        return uri;
     }
 
     public String toHttpResponseMessage() throws IOException {

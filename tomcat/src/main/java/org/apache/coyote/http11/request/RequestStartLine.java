@@ -53,7 +53,11 @@ public class RequestStartLine {
     }
 
     public String getQueryString() {
-        return uri.split("\\?")[1];
+        final var elements = uri.split("\\?");
+        if (elements.length == 2) {
+            return elements[1];
+        }
+        return null;
     }
 
     public String getVersion() {

@@ -15,15 +15,17 @@ public class Controller {
     }
 
     public  HttpResponse showLogin(final HttpRequest httpRequest) throws IOException {
-        final var parameters = httpRequest.parseQueryString();
+        if (httpRequest.getQueryString() != null) {
+            final var parameters = httpRequest.parseQueryString();
 
-        final var account = parameters.get("account");
-        final var user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
+            final var account = parameters.get("account");
+            final var user = InMemoryUserRepository.findByAccount(account)
+                    .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
 
-        final var password = parameters.get("password");
-        if (user.checkPassword(password)) {
-            System.out.println("user = " + user);
+            final var password = parameters.get("password");
+            if (user.checkPassword(password)) {
+                System.out.println("user = " + user);
+            }
         }
 
         return HttpResponse.withStaticResource(StaticResource.path("/login.html"));

@@ -19,6 +19,9 @@ public class LoginTry {
     }
 
     public String generateRedirectUrl() {
+        if (this.account == null || this.password == null) {
+            return FAIL_URL;
+        }
         Optional<User> account = InMemoryUserRepository.findByAccount(this.account);
         if (account.isEmpty()) {
             return FAIL_URL;

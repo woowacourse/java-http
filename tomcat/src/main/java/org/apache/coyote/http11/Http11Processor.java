@@ -8,6 +8,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.FileNotFoundException;
 import org.apache.coyote.http11.http.ContentType;
 import org.apache.coyote.http11.http.Header;
+import org.apache.coyote.http11.http.HttpMethod;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.StatusCode;
@@ -23,6 +24,9 @@ public class Http11Processor implements Runnable, Processor {
 
 	private static final String UNAUTHORIZED_HTML = "401.html";
 	private static final String NOT_FOUND_HTML = "404.html";
+	private static final String LOGIN_HTML = "login.html";
+	private static final String REGISTER_HTML = "register.html";
+	private static final String INDEX_HTML = "index.html";
 
 	private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
@@ -45,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
 			HttpRequest request = new HttpRequest(inputStream);
 			log.info("REQUEST \r\n{}", request);
 
-			final var response = makeHttpResponse(request);
+			final var response = handleHttpRequest(request);
 			log.info("RESPONSE \r\n{}", response);
 
 			outputStream.write(response.getBytes());
@@ -55,7 +59,7 @@ public class Http11Processor implements Runnable, Processor {
 		}
 	}
 
-	private HttpResponse makeHttpResponse(HttpRequest httpRequest) throws IOException {
+	private HttpResponse handleHttpRequest(HttpRequest httpRequest) throws IOException {
 		if (httpRequest.isStaticResourceRequest()) {
 			return handleStaticRequest(httpRequest);
 		}
@@ -69,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
 				.setHeader(Header.CONTENT_TYPE, httpRequest.getContentType().getFormat())
 				.build();
 		} catch (FileNotFoundException e) {
-			return responseErrorPage(NOT_FOUND_HTML, 404);
+			return responseErrorPage(NOT_FOUND_HTML, StatusCode.NOT_FOUND.value());
 		}
 	}
 
@@ -81,36 +85,36 @@ public class Http11Processor implements Runnable, Processor {
 				.setHeader(Header.CONTENT_TYPE, ContentType.HTML.getFormat())
 				.build();
 		}
-		if (httpRequest.getMethod().equals("GET") && requestUrl.startsWith("/login")) {
+		if (HttpMethod.GET.equals(httpRequest.getMethod()) && requestUrl.startsWith("/login")) {
 			return HttpResponse.OK()
-				.responseBody(StaticResourceUtil.getContent("login.html"))
+				.responseBody(StaticResourceUtil.getContent(LOGIN_HTML))
 				.setHeader(Header.CONTENT_TYPE, ContentType.HTML.getFormat())
 				.build();
 		}
-		if (httpRequest.getMethod().equals("POST") && requestUrl.startsWith("/login")) {
+		if (HttpMethod.POST.equals(httpRequest.getMethod()) && requestUrl.startsWith("/login")) {
 			return checkValidLogin(
 				httpRequest.getQueryString("account"),
 				httpRequest.getQueryString("password")
 			);
 		}
-		if (requestUrl.startsWith("/register")) {
+		if (HttpMethod.GET.equals(httpRequest.getMethod()) && requestUrl.startsWith("/register")) {
 			return HttpResponse.OK()
-				.responseBody(StaticResourceUtil.getContent("register.html"))
+				.responseBody(StaticResourceUtil.getContent(REGISTER_HTML))
 				.setHeader(Header.CONTENT_TYPE, ContentType.HTML.getFormat())
 				.build();
 
 		}
-		return responseErrorPage(NOT_FOUND_HTML, 404);
+		return responseErrorPage(NOT_FOUND_HTML, StatusCode.NOT_FOUND.value());
 	}
 
 	private HttpResponse checkValidLogin(String account, String password) throws IOException {
 		Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
 		if (findUser.isPresent() && findUser.get().checkPassword(password)) {
 			return HttpResponse.FOUND()
-				.setHeader(Header.LOCATION, "/index.html")
+				.setHeader(Header.LOCATION, "/" + INDEX_HTML)
 				.build();
 		}
-		return responseErrorPage(UNAUTHORIZED_HTML, 401);
+		return responseErrorPage(UNAUTHORIZED_HTML, StatusCode.UNAUTHORIZED.value());
 	}
 
 	private HttpResponse responseErrorPage(String htmlPath, int statusCode) throws IOException {

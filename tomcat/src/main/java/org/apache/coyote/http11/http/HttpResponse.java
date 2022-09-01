@@ -20,10 +20,10 @@ public class HttpResponse {
 		return getFullMessage().getBytes();
 	}
 
-	public String getFullMessage() {
+	private String getFullMessage() {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("HTTP/1.1 ")
-			.append(statusCode.getCode())
+			.append(statusCode.getValue())
 			.append(statusCode.getMessage())
 			.append("\r\n");
 

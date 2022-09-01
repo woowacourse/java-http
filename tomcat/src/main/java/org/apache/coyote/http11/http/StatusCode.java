@@ -12,26 +12,30 @@ public enum StatusCode {
 
 	;
 
-	private final int code;
+	private final int value;
 	private final String message;
 
-	StatusCode(int code, String message) {
-		this.code = code;
+	StatusCode(int value, String message) {
+		this.value = value;
 		this.message = message;
 	}
 
 	public static StatusCode from(int code) {
 		return Arrays.stream(values())
-			.filter(statusCode -> statusCode.code == code)
+			.filter(statusCode -> statusCode.value == code)
 			.findAny()
 			.orElseThrow(() -> new NoSuchElementException("해당하는 상태 코드가없습니다."));
 	}
 
-	public int getCode() {
-		return code;
+	public int getValue() {
+		return value;
 	}
 
 	public String getMessage() {
 		return message;
+	}
+
+	public int value() {
+		return this.value;
 	}
 }

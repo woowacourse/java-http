@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.Content;
+import nextstep.jwp.model.HttpRequest;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,12 +11,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Map;
-import java.util.Objects;
 
-import static nextstep.jwp.utils.ResponseUtil.getExtension;
-import static nextstep.jwp.utils.ResponseUtil.getParam;
-import static nextstep.jwp.utils.ResponseUtil.getPath;
-import static nextstep.jwp.utils.ResponseUtil.getResponseBody;
+import static nextstep.jwp.utils.RequestUtil.getResponseBody;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -39,16 +35,13 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            final var uri = Objects.requireNonNull(reader.readLine()).split(" ")[1];
-            final var path = getPath(uri);
-            final var params = getParam(uri);
-            final var responseBody = getResponseBody(path, this.getClass());
-            final var contentType = Content.getType(getExtension(path));
-            logParams(path, params);
+            HttpRequest httpRequest = HttpRequest.of(reader.readLine());
+            logParams(httpRequest);
 
+            final var responseBody = getResponseBody(httpRequest.getPath(), this.getClass());
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
+                    "Content-Type: " + httpRequest.getContentType() + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -60,9 +53,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void logParams(String path, Map<String, String> params) {
+    private void logParams(final HttpRequest httpRequest) {
+        final Map<String, String> params = httpRequest.getParams();
         if (params != null) {
-            log.info("request uri : {}. query param : {}", path, params);
+            log.info("request uri : {}. query param : {}", httpRequest.getPath(), params);
         }
     }
 }

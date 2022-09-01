@@ -1,7 +1,7 @@
 package org.apache.utils;
 
 import nextstep.jwp.exception.NotFoundFileException;
-import nextstep.jwp.utils.ResponseUtil;
+import nextstep.jwp.utils.RequestUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -11,7 +11,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class ResponseUtilTest {
+class RequestUtilTest {
 
     @Test
     @DisplayName("파일이름으로 파일내용을 읽는다.")
@@ -20,7 +20,7 @@ class ResponseUtilTest {
         String filename = "/index.html";
 
         // when
-        String actual = ResponseUtil.getResponseBody(filename, this.getClass());
+        String actual = RequestUtil.getResponseBody(filename, this.getClass());
 
         // then
         assertThat(actual).isNotBlank();
@@ -33,7 +33,7 @@ class ResponseUtilTest {
         String filename = "/nonFile";
 
         // when & then
-        assertThatThrownBy(() -> ResponseUtil.getResponseBody(filename, this.getClass()))
+        assertThatThrownBy(() -> RequestUtil.getResponseBody(filename, this.getClass()))
                 .isInstanceOf(NotFoundFileException.class);
     }
 
@@ -44,7 +44,7 @@ class ResponseUtilTest {
         String filename = "/index.html";
 
         // when
-        String actual = ResponseUtil.getExtension(filename);
+        String actual = RequestUtil.getExtension(filename);
 
         // then
         assertThat(actual).isEqualTo("html");
@@ -57,7 +57,7 @@ class ResponseUtilTest {
         String filename = "/login?account=gugu&password=password";
 
         // when
-        String actual = ResponseUtil.getPath(filename);
+        String actual = RequestUtil.calculatePath(filename);
 
         // then
         assertThat(actual).isEqualTo("/login.html");
@@ -73,7 +73,7 @@ class ResponseUtilTest {
         expected.put("password","password");
 
         // when
-        Map<String, String> actual = ResponseUtil.getParam(filename);
+        Map<String, String> actual = RequestUtil.getParam(filename);
 
         // then
         assertThat(actual).isEqualTo(expected);

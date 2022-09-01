@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,7 @@ import java.util.Objects;
 
 import static nextstep.jwp.model.Content.HTML;
 
-public class ResponseUtil {
+public class RequestUtil {
 
     public static final String DEFAULT_EXTENSION = ".html";
 
@@ -41,12 +42,8 @@ public class ResponseUtil {
         return HTML.getExtension();
     }
 
-    public static String getPath(final String uri) {
+    public static String calculatePath(final String uri) {
         Objects.requireNonNull(uri);
-        return calculatePath(uri);
-    }
-
-    private static String calculatePath(final String uri) {
         String path = uri;
         if (path.contains("?")) {
             path = path.substring(0, uri.indexOf("?"));
@@ -60,12 +57,12 @@ public class ResponseUtil {
     public static Map<String, String> getParam(final String uri) {
         Objects.requireNonNull(uri);
         if (!uri.contains("?")) {
-            return null;
+            return Collections.emptyMap();
         }
-        return calculateQueryParam(uri);
+        return calculateParam(uri);
     }
 
-    private static Map<String, String> calculateQueryParam(final String uri) {
+    private static Map<String, String> calculateParam(final String uri) {
         List<String> inputs = Arrays.asList(uri.substring(uri.indexOf("?") + 1).split("&"));
         final Map<String, String> queryParams = new HashMap();
         for (String input : inputs) {

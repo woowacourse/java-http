@@ -4,24 +4,21 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.coyote.exception.ExceptionPage;
 import org.apache.coyote.support.HttpStatus;
 import org.apache.coyote.exception.HttpException;
 
 public class ResourceView {
 
     public String findStaticResource(String uri) {
-        Path path = toResourcePath(uri);
+        final var path = toResourcePath(uri);
         return toHttpResponseMessage(HttpStatus.OK, path);
     }
 
-    public String findErrorPage(HttpException e) {
-        final var status = e.getStatus();
-        if (HttpStatus.NOT_FOUND.equals(status)) {
-            Path path = toResourcePath("/404.html");
-            return toHttpResponseMessage(HttpStatus.NOT_FOUND, path);
-        }
-        Path path = toResourcePath("/500.html");
-        return toHttpResponseMessage(HttpStatus.INTERNAL_SERVER_ERROR, path);
+    public String findErrorPage(HttpException exception) {
+        final var status = exception.getStatus();
+        final var path = toResourcePath(ExceptionPage.toUri(status));
+        return toHttpResponseMessage(status, path);
     }
 
     private Path toResourcePath(String uri) {
@@ -50,7 +47,7 @@ public class ResourceView {
             String startLine = String.format("HTTP/1.1 %s ", status.toResponse());
             String contentTypeHeader = String.format("Content-Type: %s;charset=utf-8 ", Files.probeContentType(path));
             String responseBody = new String(Files.readAllBytes(path));
-            String contentLengthHeader = String.format("Content-Length: %d " + responseBody.getBytes().length);
+            String contentLengthHeader = String.format("Content-Length: %d ", responseBody.getBytes().length);
 
             return String.join("\r\n", startLine, contentTypeHeader, contentLengthHeader, "", responseBody);
         } catch (IOException e) {

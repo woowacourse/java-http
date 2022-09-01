@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.enums.ContentType;
+import org.apache.coyote.http11.enums.FilePath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,17 +32,14 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(inputStream)) {
 
-            String[] inputs = bufferedReader.readLine()
-                    .split(" ");
-            String method = inputs[0];
-            String path = inputs[1];
-
-            final var responseBody = ResponseBody.of(method, path)
-                    .generate();
+            final String fileName = extractFileName(bufferedReader);
+            final String contentType = findContentType(fileName).getValue();
+            final String responseBody = FilePath.of(fileName)
+                    .generateFile();
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -50,5 +49,16 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String extractFileName(final BufferedReader bufferedReader) throws IOException {
+        return bufferedReader.readLine()
+                .split(" ")[1];
+    }
+
+    private ContentType findContentType(final String extractedPath) {
+        final String[] pathInfos = extractedPath.split("\\.");
+        final String fileExtension = pathInfos[pathInfos.length - 1];
+        return ContentType.of(fileExtension);
     }
 }

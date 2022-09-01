@@ -4,8 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpHeader;
+import nextstep.jwp.http.reqeust.HttpRequest;
+import nextstep.jwp.http.reqeust.HttpRequestLine;
 import nextstep.jwp.io.ClassPathResource;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -30,17 +34,33 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            BufferedReader httpReader = new BufferedReader(new InputStreamReader(inputStream));
+            BufferedReader bufferReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            String requestLine = httpReader.readLine();
-            HttpRequest httpRequest = HttpRequest.from(requestLine);
-            String response = createHttpResponse(httpRequest);
+            HttpRequest httpRequest = createHttpRequest(bufferReader);
+            String httpResponse = createHttpResponse(httpRequest);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest createHttpRequest(final BufferedReader bufferReader) throws IOException {
+        String requestLine = bufferReader.readLine();
+        HttpRequestLine httpRequestLine = HttpRequestLine.from(requestLine);
+        HttpHeader httpHeader = createHttpHeader(bufferReader);
+        return new HttpRequest(httpRequestLine, httpHeader);
+    }
+
+    private HttpHeader createHttpHeader(final BufferedReader bufferReader) throws IOException {
+        Map<String, String> params = new HashMap<>();
+        String line = "";
+        while ((line = bufferReader.readLine()).isBlank()) {
+            String[] requestHeader = line.split(":", 2);
+            params.put(requestHeader[0], requestHeader[1]);
+        }
+        return new HttpHeader(params);
     }
 
     private String createHttpResponse(final HttpRequest httpRequest) {

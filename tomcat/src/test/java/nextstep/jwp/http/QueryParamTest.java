@@ -15,6 +15,7 @@ class QueryParamTest {
         QueryParam actual = QueryParam.from(queryParam);
 
         QueryParam expected = new QueryParam("key", "value");
-        assertThat(actual).isEqualTo(expected);
+        assertThat(actual).usingRecursiveComparison()
+            .isEqualTo(expected);
     }
 }

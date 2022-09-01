@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.exception.HttpException;
-import org.apache.exception.NotFoundException;
 
 public class ResourceResponse {
 
@@ -25,6 +24,10 @@ public class ResourceResponse {
         return new ResourceResponse("/404.html", HttpStatus.NOT_FOUND);
     }
 
+    public static ResourceResponse ofInternalServerError() {
+        return new ResourceResponse("/500.html", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
     private Path toResourcePath(String uri) {
         try {
             final var classLoader = getClass().getClassLoader();
@@ -32,7 +35,7 @@ public class ResourceResponse {
             File file = new File(url.getFile());
             return file.toPath();
         } catch (NullPointerException e) {
-            throw new NotFoundException();
+            throw HttpException.ofNotFound(e);
         }
     }
 

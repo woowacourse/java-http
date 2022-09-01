@@ -1,13 +1,11 @@
 package org.apache.coyote.support;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.exception.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,17 +57,9 @@ public class HttpRequestHandler {
     public String handle() {
         if (method.equals(Method.GET)) {
             checkLoginAccount();
-            return get();
+            return new ResourceResponse(uri).toHttpResponseMessage();
         }
         throw new UnsupportedOperationException("Not implemented");
-    }
-
-    private String get() {
-        try {
-            return new ResourceResponse(uri).toHttpResponseMessage();
-        } catch (NotFoundException e) {
-            return ResourceResponse.ofNotFound().toHttpResponseMessage();
-        }
     }
 
     private void checkLoginAccount() {

@@ -204,7 +204,6 @@ class Http11ProcessorTest {
                 "",
                 "");
 
-
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 

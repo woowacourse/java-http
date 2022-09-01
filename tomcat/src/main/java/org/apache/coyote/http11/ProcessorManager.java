@@ -8,16 +8,16 @@ import org.apache.coyote.http11.urlprocessor.LoginUrlProcessor;
 import org.apache.coyote.http11.urlprocessor.RootUrlProcessor;
 import org.apache.coyote.http11.urlprocessor.UrlProcessor;
 
-public enum Processors {
-    ROOT(Processors::isRootUrl, new RootUrlProcessor()),
-    LOGIN(Processors::isLoginUrl, new LoginUrlProcessor()),
-    FILE(Processors::isFileUrl, new FileUrlProcessor());
+public enum ProcessorManager {
+    ROOT(ProcessorManager::isRootUrl, new RootUrlProcessor()),
+    LOGIN(ProcessorManager::isLoginUrl, new LoginUrlProcessor()),
+    FILE(ProcessorManager::isFileUrl, new FileUrlProcessor());
 
     private final Predicate<String> condition;
 
     private final UrlProcessor urlProcessor;
 
-    Processors(Predicate<String> condition, UrlProcessor urlProcessor) {
+    ProcessorManager(Predicate<String> condition, UrlProcessor urlProcessor) {
         this.condition = condition;
         this.urlProcessor = urlProcessor;
     }
@@ -34,15 +34,13 @@ public enum Processors {
         return url.matches(".+\\.(html|css|js|ico)");
     }
 
-    public static Processors of(String url) {
-        return Arrays.stream(Processors.values())
-                .filter(processors -> processors.condition.test(url))
+    public static UrlResponse getUrlResponse(String url) throws IOException {
+        ProcessorManager processorManager = Arrays.stream(ProcessorManager.values())
+                .filter(processor -> processor.condition.test(url))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("처리할 수 없는 요청입니다."));
-    }
 
-    public UrlResponse getUrlResponse(String url) throws IOException {
-        return urlProcessor.getResponse(url);
+        return processorManager.urlProcessor.getResponse(url);
     }
 }
 

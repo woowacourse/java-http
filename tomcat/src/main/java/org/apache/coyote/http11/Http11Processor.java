@@ -9,8 +9,11 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.LinkedHashMap;
+import java.util.NoSuchElementException;
 import java.util.Objects;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +44,32 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequestMessage httpRequestMessage = generateHttpRequestMessage(bufferedReader);
-
             String requestTarget = httpRequestMessage.getRequestTarget();
+
+            if (requestTarget.equals("/")) {
+                HttpResponseMessage httpResponseMessage = HttpResponseMessage.DEFAULT_HTTP_RESPONSE;
+                outputStream.write(httpResponseMessage.parseResponse().getBytes());
+                outputStream.flush();
+                return;
+            }
+
+            if (!requestTarget.contains(".") && requestTarget.startsWith("/login")
+                    && requestTarget.contains("?") && requestTarget.contains("=")) {
+                int index = requestTarget.indexOf("?");
+                QueryParameters queryParameters = new QueryParameters(requestTarget.substring(index + 1));
+
+                HttpResponseMessage httpResponseMessage = generateResponseMessage("login.html");
+                String response = httpResponseMessage.parseResponse();
+
+                User user = InMemoryUserRepository.findByAccount(queryParameters.getParameterValue("account"))
+                        .orElseThrow(NoSuchElementException::new);
+                log.info(user.toString());
+
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+
             String fileName = requestTarget.substring(1);
 
             HttpResponseMessage httpResponseMessage = generateResponseMessage(fileName);
@@ -57,6 +84,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpRequestMessage generateHttpRequestMessage(final BufferedReader bufferedReader) throws IOException {
         HttpRequestMessage requestMessage = new HttpRequestMessage(Objects.requireNonNull(bufferedReader.readLine()));
+        log.info(requestMessage.getRequestLine());
 
         String line;
         while (!(line = Objects.requireNonNull(bufferedReader.readLine())).isBlank()) {
@@ -71,10 +99,6 @@ public class Http11Processor implements Runnable, Processor {
         String statusLine = "HTTP/1.1 200 OK";
 
         LinkedHashMap<String, String> headers = new LinkedHashMap<>();
-
-        if (fileName.isBlank()) {
-            return HttpResponseMessage.DEFAULT_HTTP_RESPONSE;
-        }
 
         URL resourceUrl = getClass().getClassLoader().getResource("static/" + fileName);
         String responseBody = new String(Files.readAllBytes(new File(resourceUrl.getFile()).toPath()));

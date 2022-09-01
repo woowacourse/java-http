@@ -9,7 +9,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,20 +39,11 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             // 1. index.html 응답하기
-            String line = bufferedReader.readLine();
-            final String[] requestLine = line.split(" ");
-            final String requestUri = requestLine[1];
-            var responseBody = "Hello world!";
-
-            if (!requestUri.equals("/")) {
-                final Path path = new File(
-                        getClass().getClassLoader().getResource("static" + requestUri).getPath()).toPath();
-                responseBody = new String(Files.readAllBytes(path));
-            }
+            final String responseBody = createResponseBody(bufferedReader);
 
             // 2. CSS 지원하기
             final Map<String, String> requestHeader = new HashMap<>();
-            line = bufferedReader.readLine();
+            String line = bufferedReader.readLine();
             while (!"".equals(line)) {
                 final String[] headerField = line.split(": ");
                 requestHeader.put(headerField[0], headerField[1]);
@@ -66,8 +60,49 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String createResponseBody(final BufferedReader bufferedReader) throws IOException {
+        final String requestLine = bufferedReader.readLine();
+        final String requestUri = requestLine.split(" ")[1];
+
+        // 3. Query String 파싱
+        if (requestUri.contains("/login")) {
+            return createLoginResponse(requestUri);
+        }
+
+        if (!requestUri.equals("/")) {
+            return readFileFromPath(requestUri);
+        }
+        return "Hello world!";
+    }
+
+    private String createLoginResponse(final String requestUri) throws IOException {
+        final int index = requestUri.indexOf("?");
+        final String queryString = requestUri.substring(index + 1);
+        final Map<String, String> params = new HashMap<>();
+        final String[] paramPairs = queryString.split("&");
+
+        for (final String paramPair : paramPairs) {
+            final String[] pair = paramPair.split("=");
+            if (pair.length == 2) {
+                params.put(pair[0], pair[1]);
+            }
+        }
+
+        final Optional<User> user = InMemoryUserRepository.findByAccount(params.get("account"));
+        if (user.isPresent() && user.get().checkPassword(params.get("password"))) {
+            log.info("user : {}", user.get());
+        }
+
+        return readFileFromPath("/login.html");
+    }
+
+    private String readFileFromPath(final String filePath) throws IOException {
+        final Path path = new File(getClass().getClassLoader().getResource("static"  + filePath).getPath()).toPath();
+        return new String(Files.readAllBytes(path));
     }
 }

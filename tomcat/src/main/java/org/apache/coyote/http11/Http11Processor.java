@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -33,17 +35,11 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
+            // 1. index.html 응답하기
             String line = bufferedReader.readLine();
             final String[] requestLine = line.split(" ");
             final String requestUri = requestLine[1];
             var responseBody = "Hello world!";
-
-            while (!"".equals(line)) {
-                line = bufferedReader.readLine();
-                if (line == null) {
-                    return;
-                }
-            }
 
             if (!requestUri.equals("/")) {
                 final Path path = new File(
@@ -51,9 +47,19 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody = new String(Files.readAllBytes(path));
             }
 
+            // 2. CSS 지원하기
+            final Map<String, String> requestHeader = new HashMap<>();
+            line = bufferedReader.readLine();
+            while (!"".equals(line)) {
+                final String[] headerField = line.split(": ");
+                requestHeader.put(headerField[0], headerField[1]);
+                line = bufferedReader.readLine();
+            }
+            final String contentType = requestHeader.getOrDefault("Accept", "text/html").split(",")[0];
+
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

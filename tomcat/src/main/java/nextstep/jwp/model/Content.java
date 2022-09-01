@@ -5,29 +5,28 @@ import nextstep.jwp.exception.NotFoundContentTypeException;
 import java.util.Arrays;
 import java.util.Objects;
 
-public enum ContentType {
+public enum Content {
 
     HTML("html", "text/html"),
     CSS("css", "text/css"),
+    JS("js", "application/javascript"),
+    ICO("ico", "image/x-icon"),
     ;
 
     private final String extension;
     private final String type;
 
-    ContentType(String extension, String type) {
+    Content(String extension, String type) {
         this.extension = extension;
         this.type = type;
     }
 
-    public static ContentType getExtension(String extension) {
+    public static String getType(String extension) {
         Objects.requireNonNull(extension);
-        return Arrays.stream(values())
-                .filter(content -> content.extension.equals(extension))
+        Content content = Arrays.stream(values())
+                .filter(it -> it.extension.equals(extension))
                 .findAny()
                 .orElseThrow(() -> new NotFoundContentTypeException("ContentType을 찾을 수 없습니다."));
-    }
-
-    public String getType() {
-        return type;
+        return content.type;
     }
 }

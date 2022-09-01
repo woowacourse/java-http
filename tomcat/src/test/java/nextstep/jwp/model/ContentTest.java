@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class ContentTypeTest {
+class ContentTest {
 
     @Test
     @DisplayName("확장자에 맞는 contentType을 반환한다.")
@@ -16,16 +16,16 @@ class ContentTypeTest {
         String extension = "html";
 
         // when
-        ContentType contentType = ContentType.getExtension(extension);
+        String contentType = Content.getType(extension);
 
         // then
-        assertThat(contentType.getType()).isEqualTo("text/html");
+        assertThat(contentType).isEqualTo("text/html");
     }
 
     @Test
     @DisplayName("등록되지 않은 확장자를 호출할 경우 예외가 발생한다.")
     void checkNonContentType() {
-        assertThatThrownBy(() -> ContentType.getExtension("hwp"))
+        assertThatThrownBy(() -> Content.getType("hwp"))
                 .isInstanceOf(NotFoundContentTypeException.class);
     }
 }

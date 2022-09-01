@@ -10,21 +10,16 @@ import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 
-public class FileResponseMaker implements ResponseMaker {
-
-    private static final int CONTENT_TYPE_START_INDEX = 1;
+public class RegisterResponseMaker implements ResponseMaker {
 
     @Override
     public String createResponse(final String requestUrl)
             throws URISyntaxException, IOException {
         final URL resource =
-                this.getClass().getClassLoader().getResource("static" + requestUrl);
-        final String extension = requestUrl.split("\\.")[CONTENT_TYPE_START_INDEX];
+                this.getClass().getClassLoader().getResource("static" + requestUrl + ".html");
         final Path path = Paths.get(resource.toURI());
         final var responseBody = new String(Files.readAllBytes(path));
-        final ContentType contentType = ContentType.findContentType(extension);
-
-        final HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, responseBody, contentType);
+        final HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, responseBody, ContentType.HTML);
         return httpResponse.toString();
     }
 }

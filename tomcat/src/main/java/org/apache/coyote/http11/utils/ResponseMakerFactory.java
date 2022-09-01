@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import org.apache.coyote.http11.FileResponseMaker;
 import org.apache.coyote.http11.LoginResponseMaker;
+import org.apache.coyote.http11.RegisterResponseMaker;
 import org.apache.coyote.http11.ResponseMaker;
 import org.apache.coyote.http11.StringResponseMaker;
 
@@ -12,11 +13,13 @@ public enum ResponseMakerFactory {
 
     STRING(ResponseMakerFactory::isStringUrl, new StringResponseMaker()),
     FILE(ResponseMakerFactory::isFileUrl, new FileResponseMaker()),
-    LOGIN(ResponseMakerFactory::isLoginUrl, new LoginResponseMaker());
+    LOGIN(ResponseMakerFactory::isLoginUrl, new LoginResponseMaker()),
+    REGISTER(ResponseMakerFactory::isRegisterUrl, new RegisterResponseMaker());
 
     private static final Pattern FILE_REGEX = Pattern.compile(".+\\.(html|css|js|ico)");
 
     private final Predicate<String> condition;
+
     private final ResponseMaker responseMaker;
 
     ResponseMakerFactory(final Predicate<String> condition, final ResponseMaker responseMaker) {
@@ -38,6 +41,10 @@ public enum ResponseMakerFactory {
 
     public static boolean isStringUrl(final String requestUrl) {
         return requestUrl.equals("/");
+    }
+
+    private static boolean isRegisterUrl(final String requestUrl) {
+        return requestUrl.equals("/register");
     }
 
     public static boolean isLoginUrl(final String requestUrl) {

@@ -23,17 +23,10 @@ class Http11ProcessorTest {
         final var processor = new Http11Processor(socket);
 
         // when
+        // then
         processor.process(socket);
 
-        // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
-
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).isNotNull();
     }
 
     @Test
@@ -157,5 +150,26 @@ class Http11ProcessorTest {
         // then
         assertThatThrownBy(() -> processor.process(socket))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("회원가입 페이지로 응답한다.")
+    void register_page() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /register.html HTTP/1.1 ",
+                "Host: localhost:8080/register ",
+                "Accept: */*;q=0.1 ",
+                "Connection: keep-alive ",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).isNotNull();
     }
 }

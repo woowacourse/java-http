@@ -1,6 +1,6 @@
 package org.apache.coyote;
 
-import static org.apache.coyote.FilePath.findFileName;
+import static org.apache.coyote.FileName.findFileName;
 
 import java.net.URISyntaxException;
 import java.nio.file.Path;

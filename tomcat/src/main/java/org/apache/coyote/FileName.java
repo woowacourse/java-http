@@ -2,7 +2,7 @@ package org.apache.coyote;
 
 import java.util.Arrays;
 
-public enum FilePath {
+public enum FileName {
 
     DEFAULT("/", null),
     INDEX("/index.html", "index.html"),
@@ -11,13 +11,13 @@ public enum FilePath {
     private String url;
     private String filePath;
 
-    FilePath(final String url, final String fileName) {
+    FileName(final String url, final String fileName) {
         this.url = url;
         this.filePath = fileName;
     }
 
-    public static FilePath findFileName(final String requestUrl){
-        return Arrays.stream(FilePath.values())
+    public static FileName findFileName(final String requestUrl){
+        return Arrays.stream(FileName.values())
                 .filter(it -> it.url.equals(requestUrl))
                 .findFirst()
                 .orElse(NOT_FOUND);

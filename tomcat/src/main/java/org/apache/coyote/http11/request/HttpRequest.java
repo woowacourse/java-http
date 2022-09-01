@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.coyote.http11.common.HttpMethod;
 
 public class HttpRequest {
@@ -18,6 +20,15 @@ public class HttpRequest {
         final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         return new HttpRequest(RequestStartLine.from(bufferedReader.readLine()));
+    }
+
+    public Map<String, String> parseQueryString() {
+        final var parameters = new HashMap<String, String>();
+        for (var parameter : getQueryString().split("&")) {
+            final var pair = parameter.split("=");
+            parameters.put(pair[0], pair[1]);
+        }
+        return parameters;
     }
 
     public RequestStartLine getStartLine() {

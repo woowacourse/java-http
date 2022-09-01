@@ -10,8 +10,6 @@ public enum ContentType {
     ICO("ico", "image/x-icon"),
     ;
 
-    private static final String ERROR_MESSAGE = "존재하지 않는 컨텐츠 타입입니다. -> contentType: %s";
-
     private final String fileExtension;
     private final String value;
 

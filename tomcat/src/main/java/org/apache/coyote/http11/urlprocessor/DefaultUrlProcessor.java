@@ -10,7 +10,8 @@ public abstract class DefaultUrlProcessor implements UrlProcessor {
 
     protected String getResponseBody(String url) throws IOException {
         final URL resource = getClass().getClassLoader().getResource(url);
-        final String file = Objects.requireNonNull(resource).getFile();
+        Objects.requireNonNull(resource);
+        final String file = resource.getFile();
 
         return new String(Files.readAllBytes(new File(file).toPath()));
     }

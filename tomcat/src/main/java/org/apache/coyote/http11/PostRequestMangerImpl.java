@@ -26,6 +26,15 @@ public class PostRequestMangerImpl implements RequestManager {
             redirect = loginTry.generateRedirectUrl();
         }
 
+        if (fileName.getPrefix().equals("/register")) {
+            FormData registerRequestBody = requestParser.generateRequestBody();
+            RegisterTry registerTry = new RegisterTry(
+                    registerRequestBody.get("account"),
+                    registerRequestBody.get("password"),
+                    registerRequestBody.get("email"));
+            redirect = registerTry.signUp();
+        }
+
         return String.join("\r\n",
                 "HTTP/1.1 " + STATUS_CODE + " " + FOUND + " ",
                 "Location: " + redirect + " ",

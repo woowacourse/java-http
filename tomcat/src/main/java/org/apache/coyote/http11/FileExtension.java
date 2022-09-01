@@ -30,4 +30,8 @@ public enum FileExtension {
         return Stream.of(FileExtension.values())
                 .anyMatch(f -> url.endsWith(f.extension));
     }
+
+    public String getContentType() {
+        return contentType;
+    }
 }

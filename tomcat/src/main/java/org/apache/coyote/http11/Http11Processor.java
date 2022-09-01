@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
@@ -14,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.handler.LoginHandler;
+import nextstep.jwp.model.User;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -72,12 +75,25 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createOkResponseWithContent(String[] requestUrlInfo) throws IOException {
-        String fileName = requestUrlInfo[1];
-        Path filePath = findFilePath(fileName);
-        String content = new String(Files.readAllBytes(filePath));
+        String uri = requestUrlInfo[1];
+        if (FileExtension.hasFileExtension(uri)) {
+            Path filePath = findFilePath(uri);
+            String content = new String(Files.readAllBytes(filePath));
 
-        String contentType = FileExtension.findContentType(fileName);
-        return createOkResponse(contentType, content);
+            String contentType = FileExtension.findContentType(uri);
+            return createOkResponse(contentType, content);
+        }
+        if (uri.startsWith("/login")) {
+            Map<String, String> queryValues = UriParser.parseUri(uri);
+            LoginHandler loginHandler = new LoginHandler();
+            User user = loginHandler.login(queryValues);
+
+            Path filePath = findFilePath("/login.html");
+            String content = new String(Files.readAllBytes(filePath));
+            String contentType = FileExtension.HTML.getContentType();
+            return createOkResponse(contentType, content);
+        }
+        return null;
     }
 
     private Path findFilePath(String fileName) {

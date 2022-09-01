@@ -2,6 +2,7 @@ package org.apache.coyote.support;
 
 import java.io.IOException;
 import java.util.List;
+import org.apache.exception.NotFoundException;
 
 public class HttpRequestHandler {
 
@@ -32,14 +33,10 @@ public class HttpRequestHandler {
     }
 
     private String get() throws IOException {
-        ResourceResponse resourceResponse = new ResourceResponse(uri);
-        String responseBody = resourceResponse.toContent();
-        String contentType = resourceResponse.toContentType();
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                String.format("Content-Type: %s;charset=utf-8 ", contentType),
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        try {
+            return new ResourceResponse(uri).toHttpResponseMessage();
+        } catch (NotFoundException e) {
+            return ResourceResponse.ofNotFound().toHttpResponseMessage();
+        }
     }
 }

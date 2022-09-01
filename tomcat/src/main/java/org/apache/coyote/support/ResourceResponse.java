@@ -10,9 +10,19 @@ import org.apache.exception.NotFoundException;
 public class ResourceResponse {
 
     private final Path path;
+    private final HttpStatus status;
+
+    public ResourceResponse(String uri, HttpStatus status) {
+        this.path = toResourcePath(uri);
+        this.status = status;
+    }
 
     public ResourceResponse(String uri) {
-        this.path = toResourcePath(uri);
+        this(uri, HttpStatus.OK);
+    }
+
+    public static ResourceResponse ofNotFound() {
+        return new ResourceResponse("/404.html", HttpStatus.NOT_FOUND);
     }
 
     private Path toResourcePath(String uri) {
@@ -32,11 +42,14 @@ public class ResourceResponse {
         return classLoader.getResource("static" + uri);
     }
 
-    public String toContent() throws IOException {
-        return new String(Files.readAllBytes(path));
-    }
-
-    public String toContentType() throws IOException {
-        return Files.probeContentType(path);
+    public String toHttpResponseMessage() throws IOException {
+        String responseBody = new String(Files.readAllBytes(path));
+        String contentType = Files.probeContentType(path);
+        return String.join("\r\n",
+                String.format("HTTP/1.1 %s ", status.toResponse()),
+                String.format("Content-Type: %s;charset=utf-8 ", contentType),
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

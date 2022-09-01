@@ -14,6 +14,19 @@
   - [X] http://localhost:8080/login?account=gugu&password=password으로 접속하면 로그인 페이지(login.html) 페이지에 보여준다.
   - [X] Query String을 파싱해서 아이디, 비밀번호가 일치하면 회원을 조회한 결과를 출력한다.
 
+### 2단계 - 로그인 구현하기
+
+- [ ] 로그인을 할 수 있다. 
+  - [ ] 상태 응답 코드를 302로 반환한다. 
+  - [ ] 로그인에 성공하면 /index.html로 리다이렉트한다.
+  - [ ] 로그인에 실패하면 401.html로 리아디렉트한다.
+- [ ] http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)를 보여준다.
+- [ ] POST 방식으로 회원가입을 할 수 있다. 
+  - [ ] 회원가입을 완료하면 /index.html로 리다이렉트한다.
+- [ ] 로그인을 POST 방식으로 변경한다.
+- [ ] 로그인에 성공하면 HTTP Reponse의 헤더에 Set-Cookie가 존재한다.
+- [ ] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.
+
 ### 추가로 고려해볼 수 있는 부분
 
 - [ ] NOT FOUND 처리 로직을 추가한다. 

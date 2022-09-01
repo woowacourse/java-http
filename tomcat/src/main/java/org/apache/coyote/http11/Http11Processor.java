@@ -38,11 +38,10 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var input = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            BufferedReader input = new BufferedReader(new InputStreamReader(inputStream));
             HttpRequest request = HttpRequest.from(input);
-
             HttpResponse response = null;
 
             String uri = request.getUri();
@@ -62,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse main(HttpRequest request) {
-        return new HttpResponse(
+        return HttpResponse.withoutLocation(
             request.getVersion(),
             "200 OK",
             request.getUri(),
@@ -71,7 +70,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse getResource(HttpRequest request) {
-        return new HttpResponse(
+        return HttpResponse.withoutLocation(
             request.getVersion(),
             "200 OK",
             request.getUri(),
@@ -81,6 +80,16 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse login(HttpRequest request) {
         String uri = request.getUri();
+
+        if (uri.equals("/login")) {
+            return HttpResponse.withoutLocation(
+                request.getVersion(),
+                "200 OK",
+                request.getUri(),
+                readFile("/login.html")
+            );
+        }
+
         String queryString = uri.substring(uri.indexOf('?') + 1);
         Map<String, String> parsedQuery = parseQueryString(queryString);
 
@@ -90,17 +99,22 @@ public class Http11Processor implements Runnable, Processor {
         User user = InMemoryUserRepository.findByAccount(account).get();
 
         if (user.checkPassword(password)) {
-            System.out.println(user);
+            return HttpResponse.withLocation(
+                request.getVersion(),
+                "302 Found",
+                request.getUri(),
+                "/index.html",
+                ""
+            );
         } else {
-            System.out.println("비밀번호가 일치하지 않습니다.");
+            return HttpResponse.withLocation(
+                request.getVersion(),
+                "302 Found",
+                request.getUri(),
+                "/401.html",
+                ""
+            );
         }
-
-        return new HttpResponse(
-            request.getVersion(),
-            "200 OK",
-            request.getUri(),
-            readFile("/login.html")
-        );
     }
 
     private Map<String, String> parseQueryString(String query) {

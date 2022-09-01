@@ -1,25 +1,26 @@
 package study;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-import support.ApplicationContainer;
-import support.FileUtils;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
  * 웹서버는 사용자가 요청한 html 파일을 제공 할 수 있어야 한다.
- * File 클래스를 사용해서 파일을 읽어오고, 사용자에게 전달한다.
+ * File 클래스를 사용해서 파일을 읽어오고, 사용자에게 전달한다.z
  */
 @DisplayName("File 클래스 학습 테스트")
 class FileTest {
-
-    ApplicationContainer applicationContainer = new ApplicationContainer();
 
     /**
      * File 객체를 생성하려면 파일의 경로를 알아야 한다.
@@ -40,11 +41,13 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() throws URISyntaxException, FileNotFoundException {
+    void 파일의_내용을_읽는다() throws FileNotFoundException, URISyntaxException {
         final String fileName = "nextstep.txt";
 
-        final FileUtils fileUtils = applicationContainer.getSingletonObject(FileUtils.class);
-        final List<String> actual = fileUtils.readFileLines(fileName);
+        final Path path = Paths.get(getClass().getClassLoader().getResource(fileName).toURI());
+        final File file = path.toFile();
+        final BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+        final List<String> actual = bufferedReader.lines().collect(Collectors.toCollection(LinkedList::new));
 
         assertThat(actual).containsExactly("nextstep", "philz");
     }

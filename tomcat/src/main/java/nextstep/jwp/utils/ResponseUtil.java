@@ -1,4 +1,6 @@
-package org.apache.utils;
+package nextstep.jwp.utils;
+
+import nextstep.jwp.exception.NotFoundFileException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -19,7 +21,7 @@ public class ResponseUtil {
             final Path path = Paths.get(url.toURI());
             return new String(Files.readAllBytes(path));
         } catch (URISyntaxException | IOException | NullPointerException e) {
-            throw new IllegalArgumentException("파일 찾기 에러");
+            throw new NotFoundFileException("파일 찾기에 실패했습니다.");
         }
     }
 }

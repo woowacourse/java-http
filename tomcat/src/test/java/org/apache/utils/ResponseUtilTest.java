@@ -1,5 +1,7 @@
 package org.apache.utils;
 
+import nextstep.jwp.exception.NotFoundFileException;
+import nextstep.jwp.utils.ResponseUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -22,13 +24,13 @@ class ResponseUtilTest {
     }
 
     @Test
-    @DisplayName("파일이름이 없는 경우 예외를 발생한다..")
+    @DisplayName("파일이름이 없는 경우 예외를 발생한다.")
     void checkNonFile() {
         // given
         String filename = "/nonFile";
 
         // when & then
         assertThatThrownBy(() -> ResponseUtil.getResponseBody(filename, this.getClass()))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(NotFoundFileException.class);
     }
 }

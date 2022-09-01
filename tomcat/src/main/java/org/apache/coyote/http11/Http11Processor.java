@@ -11,7 +11,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Objects;
 
-import static org.apache.utils.ResponseUtil.getResponseBody;
+import static nextstep.jwp.utils.ResponseUtil.getResponseBody;
 
 public class Http11Processor implements Runnable, Processor {
 

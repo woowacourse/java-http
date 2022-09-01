@@ -6,7 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
 
-public abstract class DefaultUrlProcessor implements UrlProcessor{
+public abstract class DefaultUrlProcessor implements UrlProcessor {
 
     protected String getResponseBody(String url) throws IOException {
         final URL resource = getClass().getClassLoader().getResource(url);

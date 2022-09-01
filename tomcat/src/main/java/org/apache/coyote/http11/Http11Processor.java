@@ -33,19 +33,39 @@ public class Http11Processor implements Runnable, Processor {
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
             final var line = bufferedReader.readLine();
+
             if (line == null) {
                 throw new IllegalStateException("잘못된 요청입니다.");
             }
+
             final var fileName = line.split(" ")[1];
 
-            final var resource = getClass().getClassLoader().getResource("static/" + fileName);
+            final var fileType = fileName.split("\\.")[1];
+
+            String contentType = "";
+
+            if (fileType.equals("html")) {
+                contentType = "text/html";
+            }
+
+            if (fileType.equals("css")) {
+                contentType = "text/css";
+            }
+
+            if (fileType.equals("js")) {
+                contentType = "text/javascript";
+            }
+
+            final var resource = getClass().getClassLoader().getResource("static" + fileName);
+
+
             final var path = new File(resource.getPath()).toPath();
 
             final var responseBody = new String(Files.readAllBytes(path));
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType +";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

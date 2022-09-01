@@ -60,4 +60,28 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void css() {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/css";
+
+        assertThat(socket.output().split(";")[0]).isEqualTo(expected);
+    }
 }

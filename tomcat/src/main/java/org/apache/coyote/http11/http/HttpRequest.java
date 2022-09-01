@@ -8,38 +8,67 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class HttpRequest {
 
-	private final String value;
+	private final String method;
+	private final String url;
+	private final Map<String, String> headers;
+	private final String body;
 
 	public HttpRequest(InputStream inputStream) throws IOException {
 		BufferedReader requestReader = new BufferedReader(new InputStreamReader(inputStream));
-		List<String> requestLines = new ArrayList<>();
+
+		String[] startLine = requestReader.readLine().split(" ");
+		this.method = startLine[0];
+		this.url = startLine[1];
+		this.headers = extractHeaders(requestReader);
+		this.body = extractBody(requestReader);
+	}
+
+	private Map<String, String> extractHeaders(BufferedReader requestReader) throws IOException {
+		Map<String, String> headers = new HashMap<>();
 		while (requestReader.ready()) {
-			requestLines.add(requestReader.readLine());
+			String line = requestReader.readLine();
+			if (line.isBlank()) {
+				return headers;
+			}
+			String[] header = line.split(": ");
+			headers.put(header[0], header[1]);
 		}
-		this.value = String.join("\r\n", requestLines);
+		return headers;
+	}
+
+	private String extractBody(BufferedReader requestReader) throws IOException {
+		List<String> bodyLines = new ArrayList<>();
+		while (requestReader.ready()) {
+			bodyLines.add(requestReader.readLine());
+		}
+		return String.join("\r\n", bodyLines);
 	}
 
 	public String getUrl() {
-		return value
-			.split("\r\n")[0]
-			.split(" ")[1];
+		return url;
 	}
 
 	public boolean isStaticResourceRequest() {
-		return getUrl().contains(".");
+		return url.contains(".");
 	}
 
 	public ContentType getContentType() {
-		return ContentType.from(getUrl().split("\\.")[1]);
+		return ContentType.from(extractExtension());
+	}
+
+	private String extractExtension() {
+		return url.split("\\.")[1];
 	}
 
 	public String getQueryString(String key) {
 		return Arrays.stream(
-				getUrl().split("\\?")[1]
+				url.split("\\?")[1]
 					.split("&")
 			)
 			.collect(toMap(

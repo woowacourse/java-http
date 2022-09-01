@@ -7,12 +7,12 @@ import java.util.Objects;
 
 public enum HttpMethod {
 
-    GET("get"),
-    POST("post"),
-    PUT("put"),
-    DELETE("delete"),
-    PATCH("patch"),
-    OPTIONS("options"),
+    GET("GET"),
+    POST("POST"),
+    PUT("PUT"),
+    DELETE("DELETE"),
+    PATCH("PATCH"),
+    OPTIONS("OPTIONS"),
     ;
 
     private final String method;

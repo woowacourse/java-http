@@ -31,6 +31,10 @@ public class QueryParams {
         return new QueryParams(queryParams);
     }
 
+    public static QueryParams empty() {
+        return new QueryParams(new HashMap<>());
+    }
+
     public Optional<String> getValue(final String key) {
         return Optional.ofNullable(queryParams.get(key));
     }

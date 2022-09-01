@@ -18,21 +18,30 @@ public class HttpRequest {
     }
 
     public static HttpRequest from(final String firstLine, final List<String> headers, final String requestBody) {
-        final String[] splitFirstLine = getFirstLine(firstLine).split(" ");
+        final String[] splitFirstLine = firstLine.split(" ");
 
         final HttpMethod httpMethod = HttpMethod.from(splitFirstLine[0]);
 
         final String uriPathAndQueryString = splitFirstLine[1];
         final int queryStringFlagIndex = uriPathAndQueryString.indexOf("?");
-        final String uriPath = uriPathAndQueryString.substring(0, queryStringFlagIndex);
-        final QueryParams queryParams = QueryParams.from(uriPathAndQueryString.substring(queryStringFlagIndex + 1));
+        final String uriPath = extractUriPath(uriPathAndQueryString, queryStringFlagIndex);
+        final QueryParams queryParams = extractQueryParams(uriPathAndQueryString, queryStringFlagIndex);
 
         return new HttpRequest(httpMethod, uriPath, queryParams);
     }
 
-    private static String getFirstLine(final String httpMessage) {
-        final String[] rawHttpMessage = httpMessage.split("\r\n", 2);
-        return rawHttpMessage[0];
+    private static QueryParams extractQueryParams(final String uriPathAndQueryString, final int queryStringFlagIndex) {
+        if (queryStringFlagIndex == -1) {
+            return QueryParams.empty();
+        }
+        return QueryParams.from(uriPathAndQueryString.substring(queryStringFlagIndex + 1));
+    }
+
+    private static String extractUriPath(final String uriPathAndQueryString, final int queryStringFlagIndex) {
+        if (queryStringFlagIndex == -1) {
+            return uriPathAndQueryString;
+        }
+        return uriPathAndQueryString.substring(0, queryStringFlagIndex);
     }
 
     public HttpMethod getMethod() {

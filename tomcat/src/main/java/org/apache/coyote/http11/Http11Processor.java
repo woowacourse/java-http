@@ -13,7 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +42,15 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequestHeader httpRequestHeader = getHttpRequestHeader(inputStream);
             assert httpRequestHeader != null;
+
+            Map<String, String> queryString = httpRequestHeader.getQueryString();
+            User existedUser = InMemoryUserRepository.findByAccount(queryString.get("account"))
+                    .orElseThrow(() -> new IllegalArgumentException("아이디가 일지하지 않는다."));
+            if (!existedUser.checkPassword(queryString.get("password"))) {
+                throw new IllegalArgumentException("비밀번호가 일치히자 않는다.");
+            }
+            log.info(existedUser.toString());
+
             final String response = getResponse(httpRequestHeader);
 
             outputStream.write(response.getBytes());
@@ -50,8 +61,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponse(HttpRequestHeader httpRequestHeader) throws IOException {
-        final String requestUri = httpRequestHeader.getRequestUri();
-        System.out.println("requestUri = " + requestUri);
+        String requestUri = httpRequestHeader.getRequestUri();
+        if (!requestUri.contains(".")) {
+            requestUri += ".html";
+        }
         final URL resource = getClass().getClassLoader().getResource("static" + requestUri);
         assert resource != null;
         final Path path = new File(resource.getPath()).toPath();
@@ -93,6 +106,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private class HttpRequestHeader {
         private static final String ACCEPT = "Accept";
+        private static final String QUERY_STRING_BEGIN_DELIMITER = "?";
 
         private final String requestLine;
         private final Map<String, String> requestHeaders;
@@ -107,6 +121,17 @@ public class Http11Processor implements Runnable, Processor {
                     .split(" "))
                     .collect(Collectors.toList());
             return httpRequestMethodInformation.get(1);
+        }
+
+        public Map<String, String> getQueryString() {
+            String requestUri = getRequestUri();
+            int index = requestUri.indexOf("?");
+            String queryString = requestUri.substring(index + 1);
+            String[] dividedQueryString = queryString.split("&");
+            Map<String, String> queryStrings = Arrays.stream(dividedQueryString)
+                    .map(query -> query.split("="))
+                    .collect(Collectors.toMap(key -> key[0], value -> value[1]));
+            return queryStrings;
         }
 
         public String getAcceptHeaderValue() {

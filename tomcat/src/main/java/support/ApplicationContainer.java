@@ -8,7 +8,7 @@ import java.util.Map;
  */
 public class ApplicationContainer {
 
-    private Map<Class, Object> container = new HashMap<>();
+    private final Map<Class, Object> container = new HashMap<>();
 
     public ApplicationContainer() {
         container.put(FileUtils.class, new FileUtils());

@@ -43,16 +43,9 @@ class FileTest {
     void 파일의_내용을_읽는다() throws URISyntaxException, FileNotFoundException {
         final String fileName = "nextstep.txt";
 
-/*
-        final Path path = Paths.get(Thread.currentThread().getClass().getClassLoader().getResource(fileName).toURI());
-        final File file = path.toFile();
-        final BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
-        final List<String> actual = bufferedReader.lines().collect(Collectors.toCollection(LinkedList::new));
-*/
-
         final FileUtils fileUtils = applicationContainer.getSingletonObject(FileUtils.class);
         final List<String> actual = fileUtils.readFileLines(fileName);
 
-        assertThat(actual).containsOnly("nextstep");
+        assertThat(actual).containsExactly("nextstep", "philz");
     }
 }

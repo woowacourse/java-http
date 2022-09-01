@@ -27,9 +27,9 @@ class Http11ProcessorTest {
 
         // then
         var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
+                "HTTP/1.1 200 OK",
+                "Content-Type: text/html;charset=utf-8",
+                "Content-Length: 12",
                 "",
                 "Hello world!");
 
@@ -41,9 +41,9 @@ class Http11ProcessorTest {
     void requestHtml() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "GET /index.html HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "",
                 "");
 
@@ -56,9 +56,9 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " +body.getBytes(StandardCharsets.UTF_8).length +" \r\n" +
+        var expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/html;charset=utf-8\r\n" +
+                "Content-Length: " +body.getBytes(StandardCharsets.UTF_8).length +"\r\n" +
                 "\r\n"+
                 body;
 
@@ -70,9 +70,9 @@ class Http11ProcessorTest {
     void requestCss() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
-                "GET /css/styles.css HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "GET /css/styles.css HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "",
                 "");
 
@@ -85,9 +85,9 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
         String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/css;charset=utf-8 \r\n" +
-                "Content-Length: " +body.getBytes(StandardCharsets.UTF_8).length +" \r\n" +
+        var expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/css;charset=utf-8\r\n" +
+                "Content-Length: " +body.getBytes(StandardCharsets.UTF_8).length +"\r\n" +
                 "\r\n"+
                 body;
 
@@ -99,9 +99,9 @@ class Http11ProcessorTest {
     void requestJs() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
-                "GET /css/styles.css HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
+                "GET /css/styles.css HTTP/1.1",
+                "Host: localhost:8080",
+                "Connection: keep-alive",
                 "",
                 "");
 
@@ -114,9 +114,9 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
         String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/css;charset=utf-8 \r\n" +
-                "Content-Length: " +body.getBytes(StandardCharsets.UTF_8).length +" \r\n" +
+        var expected = "HTTP/1.1 200 OK\r\n" +
+                "Content-Type: text/css;charset=utf-8\r\n" +
+                "Content-Length: " +body.getBytes(StandardCharsets.UTF_8).length +"\r\n" +
                 "\r\n"+
                 body;
 

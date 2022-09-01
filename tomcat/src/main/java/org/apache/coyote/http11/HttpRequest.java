@@ -1,99 +1,63 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.StringTokenizer;
+import java.util.UUID;
 
 import org.apache.commons.lang3.StringUtils;
 
+import nextstep.jwp.model.Session;
+import nextstep.jwp.model.SessionManager;
+
 public class HttpRequest {
 
-    private static final String DEFAULT_PATH = "/index";
     private final HttpMethod httpMethod;
+    private final Map<String, String> queryParams;
     private final HttpStatusCode httpStatusCode;
     private final Map<String, String> httpRequestHeaders;
-    private final Map<String, String> queryParams;
-    private HttpCookie cookie;
-    private String path;
+    private final Map<String, String> bodyParams;
+    private final HttpCookie cookie;
+    private final String path;
 
-    public HttpRequest(BufferedReader bufferedReader, HttpStatusCode httpStatusCode) throws IOException {
-        String requestLine = bufferedReader.readLine();
-        httpRequestHeaders = new HashMap<>();
-        String line = bufferedReader.readLine();
-        while (!"".equals(line)) {
-            String[] headerEntity = line.replaceAll(" ", "").split(":");
-            httpRequestHeaders.put(headerEntity[0], headerEntity[1]);
-            line = bufferedReader.readLine();
-        }
-
-        StringTokenizer requestTokens = new StringTokenizer(requestLine);
-        this.httpStatusCode = httpStatusCode;
-        this.httpMethod = HttpMethod.of(requestTokens.nextToken());
-        path = requestTokens.nextToken();
-        formatPath();
-        queryParams = new HashMap<>();
-        cookie = new HttpCookie();
-
-        if (isPostRequest()) {
-            int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
-            char[] buffer = new char[contentLength];
-            bufferedReader.read(buffer, 0, contentLength);
-            String[] userInfos = new String(buffer).split("&");
-            for (String userInfo : userInfos) {
-                String[] infoEntity = userInfo.split("=");
-                queryParams.put(infoEntity[0], infoEntity[1]);
-            }
-        }
-    }
-
-    public HttpRequest(BufferedReader bufferedReader) throws IOException {
-        this(bufferedReader, HttpStatusCode.HTTP_STATUS_OK);
-    }
-
-    private HttpRequest(HttpMethod httpMethod, String uri, HttpStatusCode httpStatusCode) {
+    public HttpRequest(HttpMethod httpMethod, String path, Map<String, String> queryParams,
+        HttpStatusCode httpStatusCode, Map<String, String> httpRequestHeaders, Map<String, String> bodyParms,
+        HttpCookie cookie) {
         this.httpMethod = httpMethod;
+        this.path = path;
+        this.queryParams = queryParams;
         this.httpStatusCode = httpStatusCode;
-        httpRequestHeaders = new HashMap<>();
-        queryParams = new HashMap<>();
-        cookie = new HttpCookie();
-        path = uri;
-        formatPath();
+        this.httpRequestHeaders = httpRequestHeaders;
+        this.bodyParams = bodyParms;
+        this.cookie = cookie;
     }
 
-    public static HttpRequest of(HttpMethod httpMethod, String uri, HttpStatusCode httpStatusCode) {
-        return new HttpRequest(httpMethod, uri, httpStatusCode);
+    private boolean isGetRequest() {
+        return httpMethod.equals(HttpMethod.GET);
     }
 
-    private void formatPath() {
-        if (path.contains("?")) {
-            separateQueryParams(path);
-        }
-
-        if (path.equals("/")) {
-            path = DEFAULT_PATH;
-        }
-
-        if (!path.contains(".")) {
-            path = path + ".html";
-        }
+    private boolean isPostRequest() {
+        return httpMethod.equals(HttpMethod.POST);
     }
 
-    private void separateQueryParams(String uri) {
-        int index = uri.indexOf("?");
-        path = uri.substring(0, index);
-
-        String queryString = uri.substring(index + 1);
-        String[] queries = queryString.split("&");
-        for (String query : queries) {
-            String[] queryEntry = query.split("=");
-            queryParams.put(queryEntry[0], queryEntry[1]);
-        }
+    public boolean isValidLoginRequest() {
+        return isPostRequest() && path.startsWith("/login");
     }
 
-    public String getQueryParam(String paramName) {
-        return queryParams.get(paramName);
+    public boolean isValidRegisterRequest() {
+        return isPostRequest() && path.startsWith("/register");
+    }
+
+    public boolean isLoginRequestWithAuthorization() {
+        return isGetRequest()
+            && path.startsWith("/login")
+            && cookie.containsAttribute("JSESSIONID");
+    }
+
+    public String getCookieParam(String paramName) {
+        return cookie.getAttribute(paramName);
+    }
+
+    public String getBodyParam(String paramName) {
+        return bodyParams.get(paramName);
     }
 
     public String getStaticPath() {
@@ -109,27 +73,21 @@ public class HttpRequest {
         return "text/" + extension;
     }
 
-    public String getHttpStatusCode() {
-        return httpStatusCode.toString();
+    public HttpStatusCode getHttpStatusCode() {
+        return httpStatusCode;
     }
 
-    public boolean isPostRequest() {
-        return httpMethod.equals(HttpMethod.POST);
+    public HttpCookie getCookie() {
+        return cookie;
     }
 
-    public boolean isValidLoginRequest() {
-        return isPostRequest() && path.startsWith("/login");
+    public Session getSession() {
+        return SessionManager.getSessionManager()
+            .findSession(cookie.getAttribute("JSESSIONID"))
+            .orElse(new Session(String.valueOf(UUID.randomUUID())));
     }
 
-    public boolean isValidRegisterRequest() {
-        return isPostRequest() && path.startsWith("/register");
-    }
-
-    public void addCookie(String key, String value) {
-        cookie.addCookie(key, value);
-    }
-
-    public String getCookie() {
-        return cookie.toString();
+    public String getPath() {
+        return path;
     }
 }

@@ -11,8 +11,22 @@ public class HttpCookie {
         this.cookies = new HashMap<>();
     }
 
-    public void addCookie(String key, String value) {
-        cookies.put(key, value);
+    public static HttpCookie of(Map<String, String> cookies){
+        HttpCookie httpCookie = new HttpCookie();
+        httpCookie.putAll(cookies);
+        return httpCookie;
+    }
+
+    public void putAll(Map<String, String> cookies) {
+        this.cookies.putAll(cookies);
+    }
+
+    public String getAttribute(String name){
+        return cookies.get(name);
+    }
+
+    public boolean containsAttribute(String name){
+        return cookies.containsKey(name);
     }
 
     @Override

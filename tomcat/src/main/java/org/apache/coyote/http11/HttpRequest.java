@@ -25,7 +25,13 @@ public class HttpRequest {
         return new HttpRequest(startLine, header);
     }
 
-    public String getUri() {
+    public String uri() {
         return startLine.split(" ")[1];
+    }
+
+    public QueryString queryString() {
+        String uri = uri();
+        int index = uri.indexOf("?");
+        return QueryString.from(uri.substring(index + 1));
     }
 }

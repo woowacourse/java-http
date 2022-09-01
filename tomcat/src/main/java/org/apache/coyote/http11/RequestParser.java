@@ -2,10 +2,7 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RequestParser {
 
@@ -72,5 +69,26 @@ public class RequestParser {
     public String generateMethod() {
         System.out.println(this.rawRequest.get(0));
         return this.rawRequest.get(0).split(" ")[0];
+    }
+
+    public HttpCookie generateCookie() {
+        boolean isCookieExists = rawRequest.stream()
+                .anyMatch(each -> each.startsWith("Cookie"));
+        if (!isCookieExists) {
+            return new HttpCookie(Collections.emptyMap());
+        }
+        String[] rawCookie = rawRequest.stream()
+                .filter(each -> each.startsWith("Cookie"))
+                .findFirst()
+                .orElseGet(() -> "")
+                .replace("Cookie: ", "")
+                .split("; ");
+
+        Map<String, String> resultCookies = new HashMap<>();
+        for (String eachCookie : rawCookie) {
+            String[] parsedCookie = eachCookie.split("=");
+            resultCookies.put(parsedCookie[0], parsedCookie[1]);
+        }
+        return new HttpCookie(resultCookies);
     }
 }

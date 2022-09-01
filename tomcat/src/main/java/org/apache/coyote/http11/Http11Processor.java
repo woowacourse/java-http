@@ -75,6 +75,12 @@ public class Http11Processor implements Runnable, Processor {
         if (extension.equals("css")) {
             return "text/css";
         }
+        if (extension.equals("js")) {
+            return "text/javascript";
+        }
+        if (extension.equals("svg")) {
+            return "image/svg+xml";
+        }
         return "text/html";
     }
 

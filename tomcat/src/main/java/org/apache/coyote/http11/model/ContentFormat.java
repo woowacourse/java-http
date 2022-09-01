@@ -11,6 +11,7 @@ public enum ContentFormat {
 
     private static final int EXTENSION_INDEX = 1;
     private static final String EXTENSION_SEPARATOR = "\\.";
+
     private final String extension;
     private final String value;
 
@@ -32,10 +33,6 @@ public enum ContentFormat {
 
     private static boolean isDirectory(final String[] split) {
         return split.length < 2;
-    }
-
-    public String getExtension() {
-        return extension;
     }
 
     public String getValue() {

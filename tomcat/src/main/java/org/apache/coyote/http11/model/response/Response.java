@@ -11,10 +11,10 @@ public class Response {
     private final Headers headers;
     private final ResponseBody responseBody;
 
-    public Response(final Status status, final String url) throws IOException {
+    public Response(final Status status, final ResponseBody responseBody) throws IOException {
         this.status = status;
         this.headers = new Headers(new ArrayList<>());
-        this.responseBody = new ResponseBody(url);
+        this.responseBody = responseBody;
         this.headers.add(new Header("Content-Type", responseBody.getContentType() + ";charset=utf-8"));
         this.headers.add(new Header("Content-Length", String.valueOf(responseBody.getContentLength())));
     }

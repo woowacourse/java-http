@@ -8,9 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestProcessor;
+import org.apache.coyote.http11.request.ResourceRequestProcessor;
+import org.apache.coyote.http11.request.RootRequestProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

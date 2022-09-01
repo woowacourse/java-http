@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
-import org.assertj.core.api.Assertions;
+import org.apache.coyote.http11.request.ResourceLocator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

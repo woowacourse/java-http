@@ -1,8 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import org.apache.coyote.http11.HttpResponse;
 
 public class ResourceRequestProcessor implements HttpRequestProcessor {
 

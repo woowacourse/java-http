@@ -7,11 +7,13 @@ import static org.mockito.Mockito.verify;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -154,8 +156,7 @@ class IOStreamTest {
 
         /**
          * BufferedInputStream은 데이터 처리 속도를 높이기 위해 데이터를 버퍼에 저장한다. InputStream 객체를 생성하고 필터 생성자에 전달하면 필터에 연결된다. 버퍼 크기를 지정하지
-         * 않으면 버퍼의 기본 사이즈는 얼마일까?
-         * 👉 8192
+         * 않으면 버퍼의 기본 사이즈는 얼마일까? 👉 8192
          */
         @Test
         void 필터인_BufferedInputStream를_사용해보자() throws IOException {
@@ -185,16 +186,53 @@ class IOStreamTest {
          * 읽어올 수 있다.
          */
         @Test
-        void BufferedReader를_사용하여_문자열을_읽어온다() {
-            final String emoji = String.join("\r\n",
+        void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
+            // given
+            final String lineSeparator = "\r\n";
+            final String emoji = String.join(lineSeparator,
+                    "😀😃😄😁😆😅😂🤣🥲☺️😊",
+                    "😇🙂🙃😉😌😍🥰😘😗😙😚",
+                    "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
+                    "");
+
+            final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+
+            // when
+            final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+            final StringBuilder actual = new StringBuilder();
+
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                actual.append(line)
+                        .append(lineSeparator);
+            }
+
+            // then
+            assertThat(actual).hasToString(emoji);
+        }
+
+        @Test
+        void BufferedReader의_lines를_사용하여_문자열을_읽어온다() {
+            // given
+            final String lineSeparator = "\r\n";
+            final String emoji = String.join(lineSeparator,
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
 
+            // when
+            final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             final StringBuilder actual = new StringBuilder();
 
+            bufferedReader.lines()
+                    .forEach(line -> actual.append(line)
+                            .append(lineSeparator));
+
+            // then
             assertThat(actual).hasToString(emoji);
         }
     }

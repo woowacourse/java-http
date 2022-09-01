@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class HttpRequest {
 
-	private final String method;
+	private final HttpMethod method;
 	private final String url;
 	private final Map<String, String> headers;
 	private final String body;
@@ -19,7 +19,7 @@ public class HttpRequest {
 	public HttpRequest(InputStream inputStream) throws IOException {
 		BufferedReader requestReader = new BufferedReader(new InputStreamReader(inputStream));
 		String[] startLine = requestReader.readLine().split(" ");
-		this.method = startLine[0];
+		this.method = HttpMethod.from(startLine[0]);
 		this.url = startLine[1];
 		this.headers = extractHeaders(requestReader);
 		this.body = extractBody(requestReader);
@@ -87,7 +87,7 @@ public class HttpRequest {
 	}
 
 	public String getMethod() {
-		return method;
+		return method.name();
 	}
 
 	@Override

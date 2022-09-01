@@ -25,16 +25,6 @@ public class HttpRequest {
         return new HttpRequest(startLine, header);
     }
 
-    public String uri() {
-        return startLine.split(" ")[1];
-    }
-
-    public QueryString queryString() {
-        String uri = uri();
-        int index = uri.indexOf("?");
-        return QueryString.from(uri.substring(index + 1));
-    }
-
     public String path() {
         String uri = uri();
         int index = uri.indexOf("?");
@@ -42,5 +32,18 @@ public class HttpRequest {
             return uri;
         }
         return uri.substring(0, index);
+    }
+
+    public QueryString queryString() {
+        String uri = uri();
+        String[] pathAndQueryString = uri.split("\\?");
+        if (pathAndQueryString.length <= 1) {
+            return new QueryString(new HashMap<>());
+        }
+        return QueryString.from(pathAndQueryString[1]);
+    }
+
+    private String uri() {
+        return startLine.split(" ")[1];
     }
 }

@@ -13,6 +13,9 @@ public class QueryString {
 
     public static QueryString from(String value) {
         HashMap<String, String> queryString = new HashMap<>();
+        if (value.isEmpty()) {
+            return new QueryString(queryString);
+        }
         String[] strings = value.split("&");
         for (String string : strings) {
             String[] keyValue = string.split("=");
@@ -23,5 +26,9 @@ public class QueryString {
 
     public String get(String key) {
         return value.get(key);
+    }
+
+    public boolean isEmpty() {
+        return value.isEmpty();
     }
 }

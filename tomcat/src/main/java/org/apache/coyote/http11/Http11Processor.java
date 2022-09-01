@@ -6,12 +6,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import nextstep.jwp.Handler.LoginHandler;
+import nextstep.jwp.Handler.StaticHandler;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.StaticFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,36 +37,27 @@ public class Http11Processor implements Runnable, Processor {
             List<String> httpRequestLines = getHttpRequestLines(inputStream);
             HttpRequest request = HttpRequest.from(httpRequestLines);
 
-            handle(request, outputStream);
+            String response = handle(request);
+            outputStream.write(response.getBytes());
+            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void handle(HttpRequest request, OutputStream outputStream) throws IOException {
+    private String handle(HttpRequest request) throws IOException {
         String path = request.path();
         if (path.contains(".")) {
-            handleStatic(path, outputStream);
-            return;
+            return StaticHandler.handleStatic(path);
         }
-        handleApi(path, outputStream);
+        return handleApi(request);
     }
 
-    private void handleStatic(String path, OutputStream outputStream) throws IOException {
-        ContentType contentType = ContentType.from(path);
-        String responseBody = getBody(path);
-        String response = getResponse(contentType, responseBody);
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
-    }
-
-    private void handleApi(String path, OutputStream outputStream) throws IOException {
-        if (path.equals("/login")) {
-            handleStatic("/login.html", outputStream);
-            return;
+    private String handleApi(HttpRequest request) throws IOException {
+        if (request.path().equals("/login")) {
+            return LoginHandler.handle(request);
         }
-        handleStatic("/404.html", outputStream);
+        return StaticHandler.handleStatic("/404.html");
     }
 
     private List<String> getHttpRequestLines(InputStream inputStream) throws IOException {
@@ -76,18 +67,5 @@ public class Http11Processor implements Runnable, Processor {
             collect.add(bufferedReader.readLine());
         }
         return collect;
-    }
-
-    private String getBody(String uri) throws IOException {
-        return new String(Files.readAllBytes(StaticFile.findByUrl(uri).toPath()));
-    }
-
-    private String getResponse(ContentType contentType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType.value() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
     }
 }

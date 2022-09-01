@@ -34,7 +34,7 @@ public enum ContentType {
         return Arrays.stream(values())
                 .filter(contentType -> contentType.match(uri))
                 .findAny()
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(() -> new IllegalArgumentException(uri + "에 해당하는 contentType은 없습니다."));
     }
 
     public String value() {

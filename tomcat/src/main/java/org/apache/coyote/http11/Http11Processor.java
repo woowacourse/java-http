@@ -1,13 +1,14 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.HttpRequestMessage;
+import org.apache.HttpResponseMessage;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,34 +33,53 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final String responseBody = convertStaticResourceToString(inputStream);
+            HttpRequestMessage httpRequestMessage = new HttpRequestMessage(inputStream);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+//            if (httpRequestMessage.isStaticResourceRequest()) {
+//                String body = Files.readString(
+//                        Paths.get("./tomcat/src/main/resources/static" + httpRequestMessage.getUri())
+//                );
+//                Map<String, String> headerMap = new HashMap<>();
+//                headerMap.put("Content-Type", "text/" + httpRequestMessage.getStaticResourceType() + ";charset=utf-8");
+//                headerMap.put("Content-Length", String.valueOf(body.getBytes().length));
+//                HttpResponseMessage httpResponseMessage = new HttpResponseMessage(
+//                        "HTTP/1.1", "200 OK", headerMap, body
+//                );
+//                outputStream.write(httpResponseMessage.generateMessage().getBytes());
+//                outputStream.flush();
+//
+//                log.info("1");
+//            } else if (httpRequestMessage.getUri().equals("/")) {
+//                String body = "Hello world!";
+//                Map<String, String> headerMap = new HashMap<>();
+//                headerMap.put("Content-Type", "text");
+//                headerMap.put("Content-Length", String.valueOf(body.getBytes().length));
+//                HttpResponseMessage httpResponseMessage = new HttpResponseMessage(
+//                        "HTTP/1.1", "200 OK", headerMap, body
+//                );
+//                outputStream.write(httpResponseMessage.generateMessage().getBytes());
+//                outputStream.flush();
+//
+//                log.info("2");
+//            }
 
-            log.info("HTTP Response Message\n" + response.split("\r\n")[0]);
+            String body = "Hello world!";
+            Map<String, String> headerMap = new HashMap<>();
+            headerMap.put("Content-Type", "text/html;charset=utf-8");
+            headerMap.put("Content-Length", String.valueOf(body.getBytes().length));
+            HttpResponseMessage httpResponseMessage = new HttpResponseMessage(
+                    "HTTP/1.1", "200 OK", headerMap, body
+            );
 
-            outputStream.write(response.getBytes());
+            System.out.println("###");
+            System.out.println(httpResponseMessage.generateMessage());
+
+            outputStream.write(httpResponseMessage.generateMessage().getBytes());
             outputStream.flush();
+
+            log.info("3");
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String convertStaticResourceToString(final InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        String headerFirstLine = bufferedReader.readLine();
-        String staticResourceLocation = headerFirstLine.split(" ")[1];
-
-        log.info("HTTP Request Message\n" + headerFirstLine);
-
-        if (staticResourceLocation.equals("/")) {
-            return "Hello world!";
-        }
-        return Files.readString(Paths.get("./tomcat/src/main/resources/static" + staticResourceLocation));
     }
 }

@@ -84,4 +84,24 @@ class Http11ProcessorTest {
 
         assertThat(socket.output().split(";")[0]).isEqualTo(expected);
     }
+
+    @Test
+    void queryStringParsing() {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("gugu");
+    }
 }

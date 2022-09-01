@@ -18,9 +18,9 @@ import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.header.ContentType;
-import org.apache.coyote.header.StatusCode;
-import org.apache.coyote.response.Response;
+import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.response.header.ContentType;
+import org.apache.coyote.http11.response.header.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,8 +141,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResource(final String resourcePath) throws URISyntaxException, IOException {
-        final URI resource = getClass()
-                .getClassLoader()
+        final URI resource = Thread.currentThread()
+                .getContextClassLoader()
                 .getResource(resourcePath)
                 .toURI();
         return new String(Files.readAllBytes(Path.of(resource)));

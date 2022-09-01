@@ -1,10 +1,10 @@
-package org.apache.coyote.response;
+package org.apache.coyote.http11.response;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.header.ContentType;
-import org.apache.coyote.header.StatusCode;
+import org.apache.coyote.http11.response.header.ContentType;
+import org.apache.coyote.http11.response.header.StatusCode;
 
 public class Response {
 

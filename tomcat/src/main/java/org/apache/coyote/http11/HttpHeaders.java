@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class HttpHeaders {
 
@@ -28,6 +29,13 @@ public class HttpHeaders {
 
     public Optional<String> getValue(final String key) {
         return Optional.ofNullable(headers.get(key));
+    }
+
+    public String toHttpMessageHeader() {
+        return headers.keySet()
+                .stream()
+                .map(key -> key + KEY_VALUE_SEPARATOR + headers.get(key))
+                .collect(Collectors.joining("\r\n"));
     }
 
     @Override

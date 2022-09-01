@@ -1,8 +1,10 @@
 package org.apache.coyote.http11.request;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.QueryParams;
@@ -19,18 +21,19 @@ class HttpRequestTest {
         final List<String> headerPart = List.of(
                 "Host: localhost:8080",
                 "Connection: keep-alive",
-                "Content-Length: 80",
-                "Content-Type: application/x-www-form-urlencoded",
-                "Accept: */*");
+                "Content-Type: application/json");
         final String requestBody = "account=gugu&password=password&email=hkkang%40woowahan.com";
         final HttpRequest request = HttpRequest.from(firstLine, headerPart, requestBody);
         final QueryParams queryParams = request.getQueryParams();
-
+        final HttpHeaders headers = request.getHeaders();
         assertAll(
-                () -> Assertions.assertThat(request.getMethod()).isSameAs(HttpMethod.GET),
-                () -> Assertions.assertThat(request.getUriPath()).isEqualTo("/register"),
-                () -> Assertions.assertThat(queryParams.getValue("name").get()).isEqualTo("alex"),
-                () -> Assertions.assertThat(queryParams.getValue("age").get()).isEqualTo("7")
+                () -> assertThat(request.getMethod()).isSameAs(HttpMethod.GET),
+                () -> assertThat(request.getUriPath()).isEqualTo("/register"),
+                () -> assertThat(queryParams.getValue("name").get()).isEqualTo("alex"),
+                () -> assertThat(queryParams.getValue("age").get()).isEqualTo("7"),
+                () -> assertThat(headers.getValue("Host").get()).isEqualTo("localhost:8080"),
+                () -> assertThat(headers.getValue("Connection").get()).isEqualTo("keep-alive"),
+                () -> assertThat(headers.getValue("Content-Type").get()).isEqualTo("application/json")
         );
     }
 }

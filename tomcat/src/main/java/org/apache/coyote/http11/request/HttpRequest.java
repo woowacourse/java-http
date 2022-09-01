@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.List;
 import java.util.Objects;
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequest {
@@ -9,13 +10,14 @@ public class HttpRequest {
     private final HttpMethod method;
     private final String uriPath;
     private final QueryParams queryParams;
+    private final HttpHeaders headers;
 
-    private HttpRequest(final HttpMethod method,
-                        final String uriPath,
-                        final QueryParams queryParams) {
+    public HttpRequest(final HttpMethod method, final String uriPath, final QueryParams queryParams,
+                       final HttpHeaders headers) {
         this.method = method;
         this.uriPath = uriPath;
         this.queryParams = queryParams;
+        this.headers = headers;
     }
 
     public static HttpRequest from(final String firstLine, final List<String> headers, final String requestBody) {
@@ -28,7 +30,7 @@ public class HttpRequest {
         final String uriPath = extractUriPath(uriPathAndQueryString, queryStringFlagIndex);
         final QueryParams queryParams = extractQueryParams(uriPathAndQueryString, queryStringFlagIndex);
 
-        return new HttpRequest(httpMethod, uriPath, queryParams);
+        return new HttpRequest(httpMethod, uriPath, queryParams, HttpHeaders.from(headers));
     }
 
     private static QueryParams extractQueryParams(final String uriPathAndQueryString, final int queryStringFlagIndex) {
@@ -55,6 +57,10 @@ public class HttpRequest {
 
     public QueryParams getQueryParams() {
         return queryParams;
+    }
+
+    public HttpHeaders getHeaders() {
+        return headers;
     }
 
     @Override

@@ -4,10 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +14,7 @@ import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import nextstep.jwp.util.ResourceLoader;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.response.header.ContentType;
@@ -91,11 +89,11 @@ public class Http11Processor implements Runnable, Processor {
         try {
             return getResponse(header, path, queryParams);
         } catch (NotFoundException e) {
-            return new Response(ContentType.HTML, StatusCode.NOT_FOUND, getResource("static/404.html"));
+            return new Response(ContentType.HTML, StatusCode.NOT_FOUND, ResourceLoader.getStaticResource("/404.html"));
         } catch (IllegalArgumentException e) {
             return new Response(ContentType.HTML, StatusCode.BAD_REQUEST, "잘못된 요청입니다.");
         } catch (UnauthorizedException e) {
-            return new Response(ContentType.HTML, StatusCode.UNAUTHORIZED, getResource("static/401.html"));
+            return new Response(ContentType.HTML, StatusCode.UNAUTHORIZED, ResourceLoader.getStaticResource("/401.html"));
         }
     }
 
@@ -130,7 +128,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (path.contains(".")) {
-            return new Response(ContentType.of(parseContentType(header)), StatusCode.OK, getResource("static" + path));
+            return new Response(ContentType.of(parseContentType(header)), StatusCode.OK, ResourceLoader.getStaticResource(path));
         }
 
         if (path.equals("/login")) {
@@ -140,17 +138,9 @@ public class Http11Processor implements Runnable, Processor {
         throw new NotFoundException("페이지를 찾을 수 없습니다.");
     }
 
-    private String getResource(final String resourcePath) throws URISyntaxException, IOException {
-        final URI resource = Thread.currentThread()
-                .getContextClassLoader()
-                .getResource(resourcePath)
-                .toURI();
-        return new String(Files.readAllBytes(Path.of(resource)));
-    }
-
     private Response login(final Map<String, String> queryParams) throws URISyntaxException, IOException {
         if (queryParams.isEmpty()) {
-            return new Response(ContentType.HTML, StatusCode.OK, getResource("static/login.html"));
+            return new Response(ContentType.HTML, StatusCode.OK, ResourceLoader.getStaticResource("/login.html"));
         }
 
         if (!queryParams.containsKey("account") || !queryParams.containsKey("password")) {

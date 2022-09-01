@@ -1,5 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
+import nextstep.jwp.exception.NotFoundUserException;
 import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
@@ -138,5 +139,76 @@ class Http11ProcessorTest {
         // when & then
         assertThatThrownBy(() -> processor.process(socket))
             .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    void login() throws IOException {
+        //given
+        final String httpRequest= String.join("\r\n",
+            "GET /login?account=gugu&password=password HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Accept: text/html;q=0.1 ",
+            "Connection: keep-alive",
+            "",
+            "");
+
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        var expected = String.join("\r\n",
+            "HTTP/1.1 200 OK ",
+            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Length: " + responseBody.getBytes().length + " ",
+            "",
+            responseBody);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    void failed_login_when_not_have_id() {
+        //given
+        final String httpRequest= String.join("\r\n",
+            "GET /login?account=rookie&password=password HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Accept: text/html;q=0.1 ",
+            "Connection: keep-alive",
+            "",
+            "");
+
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when & then
+        assertThatThrownBy(() -> processor.process(socket))
+            .isInstanceOf(NotFoundUserException.class);
+    }
+
+    @Test
+    void failed_login_when_wrong_password() {
+        //given
+        final String httpRequest= String.join("\r\n",
+            "GET /login?account=gugu&password=wrong HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Accept: text/html;q=0.1 ",
+            "Connection: keep-alive",
+            "",
+            "");
+
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when & then
+        assertThatThrownBy(() -> processor.process(socket))
+            .isInstanceOf(NotFoundUserException.class);
     }
 }

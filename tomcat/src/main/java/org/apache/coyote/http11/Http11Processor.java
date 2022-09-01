@@ -35,26 +35,12 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader inputBufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String uriPath = inputBufferedReader.readLine().split(" ")[1];
 
-            var responseBody = "Hello world!";
-            String contentType = "text/html";
-            if (!uriPath.equals("/")) {
-                String extension = uriPath.split("\\.")[1];
-                if (extension.equals("css")) {
-                    contentType = "text/css";
-                }
-                if (extension.equals("js")) {
-                    contentType = "application/x-javascript";
-                }
-                if (extension.equals("ico")) {
-                    contentType = "image/x-icon";
-                }
-                String fileName = "static" + uriPath;
-                final URL resource = getClass().getClassLoader().getResource(fileName);
-                final File file = Paths.get(resource.toURI()).toFile();
-                responseBody = new String(Files.readAllBytes(file.toPath()));
-            }
+            String uriPath = inputBufferedReader.readLine().split(" ")[1];
+            
+            var responseBody = getResponseBody(uriPath);
+            String contentType = getContentType(uriPath);
+
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: " + contentType + ";charset=utf-8 ",
@@ -67,5 +53,32 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getResponseBody(String uriPath) throws URISyntaxException, IOException {
+        if (!uriPath.equals("/")) {
+            String fileName = "static" + uriPath;
+            final URL resource = getClass().getClassLoader().getResource(fileName);
+            final File file = Paths.get(resource.toURI()).toFile();
+            return new String(Files.readAllBytes(file.toPath()));
+        }
+        return "Hello world!";
+    }
+
+    private String getContentType(String uriPath) {
+        if (uriPath.equals("/")) {
+            return "text/html";
+        }
+        String extension = uriPath.split("\\.")[1];
+        if (extension.equals("css")) {
+            return "text/css";
+        }
+        if (extension.equals("js")) {
+            return "application/x-javascript";
+        }
+        if (extension.equals("ico")) {
+            return "image/*";
+        }
+        return "text/html";
     }
 }

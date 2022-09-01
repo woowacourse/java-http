@@ -37,18 +37,36 @@ public class Http11Processor implements Runnable, Processor {
             List<String> httpRequestLines = getHttpRequestLines(inputStream);
             HttpRequest request = HttpRequest.from(httpRequestLines);
 
-            String uri = request.uri();
-
-            ContentType contentType = ContentType.from(uri);
-            String responseBody = getBody(request.uri());
-
-            String response = getResponse(contentType, responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            handle(request, outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void handle(HttpRequest request, OutputStream outputStream) throws IOException {
+        String path = request.path();
+        if (path.contains(".")) {
+            handleStatic(path, outputStream);
+            return;
+        }
+        handleApi(path, outputStream);
+    }
+
+    private void handleStatic(String path, OutputStream outputStream) throws IOException {
+        ContentType contentType = ContentType.from(path);
+        String responseBody = getBody(path);
+        String response = getResponse(contentType, responseBody);
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private void handleApi(String path, OutputStream outputStream) throws IOException {
+        if (path.equals("/login")) {
+            handleStatic("/login.html", outputStream);
+            return;
+        }
+        handleStatic("/404.html", outputStream);
     }
 
     private List<String> getHttpRequestLines(InputStream inputStream) throws IOException {

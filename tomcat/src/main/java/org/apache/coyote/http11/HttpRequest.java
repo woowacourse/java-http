@@ -34,4 +34,13 @@ public class HttpRequest {
         int index = uri.indexOf("?");
         return QueryString.from(uri.substring(index + 1));
     }
+
+    public String path() {
+        String uri = uri();
+        int index = uri.indexOf("?");
+        if (index == -1) {
+            return uri;
+        }
+        return uri.substring(0, index);
+    }
 }

@@ -14,6 +14,7 @@ import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import org.apache.coyote.ContentType;
 import org.apache.coyote.FilePath;
 import org.apache.coyote.Processor;
 import org.apache.coyote.QueryStringHandler;
@@ -51,23 +52,12 @@ public class Http11Processor implements Runnable, Processor {
             FilePath filePath = FilePath.from(uri);
 
             var responseBody = getResponseBody(filePath.getValue());
-            String contentType = getContentType(filePath.getValue());
 
-            outputStream.write(getResponse(contentType, responseBody).getBytes());
+            outputStream.write(getResponse(ContentType.find(filePath.getValue()), responseBody).getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String getFilePath(String uri) {
-        if (uri.contains("?")) {
-            uri = uri.split("\\?")[0];
-        }
-        if (!uri.contains(".") && !uri.equals("/")) {
-            uri += ".html";
-        }
-        return uri;
     }
 
     private String getResponseBody(String uriPath) throws URISyntaxException, IOException {
@@ -80,27 +70,11 @@ public class Http11Processor implements Runnable, Processor {
         return new String(Files.readAllBytes(file.toPath()));
     }
 
-    private String getContentType(String uriPath) {
-        if (uriPath.equals("/")) {
-            return "text/html";
-        }
-        String extension = uriPath.split("\\.")[1];
-        if (extension.equals("css")) {
-            return "text/css";
-        }
-        if (extension.equals("js")) {
-            return "application/x-javascript";
-        }
-        if (extension.equals("ico")) {
-            return "image/x-icon";
-        }
-        return "text/html";
-    }
 
-    private String getResponse(String contentType, String responseBody) {
+    private String getResponse(ContentType contentType, String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Type: " + contentType.getType() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

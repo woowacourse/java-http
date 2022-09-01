@@ -20,3 +20,8 @@ start line = `HTTP Method + URL + HTTP version`
 
 * HTTP 메서드가 올바르지 않은 경우: 405 Method Not Allowed 응답
 * 존재하지 않는 자원을 요청하는 경우: 404 Not Found 응답과 함께 404.html을 응답
+
+
+### TODO
+
+[ ] requestURI를 이용하여 resource 파일 찾기

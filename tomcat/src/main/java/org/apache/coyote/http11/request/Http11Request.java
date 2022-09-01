@@ -22,4 +22,14 @@ public class Http11Request {
     public String getUrl() {
         return url;
     }
+
+    @Override
+    public String toString() {
+        return "Http11Request{" +
+                "method='" + method + '\'' +
+                ", url='" + url + '\'' +
+                ", header=" + header +
+                ", body='" + body + '\'' +
+                '}';
+    }
 }

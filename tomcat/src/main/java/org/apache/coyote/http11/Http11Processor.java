@@ -36,6 +36,7 @@ public class Http11Processor implements Runnable, Processor {
 
     public void get(Http11Request request, OutputStream outputStream) throws IOException {
         Http11Response response = makeResponse(request);
+
         outputStream.write(response.toMessage().getBytes());
         outputStream.flush();
     }
@@ -62,10 +63,11 @@ public class Http11Processor implements Runnable, Processor {
     private Http11Response generateResourceResponse(Http11Request request) {
         String url = request.getUrl();
         URL resource = getClass().getClassLoader().getResource("static" + url);
-
+        String extension = url.substring(url.lastIndexOf(".")+1);
+        String contentType = generateContentType(extension);
         try {
             Map<String, String> headers = new LinkedHashMap<>();
-            headers.put("Content-Type", "text/html;charset=utf-8");
+            headers.put("Content-Type", contentType + ";charset=utf-8");
             headers.put("Content-Length", Long.toString(new File(resource.getFile()).length()));
 
             Http11Response response = new Http11Response("HTTP/1.1", 200, "OK",
@@ -76,45 +78,63 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private String generateContentType(String extension) {
+        if (extension.equals("css")) {
+            return "text/css";
+        }
+        if (extension.equals("js")) {
+            return "application/javascript";
+        }
+        if (extension.equals("html")) {
+            return "text/html";
+        }
+
+        return "text/html";
+    }
+
     @Override
     public void process(final Socket connection){
 
-        try (InputStream inputStream = connection.getInputStream();
-        OutputStream outputStream = connection.getOutputStream();) {
-            Http11Request request = makeRequest(connection);
+        try (
+            InputStream inputStream = connection.getInputStream();
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            OutputStream outputStream = connection.getOutputStream();
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        ) {
+
+            Http11Request request = makeRequest(bufferedReader);
             get(request, outputStream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Http11Request makeRequest(Socket connection) {
-        try (InputStream inputStream = connection.getInputStream();
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-        ) {
-            String[] rawStart = bufferedReader.readLine().split(" ");
-            String method = rawStart[0];
-            String url = rawStart[1];
+    private Http11Request makeRequest(BufferedReader bufferedReader) throws IOException {
+        String[] rawStart = bufferedReader.readLine().split(" ");
+        String method = rawStart[0];
+        String url = rawStart[1];
 
-            Map<String, String> headers = new HashMap<>();
-            String data;
-            while (!(data = bufferedReader.readLine()).equals("")) {
-                String[] header = data.split(" ");
-                headers.put(header[0].strip(), header[1].strip());
+        Map<String, String> headers = new HashMap<>();
+        while (true) {
+            String data = bufferedReader.readLine();
+            if (data == null || data.equals("")) {
+                break;
             }
-
-            StringBuilder bodyBuilder = new StringBuilder();
-            while ((data = bufferedReader.readLine()) != null) {
-                bodyBuilder.append(data);
-                bodyBuilder.append("\r\n");
-            }
-            String body = bodyBuilder.toString();
-
-            return new Http11Request(method, url, headers, body);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            String[] header = data.split(" ");
+            headers.put(header[0].strip(), header[1].strip());
         }
 
+//            StringBuilder bodyBuilder = new StringBuilder();
+//            System.out.println("11555222");
+//            while (bufferedReader.ready() && (data = bufferedReader.readLine()) != null) {
+//                System.out.println(data);
+//                bodyBuilder.append(data);
+//                bodyBuilder.append("\r\n");
+//            }
+//
+//            System.out.println("115559992");
+//            String body = bodyBuilder.toString();
+
+        return new Http11Request(method, url, headers, "");
     }
 }

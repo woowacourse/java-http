@@ -29,6 +29,7 @@ public class Http11Response {
         }
         stringBuilder.append("\r\n");
         stringBuilder.append(body);
+        stringBuilder.append("\r\n");
 
         return stringBuilder.toString();
     }

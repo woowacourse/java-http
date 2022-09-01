@@ -11,6 +11,8 @@
   - [X] css: text/css
   - [X] js: application/javascript
 - [ ] uri의 QueryString을 파싱하는 기능이 있다.
+  - [X] http://localhost:8080/login?account=gugu&password=password으로 접속하면 로그인 페이지(login.html) 페이지에 보여준다.
+  - [ ] Query String을 파싱해서 아이디, 비밀번호가 일치하면 회원을 조회한 결과를 출력한다.
 
 ### 추가로 고려해볼 수 있는 부분
 

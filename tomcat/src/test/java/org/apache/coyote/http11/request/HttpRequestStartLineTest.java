@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.junit.jupiter.api.Test;
 
-class RequestStartLineTest {
+class HttpRequestStartLineTest {
 
     @Test
     void 입력_문자열이_blank면_예외를_던진다() {

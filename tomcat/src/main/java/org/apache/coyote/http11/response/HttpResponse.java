@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.common.StaticResource;
 
 public class HttpResponse {

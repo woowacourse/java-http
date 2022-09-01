@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.coyote.http11.common.HttpStatus;
 import org.junit.jupiter.api.Test;
 
 class StatusLineTest {

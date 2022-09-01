@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.common.HttpStatus;
+
 public class StatusLine {
 
     private final String version;

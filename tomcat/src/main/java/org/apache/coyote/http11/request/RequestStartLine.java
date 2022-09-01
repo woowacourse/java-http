@@ -2,16 +2,17 @@ package org.apache.coyote.http11.request;
 
 import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.http11.common.HttpMethod;
 
 public class RequestStartLine {
 
     private final HttpMethod method;
-    private final String path;
+    private final String uri;
     private final String version;
 
-    public RequestStartLine(final HttpMethod method, final String path, final String version) {
+    public RequestStartLine(HttpMethod method, String uri, String version) {
         this.method = method;
-        this.path = path;
+        this.uri = uri;
         this.version = version;
     }
 
@@ -43,8 +44,16 @@ public class RequestStartLine {
         return method;
     }
 
+    public String getUri() {
+        return uri;
+    }
+
     public String getPath() {
-        return path;
+        return uri.split("\\?")[0];
+    }
+
+    public String getQueryString() {
+        return uri.split("\\?")[1];
     }
 
     public String getVersion() {

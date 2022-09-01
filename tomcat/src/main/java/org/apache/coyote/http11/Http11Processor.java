@@ -1,7 +1,9 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.HttpRequest;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Map;
+import java.util.Optional;
 
 import static nextstep.jwp.utils.RequestUtil.getResponseBody;
 
@@ -55,8 +58,16 @@ public class Http11Processor implements Runnable, Processor {
 
     private void logParams(final HttpRequest httpRequest) {
         final Map<String, String> params = httpRequest.getParams();
-        if (params != null) {
+        if (!params.isEmpty() && checkUser(params)) {
             log.info("request uri : {}. query param : {}", httpRequest.getPath(), params);
         }
+    }
+
+    private boolean checkUser(final Map<String, String> params) {
+        final String account = params.get("account");
+        final String password = params.get("password");
+        Optional<User> optionalUser = InMemoryUserRepository.findByAccount(account);
+        return optionalUser.filter(user -> user.checkPassword(password))
+                .isPresent();
     }
 }

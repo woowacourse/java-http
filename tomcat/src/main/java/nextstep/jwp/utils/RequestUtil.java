@@ -48,7 +48,7 @@ public class RequestUtil {
         if (path.contains("?")) {
             path = path.substring(0, uri.indexOf("?"));
         }
-        if (!path.contains(".")) {
+        if (!path.contains(".") && !path.equals("/")) {
             path += DEFAULT_EXTENSION;
         }
         return path;

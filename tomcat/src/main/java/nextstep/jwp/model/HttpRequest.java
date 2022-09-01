@@ -30,7 +30,7 @@ public class HttpRequest {
     public static HttpRequest of(final String requestLine) {
         List<String> requests = Arrays.asList(Objects.requireNonNull(requestLine).split(" "));
         validateRequestSize(requests);
-        final var uri = Objects.requireNonNull(requestLine).split(" ")[1];
+        final var uri = requests.get(1);
         final var path = calculatePath(uri);
         final var params = getParam(uri);
         final var content = Content.getType(getExtension(path));

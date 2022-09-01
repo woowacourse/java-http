@@ -4,7 +4,7 @@ import java.util.stream.Stream;
 
 public enum FileExtension {
 
-    HTML("html", "text/html;charset=utf-8"),
+    HTML("html", "text/html"),
     JS("js", "text/javascript"),
     CSS("css", "text/css");
 

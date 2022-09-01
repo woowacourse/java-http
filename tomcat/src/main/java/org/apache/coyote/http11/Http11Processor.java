@@ -41,8 +41,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            HttpRequest httpRequest = createHttpRequest(bufferedReader);
-
+            final HttpRequest httpRequest = createHttpRequest(bufferedReader);
             final var response = createResponse(httpRequest);
 
             outputStream.write(response.getBytes());
@@ -67,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String createResponse(HttpRequest httpRequest) throws IOException {
         if (httpRequest.getUri().equals("/")) {
-            return createOkResponse("text/html;charset=utf-8", "Hello world!");
+            return createOkResponse("text/html", "Hello world!");
         }
         return createOkResponseWithContent(httpRequest.getUri());
     }
@@ -75,7 +74,7 @@ public class Http11Processor implements Runnable, Processor {
     private String createOkResponse(String contentType, String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType,
+                "Content-Type: " + contentType + ";charset=utf-8",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

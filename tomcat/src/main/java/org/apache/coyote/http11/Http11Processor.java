@@ -8,8 +8,11 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.NoSuchElementException;
 import java.util.Objects;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +41,13 @@ public class Http11Processor implements Runnable, Processor {
 
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             String line = bufferedReader.readLine();
+            String uri = line.split(" ")[1];
 
-            URL resource = getClass().getClassLoader().getResource("static" + line.split(" ")[1]);
+            if(isLoginRequest(uri)) {
+                uri = uri.substring(0, uri.lastIndexOf("?")) + ".html";
+            }
+
+            URL resource = getClass().getClassLoader().getResource("static" + uri);
 
             String fileName = Objects.requireNonNull(resource).getFile();
             String extension = fileName.substring(fileName.lastIndexOf(".") + 1);
@@ -60,5 +68,30 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private boolean isLoginRequest(String uri) {
+        int index = uri.indexOf("?");
+        if(index == -1) {
+            return false;
+        }
+
+        String path = uri.substring(0, index);
+        if (!"/login".equals(path)) {
+            return false;
+        }
+
+        String queryString = uri.substring(index + 1);
+        String[] query = queryString.split("&");
+
+        String account = query[0].split("=")[1];
+        String password = query[1].split("=")[1];
+
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(NoSuchElementException::new);
+
+        System.out.println("user : " + user);
+
+        return "gugu".equals(account) && "password".equals(password);
     }
 }

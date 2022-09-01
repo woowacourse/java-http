@@ -11,8 +11,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.exception.NoSuchUserException;
+import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -65,6 +65,7 @@ public class Http11Processor implements Runnable, Processor {
     private String getResponseBody(final RequestUri requestUri) throws IOException {
         if (requestUri.hasQueryParams()) {
             User user = getUserByAccount(requestUri.findQueryParamValue("account"));
+            validateUserPassword(requestUri, user);
             log.info("user : " + user);
         }
         if (!requestUri.getUri().equals("/")) {
@@ -76,6 +77,12 @@ public class Http11Processor implements Runnable, Processor {
     private static User getUserByAccount(final String account) {
         return InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new NoSuchUserException("존재하지 않는 회원입니다."));
+    }
+
+    private static void validateUserPassword(final RequestUri requestUri, final User user) {
+        if (user.checkPassword(requestUri.findQueryParamValue("password"))) {
+            throw new NoSuchUserException("비밀번호가 일치하지 않습니다.");
+        }
     }
 
     private String readResourceFile(final String resourcePath) throws IOException {

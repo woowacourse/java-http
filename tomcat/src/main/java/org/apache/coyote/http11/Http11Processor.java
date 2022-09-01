@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import nextstep.jwp.model.Request;
 import nextstep.jwp.vo.RequestMethod;
 import org.apache.coyote.Processor;
@@ -11,8 +13,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 

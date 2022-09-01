@@ -18,8 +18,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String WELCOME_MESSAGE = "Hello world!";
-    private static final String HTML_CONTENT_TYPE = "text/html";
-    private static final String CSS_CONTENT_TYPE = "text/css";
+    private static final String TEXT_HTML = "text/html";
+    private static final String TEXT_CSS = "text/css";
+    private static final String APPLICATION_JAVASCRIPT = "application/javascript";
 
     private final Socket connection;
 
@@ -73,11 +74,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getContentType(final String requestUri) {
-        String contentType = HTML_CONTENT_TYPE;
+        String contentType = TEXT_HTML;
 
-        final boolean isCSS = requestUri.contains(".css");
-        if (isCSS) {
-            contentType = CSS_CONTENT_TYPE;
+        if (requestUri.contains(".css")) {
+            contentType = TEXT_CSS;
+        }
+        if (requestUri.contains(".js")) {
+            contentType = APPLICATION_JAVASCRIPT;
         }
 
         return contentType;

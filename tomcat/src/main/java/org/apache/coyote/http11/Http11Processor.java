@@ -14,6 +14,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestProcessor;
 import org.apache.coyote.http11.request.ResourceRequestProcessor;
 import org.apache.coyote.http11.request.RootRequestProcessor;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

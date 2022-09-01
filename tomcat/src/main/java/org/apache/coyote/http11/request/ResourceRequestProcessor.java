@@ -3,7 +3,9 @@ package org.apache.coyote.http11.request;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.MimeType;
 
 public class ResourceRequestProcessor implements HttpRequestProcessor {
 
@@ -21,8 +23,8 @@ public class ResourceRequestProcessor implements HttpRequestProcessor {
             throw new RuntimeException(e);
         }
         return new HttpResponse(
-                "HTTP/1.1 200 OK",
-                "Content-Type: text/"+extension+";charset=utf-8\r\nContent-Length: " + responseBody.getBytes().length,
+                HttpStatus.OK,
+                MimeType.of(extension),
                 responseBody);
     }
 }

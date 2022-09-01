@@ -1,14 +1,16 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.MimeType;
 
 public class RootRequestProcessor implements HttpRequestProcessor{
     @Override
     public HttpResponse process(HttpRequest request) {
         String responseBody = "Hello world!";
         return new HttpResponse(
-                "HTTP/1.1 200 OK",
-                "Content-Type: text/html;charset=utf-8\r\nContent-Length: " + responseBody.getBytes().length,
+                HttpStatus.OK,
+                MimeType.of("html"),
                 responseBody);
     }
 }

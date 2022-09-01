@@ -27,4 +27,24 @@ class ResponseProcessorTest {
                 fileContent);
         assertThat(response).isEqualTo(expected);
     }
+    
+    @Test
+    void query_parameter가_있을_경우_true를_반환한다() throws URISyntaxException, IOException {
+        // given
+        String fileUri = "/nextstep.txt?name=eden";
+        ResponseProcessor responseProcessor = new ResponseProcessor(fileUri);
+
+        // when & then
+        assertThat(responseProcessor.existQueryParameter()).isTrue();
+    }
+
+    @Test
+    void query_parameter가_없을_경우_false를_반환한다() throws URISyntaxException, IOException {
+        // given
+        String fileUri = "/nextstep.txt";
+        ResponseProcessor responseProcessor = new ResponseProcessor(fileUri);
+
+        // when & then
+        assertThat(responseProcessor.existQueryParameter()).isFalse();
+    }
 }

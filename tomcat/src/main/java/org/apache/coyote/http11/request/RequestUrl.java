@@ -1,10 +1,10 @@
 package org.apache.coyote.http11.request;
 
-public class URL {
+public class RequestUrl {
 
     private final String value;
 
-    public URL(String value) {
+    public RequestUrl(String value) {
         this.value = value;
     }
 

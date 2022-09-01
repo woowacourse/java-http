@@ -15,9 +15,8 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.HttpRequestProcessor;
-import org.apache.coyote.http11.request.ResourceRequestProcessor;
-import org.apache.coyote.http11.request.RootRequestProcessor;
+import org.apache.coyote.http11.request.ResourceLocator;
+import org.apache.coyote.http11.request.RequestProcessor;
 import org.apache.coyote.http11.request.StartLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -28,16 +27,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final Map<String, HttpRequestProcessor> requestMappings = new ConcurrentHashMap<>();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
-        initRequestMappings();
-    }
-
-    private void initRequestMappings() {
-        requestMappings.put("root", new RootRequestProcessor());
-        requestMappings.put("resource", new ResourceRequestProcessor());
     }
 
     @Override
@@ -51,21 +43,11 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream out = connection.getOutputStream();
              final BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
 
-            String line = br.readLine();
-            log.debug("start line = {}", line);
-            StartLine startLine = StartLine.from(line);
-
-            List<String> headerLines = new ArrayList<>();
-            line = br.readLine();
-            while (!line.equals("")) {
-                log.debug("header line = {}", line);
-                headerLines.add(line);
-                line = br.readLine();
-            }
-            HttpHeaders headers = new HttpHeaders(headerLines);
+            StartLine startLine = parseStartLine(br);
+            HttpHeaders headers = parseHeaders(br);
 
             HttpRequest httpRequest = new HttpRequest(startLine.getMethod(), startLine.getUrl().getValue());
-            HttpRequestProcessor requestProcessor = getMatchedRequestProcessor(httpRequest.getRequestURI());
+            RequestProcessor requestProcessor = new RequestProcessor(new ResourceLocator("/static"));
             HttpResponse httpResponse = requestProcessor.process(httpRequest);
             out.write(httpResponse.getBytes());
             out.flush();
@@ -75,10 +57,19 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequestProcessor getMatchedRequestProcessor(String requestURI) {
-        if ("/".equals(requestURI)) {
-            return requestMappings.get("root");
+    private StartLine parseStartLine(BufferedReader br) throws IOException {
+        String line = br.readLine();
+        log.debug("start line = {}", line);
+        return StartLine.from(line);
+    }
+
+    private HttpHeaders parseHeaders(BufferedReader br) throws IOException {
+        List<String> headerLines = new ArrayList<>();
+        String line = br.readLine();
+        while (!line.equals("")) {
+            headerLines.add(line);
+            line = br.readLine();
         }
-        return requestMappings.get("resource");
+        return new HttpHeaders(headerLines);
     }
 }

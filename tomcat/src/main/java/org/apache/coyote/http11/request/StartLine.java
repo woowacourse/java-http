@@ -11,12 +11,12 @@ public class StartLine {
     private static final String DELIMITER = " ";
 
     private final HttpMethod method;
-    private final URL url;
+    private final RequestUrl requestUrl;
     private final Protocol protocol;
 
-    public StartLine(HttpMethod method, URL url, Protocol protocol) {
+    public StartLine(HttpMethod method, RequestUrl requestUrl, Protocol protocol) {
         this.method = method;
-        this.url = url;
+        this.requestUrl = requestUrl;
         this.protocol = protocol;
     }
 
@@ -25,7 +25,7 @@ public class StartLine {
         validateComponentsCount(components);
         return new StartLine(
                 HttpMethod.of(components[METHOD_INDEX]),
-                new URL(components[URL_INDEX]),
+                new RequestUrl(components[URL_INDEX]),
                 new Protocol(components[PROTOCOL_INDEX]));
     }
 
@@ -39,8 +39,8 @@ public class StartLine {
         return method;
     }
 
-    public URL getUrl() {
-        return url;
+    public RequestUrl getUrl() {
+        return requestUrl;
     }
 
     public Protocol getProtocol() {

@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -61,16 +62,18 @@ public class Http11Processor implements Runnable, Processor {
                     final User user = new User(requestBody.get("account"), requestBody.get("password"),
                             requestBody.get("email"));
                     InMemoryUserRepository.save(user);
-                    final String response = getFoundResponse();
+                    final String response = getFoundResponse(headers.get("Cookie"), "JSESSIONID=" + UUID.randomUUID());
                     outputStream.write(response.getBytes());
                     outputStream.flush();
                     return;
                 }
 
                 if (requestUri.contains("login")) {
-                    final Optional<User> possibleUser = InMemoryUserRepository.findByAccount(requestBody.get("account"));
+                    final Optional<User> possibleUser = InMemoryUserRepository.findByAccount(
+                            requestBody.get("account"));
                     if (possibleUser.isPresent()) {
-                        final String response = getFoundResponse();
+                        final String response = getFoundResponse(headers.get("Cookie"),
+                                "JSESSIONID=" + UUID.randomUUID());
                         outputStream.write(response.getBytes());
                         outputStream.flush();
                         return;
@@ -187,9 +190,18 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private String getFoundResponse() {
+    private String getFoundResponse(final String cookie, final String sessionId) {
+        if (cookie.contains("JSESSIONID=")) {
+            return String.join("\r\n",
+                    "HTTP/1.1 302 Found ",
+                    "Location: /index.html ",
+                    "");
+        }
+
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
-                "Location: /index.html");
+                "Location: /index.html ",
+                "Set-Cookie: " + sessionId + " ",
+                "");
     }
 }

@@ -2,6 +2,7 @@ package nextstep.jwp.http;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class QueryParams {
@@ -32,5 +33,22 @@ public class QueryParams {
 
     public Optional<String> getValue(final String key) {
         return Optional.ofNullable(queryParams.get(key));
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof QueryParams)) {
+            return false;
+        }
+        final QueryParams that = (QueryParams) o;
+        return Objects.equals(queryParams, that.queryParams);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(queryParams);
     }
 }

@@ -25,9 +25,11 @@ public class HttpRequest {
 
         final var startLine = RequestStartLine.from(bufferedReader.readLine());
         final var header = RequestHeader.from(readHeader(bufferedReader));
-        final var body = readBody(bufferedReader, header);
-
-        return new HttpRequest(startLine, header, body);
+        if (startLine.getMethod().equals(HttpMethod.POST)) {
+            final var body = readBody(bufferedReader, header);
+            return new HttpRequest(startLine, header, body);
+        }
+        return new HttpRequest(startLine, header, "");
     }
 
     private static String readHeader(final BufferedReader bufferedReader) throws IOException {
@@ -49,6 +51,15 @@ public class HttpRequest {
     public Map<String, String> parseQueryString() {
         final var parameters = new HashMap<String, String>();
         for (var parameter : getQueryString().split("&")) {
+            final var pair = parameter.split("=");
+            parameters.put(pair[0], pair[1]);
+        }
+        return parameters;
+    }
+
+    public Map<String, String> parseBodyQueryString() {
+        final var parameters = new HashMap<String, String>();
+        for (var parameter : getBody().split("&")) {
             final var pair = parameter.split("=");
             parameters.put(pair[0], pair[1]);
         }

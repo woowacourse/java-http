@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.io.IOException;
 import java.net.Socket;
 import nextstep.jwp.controller.Controller;
+import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.HttpMethod;
@@ -47,10 +48,13 @@ public class Http11Processor implements Runnable, Processor {
         if (httpRequest.getMethod().equals(HttpMethod.GET)) {
             return doGet(controller, httpRequest);
         }
+        if (httpRequest.getMethod().equals(HttpMethod.POST)) {
+            return doPost(controller, httpRequest);
+        }
         throw new UncheckedServletException("지원하지 않는 Http Method 입니다.");
     }
 
-    private HttpResponse doGet(final Controller controller, final HttpRequest httpRequest) throws IOException {
+    private HttpResponse doGet(final Controller controller, final HttpRequest httpRequest) {
         final var path = httpRequest.getPath();
         if (path.equals("/")) {
             return controller.showIndex();
@@ -65,5 +69,13 @@ public class Http11Processor implements Runnable, Processor {
             return controller.showRegister();
         }
         return controller.show(path);
+    }
+
+    private HttpResponse doPost(final Controller controller, final HttpRequest httpRequest) {
+        final var path = httpRequest.getPath();
+        if (path.equals("/register")) {
+            return controller.register(httpRequest.parseBodyQueryString());
+        }
+        throw new NotFoundException("존재하지 않는 요청입니다.");
     }
 }

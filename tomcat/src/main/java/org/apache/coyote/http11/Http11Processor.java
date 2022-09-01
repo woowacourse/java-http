@@ -9,9 +9,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -23,11 +21,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String DEFAULT_REQUEST_BODY = "Hello world!";
-    private static final String STATIC_FILE_PATH = "static";
-    private static final String DEFAULT_CONTENT_TYPE = "text/html";
 
     private final Socket connection;
-    private final Map<String, String> headers = new HashMap<>();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -45,11 +40,10 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             List<String> request = getRequest(bufferedReader);
-            analyzeHeaders(request);
+            HttpRequest httpRequest = HttpRequest.of(request);
 
-            final var requestURI = getRequestURI(request);
-            final var responseBody = getResponseBody(requestURI);
-            final var response = makeResponse(responseBody);
+            final var responseBody = getResponseBody(httpRequest.getRequestUri());
+            final var response = makeResponse(httpRequest.findContentType(), responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -67,45 +61,29 @@ public class Http11Processor implements Runnable, Processor {
         return request;
     }
 
-    private String getRequestURI(final List<String> request) {
-        return request.get(0).split(" ")[1];
-    }
-
-    private String getResponseBody(final String requestURI) throws IOException {
-        int index = requestURI.indexOf("?");
-        if (index != -1) {
-            String uriPath = requestURI.substring(0, index);
-            String[] queryString = requestURI.substring(index + 1).split("&");
-            Map<String, String> queryStrings = new HashMap<>();
-            for (String element : queryString) {
-                String[] split = element.split("=");
-                queryStrings.put(split[0], split[1]);
-            }
-            User user = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+    private String getResponseBody(final RequestUri requestUri) throws IOException {
+        if (requestUri.hasQueryParams()) {
+            User user = getUserByAccount(requestUri.findQueryParamValue("account"));
             log.info("user : " + user);
-            final URL url = getClass().getClassLoader().getResource(STATIC_FILE_PATH + uriPath + ".html");
-            final Path path = new File(url.getFile()).toPath();
-            return new String(Files.readAllBytes(path));
         }
-        if (!requestURI.equals("/")) {
-            final URL url = getClass().getClassLoader().getResource(STATIC_FILE_PATH + requestURI);
-            final Path path = new File(url.getFile()).toPath();
-            return new String(Files.readAllBytes(path));
+        if (!requestUri.getUri().equals("/")) {
+            return readResourceFile(requestUri.getResourcePath());
         }
         return DEFAULT_REQUEST_BODY;
     }
 
-    private void analyzeHeaders(final List<String> request) {
-        for (String header : request.subList(1, request.size())) {
-            String[] splitHeader = header.split(": ", 2);
-            headers.put(splitHeader[0], splitHeader[1]);
-        }
+    private static User getUserByAccount(final String account) {
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
     }
 
-    private String makeResponse(final String responseBody) {
-        String contentType = headers.getOrDefault("Accept", DEFAULT_CONTENT_TYPE).split(",")[0];
+    private String readResourceFile(final String resourcePath) throws IOException {
+        final URL url = getClass().getClassLoader().getResource(resourcePath);
+        final Path path = new File(url.getFile()).toPath();
+        return new String(Files.readAllBytes(path));
+    }
 
+    private String makeResponse(final String contentType, final String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",

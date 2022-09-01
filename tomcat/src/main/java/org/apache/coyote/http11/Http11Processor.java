@@ -43,8 +43,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String getUrl(BufferedReader bufferedReader) throws IOException {
-        return Objects.requireNonNull(bufferedReader.readLine()).split(" ")[1];
+    private String getUrl(BufferedReader bufferedReader) throws IOException {
+        String urlLine = bufferedReader.readLine();
+        Objects.requireNonNull(urlLine);
+        return urlLine.split(" ")[1];
     }
 
     private String getHttp11Response(UrlResponse urlResponse) {

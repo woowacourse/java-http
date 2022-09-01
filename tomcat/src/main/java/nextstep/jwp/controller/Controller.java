@@ -1,6 +1,5 @@
 package nextstep.jwp.controller;
 
-import java.io.IOException;
 import java.util.Map;
 import nextstep.jwp.exception.AuthenticationException;
 import nextstep.jwp.exception.NotFoundException;
@@ -30,15 +29,19 @@ public class Controller {
         }
     }
 
-    public HttpResponse showLogin() throws IOException {
+    public HttpResponse showLogin() {
         return HttpResponse.ok(StaticResource.path("/login.html"));
     }
 
-    public HttpResponse showRegister() throws IOException {
+    public HttpResponse showRegister() {
         return HttpResponse.ok(StaticResource.path("/register.html"));
     }
 
-    public HttpResponse show(final String path) throws IOException {
-        return HttpResponse.ok(StaticResource.path(path));
+    public HttpResponse show(final String path) {
+        try {
+            return HttpResponse.ok(StaticResource.path(path));
+        } catch (NotFoundException e) {
+            return HttpResponse.found("/404.html");
+        }
     }
 }

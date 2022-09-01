@@ -1,5 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
+import org.junit.jupiter.api.DisplayName;
 import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
+    @DisplayName("서버에 접속하면 Hello world를 응답한다.")
     @Test
     void process() {
         // given
@@ -33,6 +35,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("index 페이지를 응답한다.")
     @Test
     void index() throws IOException {
         // given
@@ -58,5 +61,50 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("css 파일 응답 시 ContentType을 text/css로 응답한다.")
+    @Test
+    void css() {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Accept: text/css,*/*;q=0.1 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output()).contains("text/css");
+    }
+
+    @DisplayName("로그인 요청 시 로그인 페이지를 응답한다.")
+    @Test
+    void login() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final String expectedContents = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        // then
+        assertThat(socket.output()).contains(expectedContents);
     }
 }

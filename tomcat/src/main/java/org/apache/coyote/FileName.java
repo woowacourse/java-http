@@ -4,16 +4,16 @@ import java.util.Arrays;
 
 public enum FileName {
 
-    DEFAULT("/", null),
-    INDEX("/index.html", "index.html"),
+    DEFAULT("/", ""),
+    LOGIN("/login","login.html"),
     NOT_FOUND("", "404.html");
 
     private String url;
-    private String filePath;
+    private String fileName;
 
     FileName(final String url, final String fileName) {
         this.url = url;
-        this.filePath = fileName;
+        this.fileName = fileName;
     }
 
     public static FileName findFileName(final String requestUrl){
@@ -23,8 +23,8 @@ public enum FileName {
                 .orElse(NOT_FOUND);
     }
 
-    public String getFilePath() {
-        return filePath;
+    public String getFileName() {
+        return fileName;
     }
 
 }

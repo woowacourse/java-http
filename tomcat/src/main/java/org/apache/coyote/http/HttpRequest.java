@@ -8,9 +8,10 @@ public class HttpRequest {
     private final HttpMethod httpMethod;
     private final String url;
 
-    public HttpRequest(final String[] request) {
-        this.httpMethod = HttpMethod.from(request[0]);
-        this.url = request[1];
+    public HttpRequest(String request) {
+        final String[] parseRequest = request.split(" ");
+        this.httpMethod = HttpMethod.from(parseRequest[0]);
+        this.url = parseRequest[1];
     }
 
     public HttpMethod getHttpMethod() {

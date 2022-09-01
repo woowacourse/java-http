@@ -16,7 +16,6 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String BLANK = " ";
 
     private final Socket connection;
 
@@ -35,13 +34,26 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final HttpRequest httpRequest = new HttpRequest(bufferedReader.readLine().split(BLANK));
-            final HttpResponse response = new HttpResponse(httpRequest.getUrl());
+            final String request = bufferedReader.readLine();
 
-            outputStream.write(response.getBody().getBytes());
+            final HttpRequest httpRequest = new HttpRequest(request);
+            final HttpResponse response = new HttpResponse(httpRequest);
+
+            outputStream.write(makeHttpMessage(response).getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
+
+    private String makeHttpMessage(HttpResponse response) {
+        return String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: " + response.getHeader().getContentType() + ";charset=utf-8 ",
+                        "Content-Length: " + response.getBody().getBytes().length + " ",
+                        "",
+                        response.getBody());
+    }
+
+
 }

@@ -5,9 +5,9 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
- * A <b>Manager</b> manages the pool of Sessions that are associated with a
+ * A <b>Manager</b> manages the pool from Sessions that are associated with a
  * particular Container.  Different Manager implementations may support
- * value-added features such as the persistent storage of session data,
+ * value-added features such as the persistent storage from session data,
  * as well as migrating sessions for distributable web applications.
  * <p>
  * In order for a <code>Manager</code> implementation to successfully operate
@@ -25,7 +25,7 @@ import java.io.IOException;
 public interface Manager {
 
     /**
-     * Add this Session to the set of active Sessions for this Manager.
+     * Add this Session to the set from active Sessions for this Manager.
      *
      * @param session Session to be added
      */

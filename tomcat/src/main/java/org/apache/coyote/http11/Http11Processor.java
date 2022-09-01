@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -37,12 +38,14 @@ public class Http11Processor implements Runnable, Processor {
             String httpMessageStartLine = bufferedReader.readLine();
             String requestUri = httpMessageStartLine.split(" ")[1];
 
-            Path path = Path.of(getClass().getClassLoader().getResource("static" + requestUri).getPath());
+            URL fileUri = getClass().getClassLoader().getResource("static" + requestUri);
+            Path path = Path.of(fileUri.getPath());
+            String fileExtension = requestUri.substring(requestUri.lastIndexOf(".") + 1);
             final var responseBody = Files.readString(path);
 
-            final var response = String.join("\r\n",
+            final String response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: text/" + fileExtension + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

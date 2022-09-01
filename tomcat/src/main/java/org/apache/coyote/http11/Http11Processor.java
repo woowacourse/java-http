@@ -10,11 +10,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Map;
 import java.util.Objects;
 
 import static nextstep.jwp.utils.ResponseUtil.getExtension;
-import static nextstep.jwp.utils.ResponseUtil.getPath;
 import static nextstep.jwp.utils.ResponseUtil.getParam;
+import static nextstep.jwp.utils.ResponseUtil.getPath;
 import static nextstep.jwp.utils.ResponseUtil.getResponseBody;
 
 public class Http11Processor implements Runnable, Processor {
@@ -41,11 +42,9 @@ public class Http11Processor implements Runnable, Processor {
             final var uri = Objects.requireNonNull(reader.readLine()).split(" ")[1];
             final var path = getPath(uri);
             final var params = getParam(uri);
-            System.out.println("uri : " + uri);
-            System.out.println("path : " + path);
-            System.out.println("params : " + params);
             final var responseBody = getResponseBody(path, this.getClass());
             final var contentType = Content.getType(getExtension(path));
+            logParams(path, params);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -58,6 +57,12 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void logParams(String path, Map<String, String> params) {
+        if (params != null) {
+            log.info("request uri : {}. query param : {}", path, params);
         }
     }
 }

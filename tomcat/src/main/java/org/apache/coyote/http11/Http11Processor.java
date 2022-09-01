@@ -5,10 +5,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
 import java.nio.file.Files;
-import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.io.ClassPathResource;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,37 +31,56 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-
             BufferedReader httpReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            String[] requestLine = httpReader.readLine().split(" ");
-            String URL = requestLine[1];
+            String URL = getUrl(httpReader.readLine());
+            log.debug("request : {}", URL);
 
-            final String response;
-
-            if (URL.equals("/")) {
-                var responseBody = "Hello world!";
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
-            } else {
-                URL resource = getClass().getClassLoader().getResource("static" + URL);
-                var responseBody = new String(Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath()));
-                response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/html;charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
-            }
+            String response = createResponse(URL);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getUrl(final String requestLine) {
+        String[] requests = requestLine.split(" ");
+        String URL = requests[1];
+        return URL;
+    }
+
+    private String createResponse(String URL) throws IOException {
+        if (URL.equals("/")) {
+            return rootResponse();
+        }
+        return htmlResponse(URL);
+    }
+
+    private String rootResponse() {
+        String responseBody = "Hello world!";
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private String htmlResponse(final String URL) throws IOException {
+        String responseBody = createResponseBody(URL);
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private String createResponseBody(final String URL) throws IOException {
+        ClassPathResource resource = new ClassPathResource(URL);
+        byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
+        return new String(responseBody);
     }
 }

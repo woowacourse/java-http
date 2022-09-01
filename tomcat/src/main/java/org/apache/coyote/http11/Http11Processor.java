@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -41,20 +42,27 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            HttpRequest httpRequest = new HttpRequest(bufferedReader);
-            String statusCode = "200 OK";
-
+            HttpRequest httpRequest = HttpRequest.of(bufferedReader);
             String path = httpRequest.getPath();
 
-            if (path.equals("/login") && httpRequest.hasParam()) {
-                Map<String, String> queryParams = httpRequest.getQueryParams();
-                Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.getOrDefault("account", ""));
+            if (httpRequest.isSameHttpMethod("POST")) {
+                Map<String, String> requestBody = httpRequest.getRequestBody();
 
-                HttpResponse httpResponse = getHttpResponse(queryParams, user);
+                if (path.equals("/login")) {
+                    Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.getOrDefault("account", ""));
 
-                outputStream.write(httpResponse.getBytes());
-                outputStream.flush();
-                return;
+                    login(requestBody, user, outputStream);
+                    return;
+                }
+                if (path.equals("/register")) {
+                    User user = new User(requestBody.get("account"), requestBody.get("password"),
+                        requestBody.get("email"));
+
+                    InMemoryUserRepository.save(user);
+
+                    sendRedirect("/index.html", outputStream);
+                    return;
+                }
             }
 
             String responseBody = getResponseBody(path);
@@ -64,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
             responseHeader.put("Content-Type", getContentType(path));
             responseHeader.put("Content-Length", contentLength);
 
-            HttpResponse httpResponse = HttpResponse.from("HTTP/1.1", statusCode, responseHeader, responseBody);
+            HttpResponse httpResponse = HttpResponse.from("HTTP/1.1", "200 OK", responseHeader, responseBody);
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
@@ -73,23 +81,30 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse getHttpResponse(Map<String, String> queryParams, Optional<User> user) {
+    private void login(Map<String, String> queryParams, Optional<User> user, OutputStream outputStream)
+        throws IOException {
         String password = queryParams.getOrDefault("password", "");
 
         if (user.isPresent() && user.get().checkPassword(password)) {
-            Map<String, String> responseHeader = Map.of("Location", "/index.html");
-            return HttpResponse.from("HTTP/1.1", "302 FOUND", responseHeader);
+            sendRedirect("/index.html", outputStream);
+            return;
         }
+        sendRedirect("/401.html", outputStream);
+    }
 
-        Map<String, String> responseHeader = Map.of("Location", "/401.html");
-        return HttpResponse.from("HTTP/1.1", "302 FOUND", responseHeader);
+    private void sendRedirect(String locationUri, OutputStream outputStream) throws IOException {
+        Map<String, String> responseHeader = Map.of("Location", locationUri);
+        HttpResponse httpResponse = HttpResponse.from("HTTP/1.1", "302 FOUND", responseHeader);
+
+        outputStream.write(httpResponse.getBytes());
+        outputStream.flush();
     }
 
     private String getResponseBody(String input) throws URISyntaxException, IOException {
         String responseBody = "Hello world!";
 
         if (!input.equals("/")) {
-            if (input.equals("/login")) {
+            if (input.equals("/login") || input.equals("/register")) {
                 input = input + ".html";
             }
             Path path = Paths.get(getClass()

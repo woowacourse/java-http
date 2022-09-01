@@ -8,32 +8,55 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class HttpRequest {
-    private final Map<String, String> requestInfo;
+    private final Map<String, String> requestHeader;
+    private final String requestBody;
 
-    public HttpRequest(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> tmp = new HashMap<>();
-
-        String[] request = bufferedReader.readLine().split(" ");
-        tmp.put("HTTP Method", request[0]);
-        tmp.put("request URI", request[1]);
-        tmp.put("HTTP Version", request[2]);
-
-        String line = bufferedReader.readLine();
-        while (!line.isEmpty()) {
-            request = line.split(": ");
-            tmp.put(request[0], request[1]);
-            line = bufferedReader.readLine();
-        }
-
-        requestInfo = tmp;
+    private HttpRequest(Map<String, String> requestHeader, String requestBody){
+        this.requestHeader = requestHeader;
+        this.requestBody = requestBody;
     }
 
-    public String get(String key) {
-        return requestInfo.get(key);
+    public static HttpRequest of(BufferedReader reader) throws IOException {
+        Map<String, String> header = getHeader(reader);
+        String requestBody = getRequestBody(reader, header);
+
+        return new HttpRequest(header, requestBody);
+    }
+
+    private static Map<String, String> getHeader(BufferedReader reader) throws IOException {
+        Map<String, String> header = new HashMap<>();
+
+        String[] request = reader.readLine().split(" ");
+        header.put("HTTP Method", request[0]);
+        header.put("request URI", request[1]);
+        header.put("HTTP Version", request[2]);
+
+        String line = reader.readLine();
+        while (!line.isEmpty()) {
+            request = line.split(": ");
+            header.put(request[0], request[1]);
+            line = reader.readLine();
+        }
+        return header;
+    }
+
+    private static String getRequestBody(BufferedReader reader, Map<String, String> header) throws IOException {
+        int contentLength = Integer.parseInt(header.getOrDefault("Content-Length", "0"));
+
+        if(contentLength > 0){
+            char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+            return new String(buffer);
+        }
+        return "";
+    }
+
+    public boolean isSameHttpMethod(String method) {
+        return requestHeader.get("HTTP Method").equals(method);
     }
 
     public String getPath() {
-        String uri = requestInfo.get("request URI");
+        String uri = requestHeader.get("request URI");
 
         int index = uri.indexOf("?");
 
@@ -44,7 +67,7 @@ public class HttpRequest {
     }
 
     public Map<String, String> getQueryParams() {
-        String uri = requestInfo.get("request URI");
+        String uri = requestHeader.get("request URI");
 
         int index = uri.indexOf("?");
         if (index != -1) {
@@ -56,6 +79,12 @@ public class HttpRequest {
         }
 
         return Map.of();
+    }
+
+    public Map<String, String> getRequestBody(){
+       return Arrays.stream(requestBody.split("&"))
+            .map(body -> body.split("="))
+            .collect(Collectors.toMap(query -> query[0], query -> query[1]));
     }
 
     public boolean hasParam() {

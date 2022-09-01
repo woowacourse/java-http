@@ -24,4 +24,9 @@ public class ResponseUtil {
             throw new NotFoundFileException("파일 찾기에 실패했습니다.");
         }
     }
+
+    public static String getExtension(final String uri) {
+        Objects.requireNonNull(uri);
+        return uri.substring(uri.lastIndexOf(".") + 1);
+    }
 }

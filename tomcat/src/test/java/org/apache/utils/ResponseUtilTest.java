@@ -33,4 +33,17 @@ class ResponseUtilTest {
         assertThatThrownBy(() -> ResponseUtil.getResponseBody(filename, this.getClass()))
                 .isInstanceOf(NotFoundFileException.class);
     }
+
+    @Test
+    @DisplayName("uri를 통해 확장자를 추출한다.")
+    void checkGetExtension() {
+        // given
+        String filename = "/index.html";
+
+        // when
+        String actual = ResponseUtil.getExtension(filename);
+
+        // then
+        assertThat(actual).isEqualTo("html");
+    }
 }

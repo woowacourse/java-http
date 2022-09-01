@@ -16,6 +16,7 @@ import org.apache.coyote.http11.model.request.Request;
 import org.apache.coyote.http11.model.response.Response;
 import org.apache.coyote.http11.model.response.ResponseBody;
 import org.apache.coyote.http11.model.response.Status;
+import org.apache.coyote.http11.utils.ResourceMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,14 +41,12 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-            Request request = new Request(reader.readLine());
-            ResponseBody responseBody = findResource(request.getUrl());
-            if (request.getUrl().equals("/login") && !request.getQueryParams().isEmpty()) {
-                if (UserService.login(request.getQueryParam("account"), request.getQueryParam("password"))) {
-                    log.info(UserService.findByAccount(request.getQueryParam("account")).toString());
-                }
-            }
-            Response response = new Response(Status.OK, responseBody);
+            Request request = Request.from(reader.readLine());
+            login(request);
+
+            Response response = new Response();
+            response.setStatus(Status.OK);
+            response.setResponseBody(findResource(request.getUrl()));
 
             outputStream.write(response.getString().getBytes());
             outputStream.flush();
@@ -56,14 +55,15 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private ResponseBody findResource(String url) throws IOException {
-        if (url.endsWith("/")) {
-            url += "/hello.txt";
+    private void login(final Request request) {
+        if (UserService.process(request.getUrl(), request.getQueryParams())) {
+            log.info(UserService.findByAccount(request.getQueryParam("account")).toString());
         }
-        if (!url.contains(".")) {
-            url += ".html";
-        }
-        Path path = Path.of(Objects.requireNonNull(this.getClass().getResource("/static" + url)).getPath());
+    }
+
+    private ResponseBody findResource(final String url) throws IOException {
+        String fileName = ResourceMatcher.matchName(url);
+        Path path = Path.of(Objects.requireNonNull(this.getClass().getResource("/static" + fileName)).getPath());
         String body = Files.readString(path);
 
         ContentFormat contentFormat = ContentFormat.findByExtension(url);

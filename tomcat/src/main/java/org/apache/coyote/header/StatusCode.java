@@ -2,9 +2,10 @@ package org.apache.coyote.header;
 
 public enum StatusCode {
     OK(200, "OK"),
-    NOT_FOUND(404, "Not Found"),
+    FOUND(302, "Found"),
+    BAD_REQUEST(400, "Bad Request"),
     UNAUTHORIZED(401, "Unauthorized"),
-    REDIRECT(301, "Redirect");
+    NOT_FOUND(404, "Not Found");
 
     private final int code;
     private final String value;

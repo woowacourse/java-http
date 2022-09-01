@@ -13,7 +13,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.NotFoundException;
+import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.header.ContentType;
 import org.apache.coyote.header.StatusCode;
@@ -50,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final Map<String, String> header = parseHeader(reader);
-            final String response = getResponse(requestUri, header).toText();
+            final String response = mapRequest(requestUri, header).toText();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -80,25 +83,20 @@ public class Http11Processor implements Runnable, Processor {
                 .split(",")[0];
     }
 
-    private Response getResponse(final String requestUri, final Map<String, String> header)
+    private Response mapRequest(final String requestUri, final Map<String, String> header)
             throws URISyntaxException, IOException {
         final String path = parsePath(requestUri);
         final Map<String, String> queryParams = parseQueryParams(requestUri);
 
-        if (path.equals("/")) {
-            return new Response(ContentType.HTML, StatusCode.OK, "Hello world!");
+        try {
+            return getResponse(header, path, queryParams);
+        } catch (NotFoundException e) {
+            return new Response(ContentType.HTML, StatusCode.NOT_FOUND, getResource("static/404.html"));
+        } catch (IllegalArgumentException e) {
+            return new Response(ContentType.HTML, StatusCode.BAD_REQUEST, "잘못된 요청입니다.");
+        } catch (UnauthorizedException e) {
+            return new Response(ContentType.HTML, StatusCode.UNAUTHORIZED, getResource("static/401.html"));
         }
-
-        if (path.contains(".")) {
-            return new Response(ContentType.of(parseContentType(header)), StatusCode.OK, getResource("static" + path));
-        }
-
-        if (path.equals("/login")) {
-            login(queryParams.getOrDefault("account", ""), queryParams.getOrDefault("password", ""));
-            return new Response(ContentType.HTML, StatusCode.OK, getResource("static/login.html"));
-        }
-
-        return new Response(ContentType.HTML, StatusCode.NOT_FOUND, getResource("static/404.html"));
     }
 
     private String parsePath(final String requestUri) {
@@ -117,12 +115,29 @@ public class Http11Processor implements Runnable, Processor {
 
         final String queryString = requestUri.substring(queryStartIndex + 1);
         return Arrays.stream(queryString.split("&"))
-                .map(param -> param.split("="))
+                .map(param -> param.split("=", 2))
+                .filter(param -> param.length == 2)
                 .collect(Collectors.toMap(
                         param -> param[0],
                         param -> param[1]
                 ));
+    }
 
+    private Response getResponse(final Map<String, String> header, final String path,
+                                 final Map<String, String> queryParams) throws URISyntaxException, IOException {
+        if (path.equals("/")) {
+            return new Response(ContentType.HTML, StatusCode.OK, "Hello world!");
+        }
+
+        if (path.contains(".")) {
+            return new Response(ContentType.of(parseContentType(header)), StatusCode.OK, getResource("static" + path));
+        }
+
+        if (path.equals("/login")) {
+            return login(queryParams);
+        }
+
+        throw new NotFoundException("페이지를 찾을 수 없습니다.");
     }
 
     private String getResource(final String resourcePath) throws URISyntaxException, IOException {
@@ -133,12 +148,26 @@ public class Http11Processor implements Runnable, Processor {
         return new String(Files.readAllBytes(Path.of(resource)));
     }
 
-    private void login(final String account, final String password) {
-        InMemoryUserRepository.findByAccount(account)
-                .ifPresent((user) -> {
-                    if (user.checkPassword(password)) {
-                        System.out.println(user);
-                    }
-                });
+    private Response login(final Map<String, String> queryParams) throws URISyntaxException, IOException {
+        if (queryParams.isEmpty()) {
+            return new Response(ContentType.HTML, StatusCode.OK, getResource("static/login.html"));
+        }
+
+        if (!queryParams.containsKey("account") || !queryParams.containsKey("password")) {
+            throw new IllegalArgumentException("계정과 비밀번호를 입력하세요.");
+        }
+
+        return loginService(queryParams.get("account"), queryParams.get("password"));
+    }
+
+    private Response loginService(final String account, final String password) {
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new NotFoundException("계정을 찾을 수 없습니다."));
+
+        if (!user.checkPassword(password)) {
+            throw new UnauthorizedException("잘못된 비밀번호입니다.");
+        }
+
+        return new Response(ContentType.HTML, StatusCode.FOUND, Map.of("Location", "/index.html"), "");
     }
 }

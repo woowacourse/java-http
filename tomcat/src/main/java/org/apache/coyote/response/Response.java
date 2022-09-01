@@ -23,7 +23,7 @@ public class Response {
     }
 
     public Response(final ContentType contentType, final StatusCode statusCode, final String body) {
-        this(contentType, statusCode, new LinkedHashMap<>(), body);
+        this(contentType, statusCode, Map.of(), body);
     }
 
     public String toText() {

@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.StaticResource;
+import org.apache.coyote.http11.common.StaticResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse doGet(final Request request) throws IOException {
         final var path = request.getPath();
         if (path.equals("/")) {
-            return HttpResponse.withStaticResource(new StaticResource("Hello world!", "html"));
+            return HttpResponse.withStaticResource(new StaticResource("Hello world!", ContentType.TEXT_HTML));
         }
         return HttpResponse.withStaticResource(StaticResource.path(path));
     }

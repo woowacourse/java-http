@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.response;
 
-public class HttpResponse {
+import org.apache.coyote.http11.common.StaticResource;
 
-    private static final String NEW_LINE = System.getProperty("line.separator");
+public class HttpResponse {
 
     private final StatusLine statusLine;
     private final Headers headers;

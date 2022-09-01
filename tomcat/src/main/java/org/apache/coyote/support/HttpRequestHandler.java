@@ -1,9 +1,6 @@
 package org.apache.coyote.support;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.List;
 
 public class HttpRequestHandler {
@@ -34,26 +31,13 @@ public class HttpRequestHandler {
         throw new UnsupportedOperationException("Not implemented");
     }
 
-    public String get() throws IOException {
-        String responseBody = findResource();
+    private String get() {
+        String responseBody = new ResourceResponse(uri).toContent();
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
-    }
-
-    private String findResource() throws IOException {
-        File file = new File(findUrl().getFile());
-        return new String(Files.readAllBytes(file.toPath()));
-    }
-
-    private URL findUrl() {
-        final var classLoader = getClass().getClassLoader();
-        if (uri.equals("/")) {
-            return classLoader.getResource("static/index.html");
-        }
-        return classLoader.getResource("static" + uri);
     }
 }

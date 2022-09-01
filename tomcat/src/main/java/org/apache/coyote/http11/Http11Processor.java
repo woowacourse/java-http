@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.util.HashMap;
+import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -34,77 +36,111 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            final var line = bufferedReader.readLine();
+            final var requestLine = bufferedReader.readLine();
 
-            if (line == null) {
+            if (requestLine == null) {
                 throw new IllegalStateException("잘못된 요청입니다.");
             }
 
-            var fileName = line.split(" ")[1];
+            final var httpRequestMethod = requestLine.split(" ")[0];
 
-            if (fileName.equals("/login")) {
-                fileName = "/login.html";
+            String response = null;
+
+            if (httpRequestMethod.equals("GET")) {
+                response = getRequest(requestLine);
             }
-
-            if (fileName.contains("/login") && fileName.contains("?")) {
-                int index = fileName.indexOf("?");
-                String[] queryStrings = fileName.substring(index + 1).split("&");
-                for (String queryString : queryStrings) {
-                    String name = queryString.split("=")[0];
-                    String value = queryString.split("=")[1];
-                    if (name.equals("account")) {
-                        User user = InMemoryUserRepository.findByAccount(value)
-                                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
-                        final var responseBody = "존재하는 유저입니다." + user;
-                        log.info(responseBody);
-
-                        final var response = String.join("\r\n",
-                                "HTTP/1.1 200 OK ",
-                                "Content-Type: text;charset=utf-8 ",
-                                "Content-Length: " + responseBody.getBytes().length + " ",
-                                "",
-                                responseBody);
-
-                        outputStream.write(response.getBytes());
-                        outputStream.flush();
-                        return;
-                    }
-                }
-            }
-
-            final var fileType = fileName.split("\\.")[1];
-
-            String contentType = "text/html";
-
-            if (fileType.equals("html")) {
-                contentType = "text/html";
-            }
-
-            if (fileType.equals("css")) {
-                contentType = "text/css";
-            }
-
-            if (fileType.equals("js")) {
-                contentType = "text/javascript";
-            }
-
-            final var resource = getClass().getClassLoader().getResource("static" + fileName);
-
-            final var path = new File(resource.getPath()).toPath();
-
-            final var responseBody = new String(Files.readAllBytes(path));
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getRequest(String requestLine) throws IOException {
+
+        final var uri = requestLine.split(" ")[1];
+
+        if (uri.contains(".")) {
+            return getResponseWithFileName(uri);
+        }
+
+        if (uri.contains("?")) {
+            return getResponseWithQueryString(uri);
+        }
+
+        return getResponse(uri);
+    }
+
+    private String getResponse(String uri) throws IOException {
+        if (uri.equals("/login")) {
+            return getResponseWithFileName("/login.html");
+        }
+        return "";
+    }
+
+    private String getResponseWithFileName(String fileName) throws IOException {
+        final var fileType = fileName.split("\\.")[1];
+
+        String contentType = "text/html";
+
+        if (fileType.equals("html")) {
+            contentType = "text/html";
+        }
+
+        if (fileType.equals("css")) {
+            contentType = "text/css";
+        }
+
+        if (fileType.equals("js")) {
+            contentType = "text/javascript";
+        }
+
+        final var resource = getClass().getClassLoader().getResource("static" + fileName);
+
+        final var path = new File(resource.getPath()).toPath();
+
+        final var responseBody = new String(Files.readAllBytes(path));
+
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+
+    }
+
+    private String getResponseWithQueryString(String uri) {
+        if (uri.contains("/login")) {
+
+            Map<String, String> queryStrings = extractQueryStrings(uri);
+
+            User user = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
+                    .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+
+            final var responseBody = "존재하는 유저입니다." + user;
+            log.info(responseBody);
+
+            return String.join("\r\n",
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: text;charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        }
+        return "";
+    }
+
+    private Map<String, String> extractQueryStrings(String uri) {
+        Map<String, String> queryStrings = new HashMap<>();
+        int index = uri.indexOf("?");
+
+        for (String queryString : uri.substring(index + 1).split("&")) {
+            String name = queryString.split("=")[0];
+            String value = queryString.split("=")[1];
+            queryStrings.put(name, value);
+        }
+        return queryStrings;
     }
 }

@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.ContentType;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final int REQUEST_URL_INDEX = 1;
     private static final Pattern FILE_REGEX = Pattern.compile(".+\\.(html|css|js|ico)");
+
 
 
     private final Socket connection;
@@ -47,7 +49,9 @@ public class Http11Processor implements Runnable, Processor {
                 outputStream.write(createHelloResponse().getBytes(StandardCharsets.UTF_8));
             }
             if (FILE_REGEX.matcher(requestUrl).matches()) {
-                outputStream.write(createFileResponse(requestUrl, "text/html").getBytes());
+                final String extension = requestUrl.split("\\.")[1];
+                final ContentType contentType = ContentType.findContentType(extension);
+                outputStream.write(createFileResponse(requestUrl, contentType).getBytes());
             }
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
@@ -55,7 +59,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createFileResponse(final String requestUrl, final String contentType)
+    private String createFileResponse(final String requestUrl, final ContentType contentType)
             throws URISyntaxException, IOException {
         final URL resource =
                 this.getClass().getClassLoader().getResource("static" + requestUrl);
@@ -64,7 +68,7 @@ public class Http11Processor implements Runnable, Processor {
 
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Type: " + contentType.getContentType() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

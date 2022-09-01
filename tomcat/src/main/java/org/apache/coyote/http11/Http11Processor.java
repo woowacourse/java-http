@@ -9,13 +9,14 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import org.apache.coyote.FilePath;
 import org.apache.coyote.Processor;
+import org.apache.coyote.QueryStringHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,30 +44,16 @@ public class Http11Processor implements Runnable, Processor {
 
             String uri = inputBufferedReader.readLine().split(" ")[1];
             if (uri.contains("?")) {
-                String[] uriPaths = uri.split("\\?");
-                String queryString = uriPaths[1];
-                String[] queryParams = queryString.split("&");
-                Map<String, String> queryMap = new HashMap<>();
-                for (String queryParam : queryParams) {
-                    String[] splitQuery = queryParam.split("=");
-                    queryMap.put(splitQuery[0], splitQuery[1]);
-                }
-                Optional<User> user = InMemoryUserRepository.findByAccount(queryMap.get("account"));
+                Map<String, String> queryParams = QueryStringHandler.queryParams(uri);
+                Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.get("account"));
                 user.ifPresent(value -> log.info(value.toString()));
             }
-            uri = getFilePath(uri);
-            System.out.println("uti : "+ uri);
-            var responseBody = getResponseBody(uri);
-            String contentType = getContentType(uri);
+            FilePath filePath = FilePath.from(uri);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            var responseBody = getResponseBody(filePath.getValue());
+            String contentType = getContentType(filePath.getValue());
 
-            outputStream.write(response.getBytes());
+            outputStream.write(getResponse(contentType, responseBody).getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
@@ -108,5 +95,14 @@ public class Http11Processor implements Runnable, Processor {
             return "image/x-icon";
         }
         return "text/html";
+    }
+
+    private String getResponse(String contentType, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.support.HttpExceptionHandler;
+import org.apache.coyote.support.HttpRequest;
 import org.apache.coyote.support.HttpRequestHandler;
 import org.apache.exception.HttpException;
 import org.slf4j.Logger;
@@ -21,6 +22,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final HttpRequestHandler requestHandler = new HttpRequestHandler();
     private final HttpExceptionHandler exceptionHandler = new HttpExceptionHandler();
 
     public Http11Processor(final Socket connection) {
@@ -41,8 +43,7 @@ public class Http11Processor implements Runnable, Processor {
 
             String response;
             try {
-                final var requestHandler = toRequestHandler(reader);
-                response = requestHandler.handle();
+                response = requestHandler.handle(toRequest(reader));
             } catch(HttpException e) {
                 response =  exceptionHandler.handle(e);
             }
@@ -54,12 +55,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequestHandler toRequestHandler(BufferedReader reader) throws IOException {
+    private HttpRequest toRequest(BufferedReader reader) throws IOException {
         List<String> request = new ArrayList<>();
         String line;
         while ((line = reader.readLine()).length() > 0) {
             request.add(line);
         }
-        return HttpRequestHandler.of(request);
+        return HttpRequest.of(request);
     }
 }

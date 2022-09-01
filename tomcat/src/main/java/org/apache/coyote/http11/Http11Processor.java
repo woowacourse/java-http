@@ -4,8 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.HttpHeader;
 import nextstep.jwp.http.reqeust.HttpRequest;
@@ -47,46 +47,40 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest createHttpRequest(final BufferedReader bufferReader) throws IOException {
-        String requestLine = bufferReader.readLine();
-        HttpRequestLine httpRequestLine = HttpRequestLine.from(requestLine);
-        HttpHeader httpHeader = createHttpHeader(bufferReader);
-        return new HttpRequest(httpRequestLine, httpHeader);
+        return new HttpRequest(httpRequestLine(bufferReader), httpRequestHeader(bufferReader));
     }
 
-    private HttpHeader createHttpHeader(final BufferedReader bufferReader) throws IOException {
-        Map<String, String> params = new HashMap<>();
-        String line = "";
-        while ((line = bufferReader.readLine()).isBlank()) {
-            String[] requestHeader = line.split(":", 2);
-            params.put(requestHeader[0], requestHeader[1]);
+    private HttpRequestLine httpRequestLine(final BufferedReader bufferReader) throws IOException {
+        String requestLine = bufferReader.readLine();
+        return HttpRequestLine.from(requestLine);
+    }
+
+    private HttpHeader httpRequestHeader(final BufferedReader bufferReader) throws IOException {
+        List<String> requestHeaders = new ArrayList<>();
+        while (bufferReader.readLine().isBlank()) {
+            requestHeaders.add(bufferReader.readLine());
         }
-        return new HttpHeader(params);
+        return new HttpHeader(requestHeaders);
     }
 
     private String createHttpResponse(final HttpRequest httpRequest) {
         String url = httpRequest.getUrl();
         if (url.equals("/")) {
-            return rootResponse();
+            return createRootResponse(httpRequest);
         }
-        return httpResponse(url);
+        String responseBody = new ClassPathResource(url).getFileContents();
+        return createOkResponse(httpRequest.getContentType(), responseBody);
     }
 
-    private String rootResponse() {
+    private String createRootResponse(final HttpRequest httpRequest) {
         String responseBody = "Hello world!";
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        return createOkResponse(httpRequest.getContentType(), responseBody);
     }
 
-    private String httpResponse(final String url) {
-        ClassPathResource resource = new ClassPathResource(url);
-        String responseBody = resource.getFileContents();
+    private String createOkResponse(final String contentType, final String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

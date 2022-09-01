@@ -1,13 +1,10 @@
 package org.apache.coyote.http11.http;
 
-import static java.util.stream.Collectors.*;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +18,6 @@ public class HttpRequest {
 
 	public HttpRequest(InputStream inputStream) throws IOException {
 		BufferedReader requestReader = new BufferedReader(new InputStreamReader(inputStream));
-
 		String[] startLine = requestReader.readLine().split(" ");
 		this.method = startLine[0];
 		this.url = startLine[1];
@@ -31,11 +27,8 @@ public class HttpRequest {
 
 	private Map<String, String> extractHeaders(BufferedReader requestReader) throws IOException {
 		Map<String, String> headers = new HashMap<>();
-		while (requestReader.ready()) {
-			String line = requestReader.readLine();
-			if (line.isBlank()) {
-				return headers;
-			}
+		String line;
+		while (!(line = requestReader.readLine()).isBlank()) {
 			String[] header = line.split(": ");
 			headers.put(header[0], header[1]);
 		}
@@ -43,11 +36,14 @@ public class HttpRequest {
 	}
 
 	private String extractBody(BufferedReader requestReader) throws IOException {
-		List<String> bodyLines = new ArrayList<>();
-		while (requestReader.ready()) {
-			bodyLines.add(requestReader.readLine());
+		String length = headers.getOrDefault(Header.CONTENT_LENGTH.getName(), null);
+		if (length == null) {
+			return null;
 		}
-		return String.join("\r\n", bodyLines);
+		int contentLength = Integer.parseInt(length);
+		char[] body = new char[contentLength];
+		requestReader.read(body, 0, contentLength);
+		return new String(body);
 	}
 
 	public String getUrl() {
@@ -67,14 +63,40 @@ public class HttpRequest {
 	}
 
 	public String getQueryString(String key) {
-		return Arrays.stream(
-				url.split("\\?")[1]
-					.split("&")
-			)
-			.collect(toMap(
-				value -> value.split("=")[0],
-				value -> value.split("=")[1])
-			)
-			.get(key);
+		String contentType = headers.get(Header.CONTENT_TYPE.getName());
+		List<String> requestParams = extractRequestParams(contentType);
+		return requestParams.stream()
+			.filter(param -> param.split("=")[0].equals(key))
+			.map(param -> param.split("=")[1])
+			.findAny()
+			.orElse("");
+	}
+
+	private List<String> extractRequestParams(String contentType) {
+		List<String> requestParams = new ArrayList<>();
+		if (ContentType.FORM_DATA.equals(contentType)) {
+			String[] params = body.split("&");
+			requestParams.addAll(List.of(params));
+		}
+		if (url.contains("?")) {
+			String[] params = url.split("\\?")[1]
+				.split("&");
+			requestParams.addAll(List.of(params));
+		}
+		return requestParams;
+	}
+
+	public String getMethod() {
+		return method;
+	}
+
+	@Override
+	public String toString() {
+		return "===HttpRequest===" + "\r\n" +
+			"method='" + method + "\r\n" +
+			"url='" + url + "\r\n" +
+			"headers=" + headers + "\r\n" +
+			"body='" + body + "\r\n" +
+			'}';
 	}
 }

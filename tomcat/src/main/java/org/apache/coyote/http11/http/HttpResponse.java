@@ -16,6 +16,10 @@ public class HttpResponse {
 		this.headers = headers;
 	}
 
+	public byte[] getBytes() {
+		return getFullMessage().getBytes();
+	}
+
 	public String getFullMessage() {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("HTTP/1.1 ")
@@ -80,5 +84,13 @@ public class HttpResponse {
 		public HttpResponse build() {
 			return new HttpResponse(statusCode, responseBody, headers);
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "===HttpResponse===" + "\r\n" +
+			"statusCode=" + statusCode + "\r\n" +
+			"headers=" + headers + "\r\n" +
+			'}';
 	}
 }

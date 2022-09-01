@@ -94,16 +94,47 @@ class Http11ProcessorTest {
 		assertThat(socket.output()).isEqualTo(expected);
 	}
 
-	@DisplayName("로그인이 성공하면 /index.html로 리다이렉트 한다.")
+	@DisplayName("/login으로 GET 요청을 보내면 login.html을 반환한다.")
 	@Test
-	void login() throws IOException {
+	void login_html() throws IOException {
 		// given
 		final String httpRequest = String.join("\r\n",
-			"GET /login?account=gugu&password=password HTTP/1.1 ",
+			"GET /login HTTP/1.1 ",
 			"Host: localhost:8080 ",
 			"Connection: keep-alive ",
 			"",
 			"");
+
+		final var socket = new StubSocket(httpRequest);
+		final Http11Processor processor = new Http11Processor(socket);
+
+		// when
+		processor.process(socket);
+
+		// then
+		final URL resource = getClass().getClassLoader().getResource("static/login.html");
+		String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+		var expected = "HTTP/1.1 200 OK \r\n" +
+			"Content-Length: " + responseBody.getBytes().length + " \r\n" +
+			"Content-Type: text/html;charset=utf-8 \r\n" +
+			"\r\n" +
+			responseBody;
+
+		assertThat(socket.output()).isEqualTo(expected);
+	}
+
+	@DisplayName("로그인이 성공하면 /index.html로 리다이렉트 한다.")
+	@Test
+	void login() {
+		// given
+		final String httpRequest = String.join("\r\n",
+			"POST /login HTTP/1.1 ",
+			"Host: localhost:8080 ",
+			"Connection: keep-alive ",
+			"Content-Type: application/x-www-form-urlencoded",
+			"Content-Length: 30",
+			"",
+			"account=gugu&password=password");
 
 		final var socket = new StubSocket(httpRequest);
 		final Http11Processor processor = new Http11Processor(socket);
@@ -123,7 +154,38 @@ class Http11ProcessorTest {
 	void login_fail() throws IOException {
 		// given
 		final String httpRequest = String.join("\r\n",
-			"GET /login?account=gugugu&password=password HTTP/1.1 ",
+			"POST /login HTTP/1.1 ",
+			"Host: localhost:8080 ",
+			"Connection: keep-alive ",
+			"Content-Type: application/x-www-form-urlencoded",
+			"Content-Length: 30",
+			"",
+			"account=gugugu&password=password");
+
+		final var socket = new StubSocket(httpRequest);
+		final Http11Processor processor = new Http11Processor(socket);
+
+		// when
+		processor.process(socket);
+
+		// then
+		final URL resource = getClass().getClassLoader().getResource("static/401.html");
+		String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+		var expected = "HTTP/1.1 401 Unauthorized \r\n" +
+			"Content-Length: " + responseBody.getBytes().length + " \r\n" +
+			"Content-Type: text/html;charset=utf-8 \r\n" +
+			"\r\n" +
+			responseBody;
+
+		assertThat(socket.output()).isEqualTo(expected);
+	}
+
+	@DisplayName("/register로 요청이 들어오면 register.html을 반환한다.")
+	@Test
+	void register_html() throws IOException {
+		// given
+		final String httpRequest = String.join("\r\n",
+			"GET /register HTTP/1.1 ",
 			"Host: localhost:8080 ",
 			"Connection: keep-alive ",
 			"",
@@ -137,9 +199,9 @@ class Http11ProcessorTest {
 
 		// then
 		// then
-		final URL resource = getClass().getClassLoader().getResource("static/401.html");
+		final URL resource = getClass().getClassLoader().getResource("static/register.html");
 		String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-		var expected = "HTTP/1.1 401 Unauthorized \r\n" +
+		var expected = "HTTP/1.1 200 OK \r\n" +
 			"Content-Length: " + responseBody.getBytes().length + " \r\n" +
 			"Content-Type: text/html;charset=utf-8 \r\n" +
 			"\r\n" +

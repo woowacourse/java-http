@@ -42,10 +42,13 @@ public class Http11Processor implements Runnable, Processor {
 		try (final var inputStream = connection.getInputStream();
 			 final var outputStream = connection.getOutputStream()) {
 
-			final var response = makeHttpResponse(new HttpRequest(inputStream));
+			HttpRequest request = new HttpRequest(inputStream);
+			log.info("REQUEST \r\n{}", request);
 
-			String responseMessage = response.getFullMessage();
-			outputStream.write(responseMessage.getBytes());
+			final var response = makeHttpResponse(request);
+			log.info("RESPONSE \r\n{}", response);
+
+			outputStream.write(response.getBytes());
 			outputStream.flush();
 		} catch (IOException | UncheckedServletException e) {
 			log.error(e.getMessage(), e);
@@ -53,14 +56,6 @@ public class Http11Processor implements Runnable, Processor {
 	}
 
 	private HttpResponse makeHttpResponse(HttpRequest httpRequest) throws IOException {
-		String requestUrl = httpRequest.getUrl();
-		if (requestUrl.equals("/")) {
-			return HttpResponse.OK()
-				.responseBody("Hello world!")
-				.setHeader(Header.CONTENT_TYPE, ContentType.HTML.getFormat())
-				.build();
-		}
-
 		if (httpRequest.isStaticResourceRequest()) {
 			return handleStaticRequest(httpRequest);
 		}
@@ -80,11 +75,30 @@ public class Http11Processor implements Runnable, Processor {
 
 	private HttpResponse handleApiRequest(HttpRequest httpRequest) throws IOException {
 		String requestUrl = httpRequest.getUrl();
-		if (requestUrl.startsWith("/login")) {
+		if (requestUrl.equals("/")) {
+			return HttpResponse.OK()
+				.responseBody("Hello world!")
+				.setHeader(Header.CONTENT_TYPE, ContentType.HTML.getFormat())
+				.build();
+		}
+		if (httpRequest.getMethod().equals("GET") && requestUrl.startsWith("/login")) {
+			return HttpResponse.OK()
+				.responseBody(StaticResourceUtil.getContent("login.html"))
+				.setHeader(Header.CONTENT_TYPE, ContentType.HTML.getFormat())
+				.build();
+		}
+		if (httpRequest.getMethod().equals("POST") && requestUrl.startsWith("/login")) {
 			return checkValidLogin(
 				httpRequest.getQueryString("account"),
 				httpRequest.getQueryString("password")
 			);
+		}
+		if (requestUrl.startsWith("/register")) {
+			return HttpResponse.OK()
+				.responseBody(StaticResourceUtil.getContent("register.html"))
+				.setHeader(Header.CONTENT_TYPE, ContentType.HTML.getFormat())
+				.build();
+
 		}
 		return responseErrorPage(NOT_FOUND_HTML, 404);
 	}

@@ -18,6 +18,8 @@ import static nextstep.jwp.model.Content.HTML;
 
 public class ResponseUtil {
 
+    public static final String DEFAULT_EXTENSION = ".html";
+
     public static String getResponseBody(final String uri, final Class<?> ClassType) {
         try {
             if (uri.equals("/")) {
@@ -41,12 +43,16 @@ public class ResponseUtil {
 
     public static String getPath(final String uri) {
         Objects.requireNonNull(uri);
+        return calculatePath(uri);
+    }
+
+    private static String calculatePath(final String uri) {
         String path = uri;
         if (path.contains("?")) {
             path = path.substring(0, uri.indexOf("?"));
         }
         if (!path.contains(".")) {
-            path += "." + HTML.getExtension();
+            path += DEFAULT_EXTENSION;
         }
         return path;
     }
@@ -56,11 +62,11 @@ public class ResponseUtil {
         if (!uri.contains("?")) {
             return null;
         }
-        List<String> inputs = Arrays.asList(uri.substring(uri.indexOf("?") + 1).split("&"));
-        return calculateQueryParam(inputs);
+        return calculateQueryParam(uri);
     }
 
-    private static Map<String, String> calculateQueryParam(List<String> inputs) {
+    private static Map<String, String> calculateQueryParam(final String uri) {
+        List<String> inputs = Arrays.asList(uri.substring(uri.indexOf("?") + 1).split("&"));
         final Map<String, String> queryParams = new HashMap();
         for (String input : inputs) {
             List<String> query = Arrays.asList(input.split("="));

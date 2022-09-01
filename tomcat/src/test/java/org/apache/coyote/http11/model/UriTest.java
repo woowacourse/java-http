@@ -3,12 +3,14 @@ package org.apache.coyote.http11.model;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 class UriTest {
 
+    @DisplayName("api 호출")
     @Test
     void isCallApi() {
         // given
@@ -18,6 +20,7 @@ class UriTest {
         assertThat(uri.isCallApi()).isTrue();
     }
 
+    @DisplayName("file 호출")
     @Test
     void isNotCallApi() {
         // given
@@ -27,7 +30,8 @@ class UriTest {
         assertThat(uri.isCallApi()).isFalse();
     }
 
-    @ParameterizedTest
+    @DisplayName("올바른 ContentType 찾기")
+    @ParameterizedTest(name = "value = {0}, expected = {1}")
     @CsvSource(value = {"/styles.css, CSS", "/index.html, HTML", "/js/scripts.js, JS", "/favicon.ico, ICO"})
     void findContentType(String path, ContentType expected) {
         // given
@@ -37,6 +41,7 @@ class UriTest {
         assertThat(uri.findContentType()).isEqualTo(expected);
     }
 
+    @DisplayName("파일 경로 찾기")
     @Test
     void findFilePath() {
         // given
@@ -46,6 +51,7 @@ class UriTest {
         assertThat(uri.findFilePath()).isEqualTo(FilePath.INDEX_PAGE);
     }
 
+    @DisplayName("쿼리스트링 찾기")
     @Test
     void getQueryString() {
         // given

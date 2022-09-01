@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,7 +51,6 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final String requestStartLine = bufferedReader.readLine();
-            log.info("request - {}", requestStartLine);
 
             final String requestUri = getRequestUri(requestStartLine);
             final String requestMethod = getRequestMethod(requestStartLine);
@@ -64,9 +64,8 @@ public class Http11Processor implements Runnable, Processor {
                     final User user = new User(requestBody.get("account"), requestBody.get("password"),
                             requestBody.get("email"));
                     InMemoryUserRepository.save(user);
-                    final String response = getFoundResponse(headers.get("Cookie"), "JSESSIONID=" + UUID.randomUUID());
-                    outputStream.write(response.getBytes());
-                    outputStream.flush();
+
+                    saveSessionAndResponse(outputStream, user);
                     return;
                 }
 
@@ -74,32 +73,24 @@ public class Http11Processor implements Runnable, Processor {
                     final Optional<User> possibleUser = InMemoryUserRepository.findByAccount(
                             requestBody.get("account"));
                     if (possibleUser.isPresent()) {
-                        final UUID sessionId = UUID.randomUUID();
-                        final String response = getFoundResponse(headers.get("Cookie"), "JSESSIONID=" + sessionId);
-                        final HttpSession session = new Session(String.valueOf(sessionId));
-                        session.setAttribute("user", possibleUser.get());
-                        new SessionManager().add(session);
-                        outputStream.write(response.getBytes());
-                        outputStream.flush();
+                        saveSessionAndResponse(outputStream, possibleUser.get());
                         return;
                     }
                 }
             }
 
-            if (requestMethod.equals(GET) && requestUri.contains("login") && headers.containsKey("Cookie") && headers.get("Cookie").contains("JSESSION")) {
+            if (requestMethod.equals(GET) && requestUri.contains("login") && headers.containsKey("Cookie")
+                    && headers.get("Cookie").contains("JSESSION")) {
                 final SessionManager sessionManager = new SessionManager();
                 final String cookie = headers.get("Cookie");
-                log.info("{}", cookie);
                 final HttpSession session = sessionManager.findSession(cookie.split("JSESSIONID=")[1]);
                 final User user = (User) session.getAttribute("user");
                 final Optional<User> possibleUser = InMemoryUserRepository.findByAccount(user.getAccount());
                 if (possibleUser.isPresent()) {
-                    final String response = getFoundResponse(headers.get("Cookie"),
-                            "JSESSIONID=" + headers.get("JSESSION"));
+                    final String response = getFoundResponse();
                     outputStream.write(response.getBytes());
                     outputStream.flush();
                     return;
-
                 }
             }
 
@@ -112,6 +103,16 @@ public class Http11Processor implements Runnable, Processor {
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void saveSessionAndResponse(final OutputStream outputStream, final User user) throws IOException {
+        final UUID sessionId = UUID.randomUUID();
+        final String response = getFoundResponse("JSESSIONID=" + sessionId);
+        final HttpSession session = new Session(String.valueOf(sessionId));
+        session.setAttribute("user", user);
+        new SessionManager().add(session);
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 
     private String getRequestUri(final String requestStartLine) {
@@ -210,18 +211,18 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private String getFoundResponse(final String cookie, final String sessionId) {
-        if (cookie != null) {
-            return String.join("\r\n",
-                    "HTTP/1.1 302 Found ",
-                    "Location: /index.html ",
-                    "");
-        }
-
+    private String getFoundResponse(final String cookie) {
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Location: /index.html ",
-                "Set-Cookie: " + sessionId + " ",
+                "Set-Cookie: " + cookie + " ",
+                "");
+    }
+
+    private String getFoundResponse() {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: /index.html ",
                 "");
     }
 }

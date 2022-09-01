@@ -10,7 +10,6 @@ public class SessionManager implements Manager {
 
     private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
 
-
     @Override
     public void add(final HttpSession session) {
         SESSIONS.put(session.getId(), session);

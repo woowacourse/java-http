@@ -9,7 +9,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +42,19 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader inputBufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
             String uriPath = inputBufferedReader.readLine().split(" ")[1];
-            
+            if (uriPath.contains("?")) {
+                String[] uriPaths = uriPath.split("\\?");
+                uriPath = uriPaths[0] + ".html";
+                String queryString = uriPaths[1];
+                String[] queryParams = queryString.split("&");
+                Map<String, String> query = new HashMap<>();
+                for (String queryParam : queryParams) {
+                    String[] splitQuery = queryParam.split("=");
+                    query.put(splitQuery[0], splitQuery[1]);
+                }
+                Optional<User> user = InMemoryUserRepository.findByAccount(query.get("account"));
+                user.ifPresent(value -> log.info(value.toString()));
+            }
             var responseBody = getResponseBody(uriPath);
             String contentType = getContentType(uriPath);
 

@@ -8,4 +8,4 @@
 - [x] `http://localhost:8080/index.html`에 접속 가능하게 구현
   - [x] `Http11ProcessorTest` 통과
 - [x] CSS 지원
-- [ ] Query String 파싱
+- [x] Query String 파싱

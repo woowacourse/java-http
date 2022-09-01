@@ -1,16 +1,13 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.ContentType;
 import org.apache.coyote.Processor;
+import org.apache.coyote.support.ResourcesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,14 +62,7 @@ public class Http11Processor implements Runnable, Processor {
         if (uri.equals(LANDING_PAGE_URL)) {
             return "Hello world!";
         }
-        return readResource(STATIC_PATH + uri);
-    }
-
-    private String readResource(final String resourcePath) throws IOException {
-        URL resource = Thread.currentThread().getContextClassLoader().getResource(resourcePath);
-        assert resource != null;
-        Path path = new File(resource.getPath()).toPath();
-        return new String(Files.readAllBytes(path));
+        return ResourcesUtil.readResource(STATIC_PATH + uri);
     }
 
     private String toResponse(final ContentType contentType, final String responseBody) {

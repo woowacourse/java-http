@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.Socket;
-import org.utils.RequestLineParser;
+import org.apache.coyote.common.request.parser.RequestLineParser;
 
 public class Http11Processor implements Runnable, Processor {
 

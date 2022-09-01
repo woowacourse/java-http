@@ -1,4 +1,4 @@
-package org.utils;
+package org.apache.coyote.common.request.parser;
 
 import org.apache.coyote.common.FileExtension;
 

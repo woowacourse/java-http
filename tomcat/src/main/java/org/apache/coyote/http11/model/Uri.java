@@ -60,7 +60,7 @@ public class Uri {
         return FilePath.of(url);
     }
 
-    public String findQueryString(final String key) {
-        return queryString.get(key);
+    public Map<String, String> getQueryString() {
+        return queryString;
     }
 }

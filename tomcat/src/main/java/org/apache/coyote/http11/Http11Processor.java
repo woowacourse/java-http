@@ -34,8 +34,10 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             final Uri uri = new Uri(extractURI(bufferedReader.readLine()));
-            final String responseBody = generateResponseBody(uri);
+            checkCallApi(uri);
 
+            final String responseBody = uri.findFilePath()
+                    .generateFile();
             final String response = generateResponse(uri, responseBody);
 
             outputStream.write(response.getBytes());
@@ -45,17 +47,15 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String extractURI(final String text) {
-        return text.split(" ")[1];
-    }
-
-    private String generateResponseBody(final Uri uri) throws IOException {
+    private void checkCallApi(final Uri uri) {
         if (uri.isCallApi()) {
             LoginHandler loginHandler = new LoginHandler();
-            loginHandler.login(uri.findQueryString("account"), uri.findQueryString("password"));
+            loginHandler.login(uri.getQueryString());
         }
-        return uri.findFilePath()
-                .generateFile();
+    }
+
+    private String extractURI(final String text) {
+        return text.split(" ")[1];
     }
 
     private String generateResponse(final Uri uri, final String responseBody) throws IOException {

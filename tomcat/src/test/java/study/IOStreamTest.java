@@ -47,14 +47,14 @@ class IOStreamTest {
          */
         @Test
         void OutputStream은_데이터를_바이트로_처리한다() throws IOException {
+            // given
             final byte[] bytes = {110, 101, 120, 116, 115, 116, 101, 112};
             final OutputStream outputStream = new ByteArrayOutputStream(bytes.length);
 
-            /**
-             * todo
-             * OutputStream 객체의 write 메서드를 사용해서 테스트를 통과시킨다
-             */
+            // when
+            outputStream.write(bytes);
 
+            // then
             final String actual = outputStream.toString();
 
             assertThat(actual).isEqualTo("nextstep");
@@ -69,14 +69,13 @@ class IOStreamTest {
          */
         @Test
         void BufferedOutputStream을_사용하면_버퍼링이_가능하다() throws IOException {
+            // given
             final OutputStream outputStream = mock(BufferedOutputStream.class);
 
-            /**
-             * todo
-             * flush를 사용해서 테스트를 통과시킨다.
-             * ByteArrayOutputStream과 어떤 차이가 있을까?
-             */
+            // when
+            outputStream.flush();
 
+            // then
             verify(outputStream, atLeastOnce()).flush();
             outputStream.close();
         }
@@ -86,14 +85,14 @@ class IOStreamTest {
          */
         @Test
         void OutputStream은_사용하고_나서_close_처리를_해준다() throws IOException {
+            // given
             final OutputStream outputStream = mock(OutputStream.class);
 
-            /**
-             * todo
-             * try-with-resources를 사용한다.
-             * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
-             */
+            // when
+            try (outputStream) {
+            }
 
+            // then
             verify(outputStream, atLeastOnce()).close();
         }
     }

@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -28,16 +30,17 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-            String[] lines = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8).split("\r\n");
+            String[] lines = reader.readLine().split("\r\n");
             String[] get = lines[0].split(" ");
 
             var responseBody = "Hello world!";
 
             if (!get[1].equals("/")) {
                 responseBody = Files.readString(
-                                Path.of(this.getClass().getResource("/static" + get[1]).getPath()));
+                        Path.of(this.getClass().getResource("/static" + get[1]).getPath()));
             }
 
             final var response = String.join("\r\n",

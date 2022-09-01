@@ -11,3 +11,8 @@
   - [X] css: text/css
   - [X] js: application/javascript
 - [ ] uri의 QueryString을 파싱하는 기능이 있다.
+
+### 추가로 고려해볼 수 있는 부분
+
+- [ ] NOT FOUND 처리 로직을 추가한다. 
+- [ ] 커스텀 예외 코드를 만든다. 

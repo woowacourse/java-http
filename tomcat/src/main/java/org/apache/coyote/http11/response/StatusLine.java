@@ -28,7 +28,8 @@ public class StatusLine {
                 " ",
                 version,
                 String.valueOf(status.getCode()),
-                status.getMessage()
+                status.getMessage(),
+                ""
                 );
     }
 }

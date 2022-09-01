@@ -15,9 +15,6 @@ public class StaticResource {
     }
 
     public static StaticResource path(final String path) throws IOException {
-        if (path.equals("/")) {
-            return new StaticResource("Hello world!", "html");
-        }
         final var resource = StaticResource.class.getClassLoader().getResource("static" + path);
         final var content = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         final var type = "text/" + path.split("\\.")[1];
@@ -29,13 +26,7 @@ public class StaticResource {
     }
 
     public String getContentType() {
-        if (contentType.equals("css")) {
-            return "text/css; charset=utf-8";
-        }
-        if (contentType.equals("js")) {
-            return "application/javascript; charset=utf-8";
-        }
-        return "text/html; charset=utf-8";
+        return contentType;
     }
 
     public String getContentLength() {

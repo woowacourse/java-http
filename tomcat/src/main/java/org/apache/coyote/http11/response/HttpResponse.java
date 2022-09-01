@@ -8,7 +8,7 @@ public class HttpResponse {
     private final Headers headers;
     private final String body;
 
-    public HttpResponse(StatusLine statusLine, Headers headers, String body) {
+    public HttpResponse(final StatusLine statusLine, final Headers headers, final String body) {
         this.statusLine = statusLine;
         this.headers = headers;
         this.body = body;
@@ -16,7 +16,7 @@ public class HttpResponse {
 
     public static HttpResponse withStaticResource(final StaticResource staticResource) {
         return new HttpResponse(
-                new StatusLine(HttpStatus.OK),
+                new StatusLine(HttpStatus.OK), // TODO: 2022/09/01 파라미터로 받으면 좋을 것 같다.
                 Headers.withStaticResource(staticResource),
                 staticResource.getContent()
         );
@@ -24,7 +24,7 @@ public class HttpResponse {
 
     @Override
     public String toString() {
-        return String.join(NEW_LINE,
+        return String.join("\r\n",
                 statusLine.toString(),
                 headers.toString(),
                 "",

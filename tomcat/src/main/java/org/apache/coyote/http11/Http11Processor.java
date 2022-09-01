@@ -35,21 +35,25 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = makeResponse(request);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toString().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String makeResponse(final Request request) throws IOException {
+    private HttpResponse makeResponse(final Request request) throws IOException {
         if (request.getMethod().equals(HttpMethod.GET)) {
-            final var path = request.getPath();
-            final var staticResource = StaticResource.path(path);
-
-            return HttpResponse.withStaticResource(staticResource)
-                    .toString();
+            return doGet(request);
         }
         throw new UncheckedServletException("지원하지 않는 Http Method 입니다.");
+    }
+
+    private HttpResponse doGet(final Request request) throws IOException {
+        final var path = request.getPath();
+        if (path.equals("/")) {
+            return HttpResponse.withStaticResource(new StaticResource("Hello world!", "html"));
+        }
+        return HttpResponse.withStaticResource(StaticResource.path(path));
     }
 }

@@ -31,4 +31,8 @@ public class HttpRequest {
     public String getPath() {
         return startLine.getPath();
     }
+
+    public String getQueryString() {
+        return startLine.getQueryString();
+    }
 }

@@ -1,21 +1,23 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+
+import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.response.Http11Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -32,42 +34,87 @@ public class Http11Processor implements Runnable, Processor {
         process(connection);
     }
 
+    public void get(Http11Request request, OutputStream outputStream) throws IOException {
+        Http11Response response = makeResponse(request);
+        outputStream.write(response.toMessage().getBytes());
+        outputStream.flush();
+    }
+
+    private Http11Response makeResponse(Http11Request request) {
+        if (request.isResource()) {
+            return generateResourceResponse(request);
+        }
+        return generateDefaultResponse();
+    }
+
+    private Http11Response generateDefaultResponse() {
+        final var responseBody = "Hello world!";
+        Map<String, String> headers = new LinkedHashMap<>();
+        headers.put("Content-Type", "text/html;charset=utf-8");
+        headers.put("Content-Length", Long.toString(responseBody.getBytes().length));
+
+        Http11Response response = new Http11Response("HTTP/1.1", 200,
+                "OK", headers, responseBody);
+
+        return response;
+    }
+
+    private Http11Response generateResourceResponse(Http11Request request) {
+        String url = request.getUrl();
+        URL resource = getClass().getClassLoader().getResource("static" + url);
+
+        try {
+            Map<String, String> headers = new LinkedHashMap<>();
+            headers.put("Content-Type", "text/html;charset=utf-8");
+            headers.put("Content-Length", Long.toString(new File(resource.getFile()).length()));
+
+            Http11Response response = new Http11Response("HTTP/1.1", 200, "OK",
+                    headers, new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+            return response;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public void process(final Socket connection){
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final var inputStreamReader = new InputStreamReader(inputStream);
-             final var bufferedReader = new BufferedReader(inputStreamReader)) {
 
+        try (InputStream inputStream = connection.getInputStream();
+        OutputStream outputStream = connection.getOutputStream();) {
+            Http11Request request = makeRequest(connection);
+            get(request, outputStream);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-            String[] startLine = bufferedReader.readLine().split(" ");
-            if (startLine[0].equals("GET") && startLine[1].equals("/index.html")) {
-                URL resource = getClass().getClassLoader().getResource("static/index.html");
+    private Http11Request makeRequest(Socket connection) {
+        try (InputStream inputStream = connection.getInputStream();
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+        ) {
+            String[] rawStart = bufferedReader.readLine().split(" ");
+            String method = rawStart[0];
+            String url = rawStart[1];
 
-                final var response = "HTTP/1.1 200 OK \r\n" +
-                        "Content-Type: text/html;charset=utf-8 \r\n" +
-                        "Content-Length: 5564 \r\n" +
-                        "\r\n"+
-                        new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-                return;
+            Map<String, String> headers = new HashMap<>();
+            String data;
+            while (!(data = bufferedReader.readLine()).equals("")) {
+                String[] header = data.split(" ");
+                headers.put(header[0].strip(), header[1].strip());
             }
 
-            final var responseBody = "Hello world!";
+            StringBuilder bodyBuilder = new StringBuilder();
+            while ((data = bufferedReader.readLine()) != null) {
+                bodyBuilder.append(data);
+                bodyBuilder.append("\r\n");
+            }
+            String body = bodyBuilder.toString();
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
+            return new Http11Request(method, url, headers, body);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
     }
 }

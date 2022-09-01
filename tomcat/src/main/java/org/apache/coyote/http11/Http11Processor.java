@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +72,22 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponseBody(final String requestURI) throws IOException {
+        int index = requestURI.indexOf("?");
+        if (index != -1) {
+            String uriPath = requestURI.substring(0, index);
+            String[] queryString = requestURI.substring(index + 1).split("&");
+            Map<String, String> queryStrings = new HashMap<>();
+            for (String element : queryString) {
+                String[] split = element.split("=");
+                queryStrings.put(split[0], split[1]);
+            }
+            User user = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+            log.info("user : " + user);
+            final URL url = getClass().getClassLoader().getResource(STATIC_FILE_PATH + uriPath + ".html");
+            final Path path = new File(url.getFile()).toPath();
+            return new String(Files.readAllBytes(path));
+        }
         if (!requestURI.equals("/")) {
             final URL url = getClass().getClassLoader().getResource(STATIC_FILE_PATH + requestURI);
             final Path path = new File(url.getFile()).toPath();

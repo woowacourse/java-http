@@ -37,10 +37,10 @@ public class Http11Processor implements Runnable, Processor {
 		try (final var inputStream = connection.getInputStream();
 			 final var outputStream = connection.getOutputStream()) {
 
-			final var request = new HttpRequest(inputStream);
-			final var response = makeHttpResponse(request);
+			final var response = makeHttpResponse(new HttpRequest(inputStream));
 
-			outputStream.write(response.getBytes());
+			String responseMessage = response.getFullMessage();
+			outputStream.write(responseMessage.getBytes());
 			outputStream.flush();
 		} catch (IOException | UncheckedServletException e) {
 			log.error(e.getMessage(), e);
@@ -50,7 +50,10 @@ public class Http11Processor implements Runnable, Processor {
 	private HttpResponse makeHttpResponse(HttpRequest httpRequest) throws IOException {
 		String requestUrl = httpRequest.getUrl();
 		if (requestUrl.equals("/")) {
-			return new HttpResponse(StatusCode.OK, "Hello world!", ContentType.HTML);
+			return HttpResponse.OK()
+				.setHeader("Content-Type", ContentType.HTML.getFormat())
+				.responseBody("Hello world!")
+				.build();
 		}
 
 		if (httpRequest.isStaticResourceRequest()) {
@@ -61,11 +64,10 @@ public class Http11Processor implements Runnable, Processor {
 
 	private HttpResponse handleStaticRequest(HttpRequest httpRequest) throws IOException {
 		try {
-			return new HttpResponse(
-				StatusCode.OK,
-				StaticResourceUtil.getContent(httpRequest.getUrl()),
-				httpRequest.getContentType()
-			);
+			return HttpResponse.OK()
+				.responseBody(StaticResourceUtil.getContent(httpRequest.getUrl()))
+				.setHeader("Content-Type", httpRequest.getContentType().getFormat())
+				.build();
 		} catch (FileNotFoundException e) {
 			return responseErrorPage(NOT_FOUND_HTML, 404);
 		}
@@ -85,13 +87,19 @@ public class Http11Processor implements Runnable, Processor {
 	private HttpResponse checkValidLogin(String account, String password) throws IOException {
 		Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
 		if (findUser.isPresent() && findUser.get().checkPassword(password)) {
-			return new HttpResponse(StatusCode.OK, findUser.get().toString(), ContentType.HTML);
+			return HttpResponse.FOUND()
+				.setHeader("Location", "/index.html")
+				.build();
 		}
 		return responseErrorPage(UNAUTHORIZED_HTML, 401);
 	}
 
 	private HttpResponse responseErrorPage(String htmlPath, int statusCode) throws IOException {
 		String responseBody = StaticResourceUtil.getContent(htmlPath);
-		return new HttpResponse(StatusCode.from(statusCode), responseBody, ContentType.HTML);
+		return HttpResponse.builder()
+			.statusCode(StatusCode.from(statusCode))
+			.responseBody(responseBody)
+			.setHeader("Content-Type", ContentType.HTML.getFormat())
+			.build();
 	}
 }

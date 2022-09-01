@@ -7,7 +7,8 @@ public enum StatusCode {
 
 	OK(200, " OK "),
 	NOT_FOUND(404, " Not Found "),
-	UNAUTHORIZED(401, " Unauthorized ")
+	UNAUTHORIZED(401, " Unauthorized "),
+	FOUND(302, " Found ")
 
 	;
 

@@ -5,8 +5,13 @@ import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Objects;
+
+import static org.apache.utils.ResponseUtil.getResponseBody;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -26,10 +31,11 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
-            final var responseBody = "Hello world!";
-
+             final var outputStream = connection.getOutputStream();
+             final var reader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
+            String uri = Objects.requireNonNull(reader.readLine()).split(" ")[1];
+            final var responseBody = getResponseBody(uri, this.getClass());
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: text/html;charset=utf-8 ",

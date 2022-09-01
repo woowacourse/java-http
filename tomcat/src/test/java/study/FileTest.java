@@ -3,9 +3,13 @@ package study;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -25,8 +29,9 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final String actual = "";
+        final URL resource = getClass().getClassLoader().getResource(fileName);
+        // 파일의 이름을 불러온다.
+        final String actual = Objects.requireNonNull(resource).getFile();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -36,14 +41,15 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException, URISyntaxException {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final Path path = null;
+        final URL resource = getClass().getClassLoader().getResource(fileName);
+        assert resource != null;
+        final Path path = Path.of(resource.toURI());
 
-        // todo
-        final List<String> actual = Collections.emptyList();
+        // 내부적으로 InputStream을 Path로 만들 수 있음
+        final List<String> actual = Files.readAllLines(path);
 
         assertThat(actual).containsOnly("nextstep");
     }

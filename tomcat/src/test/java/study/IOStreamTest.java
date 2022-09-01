@@ -207,7 +207,7 @@ class IOStreamTest {
 
             try(bufferedReader){
                 String str;
-                while((str = bufferedReader.readLine()) != null){ //힝구... 그런거어케암...
+                while((str = bufferedReader.readLine()) != null){
                     actual.append(str +"\r\n");
                 }
             } catch (IOException e) {

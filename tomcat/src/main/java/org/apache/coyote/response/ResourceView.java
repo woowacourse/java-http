@@ -44,12 +44,10 @@ public class ResourceView {
 
     private String toHttpResponseMessage(HttpStatus status, Path path) {
         try {
-            String startLine = String.format("HTTP/1.1 %s ", status.toResponse());
-            String contentTypeHeader = String.format("Content-Type: %s;charset=utf-8 ", Files.probeContentType(path));
-            String responseBody = new String(Files.readAllBytes(path));
-            String contentLengthHeader = String.format("Content-Length: %d ", responseBody.getBytes().length);
-
-            return String.join("\r\n", startLine, contentTypeHeader, contentLengthHeader, "", responseBody);
+            return new ResponseMessage(status)
+                    .setContentType(Files.probeContentType(path))
+                    .setResponseBody(new String(Files.readAllBytes(path)))
+                    .build();
         } catch (IOException e) {
             throw HttpException.ofInternalServerError(e);
         }

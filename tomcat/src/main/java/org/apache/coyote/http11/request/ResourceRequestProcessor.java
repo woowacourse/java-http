@@ -12,8 +12,7 @@ public class ResourceRequestProcessor implements HttpRequestProcessor {
     @Override
     public HttpResponse process(HttpRequest request) {
         String requestURI = request.getRequestURI();
-        ResourceLocator resourceLocator = new ResourceLocator();
-        File resource = resourceLocator.findResource(requestURI.substring(requestURI.lastIndexOf("/")));
+        File resource = ResourceLocator.findResource(requestURI.substring(requestURI.lastIndexOf("/")));
         String extension = requestURI.substring(requestURI.lastIndexOf(".") + 1);
 
         String responseBody = null;

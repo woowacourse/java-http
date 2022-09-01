@@ -13,26 +13,23 @@ class ResourceLocatorTest {
     @Test
     @DisplayName("입력된 파일명과 일치하는 파일을 찾아온다")
     void getResource() {
-        ResourceLocator resourceLocator = new ResourceLocator();
         String requestURI = "styles.css";
 
-        File resource = resourceLocator.findResource(requestURI);
+        File resource = ResourceLocator.findResource(requestURI);
         assertThat(resource).isNotNull();
     }
 
     @Test
     @DisplayName("null을 입력받는 경우 예외를 발생시킨다")
     void throwExceptionWhenInputIsNull() {
-        ResourceLocator resourceLocator = new ResourceLocator();
-        assertThatThrownBy(() -> resourceLocator.findResource(null))
+        assertThatThrownBy(() -> ResourceLocator.findResource(null))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     @DisplayName("공백을 입력받는 경우 예외를 발생시킨다")
     void throwExceptionWhenInputIsBlank() {
-        ResourceLocator resourceLocator = new ResourceLocator();
-        assertThatThrownBy(() -> resourceLocator.findResource(" "))
+        assertThatThrownBy(() -> ResourceLocator.findResource(" "))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

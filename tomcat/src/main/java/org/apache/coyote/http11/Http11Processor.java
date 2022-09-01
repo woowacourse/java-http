@@ -42,9 +42,9 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final HttpRequest httpRequest = createHttpRequest(bufferedReader);
-            final var response = createResponse(httpRequest);
+            final HttpResponse httpResponse = createResponse(httpRequest);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.toResponse());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | NoSuchElementException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
@@ -64,41 +64,30 @@ public class Http11Processor implements Runnable, Processor {
         return new HttpRequest(requestLine, requestHeader);
     }
 
-    private String createResponse(HttpRequest httpRequest) throws IOException {
-        if (httpRequest.getUri().equals("/")) {
-            return createOkResponse("text/html", "Hello world!");
-        }
-        return createOkResponseWithContent(httpRequest.getUri());
-    }
-
-    private String createOkResponse(String contentType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private String createOkResponseWithContent(String httpRequestUri) throws IOException {
-        if (FileExtension.hasFileExtension(httpRequestUri)) {
-            Path filePath = findFilePath(httpRequestUri);
+    private HttpResponse createResponse(HttpRequest httpRequest) throws IOException {
+        if (FileExtension.hasFileExtension(httpRequest.getUri())) {
+            Path filePath = findFilePath(httpRequest.getUri());
             String content = new String(Files.readAllBytes(filePath));
 
-            String contentType = FileExtension.findContentType(httpRequestUri);
-            return createOkResponse(contentType, content);
+            String contentType = FileExtension.findContentType(httpRequest.getUri());
+            return new HttpResponse("200 OK", contentType, content);
         }
-        if (httpRequestUri.startsWith("/login")) {
-            Map<String, String> queryValues = UriParser.parseUri(httpRequestUri);
+        if (httpRequest.getUri().equals("/")) {
+            String contentType = FileExtension.HTML.getContentType();
+            return new HttpResponse("200 OK", contentType, "Hello world!");
+        }
+        if (httpRequest.getUri().startsWith("/login")) {
+            Map<String, String> queryValues = UriParser.parseUri(httpRequest.getUri());
             LoginHandler loginHandler = new LoginHandler();
             User user = loginHandler.login(queryValues);
 
             Path filePath = findFilePath("/login.html");
             String content = new String(Files.readAllBytes(filePath));
             String contentType = FileExtension.HTML.getContentType();
-            return createOkResponse(contentType, content);
+            return new HttpResponse("200 OK", contentType, content);
         }
-        return null;
+        String contentType = FileExtension.HTML.getContentType();
+        return new HttpResponse("200 OK", contentType, "");
     }
 
     private Path findFilePath(String fileName) {

@@ -17,6 +17,7 @@ public enum FilePath {
     INDEX_ASSETS_PIE("/assets/chart-pie.js"),
     INDEX_JS("/js/scripts.js"),
     LOGIN_PAGE("/login.html"),
+    FAVICON("/favicon.ico"),
     ;
 
     private static final char FILE_EXTENSION_SEPARATOR = '.';

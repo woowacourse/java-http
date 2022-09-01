@@ -7,6 +7,7 @@ public enum ContentType {
     CSS("css", "text/css"),
     JS("js", "application/javascript"),
     HTML("html", "text/html"),
+    ICO("ico", "image/x-icon"),
     ;
 
     private static final String ERROR_MESSAGE = "존재하지 않는 컨텐츠 타입입니다. -> contentType: %s";

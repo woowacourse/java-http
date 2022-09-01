@@ -70,11 +70,11 @@ public class Http11Processor implements Runnable, Processor {
             String content = new String(Files.readAllBytes(filePath));
 
             String contentType = FileExtension.findContentType(httpRequest.getUri());
-            return new HttpResponse("200 OK", contentType, content);
+            return new HttpResponse(HttpStatus.OK, contentType, content);
         }
         if (httpRequest.getUri().equals("/")) {
             String contentType = FileExtension.HTML.getContentType();
-            return new HttpResponse("200 OK", contentType, "Hello world!");
+            return new HttpResponse(HttpStatus.OK, contentType, "Hello world!");
         }
         if (httpRequest.getUri().startsWith("/login")) {
             Map<String, String> queryValues = UriParser.parseUri(httpRequest.getUri());
@@ -84,10 +84,10 @@ public class Http11Processor implements Runnable, Processor {
             Path filePath = findFilePath("/login.html");
             String content = new String(Files.readAllBytes(filePath));
             String contentType = FileExtension.HTML.getContentType();
-            return new HttpResponse("200 OK", contentType, content);
+            return new HttpResponse(HttpStatus.OK, contentType, content);
         }
         String contentType = FileExtension.HTML.getContentType();
-        return new HttpResponse("200 OK", contentType, "");
+        return new HttpResponse(HttpStatus.OK, contentType, "");
     }
 
     private Path findFilePath(String fileName) {

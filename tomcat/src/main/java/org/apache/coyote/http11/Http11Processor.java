@@ -8,6 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import nextstep.jwp.UserService;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.model.ContentFormat;
@@ -41,6 +42,11 @@ public class Http11Processor implements Runnable, Processor {
 
             Request request = new Request(reader.readLine());
             ResponseBody responseBody = findResource(request.getUrl());
+            if (request.getUrl().equals("/login") && !request.getQueryParams().isEmpty()) {
+                if (UserService.login(request.getQueryParam("account"), request.getQueryParam("password"))) {
+                    log.info(UserService.findByAccount(request.getQueryParam("account")).toString());
+                }
+            }
             Response response = new Response(Status.OK, responseBody);
 
             outputStream.write(response.getString().getBytes());
@@ -53,6 +59,9 @@ public class Http11Processor implements Runnable, Processor {
     private ResponseBody findResource(String url) throws IOException {
         if (url.endsWith("/")) {
             url += "/hello.txt";
+        }
+        if (!url.contains(".")) {
+            url += ".html";
         }
         Path path = Path.of(Objects.requireNonNull(this.getClass().getResource("/static" + url)).getPath());
         String body = Files.readString(path);

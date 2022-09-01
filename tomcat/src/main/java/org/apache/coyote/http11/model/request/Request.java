@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.model.request;
 
+import java.util.Map;
+
 public class Request {
 
     private static final String LINE_SEPARATOR = "\r\n";
@@ -18,5 +20,13 @@ public class Request {
 
     public String getUrl() {
         return startLine.getUrl();
+    }
+
+    public Map<String, String> getQueryParams() {
+        return startLine.getQueryParams();
+    }
+
+    public String getQueryParam(final String key) {
+        return startLine.getQueryParam(key);
     }
 }

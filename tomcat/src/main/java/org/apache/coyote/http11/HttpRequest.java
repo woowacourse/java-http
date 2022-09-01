@@ -8,13 +8,13 @@ import java.util.stream.Collectors;
 
 public class HttpRequest {
 
-    private final String httpMethod;
+    private final HttpMethod httpMethod;
     private final String uri;
     private final Map<String, String> queryParameters;
     private final String version;
     private final Map<String, String> headers;
 
-    private HttpRequest(final String httpMethod, final String uri, final Map<String, String> queryParameters,
+    private HttpRequest(final HttpMethod httpMethod, final String uri, final Map<String, String> queryParameters,
                         final String version,
                         final Map<String, String> headers) {
         this.httpMethod = httpMethod;
@@ -29,7 +29,6 @@ public class HttpRequest {
 
         String requestLine = requestMessageLines.get(0);
         List<String> requestLines = Arrays.asList(requestLine.split(" "));
-        String method = requestLines.get(0);
         String requestTarget = requestLines.get(1);
         String uri = requestTarget.split("\\?")[0];
         if (!(uri.equals("/") || uri.contains("."))) {
@@ -37,8 +36,9 @@ public class HttpRequest {
         }
         Map<String, String> queryString = parseQueryString(requestTarget);
         String httpVersion = requestLines.get(2);
+
         Map<String, String> headers = toMap(requestMessageLines.subList(1, requestMessageLines.size()), ": ");
-        return new HttpRequest(method, uri, queryString, httpVersion, headers);
+        return new HttpRequest(HttpMethod.valueOf(requestLines.get(0)), uri, queryString, httpVersion, headers);
     }
 
     private static Map<String, String> parseQueryString(final String requestTarget) {
@@ -59,7 +59,7 @@ public class HttpRequest {
         return "text/" + uri.split("\\.")[1];
     }
 
-    public String getHttpMethod() {
+    public HttpMethod getHttpMethod() {
         return httpMethod;
     }
 

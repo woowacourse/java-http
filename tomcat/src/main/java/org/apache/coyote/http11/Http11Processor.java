@@ -6,6 +6,11 @@ import java.util.Optional;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.FileNotFoundException;
+import org.apache.coyote.http11.http.ContentType;
+import org.apache.coyote.http11.http.Header;
+import org.apache.coyote.http11.http.HttpRequest;
+import org.apache.coyote.http11.http.HttpResponse;
+import org.apache.coyote.http11.http.StatusCode;
 import org.apache.coyote.http11.util.StaticResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +56,8 @@ public class Http11Processor implements Runnable, Processor {
 		String requestUrl = httpRequest.getUrl();
 		if (requestUrl.equals("/")) {
 			return HttpResponse.OK()
-				.setHeader("Content-Type", ContentType.HTML.getFormat())
 				.responseBody("Hello world!")
+				.setHeader(Header.CONTENT_TYPE, ContentType.HTML.getFormat())
 				.build();
 		}
 
@@ -66,7 +71,7 @@ public class Http11Processor implements Runnable, Processor {
 		try {
 			return HttpResponse.OK()
 				.responseBody(StaticResourceUtil.getContent(httpRequest.getUrl()))
-				.setHeader("Content-Type", httpRequest.getContentType().getFormat())
+				.setHeader(Header.CONTENT_TYPE, httpRequest.getContentType().getFormat())
 				.build();
 		} catch (FileNotFoundException e) {
 			return responseErrorPage(NOT_FOUND_HTML, 404);
@@ -88,7 +93,7 @@ public class Http11Processor implements Runnable, Processor {
 		Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
 		if (findUser.isPresent() && findUser.get().checkPassword(password)) {
 			return HttpResponse.FOUND()
-				.setHeader("Location", "/index.html")
+				.setHeader(Header.LOCATION, "/index.html")
 				.build();
 		}
 		return responseErrorPage(UNAUTHORIZED_HTML, 401);
@@ -99,7 +104,7 @@ public class Http11Processor implements Runnable, Processor {
 		return HttpResponse.builder()
 			.statusCode(StatusCode.from(statusCode))
 			.responseBody(responseBody)
-			.setHeader("Content-Type", ContentType.HTML.getFormat())
+			.setHeader(Header.CONTENT_TYPE, ContentType.HTML.getFormat())
 			.build();
 	}
 }

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.http;
 
 import static java.util.stream.Collectors.*;
 

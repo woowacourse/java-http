@@ -1,6 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.http;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class HttpResponse {
@@ -8,9 +8,9 @@ public class HttpResponse {
 	private final StatusCode statusCode;
 	private final String responseBody;
 
-	private final Map<String, String> headers;
+	private final Map<Header, String> headers;
 
-	private HttpResponse(StatusCode statusCode, String responseBody, Map<String, String> headers) {
+	private HttpResponse(StatusCode statusCode, String responseBody, Map<Header, String> headers) {
 		this.statusCode = statusCode;
 		this.responseBody = responseBody;
 		this.headers = headers;
@@ -23,8 +23,8 @@ public class HttpResponse {
 			.append(statusCode.getMessage())
 			.append("\r\n");
 
-		for (String key : headers.keySet()) {
-			stringBuilder.append(key)
+		for (Header key : headers.keySet()) {
+			stringBuilder.append(key.getName())
 				.append(": ")
 				.append(headers.get(key))
 				.append(" ")
@@ -44,23 +44,21 @@ public class HttpResponse {
 	}
 
 	public static HttpResponseBuilder OK() {
-		return new HttpResponseBuilder(StatusCode.OK);
+		return new HttpResponseBuilder()
+			.statusCode(StatusCode.OK);
 	}
 
 	public static HttpResponseBuilder FOUND() {
-		return new HttpResponseBuilder(StatusCode.FOUND);
+		return new HttpResponseBuilder()
+			.statusCode(StatusCode.FOUND);
 	}
 
 	public static class HttpResponseBuilder {
 		private StatusCode statusCode;
 		private String responseBody;
-		private final Map<String, String> headers = new HashMap<>();
+		private final Map<Header, String> headers = new LinkedHashMap<>();
 
 		private HttpResponseBuilder() {
-		}
-
-		private HttpResponseBuilder(StatusCode statusCode) {
-			this.statusCode = statusCode;
 		}
 
 		public HttpResponseBuilder statusCode(StatusCode statusCode) {
@@ -70,12 +68,12 @@ public class HttpResponse {
 
 		public HttpResponseBuilder responseBody(String responseBody) {
 			this.responseBody = responseBody;
-			this.setHeader("Content-Length", String.valueOf(responseBody.getBytes().length));
+			this.setHeader(Header.CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
 			return this;
 		}
 
-		public HttpResponseBuilder setHeader(String key, String value) {
-			this.headers.put(key, value);
+		public HttpResponseBuilder setHeader(Header header, String value) {
+			this.headers.put(header, value);
 			return this;
 		}
 

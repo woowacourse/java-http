@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
@@ -43,7 +42,8 @@ public class Http11Processor implements Runnable, Processor {
 
             final String resource = parseRequestResource(bufferedReader);
             final String responseBody = loadResourceContent(resource);
-            final String response = createResponseMessage(responseBody);
+            final String contentType = selectContentType(resource);
+            final String response = createResponseMessage(responseBody, contentType);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -70,10 +70,18 @@ public class Http11Processor implements Runnable, Processor {
         return content;
     }
 
-    private static String createResponseMessage(final String responseBody) {
+    private String selectContentType(final String resource) {
+        final String extension = resource.split("\\.")[1];
+        if (extension.equals("css")) {
+            return "text/css";
+        }
+        return "text/html";
+    }
+
+    private static String createResponseMessage(final String responseBody, final String extension) {
         return String.join("\r\n",
             "HTTP/1.1 200 OK ",
-            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Type: " + extension + ";charset=utf-8 ",
             "Content-Length: " + responseBody.getBytes().length + " ",
             "",
             responseBody);

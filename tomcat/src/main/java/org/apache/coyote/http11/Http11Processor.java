@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,6 +42,8 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final String requestUri = getRequestUri(bufferedReader);
+            final Map<String, String> queryParam = getQueryParam(requestUri);
+
             final Map<String, String> headers = getHeaders(bufferedReader);
 
             final String responseBody = getResponseBody(requestUri);
@@ -60,6 +63,24 @@ public class Http11Processor implements Runnable, Processor {
         return splitRequestStartLine[1];
     }
 
+    private String getRequestPath(final String requestUri) {
+        if (requestUri.contains("?")) {
+            final int index = requestUri.indexOf("?");
+            return "static/" + requestUri.substring(0, index);
+        }
+        return "static/" + requestUri;
+    }
+
+    private Map<String, String> getQueryParam(final String requestUri) {
+        final int index = requestUri.indexOf("?");
+        final String[] queryStrings = requestUri.substring(index + 1)
+                .split("&");
+
+        return Arrays.stream(queryStrings)
+                .map(it -> it.split("="))
+                .collect(Collectors.toMap(it -> it[0], it -> it[1], (a, b) -> b));
+    }
+
 
     private Map<String, String> getHeaders(final BufferedReader bufferedReader) throws IOException {
         final Map<String, String> headers = new HashMap<>();
@@ -74,24 +95,26 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getContentType(final String requestUri) {
-        String contentType = TEXT_HTML;
-
         if (requestUri.contains(".css")) {
-            contentType = TEXT_CSS;
+            return TEXT_CSS;
         }
         if (requestUri.contains(".js")) {
-            contentType = APPLICATION_JAVASCRIPT;
+            return APPLICATION_JAVASCRIPT;
         }
-
-        return contentType;
+        return TEXT_HTML;
     }
 
     private String getResponseBody(final String requestUri) throws IOException {
         String responseBody = WELCOME_MESSAGE;
 
         if (!requestUri.equals("/")) {
+            String requestPath = getRequestPath(requestUri);
+            if (!requestPath.contains(".")) {
+                requestPath += ".html";
+            }
+
             final String resource = getClass().getClassLoader()
-                    .getResource("static" + requestUri)
+                    .getResource(requestPath)
                     .getPath();
             final File file = new File(resource);
             final BufferedReader fileReader = new BufferedReader(new FileReader(file));

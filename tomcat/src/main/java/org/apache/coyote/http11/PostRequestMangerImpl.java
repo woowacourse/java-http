@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.UUID;
 
 public class PostRequestMangerImpl implements RequestManager {
 
@@ -24,16 +25,25 @@ public class PostRequestMangerImpl implements RequestManager {
             FormData loginRequestBody = requestParser.generateRequestBody();
             LoginTry loginTry = new LoginTry(loginRequestBody.get("account"), loginRequestBody.get("password"));
             redirect = loginTry.generateRedirectUrl();
+
+            HttpCookie httpCookie = requestParser.generateCookie();
+            UUID cookieValue = UUID.randomUUID();
+            if (httpCookie.isContains("JSESSIONID")) {
+                cookieValue = UUID.fromString(httpCookie.get("JSESSIONID"));
+            }
+            return String.join("\r\n",
+                    "HTTP/1.1 " + STATUS_CODE + " " + FOUND + " ",
+                    "Location: " + redirect + " ",
+                    "Set-Cookie: JSESSIONID=" + cookieValue + " ",
+                    "");
         }
 
-        if (fileName.getPrefix().equals("/register")) {
-            FormData registerRequestBody = requestParser.generateRequestBody();
-            RegisterTry registerTry = new RegisterTry(
-                    registerRequestBody.get("account"),
-                    registerRequestBody.get("password"),
-                    registerRequestBody.get("email"));
-            redirect = registerTry.signUp();
-        }
+        FormData registerRequestBody = requestParser.generateRequestBody();
+        RegisterTry registerTry = new RegisterTry(
+                registerRequestBody.get("account"),
+                registerRequestBody.get("password"),
+                registerRequestBody.get("email"));
+        redirect = registerTry.signUp();
 
         return String.join("\r\n",
                 "HTTP/1.1 " + STATUS_CODE + " " + FOUND + " ",

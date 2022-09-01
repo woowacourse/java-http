@@ -7,6 +7,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.UUID;
 
 public class GetRequestMangerImpl implements RequestManager {
 
@@ -24,7 +25,7 @@ public class GetRequestMangerImpl implements RequestManager {
         FileName fileName = requestParser.generateFileName();
 
         String responseBody = fileName.getPrefix();
-        System.out.println(fileName.getPrefix() + " " + fileName.getExtension());
+
         if (!responseBody.equals("Hello world!")) {
             URL resource = getClass().getClassLoader().getResource("static/" + responseBody + "." + fileName.getExtension());
             final Path path = new File(resource.getFile()).toPath();

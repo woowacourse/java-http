@@ -57,15 +57,15 @@ public class Http11Processor implements Runnable, Processor {
     private String createResponse(String request) throws IOException {
         String[] requestUrlInfo = request.split(" ");
         if (requestUrlInfo[1].equals("/")) {
-            return createOkResponse("Hello world!");
+            return createOkResponse("text/html;charset=utf-8", "Hello world!");
         }
         return createOkResponseWithContent(requestUrlInfo);
     }
 
-    private String createOkResponse(String responseBody) {
+    private String createOkResponse(String contentType, String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType,
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
@@ -75,13 +75,15 @@ public class Http11Processor implements Runnable, Processor {
         String fileName = requestUrlInfo[1];
         Path filePath = findFilePath(fileName);
         String content = new String(Files.readAllBytes(filePath));
-        return createOkResponse(content);
+
+        String contentType = FileExtension.findContentType(fileName);
+        return createOkResponse(contentType, content);
     }
 
     private Path findFilePath(String fileName) {
         try {
             return Path.of(Objects.requireNonNull(
-                    this.getClass().getClassLoader().getResource("static/" + fileName)).getPath());
+                    this.getClass().getClassLoader().getResource("static" + fileName)).getPath());
         } catch (NullPointerException e) {
             throw new NoSuchElementException(fileName + " 파일이 존재하지 않습니다.");
         }

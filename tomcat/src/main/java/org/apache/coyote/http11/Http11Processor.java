@@ -55,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
     private List<String> getRequest(final BufferedReader bufferedReader) throws IOException {
         final List<String> request = new ArrayList<>();
         String line;
-        while ((line = bufferedReader.readLine()) != null) {
+        while (!(line = bufferedReader.readLine()).isBlank()) {
             request.add(line);
         }
         return request;
@@ -68,7 +68,7 @@ public class Http11Processor implements Runnable, Processor {
     private String getResponseBody(final String requestURI) throws IOException {
         if (!requestURI.equals("/")) {
             final URL url = getClass().getClassLoader().getResource(STATIC_FILE_PATH + requestURI);
-            final Path path = new File(Objects.requireNonNull(url).getFile()).toPath();
+            final Path path = new File(url.getFile()).toPath();
             return new String(Files.readAllBytes(path));
         }
         return DEFAULT_REQUEST_BODY;

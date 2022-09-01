@@ -72,8 +72,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private URL getResource(String uri) {
-        return getClass().getClassLoader()
+        URL resource = getClass().getClassLoader()
             .getResource("static" + uri);
+        if (resource == null) {
+            log.error("올바르지 않은 경로: " + uri);
+            return getResource("/404.html");
+        }
+        return resource;
     }
 
     private byte[] writeResponseOk(String contentType, String responseBody) {

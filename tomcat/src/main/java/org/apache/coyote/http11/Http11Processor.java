@@ -9,8 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.http.ContentType;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
+
+    private static final String FILE_NAME_DELIMITER = ".";
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
@@ -39,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
             final var outputStream = connection.getOutputStream()) {
             final List<String> request = extractRequest(inputStream);
             String responseBody = handler(extractUri(request));
-            outputStream.write(writeResponseOk(responseBody));
+            outputStream.write(writeResponseOk(ContentType.of(extractFileExtension(request)).getMediaType(), responseBody));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -61,6 +63,16 @@ public class Http11Processor implements Runnable, Processor {
         return request.get(0).split(" ")[1];
     }
 
+    private String extractFileExtension(List<String> request) {
+        final int NO_EXISTING = -1;
+        String uri = extractUri(request);
+        int fileNameDelimiterIndex = uri.lastIndexOf(FILE_NAME_DELIMITER);
+        if (fileNameDelimiterIndex == NO_EXISTING) {
+            return ContentType.TEXT_HTML.getFileExtension();
+        }
+        return uri.substring(fileNameDelimiterIndex + 1);
+    }
+
     private String handler(String uri) throws IOException {
         if ("/".equals(uri)) {
             return "Hello world!";
@@ -78,10 +90,10 @@ public class Http11Processor implements Runnable, Processor {
             .getResource("static" + uri);
     }
 
-    private byte[] writeResponseOk(String responseBody) {
+    private byte[] writeResponseOk(String contentType, String responseBody) {
         return String.join("\r\n",
             "HTTP/1.1 200 OK ",
-            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Type: " + contentType + ";charset=utf-8 ",
             "Content-Length: " + responseBody.getBytes().length + " ",
             "",
             responseBody).getBytes();

@@ -1,5 +1,13 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -25,10 +33,36 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
+        try (final var bufferedReader = new BufferedReader(
+                new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            String uri = bufferedReader.readLine().split(" ")[1];
+
+            if (uri.equals("/")) {
+                final var defaultBody = "Hello world!";
+
+                final var defaultResponse = String.join("\r\n",
+                        "HTTP/1.1 200 OK ",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: " + defaultBody.getBytes().length + " ",
+                        "",
+                        defaultBody);
+
+                outputStream.write(defaultResponse.getBytes());
+                outputStream.flush();
+
+                return;
+            }
+
+            final Path path = Path.of(getClass().getClassLoader().getResource("static/" + uri).getPath());
+            final List<String> file = Files.readAllLines(path);
+
+            StringBuilder stringBuilder = new StringBuilder();
+            for (String body : file) {
+                stringBuilder.append(body).append("\r\n");
+            }
+            final var responseBody = stringBuilder.toString();
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

@@ -6,7 +6,10 @@ import java.util.NoSuchElementException;
 public enum StatusCode {
 
 	OK(200, " OK "),
-	NOT_FOUND(404, " Not Found ");
+	NOT_FOUND(404, " Not Found "),
+	UNAUTHORIZED(401, " Unauthorized ")
+
+	;
 
 	private final int code;
 	private final String message;

@@ -1,6 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.File;
 import java.io.IOException;
@@ -120,5 +121,65 @@ class Http11ProcessorTest {
                 response;
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("올바르지 않은 확장자 요청일 경우 예외를 발생시킨다.")
+    void invalid_url() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /abc/def HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: */*;q=0.1 ",
+                "Connection: keep-alive ",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        // then
+        assertThatThrownBy(() -> processor.process(socket))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 계정으로 로그인할 경우 예외를 발생시킨다.")
+    void nonexistent_account() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /abc/def HTTP/1.1 ",
+                "Host: localhost:8080/login?account=abc&password=password ",
+                "Accept: */*;q=0.1 ",
+                "Connection: keep-alive ",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        // then
+        assertThatThrownBy(() -> processor.process(socket))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("잘못된 계정으로 로그인하는 경우 예외를 발생시킨다.")
+    void invalid_account() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /abc/def HTTP/1.1 ",
+                "Host: localhost:8080/login?account=gugu&password=password1 ",
+                "Accept: */*;q=0.1 ",
+                "Connection: keep-alive ",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        // then
+        assertThatThrownBy(() -> processor.process(socket))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

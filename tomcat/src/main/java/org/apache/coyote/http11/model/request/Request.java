@@ -9,13 +9,13 @@ public class Request {
 
     private final RequestLine startLine;
 
-    public Request(final String request) {
-        String[] lines = request.split(LINE_SEPARATOR);
-        this.startLine = new RequestLine(lines[START_LINE_INDEX]);
+    private Request(final String requestLine) {
+        this.startLine = new RequestLine(requestLine);
     }
 
-    public String getMethod() {
-        return startLine.getMethod();
+    public static Request from(final String request) {
+        String[] lines = request.split(LINE_SEPARATOR);
+        return new Request(lines[START_LINE_INDEX]);
     }
 
     public String getUrl() {

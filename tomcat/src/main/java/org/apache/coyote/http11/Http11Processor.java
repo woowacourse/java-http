@@ -33,11 +33,14 @@ public class Http11Processor implements Runnable, Processor {
         ) {
 
             String uri = reader.readLine().split(" ")[1];
+            if (uri.equals("/favicon.ico")) {
+                return;
+            }
             final ResponseHandler responseHandler = new ResponseHandler(uri);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + responseHandler.getContentType().getMIMEType() +";charset=utf-8 ",
                     "Content-Length: " + responseHandler.getResponse().getBytes().length + " ",
                     "",
                     responseHandler.getResponse());

@@ -14,6 +14,10 @@ public class ResponseHandler {
     }
 
     public String getResponse() throws IOException {
+        if (path.equals("/favicon.ico")) {
+            return "";
+        }
+
         if (path.equals("/")) {
             return "Hello world!";
         }
@@ -23,5 +27,13 @@ public class ResponseHandler {
                 .getResource("static" + path);
 
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    }
+
+    public ContentType getContentType() {
+        if (path.contains(".")) {
+            final String[] splitExtension = path.split("\\.");
+            return ContentType.matchMIMEType(splitExtension[splitExtension.length - 1]);
+        }
+        return ContentType.HTML;
     }
 }

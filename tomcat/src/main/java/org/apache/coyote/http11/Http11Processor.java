@@ -16,10 +16,7 @@ import java.util.List;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final String CONTENT_LENGTH_DELIMITER = ": ";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String EMPTY_BODY = "";
 
     private final Socket connection;
 

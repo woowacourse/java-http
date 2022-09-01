@@ -113,15 +113,14 @@ class IOStreamTest {
          */
         @Test
         void InputStream은_데이터를_바이트로_읽는다() throws IOException {
+            // given
             byte[] bytes = {-16, -97, -92, -87};
             final InputStream inputStream = new ByteArrayInputStream(bytes);
 
-            /**
-             * todo
-             * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
-             */
-            final String actual = "";
+            // when
+            final String actual = new String(inputStream.readAllBytes());
 
+            // then
             assertThat(actual).isEqualTo("🤩");
             assertThat(inputStream.read()).isEqualTo(-1);
             inputStream.close();
@@ -132,14 +131,15 @@ class IOStreamTest {
          */
         @Test
         void InputStream은_사용하고_나서_close_처리를_해준다() throws IOException {
+            // given
             final InputStream inputStream = mock(InputStream.class);
 
-            /**
-             * todo
-             * try-with-resources를 사용한다.
-             * java 9 이상에서는 변수를 try-with-resources로 처리할 수 있다.
-             */
+            // when
+            try (inputStream) {
 
+            }
+
+            // then
             verify(inputStream, atLeastOnce()).close();
         }
     }

@@ -8,19 +8,9 @@ public class HttpRequest {
     private final HttpMethod method;
     private final String requestURI;
 
-    public HttpRequest(List<String> request) {
-        this.method = parseMethod(request);
-        this.requestURI = parseRequestURI(request);
-    }
-
-    private String parseRequestURI(List<String> request) {
-        String startLine = request.get(0);
-        return startLine.split(" ")[1];
-    }
-
-    private HttpMethod parseMethod(List<String> request) {
-        String startLine = request.get(0);
-        return HttpMethod.of(startLine.split(" ")[0]);
+    public HttpRequest(HttpMethod method, String url) {
+        this.method = method;
+        this.requestURI = url;
     }
 
     public HttpMethod getMethod() {

@@ -1,14 +1,21 @@
 package nextstep.org.apache.coyote.http11;
 
+import static ch.qos.logback.classic.Level.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import support.StubSocket;
 
 class Http11ProcessorTest {
@@ -144,5 +151,59 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("쿼리스트링과 함께 '/login' 요청시 쿼리스트링을 처리하여 정상 응답을 내보낸다.")
+    @Test
+    void loginWithQueryString() {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n";
+        assertThat(socket.output()).startsWith(expected);
+    }
+
+    @DisplayName("쿼리스트링과 함께 '/login' 요청시 User 정보를 로그로 남긴다.")
+    @Test
+    void loginWithLog() {
+        // given
+        final ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        final Logger logger = (Logger) LoggerFactory.getLogger(Http11Processor.class);
+        logger.addAppender(appender);
+        appender.start();
+
+        // when
+        final String httpRequest= String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        processor.process(socket);
+
+        final List<ILoggingEvent> logs = appender.list;
+        final String message = logs.get(0).getFormattedMessage();
+        final Level level = logs.get(0).getLevel();
+
+        // then
+        assertThat(message).isEqualTo("User{id=1, account='gugu', email='hkkang@woowahan.com', password='password'}");
+        assertThat(level).isEqualTo(INFO);
     }
 }

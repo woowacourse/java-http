@@ -10,8 +10,11 @@ public class HttpResponse {
 
 	private static final String HTTP_MESSAGE_DELIMITER = " ";
 	private static final int RESOURCE_LOCATION = 1;
-	private static final String STATIC_PATH = "static/";
+	private static final String STATIC_PATH = "static";
 	private static final String DEFAULT_CONTENT = "Hello world!";
+	private static final int FILE_FORMAT = 1;
+	private static final int EXTENSION_LOCATION = 1;
+	private static final String FILE_REGEX = "\\.";
 
 	private final String contentType;
 	private final String responseBody;
@@ -51,16 +54,10 @@ public class HttpResponse {
 	}
 
 	private String selectContentType(final String resource) {
-		final String extension = resource.split("\\.")[1];
-		if (extension.equals("css")) {
-			return "text/css";
+		final String[] fileElements = resource.split(FILE_REGEX);
+		if (fileElements.length > FILE_FORMAT) {
+			return KindOfContent.getContentType(fileElements[EXTENSION_LOCATION]);
 		}
-		if (extension.equals("js")) {
-			return "text/javascript";
-		}
-		if (extension.equals("svg")) {
-			return "image/svg+xml";
-		}
-		return "text/html";
+		return KindOfContent.getDefaultContentType();
 	}
 }

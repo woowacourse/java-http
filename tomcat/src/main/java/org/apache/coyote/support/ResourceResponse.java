@@ -4,25 +4,23 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.jwp.exception.UncheckedServletException;
+import java.nio.file.Path;
 import org.apache.exception.NotFoundException;
 
 public class ResourceResponse {
 
-    private final String content;
+    private final Path path;
 
     public ResourceResponse(String uri) {
-        this.content = findResource(uri);
+        this.path = toResourcePath(uri);
     }
 
-    private String findResource(String uri) {
+    private Path toResourcePath(String uri) {
         try {
             File file = new File(findUrl(uri).getFile());
-            return new String(Files.readAllBytes(file.toPath()));
+            return file.toPath();
         } catch (NullPointerException e) {
             throw new NotFoundException();
-        } catch (IOException e) {
-            throw new UncheckedServletException(e);
         }
     }
 
@@ -34,7 +32,11 @@ public class ResourceResponse {
         return classLoader.getResource("static" + uri);
     }
 
-    public String toContent() {
-        return content;
+    public String toContent() throws IOException {
+        return new String(Files.readAllBytes(path));
+    }
+
+    public String toContentType() throws IOException {
+        return Files.probeContentType(path);
     }
 }

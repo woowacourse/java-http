@@ -31,11 +31,13 @@ public class HttpRequestHandler {
         throw new UnsupportedOperationException("Not implemented");
     }
 
-    private String get() {
-        String responseBody = new ResourceResponse(uri).toContent();
+    private String get() throws IOException {
+        ResourceResponse resourceResponse = new ResourceResponse(uri);
+        String responseBody = resourceResponse.toContent();
+        String contentType = resourceResponse.toContentType();
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                String.format("Content-Type: %s;charset=utf-8 ", contentType),
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

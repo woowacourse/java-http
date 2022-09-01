@@ -29,4 +29,8 @@ public enum Content {
                 .orElseThrow(() -> new NotFoundContentTypeException("ContentType을 찾을 수 없습니다."));
         return content.type;
     }
+
+    public String getExtension() {
+        return extension;
+    }
 }

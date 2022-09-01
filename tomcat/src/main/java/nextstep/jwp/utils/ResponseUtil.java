@@ -8,7 +8,13 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+
+import static nextstep.jwp.model.Content.HTML;
 
 public class ResponseUtil {
 
@@ -27,6 +33,39 @@ public class ResponseUtil {
 
     public static String getExtension(final String uri) {
         Objects.requireNonNull(uri);
-        return uri.substring(uri.lastIndexOf(".") + 1);
+        if (uri.contains(".")) {
+            return uri.substring(uri.lastIndexOf(".") + 1);
+        }
+        return HTML.getExtension();
+    }
+
+    public static String getPath(final String uri) {
+        Objects.requireNonNull(uri);
+        String path = uri;
+        if (path.contains("?")) {
+            path = path.substring(0, uri.indexOf("?"));
+        }
+        if (!path.contains(".")) {
+            path += "." + HTML.getExtension();
+        }
+        return path;
+    }
+
+    public static Map<String, String> getParam(final String uri) {
+        Objects.requireNonNull(uri);
+        if (!uri.contains("?")) {
+            return null;
+        }
+        List<String> inputs = Arrays.asList(uri.substring(uri.indexOf("?") + 1).split("&"));
+        return calculateQueryParam(inputs);
+    }
+
+    private static Map<String, String> calculateQueryParam(List<String> inputs) {
+        final Map<String, String> queryParams = new HashMap();
+        for (String input : inputs) {
+            List<String> query = Arrays.asList(input.split("="));
+            queryParams.put(query.get(0), query.get(1));
+        }
+        return queryParams;
     }
 }

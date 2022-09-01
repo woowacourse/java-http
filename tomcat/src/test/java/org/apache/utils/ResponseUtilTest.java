@@ -5,6 +5,9 @@ import nextstep.jwp.utils.ResponseUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -45,5 +48,34 @@ class ResponseUtilTest {
 
         // then
         assertThat(actual).isEqualTo("html");
+    }
+
+    @Test
+    @DisplayName("uri를 통해 path를 추출한다.")
+    void checkGetPath() {
+        // given
+        String filename = "/login?account=gugu&password=password";
+
+        // when
+        String actual = ResponseUtil.getPath(filename);
+
+        // then
+        assertThat(actual).isEqualTo("/login.html");
+    }
+
+    @Test
+    @DisplayName("uri를 통해 param을 추출한다.")
+    void checkGetParam() {
+        // given
+        String filename = "/login?account=gugu&password=password";
+        Map<String, String> expected = new HashMap();
+        expected.put("account","gugu");
+        expected.put("password","password");
+
+        // when
+        Map<String, String> actual = ResponseUtil.getParam(filename);
+
+        // then
+        assertThat(actual).isEqualTo(expected);
     }
 }

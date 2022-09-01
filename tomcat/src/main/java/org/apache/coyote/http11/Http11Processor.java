@@ -34,9 +34,10 @@ public class Http11Processor implements Runnable, Processor {
             final String fileName = getFileName(bufferedReader);
             final var responseBody = getResponseBody(fileName);
 
+            final String contentType = getContentType(fileName);
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -67,5 +68,12 @@ public class Http11Processor implements Runnable, Processor {
         fileInputStream.close();
 
         return responseBody;
+    }
+
+    private String getContentType(final String fileName) {
+        if (fileName.endsWith("css")) {
+            return "text/css";
+        }
+        return "text/html";
     }
 }

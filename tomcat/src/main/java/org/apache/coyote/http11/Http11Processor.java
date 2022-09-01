@@ -38,16 +38,26 @@ public class Http11Processor implements Runnable, Processor {
             String uriPath = inputBufferedReader.readLine().split(" ")[1];
 
             var responseBody = "Hello world!";
+            String contentType = "text/html";
             if (!uriPath.equals("/")) {
+                String extension = uriPath.split("\\.")[1];
+                if (extension.equals("css")) {
+                    contentType = "text/css";
+                }
+                if (extension.equals("js")) {
+                    contentType = "application/x-javascript";
+                }
+                if (extension.equals("ico")) {
+                    contentType = "image/x-icon";
+                }
                 String fileName = "static" + uriPath;
                 final URL resource = getClass().getClassLoader().getResource(fileName);
                 final File file = Paths.get(resource.toURI()).toFile();
                 responseBody = new String(Files.readAllBytes(file.toPath()));
             }
-            System.out.println(responseBody);
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);

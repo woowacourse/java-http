@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.exception.HttpException;
 import org.apache.exception.NotFoundException;
 
 public class ResourceResponse {
@@ -45,14 +46,18 @@ public class ResourceResponse {
         return uri;
     }
 
-    public String toHttpResponseMessage() throws IOException {
-        String responseBody = new String(Files.readAllBytes(path));
-        String contentType = Files.probeContentType(path);
-        return String.join("\r\n",
-                String.format("HTTP/1.1 %s ", status.toResponse()),
-                String.format("Content-Type: %s;charset=utf-8 ", contentType),
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    public String toHttpResponseMessage() {
+        try {
+            String responseBody = new String(Files.readAllBytes(path));
+            String contentType = Files.probeContentType(path);
+            return String.join("\r\n",
+                    String.format("HTTP/1.1 %s ", status.toResponse()),
+                    String.format("Content-Type: %s;charset=utf-8 ", contentType),
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
+        } catch (IOException e) {
+            throw HttpException.ofInternalServerError(e);
+        }
     }
 }

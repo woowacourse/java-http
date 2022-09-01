@@ -56,7 +56,7 @@ public class HttpRequestHandler {
         return parameters;
     }
 
-    public String handle() throws IOException {
+    public String handle() {
         if (method.equals(Method.GET)) {
             checkLoginAccount();
             return get();
@@ -64,7 +64,7 @@ public class HttpRequestHandler {
         throw new UnsupportedOperationException("Not implemented");
     }
 
-    private String get() throws IOException {
+    private String get() {
         try {
             return new ResourceResponse(uri).toHttpResponseMessage();
         } catch (NotFoundException e) {

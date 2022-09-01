@@ -1,13 +1,16 @@
 package study;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Objects;
 
 /**
  * 웹서버는 사용자가 요청한 html 파일을 제공 할 수 있어야 한다.
@@ -24,9 +27,8 @@ class FileTest {
     @Test
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
-
-        // todo
-        final String actual = "";
+        final URL resource = getClass().getClassLoader().getResource(fileName);
+        final String actual = Objects.requireNonNull(resource).getFile();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -36,14 +38,11 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException {
         final String fileName = "nextstep.txt";
-
-        // todo
-        final Path path = null;
-
-        // todo
-        final List<String> actual = Collections.emptyList();
+        final URL resource = getClass().getClassLoader().getResource(fileName);
+        final Path path = new File(Objects.requireNonNull(resource).getPath()).toPath();
+        final List<String> actual = Files.readAllLines(path);
 
         assertThat(actual).containsOnly("nextstep");
     }

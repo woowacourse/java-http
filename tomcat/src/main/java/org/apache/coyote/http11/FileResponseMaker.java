@@ -6,6 +6,9 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.apache.coyote.http11.response.ContentType;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 
 public class FileResponseMaker implements ResponseMaker {
 
@@ -22,11 +25,7 @@ public class FileResponseMaker implements ResponseMaker {
         final var responseBody = new String(Files.readAllBytes(path));
         final ContentType contentType = ContentType.findContentType(extension);
 
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType.getContentType() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        final HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, responseBody, contentType);
+        return httpResponse.toString();
     }
 }

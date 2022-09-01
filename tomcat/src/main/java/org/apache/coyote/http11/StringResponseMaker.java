@@ -1,15 +1,15 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.response.ContentType;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
+
 public class StringResponseMaker implements ResponseMaker {
 
     @Override
     public String createResponse(final String requestUrl) {
         final var responseBody = "Hello world!";
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.length() + " ",
-                "",
-                responseBody);
+        final HttpResponse httpResponse = new HttpResponse(HttpStatus.OK, responseBody, ContentType.HTML);
+        return httpResponse.toString();
     }
 }

@@ -10,6 +10,9 @@ public class QueryParamsParser {
 
     public static HashMap<String, String> parseLoginParams(final String requestUrl) {
         final HashMap<String, String> loginData = new HashMap<>();
+        if (!requestUrl.contains("?") || !requestUrl.contains("=")) {
+            return loginData;
+        }
         final String queryParams = requestUrl.split("\\?")[REQUEST_URL_QUERY_PARAM_START_INDEX];
         final String[] params = queryParams.split("&");
 

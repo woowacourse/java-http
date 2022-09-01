@@ -1,5 +1,5 @@
 package org.apache.coyote.support;
 
-public enum Method {
+public enum HttpMethod {
     GET, POST, PUT, DELETE
 }

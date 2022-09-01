@@ -1,8 +1,9 @@
-package org.apache.coyote.support;
+package org.apache.coyote.request;
 
 import java.util.Optional;
 import nextstep.jwp.model.User;
-import org.apache.exception.HttpException;
+import org.apache.coyote.response.ResourceView;
+import org.apache.coyote.exception.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -6,8 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.Processor;
-import org.apache.coyote.support.HttpRequest;
-import org.apache.coyote.support.HttpRequestHandler;
+import org.apache.coyote.request.HttpRequestHandler;
+import org.apache.coyote.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

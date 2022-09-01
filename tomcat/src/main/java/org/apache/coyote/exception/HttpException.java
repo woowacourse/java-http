@@ -1,4 +1,4 @@
-package org.apache.exception;
+package org.apache.coyote.exception;
 
 import org.apache.coyote.support.HttpStatus;
 

@@ -84,4 +84,32 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).contains(expectedResponseBody);
     }
+
+    @Test
+    void 확장자가_없는_URI로_접근하면_HTML_요청으로_받는다() throws IOException {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /index HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        URL resource = getClass().getClassLoader().getResource("static/index.html");
+        assert resource != null;
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 5670 \r\n" +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

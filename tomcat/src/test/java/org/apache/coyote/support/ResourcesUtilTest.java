@@ -25,6 +25,18 @@ class ResourcesUtilTest {
     }
 
     @Test
+    void 확장자가_없으면_빈_문자열을_반환한다() {
+        // given
+        String fileName = "no_extension";
+
+        // when
+        String actual = ResourcesUtil.parseExtension(fileName);
+
+        // then
+        assertThat(actual).isBlank();
+    }
+
+    @Test
     void resource_읽기_테스트() throws IOException {
         // given
         String fileName = "nextstep.txt";

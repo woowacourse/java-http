@@ -19,6 +19,7 @@ public class Http11Processor implements Runnable, Processor {
     public static final int URL_INDEX = 1;
     public static final String LANDING_PAGE_URL = "/";
     public static final String STATIC_PATH = "static";
+    public static final String DEFAULT_EXTENSION = ".html";
 
     private final Socket connection;
 
@@ -51,7 +52,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String parseUri(final BufferedReader bufferedReader) throws IOException {
-        return bufferedReader.readLine().split(" ", -1)[URL_INDEX];
+        String uri = bufferedReader.readLine().split(" ", -1)[URL_INDEX];
+        String extension = ResourcesUtil.parseExtension(uri);
+        if (extension.isBlank()) {
+            return uri + DEFAULT_EXTENSION;
+        }
+        return uri;
     }
 
     private String accessUri(final String uri) throws IOException {

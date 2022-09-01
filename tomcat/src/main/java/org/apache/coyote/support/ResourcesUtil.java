@@ -16,7 +16,10 @@ public class ResourcesUtil {
     }
 
     public static String parseExtension(final String uri) {
-        return uri.substring(uri.lastIndexOf(EXTENSION_DELIMITER) + 1);
+        if (uri.contains(EXTENSION_DELIMITER)) {
+            return uri.substring(uri.lastIndexOf(EXTENSION_DELIMITER) + 1);
+        }
+        return "";
     }
 
     public static String readResource(final String resourcePath) throws IOException {

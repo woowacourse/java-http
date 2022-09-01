@@ -9,7 +9,11 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.NoSuchElementException;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +47,7 @@ public class Http11Processor implements Runnable, Processor {
                 return ;
             }
 
-            final String response = createResponse(line);
+            final String response = generateResponse(line);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -58,30 +62,82 @@ public class Http11Processor implements Runnable, Processor {
         return line;
     }
 
-    private String createResponse(final String line) throws IOException {
-        final String fileName = getFileName(line);
+    private String generateResponse(final String line) throws IOException {
+        final String url = getUrl(line);
+
+        if (url.startsWith("/login")) {
+            if (url.contains("?")) {
+                return responseLoginUser(url);
+            }
+            return responseLoginPage(url);
+        }
+
+        final String fileName = getFileName(url);
+        return response(fileName);
+    }
+
+    private String responseLoginPage(final String url) throws IOException {
+        final String fileName = url + ".html";
+        return response(fileName);
+    }
+
+    private String responseLoginUser(final String url) {
+        final HashMap<String, String> params = getParams(url);
+        final String account = params.get("account");
+        final String password = params.get("password");
+
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new NoSuchElementException("해당하는 유저를 찾을 수 없습니다."));
+
+        if (!user.checkPassword(password)) {
+            return createResponse("", "password missMatch");
+//            throw new IllegalArgumentException("password가 올바르지 않습니다.");
+        }
+
+        return createResponse("", user.toString());
+    }
+
+    private HashMap<String, String> getParams(final String url) {
+        final String queryParameter = url.substring(url.indexOf("?") + 1);
+        final String[] params = queryParameter.split("&");
+        final HashMap<String, String> paramStore = new HashMap<>();
+        for (String param : params) {
+            final String[] keyValue = param.split("=");
+            paramStore.put(keyValue[0], keyValue[1]);
+        }
+        return paramStore;
+    }
+
+    private String response(final String fileName) throws IOException {
         final String contentType = getContentType(fileName);
         final String responseBody = getResponseBody(fileName);
 //            readAllLine(bufferedReader, line); // 첫줄 다음의 다른 헤더들도 읽기
+        return createResponse(contentType, responseBody);
+    }
 
+    private String createResponse(final String contentType, final String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/" + contentType + ";charset=utf-8 ",
+                "Content-Type: text" + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
     }
 
-    private String getFileName(final String line) {
+    private String getFileName(final String url) {
+        return url;
+    }
+
+    private String getUrl(final String line) {
         return line.split(" ")[1];
     }
 
     private String getContentType(final String fileName) {
         final String[] fileNameParse = fileName.split("\\.");
         if (fileNameParse.length < 2) {
-            return "html";
+            return "/html";
         }
-        return fileNameParse[1];
+        return "/" + fileNameParse[1];
     }
 
     private String getResponseBody(final String fileName) throws IOException {

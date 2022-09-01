@@ -1,12 +1,11 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.nio.file.Files;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.io.ClassPathResource;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -33,10 +32,9 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
             BufferedReader httpReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            String URL = getUrl(httpReader.readLine());
-            log.debug("request : {}", URL);
-
-            String response = createResponse(URL);
+            String requestLine = httpReader.readLine();
+            HttpRequest httpRequest = HttpRequest.from(requestLine);
+            String response = createHttpResponse(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -45,17 +43,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getUrl(final String requestLine) {
-        String[] requests = requestLine.split(" ");
-        String URL = requests[1];
-        return URL;
-    }
-
-    private String createResponse(String URL) throws IOException {
-        if (URL.equals("/")) {
+    private String createHttpResponse(final HttpRequest httpRequest) {
+        String url = httpRequest.getUrl();
+        if (url.equals("/")) {
             return rootResponse();
         }
-        return htmlResponse(URL);
+        return httpResponse(url);
     }
 
     private String rootResponse() {
@@ -68,19 +61,14 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private String htmlResponse(final String URL) throws IOException {
-        String responseBody = createResponseBody(URL);
+    private String httpResponse(final String url) {
+        ClassPathResource resource = new ClassPathResource(url);
+        String responseBody = resource.getFileContents();
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
-    }
-
-    private String createResponseBody(final String URL) throws IOException {
-        ClassPathResource resource = new ClassPathResource(URL);
-        byte[] responseBody = Files.readAllBytes(new File(resource.getFile()).toPath());
-        return new String(responseBody);
     }
 }

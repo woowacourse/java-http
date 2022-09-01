@@ -22,7 +22,7 @@ public enum ContentType {
         this.subType = subType;
     }
 
-    public static ContentType of(String fileExtension) {
+    public static ContentType from(String fileExtension) {
         return Arrays.stream(values())
             .filter(it -> it.fileExtension.equals(fileExtension))
             .findFirst()

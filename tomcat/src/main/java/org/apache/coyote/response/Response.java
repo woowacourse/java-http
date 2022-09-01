@@ -1,6 +1,6 @@
 package org.apache.coyote.response;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.header.ContentType;
@@ -15,7 +15,7 @@ public class Response {
     public Response(final ContentType contentType, final StatusCode statusCode, final Map<String, String> headers,
                     final String body) {
         this.statusCode = statusCode;
-        this.headers = new HashMap<>();
+        this.headers = new LinkedHashMap<>();
         this.headers.put("Content-Type", contentType.toString());
         this.headers.put("Content-Length", Integer.toString(body.getBytes().length));
         this.headers.putAll(headers);
@@ -23,7 +23,7 @@ public class Response {
     }
 
     public Response(final ContentType contentType, final StatusCode statusCode, final String body) {
-        this(contentType, statusCode, new HashMap<>(), body);
+        this(contentType, statusCode, new LinkedHashMap<>(), body);
     }
 
     public String toText() {

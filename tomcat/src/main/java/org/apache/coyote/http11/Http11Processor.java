@@ -61,23 +61,24 @@ public class Http11Processor implements Runnable, Processor {
                 final String account = data.get("account");
                 final User user = InMemoryUserRepository.findByAccount(account)
                         .orElseThrow(NoSuchUserException::new);
+                final String userInformation = user.toString();
 
-                log.info(user.toString());
+                log.info(userInformation);
             }
 
             if (requestUrl.contains(".html") || requestUrl.contains(".css") || requestUrl.contains(".js")) {
-                contentType = makeContentType(contentType, requestUrl);
+                contentType = ContentType.from(requestUrl);
                 responseBody = new String(readAllFile(requestUrl), UTF_8);
             }
 
             if (!requestUrl.contains(".") && !requestUrl.equals("/")) {
                 requestUrl = requestUrl + ".html";
-                contentType = makeContentType(contentType, requestUrl);
+                contentType = ContentType.from(requestUrl);
                 responseBody = new String(readAllFile(requestUrl), UTF_8);
             }
 
             if (requestUrl.equals("/")) {
-                contentType = makeContentType(contentType, requestUrl);
+                contentType = ContentType.from(requestUrl);
                 responseBody = new String(readDefaultFile(), UTF_8);
             }
 
@@ -91,7 +92,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private HashMap<String, String> makeDataFromQueryString(final String queryString) {
         final HashMap<String, String> data = new HashMap<>();
-
         final String[] queries = queryString.split("&");
 
         for (String query : queries) {
@@ -100,16 +100,6 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return data;
-    }
-
-    private static String makeContentType(String contentType, final String requestUrl) {
-        if (requestUrl.contains(".css")) {
-            contentType = "text/" + requestUrl.split("\\.")[1];
-        }
-        if (requestUrl.contains(".js")) {
-            contentType = "application/javascript";
-        }
-        return contentType;
     }
 
     private static byte[] readAllFile(final String requestUrl) throws IOException {

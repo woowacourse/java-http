@@ -195,6 +195,7 @@ class IOStreamTest {
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
                     "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
                     "");
+
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
@@ -202,7 +203,7 @@ class IOStreamTest {
             final StringBuilder actual = new StringBuilder();
             String buffer;
 
-            while((buffer = bufferedReader.readLine()) != null) {
+            while ((buffer = bufferedReader.readLine()) != null) {
                 actual.append(buffer).append("\r\n");
             }
 

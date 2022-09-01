@@ -43,13 +43,9 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             String responseBody = "Hello world!";
-            String contentType = "text/html";
 
-            final String httpStartLine = bufferedReader.readLine();
-            if (httpStartLine == null) {
-                return;
-            }
-            String requestUrl =  httpStartLine.split(" ")[1];
+            final HttpRequestHeader httpRequestHeader = makeHttpRequestHeader(bufferedReader);
+            String requestUrl = httpRequestHeader.getRequestUrl();
 
             int index = requestUrl.indexOf("?");
             if (index != -1) {
@@ -67,27 +63,36 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (requestUrl.contains(".html") || requestUrl.contains(".css") || requestUrl.contains(".js")) {
-                contentType = ContentType.from(requestUrl);
-                responseBody = new String(readAllFile(requestUrl), UTF_8);
-            }
-
-            if (!requestUrl.contains(".") && !requestUrl.equals("/")) {
-                requestUrl = requestUrl + ".html";
-                contentType = ContentType.from(requestUrl);
                 responseBody = new String(readAllFile(requestUrl), UTF_8);
             }
 
             if (requestUrl.equals("/")) {
-                contentType = ContentType.from(requestUrl);
                 responseBody = new String(readDefaultFile(), UTF_8);
             }
 
-            final String response = makeResponse(responseBody, contentType);
+            final String response = makeResponse(responseBody, ContentType.from(requestUrl));
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequestHeader makeHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {
+        final String httpStartLine = bufferedReader.readLine();
+
+        final Map<String, String> httpHeaderLines = new HashMap<>();
+        String line;
+        while ((line = bufferedReader.readLine()) != null) {
+            if (line.isBlank()) {
+                break;
+            }
+
+            final String[] header = line.split(": ");
+            httpHeaderLines.put(header[0], header[1]);
+        }
+
+        return new HttpRequestHeader(httpStartLine, httpHeaderLines);
     }
 
     private HashMap<String, String> makeDataFromQueryString(final String queryString) {

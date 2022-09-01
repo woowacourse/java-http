@@ -49,17 +49,15 @@ public class Http11Processor implements Runnable, Processor {
                 httpRequest.add(line);
             }
 
-            final String s = httpRequest.get(0);
-            final String[] firstLine = s.split(" ");
-            final String httpMethod = firstLine[0];
-            final String targetUri = firstLine[1];
+            final String firstLine = httpRequest.get(0);
+            final String[] split = firstLine.split(" ");
+            final String httpMethod = split[0];
+            final String requestUri = split[1];
+
+            System.out.println(String.join("\r\n", httpRequest));
 
             // 화면 렌더링
-            if (targetUri.equals("/index.html") && httpMethod.equals("GET")) {
-                render(outputStream, "index.html");
-            } else {
-                render(outputStream, "404.html");
-            }
+            render(outputStream, requestUri);
 
             outputStream.flush();
         } catch (final IOException | UncheckedServletException e) {
@@ -67,13 +65,26 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void render(final OutputStream outputStream, final String viewName) throws IOException {
-        final URL resource = getClass().getClassLoader().getResource("static/" + viewName);
+    private void render(final OutputStream outputStream, final String requestUri) throws IOException {
+        // static 파일
+        final String viewName = "static" + requestUri;
+        String contentType = "text/html";
+        if (requestUri.endsWith("css")) {
+            contentType = "text/css";
+        } else if (requestUri.endsWith("js")) {
+            contentType = "application/javascript";
+        }
+
+        URL resource = getClass().getClassLoader().getResource(viewName);
+        if (resource == null) {
+            resource = getClass().getClassLoader().getResource("static/404.html");
+        }
+
         final byte[] indexHtml = Files.readAllBytes(new File(resource.getFile()).toPath());
 
         final var response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + indexHtml.length + " ",
                 "",
                 new String(indexHtml));

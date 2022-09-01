@@ -7,6 +7,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
+import org.apache.coyote.http11.exception.FileNotFoundException;
+
 public class StaticResourceUtil {
 
 	private static final String STATIC_RESOURCE_ROOT_PATH = "static/";
@@ -22,6 +24,10 @@ public class StaticResourceUtil {
 	}
 
 	private static Path getPath(URL resource) {
-		return new File(Objects.requireNonNull(resource).getFile()).toPath();
+		try {
+			return new File(Objects.requireNonNull(resource).getFile()).toPath();
+		} catch (NullPointerException e) {
+			throw new FileNotFoundException("해당 파일이 존재하지 않습니다.");
+		}
 	}
 }

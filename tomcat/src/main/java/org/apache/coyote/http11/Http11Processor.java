@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.util.Optional;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.FileNotFoundException;
 import org.apache.coyote.http11.util.StaticResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
 				StaticResourceUtil.getContent(httpRequest.getUrl()),
 				httpRequest.getContentType()
 			);
-		} catch (NullPointerException e) {
+		} catch (FileNotFoundException e) {
 			return responseErrorPage(NOT_FOUND_HTML, 404);
 		}
 	}

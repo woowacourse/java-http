@@ -1,5 +1,12 @@
 package study;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Objects;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -25,8 +32,8 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final String actual = "";
+        ClassLoader classLoader = this.getClass().getClassLoader();
+        final String actual = Objects.requireNonNull(classLoader.getResource(fileName)).getPath();
 
         assertThat(actual).endsWith(fileName);
     }
@@ -36,14 +43,14 @@ class FileTest {
      * File, Files 클래스를 사용하여 파일의 내용을 읽어보자.
      */
     @Test
-    void 파일의_내용을_읽는다() {
+    void 파일의_내용을_읽는다() throws IOException, URISyntaxException {
         final String fileName = "nextstep.txt";
 
-        // todo
-        final Path path = null;
+        ClassLoader classLoader = this.getClass().getClassLoader();
+        final Path path = Paths.get(Objects.requireNonNull(classLoader.getResource(fileName)).toURI());
 
-        // todo
-        final List<String> actual = Collections.emptyList();
+        final List<String> actual = new java.util.ArrayList<>(Collections.emptyList());
+        actual.add(Files.readString(path));
 
         assertThat(actual).containsOnly("nextstep");
     }

@@ -36,10 +36,6 @@ public class HttpResponse {
 			responseBody);
 	}
 
-	public Map<String, String> getQueries() {
-		return urlParser.getQueries();
-	}
-
 	private UrlParser parseRequestResource(final BufferedReader bufferedReader) throws IOException {
 		final String firstLine = bufferedReader.readLine();
 		final String uri = firstLine.split(HTTP_MESSAGE_DELIMITER)[RESOURCE_LOCATION];
@@ -65,5 +61,9 @@ public class HttpResponse {
 		}
 		final String[] fileElements = resource.split(FILE_REGEX);
 		return KindOfContent.getContentType(fileElements[EXTENSION_LOCATION]);
+	}
+
+	public Map<String, String> getQueries() {
+		return urlParser.getQueries();
 	}
 }

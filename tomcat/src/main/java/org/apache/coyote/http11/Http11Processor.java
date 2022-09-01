@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -46,11 +47,16 @@ public class Http11Processor implements Runnable, Processor {
 
             final String requestUri = getRequestUri(bufferedReader);
 
-            if (requestUri.contains("login")) {
-                final Map<String, String> queryParam = getQueryParam(requestUri);
-                final User account = InMemoryUserRepository.findByAccount(queryParam.get("account"))
-                        .orElseThrow();
-                log.info("user: {}", account);
+            final Map<String, String> queryParam = getQueryParam(requestUri);
+            if (requestUri.contains("login") && queryParam.containsKey("account") && queryParam.containsKey(
+                    "password")) {
+                final Optional<User> possibleUser = InMemoryUserRepository.findByAccount(queryParam.get("account"));
+                if (possibleUser.isPresent()) {
+                    final String response = getFoundResponse();
+                    outputStream.write(response.getBytes());
+                    outputStream.flush();
+                    return;
+                }
             }
 
             final Map<String, String> headers = getHeaders(bufferedReader);
@@ -92,7 +98,6 @@ public class Http11Processor implements Runnable, Processor {
                 .map(it -> it.split("="))
                 .collect(Collectors.toMap(it -> it[0], it -> it[1], (a, b) -> b));
     }
-
 
     private Map<String, String> getHeaders(final BufferedReader bufferedReader) throws IOException {
         final Map<String, String> headers = new HashMap<>();
@@ -147,5 +152,11 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private String getFoundResponse() {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: /index.html");
     }
 }

@@ -15,10 +15,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -41,18 +38,13 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String fileName = bufferedReader.readLine().split(" ")[1];
 
-            String responseBody = generateBody(fileName);
-            String last = parseExtension(fileName);
-            login(fileName);
+            RequestParser requestParser = new RequestParser(saveRequest(bufferedReader));
+            String method = requestParser.generateMethod();
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/" + last + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            RequestManager requestManager = RequestMethod.selectManager(method, requestParser);
+
+            final var response = requestManager.generateResponse();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -61,60 +53,21 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String generateBody(String fileName) throws IOException {
-        if (fileName.equals("/")) {
-            return "Hello world!";
+    private List<String> saveRequest(BufferedReader bufferedReader) throws IOException {
+        List<String> requestStrings = new ArrayList<>();
+        String now;
+        Integer bodyLength = -1;
+        while (!(now = bufferedReader.readLine()).isEmpty()) {
+            requestStrings.add(now);
+            if (now.startsWith("Content-Length")) {
+                bodyLength = Integer.parseInt(now.split(": ")[1]);
+            }
         }
-        String extension = parseExtension(fileName);
-        String newFileName = fileName.split("\\?")[0].substring(1);
-        if (!newFileName.contains(extension)) {
-            newFileName += "." + extension;
+        if (bodyLength > 0) {
+            char[] buffer = new char[bodyLength];
+            bufferedReader.read(buffer, 0, bodyLength);
+            requestStrings.add(new String(buffer));
         }
-        URL resource = getClass().getClassLoader().getResource("static/" + newFileName);
-        if (resource == null) {
-            return "Hello world!";
-        }
-        final Path path = new File(resource.getFile()).toPath();
-        final List<String> actual = Files.readAllLines(path);
-        return String.join("\n", actual) + "\n";
-    }
-
-    private String parseExtension(String fileName) throws IOException {
-        if (fileName.equals("/")) {
-            return "html";
-        }
-        URL resource = getClass().getClassLoader().getResource("static/" + fileName.substring(1));
-        if (resource == null) {
-            return "html";
-        }
-        return fileName.split("\\.")[1];
-    }
-
-    private void login(String fileName) {
-        if (!fileName.contains("?")) {
-            return;
-        }
-        String[] parsed = fileName.split("\\?");
-        if (!parsed[0].equals("/login")) {
-            return;
-        }
-        String[] rawQueryString = parsed[1].split("&");
-        Map<String, String> queryString = new HashMap<>();
-        for (String eachParsed : rawQueryString) {
-            String[] secondParsed = eachParsed.split("=");
-            queryString.put(secondParsed[0], secondParsed[1]);
-        }
-        if (!queryString.containsKey("account") || !queryString.containsKey("password")) {
-            return;
-        }
-        Optional<User> account = InMemoryUserRepository.findByAccount(queryString.get("account"));
-        if (account.isEmpty()) {
-            return;
-        }
-        User user = account.get();
-        if (!user.checkPassword(queryString.get("password"))) {
-            return;
-        }
-        log.info("user : {}", user);
+        return requestStrings;
     }
 }

@@ -61,9 +61,8 @@ public class Http11Processor implements Runnable, Processor {
                 HttpResponseMessage httpResponseMessage = generateResponseMessage("login.html");
                 String response = httpResponseMessage.parseResponse();
 
-                User user = InMemoryUserRepository.findByAccount(queryParameters.getParameterValue("account"))
-                        .orElseThrow(NoSuchElementException::new);
-                log.info(user.toString());
+                validateExistsUser(queryParameters.getParameterValue("account"),
+                        queryParameters.getParameterValue("password"));
 
                 outputStream.write(response.getBytes());
                 outputStream.flush();
@@ -110,5 +109,15 @@ public class Http11Processor implements Runnable, Processor {
         headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
 
         return new HttpResponseMessage(statusLine, headers, responseBody);
+    }
+
+    private void validateExistsUser(final String account, final String password) {
+        if (!InMemoryUserRepository.existsAccountAndPassword(account, password)) {
+            throw new NoSuchElementException();
+        }
+
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(NoSuchElementException::new);
+        log.info(user.toString());
     }
 }

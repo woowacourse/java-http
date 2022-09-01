@@ -12,10 +12,12 @@ public class HttpRequest {
 
     private final RequestStartLine startLine;
     private final RequestHeader header;
+    private final String body;
 
-    public HttpRequest(final RequestStartLine startLine, final RequestHeader header) {
+    public HttpRequest(final RequestStartLine startLine, final RequestHeader header, final String body) {
         this.startLine = startLine;
         this.header = header;
+        this.body = body;
     }
 
     public static HttpRequest from(final InputStream inputStream) throws IOException {
@@ -23,8 +25,9 @@ public class HttpRequest {
 
         final var startLine = RequestStartLine.from(bufferedReader.readLine());
         final var header = RequestHeader.from(readHeader(bufferedReader));
+        final var body = readBody(bufferedReader, header);
 
-        return new HttpRequest(startLine, header);
+        return new HttpRequest(startLine, header, body);
     }
 
     private static String readHeader(final BufferedReader bufferedReader) throws IOException {
@@ -34,6 +37,13 @@ public class HttpRequest {
             stringBuilder.append(line).append("\r\n");
         }
         return stringBuilder.toString();
+    }
+
+    private static String readBody(final BufferedReader bufferedReader, final RequestHeader header) throws IOException {
+        final var contentLength = Integer.parseInt(header.get("Content-Length"));
+        final var buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 
     public Map<String, String> parseQueryString() {
@@ -59,5 +69,13 @@ public class HttpRequest {
 
     public String getQueryString() {
         return startLine.getQueryString();
+    }
+
+    public RequestHeader getHeader() {
+        return header;
+    }
+
+    public String getBody() {
+        return body;
     }
 }

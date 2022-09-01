@@ -40,6 +40,10 @@ public class RequestHeader {
         return value;
     }
 
+    public String get(final String key) {
+        return value.get(key);
+    }
+
     @Override
     public String toString() {
         return value.entrySet()

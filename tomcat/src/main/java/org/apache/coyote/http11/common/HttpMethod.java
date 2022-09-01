@@ -2,5 +2,5 @@ package org.apache.coyote.http11.common;
 
 public enum HttpMethod {
 
-    GET
+    GET, POST
 }

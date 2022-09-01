@@ -144,19 +144,24 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse loginUser(HttpRequest request) throws IOException {
         Optional<User> user = InMemoryUserRepository.findByAccount(request.getBodyParam("account"));
 
-        if (user.isPresent() && user.get().checkPassword(request.getBodyParam("password"))) {
-            log.info("user : " + user.get());
-            Session session = request.getSession();
-            session.setAttribute("user", user.get());
-            SessionManager.getSessionManager().add(session);
-            Map<String, String> cookies = Map.of("JSESSIONID", session.getId());
-            HttpCookie httpCookie = HttpCookie.of(cookies);
-
-            return redirectTo("/index", HttpStatusCode.HTTP_STATUS_FOUND)
-                .setCookie(httpCookie.toString());
+        if (isAuthorized(request, user)) {
+            return redirectTo("/401", HttpStatusCode.HTTP_STATUS_UNAUTHORIZED);
         }
 
-        return redirectTo("/401", HttpStatusCode.HTTP_STATUS_UNAUTHORIZED);
+        Session session = request.getSession();
+        session.setAttribute("user", user.get());
+        SessionManager.getSessionManager().add(session);
+
+        Map<String, String> cookies = Map.of("JSESSIONID", session.getId());
+        HttpCookie httpCookie = HttpCookie.of(cookies);
+
+        return redirectTo("/index", HttpStatusCode.HTTP_STATUS_FOUND)
+            .setCookie(httpCookie.toString());
+    }
+
+    private boolean isAuthorized(HttpRequest request, Optional<User> user) {
+        return user.isPresent()
+            && user.get().checkPassword(request.getBodyParam("password"));
     }
 
     private HttpResponse registerUser(HttpRequest request) throws IOException {

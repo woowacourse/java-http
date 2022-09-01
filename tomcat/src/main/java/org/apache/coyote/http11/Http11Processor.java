@@ -28,6 +28,10 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
+            /**
+             * /index.html
+             * new String(inputStream.readAllBytes()).split(" ")
+             */
             final var responseBody = "Hello world!";
 
             final var response = String.join("\r\n",

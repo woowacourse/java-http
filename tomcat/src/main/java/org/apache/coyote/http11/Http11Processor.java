@@ -19,7 +19,6 @@ public class Http11Processor implements Runnable, Processor {
     public static final int URL_INDEX = 1;
     public static final String LANDING_PAGE_URL = "/";
     public static final String STATIC_PATH = "static";
-    public static final String EXTENSION_DELIMITER = ".";
 
     private final Socket connection;
 

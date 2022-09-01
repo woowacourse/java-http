@@ -54,7 +54,7 @@ public class Http11Processor implements Runnable, Processor {
             final String httpMethod = split[0];
             final String requestUri = split[1];
 
-            System.out.println(String.join("\r\n", httpRequest));
+            log.info(String.join("\r\n", httpRequest));
 
             // 화면 렌더링
             render(outputStream, requestUri);
@@ -73,6 +73,8 @@ public class Http11Processor implements Runnable, Processor {
             contentType = "text/css";
         } else if (requestUri.endsWith("js")) {
             contentType = "application/javascript";
+        } else if (requestUri.endsWith("svg")){
+            contentType = "image/svg+xml";
         }
 
         URL resource = getClass().getClassLoader().getResource(viewName);

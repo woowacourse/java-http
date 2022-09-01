@@ -28,7 +28,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final HTTP11StaticFile staticFile = HTTP11StaticFile.of(inputStream);
+            final HttP11StaticFile staticFile = HttP11StaticFile.of(inputStream);
             final Http11Response http11Response = new Http11Response(outputStream);
             http11Response.write(staticFile);
         } catch (IOException | UncheckedServletException | URISyntaxException e) {

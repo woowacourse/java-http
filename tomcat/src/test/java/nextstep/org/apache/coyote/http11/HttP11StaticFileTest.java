@@ -7,12 +7,12 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.coyote.http11.HTTP11StaticFile;
+import org.apache.coyote.http11.HttP11StaticFile;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
-class HTTP11StaticFileTest {
+class HttP11StaticFileTest {
 
     private StubSocket stubSocket;
 
@@ -33,7 +33,7 @@ class HTTP11StaticFileTest {
         stubSocket = new StubSocket(httpRequest);
 
         // when
-        final HTTP11StaticFile staticFile = HTTP11StaticFile.of(stubSocket.getInputStream());
+        final HttP11StaticFile staticFile = HttP11StaticFile.of(stubSocket.getInputStream());
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
@@ -52,7 +52,7 @@ class HTTP11StaticFileTest {
                 "",
                 "");
         stubSocket = new StubSocket(httpCssRequest);
-        final HTTP11StaticFile cssFile = HTTP11StaticFile.of(stubSocket.getInputStream());
+        final HttP11StaticFile cssFile = HttP11StaticFile.of(stubSocket.getInputStream());
 
         // when
         final String actual = cssFile.getContentType();

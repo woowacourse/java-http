@@ -7,10 +7,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +45,13 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final String requestUri = getRequestUri(bufferedReader);
-            final Map<String, String> queryParam = getQueryParam(requestUri);
+
+            if (requestUri.contains("login")) {
+                final Map<String, String> queryParam = getQueryParam(requestUri);
+                final User account = InMemoryUserRepository.findByAccount(queryParam.get("account"))
+                        .orElseThrow();
+                log.info("user: {}", account);
+            }
 
             final Map<String, String> headers = getHeaders(bufferedReader);
 
@@ -72,6 +81,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Map<String, String> getQueryParam(final String requestUri) {
+        if (!requestUri.contains("?")) {
+            return Collections.emptyMap();
+        }
         final int index = requestUri.indexOf("?");
         final String[] queryStrings = requestUri.substring(index + 1)
                 .split("&");

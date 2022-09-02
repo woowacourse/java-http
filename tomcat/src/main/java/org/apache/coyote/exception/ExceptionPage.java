@@ -5,6 +5,7 @@ import org.apache.coyote.support.HttpStatus;
 
 public enum ExceptionPage {
 
+    BAD_REQUEST(HttpStatus.BAD_REQUEST, "/400.html"),
     NOT_FOUND(HttpStatus.NOT_FOUND, "/404.html"),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html")
     ;

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.LoginFailureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,28 +25,33 @@ public class RequestHeaders {
     public RequestHeaders(Map<String, String> requestHeaders, String requestUri) {
         this.requestHeaders = requestHeaders;
 
-        if (issQueryStringExist(requestUri)) {
-            validateUser(requestUri);
+        if (isQueryStringExist(requestUri)) {
+            validateAccount(requestUri);
         }
     }
 
-    private boolean issQueryStringExist(String requestUri) {
+    private boolean isQueryStringExist(String requestUri) {
         return requestUri.contains(QUERY_STRING_BEGIN_DELIMITER);
     }
 
-    private void validateUser(String requestUri) {
+    private void validateAccount(String requestUri) {
         Map<String, String> queryString = getQueryString(requestUri);
         if (queryString.containsKey("account")) {
-            User existedUser = InMemoryUserRepository.findByAccount(queryString.get("account"))
-                    .orElseThrow(() -> new IllegalArgumentException("아이디가 일지하지 않는다."));
-            if (!existedUser.checkPassword(queryString.get("password"))) {
-                throw new IllegalArgumentException("비밀번호가 일치하지 않는다.");
-            }
+            User existedUser = findUser(queryString);
             log.info(existedUser.toString());
         }
     }
 
-    public Map<String, String> getQueryString(String requestUri) {
+    private User findUser(Map<String, String> queryString) {
+        User existedUser = InMemoryUserRepository.findByAccount(queryString.get("account"))
+                .orElseThrow(LoginFailureException::new);
+        if (!existedUser.checkPassword(queryString.get("password"))) {
+            throw new LoginFailureException();
+        }
+        return existedUser;
+    }
+
+    private Map<String, String> getQueryString(String requestUri) {
         int index = requestUri.indexOf(QUERY_STRING_BEGIN_DELIMITER);
         String queryString = requestUri.substring(index + 1);
         String[] dividedQueryString = queryString.split(QUERY_STRING_UNIT_DELIMITER);
@@ -53,11 +59,14 @@ public class RequestHeaders {
 
         return Arrays.stream(dividedQueryString)
                 .map(query -> query.split(QUERY_STRING_KEY_VALUE_DELIMITER))
-                .collect(Collectors.toMap(key -> key[0], value -> value[1]));
+                .collect(Collectors.toMap(key -> key[0].trim(), value -> value[1].trim()));
     }
 
     public String getAcceptHeaderValue() {
-        return requestHeaders.get(ACCEPT);
+        if(isExistAccept()) {
+            return requestHeaders.get(ACCEPT);
+        }
+        throw new IllegalArgumentException("header에 Accept 필드가 없습니다.");
     }
 
     private boolean isExistAccept() {
@@ -66,5 +75,9 @@ public class RequestHeaders {
 
     public boolean isAcceptValueCss() {
         return isExistAccept() && (requestHeaders.get(ACCEPT).contains("text/css"));
+    }
+
+    public Map<String, String> getRequestHeaders() {
+        return requestHeaders;
     }
 }

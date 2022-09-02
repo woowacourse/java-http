@@ -2,12 +2,14 @@ package org.apache.coyote.http11.request.spec;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class QueryParams {
 
-    private static final int VALID_KEY_VALUE_COUNT = 2;
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
     private static final String PARAM_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
 
@@ -33,12 +35,12 @@ public class QueryParams {
         return Arrays.stream(keyValues)
                 .map(kv -> {
                     String[] components = kv.split(KEY_VALUE_DELIMITER);
-                    if (components.length != VALID_KEY_VALUE_COUNT) {
+                    if (components.length != List.of(KEY_INDEX, VALUE_INDEX).size()) {
                         throw new IllegalArgumentException("key-value 쌍이 맞지 않습니다. = " + Arrays.toString(components));
                     }
                     return components;
                 })
-                .collect(Collectors.toMap(components -> components[0], components -> components[1]));
+                .collect(Collectors.toMap(components -> components[KEY_INDEX], components -> components[VALUE_INDEX]));
     }
 
     public boolean hasParams() {

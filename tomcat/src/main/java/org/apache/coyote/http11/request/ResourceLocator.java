@@ -22,7 +22,6 @@ public class ResourceLocator {
     public Resource locate(String path) {
         Objects.requireNonNull(path);
         log.debug("request path = {}", path);
-
         try {
             URL url = getClass().getResource(prefix + path);
             Path filePath = Path.of(Objects.requireNonNull(url).getPath());

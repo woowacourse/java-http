@@ -30,18 +30,11 @@ public class QueryParams {
 
     private static Map<String, String> parse(String queryString) {
         String[] keyValues = queryString.split(PARAM_DELIMITER);
-        for (String keyValue : keyValues) {
-            String[] components = keyValue.split(KEY_VALUE_DELIMITER);
-            if (components.length != VALID_KEY_VALUE_COUNT) {
-                throw new IllegalArgumentException("key-value 쌍이 맞지 않습니다. = " + Arrays.toString(components));
-            }
-        }
-
         return Arrays.stream(keyValues)
                 .map(kv -> {
-                    String[] components = kv.split("=");
+                    String[] components = kv.split(KEY_VALUE_DELIMITER);
                     if (components.length != VALID_KEY_VALUE_COUNT) {
-                        throw new IllegalArgumentException("key - value 쌍이 맞지 않습니다. = " + Arrays.toString(components));
+                        throw new IllegalArgumentException("key-value 쌍이 맞지 않습니다. = " + Arrays.toString(components));
                     }
                     return components;
                 })

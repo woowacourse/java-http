@@ -61,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
         return loginHandler.login(httpRequest);
     }
 
-    private String extractURI(final String text) {
-        return text.split(BLANK)[URI_INDEX];
+    private String extractURI(final String startLine) {
+        return startLine.split(BLANK)[URI_INDEX];
     }
 }

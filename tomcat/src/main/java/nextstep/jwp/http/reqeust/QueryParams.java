@@ -10,27 +10,30 @@ public class QueryParams {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
-    private final Map<String, String> queryParams;
+    private final Map<String, String> values;
 
     public QueryParams(final String queryString) {
-        this.queryParams = new HashMap<>();
+        Map<String, String> queryParams = new HashMap<>();
 
-        String[] queryStrings = queryString.split(QUERY_CONNECTOR);
-        initQueryParams(queryStrings);
+        if (!queryString.isBlank()) {
+            initValues(queryParams, queryString);
+        }
+        this.values = queryParams;
     }
 
-    private void initQueryParams(final String[] queryStrings) {
+    private void initValues(final Map<String, String> queryParams, final String inputQueryString) {
+        String[] queryStrings = inputQueryString.split(QUERY_CONNECTOR);
         for (String queryString : queryStrings) {
             String[] queryParam = queryString.split(QUERY_SEPARATOR);
-            this.queryParams.put(queryParam[KEY_INDEX], queryParam[VALUE_INDEX]);
+            queryParams.put(queryParam[KEY_INDEX], queryParam[VALUE_INDEX]);
         }
     }
 
     public boolean isNotEmpty() {
-        return !queryParams.isEmpty();
+        return !values.isEmpty();
     }
 
     public Map<String, String> getParams() {
-        return queryParams;
+        return values;
     }
 }

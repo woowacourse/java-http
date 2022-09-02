@@ -6,6 +6,7 @@ public class HttpRequestLine {
 
     private static final String QUERY_IDENTIFIER = "?";
     private static final String HTML_EXTENSION = ".html";
+    private static final String BLANK_QUERY_STRING = "";
 
     private String method;
     private String path;
@@ -26,13 +27,19 @@ public class HttpRequestLine {
     }
 
     private static String extractPath(final String url) {
-        int index = url.indexOf(QUERY_IDENTIFIER);
-        return url.substring(0, index) + HTML_EXTENSION;
+        if (url.contains(QUERY_IDENTIFIER)) {
+            int index = url.indexOf(QUERY_IDENTIFIER);
+            return url.substring(0, index) + HTML_EXTENSION;
+        }
+        return url;
     }
 
     private static String extractQueryString(final String url) {
-        int index = url.indexOf(QUERY_IDENTIFIER);
-        return url.substring(index + 1);
+        if (url.contains(QUERY_IDENTIFIER)) {
+            int index = url.indexOf(QUERY_IDENTIFIER);
+            return url.substring(index + 1);
+        }
+        return BLANK_QUERY_STRING;
     }
 
     public boolean hasQueryParams() {

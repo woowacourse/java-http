@@ -11,6 +11,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.reqeust.HttpRequestCreator;
 import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpResponseBuilder;
 import nextstep.jwp.io.ClassPathResource;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
@@ -65,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse okResponse(final String contentType, final String responseBody) {
-        return new HttpResponse.Builder()
+        return new HttpResponseBuilder()
                 .version()
                 .statusCode("200")
                 .statusMessage("OK")

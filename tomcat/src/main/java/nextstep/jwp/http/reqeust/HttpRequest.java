@@ -6,8 +6,8 @@ import nextstep.jwp.http.HttpHeader;
 
 public class HttpRequest {
 
-    private HttpRequestLine httpRequestLine;
-    private HttpHeader httpHeaders;
+    private final HttpRequestLine httpRequestLine;
+    private final HttpHeader httpHeaders;
 
     public HttpRequest(final HttpRequestLine httpRequestLine, final HttpHeader httpHeaders) {
         this.httpRequestLine = httpRequestLine;

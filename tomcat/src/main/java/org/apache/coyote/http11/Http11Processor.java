@@ -33,8 +33,9 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final String line = bufferedReader.readLine();
-            final String url = line.split(" ")[1];
+            final var requestHeader = getRequestHeader(bufferedReader);
+            log.info("requestHeader ::: {}", requestHeader);
+            final var url = requestHeader.split(" ")[1];
             final var response = getResponse(url);
 
             outputStream.write(response.getBytes());
@@ -42,6 +43,17 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getRequestHeader(final BufferedReader bufferedReader) throws IOException {
+        StringBuilder header = new StringBuilder();
+
+        while (bufferedReader.ready()) {
+            header.append(bufferedReader.readLine())
+                    .append("\r\n");
+        }
+
+        return header.toString();
     }
 
     private String getResponse(String url) throws IOException {
@@ -66,6 +78,28 @@ public class Http11Processor implements Runnable, Processor {
                     new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         }
 
-        throw new IllegalArgumentException("유효하지 않은 요청입니다.");
+        if (url.contains("/css")) {
+            final URL resource = getClass().getClassLoader().getResource("static" + url);
+            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+            return "HTTP/1.1 200 OK \r\n" +
+                    "Content-Type: text/css;charset=utf-8 \r\n" +
+                    "Content-Length:" + responseBody.getBytes().length + " \r\n" +
+                    "\r\n" +
+                    responseBody;
+        }
+
+        if (url.contains(".js")) {
+            final URL resource = getClass().getClassLoader().getResource("static" + url);
+            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+            return "HTTP/1.1 200 OK \r\n" +
+                    "Content-Type: application/javascript;charset=utf-8 \r\n" +
+                    "Content-Length:" + responseBody.getBytes().length + " \r\n" +
+                    "\r\n" +
+                    responseBody;
+        }
+
+        throw new IllegalArgumentException("올바르지 않은 URL 요청입니다.");
     }
 }

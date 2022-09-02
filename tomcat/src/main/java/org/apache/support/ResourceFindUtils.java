@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.support;
 
 import java.io.File;
 import java.io.IOException;

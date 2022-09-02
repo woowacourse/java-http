@@ -12,6 +12,9 @@ import nextstep.jwp.exception.LoginException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.Path;
+import org.apache.support.ResourceFindUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

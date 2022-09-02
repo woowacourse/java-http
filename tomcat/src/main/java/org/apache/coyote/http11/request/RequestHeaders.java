@@ -37,15 +37,15 @@ public class RequestHeaders {
     private void validateAccount(String requestUri) {
         Map<String, String> queryString = getQueryString(requestUri);
         if (queryString.containsKey("account")) {
-            User existedUser = findUser(queryString);
+            User existedUser = findUser(queryString.get("account"), queryString.get("password"));
             log.info(existedUser.toString());
         }
     }
 
-    private User findUser(Map<String, String> queryString) {
-        User existedUser = InMemoryUserRepository.findByAccount(queryString.get("account"))
+    private User findUser(String account, String password) {
+        User existedUser = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(LoginFailureException::new);
-        if (!existedUser.checkPassword(queryString.get("password"))) {
+        if (!existedUser.checkPassword(password)) {
             throw new LoginFailureException();
         }
         return existedUser;

@@ -9,7 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public class Http11URLPath {
+public class Http11URL {
 
     private static final String DEFAULT_MEDIA_TYPE = "text/html";
     private static final String SPACE_DELIMITER = " ";
@@ -25,16 +25,16 @@ public class Http11URLPath {
     private final String path;
     private final Http11QueryParams params;
 
-    private Http11URLPath(final String path, final Http11QueryParams params) {
+    private Http11URL(final String path, final Http11QueryParams params) {
         this.path = path;
         this.params = params;
     }
 
-    public static Http11URLPath of(final InputStream inputStream) throws IOException {
+    public static Http11URL of(final InputStream inputStream) throws IOException {
         final String parsedUrl = parseUrl(inputStream);
         final Http11QueryParams params = parseQueryParams(parsedUrl);
         final String path = parsePath(parsedUrl);
-        return new Http11URLPath(path, params);
+        return new Http11URL(path, params);
     }
 
     private static String parseUrl(final InputStream inputStream) throws IOException {

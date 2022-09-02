@@ -33,8 +33,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final Http11URLPath urlPath = Http11URLPath.of(inputStream);
-            final HttP11StaticFile staticFile = HttP11StaticFile.of(urlPath);
+            final Http11URL urlPath = Http11URL.of(inputStream);
+            final Http11StaticFile staticFile = Http11StaticFile.of(urlPath);
             final Http11Response http11Response = new Http11Response(outputStream);
             logLogin(urlPath);
             http11Response.write(staticFile);
@@ -43,14 +43,14 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void logLogin(final Http11URLPath urlPath) {
+    private void logLogin(final Http11URL urlPath) {
         if (urlPath.hasPath(LOGIN_RESOURCE) && loginSuccess(urlPath)) {
             final User loggedInUser = findUser(urlPath);
             log.info(loggedInUser.toString());
         }
     }
 
-    private boolean loginSuccess(final Http11URLPath urlPath) {
+    private boolean loginSuccess(final Http11URL urlPath) {
         if (!urlPath.hasParams()) {
             return false;
         }
@@ -60,7 +60,7 @@ public class Http11Processor implements Runnable, Processor {
 
     }
 
-    private User findUser(final Http11URLPath urlPath) {
+    private User findUser(final Http11URL urlPath) {
         String account = urlPath.findParamByKey(ACCOUNT);
         return InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(IllegalArgumentException::new);

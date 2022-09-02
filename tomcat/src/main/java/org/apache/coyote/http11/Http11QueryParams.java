@@ -12,6 +12,7 @@ public class Http11QueryParams {
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+
     private final Map<String, String> params;
 
     public Http11QueryParams(final Map<String,String> params) {

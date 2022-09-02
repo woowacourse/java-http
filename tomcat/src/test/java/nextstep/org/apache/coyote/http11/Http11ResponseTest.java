@@ -7,9 +7,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
-import org.apache.coyote.http11.HttP11StaticFile;
+import org.apache.coyote.http11.Http11StaticFile;
 import org.apache.coyote.http11.Http11Response;
-import org.apache.coyote.http11.Http11URLPath;
+import org.apache.coyote.http11.Http11URL;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -36,8 +36,8 @@ class Http11ResponseTest {
         final Http11Response http11Response = new Http11Response(stubSocket.getOutputStream());
 
         // when
-        final Http11URLPath urlPath = Http11URLPath.of(stubSocket.getInputStream());
-        http11Response.write(HttP11StaticFile.of(urlPath));
+        final Http11URL urlPath = Http11URL.of(stubSocket.getInputStream());
+        http11Response.write(Http11StaticFile.of(urlPath));
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");

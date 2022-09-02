@@ -9,13 +9,13 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.exception.StaticFileNotFoundException;
-import org.apache.coyote.http11.HttP11StaticFile;
-import org.apache.coyote.http11.Http11URLPath;
+import org.apache.coyote.http11.Http11StaticFile;
+import org.apache.coyote.http11.Http11URL;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
-class HttP11StaticFileTest {
+class Http11StaticFileTest {
 
     private StubSocket stubSocket;
 
@@ -36,8 +36,8 @@ class HttP11StaticFileTest {
         stubSocket = new StubSocket(httpRequest);
 
         // when
-        final Http11URLPath urlPath = Http11URLPath.of(stubSocket.getInputStream());
-        final HttP11StaticFile staticFile = HttP11StaticFile.of(urlPath);
+        final Http11URL urlPath = Http11URL.of(stubSocket.getInputStream());
+        final Http11StaticFile staticFile = Http11StaticFile.of(urlPath);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
@@ -56,8 +56,8 @@ class HttP11StaticFileTest {
                 "",
                 "");
         stubSocket = new StubSocket(httpCssRequest);
-        final Http11URLPath urlPath = Http11URLPath.of(stubSocket.getInputStream());
-        final HttP11StaticFile cssFile = HttP11StaticFile.of(urlPath);
+        final Http11URL urlPath = Http11URL.of(stubSocket.getInputStream());
+        final Http11StaticFile cssFile = Http11StaticFile.of(urlPath);
 
         // when
         final String actual = cssFile.getContentType();
@@ -76,10 +76,10 @@ class HttP11StaticFileTest {
                 "",
                 "");
         stubSocket = new StubSocket(httpCssRequest);
-        final Http11URLPath urlPath = Http11URLPath.of(stubSocket.getInputStream());
+        final Http11URL urlPath = Http11URL.of(stubSocket.getInputStream());
 
         // when, then
-        assertThatThrownBy(() -> HttP11StaticFile.of(urlPath))
+        assertThatThrownBy(() -> Http11StaticFile.of(urlPath))
                 .isExactlyInstanceOf(StaticFileNotFoundException.class);
     }
 }

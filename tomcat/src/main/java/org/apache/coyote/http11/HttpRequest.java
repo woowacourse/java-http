@@ -9,32 +9,28 @@ public class HttpRequest {
 
     private final HttpMethod httpMethod;
     private final RequestTarget requestTarget;
-    private final String version;
+    private final HttpVersion httpVersion;
     private final Map<String, String> headers;
 
-    public HttpRequest(final HttpMethod httpMethod, final RequestTarget requestTarget, final String version,
-                       final Map<String, String> headers) {
+    private HttpRequest(final HttpMethod httpMethod, final RequestTarget requestTarget, final HttpVersion httpVersion,
+                        final Map<String, String> headers) {
         this.httpMethod = httpMethod;
         this.requestTarget = requestTarget;
-        this.version = version;
+        this.httpVersion = httpVersion;
         this.headers = headers;
     }
 
     public static HttpRequest from(final String requestMessage) {
         List<String> requestMessageLines = Arrays.asList(requestMessage.split("\r\n"));
-
         String requestLine = requestMessageLines.get(0);
-        List<String> requestLines = Arrays.asList(requestLine.split(" "));
-
-        String httpVersion = requestLines.get(2);
-
         Map<String, String> headers = requestMessageLines.subList(1, requestMessageLines.size()).stream()
                 .map(line -> line.split(": "))
                 .collect(Collectors.toMap(line -> line[0], line -> line[1]));
 
+        List<String> requestLines = Arrays.asList(requestLine.split(" "));
         return new HttpRequest(HttpMethod.valueOf(requestLines.get(0)),
                 RequestTarget.from(requestLines.get(1)),
-                httpVersion,
+                HttpVersion.valueOf(requestLines.get(2)),
                 headers);
     }
 
@@ -46,8 +42,8 @@ public class HttpRequest {
         return requestTarget;
     }
 
-    public String getVersion() {
-        return version;
+    public HttpVersion getHttpVersion() {
+        return httpVersion;
     }
 
     public Map<String, String> getHeaders() {

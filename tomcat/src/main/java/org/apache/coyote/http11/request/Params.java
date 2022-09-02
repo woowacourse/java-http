@@ -6,20 +6,20 @@ import java.util.NoSuchElementException;
 
 import utils.StringSplitter;
 
-public class Parameters {
+public class Params {
 
-    private Map<String, String> params;
+    private final Map<String, String> params;
 
-    private Parameters(final Map<String, String> params) {
+    private Params(final Map<String, String> params) {
         this.params = params;
     }
 
-    public static Parameters parse(final String query) {
+    public static Params parse(final String query) {
         final String paramsDelimiter = "&";
         final List<String> params = StringSplitter.split(paramsDelimiter, query);
 
         final String paramDelimiter = "=";
-        return new Parameters(StringSplitter.getPairs(paramDelimiter, params));
+        return new Params(StringSplitter.getPairs(paramDelimiter, params));
     }
 
     public String find(final String name) {
@@ -31,5 +31,9 @@ public class Parameters {
         if (!params.containsKey(name)) {
             throw new NoSuchElementException("파라미터를 찾을 수 없습니다 : " + name);
         }
+    }
+
+    public Map<String, String> getParams() {
+        return params;
     }
 }

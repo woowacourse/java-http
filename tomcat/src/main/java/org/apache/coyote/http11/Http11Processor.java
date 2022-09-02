@@ -113,6 +113,10 @@ public class Http11Processor implements Runnable, Processor {
             Map<String, String> queryStrings = extractQueryStrings(uri);
             Optional<User> user = InMemoryUserRepository.findByAccount(queryStrings.get("account"));
 
+            if (user.isPresent()) {
+                log.info("존재하는 유저입니다. ::: " + user);
+            }
+
             if (user.isPresent() && user.get().checkPassword(queryStrings.get("password"))) {
                 return Response.of(HttpStatus.REDIRECT, ContentType.HTML, "http://localhost:8080/index.html");
             }

@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import javassist.NotFoundException;
 import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.ResponseEntity;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +42,8 @@ public class Http11Processor implements Runnable, Processor {
                 if (isStartsWithRequestMethod(line)) {
                     final String uri = line.split(" ")[1];
                     final Controller controller = controllerMapping.getController(uri);
-                    final String responseBody = controller.execute(uri);
-                    final String response = makeResponse(responseBody);
+                    final ResponseEntity responseEntity = controller.execute(uri);
+                    final String response = makeResponse(responseEntity);
                     flushResponse(outputStream, response);
                     return;
                 }
@@ -69,12 +70,12 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private String makeResponse(final String responseBody) {
+    private String makeResponse(final ResponseEntity responseEntity) {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                responseEntity.getHttpVersion() + " " + responseEntity.getHttpStatus().getCode() + " " + responseEntity.getHttpStatus().name() + " ",
+                "Content-Type: " + responseEntity.getContentType() + ";charset=utf-8 ",
+                "Content-Length: " + responseEntity.getContentLength() + " ",
                 "",
-                responseBody);
+                responseEntity.getContent());
     }
 }

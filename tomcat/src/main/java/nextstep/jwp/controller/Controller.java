@@ -2,5 +2,5 @@ package nextstep.jwp.controller;
 
 public interface Controller {
 
-    String execute(String target) throws Exception;
+    ResponseEntity execute(String target) throws Exception;
 }

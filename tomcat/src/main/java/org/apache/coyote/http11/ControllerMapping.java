@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class ControllerMapping {
 
-    private static final List<String> resourceSuffixes = List.of(".html", ".css", ".");
+    private static final List<String> resourceSuffixes = List.of(".html", ".css", ".js");
     private final Map<String, Controller> mapping = new HashMap<>();
 
     public ControllerMapping() {
@@ -26,7 +26,7 @@ public class ControllerMapping {
         if (controller != null) {
             return controller;
         }
-        throw new NotFoundException("컨트롤러를 찾지 못함");
+        throw new NotFoundException(uri + "를 처리할 컨트롤러를 찾지 못함");
     }
 
     private boolean isResourceUri(final String uri) {

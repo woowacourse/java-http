@@ -7,7 +7,7 @@ public class Header {
 
     private ContentType contentType;
 
-    public Header(String url) {
+    public Header(final String url) {
         if(isCustomFileRequest(url)){
             this.contentType = ContentType.HTML;
         }

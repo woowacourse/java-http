@@ -14,13 +14,13 @@ public class PageMapper {
 
     private static String STATIC = "static/";
 
-    public String makeResponseBody(String url) {
+    public String makeResponseBody(final String url) {
         if (isCustomFileRequest(url)) {
             try {
                 String fileName = FileName.findFileName(url).getFileName();
                 return readFile(getFilePath(fileName));
             } catch (URISyntaxException | IOException e) {
-                e.printStackTrace();
+                throw new IllegalArgumentException("파일을 찾을 수 없습니다.");
             }
         }
 
@@ -29,7 +29,7 @@ public class PageMapper {
                 final String filePath = getFilePath(url);
                 return readFile(filePath);
             } catch (URISyntaxException | IOException e) {
-                e.printStackTrace();
+                throw new IllegalArgumentException("파일을 찾을 수 없습니다.");
             }
         }
 
@@ -46,11 +46,11 @@ public class PageMapper {
         return !url.equals("/");
     }
 
-    private String readFile(String filePath) throws IOException {
+    private String readFile(final String filePath) throws IOException {
         return new String(Files.readAllBytes(Paths.get(filePath)));
     }
 
-    private String getFilePath(String fileName) throws URISyntaxException {
+    private String getFilePath(final String fileName) throws URISyntaxException {
         return Objects.requireNonNull(
                 getClass()
                 .getClassLoader()

@@ -13,7 +13,7 @@ public class Body {
 
     private String value;
 
-    public Body(String bodyValue) {
+    public Body(final String bodyValue) {
         this.value = bodyValue;
     }
 

@@ -21,7 +21,7 @@ public class HttpRequest {
     public HttpRequest(String request) {
         final String[] parseRequest = request.split(" ");
         this.httpMethod = HttpMethod.from(parseRequest[0]);
-        int index = parseRequest[1].indexOf("?");
+        Integer index = parseRequest[1].indexOf("?");
         this.url = parseUrl(parseRequest[1], index);
         this.query = parseQuery(parseRequest[1], index);
     }
@@ -32,14 +32,14 @@ public class HttpRequest {
         }
     }
 
-    private String parseUrl(String uri, int index){
+    private String parseUrl(final String uri, final Integer index){
         if(hasQuery(index)){
             return uri.substring(0,index);
         }
         return uri;
     }
 
-    private Map<String, String> parseQuery(String uri, int index) {
+    private Map<String, String> parseQuery(final String uri, final Integer index) {
         if(hasQuery(index)){
             String queryString = uri.substring(index + 1);
             final String[] s = queryString.split("&");
@@ -50,11 +50,11 @@ public class HttpRequest {
         return new HashMap<>();
     }
 
-    private boolean hasQuery(int index) {
+    private boolean hasQuery(final int index) {
         return index >= 0;
     }
 
-    public String getQueryByValue(String key){
+    public String getQueryByValue(final String key){
         return query.get(key);
     }
 

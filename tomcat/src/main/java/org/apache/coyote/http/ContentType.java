@@ -12,7 +12,7 @@ public enum ContentType {
     private final String value;
 
 
-    ContentType(String fileExtension, String value) {
+    ContentType(final String fileExtension, final String value) {
         this.fileExtension = fileExtension;
         this.value = value;
     }

@@ -46,7 +46,7 @@ public class Http11Processor implements Runnable, Processor {
 
             printUser(httpRequest);
 
-            outputStream.write(httpResponse.getTemplate().getBytes());
+            outputStream.write(httpResponse.getResponseTemplate().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

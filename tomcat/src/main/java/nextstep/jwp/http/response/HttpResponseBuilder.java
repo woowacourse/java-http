@@ -1,11 +1,15 @@
 package nextstep.jwp.http.response;
 
+import nextstep.jwp.http.HttpHeader;
+
 public class HttpResponseBuilder {
 
+    private static final String HEADER_CONTENT_TYPE = "Content-Type";
+    private static final String HEADER_CONTENT_LENGTH = "Content-Length";
+
     private String version;
-    private String statusCode;
-    private String contentType;
-    private int contentLength;
+    private String status;
+    private HttpHeader httpHeaders = new HttpHeader();
     private String responseBody;
 
     public HttpResponseBuilder version() {
@@ -13,18 +17,18 @@ public class HttpResponseBuilder {
         return this;
     }
 
-    public HttpResponseBuilder statusCode(final String statusCode) {
-        this.statusCode = statusCode;
+    public HttpResponseBuilder status(final String status) {
+        this.status = status;
         return this;
     }
 
     public HttpResponseBuilder contentType(final String contentType) {
-        this.contentType = contentType;
+        this.httpHeaders.addHeader(HEADER_CONTENT_TYPE, contentType);
         return this;
     }
 
     public HttpResponseBuilder contentLength(final int contentLength) {
-        this.contentLength = contentLength;
+        this.httpHeaders.addHeader(HEADER_CONTENT_LENGTH, String.valueOf(contentLength));
         return this;
     }
 
@@ -34,6 +38,6 @@ public class HttpResponseBuilder {
     }
 
     public HttpResponse build() {
-        return new HttpResponse(version, statusCode, contentType, contentLength, responseBody);
+        return new HttpResponse(version, status, httpHeaders, responseBody);
     }
 }

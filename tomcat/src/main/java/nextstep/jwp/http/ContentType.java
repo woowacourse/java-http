@@ -4,9 +4,9 @@ import java.util.Arrays;
 
 public enum ContentType {
 
-    HTML("html", "text/html"),
-    CSS("css", "text/css"),
-    TEXT("", "text/html");
+    HTML("html", "text/html;charset=utf-8"),
+    CSS("css", "text/css;charset=utf-8"),
+    TEXT("", "text/html;charset=utf-8");
 
     private String extension;
     private String contentType;

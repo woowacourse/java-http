@@ -1,13 +1,11 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
-
 public class ResourceHandler implements Handler {
 
     @Override
-    public String handle(final HttpRequest httpRequest) throws IOException {
+    public String handle(final HttpRequest httpRequest) {
         String uri = httpRequest.getRequestTarget().getUri();
-        String responseBody = createResponseBody(uri);
+        String responseBody = FileReader.read(uri);
         return createResponseMessage(ContentType.from(uri), responseBody);
     }
 }

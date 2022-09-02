@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.io.IOException;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundException;
@@ -13,10 +12,10 @@ public class LoginHandler implements Handler {
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
 
     @Override
-    public String handle(final HttpRequest httpRequest) throws IOException {
+    public String handle(final HttpRequest httpRequest) {
         inquireUser(httpRequest.getRequestTarget());
         String uri = httpRequest.getRequestTarget().getUri();
-        String responseBody = createResponseBody(uri + ".html");
+        String responseBody = FileReader.read(uri + ".html");
         return createResponseMessage(ContentType.from(uri), responseBody);
     }
 

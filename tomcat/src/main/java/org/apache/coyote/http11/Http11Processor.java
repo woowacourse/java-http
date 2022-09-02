@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.Watchable;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -36,87 +37,19 @@ public class Http11Processor implements Runnable, Processor {
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             String line = bufferedReader.readLine();
+            String response = request(HttpRequest.of(line));
 
-            var response = "";
-            String responseBody = "";
-            if (line.startsWith("GET")) {
-                String[] request = line.split(" ");
-                String url = request[1];
-
-                if (url.equals("/")) {
-                    responseBody = "Hello world!";
-                    response = String.join("\r\n",
-                            "HTTP/1.1 200 OK ",
-                            "Content-Type: text/html;charset=utf-8 ",
-                            "Content-Length: " + responseBody.getBytes().length + " ",
-                            "",
-                            responseBody);
-                } else if (url.endsWith(".html")) {
-                    URL resource = getClass().getClassLoader().getResource("static" + url);
-                    if (resource != null) {
-                        String file = resource.getFile();
-                        if (file != null) {
-                            responseBody = new String(Files.readAllBytes(Paths.get(file)));
-                            response = String.join("\r\n",
-                                    "HTTP/1.1 200 OK ",
-                                    "Content-Type: text/html;charset=utf-8 ",
-                                    "Content-Length: " + responseBody.getBytes().length + " ",
-                                    "",
-                                    responseBody);
-                        }
-                    }
-                } else if (url.endsWith(".css")) {
-                    URL resource = getClass().getClassLoader().getResource("static" + url);
-                    if (resource != null) {
-                        String file = resource.getFile();
-                        if (file != null) {
-                            responseBody = new String(Files.readAllBytes(Paths.get(file)));
-                            response = String.join("\r\n",
-                                    "HTTP/1.1 200 OK ",
-                                    "Content-Type: text/css;charset=utf-8 ",
-                                    "Content-Length: " + responseBody.getBytes().length + " ",
-                                    "",
-                                    responseBody);
-                        }
-                    }
-                } else if (url.endsWith(".js")) {
-                    URL resource = getClass().getClassLoader().getResource("static" + url);
-                    if (resource != null) {
-                        String file = resource.getFile();
-                        if (file != null) {
-                            responseBody = new String(Files.readAllBytes(Paths.get(file)));
-                            response = String.join("\r\n",
-                                    "HTTP/1.1 200 OK ",
-                                    "Content-Type: text/js;charset=utf-8 ",
-                                    "Content-Length: " + responseBody.getBytes().length + " ",
-                                    "",
-                                    responseBody);
-                        }
-                    }
-                } else if (url.substring(0, url.indexOf("?")).equals("/login")) {
-                    String queryString = url.substring(url.indexOf("?") + 1);
-                    String[] split = queryString.split("&");
-                    String[] accountSplit = split[0].split("=");
-                    String[] passwordSplit = split[1].split("=");
-                    String account = "";
-                    String password = "";
-                    if (accountSplit[0].equals("account")) {
-                        account = accountSplit[1];
-                    }
-                    if (passwordSplit[1].equals("password")) {
-                        password = passwordSplit[1];
-                    }
-
-                    User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
-                    if (user.checkPassword(password)) {
-                        System.out.println(user);
-                    }
-                }
-            }
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String request(final HttpRequest httpRequest) throws IOException {
+        if (httpRequest.isGetMethod()) {
+            return httpRequest.request();
+        }
+        throw new IllegalArgumentException();
     }
 }

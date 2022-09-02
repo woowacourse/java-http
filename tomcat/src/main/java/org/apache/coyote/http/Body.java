@@ -1,7 +1,5 @@
 package org.apache.coyote.http;
 
-import static org.apache.coyote.FileName.NOT_FOUND;
-import static org.apache.coyote.FileName.findFileName;
 import static org.apache.coyote.PageMapper.isCustomFileRequest;
 
 import java.io.IOException;
@@ -15,36 +13,32 @@ public class Body {
 
     private String value;
 
-    public Body(String url) {
-        this.value = makeResponseBody(url);
+    public Body(String bodyValue) {
+        this.value = bodyValue;
     }
 
-    private String makeResponseBody(String url) {
-        if (isCustomFileRequest(url)) {
-            final Path filePath;
-            try {
-                String fileName = FileName.findFileName(url).getFileName();
-                filePath = new PageMapper().getFilePath(fileName);
-                return readFile(filePath);
-            } catch (URISyntaxException | IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        final Path filePath;
-        try {
-            filePath = new PageMapper().getFilePath(url);
-            return readFile(filePath);
-        } catch (URISyntaxException | IOException e) {
-            e.printStackTrace();
-        }
-
-        return "Hello world!";
-    }
-
-    private String readFile(Path path) throws IOException {
-        return new String(Files.readAllBytes(path));
-    }
+//    private String makeResponseBody(String url) {
+//        if (isCustomFileRequest(url)) {
+//            final Path filePath;
+//            try {
+//                String fileName = FileName.findFileName(url).getFileName();
+//                filePath = new PageMapper().getFilePath(fileName);
+//                return readFile(filePath);
+//            } catch (URISyntaxException | IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//        final Path filePath;
+//        try {
+//            filePath = new PageMapper().getFilePath(url);
+//            return readFile(filePath);
+//        } catch (URISyntaxException | IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        return "Hello world!";
+//    }
 
     public String getValue() {
         return value;

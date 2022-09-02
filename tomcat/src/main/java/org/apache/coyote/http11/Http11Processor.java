@@ -3,10 +3,12 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.PageMapper;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +39,8 @@ public class Http11Processor implements Runnable, Processor {
             final String request = bufferedReader.readLine();
 
             final HttpRequest httpRequest = new HttpRequest(request);
-            final HttpResponse response = new HttpResponse(httpRequest);
+            final String result = new PageMapper().makeResponseBody(httpRequest.getUrl());
+            final HttpResponse response = new HttpResponse(HttpStatus.OK, httpRequest.getUrl() , result);
 
             outputStream.write(makeHttpMessage(response).getBytes());
             outputStream.flush();

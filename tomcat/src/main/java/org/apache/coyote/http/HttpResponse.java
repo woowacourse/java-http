@@ -4,12 +4,14 @@ package org.apache.coyote.http;
 
 public class HttpResponse {
 
+    private HttpStatus httpStatus;
     private Header header;
     private Body body;
 
-    public HttpResponse(final HttpRequest httpRequest) {
-        this.header = new Header(httpRequest.getUrl());
-        this.body = new Body(httpRequest.getUrl());
+    public HttpResponse(final HttpStatus httpStatus, final String url, final String bodyValue) {
+        this.httpStatus = httpStatus;
+        this.header = new Header(url);
+        this.body = new Body(bodyValue);
     }
 
     public Header getHeader() {

@@ -3,7 +3,9 @@ package org.apache.coyote;
 import static org.apache.coyote.FileName.NOT_FOUND;
 import static org.apache.coyote.FileName.findFileName;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
@@ -17,12 +19,35 @@ public class PageMapper {
         return !foundFileName.getFileName().equals("") && !foundFileName.equals(NOT_FOUND);
     }
 
-    public Path getFilePath(String fileName) throws URISyntaxException {
-        return Paths.get(Objects.requireNonNull(
+    public String makeResponseBody(String url) {
+        if (isCustomFileRequest(url)) {
+            try {
+                String fileName = FileName.findFileName(url).getFileName();
+                return readFile(getFilePath(fileName));
+            } catch (URISyntaxException | IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        try {
+            return readFile(getFilePath(url));
+        } catch (URISyntaxException | IOException e) {
+            e.printStackTrace();
+        }
+
+        return "Hello world!";
+    }
+
+    private String readFile(String filePath) throws IOException {
+        return new String(Files.readAllBytes(Paths.get(filePath)));
+    }
+
+    private String getFilePath(String fileName) throws URISyntaxException {
+        return Objects.requireNonNull(
                 getClass()
                 .getClassLoader()
                 .getResource(STATIC + fileName))
-                .toURI());
+                .getPath();
     }
 
 }

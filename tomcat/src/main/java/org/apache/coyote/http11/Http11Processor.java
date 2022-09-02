@@ -5,8 +5,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Collections;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -15,8 +13,8 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpRequest;
+import org.apache.coyote.http.HttpRequestBody;
 import org.apache.coyote.http.HttpResponse;
-import org.apache.coyote.util.StringParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final HttpRequest httpRequest = HttpRequest.of(bufferedReader.readLine(), HttpHeader.from(bufferedReader));
-            final Map<String, String> requestBody = getRequestBody(bufferedReader, httpRequest.getContentLength());
+            final HttpRequestBody requestBody = HttpRequestBody.from(bufferedReader, httpRequest.getContentLength());
 
             HttpResponse httpResponse = HttpResponse.fromHttpRequest(httpRequest);
 
@@ -67,20 +65,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Map<String, String> getRequestBody(final BufferedReader bufferedReader, final int contentLength)
-            throws IOException {
-        if (contentLength == 0) {
-            return Collections.emptyMap();
-        }
-
-        final char[] buffer = new char[contentLength];
-        bufferedReader.read(buffer, 0, contentLength);
-        final String requestBody = new String(buffer);
-
-        return StringParser.toMap(requestBody);
-    }
-
-    private HttpResponse login(final Map<String, String> requestBody, final HttpResponse httpResponse) {
+    private HttpResponse login(final HttpRequestBody requestBody, final HttpResponse httpResponse) {
         final Optional<User> possibleUser = InMemoryUserRepository.findByAccount(requestBody.get("account"));
         if (possibleUser.isEmpty()) {
             return httpResponse;
@@ -96,7 +81,7 @@ public class Http11Processor implements Runnable, Processor {
                 .setSessionId(sessionId);
     }
 
-    private HttpResponse register(final Map<String, String> requestBody, final HttpResponse httpResponse) {
+    private HttpResponse register(final HttpRequestBody requestBody, final HttpResponse httpResponse) {
         final User user = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
         InMemoryUserRepository.save(user);
 

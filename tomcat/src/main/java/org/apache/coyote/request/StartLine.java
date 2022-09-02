@@ -1,5 +1,6 @@
 package org.apache.coyote.request;
 
+import java.util.HashMap;
 import org.apache.coyote.exception.HttpException;
 import org.apache.coyote.support.HttpMethod;
 import org.apache.coyote.support.HttpStatus;
@@ -12,6 +13,7 @@ public class StartLine {
     private static final int METHOD_INDEX = 0;
     private static final int URI_INDEX = 1;
     private static final int VERSION_INDEX = 2;
+    private static final String QUERY_STRING_BEGIN_SIGN = "?";
 
     private final HttpMethod method;
     private final String uri;
@@ -55,5 +57,30 @@ public class StartLine {
         } catch (IllegalArgumentException e) {
             throw new HttpException(HttpStatus.BAD_REQUEST);
         }
+    }
+
+    public HttpMethod getMethod() {
+        return method;
+    }
+
+    public String getUri() {
+        if (!uri.contains(QUERY_STRING_BEGIN_SIGN)) {
+            return uri;
+        }
+        final var delimiterIndex = uri.indexOf(QUERY_STRING_BEGIN_SIGN);
+        return uri.substring(0, delimiterIndex);
+    }
+
+    public HttpVersion getVersion() {
+        return version;
+    }
+
+    public Parameters getParameters() {
+        if (!uri.contains(QUERY_STRING_BEGIN_SIGN)) {
+            return new Parameters(new HashMap<>());
+        }
+        final var delimiterIndex = uri.indexOf(QUERY_STRING_BEGIN_SIGN);
+        final var queryString = uri.substring(delimiterIndex + 1);
+        return Parameters.ofQueryString(queryString);
     }
 }

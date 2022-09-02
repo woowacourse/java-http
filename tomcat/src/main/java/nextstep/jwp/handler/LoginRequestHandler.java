@@ -7,9 +7,16 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundUserException;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.HttpVersion;
 import nextstep.jwp.model.User;
 
 public class LoginRequestHandler implements HttpRequestHandler {
+
+    private final HttpVersion httpVersion;
+
+    public LoginRequestHandler(final HttpVersion httpVersion) {
+        this.httpVersion = httpVersion;
+    }
 
     @Override
     public HttpResponse handleHttpRequest(final HttpRequest httpRequest) {

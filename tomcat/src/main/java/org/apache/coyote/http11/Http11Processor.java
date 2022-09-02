@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import static nextstep.jwp.http.HttpVersion.HTTP_1_1;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -14,6 +12,7 @@ import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpStatus;
+import nextstep.jwp.http.HttpVersion;
 import nextstep.jwp.util.ResourcesUtil;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -21,11 +20,12 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
+    private static final HttpVersion HTTP_VERSION = HttpVersion.HTTP_1_1;
+
     private final Socket connection;
-    private final HttpRequestHandler loginRequestHandler = new LoginRequestHandler();
+    private final HttpRequestHandler loginRequestHandler = new LoginRequestHandler(HTTP_VERSION);
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -75,7 +75,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse okResponse(final ContentType contentType, final String responseBody) {
-        return new HttpResponse(HTTP_1_1, HttpStatus.OK, contentType, responseBody);
+        return new HttpResponse(HTTP_VERSION, HttpStatus.OK, contentType, responseBody);
     }
 
     private boolean isLoginRequest(final String path) {

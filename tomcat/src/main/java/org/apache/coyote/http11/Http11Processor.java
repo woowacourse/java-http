@@ -9,8 +9,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Objects;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,15 +41,15 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            final String resource = requestValue.split(" ")[1];
+            final String requestPath = requestValue.split(" ")[1];
 
             String contentType = "text/html";
 
-            if (resource.contains("/css")) {
+            if (requestPath.contains("/css")) {
                 contentType = "text/css";
             }
 
-            final String responseBody = makeResponseBody(resource);
+            final String responseBody = makeResponseBody(requestPath);
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: " + contentType + ";charset=utf-8 ",
@@ -65,18 +66,47 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    public String readHttpRequest(final InputStream inputStream) throws IOException {
+    private String readHttpRequest(final InputStream inputStream) throws IOException {
         final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
         final String requestValue = br.readLine();
         return requestValue;
     }
 
-    public String makeResponseBody(final String resource) throws IOException, URISyntaxException {
-        if ("/".equals(resource)) {
+    private String makeResponseBody(final String requestPath) throws IOException, URISyntaxException {
+        if ("/".equals(requestPath)) {
             return "Hello world!";
         }
-        final URI uri = Objects.requireNonNull(getClass().getClassLoader().getResource("static" + resource))
-                .toURI();
+
+        if (requestPath.equals("/login")) {
+            final URI uri = getClass().getClassLoader().getResource("static" + requestPath + ".html").toURI();
+            return new String(Files.readAllBytes(Paths.get(uri)));
+        }
+
+        if (requestPath.contains("/login")) {
+            int index = requestPath.indexOf("?");
+            String queryString = requestPath.substring(index + 1);
+
+            final String account = queryString.split("&")[0];
+            final String password = queryString.split("&")[1];
+
+            final String inputAccountValue = account.split("=")[1];
+            final String inputPasswordValue = password.split("=")[1];
+
+            checkLogin(inputAccountValue, inputPasswordValue);
+            return "success";
+        }
+
+        final URI uri = getClass().getClassLoader().getResource("static" + requestPath).toURI();
         return new String(Files.readAllBytes(Paths.get(uri)));
+    }
+
+    private void checkLogin(final String inputAccountValue, final String inputPasswordValue) {
+        final User user = InMemoryUserRepository.findByAccount(inputAccountValue)
+                .orElseThrow();
+
+        final boolean isSuccessLogin = user.checkPassword(inputPasswordValue);
+        if (isSuccessLogin) {
+            log.debug("{}", user);
+        }
     }
 }

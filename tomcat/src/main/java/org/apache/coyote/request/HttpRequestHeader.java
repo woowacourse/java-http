@@ -9,6 +9,8 @@ public class HttpRequestHeader {
     private static final String ROOT = "/";
     private static final String EXTENSION_CHARACTER = ".";
     private static final String DEFAULT_PAGE_URL = "/index.html";
+    private static final String START_LINE_REGEX = " ";
+    private static final int URL_INDEX = 1;
 
     private final String startLine;
     private final Map<String, String> headers;
@@ -28,7 +30,7 @@ public class HttpRequestHeader {
     }
 
     public String getRequestUrl() {
-        String requestUrl = startLine.split(" ")[1];
+        String requestUrl = startLine.split(START_LINE_REGEX)[URL_INDEX];
         requestUrl = makeDefaultRequestUrl(requestUrl);
 
         return requestUrl;

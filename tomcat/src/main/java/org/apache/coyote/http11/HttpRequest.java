@@ -3,7 +3,7 @@ package org.apache.coyote.http11;
 import org.apache.coyote.http11.exception.InvalidHttpRequestStartLineException;
 import java.util.List;
 
-public class Request {
+public class HttpRequest {
 
     private static final String HOST_PREFIX = "Host: ";
     private static final String ACCEPT_PREFIX = "Accept: ";
@@ -13,7 +13,7 @@ public class Request {
     private final String accept;
     private final String connection;
 
-    public Request(final String startLine, final String host, final String accept, final String connection) {
+    public HttpRequest(final String startLine, final String host, final String accept, final String connection) {
         this.startLine = startLine;
         this.host = host;
         this.accept = accept;
@@ -21,7 +21,7 @@ public class Request {
     }
 
 
-    public static Request of(final String startLine, final List<String> lines) {
+    public static HttpRequest of(final String startLine, final List<String> lines) {
         if (!RequestMethod.isIn(startLine)) {
             throw new InvalidHttpRequestStartLineException();
         }
@@ -30,7 +30,7 @@ public class Request {
         final String acceptType = extractByPrefix(lines, ACCEPT_PREFIX);
         final String connection = extractByPrefix(lines, CONNECTION_PREFIX);
 
-        return new Request(startLine, host, acceptType, connection);
+        return new HttpRequest(startLine, host, acceptType, connection);
     }
 
     private static String extractByPrefix(final List<String> lines, final String prefix) {

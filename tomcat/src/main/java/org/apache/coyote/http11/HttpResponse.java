@@ -1,19 +1,19 @@
 package org.apache.coyote.http11;
 
-public class Response {
+public class HttpResponse {
 
     private static final String HTTP_VERSION_1_1 = "HTTP/1.1";
     private final HttpStatus httpStatus;
     private final String contentType;
     private final String responseBody;
 
-    public Response(final HttpStatus httpStatus, final String contentType, final String responseBody) {
+    public HttpResponse(final HttpStatus httpStatus, final String contentType, final String responseBody) {
         this.httpStatus = httpStatus;
         this.contentType = contentType;
         this.responseBody = responseBody;
     }
 
-    public String toHttpResponse() {
+    public String format() {
         final String statusLine = String.join(" ",
                 HTTP_VERSION_1_1 ,
                 String.valueOf(httpStatus.getStatusCode()),

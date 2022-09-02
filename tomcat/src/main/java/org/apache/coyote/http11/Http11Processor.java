@@ -1,30 +1,27 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.FaviconNotFoundException;
 import org.apache.coyote.http11.exception.InvalidHttpRequestStartLineException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String DEFAULT_URI = "/";
     private static final String FAVICON_URI = "/favicon.ico";
-    private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
-    private static final String STATIC_RESOURCE_LOCATION = "static/";
+    private static final String QUERY_STRING_PREFIX = "?";
+    private static final String HTML_EXTENSION = ".html";
 
     private final Socket connection;
 
@@ -43,20 +40,25 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
             final String startLine = bufferedReader.readLine();
-            if (startLine == null) {
-                throw new InvalidHttpRequestStartLineException();
-            }
-
+            validateStartLine(startLine);
             final List<String> lines = readLines(bufferedReader);
-            final Request request = Request.of(startLine, lines);
-            final String httpResponse = createHttpResponse(request);
+            final HttpRequest httpRequest = HttpRequest.of(startLine, lines);
+            final String uri = parseUri(httpRequest);
+            final HttpResponse httpResponse = createHttpResponse(httpRequest, uri);
+            final String formattedResponse = httpResponse.format();
+            log.info(httpRequest.toString());
+            log.info(httpResponse.toString());
 
-            log.info(request.toString());
-
-            outputStream.write(httpResponse.getBytes());
+            outputStream.write(formattedResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | InvalidHttpRequestStartLineException | FaviconNotFoundException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void validateStartLine(final String startLine) {
+        if (startLine == null) {
+            throw new InvalidHttpRequestStartLineException();
         }
     }
 
@@ -70,28 +72,33 @@ public class Http11Processor implements Runnable, Processor {
         return lines;
     }
 
-    private String createHttpResponse(final Request request) throws IOException {
-        final String uri = request.getUri();
+    private String parseUri(final HttpRequest httpRequest) throws IOException {
+        String uri = httpRequest.getUri();
+
         if (uri.equals(FAVICON_URI)) {
             throw new FaviconNotFoundException();
         }
 
+        if (uri.contains(QUERY_STRING_PREFIX)) {
+            int index = uri.indexOf(QUERY_STRING_PREFIX);
+            String path = uri.substring(0, index);
+            String queryString = uri.substring(index + 1);
+            final QueryParameters queryParameters = QueryParameters.from(queryString);
+            logUser(queryParameters);
 
-        final URL resource = getClass().getClassLoader().getResource(STATIC_RESOURCE_LOCATION + uri);
-        final String responseBody = createResponseBody(uri, resource);
-        final Response response = new Response(HttpStatus.OK, request.getAcceptType(), responseBody);
-        log.info(response.toString());
-        return response.toHttpResponse();
-    }
-
-    private String createResponseBody(final String uri, final URL resource) throws IOException {
-        if (uri.equals(DEFAULT_URI)) {
-            return DEFAULT_RESPONSE_BODY;
+            return path + HTML_EXTENSION;
         }
 
-        final Path path = new File(Objects.requireNonNull(resource).getPath()).toPath();
-        final byte[] bytes = Files.readAllBytes(path);
+        return uri;
+    }
 
-        return new String(bytes);
+    private void logUser(final QueryParameters queryParameters) {
+        final String account = queryParameters.getValueByKey("account");
+        final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        log.info(user.toString());
+    }
+
+    private HttpResponse createHttpResponse(final HttpRequest httpRequest, final String uri) throws IOException {
+        return new HttpResponse(HttpStatus.OK, httpRequest.getAcceptType(), ResourceLoader.getContent(uri));
     }
 }

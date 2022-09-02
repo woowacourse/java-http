@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.http11.exception.HttpFormatException;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestStartLineTest {
@@ -18,8 +18,7 @@ class HttpRequestStartLineTest {
 
         // when & then
         assertThatThrownBy(() -> RequestStartLine.from(input))
-                .isInstanceOf(UncheckedServletException.class)
-                .hasMessage("Http Request Start Line이 비어있습니다.");
+                .isInstanceOf(HttpFormatException.class);
     }
 
     @Test
@@ -29,8 +28,7 @@ class HttpRequestStartLineTest {
 
         // when & then
         assertThatThrownBy(() -> RequestStartLine.from(input))
-                .isInstanceOf(UncheckedServletException.class)
-                .hasMessage("Http Request Start Line이 형식에 맞지 않습니다.");
+                .isInstanceOf(HttpFormatException.class);
     }
 
     @Test

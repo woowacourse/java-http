@@ -1,8 +1,8 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.exception.NotFoundException;
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.http11.common.HttpMethod;
+import org.apache.coyote.http11.exception.UnsupportedHttpMethodException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -22,7 +22,7 @@ public class ControllerMapper {
         if (httpRequest.getMethod().equals(HttpMethod.POST)) {
             return doPost(controller, httpRequest);
         }
-        throw new UncheckedServletException("지원하지 않는 Http Method입니다.");
+        throw new UnsupportedHttpMethodException();
     }
 
     private HttpResponse doGet(final Controller controller, final HttpRequest httpRequest) {

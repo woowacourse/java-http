@@ -15,11 +15,13 @@ public class LoginHandler {
     private static final String PASSWORD = "password";
 
     public static void login(QueryParams queryParams) {
-        String account = queryParams.get(ACCOUNT);
-        String password = queryParams.get(PASSWORD);
+        if (queryParams.contains(ACCOUNT) && queryParams.contains(PASSWORD)) {
+            String account = queryParams.get(ACCOUNT);
+            String password = queryParams.get(PASSWORD);
 
-        Optional<User> user = InMemoryUserRepository.findByAccount(account);
-        user.ifPresent(value -> loginSuccess(value, password));
+            Optional<User> user = InMemoryUserRepository.findByAccount(account);
+            user.ifPresent(value -> loginSuccess(value, password));
+        }
     }
 
     private static void loginSuccess(User user, String password) {

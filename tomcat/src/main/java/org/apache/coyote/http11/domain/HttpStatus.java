@@ -1,10 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.domain;
 
 public enum HttpStatus {
 
     OK(200);
 
-    private int statusCode;
+    private final int statusCode;
 
     HttpStatus(final int statusCode) {
         this.statusCode = statusCode;

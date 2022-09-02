@@ -1,5 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.presentation;
 
+import org.apache.coyote.http11.domain.RequestMethod;
 import org.apache.coyote.http11.exception.InvalidHttpRequestStartLineException;
 import java.util.List;
 

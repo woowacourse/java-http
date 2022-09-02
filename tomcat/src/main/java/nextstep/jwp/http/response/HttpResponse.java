@@ -2,12 +2,12 @@ package nextstep.jwp.http.response;
 
 public class HttpResponse {
 
-    private String version;
-    private String statusCode;
-    private String statusMessage;
-    private String contentType;
-    private int contentLength;
-    private String responseBody;
+    private final String version;
+    private final String statusCode;
+    private final String statusMessage;
+    private final String contentType;
+    private final int contentLength;
+    private final String responseBody;
 
     public HttpResponse(final String version, final String statusCode, final String statusMessage,
                         final String contentType, final int contentLength, final String responseBody) {

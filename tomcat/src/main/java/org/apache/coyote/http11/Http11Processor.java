@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String ROOT_URL = "/";
+    private static final String ROOT_RESPONSE_BODY = "Hello world!";
 
     private final Socket connection;
 
@@ -57,9 +59,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse createHttpResponse(final HttpRequest httpRequest) {
         String url = httpRequest.getUrl();
-        if (url.equals("/")) {
-            String responseBody = "Hello world!";
-            return okResponse(httpRequest.findContentType(), responseBody);
+        if (url.equals(ROOT_URL)) {
+            return okResponse(httpRequest.findContentType(), ROOT_RESPONSE_BODY);
         }
         String responseBody = new ClassPathResource().getFileContents(url);
         return okResponse(httpRequest.findContentType(), responseBody);

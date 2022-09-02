@@ -28,6 +28,6 @@ public class HttpRequest {
     }
 
     public Map<String, String> getQueryString() {
-        return httpRequestLine.getQueryString();
+        return httpRequestLine.getQueryParams();
     }
 }

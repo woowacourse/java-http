@@ -100,6 +100,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createHttpResponse(final HttpRequest httpRequest, final String uri) throws IOException {
+        System.err.println(httpRequest.toString());
         return new HttpResponse(HttpStatus.OK, httpRequest.getAcceptType(), ResourceLoader.getContent(uri));
     }
 }

@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 public class HttpResponse {
 
     private static final String HTTP_VERSION_1_1 = "HTTP/1.1";
+
     private final HttpStatus httpStatus;
     private final String contentType;
     private final String responseBody;

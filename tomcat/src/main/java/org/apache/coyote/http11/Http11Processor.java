@@ -46,10 +46,8 @@ public class Http11Processor implements Runnable, Processor {
 
             if (uri.contains(".")) {
                 routeForStaticFile(outputStream, uri);
-                return;
             } else if ("/".equals(uri)) {
                 routeForRoot(outputStream);
-                return;
             } else if (uri.contains("/login")) {
                 routeForLogin(outputStream, uri);
             }

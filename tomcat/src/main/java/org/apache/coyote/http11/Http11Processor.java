@@ -75,7 +75,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse okResponse(final ContentType contentType, final String responseBody) {
-        return new HttpResponse(HTTP_VERSION, HttpStatus.OK, contentType, responseBody);
+        return new HttpResponse(HTTP_VERSION, HttpStatus.OK, contentType, "", responseBody);
     }
 
     private boolean isLoginRequest(final String path) {

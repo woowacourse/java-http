@@ -26,7 +26,8 @@ public class LoginRequestHandler implements HttpRequestHandler {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(NotFoundUserException::new);
         if (user.checkPassword(password)) {
-            return HttpResponse.found(HTTP_1_1);
+            HttpResponse found = HttpResponse.found(HTTP_1_1, "/index.html");
+            return found;
         }
         return null;
     }

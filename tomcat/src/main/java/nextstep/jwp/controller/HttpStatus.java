@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 public enum HttpStatus {
 
-    OK(200);
+    OK(200), BAD_REQUEST(400), INTERNAL_SERVER_ERROR(500);
 
     private final int code;
 

@@ -1,5 +1,7 @@
 package nextstep.jwp.controller;
 
+import java.util.Objects;
+
 public class ResponseEntity {
 
     private static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
@@ -18,8 +20,20 @@ public class ResponseEntity {
         this.httpVersion = httpVersion;
         this.httpStatus = httpStatus;
         this.contentType = contentType;
-        this.content = content;
-        this.contentLength = content.getBytes().length;
+        this.content = parseContent(content);
+        this.contentLength = calculateContentLength(this.content);
+    }
+
+    private String parseContent(final String content) {
+        if (Objects.isNull(content)) {
+            return "";
+        }
+        return content;
+    }
+
+    private int calculateContentLength(final String content) {
+        return content.getBytes()
+                .length;
     }
 
     public String getHttpVersion() {

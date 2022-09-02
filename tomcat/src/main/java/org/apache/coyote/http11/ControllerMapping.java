@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import javassist.NotFoundException;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.GreetingController;
+import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.ResourceController;
 
 import java.util.HashMap;
@@ -16,6 +17,7 @@ public class ControllerMapping {
 
     public ControllerMapping() {
         mapping.put("/", new GreetingController());
+        mapping.put("/login", new LoginController());
     }
 
     public Controller getController(final String uri) throws NotFoundException {

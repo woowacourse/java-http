@@ -3,7 +3,7 @@ package nextstep.jwp.controller;
 public class GreetingController implements Controller {
 
     @Override
-    public ResponseEntity execute(final String target) throws Exception {
-        return new ResponseEntity(HttpStatus.OK, "text/html", "Hello world!");
+    public ResponseEntity execute(final RequestEntity request) throws Exception {
+        return new ResponseEntity(HttpStatus.OK, request.getContentType(), "Hello world!");
     }
 }

@@ -10,6 +10,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.request.UserRequest;
 
+import org.apache.coyote.http11.exception.FileNotFoundException;
 import org.apache.coyote.http11.exception.UserNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,13 +33,13 @@ public class ResponseHandler {
         this.path = path;
     }
 
-    public String getResponse() throws IOException {
+    public String getResponse() throws IOException, FileNotFoundException {
         final ResponseHeader responseHeader = new ResponseHeader(path);
 
         return  String.join("\r\n", responseHeader.getHeader(getResponseBody()), getResponseBody());
     }
 
-    private String getResponseBody() throws IOException {
+    private String getResponseBody() throws FileNotFoundException, IOException {
         if (path.equals(DEFAULT_PATH)) {
             return "Hello world!";
         }
@@ -48,10 +49,13 @@ public class ResponseHandler {
         return getContent(path);
     }
 
-    private String getContent(String path) throws IOException {
+    private String getContent(String path) throws FileNotFoundException, IOException {
         final URL resource = getClass()
                 .getClassLoader()
                 .getResource(RESOURCE_PATH + path + getExtension());
+        if (resource == null) {
+            throw new FileNotFoundException();
+        }
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
@@ -62,7 +66,7 @@ public class ResponseHandler {
         return DEFAULT_EXTENSION;
     }
 
-    private String getLoginContent() throws IOException {
+    private String getLoginContent() throws FileNotFoundException, IOException {
         final QueryParam queryParam = new QueryParam(path);
         final UserRequest userRequest = queryParam.toUserRequest(ACCOUNT, PASSWORD);
 

@@ -22,4 +22,12 @@ public enum HttpContent {
                 .findAny()
                 .orElse("text/plain");
     }
+
+    public String getExtension() {
+        return extension;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
 }

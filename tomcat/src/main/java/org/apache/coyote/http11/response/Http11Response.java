@@ -21,6 +21,12 @@ public class Http11Response {
         this.body = body;
     }
 
+    public Http11Response(int statusCode, String statusMessage,
+                          Map<String, String> responseHeader,
+                          String body) {
+        this("HTTP/1.1", statusCode, statusMessage, responseHeader, body);
+    }
+
     public String toMessage() {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(protocolVersion + " " + statusCode + " " + statusMessage + " \r\n");

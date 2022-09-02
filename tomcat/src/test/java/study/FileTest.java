@@ -28,7 +28,7 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        final String actual = Path.of(fileName).toString();
+        final String actual =  ClassLoader.getSystemClassLoader().getResource(fileName).getPath();
         System.out.println(actual);
         assertThat(actual).endsWith(fileName);
     }

@@ -11,41 +11,39 @@ import nextstep.jwp.model.SessionManager;
 public class HttpRequest {
 
     private final HttpMethod httpMethod;
-    private final Map<String, String> queryParams;
+    private final HttpURI uri;
     private final Map<String, String> httpRequestHeaders;
     private final Map<String, String> bodyParams;
     private final HttpCookie cookie;
-    private final String path;
 
-    public HttpRequest(HttpMethod httpMethod, String path, Map<String, String> queryParams,
+    public HttpRequest(HttpMethod httpMethod, HttpURI uri,
         Map<String, String> httpRequestHeaders, Map<String, String> bodyParms, HttpCookie cookie) {
         this.httpMethod = httpMethod;
-        this.path = path;
-        this.queryParams = queryParams;
+        this.uri = uri;
         this.httpRequestHeaders = httpRequestHeaders;
         this.bodyParams = bodyParms;
         this.cookie = cookie;
     }
 
     public boolean isValidLoginRequest() {
-        return isPostRequest() && path.startsWith("/login");
+        return isPostRequest() && uri.pathStartsWith("/login");
     }
 
     public boolean isValidRegisterRequest() {
-        return isPostRequest() && path.startsWith("/register");
+        return isPostRequest() && uri.pathStartsWith("/register");
     }
 
     public boolean isLoginRequestWithAuthorization() {
         return isGetRequest()
-            && path.startsWith("/login")
+            && uri.pathStartsWith("/login")
             && cookie.containsAttribute("JSESSIONID");
     }
 
-    private boolean isGetRequest() {
+    public boolean isGetRequest() {
         return httpMethod.equals(HttpMethod.GET);
     }
 
-    private boolean isPostRequest() {
+    public boolean isPostRequest() {
         return httpMethod.equals(HttpMethod.POST);
     }
 
@@ -54,11 +52,11 @@ public class HttpRequest {
     }
 
     public String getResourcePath() {
-        return "static" + path;
+        return "static" + uri.getPath();
     }
 
     public String getContentType() {
-        String extension = StringUtils.substringAfterLast(path, ".");
+        String extension = uri.getExtension();
 
         if (extension.equals("ico")) {
             return "image/apng";
@@ -73,6 +71,6 @@ public class HttpRequest {
     }
 
     public String getPath() {
-        return path;
+        return uri.getPath();
     }
 }

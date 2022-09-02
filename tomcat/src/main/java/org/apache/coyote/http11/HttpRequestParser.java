@@ -10,23 +10,19 @@ import java.util.StringTokenizer;
 
 public class HttpRequestParser {
 
-    private static final String DEFAULT_PATH = "/index";
     private final HttpMethod httpMethod;
-    private final Map<String, String> queryParams;
+    private final HttpURI uri;
     private final Map<String, String> httpRequestHeaders;
     private final Map<String, String> bodyParams;
     private final HttpCookie httpCookie;
-    private String path;
 
     private HttpRequestParser(HttpMethod httpMethod, String uri, Map<String, String> httpRequestHeaders,
         Map<String, String> cookies, Map<String, String> bodyParams) {
         this.httpMethod = httpMethod;
-        this.queryParams = new HashMap<>();
-        this.path = uri;
-        formatPath();
+        this.uri = HttpURI.from(uri);
         this.httpRequestHeaders = httpRequestHeaders;
         this.httpCookie = HttpCookie.of(cookies);
-        this.bodyParams = new HashMap<>();
+        this.bodyParams = bodyParams;
     }
 
     public static HttpRequestParser from(InputStream inputStream) throws IOException {
@@ -72,33 +68,9 @@ public class HttpRequestParser {
         return new HttpRequestParser(httpMethod, uri, httpRequestHeaders, cookies, bodyParams);
     }
 
-    private void formatPath() {
-        if (path.contains("?")) {
-            separateQueryParams(path);
-        }
 
-        if (path.equals("/")) {
-            path = DEFAULT_PATH;
-        }
-
-        if (!path.contains(".")) {
-            path = path + ".html";
-        }
-    }
-
-    private void separateQueryParams(String uri) {
-        int index = uri.indexOf("?");
-        path = uri.substring(0, index);
-
-        String queryString = uri.substring(index + 1);
-        String[] queries = queryString.split("&");
-        for (String query : queries) {
-            String[] queryEntry = query.split("=");
-            queryParams.put(queryEntry[0], queryEntry[1]);
-        }
-    }
 
     public HttpRequest toHttpRequest() {
-        return new HttpRequest(httpMethod, path, queryParams, httpRequestHeaders, bodyParams, httpCookie);
+        return new HttpRequest(httpMethod, uri, httpRequestHeaders, bodyParams, httpCookie);
     }
 }

@@ -72,7 +72,7 @@ public class ControllerMapper {
     }
 
     private static URL findResource(HttpRequest httpRequest) {
-        return Thread.currentThread().getContextClassLoader().getResource(httpRequest.getPath());
+        return Thread.currentThread().getContextClassLoader().getResource("static" + httpRequest.getPath());
     }
 
     private static String loadFileAsString(URL resource) {

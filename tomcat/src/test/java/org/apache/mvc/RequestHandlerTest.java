@@ -65,7 +65,7 @@ class RequestHandlerTest {
     }
 
     @Test
-    void throwsExceptionWithInvalidParameter() {
+    void throwsExceptionWithInvalidParameterLength() {
         // given & when
         Controller controller = new Controller() {
             public ResponseEntity myMethod(HttpRequest httpRequest, int a) {
@@ -77,6 +77,22 @@ class RequestHandlerTest {
         assertThatThrownBy(() -> new RequestHandler(
                 controller,
                 controller.getClass().getMethod("myMethod", HttpRequest.class, int.class)
+        )).isInstanceOf(TempException.class);
+    }
+
+    @Test
+    void throwsExceptionWithInvalidParameterType() {
+        // given & when
+        Controller controller = new Controller() {
+            public ResponseEntity myMethod(int invaliParamter) {
+                return new ResponseEntity(HttpStatus.OK, "hello");
+            }
+        };
+
+        // then
+        assertThatThrownBy(() -> new RequestHandler(
+                controller,
+                controller.getClass().getMethod("myMethod", int.class)
         )).isInstanceOf(TempException.class);
     }
 

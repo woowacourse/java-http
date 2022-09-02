@@ -17,7 +17,6 @@ public enum ContentType {
         this.fileExtension = fileExtension;
     }
 
-
     public static ContentType from(String fileExtension) {
         return Arrays.stream(values()).filter(it -> it.isSameFileExtension(fileExtension))
                 .findFirst()

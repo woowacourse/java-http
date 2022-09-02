@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package nextstep.jwp.http;
 
 import java.util.Arrays;
 import java.util.Objects;

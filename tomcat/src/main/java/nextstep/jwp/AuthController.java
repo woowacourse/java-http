@@ -1,9 +1,5 @@
 package nextstep.jwp;
 
-import java.util.List;
-import java.util.Map;
-
-import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +14,13 @@ public class AuthController {
     private AuthController() {
     }
 
-    public static void login(HttpRequest request, String account, String password) {
+    public static void login(HttpRequest request) {
+        final String account = request.getQueryValue("account");
+        final String password = request.getQueryValue("password");
+
         User user = InMemoryUserRepository.findByAccount(account)
             .orElseThrow(() -> new IllegalArgumentException("Account Not Found"));
+
         if (!user.checkPassword(password)) {
             throw new IllegalArgumentException("Password Not Matched");
         }

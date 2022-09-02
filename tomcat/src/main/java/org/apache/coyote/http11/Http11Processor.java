@@ -9,8 +9,6 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -40,23 +38,6 @@ public class Http11Processor implements Runnable, Processor {
         process(connection);
     }
 
-    public Map<String, String> getQueryString(Http11Request request) {
-        String url = request.getUrl();
-        int queryIndex = url.indexOf("?");
-        if (queryIndex == -1) {
-            return Collections.emptyMap();
-        }
-
-        Map<String, String> queries = new HashMap<>();
-        String rawQuery = url.substring(queryIndex + 1);
-        for (String query : rawQuery.split("&")) {
-            String[] temp = query.split("=");
-            queries.put(temp[0].toLowerCase(), temp[1].toLowerCase());
-        }
-
-        return queries;
-    }
-
     public void get(Http11Request request, OutputStream outputStream) throws IOException {
         Http11Response response = makeResponse(request);
 
@@ -75,17 +56,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Http11Response generateLoginPage(Http11Request request){
-        Map<String, String> queries = getQueryString(request);
+        Map<String, String> queries = request.getQueryString();
         URL resource = getClass().getClassLoader().getResource("static/login.html" );
         Map<String, String> headers = new LinkedHashMap<>();
 
         if (queries.get("account") != null && queries.get("password") != null) {
-            Optional<User> account = InMemoryUserRepository.findByAccount(queries.get("account"));
-            account.ifPresent(ac -> {
-                if (ac.checkPassword(queries.get("password"))) {
-                    System.out.println("user : " + ac);
-                }
-            });
+            checkUserInformation(queries);
         }
 
         headers.put("Content-Type", "text/html;charset=utf-8");
@@ -97,6 +73,15 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void checkUserInformation(Map<String, String> queries) {
+        Optional<User> account = InMemoryUserRepository.findByAccount(queries.get("account"));
+        account.ifPresent(ac -> {
+            if (ac.checkPassword(queries.get("password"))) {
+                System.out.println("user : " + ac);
+            }
+        });
     }
 
     private Http11Response generateDefaultResponse() {
@@ -113,9 +98,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private Http11Response generateResourceResponse(Http11Request request) {
         String url = request.getUrl();
-        URL resource = getClass().getClassLoader().getResource("static" + url);
+        URL resource = getClass().getClassLoader()
+                .getResource("static" + url);
         String extension = url.substring(url.lastIndexOf(".")+1);
-        String contentType = generateContentType(extension);
+        String contentType = HttpContent.extensionToContentType(extension);
+
         try {
             Map<String, String> headers = new LinkedHashMap<>();
             headers.put("Content-Type", contentType + ";charset=utf-8");
@@ -127,20 +114,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private String generateContentType(String extension) {
-        if (extension.equals("css")) {
-            return "text/css";
-        }
-        if (extension.equals("js")) {
-            return "application/javascript";
-        }
-        if (extension.equals("html")) {
-            return "text/html";
-        }
-
-        return "text/html";
     }
 
     @Override
@@ -161,7 +134,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Http11Request makeRequest(BufferedReader bufferedReader) throws IOException {
-        String[] rawStart = bufferedReader.readLine().split(" ");
+        String[] rawStart = bufferedReader.readLine()
+                .split(" ");
         String method = rawStart[0];
         String url = rawStart[1];
 
@@ -176,16 +150,19 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         StringBuilder bodyBuilder = new StringBuilder();
-//        while (true) {
-//            String data = bufferedReader.readLine();
-//            if (data == null) {
-//                break;
-//            }
-//            bodyBuilder.append(data);
-//            bodyBuilder.append("\r\n");
-//        }
-//
-//        String body = bodyBuilder.toString();
+        while (true) {
+            if (!bufferedReader.ready()) {
+                break;
+            }
+            String data = bufferedReader.readLine();
+            if (data == null) {
+                break;
+            }
+            bodyBuilder.append(data);
+            bodyBuilder.append("\r\n");
+        }
+
+        String body = bodyBuilder.toString();
 
         return new Http11Request(method, url, headers, "");
     }

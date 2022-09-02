@@ -41,4 +41,9 @@
 - [ ] 커스텀 예외 코드를 만든다. 
 - [ ] 더 다양한 Content Type을 지원한다. 
   - [X] svg
-- [ ] RFC2616을 참고해 이름을 리팩토링한다. 
+- [ ] RFC2616을 참고해 이름을 리팩토링한다.
+
+## 요청 처리 과정
+
+![IMG_6336](https://user-images.githubusercontent.com/45311765/188080053-6a203f41-3def-4989-a236-b9976ce0f4a7.jpg)
+

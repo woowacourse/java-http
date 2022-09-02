@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.io.IOException;
 import java.net.Socket;
-import nextstep.jwp.controller.ControllerMapper;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -30,7 +29,8 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var httpRequest = HttpRequest.from(inputStream);
-            final var httpResponse = new ControllerMapper().process(httpRequest);
+            final var mappedController = RequestMapper.mapToController(httpRequest);
+            final var httpResponse = mappedController.doService(httpRequest);
 
             outputStream.write(httpResponse.toString().getBytes());
             outputStream.flush();

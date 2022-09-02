@@ -4,21 +4,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.handler.LoginHandler;
-import nextstep.jwp.model.User;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -42,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final HttpRequest httpRequest = createHttpRequest(bufferedReader);
-            final HttpResponse httpResponse = createResponse(httpRequest);
+            final HttpResponse httpResponse = createHttpResponse(httpRequest);
 
             outputStream.write(httpResponse.toResponse());
             outputStream.flush();
@@ -64,38 +58,10 @@ public class Http11Processor implements Runnable, Processor {
         return new HttpRequest(requestLine, requestHeader);
     }
 
-    private HttpResponse createResponse(HttpRequest httpRequest) throws IOException {
+    private HttpResponse createHttpResponse(HttpRequest httpRequest) throws IOException {
         if (FileExtension.hasFileExtension(httpRequest.getUri())) {
-            Path filePath = findFilePath(httpRequest.getUri());
-            String content = new String(Files.readAllBytes(filePath));
-
-            String contentType = FileExtension.findContentType(httpRequest.getUri());
-            return new HttpResponse(HttpStatus.OK, contentType, content);
+            return FrontController.staticFileRequest(httpRequest);
         }
-        if (httpRequest.getUri().equals("/")) {
-            String contentType = FileExtension.HTML.getContentType();
-            return new HttpResponse(HttpStatus.OK, contentType, "Hello world!");
-        }
-        if (httpRequest.getUri().startsWith("/login")) {
-            Map<String, String> queryValues = UriParser.parseUri(httpRequest.getUri());
-            LoginHandler loginHandler = new LoginHandler();
-            User user = loginHandler.login(queryValues);
-
-            Path filePath = findFilePath("/login.html");
-            String content = new String(Files.readAllBytes(filePath));
-            String contentType = FileExtension.HTML.getContentType();
-            return new HttpResponse(HttpStatus.OK, contentType, content);
-        }
-        String contentType = FileExtension.HTML.getContentType();
-        return new HttpResponse(HttpStatus.OK, contentType, "");
-    }
-
-    private Path findFilePath(String fileName) {
-        try {
-            return Path.of(Objects.requireNonNull(
-                    this.getClass().getClassLoader().getResource("static" + fileName)).getPath());
-        } catch (NullPointerException e) {
-            throw new NoSuchElementException(fileName + " 파일이 존재하지 않습니다.");
-        }
+        return FrontController.nonStaticFileRequest(httpRequest);
     }
 }

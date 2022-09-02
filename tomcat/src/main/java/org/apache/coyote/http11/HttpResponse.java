@@ -21,6 +21,9 @@ public class HttpResponse {
     }
 
     public byte[] toResponse() {
+        if (statusCode.isNotFound()) {
+            return (protocolVersion + " " + statusCode.toResponseMessage()).getBytes();
+        }
         return String.join("\r\n",
                 protocolVersion + " " + statusCode.toResponseMessage(),
                 "Content-Type: " + contentType + ";charset=utf-8",

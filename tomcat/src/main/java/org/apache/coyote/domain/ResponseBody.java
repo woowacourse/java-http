@@ -9,6 +9,10 @@ import java.nio.file.Paths;
 
 public class ResponseBody {
 
+    private static final String HOME_URI = "/";
+    private static final String FILE_PATH_PREFIX = "static";
+    private static final String HOME_MESSAGE = "Hello world!";
+
     private final String value;
 
     private ResponseBody(String value) {
@@ -20,10 +24,10 @@ public class ResponseBody {
     }
 
     private static String getResponseBody(String uriPath) throws URISyntaxException, IOException {
-        if (uriPath.equals("/")) {
-            return "Hello world!";
+        if (uriPath.equals(HOME_URI)) {
+            return HOME_MESSAGE;
         }
-        String fileName = "static" + uriPath;
+        String fileName = FILE_PATH_PREFIX + uriPath;
         final URL resource = ResponseBody.class.getClassLoader().getResource(fileName);
         final File file = Paths.get(resource.toURI()).toFile();
         return new String(Files.readAllBytes(file.toPath()));

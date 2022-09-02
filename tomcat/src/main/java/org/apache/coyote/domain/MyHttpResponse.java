@@ -12,8 +12,8 @@ public class MyHttpResponse {
     }
 
     public static MyHttpResponse from(FilePath filePath) throws URISyntaxException, IOException {
-        ContentType contentType = ContentType.find(filePath.getValue());
-        ResponseBody responseBody = ResponseBody.from(filePath.getValue());
+        final ContentType contentType = ContentType.find(filePath.getValue());
+        final ResponseBody responseBody = ResponseBody.from(filePath.getValue());
         return new MyHttpResponse(generateResponse(contentType, responseBody));
     }
 

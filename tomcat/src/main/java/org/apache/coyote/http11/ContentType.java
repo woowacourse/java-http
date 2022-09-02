@@ -3,36 +3,22 @@ package org.apache.coyote.http11;
 import java.util.Arrays;
 
 public enum ContentType {
-    HTML("text/html") {
-        @Override
-        boolean match(String uri) {
-            return uri.endsWith(".html");
-        }
-    },
-    CSS("text/css") {
-        @Override
-        boolean match(String uri) {
-            return uri.endsWith(".css");
-        }
-    },
-    JAVASCRIPT("application/js") {
-        @Override
-        boolean match(String uri) {
-            return uri.endsWith(".js");
-        }
-    };
+
+    HTML("text/html", ".html"),
+    CSS("text/css", ".css"),
+    JAVASCRIPT("application/js", ".js");
 
     private final String value;
+    private final String fileNameExtension;
 
-    ContentType(String value) {
+    ContentType(String value, String fileNameExtension) {
         this.value = value;
+        this.fileNameExtension = fileNameExtension;
     }
-
-    abstract boolean match(String uri);
 
     public static ContentType from(String uri) {
         return Arrays.stream(values())
-                .filter(contentType -> contentType.match(uri))
+                .filter(contentType -> uri.endsWith(contentType.fileNameExtension))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException(uri + "에 해당하는 contentType은 없습니다."));
     }

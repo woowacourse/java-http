@@ -48,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.write(makeHttpMessage(response).getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
+            throw new IllegalArgumentException("요청을 정상적으로 처리하지 못했습니다.");
         }
     }
 

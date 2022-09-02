@@ -9,7 +9,7 @@ public class Request {
     String requestLine;
     String headers;
     String body;
-    
+
     public Request(String requestLine, String headers) {
         this.requestLine = requestLine;
         this.headers = headers;
@@ -39,10 +39,6 @@ public class Request {
     }
 
     public String getUri() {
-        String uri = requestLine.split(" ")[1];
-        if (uri.startsWith("H")) {
-            return "";
-        }
-        return uri;
+        return requestLine.split(" ")[1];
     }
 }

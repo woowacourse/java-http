@@ -88,6 +88,9 @@ public class Http11Processor implements Runnable, Processor {
         if (uri.equals("/login")) {
             return getResponseWithFileName("/login.html");
         }
+        if (uri.equals("/")) {
+            return Response.newInstanceWithResponseBody(HttpStatus.OK, ContentType.HTML, "Hello world!");
+        }
         return new Response();
     }
 

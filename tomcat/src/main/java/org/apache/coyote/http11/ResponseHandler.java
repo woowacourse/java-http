@@ -8,7 +8,7 @@ import java.util.Optional;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import nextstep.jwp.response.UserRequest;
+import nextstep.jwp.request.UserRequest;
 
 import org.apache.coyote.http11.exception.UserNotFoundException;
 import org.slf4j.Logger;

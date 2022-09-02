@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.response.UserRequest;
+import nextstep.jwp.request.UserRequest;
 import org.apache.coyote.http11.exception.QueryParamNotFoundException;
 
 public class QueryParam {

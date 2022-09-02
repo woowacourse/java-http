@@ -1,4 +1,4 @@
-package nextstep.jwp.response;
+package nextstep.jwp.request;
 
 public class UserRequest {
 

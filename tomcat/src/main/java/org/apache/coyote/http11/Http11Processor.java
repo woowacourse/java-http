@@ -6,6 +6,7 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.FaviconNotFoundException;
 import org.apache.coyote.http11.exception.InvalidHttpRequestStartLineException;
+import org.apache.coyote.http11.util.ResourceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;

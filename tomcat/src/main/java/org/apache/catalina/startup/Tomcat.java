@@ -14,7 +14,7 @@ public class Tomcat {
 
     private final List<Controller> controllers;
 
-    public Tomcat() {
+    private Tomcat() {
         this(List.of());
     }
 

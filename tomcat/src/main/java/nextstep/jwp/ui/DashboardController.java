@@ -14,11 +14,6 @@ public class DashboardController implements Controller {
         return new ResponseEntity(HttpStatus.OK, "hello root");
     }
 
-    @RequestMapping(value = "/index.html", method = RequestMethod.GET)
-    public ResponseEntity handleIndex(HttpRequest request) {
-        return new ResponseEntity(HttpStatus.OK, "hello index");
-    }
-
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public ResponseEntity handleLogin(HttpRequest request) {
         return new ResponseEntity(HttpStatus.OK, "hello login");

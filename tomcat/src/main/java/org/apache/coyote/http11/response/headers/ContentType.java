@@ -3,8 +3,8 @@ package org.apache.coyote.http11.response.headers;
 import java.util.Arrays;
 
 public enum ContentType implements ResponseHeader {
-    TEXT_HTML("text/css", ".html"),
-    TEXT_CSS("text/html", ".css"),
+    TEXT_HTML("text/html", ".html"),
+    TEXT_CSS("text/css", ".css"),
     APPLICATION_JAVASCRIPT("application/javascript", ".js"),
     TEXT_PLAIN("text/plain", "");
 

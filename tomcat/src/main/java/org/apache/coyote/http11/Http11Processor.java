@@ -38,8 +38,8 @@ public class Http11Processor implements Runnable, Processor {
             ResponseEntity responseEntity = controllerMapper.mapToHandle(request);
             HttpResponse response = HttpResponse.from(request, responseEntity);
 
-//            outputStream.write(response.getAsString().getBytes());
-//            outputStream.flush();
+            outputStream.write(response.getAsString().getBytes());
+            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

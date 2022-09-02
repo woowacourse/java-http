@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 public class RequestPath {
 
-    private static final Pattern PATH_PATTERN = Pattern.compile("(?<path>/[a-zA-Z0-9\\-.]*)[?]?");
+    private static final Pattern PATH_PATTERN = Pattern.compile("(?<path>/[a-zA-Z0-9\\-./]*)[?]?");
     private static final Pattern QUERY_PARAMETER_PATTERN
             = Pattern.compile("((?<field>[a-zA-Z0-9\\-]+)=(?<value>[a-zA-Z0-9\\-]+))&?");
 

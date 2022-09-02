@@ -2,8 +2,6 @@ package org.apache.coyote.http11;
 
 import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
@@ -26,7 +24,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String WELCOME_MESSAGE = "Hello world!";
 
     private final Socket connection;
 
@@ -51,9 +48,7 @@ public class Http11Processor implements Runnable, Processor {
             final int contentLength = httpRequest.getContentLength();
             final Map<String, String> requestBody = getRequestBody(bufferedReader, contentLength);
 
-            HttpResponse httpResponse = HttpResponse.fromStatusCode(200)
-                    .setResponseBody(getResponseBody(httpRequest.getPath()))
-                    .setContentType(httpRequest.getContentType());
+            HttpResponse httpResponse = HttpResponse.fromHttpRequest(httpRequest);
 
             if (httpRequest.isRegister()) {
                 httpResponse = register(requestBody, httpResponse);
@@ -101,30 +96,6 @@ public class Http11Processor implements Runnable, Processor {
                 .collect(Collectors.toMap(it -> it[0], it -> it[1], (a, b) -> b));
     }
 
-    private String getResponseBody(final String path) throws IOException {
-        String responseBody = WELCOME_MESSAGE;
-
-        if (!path.equals("/")) {
-            String resourcePath = "static/" + path;
-            if (!resourcePath.contains(".")) {
-                resourcePath += ".html";
-            }
-
-            final String resource = getClass().getClassLoader()
-                    .getResource(resourcePath)
-                    .getPath();
-            final File file = new File(resource);
-            final BufferedReader fileReader = new BufferedReader(new FileReader(file));
-            responseBody = fileReader.lines()
-                    .collect(Collectors.joining("\n"));
-            responseBody += "\n";
-
-            fileReader.close();
-        }
-
-        return responseBody;
-    }
-
     private HttpResponse login(final Map<String, String> requestBody, final HttpResponse httpResponse) {
         final Optional<User> possibleUser = InMemoryUserRepository.findByAccount(requestBody.get("account"));
         if (possibleUser.isEmpty()) {
@@ -141,7 +112,7 @@ public class Http11Processor implements Runnable, Processor {
                 .setSessionId(sessionId);
     }
 
-    private HttpResponse register(final Map<String, String> requestBody, HttpResponse httpResponse) {
+    private HttpResponse register(final Map<String, String> requestBody, final HttpResponse httpResponse) {
         final User user = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
         InMemoryUserRepository.save(user);
 
@@ -150,9 +121,8 @@ public class Http11Processor implements Runnable, Processor {
         session.setAttribute("user", user);
         new SessionManager().add(session);
 
-        httpResponse = httpResponse.changeStatusCode(302)
+        return httpResponse.changeStatusCode(302)
                 .setLocationAsHome()
                 .setSessionId(sessionId);
-        return httpResponse;
     }
 }

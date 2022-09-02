@@ -37,17 +37,20 @@ public class Http11Processor implements Runnable, Processor {
             HttpMethod httpMethod = httpParser.getHttpMethod();
             String httpUrl = httpParser.getHttpUrl();
 
-            String responseBody = "";
+            String response = "";
             if (httpUrl.equals("/")) {
-                responseBody = "Hello world!";
+                String responseBody = "Hello world!";
+                response = toResponse(responseBody, "html");
             }
 
-            if (httpMethod.equals(HttpMethod.GET) && httpUrl.endsWith(".html")) {
+            if (!httpUrl.equals("/") && httpMethod.equals(HttpMethod.GET)) {
                 File file = getFile(httpUrl);
-                responseBody = toResponseBody(file);
+                String responseBody = toResponseBody(file);
+                FileType fileType = FileType.from(httpUrl);
+                response = toResponse(responseBody, fileType.getType());
             }
 
-            outputStream.write(toResponse(responseBody).getBytes());
+            outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
@@ -55,9 +58,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private File getFile(String httpUrl) throws URISyntaxException {
-        String fileName = httpUrl.substring(1);
         ClassLoader classLoader = getClass().getClassLoader();
-        URL resource = classLoader.getResource("static/" + fileName);
+        URL resource = classLoader.getResource("static" + httpUrl);
 
         return Paths.get(resource.toURI()).toFile();
     }
@@ -73,10 +75,10 @@ public class Http11Processor implements Runnable, Processor {
         return stringBuilder.toString();
     }
 
-    private String toResponse(String responseBody) {
+    private String toResponse(String responseBody, String type) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/" + type + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

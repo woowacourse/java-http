@@ -87,7 +87,7 @@ class Http11URLPathTest {
         final Http11URLPath http11URLPath = Http11URLPath.of(stubSocket.getInputStream());
 
         // when
-        final String actual = http11URLPath.value();
+        final String actual = http11URLPath.getPath();
 
         // then
         assertThat(actual).isEqualTo("/login.html");

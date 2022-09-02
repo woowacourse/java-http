@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -14,9 +13,6 @@ import java.util.Objects;
 public class HttP11StaticFile {
 
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
-    private static final String DEFAULT_URL = "/";
-    private static final String SPACE_DELIMITER = " ";
-    private static final int URL_INDEX = 1;
     private static final String PATH_FROM_RESOURCE = "static";
 
     private final Http11URLPath http11URLPath;
@@ -27,10 +23,9 @@ public class HttP11StaticFile {
         this.content = content;
     }
 
-    public static HttP11StaticFile of(final InputStream inputStream) throws IOException, URISyntaxException {
-        final Http11URLPath http11URLPath = Http11URLPath.of(inputStream);
-        final String body = parseContent(http11URLPath);
-        return new HttP11StaticFile(http11URLPath, body);
+    public static HttP11StaticFile of(final Http11URLPath urlPath) throws IOException, URISyntaxException {
+        final String body = parseContent(urlPath);
+        return new HttP11StaticFile(urlPath, body);
     }
 
     private static String parseContent(final Http11URLPath http11URLPath) throws IOException, URISyntaxException {
@@ -43,7 +38,7 @@ public class HttP11StaticFile {
     }
 
     private static Path getStaticFilePath(final Http11URLPath http11URLPath) throws URISyntaxException {
-        String filePathString = PATH_FROM_RESOURCE + http11URLPath.value();
+        String filePathString = PATH_FROM_RESOURCE + http11URLPath.getPath();
         final URL fileUrl = HttP11StaticFile.class.getClassLoader().getResource(filePathString);
         final URI uri = Objects.requireNonNull(fileUrl).toURI();
         return Paths.get(uri);

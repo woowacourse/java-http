@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class Http11URLPath {
 
@@ -15,41 +16,68 @@ public class Http11URLPath {
     private static final String DEFAULT_URL = "/";
     private static final int URL_INDEX = 1;
 
-    private final String url;
+    private final String path;
+    private final Http11QueryParams params;
 
-    private Http11URLPath(final String url) {
-        this.url = url;
+    private Http11URLPath(final String path, final Http11QueryParams params) {
+        this.path = path;
+        this.params = params;
     }
 
     public static Http11URLPath of(final InputStream inputStream) throws IOException {
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        final String path = parsePath(bufferedReader);
-        return new Http11URLPath(path);
+        final String parsedUrl = parseUrl(inputStream);
+        final Http11QueryParams params = parseQueryParams(parsedUrl);
+        final String path = parsePath(parsedUrl);
+        return new Http11URLPath(path, params);
     }
 
-    private static String parsePath(final BufferedReader bufferedReader) throws IOException {
+    private static String parseUrl(final InputStream inputStream) throws IOException {
+        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         final String firstLine = bufferedReader.readLine();
-        final String parsedUrl = firstLine.split(SPACE_DELIMITER)[URL_INDEX];
+        return firstLine.split(SPACE_DELIMITER)[URL_INDEX];
+    }
+
+    private static Http11QueryParams parseQueryParams(final String parsedUrl) {
+        if (!parsedUrl.contains("?")) {
+            return null;
+        }
+        final String urlQueryParams = parsedUrl.split("\\?")[1];
+        return Http11QueryParams.of(urlQueryParams);
+    }
+
+    private static String parsePath(final String parsedUrl) {
         final String parsedPath = parsedUrl.split("\\?")[0];
-        if (!parsedPath.contains(".")) {
+        if (!parsedPath.contains(".") && !parsedPath.equals(DEFAULT_URL)) {
             return parsedPath + ".html";
         }
         return parsedPath;
     }
 
     public boolean isDefault() {
-        return DEFAULT_URL.equals(url);
+        return DEFAULT_URL.equals(path);
     }
 
     public String getMediaType() throws IOException {
         if (this.isDefault()) {
             return DEFAULT_MEDIA_TYPE;
         }
-        final Path path = new File(url).toPath();
+        final Path path = new File(this.path).toPath();
         return Files.probeContentType(path);
     }
 
-    public String value() {
-        return url;
+    public String getPath() {
+        return path;
+    }
+
+    public boolean hasPath(final String path) {
+        return this.path.equals(path);
+    }
+
+    public String findParamByKey(final String key) {
+        return params.get(key);
+    }
+
+    public boolean hasParams() {
+        return Objects.nonNull(params);
     }
 }

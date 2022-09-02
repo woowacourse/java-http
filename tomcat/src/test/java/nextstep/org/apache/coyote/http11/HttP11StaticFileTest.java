@@ -8,6 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.coyote.http11.HttP11StaticFile;
+import org.apache.coyote.http11.Http11URLPath;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -33,7 +34,8 @@ class HttP11StaticFileTest {
         stubSocket = new StubSocket(httpRequest);
 
         // when
-        final HttP11StaticFile staticFile = HttP11StaticFile.of(stubSocket.getInputStream());
+        final Http11URLPath urlPath = Http11URLPath.of(stubSocket.getInputStream());
+        final HttP11StaticFile staticFile = HttP11StaticFile.of(urlPath);
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
@@ -52,7 +54,8 @@ class HttP11StaticFileTest {
                 "",
                 "");
         stubSocket = new StubSocket(httpCssRequest);
-        final HttP11StaticFile cssFile = HttP11StaticFile.of(stubSocket.getInputStream());
+        final Http11URLPath urlPath = Http11URLPath.of(stubSocket.getInputStream());
+        final HttP11StaticFile cssFile = HttP11StaticFile.of(urlPath);
 
         // when
         final String actual = cssFile.getContentType();

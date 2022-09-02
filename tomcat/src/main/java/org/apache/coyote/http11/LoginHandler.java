@@ -1,0 +1,33 @@
+package org.apache.coyote.http11;
+
+import java.io.IOException;
+import java.util.Map;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.NotFoundException;
+import nextstep.jwp.model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class LoginHandler implements Handler {
+
+    private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
+
+    @Override
+    public String handle(final HttpRequest httpRequest) throws IOException {
+        inquireUser(httpRequest.getRequestTarget());
+        String uri = httpRequest.getRequestTarget().getUri();
+        String responseBody = createResponseBody(uri + ".html");
+        return createResponseMessage(ContentType.from(uri), responseBody);
+    }
+
+    private void inquireUser(final RequestTarget requestTarget) {
+        Map<String, String> queryParameters = requestTarget.getQueryParameters();
+        String account = queryParameters.get("account");
+        String password = queryParameters.get("password");
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new NotFoundException("User not found."));
+        if (user.checkPassword(password)) {
+            log.info("User : {}", user);
+        }
+    }
+}

@@ -36,16 +36,6 @@ public class HttpRequestHeader {
         return requestUrl;
     }
 
-    private String addExtension(final String requestUrl) {
-        final int index = requestUrl.indexOf(QUERY_START_CHARACTER);
-        if (index != -1) {
-            final String path = requestUrl.substring(0, index);
-            final String queryString = requestUrl.substring(index + 1);
-            return path + HTML_EXTENSION + QUERY_START_CHARACTER + queryString;
-        }
-        return requestUrl + HTML_EXTENSION;
-    }
-
     private String makeDefaultRequestUrl(String requestUrl) {
         if (requestUrl.equals(ROOT)) {
             return DEFAULT_PAGE_URL;
@@ -54,5 +44,15 @@ public class HttpRequestHeader {
             return addExtension(requestUrl);
         }
         return requestUrl;
+    }
+
+    private String addExtension(final String requestUrl) {
+        final int index = requestUrl.indexOf(QUERY_START_CHARACTER);
+        if (index != -1) {
+            final String path = requestUrl.substring(0, index);
+            final String queryString = requestUrl.substring(index + 1);
+            return path + HTML_EXTENSION + QUERY_START_CHARACTER + queryString;
+        }
+        return requestUrl + HTML_EXTENSION;
     }
 }

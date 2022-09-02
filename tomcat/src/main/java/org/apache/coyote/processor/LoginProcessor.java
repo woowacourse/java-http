@@ -11,11 +11,16 @@ public class LoginProcessor {
     private static final String QUERY_START_CHARACTER = "?";
 
     private static final Logger log = LoggerFactory.getLogger(LoginProcessor.class);
+    private static final int INVALID_INDEX = -1;
 
     public static void login(final String requestUrl) {
         final int index = requestUrl.indexOf(QUERY_START_CHARACTER);
-        String queryString = requestUrl.substring(index + 1);
 
+        if (index == INVALID_INDEX) {
+            return;
+        }
+
+        String queryString = requestUrl.substring(index + 1);
         final QueryProcessor queryProcessor = QueryProcessor.from(queryString);
         final String account = queryProcessor.getParameter("account");
 

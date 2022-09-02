@@ -25,7 +25,6 @@ public class LoginUriHandler extends DefaultUriHandler {
 
         final String responseBody = getResponseBody("static/login.html");
         final String contentType = ContentType.HTML.getValue();
-        System.out.println(user);
 
         return new UriResponse(responseBody, contentType);
     }

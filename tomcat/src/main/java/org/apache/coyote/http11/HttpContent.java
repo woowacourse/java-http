@@ -23,10 +23,6 @@ public enum HttpContent {
                 .orElse("text/plain");
     }
 
-    public String getExtension() {
-        return extension;
-    }
-
     public String getContentType() {
         return contentType;
     }

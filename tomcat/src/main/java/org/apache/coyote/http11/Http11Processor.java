@@ -133,7 +133,6 @@ public class Http11Processor implements Runnable, Processor {
                 OutputStream outputStream = connection.getOutputStream();
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
         ) {
-
             Http11Request request = makeRequest(bufferedReader);
             get(request, outputStream);
         } catch (IOException e) {
@@ -148,7 +147,6 @@ public class Http11Processor implements Runnable, Processor {
         String url = rawStart[URL_SEQUENCE];
 
         Map<String, String> headers = parseHeaders(bufferedReader);
-
         String body = parseBody(bufferedReader);
 
         return new Http11Request(method, url, headers, body);

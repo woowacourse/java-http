@@ -19,16 +19,21 @@ public class ResourceLocator {
         this.prefix = prefix;
     }
 
-    public Resource locate(final String path) {
-        if ("/".equals(path)) {
-            return new Resource(MimeType.of("html"), "Hello world!");
+    public Resource locate(String path) {
+        Objects.requireNonNull(path);
+        log.debug("request path = {}", path);
+        if (path.equals("/")) {
+            return new Resource(MimeType.HTML, "Hello world!");
+        }
+
+        if (path.equals("/login")) {
+            path += ".html";
         }
 
         try {
             URL url = getClass().getResource(prefix + path);
             Path filePath = Path.of(Objects.requireNonNull(url).getPath());
             String extension = path.substring(path.lastIndexOf(".") + 1);
-            log.debug("request path = {}", path);
             return new Resource(MimeType.of(extension), Files.readString(filePath));
         } catch (IOException | NullPointerException e) {
             throw new IllegalArgumentException("파일을 찾을 수 없습니다. path = " + prefix + path);

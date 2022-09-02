@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Map;
+
 public class HttpRequest {
 
     private final StartLine startLine;
@@ -12,5 +14,9 @@ public class HttpRequest {
 
     public String getPathString() {
         return startLine.getPath();
+    }
+
+    public Map<String, String> getParams() {
+        return startLine.getParams();
     }
 }

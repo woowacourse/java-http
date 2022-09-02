@@ -9,6 +9,8 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import nextstep.jwp.LoginController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpHeaders;
@@ -45,6 +47,15 @@ public class Http11Processor implements Runnable, Processor {
             HttpHeaders headers = parseHeaders(br);
 
             HttpRequest httpRequest = new HttpRequest(startLine, headers);
+
+            if (httpRequest.getPathString().equals("/login")) {
+                LoginController loginController = new LoginController();
+                Map<String, String> params = httpRequest.getParams();
+
+                loginController.login(params);
+            }
+
+
             HttpRequestHandler httpRequestHandler = new HttpRequestHandler(new ResourceLocator("/static"));
             HttpResponse httpResponse = httpRequestHandler.process(httpRequest);
             out.write(httpResponse.getBytes());

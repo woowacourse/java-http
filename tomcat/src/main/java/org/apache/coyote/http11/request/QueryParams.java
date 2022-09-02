@@ -58,4 +58,8 @@ public class QueryParams {
     public int size() {
         return value.size();
     }
+
+    public Map<String, String> getParams() {
+        return value;
+    }
 }

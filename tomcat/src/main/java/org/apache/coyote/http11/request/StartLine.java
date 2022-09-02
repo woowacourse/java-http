@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.util.List;
+import java.util.Map;
 
 public class StartLine {
 
@@ -48,5 +49,9 @@ public class StartLine {
 
     public Protocol getProtocol() {
         return protocol;
+    }
+
+    public Map<String, String> getParams() {
+        return requestUrl.getParams();
     }
 }

@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Map;
+
 public class RequestUrl {
 
     private final String path;
@@ -28,5 +30,9 @@ public class RequestUrl {
 
     public QueryParams getQueryParams() {
         return queryParams;
+    }
+
+    public Map<String, String> getParams() {
+        return queryParams.getParams();
     }
 }

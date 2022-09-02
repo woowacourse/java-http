@@ -5,8 +5,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.AuthenticationException;
 import nextstep.jwp.exception.UserNotFoundException;
@@ -23,7 +21,7 @@ public class ResponseProcessor {
     public ResponseProcessor(String uri) throws URISyntaxException, IOException {
         this.path = new Path(uri);
         this.queryParameters = new QueryParameters(uri);
-        responseBody = processResponseBody();
+        this.responseBody = processResponseBody();
     }
 
     public String getResponse() {

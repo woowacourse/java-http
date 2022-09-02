@@ -31,6 +31,10 @@ public class HttpResponse {
         );
     }
 
+    public void setSessionId(final String sessionId) {
+        responseHeaders.add("Set-Cookie", "JSESSIONID=" + sessionId);
+    }
+
     @Override
     public String toString() {
         return String.join("\r\n",

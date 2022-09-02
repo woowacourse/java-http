@@ -26,6 +26,10 @@ public class ResponseHeaders {
         return new ResponseHeaders(headers);
     }
 
+    public void add(final String key, final String value) {
+        this.value.put(key, value);
+    }
+
     @Override
     public String toString() {
         return value.entrySet()

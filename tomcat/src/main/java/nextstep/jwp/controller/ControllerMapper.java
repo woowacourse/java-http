@@ -42,7 +42,10 @@ public class ControllerMapper {
     private HttpResponse doPost(final Controller controller, final HttpRequest httpRequest) {
         final var path = httpRequest.getPath();
         if (path.equals("/login")) {
-            return controller.login(httpRequest.parseBodyQueryString());
+            return controller.login(
+                    httpRequest.getCookie().getSessionId(),
+                    httpRequest.parseBodyQueryString()
+            );
         }
         if (path.equals("/register")) {
             return controller.register(httpRequest.parseBodyQueryString());

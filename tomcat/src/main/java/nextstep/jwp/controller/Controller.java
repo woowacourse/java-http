@@ -25,10 +25,14 @@ public class Controller {
         return HttpResponse.ok(StaticResource.path("/login.html"));
     }
 
-    public HttpResponse login(final Map<String, String> parameters) {
-        try {
-            service.login(parameters);
+    public HttpResponse login(final String sessionId, final Map<String, String> parameters) {
+        if (sessionId != null) {
             return HttpResponse.found("/index.html");
+        }
+        try {
+            final var httResponse = HttpResponse.found("/index.html");
+            httResponse.setSessionId(service.login(parameters));
+            return httResponse;
         } catch (NotFoundException | AuthenticationException e) {
             return HttpResponse.found("/401.html");
         }

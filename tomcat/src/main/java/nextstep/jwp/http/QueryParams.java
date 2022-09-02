@@ -28,6 +28,11 @@ public class QueryParams {
             .orElseThrow(() -> new IllegalArgumentException("올바르지 않은 키 입니다."));
     }
 
+    public boolean contains(String key) {
+        return queryParams.stream()
+            .anyMatch(it -> it.same(key));
+    }
+
     public static QueryParams empty() {
         return new QueryParams(List.of());
     }

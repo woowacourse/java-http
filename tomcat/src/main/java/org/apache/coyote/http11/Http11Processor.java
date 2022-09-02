@@ -34,14 +34,17 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final String requestURI = bufferedReader.readLine();
-            final String resource = requestURI.split(" ")[1]
+            final String fileName = requestURI.split(" ")[1]
                     .substring(1);
-            final String requestHeader = getRequestHeader(bufferedReader);
-            final String responseBody = getResponseBody(resource);
+            final String responseBody = getResponseBody(fileName);
+            String contentType = "text/html";
+            if (fileName.endsWith(".css")) {
+                contentType = "text/css";
+            }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -53,25 +56,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponseBody(String resource) throws IOException {
-        if (resource.isEmpty()) {
+    private String getResponseBody(String fileName) throws IOException {
+        if (fileName.isEmpty()) {
             return "Hello world!";
         }
-        final Path path = Paths.get(this.getClass().getClassLoader().getResource("static/" + resource).getFile());
+        final Path path = Paths.get(this.getClass().getClassLoader().getResource("static/" + fileName).getFile());
         return new String(Files.readAllBytes(path));
     }
-
-
-    private String getRequestHeader(BufferedReader bufferedReader) throws IOException {
-        final StringBuilder sb = new StringBuilder();
-        while (true) {
-            final String line = bufferedReader.readLine();
-            if (line == null) {
-                break;
-            }
-            sb.append(line)
-                    .append("\r\n");
-        }
-        return sb.toString();
-    }
 }
+

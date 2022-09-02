@@ -1,17 +1,13 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.message.response.HttpResponse;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.mvc.ControllerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,9 +16,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final ControllerMapper controllerMapper;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection, ControllerMapper controllerMapper) {
         this.connection = connection;
+        this.controllerMapper = controllerMapper;
     }
 
     @Override
@@ -34,12 +32,17 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
+            HttpRequest request = HttpRequest.parse(inputStream);
+            ResponseEntity responseEntity = controllerMapper.mapToHandle(request);
+
+            /* TODO
+            HttpResponse.from(responseEntity)
             HttpResponse response = HttpResponse.from(reader);
 
             outputStream.write(response.getAsBytes());
             outputStream.flush();
+             */
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

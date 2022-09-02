@@ -1,5 +1,9 @@
 package org.apache.catalina.connector;
 
+import java.util.List;
+import nextstep.jwp.ui.DashboardController;
+import org.apache.mvc.Controller;
+import org.apache.mvc.ControllerMapper;
 import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,16 +20,20 @@ public class Connector implements Runnable {
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
+
     private final ServerSocket serverSocket;
     private boolean stopped;
+    private final ControllerMapper controllerMapper;
 
-    public Connector() {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT);
+    public Connector(List<Controller> controllers) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, controllers);
     }
 
-    public Connector(final int port, final int acceptCount) {
+    public Connector(final int port, final int acceptCount, List<Controller> controllers) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
+        this.controllerMapper = ControllerMapper.from(controllers);
+        log.info("web server started on port " + port);
     }
 
     private ServerSocket createServerSocket(final int port, final int acceptCount) {
@@ -65,7 +73,7 @@ public class Connector implements Runnable {
             return;
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
-        var processor = new Http11Processor(connection);
+        var processor = new Http11Processor(connection, controllerMapper);
         new Thread(processor).start();
     }
 

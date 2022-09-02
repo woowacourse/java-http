@@ -1,5 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
+import java.util.List;
+import org.apache.mvc.ControllerMapper;
 import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
@@ -13,11 +15,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
 
+    private final ControllerMapper controllerMapper = ControllerMapper.from(List.of());
+
     @Test
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final var processor = new Http11Processor(socket, controllerMapper);
 
         // when
         processor.process(socket);
@@ -44,7 +48,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        final Http11Processor processor = new Http11Processor(socket, controllerMapper);
 
         // when
         processor.process(socket);

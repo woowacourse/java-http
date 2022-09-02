@@ -61,6 +61,13 @@ public class HttpRequest {
         return index;
     }
 
+    public String getPath() {
+        return requestGeneral.getPath().getPath();
+    }
+
+    public RequestMethod getMethod() {
+        return requestGeneral.getMethod();
+    }
 
     @Override
     public String toString() {

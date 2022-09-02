@@ -125,25 +125,24 @@ public class Http11Processor implements Runnable, Processor {
         return responseBody;
     }
 
-    private HttpResponse login(final Map<String, String> requestBody, HttpResponse httpResponse) {
-        final Optional<User> possibleUser = InMemoryUserRepository.findByAccount(
-                requestBody.get("account"));
-        if (possibleUser.isPresent()) {
-            final UUID sessionId = UUID.randomUUID();
-            final HttpSession session = new Session(String.valueOf(sessionId));
-            session.setAttribute("user", possibleUser.get());
-            new SessionManager().add(session);
-
-            httpResponse = httpResponse.changeStatusCode(302)
-                    .setLocationAsHome()
-                    .setSessionId(sessionId);
+    private HttpResponse login(final Map<String, String> requestBody, final HttpResponse httpResponse) {
+        final Optional<User> possibleUser = InMemoryUserRepository.findByAccount(requestBody.get("account"));
+        if (possibleUser.isEmpty()) {
+            return httpResponse;
         }
-        return httpResponse;
+
+        final UUID sessionId = UUID.randomUUID();
+        final HttpSession session = new Session(String.valueOf(sessionId));
+        session.setAttribute("user", possibleUser.get());
+        new SessionManager().add(session);
+
+        return httpResponse.changeStatusCode(302)
+                .setLocationAsHome()
+                .setSessionId(sessionId);
     }
 
     private HttpResponse register(final Map<String, String> requestBody, HttpResponse httpResponse) {
-        final User user = new User(requestBody.get("account"), requestBody.get("password"),
-                requestBody.get("email"));
+        final User user = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
         InMemoryUserRepository.save(user);
 
         final UUID sessionId = UUID.randomUUID();

@@ -1,23 +1,18 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
-import org.apache.coyote.ContentType;
 import org.apache.coyote.FilePath;
+import org.apache.coyote.HttpRequest;
+import org.apache.coyote.MyHttpResponse;
 import org.apache.coyote.Processor;
-import org.apache.coyote.QueryStringHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,44 +34,23 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final BufferedReader inputBufferedReader = new BufferedReader(new InputStreamReader(inputStream));) {
 
-            BufferedReader inputBufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            String firstLine = inputBufferedReader.readLine();
+            HttpRequest httpRequest = HttpRequest.from(firstLine);
 
-            String uri = inputBufferedReader.readLine().split(" ")[1];
-            if (uri.contains("?")) {
-                Map<String, String> queryParams = QueryStringHandler.queryParams(uri);
-                Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.get("account"));
+            if (httpRequest.getUri().contains("login?")) {
+                Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getQueryParam().get("account"));
                 user.ifPresent(value -> log.info(value.toString()));
             }
-            FilePath filePath = FilePath.from(uri);
+            FilePath filePath = FilePath.from(httpRequest.getUri());
 
-            var responseBody = getResponseBody(filePath.getValue());
-
-            outputStream.write(getResponse(ContentType.find(filePath.getValue()), responseBody).getBytes());
+            MyHttpResponse httpResponse = MyHttpResponse.from(filePath);
+            outputStream.write(httpResponse.getValue().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String getResponseBody(String uriPath) throws URISyntaxException, IOException {
-        if (uriPath.equals("/")) {
-            return "Hello world!";
-        }
-        String fileName = "static" + uriPath;
-        final URL resource = getClass().getClassLoader().getResource(fileName);
-        final File file = Paths.get(resource.toURI()).toFile();
-        return new String(Files.readAllBytes(file.toPath()));
-    }
-
-
-    private String getResponse(ContentType contentType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType.getType() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
     }
 }

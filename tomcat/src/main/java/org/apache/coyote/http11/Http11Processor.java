@@ -1,27 +1,20 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.URL;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.ui.AuthController;
-import nextstep.jwp.ui.HomeController;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.mapping.RequestMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -81,7 +74,8 @@ public class Http11Processor implements Runnable, Processor {
         return HttpRequest.from(firstLine, headers, requestBody.toString());
     }
 
-    private void addRequestBodyLine(final BufferedReader bufferedReader, final StringBuilder requestBody) throws IOException {
+    private void addRequestBodyLine(final BufferedReader bufferedReader, final StringBuilder requestBody)
+            throws IOException {
         for (String requestBodyLine = bufferedReader.readLine();
              requestBodyLine != null && !requestBodyLine.equals("");
              requestBodyLine = bufferedReader.readLine()) {

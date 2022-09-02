@@ -2,10 +2,6 @@ package nextstep.jwp.ui;
 
 import nextstep.jwp.application.UserService;
 import nextstep.jwp.application.dto.UserDto;
-import nextstep.jwp.domain.model.User;
-import nextstep.jwp.domain.model.UserRepository;
-import nextstep.jwp.infrastructure.InMemoryUserRepository;
-import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.exception.BadRequestException;

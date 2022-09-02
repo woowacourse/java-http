@@ -1,10 +1,9 @@
 package nextstep.jwp.infrastructure;
 
-import nextstep.jwp.domain.model.User;
-
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import nextstep.jwp.domain.model.User;
 import nextstep.jwp.domain.model.UserRepository;
 
 public class InMemoryUserRepository implements UserRepository {
@@ -14,7 +13,8 @@ public class InMemoryUserRepository implements UserRepository {
 
     private static final InMemoryUserRepository instance = new InMemoryUserRepository();
 
-    private InMemoryUserRepository() {}
+    private InMemoryUserRepository() {
+    }
 
     public static InMemoryUserRepository getInstance() {
         return instance;

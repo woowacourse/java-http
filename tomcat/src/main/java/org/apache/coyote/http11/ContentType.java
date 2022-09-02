@@ -11,8 +11,7 @@ public enum ContentType {
     IMAGE_GIF("image/gif"),
     IMAGE_PNG("image/png"),
     IMAGE_JPEG("image/jpeg"),
-    IMAGE_SVG("image/svg")
-    ;
+    IMAGE_SVG("image/svg");
 
     private final static Map<String, ContentType> fileExtensionMapping = Map.of(
             ".html", TEXT_HTML,

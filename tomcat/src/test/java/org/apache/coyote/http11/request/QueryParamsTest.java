@@ -1,9 +1,8 @@
 package org.apache.coyote.http11.request;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
-import org.apache.coyote.http11.request.QueryParams;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +13,7 @@ class QueryParamsTest {
     void createQueryParams() {
         final String name = "alex";
         final String age = "7";
-        final QueryParams queryParams = QueryParams.from("name=" + name +"&age=" + age);
+        final QueryParams queryParams = QueryParams.from("name=" + name + "&age=" + age);
 
         assertAll(
                 () -> assertThat(queryParams.getValue("name").get()).isEqualTo(name),

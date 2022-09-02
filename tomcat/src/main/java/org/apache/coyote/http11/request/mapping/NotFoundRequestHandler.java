@@ -10,7 +10,6 @@ import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.mapping.RequestHandler;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public class NotFoundRequestHandler implements RequestHandler {

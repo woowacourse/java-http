@@ -2,15 +2,15 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.util.HttpParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,44 +33,52 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            HttpParser httpParser = new HttpParser(inputStream);
+            HttpMethod httpMethod = httpParser.getHttpMethod();
+            String httpUrl = httpParser.getHttpUrl();
 
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String[] startLine = bufferedReader.readLine().split(" ");
-
-            String httpMethod = startLine[0];
-            String httpUrl = startLine[1];
-            String fileName = httpUrl.substring(1);
-
-            String responseBody = "Hello world!";
-            if (httpMethod.equals("GET") && !httpUrl.equals("/") && fileName.endsWith(".html")) {
-                URL resource = getClass().getClassLoader().getResource("static/" + fileName);
-                File file = Paths.get(resource.toURI()).toFile();
-                FileInputStream fis = new FileInputStream(file);
-
-                BufferedReader br = new BufferedReader(new InputStreamReader(fis));
-                final StringBuilder stringBuilder = new StringBuilder();
-                while (true) {
-                    String s = br.readLine();
-                    if (s == null) {
-                        break;
-                    }
-                    stringBuilder.append(s);
-                    stringBuilder.append(System.lineSeparator());
-                }
-                responseBody = stringBuilder.toString();
+            String responseBody = "";
+            if (httpUrl.equals("/")) {
+                responseBody = "Hello world!";
             }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            if (httpMethod.equals(HttpMethod.GET) && httpUrl.endsWith(".html")) {
+                File file = getFile(httpUrl);
+                responseBody = toResponseBody(file);
+            }
 
-            outputStream.write(response.getBytes());
+            outputStream.write(toResponse(responseBody).getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private File getFile(String httpUrl) throws URISyntaxException {
+        String fileName = httpUrl.substring(1);
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL resource = classLoader.getResource("static/" + fileName);
+
+        return Paths.get(resource.toURI()).toFile();
+    }
+
+    private String toResponseBody(File file) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+        StringBuilder stringBuilder = new StringBuilder();
+        String nextLine = "";
+        while ((nextLine = bufferedReader.readLine()) != null) {
+            stringBuilder.append(nextLine);
+            stringBuilder.append(System.lineSeparator());
+        }
+        return stringBuilder.toString();
+    }
+
+    private String toResponse(String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

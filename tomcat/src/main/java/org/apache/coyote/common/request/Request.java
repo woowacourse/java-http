@@ -33,4 +33,8 @@ public class Request {
     public String getQueryStringValue(final String key) {
         return queryString.getOrDefault(key, "");
     }
+
+    public String getRequestIdentifier() {
+        return String.join(" ", method.getValue(), path);
+    }
 }

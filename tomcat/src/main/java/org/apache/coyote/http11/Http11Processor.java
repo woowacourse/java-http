@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.function.Function;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.view.UserOutput;
 import org.apache.coyote.Processor;
@@ -46,16 +47,8 @@ public class Http11Processor implements Runnable, Processor {
 
             final String requestStartLine = getRequestStartLine(inputStream);
             final Request request = new Request(requestStartLine);
-            final String responseBody = getStaticResource(request.getPath());
-
-            UserOutput.outputUserInformation(request);
-
-            final MediaType mediaType = MediaType.of(FileExtension.of(request.getPath()));
-            final String response = new Response.ResponseBuilder(HttpVersion.HTTP11, Status.OK)
-                    .setContentType(mediaType, Charset.UTF8)
-                    .setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
-                    .setBody(responseBody)
-                    .build()
+            final Function<Request, Response> handler = HandlerMapper.of(request);
+            final String response = handler.apply(request)
                     .getResponse();
 
             outputStream.write(response.getBytes());
@@ -63,16 +56,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String getStaticResource(final String requestUrl) throws IOException {
-        final String resourcePath = RequestLineParser.getStaticResourcePath(requestUrl);
-
-        final URL url = Thread.currentThread()
-                .getContextClassLoader()
-                .getResource(resourcePath);
-        assert url != null;
-        return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
     }
 
     private String getRequestStartLine(final InputStream inputStream) throws IOException {

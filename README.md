@@ -3,9 +3,13 @@
 - HTTP와 서블릿에 대한 이해도를 높인다.
 - 스레드, 스레드풀을 적용해보고 동시성 처리를 경험한다.
 
+<br/>
+
 ### 클래스 다이어그램
 
 ![image](./docs/class.png)
+
+<br/>
 
 ### 미션 일정
 
@@ -15,6 +19,8 @@
 - 9/6 (화) 첫 PR 전체 머지
 - 9/8 (금) 마지막 PR 요청
 - 9/13 (화) 마지막 PR 전체 머지
+
+<br/>
 
 # 1단계
 
@@ -29,3 +35,21 @@
 - [x] http://localhost:8080/index.html 페이지에 접근 가능하다.
 - [x] 접근한 페이지의 js, css 파일을 불러올 수 있다.
 - [x] uri의 QueryString을 파싱하는 기능이 있다.
+
+<br/>
+
+# 2단계
+
+### 기능 요구사항
+
+- HTTP Status Code 302
+- POST 방식으로 회원가입
+- Cookie에 JSESSIONID 값 저장하기
+- Session 구현하기
+
+### 체크리스트
+
+- [ ] HTTP Reponse의 상태 응답 코드를 302로 반환한다.
+- [ ] POST로 들어온 요청의 Request Body를 파싱할 수 있다.
+- [ ] 로그인에 성공하면 HTTP Reponse의 헤더에 Set-Cookie가 존재한다.
+- [ ] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.

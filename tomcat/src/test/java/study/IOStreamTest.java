@@ -128,7 +128,7 @@ class IOStreamTest {
              * todo
              * inputStream에서 바이트로 반환한 값을 문자열로 어떻게 바꿀까?
              */
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
             final String actual = new BufferedReader(inputStreamReader)
                     .lines()
                     .collect(Collectors.joining());
@@ -203,9 +203,13 @@ class IOStreamTest {
             final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
 
             final StringBuilder actual = new StringBuilder();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            for (int i = 0; i < 3; i++) {
-                actual.append(bufferedReader.readLine())
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            while(true) {
+                String line = bufferedReader.readLine();
+                if (line == null) {
+                    break;
+                }
+                actual.append(line)
                         .append("\r\n");
             }
 

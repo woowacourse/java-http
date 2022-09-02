@@ -6,10 +6,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.ContentType;
 import org.apache.coyote.Processor;
 import org.apache.coyote.QueryParams;
+import org.apache.coyote.exception.InvalidAccountException;
+import org.apache.coyote.exception.InvalidPasswordException;
 import org.apache.coyote.support.ResourcesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +25,7 @@ public class Http11Processor implements Runnable, Processor {
     public static final String LANDING_PAGE_URL = "/";
     public static final String STATIC_PATH = "static";
     public static final String DEFAULT_EXTENSION = ".html";
-    public static final String LOGIN_URL = "/login";
+    public static final String LOGIN_PATH = "/login.html";
     public static final String QUERY_STRING_DELIMITER = "?";
 
     private final Socket connection;
@@ -91,17 +95,43 @@ public class Http11Processor implements Runnable, Processor {
         if (uri.lastIndexOf(QUERY_STRING_DELIMITER) == -1) {
             return "";
         }
-        return uri.substring(uri.lastIndexOf(QUERY_STRING_DELIMITER));
+        return uri.substring(uri.lastIndexOf(QUERY_STRING_DELIMITER) + 1);
     }
 
     private String accessUrl(final String url, final QueryParams queryParams) throws IOException {
         if (url.equals(LANDING_PAGE_URL)) {
             return "Hello world!";
         }
-        if (url.equals(LOGIN_URL)) {
-            return "";
+        if (url.equals(LOGIN_PATH)) {
+            return renderLogin(url, queryParams);
         }
         return ResourcesUtil.readResource(STATIC_PATH + url);
+    }
+
+    private String renderLogin(final String url, final QueryParams queryParams) throws IOException {
+        if (queryParams.exists()) {
+            login(queryParams);
+        }
+        return ResourcesUtil.readResource(STATIC_PATH + url);
+    }
+
+    private void login(final QueryParams queryParams) {
+        String account = queryParams.get("account");
+        String password = queryParams.get("password");
+        User user = findUser(account);
+        checkPassword(password, user);
+        log.info(user.toString());
+    }
+
+    private User findUser(final String account) {
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(InvalidAccountException::new);
+    }
+
+    private void checkPassword(final String password, final User user) {
+        if (!user.checkPassword(password)) {
+            throw new InvalidPasswordException();
+        }
     }
 
     private ContentType parseContentType(final String uri) {

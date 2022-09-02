@@ -2,12 +2,20 @@ package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
+import org.apache.coyote.exception.InvalidAccountException;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 import support.StubSocket;
 
 class Http11ProcessorTest {
@@ -159,5 +167,35 @@ class Http11ProcessorTest {
         String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).contains(expectedResponseBody);
+    }
+
+    @Test
+    void 로그인_페이지로_접근_시_query_string으로_회원_정보를_찾아서_로그를_남긴다() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
+        Logger logger = (Logger) LoggerFactory.getLogger(Http11Processor.class);
+        logger.addAppender(listAppender);
+        listAppender.start();
+
+        // when
+        processor.process(socket);
+        List<ILoggingEvent> logs = listAppender.list;
+        String message = logs.get(0).getMessage();
+
+        // then
+        User user = InMemoryUserRepository.findByAccount("gugu")
+                .orElseThrow(InvalidAccountException::new);
+
+        assertThat(message).isEqualTo(user.toString());
     }
 }

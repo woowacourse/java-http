@@ -9,10 +9,7 @@ import java.io.Reader;
 import java.net.Socket;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.exception.InvalidRequestException;
-import org.apache.coyote.http11.exception.UserNotFoundException;
 import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.RequestUri;
@@ -54,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
                 writeHttpResponse(outputStream, httpResponse);
             }
 
-            if (requestUri.getPath().equals("/")) {
+            if (requestUri.matches("/")) {
                 HttpResponse httpResponse = new HttpResponse.Builder()
                         .contentType(ContentType.HTML)
                         .body("Hello world!")
@@ -63,12 +60,11 @@ public class Http11Processor implements Runnable, Processor {
                 writeHttpResponse(outputStream, httpResponse);
             }
 
-            if (requestUri.getPath().equals("/login")) {
-                String account = requestUri.getQuery("account").orElseThrow(InvalidRequestException::new);
+            if (requestUri.matches("/login")) {
+                String account = requestUri.getQuery("account").orElse("");
 
-                User user = InMemoryUserRepository.findByAccount(account)
-                        .orElseThrow(() -> new UserNotFoundException(account));
-                log.info("user = " + user);
+                InMemoryUserRepository.findByAccount(account)
+                        .ifPresentOrElse(System.out::println, () -> System.out.println("유저가 없습니다."));
 
                 HttpResponse httpResponse = new HttpResponse.Builder()
                         .contentType(ContentType.HTML)

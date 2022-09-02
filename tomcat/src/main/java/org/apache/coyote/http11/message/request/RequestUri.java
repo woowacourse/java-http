@@ -38,4 +38,8 @@ public class RequestUri {
     public boolean hasExtension() {
         return !getExtension().isBlank();
     }
+
+    public boolean matches(final String uri) {
+        return this.uri.getPath().equals(uri);
+    }
 }

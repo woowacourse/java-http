@@ -17,6 +17,10 @@ public class QueryString {
     private final Map<String, String> query = new HashMap<>();
 
     public QueryString(final String queryString) {
+        if (Objects.isNull(queryString) || queryString.isBlank()) {
+            return;
+        }
+
         parseQueryString(queryString);
     }
 

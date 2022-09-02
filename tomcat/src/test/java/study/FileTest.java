@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
  * File 클래스를 사용해서 파일을 읽어오고, 사용자에게 전달한다.
  */
 
+@SuppressWarnings("NonAsciiCharacters")
 @DisplayName("File 클래스 학습 테스트")
 class FileTest {
 

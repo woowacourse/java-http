@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.apache.coyote.response.StatusCode.*;
+import static org.apache.coyote.response.StatusCode.OK;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,12 +14,11 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.processor.LoginProcessor;
 import org.apache.coyote.Processor;
+import org.apache.coyote.processor.LoginProcessor;
 import org.apache.coyote.request.HttpRequestHeader;
 import org.apache.coyote.response.ContentType;
 import org.apache.coyote.response.HttpResponse;
-import org.apache.coyote.response.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,9 +54,7 @@ public class Http11Processor implements Runnable, Processor {
             handleLogin(httpRequestHeader, requestUrl);
 
             String responseBody = makeResponseBody(requestUrl);
-            StatusCode statusCode = OK;
-
-            final HttpResponse httpResponse = new HttpResponse(statusCode, ContentType.from(requestUrl), responseBody);
+            final HttpResponse httpResponse = new HttpResponse(OK, ContentType.from(requestUrl), responseBody);
             final String response = httpResponse.getResponse();
 
             outputStream.write(response.getBytes());

@@ -8,6 +8,7 @@ public class HttpRequestHeader {
     private static final String QUERY_START_CHARACTER = "?";
     private static final String ROOT = "/";
     private static final String EXTENSION_CHARACTER = ".";
+    private static final String DEFAULT_PAGE_URL = "/index.html";
 
     private final String startLine;
     private final Map<String, String> headers;
@@ -45,7 +46,7 @@ public class HttpRequestHeader {
 
     private String makeDefaultRequestUrl(String requestUrl) {
         if (requestUrl.equals(ROOT)) {
-            return "/index.html";
+            return DEFAULT_PAGE_URL;
         }
         if (!requestUrl.contains(EXTENSION_CHARACTER)) {
             return addExtension(requestUrl);

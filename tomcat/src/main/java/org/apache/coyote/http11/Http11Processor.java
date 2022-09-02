@@ -13,6 +13,7 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final int START_LINE = 1;
 
     private final Socket connection;
 
@@ -32,7 +33,7 @@ public class Http11Processor implements Runnable, Processor {
              final var reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
 
-            String uri = reader.readLine().split(" ")[1];
+            String uri = reader.readLine().split(" ")[START_LINE];
             if (uri.equals("/favicon.ico")) {
                 return;
             }

@@ -1,7 +1,10 @@
 package org.apache.coyote.http;
 
 import jakarta.servlet.http.HttpSession;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -13,10 +16,6 @@ public class HttpRequest {
 
     private static final String POST = "POST";
     private static final String GET = "GET";
-
-    private static final String TEXT_HTML = "text/html";
-    private static final String TEXT_CSS = "text/css";
-    private static final String APPLICATION_JAVASCRIPT = "application/javascript";
 
     private static final String QUERY_STRING_PREFIX = "?";
 
@@ -35,7 +34,7 @@ public class HttpRequest {
         this.headers = headers;
     }
 
-    public static HttpRequest of(final String startLine, final Map<String, String> headers) {
+    public static HttpRequest of(final String startLine, final Map<String, String> headers) throws IOException {
         final String[] splitStartLine = startLine.split(" ");
         final String httpMethod = splitStartLine[0];
         final String uri = splitStartLine[1];
@@ -68,14 +67,9 @@ public class HttpRequest {
         return uri.contains(QUERY_STRING_PREFIX);
     }
 
-    private static String getContentType(final String path) {
-        if (path.contains(".css")) {
-            return TEXT_CSS;
-        }
-        if (path.contains(".js")) {
-            return APPLICATION_JAVASCRIPT;
-        }
-        return TEXT_HTML;
+    private static String getContentType(final String path) throws IOException {
+        final Path filePath = new File(path).toPath();
+        return Files.probeContentType(filePath);
     }
 
     public boolean isRegister() {

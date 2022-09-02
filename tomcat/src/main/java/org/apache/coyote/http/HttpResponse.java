@@ -51,6 +51,9 @@ public class HttpResponse {
 
     public byte[] toResponseBytes() {
         values.add("");
+        if (responseBody != null) {
+            values.add(responseBody);
+        }
         return String.join("\r\n", values)
                 .getBytes();
     }

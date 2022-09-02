@@ -1,8 +1,13 @@
 package org.apache.coyote.http;
 
+import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
+import org.apache.coyote.http11.SessionManager;
 
 public class HttpRequest {
 
@@ -83,11 +88,41 @@ public class HttpRequest {
     }
 
     public boolean isRegister() {
-        return httpMethod.equals(POST) && path.equals("/register");
+        return isPost() && path.contains("register");
     }
 
-    public String getHttpMethod() {
-        return httpMethod;
+    public boolean isLogin() {
+        return isPost() && path.contains("login");
+    }
+
+    public boolean isLoginPage() {
+        return isGet() && path.contains("login");
+    }
+
+    public boolean alreadyLogin() throws IOException {
+        final String cookie = headers.get("Cookie");
+        if (cookie == null) {
+            return false;
+        }
+        if (!cookie.contains("JSESSION")) {
+            return false;
+        }
+        final SessionManager sessionManager = new SessionManager();
+        final HttpSession session = sessionManager.findSession(cookie.split("JSESSIONID=")[1]);
+        final User user = (User) session.getAttribute("user");
+        if (user == null) {
+            return false;
+        }
+        return InMemoryUserRepository.findByAccount(user.getAccount())
+                .isPresent();
+    }
+
+    public boolean isPost() {
+        return httpMethod.equals(POST);
+    }
+
+    public boolean isGet() {
+        return httpMethod.equals(GET);
     }
 
     public String getPath() {
@@ -102,11 +137,10 @@ public class HttpRequest {
         return contentType;
     }
 
-    public String getHeader(final String key) {
-        return headers.get(key);
-    }
-
     public int getContentLength() {
-        return Integer.parseInt(headers.get("Content-Length"));
+        if (headers.containsKey("Content-Length")) {
+            return Integer.parseInt(headers.get("Content-Length"));
+        }
+        return 0;
     }
 }

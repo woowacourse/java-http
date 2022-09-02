@@ -37,7 +37,9 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequest request = new HttpRequest(inputStream);
 
-            AuthController.login(request);
+            if (request.hasQuery() && request.hasQueryKey("account") && request.hasQueryKey("password")) {
+                AuthController.login(request, request.getQueryValue("account"), request.getQueryValue("password"));
+            }
 
             final var response = getResponse(request);
 

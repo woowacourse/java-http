@@ -18,15 +18,12 @@ public class AuthController {
     private AuthController() {
     }
 
-    public static void login(HttpRequest request) {
-
-        if (request.hasQuery() && request.hasQueryKey("account") && request.hasQueryKey("password")) {
-            User user = InMemoryUserRepository.findByAccount(request.getQueryValue("account"))
-                .orElseThrow(() -> new IllegalArgumentException("Account Not Found"));
-            if (!user.checkPassword(request.getQueryValue("password"))) {
-                throw new IllegalArgumentException("Password Not Matched");
-            }
-            log.info("user : {}", user);
+    public static void login(HttpRequest request, String account, String password) {
+        User user = InMemoryUserRepository.findByAccount(account)
+            .orElseThrow(() -> new IllegalArgumentException("Account Not Found"));
+        if (!user.checkPassword(password)) {
+            throw new IllegalArgumentException("Password Not Matched");
         }
+        log.info("user : {}", user);
     }
 }

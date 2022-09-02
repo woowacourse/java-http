@@ -2,11 +2,8 @@ package nextstep.jwp.http.response;
 
 public class HttpResponseBuilder {
 
-    private HttpResponse httpResponse;
-
     private String version;
     private String statusCode;
-    private String statusMessage;
     private String contentType;
     private int contentLength;
     private String responseBody;
@@ -18,11 +15,6 @@ public class HttpResponseBuilder {
 
     public HttpResponseBuilder statusCode(final String statusCode) {
         this.statusCode = statusCode;
-        return this;
-    }
-
-    public HttpResponseBuilder statusMessage(final String statusMessage) {
-        this.statusMessage = statusMessage;
         return this;
     }
 
@@ -42,6 +34,6 @@ public class HttpResponseBuilder {
     }
 
     public HttpResponse build() {
-        return new HttpResponse(version, statusCode, statusMessage, contentType, contentLength, responseBody);
+        return new HttpResponse(version, statusCode, contentType, contentLength, responseBody);
     }
 }

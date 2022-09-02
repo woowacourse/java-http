@@ -53,4 +53,12 @@ public class HttpRequestLine {
     public Map<String, String> getQueryParams() {
         return queryParams.getParams();
     }
+
+    public String getVersion() {
+        return version;
+    }
+
+    public String getMethod() {
+        return method;
+    }
 }

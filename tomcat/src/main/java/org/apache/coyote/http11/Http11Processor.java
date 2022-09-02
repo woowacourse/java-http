@@ -11,7 +11,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.reqeust.HttpRequestCreator;
 import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.http.response.HttpResponseBuilder;
+import nextstep.jwp.http.response.HttpResponseCreator;
 import nextstep.jwp.io.ClassPathResource;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String ROOT_URL = "/";
+    private static final String ROOT_PATH = "/";
     private static final String ROOT_RESPONSE_BODY = "Hello world!";
 
     private final Socket connection;
@@ -58,28 +58,17 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createHttpResponse(final HttpRequest httpRequest) {
-        String url = httpRequest.getUrl();
-        if (url.equals(ROOT_URL)) {
-            return okResponse(httpRequest.findContentType(), ROOT_RESPONSE_BODY);
+        String path = httpRequest.getPath();
+        if (path.equals(ROOT_PATH)) {
+            return HttpResponseCreator.okResponse(httpRequest.findContentType(), ROOT_RESPONSE_BODY);
         }
-        String responseBody = new ClassPathResource().getFileContents(url);
-        return okResponse(httpRequest.findContentType(), responseBody);
-    }
-
-    private HttpResponse okResponse(final String contentType, final String responseBody) {
-        return new HttpResponseBuilder()
-                .version()
-                .statusCode("200")
-                .statusMessage("OK")
-                .contentType(contentType)
-                .contentLength(responseBody.getBytes().length)
-                .responseBody(responseBody)
-                .build();
+        String responseBody = new ClassPathResource().getStaticContent(path);
+        return HttpResponseCreator.okResponse(httpRequest.findContentType(), responseBody);
     }
 
     private void printUser(final HttpRequest httpRequest) {
         if (httpRequest.hasQueryString()) {
-            Map<String, String> queryString = httpRequest.getQueryString();
+            Map<String, String> queryString = httpRequest.getQueryParams();
             String account = queryString.get("account");
             Optional<User> user = InMemoryUserRepository.findByAccount(account);
             log.info(user.toString());

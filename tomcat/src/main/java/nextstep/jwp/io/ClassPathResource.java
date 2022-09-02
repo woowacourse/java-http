@@ -8,7 +8,7 @@ import java.util.Objects;
 
 public class ClassPathResource {
 
-    public String getFileContents(final String url) {
+    public String getStaticContent(final String url) {
         URL resource = getClass().getClassLoader().getResource("static" + url);
         try {
             File file = new File(Objects.requireNonNull(resource).getFile());

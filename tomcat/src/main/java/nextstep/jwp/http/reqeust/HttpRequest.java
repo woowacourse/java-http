@@ -15,7 +15,7 @@ public class HttpRequest {
     }
 
     public String findContentType() {
-        String url = getUrl();
+        String url = getPath();
         return ContentType.findContentType(url);
     }
 
@@ -23,11 +23,11 @@ public class HttpRequest {
         return httpRequestLine.hasQueryParams();
     }
 
-    public String getUrl() {
+    public String getPath() {
         return httpRequestLine.getPath();
     }
 
-    public Map<String, String> getQueryString() {
+    public Map<String, String> getQueryParams() {
         return httpRequestLine.getQueryParams();
     }
 }

@@ -12,30 +12,19 @@ public class HttpRequest {
 
     private final HttpMethod httpMethod;
     private final Map<String, String> queryParams;
-    private final HttpStatusCode httpStatusCode;
     private final Map<String, String> httpRequestHeaders;
     private final Map<String, String> bodyParams;
     private final HttpCookie cookie;
     private final String path;
 
     public HttpRequest(HttpMethod httpMethod, String path, Map<String, String> queryParams,
-        HttpStatusCode httpStatusCode, Map<String, String> httpRequestHeaders, Map<String, String> bodyParms,
-        HttpCookie cookie) {
+        Map<String, String> httpRequestHeaders, Map<String, String> bodyParms, HttpCookie cookie) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.queryParams = queryParams;
-        this.httpStatusCode = httpStatusCode;
         this.httpRequestHeaders = httpRequestHeaders;
         this.bodyParams = bodyParms;
         this.cookie = cookie;
-    }
-
-    private boolean isGetRequest() {
-        return httpMethod.equals(HttpMethod.GET);
-    }
-
-    private boolean isPostRequest() {
-        return httpMethod.equals(HttpMethod.POST);
     }
 
     public boolean isValidLoginRequest() {
@@ -52,15 +41,19 @@ public class HttpRequest {
             && cookie.containsAttribute("JSESSIONID");
     }
 
-    public String getCookieParam(String paramName) {
-        return cookie.getAttribute(paramName);
+    private boolean isGetRequest() {
+        return httpMethod.equals(HttpMethod.GET);
+    }
+
+    private boolean isPostRequest() {
+        return httpMethod.equals(HttpMethod.POST);
     }
 
     public String getBodyParam(String paramName) {
         return bodyParams.get(paramName);
     }
 
-    public String getStaticPath() {
+    public String getResourcePath() {
         return "static" + path;
     }
 
@@ -71,14 +64,6 @@ public class HttpRequest {
             return "image/apng";
         }
         return "text/" + extension;
-    }
-
-    public HttpStatusCode getHttpStatusCode() {
-        return httpStatusCode;
-    }
-
-    public HttpCookie getCookie() {
-        return cookie;
     }
 
     public Session getSession() {

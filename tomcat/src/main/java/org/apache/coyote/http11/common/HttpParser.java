@@ -28,6 +28,9 @@ public class HttpParser {
 
     public static Map<String, String> parseCookie(final String cookie) {
         final var options = new HashMap<String, String>();
+        if (cookie == null || cookie.isBlank()) {
+            return options;
+        }
         for (var option : cookie.split(";")) {
             parseCookieOption(option.trim(), options);
         }

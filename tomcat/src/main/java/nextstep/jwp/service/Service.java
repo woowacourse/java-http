@@ -1,14 +1,21 @@
 package nextstep.jwp.service;
 
 import java.util.Map;
-import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.AuthenticationException;
 import nextstep.jwp.exception.DuplicationException;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.model.User;
+import org.apache.catalina.session.Session;
+import org.apache.catalina.session.SessionManager;
 
 public class Service {
+
+    private final SessionManager sessionManager;
+
+    public Service() {
+        this.sessionManager = new SessionManager();
+    }
 
     public String login(final Map<String, String> parameters) {
         final var account = parameters.get("account");
@@ -21,7 +28,20 @@ public class Service {
             throw new AuthenticationException("비밀번호가 일치하지 않습니다.");
         }
         System.out.println("로그인에 성공했습니다! user: " + user);
-        return UUID.randomUUID().toString();
+
+        final Session session = makeNewSession(user);
+        return session.getId();
+    }
+
+    private Session makeNewSession(final User user) {
+        final var session = new Session();
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+        return session;
+    }
+
+    public boolean isAlreadyLogin(final String sessionId) {
+        return sessionManager.findSession(sessionId) != null;
     }
 
     public void register(final Map<String, String> parameters) {

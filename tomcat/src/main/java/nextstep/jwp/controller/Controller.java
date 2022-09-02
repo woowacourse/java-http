@@ -21,12 +21,15 @@ public class Controller {
         return HttpResponse.ok(new StaticResource("Hello world!", ContentType.TEXT_HTML));
     }
 
-    public HttpResponse showLogin() {
+    public HttpResponse showLogin(final String sessionId) {
+        if (service.isAlreadyLogin(sessionId)) {
+            return HttpResponse.found("/index.html");
+        }
         return HttpResponse.ok(StaticResource.path("/login.html"));
     }
 
     public HttpResponse login(final String sessionId, final Map<String, String> parameters) {
-        if (sessionId != null) {
+        if (service.isAlreadyLogin(sessionId)) {
             return HttpResponse.found("/index.html");
         }
         try {

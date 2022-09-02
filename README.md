@@ -32,7 +32,8 @@
 - [X] 로그인에 성공하면 HTTP Reponse의 헤더에 Set-Cookie가 존재한다.
   - [X] HTTP Request Header의 Cookie에 JSESSIONID가 없므면 HTTP Response Header에 Set-Cookie를 추가한다.
   - [X] 이미 있으면 로그인한 사용자로 간주하고 /index.html로 리다이렉트한다.
-- [ ] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.
+- [X] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.
+  - [X] 로그인된 상태에서 /login 페이지에 GET으로 접근하면 이미 로그인한 상태이기 때문에 /index.html로 리다이렉트한다.
 
 ### 추가로 고려해볼 수 있는 부분
 

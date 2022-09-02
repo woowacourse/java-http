@@ -31,7 +31,7 @@ public class ControllerMapper {
             return controller.showIndex();
         }
         if (path.equals("/login")) {
-            return controller.showLogin();
+            return controller.showLogin(httpRequest.getCookie().getSessionId());
         }
         if (path.equals("/register")) {
             return controller.showRegister();

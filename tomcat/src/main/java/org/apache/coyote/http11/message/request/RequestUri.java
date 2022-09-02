@@ -19,9 +19,7 @@ public class RequestUri {
     }
 
     public Optional<String> getQuery(final String key) {
-        String path = uri.getPath();
-        int queryStartIndex = path.indexOf(QUERY_DELIMITER);
-        String query = path.substring(queryStartIndex + 1);
+        String query = uri.getQuery();
         QueryString queryString = new QueryString(query);
         return queryString.getQuery(key);
     }

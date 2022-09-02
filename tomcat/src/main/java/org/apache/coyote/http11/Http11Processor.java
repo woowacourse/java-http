@@ -19,6 +19,11 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
+    private static final String CONTENT_TYPE_FORMATTER = "Content-Type: text/%s;charset=utf-8 ";
+    private static final String LOGIN_REQUEST_URI = "/login";
+    private static final String ROOT_REQUEST_URI = "/";
+    private static final int FILE_NAME_INDEX = 1;
+
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -44,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            if (firstLine.contains("login")) {
+            if (firstLine.contains(LOGIN_REQUEST_URI)) {
                 showUser(firstLine);
                 return;
             }
@@ -75,37 +80,34 @@ public class Http11Processor implements Runnable, Processor {
         return user;
     }
 
-    private String generateResponse(String resource) throws IOException {
+    private String generateResponse(String requestFirstLine) throws IOException {
+        String resource = requestFirstLine.split(" ")[FILE_NAME_INDEX];
         String responseBody = generateResponseBody(resource);
-        String contentType = getContentType(resource);
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                contentType,
+                getContentType(resource),
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
     }
 
     private String getContentType(String resource) {
-        if (resource.contains("/css")) {
-            return "Content-Type: text/css;charset=utf-8 ";
+        if (resource.contains(ROOT_REQUEST_URI)) {
+            return String.format(CONTENT_TYPE_FORMATTER, "html");
         }
-        if (resource.contains("/js")) {
-            return "Content-Type: text/js;charset=utf-8 ";
-        }
-        return "Content-Type: text/html;charset=utf-8 ";
+        String fileExtension = resource.split(".")[1];
+        return String.format(CONTENT_TYPE_FORMATTER, fileExtension);
     }
 
     private String generateResponseBody(String resource) throws IOException {
-        String fileName = resource.split(" ")[1];
-        if (fileName.equals("/")) {
+        if (resource.equals(ROOT_REQUEST_URI)) {
             return "Hello world!";
         }
-        return generateResponseBodyByFile(fileName);
+        return generateResponseBodyByFile(resource);
     }
 
-    private String generateResponseBodyByFile(String fileName) throws IOException {
-        URL url = getClass().getClassLoader().getResource("static" + fileName);
+    private String generateResponseBodyByFile(String resource) throws IOException {
+        URL url = getClass().getClassLoader().getResource("static" + resource);
         String file = Objects.requireNonNull(url)
                 .getFile();
         Path path = new File(file).toPath();

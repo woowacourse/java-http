@@ -9,6 +9,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -83,16 +84,8 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (requestPath.contains("/login")) {
-            int index = requestPath.indexOf("?");
-            String queryString = requestPath.substring(index + 1);
-
-            final String account = queryString.split("&")[0];
-            final String password = queryString.split("&")[1];
-
-            final String inputAccountValue = account.split("=")[1];
-            final String inputPasswordValue = password.split("=")[1];
-
-            checkLogin(inputAccountValue, inputPasswordValue);
+            final Map<Integer, String> params = QueryStringParser.parsing(requestPath);
+            checkLogin(params.get(0), params.get(1));
             return "success";
         }
 
@@ -106,7 +99,7 @@ public class Http11Processor implements Runnable, Processor {
 
         final boolean isSuccessLogin = user.checkPassword(inputPasswordValue);
         if (isSuccessLogin) {
-            log.debug("{}", user);
+            log.debug("로그인 성공 = {}", user);
         }
     }
 }

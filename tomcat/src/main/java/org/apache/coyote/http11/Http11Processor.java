@@ -5,19 +5,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.util.StringParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,9 +43,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final HttpRequest httpRequest = HttpRequest.of(bufferedReader.readLine(), getHeaders(bufferedReader));
-
-            final int contentLength = httpRequest.getContentLength();
-            final Map<String, String> requestBody = getRequestBody(bufferedReader, contentLength);
+            final Map<String, String> requestBody = getRequestBody(bufferedReader, httpRequest.getContentLength());
 
             HttpResponse httpResponse = HttpResponse.fromHttpRequest(httpRequest);
 
@@ -87,13 +84,12 @@ public class Http11Processor implements Runnable, Processor {
         if (contentLength == 0) {
             return Collections.emptyMap();
         }
+
         final char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         final String requestBody = new String(buffer);
 
-        return Arrays.stream(requestBody.split("&"))
-                .map(it -> it.split("="))
-                .collect(Collectors.toMap(it -> it[0], it -> it[1], (a, b) -> b));
+        return StringParser.toMap(requestBody);
     }
 
     private HttpResponse login(final Map<String, String> requestBody, final HttpResponse httpResponse) {

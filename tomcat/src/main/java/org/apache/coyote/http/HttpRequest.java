@@ -3,11 +3,11 @@ package org.apache.coyote.http;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.SessionManager;
+import org.apache.coyote.util.StringParser;
 
 public class HttpRequest {
 
@@ -19,8 +19,6 @@ public class HttpRequest {
     private static final String APPLICATION_JAVASCRIPT = "application/javascript";
 
     private static final String QUERY_STRING_PREFIX = "?";
-    private static final String QUERY_STRING_DELIMITER = "&";
-    private static final String KEY_VALUE_DELIMITER = "=";
 
     private final String httpMethod;
     private final String path;
@@ -29,8 +27,7 @@ public class HttpRequest {
     private final Map<String, String> headers;
 
     private HttpRequest(final String httpMethod, final String path, final Map<String, String> queryParams,
-                        final String contentType,
-                        final Map<String, String> headers) {
+                        final String contentType, final Map<String, String> headers) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.queryParams = queryParams;
@@ -62,15 +59,9 @@ public class HttpRequest {
             return Collections.emptyMap();
         }
         final int prefixIndex = uri.indexOf(QUERY_STRING_PREFIX);
-        final String[] queryStrings = uri.substring(prefixIndex + 1)
-                .split(QUERY_STRING_DELIMITER);
+        final String queryString = uri.substring(prefixIndex + 1);
 
-        final Map<String, String> queryParams = new HashMap<>();
-        for (final String queryString : queryStrings) {
-            final String[] splitQueryString = queryString.split(KEY_VALUE_DELIMITER);
-            queryParams.put(splitQueryString[0], splitQueryString[1]);
-        }
-        return queryParams;
+        return StringParser.toMap(queryString);
     }
 
     private static boolean hasQueryString(final String uri) {
@@ -107,6 +98,7 @@ public class HttpRequest {
         if (!cookie.contains("JSESSION")) {
             return false;
         }
+
         final SessionManager sessionManager = new SessionManager();
         final HttpSession session = sessionManager.findSession(cookie.split("JSESSIONID=")[1]);
         final User user = (User) session.getAttribute("user");
@@ -127,10 +119,6 @@ public class HttpRequest {
 
     public String getPath() {
         return path;
-    }
-
-    public String getQueryParam(final String key) {
-        return queryParams.get(key);
     }
 
     public String getContentType() {

@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import http.ContentType;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -39,6 +40,9 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
             var line = bufferedReader.readLine();
+            if (line == null) {
+                return;
+            }
             final String requestUrl = line.split(" ")[1];
 
             if (requestUrl.equals("/")) {
@@ -46,7 +50,9 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (FILE_REGEX.matcher(requestUrl).matches()) {
-                outputStream.write(createResponse(requestUrl, "text/html").getBytes());
+                final String extension = requestUrl.split("\\.")[1];
+                final ContentType contentType = ContentType.findContentType(extension);
+                outputStream.write(createResponse(requestUrl, contentType).getBytes());
             }
 
             outputStream.flush();
@@ -55,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponse(final String requestUrl, final String contentType)
+    private String createResponse(final String requestUrl, final ContentType contentType)
             throws URISyntaxException, IOException {
         final URL resource = this.getClass().getClassLoader().getResource("static" + requestUrl);
         final Path path = Paths.get(resource.toURI());
@@ -63,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
 
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Type: " + contentType.getContentType() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

@@ -36,15 +36,22 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final String requestValue = readHttpRequest(inputStream);
-
             if (requestValue == null) {
                 return;
             }
 
-            final String responseBody = makeResponseBody(requestValue);
+            final String resource = requestValue.split(" ")[1];
+
+            String contentType = "text/html";
+
+            if (resource.contains("/css")) {
+                contentType = "text/css";
+            }
+
+            final String responseBody = makeResponseBody(resource);
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
+                    "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -64,9 +71,7 @@ public class Http11Processor implements Runnable, Processor {
         return requestValue;
     }
 
-    public String makeResponseBody(final String requestPath) throws IOException, URISyntaxException {
-        String resource = requestPath.split(" ")[1];
-
+    public String makeResponseBody(final String resource) throws IOException, URISyntaxException {
         if ("/".equals(resource)) {
             return "Hello world!";
         }

@@ -21,14 +21,8 @@ public class RequestHandler {
 
         if (GET.isSameMethod(request.getMethod()) && request.isSameRequestUrl("/login")) {
             UserLoginRequest userLoginRequest = UserLoginRequest.from(request.getQueryParameters());
-            ResponseEntity<String> response = new UserLoginController().doGet(userLoginRequest);
+            return new UserLoginController().doGet(userLoginRequest);
 
-            HttpHeaders httpHeaders = HttpHeaderFactory.create(
-                    new Pair(CONTENT_TYPE.getValue(), ContentType.TEXT_HTML_CHARSET_UTF_8.getValue()),
-                    new Pair(HttpHeader.LOCATION.getValue(), response.getResponse())
-            );
-
-            return new NoBodyResponse(response.getHttpStatus(), httpHeaders);
         } else if (POST.isSameMethod(request.getMethod()) && request.isSameRequestUrl("/register")) {
             UserRegisterRequest userRegisterRequest = UserRegisterRequest.from(request.parseBody());
             ResponseEntity<String> response = new UserCreateController().doPost(userRegisterRequest);
@@ -44,5 +38,4 @@ public class RequestHandler {
         );
         return new BodyResponse(HttpStatus.OK, httpHeaders, "Hello world!");
     }
-
 }

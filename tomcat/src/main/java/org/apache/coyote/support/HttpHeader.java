@@ -9,7 +9,8 @@ public enum HttpHeader {
     CONNECTION("Connection"),
     ACCEPT("Accept"),
     ACCEPT_ENCODING("Accept-Encoding"),
-    ACCEPT_LANGUAGE("Accept-Language");
+    ACCEPT_LANGUAGE("Accept-Language"),
+    SET_COOKIE("Set-Cookie");
 
     private final String value;
 

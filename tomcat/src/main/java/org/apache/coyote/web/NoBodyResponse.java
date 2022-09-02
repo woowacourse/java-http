@@ -1,5 +1,6 @@
 package org.apache.coyote.web;
 
+import org.apache.coyote.support.HttpHeader;
 import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;
 
@@ -20,6 +21,7 @@ public class NoBodyResponse extends Response {
         stringBuilder.append(getRequestLine());
         getHttpHeaders().getHeaders()
                 .forEach((key, value) -> stringBuilder.append(String.format(HEADER_TEMPLATE, key, value)));
+        stringBuilder.append(String.format(HEADER_TEMPLATE, HttpHeader.SET_COOKIE.getValue(), getCookieTemplate()));
         return stringBuilder.toString();
     }
 }

@@ -48,8 +48,8 @@ public class HttpRequest {
         return result;
     }
 
-    public boolean isCallApi() {
-        return findFilePath().isNotFilePath(url);
+    public boolean isFindFile() {
+        return findFilePath().isFilePath(url);
     }
 
     public ContentType findContentType() {

@@ -40,8 +40,8 @@ public enum FilePath {
                 .orElseThrow(() -> new IllegalArgumentException(String.format(ERROR_MESSAGE, path)));
     }
 
-    public boolean isNotFilePath(final String path) {
-        return !path.equals(value);
+    public boolean isFilePath(final String path) {
+        return path.equals(value);
     }
 
     public String findFileExtension() {

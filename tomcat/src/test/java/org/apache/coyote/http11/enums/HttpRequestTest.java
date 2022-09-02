@@ -18,7 +18,7 @@ class HttpRequestTest {
         HttpRequest httpRequest = new HttpRequest("/login");
 
         // when & then
-        assertThat(httpRequest.isCallApi()).isTrue();
+        assertThat(httpRequest.isFindFile()).isTrue();
     }
 
     @DisplayName("file 호출")
@@ -28,7 +28,7 @@ class HttpRequestTest {
         HttpRequest httpRequest = new HttpRequest("/login.html");
 
         // when & then
-        assertThat(httpRequest.isCallApi()).isFalse();
+        assertThat(httpRequest.isFindFile()).isFalse();
     }
 
     @DisplayName("올바른 ContentType 찾기")

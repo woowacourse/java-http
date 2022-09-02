@@ -25,7 +25,7 @@ class FilePathTest {
         FilePath filePath = FilePath.LOGIN_PAGE;
 
         // when & then
-        assertThat(filePath.isNotFilePath("/login")).isTrue();
+        assertThat(filePath.isFilePath("/login")).isTrue();
     }
 
     @DisplayName("유효한 파일 경로")
@@ -35,7 +35,7 @@ class FilePathTest {
         FilePath filePath = FilePath.LOGIN_PAGE;
 
         // when & then
-        assertThat(filePath.isNotFilePath("/login.html")).isFalse();
+        assertThat(filePath.isFilePath("/login.html")).isFalse();
     }
 
     @DisplayName("파일 확장자 추출")

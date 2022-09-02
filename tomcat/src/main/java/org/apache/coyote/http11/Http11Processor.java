@@ -14,6 +14,7 @@ import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.mapping.RequestMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,38 +45,20 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequest httpRequest = readHttpRequest(bufferedReader);
 
-            final String responseBody = makeResponseBody(httpRequest);
+            final String responseMessage = getResponseMessage(httpRequest);
 
-            final String response = makeOkResponse(responseBody, httpRequest);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(responseMessage.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String makeResponseBody(final HttpRequest httpRequest) throws IOException {
-        if (httpRequest.getUriPath().equals("/")) {
-            return getHomeBody();
-        }
-        final File file = findStaticFile(httpRequest);
-        final FileInputStream fileInputStream = new FileInputStream(file);
-
-        return new String(fileInputStream.readAllBytes());
-    }
-
-    private File findStaticFile(final HttpRequest httpRequest) {
-        final String path = findStaticFilePath(httpRequest);
-        return new File(path);
-    }
-
-    private String findStaticFilePath(final HttpRequest httpRequest) {
-        final URL resource = getClass()
-                .getClassLoader()
-                .getResource("static" + httpRequest.getUriPath());
-        return Objects.requireNonNull(resource)
-                .getPath();
+    private String getResponseMessage(final HttpRequest httpRequest) {
+        return RequestMapper.getInstance()
+                .getHandler(httpRequest.getUriPath())
+                .handle(httpRequest)
+                .toHttpMessage();
     }
 
     private HttpRequest readHttpRequest(final BufferedReader bufferedReader) throws IOException {
@@ -86,17 +69,12 @@ public class Http11Processor implements Runnable, Processor {
              header != null && !header.equals("");
              header = bufferedReader.readLine()) {
             headers.add(header);
-            System.out.println("header = " + header);
         }
-
-        System.out.println("headers = " + headers);
 
         final StringBuilder requestBody = new StringBuilder();
         if (headers.contains("Content-Length")) {
             addRequestBodyLine(bufferedReader, requestBody);
         }
-
-        System.out.println("requestBody = " + requestBody);
 
         return HttpRequest.from(firstLine, headers, requestBody.toString());
     }
@@ -108,33 +86,5 @@ public class Http11Processor implements Runnable, Processor {
             System.out.println("requestBodyLine = " + requestBodyLine);
             requestBody.append(requestBodyLine);
         }
-    }
-
-    private String makeOkResponse(final String responseBody, final HttpRequest httpRequest) {
-        final String uriPath = httpRequest.getUriPath();
-        final ContentType contentType = findContentType(uriPath);
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                String.format("Content-Type: %s;charset=utf-8 ", contentType.getValue()),
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private String getHomeBody() {
-        return "Hello world!";
-    }
-
-    private ContentType findContentType(final String uriPath) {
-        if (uriPath.endsWith(".html")) {
-            return ContentType.TEXT_HTML;
-        }
-        if (uriPath.endsWith(".css")) {
-            return ContentType.TEXT_CSS;
-        }
-        if (uriPath.endsWith(".js")) {
-            return ContentType.TEXT_JAVASCRIPT;
-        }
-        return ContentType.TEXT_PLAIN;
     }
 }

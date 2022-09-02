@@ -27,6 +27,10 @@ public class HttpHeaders {
         return new HttpHeaders(headers);
     }
 
+    public static HttpHeaders empty() {
+        return new HttpHeaders(new HashMap<>());
+    }
+
     public Optional<String> getValue(final String key) {
         return Optional.ofNullable(headers.get(key));
     }

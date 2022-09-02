@@ -9,17 +9,25 @@ import java.util.Map;
 
 public class HttpRequest {
 
+	private static final int HTTP_METHOD_INDEX = 0;
+	private static final int HTTP_URL_INDEX = 1;
+	private static final String EMPTY_BODY = "";
+
 	private final HttpMethod method;
 	private final String url;
 	private final Map<String, String> headers;
 	private final String body;
 
 	public HttpRequest(BufferedReader requestReader) throws IOException {
-		String[] startLine = requestReader.readLine().split(" ");
-		this.method = HttpMethod.from(startLine[0]);
-		this.url = startLine[1];
+		String startLine = requestReader.readLine();
+		this.method = HttpMethod.from(extractStartLine(startLine, HTTP_METHOD_INDEX));
+		this.url = extractStartLine(startLine, HTTP_URL_INDEX);
 		this.headers = extractHeaders(requestReader);
 		this.body = extractBody(requestReader);
+	}
+
+	private String extractStartLine(String startLine, int index) {
+		return startLine.split(" ")[index];
 	}
 
 	private Map<String, String> extractHeaders(BufferedReader requestReader) throws IOException {
@@ -27,7 +35,7 @@ public class HttpRequest {
 		String line;
 		while (!(line = requestReader.readLine()).isBlank()) {
 			String[] header = line.split(": ");
-			headers.put(header[0], header[1]);
+			headers.put(header[HTTP_METHOD_INDEX], header[HTTP_URL_INDEX]);
 		}
 		return headers;
 	}
@@ -35,11 +43,11 @@ public class HttpRequest {
 	private String extractBody(BufferedReader requestReader) throws IOException {
 		String length = headers.getOrDefault(Header.CONTENT_LENGTH.getName(), null);
 		if (length == null) {
-			return null;
+			return EMPTY_BODY;
 		}
 		int contentLength = Integer.parseInt(length);
 		char[] body = new char[contentLength];
-		requestReader.read(body, 0, contentLength);
+		requestReader.read(body, HTTP_METHOD_INDEX, contentLength);
 		return new String(body);
 	}
 
@@ -56,17 +64,17 @@ public class HttpRequest {
 	}
 
 	private String extractExtension() {
-		return url.split("\\.")[1];
+		return url.split("\\.")[HTTP_URL_INDEX];
 	}
 
 	public String getQueryString(String key) {
 		String contentType = headers.get(Header.CONTENT_TYPE.getName());
 		List<String> requestParams = extractRequestParams(contentType);
 		return requestParams.stream()
-			.filter(param -> param.split("=")[0].equals(key))
-			.map(param -> param.split("=")[1])
+			.filter(param -> param.split("=")[HTTP_METHOD_INDEX].equals(key))
+			.map(param -> param.split("=")[HTTP_URL_INDEX])
 			.findAny()
-			.orElse("");
+			.orElse(EMPTY_BODY);
 	}
 
 	private List<String> extractRequestParams(String contentType) {
@@ -76,7 +84,7 @@ public class HttpRequest {
 			requestParams.addAll(List.of(params));
 		}
 		if (url.contains("?")) {
-			String[] params = url.split("\\?")[1]
+			String[] params = url.split("\\?")[HTTP_URL_INDEX]
 				.split("&");
 			requestParams.addAll(List.of(params));
 		}

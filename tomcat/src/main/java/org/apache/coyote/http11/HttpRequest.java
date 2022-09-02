@@ -8,6 +8,7 @@ public class HttpRequest {
     private static final String HOST_PREFIX = "Host: ";
     private static final String ACCEPT_PREFIX = "Accept: ";
     private static final String CONNECTION_PREFIX = "Connection: ";
+    private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8";
 
     private final String startLine;
     private final String host;
@@ -52,6 +53,10 @@ public class HttpRequest {
     }
 
     public String getAcceptType() {
+        if (accept == null) {
+            return TEXT_HTML_CHARSET_UTF_8;
+        }
+
         return accept.split(",")[0];
     }
 

@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.coyote.domain;
 
 public class FilePath {
     private String value;

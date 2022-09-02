@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.coyote.domain;
 
 import java.io.File;
 import java.io.IOException;

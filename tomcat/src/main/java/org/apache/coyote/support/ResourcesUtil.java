@@ -15,9 +15,9 @@ public class ResourcesUtil {
     private ResourcesUtil() {
     }
 
-    public static String parseExtension(final String uri) {
-        if (uri.contains(EXTENSION_DELIMITER)) {
-            return uri.substring(uri.lastIndexOf(EXTENSION_DELIMITER) + 1);
+    public static String parseExtension(final String url) {
+        if (url.contains(EXTENSION_DELIMITER)) {
+            return url.substring(url.lastIndexOf(EXTENSION_DELIMITER) + 1);
         }
         return "";
     }

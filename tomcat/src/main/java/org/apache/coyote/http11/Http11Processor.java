@@ -9,6 +9,7 @@ import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.ContentType;
 import org.apache.coyote.Processor;
+import org.apache.coyote.QueryParams;
 import org.apache.coyote.support.ResourcesUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,8 @@ public class Http11Processor implements Runnable, Processor {
     public static final String LANDING_PAGE_URL = "/";
     public static final String STATIC_PATH = "static";
     public static final String DEFAULT_EXTENSION = ".html";
+    public static final String LOGIN_URL = "/login";
+    public static final String QUERY_STRING_DELIMITER = "?";
 
     private final Socket connection;
 
@@ -52,19 +55,53 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String parseUri(final BufferedReader bufferedReader) throws IOException {
-        String uri = bufferedReader.readLine().split(" ", -1)[URL_INDEX];
-        String extension = ResourcesUtil.parseExtension(uri);
-        if (extension.isBlank()) {
-            return uri + DEFAULT_EXTENSION;
-        }
-        return uri;
+        return bufferedReader.readLine().split(" ", -1)[URL_INDEX];
     }
 
     private String accessUri(final String uri) throws IOException {
         if (uri.equals(LANDING_PAGE_URL)) {
             return "Hello world!";
         }
-        return ResourcesUtil.readResource(STATIC_PATH + uri);
+        String url = parseUrl(uri);
+        String queryString = parseQueryString(uri);
+        return accessUrl(url, QueryParams.parseQueryParams(queryString));
+    }
+
+    private String parseUrl(final String uri) {
+        if (uri.equals(LANDING_PAGE_URL)) {
+            return uri;
+        }
+        String url = cutQueryString(uri);
+        String extension = ResourcesUtil.parseExtension(url);
+        if (extension.isBlank()) {
+            return url + DEFAULT_EXTENSION;
+        }
+        return url;
+    }
+
+    private String cutQueryString(final String uri) {
+        int lastIndexOfQueryStringDelimiter = uri.lastIndexOf(QUERY_STRING_DELIMITER);
+        if (lastIndexOfQueryStringDelimiter == -1) {
+            return uri;
+        }
+        return uri.substring(0, lastIndexOfQueryStringDelimiter);
+    }
+
+    private String parseQueryString(final String uri) {
+        if (uri.lastIndexOf(QUERY_STRING_DELIMITER) == -1) {
+            return "";
+        }
+        return uri.substring(uri.lastIndexOf(QUERY_STRING_DELIMITER));
+    }
+
+    private String accessUrl(final String url, final QueryParams queryParams) throws IOException {
+        if (url.equals(LANDING_PAGE_URL)) {
+            return "Hello world!";
+        }
+        if (url.equals(LOGIN_URL)) {
+            return "";
+        }
+        return ResourcesUtil.readResource(STATIC_PATH + url);
     }
 
     private ContentType parseContentType(final String uri) {

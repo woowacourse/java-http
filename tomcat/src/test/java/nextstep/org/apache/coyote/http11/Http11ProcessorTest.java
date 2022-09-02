@@ -112,4 +112,52 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void 로그인_페이지_렌더링() throws IOException {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        URL resource = getClass().getClassLoader().getResource("static/login.html");
+        assert resource != null;
+        String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).contains(expectedResponseBody);
+    }
+
+    @Test
+    void query_string이_있어도_로그인_페이지를_렌더링한다() throws IOException {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        URL resource = getClass().getClassLoader().getResource("static/login.html");
+        assert resource != null;
+        String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).contains(expectedResponseBody);
+    }
 }

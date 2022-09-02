@@ -1,5 +1,8 @@
 package nextstep.jwp.controller;
 
+import org.apache.http.HttpStatus;
+import org.apache.http.RequestEntity;
+import org.apache.http.ResponseEntity;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -2,10 +2,11 @@ package org.apache.coyote.http11;
 
 import javassist.NotFoundException;
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.HttpStatus;
-import nextstep.jwp.controller.RequestEntity;
-import nextstep.jwp.controller.ResponseEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.RequestEntity;
+import org.apache.http.ResponseEntity;
 import org.apache.coyote.Processor;
+import org.apache.http.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
                 final String contentType = backPart.split(",")[0];
                 requestInfoMapping.put("contentType", contentType);
             }
-            if (isStartsWithRequestMethod(line)) {
+            if (HttpMethod.isStartWithAny(line)) {
                 final String uri = getUri(line);
                 final String queryString = getQueryString(line);
                 requestInfoMapping.put("uri", uri);

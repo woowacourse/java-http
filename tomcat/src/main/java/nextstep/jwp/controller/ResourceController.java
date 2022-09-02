@@ -2,6 +2,9 @@ package nextstep.jwp.controller;
 
 import javassist.NotFoundException;
 import nextstep.jwp.ResourceReader;
+import org.apache.http.HttpStatus;
+import org.apache.http.RequestEntity;
+import org.apache.http.ResponseEntity;
 
 import java.net.URISyntaxException;
 

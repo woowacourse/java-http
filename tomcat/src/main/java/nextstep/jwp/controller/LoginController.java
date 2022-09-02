@@ -4,6 +4,9 @@ import nextstep.jwp.ResourceReader;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.dto.LoginRequest;
 import nextstep.jwp.model.User;
+import org.apache.http.HttpStatus;
+import org.apache.http.RequestEntity;
+import org.apache.http.ResponseEntity;
 
 import java.util.HashMap;
 import java.util.Map;

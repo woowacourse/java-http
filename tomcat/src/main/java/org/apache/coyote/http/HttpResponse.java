@@ -25,7 +25,7 @@ public class HttpResponse {
         final List<String> values = new ArrayList<>();
         final String responseBody = getResponseBody(httpRequest.getPath());
 
-        values.add("HTTP/1.1 200 OK ");
+        values.add(HttpStatusCode.OK.getResponseStartLine());
         values.add(httpRequest.getContentType());
         values.add("Content-Length: " + responseBody.getBytes().length + " ");
 
@@ -56,16 +56,8 @@ public class HttpResponse {
         return responseBody;
     }
 
-    public HttpResponse changeStatusCode(final int statusCode) {
-        if (statusCode == 200) {
-            values.set(0, "HTTP/1.1 200 OK ");
-        }
-        if (statusCode == 302) {
-            values.set(0, "HTTP/1.1 302 Found ");
-        }
-        if (values.isEmpty()) {
-            values.set(0, "HTTP/1.1 500 Internal Server ");
-        }
+    public HttpResponse changeStatusCode(final HttpStatusCode httpStatusCode) {
+        values.set(0, httpStatusCode.getResponseStartLine());
         return this;
     }
 

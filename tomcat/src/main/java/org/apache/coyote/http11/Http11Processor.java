@@ -38,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
             final Http11Response http11Response = new Http11Response(outputStream);
             logLogin(urlPath);
             http11Response.write(staticFile);
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
     }

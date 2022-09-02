@@ -4,6 +4,8 @@ import static java.util.stream.Collectors.toMap;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
+import nextstep.jwp.exception.InvalidQueryParamKeyException;
 
 public class Http11QueryParams {
     private static final String PARAM_DELIMITER = "&";
@@ -24,6 +26,10 @@ public class Http11QueryParams {
     }
 
     public String get(final String key) {
-        return params.getOrDefault(key, null);
+        final String value = params.get(key);
+        if (Objects.isNull(value)) {
+            throw new InvalidQueryParamKeyException();
+        }
+        return value;
     }
 }

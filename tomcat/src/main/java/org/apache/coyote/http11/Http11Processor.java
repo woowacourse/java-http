@@ -7,9 +7,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.Map;
-import java.util.stream.Collectors;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -38,11 +36,10 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var requestHeader = parseRequestHeader(bufferedReader);
+            final var requestHeader = readRequestHeader(bufferedReader);
 
-            final var url = parseUrl(requestHeader);
-            final Map<String, String> requestParam = parseRequestParams(requestHeader);
-            final var response = getResponse(url, requestParam);
+            final HttpRequest httpRequest = HttpRequest.from(requestHeader);
+            final var response = getResponse(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -51,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseRequestHeader(final BufferedReader bufferedReader) throws IOException {
+    private String readRequestHeader(final BufferedReader bufferedReader) throws IOException {
         StringBuilder header = new StringBuilder();
 
         while (bufferedReader.ready()) {
@@ -62,23 +59,8 @@ public class Http11Processor implements Runnable, Processor {
         return header.toString();
     }
 
-    private String parseUrl(final String requestHeader) {
-        return requestHeader.split(" ")[1]
-                .split("\\?")[0];
-    }
-
-    private Map<String, String> parseRequestParams(final String requestHeader) {
-        String url = requestHeader.split(" ")[1];
-
-        if (!url.contains("?")) {
-            return Map.of();
-        }
-
-        String params = url.split("\\?")[1];
-
-        return Arrays.stream(params.split("&"))
-                .map(it -> it.split("="))
-                .collect(Collectors.toMap(it -> it[0], it -> it[1]));
+    private String getResponse(final HttpRequest httpRequest) throws IOException {
+        return getResponse(httpRequest.getRequestUrl(), httpRequest.getRequestParams());
     }
 
     private String getResponse(String url, final Map<String, String> requestParam) throws IOException {

@@ -5,28 +5,28 @@ import org.apache.coyote.http11.common.StaticResource;
 
 public class HttpResponse {
 
-    private final StatusLine statusLine;
-    private final Headers headers;
+    private final ResponseStatusLine responseStatusLine;
+    private final ResponseHeaders responseHeaders;
     private final String body;
 
-    public HttpResponse(final StatusLine statusLine, final Headers headers, final String body) {
-        this.statusLine = statusLine;
-        this.headers = headers;
+    public HttpResponse(final ResponseStatusLine responseStatusLine, final ResponseHeaders responseHeaders, final String body) {
+        this.responseStatusLine = responseStatusLine;
+        this.responseHeaders = responseHeaders;
         this.body = body;
     }
 
     public static HttpResponse ok(final StaticResource staticResource) {
         return new HttpResponse(
-                new StatusLine(HttpStatus.OK),
-                Headers.withStaticResource(staticResource),
+                new ResponseStatusLine(HttpStatus.OK),
+                ResponseHeaders.withStaticResource(staticResource),
                 staticResource.getContent()
         );
     }
 
     public static HttpResponse found(final String location) {
         return new HttpResponse(
-                new StatusLine(HttpStatus.FOUND),
-                Headers.withLocation(location),
+                new ResponseStatusLine(HttpStatus.FOUND),
+                ResponseHeaders.withLocation(location),
                 ""
         );
     }
@@ -34,8 +34,8 @@ public class HttpResponse {
     @Override
     public String toString() {
         return String.join("\r\n",
-                statusLine.toString(),
-                headers.toString(),
+                responseStatusLine.toString(),
+                responseHeaders.toString(),
                 "",
                 body);
     }

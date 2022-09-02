@@ -13,7 +13,7 @@
 - [X] uri의 QueryString을 파싱하는 기능이 있다.
   - [X] http://localhost:8080/login?account=gugu&password=password으로 접속하면 로그인 페이지(login.html) 페이지에 보여준다.
   - [X] Query String을 파싱해서 아이디, 비밀번호가 일치하면 회원을 조회한 결과를 출력한다.
-  - [ ] Query String 형식에 대한 예외처리를 추가한다. 
+  - [X] Query String 형식에 대한 예외처리를 추가한다. 
 
 ### 2단계 - 로그인 구현하기
 
@@ -38,3 +38,4 @@
 - [ ] 커스텀 예외 코드를 만든다. 
 - [ ] 더 다양한 Content Type을 지원한다. 
   - [X] svg
+- [ ] RFC2616을 참고해 이름을 리팩토링한다. 

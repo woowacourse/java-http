@@ -11,10 +11,10 @@ import org.apache.coyote.http11.common.HttpParser;
 public class HttpRequest {
 
     private final RequestStartLine startLine;
-    private final RequestHeader header;
+    private final RequestHeaders header;
     private final String body;
 
-    public HttpRequest(final RequestStartLine startLine, final RequestHeader header, final String body) {
+    public HttpRequest(final RequestStartLine startLine, final RequestHeaders header, final String body) {
         this.startLine = startLine;
         this.header = header;
         this.body = body;
@@ -24,12 +24,9 @@ public class HttpRequest {
         final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         final var startLine = RequestStartLine.from(bufferedReader.readLine());
-        final var header = RequestHeader.from(readHeader(bufferedReader));
-        if (startLine.getMethod().equals(HttpMethod.POST)) {
-            final var body = readBody(bufferedReader, header);
-            return new HttpRequest(startLine, header, body);
-        }
-        return new HttpRequest(startLine, header, "");
+        final var header = RequestHeaders.from(readHeader(bufferedReader));
+        final var body = readBody(bufferedReader, header);
+        return new HttpRequest(startLine, header, body);
     }
 
     private static String readHeader(final BufferedReader bufferedReader) throws IOException {
@@ -41,11 +38,19 @@ public class HttpRequest {
         return stringBuilder.toString();
     }
 
-    private static String readBody(final BufferedReader bufferedReader, final RequestHeader header) throws IOException {
-        final var contentLength = Integer.parseInt(header.get("Content-Length"));
+    private static String readBody(final BufferedReader bufferedReader, final RequestHeaders header) throws IOException {
+        final var contentLength = parseContentLength(header);
         final var buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         return new String(buffer);
+    }
+
+    private static int parseContentLength(final RequestHeaders header) {
+        final var contentLength = header.get("Content-Length");
+        if (contentLength == null) {
+            return 0;
+        }
+        return Integer.parseInt(contentLength);
     }
 
     public Map<String, String> parseQueryString() {
@@ -72,7 +77,7 @@ public class HttpRequest {
         return startLine.getQueryString();
     }
 
-    public RequestHeader getHeader() {
+    public RequestHeaders getHeader() {
         return header;
     }
 

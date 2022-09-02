@@ -5,27 +5,25 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.common.StaticResource;
 
-public class Headers {
-
-    private static final String NEW_LINE = System.getProperty("line.separator");
+public class ResponseHeaders {
 
     private final Map<String, String> value;
 
-    public Headers(final Map<String, String> value) {
+    public ResponseHeaders(final Map<String, String> value) {
         this.value = value;
     }
 
-    public static Headers withStaticResource(final StaticResource staticResource) {
+    public static ResponseHeaders withStaticResource(final StaticResource staticResource) {
         final var headers = new LinkedHashMap<String, String>();
         headers.put("Content-Type", staticResource.getContentType());
         headers.put("Content-Length", staticResource.getContentLength());
-        return new Headers(headers);
+        return new ResponseHeaders(headers);
     }
 
-    public static Headers withLocation(final String location) {
+    public static ResponseHeaders withLocation(final String location) {
         final var headers = new LinkedHashMap<String, String>();
         headers.put("Location", location);
-        return new Headers(headers);
+        return new ResponseHeaders(headers);
     }
 
     @Override
@@ -33,6 +31,6 @@ public class Headers {
         return value.entrySet()
                 .stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
-                .collect(Collectors.joining(NEW_LINE));
+                .collect(Collectors.joining("\r\n"));
     }
 }

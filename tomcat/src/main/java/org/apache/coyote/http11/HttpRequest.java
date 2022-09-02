@@ -37,8 +37,15 @@ public class HttpRequest {
         }
         return queryStrings;
     }
-    
+
     public String getUrl() {
         return url;
+    }
+
+    public String getQueryString(final String parameter) {
+        if (!queryStrings.containsKey(parameter)) {
+            return "";
+        }
+        return queryStrings.get(parameter);
     }
 }

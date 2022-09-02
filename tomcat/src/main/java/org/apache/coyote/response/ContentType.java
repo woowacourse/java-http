@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.response;
 
 public enum ContentType {
     HTTP("text/html"),

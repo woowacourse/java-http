@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.request;
 
 import java.util.Map;
 
@@ -11,7 +11,6 @@ public class HttpRequestHeader {
         this.startLine = startLine;
         this.headers = headers;
     }
-
 
     public String getRequestUrl() {
         String requestUrl = startLine.split(" ")[1];

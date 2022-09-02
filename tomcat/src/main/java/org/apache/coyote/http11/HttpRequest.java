@@ -38,6 +38,10 @@ public class HttpRequest {
         return queryStrings;
     }
 
+    public boolean isFileRequest() {
+        return this.url.contains(".");
+    }
+
     public String getUrl() {
         return url;
     }
@@ -47,5 +51,13 @@ public class HttpRequest {
             return "";
         }
         return queryStrings.get(parameter);
+    }
+
+    public String getFileExtension() {
+        if (isFileRequest()) {
+            final int index = url.indexOf(".");
+            return url.substring(index + 1);
+        }
+        return "html";
     }
 }

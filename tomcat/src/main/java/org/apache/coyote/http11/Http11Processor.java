@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String STATIC_DIRECTORY = "static";
 
     private final Socket connection;
 
@@ -53,17 +54,14 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponseBody(final HttpRequest httpRequest) throws IOException {
-        if (httpRequest.getUrl().equals("/index.html")) {
-            final Path path = Paths.get(ClassLoader.getSystemResource("static/index.html").getPath());
-            return new String(Files.readAllBytes(path));
-        }
-        if (httpRequest.getUrl().equals("/css/styles.css")) {
-            final Path path = Paths.get(ClassLoader.getSystemResource("static/css/styles.css").getPath());
+        if (httpRequest.isFileRequest()) {
+            final Path path = Paths.get(
+                    ClassLoader.getSystemResource(STATIC_DIRECTORY + httpRequest.getUrl()).getPath());
             return new String(Files.readAllBytes(path));
         }
         if (httpRequest.getUrl().equals("/login")) {
             validateRegister(httpRequest);
-            final Path path = Paths.get(ClassLoader.getSystemResource("static/login.html").getPath());
+            final Path path = Paths.get(ClassLoader.getSystemResource(STATIC_DIRECTORY + "/login.html").getPath());
             return new String(Files.readAllBytes(path));
         }
         return "Hello world!";
@@ -84,9 +82,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getContentType(final HttpRequest httpRequest) {
-        if (httpRequest.getUrl().contains("css")) {
-            return "text/css;charset=utf-8";
-        }
-        return "text/html;charset=utf-8";
+        return "text/" + httpRequest.getFileExtension() + ";charset=utf-8";
     }
 }

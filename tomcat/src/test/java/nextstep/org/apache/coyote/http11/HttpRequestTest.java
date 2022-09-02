@@ -38,4 +38,25 @@ class HttpRequestTest {
                 () -> assertThat(password).isEqualTo("password")
         );
     }
+
+    @Test
+    @DisplayName("해당 요청이 확장자를 가진 파일에 대한 요청인지 확인한다.")
+    void isFileRequest() throws IOException {
+        // given
+        final String request = String.join("\r\n",
+                "GET /css/styles.css HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/css,*/*;q=0.1 ",
+                "Connection: keep-alive",
+                "");
+        final InputStream inputStream = new ByteArrayInputStream(request.getBytes());
+        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        final HttpRequest httpRequest = new HttpRequest(bufferedReader);
+
+        // when
+        final boolean fileRequest = httpRequest.isFileRequest();
+
+        // then
+        assertThat(fileRequest).isTrue();
+    }
 }

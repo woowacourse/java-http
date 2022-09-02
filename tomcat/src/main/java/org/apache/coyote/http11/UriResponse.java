@@ -1,11 +1,11 @@
 package org.apache.coyote.http11;
 
-public class UrlResponse {
+public class UriResponse {
 
     private final String responseBody;
     private final String contentType;
 
-    public UrlResponse(String responseBody, String contentType) {
+    public UriResponse(String responseBody, String contentType) {
         this.responseBody = responseBody;
         this.contentType = contentType;
     }

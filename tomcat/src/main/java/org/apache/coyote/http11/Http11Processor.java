@@ -30,10 +30,10 @@ public class Http11Processor implements Runnable, org.apache.coyote.Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            String url = getUrl(bufferedReader);
-            UrlResponse urlResponse = ProcessorManager.getUrlResponse(url);
+            String uri = getUri(bufferedReader);
+            UriResponse uriResponse = ControllerManager.getUriResponse(uri);
 
-            String http11Response = getHttp11Response(urlResponse);
+            String http11Response = getHttp11Response(uriResponse);
 
             outputStream.write(http11Response.getBytes());
             outputStream.flush();
@@ -42,18 +42,18 @@ public class Http11Processor implements Runnable, org.apache.coyote.Processor {
         }
     }
 
-    private String getUrl(BufferedReader bufferedReader) throws IOException {
-        String urlLine = bufferedReader.readLine();
-        Objects.requireNonNull(urlLine);
-        return urlLine.split(" ")[1];
+    private String getUri(BufferedReader bufferedReader) throws IOException {
+        String uriLine = bufferedReader.readLine();
+        Objects.requireNonNull(uriLine);
+        return uriLine.split(" ")[1];
     }
 
-    private String getHttp11Response(UrlResponse urlResponse) {
+    private String getHttp11Response(UriResponse uriResponse) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: " + urlResponse.getContentType() + ";charset=utf-8 ",
-                "Content-Length: " + urlResponse.getResponseBody().getBytes().length + " ",
+                "Content-Type: " + uriResponse.getContentType() + ";charset=utf-8 ",
+                "Content-Length: " + uriResponse.getResponseBody().getBytes().length + " ",
                 "",
-                urlResponse.getResponseBody());
+                uriResponse.getResponseBody());
     }
 }

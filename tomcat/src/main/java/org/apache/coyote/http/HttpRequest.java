@@ -12,6 +12,10 @@ import java.util.stream.Collectors;
 
 public class HttpRequest {
 
+    private static final String QUERY_DELIMETER = "&";
+    private static final String KEY_VALUE_DELIMITER = "=";
+    private static final String LOGIN_URL = "/login";
+    private static final String INDEX_DELIMITER = "?";
     private final HttpMethod httpMethod;
     private final String url;
 
@@ -21,13 +25,13 @@ public class HttpRequest {
     public HttpRequest(String request) {
         final String[] parseRequest = request.split(" ");
         this.httpMethod = HttpMethod.from(parseRequest[0]);
-        Integer index = parseRequest[1].indexOf("?");
+        Integer index = parseRequest[1].indexOf(INDEX_DELIMITER);
         this.url = parseUrl(parseRequest[1], index);
         this.query = parseQuery(parseRequest[1], index);
     }
 
     public void printUserLog(){
-        if(this.url.equals("/login")){
+        if(this.url.equals(LOGIN_URL)){
             printRequestLoginUser(this);
         }
     }
@@ -42,9 +46,9 @@ public class HttpRequest {
     private Map<String, String> parseQuery(final String uri, final Integer index) {
         if(hasQuery(index)){
             String queryString = uri.substring(index + 1);
-            final String[] s = queryString.split("&");
+            final String[] s = queryString.split(QUERY_DELIMETER);
             return Arrays.stream(s)
-                    .map(q -> q.split("="))
+                    .map(q -> q.split(KEY_VALUE_DELIMITER))
                     .collect(Collectors.toMap(key -> key[0], value -> value[1]));
         }
         return new HashMap<>();

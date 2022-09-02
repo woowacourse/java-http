@@ -11,6 +11,8 @@ import nextstep.jwp.exception.NotFoundUserException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.ResourcesUtil;
 import org.apache.coyote.Processor;
@@ -18,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
+
+    private static final String HTTP_VERSION = "HTTP/1.1";
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
@@ -45,33 +49,28 @@ public class Http11Processor implements Runnable, Processor {
 
             final var response = createResponseBody(httpRequest);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.httpResponse());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String createResponseBody(final HttpRequest httpRequest) {
+    private HttpResponse createResponseBody(final HttpRequest httpRequest) {
         if (httpRequest.isRootPath()) {
             return helloResponse();
         }
         String responseBody = ResourcesUtil.readResource(httpRequest.getFilePath(), this.getClass());
-        return okResponse(httpRequest.getContentType(), responseBody.getBytes().length, responseBody);
+        return okResponse(httpRequest.getContentType(), responseBody);
     }
 
-    private String helloResponse() {
+    private HttpResponse helloResponse() {
         var responseBody = "Hello world!";
-        return okResponse(ContentType.TEXT_HTML, responseBody.getBytes().length, responseBody);
+        return okResponse(ContentType.TEXT_HTML, responseBody);
     }
 
-    private String okResponse(final ContentType contentType, final int contentLength, final String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType.getType() + ";charset=utf-8 ",
-                "Content-Length: " + contentLength + " ",
-                "",
-                responseBody);
+    private HttpResponse okResponse(final ContentType contentType, final String responseBody) {
+        return new HttpResponse(HTTP_VERSION, HttpStatus.OK, contentType, responseBody);
     }
 
     private void printLoginUser(final HttpRequest httpRequest) {

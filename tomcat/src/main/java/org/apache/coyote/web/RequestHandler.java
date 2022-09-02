@@ -9,7 +9,6 @@ import nextstep.jwp.controller.UserLoginController;
 import nextstep.jwp.controller.dto.UserLoginRequest;
 import nextstep.jwp.controller.dto.UserRegisterRequest;
 import org.apache.coyote.support.ContentType;
-import org.apache.coyote.support.HttpHeader;
 import org.apache.coyote.support.HttpHeaderFactory;
 import org.apache.coyote.support.HttpHeaderFactory.Pair;
 import org.apache.coyote.support.HttpHeaders;
@@ -23,14 +22,11 @@ public class RequestHandler {
             UserLoginRequest userLoginRequest = UserLoginRequest.from(request.getQueryParameters());
             return new UserLoginController().doGet(userLoginRequest);
 
-        } else if (POST.isSameMethod(request.getMethod()) && request.isSameRequestUrl("/register")) {
+        }
+
+        if (POST.isSameMethod(request.getMethod()) && request.isSameRequestUrl("/register")) {
             UserRegisterRequest userRegisterRequest = UserRegisterRequest.from(request.parseBody());
-            ResponseEntity<String> response = new UserCreateController().doPost(userRegisterRequest);
-            HttpHeaders httpHeaders = HttpHeaderFactory.create(
-                    new Pair(CONTENT_TYPE.getValue(), ContentType.TEXT_HTML_CHARSET_UTF_8.getValue()),
-                    new Pair(HttpHeader.LOCATION.getValue(), response.getResponse())
-            );
-            return new NoBodyResponse(response.getHttpStatus(), httpHeaders);
+            return new UserCreateController().doPost(userRegisterRequest);
         }
 
         HttpHeaders httpHeaders = HttpHeaderFactory.create(

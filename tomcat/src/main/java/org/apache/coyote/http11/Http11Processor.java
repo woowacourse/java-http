@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.support.HttpHeader.CONTENT_TYPE;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,11 +13,16 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.file.DefaultFileHandler;
 import org.apache.coyote.file.FileHandler;
+import org.apache.coyote.support.ContentType;
+import org.apache.coyote.support.HttpHeaderFactory;
+import org.apache.coyote.support.HttpHeaderFactory.Pair;
+import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;
-import org.apache.coyote.web.BodyResponse;
-import org.apache.coyote.web.Request;
 import org.apache.coyote.web.RequestHandler;
-import org.apache.coyote.web.Response;
+import org.apache.coyote.web.request.Request;
+import org.apache.coyote.web.request.RequestParser;
+import org.apache.coyote.web.response.BodyResponse;
+import org.apache.coyote.web.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
                      new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
              final OutputStream bufferedOutputStream = new BufferedOutputStream(connection.getOutputStream())) {
 
-            Request request = Request.parse(bufferedReader);
+            Request request = RequestParser.parse(bufferedReader);
             Response response = branchRequest(request);
 
             bufferedOutputStream.write(response.createHttpResponse().getBytes());
@@ -58,8 +65,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private Response branchRequest(final Request request) throws IOException {
         if (request.isFileRequest()) {
-            String responseBody = fileHandler.getFileLines(request.getRequestUrl());
-            return new BodyResponse(HttpStatus.OK, request.getHttpHeaders().toResponse(), responseBody);
+            String responseBody = fileHandler.getFileLines(request.getRequestLine().getRequestUrl());
+            HttpHeaders httpHeaders = HttpHeaderFactory.create(
+                    new Pair(CONTENT_TYPE.getValue(), ContentType.from(request.getRequestExtension()).getValue()));
+            return new BodyResponse(HttpStatus.OK, httpHeaders, responseBody);
         }
         return new RequestHandler().handle(request);
     }

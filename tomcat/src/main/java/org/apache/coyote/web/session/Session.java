@@ -1,4 +1,4 @@
-package org.apache.coyote.web;
+package org.apache.coyote.web.session;
 
 import java.util.HashMap;
 import java.util.Map;

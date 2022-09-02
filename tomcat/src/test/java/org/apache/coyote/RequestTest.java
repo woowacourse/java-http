@@ -10,7 +10,8 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.apache.coyote.support.HttpMethod;
-import org.apache.coyote.web.Request;
+import org.apache.coyote.web.request.Request;
+import org.apache.coyote.web.request.RequestParser;
 import org.junit.jupiter.api.Test;
 
 class RequestTest {
@@ -34,68 +35,68 @@ class RequestTest {
 
     @Test
     void parse() throws IOException {
-        Request request = Request.parse(createBufferedReader(HTTP_GET_REQUEST));
+        Request request = RequestParser.parse(createBufferedReader(HTTP_GET_REQUEST));
         assertAll(
-                () -> assertThat(request.getMethod()).isEqualTo(HttpMethod.GET),
-                () -> assertThat(request.getRequestUrl()).isEqualTo("/index.html"),
-                () -> assertThat(request.getVersion()).isEqualTo("HTTP/1.1"),
+                () -> assertThat(request.getRequestLine().getMethod()).isEqualTo(HttpMethod.GET),
+                () -> assertThat(request.getRequestLine().getRequestUrl()).isEqualTo("/index.html"),
+                () -> assertThat(request.getRequestLine().getVersion()).isEqualTo("HTTP/1.1"),
                 () -> assertThat(request.getHttpHeaders().getHeaders()).containsOnlyKeys("Host", "Connection")
         );
     }
 
     @Test
     void parseRawBody() throws IOException {
-        Request request = Request.parse(createBufferedReader(HTTP_POST_REQUEST));
+        Request request = RequestParser.parse(createBufferedReader(HTTP_POST_REQUEST));
         assertThat(request.getRequestBody()).isEqualTo("account=gugu&password=password&email=hkkang%40woowahan.com");
     }
 
     @Test
     void parseBody() throws IOException {
-        Request request = Request.parse(createBufferedReader(HTTP_POST_REQUEST));
+        Request request = RequestParser.parse(createBufferedReader(HTTP_POST_REQUEST));
         Map<String, String> requestBody = request.parseBody();
         assertThat(requestBody).containsOnlyKeys("account", "password", "email");
     }
 
     @Test
     void getRequestExtension() throws IOException {
-        Request request = Request.parse(createBufferedReader(HTTP_GET_REQUEST));
+        Request request = RequestParser.parse(createBufferedReader(HTTP_GET_REQUEST));
         assertThat(request.getRequestExtension()).isEqualTo("html");
     }
 
     @Test
     void getDefaultRequestExtension() throws IOException {
-        Request request = Request.parse(createBufferedReader("GET /api/login HTTP/1.1 \r\n"));
+        Request request = RequestParser.parse(createBufferedReader("GET /api/login HTTP/1.1 \r\n"));
         assertThat(request.getRequestExtension()).isEqualTo("strings");
     }
 
     @Test
     void isFileRequest() throws IOException {
-        Request request = Request.parse(createBufferedReader(HTTP_GET_REQUEST));
+        Request request = RequestParser.parse(createBufferedReader(HTTP_GET_REQUEST));
         assertThat(request.isFileRequest()).isTrue();
     }
 
     @Test
     void isNotFileRequest() throws IOException {
-        Request request = Request.parse(createBufferedReader("GET /api/login HTTP/1.1 \r\n"));
+        Request request = RequestParser.parse(createBufferedReader("GET /api/login HTTP/1.1 \r\n"));
         assertThat(request.isFileRequest()).isFalse();
     }
 
     @Test
     void getQueryParameters() throws IOException {
-        Request request = Request.parse(
+        Request request = RequestParser.parse(
                 createBufferedReader("GET /login?account=gugu&password=password HTTP/1.1 \r\n"));
         assertThat(request.getQueryParameters()).containsKeys("account", "password");
     }
 
     @Test
     void getEmptyQueryParameters() throws IOException {
-        Request request = Request.parse(createBufferedReader("GET /api/login HTTP/1.1 \r\n"));
+        Request request = RequestParser.parse(createBufferedReader("GET /api/login HTTP/1.1 \r\n"));
         assertThat(request.getQueryParameters()).isEmpty();
     }
 
     @Test
     void isSameRequestUrl() throws IOException {
-        Request request = Request.parse(
+        Request request = RequestParser.parse(
                 createBufferedReader("GET /login?account=gugu&password=password HTTP/1.1 \r\n"));
         assertThat(request.isSameRequestUrl("/login")).isTrue();
     }

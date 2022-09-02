@@ -1,10 +1,11 @@
-package org.apache.coyote.web;
+package org.apache.coyote.web.response;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;
+import org.apache.coyote.web.session.Cookie;
 
 public abstract class Response {
 

@@ -1,4 +1,4 @@
-package org.apache.coyote.web;
+package org.apache.coyote.web.response;
 
 import java.nio.charset.StandardCharsets;
 import org.apache.coyote.support.HttpHeader;

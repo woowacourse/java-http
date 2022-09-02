@@ -12,11 +12,11 @@ import org.apache.coyote.support.HttpHeaderFactory;
 import org.apache.coyote.support.HttpHeaderFactory.Pair;
 import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;
-import org.apache.coyote.web.Cookie;
-import org.apache.coyote.web.NoBodyResponse;
-import org.apache.coyote.web.Response;
-import org.apache.coyote.web.Session;
-import org.apache.coyote.web.SessionManager;
+import org.apache.coyote.web.response.NoBodyResponse;
+import org.apache.coyote.web.response.Response;
+import org.apache.coyote.web.session.Cookie;
+import org.apache.coyote.web.session.Session;
+import org.apache.coyote.web.session.SessionManager;
 
 public class UserLoginController {
 

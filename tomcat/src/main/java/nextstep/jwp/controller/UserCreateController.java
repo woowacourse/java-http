@@ -13,8 +13,8 @@ import org.apache.coyote.support.HttpHeaderFactory;
 import org.apache.coyote.support.HttpHeaderFactory.Pair;
 import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;
-import org.apache.coyote.web.NoBodyResponse;
-import org.apache.coyote.web.Response;
+import org.apache.coyote.web.response.NoBodyResponse;
+import org.apache.coyote.web.response.Response;
 
 public class UserCreateController {
 

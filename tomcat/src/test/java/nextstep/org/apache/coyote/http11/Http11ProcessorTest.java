@@ -1,6 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -12,7 +13,8 @@ import java.nio.file.Files;
 import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.exception.InvalidAccountException;
+import org.apache.coyote.exception.InvalidPasswordException;
+import org.apache.coyote.exception.MemberNotFoundException;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -194,8 +196,44 @@ class Http11ProcessorTest {
 
         // then
         User user = InMemoryUserRepository.findByAccount("gugu")
-                .orElseThrow(InvalidAccountException::new);
+                .orElseThrow(MemberNotFoundException::new);
 
         assertThat(message).isEqualTo(user.toString());
+    }
+
+    @Test
+    void 계정_정보가_올바르지_않으면_예외를_반환한다() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /login?account=invalid&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when, then
+        assertThatThrownBy(() -> processor.process(socket))
+                .isExactlyInstanceOf(MemberNotFoundException.class);
+    }
+
+    @Test
+    void 비밀번호가_올바르지_않으면_예외를_반환한다() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=invalid HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when, then
+        assertThatThrownBy(() -> processor.process(socket))
+                .isExactlyInstanceOf(InvalidPasswordException.class);
     }
 }

@@ -7,13 +7,8 @@ import java.nio.file.Files;
 
 public class ClassPathResource {
 
-    private URL resource;
-
-    public ClassPathResource(final String url) {
-        this.resource = getClass().getClassLoader().getResource("static" + url);
-    }
-
-    public String getFileContents() {
+    public String getFileContents(final String url) {
+        URL resource = getClass().getClassLoader().getResource("static" + url);
         try {
             File file = new File(resource.getFile());
             byte[] fileContents = Files.readAllBytes(file.toPath());

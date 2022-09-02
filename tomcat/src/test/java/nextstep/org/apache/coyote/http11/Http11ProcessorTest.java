@@ -91,4 +91,34 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @DisplayName("/login url로 접근하면 login.html파일을 전달한다.")
+    @Test
+    void 로_전송하면_css_파일을_반환한다() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/html;charset=utf-8",
+                "Connection: keep-alive ",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "\r\n" +
+                responseBody;
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

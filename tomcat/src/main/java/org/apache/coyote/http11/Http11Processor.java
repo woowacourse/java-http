@@ -6,11 +6,15 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.HttpHeader;
 import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.reqeust.HttpRequestLine;
 import nextstep.jwp.io.ClassPathResource;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +43,8 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = createHttpRequest(bufferReader);
             String httpResponse = createHttpResponse(httpRequest);
 
+            printUser(httpRequest);
+
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -66,23 +72,32 @@ public class Http11Processor implements Runnable, Processor {
     private String createHttpResponse(final HttpRequest httpRequest) {
         String url = httpRequest.getUrl();
         if (url.equals("/")) {
-            return createRootResponse(httpRequest);
+            return rootResponse(httpRequest);
         }
-        String responseBody = new ClassPathResource(url).getFileContents();
-        return createOkResponse(httpRequest.getContentType(), responseBody);
+        String responseBody = new ClassPathResource().getFileContents(url);
+        return okResponse(httpRequest.findContentType(), responseBody);
     }
 
-    private String createRootResponse(final HttpRequest httpRequest) {
+    private String rootResponse(final HttpRequest httpRequest) {
         String responseBody = "Hello world!";
-        return createOkResponse(httpRequest.getContentType(), responseBody);
+        return okResponse(httpRequest.findContentType(), responseBody);
     }
 
-    private String createOkResponse(final String contentType, final String responseBody) {
+    private String okResponse(final String contentType, final String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private void printUser(final HttpRequest httpRequest) {
+        if (httpRequest.hasQueryString()) {
+            Map<String, String> queryString = httpRequest.getQueryString();
+            String account = queryString.get("account");
+            Optional<User> user = InMemoryUserRepository.findByAccount(account);
+            log.info(user.toString());
+        }
     }
 }

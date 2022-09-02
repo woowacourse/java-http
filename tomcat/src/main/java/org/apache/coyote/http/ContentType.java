@@ -1,4 +1,4 @@
-package http;
+package org.apache.coyote.http;
 
 import java.util.Arrays;
 
@@ -17,10 +17,10 @@ public enum ContentType {
         this.contentType = contentType;
     }
 
-    public static ContentType findContentType(final String extension) {
+    public static ContentType findContentType(final String url) {
         return Arrays.stream(values())
-                .filter(it -> it.extension.equals(extension))
-                .findFirst()
+                .filter(value -> url.endsWith(value.extension))
+                .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("확장자가 적절하지 않습니다."));
     }
 

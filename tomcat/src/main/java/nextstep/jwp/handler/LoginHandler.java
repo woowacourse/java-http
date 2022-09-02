@@ -7,7 +7,6 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.QueryStrings;
-import org.apache.coyote.http11.enums.ContentType;
 import org.apache.coyote.http11.enums.FilePath;
 import org.apache.coyote.http11.enums.HttpStatus;
 import org.slf4j.Logger;
@@ -26,18 +25,17 @@ public class LoginHandler {
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new UserNotFoundException(account));
 
-        ContentType contentType = httpRequest.findContentType();
         String password = queryStrings.findByKey(PASSWORD);
         if (user.checkPassword(password)) {
             log.info(user.toString());
-            return generateResponse(HttpStatus.FOUND, contentType, FilePath.INDEX_PAGE);
+            return generateResponse(HttpStatus.FOUND, httpRequest, FilePath.INDEX_PAGE);
         }
 
-        return generateResponse(HttpStatus.UNAUTHORIZED, contentType, FilePath.ERROR_401_PAGE);
+        return generateResponse(HttpStatus.UNAUTHORIZED, httpRequest, FilePath.ERROR_401_PAGE);
     }
 
-    private HttpResponse generateResponse(HttpStatus httpStatus, ContentType contentType, FilePath filePath) {
+    private HttpResponse generateResponse(HttpStatus httpStatus, HttpRequest httpRequest, FilePath filePath) {
         String responseBody = filePath.generateFile();
-        return new HttpResponse(httpStatus, contentType, responseBody);
+        return new HttpResponse(httpStatus, httpRequest, responseBody);
     }
 }

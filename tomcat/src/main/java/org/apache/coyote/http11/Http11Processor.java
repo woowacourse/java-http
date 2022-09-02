@@ -9,7 +9,6 @@ import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginHandler;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.enums.ContentType;
 import org.apache.coyote.http11.enums.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,10 +52,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse process(final HttpRequest httpRequest) {
         if (httpRequest.isFindFile()) {
-            ContentType contentType = httpRequest.findContentType();
             String responseBody = httpRequest.findFilePath()
                     .generateFile();
-            return new HttpResponse(HttpStatus.OK, contentType, responseBody);
+            return new HttpResponse(HttpStatus.OK, httpRequest, responseBody);
         }
 
         LoginHandler loginHandler = new LoginHandler();

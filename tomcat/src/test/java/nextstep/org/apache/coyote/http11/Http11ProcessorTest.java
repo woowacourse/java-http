@@ -17,19 +17,21 @@ class Http11ProcessorTest {
         // given
         final var socket = new StubSocket();
         final var processor = new Http11Processor(socket);
+        final String expectedStatusLine = "HTTP/1.1 200 OK ";
+        final String expectedContentType = "Content-Type: text/html;charset=utf-8 ";
+        final String expectedContentLength = "Content-Length: 12 ";
+        final String expectedBody = "Hello world!";
 
         // when
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
+        String actual = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(actual).contains(expectedStatusLine);
+        assertThat(actual).contains(expectedContentType);
+        assertThat(actual).contains(expectedContentLength);
+        assertThat(actual).contains(expectedBody);
     }
 
     @Test
@@ -50,13 +52,14 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var file = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: " + file.getBytes().length + " \r\n" +
-                "\r\n" +
-                file;
+        final String file = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String expectedStatusLine = "HTTP/1.1 200 OK ";
+        final String expectedContentType = "Content-Type: text/html;charset=utf-8 ";
+        final String expectedContentLength = "Content-Length: " + file.getBytes().length;
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).contains(expectedStatusLine);
+        assertThat(socket.output()).contains(expectedContentType);
+        assertThat(socket.output()).contains(expectedContentLength);
+        assertThat(socket.output()).contains(file);
     }
 }

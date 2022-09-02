@@ -9,6 +9,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -96,14 +97,10 @@ public class Http11Processor implements Runnable, Processor {
      */
     private Map<String, String> parseUserMap(final String uri) {
         final String[] queryStringArr = uri.split("\\?")[1].split("\\&");
-        final Map<String, String> map = new HashMap<>();
-        for (final String queryString : queryStringArr) {
-            final String[] split = queryString.split("\\=");
-            final String key = split[0];
-            final String value = split[1];
-            map.put(key, value);
-        }
-        return map;
+
+        return Arrays.stream(queryStringArr)
+                .map(it -> it.split("\\="))
+                .collect(Collectors.toMap(it -> it[0], it -> it[1]));
     }
 
     private void routeForStaticFile(final OutputStream outputStream, final String uri) throws IOException {

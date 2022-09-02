@@ -15,6 +15,12 @@ public class Http11URLPath {
     private static final String SPACE_DELIMITER = " ";
     private static final String DEFAULT_URL = "/";
     private static final int URL_INDEX = 1;
+    private static final String FILE_EXTENSION_DELIMITER = ".";
+    private static final String QUERY_PARAM_DELIMITER = "?";
+    private static final String QUERY_PARAM_DELIMITER_REGEX = "\\?";
+    private static final int PARAM_INDEX = 1;
+    private static final int PATH_INDEX = 0;
+    private static final String DEFAULT_FILE_EXTENSION = ".html";
 
     private final String path;
     private final Http11QueryParams params;
@@ -38,19 +44,23 @@ public class Http11URLPath {
     }
 
     private static Http11QueryParams parseQueryParams(final String parsedUrl) {
-        if (!parsedUrl.contains("?")) {
+        if (!parsedUrl.contains(QUERY_PARAM_DELIMITER)) {
             return null;
         }
-        final String urlQueryParams = parsedUrl.split("\\?")[1];
+        final String urlQueryParams = parsedUrl.split(QUERY_PARAM_DELIMITER_REGEX)[PARAM_INDEX];
         return Http11QueryParams.of(urlQueryParams);
     }
 
     private static String parsePath(final String parsedUrl) {
-        final String parsedPath = parsedUrl.split("\\?")[0];
-        if (!parsedPath.contains(".") && !parsedPath.equals(DEFAULT_URL)) {
-            return parsedPath + ".html";
+        final String parsedPath = parsedUrl.split(QUERY_PARAM_DELIMITER_REGEX)[PATH_INDEX];
+        if (hasNotFileExtension(parsedPath) && !parsedPath.equals(DEFAULT_URL)) {
+            return parsedPath + DEFAULT_FILE_EXTENSION;
         }
         return parsedPath;
+    }
+
+    private static boolean hasNotFileExtension(final String parsedPath) {
+        return !parsedPath.contains(FILE_EXTENSION_DELIMITER);
     }
 
     public boolean isDefault() {

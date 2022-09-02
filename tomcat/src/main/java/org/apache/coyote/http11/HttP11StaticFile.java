@@ -14,6 +14,7 @@ public class HttP11StaticFile {
 
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
     private static final String PATH_FROM_RESOURCE = "static";
+    private static final String NEWLINE = "\n";
 
     private final Http11URLPath http11URLPath;
     private final String content;
@@ -34,7 +35,7 @@ public class HttP11StaticFile {
         }
 
         final List<String> bodyLines = Files.readAllLines(getStaticFilePath(http11URLPath));
-        return String.join("\n", bodyLines) + "\n";
+        return String.join(NEWLINE, bodyLines) + NEWLINE;
     }
 
     private static Path getStaticFilePath(final Http11URLPath http11URLPath) throws URISyntaxException {

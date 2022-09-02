@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.awt.image.MemoryImageSource;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,7 +27,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private final Socket connection;
+    private Socket connection;
+
+    public Http11Processor() {
+    }
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -59,11 +61,11 @@ public class Http11Processor implements Runnable, Processor {
         } else if ("/".equals(uri)) {
             routeForRoot(outputStream);
         } else if (uri.contains("/login")) {
-            routeForLogin(outputStream, uri);
+            routeForLogin(uri);
         }
     }
 
-    private void routeForLogin(final OutputStream outputStream, final String uri) {
+    private void routeForLogin(final String uri) {
         final Map<String, String> userMap = parseUserMap(uri);
         final String account = userMap.get("account");
         final String password = userMap.get("password");

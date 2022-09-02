@@ -52,12 +52,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponseBody(final HttpRequest httpRequest) throws IOException {
-        if (httpRequest.getUri().equals("/index.html")) {
+        if (httpRequest.getUrl().equals("/index.html")) {
             final Path path = Paths.get(ClassLoader.getSystemResource("static/index.html").getPath());
             return new String(Files.readAllBytes(path));
         }
-        if (httpRequest.getUri().equals("/css/styles.css")) {
+        if (httpRequest.getUrl().equals("/css/styles.css")) {
             final Path path = Paths.get(ClassLoader.getSystemResource("static/css/styles.css").getPath());
+            return new String(Files.readAllBytes(path));
+        }
+        if (httpRequest.getUrl().equals("/login")) {
+            final Path path = Paths.get(ClassLoader.getSystemResource("static/login.html").getPath());
             return new String(Files.readAllBytes(path));
         }
         return "Hello world!";
@@ -71,7 +75,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getContentType(final HttpRequest httpRequest) {
-        if (httpRequest.getUri().contains("css")) {
+        if (httpRequest.getUrl().contains("css")) {
             return "text/css;charset=utf-8";
         }
         return "text/html;charset=utf-8";

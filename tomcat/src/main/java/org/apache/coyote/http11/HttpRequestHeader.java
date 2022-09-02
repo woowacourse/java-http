@@ -6,6 +6,10 @@ import java.util.Map;
 
 public class HttpRequestHeader {
 
+    private static final String KEY_VALUE_SEPARATOR = ": ";
+    private static final int KEY = 0;
+    private static final int VALUE = 1;
+
     private final Map<String, String> headers;
 
     public HttpRequestHeader(List<String> headerValues) {
@@ -15,8 +19,8 @@ public class HttpRequestHeader {
     private Map<String, String> parseHeaderValues(List<String> headerValues) {
         Map<String, String> values = new HashMap<>();
         for (String headerValue : headerValues) {
-            String[] keyAndValue = headerValue.split(": ");
-            values.put(keyAndValue[0], keyAndValue[1]);
+            String[] keyAndValue = headerValue.split(KEY_VALUE_SEPARATOR);
+            values.put(keyAndValue[KEY], keyAndValue[VALUE]);
         }
         return values;
     }

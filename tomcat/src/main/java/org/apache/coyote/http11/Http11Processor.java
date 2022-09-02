@@ -17,6 +17,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String EMPTY_LINE = "";
 
     private final Socket connection;
 
@@ -50,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
         List<String> requestHeader = new ArrayList<>();
         while (bufferedReader.ready()) {
             String line = bufferedReader.readLine();
-            if (line.equals("")) {
+            if (line.equals(EMPTY_LINE)) {
                 break;
             }
             requestHeader.add(line);

@@ -23,7 +23,7 @@ public enum FileExtension {
                 .filter(f -> f.extension.equals(fileExtension))
                 .map(f -> f.contentType)
                 .findFirst()
-                .orElse("text/html");
+                .orElse(HTML.contentType);
     }
 
     public static boolean hasFileExtension(String url) {

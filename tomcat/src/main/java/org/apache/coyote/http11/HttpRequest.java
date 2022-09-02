@@ -4,6 +4,11 @@ import java.util.List;
 
 public class HttpRequest {
 
+    private static final int REQUEST_METHOD = 0;
+    private static final int REQUEST_URI = 1;
+    private static final int PROTOCOL_VERSION = 2;
+    private static final String REQUEST_LINE_SEPARATOR = " ";
+
     private final String method;
     private final String uri;
     private final String protocolVersion;
@@ -11,14 +16,14 @@ public class HttpRequest {
 
     public HttpRequest(String requestLine, List<String> requestHeader) {
         String[] requestLineValues = parseRequestLine(requestLine);
-        this.method = requestLineValues[0];
-        this.uri = requestLineValues[1];
-        this.protocolVersion = requestLineValues[2];
+        this.method = requestLineValues[REQUEST_METHOD];
+        this.uri = requestLineValues[REQUEST_URI];
+        this.protocolVersion = requestLineValues[PROTOCOL_VERSION];
         this.httpRequestHeader = new HttpRequestHeader(requestHeader);
     }
 
     private String[] parseRequestLine(String requestLine) {
-        return requestLine.split(" ");
+        return requestLine.split(REQUEST_LINE_SEPARATOR);
     }
 
     public String getMethod() {

@@ -28,9 +28,10 @@ public class HttpRequest {
                 .collect(Collectors.toMap(line -> line[0], line -> line[1]));
 
         List<String> requestLines = Arrays.asList(requestLine.split(" "));
-        return new HttpRequest(HttpMethod.valueOf(requestLines.get(0)),
+        return new HttpRequest(
+                HttpMethod.valueOf(requestLines.get(0)),
                 RequestTarget.from(requestLines.get(1)),
-                HttpVersion.valueOf(requestLines.get(2)),
+                HttpVersion.from(requestLines.get(2)),
                 headers);
     }
 

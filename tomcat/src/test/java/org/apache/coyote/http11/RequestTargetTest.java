@@ -25,7 +25,7 @@ class RequestTargetTest {
 
     @ParameterizedTest
     @MethodSource("arguments")
-    void request(final String requestTargetValue, final String uri, final Map<String, String> queryParameters) {
+    void from(final String requestTargetValue, final String uri, final Map<String, String> queryParameters) {
         RequestTarget requestTarget = RequestTarget.from(requestTargetValue);
 
         assertAll(

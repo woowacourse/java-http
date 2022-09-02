@@ -13,8 +13,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
-import javassist.NotFoundException;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
@@ -66,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
         return stringBuilder.toString();
     }
 
-    private void inquireUser(final RequestTarget requestTarget) throws NotFoundException {
+    private void inquireUser(final RequestTarget requestTarget) {
         if (requestTarget.getUri().equals("/login.html")) {
             Map<String, String> queryParameters = requestTarget.getQueryParameters();
             String account = queryParameters.get("account");
@@ -82,14 +82,14 @@ public class Http11Processor implements Runnable, Processor {
     private String createResponseMessage(final RequestTarget requestTarget) throws IOException {
         String uri = requestTarget.getUri();
         if (uri.equals("/")) {
-            return response("text/html", "Hello world!");
+            return response(ContentType.TEXT_HTML, "Hello world!");
         }
         if (uri.contains(".")) {
             String responseBody = createResponseBody(uri);
-            return response(createContentType(uri), responseBody);
+            return response(ContentType.from(uri), responseBody);
         }
         String responseBody = createResponseBody(uri + ".html");
-        return response(createContentType(uri), responseBody);
+        return response(ContentType.from(uri), responseBody);
     }
 
     private String createResponseBody(final String uri) throws IOException {
@@ -102,17 +102,10 @@ public class Http11Processor implements Runnable, Processor {
         return new String(Files.readAllBytes(path));
     }
 
-    private String createContentType(final String uri) {
-        if (uri.contains(".")) {
-            return "text/" + uri.split("\\.")[1];
-        }
-        return "text/html";
-    }
-
-    private String response(final String contentType, final String responseBody) {
+    private String response(final ContentType contentType, final String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

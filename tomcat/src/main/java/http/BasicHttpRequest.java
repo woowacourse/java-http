@@ -24,6 +24,8 @@ public class BasicHttpRequest implements HttpRequest {
     private static final int TWO_LENGTH_WHICH_CONTAINS_BODY = 2;
     private static final String DOT_CHARACTER = ".";
     private static final int ONE_TO_IGNORE_DOT = 1;
+    private static final String QUESTION_MARK = "?";
+    private static final String EQUALS_MARK = "=";
 
     private final Map<String, String> headers;
     private final Map<String, Object> queryParameters;
@@ -87,11 +89,11 @@ public class BasicHttpRequest implements HttpRequest {
     }
 
     private static Map<String, Object> parseQueryParameters(final String requestUri) {
-        if (!requestUri.contains("?")) {
+        if (!requestUri.contains(QUESTION_MARK)) {
             return new HashMap<>();
         }
 
-        final var queryParameterUri = requestUri.substring(requestUri.indexOf("?") + 1);
+        final var queryParameterUri = requestUri.substring(requestUri.indexOf(QUESTION_MARK) + 1);
         final String[] queryParameterPairs = queryParameterUri.split("&");
 
         final var result = new HashMap<String, Object>();
@@ -103,7 +105,7 @@ public class BasicHttpRequest implements HttpRequest {
     }
 
     private static void addParameter(final Map<String, Object> queryParameters, final String queryParameterPair) {
-        final var splitQueryParameterPair = queryParameterPair.split("=");
+        final var splitQueryParameterPair = queryParameterPair.split(EQUALS_MARK);
         final var queryParameterKey = splitQueryParameterPair[0];
         final var queryParameterValue = splitQueryParameterPair[1];
 
@@ -137,8 +139,8 @@ public class BasicHttpRequest implements HttpRequest {
     @Override
     public String getRequestURIWithoutQueryParams() {
         final var requestURI = getRequestURI();
-        if (requestURI.contains("?")) {
-            return requestURI.substring(0, requestURI.indexOf("?"));
+        if (requestURI.contains(QUESTION_MARK)) {
+            return requestURI.substring(0, requestURI.indexOf(QUESTION_MARK));
         }
 
         return requestURI;

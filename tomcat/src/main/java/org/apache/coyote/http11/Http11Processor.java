@@ -7,7 +7,9 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +36,24 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final var uri = parseUri(bufferedReader);
-            final var contentType = parseContentType(uri);
-            final var responseBody = createResponseBody(uri);
+            int index = uri.indexOf("?");
+            final var path = getPath(uri);
+
+            if (path.equals("/login")) {
+                final var queryString = uri.substring(index + 1).split("&");
+                final var account = queryString[0].substring(queryString[0].lastIndexOf("=") + 1);
+                final var password = queryString[1].substring(queryString[1].lastIndexOf("=") + 1);
+
+                final User user = InMemoryUserRepository.findByAccount(account)
+                        .orElseThrow();
+
+                if (user.checkPassword(password)) {
+                    log.info("{}", user);
+                }
+            }
+
+            final var contentType = parseContentType(path);
+            final var responseBody = createResponseBody(path);
 
             final var response = createResponse(contentType, responseBody);
 
@@ -44,6 +62,15 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String getPath(final String uri) {
+        final int index = uri.indexOf("?");
+
+        if (index != -1) {
+            return uri.substring(0, index);
+        }
+        return uri;
     }
 
     private String parseUri(final BufferedReader bufferedReader) throws IOException {
@@ -55,13 +82,14 @@ public class Http11Processor implements Runnable, Processor {
         return ContentType.of(extension);
     }
 
-    private String createResponseBody(final String uri) throws IOException {
-
+    private String createResponseBody(String uri) throws IOException {
         if (uri.equals("/")) {
             return "Hello world!";
+        } else if (!uri.contains(".")) {
+            uri = uri + ".html";
         }
 
-        final URL resource = getClass().getClassLoader().getResource("static/" + uri);
+        URL resource = getClass().getClassLoader().getResource("static/" + uri);
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 

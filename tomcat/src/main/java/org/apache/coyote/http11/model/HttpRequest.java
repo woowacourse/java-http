@@ -12,6 +12,7 @@ public class HttpRequest {
     public static final String QUERY_PRAM_VALUE_DELIMITER = "=";
     public static final int QUERY_PRAM_KEY_INDEX = 0;
     public static final int QUERY_PARAM_VALUE_INDEX = 1;
+
     private final String path;
     private final Map<String, String> queryParams;
 
@@ -27,14 +28,14 @@ public class HttpRequest {
         return new HttpRequest(path, queryParams);
     }
 
-    public static String getPath(String input) {
+    private static String getPath(String input) {
         if (!input.contains(EXIST_QUERY_PARAMS)) {
             return input;
         }
         return input.substring(0, input.lastIndexOf(EXIST_QUERY_PARAMS));
     }
 
-    public static Map<String, String> getQueryParams(final String path) {
+    private static Map<String, String> getQueryParams(final String path) {
         Map<String, String> queryParams = new HashMap<>();
         if (!path.contains(EXIST_QUERY_PARAMS)) {
             return queryParams;

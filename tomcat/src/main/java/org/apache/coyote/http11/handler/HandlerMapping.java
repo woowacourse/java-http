@@ -2,6 +2,7 @@ package org.apache.coyote.http11.handler;
 
 import java.util.Arrays;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import org.apache.coyote.http11.model.HttpRequest;
 
 public enum HandlerMapping {
@@ -19,12 +20,20 @@ public enum HandlerMapping {
         this.expression = expression;
     }
 
-    public static Handler findHandler(HttpRequest httpRequest) {
+    public static Handler findHandler(final HttpRequest httpRequest) {
         String path = httpRequest.getPath();
         return Arrays.stream(values())
-                .filter(i -> path.equals(i.path))
+                .filter(matchHandler(path))
                 .findAny()
-                .map(i -> i.expression.apply(httpRequest))
-                .orElse(new FileHandle(httpRequest));
+                .map(mapToHandler(httpRequest))
+                .orElse(new ResourceHandler(httpRequest));
+    }
+
+    private static Function<HandlerMapping, Handler> mapToHandler(final HttpRequest httpRequest) {
+        return i -> i.expression.apply(httpRequest);
+    }
+
+    private static Predicate<HandlerMapping> matchHandler(final String path) {
+        return i -> path.equals(i.path);
     }
 }

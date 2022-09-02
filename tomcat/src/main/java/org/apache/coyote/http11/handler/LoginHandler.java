@@ -3,7 +3,7 @@ package org.apache.coyote.http11.handler;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.ResourceUtil;
+import org.apache.coyote.http11.handler.support.FileReader;
 import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.HttpRequest;
 import org.apache.coyote.http11.model.HttpResponse;
@@ -20,7 +20,7 @@ public class LoginHandler implements Handler {
     public String getResponse() {
         Map<String, String> queryParams = httpRequest.getQueryParams();
         validateUser(queryParams);
-        String responseBody = ResourceUtil.getResponseBody("/login.html", getClass());
+        String responseBody = FileReader.getFile("/login.html", getClass());
         HttpResponse httpResponse = HttpResponse.from(ContentType.HTML, responseBody);
         return httpResponse.getResponse();
     }

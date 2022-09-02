@@ -8,6 +8,7 @@ public class HttpResponse {
     private static final String responseLine = "HTTP/1.1 200 OK ";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
+
     private final Map<String, String> headers;
     private final String body;
 

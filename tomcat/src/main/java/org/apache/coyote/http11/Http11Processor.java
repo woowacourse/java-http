@@ -11,6 +11,7 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Objects;
 import javassist.NotFoundException;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -44,10 +45,11 @@ public class Http11Processor implements Runnable, Processor {
 
             String requestMessage = parseRequest(bufferedReader);
             HttpRequest httpRequest = HttpRequest.from(requestMessage);
+            RequestTarget requestTarget = httpRequest.getRequestTarget();
 
-            inquireUser(httpRequest);
+            inquireUser(requestTarget);
 
-            String responseMessage = createResponseMessage(httpRequest);
+            String responseMessage = createResponseMessage(requestTarget);
             outputStream.write(responseMessage.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | NotFoundException e) {
@@ -64,10 +66,11 @@ public class Http11Processor implements Runnable, Processor {
         return stringBuilder.toString();
     }
 
-    private void inquireUser(final HttpRequest httpRequest) throws NotFoundException {
-        if (httpRequest.getUri().equals("/login.html")) {
-            String account = httpRequest.getQueryParameters().get("account");
-            String password = httpRequest.getQueryParameters().get("password");
+    private void inquireUser(final RequestTarget requestTarget) throws NotFoundException {
+        if (requestTarget.getUri().equals("/login.html")) {
+            Map<String, String> queryParameters = requestTarget.getQueryParameters();
+            String account = queryParameters.get("account");
+            String password = queryParameters.get("password");
             User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new NotFoundException("User not found."));
             if (user.checkPassword(password)) {
@@ -76,23 +79,34 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponseMessage(final HttpRequest httpRequest) throws IOException {
-        String requestTarget = httpRequest.getUri();
-        if (requestTarget.equals("/")) {
+    private String createResponseMessage(final RequestTarget requestTarget) throws IOException {
+        String uri = requestTarget.getUri();
+        if (uri.equals("/")) {
             return response("text/html", "Hello world!");
         }
-        String responseBody = createResponseBody(requestTarget);
-        return response(httpRequest.getContentType(), responseBody);
+        if (uri.contains(".")) {
+            String responseBody = createResponseBody(uri);
+            return response(createContentType(uri), responseBody);
+        }
+        String responseBody = createResponseBody(uri + ".html");
+        return response(createContentType(uri), responseBody);
     }
 
-    private String createResponseBody(final String requestTarget) throws IOException {
+    private String createResponseBody(final String uri) throws IOException {
         URL resource = getClass()
                 .getClassLoader()
-                .getResource("static" + requestTarget);
+                .getResource("static" + uri);
         String filePath = Objects.requireNonNull(resource)
                 .getFile();
         Path path = new File(filePath).toPath();
         return new String(Files.readAllBytes(path));
+    }
+
+    private String createContentType(final String uri) {
+        if (uri.contains(".")) {
+            return "text/" + uri.split("\\.")[1];
+        }
+        return "text/html";
     }
 
     private String response(final String contentType, final String responseBody) {

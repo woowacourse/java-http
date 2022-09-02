@@ -22,6 +22,7 @@ import support.StubSocket;
 
 class Http11ProcessorTest {
 
+    @DisplayName("/index.html 페이지 요청시 응답으로 반환된다.")
     @Test
     void indexPage() throws IOException {
         // given

@@ -7,7 +7,9 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +92,24 @@ public class Http11Processor implements Runnable, Processor {
                                     "",
                                     responseBody);
                         }
+                    }
+                } else if (url.substring(0, url.indexOf("?")).equals("/login")) {
+                    String queryString = url.substring(url.indexOf("?") + 1);
+                    String[] split = queryString.split("&");
+                    String[] accountSplit = split[0].split("=");
+                    String[] passwordSplit = split[1].split("=");
+                    String account = "";
+                    String password = "";
+                    if (accountSplit[0].equals("account")) {
+                        account = accountSplit[1];
+                    }
+                    if (passwordSplit[1].equals("password")) {
+                        password = passwordSplit[1];
+                    }
+
+                    User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
+                    if (user.checkPassword(password)) {
+                        System.out.println(user);
                     }
                 }
             }

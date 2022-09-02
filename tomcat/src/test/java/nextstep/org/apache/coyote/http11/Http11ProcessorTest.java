@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.List;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -185,25 +187,28 @@ class Http11ProcessorTest {
         logger.addAppender(appender);
         appender.start();
 
-        // when
+        final String account = "gugu";
         final String httpRequest= String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "GET /login?account=" + account + "&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
                 "");
-
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
+        // when
         processor.process(socket);
 
+        // then
         final List<ILoggingEvent> logs = appender.list;
         final String message = logs.get(0).getFormattedMessage();
         final Level level = logs.get(0).getLevel();
 
-        // then
-        assertThat(message).isEqualTo("User{id=1, account='gugu', email='hkkang@woowahan.com', password='password'}");
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow();
+
+        assertThat(message).isEqualTo(user.toString());
         assertThat(level).isEqualTo(INFO);
     }
 }

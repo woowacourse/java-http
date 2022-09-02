@@ -21,8 +21,6 @@ public enum HandlerManager {
     }
 
     public static UriResponse getUriResponse(String uri) throws IOException {
-        UriHandler handler = getHandler(uri);
-
         String path = uri;
         Map<String, Object> parameters = new HashMap<>();
 
@@ -33,6 +31,8 @@ public enum HandlerManager {
 
             parameters = getParameters(queryString);
         }
+        UriHandler handler = getHandler(path);
+
 
         return handler.getResponse(path, parameters);
     }

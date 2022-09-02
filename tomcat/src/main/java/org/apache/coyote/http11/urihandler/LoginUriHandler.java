@@ -12,7 +12,7 @@ public class LoginUriHandler extends DefaultUriHandler {
 
     @Override
     public boolean canHandle(String uri) {
-        return uri.startsWith("/login");
+        return "/login".equals(uri);
     }
 
     @Override

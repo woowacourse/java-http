@@ -28,8 +28,8 @@ public class HttpRequest {
         return requestLine.getRequestUri().getPath();
     }
 
-    public String getParamByName(final String name) {
-        return requestLine.getRequestUri().getParamByName(name);
+    public String getParameter(final String key) {
+        return requestLine.getRequestUri().getParamByName(key);
     }
 
     public String getHeaderField(final String fieldName) {

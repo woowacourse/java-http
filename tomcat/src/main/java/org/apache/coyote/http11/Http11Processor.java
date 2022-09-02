@@ -71,8 +71,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createLoginResponse(final HttpRequest httpRequest) throws IOException {
-        final Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getParamByName("account"));
-        if (user.isPresent() && user.get().checkPassword(httpRequest.getParamByName("password"))) {
+        final Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getParameter("account"));
+        if (user.isPresent() && user.get().checkPassword(httpRequest.getParameter("password"))) {
             log.info("user : {}", user.get());
         }
         return readFileFromPath("/login.html");

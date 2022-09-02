@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -39,9 +40,11 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            String requestUri = line.split(" ")[1];
-            final String responseBody = getResponseBody(requestUri);
-            final String contentType = getContentType(requestUri);
+            String uri = line.split(" ")[1];
+            RequestUri requestUri = new RequestUri(uri);
+            final String responseBody = getResponseBody(requestUri.getPath());
+            final String contentType = getContentType(requestUri.getPath());
+            final Map<String, String> queryParams = requestUri.getQueryParams();
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

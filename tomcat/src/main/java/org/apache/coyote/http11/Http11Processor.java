@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Paths;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.service.LoginService;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.util.HttpParser;
 import org.slf4j.Logger;
@@ -37,6 +38,10 @@ public class Http11Processor implements Runnable, Processor {
             HttpMethod httpMethod = httpParser.getHttpMethod();
             String httpUrl = httpParser.getHttpUrl();
 
+            if (httpUrl.equals("/favicon.ico")) {
+                return;
+            }
+
             String response = "";
             if (httpUrl.equals("/")) {
                 String responseBody = "Hello world!";
@@ -44,9 +49,15 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (!httpUrl.equals("/") && httpMethod.equals(HttpMethod.GET)) {
-                File file = getFile(httpUrl);
+                if (httpUrl.contains("login")) {
+                    LoginService loginService = new LoginService();
+                    loginService.login(httpParser.getQueryParam());
+                }
+                
+                String fileName = ViewResolver.convert(httpUrl);
+                File file = getFile(fileName);
                 String responseBody = toResponseBody(file);
-                FileType fileType = FileType.from(httpUrl);
+                FileType fileType = FileType.from(fileName);
                 response = toResponse(responseBody, fileType.getType());
             }
 
@@ -57,9 +68,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private File getFile(String httpUrl) throws URISyntaxException {
+    private File getFile(String fileName) throws URISyntaxException {
         ClassLoader classLoader = getClass().getClassLoader();
-        URL resource = classLoader.getResource("static" + httpUrl);
+        URL resource = classLoader.getResource("static" + fileName);
 
         return Paths.get(resource.toURI()).toFile();
     }

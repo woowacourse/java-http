@@ -2,7 +2,9 @@ package nextstep.jwp.exception;
 
 public class NoUserException extends RuntimeException {
 
-    public NoUserException(String message) {
-        super(message);
+    private static final String MESSAGE = "해당 유저가 없습니다.";
+
+    public NoUserException() {
+        super(MESSAGE);
     }
 }

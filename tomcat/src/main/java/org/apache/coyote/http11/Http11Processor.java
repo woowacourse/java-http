@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.HttpRequestWrapper;
-import org.apache.coyote.http11.response.HttpResponseWrapper;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponseConvertor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,12 +36,12 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final HttpRequestWrapper requestWrapper = new HttpRequestWrapper(toRequestLines(reader));
-            final HttpResponseWrapper responseWrapper = new HttpResponseWrapper(requestWrapper);
-            log.info("\n\n###### ----REQUEST---- ###### \n\n" + requestWrapper.getLines() +
-                    "\n\n###### ----RESPONSE---- ###### \n\n" + responseWrapper.getHeader() + "\n\n");
+            final HttpRequest request = new HttpRequest(toRequestLines(reader));
+            final HttpResponseConvertor responseConvertor = new HttpResponseConvertor(request);
+            log.info("\n\n###### ----REQUEST---- ###### \n\n" + request.getLines() +
+                    "\n\n###### ----RESPONSE---- ###### \n\n" + responseConvertor.getHeader() + "\n\n");
 
-            String response = responseWrapper.getResponse();
+            final String response = responseConvertor.getResponse();
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

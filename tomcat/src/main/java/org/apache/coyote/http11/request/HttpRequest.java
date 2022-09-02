@@ -6,7 +6,7 @@ import static org.apache.coyote.Constants.CRLF;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public class HttpRequestWrapper {
+public class HttpRequest {
 
     private static final String EMPTY_REQUEST = "요청이 비어있습니다.";
 
@@ -15,7 +15,7 @@ public class HttpRequestWrapper {
     private final String path;
 
 
-    public HttpRequestWrapper(List<String> lines) {
+    public HttpRequest(List<String> lines) {
         if (lines == null || lines.isEmpty()) {
             throw new NoSuchElementException(EMPTY_REQUEST);
         }

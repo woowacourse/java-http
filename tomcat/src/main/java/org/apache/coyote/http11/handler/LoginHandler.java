@@ -3,8 +3,10 @@ package org.apache.coyote.http11.handler;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.model.HttpRequest;
 import org.apache.coyote.http11.ResourceUtil;
+import org.apache.coyote.http11.model.ContentType;
+import org.apache.coyote.http11.model.HttpRequest;
+import org.apache.coyote.http11.model.HttpResponse;
 
 public class LoginHandler implements Handler {
 
@@ -19,12 +21,8 @@ public class LoginHandler implements Handler {
         Map<String, String> queryParams = httpRequest.getQueryParams();
         validateUser(queryParams);
         String responseBody = ResourceUtil.getResponseBody("/login.html", getClass());
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + "text/html" + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        HttpResponse httpResponse = HttpResponse.from(ContentType.HTML, responseBody);
+        return httpResponse.getResponse();
     }
 
     private void validateUser(final Map<String, String> queryParams) {

@@ -1,19 +1,18 @@
 package org.apache.coyote.http11.handler;
 
+import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.HttpRequest;
+import org.apache.coyote.http11.model.HttpResponse;
 
 public class HomeHandler implements Handler {
+
+    public static final String RESPONSE_BODY = "Hello world!";
 
     public HomeHandler(final HttpRequest httpRequest) {}
 
     @Override
     public String getResponse() {
-        String responseBody = "Hello world!";
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + "text/html" + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        HttpResponse httpResponse = HttpResponse.from(ContentType.HTML, RESPONSE_BODY);
+        return httpResponse.getResponse();
     }
 }

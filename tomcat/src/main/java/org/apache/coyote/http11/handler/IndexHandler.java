@@ -1,25 +1,19 @@
 package org.apache.coyote.http11.handler;
 
-import org.apache.coyote.http11.model.HttpRequest;
 import org.apache.coyote.http11.ResourceUtil;
+import org.apache.coyote.http11.model.ContentType;
+import org.apache.coyote.http11.model.HttpRequest;
+import org.apache.coyote.http11.model.HttpResponse;
 
 public class IndexHandler implements Handler {
 
-    private final HttpRequest httpRequest;
-
-    public IndexHandler(final HttpRequest httpRequest) {
-        this.httpRequest = httpRequest;
-    }
+    public IndexHandler(final HttpRequest httpRequest) {}
 
     @Override
     public String getResponse() {
         String responseBody = ResourceUtil.getResponseBody("/index.html", getClass());
 
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + "text/html" + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        HttpResponse httpResponse = HttpResponse.from(ContentType.HTML, responseBody);
+        return httpResponse.getResponse();
     }
 }

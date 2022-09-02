@@ -5,8 +5,8 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private String path;
-    private Map<String, String> queryParams;
+    private final String path;
+    private final Map<String, String> queryParams;
 
     private HttpRequest(final String path, final Map<String, String> queryParams) {
         this.path = path;

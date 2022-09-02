@@ -32,30 +32,48 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            final Request request = new Request(bufferedReader);
-            final String response = handleResponse(request);
-            outputStream.write(response.getBytes());
+            final HttpRequest httpRequest = new HttpRequest(bufferedReader);
+            final HttpResponse httpResponse = handleResponse(httpRequest);
+            outputStream.write(httpResponse.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String handleResponse(final Request request) throws IOException {
-        final String responseBody = getResponseBody(request);
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    private HttpResponse handleResponse(final HttpRequest httpRequest) throws IOException {
+        final String responseBody = getResponseBody(httpRequest);
+        final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
+        return new HttpResponse.Builder()
+                .statusCode("200 OK")
+                .headers(httpHeaders)
+                .body(responseBody)
+                .build();
     }
 
-    private String getResponseBody(final Request request) throws IOException {
-        if (request.getUri().equals("/index.html")) {
+    private String getResponseBody(final HttpRequest httpRequest) throws IOException {
+        if (httpRequest.getUri().equals("/index.html")) {
             final Path path = Paths.get(ClassLoader.getSystemResource("static/index.html").getPath());
             return new String(Files.readAllBytes(path));
         }
+        if (httpRequest.getUri().equals("/css/styles.css")) {
+            final Path path = Paths.get(ClassLoader.getSystemResource("static/css/styles.css").getPath());
+            return new String(Files.readAllBytes(path));
+        }
         return "Hello world!";
+    }
+
+    private HttpHeaders getHttpHeaders(final HttpRequest httpRequest, final String responseBody) {
+        final HttpHeaders httpHeaders = new HttpHeaders();
+        return httpHeaders
+                .addHeader("Content-Type", getContentType(httpRequest))
+                .addHeader("Content-Length", responseBody.getBytes().length);
+    }
+
+    private String getContentType(final HttpRequest httpRequest) {
+        if (httpRequest.getUri().contains("css")) {
+            return "text/css;charset=utf-8";
+        }
+        return "text/html;charset=utf-8";
     }
 }

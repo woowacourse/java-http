@@ -3,14 +3,14 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.IOException;
 
-public class Request {
+public class HttpRequest {
 
     private String uri;
-    private Headers headers;
+    private HttpHeaders httpHeaders;
 
-    public Request(final BufferedReader bufferedReader) throws IOException {
+    public HttpRequest(final BufferedReader bufferedReader) throws IOException {
         this.uri = extractUri(bufferedReader);
-        this.headers = new Headers(bufferedReader);
+        this.httpHeaders = new HttpHeaders(bufferedReader);
     }
 
     private String extractUri(final BufferedReader bufferedReader) throws IOException {

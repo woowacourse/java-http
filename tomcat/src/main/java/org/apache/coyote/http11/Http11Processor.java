@@ -51,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String makeHttpMessage(HttpResponse response) {
         return String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
+                        "HTTP/1.1 "+ response.getHttpStatus() + " ",
                         "Content-Type: " + response.getHeader().getContentType() + ";charset=utf-8 ",
                         "Content-Length: " + response.getBody().getBytes().length + " ",
                         "",

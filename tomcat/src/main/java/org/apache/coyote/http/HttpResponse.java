@@ -14,6 +14,10 @@ public class HttpResponse {
         this.body = new Body(bodyValue);
     }
 
+    public String getHttpStatus() {
+        return httpStatus.getCode() + " " + httpStatus.getMessage() ;
+    }
+
     public Header getHeader() {
         return header;
     }

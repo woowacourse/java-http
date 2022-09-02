@@ -38,8 +38,9 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final String responseBody = getResponseBody(parseUrl(bufferedReader.readLine()));
-            final String response = createResponse(responseBody);
+            final String url = parseUrl(bufferedReader.readLine());
+            final String responseBody = getResponseBody(url);
+            final String response = createResponse(ContentType.from(url), responseBody);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -65,10 +66,10 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(Path.of(path));
     }
 
-    private String createResponse(final String responseBody) {
+    private String createResponse(final ContentType contentType, final String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: " + contentType.getValue(),
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

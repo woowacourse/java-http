@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
+import nextstep.jwp.exception.StaticFileNotFoundException;
 
 public class HttP11StaticFile {
 
@@ -33,16 +34,22 @@ public class HttP11StaticFile {
         if (http11URLPath.isDefault()) {
             return DEFAULT_RESPONSE_BODY;
         }
-
         final List<String> bodyLines = Files.readAllLines(getStaticFilePath(http11URLPath));
         return String.join(NEWLINE, bodyLines) + NEWLINE;
     }
 
     private static Path getStaticFilePath(final Http11URLPath http11URLPath) throws URISyntaxException {
         String filePathString = PATH_FROM_RESOURCE + http11URLPath.getPath();
-        final URL fileUrl = HttP11StaticFile.class.getClassLoader().getResource(filePathString);
-        final URI uri = Objects.requireNonNull(fileUrl).toURI();
+        final URI uri = getUri(filePathString);
         return Paths.get(uri);
+    }
+
+    private static URI getUri(final String filePathString) throws URISyntaxException {
+        final URL fileUrl = HttP11StaticFile.class.getClassLoader().getResource(filePathString);
+        if (Objects.isNull(fileUrl)) {
+            throw new StaticFileNotFoundException(filePathString);
+        }
+        return fileUrl.toURI();
     }
 
     public String getContentType() throws IOException {

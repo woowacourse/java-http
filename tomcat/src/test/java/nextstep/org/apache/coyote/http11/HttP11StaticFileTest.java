@@ -1,12 +1,14 @@
 package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import nextstep.jwp.exception.StaticFileNotFoundException;
 import org.apache.coyote.http11.HttP11StaticFile;
 import org.apache.coyote.http11.Http11URLPath;
 import org.junit.jupiter.api.AfterEach;
@@ -62,5 +64,22 @@ class HttP11StaticFileTest {
 
         // then
         assertThat(actual).isEqualTo("text/css");
+    }
+
+    @Test
+    void throwExceptionNotExistsFile() throws IOException {
+        // given
+        final String httpCssRequest = String.join("\r\n",
+                "GET /notExist.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+        stubSocket = new StubSocket(httpCssRequest);
+        final Http11URLPath urlPath = Http11URLPath.of(stubSocket.getInputStream());
+
+        // when, then
+        assertThatThrownBy(() -> HttP11StaticFile.of(urlPath))
+                .isExactlyInstanceOf(StaticFileNotFoundException.class);
     }
 }

@@ -3,7 +3,6 @@ package org.apache.coyote.http11.message.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,13 +60,13 @@ class RequestUriTest {
         RequestUri requestUri = new RequestUri(URL);
 
         // when
-        String actual = requestUri.getExtension().get();
+        String actual = requestUri.getExtension();
 
         // then
         assertThat(actual).isEqualTo("html");
     }
 
-    @DisplayName("파일의 확장자가 없다면 Optional.empty를 반환한다.")
+    @DisplayName("파일의 확장자가 없다면 빈 스트링을 반환한다.")
     @Test
     void getExtension_returnsOptionalEmpty() {
         // given
@@ -75,9 +74,9 @@ class RequestUriTest {
         RequestUri requestUri = new RequestUri(url);
 
         // when
-        Optional<String> actual = requestUri.getExtension();
+        String actual = requestUri.getExtension();
 
         // then
-        assertThat(actual).isEqualTo(Optional.empty());
+        assertThat(actual).isEqualTo("");
     }
 }

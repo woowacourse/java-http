@@ -2,19 +2,15 @@ package org.apache.coyote.http11.request;
 
 public class HttpRequest {
 
-    private final HttpMethod method;
-    private final String requestURI;
+    private final StartLine startLine;
+    private final HttpHeaders headers;
 
-    public HttpRequest(HttpMethod method, String url) {
-        this.method = method;
-        this.requestURI = url;
+    public HttpRequest(StartLine startLine, HttpHeaders headers) {
+        this.startLine = startLine;
+        this.headers = headers;
     }
 
-    public HttpMethod getMethod() {
-        return method;
-    }
-
-    public String getRequestURI() {
-        return requestURI;
+    public String getPathString() {
+        return startLine.getPath();
     }
 }

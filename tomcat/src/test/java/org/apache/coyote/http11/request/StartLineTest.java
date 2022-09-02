@@ -18,7 +18,7 @@ class StartLineTest {
         assertAll(
                 () -> assertThat(startLine).isNotNull(),
                 () -> assertThat(startLine.getMethod()).isEqualTo(HttpMethod.GET),
-                () -> assertThat(startLine.getUrl().getPath()).isEqualTo("/index.html"),
+                () -> assertThat(startLine.getPath()).isEqualTo("/index.html"),
                 () -> assertThat(startLine.getProtocol().value()).isEqualTo("HTTP/1.1")
         );
     }

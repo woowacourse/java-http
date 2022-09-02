@@ -42,8 +42,8 @@ public class StartLine {
         return method;
     }
 
-    public RequestUrl getUrl() {
-        return requestUrl;
+    public String getPath() {
+        return requestUrl.getPath();
     }
 
     public Protocol getProtocol() {

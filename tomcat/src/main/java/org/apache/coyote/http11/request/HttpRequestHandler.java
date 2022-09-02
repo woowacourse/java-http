@@ -12,9 +12,9 @@ public class HttpRequestHandler {
     }
 
     public HttpResponse process(HttpRequest request) {
-        String requestURI = request.getRequestURI();
+        String path = request.getPathString();
         try {
-            Resource resource = resourceLocator.locate(requestURI);
+            Resource resource = resourceLocator.locate(path);
             return new HttpResponse(
                     HttpStatus.OK,
                     resource.getMimeType(),

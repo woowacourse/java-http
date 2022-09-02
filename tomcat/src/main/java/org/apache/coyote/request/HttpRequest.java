@@ -1,9 +1,6 @@
 package org.apache.coyote.request;
 
 import java.util.List;
-import java.util.Optional;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
 import org.apache.coyote.exception.HttpException;
 import org.apache.coyote.support.HttpMethod;
 import org.apache.coyote.support.HttpStatus;
@@ -34,13 +31,6 @@ public class HttpRequest {
 
     public boolean isGet() {
         return this.method.equals(HttpMethod.GET);
-    }
-
-    public Optional<User> checkLoginAccount() {
-        if (uri.startsWith("/login") && parameters.contains("account")) {
-            return InMemoryUserRepository.findByAccount(parameters.get("account"));
-        }
-        return Optional.empty();
     }
 
     public String getUri() {

@@ -14,7 +14,9 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.httpmessage.HttpStatus;
 import org.apache.coyote.http11.httpmessage.Request;
+import org.apache.coyote.http11.httpmessage.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,8 +39,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
-            final var requestMessage = extractRequest(inputStream);
-            final var request = Request.of(requestMessage.toString());
+            final var request = extractRequest(inputStream);
 
             if (!request.isGetMethod()) {
                 throw new IllegalStateException("아직 지원하지 않는 http 요청입니다.");
@@ -52,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private StringBuilder extractRequest(InputStream inputStream) throws IOException {
+    private Request extractRequest(InputStream inputStream) throws IOException {
         final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         final var requestMessage = new StringBuilder();
@@ -65,10 +66,10 @@ public class Http11Processor implements Runnable, Processor {
                 break;
             }
         }
-        return requestMessage;
+        return Request.of(requestMessage.toString());
     }
 
-    private String doGet(Request request) throws IOException {
+    private Response doGet(Request request) throws IOException {
         final var uri = request.getUri();
 
         if (uri.contains(".")) {
@@ -82,14 +83,14 @@ public class Http11Processor implements Runnable, Processor {
         return getResponse(uri);
     }
 
-    private String getResponse(String uri) throws IOException {
+    private Response getResponse(String uri) throws IOException {
         if (uri.equals("/login")) {
             return getResponseWithFileName("/login.html");
         }
-        return "";
+        return new Response();
     }
 
-    private String getResponseWithFileName(String fileName) throws IOException {
+    private Response getResponseWithFileName(String fileName) throws IOException {
         final var fileType = fileName.split("\\.")[1];
 
         String contentType = "text/html";
@@ -107,38 +108,25 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         final var resource = getClass().getClassLoader().getResource("static" + fileName);
-
         final var path = new File(resource.getPath()).toPath();
 
         final var responseBody = new String(Files.readAllBytes(path));
 
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-
+        return Response.newInstanceWithResponseBody(HttpStatus.OK, contentType, responseBody);
     }
 
-    private String getResponseWithQueryString(String uri) throws IOException {
+    private Response getResponseWithQueryString(String uri) {
         if (uri.contains("/login")) {
 
             Map<String, String> queryStrings = extractQueryStrings(uri);
             Optional<User> user = InMemoryUserRepository.findByAccount(queryStrings.get("account"));
 
             if (user.isPresent() && user.get().checkPassword(queryStrings.get("password"))) {
-                return String.join("\r\n",
-                        "HTTP/1.1 302 ",
-                        "Location: http://localhost:8080/index.html ",
-                        "Content-Type: text/html;charset=utf-8 ");
+                return Response.of(HttpStatus.REDIRECT, "text/html", "http://localhost:8080/index.html");
             }
-            return String.join("\r\n",
-                    "HTTP/1.1 302 ",
-                    "Location: http://localhost:8080/401.html ",
-                    "Content-Type: text/html;charset=utf-8 ");
+            return Response.of(HttpStatus.REDIRECT, "text/html", "http://localhost:8080/401.html");
         }
-        return "";
+        return new Response();
     }
 
     private Map<String, String> extractQueryStrings(String uri) {

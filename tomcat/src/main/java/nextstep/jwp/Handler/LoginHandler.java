@@ -25,7 +25,9 @@ public class LoginHandler {
         String password = queryString.get("password");
 
         Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
-        if (userOptional.isEmpty() || !userOptional.get().checkPassword(password)) {
+        if (userOptional.isEmpty() ||
+                !userOptional.get()
+                        .checkPassword(password)) {
             return handleStatic("/401.html");
         }
         User user = userOptional.get();

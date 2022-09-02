@@ -54,7 +54,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String handleApi(HttpRequest request) throws IOException {
-        if (request.path().equals("/login")) {
+        if (request.path()
+                .equals("/login")) {
             return LoginHandler.handle(request);
         }
         return StaticHandler.handleStatic("/404.html");

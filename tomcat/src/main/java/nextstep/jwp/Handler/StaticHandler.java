@@ -14,7 +14,8 @@ public class StaticHandler {
     }
 
     private static String getBody(String uri) throws IOException {
-        return new String(Files.readAllBytes(StaticFile.findByUrl(uri).toPath()));
+        return new String(Files.readAllBytes(StaticFile.findByUrl(uri)
+                .toPath()));
     }
 
     public static String getResponse(ContentType contentType, String responseBody) {

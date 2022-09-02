@@ -8,7 +8,6 @@ import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginHandler;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.model.Uri;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,12 +34,12 @@ public class Http11Processor implements Runnable, Processor {
                 new InputStreamReader(connection.getInputStream()));
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final Uri uri = new Uri(extractURI(bufferedReader.readLine()));
-            checkCallApi(uri);
+            final HttpRequest httpRequest = new HttpRequest(extractURI(bufferedReader.readLine()));
+            checkCallApi(httpRequest);
 
-            final String responseBody = uri.findFilePath()
+            final String responseBody = httpRequest.findFilePath()
                     .generateFile();
-            final String response = generateResponse(uri, responseBody);
+            final String response = generateResponse(httpRequest, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -49,10 +48,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void checkCallApi(final Uri uri) {
-        if (uri.isCallApi()) {
+    private void checkCallApi(final HttpRequest httpRequest) {
+        if (httpRequest.isCallApi()) {
             LoginHandler loginHandler = new LoginHandler();
-            loginHandler.login(uri.getQueryString());
+            loginHandler.login(httpRequest.getQueryString());
         }
     }
 
@@ -60,10 +59,10 @@ public class Http11Processor implements Runnable, Processor {
         return text.split(BLANK)[URI_INDEX];
     }
 
-    private String generateResponse(final Uri uri, final String responseBody) throws IOException {
+    private String generateResponse(final HttpRequest httpRequest, final String responseBody) throws IOException {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: " + uri.findContentType().getValue() + ";charset=utf-8 ",
+                "Content-Type: " + httpRequest.findContentType().getValue() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

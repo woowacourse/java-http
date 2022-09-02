@@ -1,9 +1,11 @@
-package org.apache.coyote.http11.model;
+package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.enums.ContentType;
+import org.apache.coyote.http11.enums.FilePath;
 
-public class Uri {
+public class HttpRequest {
 
     private static final char QUERY_STRING_STANDARD = '?';
     private static final String QUERY_STRINGS_BOUNDARY = "&";
@@ -15,7 +17,7 @@ public class Uri {
     private final String url;
     private final Map<String, String> queryString;
 
-    public Uri(final String uri) {
+    public HttpRequest(final String uri) {
         url = extractURL(uri);
         queryString = extractQueryString(uri);
     }

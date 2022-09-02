@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String STATIC_DIRECTORY = "static/";
 
     private final Socket connection;
 
@@ -39,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
              InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            String uri = getFileName(bufferedReader);
+            String uri = getUri(bufferedReader);
             String contentType = getContentType(uri);
             String responseBody = getResponseBody(uri);
 
@@ -57,7 +58,7 @@ public class Http11Processor implements Runnable, Processor {
         return fileExtension.getContentType();
     }
 
-    private String getFileName(final BufferedReader bufferedReader) throws IOException {
+    private String getUri(final BufferedReader bufferedReader) throws IOException {
         return bufferedReader.readLine()
                 .split(" ")[1]
                 .substring(1);
@@ -71,7 +72,7 @@ public class Http11Processor implements Runnable, Processor {
         Url url = HandlerMapping.from(uri);
         URL resource = this.getClass()
                 .getClassLoader()
-                .getResource("static/" + url.getRequest().getPath());
+                .getResource(STATIC_DIRECTORY + url.getRequest().getPath());
 
         validatePath(resource);
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));

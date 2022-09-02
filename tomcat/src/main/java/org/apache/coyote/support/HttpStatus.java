@@ -16,7 +16,7 @@ public enum HttpStatus {
         this.reason = reason;
     }
 
-    public String toResponse() {
-        return String.format("%d %s", code, reason);
+    public String toStatusLine() {
+        return String.format("%s %d %s", HttpVersion.HTTP11.getValue(), code, reason);
     }
 }

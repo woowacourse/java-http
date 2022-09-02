@@ -27,7 +27,7 @@ public class ResponseMessage {
 
     public String build() {
         StringJoiner joiner = new StringJoiner("\r\n");
-        joiner.add(String.format("HTTP/1.1 %s ", status.toResponse()));
+        joiner.add(status.toStatusLine());
         for (String header : toHeaders()) {
             joiner.add(header);
         }

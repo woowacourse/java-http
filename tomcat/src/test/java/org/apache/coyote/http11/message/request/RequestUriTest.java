@@ -47,7 +47,7 @@ class RequestUriTest {
         RequestUri requestUri = new RequestUri(url);
 
         // when
-        String actual = requestUri.getPathWithoutQuery();
+        String actual = requestUri.getPath();
 
         // then
         assertThat(actual).isEqualTo("/index.html");

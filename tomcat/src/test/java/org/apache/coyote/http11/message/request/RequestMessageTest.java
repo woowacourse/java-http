@@ -46,7 +46,7 @@ class RequestMessageTest {
         // then
         assertAll(() -> {
             assertThat(actual.getMethod()).isEqualTo(HttpMethod.GET);
-            assertThat(actual.getRequestUri().getPathWithoutQuery()).isEqualTo("/index.html");
+            assertThat(actual.getRequestUri().getPath()).isEqualTo("/index.html");
             assertThat(actual.getVersion()).isEqualTo("HTTP/1.1");
         });
     }

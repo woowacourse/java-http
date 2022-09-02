@@ -43,29 +43,29 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            String httpRequestMessage = readHttpRequestMessage(inputStream);
-            RequestMessage requestMessage = new RequestMessage(httpRequestMessage);
+            String httpRequest = readHttpRequest(inputStream);
+            RequestMessage requestMessage = new RequestMessage(httpRequest);
 
-            ResponseMessage responseMessage = null;
-            if (requestMessage.getRequestUri().getExtension().isPresent()) {
-                responseMessage = generateResponseMessage(requestMessage.getRequestUri());
+            if (requestMessage.getRequestUri().hasExtension()) { // 정적 파일 서빙
+                ResponseMessage responseMessage = generateResponseMessage(requestMessage.getRequestUri());
+                writeHttpResponseMessage(outputStream, responseMessage);
             }
 
-            if (requestMessage.getRequestUri().getPathWithoutQuery().equals("/")) {
-                responseMessage = generateResponseMessage(new RequestUri("/index.html"));
+            if (requestMessage.getRequestUri().getPath().equals("/")) {
+                ResponseMessage responseMessage = generateResponseMessage(new RequestUri("/index.html"));
+                writeHttpResponseMessage(outputStream, responseMessage);
             }
 
-            if (requestMessage.getRequestUri().getPathWithoutQuery().equals("/login")) {
-                responseMessage = generateResponseMessage(new RequestUri("/login.html"));
+            if (requestMessage.getRequestUri().getPath().equals("/login")) {
+                ResponseMessage responseMessage = generateResponseMessage(new RequestUri("/login.html"));
+                writeHttpResponseMessage(outputStream, responseMessage);
             }
-
-            writeHttpResponseMessage(outputStream, responseMessage);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String readHttpRequestMessage(final InputStream inputStream) throws IOException {
+    private String readHttpRequest(final InputStream inputStream) throws IOException {
         Reader reader = new InputStreamReader(inputStream);
         BufferedReader bufferedReader = new BufferedReader(reader);
 
@@ -80,14 +80,14 @@ public class Http11Processor implements Runnable, Processor {
 
     private ResponseMessage generateResponseMessage(final RequestUri requestUri) {
         String body = getStaticFile(requestUri);
-        String fileExtension = requestUri.getExtension().orElse("html");
+        String fileExtension = requestUri.getExtension();
         HttpHeaders headers = generateResponseHeader(fileExtension, body);
 
         return new ResponseMessage(HttpVersion.HTTP11, HttpStatus.OK, headers, body);
     }
 
     private String getStaticFile(final RequestUri requestUri) {
-        String staticFilePath = requestUri.getPathWithoutQuery();
+        String staticFilePath = requestUri.getPath();
         return StaticFileUtil.readFile(staticFilePath);
     }
 

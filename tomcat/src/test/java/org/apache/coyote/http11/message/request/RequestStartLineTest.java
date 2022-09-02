@@ -44,6 +44,6 @@ class RequestStartLineTest {
         RequestUri actual = requestStartLine.getRequestUri();
 
         // then
-        assertThat(actual.getPathWithoutQuery()).isEqualTo("/index.html");
+        assertThat(actual.getPath()).isEqualTo("/index.html");
     }
 }

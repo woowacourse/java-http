@@ -1,28 +1,32 @@
 package org.apache.coyote.http11;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponse {
     private final String httpMethod;
     private final String statusCode;
     private final Map<String, String> headers;
-    private final String responseBody;
+    private String responseBody;
 
-    public HttpResponse(String httpMethod, String statusCode, Map<String, String> headers,
-        String responseBody) {
+    private HttpResponse(String httpMethod, String statusCode, Map<String, String> headers, String responseBody) {
         this.httpMethod = httpMethod;
         this.statusCode = statusCode;
         this.headers = headers;
         this.responseBody = responseBody;
     }
-
-    public static HttpResponse from(String httpMethod, String statusCode, Map<String, String> headers,
-        String responseBody) {
-        return new HttpResponse(httpMethod, statusCode, headers, responseBody);
+    public static HttpResponse from(String httpMethod, String statusCode) {
+        return new HttpResponse(httpMethod, statusCode, new HashMap<>(), "");
     }
 
-    public static HttpResponse from(String httpMethod, String statusCode, Map<String, String> headers) {
-        return new HttpResponse(httpMethod, statusCode, headers, "");
+    public HttpResponse addHeader(String key, String value){
+        headers.put(key, value);
+        return this;
+    }
+
+    public HttpResponse addResponseBody(String responseBody){
+        this.responseBody = responseBody;
+        return this;
     }
 
     public byte[] getBytes() {

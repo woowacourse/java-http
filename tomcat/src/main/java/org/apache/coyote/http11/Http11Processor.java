@@ -1,17 +1,18 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.HttpMethod.*;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -26,6 +27,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final SessionManager sessionManager = new SessionManager();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -39,40 +41,12 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+             final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
             HttpRequest httpRequest = HttpRequest.of(bufferedReader);
-            String path = httpRequest.getPath();
 
-            if (httpRequest.isSameHttpMethod("POST")) {
-                Map<String, String> requestBody = httpRequest.getRequestBody();
-
-                if (path.equals("/login")) {
-                    Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.getOrDefault("account", ""));
-
-                    login(requestBody, user, outputStream);
-                    return;
-                }
-                if (path.equals("/register")) {
-                    User user = new User(requestBody.get("account"), requestBody.get("password"),
-                        requestBody.get("email"));
-
-                    InMemoryUserRepository.save(user);
-
-                    sendRedirect("/index.html", outputStream);
-                    return;
-                }
-            }
-
-            String responseBody = getResponseBody(path);
-            String contentLength = Integer.toString(responseBody.getBytes().length);
-
-            Map<String, String> responseHeader = new LinkedHashMap<>();
-            responseHeader.put("Content-Type", getContentType(path));
-            responseHeader.put("Content-Length", contentLength);
-
-            HttpResponse httpResponse = HttpResponse.from("HTTP/1.1", "200 OK", responseHeader, responseBody);
+            HttpResponse httpResponse = execute(httpRequest);
 
             outputStream.write(httpResponse.getBytes());
             outputStream.flush();
@@ -81,49 +55,89 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private void login(Map<String, String> queryParams, Optional<User> user, OutputStream outputStream)
-        throws IOException {
-        String password = queryParams.getOrDefault("password", "");
-
-        if (user.isPresent() && user.get().checkPassword(password)) {
-            sendRedirect("/index.html", outputStream);
-            return;
+    private HttpResponse execute(HttpRequest httpRequest) throws IOException, URISyntaxException {
+        if (sessionManager.contains(httpRequest.getCookie("JSESSIONID")) &&
+            httpRequest.isSamePath("/login", "/register")) {
+            return redirect("/index.html");
         }
-        sendRedirect("/401.html", outputStream);
+
+        if (httpRequest.isSamePath("/login") && httpRequest.getHttpMethod() == POST) {
+            return login(httpRequest);
+        }
+
+        if (httpRequest.isSamePath("/register") && httpRequest.getHttpMethod() == POST) {
+            return register(httpRequest);
+        }
+
+        return transferResponse(httpRequest);
     }
 
-    private void sendRedirect(String locationUri, OutputStream outputStream) throws IOException {
-        Map<String, String> responseHeader = Map.of("Location", locationUri);
-        HttpResponse httpResponse = HttpResponse.from("HTTP/1.1", "302 FOUND", responseHeader);
+    private HttpResponse login(HttpRequest httpRequest) {
+        Map<String, String> requestBody = httpRequest.getRequestBody();
+        Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.get("account"));
 
-        outputStream.write(httpResponse.getBytes());
-        outputStream.flush();
-    }
+        if (user.isPresent()) {
+            User loginUser = user.get();
+            String password = requestBody.getOrDefault("password", "");
 
-    private String getResponseBody(String input) throws URISyntaxException, IOException {
-        String responseBody = "Hello world!";
+            if (loginUser.checkPassword(password)) {
+                UUID uuid = UUID.randomUUID();
 
-        if (!input.equals("/")) {
-            if (input.equals("/login") || input.equals("/register")) {
-                input = input + ".html";
+                Session session = new Session(uuid.toString());
+                session.setAttribute("user", user);
+                sessionManager.add(session);
+
+                return redirect("/index.html")
+                    .addHeader("Set-Cookie", "JSESSIONID=" + uuid);
             }
-            Path path = Paths.get(getClass()
-                .getClassLoader()
-                .getResource("static" + input)
-                .toURI());
-
-            responseBody = new String(Files.readAllBytes(path));
         }
-
-        return responseBody;
+        return redirect("/401.html");
     }
 
-    private String getContentType(String uri) {
-        String contentType = "text/html;charset=utf-8";
+    private HttpResponse register(HttpRequest httpRequest) {
+        Map<String, String> requestBody = httpRequest.getRequestBody();
 
-        if (uri.endsWith("css")) {
-            contentType = "text/css,*/*;q=0.1";
+        User user = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
+        InMemoryUserRepository.save(user);
+
+        return redirect("/index.html");
+    }
+
+    private HttpResponse redirect(String locationUri) {
+        return HttpResponse.from("HTTP/1.1", "302 FOUND")
+            .addHeader("Location", locationUri);
+    }
+
+    private HttpResponse transferResponse(HttpRequest httpRequest) throws IOException, URISyntaxException {
+        String responseBody = readResponseBody(httpRequest);
+        ContentType contentType = ContentType.findByPath(httpRequest.getPath());
+        String contentLength = Integer.toString(responseBody.getBytes().length);
+
+        return HttpResponse.from("HTTP/1.1", "200 OK")
+            .addHeader("Content-Type", contentType.getType())
+            .addHeader("Content-Length", contentLength)
+            .addResponseBody(responseBody);
+    }
+
+    private String readResponseBody(HttpRequest httpRequest) throws IOException, URISyntaxException {
+        if (httpRequest.isSamePath("/")) {
+            return "Hello world!";
         }
-        return contentType;
+
+        Path path = getPath(httpRequest);
+        return new String(Files.readAllBytes(path));
+    }
+
+    private Path getPath(HttpRequest httpRequest) throws URISyntaxException {
+        String path = httpRequest.getPath();
+
+        if (httpRequest.isSamePath("/login", "/register")) {
+            path += ".html";
+        }
+
+        return Paths.get(getClass()
+            .getClassLoader()
+            .getResource("static" + path)
+            .toURI());
     }
 }

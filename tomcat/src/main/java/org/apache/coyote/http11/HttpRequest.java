@@ -10,20 +10,23 @@ import java.util.stream.Collectors;
 public class HttpRequest {
     private final Map<String, String> requestHeader;
     private final String requestBody;
+    private final HttpCookie httpCookie;
 
-    private HttpRequest(Map<String, String> requestHeader, String requestBody){
+    private HttpRequest(Map<String, String> requestHeader, String requestBody, HttpCookie httpCookie) {
         this.requestHeader = requestHeader;
         this.requestBody = requestBody;
+        this.httpCookie = httpCookie;
     }
 
     public static HttpRequest of(BufferedReader reader) throws IOException {
-        Map<String, String> header = getHeader(reader);
-        String requestBody = getRequestBody(reader, header);
+        Map<String, String> header = parseHeader(reader);
+        String requestBody = parseBody(reader, header);
+        HttpCookie httpCookie = HttpCookie.of(header.get("Cookie"));
 
-        return new HttpRequest(header, requestBody);
+        return new HttpRequest(header, requestBody, httpCookie);
     }
 
-    private static Map<String, String> getHeader(BufferedReader reader) throws IOException {
+    private static Map<String, String> parseHeader(BufferedReader reader) throws IOException {
         Map<String, String> header = new HashMap<>();
 
         String[] request = reader.readLine().split(" ");
@@ -40,24 +43,20 @@ public class HttpRequest {
         return header;
     }
 
-    private static String getRequestBody(BufferedReader reader, Map<String, String> header) throws IOException {
+    private static String parseBody(BufferedReader reader, Map<String, String> header) throws IOException {
         int contentLength = Integer.parseInt(header.getOrDefault("Content-Length", "0"));
 
-        if(contentLength > 0){
-            char[] buffer = new char[contentLength];
-            reader.read(buffer, 0, contentLength);
-            return new String(buffer);
-        }
-        return "";
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 
-    public boolean isSameHttpMethod(String method) {
-        return requestHeader.get("HTTP Method").equals(method);
+    public HttpMethod getHttpMethod() {
+        return HttpMethod.valueOf(requestHeader.get("HTTP Method"));
     }
 
     public String getPath() {
         String uri = requestHeader.get("request URI");
-
         int index = uri.indexOf("?");
 
         if (index != -1) {
@@ -66,28 +65,19 @@ public class HttpRequest {
         return uri;
     }
 
-    public Map<String, String> getQueryParams() {
-        String uri = requestHeader.get("request URI");
-
-        int index = uri.indexOf("?");
-        if (index != -1) {
-            String queryString = uri.substring(index + 1);
-
-            return Arrays.stream(queryString.split("&"))
-                .map(query -> query.split("="))
-                .collect(Collectors.toMap(query -> query[0], query -> query[1]));
-        }
-
-        return Map.of();
-    }
-
-    public Map<String, String> getRequestBody(){
-       return Arrays.stream(requestBody.split("&"))
+    public Map<String, String> getRequestBody() {
+        return Arrays.stream(requestBody.split("&"))
             .map(body -> body.split("="))
             .collect(Collectors.toMap(query -> query[0], query -> query[1]));
     }
 
-    public boolean hasParam() {
-        return !getQueryParams().isEmpty();
+    public String getCookie(String key) {
+        return httpCookie.getOrDefault(key);
+    }
+
+    public boolean isSamePath(String... paths) {
+        String realPath = getPath();
+
+        return Arrays.asList(paths).contains(realPath);
     }
 }

@@ -31,7 +31,7 @@ public class ControllerMapper {
             return controller.showIndex();
         }
         if (path.equals("/login")) {
-            return controller.showLogin(httpRequest.getCookie().getSessionId());
+            return controller.showLogin(httpRequest.getSession());
         }
         if (path.equals("/register")) {
             return controller.showRegister();
@@ -43,7 +43,7 @@ public class ControllerMapper {
         final var path = httpRequest.getPath();
         if (path.equals("/login")) {
             return controller.login(
-                    httpRequest.getCookie().getSessionId(),
+                    httpRequest.getSession(),
                     httpRequest.parseBodyQueryString()
             );
         }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.common.HttpParser;
@@ -84,6 +85,10 @@ public class HttpRequest {
 
     public HttpCookie getCookie() {
         return HttpCookie.from(header.get("Cookie"));
+    }
+
+    public Session getSession() {
+        return new Session(getCookie().getSessionId());
     }
 
     public String getBody() {

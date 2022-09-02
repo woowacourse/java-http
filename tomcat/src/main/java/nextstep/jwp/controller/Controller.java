@@ -5,6 +5,7 @@ import nextstep.jwp.exception.AuthenticationException;
 import nextstep.jwp.exception.DuplicationException;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.service.Service;
+import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.common.ContentType;
 import org.apache.coyote.http11.common.StaticResource;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -21,15 +22,15 @@ public class Controller {
         return HttpResponse.ok(new StaticResource("Hello world!", ContentType.TEXT_HTML));
     }
 
-    public HttpResponse showLogin(final String sessionId) {
-        if (service.isAlreadyLogin(sessionId)) {
+    public HttpResponse showLogin(final Session session) {
+        if (service.isAlreadyLogin(session)) {
             return HttpResponse.found("/index.html");
         }
         return HttpResponse.ok(StaticResource.path("/login.html"));
     }
 
-    public HttpResponse login(final String sessionId, final Map<String, String> parameters) {
-        if (service.isAlreadyLogin(sessionId)) {
+    public HttpResponse login(final Session session, final Map<String, String> parameters) {
+        if (service.isAlreadyLogin(session)) {
             return HttpResponse.found("/index.html");
         }
         try {

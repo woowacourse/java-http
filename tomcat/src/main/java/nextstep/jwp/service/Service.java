@@ -40,8 +40,8 @@ public class Service {
         return session;
     }
 
-    public boolean isAlreadyLogin(final String sessionId) {
-        return sessionManager.findSession(sessionId) != null;
+    public boolean isAlreadyLogin(final Session session) {
+        return sessionManager.findSession(session.getId()) != null;
     }
 
     public void register(final Map<String, String> parameters) {

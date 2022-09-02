@@ -2,6 +2,17 @@
 
 ---
 
+## 레벨1 구현 내용 정리
+
+- [x] GET /index.html 응답하기
+  - [x] `http://localhost:8080/index.html` 요청시 index.html 파일을 응답한다.
+  - [x] `http://localhost:8080` 으로 요청시 index.html 을 기본으로 응답해준다.
+  - [x] 파일 확장자가 명시되지 않은 경우 `.html` 을 붙인 파일을 응답한다.
+- [x] CSS 지원하기
+  - [x] Accept 에 명시한 MIME 타입으로 반해줄 수 있다.
+- [x] Query String 파싱
+  - [x] Query String 이 포함된 요청인 경우 이를 처리해준다. 구체적으로 account 로 InMemory DB에 미리 저장되어 있는 사용자를 조회하여 로그를 남긴다. 
+
 ## 새롭게 알게 된 내용 (레벨1)
 
 ### ClassLoader.getSystemResource

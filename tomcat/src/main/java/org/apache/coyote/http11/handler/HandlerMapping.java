@@ -8,10 +8,11 @@ public enum HandlerMapping {
 
     LOGIN("/login", LoginHandler::new),
     INDEX("/index.html", IndexHandler::new),
+    HOME("/", HomeHandler::new)
     ;
 
     private final String path;
-    private Function<HttpRequest, Handler> expression;
+    private final Function<HttpRequest, Handler> expression;
 
     HandlerMapping(final String path, final Function<HttpRequest, Handler> expression) {
         this.path = path;
@@ -21,7 +22,7 @@ public enum HandlerMapping {
     public static Handler findHandler(HttpRequest httpRequest) {
         String path = httpRequest.getPath();
         return Arrays.stream(values())
-                .filter(i -> path.contains(i.path))
+                .filter(i -> path.equals(i.path))
                 .findAny()
                 .map(i -> i.expression.apply(httpRequest))
                 .orElse(new FileHandle(httpRequest));

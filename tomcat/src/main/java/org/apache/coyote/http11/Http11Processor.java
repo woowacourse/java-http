@@ -46,16 +46,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createResponse(final HttpRequest httpRequest) {
-        if (httpRequest.getPath().equals("/")) {
-            String responseBody = "Hello world!";
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + "text/html" + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-        }
-
         Handler handler = HandlerMapping.findHandler(httpRequest);
         return handler.getResponse();
     }

@@ -4,6 +4,9 @@ import nextstep.jwp.http.HttpHeader;
 
 public class HttpResponse {
 
+    private static final String BLANK = " ";
+    private static final String SEPARATOR = "\r\n";
+
     private final String version;
     private final StatusCode statusCode;
     private final HttpHeader httpHeaders;
@@ -26,10 +29,10 @@ public class HttpResponse {
     }
 
     private String createStatusLineTemplate() {
-        return version + " " + statusCode.getCode() + " " + statusCode.getMessage() + " " + "\r\n";
+        return version + BLANK + statusCode.getCode() + BLANK + statusCode.getMessage() + BLANK + SEPARATOR;
     }
 
     private String createResponseBodyTemplate() {
-        return "\r\n" + "\r\n" + responseBody;
+        return SEPARATOR + SEPARATOR + responseBody;
     }
 }

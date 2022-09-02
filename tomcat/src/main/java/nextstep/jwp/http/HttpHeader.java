@@ -7,7 +7,9 @@ import java.util.stream.Collectors;
 
 public class HttpHeader {
 
-    private static final String HEADER_SEPARATOR = ":";
+    private static final String HEADER_SEPARATOR = ": ";
+    private static final String LINE_SEPARATOR = "\r\n";
+    private static final String BLANK = " ";
     private static final int SPLIT_SIZE = 2;
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
@@ -33,7 +35,7 @@ public class HttpHeader {
 
     public String createHeaderTemplate() {
         return headers.entrySet().stream()
-                .map(header -> header.getKey() + ": " + header.getValue() + " ")
-                .collect(Collectors.joining("\r\n"));
+                .map(header -> header.getKey() + HEADER_SEPARATOR + header.getValue() + BLANK)
+                .collect(Collectors.joining(LINE_SEPARATOR));
     }
 }

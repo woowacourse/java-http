@@ -2,8 +2,8 @@ package org.apache.coyote.request;
 
 import java.util.Optional;
 import nextstep.jwp.model.User;
-import org.apache.coyote.response.ResourceView;
 import org.apache.coyote.exception.HttpException;
+import org.apache.coyote.response.ResourceView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,15 +14,15 @@ public class HttpRequestHandler {
     private final ResourceView resourceView = new ResourceView();
 
     public String handle(HttpRequest request) {
-        try {
-            if (request.isGet()) {
-                logAccount(request);
-                return resourceView.findStaticResource(request.getUri());
-            }
-            throw new UnsupportedOperationException("Not implemented");
-        } catch (HttpException e) {
-            return resourceView.findErrorPage(e);
+        if (request.isGet()) {
+            logAccount(request);
+            return resourceView.findStaticResource(request.getUri());
         }
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    public String handle(HttpException exception) {
+        return resourceView.findErrorPage(exception);
     }
 
     private void logAccount(HttpRequest request) {

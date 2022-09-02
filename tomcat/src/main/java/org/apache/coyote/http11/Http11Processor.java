@@ -6,7 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.Processor;
-import org.apache.coyote.request.HttpRequestHandler;
+import org.apache.coyote.request.HttpRequestMapper;
 import org.apache.coyote.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +19,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final HttpRequestHandler requestHandler = new HttpRequestHandler();
+    private final HttpRequestMapper requestHandler = new HttpRequestMapper();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;

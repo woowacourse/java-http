@@ -1,11 +1,11 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.Http11Processor.HTTP_VERSION;
 import static org.apache.coyote.http11.StatusCode.OK;
 
 public class ResponseHeader {
 
     private static final String EXTENSION_DELIMITER = ".";
+    private static final String HTTP_VERSION = "HTTP/1.1";
 
     private final String path;
 

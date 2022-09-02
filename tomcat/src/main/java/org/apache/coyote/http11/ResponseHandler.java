@@ -24,8 +24,8 @@ public class ResponseHandler {
     private static final String PASSWORD = "password";
     private static final String DEFAULT_PATH = "/";
     private static final String DEFAULT_EXTENSION = ".html";
-    public static final String QUERY_PARAM = "?";
-    public static final String EXTENSION_DELIMITER = ".";
+    private static final String QUERY_PARAM = "?";
+    private static final String EXTENSION_DELIMITER = ".";
 
     private final String path;
 

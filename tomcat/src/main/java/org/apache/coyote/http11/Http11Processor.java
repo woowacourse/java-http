@@ -15,7 +15,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final int START_LINE = 1;
-    public static final String HTTP_VERSION = "HTTP/1.1";
 
     private final Socket connection;
 

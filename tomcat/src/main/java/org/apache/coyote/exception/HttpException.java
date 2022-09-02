@@ -6,6 +6,10 @@ public class HttpException extends RuntimeException {
 
     private final HttpStatus status;
 
+    public HttpException(HttpStatus status) {
+        this.status = status;
+    }
+
     public HttpException(Exception e, HttpStatus status) {
         super(e);
         this.status = status;

@@ -1,16 +1,21 @@
 package org.apache.coyote.http11;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
-
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String INDEX_PATH = "static/index.html";
 
     private final Socket connection;
 
@@ -28,7 +33,12 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final URL resource = getClass().getClassLoader().getResource(INDEX_PATH);
+            if (resource == null) {
+                throw new FileNotFoundException(INDEX_PATH + "not found");
+            }
+            Path path = new File(resource.getFile()).toPath();
+            final var responseBody = new String(Files.readAllBytes(path));
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

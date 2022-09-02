@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -15,6 +16,10 @@ public class Params {
     }
 
     public static Params parse(final String query) {
+        if (query == null) {
+            return new Params(Collections.emptyMap());
+        }
+
         final String paramsDelimiter = "&";
         final List<String> params = StringSplitter.split(paramsDelimiter, query);
 

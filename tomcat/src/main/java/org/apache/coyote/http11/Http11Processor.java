@@ -9,14 +9,12 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.ResourceLocator;
-import org.apache.coyote.http11.request.RequestProcessor;
+import org.apache.coyote.http11.request.HttpRequestHandler;
 import org.apache.coyote.http11.request.StartLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -47,8 +45,8 @@ public class Http11Processor implements Runnable, Processor {
             HttpHeaders headers = parseHeaders(br);
 
             HttpRequest httpRequest = new HttpRequest(startLine.getMethod(), startLine.getUrl().getValue());
-            RequestProcessor requestProcessor = new RequestProcessor(new ResourceLocator("/static"));
-            HttpResponse httpResponse = requestProcessor.process(httpRequest);
+            HttpRequestHandler httpRequestHandler = new HttpRequestHandler(new ResourceLocator("/static"));
+            HttpResponse httpResponse = httpRequestHandler.process(httpRequest);
             out.write(httpResponse.getBytes());
             out.flush();
 

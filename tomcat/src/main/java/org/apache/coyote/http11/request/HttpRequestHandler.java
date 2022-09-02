@@ -3,11 +3,11 @@ package org.apache.coyote.http11.request;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 
-public class RequestProcessor {
+public class HttpRequestHandler {
 
     private final ResourceLocator resourceLocator;
 
-    public RequestProcessor(ResourceLocator resourceLocator) {
+    public HttpRequestHandler(ResourceLocator resourceLocator) {
         this.resourceLocator = resourceLocator;
     }
 

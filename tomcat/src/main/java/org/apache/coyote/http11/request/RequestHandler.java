@@ -1,12 +1,11 @@
 package org.apache.coyote.http11.request;
 
 import java.net.URI;
-import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.apache.coyote.http11.response.Resource;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,13 +28,10 @@ public class RequestHandler {
     }
 
     private String login(final RequestHeader request) {
-        final URI uri = request.getUri();
-        final String query = uri.getQuery();
+        final Uri uri = Uri.parse(request.getUri());
 
-        final String paramDelimiter = "&";
-        final List<String> params = List.of(query.split(paramDelimiter));
-        final String account = params.get(0).split("=")[1];
-        final String password = params.get(1).split("=")[1];
+        final String account = uri.findParam("account");
+        final String password = uri.findParam("password");
 
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(NoSuchElementException::new);
@@ -46,6 +42,7 @@ public class RequestHandler {
 
         return resource("login.html");
     }
+
 
     private String resource(final RequestHeader request) {
         final URI uri = request.getUri();

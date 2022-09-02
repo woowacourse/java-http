@@ -5,6 +5,9 @@ import java.util.Optional;
 
 public class RequestUri {
 
+    private static final String FILE_EXTENSION_DELIMITER = ".";
+    private static final String EMPTY_STRING = "";
+
     private final URI uri;
 
     public RequestUri(final String uri) {
@@ -24,9 +27,9 @@ public class RequestUri {
     public String getExtension() {
         String path = getPath();
 
-        int lastDotIndex = path.lastIndexOf(".");
+        int lastDotIndex = path.lastIndexOf(FILE_EXTENSION_DELIMITER);
         if (lastDotIndex < 0) {
-            return "";
+            return EMPTY_STRING;
         }
 
         return path.substring(lastDotIndex + 1);

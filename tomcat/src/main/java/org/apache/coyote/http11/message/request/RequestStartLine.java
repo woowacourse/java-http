@@ -9,6 +9,7 @@ import org.apache.coyote.http11.message.common.HttpMethod;
 public class RequestStartLine {
 
     private static final String START_LINE_DELIMITER = " ";
+
     private static final int METHOD_INDEX = 0;
     private static final int REQUEST_URI_INDEX = 1;
     private static final int VERSION_INDEX = 2;

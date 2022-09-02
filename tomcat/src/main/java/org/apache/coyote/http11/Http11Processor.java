@@ -43,12 +43,12 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
              OutputStream outputStream = connection.getOutputStream()) {
 
-            HttpRequestMessage httpRequestMessage = generateHttpRequestMessage(bufferedReader);
-            String requestTarget = httpRequestMessage.getRequestTarget();
+            HttpRequest httpRequest = generateHttpRequestMessage(bufferedReader);
+            String requestTarget = httpRequest.getRequestTarget();
 
             if (requestTarget.equals("/")) {
-                HttpResponseMessage httpResponseMessage = HttpResponseMessage.DEFAULT_HTTP_RESPONSE;
-                outputStream.write(httpResponseMessage.parseResponse().getBytes());
+                HttpResponse httpResponse = HttpResponse.DEFAULT_HTTP_RESPONSE;
+                outputStream.write(httpResponse.parseResponse().getBytes());
                 outputStream.flush();
                 return;
             }
@@ -58,8 +58,8 @@ public class Http11Processor implements Runnable, Processor {
                 int index = requestTarget.indexOf("?");
                 QueryParameters queryParameters = new QueryParameters(requestTarget.substring(index + 1));
 
-                HttpResponseMessage httpResponseMessage = generateResponseMessage("login.html");
-                String response = httpResponseMessage.parseResponse();
+                HttpResponse httpResponse = generateResponseMessage("login.html");
+                String response = httpResponse.parseResponse();
 
                 validateExistsUser(queryParameters.getParameterValue("account"),
                         queryParameters.getParameterValue("password"));
@@ -71,8 +71,8 @@ public class Http11Processor implements Runnable, Processor {
 
             String fileName = requestTarget.substring(1);
 
-            HttpResponseMessage httpResponseMessage = generateResponseMessage(fileName);
-            String response = httpResponseMessage.parseResponse();
+            HttpResponse httpResponse = generateResponseMessage(fileName);
+            String response = httpResponse.parseResponse();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -81,8 +81,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequestMessage generateHttpRequestMessage(final BufferedReader bufferedReader) throws IOException {
-        HttpRequestMessage requestMessage = new HttpRequestMessage(Objects.requireNonNull(bufferedReader.readLine()));
+    private HttpRequest generateHttpRequestMessage(final BufferedReader bufferedReader) throws IOException {
+        HttpRequest requestMessage = new HttpRequest(Objects.requireNonNull(bufferedReader.readLine()));
         log.info(requestMessage.getRequestLine());
 
         String line;
@@ -94,7 +94,7 @@ public class Http11Processor implements Runnable, Processor {
         return requestMessage;
     }
 
-    private HttpResponseMessage generateResponseMessage(final String fileName) throws IOException {
+    private HttpResponse generateResponseMessage(final String fileName) throws IOException {
         String statusLine = "HTTP/1.1 200 OK";
 
         LinkedHashMap<String, String> headers = new LinkedHashMap<>();
@@ -108,7 +108,7 @@ public class Http11Processor implements Runnable, Processor {
         headers.put("Content-Type", contentType);
         headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
 
-        return new HttpResponseMessage(statusLine, headers, responseBody);
+        return new HttpResponse(statusLine, headers, responseBody);
     }
 
     private void validateExistsUser(final String account, final String password) {

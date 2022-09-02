@@ -3,9 +3,9 @@ package org.apache.coyote.http11;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class HttpResponseMessage {
+public class HttpResponse {
 
-    public static final HttpResponseMessage DEFAULT_HTTP_RESPONSE;
+    public static final HttpResponse DEFAULT_HTTP_RESPONSE;
 
     static {
         String statusLine = "HTTP/1.1 200 OK";
@@ -15,15 +15,14 @@ public class HttpResponseMessage {
         headers.put("Content-Type", ContentType.HTML.getValue());
         headers.put("Content-Length", String.valueOf(body.getBytes().length));
 
-        DEFAULT_HTTP_RESPONSE = new HttpResponseMessage(statusLine, headers, body);
+        DEFAULT_HTTP_RESPONSE = new HttpResponse(statusLine, headers, body);
     }
 
     private final String statusLine;
     private final LinkedHashMap<String, String> headers;
     private final String body;
 
-    public HttpResponseMessage(final String statusLine, final LinkedHashMap<String, String> headers,
-                               final String body) {
+    public HttpResponse(final String statusLine, final LinkedHashMap<String, String> headers, final String body) {
         this.statusLine = statusLine;
         this.headers = headers;
         this.body = body;

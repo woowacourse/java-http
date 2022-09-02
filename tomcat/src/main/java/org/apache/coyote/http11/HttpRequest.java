@@ -3,16 +3,16 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpRequestMessage {
+public class HttpRequest {
 
     private final RequestLine requestLine;
     private final Map<String, String> headers;
 
-    public HttpRequestMessage(final String startLine) {
+    public HttpRequest(final String startLine) {
         this(startLine, new HashMap<>());
     }
 
-    public HttpRequestMessage(final String startLine, final Map<String, String> headers) {
+    public HttpRequest(final String startLine, final Map<String, String> headers) {
         String[] splitStartLine = startLine.split(" ");
         this.requestLine = new RequestLine(splitStartLine[0], splitStartLine[1], splitStartLine[2]);
         this.headers = headers;

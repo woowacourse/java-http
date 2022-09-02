@@ -53,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createResponseBody(final HttpRequest httpRequest) {
-        if (httpRequest.getPath().equals("/")) {
+        if (httpRequest.isRootPath()) {
             return helloResponse();
         }
         String responseBody = ResourcesUtil.readResource(httpRequest.getFilePath(), this.getClass());

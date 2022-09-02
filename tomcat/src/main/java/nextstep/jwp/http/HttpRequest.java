@@ -16,6 +16,7 @@ public class HttpRequest {
 
     private static final String STATIC_EXTENTION_DOT = ".";
     private static final String DEFAULT_STATIC_EXTENSION = ".html";
+    private static final String ROOT_PATH = "/";
 
     private static final String EMPTY_QUERY_PARAMETER = "";
 
@@ -95,6 +96,10 @@ public class HttpRequest {
             return path;
         }
         return path + DEFAULT_STATIC_EXTENSION;
+    }
+
+    public boolean isRootPath() {
+        return path.equals(ROOT_PATH);
     }
 
     public String getUri() {

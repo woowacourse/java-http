@@ -9,7 +9,7 @@ public class ResponseMessage {
 
     private final HttpStatus status;
     private String contentType;
-    private String responseBody;
+    private String messageBody;
 
     public ResponseMessage(HttpStatus status) {
         this.status = status;
@@ -20,8 +20,8 @@ public class ResponseMessage {
         return this;
     }
 
-    public ResponseMessage setResponseBody(String responseBody) {
-        this.responseBody = responseBody;
+    public ResponseMessage setMessageBody(String messageBody) {
+        this.messageBody = messageBody;
         return this;
     }
 
@@ -32,7 +32,9 @@ public class ResponseMessage {
             joiner.add(header);
         }
         joiner.add("");
-        joiner.add(responseBody);
+        if (messageBody != null && messageBody.length() > 0) {
+            joiner.add(messageBody);
+        }
 
         return joiner.toString();
     }
@@ -42,8 +44,8 @@ public class ResponseMessage {
         if (contentType != null) {
             headers.add(String.format("Content-Type: %s;charset=utf-8 ", contentType));
         }
-        if (responseBody != null) {
-            headers.add(String.format("Content-Length: %d ", responseBody.getBytes().length));
+        if (messageBody != null) {
+            headers.add(String.format("Content-Length: %d ", messageBody.getBytes().length));
         }
         return headers;
     }

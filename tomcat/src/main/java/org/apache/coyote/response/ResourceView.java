@@ -46,7 +46,7 @@ public class ResourceView {
         try {
             return new ResponseMessage(status)
                     .setContentType(Files.probeContentType(path))
-                    .setResponseBody(new String(Files.readAllBytes(path)))
+                    .setMessageBody(new String(Files.readAllBytes(path)))
                     .build();
         } catch (IOException e) {
             throw HttpException.ofInternalServerError(e);

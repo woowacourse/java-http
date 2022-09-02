@@ -22,7 +22,7 @@ class RequestPathTest {
     }
 
     @Test
-    void parsePathWithQueryString () {
+    void parsePathWithQueryString() {
         // given
         String pathString = "/hello?a=1";
         // when
@@ -33,7 +33,7 @@ class RequestPathTest {
                 () -> assertThat(requestPath.getQueryParameters()).contains(Map.entry("a", "1"))
         );
     }
-    
+
     @Test
     void parsePathWithMutlipleQueryString() {
         // given

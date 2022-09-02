@@ -77,7 +77,7 @@ class ControllerMapperTest {
         // then
         assertThat(responseEntity.getStatus()).isEqualTo(HttpStatus.OK);
     }
-    
+
     @Test
     void mapToNotFound() {
         // given

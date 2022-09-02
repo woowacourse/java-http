@@ -1,17 +1,15 @@
 package org.apache.catalina.connector;
 
-import java.util.List;
-import nextstep.jwp.ui.DashboardController;
-import org.apache.mvc.Controller;
-import org.apache.mvc.ControllerMapper;
-import org.apache.coyote.http11.Http11Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
+import org.apache.coyote.http11.Http11Processor;
+import org.apache.mvc.Controller;
+import org.apache.mvc.ControllerMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connector implements Runnable {
 

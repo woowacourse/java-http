@@ -1,12 +1,11 @@
 package org.apache.catalina.startup;
 
+import java.io.IOException;
 import java.util.List;
 import org.apache.catalina.connector.Connector;
 import org.apache.mvc.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
 
 public class Tomcat {
 

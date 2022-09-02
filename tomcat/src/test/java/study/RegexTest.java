@@ -9,7 +9,8 @@ import org.junit.jupiter.api.Test;
 public class RegexTest {
 
     private final Pattern pathPattern = Pattern.compile("(?<path>/[a-zA-Z0-9\\-]*)[?]?");
-    private final Pattern queryParameterPattern = Pattern.compile("((?<field>[a-zA-Z0-9\\-]+)=(?<value>[a-zA-Z0-9\\-]+))&?");
+    private final Pattern queryParameterPattern = Pattern.compile(
+            "((?<field>[a-zA-Z0-9\\-]+)=(?<value>[a-zA-Z0-9\\-]+))&?");
 
 
     @Test

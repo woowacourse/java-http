@@ -84,4 +84,25 @@ class Http11ProcessorTest {
         // then
         assertThat(socket.output().contains("text/css")).isTrue();
     }
+
+    @DisplayName("query string으로 들어온 파일을 html파일로 읽는다.")
+    @Test
+    void queryString() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        assertThat(socket.output().contains("text/html")).isTrue();
+    }
 }

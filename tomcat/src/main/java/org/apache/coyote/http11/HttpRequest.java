@@ -1,31 +1,52 @@
 package org.apache.coyote.http11;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class HttpRequest {
 
-    final String requestMethod;
-    final String requestUri;
-    final String protocolVersion;
+    final private String requestMethod;
+    final private String requestUri;
+    final private String protocol;
+    final private Map<String, String> queryStrings = new HashMap<>();
 
     public HttpRequest(final List<String> request) {
         String requestLine = request.get(0);
-        String[] s = requestLine.split(" ");
-        this.requestMethod = s[0];
-        this.requestUri = s[1];
-        this.protocolVersion = s[2];
-    }
-
-    public String getRequestMethod() {
-        return requestMethod;
+        String[] str = requestLine.split(" ");
+        this.requestMethod = str[0];
+        if (str[1].contains("?")) {
+            int index = str[1].indexOf("?");
+            String path = str[1].substring(0, index);
+            if (!path.contains(".")) {
+                this.requestUri = path + ".html";
+            } else {
+                this.requestUri = path;
+            }
+            if (!str[1].substring(index + 1).isEmpty()) {
+                String queryString = str[1].substring(index + 1);
+                String[] queries = queryString.split("&");
+                for (String query : queries) {
+                    String[] s = query.split("=");
+                    queryStrings.put(s[0], s[1]);
+                }
+            }
+        } else {
+            this.requestUri = str[1];
+        }
+        this.protocol = str[2];
     }
 
     public String getRequestUri() {
         return requestUri;
     }
 
-    public String getProtocolVersion() {
-        return protocolVersion;
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public Map<String, String> getQueryStrings() {
+        return queryStrings;
     }
 
     @Override
@@ -33,7 +54,8 @@ public class HttpRequest {
         return "HttpRequest{" +
                 "requestMethod='" + requestMethod + '\'' +
                 ", requestUri='" + requestUri + '\'' +
-                ", protocolVersion='" + protocolVersion + '\'' +
+                ", protocolVersion='" + protocol + '\'' +
+                ", queryStrings=" + queryStrings +
                 '}';
     }
 }

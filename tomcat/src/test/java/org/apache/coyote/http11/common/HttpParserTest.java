@@ -58,6 +58,33 @@ class HttpParserTest {
     }
 
     @Test
+    void cookie_형식에_맞게_파싱한다() {
+        // given
+        final var str = "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
+
+        // when
+        final var cookie = HttpParser.parseCookie(str);
+
+        // then
+        assertAll(
+                () -> assertThat(cookie.get("yummy_cookie")).isEqualTo("choco"),
+                () -> assertThat(cookie.get("tasty_cookie")).isEqualTo("strawberry"),
+                () -> assertThat(cookie.get("JSESSIONID")).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46")
+        );
+    }
+
+    @Test
+    void cookie_형식에_맞지_않는_경우_예외를_던진다() {
+        // given
+        final var str = "yummy_cookie=choco; tasty_cookie";
+
+
+        // when & then
+        assertThatThrownBy(() -> HttpParser.parseCookie(str))
+                .isInstanceOf(HttpFormatException.class);
+    }
+
+    @Test
     void query_string_형식에_맞게_파싱한다() {
         // given
         final var str = "account=ellie&password=password";

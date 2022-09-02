@@ -26,6 +26,23 @@ public class HttpParser {
         }
     }
 
+    public static Map<String, String> parseCookie(final String cookie) {
+        final var options = new HashMap<String, String>();
+        for (var option : cookie.split(";")) {
+            parseCookieOption(option.trim(), options);
+        }
+        return options;
+    }
+
+    private static void parseCookieOption(String option, HashMap<String, String> options) {
+        try {
+            final var index = option.indexOf("=");
+            options.put(option.substring(0, index).trim(), option.substring(index + 1).trim());
+        } catch (StringIndexOutOfBoundsException e) {
+            throw new HttpFormatException("HTTP Cookie 형식에 맞지 않습니다.");
+        }
+    }
+
     public static Map<String, String> parseQueryString(final String message) {
         final var parameters = new HashMap<String, String>();
         for (var parameter : message.split("&")) {

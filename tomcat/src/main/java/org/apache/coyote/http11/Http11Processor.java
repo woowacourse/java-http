@@ -1,12 +1,19 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequestWrapper;
+import org.apache.coyote.http11.response.HttpResponseWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -25,22 +32,31 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final InputStream inputStream = connection.getInputStream();
+             final OutputStream outputStream = connection.getOutputStream();
+             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var responseBody = "Hello world!";
+            HttpRequestWrapper requestWrapper = new HttpRequestWrapper(toRequestLines(reader));
+            log.info("\n\n###### ----REQUEST---- ###### \n\n" + requestWrapper.getLines() + "\n\n");
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            HttpResponseWrapper responseWrapper = new HttpResponseWrapper(requestWrapper);
+            String response = responseWrapper.getResponse();
+            log.info("\n\n###### ----RESPONSE---- ###### \n\n" + responseWrapper.getHeader() + "\n\n");
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private List<String> toRequestLines(BufferedReader reader) throws IOException {
+        List<String> lines = new ArrayList<>();
+        String line = " ";
+        while (!line.isEmpty()) {
+            line = reader.readLine();
+            lines.add(line);
+        }
+        return lines;
     }
 }

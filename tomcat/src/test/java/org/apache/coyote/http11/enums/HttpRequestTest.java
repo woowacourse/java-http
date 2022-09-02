@@ -2,7 +2,6 @@ package org.apache.coyote.http11.enums;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Map;
 import org.apache.coyote.http11.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,14 +10,14 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 class HttpRequestTest {
 
-    @DisplayName("api 호출")
+    @DisplayName("file 호출이 아님")
     @Test
     void isCallApi() {
         // given
         HttpRequest httpRequest = new HttpRequest("/login");
 
         // when & then
-        assertThat(httpRequest.isFindFile()).isTrue();
+        assertThat(httpRequest.isFindFile()).isFalse();
     }
 
     @DisplayName("file 호출")
@@ -28,7 +27,7 @@ class HttpRequestTest {
         HttpRequest httpRequest = new HttpRequest("/login.html");
 
         // when & then
-        assertThat(httpRequest.isFindFile()).isFalse();
+        assertThat(httpRequest.isFindFile()).isTrue();
     }
 
     @DisplayName("올바른 ContentType 찾기")
@@ -50,21 +49,5 @@ class HttpRequestTest {
 
         // when & then
         assertThat(httpRequest.findFilePath()).isEqualTo(FilePath.INDEX_PAGE);
-    }
-
-    @DisplayName("쿼리스트링 찾기")
-    @Test
-    void getQueryString() {
-        // given
-        String key = "key";
-        String value = "value";
-        HttpRequest httpRequest = new HttpRequest("/index.html?" + key + "=" + value);
-
-        // when
-        Map<String, String> result = httpRequest.getQueryString();
-
-        // then
-        assertThat(result.size()).isEqualTo(1);
-        assertThat(result.get(key)).isEqualTo(value);
     }
 }

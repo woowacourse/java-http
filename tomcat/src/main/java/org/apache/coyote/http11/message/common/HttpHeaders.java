@@ -25,10 +25,6 @@ public class HttpHeaders {
 
     private final Map<String, String> headers;
 
-    public HttpHeaders() {
-        this.headers = new LinkedHashMap<>();
-    }
-
     public HttpHeaders(final Map<String, String> headers) {
         this.headers = new LinkedHashMap<>(headers);
     }
@@ -53,10 +49,6 @@ public class HttpHeaders {
         }
 
         return Optional.of(value);
-    }
-
-    public void addHeader(final String key, final String value) {
-        headers.put(key, value);
     }
 
     public String generateHeaderText() {

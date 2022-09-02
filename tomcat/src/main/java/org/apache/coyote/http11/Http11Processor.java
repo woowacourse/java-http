@@ -50,7 +50,7 @@ public class Http11Processor implements Runnable, Processor {
 
             UserOutput.outputUserInformation(request);
 
-            final MediaType mediaType = MediaType.of(FileExtension.of(requestStartLine));
+            final MediaType mediaType = MediaType.of(FileExtension.of(request.getPath()));
             final String response = new Response.ResponseBuilder(HttpVersion.HTTP11, Status.OK)
                     .setContentType(mediaType, Charset.UTF8)
                     .setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)

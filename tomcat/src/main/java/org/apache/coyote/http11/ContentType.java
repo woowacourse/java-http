@@ -11,17 +11,18 @@ public enum ContentType {
         this.contentType = contentType;
     }
 
-    public static String from(final String requestUrl) {
+    public static ContentType from(final String requestUrl) {
         if (requestUrl.contains(".css")) {
-            return CSS.getContentType();
+            return CSS;
         }
         if (requestUrl.contains(".js")) {
-            return JS.getContentType();
+            return JS;
         }
-        return HTTP.getContentType();
+        return HTTP;
     }
 
-    private String getContentType() {
-        return contentType;
+    @Override
+    public String toString() {
+        return this.contentType;
     }
 }

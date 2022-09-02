@@ -21,7 +21,7 @@ public class HttpRequestHeader {
     }
 
     private static String makeDefualtRequestUrl(String requestUrl) {
-        if (!requestUrl.contains(".") && !requestUrl.equals("/")) {
+        if (!requestUrl.contains(".") && !requestUrl.equals("/") && !requestUrl.contains("?")) {
             requestUrl = requestUrl + ".html";
         }
         return requestUrl;

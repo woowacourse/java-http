@@ -16,6 +16,10 @@ import java.util.Optional;
 
 public class LoginController implements Controller {
 
+    private static final String APPEND_DELIMITER = "&";
+    private static final String EQUAL_DELIMITER = "=";
+    private static final int QUERY_PARAM_KEY_VALUE_SIZE = 2;
+
     private final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
@@ -36,13 +40,13 @@ public class LoginController implements Controller {
 
     private LoginRequest convert(final String queryString) {
         final Map<String, String> paramMapping = new HashMap<>();
-        for (String info : queryString.split("&")) {
-            final String[] keyValue = info.split("=");
-            if (keyValue.length != 2) {
+        for (String info : queryString.split(APPEND_DELIMITER)) {
+            final String[] queryParam = info.split(EQUAL_DELIMITER);
+            if (queryParam.length != QUERY_PARAM_KEY_VALUE_SIZE) {
                 throw new IllegalArgumentException("key value 값이 올바르지 않음");
             }
-            final String key = keyValue[0];
-            final String value = keyValue[1];
+            final String key = queryParam[0];
+            final String value = queryParam[1];
             paramMapping.put(key, value);
         }
         return new LoginRequest(paramMapping.get("account"), paramMapping.get("password"));

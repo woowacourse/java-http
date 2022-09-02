@@ -1,6 +1,7 @@
 package nextstep.jwp.http.response;
 
 import nextstep.jwp.http.common.HttpStatus;
+import nextstep.jwp.http.request.HttpVersion;
 import nextstep.jwp.model.StaticResource;
 
 public class HttpResponse {
@@ -24,7 +25,7 @@ public class HttpResponse {
         return new HttpResponse(httpStatus, responseHeaders, responseBody);
     }
 
-    public static HttpResponse redirect(HttpStatus httpStatus, String location) {
+    public static HttpResponse createRedirect(HttpStatus httpStatus, String location) {
         ResponseHeaders responseHeaders = ResponseHeaders.createWithDirect(location);
         ResponseBody responseBody = ResponseBody.empty();
 
@@ -41,5 +42,16 @@ public class HttpResponse {
 
     public String getResponseBody() {
         return responseBody.getValue();
+    }
+
+    public String getResponse() {
+        String response = String.join("\r\n",
+            HttpVersion.HTTP_1_1.getValue() + " " + httpStatus.getCode() + " " + httpStatus.getDescription() + " ",
+            "Content-Type: " + responseHeaders.getHeader("Content-Type") + ";charset=utf-8 ",
+            "Content-Length: " + responseBody.getValue().getBytes().length + " ",
+            "",
+            responseBody.getValue());
+
+        return response;
     }
 }

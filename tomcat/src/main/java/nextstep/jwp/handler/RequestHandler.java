@@ -25,7 +25,7 @@ public class RequestHandler {
         try {
             return findByUri(httpRequest);
         } catch (RuntimeException e) {
-            return HttpResponse.redirect(HttpStatus.UNAUTHORIZED, "/401.html");
+            return HttpResponse.createRedirect(HttpStatus.UNAUTHORIZED, "/401.html");
         }
     }
 

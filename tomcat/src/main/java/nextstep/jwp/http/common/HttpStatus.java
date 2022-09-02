@@ -13,4 +13,12 @@ public enum HttpStatus {
         this.code = code;
         this.description = description;
     }
+
+    public int getCode() {
+        return code;
+    }
+
+    public String getDescription() {
+        return description;
+    }
 }

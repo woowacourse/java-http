@@ -35,17 +35,9 @@ public class Http11Processor implements Runnable, Processor {
             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-
             HttpResponse httpResponse = RequestHandler.execute(httpRequest);
 
-            final String response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + httpResponse.getHeader("Content-Type") + ";charset=utf-8 ",
-                "Content-Length: " + httpResponse.getResponseBody().getBytes().length + " ",
-                "",
-                httpResponse.getResponseBody());
-
-            writeResponse(outputStream, response);
+            writeResponse(outputStream, httpResponse.getResponse());
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

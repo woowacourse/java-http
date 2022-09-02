@@ -31,7 +31,7 @@ public class Http11Processor implements Runnable, org.apache.coyote.Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             String uri = getUri(bufferedReader);
-            UriResponse uriResponse = ControllerManager.getUriResponse(uri);
+            UriResponse uriResponse = HandlerManager.getUriResponse(uri);
 
             String http11Response = getHttp11Response(uriResponse);
 

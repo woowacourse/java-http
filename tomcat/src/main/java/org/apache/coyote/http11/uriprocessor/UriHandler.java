@@ -1,9 +1,12 @@
 package org.apache.coyote.http11.uriprocessor;
 
 import java.io.IOException;
+import java.util.Map;
 import org.apache.coyote.http11.UriResponse;
 
 public interface UriHandler {
 
-    UriResponse getResponse(String uri) throws IOException;
+    boolean canHandle(String uri);
+
+    UriResponse getResponse(String path, Map<String, Object> parameters) throws IOException;
 }

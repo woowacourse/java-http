@@ -36,13 +36,12 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            HttpRequestWrapper requestWrapper = new HttpRequestWrapper(toRequestLines(reader));
-            log.info("\n\n###### ----REQUEST---- ###### \n\n" + requestWrapper.getLines() + "\n\n");
+            final HttpRequestWrapper requestWrapper = new HttpRequestWrapper(toRequestLines(reader));
+            final HttpResponseWrapper responseWrapper = new HttpResponseWrapper(requestWrapper);
+            log.info("\n\n###### ----REQUEST---- ###### \n\n" + requestWrapper.getLines() +
+                    "\n\n###### ----RESPONSE---- ###### \n\n" + responseWrapper.getHeader() + "\n\n");
 
-            HttpResponseWrapper responseWrapper = new HttpResponseWrapper(requestWrapper);
             String response = responseWrapper.getResponse();
-            log.info("\n\n###### ----RESPONSE---- ###### \n\n" + responseWrapper.getHeader() + "\n\n");
-
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -50,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private List<String> toRequestLines(BufferedReader reader) throws IOException {
+    private List<String> toRequestLines(final BufferedReader reader) throws IOException {
         List<String> lines = new ArrayList<>();
         String line = " ";
         while (!line.isEmpty()) {

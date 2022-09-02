@@ -1,22 +1,27 @@
 package org.apache.coyote.http11.response;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class HttpResponseHeader {
-    private final String headers;
+    private final List<String> headers;
+
     public HttpResponseHeader(String status) {
-        this.headers = toResponseHeaders(status);
+        this.headers = new ArrayList<>();
+        this.headers.add("HTTP/1.1 " + status + " ");
     }
 
     public String getHeaders() {
-        return headers;
+        return String.join("\r\n", headers);
     }
 
-    private String toResponseHeaders(String status) {
-        return String.join("\r\n",
-                "HTTP/1.1 " + status + " ",
-                "Content-Type: text/html;charset=utf-8 ");
+    public HttpResponseHeader addContentType(String contentType) {
+        headers.add("Content-Type: " + contentType + ";charset=utf-8 ");
+        return this;
     }
 
-    public String getContentLengthHeader(int contentLength) {
-        return "Content-Length: " + contentLength + " ";
+    public HttpResponseHeader addContentLength(int contentLength) {
+        headers.add("Content-Length: " + contentLength + " ");
+        return this;
     }
 }

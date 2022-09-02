@@ -58,4 +58,4 @@ http://localhost:8080/login?account=gugu&password=password으로 접속하면 �
 
 - [x] GET /index.html 응답하기
 - [x] 예외 처리후 404.html 응답하기
-- 
+- [x] CSS 지원하기

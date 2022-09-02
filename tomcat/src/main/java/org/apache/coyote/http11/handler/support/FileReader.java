@@ -7,6 +7,9 @@ import java.nio.file.Paths;
 
 public class FileReader {
 
+    private FileReader() {
+    }
+
     public static String getFile(final String path, final Class<?> classes) {
         try {
             URL resource = classes.getResource("/static" + path);

@@ -16,9 +16,9 @@ public class ResourceHandler implements Handler{
     @Override
     public String getResponse() {
         String path = httpRequest.getPath();
-        String responseBody = FileReader.getFile(path, getClass());
-
         ContentType contentType = ContentType.from(path);
+
+        String responseBody = FileReader.getFile(path, getClass());
         HttpResponse httpResponse = HttpResponse.of(contentType, responseBody);
         return httpResponse.getResponse();
     }

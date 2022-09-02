@@ -5,13 +5,13 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    public static final String REQUEST_LINE_DELIMITER = " ";
-    public static final int PATH_INDEX = 1;
-    public static final String EXIST_QUERY_PARAMS = "?";
-    public static final String QUERY_PARAMS_DELIMITER = "&";
-    public static final String QUERY_PRAM_VALUE_DELIMITER = "=";
-    public static final int QUERY_PRAM_KEY_INDEX = 0;
-    public static final int QUERY_PARAM_VALUE_INDEX = 1;
+    private static final String REQUEST_LINE_DELIMITER = " ";
+    private static final int PATH_INDEX = 1;
+    private static final String EXIST_QUERY_PARAMS = "?";
+    private static final String QUERY_PARAMS_DELIMITER = "&";
+    private static final String QUERY_PRAM_VALUE_DELIMITER = "=";
+    private static final int QUERY_PRAM_KEY_INDEX = 0;
+    private static final int QUERY_PARAM_VALUE_INDEX = 1;
 
     private final String path;
     private final Map<String, String> queryParams;
@@ -29,7 +29,7 @@ public class HttpRequest {
     }
 
     private static String getPath(String input) {
-        if (!input.contains(EXIST_QUERY_PARAMS)) {
+        if (existQueryParams(input)) {
             return input;
         }
         return input.substring(0, input.lastIndexOf(EXIST_QUERY_PARAMS));
@@ -37,17 +37,25 @@ public class HttpRequest {
 
     private static Map<String, String> getQueryParams(final String path) {
         Map<String, String> queryParams = new HashMap<>();
-        if (!path.contains(EXIST_QUERY_PARAMS)) {
+        if (existQueryParams(path)) {
             return queryParams;
         }
 
-        String queryString = path.substring(path.lastIndexOf(EXIST_QUERY_PARAMS) + 1);
-        String[] queryParam = queryString.split(QUERY_PARAMS_DELIMITER);
-        for (String param : queryParam) {
-            String[] split1 = param.split(QUERY_PRAM_VALUE_DELIMITER);
-            queryParams.put(split1[QUERY_PRAM_KEY_INDEX], split1[QUERY_PARAM_VALUE_INDEX]);
+        String[] queryString = getQueryString(path);
+        for (String param : queryString) {
+            String[] paramsInfo = param.split(QUERY_PRAM_VALUE_DELIMITER);
+            queryParams.put(paramsInfo[QUERY_PRAM_KEY_INDEX], paramsInfo[QUERY_PARAM_VALUE_INDEX]);
         }
         return queryParams;
+    }
+
+    private static String[] getQueryString(final String path) {
+        String queryString = path.substring(path.lastIndexOf(EXIST_QUERY_PARAMS) + 1);
+        return queryString.split(QUERY_PARAMS_DELIMITER);
+    }
+
+    private static boolean existQueryParams(final String path) {
+        return !path.contains(EXIST_QUERY_PARAMS);
     }
 
     public String getPath() {

@@ -9,8 +9,7 @@ public enum HandlerMapping {
 
     LOGIN("/login", LoginHandler::new),
     INDEX("/index.html", IndexHandler::new),
-    HOME("/", HomeHandler::new)
-    ;
+    HOME("/", HomeHandler::new);
 
     private final String path;
     private final Function<HttpRequest, Handler> expression;

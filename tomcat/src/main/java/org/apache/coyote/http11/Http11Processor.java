@@ -44,17 +44,17 @@ public class Http11Processor implements Runnable, Processor {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            String firstLine = bufferedReader.readLine();
-            if (firstLine == null) {
+            String requestFirstLine = bufferedReader.readLine();
+            if (requestFirstLine == null) {
                 return;
             }
 
-            if (firstLine.contains(LOGIN_REQUEST_URI)) {
-                showUser(firstLine);
+            if (requestFirstLine.contains(LOGIN_REQUEST_URI)) {
+                showUser(requestFirstLine);
                 return;
             }
 
-            var response = generateResponse(firstLine);
+            var response = generateResponse(requestFirstLine);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

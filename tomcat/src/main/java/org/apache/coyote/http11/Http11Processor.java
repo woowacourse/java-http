@@ -62,12 +62,17 @@ public class Http11Processor implements Runnable, Processor {
         String queryString = resource.substring(questionIndex);
         String account = queryString.split("account=")[1].split("&")[0];
         String password = queryString.split("password=")[1].split(" ")[0];
+        User user = findUser(account, password);
+        log.debug(user.toString());
+    }
+
+    private User findUser(String account, String password) {
         User user = findByAccount(account)
                 .orElseThrow(IllegalArgumentException::new);
         if (!user.checkPassword(password)) {
             throw new IllegalArgumentException();
         }
-        log.debug(user.toString());
+        return user;
     }
 
     private String generateResponse(String resource) throws IOException {

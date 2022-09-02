@@ -52,7 +52,7 @@ class Http11ProcessorTest {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         InputStream inputStream = loader.getResourceAsStream("static/index.html");
         final byte[] contentByte = inputStream.readAllBytes();
-        final String content = new String(contentByte).replaceAll("\r", "");
+        final String content = new String(contentByte);
 //        final URL resource = getClass().getClassLoader().getResource("static/index.html");
 
         // then

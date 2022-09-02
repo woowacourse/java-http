@@ -3,7 +3,8 @@ package nextstep.jwp.http.common;
 public enum HttpStatus {
 
     OK(200, "OK"),
-    UNAUTHORIZED(401, "Unauthorized")
+    UNAUTHORIZED(401, "Unauthorized"),
+    INTERNAL_SERVER_ERROR(500, "Internal Server Error")
     ;
 
     private final int code;

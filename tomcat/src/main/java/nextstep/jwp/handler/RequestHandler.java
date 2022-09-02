@@ -25,7 +25,8 @@ public class RequestHandler {
         try {
             return findByUri(httpRequest);
         } catch (RuntimeException e) {
-            return HttpResponse.createRedirect(HttpStatus.UNAUTHORIZED, "/401.html");
+            return HttpResponse.createBody(HttpStatus.INTERNAL_SERVER_ERROR,
+                StaticResourceUtil.findByPathWithExtension("/", "500.html"));
         }
     }
 

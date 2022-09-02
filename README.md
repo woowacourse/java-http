@@ -25,7 +25,7 @@ start line = `HTTP Method + URL + HTTP version`
 ### TODO
 
 [x] requestURI를 이용하여 resourceLocator 파일 찾기
-[ ] 문서 이외의 확장자 처리
+[x] 문서 이외의 확장자 처리
 [x] query param 처리
 
 핸들러 매핑

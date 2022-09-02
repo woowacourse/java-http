@@ -1,4 +1,4 @@
-package org.apache.coyote.request;
+package org.apache.coyote.processor;
 
 import java.util.HashMap;
 import java.util.Map;

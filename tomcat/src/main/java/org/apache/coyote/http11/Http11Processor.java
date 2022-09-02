@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.apache.coyote.response.StatusCode.*;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -12,15 +13,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.NoSuchUserException;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
+import org.apache.coyote.processor.LoginProcessor;
 import org.apache.coyote.Processor;
 import org.apache.coyote.request.HttpRequestHeader;
-import org.apache.coyote.request.QueryProcessor;
 import org.apache.coyote.response.ContentType;
 import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.response.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,25 +50,12 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final HttpRequestHeader httpRequestHeader = makeHttpRequestHeader(bufferedReader);
-            String requestUrl = httpRequestHeader.getRequestUrl();
+            String requestUrl = httpRequestHeader.getRequestUrlWithoutQuery();
 
-            int index = requestUrl.indexOf("?");
-            if (index != -1) {
-                String queryString = requestUrl.substring(index + 1);
-                requestUrl = requestUrl.substring(0, index) + ".html";
-
-                final QueryProcessor queryProcessor = QueryProcessor.from(queryString);
-                final String account = queryProcessor.getParameter("account");
-
-                final User user = InMemoryUserRepository.findByAccount(account)
-                        .orElseThrow(NoSuchUserException::new);
-
-                final String userInformation = user.toString();
-                log.info(userInformation);
-            }
+            handleLogin(httpRequestHeader, requestUrl);
 
             String responseBody = makeResponseBody(requestUrl);
-            String statusCode = "200 OK";
+            StatusCode statusCode = OK;
 
             final HttpResponse httpResponse = new HttpResponse(statusCode, ContentType.from(requestUrl), responseBody);
             final String response = httpResponse.getResponse();
@@ -78,6 +64,13 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private static void handleLogin(final HttpRequestHeader httpRequestHeader, final String requestUrl) {
+        if (requestUrl.contains("login")) {
+            final String fullRequestUrl = httpRequestHeader.getRequestUrl();
+            LoginProcessor.login(fullRequestUrl);
         }
     }
 
@@ -110,6 +103,7 @@ public class Http11Processor implements Runnable, Processor {
             final String[] header = line.split(HEADER_DELIMITER);
             httpHeaderLines.put(header[KEY_INDEX], header[VALUE_INDEX]);
         }
+
         return httpHeaderLines;
     }
 }

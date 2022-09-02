@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static nextstep.jwp.views.RequestLoginUserOutput.printRequestLoginUser;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -39,6 +41,7 @@ public class Http11Processor implements Runnable, Processor {
             final String request = bufferedReader.readLine();
 
             final HttpRequest httpRequest = new HttpRequest(request);
+            httpRequest.printUserLog();
             final String result = new PageMapper().makeResponseBody(httpRequest.getUrl());
             final HttpResponse response = new HttpResponse(HttpStatus.OK, httpRequest.getUrl() , result);
 

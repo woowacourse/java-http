@@ -14,11 +14,6 @@ public class PageMapper {
 
     private static String STATIC = "static/";
 
-    public static boolean isCustomFileRequest(final String url){
-        final FileName foundFileName = findFileName(url);
-        return !foundFileName.getFileName().equals("") && !foundFileName.equals(NOT_FOUND);
-    }
-
     public String makeResponseBody(String url) {
         if (isCustomFileRequest(url)) {
             try {
@@ -29,13 +24,26 @@ public class PageMapper {
             }
         }
 
-        try {
-            return readFile(getFilePath(url));
-        } catch (URISyntaxException | IOException e) {
-            e.printStackTrace();
+        if(isFileRequest(url)){
+            try {
+                final String filePath = getFilePath(url);
+                return readFile(filePath);
+            } catch (URISyntaxException | IOException e) {
+                e.printStackTrace();
+            }
         }
 
+
         return "Hello world!";
+    }
+
+    public static boolean isCustomFileRequest(final String url){
+        final FileName foundFileName = findFileName(url);
+        return !foundFileName.getFileName().equals("") && !foundFileName.equals(NOT_FOUND);
+    }
+
+    private boolean isFileRequest(String url) {
+        return !url.equals("/");
     }
 
     private String readFile(String filePath) throws IOException {

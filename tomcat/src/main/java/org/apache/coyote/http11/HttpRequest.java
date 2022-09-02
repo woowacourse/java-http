@@ -17,7 +17,8 @@ public class HttpRequest {
     }
 
     public static HttpRequest of(List<String> inputs) {
-        final String uri = inputs.get(0).split(" ")[1];
+        String startLine = inputs.get(0);
+        final String uri = startLine.split(" ")[1];
         return new HttpRequest(RequestUri.of(uri), parseHeaders(inputs));
     }
 
@@ -31,7 +32,8 @@ public class HttpRequest {
     }
 
     public String findContentType() {
-        return headers.getOrDefault("Accept", DEFAULT_CONTENT_TYPE).split(",")[0];
+        String accept = headers.getOrDefault("Accept", DEFAULT_CONTENT_TYPE);
+        return accept.split(",")[0];
     }
 
     public RequestUri getRequestUri() {

@@ -3,7 +3,9 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -36,15 +38,15 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-             final var outputStream = connection.getOutputStream()) {
+        try (final InputStream inputStream = connection.getInputStream();
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+             final OutputStream outputStream = connection.getOutputStream()) {
 
-            List<String> request = getRequest(bufferedReader);
+            List<String> request = readRequest(bufferedReader);
             HttpRequest httpRequest = HttpRequest.of(request);
 
-            final var responseBody = getResponseBody(httpRequest.getRequestUri());
-            final var response = makeResponse(httpRequest.findContentType(), responseBody);
+            final String responseBody = getResponseBody(httpRequest.getRequestUri());
+            final String response = makeResponse(httpRequest.findContentType(), responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -53,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private List<String> getRequest(final BufferedReader bufferedReader) throws IOException {
+    private List<String> readRequest(final BufferedReader bufferedReader) throws IOException {
         final List<String> request = new ArrayList<>();
         String line;
         while (!(line = bufferedReader.readLine()).isBlank()) {
@@ -64,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getResponseBody(final RequestUri requestUri) throws IOException {
         if (requestUri.hasQueryParams()) {
-            User user = getUserByAccount(requestUri.findQueryParamValue("account"));
+            final User user = getUserByAccount(requestUri.findQueryParamValue("account"));
             validateUserPassword(requestUri, user);
             log.info("user : " + user);
         }

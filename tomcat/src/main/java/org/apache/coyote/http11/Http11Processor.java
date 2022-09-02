@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -35,34 +34,45 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
             String firstLine = new BufferedReader(new InputStreamReader(inputStream)).readLine();
-
-            String responseBody = getResponseBody(firstLine);
-            String response = generateResponse(responseBody);
+            String response = generateResponse(firstLine);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String generateResponse(String responseBody) {
+    private String generateResponse(String firstLine) throws IOException {
+        String responseBody = generateResponseBody(firstLine);
+        String contentType = getContentType(firstLine);
+
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                contentType,
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
     }
 
-    private String getResponseBody(String firstLine) throws IOException, URISyntaxException {
+    private String getContentType(String firstLine) {
+        if (firstLine.contains("/css")) {
+            return "Content-Type: text/css;charset=utf-8 ";
+        }
+        if (firstLine.contains("/js")) {
+            return "Content-Type: text/js;charset=utf-8 ";
+        }
+        return "Content-Type: text/html;charset=utf-8 ";
+    }
+
+    private String generateResponseBody(String firstLine) throws IOException {
         if ("/".equals(firstLine.split(" ")[1])) {
             return DEFAULT_RESPONSE_BODY;
         }
 
-        String fileName = firstLine.split(" ")[1].replace("/", "");
+        String fileName = firstLine.split(" ")[1];
         Path path = new File(
-                Objects.requireNonNull(getClass().getClassLoader().getResource("static/" + fileName)).getFile()
+                Objects.requireNonNull(getClass().getClassLoader().getResource("static" + fileName)).getFile()
         ).toPath();
 
         return Files.readString(path);

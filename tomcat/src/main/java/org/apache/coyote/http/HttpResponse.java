@@ -2,6 +2,7 @@ package org.apache.coyote.http;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class HttpResponse {
 
@@ -28,6 +29,19 @@ public class HttpResponse {
         return new HttpResponse(values);
     }
 
+    public HttpResponse changeStatusCode(final int statusCode) {
+        if (statusCode == 200) {
+            values.set(0, "HTTP/1.1 200 OK ");
+        }
+        if (statusCode == 302) {
+            values.set(0, "HTTP/1.1 302 Found ");
+        }
+        if (values.isEmpty()) {
+            values.set(0, "HTTP/1.1 500 Internal Server ");
+        }
+        return this;
+    }
+
     public HttpResponse setContentType(final String contentType) {
         values.add("Content-Type: " + contentType + ";charset=utf-8 ");
         return this;
@@ -39,13 +53,13 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse setLocation(final String path) {
-        values.add("Location: " + path + " ");
+    public HttpResponse setLocationAsHome() {
+        values.add("Location: /index.html ");
         return this;
     }
 
-    public HttpResponse setCookie(final String cookie) {
-        values.add("Set-Cookie: " + cookie + " ");
+    public HttpResponse setSessionId(final UUID sessionId) {
+        values.add("Set-Cookie: JSESSIONID=" + sessionId + " ");
         return this;
     }
 

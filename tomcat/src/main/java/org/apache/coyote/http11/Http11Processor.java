@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,59 +51,28 @@ public class Http11Processor implements Runnable, Processor {
             final int contentLength = httpRequest.getContentLength();
             final Map<String, String> requestBody = getRequestBody(bufferedReader, contentLength);
 
-            if (httpRequest.isRegister()) {
-                final User user = new User(requestBody.get("account"), requestBody.get("password"),
-                        requestBody.get("email"));
-                InMemoryUserRepository.save(user);
+            HttpResponse httpResponse = HttpResponse.fromStatusCode(200)
+                    .setResponseBody(getResponseBody(httpRequest.getPath()))
+                    .setContentType(httpRequest.getContentType());
 
-                saveSessionAndResponse(outputStream, user);
-                return;
+            if (httpRequest.isRegister()) {
+                httpResponse = register(requestBody, httpResponse);
             }
 
             if (httpRequest.isLogin()) {
-                final Optional<User> possibleUser = InMemoryUserRepository.findByAccount(
-                        requestBody.get("account"));
-                if (possibleUser.isPresent()) {
-                    saveSessionAndResponse(outputStream, possibleUser.get());
-                    return;
-                }
+                httpResponse = login(requestBody, httpResponse);
             }
 
             if (httpRequest.isLoginPage() && httpRequest.alreadyLogin()) {
-                final byte[] response = HttpResponse.fromStatusCode(302)
-                        .setLocation("/index.html")
-                        .toResponseBytes();
-                outputStream.write(response);
-                outputStream.flush();
-                return;
+                httpResponse = httpResponse.changeStatusCode(302)
+                        .setLocationAsHome();
             }
 
-            final String responseBody = getResponseBody(httpRequest.getPath());
-            final byte[] response = HttpResponse.fromStatusCode(200)
-                    .setResponseBody(responseBody)
-                    .setContentType(httpRequest.getContentType())
-                    .toResponseBytes();
-
-            outputStream.write(response);
+            outputStream.write(httpResponse.toResponseBytes());
             outputStream.flush();
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private void saveSessionAndResponse(final OutputStream outputStream, final User user) throws IOException {
-        final UUID sessionId = UUID.randomUUID();
-        final HttpSession session = new Session(String.valueOf(sessionId));
-        session.setAttribute("user", user);
-        new SessionManager().add(session);
-
-        final byte[] response = HttpResponse.fromStatusCode(302)
-                .setLocation("/index.html")
-                .setCookie("JSESSIONID=" + sessionId)
-                .toResponseBytes();
-
-        outputStream.write(response);
-        outputStream.flush();
     }
 
     private Map<String, String> getHeaders(final BufferedReader bufferedReader) throws IOException {
@@ -155,5 +123,37 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return responseBody;
+    }
+
+    private HttpResponse login(final Map<String, String> requestBody, HttpResponse httpResponse) {
+        final Optional<User> possibleUser = InMemoryUserRepository.findByAccount(
+                requestBody.get("account"));
+        if (possibleUser.isPresent()) {
+            final UUID sessionId = UUID.randomUUID();
+            final HttpSession session = new Session(String.valueOf(sessionId));
+            session.setAttribute("user", possibleUser.get());
+            new SessionManager().add(session);
+
+            httpResponse = httpResponse.changeStatusCode(302)
+                    .setLocationAsHome()
+                    .setSessionId(sessionId);
+        }
+        return httpResponse;
+    }
+
+    private HttpResponse register(final Map<String, String> requestBody, HttpResponse httpResponse) {
+        final User user = new User(requestBody.get("account"), requestBody.get("password"),
+                requestBody.get("email"));
+        InMemoryUserRepository.save(user);
+
+        final UUID sessionId = UUID.randomUUID();
+        final HttpSession session = new Session(String.valueOf(sessionId));
+        session.setAttribute("user", user);
+        new SessionManager().add(session);
+
+        httpResponse = httpResponse.changeStatusCode(302)
+                .setLocationAsHome()
+                .setSessionId(sessionId);
+        return httpResponse;
     }
 }

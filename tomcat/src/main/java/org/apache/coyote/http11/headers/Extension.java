@@ -22,13 +22,14 @@ public class Extension {
     }
 
     private void validateExtension(String name) {
-        if(!("css".equals(name) || "js".equals(name) || "html".equals(name) || "svg".equals(name) || "ico".equals(name))){
+        if (!("css".equals(name) || "js".equals(name) || "html".equals(name) || "svg".equals(name) || "ico".equals(
+                name))) {
             log.info("extension : {} ", name);
             throw new IllegalArgumentException("올바른 확장자가 아닙니다.");
         }
     }
 
-    public String getContentType(){
+    public String getContentType() {
         if ("svg".equals(name)) {
             return "image/" + name + "+xml";
         }

@@ -8,13 +8,12 @@ import java.net.Socket;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.jwp.db.InMemoryUserRepository;
+import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.dto.Http11Request;
 import org.apache.coyote.http11.headers.Extension;
-import org.apache.coyote.http11.utils.StringParser;
+import org.apache.coyote.http11.url.HandlerMapping;
+import org.apache.coyote.http11.url.Url;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,29 +64,29 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponseBody(final String uri) throws IOException, URISyntaxException {
-        String path = uri;
+
         if (uri.isEmpty()) {
             return "Hello world!";
         }
-        if (uri.startsWith("login")) {
-            Http11Request http11Request = StringParser.loginQuery(uri);
-
-            User user = InMemoryUserRepository.findByAccount(http11Request.getAccount())
-                    .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호를 잘못 입력하였습니다."));
-            log.info("user : {}", user);
-            path = http11Request.getPath();
-        }
+        Url url = HandlerMapping.from(uri);
         URL resource = this.getClass()
                 .getClassLoader()
-                .getResource("static/" + path);
+                .getResource("static/" + url.getRequest().getPath());
 
+        validatePath(resource);
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    }
+
+    private void validatePath(URL resource) {
+        if (Objects.isNull(resource)) {
+            throw new IllegalArgumentException("경로가 잘못 되었습니다. : null");
+        }
     }
 
     private String createResponse(String contentType, String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: "+ contentType + ";charset=utf-8 ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

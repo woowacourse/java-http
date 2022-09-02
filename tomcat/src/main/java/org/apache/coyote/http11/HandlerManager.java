@@ -4,10 +4,10 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.http11.uriprocessor.FileUriHandler;
-import org.apache.coyote.http11.uriprocessor.LoginUriHandler;
-import org.apache.coyote.http11.uriprocessor.RootUriHandler;
-import org.apache.coyote.http11.uriprocessor.UriHandler;
+import org.apache.coyote.http11.urihandler.FileUriHandler;
+import org.apache.coyote.http11.urihandler.LoginUriHandler;
+import org.apache.coyote.http11.urihandler.RootUriHandler;
+import org.apache.coyote.http11.urihandler.UriHandler;
 
 public enum HandlerManager {
     ROOT(new RootUriHandler()),

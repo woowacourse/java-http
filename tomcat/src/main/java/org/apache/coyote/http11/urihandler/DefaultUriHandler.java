@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.uriprocessor;
+package org.apache.coyote.http11.urihandler;
 
 import java.io.File;
 import java.io.IOException;

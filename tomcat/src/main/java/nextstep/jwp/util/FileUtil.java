@@ -2,11 +2,11 @@ package nextstep.jwp.util;
 
 import java.util.Objects;
 
-public class FileNameUtil {
+public class FileUtil {
 
     private static final String EXTENTION_DOT = ".";
 
-    private FileNameUtil() {
+    private FileUtil() {
     }
 
     public static String getExtension(final String path) {

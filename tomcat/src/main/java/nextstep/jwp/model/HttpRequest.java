@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.util.FileNameUtil;
+import nextstep.jwp.util.FileUtil;
 
 public class HttpRequest {
 
@@ -98,7 +98,7 @@ public class HttpRequest {
 
     private static ContentType getContentType(final String path) {
         if (isResource(path)) {
-            return ContentType.fromExtension(FileNameUtil.getExtension(path));
+            return ContentType.fromExtension(FileUtil.getExtension(path));
         }
         return ContentType.TEXT_HTML;
     }

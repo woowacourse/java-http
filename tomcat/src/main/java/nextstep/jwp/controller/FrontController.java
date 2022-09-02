@@ -12,11 +12,11 @@ import java.util.Objects;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 
-public class Controller {
+public class FrontController {
 
     public HttpResponse run(HttpRequest httpRequest) throws IOException {
         if (httpRequest.getRequestUri().equals("/")) {

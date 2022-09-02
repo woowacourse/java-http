@@ -1,4 +1,6 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
+
+import org.apache.coyote.http11.response.HttpStatus;
 
 public class HttpResponse {
 

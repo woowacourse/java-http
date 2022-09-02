@@ -10,9 +10,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.FrontController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = new HttpRequest(request);
             log.debug(httpRequest.toString());
 
-            Controller controller = new Controller();
+            FrontController controller = new FrontController();
             HttpResponse httpResponse = controller.run(httpRequest);
             String response = httpResponse.parseToString();
             outputStream.write(response.getBytes());

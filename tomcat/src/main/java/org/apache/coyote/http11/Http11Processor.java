@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.support.Parser.parseQueryString;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -7,16 +9,20 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
+import java.util.Map;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.support.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    public static final String DEFAULT_VIEW_EXTENSION = ".html";
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
+    public static final String DEFAULT_RESOURCE_PACKAGE = "static";
+    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
 
@@ -44,9 +50,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String generateResponse(String firstLine) throws IOException {
-        String responseBody = generateResponseBody(firstLine);
+        String parsedURI = Parser.parseUri(firstLine);
+        String responseBody = generateResponseBody(parsedURI);
         String contentType = getContentType(firstLine);
 
+        parseQuery(parsedURI);
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 contentType,
@@ -65,16 +73,27 @@ public class Http11Processor implements Runnable, Processor {
         return "Content-Type: text/html;charset=utf-8 ";
     }
 
-    private String generateResponseBody(String firstLine) throws IOException {
-        if ("/".equals(firstLine.split(" ")[1])) {
+    private String generateResponseBody(String parsedURI) throws IOException {
+        String resource = parsedURI.split("\\?")[0];
+        if ("/".equals(parsedURI)) {
             return DEFAULT_RESPONSE_BODY;
         }
 
-        String fileName = firstLine.split(" ")[1];
+        if (parsedURI.contains("login")) {
+            resource += DEFAULT_VIEW_EXTENSION;
+        }
+
         Path path = new File(
-                Objects.requireNonNull(getClass().getClassLoader().getResource("static" + fileName)).getFile()
+                getClass().getClassLoader().getResource(DEFAULT_RESOURCE_PACKAGE + resource).getFile()
         ).toPath();
 
         return Files.readString(path);
+    }
+
+    private void parseQuery(String parsedURI) {
+        if (parsedURI.contains("?")) {
+            Map<String, String> queryMap = parseQueryString(parsedURI);
+            InMemoryUserRepository.findByAccountAndPassword(queryMap.get("account"), queryMap.get("password"));
+        }
     }
 }

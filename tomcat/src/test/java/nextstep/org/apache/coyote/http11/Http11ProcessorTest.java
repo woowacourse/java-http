@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
@@ -27,11 +26,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        HttpResponse response = HttpResponse.ok();
-        response.addHeader("Content-Type", "text/html");
-        response.addBody("Hello world!");
+        HttpResponse response = HttpResponse.ok()
+                .header("Content-Type", "text/html")
+                .textBody("Hello world!")
+                .build();
 
-        assertThat(socket.output()).isEqualTo(response.getString());
+        assertThat(socket.output()).isEqualTo(response.writeValueAsString());
     }
 
     @Test
@@ -54,11 +54,12 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        final HttpResponse response = HttpResponse.ok();
-        response.addHeader("Content-Type", "text/html");
-        response.addBody(responseBody);
+        final HttpResponse response = HttpResponse.ok()
+                .header("Content-Type", "text/html")
+                .textBody(responseBody)
+                .build();
 
-        assertThat(socket.output()).isEqualTo(response.getString());
+        assertThat(socket.output()).isEqualTo(response.writeValueAsString());
     }
 
     @Test
@@ -82,11 +83,34 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        final HttpResponse response = HttpResponse.ok();
-        response.addHeader("Content-Type", "text/css");
-        response.addBody(responseBody);
+        final HttpResponse response = HttpResponse.ok()
+                .header("Content-Type", "text/css")
+                .textBody(responseBody)
+                .build();
 
-        assertThat(socket.output()).contains(response.getString());
+        assertThat(socket.output()).contains(response.writeValueAsString());
+    }
+
+    @Test
+    void notFound() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /notFound.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/html,*/*;q=0.1 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final HttpResponse response = HttpResponse.notFound().build();
+        assertThat(socket.output()).contains(response.writeValueAsString());
     }
 
     @Test
@@ -110,11 +134,12 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        final HttpResponse response = HttpResponse.ok();
-        response.addHeader("Content-Type", "text/html");
-        response.addBody(responseBody);
+        final HttpResponse response = HttpResponse.ok()
+                .header("Content-Type", "text/html")
+                .textBody(responseBody)
+                .build();
 
-        assertThat(socket.output()).contains(response.getString());
+        assertThat(socket.output()).contains(response.writeValueAsString());
     }
 
     @Test
@@ -135,9 +160,9 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        HttpResponse response = HttpResponse.redirect();
+        HttpResponse response = HttpResponse.redirect("/index.html").build();
         response.addHeader("Location", "/index.html");
-        assertThat(socket.output()).contains(response.getString());
+        assertThat(socket.output()).contains(response.writeValueAsString());
     }
 
     @ParameterizedTest
@@ -159,8 +184,8 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        HttpResponse response = HttpResponse.redirect();
+        HttpResponse response = HttpResponse.redirect("/401.html").build();
         response.addHeader("Location", "/401.html");
-        assertThat(socket.output()).contains(response.getString());
+        assertThat(socket.output()).contains(response.writeValueAsString());
     }
 }

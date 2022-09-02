@@ -9,15 +9,20 @@ public class HttpResponse {
     private final Map<String, String> responseHeaders;
     private String responseBody;
 
-    public static HttpResponse ok() {
-        return new HttpResponse("HTTP/1.1 200 OK \r\n");
+    public static HttpResponseBuilder ok() {
+        return new HttpResponseBuilder("HTTP/1.1 200 OK \r\n");
     }
 
-    public static HttpResponse redirect() {
-        return new HttpResponse("HTTP/1.1 302 Found \r\n");
+    public static HttpResponseBuilder redirect(final String url) {
+        return new HttpResponseBuilder("HTTP/1.1 302 Found \r\n")
+                .header("Location", url);
     }
 
-    private HttpResponse(String startLine) {
+    public static HttpResponseBuilder notFound() {
+        return new HttpResponseBuilder("HTTP/1.1 404 Not Found \r\n");
+    }
+
+    HttpResponse(String startLine) {
         responseStartLine = startLine;
         responseHeaders = new TreeMap<>();
         responseBody = "";
@@ -32,11 +37,11 @@ public class HttpResponse {
         responseHeaders.put(name, value);
     }
 
-    public byte[] getBytes() {
-        return getString().getBytes();
+    public byte[] writeValueAsBytes() {
+        return writeValueAsString().getBytes();
     }
 
-    public String getString() {
+    public String writeValueAsString() {
         String response = responseStartLine;
         for (String key : responseHeaders.keySet()) {
             response += key + ": " + responseHeaders.get(key) + " \r\n";
@@ -44,5 +49,10 @@ public class HttpResponse {
         response += "\r\n";
         response += responseBody;
         return response;
+    }
+
+    public boolean hasBody() {
+        System.out.println(responseBody.length());
+        return responseBody.length() > 0;
     }
 }

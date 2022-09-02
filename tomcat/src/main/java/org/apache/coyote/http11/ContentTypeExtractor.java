@@ -20,7 +20,7 @@ public class ContentTypeExtractor {
     }
 
     private boolean hasExtension(final HttpRequest httpRequest) {
-        return httpRequest.getUri().contains(".");
+        return !getExtension(httpRequest).isBlank();
     }
 
     private String getContentTypeByExtension(final HttpRequest httpRequest) {
@@ -28,8 +28,11 @@ public class ContentTypeExtractor {
     }
 
     private String getExtension(final HttpRequest httpRequest) {
-        final int lastDotIndex = httpRequest.getUri().lastIndexOf('.');
-        final String extension = httpRequest.getUri().substring(lastDotIndex + 1);
-        return extension.equals("js") ? "javascript" : extension;
+        if (httpRequest.getUri().contains(".")) {
+            final int lastDotIndex = httpRequest.getUri().lastIndexOf('.');
+            final String extension = httpRequest.getUri().substring(lastDotIndex + 1);
+            return extension.equals("js") ? "javascript" : extension;
+        }
+        return "";
     }
 }

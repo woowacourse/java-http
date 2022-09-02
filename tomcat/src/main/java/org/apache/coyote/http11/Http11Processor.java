@@ -2,11 +2,11 @@ package org.apache.coyote.http11;
 
 import javassist.NotFoundException;
 import nextstep.jwp.controller.Controller;
+import org.apache.coyote.Processor;
+import org.apache.http.HttpMethod;
 import org.apache.http.HttpStatus;
 import org.apache.http.RequestEntity;
 import org.apache.http.ResponseEntity;
-import org.apache.coyote.Processor;
-import org.apache.http.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
@@ -96,15 +95,6 @@ public class Http11Processor implements Runnable, Processor {
             return null;
         }
         return splited[1];
-    }
-
-    private boolean isStartsWithRequestMethod(final String line) {
-        for (String requestMethod : List.of("GET", "POST", "PUT", "PATCH", "DELETE")) {
-            if (line.startsWith(requestMethod)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void flushResponse(final OutputStream outputStream, final String responseBody) {

@@ -7,12 +7,16 @@ import nextstep.jwp.model.User;
 import org.apache.http.HttpStatus;
 import org.apache.http.RequestEntity;
 import org.apache.http.ResponseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class LoginController implements Controller {
+
+    private final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
     public ResponseEntity execute(final RequestEntity requestEntity) throws Exception {
@@ -21,6 +25,7 @@ public class LoginController implements Controller {
 
         if (wrappedUser.isPresent()) {
             final User user = wrappedUser.get();
+            log.debug(user.toString());
             if (user.isSamePassword(loginRequest.getPassword())) {
                 return new ResponseEntity(HttpStatus.OK, requestEntity.getContentType(), new ResourceReader().read("/login.html"));
             }

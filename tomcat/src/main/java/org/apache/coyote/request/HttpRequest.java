@@ -46,4 +46,8 @@ public class HttpRequest {
     public String getUri() {
         return uri;
     }
+
+    public Parameters getParameters() {
+        return parameters;
+    }
 }

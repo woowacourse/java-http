@@ -1,6 +1,8 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Map;
+import org.apache.coyote.http11.request.spec.HttpHeaders;
+import org.apache.coyote.http11.request.spec.StartLine;
 
 public class HttpRequest {
 

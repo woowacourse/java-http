@@ -1,11 +1,11 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.response.MimeType;
+import org.apache.coyote.http11.response.spec.MimeType;
 
 public class Resource {
 
-    private MimeType mimeType;
-    private String data;
+    private final MimeType mimeType;
+    private final String data;
 
     public Resource(MimeType mimeType, String data) {
         this.mimeType = mimeType;

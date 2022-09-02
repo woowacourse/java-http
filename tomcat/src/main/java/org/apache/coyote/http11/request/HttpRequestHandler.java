@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.spec.HttpStatus;
 
 public class HttpRequestHandler {
 

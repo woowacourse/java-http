@@ -5,7 +5,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import org.apache.coyote.http11.response.MimeType;
+import org.apache.coyote.http11.response.spec.MimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

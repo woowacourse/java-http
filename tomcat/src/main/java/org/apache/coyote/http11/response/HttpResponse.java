@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.response;
 
+import org.apache.coyote.http11.response.spec.HttpStatus;
+import org.apache.coyote.http11.response.spec.MimeType;
+
 public class HttpResponse {
 
     private static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";

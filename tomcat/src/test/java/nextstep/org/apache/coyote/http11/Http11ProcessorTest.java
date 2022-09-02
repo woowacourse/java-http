@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.exception.InvalidLoginFormantException;
 import org.apache.coyote.exception.InvalidPasswordException;
 import org.apache.coyote.exception.MemberNotFoundException;
 import org.apache.coyote.http11.Http11Processor;
@@ -235,5 +236,23 @@ class Http11ProcessorTest {
         // when, then
         assertThatThrownBy(() -> processor.process(socket))
                 .isExactlyInstanceOf(InvalidPasswordException.class);
+    }
+
+    @Test
+    void 쿼리스트링에_account나_password가_들어있지_않으면_예외를_반환한다() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /login?query=invalid HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when, then
+        assertThatThrownBy(() -> processor.process(socket))
+                .isExactlyInstanceOf(InvalidLoginFormantException.class);
     }
 }

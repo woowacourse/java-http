@@ -6,12 +6,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.ContentType;
 import org.apache.coyote.Processor;
 import org.apache.coyote.QueryParams;
+import org.apache.coyote.exception.InvalidLoginFormantException;
 import org.apache.coyote.exception.InvalidPasswordException;
 import org.apache.coyote.exception.MemberNotFoundException;
 import org.apache.coyote.support.ResourcesUtil;
@@ -97,6 +99,9 @@ public class Http11Processor implements Runnable, Processor {
     private void login(final QueryParams queryParams) {
         String account = queryParams.get("account");
         String password = queryParams.get("password");
+        if (Objects.isNull(account) || Objects.isNull(password)) {
+            throw new InvalidLoginFormantException();
+        }
         User user = findUser(account);
         checkPassword(password, user);
         log.info(user.toString());

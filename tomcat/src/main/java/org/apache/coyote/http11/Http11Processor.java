@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -99,10 +100,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String generateResponseBodyByFile(String fileName) throws IOException {
-        Path path = new File(Objects.requireNonNull(
-                getClass().getClassLoader().getResource("static" + fileName)).getFile()
-        ).toPath();
-
+        URL url = getClass().getClassLoader().getResource("static" + fileName);
+        String file = Objects.requireNonNull(url)
+                .getFile();
+        Path path = new File(file).toPath();
         return Files.readString(path);
     }
 }

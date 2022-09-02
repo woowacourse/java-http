@@ -20,18 +20,18 @@ public class HttpRequest {
     private final String path;
     private final Map<String, String> queryParams;
     private final String contentType;
-    private final Map<String, String> headers;
+    private final HttpHeader header;
 
     private HttpRequest(final HttpMethod httpMethod, final String path, final Map<String, String> queryParams,
-                        final String contentType, final Map<String, String> headers) {
+                        final String contentType, final HttpHeader header) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.queryParams = queryParams;
         this.contentType = contentType;
-        this.headers = headers;
+        this.header = header;
     }
 
-    public static HttpRequest of(final String startLine, final Map<String, String> headers) throws IOException {
+    public static HttpRequest of(final String startLine, final HttpHeader headers) throws IOException {
         final String[] splitStartLine = startLine.split(" ");
         final HttpMethod httpMethod = HttpMethod.from(splitStartLine[0]);
         final String uri = splitStartLine[1];
@@ -82,16 +82,12 @@ public class HttpRequest {
     }
 
     public boolean alreadyLogin() throws IOException {
-        final String cookie = headers.get("Cookie");
-        if (cookie == null) {
-            return false;
-        }
-        if (!cookie.contains("JSESSION")) {
+        if (!header.hasSessionId()) {
             return false;
         }
 
         final SessionManager sessionManager = new SessionManager();
-        final HttpSession session = sessionManager.findSession(cookie.split("JSESSIONID=")[1]);
+        final HttpSession session = sessionManager.findSession(header.getSessionId());
         final User user = (User) session.getAttribute("user");
         if (user == null) {
             return false;
@@ -109,9 +105,6 @@ public class HttpRequest {
     }
 
     public int getContentLength() {
-        if (headers.containsKey("Content-Length")) {
-            return Integer.parseInt(headers.get("Content-Length"));
-        }
-        return 0;
+        return header.getContentLength();
     }
 }

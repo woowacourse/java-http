@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -14,6 +13,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http.HttpHeader;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.util.StringParser;
@@ -42,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
              final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            final HttpRequest httpRequest = HttpRequest.of(bufferedReader.readLine(), getHeaders(bufferedReader));
+            final HttpRequest httpRequest = HttpRequest.of(bufferedReader.readLine(), HttpHeader.from(bufferedReader));
             final Map<String, String> requestBody = getRequestBody(bufferedReader, httpRequest.getContentLength());
 
             HttpResponse httpResponse = HttpResponse.fromHttpRequest(httpRequest);
@@ -65,18 +65,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private Map<String, String> getHeaders(final BufferedReader bufferedReader) throws IOException {
-        final Map<String, String> headers = new HashMap<>();
-
-        String header;
-        while (!"".equals((header = bufferedReader.readLine()))) {
-            final String[] splitHeader = header.split(": ");
-            headers.put(splitHeader[0], splitHeader[1]);
-        }
-
-        return headers;
     }
 
     private Map<String, String> getRequestBody(final BufferedReader bufferedReader, final int contentLength)

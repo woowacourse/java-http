@@ -7,6 +7,7 @@ import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.mvc.ControllerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,14 +36,10 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest request = HttpRequest.parse(inputStream);
             ResponseEntity responseEntity = controllerMapper.mapToHandle(request);
+            HttpResponse response = HttpResponse.from(request, responseEntity);
 
-            /* TODO
-            HttpResponse.from(responseEntity)
-            HttpResponse response = HttpResponse.from(reader);
-
-            outputStream.write(response.getAsBytes());
-            outputStream.flush();
-             */
+//            outputStream.write(response.getAsString().getBytes());
+//            outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

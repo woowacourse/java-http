@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-public enum HttpStatus {
+public enum HttpStatus implements Response {
 
     OK(200),
     NOT_FOUND(404);
@@ -9,5 +9,10 @@ public enum HttpStatus {
 
     HttpStatus(int code) {
         this.code = code;
+    }
+
+    @Override
+    public String getAsString() {
+        return code + " " + name();
     }
 }

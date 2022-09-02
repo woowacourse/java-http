@@ -1,0 +1,19 @@
+package org.apache.coyote.http11.response.headers;
+
+import static org.assertj.core.api.Assertions.*;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+class ContentLengthTest {
+
+    @Test
+    void createWithBodyString() {
+        // given
+        String bodyString = "hello world";
+        // when
+        ContentLength contentLength = ContentLength.from(bodyString);
+        // then
+        assertThat(contentLength.getAsString()).isEqualTo("Content-Length: 11");
+    }
+}

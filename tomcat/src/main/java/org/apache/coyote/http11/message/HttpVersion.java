@@ -12,6 +12,10 @@ public enum HttpVersion {
         this.version = version;
     }
 
+    public String getVersion() {
+        return version;
+    }
+
     public static HttpVersion findVersion(String version) {
         return Arrays.stream(values())
                 .filter(value -> value.version.equalsIgnoreCase(version))

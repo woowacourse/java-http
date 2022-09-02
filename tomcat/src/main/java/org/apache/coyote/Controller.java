@@ -2,6 +2,6 @@ package org.apache.coyote;
 
 import java.util.Map;
 
-public interface Handler {
+public interface Controller {
     void process(Map<String, String> params);
 }

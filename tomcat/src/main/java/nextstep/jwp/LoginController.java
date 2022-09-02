@@ -3,11 +3,11 @@ package nextstep.jwp;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.Handler;
+import org.apache.coyote.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController implements Handler {
+public class LoginController implements Controller {
 
     Logger log = LoggerFactory.getLogger(getClass());
 

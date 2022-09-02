@@ -39,8 +39,8 @@ public class RequestLine {
         return requestValue;
     }
 
-    public String getRequestMethod() {
-        return requestMethod.name();
+    public RequestMethod getRequestMethod() {
+        return requestMethod;
     }
 
     public RequestUri getRequestUri() {

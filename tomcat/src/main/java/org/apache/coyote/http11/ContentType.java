@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 public enum ContentType {
+
     CSS("text/css", "css"),
     HTML("text/html", "html"),
-    JAVASCRIPT("text/javascript", "js"),
-    PLAIN("text/plain", "");
+    JAVASCRIPT("text/javascript", "js");
 
     private final String contentType;
     private final String extension;

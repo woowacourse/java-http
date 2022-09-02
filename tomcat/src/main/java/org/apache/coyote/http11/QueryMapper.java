@@ -15,17 +15,22 @@ public class QueryMapper {
 
     public Map<String, String> getParameters() {
         Map<String, String> result = new HashMap<>();
-        List<String> parameters = List.of(this.query.split("&"));
+        List<String> parameterPairs = List.of(this.query.split("&"));
 
-        for (String parameter : parameters) {
-            List<String> pair = List.of(parameter.split("="));
-            if (pair.size() == 1) {
-                result.put(pair.get(0), "");
-                continue;
-            }
-            result.put(pair.get(0), pair.get(1));
+        for (String parameterPair : parameterPairs) {
+            insertParameter(result, parameterPair);
         }
 
         return result;
+    }
+
+    private static void insertParameter(Map<String, String> result, String parameterPair) {
+        List<String> pair = List.of(parameterPair.split("="));
+
+        if (pair.size() == 1) {
+            result.put(pair.get(0), "");
+            return;
+        }
+        result.put(pair.get(0), pair.get(1));
     }
 }

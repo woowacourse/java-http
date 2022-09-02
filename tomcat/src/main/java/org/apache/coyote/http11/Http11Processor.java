@@ -62,7 +62,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getResponseBody(String requestUri) throws IOException {
         if (requestUri.equals("/")) {
-            return "Nothing";
+            requestUri = "/index.html";
+        }
+        if (!requestUri.contains(".")) {
+            requestUri += ".html";
         }
         URL resource = getClass().getClassLoader().getResource("static" + requestUri);
         Path filePath = new File(resource.getPath()).toPath();

@@ -14,18 +14,15 @@ import org.apache.coyote.util.StringParser;
 
 public class HttpRequest {
 
-    private static final String POST = "POST";
-    private static final String GET = "GET";
-
     private static final String QUERY_STRING_PREFIX = "?";
 
-    private final String httpMethod;
+    private final HttpMethod httpMethod;
     private final String path;
     private final Map<String, String> queryParams;
     private final String contentType;
     private final Map<String, String> headers;
 
-    private HttpRequest(final String httpMethod, final String path, final Map<String, String> queryParams,
+    private HttpRequest(final HttpMethod httpMethod, final String path, final Map<String, String> queryParams,
                         final String contentType, final Map<String, String> headers) {
         this.httpMethod = httpMethod;
         this.path = path;
@@ -36,7 +33,7 @@ public class HttpRequest {
 
     public static HttpRequest of(final String startLine, final Map<String, String> headers) throws IOException {
         final String[] splitStartLine = startLine.split(" ");
-        final String httpMethod = splitStartLine[0];
+        final HttpMethod httpMethod = HttpMethod.from(splitStartLine[0]);
         final String uri = splitStartLine[1];
         final String path = getPath(uri);
         final Map<String, String> queryParams = getQueryParams(uri);
@@ -73,15 +70,15 @@ public class HttpRequest {
     }
 
     public boolean isRegister() {
-        return isPost() && path.contains("register");
+        return httpMethod.isPost() && path.contains("register");
     }
 
     public boolean isLogin() {
-        return isPost() && path.contains("login");
+        return httpMethod.isPost() && path.contains("login");
     }
 
     public boolean isLoginPage() {
-        return isGet() && path.contains("login");
+        return httpMethod.isGet() && path.contains("login");
     }
 
     public boolean alreadyLogin() throws IOException {
@@ -101,14 +98,6 @@ public class HttpRequest {
         }
         return InMemoryUserRepository.findByAccount(user.getAccount())
                 .isPresent();
-    }
-
-    public boolean isPost() {
-        return httpMethod.equals(POST);
-    }
-
-    public boolean isGet() {
-        return httpMethod.equals(GET);
     }
 
     public String getPath() {

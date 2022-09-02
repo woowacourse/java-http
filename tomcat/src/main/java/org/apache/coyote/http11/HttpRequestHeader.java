@@ -15,16 +15,16 @@ public class HttpRequestHeader {
 
     public String getRequestUrl() {
         String requestUrl = startLine.split(" ")[1];
-        requestUrl = makeDefualtRequestUrl(requestUrl);
+        requestUrl = makeDefaultRequestUrl(requestUrl);
 
         return requestUrl;
     }
 
-    private static String makeDefualtRequestUrl(String requestUrl) {
+    private static String makeDefaultRequestUrl(String requestUrl) {
         if (requestUrl.equals("/")) {
             return "/index.html";
         }
-        if (!requestUrl.contains(".") && !requestUrl.equals("/") && !requestUrl.contains("?")) {
+        if (!requestUrl.contains(".") && !requestUrl.contains("?")) {
             requestUrl = requestUrl + ".html";
         }
         return requestUrl;

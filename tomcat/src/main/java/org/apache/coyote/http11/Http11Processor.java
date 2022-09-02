@@ -22,6 +22,10 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
+    private static final String HEADER_DELIMITER = ": ";
+
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -50,8 +54,8 @@ public class Http11Processor implements Runnable, Processor {
                 String queryString = requestUrl.substring(index + 1);
                 requestUrl = requestUrl.substring(0, index) + ".html";
 
-                final Map<String, String> data = makeDataFromQueryString(queryString);
-                final String account = data.get("account");
+                final QueryProcessor queryProcessor = QueryProcessor.from(queryString);
+                final String account = queryProcessor.getParameter("account");
 
                 final User user = InMemoryUserRepository.findByAccount(account)
                         .orElseThrow(NoSuchUserException::new);
@@ -85,30 +89,23 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpRequestHeader makeHttpRequestHeader(final BufferedReader bufferedReader) throws IOException {
         final String httpStartLine = bufferedReader.readLine();
+        final Map<String, String> httpHeaderLines = makeHttpHeaderLines(bufferedReader);
 
+        return new HttpRequestHeader(httpStartLine, httpHeaderLines);
+    }
+
+    private static Map<String, String> makeHttpHeaderLines(final BufferedReader bufferedReader) throws IOException {
         final Map<String, String> httpHeaderLines = new HashMap<>();
+
         String line;
         while ((line = bufferedReader.readLine()) != null) {
             if (line.isBlank()) {
                 break;
             }
 
-            final String[] header = line.split(": ");
-            httpHeaderLines.put(header[0], header[1]);
+            final String[] header = line.split(HEADER_DELIMITER);
+            httpHeaderLines.put(header[KEY_INDEX], header[VALUE_INDEX]);
         }
-
-        return new HttpRequestHeader(httpStartLine, httpHeaderLines);
-    }
-
-    private HashMap<String, String> makeDataFromQueryString(final String queryString) {
-        final HashMap<String, String> data = new HashMap<>();
-        final String[] queries = queryString.split("&");
-
-        for (String query : queries) {
-            final String[] values = query.split("=");
-            data.put(values[0], values[1]);
-        }
-
-        return data;
+        return httpHeaderLines;
     }
 }

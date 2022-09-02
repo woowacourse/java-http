@@ -10,6 +10,9 @@ import java.util.Map.Entry;
 
 public class HttpHeaders {
 
+    private static final String HTTP_HEADER_DELIMITER = ": ";
+    private static final String NONE_HEADER = "";
+
     private final Map<HttpHeader, String> headers;
 
     public HttpHeaders() {
@@ -24,14 +27,18 @@ public class HttpHeaders {
         final Map<HttpHeader, String> headers = new LinkedHashMap<>();
         while (bufferedReader.ready()) {
             final String line = bufferedReader.readLine();
-            if (!"".equals(line)) {
-                final String[] headerValue = line.split(": ");
-                final HttpHeader httpHeader = HttpHeader.of(headerValue[0]);
-                final String value = headerValue[1];
-                headers.put(httpHeader, value);
-            }
+            parseHeader(headers, line);
         }
         return headers;
+    }
+
+    private void parseHeader(final Map<HttpHeader, String> headers, final String line) {
+        if (!NONE_HEADER.equals(line)) {
+            final String[] headerValue = line.split(HTTP_HEADER_DELIMITER);
+            final HttpHeader httpHeader = HttpHeader.of(headerValue[0]);
+            final String value = headerValue[1];
+            headers.put(httpHeader, value);
+        }
     }
 
     public HttpHeaders addHeader(final HttpHeader header, final String value) {
@@ -47,7 +54,7 @@ public class HttpHeaders {
     public String encodingToString() {
         final List<String> headers = new ArrayList<>();
         for (Entry<HttpHeader, String> entry : this.headers.entrySet()) {
-            final String join = String.join(": ", entry.getKey().getValue(), entry.getValue()) + " ";
+            final String join = String.join(HTTP_HEADER_DELIMITER, entry.getKey().getValue(), entry.getValue()) + " ";
             headers.add(join);
         }
         return String.join("\r\n", headers);

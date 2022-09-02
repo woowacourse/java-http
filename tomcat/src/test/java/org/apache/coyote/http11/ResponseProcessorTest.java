@@ -17,8 +17,8 @@ class ResponseProcessorTest {
     @Test
     void getResponse를_하면_http_형식을_응답한다() throws URISyntaxException, IOException {
         // given
-        String fileUri = "/nextstep.txt";
-        ResponseProcessor responseProcessor = new ResponseProcessor(fileUri);
+        String fileUri = "GET /nextstep.txt HTTP/1.1";
+        ResponseProcessor responseProcessor = new ResponseProcessor(new StartLine(fileUri));
 
         // when
         String response = responseProcessor.getResponse();
@@ -37,12 +37,12 @@ class ResponseProcessorTest {
     @Test
     void query_parameter로_올바른_계정_정보가_들어오면_print한다() throws URISyntaxException, IOException {
         // given
-        String uri = "/login?account=gugu&password=password";
+        String fileUri = "GET /login?account=gugu&password=password HTTP/1.1";
         ByteArrayOutputStream outContent = new ByteArrayOutputStream();
         System.setOut(new PrintStream(outContent));
 
         // when
-        new ResponseProcessor(uri);
+        ResponseProcessor responseProcessor = new ResponseProcessor(new StartLine(fileUri));
 
         // then
         String expected = InMemoryUserRepository.findByAccount("gugu").orElseThrow().toString().concat("\n");
@@ -52,20 +52,22 @@ class ResponseProcessorTest {
     @Test
     void query_parameter로_들어온_계정_정보가_없을_경우_예외를_반환한다() {
         // given
-        String uri = "/login?account=eden&password=password";
+        String rawStartLine = "GET /login?account=eden&password=password HTTP/1.1";
+        StartLine startLine = new StartLine(rawStartLine);
 
         // when & then
-        assertThatThrownBy(() -> new ResponseProcessor(uri))
+        assertThatThrownBy(() -> new ResponseProcessor(startLine))
                 .isInstanceOf(UserNotFoundException.class);
     }
 
     @Test
     void query_parameter로_들어온_계정_정보가_일치하지_않을_경우_예외를_반환한다() {
         // given
-        String uri = "/login?account=gugu&password=gugugugu";
+        String rawStartLine = "GET /login?account=gugu&password=gugugugu HTTP/1.1";
+        StartLine startLine = new StartLine(rawStartLine);
 
         // when & then
-        assertThatThrownBy(() -> new ResponseProcessor(uri))
+        assertThatThrownBy(() -> new ResponseProcessor(startLine))
                 .isInstanceOf(AuthenticationException.class);
     }
 }

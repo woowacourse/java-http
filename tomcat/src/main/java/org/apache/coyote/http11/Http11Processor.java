@@ -27,18 +27,16 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
+        try (final var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              final var outputStream = connection.getOutputStream()) {
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            String uri = bufferedReader.readLine().split(" ")[1];
-            ResponseProcessor responseProcessor = new ResponseProcessor(uri);
+            StartLine startLine = new StartLine(bufferedReader.readLine());
+            ResponseProcessor responseProcessor = new ResponseProcessor(startLine);
 
             final var response = responseProcessor.getResponse();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-            bufferedReader.close();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }

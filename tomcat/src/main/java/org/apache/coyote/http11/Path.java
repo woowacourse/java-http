@@ -10,7 +10,7 @@ public class Path {
     public Path(String uri) {
         int queryParameterIndex = uri.indexOf("?");
         if (queryParameterIndex != NOT_EXIST_QUERY_PARAMETER_CHARACTER) {
-            this.value = uri.substring(queryParameterIndex);
+            this.value = uri.substring(0, queryParameterIndex);
             return;
         }
         this.value = uri;

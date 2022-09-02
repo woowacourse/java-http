@@ -18,7 +18,8 @@ public class ResponseProcessor {
     private final QueryParameters queryParameters;
     private final String responseBody;
 
-    public ResponseProcessor(String uri) throws URISyntaxException, IOException {
+    public ResponseProcessor(StartLine startLine) throws URISyntaxException, IOException {
+        String uri = startLine.getUri();
         this.path = new Path(uri);
         this.queryParameters = new QueryParameters(uri);
         this.responseBody = processResponseBody();

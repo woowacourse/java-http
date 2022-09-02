@@ -10,8 +10,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import nextstep.jwp.LoginController;
+import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.Handler;
+import org.apache.coyote.HandlerMappings;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -48,13 +50,12 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = new HttpRequest(startLine, headers);
 
-            if (httpRequest.getPathString().equals("/login")) {
-                LoginController loginController = new LoginController();
+            HandlerMappings handlerMappings = new HandlerMappings();
+            Handler handler = handlerMappings.getAdaptiveHandler(httpRequest.getPathString());
+            if (Objects.nonNull(handler)) {
                 Map<String, String> params = httpRequest.getParams();
-
-                loginController.login(params);
+                handler.process(params);
             }
-
 
             HttpRequestHandler httpRequestHandler = new HttpRequestHandler(new ResourceLocator("/static"));
             HttpResponse httpResponse = httpRequestHandler.process(httpRequest);

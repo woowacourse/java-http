@@ -2,11 +2,11 @@ package org.apache.coyote.http11;
 
 public class HttpResponse {
 
-    private String statusCode;
-    private HttpHeaders httpHeaders;
-    private String body;
+    private final HttpStatusCode statusCode;
+    private final HttpHeaders httpHeaders;
+    private final String body;
 
-    public HttpResponse(final String statusCode, final HttpHeaders httpHeaders, final String body) {
+    public HttpResponse(final HttpStatusCode statusCode, final HttpHeaders httpHeaders, final String body) {
         this.statusCode = statusCode;
         this.httpHeaders = httpHeaders;
         this.body = body;
@@ -14,7 +14,7 @@ public class HttpResponse {
 
     public byte[] getBytes() {
         final String join = String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " ",
+                "HTTP/1.1 " + statusCode.getValue() + " ",
                 httpHeaders.encodingToString(),
                 "",
                 body);
@@ -23,14 +23,14 @@ public class HttpResponse {
 
     public static class Builder {
 
-        private String statusCode;
+        private HttpStatusCode statusCode;
         private HttpHeaders httpHeaders;
         private String body;
 
         public Builder() {
         }
 
-        public Builder statusCode(final String statusCode) {
+        public Builder statusCode(final HttpStatusCode statusCode) {
             this.statusCode = statusCode;
             return this;
         }

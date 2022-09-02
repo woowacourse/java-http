@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import static org.apache.coyote.http11.HttpHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.HttpHeader.CONTENT_TYPE;
+import static org.apache.coyote.http11.HttpStatusCode.OK;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -50,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
         final String responseBody = getResponseBody(httpRequest);
         final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
         return new HttpResponse.Builder()
-                .statusCode("200 OK")
+                .statusCode(OK)
                 .headers(httpHeaders)
                 .body(responseBody)
                 .build();

@@ -8,8 +8,9 @@ import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.http.HttpCreator;
 import nextstep.jwp.http.reqeust.HttpRequest;
+import nextstep.jwp.http.reqeust.HttpRequestCreator;
+import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.io.ClassPathResource;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
@@ -38,11 +39,11 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader bufferReader = new BufferedReader(new InputStreamReader(inputStream));
 
             HttpRequest httpRequest = createHttpRequest(bufferReader);
-            String httpResponse = createHttpResponse(httpRequest);
+            HttpResponse httpResponse = createHttpResponse(httpRequest);
 
             printUser(httpRequest);
 
-            outputStream.write(httpResponse.getBytes());
+            outputStream.write(httpResponse.getTemplate().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -50,30 +51,28 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest createHttpRequest(final BufferedReader bufferReader) throws IOException {
-        return HttpCreator.createHttpRequest(bufferReader);
+        return HttpRequestCreator.createHttpRequest(bufferReader);
     }
 
-    private String createHttpResponse(final HttpRequest httpRequest) {
+    private HttpResponse createHttpResponse(final HttpRequest httpRequest) {
         String url = httpRequest.getUrl();
         if (url.equals("/")) {
-            return rootResponse(httpRequest);
+            String responseBody = "Hello world!";
+            return okResponse(httpRequest.findContentType(), responseBody);
         }
         String responseBody = new ClassPathResource().getFileContents(url);
         return okResponse(httpRequest.findContentType(), responseBody);
     }
 
-    private String rootResponse(final HttpRequest httpRequest) {
-        String responseBody = "Hello world!";
-        return okResponse(httpRequest.findContentType(), responseBody);
-    }
-
-    private String okResponse(final String contentType, final String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    private HttpResponse okResponse(final String contentType, final String responseBody) {
+        return new HttpResponse.Builder()
+                .version()
+                .statusCode("200")
+                .statusMessage("OK")
+                .contentType(contentType)
+                .contentLength(responseBody.getBytes().length)
+                .responseBody(responseBody)
+                .build();
     }
 
     private void printUser(final HttpRequest httpRequest) {

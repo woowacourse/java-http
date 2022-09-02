@@ -8,17 +8,17 @@ public enum ContentType {
     CSS("css", "text/css"),
     TEXT("", "text/html");
 
-    private String lastUrl;
+    private String extension;
     private String contentType;
 
-    ContentType(final String lastUrl, final String contentType) {
-        this.lastUrl = lastUrl;
+    ContentType(final String extension, final String contentType) {
+        this.extension = extension;
         this.contentType = contentType;
     }
 
     public static String findContentType(final String otherUrl) {
         return Arrays.stream(values())
-                .filter(value -> otherUrl.contains(value.lastUrl))
+                .filter(value -> otherUrl.contains(value.extension))
                 .findFirst()
                 .map(value -> value.contentType)
                 .orElseThrow(IllegalArgumentException::new);

@@ -1,13 +1,12 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.reqeust;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import nextstep.jwp.http.reqeust.HttpRequest;
-import nextstep.jwp.http.reqeust.HttpRequestLine;
+import nextstep.jwp.http.HttpHeader;
 
-public class HttpCreator {
+public class HttpRequestCreator {
 
     public static HttpRequest createHttpRequest(final BufferedReader bufferReader) throws IOException {
         return new HttpRequest(httpRequestLine(bufferReader), httpRequestHeader(bufferReader));

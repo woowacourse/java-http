@@ -37,7 +37,8 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequest request = new HttpRequest(inputStream);
 
-            if (request.hasQuery() && request.hasQueryKey("account") && request.hasQueryKey("password")) {
+            if (request.getUrl().getPath().endsWith("/login") && request.hasQueryKey("account") && request.hasQueryKey(
+                "password")) {
                 AuthController.login(request, request.getQueryValue("account"), request.getQueryValue("password"));
             }
 
@@ -70,7 +71,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponseBody(HttpRequest request) throws IOException, URISyntaxException {
-        final URL requestUrl = request.getUrl(request.getUri());
+        final URL requestUrl = request.getUrl();
         if (requestUrl.getPath().equals("/")) {
             return "Hello world!";
         }

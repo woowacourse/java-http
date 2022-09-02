@@ -21,6 +21,7 @@ public class HttpRequest {
     private static final String REQUEST_URI = "REQUEST URI";
     private static final String HTTP_METHOD = "HTTP METHOD";
     private static final String HTTP_VERSION = "HTTP VERSION";
+
     private final Map<String, String> headers;
     private final QueryParams queryParams;
 
@@ -72,37 +73,46 @@ public class HttpRequest {
         return headers.get(headerName);
     }
 
-    public URI getUri() throws URISyntaxException {
+    private URI getUri() throws URISyntaxException {
         return new URI("http://" + getHeaderValue("Host") + getHeaderValue(REQUEST_URI));
     }
 
-    public URL getUrl(URI requestURI) throws MalformedURLException, URISyntaxException {
-        if (requestURI.getPath().equals("/")) {
-            return requestURI.toURL();
+    public URL getUrl() throws MalformedURLException, URISyntaxException {
+        final URI requestUri = getUri();
+
+        if (requestUri.getPath().equals("/")) {
+            return requestUri.toURL();
         }
-        if (!Objects.isNull(requestURI.getQuery())) {
-            return getUrl(new URI(
-                requestURI.getScheme() + "://" + requestURI.getHost() + ":" + requestURI.getPort()
-                    + requestURI.getPath()));
+        if (hasQuery()) {
+            return addExtensionToPath(new URI(removeQueryStrings(requestUri)));
         }
 
-        if (!requestURI.getPath().contains(".")) {
-            requestURI = new URI(requestURI + ".html");
+        return addExtensionToPath(requestUri);
+    }
+
+    private String removeQueryStrings(URI requestUri) {
+        return requestUri.toString()
+            .replace("?" + requestUri.getQuery(), "");
+    }
+
+    private URL addExtensionToPath(URI requestUri) throws MalformedURLException, URISyntaxException {
+        if (!requestUri.getPath().contains(".")) {
+            requestUri = new URI(requestUri + ".html");
         }
 
-        URL resource = getClass().getClassLoader().getResource("static" + requestURI.getPath());
+        URL resource = getClass().getClassLoader().getResource("static" + requestUri.getPath());
         if (Objects.isNull(resource)) {
-            return requestURI.toURL();
+            return requestUri.toURL();
         }
         return resource;
     }
 
-    public boolean containsHeader(String headerName) {
-        return headers.containsKey(headerName);
+    private boolean hasQuery() {
+        return queryParams.hasQuery();
     }
 
-    public boolean hasQuery() {
-        return queryParams.hasQuery();
+    public boolean containsHeader(String headerName) {
+        return headers.containsKey(headerName);
     }
 
     public boolean hasQueryKey(String queryKey) {

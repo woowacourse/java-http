@@ -38,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final String responseBody = getResponseBody(parseUrl(bufferedReader));
+            final String responseBody = getResponseBody(parseUrl(bufferedReader.readLine()));
             final String response = createResponse(responseBody);
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -47,9 +47,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseUrl(final BufferedReader bufferedReader) throws IOException {
-        return bufferedReader.readLine()
-                .split(URL_START_REGEX)[URL_INDEX];
+    private String parseUrl(final String request) throws IOException {
+        return request.split(URL_START_REGEX)[URL_INDEX];
     }
 
     private String getResponseBody(final String url) throws IOException {

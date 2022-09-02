@@ -24,9 +24,13 @@ public class QueryStrings {
             return new HashMap<>();
         }
 
+        final String queryStringText = uri.substring(index + 1);
+        return initialQueryStringMap(queryStringText);
+    }
+
+    private Map<String, String> initialQueryStringMap(final String queryStringText) {
         final Map<String, String> result = new HashMap<>();
-        final String[] queryStrings = uri.substring(index + 1)
-                .split(QUERY_STRINGS_BOUNDARY);
+        final String[] queryStrings = queryStringText.split(QUERY_STRINGS_BOUNDARY);
 
         for (String queryString : queryStrings) {
             String[] keyValuePair = queryString.split(KEY_VALUE_BOUNDARY);

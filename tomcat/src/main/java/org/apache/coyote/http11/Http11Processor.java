@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String STATIC_RESOURCE_PREFIX = "/static";
 
     private final Socket connection;
 
@@ -45,27 +46,23 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream out = connection.getOutputStream();
              final BufferedReader br = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
 
-            StartLine startLine = parseStartLine(br);
-            HttpHeaders headers = parseHeaders(br);
+            HttpRequestHandler httpRequestHandler = new HttpRequestHandler(new ResourceLocator(STATIC_RESOURCE_PREFIX));
+            HttpRequest httpRequest = createHttpRequest(br);
 
-            HttpRequest httpRequest = new HttpRequest(startLine, headers);
-
-            ControllerMappings controllerMappings = new ControllerMappings();
-            Controller controller = controllerMappings.getAdaptiveController(httpRequest.getPathString());
-            if (Objects.nonNull(controller)) {
-                Map<String, String> params = httpRequest.getParams();
-                String pathName = controller.process(params);
-                httpRequest.setPath(pathName);
-            }
-
-            HttpRequestHandler httpRequestHandler = new HttpRequestHandler(new ResourceLocator("/static"));
+            handleRequestIfPossible(httpRequest);
             HttpResponse httpResponse = httpRequestHandler.process(httpRequest);
+
             out.write(httpResponse.getBytes());
             out.flush();
-
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest createHttpRequest(BufferedReader br) throws IOException {
+        StartLine startLine = parseStartLine(br);
+        HttpHeaders headers = parseHeaders(br);
+        return new HttpRequest(startLine, headers);
     }
 
     private StartLine parseStartLine(BufferedReader br) throws IOException {
@@ -82,5 +79,15 @@ public class Http11Processor implements Runnable, Processor {
             line = br.readLine();
         }
         return new HttpHeaders(headerLines);
+    }
+
+    private void handleRequestIfPossible(HttpRequest httpRequest) {
+        ControllerMappings controllerMappings = new ControllerMappings();
+        Controller controller = controllerMappings.getAdaptiveController(httpRequest.getPathString());
+        if (Objects.nonNull(controller)) {
+            Map<String, String> params = httpRequest.getParams();
+            String pathName = controller.process(params);
+            httpRequest.setPath(pathName);
+        }
     }
 }

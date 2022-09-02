@@ -9,7 +9,10 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Optional;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +48,14 @@ public class Http11Processor implements Runnable, Processor {
             final String responseBody = getResponseBody(requestUri.getPath());
             final String contentType = getContentType(requestUri.getPath());
             final Map<String, String> queryParams = requestUri.getQueryParams();
+
+            if (queryParams.containsKey("account")) {
+                Optional<User> account = InMemoryUserRepository.findByAccount(queryParams.get("account"));
+                if (account.isPresent()) {
+                    User user = account.get();
+                    log.info("user = {}", user);
+                }
+            }
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

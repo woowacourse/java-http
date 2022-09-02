@@ -23,8 +23,18 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+
+    private static final String WELCOME_PAGE_PATH = "/";
+    private static final String LOGIN_PAGE_PATH = "/login";
+    private static final String STATIC_PATH = "static";
+
     private static final String NOT_FOUND_PAGE = "static/404.html";
-    private static final String WELCOM_PATH = "/";
+    private static final String LOGIN_PAGE = "static/login.html";
+
+    private static final String WELCOME_MESSAGE = "Hello world!";
+
+    private static final String ACCOUNT_PARAM = "account";
+    private static final String PASSWORD_PARAM = "password";
 
     private final Socket connection;
 
@@ -40,12 +50,11 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            // HTTP 요청 읽기
-            final HttpRequest httpRequest = toHttpRequest(inputStream);
+            final HttpRequest httpRequest = toHttpRequest(bufferedReader);
 
-            // 로직 처리
             doService(outputStream, httpRequest);
 
         } catch (final IOException | UncheckedServletException e) {
@@ -53,13 +62,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static HttpRequest toHttpRequest(final InputStream inputStream) throws IOException {
-        final List<String> rawHttpRequest = readHttpRequest(inputStream);
+    private static HttpRequest toHttpRequest(final BufferedReader bufferedReader) throws IOException {
+        final List<String> rawHttpRequest = readHttpRequest(bufferedReader);
         return HttpRequest.from(rawHttpRequest);
     }
 
-    private static List<String> readHttpRequest(final InputStream inputStream) throws IOException {
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+    private static List<String> readHttpRequest(final BufferedReader bufferedReader) throws IOException {
         final List<String> rawHttpRequest = new ArrayList<>();
 
         String line = bufferedReader.readLine();
@@ -75,8 +83,33 @@ public class Http11Processor implements Runnable, Processor {
         return rawHttpRequest;
     }
 
-    private static void renderWelcomePage(final OutputStream outputStream) throws IOException {
-        final String responseBody = "Hello world!";
+    private void doService(final OutputStream outputStream, final HttpRequest httpRequest) throws IOException {
+        final String requestUri = httpRequest.getPath();
+        String viewName = STATIC_PATH + requestUri;
+
+        if (WELCOME_PAGE_PATH.equals(httpRequest.getPath())) {
+            renderWelcomePage(outputStream);
+            return;
+        } else if (LOGIN_PAGE_PATH.equals(requestUri)) {
+            viewName = LOGIN_PAGE;
+
+            if (httpRequest.haveParam(ACCOUNT_PARAM) && httpRequest.haveParam(PASSWORD_PARAM)) {
+                final String account = httpRequest.getParam(ACCOUNT_PARAM);
+                final String password = httpRequest.getParam(PASSWORD_PARAM);
+                final User user = InMemoryUserRepository.findByAccount(account)
+                        .orElseThrow(NoSuchElementException::new);
+                if (user.checkPassword(password)) {
+                    final String outputMessage = user.toString();
+                    log.info(outputMessage);
+                }
+            }
+        }
+
+        render(outputStream, viewName);
+    }
+
+    private void renderWelcomePage(final OutputStream outputStream) throws IOException {
+        final String responseBody = WELCOME_MESSAGE;
         final String response = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
@@ -88,28 +121,7 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private void doService(final OutputStream outputStream, final HttpRequest httpRequest) throws IOException {
-        final String requestUri = httpRequest.getPath();
-        String viewName = "static" + requestUri;
-
-        if (WELCOM_PATH.equals(httpRequest.getPath())) {
-            renderWelcomePage(outputStream);
-            return;
-        } else if ("/login".equals(requestUri)) {
-            viewName = "static/login.html";
-
-            if (httpRequest.haveParam("account") && httpRequest.haveParam("password")) {
-                final String account = httpRequest.getParam("account");
-                final String password = httpRequest.getParam("password");
-                final User user = InMemoryUserRepository.findByAccount(account)
-                        .orElseThrow(NoSuchElementException::new);
-                if (user.checkPassword(password)) {
-                    final String outputMessage = user.toString();
-                    log.info(outputMessage);
-                }
-            }
-        }
-
+    private void render(final OutputStream outputStream, final String viewName) throws IOException {
         URL resource = getClass().getClassLoader().getResource(viewName);
         if (resource == null) {
             resource = getClass().getClassLoader().getResource(NOT_FOUND_PAGE);

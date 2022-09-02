@@ -9,12 +9,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
+import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import nextstep.jwp.exception.UncheckedServletException;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -36,7 +34,7 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final BufferedReader headerReader = new BufferedReader(new InputStreamReader(inputStream,
-                 StandardCharsets.UTF_8))) {
+                     StandardCharsets.UTF_8))) {
             final HttpRequestStartLineContents startLineContents = HttpRequestStartLineContents.from(headerReader);
 
             final URL resourceUrl = getResourceUrl(startLineContents.getUrl());
@@ -44,11 +42,11 @@ public class Http11Processor implements Runnable, Processor {
             final String responseBody = readContext(resourceUrl);
 
             final var response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + getContentType(startLineContents.getUrl()) + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+                    "HTTP/1.1 200 OK ",
+                    "Content-Type: " + getContentType(startLineContents.getUrl()) + ";charset=utf-8 ",
+                    "Content-Length: " + responseBody.getBytes().length + " ",
+                    "",
+                    responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -68,9 +66,13 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html";
     }
 
-    private URL getResourceUrl(final String requestUri) {
+    private URL getResourceUrl(String requestUri) {
         if (requestUri.equals("/")) {
             return null;
+        }
+
+        if (!requestUri.contains(".")) {
+            requestUri += ".html";
         }
         return getClass().getClassLoader().getResource("static" + requestUri);
     }

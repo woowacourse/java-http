@@ -4,15 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.http.HttpHeader;
+import nextstep.jwp.http.HttpCreator;
 import nextstep.jwp.http.reqeust.HttpRequest;
-import nextstep.jwp.http.reqeust.HttpRequestLine;
 import nextstep.jwp.io.ClassPathResource;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
@@ -53,20 +50,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest createHttpRequest(final BufferedReader bufferReader) throws IOException {
-        return new HttpRequest(httpRequestLine(bufferReader), httpRequestHeader(bufferReader));
-    }
-
-    private HttpRequestLine httpRequestLine(final BufferedReader bufferReader) throws IOException {
-        String requestLine = bufferReader.readLine();
-        return HttpRequestLine.from(requestLine);
-    }
-
-    private HttpHeader httpRequestHeader(final BufferedReader bufferReader) throws IOException {
-        List<String> requestHeaders = new ArrayList<>();
-        while (bufferReader.readLine().isBlank()) {
-            requestHeaders.add(bufferReader.readLine());
-        }
-        return new HttpHeader(requestHeaders);
+        return HttpCreator.createHttpRequest(bufferReader);
     }
 
     private String createHttpResponse(final HttpRequest httpRequest) {

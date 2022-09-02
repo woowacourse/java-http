@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import java.util.Map;
 import nextstep.jwp.exception.DuplicationException;
-import nextstep.jwp.service.Service;
+import nextstep.jwp.service.RegisterService;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.common.StaticResource;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -10,10 +10,10 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class RegisterController implements Controller {
 
-    private final Service service;
+    private final RegisterService registerService;
 
     public RegisterController() {
-        service = new Service();
+        registerService = new RegisterService();
     }
 
     @Override
@@ -33,7 +33,7 @@ public class RegisterController implements Controller {
 
     public HttpResponse register(final Map<String, String> parameters) {
         try {
-            service.register(parameters);
+            registerService.register(parameters);
             return HttpResponse.found("/index.html");
         } catch (DuplicationException e) {
             return HttpResponse.found("/register.html");

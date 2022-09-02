@@ -3,7 +3,7 @@ package nextstep.jwp.controller;
 import java.util.Map;
 import nextstep.jwp.exception.AuthenticationException;
 import nextstep.jwp.exception.NotFoundException;
-import nextstep.jwp.service.Service;
+import nextstep.jwp.service.LoginService;
 import org.apache.catalina.session.Session;
 import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.common.StaticResource;
@@ -12,10 +12,10 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class LoginController implements Controller {
 
-    private final Service service;
+    private final LoginService loginService;
 
     public LoginController() {
-        service = new Service();
+        loginService = new LoginService();
     }
 
     @Override
@@ -30,19 +30,19 @@ public class LoginController implements Controller {
     }
 
     public HttpResponse show(final Session session) {
-        if (service.isAlreadyLogin(session)) {
+        if (loginService.isAlreadyLogin(session)) {
             return HttpResponse.found("/index.html");
         }
         return HttpResponse.ok(StaticResource.path("/login.html"));
     }
 
     public HttpResponse login(final Session session, final Map<String, String> parameters) {
-        if (service.isAlreadyLogin(session)) {
+        if (loginService.isAlreadyLogin(session)) {
             return HttpResponse.found("/index.html");
         }
         try {
             final var httResponse = HttpResponse.found("/index.html");
-            httResponse.setSessionId(service.login(parameters));
+            httResponse.setSessionId(loginService.login(parameters));
             return httResponse;
         } catch (NotFoundException | AuthenticationException e) {
             return HttpResponse.found("/401.html");

@@ -82,7 +82,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static void validateUserPassword(final RequestUri requestUri, final User user) {
-        if (user.checkPassword(requestUri.findQueryParamValue("password"))) {
+        if (!user.checkPassword(requestUri.findQueryParamValue("password"))) {
             throw new NoSuchUserException("비밀번호가 일치하지 않습니다.");
         }
     }

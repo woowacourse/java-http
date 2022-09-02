@@ -1,11 +1,14 @@
 package org.apache.coyote.web;
 
+import static org.apache.coyote.web.SessionManager.JSESSIONID;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.coyote.exception.HttpRequestStartLineNotValidException;
 import org.apache.coyote.support.HttpHeader;
@@ -25,6 +28,7 @@ public class Request {
     private static final String HEADER_DELIMITER = ": ";
     private static final String CONNECT_DELIMITER = "&";
     private static final String ASSIGN_DELIMITER = "=";
+    private static final String SET_COOKIE_DELIMITER = "; ";
 
     private final HttpMethod method;
     private final String requestUrl;
@@ -99,10 +103,18 @@ public class Request {
         return doParse(requestBody);
     }
 
-    private Map<String, String> doParse(final String content) {
-        return Arrays.stream(content.split(CONNECT_DELIMITER))
+    private Map<String, String> doParse(final String requestBody) {
+        return Arrays.stream(requestBody.split(CONNECT_DELIMITER))
                 .collect(Collectors.toMap(parameter -> getSplitValue(parameter, ASSIGN_DELIMITER, 0),
                         parameter -> getSplitValue(parameter, ASSIGN_DELIMITER, 1)));
+    }
+
+    public Optional<String> getSession() {
+        String cookie = httpHeaders.getValueOrDefault(HttpHeader.COOKIE.getValue(), "");
+        return Arrays.stream(cookie.split(SET_COOKIE_DELIMITER))
+                .filter(value -> value.contains(JSESSIONID))
+                .map(session -> session.split(ASSIGN_DELIMITER)[1])
+                .findFirst();
     }
 
     public HttpMethod getMethod() {

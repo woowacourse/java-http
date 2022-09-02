@@ -6,12 +6,21 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
 
-    private static Map<String, Object> store = new ConcurrentHashMap<>();
+    public static final String JSESSIONID = "JSESSIONID";
 
-    public static void createSession(final Object object, final Response response) {
+    private static Map<String, Session> store = new ConcurrentHashMap<>();
+
+    public static Cookie createCookie() {
         String id = UUID.randomUUID().toString();
 
-        store.put(id, object);
-        response.addCookie(new Cookie("JSESSIONID", id));
+        return new Cookie(JSESSIONID, id);
+    }
+
+    public static Session findSession(final String id) {
+        return store.get(id);
+    }
+
+    public static void remove(final String id) {
+        store.remove(id);
     }
 }

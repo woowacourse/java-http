@@ -12,8 +12,10 @@ import org.apache.coyote.support.HttpHeaderFactory;
 import org.apache.coyote.support.HttpHeaderFactory.Pair;
 import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;
+import org.apache.coyote.web.Cookie;
 import org.apache.coyote.web.NoBodyResponse;
 import org.apache.coyote.web.Response;
+import org.apache.coyote.web.Session;
 import org.apache.coyote.web.SessionManager;
 
 public class UserLoginController {
@@ -27,7 +29,10 @@ public class UserLoginController {
                     new Pair(HttpHeader.LOCATION.getValue(), "/index.html")
             );
             Response response = new NoBodyResponse(HttpStatus.FOUND, httpHeaders);
-            SessionManager.createSession(user, response);
+            Cookie cookie = SessionManager.createCookie();
+            Session session = new Session(cookie.getKey());
+            session.setAttribute("user", user);
+            response.addCookie(cookie);
             return response;
         }
         HttpHeaders httpHeaders = HttpHeaderFactory.create(

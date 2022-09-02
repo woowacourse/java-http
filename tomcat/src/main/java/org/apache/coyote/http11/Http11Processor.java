@@ -11,11 +11,6 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.file.DefaultFileHandler;
 import org.apache.coyote.file.FileHandler;
-import org.apache.coyote.support.ContentType;
-import org.apache.coyote.support.HttpHeader;
-import org.apache.coyote.support.HttpHeaderFactory;
-import org.apache.coyote.support.HttpHeaderFactory.Pair;
-import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;
 import org.apache.coyote.web.BodyResponse;
 import org.apache.coyote.web.Request;
@@ -64,11 +59,7 @@ public class Http11Processor implements Runnable, Processor {
     private Response branchRequest(final Request request) throws IOException {
         if (request.isFileRequest()) {
             String responseBody = fileHandler.getFileLines(request.getRequestUrl());
-            String extension = request.getRequestExtension();
-            HttpHeaders httpHeaders = HttpHeaderFactory.create(
-                    new Pair(HttpHeader.CONTENT_TYPE.getValue(), ContentType.from(extension).getValue())
-            );
-            return new BodyResponse(HttpStatus.OK, httpHeaders, responseBody);
+            return new BodyResponse(HttpStatus.OK, request.getHttpHeaders().toResponse(), responseBody);
         }
         return new RequestHandler().handle(request);
     }

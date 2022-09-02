@@ -10,6 +10,13 @@ public class RequestLine {
     private static final String QUERY_PARAMETER_DELIMITER = "\\?";
     private static final int NO_SPLIT_SIGN = 1;
     private static final String EXTENSION_DELIMITER = "\\.";
+    private static final int REQUEST_URL_INDEX = 1;
+    private static final int REQUEST_URL_ONLY_INDEX = 0;
+    private static final int QUERY_STRING_INDEX = 1;
+    private static final int HTTP_METHOD_INDEX = 0;
+    private static final int HTTP_VERSION_INDEX = 2;
+    private static final int FILE_EXTENSION_INDEX = 1;
+
 
     private final HttpMethod method;
     private final String requestUrl;
@@ -30,17 +37,17 @@ public class RequestLine {
         if (requestLine.length != REQUEST_LINE_LENGTH) {
             throw new HttpRequestStartLineNotValidException();
         }
-        String[] splitRequestUrl = requestLine[1].split(QUERY_PARAMETER_DELIMITER);
+        String[] splitRequestUrl = requestLine[REQUEST_URL_INDEX].split(QUERY_PARAMETER_DELIMITER);
         if (splitRequestUrl.length == NO_SPLIT_SIGN) {
-            return new RequestLine(HttpMethod.of(requestLine[0]),
-                    splitRequestUrl[0],
+            return new RequestLine(HttpMethod.of(requestLine[HTTP_METHOD_INDEX]),
+                    splitRequestUrl[REQUEST_URL_ONLY_INDEX],
                     null,
-                    requestLine[2]);
+                    requestLine[HTTP_VERSION_INDEX]);
         }
-        return new RequestLine(HttpMethod.of(requestLine[0]),
-                splitRequestUrl[0],
-                splitRequestUrl[1],
-                requestLine[2]);
+        return new RequestLine(HttpMethod.of(requestLine[HTTP_METHOD_INDEX]),
+                splitRequestUrl[REQUEST_URL_ONLY_INDEX],
+                splitRequestUrl[QUERY_STRING_INDEX],
+                requestLine[HTTP_VERSION_INDEX]);
     }
 
     public boolean isSameMethod(final HttpMethod method) {
@@ -56,7 +63,7 @@ public class RequestLine {
         if (split.length == NO_SPLIT_SIGN) {
             return Optional.empty();
         }
-        return Optional.of(split[1]);
+        return Optional.of(split[FILE_EXTENSION_INDEX]);
     }
 
     public HttpMethod getMethod() {

@@ -18,6 +18,8 @@ public class Request {
     private static final String CONNECT_DELIMITER = "&";
     private static final String ASSIGN_DELIMITER = "=";
     private static final String SET_COOKIE_DELIMITER = "; ";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
@@ -51,10 +53,6 @@ public class Request {
         return doParse(queryParameter);
     }
 
-    private String getSplitValue(final String content, final String delimiter, final int index) {
-        return content.split(delimiter)[index];
-    }
-
     public boolean isSameHttpMethod(final HttpMethod method) {
         return requestLine.isSameMethod(method);
     }
@@ -69,8 +67,12 @@ public class Request {
 
     private Map<String, String> doParse(final String content) {
         return Arrays.stream(content.split(CONNECT_DELIMITER))
-                .collect(Collectors.toMap(parameter -> getSplitValue(parameter, ASSIGN_DELIMITER, 0),
-                        parameter -> getSplitValue(parameter, ASSIGN_DELIMITER, 1)));
+                .collect(Collectors.toMap(parameter -> getSplitValue(parameter, ASSIGN_DELIMITER, KEY_INDEX),
+                        parameter -> getSplitValue(parameter, ASSIGN_DELIMITER, VALUE_INDEX)));
+    }
+
+    private String getSplitValue(final String content, final String delimiter, final int index) {
+        return content.split(delimiter)[index];
     }
 
     public Optional<String> getSession() {

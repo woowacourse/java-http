@@ -13,6 +13,10 @@ public class HttpHeaderFactory {
 
     public static class Pair {
 
+        private static final int PAIR_SIZE = 2;
+        private static final int KEY_INDEX = 0;
+        private static final int VALUE_INDEX = 1;
+
         private final String key;
         private final String value;
 
@@ -23,10 +27,10 @@ public class HttpHeaderFactory {
 
         public static Pair splitBy(final String content, final String delimiter) {
             String[] header = content.split(delimiter);
-            if (header.length != 2) {
+            if (header.length != PAIR_SIZE) {
                 throw new IllegalArgumentException();
             }
-            return new Pair(header[0].strip(), header[1].strip());
+            return new Pair(header[KEY_INDEX].strip(), header[VALUE_INDEX].strip());
         }
 
         public String getKey() {

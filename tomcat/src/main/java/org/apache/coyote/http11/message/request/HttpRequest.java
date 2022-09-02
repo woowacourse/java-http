@@ -6,7 +6,7 @@ import org.apache.coyote.http11.message.common.HttpHeaders;
 
 @ToString
 @Getter
-public class RequestMessage {
+public class HttpRequest {
 
     private static final String NEW_LINE = "\r\n";
     private static final String HEADER_BODY_DELIMITER = NEW_LINE + NEW_LINE;
@@ -20,7 +20,7 @@ public class RequestMessage {
     private final HttpHeaders httpHeaders;
     private final String requestBody;
 
-    public RequestMessage(final String message) {
+    public HttpRequest(final String message) {
         String[] splitHeaderBody = message.split(HEADER_BODY_DELIMITER, -1);
         String requestLineAndHeader = splitHeaderBody[REQUEST_LINE_AND_HEADER_INDEX];
         String[] splitByNewLine = requestLineAndHeader.split(NEW_LINE, 2);

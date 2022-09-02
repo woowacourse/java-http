@@ -8,7 +8,7 @@ import org.apache.coyote.http11.message.common.HttpMethod;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class RequestMessageTest {
+class HttpRequestTest {
 
     @DisplayName("HTTP Request Message를 전달받아 생성된다.")
     @Test
@@ -22,7 +22,7 @@ class RequestMessageTest {
                 "");
 
         // when
-        RequestMessage actual = new RequestMessage(httpRequest);
+        HttpRequest actual = new HttpRequest(httpRequest);
 
         // then
         assertThat(actual).isNotNull();
@@ -38,7 +38,7 @@ class RequestMessageTest {
                 "Connection: keep-alive",
                 "",
                 "");
-        RequestMessage requestMessage = new RequestMessage(httpRequest);
+        HttpRequest requestMessage = new HttpRequest(httpRequest);
 
         // when
         RequestStartLine actual = requestMessage.getRequestStartLine();
@@ -61,7 +61,7 @@ class RequestMessageTest {
                 "Connection: keep-alive",
                 "",
                 "");
-        RequestMessage requestMessage = new RequestMessage(httpRequest);
+        HttpRequest requestMessage = new HttpRequest(httpRequest);
 
         // when
         HttpHeaders actual = requestMessage.getHttpHeaders();

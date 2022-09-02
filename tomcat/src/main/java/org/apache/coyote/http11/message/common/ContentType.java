@@ -5,6 +5,7 @@ import lombok.Getter;
 
 @Getter
 public enum ContentType {
+    PLAINTEXT("", "text/plain"),
     HTML("html", "text/html"),
     CSS("css", "text/css"),
     JAVASCRIPT("javascript", "text/javascript"),
@@ -22,6 +23,6 @@ public enum ContentType {
         return Arrays.stream(values())
                 .filter(it -> it.getExtension().equals(extension))
                 .findFirst()
-                .orElse(HTML);
+                .orElse(PLAINTEXT);
     }
 }

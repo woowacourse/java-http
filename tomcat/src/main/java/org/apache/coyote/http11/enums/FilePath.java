@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -57,16 +58,25 @@ public enum FilePath {
             return DEFAULT_PAGE_MESSAGE;
         }
 
-        final URL url = Objects.requireNonNull(getClass()
-                .getClassLoader()
-                .getResource(STATIC_PATH + value));
-
-        final File file = new File(url.getFile());
-
         try {
-            return new String(Files.readAllBytes(file.toPath()));
+            final File file = findFile(STATIC_PATH + value);
+            final Path path = file.toPath();
+            return new String(Files.readAllBytes(path));
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private File findFile(final String resource) {
+        final URL url = getClass()
+                .getClassLoader()
+                .getResource(resource);
+
+        if (Objects.isNull(url)) {
+            throw new IllegalArgumentException(String.format("유효하지 않은 경로입니다. -> resource: %s", resource));
+        }
+
+        return new File(url.getFile());
     }
 }

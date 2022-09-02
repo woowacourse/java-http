@@ -27,4 +27,12 @@ public class Response {
                 contentLength,
                 "", responseBody);
     }
+
+    @Override
+    public String toString() {
+        return "Response{" +
+                "httpStatus=" + httpStatus +
+                ", contentType='" + contentType + '\'' +
+                '}';
+    }
 }

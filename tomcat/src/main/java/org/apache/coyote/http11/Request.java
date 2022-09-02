@@ -10,13 +10,13 @@ public class Request {
     private static final String CONNECTION_PREFIX = "Connection: ";
     private final String startLine;
     private final String host;
-    private final String acceptType;
+    private final String accept;
     private final String connection;
 
-    public Request(final String startLine, final String host, final String acceptType, final String connection) {
+    public Request(final String startLine, final String host, final String accept, final String connection) {
         this.startLine = startLine;
         this.host = host;
-        this.acceptType = acceptType;
+        this.accept = accept;
         this.connection = connection;
     }
 
@@ -46,6 +46,14 @@ public class Request {
         return lineByPrefix.split(prefix)[1];
     }
 
+    public String getUri() {
+        return startLine.split(" ")[1];
+    }
+
+    public String getAcceptType() {
+        return accept.split(",")[0];
+    }
+
     public String getStartLine() {
         return startLine;
     }
@@ -54,8 +62,8 @@ public class Request {
         return host;
     }
 
-    public String getAcceptType() {
-        return acceptType;
+    public String getAccept() {
+        return accept;
     }
 
     public String getConnection() {
@@ -67,7 +75,7 @@ public class Request {
         return "Request{" +
                 "startLine='" + startLine + '\'' +
                 ", host='" + host + '\'' +
-                ", acceptType='" + acceptType + '\'' +
+                ", acceptType='" + accept + '\'' +
                 ", connection='" + connection + '\'' +
                 '}';
     }

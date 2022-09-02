@@ -6,7 +6,10 @@ import org.apache.coyote.http11.exception.FaviconNotFoundException;
 import org.apache.coyote.http11.exception.InvalidHttpRequestStartLineException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -20,8 +23,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String DEFAULT_URI = "/";
     private static final String FAVICON_URI = "/favicon.ico";
-    private static final String TEXT_HTML_CHARSET_UTF_8 = "text/html;charset=utf-8";
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
+    private static final String STATIC_RESOURCE_LOCATION = "static/";
 
     private final Socket connection;
 
@@ -46,9 +49,12 @@ public class Http11Processor implements Runnable, Processor {
 
             final List<String> lines = readLines(bufferedReader);
             final Request request = Request.of(startLine, lines);
+            final String httpResponse = createHttpResponse(request);
+
             log.info(request.toString());
 
-            writeResponseToBuffer(outputStream, request.getStartLine());
+            outputStream.write(httpResponse.getBytes());
+            outputStream.flush();
         } catch (IOException | UncheckedServletException | InvalidHttpRequestStartLineException | FaviconNotFoundException e) {
             log.error(e.getMessage(), e);
         }
@@ -64,19 +70,18 @@ public class Http11Processor implements Runnable, Processor {
         return lines;
     }
 
-    private void writeResponseToBuffer(final OutputStream outputStream, final String startLine) throws IOException {
-        final String uri = startLine.split(" ")[1];
+    private String createHttpResponse(final Request request) throws IOException {
+        final String uri = request.getUri();
         if (uri.equals(FAVICON_URI)) {
             throw new FaviconNotFoundException();
         }
-        final URL resource = getClass().getClassLoader().getResource("static/" + uri);
+
+
+        final URL resource = getClass().getClassLoader().getResource(STATIC_RESOURCE_LOCATION + uri);
         final String responseBody = createResponseBody(uri, resource);
-
-        final Response response = new Response(HttpStatus.OK, TEXT_HTML_CHARSET_UTF_8, responseBody);
-        final String httpResponse = response.toHttpResponse();
-
-        outputStream.write(httpResponse.getBytes());
-        outputStream.flush();
+        final Response response = new Response(HttpStatus.OK, request.getAcceptType(), responseBody);
+        log.info(response.toString());
+        return response.toHttpResponse();
     }
 
     private String createResponseBody(final String uri, final URL resource) throws IOException {

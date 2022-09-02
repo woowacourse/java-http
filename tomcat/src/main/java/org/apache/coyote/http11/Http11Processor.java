@@ -13,6 +13,9 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String LOGIN_RESOURCE = "/login.html";
+    private static final String PASSWORD = "password";
+    private static final String ACCOUNT = "account";
 
     private final Socket connection;
 
@@ -41,14 +44,25 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void logLogin(final Http11URLPath urlPath) {
-        if (urlPath.hasPath("/login.html") && urlPath.hasParams()) {
-            String id = urlPath.findParamByKey("account");
-            String password = urlPath.findParamByKey("password");
-            final User foundAccount = InMemoryUserRepository.findByAccount(id)
-                    .orElseThrow(IllegalArgumentException::new);
-            if (foundAccount.checkPassword(password)) {
-                log.info(foundAccount.toString());
-            }
+        if (urlPath.hasPath(LOGIN_RESOURCE) && loginSuccess(urlPath)) {
+            final User loggedInUser = findUser(urlPath);
+            log.info(loggedInUser.toString());
         }
+    }
+
+    private boolean loginSuccess(final Http11URLPath urlPath) {
+        if (!urlPath.hasParams()) {
+            return false;
+        }
+        final User foundUser = findUser(urlPath);
+        final String password = urlPath.findParamByKey(PASSWORD);
+        return foundUser.checkPassword(password);
+
+    }
+
+    private User findUser(final Http11URLPath urlPath) {
+        String account = urlPath.findParamByKey(ACCOUNT);
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(IllegalArgumentException::new);
     }
 }

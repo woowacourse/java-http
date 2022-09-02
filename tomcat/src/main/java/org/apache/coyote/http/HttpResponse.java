@@ -6,7 +6,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class HttpResponse {
@@ -66,7 +65,7 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse setSessionId(final UUID sessionId) {
+    public HttpResponse setSessionId(final String sessionId) {
         values.add("Set-Cookie: JSESSIONID=" + sessionId + " ");
         return this;
     }

@@ -1,6 +1,5 @@
 package org.apache.coyote.http;
 
-import jakarta.servlet.http.HttpSession;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,6 +8,7 @@ import java.util.Collections;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.Session;
 import org.apache.coyote.http11.SessionManager;
 import org.apache.coyote.util.StringParser;
 
@@ -86,8 +86,7 @@ public class HttpRequest {
             return false;
         }
 
-        final SessionManager sessionManager = new SessionManager();
-        final HttpSession session = sessionManager.findSession(header.getSessionId());
+        final Session session = SessionManager.findSession(header.getSessionId());
         final User user = (User) session.getAttribute("user");
         if (user == null) {
             return false;

@@ -1,12 +1,10 @@
 package org.apache.coyote.http11;
 
-import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Optional;
-import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -72,27 +70,25 @@ public class Http11Processor implements Runnable, Processor {
             return httpResponse;
         }
 
-        final UUID sessionId = UUID.randomUUID();
-        final HttpSession session = new Session(String.valueOf(sessionId));
+        final Session session = Session.generate();
         session.setAttribute("user", possibleUser.get());
-        new SessionManager().add(session);
+        SessionManager.add(session);
 
         return httpResponse.changeStatusCode(HttpStatusCode.FOUND)
                 .setLocationAsHome()
-                .setSessionId(sessionId);
+                .setSessionId(session.getId());
     }
 
     private HttpResponse register(final HttpRequestBody requestBody, final HttpResponse httpResponse) {
         final User user = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
         InMemoryUserRepository.save(user);
 
-        final UUID sessionId = UUID.randomUUID();
-        final HttpSession session = new Session(String.valueOf(sessionId));
+        final Session session = Session.generate();
         session.setAttribute("user", user);
-        new SessionManager().add(session);
+        SessionManager.add(session);
 
         return httpResponse.changeStatusCode(HttpStatusCode.FOUND)
                 .setLocationAsHome()
-                .setSessionId(sessionId);
+                .setSessionId(session.getId());
     }
 }

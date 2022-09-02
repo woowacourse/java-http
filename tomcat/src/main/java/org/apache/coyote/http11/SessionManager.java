@@ -1,26 +1,20 @@
 package org.apache.coyote.http11;
 
-import jakarta.servlet.http.HttpSession;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.catalina.Manager;
 
-public class SessionManager implements Manager {
+public class SessionManager {
 
-    private static final Map<String, HttpSession> SESSIONS = new HashMap<>();
+    private static final Map<String, Session> SESSIONS = new HashMap<>();
 
-    @Override
-    public void add(final HttpSession session) {
+    private SessionManager() {
+    }
+
+    public static void add(final Session session) {
         SESSIONS.put(session.getId(), session);
     }
 
-    @Override
-    public HttpSession findSession(final String id) throws IOException {
+    public static Session findSession(final String id) {
         return SESSIONS.get(id);
-    }
-
-    @Override
-    public void remove(final HttpSession session) {
     }
 }

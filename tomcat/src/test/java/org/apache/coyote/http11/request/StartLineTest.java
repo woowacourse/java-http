@@ -1,12 +1,8 @@
 package org.apache.coyote.http11.request;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.List;
-import org.apache.coyote.http11.HttpMethod;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +18,7 @@ class StartLineTest {
         assertAll(
                 () -> assertThat(startLine).isNotNull(),
                 () -> assertThat(startLine.getMethod()).isEqualTo(HttpMethod.GET),
-                () -> assertThat(startLine.getUrl().getValue()).isEqualTo("/index.html"),
+                () -> assertThat(startLine.getUrl().getPath()).isEqualTo("/index.html"),
                 () -> assertThat(startLine.getProtocol().value()).isEqualTo("HTTP/1.1")
         );
     }

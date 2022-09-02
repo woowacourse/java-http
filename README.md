@@ -24,4 +24,21 @@ start line = `HTTP Method + URL + HTTP version`
 
 ### TODO
 
-[ ] requestURI를 이용하여 resource 파일 찾기
+[ ] requestURI를 이용하여 resourceLocator 파일 찾기
+[ ] 문서 이외의 확장자 처리
+[ ] query param 처리
+
+
+### 책임 분리
+
+#### Http11Processor
+
+* Socket Connection이 들어오면 이를 처리한다.
+* 입력을 stream에서 읽어들인다.
+* Http 요청을 생성한다.
+* Http 응답을 생성한다.
+* 출력을 stream에 쓴다.
+
+#### ResourceLocator
+
+* 자원의 위치를 입력받아 해당 자원을 반환한다.

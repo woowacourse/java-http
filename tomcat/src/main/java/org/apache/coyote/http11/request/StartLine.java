@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.request;
 
 import java.util.List;
-import org.apache.coyote.http11.HttpMethod;
 
 public class StartLine {
 
@@ -24,9 +23,13 @@ public class StartLine {
         String[] components = line.split(DELIMITER);
         validateComponentsCount(components);
         return new StartLine(
-                HttpMethod.of(components[METHOD_INDEX]),
-                new RequestUrl(components[URL_INDEX]),
+                HttpMethod.from(components[METHOD_INDEX]),
+                RequestUrl.from(components[URL_INDEX]),
                 new Protocol(components[PROTOCOL_INDEX]));
+    }
+
+    public boolean hasQueryParams() {
+        return requestUrl.hasQueryParams();
     }
 
     private static void validateComponentsCount(String[] components) {

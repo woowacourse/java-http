@@ -44,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
             StartLine startLine = parseStartLine(br);
             HttpHeaders headers = parseHeaders(br);
 
-            HttpRequest httpRequest = new HttpRequest(startLine.getMethod(), startLine.getUrl().getValue());
+            HttpRequest httpRequest = new HttpRequest(startLine.getMethod(), startLine.getUrl().getPath());
             HttpRequestHandler httpRequestHandler = new HttpRequestHandler(new ResourceLocator("/static"));
             HttpResponse httpResponse = httpRequestHandler.process(httpRequest);
             out.write(httpResponse.getBytes());

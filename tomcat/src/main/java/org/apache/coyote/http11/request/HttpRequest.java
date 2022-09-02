@@ -1,8 +1,5 @@
 package org.apache.coyote.http11.request;
 
-import java.util.List;
-import org.apache.coyote.http11.HttpMethod;
-
 public class HttpRequest {
 
     private final HttpMethod method;

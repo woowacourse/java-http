@@ -35,6 +35,9 @@ public class Request {
     }
 
     public String getRequestIdentifier() {
+        if (queryString.size() != 0) {
+            return String.join(" ", method.getValue(), path, PATH_QUERY_STRING_DELIMITER);
+        }
         return String.join(" ", method.getValue(), path);
     }
 }

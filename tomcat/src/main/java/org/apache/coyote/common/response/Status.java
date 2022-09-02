@@ -2,7 +2,9 @@ package org.apache.coyote.common.response;
 
 public enum Status {
 
-    OK("200 OK")
+    OK("200 Ok"),
+    FOUND("302 Found"),
+    UNAUTHORIZED("401 Unauthorized")
     ;
 
     private final String value;

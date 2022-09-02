@@ -2,6 +2,7 @@ package org.apache.coyote.web.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class Session {
 
@@ -16,8 +17,11 @@ public class Session {
         return id;
     }
 
-    public Object getAttribute(final String name) {
-        return values.get(name);
+    public Optional<Object> getAttribute(final String name) {
+        if (values.containsKey(name)) {
+            return Optional.of(values.get(name));
+        }
+        return Optional.empty();
     }
 
     public void setAttribute(final String name, final Object value) {

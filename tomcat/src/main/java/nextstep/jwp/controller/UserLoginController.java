@@ -32,6 +32,7 @@ public class UserLoginController {
             Cookie cookie = SessionManager.createCookie();
             Session session = new Session(cookie.getKey());
             session.setAttribute("user", user);
+            SessionManager.addSession(cookie.getValue(), session);
             response.addCookie(cookie);
             return response;
         }

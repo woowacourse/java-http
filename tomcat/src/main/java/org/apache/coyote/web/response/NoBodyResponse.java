@@ -21,7 +21,9 @@ public class NoBodyResponse extends Response {
         stringBuilder.append(getRequestLine());
         getHttpHeaders().getHeaders()
                 .forEach((key, value) -> stringBuilder.append(String.format(HEADER_TEMPLATE, key, value)));
-        stringBuilder.append(String.format(HEADER_TEMPLATE, HttpHeader.SET_COOKIE.getValue(), getCookieTemplate()));
+        if (!getCookies().isEmpty()) {
+            stringBuilder.append(String.format(HEADER_TEMPLATE, HttpHeader.SET_COOKIE.getValue(), getCookieTemplate()));
+        }
         return stringBuilder.toString();
     }
 }

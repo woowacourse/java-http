@@ -18,7 +18,7 @@ public class HttpResponse {
 
     public String format() {
         final String statusLine = String.join(" ",
-                HTTP_VERSION_1_1 ,
+                HTTP_VERSION_1_1,
                 String.valueOf(httpStatus.getStatusCode()),
                 httpStatus.name()) + " ";
         final String contentType = "Content-Type: " + this.contentType + " ";

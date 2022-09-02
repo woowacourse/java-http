@@ -1,8 +1,7 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.coyote.http11.util.ResourceLoader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;

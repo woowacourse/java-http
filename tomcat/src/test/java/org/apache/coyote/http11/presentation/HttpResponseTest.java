@@ -1,10 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.presentation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.coyote.http11.domain.HttpStatus;
-import org.apache.coyote.http11.presentation.HttpRequest;
-import org.apache.coyote.http11.presentation.HttpResponse;
 import org.apache.coyote.http11.util.ResourceLoader;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

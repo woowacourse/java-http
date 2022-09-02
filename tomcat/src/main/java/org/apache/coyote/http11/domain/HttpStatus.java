@@ -11,7 +11,7 @@ public enum HttpStatus {
     }
 
     public String toStatusLine() {
-        return String.valueOf(statusCode) + " " + name();
+        return statusCode + " " + name();
     }
 
     public int getStatusCode() {

@@ -13,6 +13,7 @@ import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 
@@ -21,7 +22,7 @@ public class FrontController {
     public HttpResponse run(HttpRequest httpRequest) throws IOException {
         if (httpRequest.getRequestUri().equals("/")) {
             final String responseBody = "Hello world!";
-            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, "text/html;charset=utf-8", responseBody);
+            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.HTML, responseBody);
         }
         if (httpRequest.getRequestUri().endsWith(".html")) {
             if (httpRequest.getRequestUri().equals("/login.html")) {
@@ -30,19 +31,19 @@ public class FrontController {
                 user.ifPresent(value -> log.debug(value.toString()));
             }
             final String responseBody = getResponseBody(httpRequest);
-            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, "text/html;charset=utf-8", responseBody);
+            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.HTML, responseBody);
         }
         if (httpRequest.getRequestUri().endsWith(".css")) {
             final String responseBody = getResponseBody(httpRequest);
-            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, "text/css;charset=utf-8", responseBody);
+            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.CSS, responseBody);
 
         }
         if (httpRequest.getRequestUri().endsWith(".js")) {
             final String responseBody = getResponseBody(httpRequest);
-            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, "text/javascript;charset=utf-8",
+            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.JAVASCRIPT,
                     responseBody);
         }
-        return new HttpResponse(httpRequest.getProtocol(), HttpStatus.NOT_FOUND, "text/html;charset=utf-8", null);
+        return new HttpResponse(httpRequest.getProtocol(), HttpStatus.NOT_FOUND, ContentType.HTML, null);
     }
 
     private String getResponseBody(final HttpRequest httpRequest) throws IOException {

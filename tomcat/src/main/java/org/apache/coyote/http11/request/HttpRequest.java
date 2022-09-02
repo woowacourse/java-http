@@ -54,7 +54,7 @@ public class HttpRequest {
         return "HttpRequest{" +
                 "requestMethod='" + requestMethod + '\'' +
                 ", requestUri='" + requestUri + '\'' +
-                ", protocolVersion='" + protocol + '\'' +
+                ", protocol='" + protocol + '\'' +
                 ", queryStrings=" + queryStrings +
                 '}';
     }

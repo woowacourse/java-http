@@ -6,7 +6,7 @@ import java.util.Map;
 public class HttpResponse {
 
     private static final String HEADER_DELIMITER = ": ";
-    private static final String responseLine = "HTTP/1.1 200 OK ";
+    private static final String RESPONSE_LINE = "HTTP/1.1 200 OK ";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
 
@@ -32,7 +32,7 @@ public class HttpResponse {
 
     public String getResponse() {
         return String.join("\r\n",
-                responseLine,
+                RESPONSE_LINE,
                 CONTENT_TYPE + HEADER_DELIMITER + headers.get(CONTENT_TYPE) + ";charset=utf-8 ",
                 CONTENT_LENGTH + HEADER_DELIMITER + headers.get(CONTENT_LENGTH) + " ",
                 "",

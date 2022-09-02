@@ -28,7 +28,7 @@ public class HttpRequest {
         return new HttpRequest(path, queryParams);
     }
 
-    private static String getPath(String input) {
+    private static String getPath(final String input) {
         if (existQueryParams(input)) {
             return input;
         }

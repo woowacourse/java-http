@@ -11,7 +11,6 @@ import java.nio.file.Files;
 import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.headers.Extension;
 import org.apache.coyote.http11.url.HandlerMapping;
 import org.apache.coyote.http11.url.Url;
 import org.slf4j.Logger;
@@ -41,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             String uri = getUri(bufferedReader);
-            String contentType = getContentType(uri);
+            String contentType = Extension.convertToContentType(uri);
             String responseBody = getResponseBody(uri);
 
             final var response = createResponse(contentType, responseBody);
@@ -51,11 +50,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String getContentType(String file) {
-        Extension fileExtension = Extension.create(file);
-        return fileExtension.getContentType();
     }
 
     private String getUri(final BufferedReader bufferedReader) throws IOException {

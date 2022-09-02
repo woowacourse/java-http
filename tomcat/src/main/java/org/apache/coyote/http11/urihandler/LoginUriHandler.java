@@ -7,8 +7,13 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.UriResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoginUriHandler extends DefaultUriHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(LoginUriHandler.class);
+
 
     @Override
     public boolean canHandle(String uri) {
@@ -26,15 +31,17 @@ public class LoginUriHandler extends DefaultUriHandler {
         final String responseBody = getResponseBody("static/login.html");
         final String contentType = ContentType.HTML.getValue();
 
+        log.info(user.toString());
+
         return new UriResponse(responseBody, contentType);
     }
 
-    private static String getParameter(Map<String, Object> parameters, String parameter) {
+    private String getParameter(Map<String, Object> parameters, String parameter) {
         String value = (String) parameters.get(parameter);
         return Objects.requireNonNull(value);
     }
 
-    private static User findUser(String account) {
+    private User findUser(String account) {
         return InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 account 입니다."));
     }

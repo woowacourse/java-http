@@ -1,11 +1,11 @@
 package org.apache.coyote.http11;
 
-public class RequestURI {
+public class RequestTarget {
 
     private final String path;
     private final QueryParameters queryParameters;
 
-    public RequestURI(final String requestURI) {
+    public RequestTarget(final String requestURI) {
         if (!requestURI.contains("?")) {
             this.path = requestURI;
             this.queryParameters = QueryParameters.EMPTY_QUERY_PARAMETERS;
@@ -15,11 +15,6 @@ public class RequestURI {
         int index = requestURI.indexOf("?");
         this.path = requestURI.substring(0, index);
         this.queryParameters = new QueryParameters(requestURI.substring(index + 1));
-    }
-
-    public RequestURI(final String path, final QueryParameters queryParameters) {
-        this.path = path;
-        this.queryParameters = queryParameters;
     }
 
     public boolean isQueryParametersEmpty() {

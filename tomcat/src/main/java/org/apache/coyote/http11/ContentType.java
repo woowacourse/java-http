@@ -5,9 +5,9 @@ import java.util.NoSuchElementException;
 
 public enum ContentType {
 
-    HTML("html", "text/html;charset=utf-8"),
-    CSS("css", "text/css"),
-    JAVASCRIPT("js", "text/javascript");
+    HTML(".html", "text/html;charset=utf-8"),
+    CSS(".css", "text/css"),
+    JAVASCRIPT(".js", "text/javascript");
 
     private final String extension;
     private final String value;

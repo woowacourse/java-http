@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.LinkedHashMap;
 import java.util.NoSuchElementException;
@@ -15,6 +14,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.utill.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,76 +39,59 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
-             InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
              OutputStream outputStream = connection.getOutputStream()) {
+            HttpRequest httpRequest = generateHttpRequest(bufferedReader);
 
-            HttpRequest httpRequest = generateHttpRequestMessage(bufferedReader);
-            String requestTarget = httpRequest.getRequestTarget();
-
-            if (requestTarget.equals("/")) {
-                HttpResponse httpResponse = HttpResponse.DEFAULT_HTTP_RESPONSE;
-                outputStream.write(httpResponse.parseResponse().getBytes());
-                outputStream.flush();
+            if (httpRequest.getPath().equals("/")) {
+                write(outputStream, HttpResponse.DEFAULT_HTTP_RESPONSE);
                 return;
             }
 
-            if (!requestTarget.contains(".") && requestTarget.startsWith("/login")
-                    && requestTarget.contains("?") && requestTarget.contains("=")) {
-                int index = requestTarget.indexOf("?");
-                QueryParameters queryParameters = new QueryParameters(requestTarget.substring(index + 1));
-
-                HttpResponse httpResponse = generateResponseMessage("login.html");
-                String response = httpResponse.parseResponse();
-
-                validateExistsUser(queryParameters.getParameterValue("account"),
-                        queryParameters.getParameterValue("password"));
-
-                outputStream.write(response.getBytes());
-                outputStream.flush();
+            if (httpRequest.getPath().contains(".")) {
+                String fileName = httpRequest.getPath().substring(1);
+                write(outputStream, generate200HttpResponse(fileName));
                 return;
             }
 
-            String fileName = requestTarget.substring(1);
-
-            HttpResponse httpResponse = generateResponseMessage(fileName);
-            String response = httpResponse.parseResponse();
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            if (httpRequest.getPath().equals("/login") && httpRequest.existsQueryString()) {
+                validateExistsUser(httpRequest.getQueryParameter("account"), httpRequest.getQueryParameter("password"));
+                write(outputStream, generate200HttpResponse("login.html"));
+            }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private HttpRequest generateHttpRequestMessage(final BufferedReader bufferedReader) throws IOException {
-        HttpRequest requestMessage = new HttpRequest(Objects.requireNonNull(bufferedReader.readLine()));
-        log.info(requestMessage.getRequestLine());
+    private HttpRequest generateHttpRequest(final BufferedReader bufferedReader) throws IOException {
+        HttpRequest request = new HttpRequest(Objects.requireNonNull(bufferedReader.readLine()));
+        log.info(request.getRequestLine());
 
         String line;
         while (!(line = Objects.requireNonNull(bufferedReader.readLine())).isBlank()) {
             String[] splitHeader = line.split(": ");
-            requestMessage.addHeader(splitHeader[0], splitHeader[1]);
+            request.addHeader(splitHeader[0], splitHeader[1]);
         }
 
-        return requestMessage;
+        return request;
     }
 
-    private HttpResponse generateResponseMessage(final String fileName) throws IOException {
-        String statusLine = "HTTP/1.1 200 OK";
+    private HttpResponse generate200HttpResponse(final String fileName) throws IOException {
+        String fileExtension = FileUtils.getFileExtension(fileName);
+        ContentType contentType = ContentType.parse(fileExtension);
 
+        String responseBody = FileUtils.readFile(fileName);
         LinkedHashMap<String, String> headers = new LinkedHashMap<>();
-
-        URL resourceUrl = getClass().getClassLoader().getResource("static/" + fileName);
-        String responseBody = new String(Files.readAllBytes(new File(resourceUrl.getFile()).toPath()));
-
-        String contentType = ContentType.parse(fileName.split("\\.")[1])
-                .getValue();
-
-        headers.put("Content-Type", contentType);
+        headers.put("Content-Type", contentType.getValue());
         headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
 
-        return new HttpResponse(statusLine, headers, responseBody);
+        return new HttpResponse("HTTP/1.1 200 OK", headers, responseBody);
+    }
+
+    private void write(final OutputStream outputStream, final HttpResponse httpResponse) throws IOException {
+        outputStream.write(httpResponse.parseResponse().getBytes());
+        outputStream.flush();
     }
 
     private void validateExistsUser(final String account, final String password) {

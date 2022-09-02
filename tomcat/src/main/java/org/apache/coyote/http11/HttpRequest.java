@@ -23,11 +23,26 @@ public class HttpRequest {
     }
 
     public String getRequestLine() {
-        return requestLine.getHttpMethod() + " " + requestLine.getRequestTarget() + " " + requestLine.getHttpVersion();
+        return requestLine.getHttpMethod() + " " + getPath() + " " + requestLine.getHttpVersion();
     }
 
-    public String getRequestTarget() {
-        return requestLine.getRequestTarget();
+    public String getHttpMethod() {
+        return requestLine.getHttpMethod();
+    }
+
+    public String getPath() {
+        RequestTarget requestTarget = requestLine.getRequestTarget();
+        return requestTarget.getPath();
+    }
+
+    public boolean existsQueryString() {
+        RequestTarget requestTarget = requestLine.getRequestTarget();
+        return !requestTarget.isQueryParametersEmpty();
+    }
+
+    public String getQueryParameter(final String key) {
+        RequestTarget requestTarget = requestLine.getRequestTarget();
+        return requestTarget.getQueryParameterKey(key);
     }
 
     public Map<String, String> getHeaders() {

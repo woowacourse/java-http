@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.util.UUID;
+import org.apache.catalina.SessionManager;
 
 public class PostRequestMangerImpl implements RequestManager {
 
@@ -18,32 +16,26 @@ public class PostRequestMangerImpl implements RequestManager {
     @Override
     public String generateResponse() {
         FileName fileName = requestParser.generateFileName();
+        FormData requestBody = requestParser.generateRequestBody();
+        SessionManager sessionManager = new SessionManager();
 
-        String redirect = "";
-        System.out.println(fileName.getPrefix() + " " + fileName.getExtension());
         if (fileName.getPrefix().equals("/login")) {
-            FormData loginRequestBody = requestParser.generateRequestBody();
-            LoginTry loginTry = new LoginTry(loginRequestBody.get("account"), loginRequestBody.get("password"));
-            redirect = loginTry.generateRedirectUrl();
+            LoginService loginService = new LoginService();
+            LoginResult loginResult = loginService.signIn(requestBody.get("account"), requestBody.get("password"));
 
-            HttpCookie httpCookie = requestParser.generateCookie();
-            UUID cookieValue = UUID.randomUUID();
-            if (httpCookie.isContains("JSESSIONID")) {
-                cookieValue = UUID.fromString(httpCookie.get("JSESSIONID"));
-            }
             return String.join("\r\n",
                     "HTTP/1.1 " + STATUS_CODE + " " + FOUND + " ",
-                    "Location: " + redirect + " ",
-                    "Set-Cookie: JSESSIONID=" + cookieValue + " ",
+                    "Set-Cookie: JSESSIONID=" + loginResult.getSession().getId() + " ",
+                    "Location: " + loginResult.getRedirectUrl() + " ",
                     "");
         }
 
-        FormData registerRequestBody = requestParser.generateRequestBody();
-        RegisterTry registerTry = new RegisterTry(
-                registerRequestBody.get("account"),
-                registerRequestBody.get("password"),
-                registerRequestBody.get("email"));
-        redirect = registerTry.signUp();
+        RegisterService registerService = new RegisterService();
+        String redirect = registerService.signUp(
+                requestBody.get("account"),
+                requestBody.get("password"),
+                requestBody.get("email")
+        );
 
         return String.join("\r\n",
                 "HTTP/1.1 " + STATUS_CODE + " " + FOUND + " ",

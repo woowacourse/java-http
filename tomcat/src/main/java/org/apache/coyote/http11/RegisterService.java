@@ -3,25 +3,14 @@ package org.apache.coyote.http11;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 
-public class RegisterTry {
+public class RegisterService {
 
     private static final String SUCCESS_URL = "/index.html";
     private static final String FAIL_URL = "/401.html";
 
-    private final String account;
-    private final String password;
-
-    private final String email;
-
-    public RegisterTry(String account, String password, String email) {
-        this.account = account;
-        this.password = password;
-        this.email = email;
-    }
-
-    public String signUp() {
+    public String signUp(String account, String password, String email) {
         try {
-            User user = new User(this.account, this.password, this.email);
+            User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
             return SUCCESS_URL;
         }

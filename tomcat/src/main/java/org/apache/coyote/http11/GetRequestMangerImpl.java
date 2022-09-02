@@ -1,18 +1,15 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.File;
+import org.apache.catalina.SessionManager;
+
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.UUID;
 
 public class GetRequestMangerImpl implements RequestManager {
 
+    private static final String PREFIX = "static/";
     private static final Integer STATUS_CODE = 200;
     private static final String OK = "OK";
+    private static final String POST_LOGIN_REDIRECT = "static/index.html";
 
     private final RequestParser requestParser;
 
@@ -23,14 +20,13 @@ public class GetRequestMangerImpl implements RequestManager {
     @Override
     public String generateResponse() throws IOException {
         FileName fileName = requestParser.generateFileName();
+        SessionManager sessionManager = new SessionManager();
+        HttpCookie httpCookie = requestParser.generateCookie();
+        String sessionId = httpCookie.generateJsessionId();
+        String responseBody = HtmlLoader.generateFile(PREFIX + fileName.concat());
 
-        String responseBody = fileName.getPrefix();
-
-        if (!responseBody.equals("Hello world!")) {
-            URL resource = getClass().getClassLoader().getResource("static/" + responseBody + "." + fileName.getExtension());
-            final Path path = new File(resource.getFile()).toPath();
-            final List<String> actual = Files.readAllLines(path);
-            responseBody = String.join("\n", actual) + "\n";
+        if (fileName.getPrefix().equals("/login") && sessionManager.isExistSession(sessionId)) {
+            responseBody = HtmlLoader.generateFile(POST_LOGIN_REDIRECT);
         }
 
         return String.join("\r\n",

@@ -27,6 +27,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String FAVICON_URI = "/favicon.ico";
     private static final String QUERY_STRING_PREFIX = "?";
     private static final String HTML_EXTENSION = ".html";
+    private static final String ACCOUNT_KEY = "account";
 
     private final Socket connection;
 
@@ -56,7 +57,8 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(formattedResponse.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | InvalidHttpRequestStartLineException | FaviconNotFoundException e) {
+        } catch (IOException | UncheckedServletException |
+                InvalidHttpRequestStartLineException | FaviconNotFoundException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -98,7 +100,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void logUser(final QueryParameters queryParameters) {
-        final String account = queryParameters.getValueByKey("account");
+        final String account = queryParameters.getValueByKey(ACCOUNT_KEY);
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
         log.info(user.toString());
     }

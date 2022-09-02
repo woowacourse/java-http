@@ -42,12 +42,12 @@ public class RequestPath {
         return queryParameters;
     }
 
-    public boolean isStaticFile(String extension) {
-        return this.path.endsWith(extension);
-    }
-
     public String getPath() {
         return path;
+    }
+
+    public String getParameter(String field) {
+        return queryParameters.get(field);
     }
 
     public Map<String, String> getQueryParameters() {

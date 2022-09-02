@@ -65,6 +65,10 @@ public class HttpRequest {
         return requestGeneral.getPath().getPath();
     }
 
+    public String getParameter(String field) {
+        return requestGeneral.getPath().getParameter(field);
+    }
+
     public RequestMethod getMethod() {
         return requestGeneral.getMethod();
     }

@@ -45,6 +45,10 @@ public class RequestGeneral {
         return path;
     }
 
+    public String getParameter(String field) {
+        return path.getParameter(field);
+    }
+
     public HttpVersion getHttpVersion() {
         return httpVersion;
     }

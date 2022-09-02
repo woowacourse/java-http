@@ -11,6 +11,12 @@ public class HttpRequest {
     private static final String REQUEST_URI = "RequestURI";
     private static final String HTTP_METHOD = "HttpMethod";
 
+    private static final String START_LINE_DELIMITER = " ";
+    private static final String REQUEST_PARAM_DELIMITER = "?";
+    private static final String PARAMS_DELIMITER = "&";
+    private static final String KEY_VALUE_DELIMITER = "=";
+    private static final String REQUEST_HEADER_DELIMITER = ": ";
+
     private final Map<String, String> requestMap;
     private final Map<String, String> paramMap;
 
@@ -35,7 +41,7 @@ public class HttpRequest {
     private static void extractStartLine(final List<String> httpRequestStrs, final Map<String, String> requestMap,
                                          final Map<String, String> paramMap) {
         final String startLine = httpRequestStrs.remove(START_LINE_INDEX);
-        final String[] startLineContents = startLine.split(" ");
+        final String[] startLineContents = startLine.split(START_LINE_DELIMITER);
         requestMap.put(HTTP_METHOD, startLineContents[0]);
 
         extractRequestUri(requestMap, paramMap, startLineContents);
@@ -44,8 +50,8 @@ public class HttpRequest {
     private static void extractRequestUri(final Map<String, String> requestMap, final Map<String, String> paramMap,
                                           final String[] startLineContents) {
         final String uri = startLineContents[1];
-        if (uri.contains("?")) {
-            final int index = uri.indexOf("?");
+        if (uri.contains(REQUEST_PARAM_DELIMITER)) {
+            final int index = uri.indexOf(REQUEST_PARAM_DELIMITER);
             final String path = uri.substring(0, index);
             final String queryString = uri.substring(index + 1);
             requestMap.put(REQUEST_URI, path);
@@ -56,9 +62,9 @@ public class HttpRequest {
     }
 
     private static void extractRequestParam(final Map<String, String> paramMap, final String queryString) {
-        final String[] queryParams = queryString.split("&");
+        final String[] queryParams = queryString.split(PARAMS_DELIMITER);
         Arrays.stream(queryParams)
-                .map(it -> it.split("="))
+                .map(it -> it.split(KEY_VALUE_DELIMITER))
                 .forEach(paramKeyValue -> paramMap.put(paramKeyValue[0], paramKeyValue[1]));
     }
 
@@ -67,7 +73,7 @@ public class HttpRequest {
             if (requestHeader.equals("")) {
                 break;
             }
-            final String[] requestKeyValue = requestHeader.split(": ");
+            final String[] requestKeyValue = requestHeader.split(REQUEST_HEADER_DELIMITER);
             requestMap.put(requestKeyValue[START_LINE_INDEX], requestKeyValue[1]);
         }
     }

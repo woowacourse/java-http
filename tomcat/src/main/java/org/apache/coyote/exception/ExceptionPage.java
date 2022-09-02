@@ -6,7 +6,7 @@ import org.apache.coyote.support.HttpStatus;
 public enum ExceptionPage {
 
     NOT_FOUND(HttpStatus.NOT_FOUND, "/404.html"),
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html"),
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html")
     ;
 
     private final HttpStatus status;
@@ -18,11 +18,10 @@ public enum ExceptionPage {
     }
 
     public static String toUri(HttpStatus status) {
-        final var uri = Arrays.stream(values())
+        return Arrays.stream(values())
                 .filter(it -> it.status.equals(status))
                 .map(it -> it.uri)
-                .findAny();
-
-        return uri.orElse(INTERNAL_SERVER_ERROR.uri);
+                .findAny()
+                .orElse(INTERNAL_SERVER_ERROR.uri);
     }
 }

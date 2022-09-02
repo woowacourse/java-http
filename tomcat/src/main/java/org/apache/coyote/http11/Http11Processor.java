@@ -9,7 +9,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -19,6 +18,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,9 +26,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String WELCOME_MESSAGE = "Hello world!";
-    private static final String TEXT_HTML = "text/html";
-    private static final String TEXT_CSS = "text/css";
-    private static final String APPLICATION_JAVASCRIPT = "application/javascript";
     private static final String POST = "POST";
     private static final String GET = "GET";
 
@@ -87,18 +84,21 @@ public class Http11Processor implements Runnable, Processor {
                 final User user = (User) session.getAttribute("user");
                 final Optional<User> possibleUser = InMemoryUserRepository.findByAccount(user.getAccount());
                 if (possibleUser.isPresent()) {
-                    final String response = getFoundResponse();
-                    outputStream.write(response.getBytes());
+                    final byte[] response = HttpResponse.fromStatusCode(302)
+                            .setLocation("/index.html")
+                            .toResponseBytes();
+                    outputStream.write(response);
                     outputStream.flush();
                     return;
                 }
             }
 
             final String responseBody = getResponseBody(requestUri);
-            final String contentType = getContentType(requestUri);
-            final String response = getOKResponse(responseBody, contentType);
+            final byte[] response = HttpResponse.fromStatusCode(200)
+                    .setResponseBody(responseBody)
+                    .toResponseBytes();
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response);
             outputStream.flush();
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -107,11 +107,16 @@ public class Http11Processor implements Runnable, Processor {
 
     private void saveSessionAndResponse(final OutputStream outputStream, final User user) throws IOException {
         final UUID sessionId = UUID.randomUUID();
-        final String response = getFoundResponse("JSESSIONID=" + sessionId);
         final HttpSession session = new Session(String.valueOf(sessionId));
         session.setAttribute("user", user);
         new SessionManager().add(session);
-        outputStream.write(response.getBytes());
+
+        final byte[] response = HttpResponse.fromStatusCode(302)
+                .setLocation("/index.html")
+                .setCookie("JSESSIONID=" + sessionId)
+                .toResponseBytes();
+
+        outputStream.write(response);
         outputStream.flush();
     }
 
@@ -129,19 +134,6 @@ public class Http11Processor implements Runnable, Processor {
             return "static/" + requestUri.substring(0, index);
         }
         return "static/" + requestUri;
-    }
-
-    private Map<String, String> getQueryParam(final String requestUri) {
-        if (!requestUri.contains("?")) {
-            return Collections.emptyMap();
-        }
-        final int index = requestUri.indexOf("?");
-        final String[] queryStrings = requestUri.substring(index + 1)
-                .split("&");
-
-        return Arrays.stream(queryStrings)
-                .map(it -> it.split("="))
-                .collect(Collectors.toMap(it -> it[0], it -> it[1], (a, b) -> b));
     }
 
     private Map<String, String> getHeaders(final BufferedReader bufferedReader) throws IOException {
@@ -167,17 +159,6 @@ public class Http11Processor implements Runnable, Processor {
                 .collect(Collectors.toMap(it -> it[0], it -> it[1], (a, b) -> b));
     }
 
-
-    private String getContentType(final String requestUri) {
-        if (requestUri.contains(".css")) {
-            return TEXT_CSS;
-        }
-        if (requestUri.contains(".js")) {
-            return APPLICATION_JAVASCRIPT;
-        }
-        return TEXT_HTML;
-    }
-
     private String getResponseBody(final String requestUri) throws IOException {
         String responseBody = WELCOME_MESSAGE;
 
@@ -200,29 +181,5 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return responseBody;
-    }
-
-    private String getOKResponse(final String responseBody, final String contentType) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
-    }
-
-    private String getFoundResponse(final String cookie) {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /index.html ",
-                "Set-Cookie: " + cookie + " ",
-                "");
-    }
-
-    private String getFoundResponse() {
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /index.html ",
-                "");
     }
 }

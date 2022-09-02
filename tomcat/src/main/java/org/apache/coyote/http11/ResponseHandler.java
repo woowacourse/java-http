@@ -16,12 +16,13 @@ import org.slf4j.LoggerFactory;
 
 public class ResponseHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(ResponseHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResponseHandler.class);
     private static final String RESOURCE_PATH = "static";
     private static final String LOGIN_PATH = "/login";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String DEFAULT_PATH = "/";
+    private static final String DEFAULT_EXTENSION = ".html";
 
     private final String path;
 
@@ -30,22 +31,29 @@ public class ResponseHandler {
     }
 
     public String getResponse() throws IOException {
+        final ResponseHeader responseHeader = new ResponseHeader(path);
+
+        return  String.join("\r\n", responseHeader.getHeader(getResponseBody()), getResponseBody());
+    }
+
+    private String getResponseBody() throws IOException {
         if (path.equals(DEFAULT_PATH)) {
             return "Hello world!";
         }
-
         if (path.contains(LOGIN_PATH)) {
-            return pathHasLogin();
+            return getLoginContent();
         }
+        return getContent(path, "");
+    }
 
+    private String getContent(String path, String extension) throws IOException {
         final URL resource = getClass()
                 .getClassLoader()
-                .getResource(RESOURCE_PATH + path);
-
+                .getResource(RESOURCE_PATH + path + extension);
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
-    private String pathHasLogin() throws IOException {
+    private String getLoginContent() throws IOException {
         final QueryParam queryParam = new QueryParam(path);
         final UserRequest userRequest = queryParam.toUserRequest(ACCOUNT, PASSWORD);
 
@@ -53,20 +61,8 @@ public class ResponseHandler {
         if (user.isEmpty()) {
             throw new UserNotFoundException();
         }
-        log.info(user.get().toString());
+        LOGGER.info(user.get().toString());
 
-        final URL resource = getClass()
-                .getClassLoader()
-                .getResource(RESOURCE_PATH + LOGIN_PATH + ".html");
-
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-    }
-
-    public ContentType getContentType() {
-        if (path.contains(".")) {
-            final String[] splitExtension = path.split("\\.");
-            return ContentType.matchMIMEType(splitExtension[splitExtension.length - 1]);
-        }
-        return ContentType.HTML;
+        return getContent(LOGIN_PATH, DEFAULT_EXTENSION);
     }
 }

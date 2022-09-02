@@ -1,12 +1,12 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -14,6 +14,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final int START_LINE = 1;
+    public static final String HTTP_VERSION = "HTTP/1.1";
 
     private final Socket connection;
 
@@ -38,13 +39,7 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
             final ResponseHandler responseHandler = new ResponseHandler(uri);
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + responseHandler.getContentType().getMIMEType() +";charset=utf-8 ",
-                    "Content-Length: " + responseHandler.getResponse().getBytes().length + " ",
-                    "",
-                    responseHandler.getResponse());
+            final String response = responseHandler.getResponse();
 
             outputStream.write(response.getBytes());
             outputStream.flush();

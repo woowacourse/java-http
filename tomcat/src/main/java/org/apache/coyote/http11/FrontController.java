@@ -15,10 +15,14 @@ public class FrontController {
     private static final String STATIC_RESOURCE_PATH = "static";
 
     public static HttpResponse staticFileRequest(HttpRequest httpRequest) throws IOException {
-        Path filePath = findFilePath(httpRequest.getUri());
+        return staticFileRequest(httpRequest.getUri());
+    }
+
+    public static HttpResponse staticFileRequest(String fileName) throws IOException {
+        Path filePath = findFilePath(fileName);
         String content = new String(Files.readAllBytes(filePath));
 
-        String contentType = FileExtension.findContentType(httpRequest.getUri());
+        String contentType = FileExtension.findContentType(fileName);
         return new HttpResponse(HttpStatus.OK, contentType, content);
     }
 
@@ -27,7 +31,7 @@ public class FrontController {
             return Path.of(Objects.requireNonNull(FrontController.class.getClassLoader()
                     .getResource(STATIC_RESOURCE_PATH + fileName)).getPath());
         } catch (NullPointerException e) {
-            throw new NoSuchElementException(fileName + " 파일이 존재하지 않습니다.");
+            throw new FileNotExistException(fileName + " 파일이 존재하지 않습니다.");
         }
     }
 
@@ -36,15 +40,13 @@ public class FrontController {
             String contentType = FileExtension.HTML.getContentType();
             return new HttpResponse(HttpStatus.OK, contentType, "Hello world!");
         }
+
         if (httpRequest.getUri().startsWith("/login")) {
             Map<String, String> queryValues = QueryStringParser.parseUri(httpRequest.getUri());
             LoginHandler loginHandler = new LoginHandler();
             User user = loginHandler.login(queryValues);
 
-            Path filePath = findFilePath("/login.html");
-            String content = new String(Files.readAllBytes(filePath));
-            String contentType = FileExtension.HTML.getContentType();
-            return new HttpResponse(HttpStatus.OK, contentType, content);
+            return staticFileRequest("/login.html");
         }
         return new HttpResponse(HttpStatus.NOT_FOUND, null, null);
     }

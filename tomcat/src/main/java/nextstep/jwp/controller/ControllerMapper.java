@@ -30,9 +30,6 @@ public class ControllerMapper {
         if (path.equals("/")) {
             return controller.showIndex();
         }
-        if (path.equals("/login") && httpRequest.getQueryString() != null) {
-            return controller.login(httpRequest.parseQueryString());
-        }
         if (path.equals("/login")) {
             return controller.showLogin();
         }
@@ -44,6 +41,9 @@ public class ControllerMapper {
 
     private HttpResponse doPost(final Controller controller, final HttpRequest httpRequest) {
         final var path = httpRequest.getPath();
+        if (path.equals("/login")) {
+            return controller.login(httpRequest.parseBodyQueryString());
+        }
         if (path.equals("/register")) {
             return controller.register(httpRequest.parseBodyQueryString());
         }

@@ -28,7 +28,7 @@
   - [X] request body를 Content-Type에 맞게 파싱한다. 
   - [X] 회원가입을 완료하면 /index.html로 리다이렉트한다.
   - [X] 회원가입에 실패하는 경우 /register.html로 리다이렉트한다. (중복된 아이디)
-- [ ] 로그인을 POST 방식으로 변경한다.
+- [X] 로그인을 POST 방식으로 변경한다.
 - [ ] 로그인에 성공하면 HTTP Reponse의 헤더에 Set-Cookie가 존재한다.
 - [ ] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.
 

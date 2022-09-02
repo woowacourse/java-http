@@ -7,8 +7,6 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -36,20 +34,14 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));) {
 
             // 1. index.html 응답하기
-            final String responseBody = createResponseBody(bufferedReader);
+            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+            final String responseBody = createResponseBody(httpRequest);
 
             // 2. CSS 지원하기
-            final Map<String, String> requestHeader = new HashMap<>();
-            String line = bufferedReader.readLine();
-            while (!"".equals(line)) {
-                final String[] headerField = line.split(": ");
-                requestHeader.put(headerField[0], headerField[1]);
-                line = bufferedReader.readLine();
-            }
-            final String contentType = requestHeader.getOrDefault("Accept", "text/html").split(",")[0];
+            final String contentType = httpRequest.getHeaderField("Accept");
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -65,13 +57,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponseBody(final BufferedReader bufferedReader) throws IOException {
-        final String requestLine = bufferedReader.readLine();
-        final String requestUri = requestLine.split(" ")[1];
-
+    private String createResponseBody(final HttpRequest httpRequest) throws IOException {
+        final String requestUri = httpRequest.parseUriPath();
         // 3. Query String 파싱
         if (requestUri.contains("/login")) {
-            return createLoginResponse(requestUri);
+            return createLoginResponse(httpRequest);
         }
 
         if (!requestUri.equals("/")) {
@@ -80,29 +70,16 @@ public class Http11Processor implements Runnable, Processor {
         return "Hello world!";
     }
 
-    private String createLoginResponse(final String requestUri) throws IOException {
-        final int index = requestUri.indexOf("?");
-        final String queryString = requestUri.substring(index + 1);
-        final Map<String, String> params = new HashMap<>();
-        final String[] paramPairs = queryString.split("&");
-
-        for (final String paramPair : paramPairs) {
-            final String[] pair = paramPair.split("=");
-            if (pair.length == 2) {
-                params.put(pair[0], pair[1]);
-            }
-        }
-
-        final Optional<User> user = InMemoryUserRepository.findByAccount(params.get("account"));
-        if (user.isPresent() && user.get().checkPassword(params.get("password"))) {
+    private String createLoginResponse(final HttpRequest httpRequest) throws IOException {
+        final Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getParamByName("account"));
+        if (user.isPresent() && user.get().checkPassword(httpRequest.getParamByName("password"))) {
             log.info("user : {}", user.get());
         }
-
         return readFileFromPath("/login.html");
     }
 
     private String readFileFromPath(final String filePath) throws IOException {
-        final Path path = new File(getClass().getClassLoader().getResource("static"  + filePath).getPath()).toPath();
+        final Path path = new File(getClass().getClassLoader().getResource("static" + filePath).getPath()).toPath();
         return new String(Files.readAllBytes(path));
     }
 }

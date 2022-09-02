@@ -28,15 +28,20 @@ public class RequestUri {
         return uri.getPath().split("\\?")[0];
     }
 
-    public Optional<String> getExtension() {
+    public String getExtension() {
         String pathWithoutQuery = getPathWithoutQuery();
         int lastIndexOfSlash = pathWithoutQuery.lastIndexOf("/");
         String filename = pathWithoutQuery.substring(lastIndexOfSlash);
 
-        if (!filename.contains(".")) {
-            return Optional.empty();
+        int lastDotIndex = filename.lastIndexOf(".");
+        if (lastDotIndex < 0) {
+            return "";
         }
 
-        return Optional.of(filename.split("\\.")[1]);
+        return filename.substring(lastDotIndex + 1);
+    }
+
+    public boolean hasExtension() {
+        return !getExtension().isBlank();
     }
 }

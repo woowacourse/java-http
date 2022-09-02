@@ -1,16 +1,17 @@
 package org.apache.coyote.http11;
 
 import javassist.NotFoundException;
-import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.controller.Controller;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.List;
 
 public class Http11Processor implements Runnable, Processor {
@@ -18,6 +19,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final ControllerMapping controllerMapping = new ControllerMapping();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -38,17 +40,18 @@ public class Http11Processor implements Runnable, Processor {
             while (!(line = bufferedReader.readLine()).isBlank()) {
                 if (isStartsWithRequestMethod(line)) {
                     final String uri = line.split(" ")[1];
-                    final String responseBody = executeController(uri);
+                    final Controller controller = controllerMapping.getController(uri);
+                    final String responseBody = controller.execute(uri);
                     final String response = makeResponse(responseBody);
                     flushResponse(outputStream, response);
                     return;
                 }
             }
 
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
         } catch (NotFoundException | URISyntaxException e) {
-
+            log.info(e.getMessage());
+        } catch (Exception e) {
+            log.info(e.getMessage());
         }
     }
 
@@ -73,28 +76,5 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
-    }
-
-    private String executeController(final String uri) throws URISyntaxException, NotFoundException {
-        if (uri.equals("/")) {
-            return "Hello world!";
-        }
-        if (uri.contains(".")) {
-            final URL resource = getClass().getClassLoader().getResource("static" + uri);
-            if (resource == null) {
-                throw new NotFoundException("자원을 찾지 못했음 : " + uri);
-            }
-            return readFile(new File(resource.toURI()));
-        }
-        return "";
-    }
-
-    private String readFile(final File file) {
-        try {
-            return new String(Files.readAllBytes(file.toPath()));
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-        return null;
     }
 }

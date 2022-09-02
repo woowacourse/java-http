@@ -3,9 +3,8 @@ package org.apache.coyote.http11.http;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 public class HttpRequest {
 
@@ -23,42 +22,31 @@ public class HttpRequest {
 	private static final String PARAM_DELIMITER = "&";
 	private static final String QUERY_STRING_DELIMITER = "?";
 
-	private static final String HEADER_DELIMITER = ": ";
 	private static final String EXTENSION_DELIMITER = ".";
 
 	private final HttpMethod method;
 	private final String url;
-	private final Map<String, String> headers;
+	private final HttpHeaders httpHeaders;
 	private final String body;
 
 	public HttpRequest(BufferedReader requestReader) throws IOException {
 		String startLine = requestReader.readLine();
-		this.method = HttpMethod.from(extractStartLine(startLine, HTTP_METHOD_INDEX));
-		this.url = extractStartLine(startLine, HTTP_URL_INDEX);
-		this.headers = extractHeaders(requestReader);
+		this.method = HttpMethod.from(parseStartLine(startLine, HTTP_METHOD_INDEX));
+		this.url = parseStartLine(startLine, HTTP_URL_INDEX);
+		this.httpHeaders = new HttpHeaders(requestReader);
 		this.body = extractBody(requestReader);
 	}
 
-	private String extractStartLine(String startLine, int index) {
+	private String parseStartLine(String startLine, int index) {
 		return startLine.split(START_LINE_DELIMITER)[index];
 	}
 
-	private Map<String, String> extractHeaders(BufferedReader requestReader) throws IOException {
-		Map<String, String> headers = new HashMap<>();
-		String line;
-		while (!(line = requestReader.readLine()).isBlank()) {
-			String[] header = line.split(HEADER_DELIMITER);
-			headers.put(header[HTTP_METHOD_INDEX], header[HTTP_URL_INDEX]);
-		}
-		return headers;
-	}
-
 	private String extractBody(BufferedReader requestReader) throws IOException {
-		String length = headers.getOrDefault(Header.CONTENT_LENGTH.getValue(), null);
-		if (length == null) {
+		Optional<String> length = httpHeaders.findValue(HttpHeader.CONTENT_LENGTH);
+		if (length.isEmpty()) {
 			return EMPTY_BODY;
 		}
-		int contentLength = Integer.parseInt(length);
+		int contentLength = Integer.parseInt(length.get());
 		char[] body = new char[contentLength];
 		requestReader.read(body, HTTP_METHOD_INDEX, contentLength);
 		return new String(body);
@@ -81,7 +69,7 @@ public class HttpRequest {
 	}
 
 	public String getQueryString(String key) {
-		String contentType = headers.get(Header.CONTENT_TYPE.getValue());
+		String contentType = httpHeaders.getValue(HttpHeader.CONTENT_TYPE);
 		List<String> requestParams = extractRequestParams(contentType);
 		return requestParams.stream()
 			.filter(param -> param.split(PARAM_KEY_VALUE_DELIMITER)[PARAM_KEY_INDEX].equals(key))
@@ -113,7 +101,7 @@ public class HttpRequest {
 		return "===HttpRequest===" + "\r\n" +
 			"method='" + method + "\r\n" +
 			"url='" + url + "\r\n" +
-			"headers=" + headers + "\r\n" +
+			httpHeaders + "\r\n" +
 			"body='" + body + "\r\n" +
 			'}';
 	}

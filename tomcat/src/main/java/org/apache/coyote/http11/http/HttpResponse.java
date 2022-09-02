@@ -7,13 +7,12 @@ public class HttpResponse {
 
 	private final StatusCode statusCode;
 	private final String responseBody;
+	private final HttpHeaders httpHeaders;
 
-	private final Map<Header, String> headers;
-
-	private HttpResponse(StatusCode statusCode, String responseBody, Map<Header, String> headers) {
+	private HttpResponse(StatusCode statusCode, String responseBody, Map<HttpHeader, String> headers) {
 		this.statusCode = statusCode;
 		this.responseBody = responseBody;
-		this.headers = headers;
+		this.httpHeaders = new HttpHeaders(headers);
 	}
 
 	public byte[] getBytes() {
@@ -27,10 +26,10 @@ public class HttpResponse {
 			.append(statusCode.getMessage())
 			.append("\r\n");
 
-		for (Header key : headers.keySet()) {
+		for (HttpHeader key : httpHeaders.getHeaders()) {
 			stringBuilder.append(key.getValue())
 				.append(": ")
-				.append(headers.get(key))
+				.append(httpHeaders.getValue(key))
 				.append(" ")
 				.append("\r\n");
 		}
@@ -60,7 +59,7 @@ public class HttpResponse {
 	public static class HttpResponseBuilder {
 		private StatusCode statusCode;
 		private String responseBody;
-		private final Map<Header, String> headers = new LinkedHashMap<>();
+		private final Map<HttpHeader, String> headers = new LinkedHashMap<>();
 
 		private HttpResponseBuilder() {
 		}
@@ -72,12 +71,12 @@ public class HttpResponse {
 
 		public HttpResponseBuilder responseBody(String responseBody) {
 			this.responseBody = responseBody;
-			this.setHeader(Header.CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
+			this.setHeader(HttpHeader.CONTENT_LENGTH, String.valueOf(responseBody.getBytes().length));
 			return this;
 		}
 
-		public HttpResponseBuilder setHeader(Header header, String value) {
-			this.headers.put(header, value);
+		public HttpResponseBuilder setHeader(HttpHeader httpHeader, String value) {
+			this.headers.put(httpHeader, value);
 			return this;
 		}
 
@@ -90,7 +89,7 @@ public class HttpResponse {
 	public String toString() {
 		return "===HttpResponse===" + "\r\n" +
 			"statusCode=" + statusCode + "\r\n" +
-			"headers=" + headers + "\r\n" +
+			"headers=" + httpHeaders + "\r\n" +
 			'}';
 	}
 }

@@ -9,7 +9,7 @@ import java.util.Optional;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.FileNotFoundException;
 import org.apache.coyote.http11.http.ContentType;
-import org.apache.coyote.http11.http.Header;
+import org.apache.coyote.http11.http.HttpHeader;
 import org.apache.coyote.http11.http.HttpMethod;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
@@ -73,7 +73,7 @@ public class Http11Processor implements Runnable, Processor {
 		try {
 			return HttpResponse.OK()
 				.responseBody(StaticResourceUtil.getContent(httpRequest.getUrl()))
-				.setHeader(Header.CONTENT_TYPE, httpRequest.getContentType().getFormat())
+				.setHeader(HttpHeader.CONTENT_TYPE, httpRequest.getContentType().getFormat())
 				.build();
 		} catch (FileNotFoundException e) {
 			return responseErrorPage(NOT_FOUND_HTML, StatusCode.NOT_FOUND.value());
@@ -85,13 +85,13 @@ public class Http11Processor implements Runnable, Processor {
 		if (requestUrl.equals("/")) {
 			return HttpResponse.OK()
 				.responseBody("Hello world!")
-				.setHeader(Header.CONTENT_TYPE, ContentType.HTML.getFormat())
+				.setHeader(HttpHeader.CONTENT_TYPE, ContentType.HTML.getFormat())
 				.build();
 		}
 		if (HttpMethod.GET.equals(httpRequest.getMethod()) && requestUrl.startsWith("/login")) {
 			return HttpResponse.OK()
 				.responseBody(StaticResourceUtil.getContent(LOGIN_HTML))
-				.setHeader(Header.CONTENT_TYPE, ContentType.HTML.getFormat())
+				.setHeader(HttpHeader.CONTENT_TYPE, ContentType.HTML.getFormat())
 				.build();
 		}
 		if (HttpMethod.POST.equals(httpRequest.getMethod()) && requestUrl.startsWith("/login")) {
@@ -103,7 +103,7 @@ public class Http11Processor implements Runnable, Processor {
 		if (HttpMethod.GET.equals(httpRequest.getMethod()) && requestUrl.startsWith("/register")) {
 			return HttpResponse.OK()
 				.responseBody(StaticResourceUtil.getContent(REGISTER_HTML))
-				.setHeader(Header.CONTENT_TYPE, ContentType.HTML.getFormat())
+				.setHeader(HttpHeader.CONTENT_TYPE, ContentType.HTML.getFormat())
 				.build();
 
 		}
@@ -114,7 +114,7 @@ public class Http11Processor implements Runnable, Processor {
 		Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
 		if (findUser.isPresent() && findUser.get().checkPassword(password)) {
 			return HttpResponse.FOUND()
-				.setHeader(Header.LOCATION, "/" + INDEX_HTML)
+				.setHeader(HttpHeader.LOCATION, "/" + INDEX_HTML)
 				.build();
 		}
 		return responseErrorPage(UNAUTHORIZED_HTML, StatusCode.UNAUTHORIZED.value());
@@ -125,7 +125,7 @@ public class Http11Processor implements Runnable, Processor {
 		return HttpResponse.builder()
 			.statusCode(StatusCode.from(statusCode))
 			.responseBody(responseBody)
-			.setHeader(Header.CONTENT_TYPE, ContentType.HTML.getFormat())
+			.setHeader(HttpHeader.CONTENT_TYPE, ContentType.HTML.getFormat())
 			.build();
 	}
 }

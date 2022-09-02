@@ -39,9 +39,9 @@ public class HttpRequest {
         String[] requestLineValues = splitRequestLine(requestLine);
 
         String uri = requestLineValues[REQUEST_LINE_URI_INDEX];
-        String path = getPath(uri);
-        RequestParams queryParams = RequestParams.from(getQueryParameter(uri));
-        ContentType contentType = getContentType(path);
+        String path = parsePath(uri);
+        RequestParams queryParams = RequestParams.from(parseQueryParameter(uri));
+        ContentType contentType = parseContentType(path);
         HttpMethod httpMethod = HttpMethod.from(requestLineValues[REQUEST_LINE_HTTP_METHOD_INDEX]);
 
         return new HttpRequest(uri, path, queryParams, contentType, httpMethod);
@@ -66,21 +66,21 @@ public class HttpRequest {
         }
     }
 
-    private static String getPath(final String uri) {
+    private static String parsePath(final String uri) {
         if (uri.contains(URI_QUERY_PARAM_DELIMITER)) {
             return uri.substring(0, uri.lastIndexOf(URI_QUERY_PARAM_DELIMITER));
         }
         return uri;
     }
 
-    private static String getQueryParameter(final String uri) {
+    private static String parseQueryParameter(final String uri) {
         if (uri.contains(URI_QUERY_PARAM_DELIMITER)) {
             return uri.substring(uri.lastIndexOf(URI_QUERY_PARAM_DELIMITER) + 1);
         }
         return EMPTY_QUERY_PARAMETER;
     }
 
-    private static ContentType getContentType(final String path) {
+    private static ContentType parseContentType(final String path) {
         if (isResource(path)) {
             return ContentType.fromExtension(FileUtil.getExtension(path));
         }

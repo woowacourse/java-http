@@ -17,6 +17,7 @@ public enum FilePath {
     INDEX_ASSETS_PIE("/assets/chart-pie.js"),
     INDEX_JS("/js/scripts.js"),
     LOGIN_PAGE("/login.html"),
+    ERROR_401_PAGE("/401.html"),
     FAVICON("/favicon.ico"),
     ;
 
@@ -51,7 +52,7 @@ public enum FilePath {
         return value.substring(index);
     }
 
-    public String generateFile() throws IOException {
+    public String generateFile() {
         if (this == DEFAULT_PAGE) {
             return DEFAULT_PAGE_MESSAGE;
         }
@@ -62,6 +63,10 @@ public enum FilePath {
 
         final File file = new File(url.getFile());
 
-        return new String(Files.readAllBytes(file.toPath()));
+        try {
+            return new String(Files.readAllBytes(file.toPath()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -7,7 +7,8 @@ import org.apache.coyote.http11.model.HttpResponse;
 
 public class IndexHandler implements Handler {
 
-    public IndexHandler(final HttpRequest httpRequest) {}
+    public IndexHandler(final HttpRequest httpRequest) {
+    }
 
     @Override
     public String getResponse() {

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponse {
+
     private static final String HEADER_DELIMITER = ": ";
     private static final String responseLine = "HTTP/1.1 200 OK ";
     private static final String CONTENT_TYPE = "Content-Type";
@@ -33,7 +34,7 @@ public class HttpResponse {
         return String.join("\r\n",
                 responseLine,
                 CONTENT_TYPE + HEADER_DELIMITER + headers.get(CONTENT_TYPE) + ";charset=utf-8 ",
-                CONTENT_LENGTH+ HEADER_DELIMITER + headers.get(CONTENT_LENGTH) + " ",
+                CONTENT_LENGTH + HEADER_DELIMITER + headers.get(CONTENT_LENGTH) + " ",
                 "",
                 this.body);
     }

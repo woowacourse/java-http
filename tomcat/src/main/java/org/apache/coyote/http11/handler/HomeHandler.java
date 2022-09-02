@@ -8,7 +8,8 @@ public class HomeHandler implements Handler {
 
     public static final String RESPONSE_BODY = "Hello world!";
 
-    public HomeHandler(final HttpRequest httpRequest) {}
+    public HomeHandler(final HttpRequest httpRequest) {
+    }
 
     @Override
     public String getResponse() {

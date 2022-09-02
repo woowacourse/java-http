@@ -5,7 +5,7 @@ import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.HttpRequest;
 import org.apache.coyote.http11.model.HttpResponse;
 
-public class ResourceHandler implements Handler{
+public class ResourceHandler implements Handler {
 
     private final HttpRequest httpRequest;
 

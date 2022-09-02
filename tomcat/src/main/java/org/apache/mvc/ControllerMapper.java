@@ -13,11 +13,13 @@ import java.util.stream.Collectors;
 import org.apache.coyote.http11.ResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.headers.ContentType;
 import org.apache.exception.TempException;
 import org.apache.mvc.annotation.RequestMapping;
 
 public class ControllerMapper {
 
+    private static final String REDIRECT = "redirect:";
     private final Map<RequestKey, RequestHandler> map;
 
     private ControllerMapper(Map<RequestKey, RequestHandler> map) {
@@ -53,9 +55,17 @@ public class ControllerMapper {
     public ResponseEntity mapToHandle(HttpRequest httpRequest) {
         RequestHandler requestHandler = findMappedHandler(httpRequest);
         if (requestHandler == null) {
-            return mapToStatic(httpRequest);
+            return mapToStatic(httpRequest.getPath());
         }
-        return requestHandler.handle(httpRequest);
+        ResponseEntity entity = requestHandler.handle(httpRequest);
+        return handleIfRedirect(entity);
+    }
+
+    private ResponseEntity handleIfRedirect(ResponseEntity entity) {
+        if (!isRedirect(entity.getBody())) {
+            return entity;
+        }
+        return mapToStatic(entity.getBody().replace(REDIRECT, ""));
     }
 
     private RequestHandler findMappedHandler(HttpRequest httpRequest) {
@@ -63,16 +73,28 @@ public class ControllerMapper {
         return map.get(requestKey);
     }
 
-    private ResponseEntity mapToStatic(HttpRequest httpRequest) {
-        URL resource = findResource(httpRequest);
+    private boolean isRedirect(String entityBody) {
+        return entityBody.startsWith(REDIRECT);
+    }
+
+    private ResponseEntity mapToStatic(String path) {
+        URL resource = findResource(path);
         if (resource == null) {
             return mapToNotFound();
         }
-        return new ResponseEntity(HttpStatus.OK, loadFileAsString(resource));
+        return new ResponseEntity(HttpStatus.OK, loadFileAsString(resource), determineContentType(path));
     }
 
-    private static URL findResource(HttpRequest httpRequest) {
-        return Thread.currentThread().getContextClassLoader().getResource("static" + httpRequest.getPath());
+    private ContentType determineContentType(String path) {
+        return ContentType.findWithExtension(path);
+    }
+
+    private static URL findResource(String path) {
+        StringBuilder builder = new StringBuilder("static");
+        if (!path.startsWith("/")) {
+            builder.append("/");
+        }
+        return Thread.currentThread().getContextClassLoader().getResource(builder + path);
     }
 
     private static String loadFileAsString(URL resource) {
@@ -86,6 +108,7 @@ public class ControllerMapper {
     }
 
     private ResponseEntity mapToNotFound() {
-        return new ResponseEntity(HttpStatus.NOT_FOUND, "");
+        return new ResponseEntity(HttpStatus.NOT_FOUND, "", ContentType.TEXT_PLAIN);
     }
+
 }

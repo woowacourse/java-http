@@ -3,9 +3,7 @@ package org.apache.coyote.http11.response;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.ResponseEntity;
-import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.headers.ContentLength;
-import org.apache.coyote.http11.response.headers.ContentType;
 import org.apache.coyote.http11.response.headers.ResponseHeader;
 
 public class ResponseHeaders implements Response {
@@ -16,10 +14,9 @@ public class ResponseHeaders implements Response {
         this.headers = headers;
     }
 
-    public static ResponseHeaders from(HttpRequest request, ResponseEntity responseEntity) {
-        ContentType contentType = ContentType.findWithExtension(request.getPath());
+    public static ResponseHeaders from(ResponseEntity responseEntity) {
         ContentLength contentLength = ContentLength.from(responseEntity.getBody());
-        return new ResponseHeaders(List.of(contentType, contentLength));
+        return new ResponseHeaders(List.of(responseEntity.getContentType(), contentLength));
     }
 
     @Override

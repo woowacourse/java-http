@@ -20,9 +20,9 @@ class HttpResponseTest {
                 ""
         );
         HttpRequest request = HttpRequest.parse(new ByteArrayInputStream(http.getBytes()));
-        ResponseEntity entity = new ResponseEntity(HttpStatus.OK, "hello world");
+        ResponseEntity entity = new ResponseEntity(HttpStatus.OK, "hello world", determineContentType(path));
         // when
-        HttpResponse response = HttpResponse.from(request, entity);
+        HttpResponse response = HttpResponse.from(entity);
         // then
         assertThat(response).isNotNull();
     }
@@ -38,8 +38,8 @@ class HttpResponseTest {
                 ""
         );
         HttpRequest request = HttpRequest.parse(new ByteArrayInputStream(http.getBytes()));
-        ResponseEntity entity = new ResponseEntity(HttpStatus.OK, "hello world");
-        HttpResponse response = HttpResponse.from(request, entity);
+        ResponseEntity entity = new ResponseEntity(HttpStatus.OK, "hello world", determineContentType(path));
+        HttpResponse response = HttpResponse.from(entity);
 
         // when
         String responseString = response.getAsString();

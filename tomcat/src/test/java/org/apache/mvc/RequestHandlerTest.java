@@ -17,7 +17,7 @@ class RequestHandlerTest {
         // given & when
         Controller controller = new Controller() {
             public ResponseEntity myMethod(HttpRequest httpRequest) {
-                return new ResponseEntity(HttpStatus.OK, "hello");
+                return new ResponseEntity(HttpStatus.OK, "hello", determineContentType(path));
             }
         };
 
@@ -33,7 +33,7 @@ class RequestHandlerTest {
         // given
         Controller controller = new Controller() {
             public ResponseEntity myMethod(HttpRequest httpRequest) {
-                return new ResponseEntity(HttpStatus.OK, "hello");
+                return new ResponseEntity(HttpStatus.OK, "hello", determineContentType(path));
             }
         };
         RequestHandler handler = new RequestHandler(
@@ -69,7 +69,7 @@ class RequestHandlerTest {
         // given & when
         Controller controller = new Controller() {
             public ResponseEntity myMethod(HttpRequest httpRequest, int a) {
-                return new ResponseEntity(HttpStatus.OK, "hello");
+                return new ResponseEntity(HttpStatus.OK, "hello", determineContentType(path));
             }
         };
 
@@ -85,7 +85,7 @@ class RequestHandlerTest {
         // given & when
         Controller controller = new Controller() {
             public ResponseEntity myMethod(int invaliParamter) {
-                return new ResponseEntity(HttpStatus.OK, "hello");
+                return new ResponseEntity(HttpStatus.OK, "hello", determineContentType(path));
             }
         };
 
@@ -101,7 +101,7 @@ class RequestHandlerTest {
         // given & when
         Controller controller = new Controller() {
             public ResponseEntity myMethod(HttpRequest httpRequest) {
-                return new ResponseEntity(HttpStatus.OK, "hello");
+                return new ResponseEntity(HttpStatus.OK, "hello", determineContentType(path));
             }
         };
         Object invalidInstance = new Object();

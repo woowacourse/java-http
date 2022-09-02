@@ -36,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest request = HttpRequest.parse(inputStream);
             ResponseEntity responseEntity = controllerMapper.mapToHandle(request);
-            HttpResponse response = HttpResponse.from(request, responseEntity);
+            HttpResponse response = HttpResponse.from(responseEntity);
 
             outputStream.write(response.getAsString().getBytes());
             outputStream.flush();

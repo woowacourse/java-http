@@ -20,10 +20,10 @@ class ResponseHeadersTest {
                 ""
         );
         HttpRequest request = HttpRequest.parse(new ByteArrayInputStream(http.getBytes()));
-        ResponseEntity entity = new ResponseEntity(HttpStatus.OK, "hello world");
+        ResponseEntity entity = new ResponseEntity(HttpStatus.OK, "hello world", determineContentType(path));
         // when
 
-        ResponseHeaders headers = ResponseHeaders.from(request, entity);
+        ResponseHeaders headers = ResponseHeaders.from(entity);
         // then
         assertThat(headers).isNotNull();
     }
@@ -39,8 +39,8 @@ class ResponseHeadersTest {
                 ""
         );
         HttpRequest request = HttpRequest.parse(new ByteArrayInputStream(http.getBytes()));
-        ResponseEntity entity = new ResponseEntity(HttpStatus.OK, "hello world");
-        ResponseHeaders headers = ResponseHeaders.from(request, entity);
+        ResponseEntity entity = new ResponseEntity(HttpStatus.OK, "hello world", determineContentType(path));
+        ResponseHeaders headers = ResponseHeaders.from(entity);
         // when
         String headersString = headers.getAsString();
         // then

@@ -19,7 +19,7 @@ class ControllerMapperTest {
     public static class TestController implements Controller {
         @RequestMapping(value = "/", method = RequestMethod.GET)
         public ResponseEntity myMethod(HttpRequest httpRequest) {
-            return new ResponseEntity(HttpStatus.OK, "hello");
+            return new ResponseEntity(HttpStatus.OK, "hello", determineContentType(path));
         }
     }
 

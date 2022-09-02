@@ -16,9 +16,9 @@ public class HttpResponse implements Response {
         this.body = body;
     }
 
-    public static HttpResponse from(HttpRequest request, ResponseEntity responseEntity) {
+    public static HttpResponse from(ResponseEntity responseEntity) {
         ResponseGeneral general = new ResponseGeneral(HttpVersion.HTTP11, responseEntity.getStatus());
-        ResponseHeaders headers = ResponseHeaders.from(request, responseEntity);
+        ResponseHeaders headers = ResponseHeaders.from(responseEntity);
         ResponseBody body = new ResponseBody(responseEntity.getBody());
 
         return new HttpResponse(general, headers, body);

@@ -13,6 +13,7 @@ import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpStatus;
 import nextstep.jwp.http.HttpVersion;
+import nextstep.jwp.http.Location;
 import nextstep.jwp.util.ResourcesUtil;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -75,7 +76,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse okResponse(final ContentType contentType, final String responseBody) {
-        return new HttpResponse(HTTP_VERSION, HttpStatus.OK, contentType, "", responseBody);
+        return new HttpResponse(HTTP_VERSION, HttpStatus.OK, contentType, Location.empty(), responseBody);
     }
 
     private boolean isLoginRequest(final String path) {

@@ -8,6 +8,7 @@ import nextstep.jwp.exception.NotFoundUserException;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpVersion;
+import nextstep.jwp.http.Location;
 import nextstep.jwp.model.User;
 
 public class LoginRequestHandler implements HttpRequestHandler {
@@ -26,8 +27,7 @@ public class LoginRequestHandler implements HttpRequestHandler {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(NotFoundUserException::new);
         if (user.checkPassword(password)) {
-            HttpResponse found = HttpResponse.found(HTTP_1_1, "/index.html");
-            return found;
+            return HttpResponse.found(HTTP_1_1, new Location("/index.html"));
         }
         return null;
     }

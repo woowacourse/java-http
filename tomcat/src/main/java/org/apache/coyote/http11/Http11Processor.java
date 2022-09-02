@@ -33,29 +33,44 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var request = bufferedReader.readLine();
-            final var uri = request.split(" ")[1];
-            final String responseBody;
+            final var uri = parseUri(bufferedReader);
+            final var contentType = parseContentType(uri);
+            final var responseBody = createResponseBody(uri);
 
-            if (uri.equals("/")) {
-                responseBody = "Hello world!";
-            } else {
-                final URL resource = getClass().getClassLoader().getResource("static/" + uri);
-                final var content = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-                responseBody = content;
-            }
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final var response = createResponse(contentType, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String parseUri(final BufferedReader bufferedReader) throws IOException {
+        return bufferedReader.readLine().split(" ")[1];
+    }
+
+    private ContentType parseContentType(final String uri) {
+        final var extension = uri.substring(uri.lastIndexOf(".") + 1);
+        return ContentType.of(extension);
+    }
+
+    private String createResponseBody(final String uri) throws IOException {
+
+        if (uri.equals("/")) {
+            return "Hello world!";
+        }
+
+        final URL resource = getClass().getClassLoader().getResource("static/" + uri);
+        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    }
+
+    private String createResponse(final ContentType contentType, final String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

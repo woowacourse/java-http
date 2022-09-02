@@ -7,7 +7,12 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +38,13 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var requestHeader = getRequestHeader(bufferedReader);
-            log.info("requestHeader ::: {}", requestHeader);
-            final var url = requestHeader.split(" ")[1];
-            final var response = getResponse(url);
+            final var requestHeader = parseRequestHeader(bufferedReader);
+            if (requestHeader.isBlank()) {
+                return;
+            }
+            final var url = parseUrl(requestHeader);
+            final Map<String, String> requestParam = parseRequestParams(requestHeader);
+            final var response = getResponse(url, requestParam);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -45,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getRequestHeader(final BufferedReader bufferedReader) throws IOException {
+    private String parseRequestHeader(final BufferedReader bufferedReader) throws IOException {
         StringBuilder header = new StringBuilder();
 
         while (bufferedReader.ready()) {
@@ -56,7 +64,26 @@ public class Http11Processor implements Runnable, Processor {
         return header.toString();
     }
 
-    private String getResponse(String url) throws IOException {
+    private String parseUrl(final String requestHeader) {
+        return requestHeader.split(" ")[1]
+                .split("\\?")[0];
+    }
+
+    private Map<String, String> parseRequestParams(final String requestHeader) {
+        String url = requestHeader.split(" ")[1];
+
+        if (!url.contains("?")) {
+            return Map.of();
+        }
+
+        String params = url.split("\\?")[1];
+
+        return Arrays.stream(params.split("&"))
+                .map(it -> it.split("="))
+                .collect(Collectors.toMap(it -> it[0], it -> it[1]));
+    }
+
+    private String getResponse(String url, final Map<String, String> requestParam) throws IOException {
         if ("/".equals(url)) {
             final var responseBody = "Hello world!";
 
@@ -78,7 +105,25 @@ public class Http11Processor implements Runnable, Processor {
                     new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         }
 
-        if (url.contains("/css")) {
+        if ("/login".equals(url)) {
+            final URL resource = getClass().getClassLoader().getResource("static" + url + ".html");
+            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+            User user = InMemoryUserRepository.findByAccount(requestParam.get("account"))
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+            if (user.checkPassword(requestParam.get("password"))) {
+                log.info(user.toString());
+            }
+
+            return "HTTP/1.1 200 OK \r\n" +
+                    "Content-Type: text/html;charset=utf-8 \r\n" +
+                    "Content-Length:" + responseBody.getBytes().length + " \r\n" +
+                    "\r\n" +
+                    responseBody;
+        }
+
+        if (url.contains(".css")) {
             final URL resource = getClass().getClassLoader().getResource("static" + url);
             final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -98,6 +143,10 @@ public class Http11Processor implements Runnable, Processor {
                     "Content-Length:" + responseBody.getBytes().length + " \r\n" +
                     "\r\n" +
                     responseBody;
+        }
+
+        if (url.contains("?")) {
+
         }
 
         throw new IllegalArgumentException("올바르지 않은 URL 요청입니다.");

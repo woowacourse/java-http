@@ -14,6 +14,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.HttpStatus;
 import org.apache.coyote.http11.httpmessage.Request;
 import org.apache.coyote.http11.httpmessage.Response;
@@ -91,21 +92,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Response getResponseWithFileName(String fileName) throws IOException {
-        final var fileType = fileName.split("\\.")[1];
+        final var fileExtension = fileName.split("\\.")[1];
 
-        String contentType = "text/html";
-
-        if (fileType.equals("html")) {
-            contentType = "text/html";
-        }
-
-        if (fileType.equals("css")) {
-            contentType = "text/css";
-        }
-
-        if (fileType.equals("js")) {
-            contentType = "text/javascript";
-        }
+        final var contentType = ContentType.from(fileExtension);
 
         final var resource = getClass().getClassLoader().getResource("static" + fileName);
         final var path = new File(resource.getPath()).toPath();
@@ -122,9 +111,9 @@ public class Http11Processor implements Runnable, Processor {
             Optional<User> user = InMemoryUserRepository.findByAccount(queryStrings.get("account"));
 
             if (user.isPresent() && user.get().checkPassword(queryStrings.get("password"))) {
-                return Response.of(HttpStatus.REDIRECT, "text/html", "http://localhost:8080/index.html");
+                return Response.of(HttpStatus.REDIRECT, ContentType.HTML, "http://localhost:8080/index.html");
             }
-            return Response.of(HttpStatus.REDIRECT, "text/html", "http://localhost:8080/401.html");
+            return Response.of(HttpStatus.REDIRECT, ContentType.HTML, "http://localhost:8080/401.html");
         }
         return new Response();
     }

@@ -20,11 +20,11 @@ public class HttpRequest {
     }
 
     public boolean hasQueryString() {
-        return httpRequestLine.hasQueryString();
+        return httpRequestLine.hasQueryParams();
     }
 
     public String getUrl() {
-        return httpRequestLine.getUrl();
+        return httpRequestLine.getPath();
     }
 
     public Map<String, String> getQueryString() {

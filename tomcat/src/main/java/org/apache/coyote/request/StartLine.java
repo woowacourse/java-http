@@ -30,18 +30,10 @@ public class StartLine {
         if (elements.length != START_LINE_ELEMENT_COUNT) {
             throw new HttpException(HttpStatus.BAD_REQUEST);
         }
-        final var method = toValidMethod(elements[METHOD_INDEX]);
+        final var method = HttpMethod.of(elements[METHOD_INDEX]);
         final var uri = toUri(elements[URI_INDEX]);
-        final var version = toValidVersion(elements[VERSION_INDEX]);
+        final var version = HttpVersion.of(elements[VERSION_INDEX]);
         return new StartLine(method, uri, version);
-    }
-
-    private static HttpMethod toValidMethod(String method) {
-        try {
-            return HttpMethod.valueOf(method);
-        } catch (IllegalArgumentException e) {
-            throw new HttpException(HttpStatus.BAD_REQUEST);
-        }
     }
 
     private static String toUri(String uri) {
@@ -49,14 +41,6 @@ public class StartLine {
             throw new HttpException(HttpStatus.BAD_REQUEST);
         }
         return uri;
-    }
-
-    private static HttpVersion toValidVersion(String version) {
-        try {
-            return HttpVersion.valueOf(version);
-        } catch (IllegalArgumentException e) {
-            throw new HttpException(HttpStatus.BAD_REQUEST);
-        }
     }
 
     public HttpMethod getMethod() {

@@ -8,12 +8,13 @@ public class HttpRequest {
     private static final String HOST_PREFIX = "Host: ";
     private static final String ACCEPT_PREFIX = "Accept: ";
     private static final String CONNECTION_PREFIX = "Connection: ";
+
     private final String startLine;
     private final String host;
     private final String accept;
     private final String connection;
 
-    public HttpRequest(final String startLine, final String host, final String accept, final String connection) {
+    private HttpRequest(final String startLine, final String host, final String accept, final String connection) {
         this.startLine = startLine;
         this.host = host;
         this.accept = accept;
@@ -52,22 +53,6 @@ public class HttpRequest {
 
     public String getAcceptType() {
         return accept.split(",")[0];
-    }
-
-    public String getStartLine() {
-        return startLine;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public String getAccept() {
-        return accept;
-    }
-
-    public String getConnection() {
-        return connection;
     }
 
     @Override

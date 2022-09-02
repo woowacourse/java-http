@@ -5,7 +5,8 @@ import java.util.Arrays;
 public enum Extension {
     HTML(".html", "text/html"),
     CSS(".css", "text/css"),
-    JS(".js", "text/javascript");
+    JS(".js", "text/javascript"),
+    ICO(".ico", "image/x-icon");
 
     private final String extension;
     private final String contentType;
@@ -22,7 +23,15 @@ public enum Extension {
                 .orElse(HTML);
     }
 
+    public String getExtension() {
+        return extension;
+    }
+
     public String getContentType() {
         return contentType;
+    }
+
+    public boolean isIco() {
+        return this == Extension.ICO;
     }
 }

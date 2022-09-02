@@ -20,4 +20,8 @@ public class HttpRequest {
         final String[] split = request.split(" ");
         return new HttpRequest(HttpMethod.from(split[0]), Path.from(split[1]));
     }
+
+    public Path getPath() {
+        return path;
+    }
 }

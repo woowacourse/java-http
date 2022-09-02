@@ -16,5 +16,4 @@ public enum HttpMethod {
                 .findAny()
                 .orElseThrow(() -> new UncheckedServletException("올바른 Http Method가 아닙니다."));
     }
-
 }

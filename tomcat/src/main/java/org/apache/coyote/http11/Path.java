@@ -16,14 +16,21 @@ public class Path {
 
     public static Path from(String uri) {
         if (!uri.contains("?")) {
-            return new Path(uri, Extension.from(uri), QueryParameter.from(null));
+            return new Path(removeExtension(uri), Extension.from(uri), QueryParameter.from(null));
         }
 
         int index = uri.indexOf("?");
         String resource = uri.substring(0, index);
         String queryParameter = uri.substring(index + 1);
 
-        return new Path(resource, Extension.from(resource), QueryParameter.from(queryParameter));
+        return new Path(removeExtension(resource), Extension.from(resource), QueryParameter.from(queryParameter));
+    }
+
+    private static String removeExtension(String uri) {
+        if (uri.contains(".")) {
+            return uri.split("\\.")[0];
+        }
+        return uri;
     }
 
     public String getResource() {
@@ -36,5 +43,13 @@ public class Path {
 
     public Map<String, String> getQueryParameter() {
         return queryParameter.getParams();
+    }
+
+    public String getExtension() {
+        return extension.getExtension();
+    }
+
+    public boolean isIcoContentType() {
+        return extension.isIco();
     }
 }

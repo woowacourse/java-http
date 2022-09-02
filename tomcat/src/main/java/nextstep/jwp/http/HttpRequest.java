@@ -2,7 +2,6 @@ package nextstep.jwp.http;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.util.FileUtil;
 
@@ -20,16 +19,13 @@ public class HttpRequest {
 
     private static final String EMPTY_QUERY_PARAMETER = "";
 
-    private static final String QUERY_PARAM_DELIMITER = "&";
-    private static final String QUERY_PARAM_VALUE_DELIMITER = "=";
-
     private final String uri;
     private final String path;
-    private final Map<String, String> queryParams;
+    private final RequestParams queryParams;
     private final ContentType contentType;
     private final HttpMethod httpMethod;
 
-    public HttpRequest(final String uri, final String path, final Map<String, String> queryParams,
+    public HttpRequest(final String uri, final String path, final RequestParams queryParams,
                        final ContentType contentType, final HttpMethod httpMethod) {
         this.uri = uri;
         this.path = path;
@@ -43,7 +39,7 @@ public class HttpRequest {
 
         String uri = requestLineValues[REQUEST_LINE_URI_INDEX];
         String path = getPath(uri);
-        Map<String, String> queryParams = getQueryParam(getQueryParameter(uri));
+        RequestParams queryParams = RequestParams.from(getQueryParameter(uri));
         ContentType contentType = getContentType(path);
         HttpMethod httpMethod = HttpMethod.from(requestLineValues[REQUEST_LINE_HTTP_METHOD_INDEX]);
 
@@ -83,19 +79,6 @@ public class HttpRequest {
         return EMPTY_QUERY_PARAMETER;
     }
 
-    private static Map<String, String> getQueryParam(final String queryParameter) {
-        Map<String, String> queryParams = new ConcurrentHashMap<>();
-        if (queryParameter.equals(EMPTY_QUERY_PARAMETER)) {
-            return queryParams;
-        }
-        String[] queryParamUris = queryParameter.split(QUERY_PARAM_DELIMITER);
-        for (String queryParamUri : queryParamUris) {
-            String[] param = queryParamUri.split(QUERY_PARAM_VALUE_DELIMITER);
-            queryParams.put(param[0], param[1]);
-        }
-        return queryParams;
-    }
-
     private static ContentType getContentType(final String path) {
         if (isResource(path)) {
             return ContentType.fromExtension(FileUtil.getExtension(path));
@@ -123,7 +106,7 @@ public class HttpRequest {
     }
 
     public Map<String, String> getQueryParams() {
-        return queryParams;
+        return queryParams.getValues();
     }
 
     public ContentType getContentType() {

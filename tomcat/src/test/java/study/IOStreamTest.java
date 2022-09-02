@@ -168,9 +168,9 @@ class IOStreamTest {
         void 필터인_BufferedInputStream를_사용해보자() throws IOException {
             final String text = "필터에 연결해보자.";
 
-            try(final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
-                final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
-            ){
+            try (final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
+                 final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
+            ) {
                 final byte[] actual = bufferedInputStream.readAllBytes();
 
                 assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
@@ -203,8 +203,8 @@ class IOStreamTest {
                  InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                  BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            ){
-                while(bufferedReader.ready()) {
+            ) {
+                while (bufferedReader.ready()) {
                     actual.append(bufferedReader.readLine())
                             .append("\r\n");
                 }

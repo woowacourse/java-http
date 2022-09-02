@@ -20,10 +20,6 @@ public class Http11Request {
         return account;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
     public String getPath() {
         return path;
     }

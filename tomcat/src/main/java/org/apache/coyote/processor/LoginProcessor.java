@@ -9,9 +9,12 @@ import org.slf4j.LoggerFactory;
 public class LoginProcessor {
 
     private static final String QUERY_START_CHARACTER = "?";
+    private static final int INVALID_INDEX = -1;
 
     private static final Logger log = LoggerFactory.getLogger(LoginProcessor.class);
-    private static final int INVALID_INDEX = -1;
+
+    private LoginProcessor() {
+    }
 
     public static void login(final String requestUrl) {
         final int index = requestUrl.indexOf(QUERY_START_CHARACTER);

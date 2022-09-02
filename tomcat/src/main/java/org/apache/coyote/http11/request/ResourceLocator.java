@@ -6,8 +6,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 import org.apache.coyote.http11.response.MimeType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ResourceLocator {
+
+    private static final Logger log = LoggerFactory.getLogger(ResourceLocator.class);
 
     private final String prefix;
 
@@ -15,8 +19,7 @@ public class ResourceLocator {
         this.prefix = prefix;
     }
 
-    public Resource findResource(final String path) {
-
+    public Resource locate(final String path) {
         if ("/".equals(path)) {
             return new Resource(MimeType.of("html"), "Hello world!");
         }
@@ -25,6 +28,7 @@ public class ResourceLocator {
             URL url = getClass().getResource(prefix + path);
             Path filePath = Path.of(Objects.requireNonNull(url).getPath());
             String extension = path.substring(path.lastIndexOf(".") + 1);
+            log.debug("request path = {}", path);
             return new Resource(MimeType.of(extension), Files.readString(filePath));
         } catch (IOException | NullPointerException e) {
             throw new IllegalArgumentException("파일을 찾을 수 없습니다. path = " + prefix + path);

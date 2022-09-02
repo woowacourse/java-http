@@ -2,7 +2,6 @@ package org.apache.coyote.http11.request;
 
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.MimeType;
 
 public class RequestProcessor {
 
@@ -14,10 +13,19 @@ public class RequestProcessor {
 
     public HttpResponse process(HttpRequest request) {
         String requestURI = request.getRequestURI();
-        Resource resource = resourceLocator.findResource(requestURI);
-        return new HttpResponse(
-                HttpStatus.OK,
-                resource.getMimeType(),
-                resource.getData());
+        try {
+            Resource resource = resourceLocator.locate(requestURI);
+            return new HttpResponse(
+                    HttpStatus.OK,
+                    resource.getMimeType(),
+                    resource.getData());
+        } catch (IllegalArgumentException e) {
+            Resource resource = resourceLocator.locate("/404.html");
+            return new HttpResponse(
+                    HttpStatus.NOT_FOUND,
+                    resource.getMimeType(),
+                    resource.getData()
+            );
+        }
     }
 }

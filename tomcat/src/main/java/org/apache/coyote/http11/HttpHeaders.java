@@ -10,7 +10,7 @@ import java.util.Map.Entry;
 
 public class HttpHeaders {
 
-    private Map<String, String> headers;
+    private final Map<HttpHeader, String> headers;
 
     public HttpHeaders() {
         this.headers = new LinkedHashMap<>();
@@ -20,34 +20,34 @@ public class HttpHeaders {
         this.headers = extractHeaders(bufferedReader);
     }
 
-    private Map<String, String> extractHeaders(final BufferedReader bufferedReader) throws IOException {
-        final Map<String, String> headers = new LinkedHashMap<>();
+    private Map<HttpHeader, String> extractHeaders(final BufferedReader bufferedReader) throws IOException {
+        final Map<HttpHeader, String> headers = new LinkedHashMap<>();
         while (bufferedReader.ready()) {
             final String line = bufferedReader.readLine();
             if (!"".equals(line)) {
                 final String[] headerValue = line.split(": ");
-                final String header = headerValue[0];
+                final HttpHeader httpHeader = HttpHeader.of(headerValue[0]);
                 final String value = headerValue[1];
-                headers.put(header, value);
+                headers.put(httpHeader, value);
             }
         }
         return headers;
     }
 
-    public HttpHeaders addHeader(final String header, final String value) {
+    public HttpHeaders addHeader(final HttpHeader header, final String value) {
         headers.put(header, value);
         return this;
     }
 
-    public HttpHeaders addHeader(final String header, final int value) {
+    public HttpHeaders addHeader(final HttpHeader header, final int value) {
         headers.put(header, String.valueOf(value));
         return this;
     }
 
     public String encodingToString() {
         final List<String> headers = new ArrayList<>();
-        for (Entry<String, String> entry : this.headers.entrySet()) {
-            final String join = String.join(": ", entry.getKey(), entry.getValue()) + " ";
+        for (Entry<HttpHeader, String> entry : this.headers.entrySet()) {
+            final String join = String.join(": ", entry.getKey().getValue(), entry.getValue()) + " ";
             headers.add(join);
         }
         return String.join("\r\n", headers);

@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.HttpHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http11.HttpHeader.CONTENT_TYPE;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -77,8 +80,8 @@ public class Http11Processor implements Runnable, Processor {
     private HttpHeaders getHttpHeaders(final HttpRequest httpRequest, final String responseBody) {
         final HttpHeaders httpHeaders = new HttpHeaders();
         return httpHeaders
-                .addHeader("Content-Type", getContentType(httpRequest))
-                .addHeader("Content-Length", responseBody.getBytes().length);
+                .addHeader(CONTENT_TYPE, getContentType(httpRequest))
+                .addHeader(CONTENT_LENGTH, responseBody.getBytes().length);
     }
 
     private String getContentType(final HttpRequest httpRequest) {

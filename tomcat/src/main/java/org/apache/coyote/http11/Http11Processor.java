@@ -54,7 +54,8 @@ public class Http11Processor implements Runnable, Processor {
             Controller controller = controllerMappings.getAdaptiveController(httpRequest.getPathString());
             if (Objects.nonNull(controller)) {
                 Map<String, String> params = httpRequest.getParams();
-                controller.process(params);
+                String pathName = controller.process(params);
+                httpRequest.setPath(pathName);
             }
 
             HttpRequestHandler httpRequestHandler = new HttpRequestHandler(new ResourceLocator("/static"));

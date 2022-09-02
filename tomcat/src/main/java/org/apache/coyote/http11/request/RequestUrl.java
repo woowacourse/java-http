@@ -4,7 +4,7 @@ import java.util.Map;
 
 public class RequestUrl {
 
-    private final String path;
+    private String path;
     private final QueryParams queryParams;
 
     public RequestUrl(String path, QueryParams queryParams) {
@@ -34,5 +34,9 @@ public class RequestUrl {
 
     public Map<String, String> getParams() {
         return queryParams.getParams();
+    }
+
+    public void setPath(String pathName) {
+        this.path = pathName;
     }
 }

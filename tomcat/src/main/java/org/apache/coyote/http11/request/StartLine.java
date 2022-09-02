@@ -54,4 +54,8 @@ public class StartLine {
     public Map<String, String> getParams() {
         return requestUrl.getParams();
     }
+
+    public void setPath(String pathName) {
+        requestUrl.setPath(pathName);
+    }
 }

@@ -22,13 +22,6 @@ public class ResourceLocator {
     public Resource locate(String path) {
         Objects.requireNonNull(path);
         log.debug("request path = {}", path);
-        if (path.equals("/")) {
-            return new Resource(MimeType.HTML, "Hello world!");
-        }
-
-        if (path.equals("/login")) {
-            path += ".html";
-        }
 
         try {
             URL url = getClass().getResource(prefix + path);

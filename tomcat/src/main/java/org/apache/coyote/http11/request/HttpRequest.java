@@ -19,4 +19,8 @@ public class HttpRequest {
     public Map<String, String> getParams() {
         return startLine.getParams();
     }
+
+    public void setPath(String pathName) {
+        startLine.setPath(pathName);
+    }
 }

@@ -1,5 +1,7 @@
 package nextstep.jwp.ui;
 
+import nextstep.jwp.application.UserService;
+import nextstep.jwp.application.dto.UserDto;
 import nextstep.jwp.domain.model.User;
 import nextstep.jwp.domain.model.UserRepository;
 import nextstep.jwp.infrastructure.InMemoryUserRepository;
@@ -7,7 +9,6 @@ import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.exception.BadRequestException;
-import org.apache.coyote.http11.exception.NotFoundException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.QueryParams;
 import org.apache.coyote.http11.request.mapping.RequestMapper;
@@ -20,7 +21,7 @@ public class AuthController {
 
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
-    private static final UserRepository userRepository = InMemoryUserRepository.getInstance();
+    private final UserService userService = new UserService();
 
     public void init() {
         final RequestMapper requestMapper = RequestMapper.getInstance();
@@ -33,8 +34,7 @@ public class AuthController {
                 .orElseThrow(() -> new BadRequestException("account가 없습니다."));
         final String password = queryParams.getValue("password")
                 .orElseThrow(() -> new BadRequestException("password가 없습니다."));
-        final User user = userRepository.findByAccount(account)
-                .orElseThrow(() -> new NotFoundException("찾는 유저가 없습니다."));
+        final UserDto user = userService.findByAccount(account);
         log.info("user = {}", user);
         return HtmlResponse.of(HttpStatus.OK, HttpHeaders.empty(), "login.html");
     }

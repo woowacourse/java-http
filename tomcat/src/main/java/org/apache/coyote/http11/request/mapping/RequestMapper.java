@@ -43,4 +43,8 @@ public class RequestMapper {
         }
         mappings.put(mappingUri, requestHandler);
     }
+
+    public void deleteAllMapping() {
+        mappings.clear();
+    }
 }

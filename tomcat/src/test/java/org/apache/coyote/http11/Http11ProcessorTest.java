@@ -6,11 +6,22 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.ui.AuthController;
+import nextstep.jwp.ui.HomeController;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.request.mapping.RequestMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
+
+    @BeforeEach
+    void setUp() {
+        RequestMapper.getInstance().deleteAllMapping();
+        new AuthController().init();
+        new HomeController().init();
+    }
 
     @Test
     void process() {

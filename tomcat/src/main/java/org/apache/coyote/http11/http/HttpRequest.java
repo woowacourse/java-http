@@ -2,8 +2,6 @@ package org.apache.coyote.http11.http;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,8 +14,7 @@ public class HttpRequest {
 	private final Map<String, String> headers;
 	private final String body;
 
-	public HttpRequest(InputStream inputStream) throws IOException {
-		BufferedReader requestReader = new BufferedReader(new InputStreamReader(inputStream));
+	public HttpRequest(BufferedReader requestReader) throws IOException {
 		String[] startLine = requestReader.readLine().split(" ");
 		this.method = HttpMethod.from(startLine[0]);
 		this.url = startLine[1];

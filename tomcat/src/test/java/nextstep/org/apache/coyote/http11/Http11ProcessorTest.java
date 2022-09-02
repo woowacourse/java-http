@@ -157,4 +157,37 @@ class Http11ProcessorTest {
 
         assertThat(logs).isNotEmpty();
     }
+
+    @Test
+    @DisplayName("잘못된 url로 요청이 들어오는 경우 404.html이 응답된다.")
+    void requestWithWrongUrl() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /invalid",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Accept: */*",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+        final Logger logger = (Logger) LoggerFactory.getLogger(Http11Processor.class);
+        final ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        final byte[] content = Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath());
+        var expected = "HTTP/1.1 404 NOT FOUND \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + content.length + " \r\n" +
+                "\r\n" +
+                new String(content);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

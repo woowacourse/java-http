@@ -7,6 +7,10 @@ import java.util.stream.Collectors;
 
 public class QueryParams {
 
+    private static final int VALID_KEY_VALUE_COUNT = 2;
+    private static final String PARAM_DELIMITER = "&";
+    private static final String KEY_VALUE_DELIMITER = "=";
+
     private final Map<String, String> value;
 
     public QueryParams(Map<String, String> value) {
@@ -25,10 +29,10 @@ public class QueryParams {
     }
 
     private static Map<String, String> parse(String queryString) {
-        String[] keyValues = queryString.split("&");
+        String[] keyValues = queryString.split(PARAM_DELIMITER);
         for (String keyValue : keyValues) {
-            String[] components = keyValue.split("=");
-            if (components.length != 2) {
+            String[] components = keyValue.split(KEY_VALUE_DELIMITER);
+            if (components.length != VALID_KEY_VALUE_COUNT) {
                 throw new IllegalArgumentException("key-value 쌍이 맞지 않습니다. = " + Arrays.toString(components));
             }
         }
@@ -36,7 +40,7 @@ public class QueryParams {
         return Arrays.stream(keyValues)
                 .map(kv -> {
                     String[] components = kv.split("=");
-                    if (components.length != 2) {
+                    if (components.length != VALID_KEY_VALUE_COUNT) {
                         throw new IllegalArgumentException("key - value 쌍이 맞지 않습니다. = " + Arrays.toString(components));
                     }
                     return components;
@@ -45,7 +49,7 @@ public class QueryParams {
     }
 
     public boolean hasParams() {
-        return value.size() != 0;
+        return !value.isEmpty();
     }
 
     public String get(String key) {

@@ -4,6 +4,10 @@ import java.util.Map;
 
 public class RequestUrl {
 
+    private static final int PATH_INDEX = 0;
+    private static final int QUERY_STRING_INDEX = 1;
+    private static final String PATH_QUERY_STRING_DELIMITER = "\\?";
+
     private String path;
     private final QueryParams queryParams;
 
@@ -13,11 +17,11 @@ public class RequestUrl {
     }
 
     public static RequestUrl from(String url) {
-        String[] components = url.split("\\?");
+        String[] components = url.split(PATH_QUERY_STRING_DELIMITER);
         if (components.length < 2) {
-            return new RequestUrl(components[0], QueryParams.empty());
+            return new RequestUrl(components[PATH_INDEX], QueryParams.empty());
         }
-        return new RequestUrl(components[0], QueryParams.from(components[1]));
+        return new RequestUrl(components[PATH_INDEX], QueryParams.from(components[QUERY_STRING_INDEX]));
     }
 
     public boolean hasQueryParams() {

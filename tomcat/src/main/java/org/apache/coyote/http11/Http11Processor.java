@@ -39,9 +39,7 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final var requestHeader = parseRequestHeader(bufferedReader);
-            if (requestHeader.isBlank()) {
-                return;
-            }
+
             final var url = parseUrl(requestHeader);
             final Map<String, String> requestParam = parseRequestParams(requestHeader);
             final var response = getResponse(url, requestParam);
@@ -87,22 +85,14 @@ public class Http11Processor implements Runnable, Processor {
         if ("/".equals(url)) {
             final var responseBody = "Hello world!";
 
-            return String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            return createResponse("text/html", responseBody);
         }
 
         if ("/index.html".equals(url)) {
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
+            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-            return "HTTP/1.1 200 OK \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: 5564 \r\n" +
-                    "\r\n" +
-                    new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            return createResponse("text/html", responseBody);
         }
 
         if ("/login".equals(url)) {
@@ -116,39 +106,32 @@ public class Http11Processor implements Runnable, Processor {
                 log.info(user.toString());
             }
 
-            return "HTTP/1.1 200 OK \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length:" + responseBody.getBytes().length + " \r\n" +
-                    "\r\n" +
-                    responseBody;
+            return createResponse("text/html", responseBody);
         }
 
         if (url.contains(".css")) {
             final URL resource = getClass().getClassLoader().getResource("static" + url);
             final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-            return "HTTP/1.1 200 OK \r\n" +
-                    "Content-Type: text/css;charset=utf-8 \r\n" +
-                    "Content-Length:" + responseBody.getBytes().length + " \r\n" +
-                    "\r\n" +
-                    responseBody;
+            return createResponse("text/css", responseBody);
         }
 
         if (url.contains(".js")) {
             final URL resource = getClass().getClassLoader().getResource("static" + url);
             final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-            return "HTTP/1.1 200 OK \r\n" +
-                    "Content-Type: application/javascript;charset=utf-8 \r\n" +
-                    "Content-Length:" + responseBody.getBytes().length + " \r\n" +
-                    "\r\n" +
-                    responseBody;
-        }
-
-        if (url.contains("?")) {
-
+            return createResponse("application/javascript", responseBody);
         }
 
         throw new IllegalArgumentException("올바르지 않은 URL 요청입니다.");
+    }
+
+    private String createResponse(String contentType, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

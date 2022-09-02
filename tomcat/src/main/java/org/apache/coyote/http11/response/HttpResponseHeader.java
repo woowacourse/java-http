@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.Constants.CRLF;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,7 +14,7 @@ public class HttpResponseHeader {
     }
 
     public String getHeaders() {
-        return String.join("\r\n", headers);
+        return String.join(CRLF, headers);
     }
 
     public HttpResponseHeader addContentType(String contentType) {

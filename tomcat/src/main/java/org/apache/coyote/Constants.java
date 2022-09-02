@@ -5,6 +5,7 @@ import java.util.List;
 public class Constants {
 
     public static final String ROOT = "static";
+    public static final String CRLF = "\r\n";
 
     public static final List<String> HTML = List.of("/index.html", "/login.html", "/register.html");
     public static final List<String> JS = List.of("/js/scripts.js",

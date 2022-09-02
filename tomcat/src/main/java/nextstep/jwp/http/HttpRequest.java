@@ -9,7 +9,6 @@ public class HttpRequest {
 
     private static final String BLANK = " ";
     private static final int REQUEST_LINE_COUNT = 3;
-    private static final int REQUEST_LINE_HTTP_METHOD_INDEX = 0;
     private static final int REQUEST_LINE_URI_INDEX = 1;
 
     private static final String URI_QUERY_PARAM_DELIMITER = "?";
@@ -20,19 +19,15 @@ public class HttpRequest {
 
     private static final String EMPTY_QUERY_PARAMETER = "";
 
-    private final String uri;
     private final String path;
     private final RequestParams queryParams;
     private final ContentType contentType;
-    private final HttpMethod httpMethod;
 
-    public HttpRequest(final String uri, final String path, final RequestParams queryParams,
-                       final ContentType contentType, final HttpMethod httpMethod) {
-        this.uri = uri;
+    public HttpRequest(final String path, final RequestParams queryParams,
+                       final ContentType contentType) {
         this.path = path;
         this.queryParams = queryParams;
         this.contentType = contentType;
-        this.httpMethod = httpMethod;
     }
 
     public static HttpRequest from(final String requestLine) {
@@ -42,9 +37,8 @@ public class HttpRequest {
         String path = parsePath(uri);
         RequestParams queryParams = RequestParams.from(parseQueryParameter(uri));
         ContentType contentType = parseContentType(path);
-        HttpMethod httpMethod = HttpMethod.from(requestLineValues[REQUEST_LINE_HTTP_METHOD_INDEX]);
 
-        return new HttpRequest(uri, path, queryParams, contentType, httpMethod);
+        return new HttpRequest(path, queryParams, contentType);
     }
 
     private static String[] splitRequestLine(final String requestLine) {
@@ -102,10 +96,6 @@ public class HttpRequest {
         return path.equals(ROOT_PATH);
     }
 
-    public String getUri() {
-        return uri;
-    }
-
     public String getPath() {
         return path;
     }
@@ -118,10 +108,6 @@ public class HttpRequest {
         return contentType;
     }
 
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
-    }
-
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -131,13 +117,12 @@ public class HttpRequest {
             return false;
         }
         final HttpRequest that = (HttpRequest) o;
-        return Objects.equals(uri, that.uri) && Objects.equals(path, that.path) && Objects
-                .equals(queryParams, that.queryParams) && contentType == that.contentType
-                && httpMethod == that.httpMethod;
+        return Objects.equals(path, that.path) && Objects.equals(queryParams, that.queryParams)
+                && contentType == that.contentType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(uri, path, queryParams, contentType, httpMethod);
+        return Objects.hash(path, queryParams, contentType);
     }
 }

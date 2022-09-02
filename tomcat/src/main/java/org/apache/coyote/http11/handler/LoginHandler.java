@@ -21,7 +21,7 @@ public class LoginHandler implements Handler {
         Map<String, String> queryParams = httpRequest.getQueryParams();
         validateUser(queryParams);
         String responseBody = FileReader.getFile("/login.html", getClass());
-        HttpResponse httpResponse = HttpResponse.from(ContentType.HTML, responseBody);
+        HttpResponse httpResponse = HttpResponse.of(ContentType.HTML, responseBody);
         return httpResponse.getResponse();
     }
 

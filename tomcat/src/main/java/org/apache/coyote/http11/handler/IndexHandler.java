@@ -13,7 +13,7 @@ public class IndexHandler implements Handler {
     public String getResponse() {
         String responseBody = FileReader.getFile("/index.html", getClass());
 
-        HttpResponse httpResponse = HttpResponse.from(ContentType.HTML, responseBody);
+        HttpResponse httpResponse = HttpResponse.of(ContentType.HTML, responseBody);
         return httpResponse.getResponse();
     }
 }

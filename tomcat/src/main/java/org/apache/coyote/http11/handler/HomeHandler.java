@@ -12,7 +12,7 @@ public class HomeHandler implements Handler {
 
     @Override
     public String getResponse() {
-        HttpResponse httpResponse = HttpResponse.from(ContentType.HTML, RESPONSE_BODY);
+        HttpResponse httpResponse = HttpResponse.of(ContentType.HTML, RESPONSE_BODY);
         return httpResponse.getResponse();
     }
 }

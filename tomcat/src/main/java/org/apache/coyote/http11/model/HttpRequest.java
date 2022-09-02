@@ -21,7 +21,7 @@ public class HttpRequest {
         this.queryParams = queryParams;
     }
 
-    public static HttpRequest of(final String uri) {
+    public static HttpRequest from(final String uri) {
         String[] readLine = uri.split(REQUEST_LINE_DELIMITER);
         String path = getPath(readLine[PATH_INDEX]);
         Map<String, String> queryParams = getQueryParams(readLine[PATH_INDEX]);

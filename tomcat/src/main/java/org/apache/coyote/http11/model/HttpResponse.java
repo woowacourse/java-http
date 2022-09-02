@@ -17,7 +17,7 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse from(final ContentType contentType, final String body) {
+    public static HttpResponse of(final ContentType contentType, final String body) {
         Map<String, String> headers = initHeaders(contentType, body);
         return new HttpResponse(headers, body);
     }

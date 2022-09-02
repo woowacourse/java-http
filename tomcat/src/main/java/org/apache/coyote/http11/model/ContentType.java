@@ -15,7 +15,7 @@ public enum ContentType {
         this.extension = extension;
     }
 
-    public static ContentType of(final String input) {
+    public static ContentType from(final String input) {
         return Arrays.stream(values())
                 .filter(i -> input.contains(i.extension))
                 .findAny()

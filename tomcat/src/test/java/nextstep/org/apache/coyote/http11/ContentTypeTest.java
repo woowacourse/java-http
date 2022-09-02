@@ -10,7 +10,7 @@ public class ContentTypeTest {
     @Test
     void getContentType() {
         String input = "/index.html";
-        ContentType result = ContentType.of(input);
+        ContentType result = ContentType.from(input);
 
         assertThat(result).isEqualTo(ContentType.HTML);
     }

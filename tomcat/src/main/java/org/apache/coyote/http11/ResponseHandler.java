@@ -23,6 +23,8 @@ public class ResponseHandler {
     private static final String PASSWORD = "password";
     private static final String DEFAULT_PATH = "/";
     private static final String DEFAULT_EXTENSION = ".html";
+    public static final String QUERY_PARAM = "?";
+    public static final String EXTENSION_DELIMITER = ".";
 
     private final String path;
 
@@ -40,17 +42,24 @@ public class ResponseHandler {
         if (path.equals(DEFAULT_PATH)) {
             return "Hello world!";
         }
-        if (path.contains(LOGIN_PATH)) {
+        if (path.contains(LOGIN_PATH) && path.contains(QUERY_PARAM)) {
             return getLoginContent();
         }
-        return getContent(path, "");
+        return getContent(path);
     }
 
-    private String getContent(String path, String extension) throws IOException {
+    private String getContent(String path) throws IOException {
         final URL resource = getClass()
                 .getClassLoader()
-                .getResource(RESOURCE_PATH + path + extension);
+                .getResource(RESOURCE_PATH + path + getExtension());
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+    }
+
+    private String getExtension() {
+        if (path.contains(EXTENSION_DELIMITER)) {
+            return "";
+        }
+        return DEFAULT_EXTENSION;
     }
 
     private String getLoginContent() throws IOException {
@@ -63,6 +72,6 @@ public class ResponseHandler {
         }
         LOGGER.info(user.get().toString());
 
-        return getContent(LOGIN_PATH, DEFAULT_EXTENSION);
+        return getContent(LOGIN_PATH);
     }
 }

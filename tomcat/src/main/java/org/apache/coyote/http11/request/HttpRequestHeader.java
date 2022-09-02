@@ -40,4 +40,12 @@ public class HttpRequestHeader {
     public boolean isAcceptValueCss() {
         return isExistAccept() && (getAcceptHeaderValue().contains("text/css"));
     }
+
+    public String getRequestLine() {
+        return requestLine;
+    }
+
+    public RequestHeaders getRequestHeaders() {
+        return requestHeaders;
+    }
 }

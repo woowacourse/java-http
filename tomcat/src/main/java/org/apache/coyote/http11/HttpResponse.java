@@ -61,4 +61,8 @@ public class HttpResponse {
     public byte[] getBytes() {
         return response.getBytes();
     }
+
+    public String getResponse() {
+        return response;
+    }
 }

@@ -1,10 +1,6 @@
 package org.apache.coyote.http11.response;
 
 import static org.apache.coyote.Constants.CRLF;
-import static org.apache.coyote.Constants.CSS;
-import static org.apache.coyote.Constants.HTML;
-import static org.apache.coyote.Constants.IMG;
-import static org.apache.coyote.Constants.JS;
 import static org.apache.coyote.Constants.ROOT;
 import static org.apache.coyote.http11.response.element.HttpMethod.GET;
 
@@ -16,6 +12,8 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.element.HttpMethod;
 import org.apache.coyote.http11.response.element.HttpStatus;
+import org.apache.coyote.http11.response.factory.ErrorResponseFactory;
+import org.apache.coyote.http11.response.factory.StaticResponseFactory;
 import org.apache.coyote.http11.utils.UriParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,27 +30,19 @@ public class HttpResponseConvertor {
             this.response = parseResponse(request);
         } catch (NoSuchElementException e) {
             log.error(e.getMessage(), e);
-            this.response = HttpResponse.from(HttpResponseBody.of(ROOT + "/404.html"), HttpStatus.NOT_FOUND,
-                    "text/html");
+            this.response = ErrorResponseFactory.NOT_FOUND.getValue();
         } catch (NoUserException e) {
             log.error(e.getMessage(), e);
-            this.response = HttpResponse.from(HttpResponseBody.of(ROOT + "/401.html"), HttpStatus.UNAUTHORIZED,
-                    "text/html");
+            this.response = ErrorResponseFactory.UNAUTHORIZED.getValue();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            this.response = HttpResponse.from(HttpResponseBody.of(ROOT + "/500.html"), HttpStatus.INTERNAL_SERVER_ERROR,
-                    "text/html");
+            this.response = ErrorResponseFactory.INTERNAL_SERVER_ERROR.getValue();
         }
     }
 
     private HttpResponse parseResponse(HttpRequest request) {
         HttpMethod method = HttpMethod.valueOf(request.getMethod());
         String path = request.getPath();
-
-        HttpResponse staticResponse = getResponseOfStaticResource(method, path);
-        if (staticResponse != null) {
-            return staticResponse;
-        }
 
         if (method == GET && List.of("/", "").contains(path)) {
             return HttpResponse.from(new HttpResponseBody("Hello world!"), HttpStatus.OK, "text/html");
@@ -62,26 +52,7 @@ public class HttpResponseConvertor {
             return HttpResponse.from(HttpResponseBody.of(ROOT + "/login.html"), HttpStatus.OK, "text/html");
         }
 
-        throw new NoSuchElementException("해당 페이지를 찾을 수 없습니다: " + path);
-    }
-
-    private HttpResponse getResponseOfStaticResource(HttpMethod method, String path) {
-        HttpStatus status = HttpStatus.OK;
-
-        if (method == GET && HTML.stream().anyMatch(e -> e.equals(path))) {
-            return HttpResponse.from(HttpResponseBody.of(ROOT + path), status, "text/html");
-        }
-        if (method == GET && JS.stream().anyMatch(e -> e.equals(path))) {
-            return HttpResponse.from(HttpResponseBody.of(ROOT + path), status, "text/plain");
-        }
-        if (method == GET && CSS.stream().anyMatch(e -> e.equals(path))) {
-            return HttpResponse.from(HttpResponseBody.of(ROOT + path), status, "text/css");
-        }
-        if (method == GET && IMG.stream().anyMatch(e -> e.equals(path))) {
-            return HttpResponse.from(HttpResponseBody.of(ROOT + path), status, "image/svg+xml");
-        }
-
-        return null;
+        return StaticResponseFactory.getResponse(method, path);
     }
 
     private void logIfLogin(String uri) {

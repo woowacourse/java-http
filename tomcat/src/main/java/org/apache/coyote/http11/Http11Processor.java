@@ -12,7 +12,6 @@ import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Http11Request;
@@ -21,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -61,9 +59,9 @@ public class Http11Processor implements Runnable, Processor {
         return generateDefaultResponse();
     }
 
-    private Http11Response generateLoginPage(Http11Request request){
+    private Http11Response generateLoginPage(Http11Request request) {
         Map<String, String> queries = request.getQueryString();
-        URL resource = getClass().getClassLoader().getResource(RESOURCE_FOLDER + "/login.html" );
+        URL resource = getClass().getClassLoader().getResource(RESOURCE_FOLDER + "/login.html");
         Map<String, String> headers = new LinkedHashMap<>();
 
         if (queries.get("account") != null && queries.get("password") != null) {
@@ -106,13 +104,14 @@ public class Http11Processor implements Runnable, Processor {
         String url = request.getUrl();
         URL resource = getClass().getClassLoader()
                 .getResource(RESOURCE_FOLDER + url);
-        String extension = url.substring(url.lastIndexOf(".")+1);
+        String extension = url.substring(url.lastIndexOf(".") + 1);
         String contentType = HttpContent.extensionToContentType(extension);
 
         try {
             Map<String, String> headers = new LinkedHashMap<>();
             headers.put(HttpHeaders.CONTENT_TYPE.getHeaderName(), contentType);
-            headers.put(HttpHeaders.CONTENT_LENGTH.getHeaderName(), Long.toString(new File(resource.getFile()).length()));
+            headers.put(HttpHeaders.CONTENT_LENGTH.getHeaderName(),
+                    Long.toString(new File(resource.getFile()).length()));
 
             return new Http11Response(
                     HttpStatus.OK.getStatusCode(),
@@ -126,13 +125,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public void process(final Socket connection){
+    public void process(final Socket connection) {
 
         try (
-            InputStream inputStream = connection.getInputStream();
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            OutputStream outputStream = connection.getOutputStream();
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                InputStream inputStream = connection.getInputStream();
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                OutputStream outputStream = connection.getOutputStream();
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
         ) {
 
             Http11Request request = makeRequest(bufferedReader);
@@ -148,18 +147,16 @@ public class Http11Processor implements Runnable, Processor {
         String method = rawStart[METHOD_SEQUENCE];
         String url = rawStart[URL_SEQUENCE];
 
-        Map<String, String> headers = new HashMap<>();
-        while (true) {
-            String data = bufferedReader.readLine();
-            if (data == null || data.equals("")) {
-                break;
-            }
-            String[] header = data.split(" ");
-            headers.put(header[HEADER_NAME_INDEX].strip(), header[HEADER_VALUE_INDEX].strip());
-        }
+        Map<String, String> headers = parseHeaders(bufferedReader);
 
+        String body = parseBody(bufferedReader);
+
+        return new Http11Request(method, url, headers, body);
+    }
+
+    private String parseBody(BufferedReader bufferedReader) throws IOException {
         StringBuilder bodyBuilder = new StringBuilder();
-        while (!bufferedReader.ready()) {
+        while (bufferedReader.ready()) {
             String data = bufferedReader.readLine();
             if (data == null) {
                 break;
@@ -169,7 +166,19 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         String body = bodyBuilder.toString();
+        return body;
+    }
 
-        return new Http11Request(method, url, headers, body);
+    private Map<String, String> parseHeaders(BufferedReader bufferedReader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        while (true) {
+            String data = bufferedReader.readLine();
+            if (data == null || data.equals("")) {
+                break;
+            }
+            String[] header = data.split(" ");
+            headers.put(header[HEADER_NAME_INDEX].strip(), header[HEADER_VALUE_INDEX].strip());
+        }
+        return headers;
     }
 }

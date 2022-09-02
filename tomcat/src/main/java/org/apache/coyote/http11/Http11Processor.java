@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    public static final String DEFAULT_BODY = "Hello world!";
+    private static final String DEFAULT_BODY = "Hello world!";
 
     private final Socket connection;
 

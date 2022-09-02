@@ -1,12 +1,16 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -28,15 +32,67 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            String line = bufferedReader.readLine();
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            var response = "";
+            String responseBody = "";
+            if (line.startsWith("GET")) {
+                String[] request = line.split(" ");
+                String url = request[1];
 
+                if (url.equals("/")) {
+                    responseBody = "Hello world!";
+                    response = String.join("\r\n",
+                            "HTTP/1.1 200 OK ",
+                            "Content-Type: text/html;charset=utf-8 ",
+                            "Content-Length: " + responseBody.getBytes().length + " ",
+                            "",
+                            responseBody);
+                } else if (url.endsWith(".html")) {
+                    URL resource = getClass().getClassLoader().getResource("static" + url);
+                    if (resource != null) {
+                        String file = resource.getFile();
+                        if (file != null) {
+                            responseBody = new String(Files.readAllBytes(Paths.get(file)));
+                            response = String.join("\r\n",
+                                    "HTTP/1.1 200 OK ",
+                                    "Content-Type: text/html;charset=utf-8 ",
+                                    "Content-Length: " + responseBody.getBytes().length + " ",
+                                    "",
+                                    responseBody);
+                        }
+                    }
+                } else if (url.endsWith(".css")) {
+                    URL resource = getClass().getClassLoader().getResource("static" + url);
+                    if (resource != null) {
+                        String file = resource.getFile();
+                        if (file != null) {
+                            responseBody = new String(Files.readAllBytes(Paths.get(file)));
+                            response = String.join("\r\n",
+                                    "HTTP/1.1 200 OK ",
+                                    "Content-Type: text/css;charset=utf-8 ",
+                                    "Content-Length: " + responseBody.getBytes().length + " ",
+                                    "",
+                                    responseBody);
+                        }
+                    }
+                } else if (url.endsWith(".js")) {
+                    URL resource = getClass().getClassLoader().getResource("static" + url);
+                    if (resource != null) {
+                        String file = resource.getFile();
+                        if (file != null) {
+                            responseBody = new String(Files.readAllBytes(Paths.get(file)));
+                            response = String.join("\r\n",
+                                    "HTTP/1.1 200 OK ",
+                                    "Content-Type: text/js;charset=utf-8 ",
+                                    "Content-Length: " + responseBody.getBytes().length + " ",
+                                    "",
+                                    responseBody);
+                        }
+                    }
+                }
+            }
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

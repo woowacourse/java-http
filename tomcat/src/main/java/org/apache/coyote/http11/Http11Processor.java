@@ -7,10 +7,15 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.net.Socket;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.InvalidRequestException;
+import org.apache.coyote.http11.exception.UserNotFoundException;
 import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.request.RequestUri;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.util.StaticFileUtil;
 import org.slf4j.Logger;
@@ -37,19 +42,19 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            String httpRequest = readHttpRequest(inputStream);
-            HttpRequest requestMessage = new HttpRequest(httpRequest);
+            HttpRequest httpRequest = new HttpRequest(readHttpRequest(inputStream));
+            RequestUri requestUri = httpRequest.getRequestUri();
 
-            if (requestMessage.getRequestUri().hasExtension()) { // 정적 파일 서빙
+            if (requestUri.hasExtension()) { // 정적 파일 서빙
                 HttpResponse httpResponse = new HttpResponse.Builder()
-                        .contentType(requestMessage.getRequestUri().getExtension())
-                        .body(StaticFileUtil.readFile(requestMessage.getRequestUri().getPath()))
+                        .contentType(requestUri.getExtension())
+                        .body(StaticFileUtil.readFile(requestUri.getPath()))
                         .build();
 
                 writeHttpResponse(outputStream, httpResponse);
             }
 
-            if (requestMessage.getRequestUri().getPath().equals("/")) {
+            if (requestUri.getPath().equals("/")) {
                 HttpResponse httpResponse = new HttpResponse.Builder()
                         .contentType(ContentType.HTML)
                         .body("Hello world!")
@@ -58,7 +63,13 @@ public class Http11Processor implements Runnable, Processor {
                 writeHttpResponse(outputStream, httpResponse);
             }
 
-            if (requestMessage.getRequestUri().getPath().equals("/login")) {
+            if (requestUri.getPath().equals("/login")) {
+                String account = requestUri.getQuery("account").orElseThrow(InvalidRequestException::new);
+
+                User user = InMemoryUserRepository.findByAccount(account)
+                        .orElseThrow(() -> new UserNotFoundException(account));
+                log.info("user = " + user);
+
                 HttpResponse httpResponse = new HttpResponse.Builder()
                         .contentType(ContentType.HTML)
                         .body(StaticFileUtil.readFile("/login.html"))

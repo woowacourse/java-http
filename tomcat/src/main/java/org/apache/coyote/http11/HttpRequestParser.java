@@ -68,6 +68,7 @@ public class HttpRequestParser {
             bodyParams.put(attributeTokenizer.nextToken(), attributeTokenizer.nextToken());
         }
 
+        bufferedReader.close();
         return new HttpRequestParser(httpMethod, uri, httpRequestHeaders, cookies, bodyParams);
     }
 

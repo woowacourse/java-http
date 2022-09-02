@@ -52,7 +52,7 @@ public class RequestHeaders {
         return true;
     }
 
-    public int getContentLength() {
-        return Integer.parseInt(headers.get(CONTENT_LENGTH));
-    }
+//    public int getContentLength() {
+//        return Integer.parseInt(headers.get(CONTENT_LENGTH));
+//    }
 }

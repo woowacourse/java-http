@@ -25,24 +25,12 @@ public class HttpResponse {
         return new HttpResponse(httpStatus, responseHeaders, responseBody);
     }
 
-    public static HttpResponse createRedirect(HttpStatus httpStatus, String location) {
-        ResponseHeaders responseHeaders = ResponseHeaders.createWithDirect(location);
-        ResponseBody responseBody = ResponseBody.empty();
-
-        return new HttpResponse(httpStatus, responseHeaders, responseBody);
-    }
-
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
-    }
-
-    public String getHeader(String parameter) {
-        return responseHeaders.getHeader(parameter);
-    }
-
-    public String getResponseBody() {
-        return responseBody.getValue();
-    }
+//    public static HttpResponse createRedirect(HttpStatus httpStatus, String location) {
+//        ResponseHeaders responseHeaders = ResponseHeaders.createWithDirect(location);
+//        ResponseBody responseBody = ResponseBody.empty();
+//
+//        return new HttpResponse(httpStatus, responseHeaders, responseBody);
+//    }
 
     public String getResponse() {
         String response = String.join("\r\n",

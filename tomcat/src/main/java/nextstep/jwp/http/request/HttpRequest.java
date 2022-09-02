@@ -2,6 +2,7 @@ package nextstep.jwp.http.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Map;
 
 public class HttpRequest {
 
@@ -21,8 +22,12 @@ public class HttpRequest {
         return new HttpRequest(requestLine, requestHeaders);
     }
 
-    public RequestUri getUri() {
+    public String getUri() {
         return requestLine.getRequestUri();
+    }
+
+    public Map<String, String> getQueryParameters() {
+        return requestLine.getQueryParameters();
     }
 
     public RequestMethod getMethod() {

@@ -1,5 +1,6 @@
 package nextstep.jwp.http.request;
 
+import java.util.Map;
 import nextstep.jwp.exception.InvalidRequestLineException;
 
 public class RequestLine {
@@ -43,8 +44,12 @@ public class RequestLine {
         return requestMethod;
     }
 
-    public RequestUri getRequestUri() {
-        return requestUri;
+    public String getRequestUri() {
+        return requestUri.getValue();
+    }
+
+    public Map<String, String> getQueryParameters() {
+        return requestUri.getQueryParameters();
     }
 
     public String getUriParameter(String parameter) {

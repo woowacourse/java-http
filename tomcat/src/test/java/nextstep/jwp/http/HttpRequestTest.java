@@ -45,7 +45,7 @@ class HttpRequestTest {
 
         HttpRequest httpRequest = HttpRequest.from(bufferedReader);
 
-        String method = httpRequest.getUri().getValue();
+        String method = httpRequest.getUri();
 
         assertThat(method).isEqualTo("/login");
     }
@@ -58,7 +58,7 @@ class HttpRequestTest {
 
         HttpRequest httpRequest = HttpRequest.from(bufferedReader);
 
-        Map<String, String> queryParams = httpRequest.getUri().getQueryParameters();
+        Map<String, String> queryParams = httpRequest.getQueryParameters();
 
         assertThat(queryParams).isEqualTo(
             Map.of("account", "gugu", "password", "password"));

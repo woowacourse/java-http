@@ -31,13 +31,13 @@ public class RequestHandler {
     }
 
     private static HttpResponse findByUri(final HttpRequest httpRequest) throws IOException {
-        if ("/".equals(httpRequest.getUri().getValue())) {
+        if ("/".equals(httpRequest.getUri())) {
             if (GET.equals(httpRequest.getMethod())) {
                 return HttpResponse.createBody(HttpStatus.OK, new StaticResource(new Content("Hello world!"), TEXT_HTML));
             }
         }
 
-        if ("/login".equals(httpRequest.getUri().getValue())) {
+        if ("/login".equals(httpRequest.getUri())) {
             if (GET.equals(httpRequest.getMethod())) {
                 User user;
                 try {
@@ -53,7 +53,7 @@ public class RequestHandler {
             }
         }
 
-        StaticResource staticResource = StaticResourceUtil.findByPath(httpRequest.getUri().getValue());
+        StaticResource staticResource = StaticResourceUtil.findByPath(httpRequest.getUri());
         return HttpResponse.createBody(HttpStatus.OK, staticResource);
     }
 

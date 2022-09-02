@@ -9,6 +9,9 @@ public class RequestParams {
     private static final String QUERY_PARAM_DELIMITER = "&";
     private static final String QUERY_PARAM_VALUE_DELIMITER = "=";
 
+    private static final int QUERY_PARAM_KEY_INDEX = 0;
+    private static final int QUERY_PARAM_VALUE_INDEX = 1;
+
     private final Map<String, String> values;
 
     public RequestParams(final Map<String, String> values) {
@@ -27,7 +30,7 @@ public class RequestParams {
         String[] queryParamUris = queryParameter.split(QUERY_PARAM_DELIMITER);
         for (String queryParamUri : queryParamUris) {
             String[] param = queryParamUri.split(QUERY_PARAM_VALUE_DELIMITER);
-            queryParams.put(param[0], param[1]);
+            queryParams.put(param[QUERY_PARAM_KEY_INDEX], param[QUERY_PARAM_VALUE_INDEX]);
         }
         return queryParams;
     }

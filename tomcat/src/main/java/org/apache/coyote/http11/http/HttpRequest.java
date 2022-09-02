@@ -9,9 +9,22 @@ import java.util.Map;
 
 public class HttpRequest {
 
+	private static final String START_LINE_DELIMITER = " ";
+
 	private static final int HTTP_METHOD_INDEX = 0;
 	private static final int HTTP_URL_INDEX = 1;
+
 	private static final String EMPTY_BODY = "";
+
+	private static final int PARAM_KEY_INDEX = 0;
+	private static final int PARAM_VALUE_INDEX = 1;
+	private static final int PARAMS_INDEX = 1;
+	private static final String PARAM_KEY_VALUE_DELIMITER = "=";
+	private static final String PARAM_DELIMITER = "&";
+	private static final String QUERY_STRING_DELIMITER = "?";
+
+	private static final String HEADER_DELIMITER = ": ";
+	private static final String EXTENSION_DELIMITER = ".";
 
 	private final HttpMethod method;
 	private final String url;
@@ -27,21 +40,21 @@ public class HttpRequest {
 	}
 
 	private String extractStartLine(String startLine, int index) {
-		return startLine.split(" ")[index];
+		return startLine.split(START_LINE_DELIMITER)[index];
 	}
 
 	private Map<String, String> extractHeaders(BufferedReader requestReader) throws IOException {
 		Map<String, String> headers = new HashMap<>();
 		String line;
 		while (!(line = requestReader.readLine()).isBlank()) {
-			String[] header = line.split(": ");
+			String[] header = line.split(HEADER_DELIMITER);
 			headers.put(header[HTTP_METHOD_INDEX], header[HTTP_URL_INDEX]);
 		}
 		return headers;
 	}
 
 	private String extractBody(BufferedReader requestReader) throws IOException {
-		String length = headers.getOrDefault(Header.CONTENT_LENGTH.getName(), null);
+		String length = headers.getOrDefault(Header.CONTENT_LENGTH.getValue(), null);
 		if (length == null) {
 			return EMPTY_BODY;
 		}
@@ -56,7 +69,7 @@ public class HttpRequest {
 	}
 
 	public boolean isStaticResourceRequest() {
-		return url.contains(".");
+		return url.contains(EXTENSION_DELIMITER);
 	}
 
 	public ContentType getContentType() {
@@ -64,15 +77,15 @@ public class HttpRequest {
 	}
 
 	private String extractExtension() {
-		return url.split("\\.")[HTTP_URL_INDEX];
+		return url.split("\\" + EXTENSION_DELIMITER)[HTTP_URL_INDEX];
 	}
 
 	public String getQueryString(String key) {
-		String contentType = headers.get(Header.CONTENT_TYPE.getName());
+		String contentType = headers.get(Header.CONTENT_TYPE.getValue());
 		List<String> requestParams = extractRequestParams(contentType);
 		return requestParams.stream()
-			.filter(param -> param.split("=")[HTTP_METHOD_INDEX].equals(key))
-			.map(param -> param.split("=")[HTTP_URL_INDEX])
+			.filter(param -> param.split(PARAM_KEY_VALUE_DELIMITER)[PARAM_KEY_INDEX].equals(key))
+			.map(param -> param.split(PARAM_KEY_VALUE_DELIMITER)[PARAM_VALUE_INDEX])
 			.findAny()
 			.orElse(EMPTY_BODY);
 	}
@@ -80,12 +93,12 @@ public class HttpRequest {
 	private List<String> extractRequestParams(String contentType) {
 		List<String> requestParams = new ArrayList<>();
 		if (ContentType.FORM_DATA.equals(contentType)) {
-			String[] params = body.split("&");
+			String[] params = body.split(PARAM_DELIMITER);
 			requestParams.addAll(List.of(params));
 		}
-		if (url.contains("?")) {
-			String[] params = url.split("\\?")[HTTP_URL_INDEX]
-				.split("&");
+		if (url.contains(QUERY_STRING_DELIMITER)) {
+			String[] params = url.split("\\" + QUERY_STRING_DELIMITER)[PARAMS_INDEX]
+				.split(PARAM_DELIMITER);
 			requestParams.addAll(List.of(params));
 		}
 		return requestParams;

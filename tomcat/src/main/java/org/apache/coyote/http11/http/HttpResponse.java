@@ -28,7 +28,7 @@ public class HttpResponse {
 			.append("\r\n");
 
 		for (Header key : headers.keySet()) {
-			stringBuilder.append(key.getName())
+			stringBuilder.append(key.getValue())
 				.append(": ")
 				.append(headers.get(key))
 				.append(" ")

@@ -8,13 +8,13 @@ public enum Header {
 
 	;
 
-	private final String name;
+	private final String value;
 
 	Header(String name) {
-		this.name = name;
+		this.value = name;
 	}
 
-	public String getName() {
-		return name;
+	public String getValue() {
+		return value;
 	}
 }

@@ -12,6 +12,7 @@ public class HttpRequestCreator {
     private static final int METHOD_INDEX = 0;
     private static final int URL_INDEX = 1;
     private static final int VERSION_INDEX = 2;
+    public static final int REQUEST_LINE_CONTENT_COUNT = 3;
 
     public static HttpRequest createHttpRequest(final BufferedReader bufferReader) throws IOException {
         return new HttpRequest(httpRequestLine(bufferReader), httpRequestHeader(bufferReader));
@@ -19,7 +20,14 @@ public class HttpRequestCreator {
 
     private static HttpRequestLine httpRequestLine(final BufferedReader bufferReader) throws IOException {
         String[] line = bufferReader.readLine().split(LINE_SEPARATOR);
+        validateLineFormat(line);
         return HttpRequestLine.from(line[METHOD_INDEX], line[URL_INDEX], line[VERSION_INDEX]);
+    }
+
+    private static void validateLineFormat(final String[] line) {
+        if (line.length != REQUEST_LINE_CONTENT_COUNT) {
+            throw new IllegalArgumentException();
+        }
     }
 
     private static HttpHeader httpRequestHeader(final BufferedReader bufferReader) throws IOException {

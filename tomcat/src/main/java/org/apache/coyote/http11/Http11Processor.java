@@ -50,12 +50,15 @@ public class Http11Processor implements Runnable, Processor {
         List<String> requestHeader = new ArrayList<>();
         while (bufferedReader.ready()) {
             String line = bufferedReader.readLine();
-            if (line.equals(EMPTY_LINE)) {
-                break;
-            }
-            requestHeader.add(line);
+            addRequestHeader(requestHeader, line);
         }
         return new HttpRequest(requestLine, requestHeader);
+    }
+
+    private static void addRequestHeader(List<String> requestHeader, String line) {
+        if (!line.equals(EMPTY_LINE)) {
+            requestHeader.add(line);
+        }
     }
 
     private HttpResponse createHttpResponse(HttpRequest httpRequest) throws IOException {

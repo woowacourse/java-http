@@ -118,4 +118,34 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @DisplayName("요청한 정적 리소스 파일이 존재하지 않는 경우 404 NotFound 페이지를 출력하고 404 StatusCode를 반환한다.")
+    @Test
+    void notFound() throws IOException {
+
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /test.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        final byte[] bytes = Files.readAllBytes(new File(resource.getFile()).toPath());
+        final var expected = "HTTP/1.1 404 Not Found \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + bytes.length + " \r\n" +
+                "\r\n" +
+                new String(bytes);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

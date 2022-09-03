@@ -36,6 +36,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final String ACCOUNT_PARAM = "account";
     private static final String PASSWORD_PARAM = "password";
 
+    private static final String OK = "200 OK";
+    private static final String NOT_FOUND = "404 Not Found";
+
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {
@@ -126,22 +129,28 @@ public class Http11Processor implements Runnable, Processor {
 
     private void render(final OutputStream outputStream, final String viewName) throws IOException {
         URL resource = getClass().getClassLoader().getResource(viewName);
+        String statusCode = OK;
         if (resource == null) {
             resource = getClass().getClassLoader().getResource(NOT_FOUND_PAGE);
+            statusCode = NOT_FOUND;
         }
 
+        final String response = toResponse(resource, statusCode);
+
+        outputStream.write(response.getBytes());
+        outputStream.flush();
+    }
+
+    private String toResponse(final URL resource, final String statusCode) throws IOException {
         final File file = new File(resource.getFile());
         final Path path = file.toPath();
         final byte[] responseBody = Files.readAllBytes(path);
 
-        final String response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+        return String.join("\r\n",
+                "HTTP/1.1 " + statusCode + " ",
                 "Content-Type: " + Files.probeContentType(path) + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.length + " ",
                 "",
                 new String(responseBody));
-
-        outputStream.write(response.getBytes());
-        outputStream.flush();
     }
 }

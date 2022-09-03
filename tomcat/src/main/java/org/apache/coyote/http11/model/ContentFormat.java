@@ -9,6 +9,7 @@ public enum ContentFormat {
     TEXT_JAVASCRIPT("js", "text/javascript")
     ;
 
+    public static final int FILE_LENGTH = 2;
     private static final int EXTENSION_INDEX = 1;
     private static final String EXTENSION_SEPARATOR = "\\.";
 
@@ -32,7 +33,7 @@ public enum ContentFormat {
     }
 
     private static boolean isDirectory(final String[] split) {
-        return split.length < 2;
+        return split.length < FILE_LENGTH;
     }
 
     public String getValue() {

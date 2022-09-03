@@ -8,7 +8,7 @@ public enum HttpHeaderType {
     CONTENT_LENGTH("Content-Length"),
     HOST("Host");
 
-    private String value;
+    private final String value;
 
     HttpHeaderType(final String value) {
         this.value = value;

@@ -10,8 +10,8 @@ public enum ContentType {
     JS("js", "application/js"),
     UTF_8("utf-8", "charset=utf-8");
 
-    private String key;
-    private String value;
+    private final String key;
+    private final String value;
 
     ContentType(final String key, final String value) {
         this.key = key;

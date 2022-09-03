@@ -6,7 +6,7 @@ import java.util.NoSuchElementException;
 public enum HttpMethod {
     GET("GET");
 
-    private String value;
+    private final String value;
 
     HttpMethod(final String value) {
         this.value = value;

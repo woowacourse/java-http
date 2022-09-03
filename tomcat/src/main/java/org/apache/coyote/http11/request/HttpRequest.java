@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.request.header.RequestLine;
@@ -23,5 +24,13 @@ public class HttpRequest {
 
 	public String getUrl() {
 		return requestLine.getUrl();
+	}
+
+	public Map<String, String> getQueries() {
+		return requestLine.getQueries();
+	}
+
+	public String getHttpVersion() {
+		return requestLine.getHttpVersion();
 	}
 }

@@ -1,81 +1,60 @@
 package org.apache.coyote.http11.response;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.Map;
-
+import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.KindOfContent;
-import org.apache.coyote.http11.UrlParser;
 import org.apache.coyote.http11.response.header.StatusCode;
+import org.apache.coyote.http11.response.header.StatusLine;
+import org.apache.coyote.http11.util.ResourceSearcher;
 
 public class HttpResponse {
 
-	private static final String HTTP_MESSAGE_DELIMITER = " ";
-	private static final int RESOURCE_LOCATION = 1;
-	private static final String STATIC_PATH = "static";
-	private static final String DEFAULT_CONTENT = "Hello world!";
-	private static final int EXTENSION_LOCATION = 1;
+	private static final ResourceSearcher RESOURCE_SEARCHER = new ResourceSearcher();
 	private static final String FILE_REGEX = "\\.";
-	private static final String ROOT_URI = "/";
+	private static final int EXTENSION_LOCATION = 1;
 
-	private final UrlParser urlParser;
-	private final String contentType;
+	private final StatusLine statusLine;
+	private final HttpHeaders httpHeaders;
 	private final String body;
 
-	private HttpResponse(final UrlParser urlParser, final String contentType, final String body) {
-		this.urlParser = urlParser;
-		this.contentType = contentType;
+	private HttpResponse(final StatusLine statusLine, final HttpHeaders httpHeaders, final String body) {
+		this.statusLine = statusLine;
+		this.httpHeaders = httpHeaders;
 		this.body = body;
 	}
 
-	public static HttpResponse from(final BufferedReader bufferedReader) throws IOException {
-		final UrlParser urlParser = parseRequestResource(bufferedReader);
-		final String contentType = selectContentType(urlParser.getResource());
-		final String responseBody = loadResourceContent(urlParser.getResource());
+	public static HttpResponse of(final String httpVersion, final String resource) {
+		final StatusLine statusLine = new StatusLine(httpVersion, StatusCode.OK);
 
-		return new HttpResponse(urlParser, contentType, responseBody);
-	}
+		final String contentType = selectContentType(resource);
+		final String body = loadResourceContent(resource);
+		final HttpHeaders httpHeaders = createHttpHeaders(contentType, body);
 
-	public String createResponseMessage() {
-		return String.join("\r\n",
-			"HTTP/1.1 " + StatusCode.OK.toMessage() + " ",
-			"Content-Type: " + contentType + ";charset=utf-8 ",
-			"Content-Length: " + body.getBytes().length + " ",
-			"",
-			body);
-	}
-
-	private static UrlParser parseRequestResource(final BufferedReader bufferedReader) throws IOException {
-		final String firstLine = bufferedReader.readLine();
-		final String uri = firstLine.split(HTTP_MESSAGE_DELIMITER)[RESOURCE_LOCATION];
-
-		return new UrlParser(uri);
-	}
-
-	private static String loadResourceContent(final String resource) {
-		final URL path = HttpResponse.class.getClassLoader().getResource(STATIC_PATH + resource);
-
-		final String content;
-		try {
-			content = new String(Files.readAllBytes(new File(path.getFile()).toPath()));
-		} catch (IOException e) {
-			return DEFAULT_CONTENT;
-		}
-		return content;
+		return new HttpResponse(statusLine, httpHeaders, body);
 	}
 
 	private static String selectContentType(final String resource) {
-		if (resource.equals(ROOT_URI)) {
-			return KindOfContent.getDefaultContentType();
-		}
 		final String[] fileElements = resource.split(FILE_REGEX);
+
 		return KindOfContent.getContentType(fileElements[EXTENSION_LOCATION]);
 	}
 
-	public Map<String, String> getQueries() {
-		return urlParser.getQueries();
+	private static String loadResourceContent(final String resource) {
+		return RESOURCE_SEARCHER.loadContent(resource);
+	}
+
+	private static HttpHeaders createHttpHeaders(final String contentType, final String body) {
+		int length = body.getBytes().length;
+		return HttpHeaders.init()
+			.add("Content-Type", contentType + ";charset=utf-8")
+			.add("Content-Length", String.valueOf(length));
+	}
+
+	public String toMessage() {
+		return String.join("\r\n",
+			statusLine.toMessage(),
+			httpHeaders.toMessage(),
+			"",
+			body
+		);
 	}
 }

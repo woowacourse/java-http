@@ -38,4 +38,8 @@ public class QueryParams {
 			throw new IllegalArgumentException(String.format("파라미터가 중복적으로 입력되었습니다. [%s]", key));
 		}
 	}
+
+	public Map<String, String> getValue() {
+		return Map.copyOf(value);
+	}
 }

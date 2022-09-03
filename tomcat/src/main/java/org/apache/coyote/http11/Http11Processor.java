@@ -41,10 +41,10 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final HttpRequest httpRequest = createHttpRequest(bufferedReader);
-            final HttpResponse httpResponse = HttpResponse.from(bufferedReader);
-            final String responseMessage = httpResponse.createResponseMessage();
+            final HttpResponse httpResponse = createHttpResponse(httpRequest);
+            final String responseMessage = httpResponse.toMessage();
 
-            printQueries(httpResponse);
+            printQueries(httpRequest);
 
             outputStream.write(responseMessage.getBytes());
             outputStream.flush();
@@ -63,6 +63,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private List<String> extractMessage(final BufferedReader bufferedReader) throws IOException {
         final List<String> messages = new ArrayList<>();
+        if (!bufferedReader.ready()) {
+            return messages;
+        }
+
         for (String message = bufferedReader.readLine();
              bufferedReader.ready() && !message.equals("");
              message = bufferedReader.readLine()) {
@@ -72,8 +76,24 @@ public class Http11Processor implements Runnable, Processor {
         return messages;
     }
 
-    private static void printQueries(final HttpResponse httpResponse) {
-        final Map<String, String> queries = httpResponse.getQueries();
+    private HttpResponse createHttpResponse(final HttpRequest httpRequest) {
+        final String resourceName = linkResourceFromUrl(httpRequest.getUrl());
+
+        return HttpResponse.of(httpRequest.getHttpVersion(), resourceName);
+    }
+
+    private String linkResourceFromUrl(final String url) {
+        if (url.equals("/")) {
+            return "/helloWorld.html";
+        }
+        if (url.equals("/login")) {
+            return "/login.html";
+        }
+        return url;
+    }
+
+    private void printQueries(final HttpRequest httpRequest) {
+        final Map<String, String> queries = httpRequest.getQueries();
         if (queries.isEmpty()) {
             return;
         }

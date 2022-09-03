@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request.header;
 
+import java.util.Map;
+
 public class RequestLine {
 
 	private static final String MESSAGE_DELIMITER = " ";
@@ -29,5 +31,13 @@ public class RequestLine {
 
 	public String getUrl() {
 		return resource.getUrl();
+	}
+
+	public Map<String, String> getQueries() {
+		return resource.getQueries();
+	}
+
+	public String getHttpVersion() {
+		return httpVersion;
 	}
 }

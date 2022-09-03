@@ -11,6 +11,10 @@ public class StatusLine {
 	}
 
 	public String toMessage() {
-		return String.join(" ", httpVersion, statusCode.toMessage());
+		final StringBuilder message = new StringBuilder().append(httpVersion)
+			.append(" ")
+			.append(statusCode.toMessage())
+			.append(" ");
+		return new String(message);
 	}
 }

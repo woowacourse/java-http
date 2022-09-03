@@ -1,15 +1,17 @@
 package org.apache.coyote.http11.request.header;
 
+import java.util.Map;
+
 public class Resource {
 
 	private static final String URL_PARAMS_DELIMITER = "?";
 
 	private final String url;
-	private final QueryParams value;
+	private final QueryParams queryParams;
 
-	private Resource(final String url, final QueryParams value) {
+	private Resource(final String url, final QueryParams queryParams) {
 		this.url = url;
-		this.value = value;
+		this.queryParams = queryParams;
 	}
 
 	public static Resource from(final String resource) {
@@ -25,5 +27,9 @@ public class Resource {
 
 	public String getUrl() {
 		return url;
+	}
+
+	public Map<String, String> getQueries() {
+		return queryParams.getValue();
 	}
 }

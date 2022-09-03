@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,11 +17,11 @@ public class HttpHeaders {
 	}
 
 	public static HttpHeaders init() {
-		return new HttpHeaders(new HashMap<>());
+		return new HttpHeaders(new LinkedHashMap<>());
 	}
 
 	public static HttpHeaders from(final List<String> messages) {
-		final Map<String, String> headers = new HashMap<>();
+		final Map<String, String> headers = new LinkedHashMap<>();
 		for (final String message : messages) {
 			final String[] headerElement = message.split(KEY_VALUE_DELIMITER);
 			headers.put(headerElement[KEY], headerElement[VALUE]);
@@ -39,8 +39,16 @@ public class HttpHeaders {
 		for (Map.Entry<String, String> entry : value.entrySet()) {
 			message.append(entry.getKey())
 				.append(KEY_VALUE_DELIMITER)
-				.append(entry.getValue());
+				.append(entry.getValue())
+				.append(" ")
+				.append("\r\n");
 		}
+		excludeLastEmpty(message);
 		return new String(message);
+	}
+
+	private void excludeLastEmpty(final StringBuilder message) {
+		message.deleteCharAt(message.length() - 1);
+		message.deleteCharAt(message.length() - 1);
 	}
 }

@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import java.util.List;
 
+import org.apache.coyote.exception.InvalidRequestLineFormException;
+
 public class HttpRequest {
 
     private static final int REQUEST_METHOD = 0;
@@ -16,10 +18,17 @@ public class HttpRequest {
 
     public HttpRequest(String requestLine, List<String> requestHeader) {
         String[] requestLineValues = parseRequestLine(requestLine);
+        validateRequestLineValues(requestLineValues);
         this.method = requestLineValues[REQUEST_METHOD];
         this.uri = requestLineValues[REQUEST_URI];
         this.protocolVersion = requestLineValues[PROTOCOL_VERSION];
         this.httpRequestHeader = new HttpRequestHeader(requestHeader);
+    }
+
+    private void validateRequestLineValues(String[] requestLineValues) {
+        if (requestLineValues.length != 3) {
+            throw new InvalidRequestLineFormException();
+        }
     }
 
     private String[] parseRequestLine(String requestLine) {

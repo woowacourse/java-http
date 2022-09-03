@@ -1,10 +1,12 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
 
+import org.apache.coyote.exception.InvalidRequestLineFormException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -25,5 +27,14 @@ class HttpRequestTest {
                 () -> assertThat(httpRequestHeader.getHeaderValue("Host")).isEqualTo("localhost:8080 "),
                 () -> assertThat(httpRequestHeader.getHeaderValue("Connection")).isEqualTo("keep-alive ")
         );
+    }
+
+    @Test
+    void validateRequestLineValues() {
+        String requestLine = "GET /index.html";
+        List<String> requestHeader = List.of("Host: localhost:8080 ", "Connection: keep-alive ");
+
+        assertThatThrownBy(() -> new HttpRequest(requestLine, requestHeader))
+                .isInstanceOf(InvalidRequestLineFormException.class);
     }
 }

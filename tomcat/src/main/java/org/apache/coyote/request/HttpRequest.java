@@ -10,13 +10,15 @@ public class HttpRequest {
     private final HttpVersion version;
     private final Parameters parameters;
     private final RequestHeaders headers;
+    private final String body;
 
-    public HttpRequest(StartLine startLine, RequestHeaders headers) {
+    public HttpRequest(StartLine startLine, RequestHeaders headers, String body) {
         this.method = startLine.getMethod();
         this.uri = startLine.getUri();
         this.version = startLine.getVersion();
         this.headers = headers;
         this.parameters = startLine.getParameters();
+        this.body = body;
     }
 
     public boolean isMethodOf(HttpMethod method) {

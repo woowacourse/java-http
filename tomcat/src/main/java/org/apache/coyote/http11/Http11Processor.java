@@ -11,6 +11,7 @@ import org.apache.coyote.request.RequestHeaders;
 import org.apache.coyote.request.StartLine;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.servlet.CustomServlet;
+import org.apache.coyote.support.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +46,7 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(response.toMessage().getBytes());
             outputStream.flush();
-        } catch (IOException e) {
+        } catch (IOException | HttpException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -53,7 +54,9 @@ public class Http11Processor implements Runnable, Processor {
     private HttpRequest toRequest(BufferedReader reader) throws IOException {
         final var startLine = StartLine.of(reader.readLine());
         final var headers = readHeaders(reader);
-        return new HttpRequest(startLine, headers);
+        final var body = readBody(reader, headers);
+
+        return new HttpRequest(startLine, headers, body);
     }
 
     private RequestHeaders readHeaders(BufferedReader reader) throws IOException {
@@ -63,5 +66,15 @@ public class Http11Processor implements Runnable, Processor {
             request.add(line);
         }
         return RequestHeaders.of(request);
+    }
+
+    private String readBody(BufferedReader reader, RequestHeaders headers) throws IOException {
+        int contentLength = headers.getContentLength();
+        if (contentLength == 0) {
+            return "";
+        }
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 }

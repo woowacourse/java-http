@@ -10,6 +10,7 @@ public class RequestHeaders {
 
     private static final String HEADER_DELIMITER = ": ";
     private static final int HEADER_LINE_ELEMENT_COUNT = 2;
+    private static final String CONTENT_LENGTH = "Content-Length";
 
     private final Map<String, String> headers;
 
@@ -33,5 +34,12 @@ public class RequestHeaders {
         final var key = elements[0];
         final var value = elements[1];
         headers.put(key, value);
+    }
+
+    public int getContentLength() {
+        if (headers.containsKey(CONTENT_LENGTH)) {
+            return 0;
+        }
+        return Integer.parseInt(headers.get(CONTENT_LENGTH));
     }
 }

@@ -19,8 +19,4 @@ public class StaticResourceUtil {
             throw new IllegalArgumentException(e);
         }
     }
-
-    public static StaticResource findByPathWithExtension(String path, String extension) throws IOException{
-        return findByPath(path + extension);
-    }
 }

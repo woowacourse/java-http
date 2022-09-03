@@ -26,7 +26,7 @@ public class RequestHandler {
             return findByUri(httpRequest);
         } catch (RuntimeException e) {
             return HttpResponse.create(HttpStatus.INTERNAL_SERVER_ERROR, httpRequest.getRequestHeaders(),
-                StaticResourceUtil.findByPathWithExtension("/", "500.html"));
+                StaticResourceUtil.findByPath("/500.html"));
         }
     }
 
@@ -45,10 +45,10 @@ public class RequestHandler {
                         .orElseThrow(NotFoundUserException::new);
                     validateCheckPassword(user, httpRequest.getQueryParameterValue("password"));
                     log.info("user : {}", user);
-                    return HttpResponse.create(HttpStatus.OK, httpRequest.getRequestHeaders(), StaticResourceUtil.findByPathWithExtension("/login", ".html"));
+                    return HttpResponse.create(HttpStatus.OK, httpRequest.getRequestHeaders(), StaticResourceUtil.findByPath("/login.html"));
                 } catch (NotFoundUserException e) {
                     return HttpResponse.create(HttpStatus.UNAUTHORIZED, httpRequest.getRequestHeaders(),
-                        StaticResourceUtil.findByPathWithExtension("/", "401.html"));
+                        StaticResourceUtil.findByPath("/401.html"));
                 }
             }
         }

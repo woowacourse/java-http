@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.HttpHeaders;
-import org.apache.coyote.http11.KindOfContent;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.response.header.StatusCode;
 import org.apache.coyote.http11.response.header.StatusLine;
 import org.apache.coyote.http11.util.ResourceSearcher;
@@ -35,7 +35,7 @@ public class HttpResponse {
 	private static String selectContentType(final String resource) {
 		final String[] fileElements = resource.split(FILE_REGEX);
 
-		return KindOfContent.getContentType(fileElements[EXTENSION_LOCATION]);
+		return ContentType.getContentType(fileElements[EXTENSION_LOCATION]);
 	}
 
 	private static String loadResourceContent(final String resource) {

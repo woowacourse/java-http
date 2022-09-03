@@ -11,7 +11,7 @@ import java.util.Objects;
 import nextstep.jwp.UserService;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.model.ContentFormat;
+import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.request.Request;
 import org.apache.coyote.http11.model.response.Response;
 import org.apache.coyote.http11.model.response.ResponseBody;
@@ -59,8 +59,8 @@ public class Http11Processor implements Runnable, Processor {
         Path path = Path.of(Objects.requireNonNull(this.getClass().getResource("/static" + fileName)).getPath());
         String body = Files.readString(path);
 
-        ContentFormat contentFormat = ContentFormat.findByExtension(url);
+        ContentType contentType = ContentType.findByExtension(url);
 
-        return new ResponseBody(body, contentFormat);
+        return new ResponseBody(body, contentType);
     }
 }

@@ -1,15 +1,15 @@
 package org.apache.coyote.http11.model.response;
 
-import org.apache.coyote.http11.model.ContentFormat;
+import org.apache.coyote.http11.model.ContentType;
 
 public class ResponseBody {
 
-    private final ContentFormat contentFormat;
+    private final ContentType contentType;
     private final String body;
 
-    public ResponseBody(final String body, final ContentFormat contentFormat) {
+    public ResponseBody(final String body, final ContentType contentType) {
         this.body = body;
-        this.contentFormat = contentFormat;
+        this.contentType = contentType;
     }
 
     public int getContentLength() {
@@ -17,7 +17,7 @@ public class ResponseBody {
     }
 
     public String getContentType() {
-        return contentFormat.getValue();
+        return contentType.getValue();
     }
 
     public String getBody() {

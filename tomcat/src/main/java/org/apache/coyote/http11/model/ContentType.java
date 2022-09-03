@@ -2,7 +2,7 @@ package org.apache.coyote.http11.model;
 
 import java.util.Arrays;
 
-public enum ContentFormat {
+public enum ContentType {
 
     TEXT_HTML("html", "text/html"),
     TEXT_CSS("css", "text/css"),
@@ -16,18 +16,18 @@ public enum ContentFormat {
     private final String extension;
     private final String value;
 
-    ContentFormat(final String extension, final String value) {
+    ContentType(final String extension, final String value) {
         this.extension = extension;
         this.value = value;
     }
 
-    public static ContentFormat findByExtension(final String url) {
+    public static ContentType findByExtension(final String url) {
         String[] filePath = url.split(EXTENSION_SEPARATOR);
         if (isDirectory(filePath)) {
             return TEXT_HTML;
         }
-        return Arrays.stream(ContentFormat.values())
-                .filter(contentFormat -> contentFormat.extension.equals(filePath[EXTENSION_INDEX]))
+        return Arrays.stream(ContentType.values())
+                .filter(contentType -> contentType.extension.equals(filePath[EXTENSION_INDEX]))
                 .findFirst()
                 .orElse(TEXT_HTML);
     }

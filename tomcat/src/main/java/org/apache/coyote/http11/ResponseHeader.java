@@ -13,19 +13,19 @@ public class ResponseHeader {
         this.path = path;
     }
 
-    private ContentType getContentType() {
-        if (path.contains(EXTENSION_DELIMITER)) {
-            final String[] splitExtension = path.split("\\.");
-            return ContentType.matchMIMEType(splitExtension[splitExtension.length - 1]);
-        }
-        return ContentType.HTML;
-    }
-
     public String getHeader(String response) {
         return String.join("\r\n",
                 HTTP_VERSION + OK.getStatusMessage(),
                 "Content-Type: " + getContentType().getMIMEType() +";charset=utf-8 ",
                 "Content-Length: " + response.getBytes().length + " ",
                 "");
+    }
+
+    private ContentType getContentType() {
+        if (path.contains(EXTENSION_DELIMITER)) {
+            final String[] splitExtension = path.split("\\.");
+            return ContentType.matchMIMEType(splitExtension[splitExtension.length - 1]);
+        }
+        return ContentType.HTML;
     }
 }

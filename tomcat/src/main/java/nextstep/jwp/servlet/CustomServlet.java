@@ -13,24 +13,18 @@ import org.apache.coyote.servlet.response.HttpResponse;
 public class CustomServlet implements Servlet {
 
     private final HandlerMapper handlerMapper;
-    private final ExceptionHandler exceptionHandler;
-    private final ViewResolver viewResolver;
 
     public CustomServlet() {
-        final var viewResolver = new ViewResolver();
         final var handlerMappings = HandlerMappings.of(new GetController(),
                 new PostController(new UserService(new InMemoryUserRepository())));
-        this.handlerMapper = new HandlerMapper(handlerMappings, viewResolver);
-        this.exceptionHandler = new ExceptionHandler();
-        this.viewResolver = viewResolver;
+        this.handlerMapper = new HandlerMapper(handlerMappings, new ExceptionHandler(), new ViewResolver());
     }
 
     public HttpResponse service(HttpRequest request) {
         try {
             return handlerMapper.handle(request);
         } catch (HttpException exception) {
-            final var viewResource = exceptionHandler.handle(exception);
-            return viewResolver.findStaticResource(viewResource);
+            return handlerMapper.handle(exception);
         }
     }
 }

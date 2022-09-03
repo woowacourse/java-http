@@ -1,16 +1,21 @@
 package nextstep.jwp.servlet;
 
+import nextstep.jwp.exception.ExceptionHandler;
 import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.response.HttpResponse;
+import org.apache.coyote.support.HttpException;
 
 public class HandlerMapper {
 
     private final HandlerMappings handlerMappings;
+    private final ExceptionHandler exceptionHandler;
     private final ViewResolver viewResolver;
 
     public HandlerMapper(HandlerMappings handlerMappings,
+                         ExceptionHandler exceptionHandler,
                          ViewResolver viewResolver) {
         this.handlerMappings = handlerMappings;
+        this.exceptionHandler = exceptionHandler;
         this.viewResolver = viewResolver;
     }
 
@@ -31,5 +36,10 @@ public class HandlerMapper {
             return viewResolver.findStaticResource((String) response);
         }
         throw new UnsupportedOperationException("invalid request");
+    }
+
+    public HttpResponse handle(HttpException exception) {
+        final var viewResource = exceptionHandler.handle(exception);
+        return viewResolver.findStaticResource(viewResource);
     }
 }

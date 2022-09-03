@@ -6,7 +6,7 @@ import java.util.NoSuchElementException;
 public enum HttpVersion {
     HTTP11("HTTP/1.1");
 
-    private String version;
+    private final String version;
 
     HttpVersion(final String version) {
         this.version = version;

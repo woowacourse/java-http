@@ -3,8 +3,8 @@ package org.apache.coyote.http11.http.response;
 public enum HttpStatus {
     OK(200, "OK");
 
-    private int code;
-    private String message;
+    private final int code;
+    private final String message;
 
     HttpStatus(final int code, final String message) {
         this.code = code;

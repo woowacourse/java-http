@@ -13,8 +13,8 @@ public enum HandlerMapper {
     RESOURCE(Pattern.compile("^(/[a-z|A-Z|가-힣|ㄱ-ㅎ|_|\\-]*)+(\\.[a-z]*)$"), new ResourceHandler()),
     LOGIN(Pattern.compile("^(/login)(\\?([^#\\s]*))?"), new LoginHandler());
 
-    private Pattern urlRegex;
-    private Handler handler;
+    private final Pattern urlRegex;
+    private final Handler handler;
 
     HandlerMapper(final Pattern urlRegex, final Handler handler) {
         this.urlRegex = urlRegex;

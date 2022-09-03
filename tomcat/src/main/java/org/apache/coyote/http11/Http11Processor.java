@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -38,8 +37,8 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final InputStream inputStream = connection.getInputStream();
-             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        try (final BufferedReader bufferedReader
+                     = new BufferedReader(new InputStreamReader(connection.getInputStream()));
              final OutputStream outputStream = connection.getOutputStream()) {
 
             List<String> request = readRequest(bufferedReader);
@@ -76,7 +75,7 @@ public class Http11Processor implements Runnable, Processor {
         return DEFAULT_REQUEST_BODY;
     }
 
-    private static User getUserByAccount(final String account) {
+    private User getUserByAccount(final String account) {
         return InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new NoSuchUserException("존재하지 않는 회원입니다."));
     }

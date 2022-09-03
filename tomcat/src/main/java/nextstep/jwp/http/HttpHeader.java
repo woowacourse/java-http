@@ -25,7 +25,7 @@ public class HttpHeader {
 
         for (String header : headers) {
             String[] headerLine = header.split(HEADER_SEPARATOR, SPLIT_SIZE);
-            this.headers.put(headerLine[KEY_INDEX], headerLine[VALUE_INDEX]);
+            addHeader(headerLine[KEY_INDEX], headerLine[VALUE_INDEX]);
         }
     }
 

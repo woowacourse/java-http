@@ -79,5 +79,5 @@ http://localhost:8080/login?account=gugu&password=password으로 접속하면 �
 - [x] password 가 틀렸을때의 예외 처리
 - [x] 사용하지 않는 메서드 삭제
 - [x] 메서드의 네이밍을 extractQuery 로 변경
-- [ ] 정적 파일을 동적으로(classLoader...getResource) 관리
+- [x] 정적 파일을 동적으로(classLoader...getResource) 관리
 - [ ] converter 메서드 네이밍 변경 및 상태리스로 만들기

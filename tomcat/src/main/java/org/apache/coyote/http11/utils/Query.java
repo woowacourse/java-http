@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class UriParser {
+public class Query {
 
     private static final String PATH_DELIMITER = "?";
     private static final String QUERY_DELIMITER = "&";
@@ -12,7 +12,7 @@ public class UriParser {
 
     private final Map<String, String> params;
 
-    public UriParser(String uri) {
+    public Query(String uri) {
         this.params = extractQuery(uri);
     }
 

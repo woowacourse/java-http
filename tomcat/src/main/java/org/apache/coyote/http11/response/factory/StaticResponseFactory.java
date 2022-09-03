@@ -2,46 +2,38 @@ package org.apache.coyote.http11.response.factory;
 
 import static org.apache.coyote.Constants.ROOT;
 
-import java.util.Arrays;
-import java.util.List;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.NoSuchElementException;
-import org.apache.coyote.Constants;
+import java.util.Objects;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseBody;
 import org.apache.coyote.http11.response.element.HttpMethod;
 import org.apache.coyote.http11.response.element.HttpStatus;
 
-public enum StaticResponseFactory {
-    HTML(Constants.HTML, "text/html"),
-    CSS(Constants.CSS, "text/css"),
-    JS(Constants.JS, "text/plain"),
-    IMG(Constants.IMG, "image/svg+xml");
+public class StaticResponseFactory {
 
-    private final List<String> paths;
-    private final String contentType;
-
-    StaticResponseFactory(List<String> paths, String contentType) {
-        this.paths = paths;
-        this.contentType = contentType;
-    }
-
-    public static HttpResponse getResponse(HttpMethod method, String path) {
+    public HttpResponse getResponse(HttpMethod method, String url, HttpStatus status) {
         if (method != HttpMethod.GET) {
             throw new NoSuchElementException();
         }
-        HttpStatus status = HttpStatus.OK;
-        StaticResponseFactory collector = Arrays.stream(values())
-                .filter(name -> name.paths.stream().anyMatch(e -> e.equals(path)))
-                .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("해당 페이지를 찾을 수 없습니다: " + path));
-        return to(status, path, collector.contentType);
+        try {
+            URL fileUrl = HttpResponseBody.class.getClassLoader().getResource(ROOT + url);
+            String file = Objects.requireNonNull(fileUrl).getFile();
+            Path path = new File(file).toPath();
+
+            String contentType = Files.probeContentType(path);
+            return HttpResponse.from(HttpResponseBody.of(ROOT + url), status,
+                    contentType);
+        } catch (NullPointerException | IOException e) {
+            throw new NoSuchElementException("해당 페이지를 찾을 수 없습니다: " + url);
+        }
     }
 
-    public static HttpResponse to(HttpStatus status, String path, String contentType) {
-        return HttpResponse.from(HttpResponseBody.of(ROOT + path), status, contentType);
-    }
-
-    public List<String> getPaths() {
-        return paths;
+    public HttpResponse getResponse(HttpMethod method, String url) {
+        return getResponse(method, url, HttpStatus.OK);
     }
 }

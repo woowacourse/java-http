@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.response;
 
 import static org.apache.coyote.Constants.CRLF;
-import static org.apache.coyote.Constants.ROOT;
 import static org.apache.coyote.http11.response.element.HttpMethod.GET;
 
 import java.util.List;
@@ -13,15 +12,15 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.element.HttpMethod;
 import org.apache.coyote.http11.response.element.HttpStatus;
-import org.apache.coyote.http11.response.factory.ErrorResponseFactory;
 import org.apache.coyote.http11.response.factory.StaticResponseFactory;
-import org.apache.coyote.http11.utils.UriParser;
+import org.apache.coyote.http11.utils.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class HttpResponseMapper {
 
-    private static final Logger log = LoggerFactory.getLogger(HttpResponseMapper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HttpResponseMapper.class);
+    private static final StaticResponseFactory STATIC_RESPONSE_FACTORY = new StaticResponseFactory();
 
     private HttpResponse response;
 
@@ -29,14 +28,14 @@ public class HttpResponseMapper {
         try {
             this.response = parseResponse(request);
         } catch (NoSuchElementException e) {
-            log.error(e.getMessage(), e);
-            this.response = ErrorResponseFactory.NOT_FOUND.getValue();
+            LOG.error(e.getMessage(), e);
+            this.response = STATIC_RESPONSE_FACTORY.getResponse(GET, "/404.html", HttpStatus.NOT_FOUND);
         } catch (NoUserException | InvalidPasswordException e) {
-            log.error(e.getMessage(), e);
-            this.response = ErrorResponseFactory.UNAUTHORIZED.getValue();
+            LOG.error(e.getMessage(), e);
+            this.response = STATIC_RESPONSE_FACTORY.getResponse(GET, "/401.html", HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
-            log.error(e.getMessage(), e);
-            this.response = ErrorResponseFactory.INTERNAL_SERVER_ERROR.getValue();
+            LOG.error(e.getMessage(), e);
+            this.response = STATIC_RESPONSE_FACTORY.getResponse(GET, "/500.html", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -45,26 +44,26 @@ public class HttpResponseMapper {
         String path = request.getPath();
 
         if (method == GET && List.of("/", "").contains(path)) {
-            return HttpResponse.from(new HttpResponseBody("Hello world!"), HttpStatus.OK, "text/html");
+            return STATIC_RESPONSE_FACTORY.getResponse(method, "/welcome.html");
         }
         if (method == GET && path.split("\\?")[0].equals("/login")) {
             logIfLogin(path);
-            return HttpResponse.from(HttpResponseBody.of(ROOT + "/login.html"), HttpStatus.OK, "text/html");
+            return STATIC_RESPONSE_FACTORY.getResponse(method, "/login.html");
         }
-        return StaticResponseFactory.getResponse(method, path);
+        return STATIC_RESPONSE_FACTORY.getResponse(method, path);
     }
 
     private void logIfLogin(String uri) {
         if (!uri.contains("?")) {
             return;
         }
-        UriParser uriParser = new UriParser(uri);
-        User user = InMemoryUserRepository.findByAccount(uriParser.find("account"))
+        Query query = new Query(uri);
+        User user = InMemoryUserRepository.findByAccount(query.find("account"))
                 .orElseThrow(NoUserException::new);
-        if (!user.checkPassword(uriParser.find("password"))) {
+        if (!user.checkPassword(query.find("password"))) {
             throw new InvalidPasswordException();
         }
-        log.info("userLogin: " + CRLF + user + CRLF);
+        LOG.info("userLogin: " + CRLF + user + CRLF);
     }
 
     public String getHeader() {

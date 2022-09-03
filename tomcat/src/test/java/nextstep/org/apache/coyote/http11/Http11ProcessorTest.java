@@ -7,12 +7,14 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Files;
 import org.apache.coyote.http11.Http11Processor;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
 
     @Test
+    @DisplayName("웰컴 페이지를 응답한다.")
     void process() {
         // given
         final var socket = new StubSocket();
@@ -22,7 +24,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = String.join(CRLF,
+        String expected = String.join(CRLF,
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
@@ -33,6 +35,7 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("메인 페이지를 응답한다.")
     void index() {
         // given
         final String httpRequest = String.join(CRLF,
@@ -60,6 +63,7 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("CSS 파일을 응답한다.")
     void css() {
         // given
         final String httpRequest = String.join(CRLF,
@@ -87,6 +91,7 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("로그인 페이지를 응답한다.")
     void login() {
         // given
         final String httpRequest = String.join(CRLF,

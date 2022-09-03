@@ -3,11 +3,12 @@ package org.apache.coyote.http11.handler;
 import java.util.Arrays;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import org.apache.coyote.http11.model.HttpRequest;
+import org.apache.coyote.http11.model.request.HttpRequest;
 
 public enum HandlerMapping {
 
     LOGIN("/login", LoginHandler::new),
+    REGISTER("/register", RegisterHandler::new),
     INDEX("/index.html", IndexHandler::new),
     HOME("/", HomeHandler::new),
     ;

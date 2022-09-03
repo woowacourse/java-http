@@ -1,46 +1,47 @@
-package org.apache.coyote.http11.model;
+package org.apache.coyote.http11.model.request;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpRequest {
+public class HttpRequestLine {
 
-    private static final String REQUEST_LINE_DELIMITER = " ";
-    private static final int PATH_INDEX = 1;
     private static final String EXIST_QUERY_PARAMS = "?";
     private static final String QUERY_PARAMS_DELIMITER = "&";
     private static final String QUERY_PRAM_VALUE_DELIMITER = "=";
     private static final int QUERY_PRAM_KEY_INDEX = 0;
     private static final int QUERY_PARAM_VALUE_INDEX = 1;
 
-    private final String requestTarget;
-    private final Map<String, String> queryParams;
+    private final Method method;
+    private final String target;
+    private final Map<String, String> params;
 
-    private HttpRequest(final String requestTarget, final Map<String, String> queryParams) {
-        this.requestTarget = requestTarget;
-        this.queryParams = queryParams;
+    private HttpRequestLine(final Method method, final String target, final Map<String, String> params) {
+        this.method = method;
+        this.target = target;
+        this.params = params;
     }
 
-    public static HttpRequest from(final String uri) {
-        String[] readLine = uri.split(REQUEST_LINE_DELIMITER);
-        String path = getPath(readLine[PATH_INDEX]);
-        Map<String, String> queryParams = getQueryParams(readLine[PATH_INDEX]);
-        return new HttpRequest(path, queryParams);
+    public static HttpRequestLine of(final String requestLine) {
+        String[] splitRequestLine = requestLine.split(" ");
+        Method method = Method.findMethod(splitRequestLine[0]);
+        String target = createTarget(splitRequestLine[1]);
+        Map<String, String> params = createParams(splitRequestLine[1]);
+        return new HttpRequestLine(method, target, params);
     }
 
-    private static String getPath(final String input) {
+    private static String createTarget(final String input) {
         if (existQueryParams(input)) {
             return input;
         }
         return input.substring(0, input.lastIndexOf(EXIST_QUERY_PARAMS));
     }
 
-    private static Map<String, String> getQueryParams(final String path) {
+    private static Map<String, String> createParams(final String input) {
         Map<String, String> queryParams = new HashMap<>();
-        if (existQueryParams(path)) {
+        if (existQueryParams(input)) {
             return queryParams;
         }
-        return splitQueryParams(path, queryParams);
+        return splitQueryParams(input, queryParams);
     }
 
     private static Map<String, String> splitQueryParams(final String path, final Map<String, String> queryParams) {
@@ -61,15 +62,15 @@ public class HttpRequest {
         return !path.contains(EXIST_QUERY_PARAMS);
     }
 
-    public String getRequestTarget() {
-        return requestTarget;
-    }
-
-    public Map<String, String> getQueryParams() {
-        return queryParams;
-    }
-
     public boolean isEmptyQueryParams() {
-        return queryParams.isEmpty();
+        return params.isEmpty();
+    }
+
+    public Map<String, String> getParams() {
+        return params;
+    }
+
+    public String getTarget() {
+        return target;
     }
 }

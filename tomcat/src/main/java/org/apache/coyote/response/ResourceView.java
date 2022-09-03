@@ -45,7 +45,7 @@ public class ResourceView {
     private HttpResponse toHttpResponse(HttpStatus status, Path path) {
         try {
             return new HttpResponseBuilder(status)
-                    .setContentType(Files.probeContentType(path))
+                    .setContentType(String.format("%s;charset=utf-8", Files.probeContentType(path)))
                     .setMessageBody(new String(Files.readAllBytes(path)))
                     .build();
         } catch (IOException e) {

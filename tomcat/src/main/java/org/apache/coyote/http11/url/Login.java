@@ -3,7 +3,7 @@ package org.apache.coyote.http11.url;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.dto.Http11Request;
-import org.apache.coyote.http11.utils.StringParser;
+import org.apache.coyote.http11.utils.UrlParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,9 +16,12 @@ public class Login extends Url {
 
     @Override
     public Http11Request getRequest() {
-        Http11Request http11Request = StringParser.loginQuery(getPath());
+        Http11Request http11Request = UrlParser.loginQuery(getPath());
 
-        User user = InMemoryUserRepository.findByAccount(http11Request.getAccount())
+        if (!http11Request.existsData()) {
+            return http11Request;
+        }
+        User user = InMemoryUserRepository.findByAccount(http11Request.getLoginQueryDataDto().getAccount())
                 .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호를 잘못 입력하였습니다."));
         log.info("user : {}", user);
 

@@ -1,23 +1,24 @@
 package org.apache.coyote.http11.dto;
 
 public class Http11Request {
-
-    private final String account;
-    private final String password;
+    private final LoginQueryDataDto loginQueryDataDto;
     private final String path;
 
     public Http11Request(String path) {
-        this(null, null, path);
+        this(null, path);
     }
 
-    public Http11Request(String account, String password, String path) {
-        this.account = account;
-        this.password = password;
+    public Http11Request(LoginQueryDataDto loginQueryDataDto, String path) {
+        this.loginQueryDataDto = loginQueryDataDto;
         this.path = path;
     }
 
-    public String getAccount() {
-        return account;
+    public boolean existsData() {
+        return loginQueryDataDto != null;
+    }
+
+    public LoginQueryDataDto getLoginQueryDataDto() {
+        return loginQueryDataDto;
     }
 
     public String getPath() {

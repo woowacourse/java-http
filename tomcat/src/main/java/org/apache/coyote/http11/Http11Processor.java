@@ -59,7 +59,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getResponseBody(final String uri) throws IOException, URISyntaxException {
-
         if (uri.isEmpty()) {
             return "Hello world!";
         }

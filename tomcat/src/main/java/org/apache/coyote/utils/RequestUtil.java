@@ -72,7 +72,7 @@ public class RequestUtil {
 
     private static Map<String, String> calculateParam(final String uri) {
         List<String> inputs = Arrays.asList(uri.substring(uri.indexOf(PARAM_START_SEPARATOR) + 1).split(PARAM_DELIMITER));
-        final Map<String, String> queryParams = new HashMap();
+        final Map<String, String> queryParams = new HashMap<>();
         for (String input : inputs) {
             List<String> query = Arrays.asList(input.split(PARAM_COUPLER));
             queryParams.put(query.get(KEY), query.get(VALUE));

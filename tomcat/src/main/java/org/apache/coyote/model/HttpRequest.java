@@ -4,7 +4,6 @@ import nextstep.jwp.exception.InvalidRequestFormat;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import static org.apache.coyote.utils.RequestUtil.calculatePath;
@@ -16,14 +15,14 @@ public class HttpRequest {
     public static final int REQUEST_SIZE_DEADLINE = 3;
     private final String uri;
     private final String path;
-    private final Map<String, String> params;
+    private final HttpParam params;
     private final String contentType;
     private final HttpMethod httpMethod;
 
-    protected HttpRequest(String uri, String path, Map<String, String> params, String contentType, HttpMethod httpMethod) {
+    public HttpRequest(String uri, String path, HttpParam httpParam, String contentType, HttpMethod httpMethod) {
         this.uri = uri;
         this.path = path;
-        this.params = params;
+        this.params = httpParam;
         this.contentType = contentType;
         this.httpMethod = httpMethod;
     }
@@ -33,9 +32,9 @@ public class HttpRequest {
         validateRequestSize(requests);
         final var uri = requests.get(1);
         final var path = calculatePath(uri);
-        final var params = getParam(uri);
+        final var httpParams = HttpParam.of(getParam(uri));
         final var content = Content.getType(getExtension(path));
-        return new HttpRequest(uri, path, params, content, HttpMethod.of(requests.get(0)));
+        return new HttpRequest(uri, path, httpParams, content, HttpMethod.of(requests.get(0)));
     }
 
     private static void validateRequestSize(List<String> requests) {
@@ -44,7 +43,7 @@ public class HttpRequest {
         }
     }
 
-    public Map<String, String> getParams() {
+    public HttpParam getParams() {
         return params;
     }
 

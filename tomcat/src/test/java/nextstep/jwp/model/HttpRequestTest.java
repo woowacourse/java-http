@@ -35,7 +35,8 @@ class HttpRequestTest {
         HttpRequest actual = HttpRequest.of(requestLine);
 
         // then
-        assertThat(actual.getParams()).isEmpty();
+        assertThat(actual.getParams()
+                .isEmpty()).isTrue();
     }
 
     @Test

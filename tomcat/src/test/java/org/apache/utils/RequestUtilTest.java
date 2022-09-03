@@ -68,9 +68,9 @@ class RequestUtilTest {
     void checkGetParam() {
         // given
         String filename = "/login?account=gugu&password=password";
-        Map<String, String> expected = new HashMap();
-        expected.put("account","gugu");
-        expected.put("password","password");
+        Map<String, String> expected = new HashMap<>();
+        expected.put("account", "gugu");
+        expected.put("password", "password");
 
         // when
         Map<String, String> actual = RequestUtil.getParam(filename);

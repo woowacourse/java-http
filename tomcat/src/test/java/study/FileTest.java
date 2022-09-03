@@ -2,8 +2,6 @@ package study;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -34,7 +32,10 @@ class FileTest {
         final URL url = getClass().getClassLoader().getResource(fileName);
 
         // todo
-        final String actual = Objects.requireNonNull(url).getPath();
+        if (url == null) {
+            throw new NullPointerException(fileName + " 파일이 없습니다.");
+        }
+        final String actual = url.getPath();
 
         assertThat(actual).endsWith(fileName);
     }

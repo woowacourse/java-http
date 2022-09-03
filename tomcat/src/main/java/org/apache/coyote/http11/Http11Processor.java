@@ -1,15 +1,14 @@
 package org.apache.coyote.http11;
 
 import http.BasicHttpRequest;
-import http.HttpRequest;
 import java.io.BufferedReader;
-import java.io.File;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.nio.file.Files;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.ui.HomeController;
+import nextstep.jwp.ui.MainController;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +18,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final HomeController homeController;
+    private final MainController mainController;
 
-    public Http11Processor(final Socket connection, final HomeController homeController) {
+    public Http11Processor(final Socket connection, final MainController mainController) {
         this.connection = connection;
-        this.homeController = homeController;
+        this.mainController = mainController;
     }
 
     @Override
@@ -36,17 +35,16 @@ public class Http11Processor implements Runnable, Processor {
         try (
                 final var inputStream = connection.getInputStream();
                 final var outputStream = connection.getOutputStream();
-                final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+                final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+                final var bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));
         ) {
-            final var httpMessage = parseRequest(bufferedReader);
-            final var request = BasicHttpRequest.from(httpMessage);
-            final var contentType = request.getContentType();
+            final var httpMessageRequest = parseRequest(bufferedReader);
+            final var httpRequest = BasicHttpRequest.from(httpMessageRequest);
+            final var httpResponse = mainController.doService(httpRequest);
+            final var httpMessageResponse = httpResponse.getResponseHttpMessage();
 
-            final var responseBody = getResponseBodyByURI(request);
-            final var response = createResponseWithBody(responseBody, contentType);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            bufferedWriter.write(httpMessageResponse);
+            bufferedWriter.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
@@ -60,27 +58,5 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return request.toString();
-    }
-
-    private String getResponseBodyByURI(final HttpRequest request) throws IOException {
-        var requestURI = request.getRequestURI();
-
-        if (!requestURI.contains(".")) {
-            return homeController.service(request);
-        }
-
-        final var resource = getClass().getClassLoader().getResource(String.format("static%s", requestURI));
-        final var path = new File(resource.getFile()).toPath();
-
-        return new String(Files.readAllBytes(path));
-    }
-
-    private String createResponseWithBody(final String responseBody, final String contentType) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                String.format("Content-Type: %s ", contentType),
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
     }
 }

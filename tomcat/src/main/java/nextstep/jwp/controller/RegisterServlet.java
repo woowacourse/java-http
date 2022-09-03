@@ -1,7 +1,6 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.NoSuchUserException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
@@ -10,10 +9,10 @@ import org.apache.servlet.HttpServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginServlet extends HttpServlet {
+public class RegisterServlet extends HttpServlet {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginServlet.class);
-    private static final String PATH = "/login";
+    private static final Logger log = LoggerFactory.getLogger(RegisterServlet.class);
+    private static final String PATH = "/register";
 
     @Override
     public boolean isSupported(final String path) {
@@ -23,22 +22,24 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         httpResponse.addStatusCode(StatusCode.OK);
-        httpResponse.addView("login.html");
+        httpResponse.addView("register.html");
     }
 
+    @Override
     protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        String account = httpRequest.getBodyParameter("account");
-        String password = httpRequest.getBodyParameter("password");
-
-        if (InMemoryUserRepository.existsAccountAndPassword(account, password)) {
-            User user = InMemoryUserRepository.findByAccount(account).orElseThrow(NoSuchUserException::new);
-            log.info(user.toString());
-
-            httpResponse.sendRedirect("/index.html");
-            return;
+        if (!httpRequest.hasBodyParameter("account", "password", "email")) {
+            httpResponse.addStatusCode(StatusCode.OK);
+            httpResponse.addView("login.html");
         }
 
-        httpResponse.addStatusCode(StatusCode.UNAUTHORIZED);
-        httpResponse.addView("401.html");
+        String account = httpRequest.getBodyParameter("account");
+        String password = httpRequest.getBodyParameter("password");
+        String email = httpRequest.getBodyParameter("email");
+
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        log.info("{} 회원가입 성공!", user.getAccount());
+
+        httpResponse.sendRedirect("/index.html");
     }
 }

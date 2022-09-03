@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import java.util.LinkedHashMap;
-import org.apache.coyote.http11.exception.NoSuchHeaderException;
 
 public class Headers {
 
@@ -15,11 +14,11 @@ public class Headers {
         values.put(key, value);
     }
 
-    public String findByHeaderKey(final String key) {
-        if (!values.containsKey(key)) {
-            throw new NoSuchHeaderException();
-        }
+    public boolean hasHeader(final String key) {
+        return values.containsKey(key);
+    }
 
+    public String getHeader(final String key) {
         return values.get(key);
     }
 

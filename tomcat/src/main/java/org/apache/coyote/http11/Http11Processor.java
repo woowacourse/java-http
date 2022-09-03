@@ -20,6 +20,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String REQUEST_HEADER_SPLITTER = ": ";
     private static final int REQUEST_HEADER_KEY_INDEX = 0;
     private static final int RESPONSE_HEADER_KEY_INDEX = 1;
+    private static final String CONTENT_LENGTH = "Content-Length";
 
     private final Socket connection;
 
@@ -61,17 +62,26 @@ public class Http11Processor implements Runnable, Processor {
         HttpRequest request = new HttpRequest(Objects.requireNonNull(bufferedReader.readLine()));
         log.info(request.getRequestLine());
 
+        addHeaders(bufferedReader, request);
+        addBody(bufferedReader, request);
+        return request;
+    }
+
+    private void addHeaders(final BufferedReader bufferedReader, final HttpRequest request) throws IOException {
         String line;
         while (!(line = Objects.requireNonNull(bufferedReader.readLine())).isBlank()) {
             String[] splitHeader = line.split(REQUEST_HEADER_SPLITTER);
             request.addHeader(splitHeader[REQUEST_HEADER_KEY_INDEX], splitHeader[RESPONSE_HEADER_KEY_INDEX]);
         }
+    }
 
-        while (bufferedReader.ready()) {
-            request.addBody(bufferedReader.readLine());
+    private void addBody(final BufferedReader bufferedReader, final HttpRequest request) throws IOException {
+        if (request.hasHeader(CONTENT_LENGTH)) {
+            int contentLength = Integer.parseInt(request.getHeader(CONTENT_LENGTH));
+            char[] body = new char[contentLength];
+            bufferedReader.read(body, 0, contentLength);
+            request.addBody(String.copyValueOf(body));
         }
-
-        return request;
     }
 
     private boolean isResource(final HttpRequest httpRequest) {

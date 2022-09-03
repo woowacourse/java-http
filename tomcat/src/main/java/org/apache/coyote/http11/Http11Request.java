@@ -4,9 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 import nextstep.jwp.exception.MethodNotAllowedException;
 
 public class Http11Request {
+
+    private static final List<String> ALLOWED_METHODS = List.of("GET");
 
     private final String requestMethod;
     private final String requestUrl;
@@ -18,7 +21,7 @@ public class Http11Request {
     }
 
     private static void validateRequestMethod(String requestMethod) {
-        if (!"GET".equals(requestMethod)) {
+        if (!ALLOWED_METHODS.contains(requestMethod)) {
             throw new MethodNotAllowedException(requestMethod + "는 사용할 수 없는 메서드입니다.");
         }
     }

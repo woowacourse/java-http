@@ -8,7 +8,7 @@ public class QueryParam {
     private static final int QUERY_PARAM = 1;
     private static final String KEY_VALUE_PAIR_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
-    private static final String QUERY_PARAM_DELIMITER = "\\?";
+    private static final String QUERY_PARAM_DELIMITER = "?";
 
     private final Map<String, String> parameters;
 
@@ -17,7 +17,7 @@ public class QueryParam {
     }
 
     private String toQueryString(final String path) {
-        return path.split(QUERY_PARAM_DELIMITER)[QUERY_PARAM];
+        return path.split("\\"+ QUERY_PARAM_DELIMITER)[QUERY_PARAM];
     }
 
     public static boolean isQueryParam(String path) {

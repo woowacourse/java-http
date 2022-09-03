@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Optional;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -20,9 +19,7 @@ public class ResponseHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResponseHandler.class);
     private static final String RESOURCE_PATH = "static";
-    private static final String LOGIN_PATH = "/login";
-    private static final String DEFAULT_PATH = "/";
-    private static final String DEFAULT_EXTENSION = ".html";
+    private static final String DEFAULT_EXTENSION = "html";
     private static final String EXTENSION_DELIMITER = ".";
 
     private final String path;
@@ -38,10 +35,10 @@ public class ResponseHandler {
     }
 
     private String getResponseBody() throws FileNotFoundException, IOException {
-        if (path.equals(DEFAULT_PATH)) {
+        if (path.equals("/")) {
             return "Hello world!";
         }
-        if (path.contains(LOGIN_PATH) && QueryParam.isQueryParam(path)) {
+        if (path.contains("/login") && QueryParam.isQueryParam(path)) {
             return getLoginContent();
         }
         return getContent(path);
@@ -61,7 +58,7 @@ public class ResponseHandler {
         if (path.contains(EXTENSION_DELIMITER)) {
             return "";
         }
-        return DEFAULT_EXTENSION;
+        return EXTENSION_DELIMITER + DEFAULT_EXTENSION;
     }
 
     private String getLoginContent() throws FileNotFoundException, IOException {
@@ -75,7 +72,7 @@ public class ResponseHandler {
                     .orElseThrow(UserNotFoundException::new);
 
             LOGGER.info(user.toString());
-            return getContent(LOGIN_PATH);
+            return getContent("/login");
         }
         throw new QueryParamNotFoundException();
     }

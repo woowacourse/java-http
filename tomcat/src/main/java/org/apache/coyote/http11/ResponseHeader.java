@@ -23,7 +23,7 @@ public class ResponseHeader {
 
     private ContentType getContentType() {
         if (path.contains(EXTENSION_DELIMITER)) {
-            final String[] splitExtension = path.split("\\.");
+            final String[] splitExtension = path.split("\\" + EXTENSION_DELIMITER);
             return ContentType.matchMIMEType(splitExtension[splitExtension.length - 1]);
         }
         return ContentType.HTML;

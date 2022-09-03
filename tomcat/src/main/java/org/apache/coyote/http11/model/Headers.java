@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.model;
 
+import static org.apache.coyote.http11.model.StringFormat.CRLF;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,6 +21,6 @@ public class Headers {
         List<String> headerStrings = headers.stream()
                 .map(Header::getString)
                 .collect(Collectors.toList());
-        return String.join("\r\n", headerStrings);
+        return String.join(CRLF, headerStrings);
     }
 }

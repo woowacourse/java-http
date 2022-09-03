@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.model.response;
 
+import static org.apache.coyote.http11.model.StringFormat.CRLF;
+
 import java.util.ArrayList;
 import org.apache.coyote.http11.model.Header;
 import org.apache.coyote.http11.model.Headers;
@@ -28,7 +30,7 @@ public class Response {
     }
 
     private String getString() {
-        return String.join("\r\n",
+        return String.join(CRLF,
                 "HTTP/1.1" + " " + status.getCode() + " " + status.name() + " ",
                 headers.getString(),
                 "",

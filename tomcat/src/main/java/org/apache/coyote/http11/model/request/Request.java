@@ -1,10 +1,11 @@
 package org.apache.coyote.http11.model.request;
 
+import static org.apache.coyote.http11.model.StringFormat.CRLF;
+
 import java.util.Map;
 
 public class Request {
 
-    private static final String LINE_SEPARATOR = "\r\n";
     private static final int START_LINE_INDEX = 0;
 
     private final RequestLine startLine;
@@ -14,7 +15,7 @@ public class Request {
     }
 
     public static Request from(final String request) {
-        String[] lines = request.split(LINE_SEPARATOR);
+        String[] lines = request.split(CRLF);
         return new Request(lines[START_LINE_INDEX]);
     }
 

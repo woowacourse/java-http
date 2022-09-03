@@ -17,11 +17,11 @@ public class UriParser {
     }
 
     public static String parseUri(final BufferedReader bufferedReader) throws IOException {
-        String[] firstLineElements = bufferedReader.readLine().split(" ");
-        if (firstLineElements.length != VALID_START_LINE_SIZE) {
+        String[] parsedStartLine = bufferedReader.readLine().split(" ");
+        if (parsedStartLine.length != VALID_START_LINE_SIZE) {
             throw new InvalidHttpRequestFormatException();
         }
-        return firstLineElements[URL_INDEX];
+        return parsedStartLine[URL_INDEX];
     }
 
     public static String parseUrl(final String uri) {

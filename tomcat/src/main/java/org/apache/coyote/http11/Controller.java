@@ -13,9 +13,10 @@ import org.slf4j.LoggerFactory;
 
 public enum Controller {
 
-    HOME("/", object -> "Hello world!"),
+    HOME("/", Controller::home),
     LOGIN("/login", Controller::login);
 
+    private static final String WELCOME_MESSAGE = "Hello world!";
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     private final String path;
@@ -32,6 +33,10 @@ public enum Controller {
                 .findFirst()
                 .orElseThrow(ResourceNotFoundException::new)
                 .function.apply(queryParameters);
+    }
+
+    private static String home(Object o) {
+        return WELCOME_MESSAGE;
     }
 
     private static String login(Object object) {

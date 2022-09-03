@@ -8,6 +8,8 @@ public class QueryParameters {
     private static final int NOT_EXIST_QUERY_PARAMETER_CHARACTER = -1;
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final String ACCOUNT = "account";
+    private static final String PASSWORD = "password";
 
     private final Map<String, String> values;
 
@@ -25,11 +27,11 @@ public class QueryParameters {
     }
 
     public String getAccount() {
-        return values.get("account");
+        return values.get(ACCOUNT);
     }
 
     public String getPassword() {
-        return values.get("password");
+        return values.get(PASSWORD);
     }
 
     private static void putKeyValues(String[] eachQueryParameters) {

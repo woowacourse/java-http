@@ -70,28 +70,24 @@ public class Http11Processor implements Runnable, Processor {
             }
             if (path.endsWith(".html")) {
                 return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.HTML,
-                        getStaticResponse(path));
+                        getStaticResourceResponse(path));
             }
             if (path.endsWith(".css")) {
                 return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.CSS,
-                        getStaticResponse(path));
+                        getStaticResourceResponse(path));
             }
             if (path.endsWith(".js")) {
                 return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.JAVASCRIPT,
-                        getStaticResponse(path));
+                        getStaticResourceResponse(path));
             }
-
-            Optional<User> user = InMemoryUserRepository.findByAccount(
-                    httpRequest.getUri().getQueryParams().get("account"));
-            user.ifPresent(value -> log.debug(value.toString()));
-            String responseBody = getStaticResponse(path + ".html");
-            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.HTML, responseBody);
+            return getDynamicResourceResponse(httpRequest);
         } catch (RuntimeException e) {
-            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.NOT_FOUND, ContentType.HTML, null);
+            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.NOT_FOUND, ContentType.HTML,
+                    "페이지를 찾을 수 없습니다.");
         }
     }
 
-    private String getStaticResponse(String resourcePath) throws IOException {
+    private String getStaticResourceResponse(String resourcePath) throws IOException {
         URL resourceURL = getClass().getClassLoader().getResource("static" + resourcePath);
         try {
             File file = new File(Objects.requireNonNull(resourceURL).toURI());
@@ -100,5 +96,17 @@ public class Http11Processor implements Runnable, Processor {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private HttpResponse getDynamicResourceResponse(HttpRequest httpRequest) throws IOException {
+        String path = httpRequest.getUri().getPath();
+        if (path.equals("/login")) {
+            Optional<User> user = InMemoryUserRepository.findByAccount(
+                    httpRequest.getUri().getQueryParams().get("account"));
+            user.ifPresent(value -> log.debug(value.toString()));
+        }
+
+        String responseBody = getStaticResourceResponse(path + ".html");
+        return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.HTML, responseBody);
     }
 }

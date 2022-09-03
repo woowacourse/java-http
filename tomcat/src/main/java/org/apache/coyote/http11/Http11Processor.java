@@ -9,9 +9,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.StaticResourceController;
-import nextstep.jwp.controller.WelcomeController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
@@ -22,9 +19,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
-    private static final String WELCOME_PAGE_PATH = "/";
-    private static final String LOGIN_PAGE_PATH = "/login";
 
     private final Socket connection;
 
@@ -77,17 +71,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void doService(final HttpRequest request, final HttpResponse response) throws Exception {
-        final String requestUri = request.getPath();
-        final Controller controller;
-
-        if (WELCOME_PAGE_PATH.equals(requestUri)) {
-            controller = WelcomeController.getInstance();
-        } else if (LOGIN_PAGE_PATH.equals(requestUri)) {
-            controller = LoginController.getInstance();
-        } else {
-            controller = StaticResourceController.getInstance();
-        }
-
+        final String path = request.getPath();
+        final Controller controller = RequestMapping.findController(path);
         controller.service(request, response);
     }
 

@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import java.util.Objects;
+
 public class RequestLine {
 
     private final HttpMethod method;
@@ -36,5 +38,23 @@ public class RequestLine {
 
     public Http11Version getHttpVersion() {
         return httpVersion;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        RequestLine that = (RequestLine) o;
+        return method == that.method && Objects.equals(uri, that.uri) && Objects.equals(httpVersion,
+                that.httpVersion);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(method, uri, httpVersion);
     }
 }

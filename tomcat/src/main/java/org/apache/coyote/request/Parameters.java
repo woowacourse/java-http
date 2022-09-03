@@ -2,7 +2,6 @@ package org.apache.coyote.request;
 
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.coyote.exception.HttpException;
 
 public class Parameters {
 
@@ -34,15 +33,10 @@ public class Parameters {
         parameters.put(key, value);
     }
 
-    public boolean contains(String parameterKey) {
-        return value.containsKey(parameterKey);
-    }
-
     public String get(String parameterKey) {
-        try {
+        if (value.containsKey(parameterKey)) {
             return value.get(parameterKey);
-        } catch (NullPointerException e) {
-            throw HttpException.ofInternalServerError(e);
         }
+        return "";
     }
 }

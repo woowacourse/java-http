@@ -12,11 +12,11 @@ public class HttpRequestHandler {
     private final ResourceView resourceView = new ResourceView();
 
     public HttpResponse handle(HttpRequest request) {
-        if (request.getUri().startsWith("/login")) {
-            authController.login(request);
-        }
         if (request.isMethodOf(HttpMethod.GET)) {
             return resourceView.findStaticResource(request.getUri());
+        }
+        if (request.getUri().startsWith("/login") && request.isMethodOf(HttpMethod.POST)) {
+            return authController.login(request);
         }
         throw new UnsupportedOperationException("Not implemented");
     }

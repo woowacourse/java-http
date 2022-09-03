@@ -1,16 +1,22 @@
 package nextstep.jwp.service;
 
-import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
-import org.apache.coyote.request.Parameters;
+import org.apache.coyote.exception.HttpException;
+import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.response.HttpResponse.HttpResponseBuilder;
+import org.apache.coyote.support.HttpStatus;
 
 public class UserService {
 
-    public Optional<User> findUser(Parameters parameters) {
-        if (parameters.contains("account")) {
-            return InMemoryUserRepository.findByAccount(parameters.get("account"));
+    public HttpResponse findUser(String account, String password) {
+        final var user = InMemoryUserRepository.findByAccount(account);
+        if (user.isEmpty()) {
+            throw new HttpException(HttpStatus.UNAUTHORIZED);
         }
-        return Optional.empty();
+        final var foundUser = user.get();
+        if (!foundUser.checkPassword(password)) {
+            throw new HttpException(HttpStatus.UNAUTHORIZED);
+        }
+        return new HttpResponseBuilder(HttpStatus.FOUND).build();
     }
 }

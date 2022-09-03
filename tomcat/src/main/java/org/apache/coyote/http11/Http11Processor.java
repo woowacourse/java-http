@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.Constants.CRLF;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,11 +17,13 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import servlet.Servlet;
+import servlet.ServletImpl;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger LOG = LoggerFactory.getLogger(Http11Processor.class);
-    private static final HttpResponseMapper RESOLVER = new HttpResponseMapper();
+    private static final Servlet SERVLET = new ServletImpl();
 
     private final Socket connection;
 
@@ -38,29 +42,29 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            HttpRequest request = new HttpRequest(toRequestLines(reader));
-            HttpResponse response = RESOLVER.resolveException(request);
+            String request = readRequest(reader);
+            String response = SERVLET.doService(request);
             logIO(request, response);
 
-            outputStream.write(response.getResponse().getBytes());
+            outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             LOG.error(e.getMessage(), e);
         }
     }
 
-    private void logIO(HttpRequest request, HttpResponse httpResponse) {
-        LOG.info("\n\n###### ----REQUEST---- ###### \n\n" + request.getLines() +
-                "\n\n###### ----RESPONSE---- ###### \n\n" + httpResponse.getHeader() + "\n\n");
+    private void logIO(String request, String response) {
+        LOG.info("\n\n###### ----REQUEST---- ###### \n\n" + request +
+                "\n\n###### ----RESPONSE---- ###### \n\n" + response + "\n\n");
     }
 
-    private List<String> toRequestLines(final BufferedReader reader) throws IOException {
+    private String readRequest(final BufferedReader reader) throws IOException {
         List<String> lines = new ArrayList<>();
         String line = " ";
         while (!line.isEmpty()) {
             line = reader.readLine();
             lines.add(line);
         }
-        return lines;
+        return String.join(CRLF, lines);
     }
 }

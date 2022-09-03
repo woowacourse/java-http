@@ -13,7 +13,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.element.HttpMethod;
 import org.apache.coyote.http11.response.element.HttpStatus;
 import org.apache.coyote.http11.response.factory.StaticResponseFactory;
-import org.apache.coyote.http11.utils.Query;
+import org.apache.coyote.http11.request.element.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

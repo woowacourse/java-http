@@ -3,8 +3,10 @@ package org.apache.coyote.http11.request;
 
 import static org.apache.coyote.Constants.CRLF;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 public class HttpRequest {
 
@@ -15,11 +17,12 @@ public class HttpRequest {
     private final String path;
 
 
-    public HttpRequest(List<String> lines) {
-        if (lines == null || lines.isEmpty()) {
+    public HttpRequest(String request) {
+        if (request == null || request.isEmpty()) {
             throw new NoSuchElementException(EMPTY_REQUEST);
         }
-        this.lines = lines;
+        this.lines = Arrays.stream(request.split(CRLF))
+                .collect(Collectors.toList());
         String[] firstLineElements = lines.get(0).split(" ");
         this.method = firstLineElements[0];
         this.path = firstLineElements[1];
@@ -31,9 +34,5 @@ public class HttpRequest {
 
     public String getPath() {
         return path;
-    }
-
-    public String getLines() {
-        return String.join(CRLF, lines);
     }
 }

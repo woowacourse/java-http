@@ -15,8 +15,8 @@ public class Controller {
 
     public String execute(final HttpRequestUri httpRequestUri) {
         if (isLogin(httpRequestUri.getValue())) {
-            LoginController loginController = new LoginController(httpRequest);
-            return loginController.login();
+            LoginController loginController = new LoginController();
+            return loginController.login(httpRequest);
         }
         throw new BadRequestException(httpRequestUri.getValue());
     }

@@ -1,4 +1,4 @@
-package nextstep.jwp.servlet;
+package nextstep.jwp.servlet.view;
 
 import org.apache.coyote.support.HttpStatus;
 

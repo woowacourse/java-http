@@ -5,6 +5,8 @@ import nextstep.jwp.controller.PostController;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.ExceptionHandler;
 import nextstep.jwp.service.UserService;
+import nextstep.jwp.servlet.handler.HandlerMappings;
+import nextstep.jwp.servlet.view.ViewResolver;
 import org.apache.coyote.servlet.Servlet;
 import org.apache.coyote.support.HttpException;
 import org.apache.coyote.servlet.request.HttpRequest;

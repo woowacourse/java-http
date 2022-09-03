@@ -1,4 +1,4 @@
-package nextstep.jwp.servlet;
+package nextstep.jwp.servlet.handler;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;

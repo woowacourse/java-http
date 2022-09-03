@@ -1,7 +1,7 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.service.UserService;
-import nextstep.jwp.servlet.RequestMapping;
+import nextstep.jwp.servlet.handler.RequestMapping;
 import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.request.Parameters;
 import org.apache.coyote.servlet.response.HttpResponse;

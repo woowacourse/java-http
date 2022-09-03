@@ -1,7 +1,7 @@
 package nextstep.jwp.exception;
 
 import java.util.Arrays;
-import nextstep.jwp.servlet.ViewResource;
+import nextstep.jwp.servlet.view.ViewResource;
 import org.apache.coyote.support.HttpException;
 import org.apache.coyote.support.HttpStatus;
 

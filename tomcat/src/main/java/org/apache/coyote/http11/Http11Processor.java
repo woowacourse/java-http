@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginHandler;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.enums.HttpStatus;
@@ -43,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.write(httpResponse.generateResponse()
                     .getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }

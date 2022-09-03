@@ -6,7 +6,7 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class HttpRequestTest {
+class HttpRequestTest {
 
     @Test
     @DisplayName("Request line을 받으면 Http Request 를 반환한다.")

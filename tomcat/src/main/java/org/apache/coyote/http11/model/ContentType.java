@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model;
 
 public enum ContentType {
     TEXT_HTML_CHARSET_UTF_8("text/html;charset=utf-8"),

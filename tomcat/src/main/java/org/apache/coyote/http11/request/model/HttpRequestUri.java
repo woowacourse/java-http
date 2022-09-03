@@ -1,8 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request.model;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
 import org.apache.coyote.exception.UnSupportedMediaType;
+import org.apache.coyote.http11.model.ContentType;
 
 public class HttpRequestUri {
 

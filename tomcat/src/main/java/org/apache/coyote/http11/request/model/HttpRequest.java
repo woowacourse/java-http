@@ -1,11 +1,15 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request.model;
 
 import nextstep.jwp.presentation.LoginController;
+import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.QueryStrings;
+import org.apache.coyote.http11.model.HttpStatus;
 import org.apache.coyote.util.FileUtils;
 
 public class HttpRequest {
 
     public static final String INDEX_BODY = "Hello world!";
+
     private final HttpMethod method;
     private final HttpRequestUri uri;
     private final HttpVersion version;

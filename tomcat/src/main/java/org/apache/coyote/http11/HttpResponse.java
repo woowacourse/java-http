@@ -1,6 +1,9 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http11.request.model.HttpVersion;
+
 public class HttpResponse {
+
     private final String response;
 
     public HttpResponse(final String response) {

@@ -1,9 +1,11 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.apache.coyote.exception.UnSupportedMediaType;
+import org.apache.coyote.http11.model.ContentType;
+import org.apache.coyote.http11.request.model.HttpRequestUri;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

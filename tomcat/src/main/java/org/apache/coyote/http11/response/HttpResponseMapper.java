@@ -22,24 +22,25 @@ public class HttpResponseMapper {
     private static final Logger LOG = LoggerFactory.getLogger(HttpResponseMapper.class);
     private static final StaticResponseFactory STATIC_RESPONSE_FACTORY = new StaticResponseFactory();
 
-    private HttpResponse response;
+    public HttpResponseMapper() {
+    }
 
-    public HttpResponseMapper(HttpRequest request) {
+    public HttpResponse resolveException(HttpRequest request) {
         try {
-            this.response = parseResponse(request);
+            return handleResponse(request);
         } catch (NoSuchElementException e) {
             LOG.error(e.getMessage(), e);
-            this.response = STATIC_RESPONSE_FACTORY.getResponse(GET, "/404.html", HttpStatus.NOT_FOUND);
+            return STATIC_RESPONSE_FACTORY.getResponse(GET, "/404.html", HttpStatus.NOT_FOUND);
         } catch (NoUserException | InvalidPasswordException e) {
             LOG.error(e.getMessage(), e);
-            this.response = STATIC_RESPONSE_FACTORY.getResponse(GET, "/401.html", HttpStatus.UNAUTHORIZED);
+            return STATIC_RESPONSE_FACTORY.getResponse(GET, "/401.html", HttpStatus.UNAUTHORIZED);
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
-            this.response = STATIC_RESPONSE_FACTORY.getResponse(GET, "/500.html", HttpStatus.INTERNAL_SERVER_ERROR);
+            return STATIC_RESPONSE_FACTORY.getResponse(GET, "/500.html", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    private HttpResponse parseResponse(HttpRequest request) {
+    private HttpResponse handleResponse(HttpRequest request) {
         HttpMethod method = HttpMethod.valueOf(request.getMethod());
         String path = request.getPath();
 
@@ -64,13 +65,5 @@ public class HttpResponseMapper {
             throw new InvalidPasswordException();
         }
         LOG.info("userLogin: " + CRLF + user + CRLF);
-    }
-
-    public String getHeader() {
-        return response.getHeader().getHeaders();
-    }
-
-    public String getResponse() {
-        return String.join(CRLF, getHeader(), "", response.getBody().getBodyContext());
     }
 }

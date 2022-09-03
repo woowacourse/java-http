@@ -11,13 +11,15 @@ import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpResponseMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Http11Processor.class);
+    private static final HttpResponseMapper RESOLVER = new HttpResponseMapper();
 
     private final Socket connection;
 
@@ -36,17 +38,20 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final HttpRequest request = new HttpRequest(toRequestLines(reader));
-            final HttpResponseMapper responseMapper = new HttpResponseMapper(request);
-            log.info("\n\n###### ----REQUEST---- ###### \n\n" + request.getLines() +
-                    "\n\n###### ----RESPONSE---- ###### \n\n" + responseMapper.getHeader() + "\n\n");
+            HttpRequest request = new HttpRequest(toRequestLines(reader));
+            HttpResponse response = RESOLVER.resolveException(request);
+            logIO(request, response);
 
-            final String response = responseMapper.getResponse();
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
+            LOG.error(e.getMessage(), e);
         }
+    }
+
+    private void logIO(HttpRequest request, HttpResponse httpResponse) {
+        LOG.info("\n\n###### ----REQUEST---- ###### \n\n" + request.getLines() +
+                "\n\n###### ----RESPONSE---- ###### \n\n" + httpResponse.getHeader() + "\n\n");
     }
 
     private List<String> toRequestLines(final BufferedReader reader) throws IOException {

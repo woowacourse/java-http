@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.Constants.CRLF;
+
 import org.apache.coyote.http11.response.element.HttpStatus;
 
 public class HttpResponse {
@@ -25,5 +27,12 @@ public class HttpResponse {
 
     public HttpResponseBody getBody() {
         return body;
+    }
+
+    public String getResponse() {
+        return String.join(CRLF,
+                header.getHeaders(),
+                "",
+                body.getBodyContext());
     }
 }

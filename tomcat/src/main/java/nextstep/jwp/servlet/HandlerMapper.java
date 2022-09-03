@@ -1,30 +1,47 @@
 package nextstep.jwp.servlet;
 
-import nextstep.jwp.controller.AuthController;
-import nextstep.jwp.support.ResourceRegistry;
+import nextstep.jwp.controller.PostController;
+import nextstep.jwp.controller.GetController;
+import nextstep.jwp.controller.ResourceController;
 import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.response.HttpResponse;
 import org.apache.coyote.support.HttpMethod;
 
 public class HandlerMapper {
 
-    private final AuthController authController;
-    private final ResourceRegistry resourceRegistry;
+    private final GetController getController;
+    private final PostController postController;
+    private final ResourceController resourceController;
 
-    public HandlerMapper(AuthController authController, ResourceRegistry resourceRegistry) {
-        this.authController = authController;
-        this.resourceRegistry = resourceRegistry;
+    public HandlerMapper(GetController getController,
+                         PostController postController,
+                         ResourceController resourceController) {
+        this.getController = getController;
+        this.postController = postController;
+        this.resourceController = resourceController;
     }
 
     public HttpResponse handle(HttpRequest request) {
+        String uri = request.getUri();
         if (request.isMethodOf(HttpMethod.GET)) {
-            return resourceRegistry.findStaticResource(request.getUri());
+            if (uri.matches("/") || uri.matches("/index")) {
+                return getController.home();
+            }
+            if (uri.matches("/login")) {
+                return getController.login();
+            }
+            if (uri.matches("/register")) {
+                return getController.register();
+            }
+            return resourceController.find(request);
         }
-        if (request.getUri().matches("/register") && request.isMethodOf(HttpMethod.POST)) {
-            return authController.register(request);
-        }
-        if (request.getUri().matches("/login") && request.isMethodOf(HttpMethod.POST)) {
-            return authController.login(request);
+        if (request.isMethodOf(HttpMethod.POST)) {
+            if (uri.matches("/login")) {
+                return postController.login(request);
+            }
+            if (uri.matches("/register")) {
+                return postController.register(request);
+            }
         }
         throw new UnsupportedOperationException("Not implemented");
     }

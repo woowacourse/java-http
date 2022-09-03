@@ -1,7 +1,9 @@
 package nextstep.jwp.servlet;
 
-import nextstep.jwp.controller.AuthController;
 import nextstep.jwp.controller.ErrorController;
+import nextstep.jwp.controller.GetController;
+import nextstep.jwp.controller.PostController;
+import nextstep.jwp.controller.ResourceController;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.service.UserService;
 import nextstep.jwp.support.ResourceRegistry;
@@ -17,8 +19,10 @@ public class CustomServlet implements Servlet {
 
     public CustomServlet() {
         final var resourceRegistry = new ResourceRegistry();
-        final var authController = new AuthController(new UserService(new InMemoryUserRepository()));
-        this.handlerMapper = new HandlerMapper(authController, resourceRegistry);
+        this.handlerMapper = new HandlerMapper(
+                new GetController(resourceRegistry),
+                new PostController(new UserService(new InMemoryUserRepository())),
+                new ResourceController(resourceRegistry));
         this.errorController = new ErrorController(resourceRegistry);
     }
 

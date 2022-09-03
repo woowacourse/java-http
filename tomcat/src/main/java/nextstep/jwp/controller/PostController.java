@@ -5,11 +5,11 @@ import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.request.Parameters;
 import org.apache.coyote.servlet.response.HttpResponse;
 
-public class AuthController {
+public class PostController {
 
     private final UserService userService;
 
-    public AuthController(UserService userService) {
+    public PostController(UserService userService) {
         this.userService = userService;
     }
 

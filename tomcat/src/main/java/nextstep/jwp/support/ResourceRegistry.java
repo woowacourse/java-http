@@ -25,22 +25,12 @@ public class ResourceRegistry {
     private Path toResourcePath(String uri) {
         try {
             final var classLoader = getClass().getClassLoader();
-            final var url = classLoader.getResource("static" + toDefaultUri(uri));
+            final var url = classLoader.getResource("static" + uri);
             final var file = new File(url.getFile());
             return file.toPath();
         } catch (NullPointerException e) {
             throw HttpException.ofNotFound(e);
         }
-    }
-
-    private static String toDefaultUri(String uri) {
-        if (uri.equals("/")) {
-            return "/index.html";
-        }
-        if (!uri.contains(".")) {
-            return uri + ".html";
-        }
-        return uri;
     }
 
     private HttpResponse toHttpResponse(HttpStatus status, Path path) {

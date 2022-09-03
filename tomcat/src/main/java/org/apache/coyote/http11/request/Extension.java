@@ -6,7 +6,8 @@ public enum Extension {
     HTML(".html", "text/html"),
     CSS(".css", "text/css"),
     JS(".js", "text/javascript"),
-    ICO(".ico", "image/x-icon");
+    ICO(".ico", "image/x-icon"),
+    ;
 
     private final String extension;
     private final String contentType;

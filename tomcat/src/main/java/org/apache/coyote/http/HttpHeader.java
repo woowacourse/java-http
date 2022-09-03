@@ -18,7 +18,7 @@ public class HttpHeader {
     }
 
     public static HttpHeader from(final List<String> headerList) {
-        Map<String, String> headers = new HashMap();
+        Map<String, String> headers = new HashMap<>();
         for (String header : headerList) {
             String[] headerLine = header.split(HEADER_SEPARATOR, SPLIT_SIZE);
             headers.put(headerLine[KEY_INDEX], headerLine[VALUE_INDEX]);

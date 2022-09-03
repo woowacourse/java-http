@@ -24,4 +24,14 @@ public class HttpHeaders {
 		}
 		return new HttpHeaders(headers);
 	}
+
+	public String toMessage() {
+		final StringBuilder message = new StringBuilder();
+		for (Map.Entry<String, String> entry : value.entrySet()) {
+			message.append(entry.getKey())
+				.append(KEY_VALUE_DELIMITER)
+				.append(entry.getValue());
+		}
+		return new String(message);
+	}
 }

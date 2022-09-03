@@ -11,7 +11,7 @@ public class StaticResourceUtil {
 
     public static StaticResource findByPath(String path) throws IOException {
         try {
-            URL url = ClassLoader.getSystemResource(PREFIX + path);
+            URL url = Thread.currentThread().getContextClassLoader().getResource(PREFIX + path);
             File file = new File(url.getFile());
 
             return StaticResource.from(file);

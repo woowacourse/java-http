@@ -53,6 +53,4 @@ class RegexTest {
 
         assertThat(matcher.find()).isTrue();
     }
-
-
 }

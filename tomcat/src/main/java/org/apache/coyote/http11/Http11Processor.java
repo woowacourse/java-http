@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.request.RequestHeaders;
+import org.apache.coyote.request.StartLine;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.servlet.CustomServlet;
 import org.slf4j.Logger;
@@ -49,11 +51,17 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest toRequest(BufferedReader reader) throws IOException {
+        final var startLine = StartLine.of(reader.readLine());
+        final var headers = readHeaders(reader);
+        return new HttpRequest(startLine, headers);
+    }
+
+    private RequestHeaders readHeaders(BufferedReader reader) throws IOException {
         List<String> request = new ArrayList<>();
         String line;
         while ((line = reader.readLine()).length() > 0) {
             request.add(line);
         }
-        return HttpRequest.of(request);
+        return RequestHeaders.of(request);
     }
 }

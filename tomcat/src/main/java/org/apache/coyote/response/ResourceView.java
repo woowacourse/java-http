@@ -11,15 +11,15 @@ import org.apache.coyote.exception.HttpException;
 
 public class ResourceView {
 
-    public String findStaticResource(String uri) {
+    public HttpResponse findStaticResource(String uri) {
         final var path = toResourcePath(uri);
-        return toHttpResponseMessage(HttpStatus.OK, path);
+        return toHttpResponse(HttpStatus.OK, path);
     }
 
-    public String findErrorPage(HttpException exception) {
+    public HttpResponse findErrorPage(HttpException exception) {
         final var status = exception.getStatus();
         final var path = toResourcePath(ExceptionPage.toUri(status));
-        return toHttpResponseMessage(status, path);
+        return toHttpResponse(status, path);
     }
 
     private Path toResourcePath(String uri) {
@@ -43,13 +43,12 @@ public class ResourceView {
         return uri;
     }
 
-    private String toHttpResponseMessage(HttpStatus status, Path path) {
+    private HttpResponse toHttpResponse(HttpStatus status, Path path) {
         try {
             return new HttpResponseBuilder(status)
                     .setContentType(Files.probeContentType(path))
                     .setMessageBody(new String(Files.readAllBytes(path)))
-                    .build()
-                    .toMessage();
+                    .build();
         } catch (IOException e) {
             throw HttpException.ofInternalServerError(e);
         }

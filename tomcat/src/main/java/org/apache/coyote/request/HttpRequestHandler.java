@@ -2,6 +2,7 @@ package org.apache.coyote.request;
 
 import nextstep.jwp.controller.AuthController;
 import org.apache.coyote.exception.HttpException;
+import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.ResourceView;
 
 public class HttpRequestHandler {
@@ -9,7 +10,7 @@ public class HttpRequestHandler {
     private final AuthController authController = new AuthController();
     private final ResourceView resourceView = new ResourceView();
 
-    public String handle(HttpRequest request) {
+    public HttpResponse handle(HttpRequest request) {
         if (request.getUri().startsWith("/login")) {
             authController.login(request);
         }
@@ -19,7 +20,7 @@ public class HttpRequestHandler {
         throw new UnsupportedOperationException("Not implemented");
     }
 
-    public String handle(HttpException exception) {
+    public HttpResponse handle(HttpException exception) {
         return resourceView.findErrorPage(exception);
     }
 }

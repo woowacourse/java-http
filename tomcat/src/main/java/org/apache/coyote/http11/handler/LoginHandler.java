@@ -7,6 +7,7 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.handler.support.FileReader;
 import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.request.HttpRequest;
+import org.apache.coyote.http11.model.request.Method;
 import org.apache.coyote.http11.model.response.HttpResponse;
 import org.apache.coyote.http11.model.response.HttpResponseLine;
 import org.apache.coyote.http11.model.response.HttpStatusCode;
@@ -30,10 +31,10 @@ public class LoginHandler implements Handler {
     }
 
     private HttpResponse getResourcePath(HttpRequest httpRequest) {
-        if (httpRequest.isEmptyQueryParams()) {
+        if (httpRequest.matchRequestMethod(Method.GET)) {
             return createHttpResponse(HttpStatusCode.OK, FileReader.getFile(LOGIN_RESOURCE_PATH, getClass()));
         }
-        if (checkLogin(httpRequest.getQueryParams())) {
+        if (httpRequest.matchRequestMethod(Method.POST) && checkLogin(httpRequest.getBody())) {
             return createHttpResponse(HttpStatusCode.OK, FileReader.getFile(INDEX_RESOURCE_PATH, getClass()));
         }
         return createHttpResponse(HttpStatusCode.UNAUTHORIZED, FileReader.getFile(UNAUTHORIZED_RESOURCE_PATH, getClass()));

@@ -73,4 +73,29 @@ public class HttpRequestLine {
     public String getTarget() {
         return target;
     }
+
+    public Method getMethod() {
+        return method;
+    }
+
+    public boolean isGetMethod() {
+        return method == Method.GET;
+    }
+
+    public boolean matchMethod(final Method method) {
+        return this.method == method;
+    }
+
+    @Override
+    public String toString() {
+        return "HttpRequestLine{" +
+                "method=" + method.getName() +
+                ", target='" + target + '\'' +
+                ", params=" + params +
+                '}';
+    }
+
+    public boolean hasParams() {
+        return params.isEmpty();
+    }
 }

@@ -16,12 +16,11 @@ class HttpRequestTest {
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
-                "");
+                "account=gugu&password=password");
 
         ByteArrayInputStream inputStream = new ByteArrayInputStream(httpRequest.getBytes());
         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, UTF_8));
         HttpRequest from = HttpRequest.from(reader);
-        System.out.println(from);
+        System.out.println(from.toString());
     }
-
 }

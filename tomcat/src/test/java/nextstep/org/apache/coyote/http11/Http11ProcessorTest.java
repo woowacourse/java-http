@@ -51,7 +51,6 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-        System.out.println("테스트"+responseBody.getBytes().length);
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: "+ responseBody.getBytes().length +" \r\n" +

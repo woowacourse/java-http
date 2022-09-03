@@ -14,23 +14,23 @@ public class HttpRequestCreator {
     private static final int VERSION_INDEX = 2;
     public static final int REQUEST_LINE_CONTENT_COUNT = 3;
 
-    public static HttpRequest createHttpRequest(final BufferedReader bufferReader) throws IOException {
+    public HttpRequest createHttpRequest(final BufferedReader bufferReader) throws IOException {
         return new HttpRequest(httpRequestLine(bufferReader), httpRequestHeader(bufferReader));
     }
 
-    private static HttpRequestLine httpRequestLine(final BufferedReader bufferReader) throws IOException {
+    private HttpRequestLine httpRequestLine(final BufferedReader bufferReader) throws IOException {
         String[] line = bufferReader.readLine().split(LINE_SEPARATOR);
         validateLineFormat(line);
         return HttpRequestLine.of(line[METHOD_INDEX], line[URL_INDEX], line[VERSION_INDEX]);
     }
 
-    private static void validateLineFormat(final String[] line) {
+    private void validateLineFormat(final String[] line) {
         if (line.length != REQUEST_LINE_CONTENT_COUNT) {
             throw new IllegalArgumentException();
         }
     }
 
-    private static HttpHeader httpRequestHeader(final BufferedReader bufferReader) throws IOException {
+    private HttpHeader httpRequestHeader(final BufferedReader bufferReader) throws IOException {
         List<String> headers = new ArrayList<>();
         while (bufferReader.readLine().isBlank()) {
             headers.add(bufferReader.readLine());

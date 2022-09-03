@@ -54,7 +54,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest createHttpRequest(final BufferedReader bufferReader) throws IOException {
-        return HttpRequestCreator.createHttpRequest(bufferReader);
+        return new HttpRequestCreator().createHttpRequest(bufferReader);
     }
 
     private HttpResponse createHttpResponse(final HttpRequest httpRequest) {

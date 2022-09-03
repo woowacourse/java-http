@@ -1,4 +1,4 @@
-package org.apache.coyote.response;
+package org.apache.coyote.servlet.response;
 
 import java.util.ArrayList;
 import java.util.List;

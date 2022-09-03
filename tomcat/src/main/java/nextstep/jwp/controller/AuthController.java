@@ -1,9 +1,9 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.service.UserService;
-import org.apache.coyote.request.HttpRequest;
-import org.apache.coyote.request.Parameters;
-import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.servlet.request.HttpRequest;
+import org.apache.coyote.servlet.request.Parameters;
+import org.apache.coyote.servlet.response.HttpResponse;
 
 public class AuthController {
 

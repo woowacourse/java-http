@@ -1,4 +1,4 @@
-package org.apache.coyote.request;
+package org.apache.coyote.servlet.request;
 
 import java.util.HashMap;
 import org.apache.coyote.support.HttpException;

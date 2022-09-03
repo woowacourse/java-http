@@ -2,9 +2,9 @@ package nextstep.jwp.servlet;
 
 import nextstep.jwp.controller.AuthController;
 import nextstep.jwp.support.ResourceRegistry;
-import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.support.HttpException;
-import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.servlet.response.HttpResponse;
 import org.apache.coyote.support.HttpMethod;
 
 public class HttpRequestHandler {

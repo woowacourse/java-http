@@ -14,6 +14,9 @@ public class LoginHandler {
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
 
+    private LoginHandler() {
+    }
+
     public static void login(QueryParams queryParams) {
         if (queryParams.contains(ACCOUNT) && queryParams.contains(PASSWORD)) {
             String account = queryParams.get(ACCOUNT);

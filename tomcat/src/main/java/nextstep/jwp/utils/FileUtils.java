@@ -15,6 +15,9 @@ public class FileUtils {
     private static final String FILE_NAME_DELIMITER = ".";
     private static final int NO_EXISTING = -1;
 
+    private FileUtils() {
+    }
+
     public static String extractFileExtension(String path) {
         int fileNameDelimiterIndex = path.lastIndexOf(FILE_NAME_DELIMITER);
         if (fileNameDelimiterIndex == NO_EXISTING) {

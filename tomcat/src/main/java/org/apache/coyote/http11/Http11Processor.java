@@ -5,7 +5,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -73,20 +75,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getResponseBody(final String path, final Parameters parameters) throws IOException {
         final String url = rewrite(path);
+        writeLogging(url, parameters);
+
         if (url.equals("/")) {
             return "Hello world!";
         }
-        if (url.equals(LOGIN_PAGE_URL)) {
-            loggingAccount(parameters);
-        }
 
-        final String filePath = getClass().getClassLoader().getResource("static" + url).getPath();
-        final FileInputStream fileInputStream = new FileInputStream(filePath);
-
-        final String responseBody = new String(fileInputStream.readAllBytes());
-        fileInputStream.close();
-
-        return responseBody;
+        return readFile(url);
     }
 
     private String rewrite(final String path) {
@@ -94,6 +89,23 @@ public class Http11Processor implements Runnable, Processor {
             return LOGIN_PAGE_URL;
         }
         return path;
+    }
+
+    private void writeLogging(final String url, final Parameters parameters) {
+        if (url.equals(LOGIN_PAGE_URL)) {
+            loggingAccount(parameters);
+        }
+    }
+
+    private String readFile(final String url) throws IOException {
+        final URL fileUrl = getClass().getClassLoader().getResource("static" + url);
+        if (fileUrl == null) {
+            throw new NoSuchFileException(url + " 파일이 없습니다.");
+        }
+
+        try (final FileInputStream fileInputStream = new FileInputStream(fileUrl.getPath())) {
+            return new String(fileInputStream.readAllBytes());
+        }
     }
 
     private void loggingAccount(final Parameters parameters) {

@@ -35,9 +35,6 @@ public class Http11Processor implements Runnable, Processor {
         ) {
 
             String uri = reader.readLine().split(" ")[URI];
-            if (uri.equals("/favicon.ico")) {
-                return;
-            }
             final ResponseHandler responseHandler = new ResponseHandler(uri);
             final String response = responseHandler.getResponse();
 

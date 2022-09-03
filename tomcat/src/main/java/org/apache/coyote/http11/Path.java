@@ -29,9 +29,7 @@ public class Path {
     }
 
     public String extractContentType() {
-        if (value.endsWith("css")) {
-            return "css";
-        }
-        return "html";
+        ContentType contentType = ContentType.findContentType(value);
+        return contentType.name().toLowerCase();
     }
 }

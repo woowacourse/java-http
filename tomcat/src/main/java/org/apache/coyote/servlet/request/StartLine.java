@@ -59,6 +59,10 @@ public class StartLine {
         return this.method.equals(method);
     }
 
+    public HttpMethod getMethod() {
+        return method;
+    }
+
     public String getUri() {
         if (!uri.contains(QUERY_STRING_BEGIN_SIGN)) {
             return uri;

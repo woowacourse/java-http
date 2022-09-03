@@ -22,6 +22,10 @@ public class HttpRequest {
         return startLine.getUri();
     }
 
+    public HttpMethod getMethod() {
+        return startLine.getMethod();
+    }
+
     public Parameters getParameters() {
         if (headers.hasParametersAsBody()) {
             return Parameters.of(body);

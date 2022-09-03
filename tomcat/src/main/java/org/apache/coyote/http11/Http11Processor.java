@@ -15,9 +15,11 @@ import java.io.IOException;
 import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
-
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final ServletContainer SERVLET_CONTAINER = new ServletContainer();
+
+    private static final String REQUEST_HEADER_SPLITTER = ": ";
+    private static final int REQUEST_HEADER_KEY_INDEX = 0;
+    private static final int RESPONSE_HEADER_KEY_INDEX = 1;
 
     private final Socket connection;
 
@@ -40,13 +42,13 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = generateHttpRequest(bufferedReader);
             HttpResponse httpResponse = new HttpResponse();
 
-            if (httpRequest.getPath().contains(".")) {
+            if (isResource(httpRequest)) {
                 httpResponse.addView(httpRequest.getPath());
                 write(outputStream, httpResponse);
                 return;
             }
 
-            Servlet servlet = SERVLET_CONTAINER.findByPath(httpRequest.getPath());
+            Servlet servlet = ServletContainer.findByPath(httpRequest.getPath());
             servlet.service(httpRequest, httpResponse);
 
             write(outputStream, httpResponse);
@@ -61,15 +63,21 @@ public class Http11Processor implements Runnable, Processor {
 
         String line;
         while (!(line = Objects.requireNonNull(bufferedReader.readLine())).isBlank()) {
-            String[] splitHeader = line.split(": ");
-            request.addHeader(splitHeader[0], splitHeader[1]);
+            String[] splitHeader = line.split(REQUEST_HEADER_SPLITTER);
+            request.addHeader(splitHeader[REQUEST_HEADER_KEY_INDEX], splitHeader[RESPONSE_HEADER_KEY_INDEX]);
         }
 
         return request;
     }
 
+    private boolean isResource(final HttpRequest httpRequest) {
+        String path = httpRequest.getPath();
+        return path.contains(".");
+    }
+
     private void write(final OutputStream outputStream, final HttpResponse httpResponse) throws IOException {
-        outputStream.write(httpResponse.parseResponse().getBytes());
+        String response = httpResponse.parseResponse();
+        outputStream.write(response.getBytes());
         outputStream.flush();
     }
 }

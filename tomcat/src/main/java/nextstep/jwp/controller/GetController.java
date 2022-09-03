@@ -3,6 +3,7 @@ package nextstep.jwp.controller;
 import nextstep.jwp.support.ResourceRegistry;
 import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.response.HttpResponse;
+import org.apache.coyote.support.HttpMethod;
 
 public class GetController {
 
@@ -12,15 +13,18 @@ public class GetController {
         this.resourceRegistry = resourceRegistry;
     }
 
-    public HttpResponse home() {
+    @RequestMapping(method = HttpMethod.GET, path = {"/", "/index"})
+    public HttpResponse home(HttpRequest request) {
         return resourceRegistry.findStaticResource("/index.html");
     }
 
-    public HttpResponse login() {
+    @RequestMapping(method = HttpMethod.GET, path = "/login")
+    public HttpResponse login(HttpRequest request) {
         return resourceRegistry.findStaticResource("/login.html");
     }
 
-    public HttpResponse register() {
+    @RequestMapping(method = HttpMethod.GET, path = "/register")
+    public HttpResponse register(HttpRequest request) {
         return resourceRegistry.findStaticResource("/register.html");
     }
 }

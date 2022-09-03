@@ -19,10 +19,10 @@ public class CustomServlet implements Servlet {
 
     public CustomServlet() {
         final var resourceRegistry = new ResourceRegistry();
-        this.handlerMapper = new HandlerMapper(
+        final var handlerMappings = HandlerMappings.of(
                 new GetController(resourceRegistry),
-                new PostController(new UserService(new InMemoryUserRepository())),
-                new ResourceController(resourceRegistry));
+                new PostController(new UserService(new InMemoryUserRepository())));
+        this.handlerMapper = new HandlerMapper(handlerMappings, new ResourceController(resourceRegistry));
         this.errorController = new ErrorController(resourceRegistry);
     }
 

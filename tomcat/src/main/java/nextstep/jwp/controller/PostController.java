@@ -4,6 +4,7 @@ import nextstep.jwp.service.UserService;
 import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.request.Parameters;
 import org.apache.coyote.servlet.response.HttpResponse;
+import org.apache.coyote.support.HttpMethod;
 
 public class PostController {
 
@@ -13,6 +14,7 @@ public class PostController {
         this.userService = userService;
     }
 
+    @RequestMapping(method = HttpMethod.POST, path = "/login")
     public HttpResponse login(HttpRequest request) {
         Parameters parameters = request.getParameters();
         final var account = parameters.get("account");
@@ -20,6 +22,7 @@ public class PostController {
         return userService.findUser(account, password);
     }
 
+    @RequestMapping(method = HttpMethod.POST, path = "/register")
     public HttpResponse register(HttpRequest request) {
         Parameters parameters = request.getParameters();
         final var account = parameters.get("account");

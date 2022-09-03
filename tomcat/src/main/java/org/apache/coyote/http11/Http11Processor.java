@@ -4,23 +4,21 @@ import static org.apache.coyote.constant.HttpStatus.NOT_FOUND;
 import static org.apache.coyote.constant.HttpStatus.OK;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
-import org.apache.coyote.Processor;
 import org.apache.coyote.HttpRequest;
+import org.apache.coyote.HttpResponse;
+import org.apache.coyote.Processor;
 import org.apache.coyote.constant.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -113,46 +111,30 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void renderWelcomePage(final OutputStream outputStream) throws IOException {
-        final String responseBody = WELCOME_MESSAGE;
-        final String response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        final HttpResponse response = HttpResponse.builder()
+                .status(OK)
+                .body(WELCOME_MESSAGE)
+                .build();
 
-        outputStream.write(response.getBytes());
+        outputStream.write(response.toBytes());
         outputStream.flush();
     }
 
     private void render(final OutputStream outputStream, final String viewName) throws IOException {
         URL resource = getClass().getClassLoader().getResource(viewName);
         HttpStatus statusCode = OK;
+
         if (resource == null) {
             resource = getClass().getClassLoader().getResource(NOT_FOUND_PAGE);
             statusCode = NOT_FOUND;
         }
 
-        final String response = toResponse(resource, statusCode);
+        final HttpResponse response = HttpResponse.builder()
+                .status(statusCode)
+                .body(resource)
+                .build();
 
-        outputStream.write(response.getBytes());
+        outputStream.write(response.toBytes());
         outputStream.flush();
-    }
-
-    private String toResponse(final URL resource, final HttpStatus httpStatus) throws IOException {
-        final File file = new File(resource.getFile());
-        final Path path = file.toPath();
-        final byte[] responseBody = Files.readAllBytes(path);
-
-        return String.join("\r\n",
-                "HTTP/1.1 " + getStatusMessage(httpStatus) + " ",
-                "Content-Type: " + Files.probeContentType(path) + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.length + " ",
-                "",
-                new String(responseBody));
-    }
-
-    private static String getStatusMessage(final HttpStatus httpStatus) {
-        return String.join(" ", String.valueOf(httpStatus.getStatusCode()), httpStatus.getStatusMessage());
     }
 }

@@ -1,11 +1,11 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.http.response;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.http11.HttpVersion;
+import org.apache.coyote.http11.http.HttpVersion;
 import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.header.HttpHeaderType;
-import org.apache.coyote.http11.request.HttpHeaders;
+import org.apache.coyote.http11.http.HttpHeaders;
 
 public class HttpResponse {
 

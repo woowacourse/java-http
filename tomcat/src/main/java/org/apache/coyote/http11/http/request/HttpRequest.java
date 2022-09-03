@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.http.request;
 
 import static org.apache.catalina.utils.IOUtils.readData;
 import static org.apache.coyote.http11.header.HttpHeaderType.CONTENT_LENGTH;
@@ -6,6 +6,7 @@ import static org.apache.coyote.http11.header.HttpHeaderType.CONTENT_LENGTH;
 import java.io.BufferedReader;
 import java.io.IOException;
 import org.apache.coyote.http11.header.HttpHeader;
+import org.apache.coyote.http11.http.HttpHeaders;
 
 public class HttpRequest {
 

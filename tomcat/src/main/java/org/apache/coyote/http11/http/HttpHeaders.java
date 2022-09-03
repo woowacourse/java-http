@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.http;
 
 import static org.apache.catalina.utils.Parser.removeBlank;
 

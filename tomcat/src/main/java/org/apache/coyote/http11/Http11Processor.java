@@ -12,8 +12,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -30,6 +28,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    public static final String WELCOME_MESSAGE = "Hello world!";
 
     private final Socket connection;
 
@@ -46,12 +45,10 @@ public class Http11Processor implements Runnable, Processor {
     public void process(Socket connection) {
         try (var inputStream = connection.getInputStream();
              var outputStream = connection.getOutputStream()) {
-
-            List<String> request = getRequest(inputStream);
-            HttpRequest httpRequest = new HttpRequest(request);
-
+            HttpRequest httpRequest = new HttpRequest(getRequestLine(inputStream));
             HttpResponse httpResponse = getResponse(httpRequest);
             String response = httpResponse.parseToString();
+
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -59,53 +56,43 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private List<String> getRequest(InputStream inputStream) throws IOException {
-        List<String> request = new ArrayList<>();
-
+    private String getRequestLine(InputStream inputStream) throws IOException {
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(inputStream, Charset.forName(StandardCharsets.UTF_8.name())));
-        String line = reader.readLine();
-
-        while (!"".equals(line)) {
-            if (Objects.isNull(line)) {
-                break;
-            }
-            request.add(line);
-            line = reader.readLine();
-        }
-        return request;
+        return reader.readLine();
     }
 
     public HttpResponse getResponse(HttpRequest httpRequest) throws IOException {
-        if (httpRequest.getRequestUri().equals("/")) {
-            String responseBody = "Hello world!";
-            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.HTML, responseBody);
-        }
-        if (httpRequest.getRequestUri().endsWith(".html")) {
-            if (httpRequest.getRequestUri().equals("/login.html")) {
-                Optional<User> user = InMemoryUserRepository.findByAccount(
-                        httpRequest.getQueryStrings().get("account"));
-                user.ifPresent(value -> log.debug(value.toString()));
+        try {
+            String path = httpRequest.getUri().getPath();
+            if (path.equals("/")) {
+                return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.HTML, WELCOME_MESSAGE);
             }
-            String responseBody = getResponseBody(httpRequest);
-            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.HTML, responseBody);
-        }
-        if (httpRequest.getRequestUri().endsWith(".css")) {
-            String responseBody = getResponseBody(httpRequest);
-            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.CSS, responseBody);
+            if (path.endsWith(".html")) {
+                return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.HTML,
+                        getStaticResponse(path));
+            }
+            if (path.endsWith(".css")) {
+                return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.CSS,
+                        getStaticResponse(path));
+            }
+            if (path.endsWith(".js")) {
+                return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.JAVASCRIPT,
+                        getStaticResponse(path));
+            }
 
+            Optional<User> user = InMemoryUserRepository.findByAccount(
+                    httpRequest.getUri().getQueryParams().get("account"));
+            user.ifPresent(value -> log.debug(value.toString()));
+            String responseBody = getStaticResponse(path + ".html");
+            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.HTML, responseBody);
+        } catch (RuntimeException e) {
+            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.NOT_FOUND, ContentType.HTML, null);
         }
-        if (httpRequest.getRequestUri().endsWith(".js")) {
-            String responseBody = getResponseBody(httpRequest);
-            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.JAVASCRIPT,
-                    responseBody);
-        }
-        return new HttpResponse(httpRequest.getProtocol(), HttpStatus.NOT_FOUND, ContentType.HTML, null);
     }
 
-    private String getResponseBody(HttpRequest httpRequest) throws IOException {
-        URL resourceURL = getClass().getClassLoader()
-                .getResource("static" + httpRequest.getRequestUri());
+    private String getStaticResponse(String resourcePath) throws IOException {
+        URL resourceURL = getClass().getClassLoader().getResource("static" + resourcePath);
         try {
             File file = new File(Objects.requireNonNull(resourceURL).toURI());
             Path path = file.getAbsoluteFile().toPath();

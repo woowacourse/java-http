@@ -7,7 +7,8 @@ public enum ContentType {
 
     HTML(".html", "text/html;charset=utf-8"),
     CSS(".css", "text/css"),
-    JAVASCRIPT(".js", "text/javascript");
+    JAVASCRIPT(".js", "application/javascript"),
+    SVG(".svg", "image/svg+xml");
 
     private final String extension;
     private final String value;

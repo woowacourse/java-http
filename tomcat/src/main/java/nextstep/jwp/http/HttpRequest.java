@@ -54,15 +54,6 @@ public class HttpRequest {
         return FileUtils.extractFileExtension(path);
     }
 
-
-    public String getHttpMethod() {
-        return httpMethod;
-    }
-
-    public String getUri() {
-        return uri;
-    }
-
     public String getPath() {
         return path;
     }

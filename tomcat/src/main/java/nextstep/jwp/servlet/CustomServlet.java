@@ -16,12 +16,11 @@ public class CustomServlet implements Servlet {
     private final ErrorController errorController;
 
     public CustomServlet() {
-        final var resourceRegistry = new ViewResolver();
-        final var handlerMappings = HandlerMappings.of(
-                new GetController(resourceRegistry),
+        final var viewResolver = new ViewResolver();
+        final var handlerMappings = HandlerMappings.of(new GetController(),
                 new PostController(new UserService(new InMemoryUserRepository())));
-        this.handlerMapper = new HandlerMapper(handlerMappings, resourceRegistry);
-        this.errorController = new ErrorController(resourceRegistry);
+        this.handlerMapper = new HandlerMapper(handlerMappings, viewResolver);
+        this.errorController = new ErrorController(viewResolver);
     }
 
     public HttpResponse service(HttpRequest request) {

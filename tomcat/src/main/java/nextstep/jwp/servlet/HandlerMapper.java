@@ -16,10 +16,20 @@ public class HandlerMapper {
 
     public HttpResponse handle(HttpRequest request) {
         Handler handler = handlerMappings.getHandler(request);
-        if (handler != null) {
-            final var response = handler.handle(request);
+        if (handler == null) {
+            return viewResolver.findStaticResource(request.getUri());
+        }
+        return handle(request, handler);
+    }
+
+    private HttpResponse handle(HttpRequest request, Handler handler) {
+        final var response = handler.handle(request);
+        if (handler.hasReturnTypeOf(HttpResponse.class)) {
             return (HttpResponse) response;
         }
-        return viewResolver.findStaticResource(request.getUri());
+        if (handler.hasReturnTypeOf(String.class)) {
+            return viewResolver.findStaticResource((String) response);
+        }
+        throw new UnsupportedOperationException("invalid request");
     }
 }

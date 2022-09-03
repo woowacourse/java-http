@@ -15,8 +15,8 @@ public class Handler {
         this.controller = controller;
     }
 
-    public Class<?> getReturnType() {
-        return method.getReturnType();
+    public boolean hasReturnTypeOf(Class<?> clazz) {
+        return method.getReturnType().equals(clazz);
     }
 
     public Object handle(Object arg) {

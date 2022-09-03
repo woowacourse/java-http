@@ -1,6 +1,4 @@
-package org.apache.coyote.exception;
-
-import org.apache.coyote.support.HttpStatus;
+package org.apache.coyote.support;
 
 public class HttpException extends RuntimeException {
 

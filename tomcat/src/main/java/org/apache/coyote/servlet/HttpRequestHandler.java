@@ -1,7 +1,8 @@
-package org.apache.coyote.request;
+package org.apache.coyote.servlet;
 
 import nextstep.jwp.controller.AuthController;
-import org.apache.coyote.exception.HttpException;
+import org.apache.coyote.request.HttpRequest;
+import org.apache.coyote.support.HttpException;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.ResourceView;
 import org.apache.coyote.support.HttpMethod;

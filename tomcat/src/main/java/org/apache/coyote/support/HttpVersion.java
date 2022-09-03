@@ -1,7 +1,6 @@
 package org.apache.coyote.support;
 
 import java.util.Arrays;
-import org.apache.coyote.exception.HttpException;
 
 public enum HttpVersion {
 

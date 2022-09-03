@@ -1,7 +1,7 @@
 package nextstep.jwp.service;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import org.apache.coyote.exception.HttpException;
+import org.apache.coyote.support.HttpException;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.HttpResponse.HttpResponseBuilder;
 import org.apache.coyote.support.HttpStatus;

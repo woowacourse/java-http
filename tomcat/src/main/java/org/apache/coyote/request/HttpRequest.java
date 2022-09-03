@@ -1,7 +1,7 @@
 package org.apache.coyote.request;
 
 import java.util.List;
-import org.apache.coyote.exception.HttpException;
+import org.apache.coyote.support.HttpException;
 import org.apache.coyote.support.HttpMethod;
 import org.apache.coyote.support.HttpStatus;
 import org.apache.coyote.support.HttpVersion;

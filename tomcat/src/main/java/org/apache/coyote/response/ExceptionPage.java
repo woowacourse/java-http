@@ -1,4 +1,4 @@
-package org.apache.coyote.exception;
+package org.apache.coyote.response;
 
 import java.util.Arrays;
 import org.apache.coyote.support.HttpStatus;

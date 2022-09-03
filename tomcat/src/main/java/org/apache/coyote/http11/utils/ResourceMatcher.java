@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 
 public enum ResourceMatcher implements Predicate<String> {
 
-    DEFAULT(url -> url.endsWith("/"), url -> url += "/hello.txt"),
+    DEFAULT(url -> url.endsWith("/"), url -> url += "hello.txt"),
     HTML(url -> !url.contains("."), url -> url += ".html"),
     ;
 

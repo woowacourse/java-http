@@ -55,8 +55,8 @@ public class StartLine {
         return uri;
     }
 
-    public HttpMethod getMethod() {
-        return method;
+    public boolean hasMethodOf(HttpMethod method) {
+        return this.method.equals(method);
     }
 
     public String getUri() {
@@ -65,10 +65,6 @@ public class StartLine {
         }
         final var delimiterIndex = uri.indexOf(QUERY_STRING_BEGIN_SIGN);
         return uri.substring(0, delimiterIndex);
-    }
-
-    public HttpVersion getVersion() {
-        return version;
     }
 
     public Parameters getParameters() {

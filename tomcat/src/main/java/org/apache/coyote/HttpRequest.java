@@ -39,6 +39,10 @@ public class HttpRequest {
         return path.getValue();
     }
 
+    public HttpMethod getMethod() {
+        return method;
+    }
+
     public String getParam(final String param) {
         return path.getParam(param);
     }

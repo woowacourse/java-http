@@ -28,3 +28,4 @@
 - [ ] 비즈니스 로직과 tomcat 기능을 분리하기
 - [x] HttpRequest에서 일급컬렉션 사용하기
 - [x] 반복되는 상수를 Enum으로 처리하기
+- [ ] loginController 악취 제거하기

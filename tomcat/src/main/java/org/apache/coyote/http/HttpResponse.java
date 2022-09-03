@@ -1,18 +1,28 @@
 package org.apache.coyote.http;
 
 
+import java.util.Map;
 
 public class HttpResponse {
 
     private HttpStatus httpStatus;
     private Header header;
-    private Body body;
+    private String body;
 
-    public HttpResponse(final HttpStatus httpStatus, final String url, final String bodyValue) {
+    public HttpResponse(HttpStatus httpStatus, Map<String, String> header, String body) {
         this.httpStatus = httpStatus;
-        this.header = new Header(url);
-        this.body = new Body(bodyValue);
+        this.header = new Header(header);
+        this.body = body;
     }
+
+    public static HttpResponseBuilder ok(){
+        return new HttpResponseBuilder(HttpStatus.OK);
+    }
+
+    public static HttpResponseBuilder notFound(){
+        return new HttpResponseBuilder(HttpStatus.NOT_FOUND);
+    }
+
 
     public String getHttpStatus() {
         return httpStatus.getCode() + " " + httpStatus.getMessage() ;
@@ -23,6 +33,6 @@ public class HttpResponse {
     }
 
     public String getBody() {
-        return body.getValue();
+        return body;
     }
 }

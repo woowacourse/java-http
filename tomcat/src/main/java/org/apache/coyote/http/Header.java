@@ -1,21 +1,20 @@
 package org.apache.coyote.http;
 
-import static org.apache.coyote.PageMapper.isCustomFileRequest;
-
+import java.util.Map;
 
 public class Header {
 
-    private static final String DOT = ".";
-    private ContentType contentType;
+    private Map<String, String> values;
 
-    public Header(final String url) {
-        if(isCustomFileRequest(url)){
-            this.contentType = ContentType.HTML;
-        }
-        this.contentType = ContentType.from(url.substring(url.lastIndexOf(DOT)+1));
+    public Header(Map<String, String> header) {
+        this.values = header;
     }
 
-    public String getContentType() {
-        return contentType.getValue();
+    public Map<String, String> values() {
+        return values;
+    }
+
+    public String getContentType(){
+        return values.getOrDefault("Content-Type", "");
     }
 }

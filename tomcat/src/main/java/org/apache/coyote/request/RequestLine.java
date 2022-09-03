@@ -32,6 +32,14 @@ public class RequestLine {
         return new RequestLine(HttpMethod.of(tokens[HTTP_METHOD_INDEX]), requestUri, QueryParams.from(parameter));
     }
 
+    public boolean isGet() {
+        return httpMethod.isGet();
+    }
+
+    public boolean isPost() {
+        return httpMethod.isPost();
+    }
+
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }

@@ -5,6 +5,7 @@ import org.apache.coyote.exception.NoSuchHttpMethodException;
 
 public enum HttpMethod {
     GET("GET"),
+    POST("POST"),
     ;
 
     private final String value;
@@ -20,7 +21,15 @@ public enum HttpMethod {
                 .orElseThrow(() -> new NoSuchHttpMethodException());
     }
 
-    public boolean isSame(final String httpMethod) {
+    private boolean isSame(final String httpMethod) {
         return value.equals(httpMethod);
+    }
+
+    public boolean isGet() {
+        return this.equals(GET);
+    }
+
+    public boolean isPost() {
+        return this.equals(POST);
     }
 }

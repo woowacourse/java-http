@@ -27,6 +27,14 @@ public class HttpRequest {
         }
     }
 
+    public boolean isGet() {
+        return requestLine.isGet();
+    }
+
+    public boolean isPost() {
+        return requestLine.isPost();
+    }
+
     public HttpMethod getHttpMethod() {
         return requestLine.getHttpMethod();
     }

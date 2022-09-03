@@ -11,5 +11,10 @@
   - [x] 예상하지 못한 문제인 경우, 500.html 응답
   - [x] 상태코드가 500이 아니더라도, 대응되는 html 파일이 없는 경우 500.html 응답
 
-- [x] uri에 query string이 포함되면 파싱하여 처리한다.
-  - [x] `GET /login.html` 요청시 query string에 대응되는 사용자 데이터가 인메모리 DB에 존재하면 로그에 출력한다.
+- [x] 요청에 parameter 값이 포함되면 파싱하여 처리한다.
+  - [x] Content-Type 헤더 값에 따라 Request Body의 파라미터 값을 파싱할 수 있다.
+  - [x] uri에 query string이 포함되면 파싱하여 처리한다.
+
+- [x] `POST /login` 요청시 form에 입력된 값에 따라 302 혹은 401을 응답한다.
+  - [x] `account`와 `password` 정보에 대응되는 사용자가 서버에 존재하는 경우 302를 응답하여 /index.html 페이지로 이동시킨다.
+  - [x] 잘못된 사용자 정보를 입력한 경우, 401을 응답하며, /401.html 페이지를 보여준다.

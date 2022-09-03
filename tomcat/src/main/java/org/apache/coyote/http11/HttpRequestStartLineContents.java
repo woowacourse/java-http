@@ -43,7 +43,7 @@ public class HttpRequestStartLineContents {
         }
         final int indexOfQueryStringPrefix = uriAndQueryParams.indexOf(QUERY_STRING_PREFIX);
 
-        saveQueryParams(uriAndQueryParams.substring(indexOfQueryStringPrefix), queryParams);
+        saveQueryParams(uriAndQueryParams.substring(indexOfQueryStringPrefix + 1), queryParams);
         return uriAndQueryParams.substring(0, indexOfQueryStringPrefix);
     }
 
@@ -58,5 +58,9 @@ public class HttpRequestStartLineContents {
 
     public String getUri() {
         return uri;
+    }
+
+    public Map<String, String> getQueryParams() {
+        return queryParams;
     }
 }

@@ -21,6 +21,10 @@ public class HttpResponse {
         return httpHeaders;
     }
 
+    public void addHeader(final String key, final String value) {
+        httpHeaders.addValue(key, value);
+    }
+
     public String generateResponse() {
         final String separator = "\r\n";
         return String.join(separator,

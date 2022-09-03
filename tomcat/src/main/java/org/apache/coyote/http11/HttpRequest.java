@@ -21,6 +21,10 @@ public class HttpRequest {
         return uri.substring(0, index);
     }
 
+    public boolean isQueryStringEmpty() {
+        return queryStrings.isEmpty();
+    }
+
     public String getUrl() {
         return url;
     }

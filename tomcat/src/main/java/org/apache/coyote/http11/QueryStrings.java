@@ -40,6 +40,10 @@ public class QueryStrings {
         return result;
     }
 
+    public boolean isEmpty() {
+        return value.isEmpty();
+    }
+
     public String findByKey(final String key) {
         return value.get(key);
     }

@@ -11,10 +11,12 @@ public class RequestLoginUserOutput {
     private static final Logger log = LoggerFactory.getLogger(RequestLoginUserOutput.class);
 
     public static void printRequestLoginUser(final HttpRequest httpRequest){
+        if(!httpRequest.hasQuery()){
+            return;
+        }
         final String account = httpRequest.getQueryByValue("account");
         InMemoryUserRepository.findByAccount(account)
                 .ifPresent(it -> log.info(it.toString()));
-
     }
 
 }

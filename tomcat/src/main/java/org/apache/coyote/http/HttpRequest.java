@@ -52,6 +52,10 @@ public class HttpRequest {
         return index >= 0;
     }
 
+    public boolean hasQuery() {
+        return query.size() != 0;
+    }
+
     public String getQueryByValue(final String key){
         return query.get(key);
     }

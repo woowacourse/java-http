@@ -17,6 +17,8 @@ public class UserService {
         if (!foundUser.checkPassword(password)) {
             throw new HttpException(HttpStatus.UNAUTHORIZED);
         }
-        return new HttpResponseBuilder(HttpStatus.FOUND).build();
+        return new HttpResponseBuilder(HttpStatus.FOUND)
+                .setLocation("/index.html")
+                .build();
     }
 }

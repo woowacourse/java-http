@@ -1,4 +1,4 @@
-package org.apache.coyote.common.constant;
+package org.apache.coyote.constant;
 
 public enum HttpStatus {
 

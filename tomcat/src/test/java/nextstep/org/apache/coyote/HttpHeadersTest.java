@@ -1,10 +1,10 @@
-package nextstep.org.apache.coyote.http11.common;
+package nextstep.org.apache.coyote;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
-import org.apache.coyote.common.HttpHeaders;
+import org.apache.coyote.HttpHeaders;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

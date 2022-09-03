@@ -1,10 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.common.HttpHeaders;
-import org.apache.coyote.common.HttpPath;
-import org.apache.coyote.common.constant.HttpMethod;
+import org.apache.coyote.constant.HttpMethod;
 
 public class HttpRequest {
 

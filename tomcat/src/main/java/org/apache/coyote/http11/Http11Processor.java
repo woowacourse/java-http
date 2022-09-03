@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.common.constant.HttpStatus.NOT_FOUND;
-import static org.apache.coyote.common.constant.HttpStatus.OK;
+import static org.apache.coyote.constant.HttpStatus.NOT_FOUND;
+import static org.apache.coyote.constant.HttpStatus.OK;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,7 +20,8 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.common.constant.HttpStatus;
+import org.apache.coyote.HttpRequest;
+import org.apache.coyote.constant.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

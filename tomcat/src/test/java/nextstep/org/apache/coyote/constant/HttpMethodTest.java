@@ -1,6 +1,6 @@
-package nextstep.org.apache.coyote.http11.common.constant;
+package nextstep.org.apache.coyote.constant;
 
-import org.apache.coyote.common.constant.HttpMethod;
+import org.apache.coyote.constant.HttpMethod;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 

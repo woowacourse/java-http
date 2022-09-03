@@ -15,6 +15,8 @@ import nextstep.jwp.exception.LoginFailedException;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.Http11Request.Http11Request;
+import org.apache.coyote.http11.Http11Request.Http11RequestHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,9 +25,12 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final Http11RequestHandler http11RequestHandler;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(final Socket connection,
+                           final Http11RequestHandler http11RequestHandler) {
         this.connection = connection;
+        this.http11RequestHandler = http11RequestHandler;
     }
 
     @Override
@@ -36,11 +41,12 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
+             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
              final var outputStream = connection.getOutputStream()) {
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String fileName = bufferedReader.readLine().split(" ")[1];
+            Http11Request http11Request = http11RequestHandler.makeRequest(bufferedReader);
 
-            final var response = makeResponse(fileName);
+            final var response = makeResponse(http11Request.getUri());
 
             outputStream.write(response.getBytes());
             outputStream.flush();

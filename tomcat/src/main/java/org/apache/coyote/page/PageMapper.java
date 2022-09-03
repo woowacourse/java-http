@@ -10,19 +10,19 @@ public class PageMapper {
     private final static String STATIC = "static" + File.separator;
 
     public Path getStaticFilePath(final String url){
-        return Paths.get(Objects.requireNonNull(
-                getClass()
-                .getClassLoader()
-                .getResource(STATIC + url))
-                .getPath());
+        return getPath(url);
     }
 
     public Path getFilePath(final String url){
         String fileName = FileName.findFileName(url).getFileName();
+        return getPath(fileName);
+    }
+
+    private Path getPath(String url) {
         return Paths.get(Objects.requireNonNull(
                 getClass()
                 .getClassLoader()
-                .getResource(STATIC + fileName))
+                .getResource(STATIC + url))
                 .getPath());
     }
 }

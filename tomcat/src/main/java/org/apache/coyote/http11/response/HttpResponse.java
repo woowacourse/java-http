@@ -40,7 +40,7 @@ public class HttpResponse {
 
 	public String createResponseMessage() {
 		return String.join("\r\n",
-			"HTTP/1.1 200 OK ",
+			"HTTP/1.1 " + StatusCode.OK.toMessage() + " ",
 			"Content-Type: " + contentType + ";charset=utf-8 ",
 			"Content-Length: " + body.getBytes().length + " ",
 			"",

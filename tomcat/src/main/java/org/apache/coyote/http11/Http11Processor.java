@@ -6,9 +6,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -35,21 +38,20 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream();
-             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+             BufferedReader bufferedReader = new BufferedReader(
+                     new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-            String resource = getResource(bufferedReader);
-            resource = changeResource(resource);
+            StartLine startLine = StartLine.from(bufferedReader.readLine());
+            startLine.changeRequestURL();
+            List<String> headerLines = getHeaderLines(bufferedReader);
+            QueryParams queryParams = QueryParams.from(startLine.getRequestURL());
+            HttpRequest httpRequest = new HttpRequest(startLine, headerLines, queryParams);
 
-            if (resource.contains("?")) {
-                int index = resource.indexOf("?");
-                String path = resource.substring(0, index);
-                String queryString = resource.substring(index + 1);
-                parsingQueryString(path, queryString);
-            }
+            processLogin(queryParams);
 
-            String responseBody = getResponseBody(resource);
+            String contentType = checkContentType(startLine.getRequestURL());
+            String responseBody = getResponseBody(httpRequest);
 
-            String contentType = checkContentType(resource);
 
             var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
@@ -65,23 +67,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResource(BufferedReader bufferedReader) throws IOException {
-        String requestURI = bufferedReader.readLine();
-        return requestURI.split(" ")[1]
-                .substring(1);
-    }
-
-    private String changeResource(String resource) {
-        if (resource.equals("login")) {
-            resource += ".html";
+    private List<String> getHeaderLines(BufferedReader bufferedReader) throws IOException {
+        List<String> headerLines = new ArrayList<>();
+        String line = bufferedReader.readLine();
+        while (!line.equals("")) {
+            headerLines.add(line);
+            line = bufferedReader.readLine();
         }
-        return resource;
+        return headerLines;
     }
 
-    private void parsingQueryString(String path, String queryString) {
-        if (path.equals("login")) {
-            String account = queryString.split("&")[0].split("=")[1];
-            String password = queryString.split("&")[1].split("=")[1];
+    private void processLogin(QueryParams queryParams) {
+        if (queryParams.isLoginPath()) {
+            String account = queryParams.getParamValue("account");
+            String password = queryParams.getParamValue("password");
             checkUser(account, password);
         }
     }
@@ -94,23 +93,22 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String checkContentType(String resource) {
+    private String checkContentType(String requestURL) {
         String contentType = "text/html";
-        if (resource.endsWith(".css")) {
+        if (requestURL.endsWith(".css")) {
             contentType = "text/css";
         }
         return contentType;
     }
 
-    private String getResponseBody(String resource) throws IOException {
-        if (resource.isEmpty()) {
+    private String getResponseBody(HttpRequest httpRequest) throws IOException {
+        if (httpRequest.isMainRequest()) {
             return "Hello world!";
         }
-        if (resource.contains("?")) {
+        if (httpRequest.hasParams()) {
             return "success";
         }
-        Path path = Paths.get(this.getClass().getClassLoader().getResource("static/" + resource).getFile());
+        Path path = Paths.get(this.getClass().getClassLoader().getResource("static" + httpRequest.getRequestURL()).getFile());
         return new String(Files.readAllBytes(path));
     }
 }
-

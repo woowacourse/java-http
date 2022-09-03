@@ -24,4 +24,8 @@ public class HttpRequestHeader {
         }
         return values;
     }
+
+    public String getHeaderValue(String key) {
+        return headers.get(key);
+    }
 }

@@ -3,21 +3,15 @@ package org.apache.util;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
 
 public class FileUtil {
 
     private FileUtil() {
     }
 
-    public static String loadFile(String path) {
-        try {
-            URL resource = findResource(path);
-            File file = toFile(resource);
-            return new String(Files.readAllBytes(file.toPath()));
-        } catch (IOException e) {
-            throw new IllegalArgumentException(path + "가 존재하지 않습니다.");
-        }
+    public static File loadFile(String path) {
+        URL resource = findResource(path);
+        return toFile(resource);
     }
 
     private static URL findResource(String path) {

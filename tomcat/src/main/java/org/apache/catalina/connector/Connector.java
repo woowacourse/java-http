@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.List;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.mvc.Controller;
-import org.apache.mvc.ControllerMapper;
+import org.apache.mvc.HandlerMapper;
+import org.apache.mvc.handlerchain.RequestHandlerChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,16 +19,16 @@ public class Connector implements Runnable {
 
     private final ServerSocket serverSocket;
     private boolean stopped;
-    private final ControllerMapper controllerMapper;
+    private final HandlerMapper handlerMapper;
 
-    public Connector(List<Controller> controllers) {
-        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, controllers);
+    public Connector(RequestHandlerChain chain) {
+        this(DEFAULT_PORT, DEFAULT_ACCEPT_COUNT, chain);
     }
 
-    public Connector(final int port, final int acceptCount, List<Controller> controllers) {
+    public Connector(final int port, final int acceptCount, RequestHandlerChain chain) {
         this.serverSocket = createServerSocket(port, acceptCount);
         this.stopped = false;
-        this.controllerMapper = ControllerMapper.from(controllers);
+        this.handlerMapper = new HandlerMapper(chain);
         log.info("web server started on port " + port);
     }
 
@@ -70,7 +69,7 @@ public class Connector implements Runnable {
             return;
         }
         log.info("connect host: {}, port: {}", connection.getInetAddress(), connection.getPort());
-        var processor = new Http11Processor(connection, controllerMapper);
+        var processor = new Http11Processor(connection, handlerMapper);
         new Thread(processor).start();
     }
 

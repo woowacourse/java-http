@@ -7,12 +7,12 @@ import org.apache.coyote.http11.ResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.exception.TempException;
 
-public class RequestHandler {
+public class RequestHandlerMethod {
 
     private final Object instance;
     private final Method method;
 
-    public RequestHandler(Object instance, Method method) {
+    public RequestHandlerMethod(Object instance, Method method) {
         validateInvocable(instance, method);
         this.instance = instance;
         this.method = method;
@@ -50,7 +50,7 @@ public class RequestHandler {
             Object result = method.invoke(instance, httpRequest);
             return castToResponseEntity(result);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new TempException();
+            throw new IllegalStateException(e);
         }
     }
 

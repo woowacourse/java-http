@@ -10,19 +10,19 @@ import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.exception.TempException;
 import org.junit.jupiter.api.Test;
 
-class RequestHandlerTest {
+class RequestHandlerMethodTest {
 
     @Test
     void createHttpRequest() {
         // given & when
         Controller controller = new Controller() {
             public ResponseEntity myMethod(HttpRequest httpRequest) {
-                return new ResponseEntity(HttpStatus.OK, "hello", determineContentType(path));
+                return new ResponseEntity(HttpStatus.OK, "hello");
             }
         };
 
         // then
-        assertThatNoException().isThrownBy(() -> new RequestHandler(
+        assertThatNoException().isThrownBy(() -> new RequestHandlerMethod(
                 controller,
                 controller.getClass().getMethod("myMethod", HttpRequest.class)
         ));
@@ -33,10 +33,10 @@ class RequestHandlerTest {
         // given
         Controller controller = new Controller() {
             public ResponseEntity myMethod(HttpRequest httpRequest) {
-                return new ResponseEntity(HttpStatus.OK, "hello", determineContentType(path));
+                return new ResponseEntity(HttpStatus.OK, "hello");
             }
         };
-        RequestHandler handler = new RequestHandler(
+        RequestHandlerMethod handler = new RequestHandlerMethod(
                 controller,
                 controller.getClass().getMethod("myMethod", HttpRequest.class)
         );
@@ -58,7 +58,7 @@ class RequestHandlerTest {
         };
 
         // then
-        assertThatThrownBy(() -> new RequestHandler(
+        assertThatThrownBy(() -> new RequestHandlerMethod(
                 controller,
                 controller.getClass().getMethod("myMethod", HttpRequest.class)
         )).isInstanceOf(TempException.class);
@@ -69,12 +69,12 @@ class RequestHandlerTest {
         // given & when
         Controller controller = new Controller() {
             public ResponseEntity myMethod(HttpRequest httpRequest, int a) {
-                return new ResponseEntity(HttpStatus.OK, "hello", determineContentType(path));
+                return new ResponseEntity(HttpStatus.OK, "hello");
             }
         };
 
         // then
-        assertThatThrownBy(() -> new RequestHandler(
+        assertThatThrownBy(() -> new RequestHandlerMethod(
                 controller,
                 controller.getClass().getMethod("myMethod", HttpRequest.class, int.class)
         )).isInstanceOf(TempException.class);
@@ -85,12 +85,12 @@ class RequestHandlerTest {
         // given & when
         Controller controller = new Controller() {
             public ResponseEntity myMethod(int invaliParamter) {
-                return new ResponseEntity(HttpStatus.OK, "hello", determineContentType(path));
+                return new ResponseEntity(HttpStatus.OK, "hello");
             }
         };
 
         // then
-        assertThatThrownBy(() -> new RequestHandler(
+        assertThatThrownBy(() -> new RequestHandlerMethod(
                 controller,
                 controller.getClass().getMethod("myMethod", int.class)
         )).isInstanceOf(TempException.class);
@@ -101,13 +101,13 @@ class RequestHandlerTest {
         // given & when
         Controller controller = new Controller() {
             public ResponseEntity myMethod(HttpRequest httpRequest) {
-                return new ResponseEntity(HttpStatus.OK, "hello", determineContentType(path));
+                return new ResponseEntity(HttpStatus.OK, "hello");
             }
         };
         Object invalidInstance = new Object();
 
         // then
-        assertThatThrownBy(() -> new RequestHandler(
+        assertThatThrownBy(() -> new RequestHandlerMethod(
                 invalidInstance,
                 controller.getClass().getMethod("myMethod", HttpRequest.class)
         )).isInstanceOf(TempException.class);

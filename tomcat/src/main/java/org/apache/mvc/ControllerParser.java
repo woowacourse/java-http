@@ -10,7 +10,7 @@ import org.apache.mvc.annotation.RequestMapping;
 
 public class ControllerParser {
 
-    public static Map<RequestKey, RequestHandler> parse(List<Controller> controllers) {
+    public static Map<RequestKey, RequestHandlerMethod> parse(List<Controller> controllers) {
         return controllers.stream()
                 .flatMap(controller -> dismantleMethod(controller).entrySet().stream())
                 .collect(Collectors.toMap(
@@ -19,12 +19,12 @@ public class ControllerParser {
                 ));
     }
 
-    private static Map<RequestKey, RequestHandler> dismantleMethod(Controller controller) {
+    private static Map<RequestKey, RequestHandlerMethod> dismantleMethod(Controller controller) {
         return Arrays.stream(controller.getClass().getDeclaredMethods())
                 .filter(method -> findRequestMappedMethod(method) != null)
                 .collect(Collectors.toMap(
                         method -> RequestKey.from(findRequestMappedMethod(method)),
-                        method -> new RequestHandler(controller, method)
+                        method -> new RequestHandlerMethod(controller, method)
                 ));
     }
 

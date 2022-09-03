@@ -10,19 +10,14 @@ import org.junit.jupiter.api.Test;
 class HttpResponseTest {
 
     @Test
-    void createResponseWithRequestAndEntity() {
+    void createResponseWithStatusAndBody() {
         // given
-        String http = String.join("\n",
-                "GET / HTTP/1.1",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                ""
-        );
-        HttpRequest request = HttpRequest.parse(new ByteArrayInputStream(http.getBytes()));
-        ResponseEntity entity = new ResponseEntity(HttpStatus.OK, "hello world", determineContentType(path));
+        String bodyString = "hello world";
+        HttpStatus status = HttpStatus.OK;
+
         // when
-        HttpResponse response = HttpResponse.from(entity);
+        HttpResponse response = HttpResponse.from(status, bodyString);
+
         // then
         assertThat(response).isNotNull();
     }
@@ -30,16 +25,9 @@ class HttpResponseTest {
     @Test
     void getAsString() {
         // given
-        String http = String.join("\n",
-                "GET / HTTP/1.1",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                ""
-        );
-        HttpRequest request = HttpRequest.parse(new ByteArrayInputStream(http.getBytes()));
-        ResponseEntity entity = new ResponseEntity(HttpStatus.OK, "hello world", determineContentType(path));
-        HttpResponse response = HttpResponse.from(entity);
+        String bodyString = "hello world";
+        HttpStatus status = HttpStatus.OK;
+        HttpResponse response = HttpResponse.from(status, bodyString);
 
         // when
         String responseString = response.getAsString();
@@ -48,7 +36,6 @@ class HttpResponseTest {
         assertThat(responseString).isEqualTo(
                 String.join("\n",
                         "HTTP/1.1 200 OK",
-                        "Content-Type: text/plain",
                         "Content-Length: 11",
                         "",
                         "hello world")

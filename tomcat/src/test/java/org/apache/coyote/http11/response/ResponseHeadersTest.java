@@ -12,18 +12,9 @@ class ResponseHeadersTest {
     @Test
     void createResponseHeaders() {
         // given
-        String http = String.join("\n",
-                "GET / HTTP/1.1",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                ""
-        );
-        HttpRequest request = HttpRequest.parse(new ByteArrayInputStream(http.getBytes()));
-        ResponseEntity entity = new ResponseEntity(HttpStatus.OK, "hello world", determineContentType(path));
+        String bodyString = "hello world";
         // when
-
-        ResponseHeaders headers = ResponseHeaders.from(entity);
+        ResponseHeaders headers = ResponseHeaders.from(bodyString);
         // then
         assertThat(headers).isNotNull();
     }
@@ -31,19 +22,13 @@ class ResponseHeadersTest {
     @Test
     void getAsString() {
         // given
-        String http = String.join("\n",
-                "GET / HTTP/1.1",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                ""
-        );
-        HttpRequest request = HttpRequest.parse(new ByteArrayInputStream(http.getBytes()));
-        ResponseEntity entity = new ResponseEntity(HttpStatus.OK, "hello world", determineContentType(path));
-        ResponseHeaders headers = ResponseHeaders.from(entity);
+        String bodyString = "hello world";
+        ResponseHeaders headers = ResponseHeaders.from(bodyString);
+
         // when
         String headersString = headers.getAsString();
+
         // then
-        assertThat(headersString).isEqualTo("Content-Type: text/plain\nContent-Length: 11");
+        assertThat(headersString).isEqualTo("Content-Length: 11");
     }
 }

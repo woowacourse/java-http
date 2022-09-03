@@ -7,12 +7,17 @@ import org.apache.coyote.servlet.request.Parameters;
 import org.apache.coyote.servlet.response.HttpResponse;
 import org.apache.coyote.support.HttpMethod;
 
-public class PostController {
+public class AuthController {
 
     private final UserService userService;
 
-    public PostController(UserService userService) {
+    public AuthController(UserService userService) {
         this.userService = userService;
+    }
+
+    @RequestMapping(method = HttpMethod.GET, path = "/login")
+    public String getLoginPage() {
+        return "/login.html";
     }
 
     @RequestMapping(method = HttpMethod.POST, path = "/login")
@@ -21,6 +26,11 @@ public class PostController {
         final var account = parameters.get("account");
         final var password = parameters.get("password");
         return userService.findUser(account, password);
+    }
+
+    @RequestMapping(method = HttpMethod.GET, path = "/register")
+    public String getRegisterPage() {
+        return "/register.html";
     }
 
     @RequestMapping(method = HttpMethod.POST, path = "/register")

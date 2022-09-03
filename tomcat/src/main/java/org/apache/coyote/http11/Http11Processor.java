@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final String CONTENT_TYPE_FORMATTER = "Content-Type: text/%s;charset=utf-8 ";
+    private static final String PLAIN_CONTENT_TYPE = "plain";
     private static final String LOGIN_REQUEST_URI = "/login";
     private static final String ROOT_REQUEST_URI = "/";
     private static final String QUERY_STRING_PREFIX = "?";
@@ -92,10 +93,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getContentType(String resource) {
-        if (resource.contains(ROOT_REQUEST_URI)) {
-            return String.format(CONTENT_TYPE_FORMATTER, "html");
+        System.out.println(resource);
+        if (resource.equals(ROOT_REQUEST_URI)) {
+            return String.format(CONTENT_TYPE_FORMATTER, PLAIN_CONTENT_TYPE);
         }
-        String fileExtension = resource.split(".")[1];
+        String fileExtension = resource.split("\\.")[1];
         return String.format(CONTENT_TYPE_FORMATTER, fileExtension);
     }
 

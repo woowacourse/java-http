@@ -30,6 +30,9 @@ public class HttpRequest {
     }
 
     public Parameters getParameters() {
+        if (headers.hasParametersAsBody()) {
+            return Parameters.ofQueryString(body);
+        }
         return parameters;
     }
 }

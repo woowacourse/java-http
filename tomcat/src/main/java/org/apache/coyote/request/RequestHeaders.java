@@ -11,6 +11,8 @@ public class RequestHeaders {
     private static final String HEADER_DELIMITER = ": ";
     private static final int HEADER_LINE_ELEMENT_COUNT = 2;
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_TYPE_URL_ENCODED = "application/x-www-form-urlencoded";
 
     private final Map<String, String> headers;
 
@@ -41,5 +43,9 @@ public class RequestHeaders {
             return 0;
         }
         return Integer.parseInt(headers.get(CONTENT_LENGTH));
+    }
+
+    public boolean hasParametersAsBody() {
+        return CONTENT_TYPE_URL_ENCODED.equals(headers.get(CONTENT_TYPE));
     }
 }

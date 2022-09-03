@@ -22,27 +22,31 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        if (!httpRequest.hasQueryParameter("account", "password")) {
+        if (httpRequest.isQueryParametersEmpty()) {
+            httpResponse.addStatusCode(StatusCode.OK);
+            httpResponse.addView("login.html");
+            return;
+        }
+
+        login(httpRequest, httpResponse);
+    }
+
+    private void login(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        String account = httpRequest.getQueryParameter("account");
+        String password = httpRequest.getQueryParameter("password");
+
+        if (InMemoryUserRepository.existsAccountAndPassword(account, password)) {
+            User user = InMemoryUserRepository.findByAccount(account).orElseThrow(NoSuchUserException::new);
+            log.info(user.toString());
             httpResponse.sendRedirect("/index.html");
             return;
         }
 
-        validateExistsUser(httpRequest.getQueryParameter("account"), httpRequest.getQueryParameter("password"));
-        httpResponse.addStatusCode(StatusCode.OK);
-        httpResponse.addView("login.html");
+        httpResponse.addStatusCode(StatusCode.UNAUTHORIZED);
+        httpResponse.addView("401.html");
     }
 
     protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         throw new UnsupportedOperationException();
-    }
-
-    private void validateExistsUser(final String account, final String password) {
-        if (!InMemoryUserRepository.existsAccountAndPassword(account, password)) {
-            throw new NoSuchUserException();
-        }
-
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(NoSuchUserException::new);
-        log.info(user.toString());
     }
 }

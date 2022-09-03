@@ -104,10 +104,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        URL resource = getClass().getClassLoader().getResource("static/login.html");
-        String expected = "HTTP/1.1 200 OK \r\n" +
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3796 \r\n" +
+                "Content-Length: 5564 \r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

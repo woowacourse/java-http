@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.common.HeaderKeys;
+import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.response.header.StatusCode;
 import org.apache.coyote.http11.response.header.StatusLine;
@@ -45,8 +46,8 @@ public class HttpResponse {
 	private static HttpHeaders createHttpHeaders(final String contentType, final String body) {
 		int length = body.getBytes().length;
 		return HttpHeaders.init()
-			.add("Content-Type", contentType + ";charset=utf-8")
-			.add("Content-Length", String.valueOf(length));
+			.add(HeaderKeys.CONTENT_TYPE.getName(), contentType + ";charset=utf-8")
+			.add(HeaderKeys.CONTENT_LENGTH.getName(), String.valueOf(length));
 	}
 
 	public String toMessage() {

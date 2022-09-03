@@ -6,19 +6,19 @@ public enum HttpStatus {
     NOT_FOUND(404, "Not Found"),
     ;
 
-    private final int number;
-    private final String message;
+    private final int statusCode;
+    private final String statusMessage;
 
-    HttpStatus(final int number, final String message) {
-        this.number = number;
-        this.message = message;
+    HttpStatus(final int statusCode, final String statusMessage) {
+        this.statusCode = statusCode;
+        this.statusMessage = statusMessage;
     }
 
-    public int getNumber() {
-        return number;
+    public int getStatusCode() {
+        return statusCode;
     }
 
-    public String getMessage() {
-        return message;
+    public String getStatusMessage() {
+        return statusMessage;
     }
 }

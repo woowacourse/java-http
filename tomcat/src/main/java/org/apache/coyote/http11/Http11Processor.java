@@ -153,6 +153,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static String getStatusMessage(final HttpStatus httpStatus) {
-        return String.join(" ", String.valueOf(httpStatus.getNumber()), httpStatus.getMessage());
+        return String.join(" ", String.valueOf(httpStatus.getStatusCode()), httpStatus.getStatusMessage());
     }
 }

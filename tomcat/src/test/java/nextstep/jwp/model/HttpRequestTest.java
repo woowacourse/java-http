@@ -1,6 +1,8 @@
 package nextstep.jwp.model;
 
 import nextstep.jwp.exception.InvalidRequestFormat;
+import org.apache.coyote.model.HttpMethod;
+import org.apache.coyote.model.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

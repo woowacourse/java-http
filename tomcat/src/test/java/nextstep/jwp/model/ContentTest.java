@@ -1,6 +1,7 @@
 package nextstep.jwp.model;
 
 import nextstep.jwp.exception.NotFoundContentTypeException;
+import org.apache.coyote.model.Content;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

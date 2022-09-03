@@ -1,4 +1,4 @@
-package nextstep.jwp.model;
+package org.apache.coyote.model;
 
 import nextstep.jwp.exception.NotFoundHttpMethodException;
 

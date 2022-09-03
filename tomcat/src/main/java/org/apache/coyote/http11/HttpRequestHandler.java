@@ -12,6 +12,6 @@ public class HttpRequestHandler {
 
     public static HttpRequest newHttpRequest(final String startLine) {
         String[] split = startLine.split(MESSAGE_DELIMITER);
-        return new HttpRequest(HttpMethod.valueOf(split[METHOD]), split[URI], HttpVersion.of(split[VERSION]));
+        return new HttpRequest(split[METHOD], split[URI], split[VERSION]);
     }
 }

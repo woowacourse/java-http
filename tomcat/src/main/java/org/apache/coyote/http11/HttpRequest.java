@@ -5,14 +5,19 @@ import org.apache.coyote.util.FileUtils;
 
 public class HttpRequest {
 
+    public static final String INDEX_BODY = "Hello world!";
     private final HttpMethod method;
-    private final String uri;
+    private final HttpRequestUri uri;
     private final HttpVersion version;
 
-    public HttpRequest(final HttpMethod method, final String uri, final HttpVersion version) {
+    public HttpRequest(final HttpMethod method, final HttpRequestUri uri, final HttpVersion version) {
         this.method = method;
         this.uri = uri;
         this.version = version;
+    }
+
+    public HttpRequest(final String method, final String uri, final String version) {
+        this(HttpMethod.of(method), HttpRequestUri.of(uri), HttpVersion.of(version));
     }
 
     public boolean isGetMethod() {
@@ -23,7 +28,7 @@ public class HttpRequest {
         return method;
     }
 
-    public String getUri() {
+    public HttpRequestUri getUri() {
         return uri;
     }
 
@@ -32,71 +37,37 @@ public class HttpRequest {
     }
 
     public String request() {
-        if (uri.equals("/")) {
-            return index();
+        if (uri.isIndex()) {
+            return response(INDEX_BODY);
         }
-        if (uri.endsWith(".html")) {
-            return html();
-        }
-        if (uri.endsWith(".css")) {
-            return css();
-        }
-        if (uri.endsWith(".js")) {
-            return js();
-        }
-        if (isQueryString(uri) && isLogin(uri)) {
-            QueryStrings queryStrings = new QueryStrings(uri);
+
+        if (isQueryString(uri.getValue()) && isLogin(uri.getValue())) {
+            QueryStrings queryStrings = new QueryStrings(uri.getValue());
             LoginController loginController = new LoginController();
             loginController.login(queryStrings.find("account"), queryStrings.find("password"));
             return "success";
         }
-
-        throw new IllegalArgumentException();
+        return response();
     }
 
-    private String index() {
-        String responseBody = "Hello world!";
+    private String response() {
+        String responseBody = FileUtils.readAllBytes(uri.getValue());
         return HttpResponse.builder()
                 .body(responseBody)
                 .version(version)
                 .status(HttpStatus.OK.getValue())
-                .contentType(ContentType.TEXT_HTML_CHARSET_UTF_8.getValue())
+                .contentType(uri.getContentType().getValue())
                 .contentLength(responseBody.getBytes().length)
                 .build()
                 .getResponse();
     }
 
-    private String html() {
-        String responseBody = FileUtils.readAllBytes(uri);
+    private String response(final String responseBody) {
         return HttpResponse.builder()
                 .body(responseBody)
                 .version(version)
                 .status(HttpStatus.OK.getValue())
-                .contentType(ContentType.TEXT_HTML_CHARSET_UTF_8.getValue())
-                .contentLength(responseBody.getBytes().length)
-                .build()
-                .getResponse();
-    }
-
-    private String css() {
-        String responseBody = FileUtils.readAllBytes(uri);
-        return HttpResponse.builder()
-                .body(responseBody)
-                .version(version)
-                .status(HttpStatus.OK.getValue())
-                .contentType(ContentType.TEXT_CSS_CHARSET_UTF_8.getValue())
-                .contentLength(responseBody.getBytes().length)
-                .build()
-                .getResponse();
-    }
-
-    private String js() {
-        String responseBody = FileUtils.readAllBytes(uri);
-        return HttpResponse.builder()
-                .body(responseBody)
-                .version(version)
-                .status(HttpStatus.OK.getValue())
-                .contentType(ContentType.TEXT_JS_CHARSET_UTF_8.getValue())
+                .contentType(uri.getContentType().getValue())
                 .contentLength(responseBody.getBytes().length)
                 .build()
                 .getResponse();

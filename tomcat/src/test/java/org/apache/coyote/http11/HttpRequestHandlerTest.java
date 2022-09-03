@@ -17,7 +17,7 @@ class HttpRequestHandlerTest {
 
         assertAll(
                 () -> assertThat(httpRequest.getMethod()).isEqualTo(HttpMethod.GET),
-                () -> assertThat(httpRequest.getUri()).isEqualTo("/index.html"),
+                () -> assertThat(httpRequest.getUri().getValue()).isEqualTo("/index.html"),
                 () -> assertThat(httpRequest.getVersion()).isEqualTo(HttpVersion.HTTP_1_1)
         );
     }

@@ -32,16 +32,16 @@ public class HttpRequest {
         this.body = body;
     }
 
-    public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
+    public static HttpRequest of(final BufferedReader bufferedReader) throws IOException {
         final String startLine = bufferedReader.readLine();
         if (startLine == null) {
             throw new IllegalArgumentException("request가 비어있습니다.");
         }
 
         final String[] startLineInfos = startLine.split(" ");
-        final HttpMethod method = HttpMethod.from(startLineInfos[0]);
+        final HttpMethod method = HttpMethod.of(startLineInfos[0]);
         final String path = startLineInfos[1];
-        final HttpVersion version = HttpVersion.from(startLineInfos[2]);
+        final HttpVersion version = HttpVersion.of(startLineInfos[2]);
         final Map<HttpHeaderType, HttpHeader> headers = readAllHeaders(bufferedReader);
         final String body = readBody(bufferedReader, headers);
 
@@ -59,7 +59,7 @@ public class HttpRequest {
             final String[] header = line.split(":");
             final String headerType = removeBlank(header[0]);
             final String headerValue = removeBlank(header[1]);
-            final HttpHeaderType httpHeaderType = HttpHeaderType.from(headerType);
+            final HttpHeaderType httpHeaderType = HttpHeaderType.of(headerType);
             headers.put(httpHeaderType, HttpHeader.of(httpHeaderType, headerValue));
         }
 

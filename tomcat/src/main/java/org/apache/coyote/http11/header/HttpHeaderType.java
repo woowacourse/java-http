@@ -14,7 +14,7 @@ public enum HttpHeaderType {
         this.value = value;
     }
 
-    public static HttpHeaderType from(final String value) {
+    public static HttpHeaderType of(final String value) {
         return Arrays.stream(HttpHeaderType.values())
                 .findFirst()
                 .orElseThrow(() -> new NoSuchElementException("해당하는 HttpHeaderType이 없습니다. " + value));

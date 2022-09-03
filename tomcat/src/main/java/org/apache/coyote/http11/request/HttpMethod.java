@@ -12,8 +12,9 @@ public enum HttpMethod {
         this.value = value;
     }
 
-    public static HttpMethod from(final String value) {
+    public static HttpMethod of(final String value) {
         return Arrays.stream(HttpMethod.values())
+                .filter(it -> it.value.equals(value))
                 .findFirst()
                 .orElseThrow(() -> new NoSuchElementException("해당하는 HttpHeaderType이 없습니다. " + value));
     }

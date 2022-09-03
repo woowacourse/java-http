@@ -12,8 +12,9 @@ public enum HttpVersion {
         this.version = version;
     }
 
-    public static HttpVersion from(final String version) {
+    public static HttpVersion of(final String version) {
         return Arrays.stream(HttpVersion.values())
+                .filter(it -> it.version.equals(version))
                 .findFirst()
                 .orElseThrow(() -> new NoSuchElementException("해당하는 HttpHeaderType이 없습니다. " + version));
     }

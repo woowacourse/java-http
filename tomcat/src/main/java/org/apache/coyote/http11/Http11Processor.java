@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String DEFAULT_MESSAGE = "Hello world!";
 
     private final Socket connection;
 
@@ -43,9 +42,9 @@ public class Http11Processor implements Runnable, Processor {
             final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, UTF_8);
             final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            final Handler handler = HandlerMapping.getHandlerFrom(httpRequest.getPath());
-            final HttpResponse httpResponse = handler.handle();
+            final HttpRequest httpRequest = HttpRequest.of(bufferedReader);
+            final Handler handler = HandlerMapper.getHandlerFrom(httpRequest.getPath());
+            final HttpResponse httpResponse = handler.handle(httpRequest);
             final String response = httpResponse.generateResponse();
 
             outputStream.write(response.getBytes());

@@ -1,14 +1,6 @@
 package org.apache.coyote.http11.request.model;
 
-import nextstep.jwp.presentation.LoginController;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.QueryStrings;
-import org.apache.coyote.http11.model.HttpStatus;
-import org.apache.coyote.util.FileUtils;
-
 public class HttpRequest {
-
-    public static final String INDEX_BODY = "Hello world!";
 
     private final HttpMethod method;
     private final HttpRequestUri uri;
@@ -28,6 +20,14 @@ public class HttpRequest {
         return method.isGet();
     }
 
+    public boolean isIndex() {
+        return uri.isIndex();
+    }
+
+    public boolean isQueryString() {
+        return uri.isQuery();
+    }
+
     public HttpMethod getMethod() {
         return method;
     }
@@ -38,51 +38,5 @@ public class HttpRequest {
 
     public HttpVersion getVersion() {
         return version;
-    }
-
-    public String request() {
-        if (uri.isIndex()) {
-            return response(INDEX_BODY);
-        }
-
-        if (isQueryString(uri.getValue()) && isLogin(uri.getValue())) {
-            QueryStrings queryStrings = new QueryStrings(uri.getValue());
-            LoginController loginController = new LoginController();
-            loginController.login(queryStrings.find("account"), queryStrings.find("password"));
-            return "success";
-        }
-        return response();
-    }
-
-    private String response() {
-        String responseBody = FileUtils.readAllBytes(uri.getValue());
-        return HttpResponse.builder()
-                .body(responseBody)
-                .version(version)
-                .status(HttpStatus.OK.getValue())
-                .contentType(uri.getContentType().getValue())
-                .contentLength(responseBody.getBytes().length)
-                .build()
-                .getResponse();
-    }
-
-    private String response(final String responseBody) {
-        return HttpResponse.builder()
-                .body(responseBody)
-                .version(version)
-                .status(HttpStatus.OK.getValue())
-                .contentType(uri.getContentType().getValue())
-                .contentLength(responseBody.getBytes().length)
-                .build()
-                .getResponse();
-    }
-
-    private boolean isLogin(final String uri) {
-        String requestUri = uri.substring(0, uri.indexOf("?"));
-        return requestUri.equals("/login");
-    }
-
-    private boolean isQueryString(final String uri) {
-        return uri.contains("?");
     }
 }

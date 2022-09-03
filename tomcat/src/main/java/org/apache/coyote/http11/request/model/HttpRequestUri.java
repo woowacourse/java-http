@@ -7,7 +7,8 @@ import org.apache.coyote.http11.model.ContentType;
 
 public class HttpRequestUri {
 
-    public static final String INDEX_URI = "/";
+    private static final String INDEX_URI = "/";
+    private static final String QUERY_PARAMETER = "?";
 
     private final String value;
 
@@ -29,6 +30,10 @@ public class HttpRequestUri {
 
     public boolean isIndex() {
         return value.equals(INDEX_URI);
+    }
+
+    public boolean isQuery() {
+        return value.contains(QUERY_PARAMETER);
     }
 
     private enum RequestContentType {

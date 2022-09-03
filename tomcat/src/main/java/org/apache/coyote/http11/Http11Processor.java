@@ -33,19 +33,15 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             String line = bufferedReader.readLine();
-            String response = request(HttpRequestHandler.newHttpRequest(line));
+            HttpRequest httpRequest = HttpRequestHandler.newHttpRequest(line);
 
-            outputStream.write(response.getBytes());
+            WebClient webClient = new WebClient();
+            HttpResponse response = webClient.request(httpRequest);
+
+            outputStream.write(response.getValue().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String request(final HttpRequest httpRequest) throws IOException {
-        if (httpRequest.isGetMethod()) {
-            return httpRequest.request();
-        }
-        throw new IllegalArgumentException();
     }
 }

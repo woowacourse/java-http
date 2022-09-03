@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request.model;
 
 import java.util.Arrays;
+import org.apache.coyote.exception.MethodNotAllowedException;
 
 public enum HttpMethod {
 
@@ -16,7 +17,7 @@ public enum HttpMethod {
         return Arrays.stream(HttpMethod.values())
                 .findFirst()
                 .filter(it -> it.value.equalsIgnoreCase(value))
-                .orElseThrow();
+                .orElseThrow(() -> new MethodNotAllowedException(value));
     }
 
     public boolean isGet() {

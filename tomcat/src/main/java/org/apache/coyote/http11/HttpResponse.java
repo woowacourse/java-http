@@ -4,14 +4,14 @@ import org.apache.coyote.http11.request.model.HttpVersion;
 
 public class HttpResponse {
 
-    private final String response;
+    private final String value;
 
-    public HttpResponse(final String response) {
-        this.response = response;
+    public HttpResponse(final String value) {
+        this.value = value;
     }
 
-    public String getResponse() {
-        return response;
+    public String getValue() {
+        return value;
     }
 
     public static Builder builder() {

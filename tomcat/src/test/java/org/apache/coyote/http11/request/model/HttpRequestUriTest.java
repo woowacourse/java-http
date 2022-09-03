@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.apache.coyote.exception.UnSupportedMediaType;
 import org.apache.coyote.http11.model.ContentType;
-import org.apache.coyote.http11.request.model.HttpRequestUri;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -49,5 +48,21 @@ class HttpRequestUriTest {
         assertThatThrownBy(httpRequestUri::getContentType)
                 .hasMessage("not found type : noooo")
                 .isInstanceOf(UnSupportedMediaType.class);
+    }
+
+    @Test
+    @DisplayName("해당요청이 인덱스 요청인지 확인한다.")
+    void isIndex() {
+        HttpRequestUri httpRequestUri = new HttpRequestUri("/");
+
+        assertThat(httpRequestUri.isIndex()).isTrue();
+    }
+
+    @Test
+    @DisplayName("해당요청이 쿼리 스트링 요청인지 확인한다.")
+    void isQueryString() {
+        HttpRequestUri httpRequestUri = new HttpRequestUri("/login?account=gugu&password=password");
+
+        assertThat(httpRequestUri.isQuery()).isTrue();
     }
 }

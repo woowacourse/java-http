@@ -30,12 +30,6 @@ public class HttpRequest {
         this.query = parseQuery(parseRequest[1], index);
     }
 
-    public void printUserLog(){
-        if(this.url.equals(LOGIN_URL)){
-            printRequestLoginUser(this);
-        }
-    }
-
     private String parseUrl(final String uri, final Integer index){
         if(hasQuery(index)){
             return uri.substring(0,index);

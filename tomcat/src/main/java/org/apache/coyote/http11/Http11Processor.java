@@ -54,10 +54,11 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest createHttpRequest(final BufferedReader bufferedReader) throws IOException {
+        final String requestLine = bufferedReader.readLine();
         final List<String> headers = extractMessage(bufferedReader);
         final List<String> bodies = extractMessage(bufferedReader);
 
-        return HttpRequest.of(headers, bodies);
+        return HttpRequest.of(requestLine, headers, bodies);
     }
 
     private List<String> extractMessage(final BufferedReader bufferedReader) throws IOException {

@@ -19,6 +19,6 @@ public enum HttpStatus {
     }
 
     public String toStatusLine() {
-        return String.format("%s %d %s", HttpVersion.HTTP11.getValue(), code, reason);
+        return String.format("%s %d %s ", HttpVersion.HTTP11.getValue(), code, reason);
     }
 }

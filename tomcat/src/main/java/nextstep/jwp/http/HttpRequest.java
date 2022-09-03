@@ -1,7 +1,5 @@
 package nextstep.jwp.http;
 
-import static java.util.List.of;
-
 import java.util.List;
 import nextstep.jwp.utils.FileUtils;
 
@@ -28,10 +26,10 @@ public class HttpRequest {
     }
 
     public static HttpRequest from(String requestLine) {
-        List<String> request = of(requestLine.split(REQUEST_LINE_SEPARATOR));
+        List<String> request = List.of(requestLine.split(REQUEST_LINE_SEPARATOR));
         String httpMethod = request.get(HTTP_METHOD_INDEX);
         String uri = request.get(URI_INDEX);
-        List<String> separatedUri = of(uri.split(URI_PATH_SEPARATOR));
+        List<String> separatedUri = List.of(uri.split(URI_PATH_SEPARATOR));
         return handleHavingQueryParams(httpMethod, uri, separatedUri);
     }
 

@@ -10,13 +10,15 @@ public class UriParser {
     private static final int URL_INDEX = 1;
     private static final String QUERY_STRING_DELIMITER = "?";
     private static final String EXTENSION_DELIMITER = ".";
+    public static final int VALID_START_LINE_SIZE = 3;
+    public static final int DELIMITER_NOT_FOUND = -1;
 
     private UriParser() {
     }
 
     public static String parseUri(final BufferedReader bufferedReader) throws IOException {
         String[] firstLineElements = bufferedReader.readLine().split(" ");
-        if (firstLineElements.length != 3) {
+        if (firstLineElements.length != VALID_START_LINE_SIZE) {
             throw new InvalidHttpRequestFormatException();
         }
         return firstLineElements[URL_INDEX];
@@ -24,7 +26,7 @@ public class UriParser {
 
     public static String parseUrl(final String uri) {
         int lastIndexOfQueryStringDelimiter = uri.lastIndexOf(QUERY_STRING_DELIMITER);
-        if (lastIndexOfQueryStringDelimiter == -1) {
+        if (lastIndexOfQueryStringDelimiter == DELIMITER_NOT_FOUND) {
             return uri;
         }
         return uri.substring(0, lastIndexOfQueryStringDelimiter);
@@ -32,7 +34,7 @@ public class UriParser {
 
     public static String parseQueryString(final String uri) {
         int lastIndexOfQueryStringDelimiter = uri.lastIndexOf(QUERY_STRING_DELIMITER);
-        if (lastIndexOfQueryStringDelimiter == -1) {
+        if (lastIndexOfQueryStringDelimiter == DELIMITER_NOT_FOUND) {
             return "";
         }
         return uri.substring(lastIndexOfQueryStringDelimiter + 1);

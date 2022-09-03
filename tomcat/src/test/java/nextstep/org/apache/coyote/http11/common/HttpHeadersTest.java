@@ -25,4 +25,17 @@ class HttpHeadersTest {
                 () -> assertThat(headers.getHeader("Connection")).isEqualTo("keep-alive")
         );
     }
+
+    @Test
+    @DisplayName("HttpHeaders는 없는 Header로 조회시에 null을 반환한다.")
+    void getHeaderNull() {
+        final List<String> raw = List.of(
+                "Host: localhost:8080 ",
+                "Connection: keep-alive "
+        );
+
+        final HttpHeaders headers = HttpHeaders.from(raw);
+
+        assertThat(headers.getHeader("Cache")).isNull();
+    }
 }

@@ -13,7 +13,7 @@ public enum HttpMethod {
     TRACE,
     ;
 
-    public static HttpMethod from(String value) {
+    public static HttpMethod from(final String value) {
         return Arrays.stream(HttpMethod.values())
                 .filter(httpMethod -> httpMethod.name().equals(value.toUpperCase()))
                 .findFirst()

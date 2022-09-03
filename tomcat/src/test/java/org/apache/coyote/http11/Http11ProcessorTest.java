@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.Http11RequestTest.getHttp11RequestContent;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
@@ -34,12 +35,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        final String httpRequest = getHttp11RequestContent("GET", "/index.html");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

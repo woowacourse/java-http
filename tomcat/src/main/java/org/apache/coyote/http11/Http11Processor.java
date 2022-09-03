@@ -1,10 +1,8 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
@@ -38,17 +36,15 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-            final String request = bufferedReader.readLine().trim();
-            String uri = request.split(" ")[1];
+            final Http11Request request = Http11Request.of(inputStream);
+            String url = request.getRequestUrl();
             String responseBody = "Hello world!";
             String contentType = "html";
-            if (uri == null) {
+            if (url == null) {
                 throw new IllegalArgumentException("잘못된 형식의 요청입니다.");
             }
 
-            if ("/".equals(uri)) {
+            if ("/".equals(url)) {
                 final var response = String.join("\r\n",
                         "HTTP/1.1 200 OK ",
                         "Content-Type: text/" + contentType + ";charset=utf-8 ",
@@ -61,13 +57,13 @@ public class Http11Processor implements Runnable, Processor {
                 return;
             }
 
-            String resourcePath = uri;
-            if ("/login".equals(uri.substring(0, 6))) {
+            String resourcePath = url;
+            if ("/login".equals(url.substring(0, 6))) {
                 resourcePath = "/login.html";
 
-                int index = uri.indexOf("?");
+                int index = url.indexOf("?");
                 Map<String, String> queryStrings = new HashMap<>();
-                for (String querystring : uri.substring(index + 1).split("&")) {
+                for (String querystring : url.substring(index + 1).split("&")) {
                     String name = querystring.split("=")[0];
                     String value = querystring.split("=")[1];
                     queryStrings.put(name, value);

@@ -65,20 +65,16 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static HttpRequest toHttpRequest(final BufferedReader bufferedReader) throws IOException {
+    private HttpRequest toHttpRequest(final BufferedReader bufferedReader) throws IOException {
         final List<String> rawHttpRequest = readHttpRequest(bufferedReader);
         return HttpRequest.from(rawHttpRequest);
     }
 
-    private static List<String> readHttpRequest(final BufferedReader bufferedReader) throws IOException {
+    private List<String> readHttpRequest(final BufferedReader bufferedReader) throws IOException {
         final List<String> rawHttpRequest = new ArrayList<>();
 
-        String line = bufferedReader.readLine();
-        rawHttpRequest.add(line);
-        while (!"".equals(line)) {
-            if (line == null) {
-                break;
-            }
+        String line = " ";
+        while (!line.isEmpty()) {
             line = bufferedReader.readLine();
             rawHttpRequest.add(line);
         }

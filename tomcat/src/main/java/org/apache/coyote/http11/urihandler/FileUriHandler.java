@@ -9,7 +9,8 @@ import org.apache.coyote.http11.UriResponse;
 
 public class FileUriHandler extends DefaultUriHandler {
 
-    private static final Pattern FILE_URI_PATTERN = Pattern.compile(".+\\.(html|css|js|ico)");
+    private static final Pattern FILE_URI_PATTERN = Pattern.compile("/.+\\.(html|css|js|ico)");
+
     @Override
     public boolean canHandle(String uri) {
         Matcher matcher = FILE_URI_PATTERN.matcher(uri);
@@ -24,7 +25,7 @@ public class FileUriHandler extends DefaultUriHandler {
         return new UriResponse(responseBody, contentType);
     }
 
-    private static String getFileType(String uri) {
+    private String getFileType(String uri) {
         return uri.split("\\.")[1];
     }
 }

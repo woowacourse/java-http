@@ -1,11 +1,13 @@
 package org.apache.coyote.http11;
 
 import java.text.MessageFormat;
-import nextstep.jwp.presentation.LoginController;
 import org.apache.coyote.exception.MethodNotAllowedException;
 import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.HttpStatus;
 import org.apache.coyote.http11.request.model.HttpRequest;
+import org.apache.coyote.http11.request.model.HttpRequestUri;
+import org.apache.coyote.http11.request.model.HttpVersion;
+import org.apache.coyote.support.Controller;
 import org.apache.coyote.util.FileUtils;
 
 public class WebClient {
@@ -25,16 +27,24 @@ public class WebClient {
         }
 
         if (httpRequest.isQueryString()) {
-            QueryStrings queryStrings = new QueryStrings(httpRequest.getUri().getValue());
-            if (isLogin(httpRequest.getUri().getValue())) {
-                LoginController loginController = new LoginController();
-                loginController.login(queryStrings.find("account"), queryStrings.find("password"));
-            }
-            return getForObject(httpRequest, ContentType.TEXT_HTML_CHARSET_UTF_8);
+            Controller controller = new Controller(httpRequest);
+            return getForObject(controller.execute(httpRequest.getUri()));
         }
 
         String responseBody = FileUtils.readAllBytes(httpRequest.getUri().getValue());
         return getForObject(httpRequest, responseBody);
+    }
+
+    private HttpResponse getForObject(final String body) {
+        HttpRequestUri httpRequestUri = new HttpRequestUri(body);
+        String responseBody = FileUtils.readAllBytes(httpRequestUri.getValue());
+        return HttpResponse.builder()
+                .body(responseBody)
+                .version(HttpVersion.HTTP_1_1)
+                .status(HttpStatus.OK.getValue())
+                .contentType(ContentType.TEXT_HTML_CHARSET_UTF_8.getValue())
+                .contentLength(WebClient.INDEX_BODY.getBytes().length)
+                .build();
     }
 
     private HttpResponse getForObject(final HttpRequest httpRequest, final String responseBody) {
@@ -47,15 +57,6 @@ public class WebClient {
                 .build();
     }
 
-    private HttpResponse getForObject(final HttpRequest httpRequest, final ContentType contentType) {
-        return HttpResponse.builder()
-                .version(httpRequest.getVersion())
-                .status(HttpStatus.OK.getValue())
-                .contentType(contentType.getValue())
-                .contentLength(WebClient.INDEX_BODY.getBytes().length)
-                .build();
-    }
-
     private HttpResponse getForObject(final HttpRequest httpRequest, final ContentType contentType, String body) {
         return HttpResponse.builder()
                 .body(body)
@@ -64,10 +65,5 @@ public class WebClient {
                 .contentType(contentType.getValue())
                 .contentLength(body.getBytes().length)
                 .build();
-    }
-
-    private boolean isLogin(final String uri) {
-        String requestUri = uri.substring(0, uri.indexOf("?"));
-        return requestUri.equals("/login");
     }
 }

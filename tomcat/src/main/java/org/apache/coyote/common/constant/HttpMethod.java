@@ -3,6 +3,7 @@ package org.apache.coyote.common.constant;
 import java.util.Arrays;
 
 public enum HttpMethod {
+
     GET,
     HEAD,
     POST,

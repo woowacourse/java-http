@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.common.constant.HttpStatus.NOT_FOUND;
+import static org.apache.coyote.common.constant.HttpStatus.OK;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +20,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.common.constant.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +39,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final String ACCOUNT_PARAM = "account";
     private static final String PASSWORD_PARAM = "password";
-
-    private static final String OK = "200 OK";
-    private static final String NOT_FOUND = "404 Not Found";
 
     private final Socket connection;
 
@@ -125,7 +126,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void render(final OutputStream outputStream, final String viewName) throws IOException {
         URL resource = getClass().getClassLoader().getResource(viewName);
-        String statusCode = OK;
+        HttpStatus statusCode = OK;
         if (resource == null) {
             resource = getClass().getClassLoader().getResource(NOT_FOUND_PAGE);
             statusCode = NOT_FOUND;
@@ -137,16 +138,20 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
-    private String toResponse(final URL resource, final String statusCode) throws IOException {
+    private String toResponse(final URL resource, final HttpStatus httpStatus) throws IOException {
         final File file = new File(resource.getFile());
         final Path path = file.toPath();
         final byte[] responseBody = Files.readAllBytes(path);
 
         return String.join("\r\n",
-                "HTTP/1.1 " + statusCode + " ",
+                "HTTP/1.1 " + getStatusMessage(httpStatus) + " ",
                 "Content-Type: " + Files.probeContentType(path) + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.length + " ",
                 "",
                 new String(responseBody));
+    }
+
+    private static String getStatusMessage(final HttpStatus httpStatus) {
+        return String.join(" ", String.valueOf(httpStatus.getNumber()), httpStatus.getMessage());
     }
 }

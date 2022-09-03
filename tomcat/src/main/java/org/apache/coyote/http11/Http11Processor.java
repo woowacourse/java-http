@@ -22,6 +22,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String CONTENT_TYPE_FORMATTER = "Content-Type: text/%s;charset=utf-8 ";
     private static final String LOGIN_REQUEST_URI = "/login";
     private static final String ROOT_REQUEST_URI = "/";
+    private static final String QUERY_STRING_PREFIX = "?";
     private static final int FILE_NAME_INDEX = 1;
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
@@ -62,7 +63,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void showUser(String resource) {
-        int questionIndex = resource.indexOf("?");
+        int questionIndex = resource.indexOf(QUERY_STRING_PREFIX);
         String queryString = resource.substring(questionIndex);
         String account = queryString.split("account=")[1].split("&")[0];
         String password = queryString.split("password=")[1].split(" ")[0];

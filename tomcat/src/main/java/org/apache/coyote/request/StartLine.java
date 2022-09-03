@@ -73,6 +73,6 @@ public class StartLine {
         }
         final var delimiterIndex = uri.indexOf(QUERY_STRING_BEGIN_SIGN);
         final var queryString = uri.substring(delimiterIndex + 1);
-        return Parameters.ofQueryString(queryString);
+        return Parameters.of(queryString);
     }
 }

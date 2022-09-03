@@ -16,8 +16,8 @@ public class ResponseProcessor {
 
     public ResponseProcessor(StartLine startLine) throws URISyntaxException, IOException {
         String uri = startLine.getUri();
-        this.path = new Path(uri);
-        this.queryParameters = new QueryParameters(uri);
+        this.path = Path.of(uri);
+        this.queryParameters = QueryParameters.of(uri);
         this.responseBody = processResponseBody();
     }
 

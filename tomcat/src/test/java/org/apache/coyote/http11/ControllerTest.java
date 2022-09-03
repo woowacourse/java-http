@@ -15,7 +15,7 @@ class ControllerTest {
     void 올바른_로그인_요청을_처리한다() {
         // given
         String url = "/login?account=gugu&password=password";
-        QueryParameters queryParameters = new QueryParameters(url);
+        QueryParameters queryParameters = QueryParameters.of(url);
 
         // when
         String response = Controller.processRequest("/login", queryParameters);
@@ -28,7 +28,7 @@ class ControllerTest {
     void 로그인_시_계정이_없는_요청일_경우_예외를_던진다() {
         // given
         String url = "/login?account=eden&password=password";
-        QueryParameters queryParameters = new QueryParameters(url);
+        QueryParameters queryParameters = QueryParameters.of(url);
 
         // when & then
         assertThatThrownBy(() -> Controller.processRequest("/login", queryParameters))
@@ -39,7 +39,7 @@ class ControllerTest {
     void 로그인_시_비밀번호가_일치하지_않는_요청일_경우_예외를_던진다() {
         // given
         String url = "/login?account=gugu&password=gugugugu";
-        QueryParameters queryParameters = new QueryParameters(url);
+        QueryParameters queryParameters = QueryParameters.of(url);
 
         // when & then
         assertThatThrownBy(() -> Controller.processRequest("/login", queryParameters))
@@ -50,7 +50,7 @@ class ControllerTest {
     void home_요청일_경우_hello_world를_반환한다() {
         // given
         String url = "/";
-        QueryParameters queryParameters = new QueryParameters(url);
+        QueryParameters queryParameters = QueryParameters.of(url);
 
         // when
         String response = Controller.processRequest("/", queryParameters);
@@ -63,7 +63,7 @@ class ControllerTest {
     void 없는_api_요청일_경우_예외를_반환한다() {
         // given
         String url = "/eden";
-        QueryParameters queryParameters = new QueryParameters(url);
+        QueryParameters queryParameters = QueryParameters.of(url);
 
         // when & then
         assertThatThrownBy(() -> Controller.processRequest(url, queryParameters))

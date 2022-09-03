@@ -11,7 +11,7 @@ class QueryParametersTest {
     void query_parameter가_있을_경우_true를_반환한다() {
         // given
         String uri = "/nextstep.txt?name=eden";
-        QueryParameters queryParameters = new QueryParameters(uri);
+        QueryParameters queryParameters = QueryParameters.of(uri);
 
         // when & then
         assertThat(queryParameters.isEmpty()).isFalse();
@@ -21,7 +21,7 @@ class QueryParametersTest {
     void query_parameter가_없을_경우_false를_반환한다() {
         // given
         String uri = "/nextstep.txt";
-        QueryParameters queryParameters = new QueryParameters(uri);
+        QueryParameters queryParameters = QueryParameters.of(uri);
 
         // when & then
         assertThat(queryParameters.isEmpty()).isTrue();
@@ -31,7 +31,7 @@ class QueryParametersTest {
     void query_parameter로_account와_password가_들어오면_저장한다() {
         // given
         String uri = "/test?account=eden&password=eden123";
-        QueryParameters queryParameters = new QueryParameters(uri);
+        QueryParameters queryParameters = QueryParameters.of(uri);
 
         // when & then
         Assertions.assertAll(

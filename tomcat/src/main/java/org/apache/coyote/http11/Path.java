@@ -7,13 +7,16 @@ public class Path {
 
     private final String value;
 
-    public Path(String uri) {
+    private Path(String uri) {
+        this.value = uri;
+    }
+
+    public static Path of(String uri) {
         int queryParameterIndex = uri.indexOf("?");
         if (queryParameterIndex != NOT_EXIST_QUERY_PARAMETER_CHARACTER) {
-            this.value = uri.substring(0, queryParameterIndex);
-            return;
+            return new Path(uri.substring(0, queryParameterIndex));
         }
-        this.value = uri;
+        return new Path(uri);
     }
 
     public boolean isFileRequest() {

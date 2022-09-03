@@ -11,14 +11,13 @@ public class QueryParameters {
 
     private final Map<String, String> values;
 
-    public QueryParameters(String uri) {
-        this.values = new HashMap<>();
-        int queryParameterIndex = uri.indexOf("?");
-        if (queryParameterIndex != NOT_EXIST_QUERY_PARAMETER_CHARACTER) {
-            String queryParameters = uri.substring(queryParameterIndex + 1);
-            String[] eachQueryParameters = queryParameters.split("&");
-            putKeyValues(eachQueryParameters);
-        }
+    private QueryParameters(Map<String, String> uri) {
+        this.values = uri;
+    }
+
+    public static QueryParameters of(String uri) {
+        Map<String, String> queryParameters = processQueryParameters(uri);
+        return new QueryParameters(queryParameters);
     }
 
     public boolean isEmpty() {
@@ -33,10 +32,21 @@ public class QueryParameters {
         return values.get("password");
     }
 
-    private void putKeyValues(String[] eachQueryParameters) {
-        for (String queryParameter : eachQueryParameters) {
-            String[] keyValues = queryParameter.split("=");
-            values.put(keyValues[KEY_INDEX], keyValues[VALUE_INDEX]);
+    private static void putKeyValues(String[] eachQueryParameters) {
+
+    }
+
+    private static Map<String, String> processQueryParameters(String uri) {
+        Map<String, String> queryParameters = new HashMap<>();
+        int queryParameterIndex = uri.indexOf("?");
+        if (queryParameterIndex != NOT_EXIST_QUERY_PARAMETER_CHARACTER) {
+            String queryParameter = uri.substring(queryParameterIndex + 1);
+            String[] eachQueryParameters = queryParameter.split("&");
+            for (String q : eachQueryParameters) {
+                String[] keyValues = q.split("=");
+                queryParameters.put(keyValues[KEY_INDEX], keyValues[VALUE_INDEX]);
+            }
         }
+        return queryParameters;
     }
 }

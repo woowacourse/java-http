@@ -1,22 +1,21 @@
 package org.apache.coyote.http11.response;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import org.apache.coyote.http11.HttpVersion;
 import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.header.HttpHeaderType;
+import org.apache.coyote.http11.request.HttpHeaders;
 
 public class HttpResponse {
 
-    private HttpVersion httpVersion;
-    private HttpStatus httpStatus;
-    private Map<HttpHeaderType, HttpHeader> headers;
-    private String body;
+    private final HttpVersion httpVersion;
+    private final HttpStatus httpStatus;
+    private final HttpHeaders headers;
+    private final String body;
 
     private HttpResponse(final HttpVersion httpVersion, final HttpStatus httpStatus,
-                         final Map<HttpHeaderType, HttpHeader> headers, final String body) {
+                        final HttpHeaders headers, final String body) {
         this.httpVersion = httpVersion;
         this.httpStatus = httpStatus;
         this.headers = headers;
@@ -27,11 +26,7 @@ public class HttpResponse {
                                   final HttpStatus status,
                                   final String body,
                                   final HttpHeader... httpHeaders) {
-        final Map<HttpHeaderType, HttpHeader> headers = new LinkedHashMap<>();
-        for (HttpHeader httpHeader : httpHeaders) {
-            headers.put(httpHeader.getHttpHeaderType(), httpHeader);
-        }
-
+        final HttpHeaders headers = HttpHeaders.of(httpHeaders);
         return new HttpResponse(httpVersion, status, headers, body);
     }
 
@@ -43,7 +38,7 @@ public class HttpResponse {
         return httpStatus;
     }
 
-    public Map<HttpHeaderType, HttpHeader> getHeaders() {
+    public HttpHeaders getHeaders() {
         return headers;
     }
 

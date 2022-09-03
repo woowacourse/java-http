@@ -22,7 +22,7 @@ public class ResourceHandler implements Handler{
     }
 
     protected HttpResponse generateResourceResponse(final HttpRequest httpRequest) {
-        final String path = httpRequest.getPath();
+        final String path = httpRequest.getStartLine().getPath();
         final String fileName = Parser.convertResourceFileName(path);
         final String fileType = Parser.parseFileType(fileName);
         try {

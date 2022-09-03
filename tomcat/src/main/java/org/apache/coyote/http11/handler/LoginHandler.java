@@ -16,11 +16,13 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class LoginHandler extends ResourceHandler{
 
+    private static final String QUERY_PARAMETER_START_LETTER = "?";
+
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) {
-        final String path = httpRequest.getPath();
-        if (path.contains("?")) {
-            final Map<String, String> queryParams = Parser.parseQueryParams(httpRequest.getPath());
+        final String path = httpRequest.getStartLine().getPath();
+        if (path.contains(QUERY_PARAMETER_START_LETTER)) {
+            final Map<String, String> queryParams = Parser.parseQueryParams(path);
             final User user = getUserByQueryParams(queryParams);
 
             final String body = user.toString();

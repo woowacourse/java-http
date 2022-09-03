@@ -15,7 +15,7 @@ public class HttpRequest {
 
     public HttpRequest(final String startLine, final Map<String, String> headers) {
         String[] splitStartLine = startLine.split(" ");
-        this.requestLine = new RequestLine(HttpMethod.valueOf(splitStartLine[0]), splitStartLine[1], splitStartLine[2]);
+        this.requestLine = new RequestLine(splitStartLine[0], splitStartLine[1], splitStartLine[2]);
         this.headers = new Headers(new LinkedHashMap<>(headers));
     }
 

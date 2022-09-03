@@ -45,7 +45,9 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = generateHttpRequest(bufferedReader);
 
             if (httpRequest.getPath().equals("/")) {
-                write(outputStream, HttpResponse.DEFAULT_HTTP_RESPONSE);
+                HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP11, StatusCode.OK, ContentType.HTML,
+                        "Hello world!");
+                write(outputStream, httpResponse);
                 return;
             }
 
@@ -82,11 +84,8 @@ public class Http11Processor implements Runnable, Processor {
         ContentType contentType = ContentType.parse(fileExtension);
 
         String responseBody = FileUtils.readFile(fileName);
-        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", contentType.getValue());
-        headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
 
-        return new HttpResponse("HTTP/1.1 200 OK", headers, responseBody);
+        return new HttpResponse(HttpVersion.HTTP11, StatusCode.OK, contentType, responseBody);
     }
 
     private void write(final OutputStream outputStream, final HttpResponse httpResponse) throws IOException {

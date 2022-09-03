@@ -2,30 +2,31 @@ package org.apache.coyote.http11;
 
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
+import org.apache.coyote.StatusLine;
 
 public class HttpResponse {
 
-    public static final HttpResponse DEFAULT_HTTP_RESPONSE;
-
-    static {
-        String statusLine = "HTTP/1.1 200 OK";
-        String body = "Hello world!";
-
-        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
-        headers.put("Content-Type", ContentType.HTML.getValue());
-        headers.put("Content-Length", String.valueOf(body.getBytes().length));
-
-        DEFAULT_HTTP_RESPONSE = new HttpResponse(statusLine, headers, body);
-    }
-
-    private final String statusLine;
+    private final StatusLine statusLine;
     private final Headers headers;
     private final String body;
 
-    public HttpResponse(final String statusLine, final LinkedHashMap<String, String> headers, final String body) {
-        this.statusLine = statusLine;
-        this.headers = new Headers(headers);
+    public HttpResponse(final HttpVersion httpVersion, final StatusCode statusCode, final ContentType contentType,
+                        final String body) {
+        this.statusLine = new StatusLine(httpVersion, statusCode);
+        this.headers = generateHeaders(contentType, body);
         this.body = body;
+    }
+
+    private static Headers generateHeaders(final ContentType contentType, final String body) {
+        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
+        headers.put("Content-Type", contentType.getValue());
+        headers.put("Content-Length", getContentLength(body));
+        return new Headers(headers);
+    }
+
+    private static String getContentLength(final String body) {
+        int contentLength = body.getBytes().length;
+        return String.valueOf(contentLength);
     }
 
     public String parseResponse() {
@@ -38,7 +39,7 @@ public class HttpResponse {
                     .append(" \r\n");
         }
 
-        return statusLine + " \r\n" +
+        return statusLine.getStatusLineMessage() + " \r\n" +
                 headers +
                 "\r\n" +
                 body;

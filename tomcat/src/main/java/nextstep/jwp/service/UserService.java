@@ -14,8 +14,14 @@ public class UserService {
 
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
+    private final InMemoryUserRepository userRepository;
+
+    public UserService(InMemoryUserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     public HttpResponse findUser(String account, String password) {
-        final var user = InMemoryUserRepository.findByAccount(account);
+        final var user = userRepository.findByAccount(account);
         if (user.isEmpty()) {
             throw new HttpException(HttpStatus.UNAUTHORIZED);
         }
@@ -30,14 +36,14 @@ public class UserService {
     }
 
     public HttpResponse saveUser(String account, String password, String email) {
-        final var user = InMemoryUserRepository.findByAccount(account);
+        final var user = userRepository.findByAccount(account);
         if (user.isPresent()) {
             throw new HttpException(HttpStatus.BAD_REQUEST);
         }
         if (account.isBlank() || password.isBlank() || email.isBlank()) {
             throw new HttpException(HttpStatus.BAD_REQUEST);
         }
-        final var savedUser = InMemoryUserRepository.save(new User(account, password, email));
+        final var savedUser = userRepository.save(new User(account, password, email));
         log.info("회원가입 성공! - {}", savedUser);
         return new HttpResponseBuilder(HttpStatus.FOUND)
                 .setLocation("/index.html")

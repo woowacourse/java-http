@@ -3,14 +3,18 @@ package nextstep.jwp.servlet;
 import nextstep.jwp.controller.AuthController;
 import nextstep.jwp.support.ResourceRegistry;
 import org.apache.coyote.servlet.request.HttpRequest;
-import org.apache.coyote.support.HttpException;
 import org.apache.coyote.servlet.response.HttpResponse;
 import org.apache.coyote.support.HttpMethod;
 
-public class HttpRequestHandler {
+public class HandlerMapper {
 
-    private final AuthController authController = new AuthController();
-    private final ResourceRegistry resourceRegistry = new ResourceRegistry();
+    private final AuthController authController;
+    private final ResourceRegistry resourceRegistry;
+
+    public HandlerMapper(AuthController authController, ResourceRegistry resourceRegistry) {
+        this.authController = authController;
+        this.resourceRegistry = resourceRegistry;
+    }
 
     public HttpResponse handle(HttpRequest request) {
         if (request.isMethodOf(HttpMethod.GET)) {
@@ -23,9 +27,5 @@ public class HttpRequestHandler {
             return authController.login(request);
         }
         throw new UnsupportedOperationException("Not implemented");
-    }
-
-    public HttpResponse handle(HttpException exception) {
-        return resourceRegistry.findErrorPage(exception);
     }
 }

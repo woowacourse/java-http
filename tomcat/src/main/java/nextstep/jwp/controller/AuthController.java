@@ -7,7 +7,11 @@ import org.apache.coyote.servlet.response.HttpResponse;
 
 public class AuthController {
 
-    private final UserService userService = new UserService();
+    private final UserService userService;
+
+    public AuthController(UserService userService) {
+        this.userService = userService;
+    }
 
     public HttpResponse login(HttpRequest request) {
         Parameters parameters = request.getParameters();

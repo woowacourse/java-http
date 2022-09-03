@@ -37,7 +37,7 @@ public class RequestHeaders {
     }
 
     public int getContentLength() {
-        if (headers.containsKey(CONTENT_LENGTH)) {
+        if (!headers.containsKey(CONTENT_LENGTH)) {
             return 0;
         }
         return Integer.parseInt(headers.get(CONTENT_LENGTH));

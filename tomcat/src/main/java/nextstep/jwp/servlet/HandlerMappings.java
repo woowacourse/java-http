@@ -4,7 +4,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import nextstep.jwp.controller.RequestMapping;
 import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.support.HttpMethod;
 

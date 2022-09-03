@@ -1,7 +1,7 @@
 package nextstep.jwp.controller;
 
+import nextstep.jwp.servlet.RequestMapping;
 import nextstep.jwp.servlet.ViewResolver;
-import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.response.HttpResponse;
 import org.apache.coyote.support.HttpMethod;
 
@@ -14,17 +14,17 @@ public class GetController {
     }
 
     @RequestMapping(method = HttpMethod.GET, path = {"/", "/index"})
-    public HttpResponse home(HttpRequest request) {
+    public HttpResponse home() {
         return viewResolver.findStaticResource("/index.html");
     }
 
     @RequestMapping(method = HttpMethod.GET, path = "/login")
-    public HttpResponse login(HttpRequest request) {
+    public HttpResponse login() {
         return viewResolver.findStaticResource("/login.html");
     }
 
     @RequestMapping(method = HttpMethod.GET, path = "/register")
-    public HttpResponse register(HttpRequest request) {
+    public HttpResponse register() {
         return viewResolver.findStaticResource("/register.html");
     }
 }

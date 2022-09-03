@@ -1,4 +1,4 @@
-package nextstep.jwp.controller;
+package nextstep.jwp.servlet;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -17,71 +17,44 @@ public class HttpResponse {
 
     private static final String BLANK = " ";
     private static final String HTTP_VERSION = "HTTP/1.1 ";
+    private static final String CHARSET_UTF_8 = ";charset=utf-8";
 
-    private final String body;
-    private final HttpStatus status;
+    private String body;
+    private HttpStatus status;
     private final HttpHeaders headers;
 
-    private HttpResponse(final String body, final HttpStatus status, final HttpHeaders headers) {
+    public HttpResponse() {
+        body = "";
+        this.status = HttpStatus.OK;
+        this.headers = new HttpHeaders(new LinkedHashMap<>());
+    }
+
+    public void setBody(final String body) {
         this.body = body;
+        final byte[] responseBody = body.getBytes();
+
+        headers.addHeader(CONTENT_TYPE, MediaType.TEXT_HTML.getValue() + CHARSET_UTF_8);
+        headers.addHeader(CONTENT_LENGTH, String.valueOf(responseBody.length));
+    }
+
+    public void setBody(final URL resource) throws IOException {
+        Objects.requireNonNull(resource);
+
+        final File file = new File(resource.getFile());
+        final Path path = file.toPath();
+        final byte[] responseBody = Files.readAllBytes(path);
+
+        headers.addHeader(CONTENT_TYPE, Files.probeContentType(path) + CHARSET_UTF_8);
+        headers.addHeader(CONTENT_LENGTH, String.valueOf(responseBody.length));
+        this.body = new String(responseBody);
+    }
+
+    public void setStatus(final HttpStatus status){
         this.status = status;
-        this.headers = headers;
     }
 
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    public static class Builder {
-
-        private static final String CHARSET_UTF_8 = ";charset=utf-8";
-
-        private String body;
-        private HttpStatus status;
-        private final HttpHeaders headers;
-
-        public Builder() {
-            this.headers = new HttpHeaders(new LinkedHashMap<>());
-        }
-
-        public Builder body(final String body) {
-            this.body = body;
-            final byte[] responseBody = body.getBytes();
-
-            headers.addHeader(CONTENT_TYPE, MediaType.TEXT_HTML.getValue() + CHARSET_UTF_8);
-            headers.addHeader(CONTENT_LENGTH, String.valueOf(responseBody.length));
-
-            return this;
-        }
-
-        public Builder body(final URL resource) throws IOException {
-            Objects.requireNonNull(resource);
-
-            final File file = new File(resource.getFile());
-            final Path path = file.toPath();
-            final byte[] responseBody = Files.readAllBytes(path);
-
-            headers.addHeader(CONTENT_TYPE, Files.probeContentType(path) + CHARSET_UTF_8);
-            headers.addHeader("Content-Length", String.valueOf(responseBody.length));
-
-            this.body = new String(responseBody);
-
-            return this;
-        }
-
-        public Builder status(final HttpStatus status) {
-            this.status = status;
-            return this;
-        }
-
-        public Builder header(final String key, final String value) {
-            headers.addHeader(key, value);
-            return this;
-        }
-
-        public HttpResponse build() {
-            return new HttpResponse(body, status, headers);
-        }
+    public void addHeader(final String key, final String value) {
+        headers.addHeader(key, value);
     }
 
     public byte[] toBytes() {

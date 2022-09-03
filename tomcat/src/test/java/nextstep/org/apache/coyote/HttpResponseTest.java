@@ -26,10 +26,9 @@ public class HttpResponseTest {
                 "Hello world!");
 
         // when
-        final HttpResponse response = HttpResponse.builder()
-                .body("Hello world!")
-                .status(HttpStatus.OK)
-                .build();
+        final HttpResponse response = new HttpResponse();
+        response.setBody("Hello world!");
+        response.setStatus(HttpStatus.OK);
 
         final String actual = response.toString();
 
@@ -45,10 +44,9 @@ public class HttpResponseTest {
         Objects.requireNonNull(resource);
 
         // when
-        final HttpResponse response = HttpResponse.builder()
-                .body(resource)
-                .status(HttpStatus.OK)
-                .build();
+        final HttpResponse response = new HttpResponse();
+        response.setBody(resource);
+        response.setStatus(HttpStatus.OK);
 
         // then
         final var expected = String.join("\r\n",

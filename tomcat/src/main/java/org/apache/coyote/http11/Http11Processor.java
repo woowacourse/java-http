@@ -57,8 +57,11 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             final HttpRequest httpRequest = toHttpRequest(bufferedReader);
+            final HttpResponse httpResponse = new HttpResponse();
 
-            doService(outputStream, httpRequest);
+            doService(httpRequest, httpResponse);
+
+            write(outputStream, httpResponse);
 
         } catch (final IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -85,42 +88,41 @@ public class Http11Processor implements Runnable, Processor {
         return rawHttpRequest;
     }
 
-    private void doService(final OutputStream outputStream, final HttpRequest httpRequest) throws IOException {
+    private void doService(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         final String requestUri = httpRequest.getPath();
         String viewName = STATIC_PATH + requestUri;
 
         if (WELCOME_PAGE_PATH.equals(httpRequest.getPath())) {
-            renderWelcomePage(outputStream);
+            renderWelcomePage(httpResponse);
             return;
         } else if (LOGIN_PAGE_PATH.equals(requestUri)) {
-            viewName = LOGIN_PAGE;
+            viewName = login(httpRequest);
+        }
 
-            if (httpRequest.haveParam(ACCOUNT_PARAM) && httpRequest.haveParam(PASSWORD_PARAM)) {
-                final String account = httpRequest.getParam(ACCOUNT_PARAM);
-                final String password = httpRequest.getParam(PASSWORD_PARAM);
-                final User user = InMemoryUserRepository.findByAccount(account)
-                        .orElseThrow(NoSuchElementException::new);
-                if (user.checkPassword(password)) {
-                    final String outputMessage = user.toString();
-                    log.info(outputMessage);
-                }
+        render(httpResponse, viewName);
+    }
+
+    private void renderWelcomePage(final HttpResponse httpResponse) {
+        httpResponse.setBody(WELCOME_MESSAGE);
+        httpResponse.setStatus(OK);
+    }
+
+    private static String login(final HttpRequest httpRequest) {
+        if (httpRequest.haveParam(ACCOUNT_PARAM) && httpRequest.haveParam(PASSWORD_PARAM)) {
+            final String account = httpRequest.getParam(ACCOUNT_PARAM);
+            final String password = httpRequest.getParam(PASSWORD_PARAM);
+            final User user = InMemoryUserRepository.findByAccount(account)
+                    .orElseThrow(NoSuchElementException::new);
+            if (user.checkPassword(password)) {
+                final String outputMessage = user.toString();
+                log.info(outputMessage);
             }
         }
 
-        render(outputStream, viewName);
+        return LOGIN_PAGE;
     }
 
-    private void renderWelcomePage(final OutputStream outputStream) throws IOException {
-        final HttpResponse response = HttpResponse.builder()
-                .status(OK)
-                .body(WELCOME_MESSAGE)
-                .build();
-
-        outputStream.write(response.toBytes());
-        outputStream.flush();
-    }
-
-    private void render(final OutputStream outputStream, final String viewName) throws IOException {
+    private void render(final HttpResponse httpResponse, final String viewName) throws IOException {
         URL resource = getClass().getClassLoader().getResource(viewName);
         HttpStatus statusCode = OK;
 
@@ -129,11 +131,11 @@ public class Http11Processor implements Runnable, Processor {
             statusCode = NOT_FOUND;
         }
 
-        final HttpResponse response = HttpResponse.builder()
-                .status(statusCode)
-                .body(resource)
-                .build();
+        httpResponse.setBody(resource);
+        httpResponse.setStatus(statusCode);
+    }
 
+    private void write(final OutputStream outputStream, final HttpResponse response) throws IOException {
         outputStream.write(response.toBytes());
         outputStream.flush();
     }

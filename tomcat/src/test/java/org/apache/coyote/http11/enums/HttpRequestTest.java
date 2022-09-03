@@ -10,26 +10,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 class HttpRequestTest {
 
-    @DisplayName("file 호출이 아님")
-    @Test
-    void isCallApi() {
-        // given
-        HttpRequest httpRequest = new HttpRequest("/login");
-
-        // when & then
-        assertThat(httpRequest.isFindFile()).isFalse();
-    }
-
-    @DisplayName("file 호출")
-    @Test
-    void isNotCallApi() {
-        // given
-        HttpRequest httpRequest = new HttpRequest("/login.html");
-
-        // when & then
-        assertThat(httpRequest.isFindFile()).isTrue();
-    }
-
     @DisplayName("올바른 ContentType 찾기")
     @ParameterizedTest(name = "value = {0}, expected = {1}")
     @CsvSource(value = {"/styles.css, CSS", "/index.html, HTML", "/js/scripts.js, JS", "/favicon.ico, ICO"})

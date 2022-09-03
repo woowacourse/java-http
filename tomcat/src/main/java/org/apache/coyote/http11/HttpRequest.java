@@ -24,10 +24,6 @@ public class HttpRequest {
         return uri.substring(0, index);
     }
 
-    public boolean isFindFile() {
-        return findFilePath().isFilePath(url);
-    }
-
     public ContentType findContentType() {
         return ContentType.of(
                 findFilePath().findFileExtension()
@@ -36,6 +32,10 @@ public class HttpRequest {
 
     public FilePath findFilePath() {
         return FilePath.of(url);
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     public QueryStrings getQueryStrings() {

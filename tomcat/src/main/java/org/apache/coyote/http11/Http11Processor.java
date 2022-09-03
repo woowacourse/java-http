@@ -51,14 +51,19 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse process(final HttpRequest httpRequest) {
-        if (httpRequest.isFindFile()) {
-            String responseBody = httpRequest.findFilePath()
-                    .generateFile();
-            return new HttpResponse(HttpStatus.OK, httpRequest, responseBody);
+        final String url = httpRequest.getUrl();
+
+        if ("/".equals(url)) {
+            return new HttpResponse(HttpStatus.OK, httpRequest, "Hello world!");
         }
 
-        LoginHandler loginHandler = new LoginHandler();
-        return loginHandler.login(httpRequest);
+        if ("/login".equals(url)) {
+            return new LoginHandler().login(httpRequest);
+        }
+
+        final String responseBody = httpRequest.findFilePath()
+                .generateFile();
+        return new HttpResponse(HttpStatus.OK, httpRequest, responseBody);
     }
 
     private String extractURI(final String startLine) {

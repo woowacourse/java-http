@@ -44,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
             List<String> request = readRequest(bufferedReader);
             HttpRequest httpRequest = HttpRequest.of(request);
 
-            final String responseBody = getResponseBody(httpRequest.getRequestUri());
+            final String responseBody = getResponseBody(httpRequest.extractRequestUri());
             final String response = makeResponse(httpRequest.findContentType(), responseBody);
 
             outputStream.write(response.getBytes());

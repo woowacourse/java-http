@@ -20,7 +20,7 @@ class HttpRequestTest {
         final HttpRequest httpRequest = HttpRequest.of(request);
 
         // then
-        assertThat(httpRequest.getRequestUri().getUri()).isEqualTo("/login?account=gugu&password=password");
+        assertThat(httpRequest.extractRequestUri().getUri()).isEqualTo("/login?account=gugu&password=password");
     }
 
     @Test

@@ -14,6 +14,7 @@ public class FileUtils {
 
     private static final String FILE_NAME_DELIMITER = ".";
     private static final int NO_EXISTING = -1;
+    private static final String EMPTY_FILE = "";
 
     private FileUtils() {
     }
@@ -27,7 +28,6 @@ public class FileUtils {
     }
 
     public static String readFile(URL resource){
-        String EMPTY_FILE = "";
         if (resource == null) {
             return EMPTY_FILE;
         }

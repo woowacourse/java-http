@@ -6,9 +6,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.Processor;
-import org.apache.coyote.request.CustomServlet;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.servlet.CustomServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,11 +20,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final CustomServlet customServlet;
+    private final CustomServlet servlet;
 
-    public Http11Processor(final Socket connection, final CustomServlet customServlet) {
+    public Http11Processor(final Socket connection, final CustomServlet servlet) {
         this.connection = connection;
-        this.customServlet = customServlet;
+        this.servlet = servlet;
     }
 
     @Override
@@ -39,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
              final var reader = new BufferedReader(streamReader);
              final var outputStream = connection.getOutputStream()) {
 
-            HttpResponse response = customServlet.service(toRequest(reader));
+            HttpResponse response = servlet.service(toRequest(reader));
 
             outputStream.write(response.toMessage().getBytes());
             outputStream.flush();

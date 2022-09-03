@@ -13,8 +13,8 @@ import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final int START_LINE = 1;
+    private static final Logger LOGGER = LoggerFactory.getLogger(Http11Processor.class);
+    private static final int URI = 1;
 
     private final Socket connection;
 
@@ -34,7 +34,7 @@ public class Http11Processor implements Runnable, Processor {
              final var reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
 
-            String uri = reader.readLine().split(" ")[START_LINE];
+            String uri = reader.readLine().split(" ")[URI];
             if (uri.equals("/favicon.ico")) {
                 return;
             }
@@ -44,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | FileNotFoundException e) {
-            log.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
     }
 }

@@ -14,8 +14,10 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http.HttpVersion;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
+import org.apache.coyote.http.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,7 +54,7 @@ public class Http11Processor implements Runnable, Processor {
                 log.info(user.toString());
             }
 
-            outputStream.write(httpResponse.getTemplate().getBytes());
+            outputStream.write(httpResponse.convertTemplate().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
@@ -64,28 +66,26 @@ public class Http11Processor implements Runnable, Processor {
         if (url.equals("/")) {
             return getHelloResponse();
         }
-        return createResponse(url);
+        return createResponse(httpRequest);
     }
 
-    private HttpResponse createResponse(final String requestUrl)
+    private HttpResponse createResponse(final HttpRequest httpRequest)
             throws URISyntaxException, IOException {
-        final URL resource = this.getClass().getClassLoader().getResource("static" + requestUrl);
+        final URL resource = this.getClass().getClassLoader().getResource("static" + httpRequest.getUrl());
         final Path path = Paths.get(resource.toURI());
         final String responseBody = new String(Files.readAllBytes(path));
 
-        return new HttpResponse("HTTP/1.1",
-                "200",
-                "OK",
-                ContentType.findContentType(requestUrl),
+        return new HttpResponse(httpRequest.getVersion(),
+                HttpStatus.OK,
+                ContentType.findContentType(httpRequest.getUrl()),
                 responseBody.getBytes().length,
                 responseBody);
     }
 
     private HttpResponse getHelloResponse() {
         String responseBody = "Hello world!";
-        return new HttpResponse("HTTP/1.1",
-                "200",
-                "OK",
+        return new HttpResponse(HttpVersion.HTTP11,
+                HttpStatus.OK,
                 ContentType.HTML,
                 responseBody.getBytes().length,
                 responseBody);

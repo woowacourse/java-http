@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http.HttpHeader;
+import org.apache.coyote.http.HttpVersion;
 
 public class HttpRequest {
 
@@ -20,18 +21,6 @@ public class HttpRequest {
     public HttpRequest(final HttpRequestLine httpRequestLine, final HttpHeader httpHeaders) {
         this.httpRequestLine = httpRequestLine;
         this.httpHeaders = httpHeaders;
-    }
-
-    public boolean hasQueryString() {
-        return httpRequestLine.hasQueryParams();
-    }
-
-    public String getUrl() {
-        return httpRequestLine.getPath();
-    }
-
-    public Map<String, String> getQueryString() {
-        return httpRequestLine.getQueryParams();
     }
 
     public static HttpRequest parse(final BufferedReader bufferedReader) throws IOException {
@@ -49,6 +38,26 @@ public class HttpRequest {
 
     private static HttpRequestLine createHttpRequestLine(final BufferedReader bufferedReader) throws IOException {
         final String[] line = bufferedReader.readLine().split(LINE_SEPARATOR);
-        return HttpRequestLine.from(line[METHOD_INDEX], line[URL_INDEX], line[VERSION_INDEX]);
+        return HttpRequestLine.from(
+                RequestMethod.findMethod(line[METHOD_INDEX]),
+                line[URL_INDEX],
+                HttpVersion.findVersion(line[VERSION_INDEX])
+        );
+    }
+
+    public boolean hasQueryString() {
+        return httpRequestLine.hasQueryParams();
+    }
+
+    public String getUrl() {
+        return httpRequestLine.getPath();
+    }
+
+    public Map<String, String> getQueryString() {
+        return httpRequestLine.getQueryParams();
+    }
+
+    public HttpVersion getVersion() {
+        return httpRequestLine.getVersion();
     }
 }

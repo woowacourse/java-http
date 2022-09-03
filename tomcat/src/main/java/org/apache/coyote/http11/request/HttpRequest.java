@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.List;
 
 import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.request.header.RequestLine;
 
 public class HttpRequest {
 

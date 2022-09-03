@@ -16,28 +16,28 @@ public class LoginController {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String LOGIN_PAGE = "/login.html";
-    private static final String UNAUTHORIED_PAGE = "/401.html";
+    private static final String UNAUTHORIZED_PAGE = "/401.html";
 
     public static String handle(HttpRequest request) throws IOException {
         QueryString queryString = request.queryString();
         if (queryString.isEmpty()) {
             return handleStatic(LOGIN_PAGE);
         }
-        String account = queryString.get("account");
-        String password = queryString.get("password");
-
-        Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
-        if (isInvalidUser(password, userOptional)) {
-            return handleStatic(UNAUTHORIED_PAGE);
+        if (isValidUser(queryString.get("account"), queryString.get("password"))) {
+            return handleStatic(LOGIN_PAGE);
         }
-        User user = userOptional.get();
-        log.info(user.toString());
-        return handleStatic(LOGIN_PAGE);
+        return handleStatic(UNAUTHORIZED_PAGE);
     }
 
-    private static boolean isInvalidUser(String password, Optional<User> userOptional) {
-        return userOptional.isEmpty() ||
-                !userOptional.get()
-                        .checkPassword(password);
+    private static Boolean isValidUser(String account, String password) {
+        Optional<User> userOptional = InMemoryUserRepository.findByAccount(account);
+        if (userOptional.isPresent() &&
+                userOptional.get()
+                        .checkPassword(password)) {
+            User user = userOptional.get();
+            log.info(user.toString());
+            return true;
+        }
+        return false;
     }
 }

@@ -18,13 +18,13 @@ public class RequestLine {
     private final String uri;
     private final String version;
 
-    public RequestLine(String method, String uri, String version) {
+    private RequestLine(String method, String uri, String version) {
         this.method = method;
         this.uri = uri;
         this.version = version;
     }
 
-    public RequestLine(String... component) {
+    private RequestLine(String... component) {
         this(component[METHOD_INDEX], component[URI_INDEX], component[VERSION_INDEX]);
     }
 

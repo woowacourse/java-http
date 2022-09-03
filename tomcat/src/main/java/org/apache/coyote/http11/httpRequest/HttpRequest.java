@@ -15,7 +15,7 @@ public class HttpRequest {
     private final RequestLine requestLine;
     private final Map<String, String> header;
 
-    public HttpRequest(RequestLine requestLine, Map<String, String> header) {
+    private HttpRequest(RequestLine requestLine, Map<String, String> header) {
         this.requestLine = requestLine;
         this.header = header;
     }

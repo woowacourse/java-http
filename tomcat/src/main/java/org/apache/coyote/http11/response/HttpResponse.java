@@ -1,8 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.ResponseEntity;
 import org.apache.coyote.http11.message.HttpVersion;
-import org.apache.coyote.http11.response.headers.ContentType;
 import org.apache.coyote.http11.response.headers.ResponseHeader;
 
 public class HttpResponse implements Response {

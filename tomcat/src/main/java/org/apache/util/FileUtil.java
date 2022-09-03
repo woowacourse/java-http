@@ -1,7 +1,6 @@
 package org.apache.util;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 
 public class FileUtil {

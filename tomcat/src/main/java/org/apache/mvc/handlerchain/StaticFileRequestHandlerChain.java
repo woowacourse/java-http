@@ -6,8 +6,6 @@ import java.nio.file.Files;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.response.ResponseBody;
-import org.apache.coyote.http11.response.headers.ContentLength;
 import org.apache.coyote.http11.response.headers.ContentType;
 import org.apache.util.FileUtil;
 import org.apache.util.UrlUtil;

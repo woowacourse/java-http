@@ -2,9 +2,6 @@ package org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.ByteArrayInputStream;
-import org.apache.coyote.http11.ResponseEntity;
-import org.apache.coyote.http11.request.HttpRequest;
 import org.junit.jupiter.api.Test;
 
 class ResponseHeadersTest {

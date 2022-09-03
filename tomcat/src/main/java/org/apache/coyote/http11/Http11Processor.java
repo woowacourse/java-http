@@ -9,7 +9,11 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
+import java.util.Optional;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +41,7 @@ public class Http11Processor implements Runnable, Processor {
                      StandardCharsets.UTF_8))) {
             final HttpRequestStartLineContents startLineContents = HttpRequestStartLineContents.from(headerReader);
 
+            checkUser(startLineContents);
             final URL resourceUrl = getResourceUrl(startLineContents.getUri());
 
             final String responseBody = readContext(resourceUrl);
@@ -69,6 +74,26 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return "text/html";
+    }
+
+    private void checkUser(HttpRequestStartLineContents startLineContents) {
+        if (!startLineContents.getUri().contains("login")) {
+            return;
+        }
+
+        final Map<String, String> queryParams = startLineContents.getQueryParams();
+        final Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.get("account"));
+
+        if (user.isPresent()) {
+            final User loginUser = user.get();
+            logLoginUser(queryParams, loginUser);
+        }
+    }
+
+    private void logLoginUser(Map<String, String> queryParams, User loginUser) {
+        if (loginUser.checkPassword(queryParams.get("password"))) {
+            log.info("user : " + loginUser.toString());
+        }
     }
 
     private URL getResourceUrl(String requestUri) {

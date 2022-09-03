@@ -1,1 +1,15 @@
 # 톰캣 구현하기
+
+- [x] GET 요청시 URI에 대응되는 정적 자원 응답하기
+  - [x] `GET /` 요청에 대해 index.html 응답
+  - [x] URI에 확장자가 포함되지 않은 경우, 자동으로 끝에 `.html`을 추가하여 자원 조회
+  - [x] 요청한 자원의 확장자에 따라 Content-Type 설정하여 응답 (text/html, text/css, text/javascript, etc)
+
+- [x] 요청 처리 과정에서 문제가 발생한 경우, 그에 대응되는 메시지 응답하기
+  - [x] 응답 메시지에 관련 상태코드 추가(e.g., 404 NOT FOUND)
+  - [x] 존재하지 않는 자원을 요청한 경우, 404.html 응답
+  - [x] 예상하지 못한 문제인 경우, 500.html 응답
+  - [x] 상태코드가 500이 아니더라도, 대응되는 html 파일이 없는 경우 500.html 응답
+
+- [x] uri에 query string이 포함되면 파싱하여 처리한다.
+  - [x] `GET /login.html` 요청시 query string에 대응되는 사용자 데이터가 인메모리 DB에 존재하면 로그에 출력한다.

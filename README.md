@@ -61,9 +61,9 @@ http://localhost:8080/login?account=gugu&password=password으로 접속하면 �
 - [x] CSS 지원하기
 - [x] Query String 파싱
 
-## 리팩토링 목록
+## 🔥 리팩토링 목록
 
-### 진짜 디스패처 서블릿처럼 만들기
+### ⚽️ 진짜 디스패처 서블릿처럼 만들기
 
 - [ ] 새 클래스 생성 및 역할분리
 - [ ] 서블릿
@@ -73,7 +73,9 @@ http://localhost:8080/login?account=gugu&password=password으로 접속하면 �
 - [ ] 서비스
 - [ ] 뷰리졸버
 
-### 1차 피드백
+### 📝 피드백
+
+#### 1차 피드백
 
 - [x] private 으로 제한
 - [x] password 가 틀렸을때의 예외 처리

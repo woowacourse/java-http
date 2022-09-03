@@ -21,10 +21,6 @@ public class HttpResponse {
         return new HttpResponse(header, responseBody);
     }
 
-    public HttpResponseHeader getHeader() {
-        return header;
-    }
-
     public HttpResponseBody getBody() {
         return body;
     }

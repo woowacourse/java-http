@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.response.factory;
+package servlet.view;
 
 import static org.apache.coyote.Constants.ROOT;
 
@@ -14,14 +14,16 @@ import org.apache.coyote.http11.response.HttpResponseBody;
 import org.apache.coyote.http11.response.element.HttpMethod;
 import org.apache.coyote.http11.response.element.HttpStatus;
 
-public class StaticResponseFactory {
+public class ViewResolver {
+
+    public ViewResolver() {}
 
     public HttpResponse getResponse(HttpMethod method, String url, HttpStatus status) {
         if (method != HttpMethod.GET) {
             throw new NoSuchElementException();
         }
         try {
-            URL fileUrl = HttpResponseBody.class.getClassLoader().getResource(ROOT + url);
+            URL fileUrl = getClass().getClassLoader().getResource(ROOT + url);
             String file = Objects.requireNonNull(fileUrl).getFile();
             Path path = new File(file).toPath();
 

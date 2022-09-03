@@ -11,22 +11,32 @@ import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.element.HttpMethod;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import servlet.view.ViewResolver;
 
-class StaticResponseFactoryTest {
+class ViewResolverTest {
 
     @Test
     @DisplayName("URL 에 맞는 정적리소스를 매핑한다.")
     void getResponse() {
-        StaticResponseFactory factory = new StaticResponseFactory();
+        ViewResolver factory = new ViewResolver();
         HttpResponse response = factory.getResponse(HttpMethod.GET, "/index.html");
         String bodyContext = response.getBody().getBodyContext();
         assertThat(bodyContext).contains("<!DOCTYPE html>");
     }
 
     @Test
+    @DisplayName("URL 에 맞는 정적리소스를 매핑한다. favicon")
+    void getResponse_favicon() {
+        ViewResolver factory = new ViewResolver();
+        HttpResponse response = factory.getResponse(HttpMethod.GET, "/favicon.ico");
+        String bodyContext = response.getBody().getBodyContext();
+        assertThat(bodyContext).contains("1");
+    }
+
+    @Test
     @DisplayName("URL 에 맞는 정적리소스가 없을 시 예외 발생한다.")
     void getResponse_Exception() {
-        StaticResponseFactory factory = new StaticResponseFactory();
+        ViewResolver factory = new ViewResolver();
         assertThatThrownBy(() -> factory.getResponse(HttpMethod.GET, "/asdf"))
                 .isInstanceOf(NoSuchElementException.class);
     }
@@ -38,6 +48,7 @@ class StaticResponseFactoryTest {
         assertThat(probeContentType("/css/styles.css")).isEqualTo("text/css");
         assertThat(probeContentType("/assets/chart-area.js")).isEqualTo("text/javascript");
         assertThat(probeContentType("/awrhg")).isEqualTo(null);
+        assertThat(probeContentType("/favicon.ico")).isEqualTo("image/vnd.microsoft.icon");
     }
 
     private String probeContentType(String url) {

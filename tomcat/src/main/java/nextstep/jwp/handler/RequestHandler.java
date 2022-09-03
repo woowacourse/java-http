@@ -31,19 +31,19 @@ public class RequestHandler {
     }
 
     private static HttpResponse findByUri(final HttpRequest httpRequest) throws IOException {
-        if ("/".equals(httpRequest.getUri())) {
-            if (GET.equals(httpRequest.getMethod())) {
+        if ("/".equals(httpRequest.getRequestUri())) {
+            if (GET.name().equals(httpRequest.getRequestMethod())) {
                 return HttpResponse.createBody(HttpStatus.OK, new StaticResource(new Content("Hello world!"), TEXT_HTML));
             }
         }
 
-        if ("/login".equals(httpRequest.getUri())) {
-            if (GET.equals(httpRequest.getMethod())) {
+        if ("/login".equals(httpRequest.getRequestUri())) {
+            if (GET.name().equals(httpRequest.getRequestMethod())) {
                 User user;
                 try {
-                    user = InMemoryUserRepository.findByAccount(httpRequest.getUriParameter("account"))
+                    user = InMemoryUserRepository.findByAccount(httpRequest.getQueryParameterValue("account"))
                         .orElseThrow(NotFoundUserException::new);
-                    validateCheckPassword(user, httpRequest.getUriParameter("password"));
+                    validateCheckPassword(user, httpRequest.getQueryParameterValue("password"));
                     log.info("user : {}", user);
                     return HttpResponse.createBody(HttpStatus.OK, StaticResourceUtil.findByPathWithExtension("/login", ".html"));
                 } catch (NotFoundUserException e) {
@@ -53,7 +53,7 @@ public class RequestHandler {
             }
         }
 
-        StaticResource staticResource = StaticResourceUtil.findByPath(httpRequest.getUri());
+        StaticResource staticResource = StaticResourceUtil.findByPath(httpRequest.getRequestUri());
         return HttpResponse.createBody(HttpStatus.OK, staticResource);
     }
 

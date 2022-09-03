@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -41,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(httpResponse.toResponse());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | NoSuchElementException | IllegalArgumentException e) {
+        } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
     }

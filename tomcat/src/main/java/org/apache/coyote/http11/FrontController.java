@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
+import org.apache.coyote.exception.FileNotExistException;
+
+import nextstep.jwp.exception.InvalidLoginRequestException;
 import nextstep.jwp.handler.LoginHandler;
 import nextstep.jwp.model.User;
 
@@ -19,11 +21,15 @@ public class FrontController {
     }
 
     public static HttpResponse staticFileRequest(String fileName) throws IOException {
-        Path filePath = findFilePath(fileName);
-        String content = new String(Files.readAllBytes(filePath));
+        try {
+            Path filePath = findFilePath(fileName);
+            String content = new String(Files.readAllBytes(filePath));
 
-        String contentType = FileExtension.findContentType(fileName);
-        return new HttpResponse(HttpStatus.OK, contentType, content);
+            String contentType = FileExtension.findContentType(fileName);
+            return new HttpResponse(HttpStatus.OK, contentType, content);
+        } catch (FileNotExistException e) {
+            return new HttpResponse(HttpStatus.NOT_FOUND, null, null);
+        }
     }
 
     private static Path findFilePath(String fileName) {
@@ -42,12 +48,20 @@ public class FrontController {
         }
 
         if (httpRequest.getUri().startsWith("/login")) {
+            return performLogin(httpRequest);
+        }
+        return new HttpResponse(HttpStatus.NOT_FOUND, null, null);
+    }
+
+    private static HttpResponse performLogin(HttpRequest httpRequest) throws IOException {
+        try {
             Map<String, String> queryValues = QueryStringParser.parseUri(httpRequest.getUri());
             LoginHandler loginHandler = new LoginHandler();
             User user = loginHandler.login(queryValues);
 
             return staticFileRequest("/login.html");
+        } catch (InvalidLoginRequestException e) {
+            return new HttpResponse(HttpStatus.NOT_FOUND, null, null);
         }
-        return new HttpResponse(HttpStatus.NOT_FOUND, null, null);
     }
 }

@@ -1,15 +1,13 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.request.UserRequest;
 import org.apache.coyote.http11.exception.QueryParamNotFoundException;
+import org.apache.coyote.http11.utils.PairConverter;
 
 public class QueryParam {
 
     private static final int QUERY_PARAM = 1;
-    private static final int QUERY_PARAM_KEY = 0;
-    private static final int QUERY_PARAM_VALUE = 1;
     private static final String KEY_VALUE_PAIR_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final String QUERY_PARAM_DELIMITER = "\\?";
@@ -17,21 +15,11 @@ public class QueryParam {
     private final Map<String, String> parameters;
 
     public QueryParam(final String path) {
-        this.parameters = toParameters(path);
+        this.parameters = PairConverter.toMap(toQueryString(path), KEY_VALUE_PAIR_DELIMITER, KEY_VALUE_DELIMITER);
     }
 
-    private Map<String, String> toParameters(final String path) {
-        Map<String, String> parameters = new HashMap<>();
-
-        String queryString = path.split(QUERY_PARAM_DELIMITER)[QUERY_PARAM];
-        for(String keyAndValue : queryString.split(KEY_VALUE_PAIR_DELIMITER)) {
-            String key = keyAndValue.split(KEY_VALUE_DELIMITER)[QUERY_PARAM_KEY];
-            String value = keyAndValue.split(KEY_VALUE_DELIMITER)[QUERY_PARAM_VALUE];
-
-            parameters.put(key, value);
-        }
-
-        return parameters;
+    private String toQueryString(final String path) {
+        return path.split(QUERY_PARAM_DELIMITER)[QUERY_PARAM];
     }
 
     private boolean matchParameters(String key) {

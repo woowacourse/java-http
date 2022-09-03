@@ -29,8 +29,8 @@ public class HttpRequest {
         return new HttpRequest(StartLine.of(request.get(START_LINE_INDEX)));
     }
 
-    public boolean isGet() {
-        return this.method.equals(HttpMethod.GET);
+    public boolean isMethodOf(HttpMethod method) {
+        return this.method.equals(method);
     }
 
     public String getUri() {

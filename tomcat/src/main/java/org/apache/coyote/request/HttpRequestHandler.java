@@ -4,6 +4,7 @@ import nextstep.jwp.controller.AuthController;
 import org.apache.coyote.exception.HttpException;
 import org.apache.coyote.response.HttpResponse;
 import org.apache.coyote.response.ResourceView;
+import org.apache.coyote.support.HttpMethod;
 
 public class HttpRequestHandler {
 
@@ -14,7 +15,7 @@ public class HttpRequestHandler {
         if (request.getUri().startsWith("/login")) {
             authController.login(request);
         }
-        if (request.isGet()) {
+        if (request.isMethodOf(HttpMethod.GET)) {
             return resourceView.findStaticResource(request.getUri());
         }
         throw new UnsupportedOperationException("Not implemented");

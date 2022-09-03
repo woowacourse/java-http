@@ -1,5 +1,6 @@
 package nextstep.jwp.handler;
 
+import java.io.File;
 import nextstep.Application;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UserNotFoundException;
@@ -7,8 +8,8 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.QueryStrings;
-import org.apache.coyote.http11.enums.FilePath;
 import org.apache.coyote.http11.enums.HttpStatus;
+import org.apache.coyote.http11.utils.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,14 +29,16 @@ public class LoginHandler {
         String password = queryStrings.findByKey(PASSWORD);
         if (user.checkPassword(password)) {
             log.info(user.toString());
-            return generateResponse(HttpStatus.FOUND, httpRequest, FilePath.INDEX_PAGE);
+            return generateResponse(HttpStatus.FOUND, "/login.html");
         }
 
-        return generateResponse(HttpStatus.UNAUTHORIZED, httpRequest, FilePath.ERROR_401_PAGE);
+        return generateResponse(HttpStatus.UNAUTHORIZED, "/401.html");
     }
 
-    private HttpResponse generateResponse(HttpStatus httpStatus, HttpRequest httpRequest, FilePath filePath) {
-        String responseBody = filePath.generateFile();
-        return new HttpResponse(httpStatus, httpRequest, responseBody);
+    private HttpResponse generateResponse(final HttpStatus httpStatus, final String path) {
+        final File file = FileUtil.findFile(path);
+        final String contentType = FileUtil.findContentType(file);
+        final String responseBody = FileUtil.generateFile(file);
+        return new HttpResponse(httpStatus, contentType, responseBody);
     }
 }

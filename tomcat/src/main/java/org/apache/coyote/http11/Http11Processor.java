@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,6 +11,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginHandler;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.enums.HttpStatus;
+import org.apache.coyote.http11.utils.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,16 +56,17 @@ public class Http11Processor implements Runnable, Processor {
         final String url = httpRequest.getUrl();
 
         if ("/".equals(url)) {
-            return new HttpResponse(HttpStatus.OK, httpRequest, "Hello world!");
+            return new HttpResponse(HttpStatus.OK, "text/plain", "Hello world!");
         }
 
         if ("/login".equals(url)) {
             return new LoginHandler().login(httpRequest);
         }
 
-        final String responseBody = httpRequest.findFilePath()
-                .generateFile();
-        return new HttpResponse(HttpStatus.OK, httpRequest, responseBody);
+        final File file = FileUtil.findFile(url);
+        final String contentType = FileUtil.findContentType(file);
+        final String responseBody = FileUtil.generateFile(file);
+        return new HttpResponse(HttpStatus.OK, contentType, responseBody);
     }
 
     private String extractURI(final String startLine) {

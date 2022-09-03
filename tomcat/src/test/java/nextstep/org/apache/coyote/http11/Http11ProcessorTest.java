@@ -18,7 +18,7 @@ class Http11ProcessorTest {
         final var socket = new StubSocket();
         final var processor = new Http11Processor(socket);
         final String expectedStatusLine = "HTTP/1.1 200 OK ";
-        final String expectedContentType = "Content-Type: text/html;charset=utf-8 ";
+        final String expectedContentType = "Content-Type: text/plain;charset=utf-8 ";
         final String expectedContentLength = "Content-Length: 12 ";
         final String expectedBody = "Hello world!";
 

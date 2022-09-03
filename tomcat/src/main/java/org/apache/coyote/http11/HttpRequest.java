@@ -1,8 +1,5 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.http11.enums.ContentType;
-import org.apache.coyote.http11.enums.FilePath;
-
 public class HttpRequest {
 
     private static final char QUERY_STRING_STANDARD = '?';
@@ -22,16 +19,6 @@ public class HttpRequest {
             return uri;
         }
         return uri.substring(0, index);
-    }
-
-    public ContentType findContentType() {
-        return ContentType.of(
-                findFilePath().findFileExtension()
-        );
-    }
-
-    public FilePath findFilePath() {
-        return FilePath.of(url);
     }
 
     public String getUrl() {

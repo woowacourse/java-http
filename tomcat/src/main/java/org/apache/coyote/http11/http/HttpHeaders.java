@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -15,7 +16,7 @@ public class HttpHeaders {
 	private static final int HEADER_KEY_INDEX = 0;
 	private static final int HEADER_VALUE_INDEX = 1;
 
-	private final Map<HttpHeader, String> headers = new HashMap<>();
+	private final Map<HttpHeader, String> headers = new LinkedHashMap<>();
 
 	public HttpHeaders(Map<HttpHeader, String> headers) {
 		this.headers.putAll(headers);

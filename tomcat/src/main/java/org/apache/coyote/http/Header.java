@@ -6,7 +6,7 @@ public class Header {
 
     private Map<String, String> values;
 
-    public Header(Map<String, String> header) {
+    public Header(final Map<String, String> header) {
         this.values = header;
     }
 

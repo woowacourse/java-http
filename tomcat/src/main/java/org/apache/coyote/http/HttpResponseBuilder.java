@@ -16,20 +16,20 @@ public class HttpResponseBuilder {
     private Map<String, String> header;
     private String body;
 
-    public HttpResponseBuilder(HttpStatus httpStatus) {
+    public HttpResponseBuilder(final HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
         this.header = new HashMap<>();
         this.body = "";
     }
 
-    public HttpResponseBuilder header(Header inputHeader){
+    public HttpResponseBuilder header(final Header inputHeader){
         for (Entry<String, String> value : inputHeader.values().entrySet()) {
             header.put(value.getKey(), value.getValue());
         }
         return this;
     }
 
-    public HttpResponseBuilder body(Path path){
+    public HttpResponseBuilder body(final Path path){
         try {
             header.put("Content-Type", Files.probeContentType(path));
         } catch (IOException e) {
@@ -40,7 +40,7 @@ public class HttpResponseBuilder {
         return this;
     }
 
-    public HttpResponseBuilder body(String bodyValue){
+    public HttpResponseBuilder body(final String bodyValue){
         header.put("Content-Type", "text/html");
         this.body = bodyValue;
         return this;

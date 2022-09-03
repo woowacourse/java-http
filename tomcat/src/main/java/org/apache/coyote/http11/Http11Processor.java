@@ -40,7 +40,6 @@ public class Http11Processor implements Runnable, Processor {
             final String request = bufferedReader.readLine();
 
             final HttpRequest httpRequest = new HttpRequest(request);
-
             final HttpResponse response = requestMapping(httpRequest);
 
             outputStream.write(makeHttpMessage(response).getBytes());
@@ -50,7 +49,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse requestMapping(HttpRequest request){
+    private HttpResponse requestMapping(final HttpRequest request){
         if(request.getUrl().equals("/")){
             return new InitController().home();
         }

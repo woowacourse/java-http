@@ -30,9 +30,18 @@ public class Response {
     }
 
     private String getString() {
-        return String.join(CRLF,
+        String defaultFormat = String.join(CRLF,
                 "HTTP/1.1" + " " + status.getCode() + " " + status.name() + " ",
-                headers.getString(),
+                headers.getString());
+        if (responseBody != null) {
+            return joinBody(defaultFormat);
+        }
+        return defaultFormat;
+    }
+
+    private String joinBody(final String defaultFormat) {
+        return String.join(CRLF,
+                defaultFormat,
                 "",
                 responseBody.getBody());
     }

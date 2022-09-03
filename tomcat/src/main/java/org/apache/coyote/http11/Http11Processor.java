@@ -4,9 +4,6 @@ import static org.apache.coyote.http11.Url.LOGIN;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -36,25 +33,10 @@ public class Http11Processor implements Runnable, Processor {
 
             final Http11Request request = Http11Request.of(inputStream);
             final String url = request.getRequestUrl();
-            if (url == null) {
-                throw new IllegalArgumentException("잘못된 형식의 요청입니다.");
-            }
             final Http11Response response = Url.getResponseFrom(url);
-
             if (Url.find(url).equals(LOGIN)) {
-                int index = url.indexOf("?");
-                Map<String, String> queryStrings = new HashMap<>();
-                for (String querystring : url.substring(index + 1).split("&")) {
-                    String name = querystring.split("=")[0];
-                    String value = querystring.split("=")[1];
-                    queryStrings.put(name, value);
-                }
-
-                Optional<User> user = InMemoryUserRepository.findByAccount(queryStrings.get("account"));
-
-                if (user.isPresent() && user.get().checkPassword(queryStrings.get("password"))) {
-                    log.info(queryStrings.get("account") + "는 존재하는 유저입니다.");
-                }
+                Http11QueryParams queryParams = Http11QueryParams.from(url);
+                logUserInfo(queryParams);
             }
 
             String responseContent = response.getOkResponse();
@@ -63,6 +45,17 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private static void logUserInfo(Http11QueryParams queryParams) {
+        String account = queryParams.getValueFrom("account");
+        String password = queryParams.getValueFrom("password");
+
+        User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+        if (user.checkPassword(password)) {
+            log.info(user.toString());
         }
     }
 }

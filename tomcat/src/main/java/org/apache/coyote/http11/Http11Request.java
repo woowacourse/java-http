@@ -24,11 +24,22 @@ public class Http11Request {
     }
 
     public static Http11Request of(final InputStream inputStream) throws IOException {
+        final String startLine = getStartLine(inputStream);
+        final String[] startLineParts = startLine.split(" ");
+        validateUrl(startLineParts);
+        return new Http11Request(startLineParts[0], startLineParts[1]);
+    }
+
+    private static String getStartLine(InputStream inputStream) throws IOException {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-        final String startLine = bufferedReader.readLine().trim();
-        String[] startLineParts = startLine.split(" ");
-        return new Http11Request(startLineParts[0], startLineParts[1]);
+        return bufferedReader.readLine().trim();
+    }
+
+    private static void validateUrl(String[] startLineParts) {
+        if (startLineParts[1] == null) {
+            throw new IllegalArgumentException("잘못된 형식의 요청입니다.");
+        }
     }
 
     public String getRequestUrl() {

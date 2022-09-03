@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import nextstep.jwp.support.ExceptionPage;
 import org.apache.coyote.servlet.response.HttpResponse;
 import org.apache.coyote.servlet.response.HttpResponse.HttpResponseBuilder;
 import org.apache.coyote.support.HttpException;
@@ -17,9 +16,9 @@ public class ViewResolver {
         return toHttpResponse(HttpStatus.OK, path);
     }
 
-    public HttpResponse findErrorPage(HttpException exception) {
-        final var status = exception.getStatus();
-        final var path = toResourcePath(ExceptionPage.toUri(status));
+    public HttpResponse findStaticResource(ViewResource viewResource) {
+        final var status = viewResource.getStatus();
+        final var path = toResourcePath(viewResource.getUri());
         return toHttpResponse(status, path);
     }
 

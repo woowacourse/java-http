@@ -10,7 +10,7 @@ import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.request.RequestHeaders;
 import org.apache.coyote.request.StartLine;
 import org.apache.coyote.response.HttpResponse;
-import org.apache.coyote.servlet.CustomServlet;
+import org.apache.coyote.servlet.Servlet;
 import org.apache.coyote.support.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +23,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final CustomServlet servlet;
+    private final Servlet servlet;
 
-    public Http11Processor(final Socket connection, final CustomServlet servlet) {
+    public Http11Processor(final Socket connection, final Servlet servlet) {
         this.connection = connection;
         this.servlet = servlet;
     }

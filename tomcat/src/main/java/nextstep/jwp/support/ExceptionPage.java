@@ -1,4 +1,4 @@
-package org.apache.coyote.response;
+package nextstep.jwp.support;
 
 import java.util.Arrays;
 import org.apache.coyote.support.HttpStatus;

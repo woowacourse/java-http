@@ -1,6 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
-import org.apache.coyote.servlet.CustomServlet;
+import nextstep.jwp.servlet.CustomServlet;
 import org.junit.jupiter.api.DisplayName;
 import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;

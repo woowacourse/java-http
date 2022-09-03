@@ -65,6 +65,10 @@ public class HttpRequest {
         return requestGeneral.getPath().getPath();
     }
 
+    public HttpRequest redirectPath(String path) {
+        return new HttpRequest(requestGeneral.redirectPath(path), requestHeaders, requestBody);
+    }
+
     public String getParameter(String field) {
         return requestGeneral.getPath().getParameter(field);
     }

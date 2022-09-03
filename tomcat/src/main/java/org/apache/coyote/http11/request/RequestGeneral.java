@@ -37,6 +37,10 @@ public class RequestGeneral {
         }
     }
 
+    public RequestGeneral redirectPath(String path) {
+        return new RequestGeneral(method, new RequestPath(path, null), httpVersion);
+    }
+
     public RequestMethod getMethod() {
         return method;
     }

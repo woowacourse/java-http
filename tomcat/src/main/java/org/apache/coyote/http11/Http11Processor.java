@@ -56,7 +56,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void login(final Request request) {
         if (UserService.process(request.getUrl(), request.getQueryParams())) {
-            log.info(UserService.findByAccount(request.getQueryParam("account")).toString());
+            log.info(UserService.findByAccount(request.getQueryParams().get("account")).toString());
         }
     }
 

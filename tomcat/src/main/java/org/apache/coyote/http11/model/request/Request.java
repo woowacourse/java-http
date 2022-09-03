@@ -25,8 +25,4 @@ public class Request {
     public Map<String, String> getQueryParams() {
         return startLine.getQueryParams();
     }
-
-    public String getQueryParam(final String key) {
-        return startLine.getQueryParam(key);
-    }
 }

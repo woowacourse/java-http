@@ -31,4 +31,24 @@ public class HttpResponse {
                 "",
                 responseBody).getBytes();
     }
+
+    public String getProtocolVersion() {
+        return protocolVersion;
+    }
+
+    public HttpStatus getStatusCode() {
+        return statusCode;
+    }
+
+    public String getContentType() {
+        return contentType;
+    }
+
+    public int getContentLength() {
+        return contentLength;
+    }
+
+    public String getResponseBody() {
+        return responseBody;
+    }
 }

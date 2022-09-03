@@ -19,11 +19,11 @@ class HttpRequestTest {
         HttpRequest httpRequest = new HttpRequest(requestLine, requestHeader);
         HttpRequestHeader httpRequestHeader = httpRequest.getHttpRequestHeader();
         assertAll(
-                () -> assertThat(httpRequest.getMethod().equals("GET")),
-                () -> assertThat(httpRequest.getUri().equals("/index.html")),
-                () -> assertThat(httpRequest.getProtocolVersion().equals("HTTP/1.1")),
-                () -> assertThat(httpRequestHeader.getHeaderValue("Host").equals("localhost:8080")),
-                () -> assertThat(httpRequestHeader.getHeaderValue("Connection").equals("keep-alive"))
+                () -> assertThat(httpRequest.getMethod()).isEqualTo("GET"),
+                () -> assertThat(httpRequest.getUri()).isEqualTo("/index.html"),
+                () -> assertThat(httpRequest.getProtocolVersion()).isEqualTo("HTTP/1.1"),
+                () -> assertThat(httpRequestHeader.getHeaderValue("Host")).isEqualTo("localhost:8080 "),
+                () -> assertThat(httpRequestHeader.getHeaderValue("Connection")).isEqualTo("keep-alive ")
         );
     }
 }

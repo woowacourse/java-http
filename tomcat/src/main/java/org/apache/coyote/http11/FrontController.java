@@ -28,7 +28,7 @@ public class FrontController {
             String contentType = FileExtension.findContentType(fileName);
             return new HttpResponse(HttpStatus.OK, contentType, content);
         } catch (FileNotExistException e) {
-            return new HttpResponse(HttpStatus.NOT_FOUND, null, null);
+            return new HttpResponse(HttpStatus.NOT_FOUND, null, "");
         }
     }
 
@@ -50,7 +50,7 @@ public class FrontController {
         if (httpRequest.getUri().startsWith("/login")) {
             return performLogin(httpRequest);
         }
-        return new HttpResponse(HttpStatus.NOT_FOUND, null, null);
+        return new HttpResponse(HttpStatus.NOT_FOUND, null, "");
     }
 
     private static HttpResponse performLogin(HttpRequest httpRequest) throws IOException {
@@ -61,7 +61,7 @@ public class FrontController {
 
             return staticFileRequest("/login.html");
         } catch (InvalidLoginRequestException e) {
-            return new HttpResponse(HttpStatus.NOT_FOUND, null, null);
+            return new HttpResponse(HttpStatus.NOT_FOUND, null, "");
         }
     }
 }

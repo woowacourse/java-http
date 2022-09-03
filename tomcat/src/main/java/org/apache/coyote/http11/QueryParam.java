@@ -1,8 +1,6 @@
 package org.apache.coyote.http11;
 
 import java.util.Map;
-import nextstep.jwp.request.UserRequest;
-import org.apache.coyote.http11.exception.QueryParamNotFoundException;
 import org.apache.coyote.http11.utils.PairConverter;
 
 public class QueryParam {
@@ -22,14 +20,15 @@ public class QueryParam {
         return path.split(QUERY_PARAM_DELIMITER)[QUERY_PARAM];
     }
 
-    private boolean matchParameters(String key) {
+    public static boolean isQueryParam(String path) {
+        return path.contains(QUERY_PARAM_DELIMITER);
+    }
+
+    public boolean matchParameters(String key) {
         return parameters.containsKey(key);
     }
 
-    public UserRequest toUserRequest(String account, String password) {
-        if (matchParameters(account) && matchParameters(password)) {
-            return new UserRequest(parameters.get(account), parameters.get(password));
-        }
-        throw new QueryParamNotFoundException();
+    public String getValue(String key) {
+        return parameters.get(key);
     }
 }

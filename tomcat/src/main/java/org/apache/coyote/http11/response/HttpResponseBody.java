@@ -24,7 +24,7 @@ public class HttpResponseBody {
         return new HttpResponseBody(bodyOf(fileName));
     }
 
-    public static String bodyOf(final String fileName) {
+    private static String bodyOf(final String fileName) {
         try {
             URL url = HttpResponseBody.class.getClassLoader().getResource(fileName);
             String file = Objects.requireNonNull(url).getFile();

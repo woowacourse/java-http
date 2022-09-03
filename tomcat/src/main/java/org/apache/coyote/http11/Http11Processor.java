@@ -11,7 +11,7 @@ import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.response.HttpResponseConvertor;
+import org.apache.coyote.http11.response.HttpResponseMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,11 +37,11 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final HttpRequest request = new HttpRequest(toRequestLines(reader));
-            final HttpResponseConvertor responseConvertor = new HttpResponseConvertor(request);
+            final HttpResponseMapper responseMapper = new HttpResponseMapper(request);
             log.info("\n\n###### ----REQUEST---- ###### \n\n" + request.getLines() +
-                    "\n\n###### ----RESPONSE---- ###### \n\n" + responseConvertor.getHeader() + "\n\n");
+                    "\n\n###### ----RESPONSE---- ###### \n\n" + responseMapper.getHeader() + "\n\n");
 
-            final String response = responseConvertor.getResponse();
+            final String response = responseMapper.getResponse();
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

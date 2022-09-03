@@ -2,37 +2,47 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpRequest {
+    private static final Logger log = LoggerFactory.getLogger(HttpRequest.class);
+
     private final RequestLine requestLine;
-    private final RequestHeader requestHeader;
+    private final RequestHeaders requestHeaders;
     private RequestBody requestBody;
 
 
-    public HttpRequest(final RequestLine requestLine, final RequestHeader requestHeader) {
+    private HttpRequest(final RequestLine requestLine, final RequestHeaders requestHeaders) {
         this.requestLine = requestLine;
-        this.requestHeader = requestHeader;
+        this.requestHeaders = requestHeaders;
+        this.requestBody = new RequestBody();
     }
 
     public static HttpRequest from(final BufferedReader bufferedReader) {
         try {
-            final RequestLine requestLine = RequestLine.of(bufferedReader.readLine());
-            final RequestHeader requestHeader = RequestHeader.of(bufferedReader);
-            return new HttpRequest(requestLine, requestHeader);
+            final RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
+            final RequestHeaders requestHeaders = RequestHeaders.from(bufferedReader);
+            return new HttpRequest(requestLine, requestHeaders);
         } catch (final IOException e) {
-            throw new RuntimeException(e);
+            log.error("invalid input", e);
+            throw new IllegalArgumentException("올바른 HttpRequest 형식이 아닙니다.");
         }
     }
 
-    public String parseUriPath() {
-        return requestLine.getRequestUri().getPath();
+    public String getUri() {
+        return requestLine.getUri();
+    }
+
+    public boolean containsQuery() {
+        return requestLine.containsQuery();
     }
 
     public String getParameter(final String key) {
-        return requestLine.getRequestUri().getParamByName(key);
+        return requestLine.findParamValueByName(key);
     }
 
     public String getHeaderField(final String fieldName) {
-        return requestHeader.getField(fieldName);
+        return requestHeaders.getField(fieldName);
     }
 }

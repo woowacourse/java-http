@@ -5,8 +5,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -35,21 +37,12 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));) {
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            // 1. index.html 응답하기
             final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             final String responseBody = createResponseBody(httpRequest);
-
-            // 2. CSS 지원하기
             final String contentType = httpRequest.getHeaderField("Accept");
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final String response = createResponse(responseBody, contentType);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -59,8 +52,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createResponseBody(final HttpRequest httpRequest) throws IOException {
-        final String requestUri = httpRequest.parseUriPath();
-        // 3. Query String 파싱
+        final String requestUri = httpRequest.getUri();
         if (requestUri.contains("/login")) {
             return createLoginResponse(httpRequest);
         }
@@ -72,15 +64,28 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createLoginResponse(final HttpRequest httpRequest) throws IOException {
-        final Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getParameter("account"));
-        if (user.isPresent() && user.get().checkPassword(httpRequest.getParameter("password"))) {
-            log.info("user : {}", user.get());
+        if (httpRequest.containsQuery()) {
+            final Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getParameter("account"));
+            if (user.isPresent() && user.get().checkPassword(httpRequest.getParameter("password"))) {
+                log.info("user : {}", user.get());
+            }
         }
         return readFileFromPath("/login.html");
     }
 
     private String readFileFromPath(final String filePath) throws IOException {
-        final Path path = new File(getClass().getClassLoader().getResource("static" + filePath).getPath()).toPath();
+        final URL url = getClass().getClassLoader().getResource("static" + filePath);
+        Objects.requireNonNull(url);
+        final Path path = new File(url.getPath()).toPath();
         return new String(Files.readAllBytes(path));
+    }
+
+    private String createResponse(final String responseBody, final String contentType) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

@@ -37,13 +37,13 @@ public class Http11Processor implements Runnable, Processor {
                      StandardCharsets.UTF_8))) {
             final HttpRequestStartLineContents startLineContents = HttpRequestStartLineContents.from(headerReader);
 
-            final URL resourceUrl = getResourceUrl(startLineContents.getUrl());
+            final URL resourceUrl = getResourceUrl(startLineContents.getUri());
 
             final String responseBody = readContext(resourceUrl);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: " + getContentType(startLineContents.getUrl()) + ";charset=utf-8 ",
+                    "Content-Type: " + getContentType(startLineContents.getUri()) + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -55,14 +55,19 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getContentType(final String url) {
-        if (url == null) {
+    private String getContentType(final String uri) {
+        if (uri == null) {
             return "text/html";
         }
 
-        if (url.contains(".css")) {
+        if (uri.contains(".css")) {
             return "text/css";
         }
+
+        if (uri.contains(".js")) {
+            return "text/javascript";
+        }
+
         return "text/html";
     }
 

@@ -2,7 +2,14 @@ package org.apache.coyote.http11;
 
 public enum StatusCode {
 
-    OK(200, "OK");
+    // 2XX
+    OK(200, "OK"),
+
+    // 3XX
+    FOUND(302, "Found"),
+
+    // 4XX
+    NOT_FOUND(404, "Not Found");
 
     private final int code;
     private final String message;

@@ -9,22 +9,6 @@ import org.junit.jupiter.api.Test;
 
 class RequestURITest {
 
-    @DisplayName("RequestURI를 생성한다.")
-    @Test
-    void RequestURI를_생성한다() {
-        // given
-        String requestTarget = "/index.html";
-
-        // when
-        RequestURI actual = new RequestURI(requestTarget);
-
-        // then
-        assertAll(() -> {
-            assertThat(actual.getPath()).isEqualTo("/index.html");
-            assertThat(actual.isQueryParametersEmpty()).isTrue();
-        });
-    }
-
     @DisplayName("requestURI를 받아 path와 query를 분리한다.")
     @Test
     void requestURI를_받아_path와_query를_분리한다() {

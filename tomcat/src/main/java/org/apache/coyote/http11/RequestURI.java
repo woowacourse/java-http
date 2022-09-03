@@ -17,8 +17,8 @@ public class RequestURI {
         this.queryParameters = new QueryParameters(requestURI.substring(index + 1));
     }
 
-    public boolean isQueryParametersEmpty() {
-        return queryParameters.isEmpty();
+    public boolean hasQueryParameter(final String... keys) {
+        return queryParameters.hasQueryParameter(keys);
     }
 
     public String getQueryParameterKey(final String key) {

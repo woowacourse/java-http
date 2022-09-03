@@ -2,7 +2,9 @@ package org.apache.coyote.http11;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.exception.NoSuchQueryParameterException;
 
@@ -23,10 +25,6 @@ public class QueryParameters {
         this.values = values;
     }
 
-    public String getParameterValue(final String key) {
-        return values.get(key);
-    }
-
     public String findByQueryParameterKey(final String key) {
         if (!values.containsKey(key)) {
             throw new NoSuchQueryParameterException();
@@ -35,11 +33,8 @@ public class QueryParameters {
         return values.get(key);
     }
 
-    public boolean isEmpty() {
-        return values.isEmpty();
-    }
-
-    public Map<String, String> getValues() {
-        return values;
+    public boolean hasQueryParameter(final String... keys) {
+        Set<String> keySet = values.keySet();
+        return keySet.containsAll(List.of(keys));
     }
 }

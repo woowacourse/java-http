@@ -5,11 +5,19 @@ import org.apache.coyote.http11.StatusCode;
 
 public class StatusLine {
 
-    private final HttpVersion httpVersion;
-    private final StatusCode statusCode;
+    private HttpVersion httpVersion;
+    private StatusCode statusCode;
 
-    public StatusLine(final HttpVersion httpVersion, final StatusCode statusCode) {
+    public StatusLine() {
+        this.httpVersion = HttpVersion.HTTP11;
+        this.statusCode = StatusCode.OK;
+    }
+
+    public void addHttpVersion(final HttpVersion httpVersion) {
         this.httpVersion = httpVersion;
+    }
+
+    public void addStatusCode(final StatusCode statusCode) {
         this.statusCode = statusCode;
     }
 

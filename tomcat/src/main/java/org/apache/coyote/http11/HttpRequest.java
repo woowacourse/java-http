@@ -20,7 +20,7 @@ public class HttpRequest {
     }
 
     public String getRequestLine() {
-        return requestLine.getHttpMethod() + " " + getPath() + " " + requestLine.getHttpVersion();
+        return requestLine.getHttpMethod() + " " + getPath() + " " + requestLine.getHttpVersion().getValue();
     }
 
     public HttpMethod getHttpMethod() {
@@ -32,21 +32,17 @@ public class HttpRequest {
         return requestURI.getPath();
     }
 
-    public boolean existsQueryString() {
-        RequestURI requestURI = requestLine.getRequestURI();
-        return !requestURI.isQueryParametersEmpty();
-    }
-
     public String getQueryParameter(final String key) {
         RequestURI requestURI = requestLine.getRequestURI();
         return requestURI.getQueryParameterKey(key);
     }
 
-    public void addHeader(final String key, final String value) {
-        headers.addHeader(key, value);
+    public boolean hasQueryParameter(final String... keys) {
+        RequestURI requestURI = requestLine.getRequestURI();
+        return requestURI.hasQueryParameter(keys);
     }
 
-    public String getHeader(final String key) {
-        return headers.findByHeaderKey(key);
+    public void addHeader(final String key, final String value) {
+        headers.addHeader(key, value);
     }
 }

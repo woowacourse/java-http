@@ -14,7 +14,7 @@ public class FileUtils {
     private FileUtils() {
     }
 
-    public static String readFile(final String fileName) throws IOException {
+    public static String readFile(final String fileName) {
         Objects.requireNonNull(fileName);
         URL resourceUrl = FileUtils.class.getClassLoader().getResource(BASE_RESOURCE_URL + "/" + fileName);
 
@@ -23,7 +23,11 @@ public class FileUtils {
         }
 
         File file = new File(resourceUrl.getFile());
-        return new String(Files.readAllBytes(file.toPath()));
+        try {
+            return new String(Files.readAllBytes(file.toPath()));
+        } catch (IOException e) {
+            throw new NotFoundFileException();
+        }
     }
 
     public static String getFileExtension(final String fileName) {

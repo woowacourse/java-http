@@ -1,20 +1,13 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.URL;
-import java.nio.file.Files;
-import java.util.LinkedHashMap;
-import java.util.NoSuchElementException;
 import java.util.Objects;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.utill.FileUtils;
+import org.apache.servlet.Servlet;
+import org.apache.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +17,7 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final ServletContainer SERVLET_CONTAINER = new ServletContainer();
 
     private final Socket connection;
 
@@ -42,26 +36,21 @@ public class Http11Processor implements Runnable, Processor {
              InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
              OutputStream outputStream = connection.getOutputStream()) {
-            HttpRequest httpRequest = generateHttpRequest(bufferedReader);
 
-            if (httpRequest.getPath().equals("/")) {
-                HttpResponse httpResponse = new HttpResponse(HttpVersion.HTTP11, StatusCode.OK, ContentType.HTML,
-                        "Hello world!");
+            HttpRequest httpRequest = generateHttpRequest(bufferedReader);
+            HttpResponse httpResponse = new HttpResponse();
+
+            if (httpRequest.getPath().contains(".")) {
+                httpResponse.addView(httpRequest.getPath());
                 write(outputStream, httpResponse);
                 return;
             }
 
-            if (httpRequest.getPath().contains(".")) {
-                String fileName = httpRequest.getPath().substring(1);
-                write(outputStream, generate200HttpResponse(fileName));
-                return;
-            }
+            Servlet servlet = SERVLET_CONTAINER.findByPath(httpRequest.getPath());
+            servlet.service(httpRequest, httpResponse);
 
-            if (httpRequest.getPath().equals("/login") && httpRequest.existsQueryString()) {
-                validateExistsUser(httpRequest.getQueryParameter("account"), httpRequest.getQueryParameter("password"));
-                write(outputStream, generate200HttpResponse("login.html"));
-            }
-        } catch (IOException | UncheckedServletException e) {
+            write(outputStream, httpResponse);
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -79,27 +68,8 @@ public class Http11Processor implements Runnable, Processor {
         return request;
     }
 
-    private HttpResponse generate200HttpResponse(final String fileName) throws IOException {
-        String fileExtension = FileUtils.getFileExtension(fileName);
-        ContentType contentType = ContentType.parse(fileExtension);
-
-        String responseBody = FileUtils.readFile(fileName);
-
-        return new HttpResponse(HttpVersion.HTTP11, StatusCode.OK, contentType, responseBody);
-    }
-
     private void write(final OutputStream outputStream, final HttpResponse httpResponse) throws IOException {
         outputStream.write(httpResponse.parseResponse().getBytes());
         outputStream.flush();
-    }
-
-    private void validateExistsUser(final String account, final String password) {
-        if (!InMemoryUserRepository.existsAccountAndPassword(account, password)) {
-            throw new NoSuchElementException();
-        }
-
-        User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(NoSuchElementException::new);
-        log.info(user.toString());
     }
 }

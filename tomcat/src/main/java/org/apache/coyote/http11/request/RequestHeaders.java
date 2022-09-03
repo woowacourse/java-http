@@ -23,10 +23,6 @@ public class RequestHeaders {
         return requestHeaders.containsKey(ACCEPT);
     }
 
-    public boolean isAcceptValueCss() {
-        return isExistAccept() && (requestHeaders.get(ACCEPT).contains("text/css"));
-    }
-
     public Map<String, String> getRequestHeaders() {
         return requestHeaders;
     }

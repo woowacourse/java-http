@@ -27,7 +27,7 @@ public class RequestLine {
         this.requestLine = requestLine;
 
         String requestUri = getRequestUri();
-        if (isQueryStringExist(requestUri)) {
+        if (isExistQueryString(requestUri)) {
             validateAccount(requestUri);
         }
     }
@@ -39,7 +39,7 @@ public class RequestLine {
         return httpRequestMethodInformation.get(REQUEST_URI_INDEX);
     }
 
-    private boolean isQueryStringExist(String requestUri) {
+    private boolean isExistQueryString(String requestUri) {
         return requestUri.contains(QUERY_STRING_BEGIN_DELIMITER);
     }
 

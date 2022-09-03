@@ -27,7 +27,7 @@ class HttpRequestHeaderFactoryTest {
 
         //then
         assert httpRequestHeader != null;
-        assertThat(httpRequestHeader.getRequestLine()).isEqualTo("GET /index.html HTTP/1.1 ");
+        assertThat(httpRequestHeader.getRequestLine().getRequestLine()).isEqualTo("GET /index.html HTTP/1.1 ");
         assertThat(httpRequestHeader.getRequestHeaders()).isNotNull();
     }
 }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 
 public class HttpResponse {
@@ -51,11 +52,8 @@ public class HttpResponse {
     }
 
     private String getContentType(HttpRequestHeader httpRequestHeader) {
-        String responseContentType = "text/html";
-        if (httpRequestHeader.isAcceptValueCss()) {
-            responseContentType = httpRequestHeader.getAcceptHeaderValue();
-        }
-        return responseContentType + ";charset=utf-8 ";
+        String requestUri = httpRequestHeader.getRequestUri();
+        return ContentType.find(requestUri) + ";charset=utf-8 ";
     }
 
     public byte[] getBytes() {

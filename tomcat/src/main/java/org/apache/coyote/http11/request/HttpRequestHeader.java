@@ -20,20 +20,8 @@ public class HttpRequestHeader {
         return requestLine.getRequestUri();
     }
 
-    public String getAcceptHeaderValue() {
-        return requestHeaders.getAcceptHeaderValue();
-    }
-
-    public boolean isAcceptValueCss() {
-        return isExistAccept() && (getAcceptHeaderValue().contains("text/css"));
-    }
-
-    private boolean isExistAccept() {
-        return requestHeaders.isAcceptValueCss();
-    }
-
-    public String getRequestLine() {
-        return requestLine.getRequestLine();
+    public RequestLine getRequestLine() {
+        return requestLine;
     }
 
     public RequestHeaders getRequestHeaders() {

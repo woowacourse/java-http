@@ -42,22 +42,33 @@ public class Http11Processor implements Runnable, Processor {
              final var input = new BufferedReader(new InputStreamReader(inputStream))) {
 
             HttpRequest request = HttpRequest.from(input);
-            HttpResponse response = null;
-
-            String uri = request.getUri();
-            if (uri.equals("/")) {
-                response = main(request);
-            } else if (uri.contains(".")) {
-                response = getResource(request);
-            } else if (uri.contains("/login")) {
-                response = login(request);
-            }
+            HttpResponse response = processing(request);
 
             outputStream.write(response.toResponseString().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse processing(HttpRequest request) {
+        String uri = request.getUri();
+
+        if (uri.equals("/")) {
+            return main(request);
+        } else if (uri.contains(".")) {
+            return getResource(request);
+        } else if (uri.contains("/login")) {
+            return login(request);
+        }
+
+        return HttpResponse.withLocation(
+            request.getVersion(),
+            "404 Not Found",
+            request.getUri(),
+            "/404.html",
+            ""
+        );
     }
 
     private HttpResponse main(HttpRequest request) {

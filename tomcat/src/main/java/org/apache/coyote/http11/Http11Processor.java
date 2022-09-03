@@ -40,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             String uri = getUri(bufferedReader);
-            String contentType = Extension.convertToContentType(uri);
+            String contentType = ContentType.from(uri);
             String responseBody = getResponseBody(uri);
 
             final var response = createResponse(contentType, responseBody);

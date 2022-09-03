@@ -10,10 +10,19 @@ import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
+    private static final LoginController instance = new LoginController();
+
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     private static final String ACCOUNT_PARAM = "account";
     private static final String PASSWORD_PARAM = "password";
+
+    private LoginController() {
+    }
+
+    public static LoginController getInstance() {
+        return instance;
+    }
 
     @Override
     void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
@@ -28,7 +37,7 @@ public class LoginController extends AbstractController {
             }
         }
 
-        final StaticResourceController staticResourceController = new StaticResourceController();
+        final StaticResourceController staticResourceController = StaticResourceController.getInstance();
         staticResourceController.service(request, response);
     }
 }

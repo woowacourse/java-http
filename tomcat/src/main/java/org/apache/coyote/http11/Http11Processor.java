@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.StaticResourceController;
 import nextstep.jwp.controller.WelcomeController;
@@ -77,17 +78,17 @@ public class Http11Processor implements Runnable, Processor {
 
     private void doService(final HttpRequest request, final HttpResponse response) throws Exception {
         final String requestUri = request.getPath();
+        final Controller controller;
 
         if (WELCOME_PAGE_PATH.equals(requestUri)) {
-            final WelcomeController controller = new WelcomeController();
-            controller.service(request, response);
+            controller = WelcomeController.getInstance();
         } else if (LOGIN_PAGE_PATH.equals(requestUri)) {
-            final LoginController controller = new LoginController();
-            controller.service(request, response);
+            controller = LoginController.getInstance();
         } else {
-            final StaticResourceController controller = new StaticResourceController();
-            controller.service(request, response);
+            controller = StaticResourceController.getInstance();
         }
+
+        controller.service(request, response);
     }
 
     private void write(final OutputStream outputStream, final HttpResponse response) throws IOException {

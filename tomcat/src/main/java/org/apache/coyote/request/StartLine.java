@@ -26,14 +26,26 @@ public class StartLine {
     }
 
     public static StartLine of(String startLine) {
-        final var elements = startLine.split(DELIMITER);
-        if (elements.length != START_LINE_ELEMENT_COUNT) {
-            throw new HttpException(HttpStatus.BAD_REQUEST);
-        }
+        validate(startLine);
+        final var elements = extract(startLine);
         final var method = HttpMethod.of(elements[METHOD_INDEX]);
         final var uri = toUri(elements[URI_INDEX]);
         final var version = HttpVersion.of(elements[VERSION_INDEX]);
         return new StartLine(method, uri, version);
+    }
+
+    private static void validate(String startLine) {
+        if (startLine == null || startLine.length() == 0) {
+            throw new HttpException(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    private static String[] extract(String startLine) {
+        final var elements = startLine.split(DELIMITER);
+        if (elements.length != START_LINE_ELEMENT_COUNT) {
+            throw new HttpException(HttpStatus.BAD_REQUEST);
+        }
+        return elements;
     }
 
     private static String toUri(String uri) {

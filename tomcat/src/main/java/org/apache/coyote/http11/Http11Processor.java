@@ -38,11 +38,7 @@ public class Http11Processor implements Runnable, Processor {
                 Http11QueryParams queryParams = Http11QueryParams.from(url);
                 logUserInfo(queryParams);
             }
-
-            String responseContent = response.getOkResponse();
-
-            outputStream.write(responseContent.getBytes());
-            outputStream.flush();
+            response.write(outputStream);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

@@ -13,8 +13,8 @@
 - [x] Http11Request를 만들어 InputStream으로부터 request를 가져오는 책임 분리
 - [x] Url를 enum으로 만들어 Processor 내의 분기 처리 제거
 - [x] Http11Response를 만들어 response를 만드는 책임 분리
-  - [ ] outputStream 부분까지 책임 분리
+    - [x] outputStream.write() 부분까지 책임 분리
 - [x] GET 이외의 요청에 대한 처리
-- [ ] 커스텀 예외를 만들어 상황에 보다 적합한 예외 반환
+- [x] 커스텀 예외를 만들어 상황에 보다 적합한 예외 반환
 - [x] 로그인시 존재하는 유저인지 확인하는 로직 처리 고민하기
-  - [x] queryString을 관리하는 책임 분리
+    - [x] queryString을 관리하는 책임 분리

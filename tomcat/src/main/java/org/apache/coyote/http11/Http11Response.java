@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.exception.ResourcePathNotFoundException;
@@ -25,7 +26,7 @@ public class Http11Response {
                 .getContextClassLoader()
                 .getResource("static" + resourcePath);
         validateResourcePath(resource);
-        
+
         final String responseBody = getResponseBody(resource);
         final String contentType = resourcePath.split("\\.")[1];
         return new Http11Response(contentType, responseBody);
@@ -46,6 +47,11 @@ public class Http11Response {
         }
     }
 
+    public void write(OutputStream outputStream) throws IOException {
+        outputStream.write(getOkResponse().getBytes());
+        outputStream.flush();
+    }
+
     public String getOkResponse() {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
@@ -62,6 +68,4 @@ public class Http11Response {
     private String getContentLengthHeader() {
         return String.format("Content-Length: %s ", responseBody.getBytes().length);
     }
-
-
 }

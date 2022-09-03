@@ -10,3 +10,20 @@
 - [x] Query String 파싱
   - [x] /login 페이지 처리하기
   - [x] Query String이 일치할 경우 로그를 찍어준다.
+
+### 테스트 보완하기
+- [ ] 테스트를 보완한다.
+  - [ ] CSS 지원 테스트
+  - [ ] js 지원 테스트
+  - [ ] 404 페이지 테스트
+  - [ ] HttpRequest 잘 만들어지는지 테스트
+
+### 예외 처리하기
+- [ ] param에 값이 없는 경우 처리하기 (account=&passowrd=123)
+- [ ] 현재 레포지터리에 없는 값으로 로그인 했을 경우 NoSuchElementException을 띄우는데 이를 처리하기
+
+### 리팩토링
+- [ ] Http11Processor에서 Parsing하는 책임 분리하기
+- [ ] 비즈니스 로직과 tomcat 기능을 분리하기
+- [ ] HttpRequest에서 일급컬렉션 사용하기
+- [ ] 반복되는 상수를 Enum으로 처리하기

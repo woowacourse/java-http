@@ -18,23 +18,13 @@ class PathTest {
     }
 
     @Test
-    void 로그인_화면_요청인지_확인한다() {
-        // given
-        String uri = "/login";
-        Path path = new Path(uri);
-
-        // when & then
-        assertThat(path.isLogin()).isTrue();
-    }
-
-    @Test
     void 파일명을_반환한다() {
         // given
-        String uri = "/login";
+        String uri = "/index.html";
         Path path = new Path(uri);
 
         // when & then
-        assertThat(path.getFileName()).isEqualTo("login");
+        assertThat(path.getFileName()).isEqualTo("index.html");
     }
 
     @Test

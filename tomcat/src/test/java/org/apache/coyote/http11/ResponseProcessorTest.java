@@ -42,11 +42,11 @@ class ResponseProcessorTest {
         System.setOut(new PrintStream(outContent));
 
         // when
-        ResponseProcessor responseProcessor = new ResponseProcessor(new StartLine(fileUri));
+        new ResponseProcessor(new StartLine(fileUri));
 
         // then
         String expected = InMemoryUserRepository.findByAccount("gugu").orElseThrow().toString().concat("\n");
-        assertThat(outContent.toString()).isEqualTo(expected);
+        assertThat(outContent.toString()).contains(expected);
     }
 
     @Test

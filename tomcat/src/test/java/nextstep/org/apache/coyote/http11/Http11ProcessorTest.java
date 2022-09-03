@@ -146,7 +146,7 @@ class Http11ProcessorTest {
 
         // then
         String expected = InMemoryUserRepository.findByAccount("gugu").orElseThrow().toString().concat("\n");
-        assertThat(outContent.toString()).isEqualTo(expected);
+        assertThat(outContent.toString()).contains(expected);
     }
 
     @Test

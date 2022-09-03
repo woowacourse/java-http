@@ -20,10 +20,6 @@ public class Path {
         return value.contains(".");
     }
 
-    public boolean isLogin() {
-        return value.equals("/login");
-    }
-
     public String getFileName() {
         return value.substring(EXCLUDE_SLASH_INDEX);
     }
@@ -31,5 +27,9 @@ public class Path {
     public String extractContentType() {
         ContentType contentType = ContentType.findContentType(value);
         return contentType.name().toLowerCase();
+    }
+
+    public String value() {
+        return value;
     }
 }

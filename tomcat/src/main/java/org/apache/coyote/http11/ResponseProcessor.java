@@ -5,10 +5,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.AuthenticationException;
-import nextstep.jwp.exception.UserNotFoundException;
-import nextstep.jwp.model.User;
 
 public class ResponseProcessor {
 
@@ -39,12 +35,18 @@ public class ResponseProcessor {
             String fileName = path.getFileName();
             return readFile(fileName);
         }
-        if (path.isLogin()) {
-            String fileName = path.getFileName().concat(".html");
-            checkUser();
-            return readFile(fileName);
+        return processResponseBody(Controller.processRequest(path.value(), queryParameters));
+    }
+
+    private String processResponseBody(String response) throws URISyntaxException, IOException {
+        if (doesNeedViewFile(response)) {
+            return readFile(response);
         }
-        return "Hello world!";
+        return response;
+    }
+
+    private boolean doesNeedViewFile(String response) {
+        return response.endsWith(".html");
     }
 
     private String readFile(String fileName) throws URISyntaxException, IOException {
@@ -55,17 +57,5 @@ public class ResponseProcessor {
 
     private int extractContentLength() {
         return responseBody.getBytes().length;
-    }
-
-    private void checkUser() {
-        if (queryParameters.isEmpty()) {
-            return;
-        }
-        User user = InMemoryUserRepository.findByAccount(queryParameters.getAccount())
-                .orElseThrow(UserNotFoundException::new);
-        if (!user.checkPassword(queryParameters.getPassword())) {
-            throw new AuthenticationException();
-        }
-        System.out.println(user);
     }
 }

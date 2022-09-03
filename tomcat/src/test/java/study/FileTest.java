@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -33,7 +33,7 @@ class FileTest {
 
         // todo
         if (url == null) {
-            throw new NullPointerException(fileName + " 파일이 없습니다.");
+            throw new NoSuchFileException(fileName + " 파일이 없습니다.");
         }
         final String actual = url.getPath();
 
@@ -49,10 +49,12 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // todo
-        // final Path path = Paths.get("src", "test", "resources", fileName);
-        String finePath = Objects.requireNonNull(getClass().getClassLoader().getResource(fileName)).getPath();
-        final Path path = Paths.get(finePath);
-        final InputStream inputStream = Files.newInputStream(path.toAbsolutePath());
+        final URL url = getClass().getClassLoader().getResource(fileName);
+        if (url == null) {
+            throw new NoSuchFileException(fileName + " 파일이 없습니다.");
+        }
+        final Path path = Paths.get(url.getPath());
+        final InputStream inputStream = Files.newInputStream(path);
 
         // todo
         final List<String> actual = new ArrayList<>();

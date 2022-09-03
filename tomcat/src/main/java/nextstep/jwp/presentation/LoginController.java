@@ -18,7 +18,7 @@ public class LoginController {
     }
 
     public String login() {
-        QueryStrings queryStrings = new QueryStrings(httpRequest.getUri().getValue());
+        QueryStrings queryStrings = QueryStrings.of(httpRequest.getUri().getValue());
         String account = queryStrings.find("account");
         String password = queryStrings.find("password");
 

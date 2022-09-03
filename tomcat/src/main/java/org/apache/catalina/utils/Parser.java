@@ -11,4 +11,11 @@ public class Parser {
         }
         return fileName.split("\\.")[1];
     }
+
+    public static String generateResourceFileName(final String path) {
+        if (!path.contains(".")) {
+            return path + ".html";
+        }
+        return path;
+    }
 }

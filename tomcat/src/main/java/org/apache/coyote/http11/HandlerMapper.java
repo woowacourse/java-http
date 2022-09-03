@@ -5,11 +5,13 @@ import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.handler.HomeHandler;
+import org.apache.coyote.http11.handler.LoginHandler;
 import org.apache.coyote.http11.handler.ResourceHandler;
 
 public enum HandlerMapper {
     HOME(Pattern.compile("^/$"), new HomeHandler()),
-    RESOURCE(Pattern.compile("^/[a-z|A-Z]|[\\-]*/?\\.[a-z|A-Z]|[\\-]*"), new ResourceHandler());
+    RESOURCE(Pattern.compile("^(/[a-z|A-Z|가-힣|ㄱ-ㅎ|_|\\-]*)+(\\.[a-z]*)$"), new ResourceHandler()),
+    LOGIN(Pattern.compile("^(/login)(\\?([^#\\s]*))?"), new LoginHandler());
 
     private Pattern urlRegex;
     private Handler handler;

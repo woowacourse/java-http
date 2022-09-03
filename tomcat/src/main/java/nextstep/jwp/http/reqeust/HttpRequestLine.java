@@ -20,7 +20,7 @@ public class HttpRequestLine {
         this.version = version;
     }
 
-    public static HttpRequestLine from(final String method, final String url, final String version) {
+    public static HttpRequestLine of(final String method, final String url, final String version) {
         String path = extractPath(url);
         String queryString = extractQueryString(url);
         return new HttpRequestLine(method, path, queryString, version);
@@ -52,13 +52,5 @@ public class HttpRequestLine {
 
     public Map<String, String> getQueryParams() {
         return queryParams.getParams();
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public String getMethod() {
-        return method;
     }
 }

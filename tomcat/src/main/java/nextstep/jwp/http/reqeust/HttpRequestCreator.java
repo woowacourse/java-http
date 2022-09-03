@@ -21,7 +21,7 @@ public class HttpRequestCreator {
     private static HttpRequestLine httpRequestLine(final BufferedReader bufferReader) throws IOException {
         String[] line = bufferReader.readLine().split(LINE_SEPARATOR);
         validateLineFormat(line);
-        return HttpRequestLine.from(line[METHOD_INDEX], line[URL_INDEX], line[VERSION_INDEX]);
+        return HttpRequestLine.of(line[METHOD_INDEX], line[URL_INDEX], line[VERSION_INDEX]);
     }
 
     private static void validateLineFormat(final String[] line) {

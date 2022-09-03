@@ -1,4 +1,4 @@
-package nextstep.jwp.utils;
+package org.apache.coyote.utils;
 
 import nextstep.jwp.exception.NotFoundFileException;
 
@@ -20,13 +20,21 @@ import static org.apache.coyote.model.Content.HTML;
 public class RequestUtil {
 
     public static final String DEFAULT_EXTENSION = ".html";
+    public static final String DEFAULT_INDEX = "/";
+    public static final String STATIC = "static";
+    public static final String EXTENSION_SEPARATOR = ".";
+    public static final String PARAM_START_SEPARATOR = "?";
+    public static final String PARAM_COUPLER = "=";
+    public static final String PARAM_DELIMITER = "&";
+    public static final int KEY = 0;
+    public static final int VALUE = 1;
 
     public static String getResponseBody(final String uri, final Class<?> ClassType) {
         try {
-            if (uri.equals("/")) {
+            if (uri.equals(DEFAULT_INDEX)) {
                 return "Hello world!";
             }
-            final URL url = Objects.requireNonNull(ClassType.getClassLoader().getResource("static" + uri));
+            final URL url = Objects.requireNonNull(ClassType.getClassLoader().getResource(STATIC + uri));
             final Path path = Paths.get(url.toURI());
             return new String(Files.readAllBytes(path));
         } catch (URISyntaxException | IOException | NullPointerException e) {
@@ -36,8 +44,8 @@ public class RequestUtil {
 
     public static String getExtension(final String uri) {
         Objects.requireNonNull(uri);
-        if (uri.contains(".")) {
-            return uri.substring(uri.lastIndexOf(".") + 1);
+        if (uri.contains(EXTENSION_SEPARATOR)) {
+            return uri.substring(uri.lastIndexOf(EXTENSION_SEPARATOR) + 1);
         }
         return HTML.getExtension();
     }
@@ -45,10 +53,10 @@ public class RequestUtil {
     public static String calculatePath(final String uri) {
         Objects.requireNonNull(uri);
         String path = uri;
-        if (path.contains("?")) {
-            path = path.substring(0, uri.indexOf("?"));
+        if (path.contains(PARAM_START_SEPARATOR)) {
+            path = path.substring(0, uri.indexOf(PARAM_START_SEPARATOR));
         }
-        if (!path.contains(".") && !path.equals("/")) {
+        if (!path.contains(EXTENSION_SEPARATOR) && !path.equals(DEFAULT_INDEX)) {
             path += DEFAULT_EXTENSION;
         }
         return path;
@@ -56,18 +64,18 @@ public class RequestUtil {
 
     public static Map<String, String> getParam(final String uri) {
         Objects.requireNonNull(uri);
-        if (!uri.contains("?")) {
+        if (!uri.contains(PARAM_START_SEPARATOR)) {
             return Collections.emptyMap();
         }
         return calculateParam(uri);
     }
 
     private static Map<String, String> calculateParam(final String uri) {
-        List<String> inputs = Arrays.asList(uri.substring(uri.indexOf("?") + 1).split("&"));
+        List<String> inputs = Arrays.asList(uri.substring(uri.indexOf(PARAM_START_SEPARATOR) + 1).split(PARAM_DELIMITER));
         final Map<String, String> queryParams = new HashMap();
         for (String input : inputs) {
-            List<String> query = Arrays.asList(input.split("="));
-            queryParams.put(query.get(0), query.get(1));
+            List<String> query = Arrays.asList(input.split(PARAM_COUPLER));
+            queryParams.put(query.get(KEY), query.get(VALUE));
         }
         return queryParams;
     }

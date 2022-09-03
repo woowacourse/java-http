@@ -15,7 +15,7 @@ import java.net.Socket;
 import java.util.Map;
 import java.util.Optional;
 
-import static nextstep.jwp.utils.RequestUtil.getResponseBody;
+import static org.apache.coyote.utils.RequestUtil.getResponseBody;
 
 public class Http11Processor implements Runnable, Processor {
 

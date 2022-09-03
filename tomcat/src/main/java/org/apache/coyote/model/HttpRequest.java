@@ -7,12 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static nextstep.jwp.utils.RequestUtil.calculatePath;
-import static nextstep.jwp.utils.RequestUtil.getExtension;
-import static nextstep.jwp.utils.RequestUtil.getParam;
+import static org.apache.coyote.utils.RequestUtil.calculatePath;
+import static org.apache.coyote.utils.RequestUtil.getExtension;
+import static org.apache.coyote.utils.RequestUtil.getParam;
 
 public class HttpRequest {
 
+    public static final int REQUEST_SIZE_DEADLINE = 3;
     private final String uri;
     private final String path;
     private final Map<String, String> params;
@@ -38,7 +39,7 @@ public class HttpRequest {
     }
 
     private static void validateRequestSize(List<String> requests) {
-        if (requests.size() < 3) {
+        if (requests.size() < REQUEST_SIZE_DEADLINE) {
             throw new InvalidRequestFormat("요청 값이 올바르지 않습니다.");
         }
     }

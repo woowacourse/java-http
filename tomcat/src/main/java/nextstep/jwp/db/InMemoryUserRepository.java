@@ -19,6 +19,9 @@ public class InMemoryUserRepository {
     }
 
     public Optional<User> findByAccount(String account) {
+        if (account == null) {
+            return Optional.empty();
+        }
         return Optional.ofNullable(database.get(account));
     }
 }

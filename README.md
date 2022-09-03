@@ -21,6 +21,7 @@
 ### 예외 처리하기
 - [ ] param에 값이 없는 경우 처리하기 (account=&passowrd=123)
 - [ ] 현재 레포지터리에 없는 값으로 로그인 했을 경우 NoSuchElementException을 띄우는데 이를 처리하기
+- [ ] 커스텀 예외를 만들어 Http 관련 예외 처리하기
 
 ### 리팩토링
 - [ ] Http11Processor에서 Parsing하는 책임 분리하기

@@ -26,4 +26,8 @@ public class RequestLine {
 			requestLineElement[HTTP_VERSION]
 		);
 	}
+
+	public String getUrl() {
+		return resource.getUrl();
+	}
 }

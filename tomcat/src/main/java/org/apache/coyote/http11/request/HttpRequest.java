@@ -20,4 +20,8 @@ public class HttpRequest {
 	public static HttpRequest of(final String requestLine, final List<String> headers, final List<String> body) {
 		return new HttpRequest(RequestLine.from(requestLine), HttpHeaders.from(headers), body);
 	}
+
+	public String getUrl() {
+		return requestLine.getUrl();
+	}
 }

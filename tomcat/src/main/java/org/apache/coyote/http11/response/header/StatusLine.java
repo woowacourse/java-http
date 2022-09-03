@@ -1,13 +1,11 @@
 package org.apache.coyote.http11.response.header;
 
-import org.apache.coyote.http11.response.header.StatusCode;
-
 public class StatusLine {
 
 	private final String httpVersion;
 	private final StatusCode statusCode;
 
-	private StatusLine(final String httpVersion, final StatusCode statusCode) {
+	public StatusLine(final String httpVersion, final StatusCode statusCode) {
 		this.httpVersion = httpVersion;
 		this.statusCode = statusCode;
 	}

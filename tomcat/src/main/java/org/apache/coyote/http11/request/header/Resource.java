@@ -22,4 +22,8 @@ public class Resource {
 			QueryParams.from(resource.substring(startParams + 1))
 		);
 	}
+
+	public String getUrl() {
+		return url;
+	}
 }

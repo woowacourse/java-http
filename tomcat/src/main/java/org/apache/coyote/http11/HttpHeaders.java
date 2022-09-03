@@ -16,6 +16,10 @@ public class HttpHeaders {
 		this.value = value;
 	}
 
+	public static HttpHeaders init() {
+		return new HttpHeaders(new HashMap<>());
+	}
+
 	public static HttpHeaders from(final List<String> messages) {
 		final Map<String, String> headers = new HashMap<>();
 		for (final String message : messages) {
@@ -23,6 +27,11 @@ public class HttpHeaders {
 			headers.put(headerElement[KEY], headerElement[VALUE]);
 		}
 		return new HttpHeaders(headers);
+	}
+
+	public HttpHeaders add(final String key, final String value) {
+		this.value.put(key, value);
+		return this;
 	}
 
 	public String toMessage() {

@@ -7,6 +7,9 @@ import org.apache.coyote.http11.response.header.StatusLine;
 
 public class HttpResponse2 {
 
+	private static final String FILE_REGEX = "\\.";
+	private static final int EXTENSION_LOCATION = 1;
+
 	private final StatusLine statusLine;
 	private final HttpHeaders httpHeaders;
 	private final String body;
@@ -17,17 +20,25 @@ public class HttpResponse2 {
 		this.body = body;
 	}
 
-	public static HttpResponse2 of(final String httpVersion, final KindOfContent kindOfContent, final String body) {
+	public static HttpResponse2 of(final String httpVersion, final String resource, final String body) {
 		final StatusLine statusLine = new StatusLine(httpVersion, StatusCode.OK);
-		final HttpHeaders httpHeaders = createHttpHeaders(kindOfContent, body);
+
+		final String contentType = selectContentType(resource);
+		final HttpHeaders httpHeaders = createHttpHeaders(contentType, body);
 
 		return new HttpResponse2(statusLine, httpHeaders, body);
 	}
 
-	private static HttpHeaders createHttpHeaders(final KindOfContent kindOfContent, final String body) {
+	private static HttpHeaders createHttpHeaders(final String contentType, final String body) {
 		return HttpHeaders.init()
-			.add("Content-Type", kindOfContent.name() + ";charset=utf-8 ")
+			.add("Content-Type", contentType + ";charset=utf-8 ")
 			.add("Content-Length", String.valueOf(body.getBytes().length));
+	}
+
+	private static String selectContentType(final String resource) {
+		final String[] fileElements = resource.split(FILE_REGEX);
+
+		return KindOfContent.getContentType(fileElements[EXTENSION_LOCATION]);
 	}
 
 	public String toMessage() {

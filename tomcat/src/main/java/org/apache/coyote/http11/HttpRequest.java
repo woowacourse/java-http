@@ -31,18 +31,18 @@ public class HttpRequest {
     }
 
     public String getPath() {
-        RequestTarget requestTarget = requestLine.getRequestTarget();
-        return requestTarget.getPath();
+        RequestURI requestURI = requestLine.getRequestURI();
+        return requestURI.getPath();
     }
 
     public boolean existsQueryString() {
-        RequestTarget requestTarget = requestLine.getRequestTarget();
-        return !requestTarget.isQueryParametersEmpty();
+        RequestURI requestURI = requestLine.getRequestURI();
+        return !requestURI.isQueryParametersEmpty();
     }
 
     public String getQueryParameter(final String key) {
-        RequestTarget requestTarget = requestLine.getRequestTarget();
-        return requestTarget.getQueryParameterKey(key);
+        RequestURI requestURI = requestLine.getRequestURI();
+        return requestURI.getQueryParameterKey(key);
     }
 
     public Map<String, String> getHeaders() {

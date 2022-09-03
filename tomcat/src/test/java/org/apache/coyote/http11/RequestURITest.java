@@ -7,7 +7,7 @@ import org.apache.coyote.http11.exception.NoSuchQueryParameterException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class RequestTargetTest {
+class RequestURITest {
 
     @DisplayName("RequestURI를 생성한다.")
     @Test
@@ -16,7 +16,7 @@ class RequestTargetTest {
         String requestTarget = "/index.html";
 
         // when
-        RequestTarget actual = new RequestTarget(requestTarget);
+        RequestURI actual = new RequestURI(requestTarget);
 
         // then
         assertAll(() -> {
@@ -32,7 +32,7 @@ class RequestTargetTest {
         String requestTarget = "/login?account=mat&password=password";
 
         // when
-        RequestTarget actual = new RequestTarget(requestTarget);
+        RequestURI actual = new RequestURI(requestTarget);
 
         // then
         assertAll(() -> {
@@ -49,7 +49,7 @@ class RequestTargetTest {
         String requestTarget = "/login?account=mat&password=password";
 
         // when
-        RequestTarget actual = new RequestTarget(requestTarget);
+        RequestURI actual = new RequestURI(requestTarget);
 
         // then
         assertThatThrownBy(() -> actual.getQueryParameterKey("mat"))

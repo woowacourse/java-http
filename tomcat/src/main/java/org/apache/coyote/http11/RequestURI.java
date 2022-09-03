@@ -1,11 +1,11 @@
 package org.apache.coyote.http11;
 
-public class RequestTarget {
+public class RequestURI {
 
     private final String path;
     private final QueryParameters queryParameters;
 
-    public RequestTarget(final String requestURI) {
+    public RequestURI(final String requestURI) {
         if (!requestURI.contains("?")) {
             this.path = requestURI;
             this.queryParameters = QueryParameters.EMPTY_QUERY_PARAMETERS;

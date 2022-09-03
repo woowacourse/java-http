@@ -42,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
              final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
             Request request = Request.from(reader.readLine());
-            login(request);
+            UserService.process(request);
 
             Response response = Response.of(Status.OK);
             response.addResponseBody(findResource(request.getUrl()));
@@ -51,12 +51,6 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
-        }
-    }
-
-    private void login(final Request request) {
-        if (UserService.process(request.getUrl(), request.getQueryParams())) {
-            log.info(UserService.findByAccount(request.getQueryParams().get("account")).toString());
         }
     }
 

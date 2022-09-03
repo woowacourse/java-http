@@ -18,16 +18,16 @@ public enum Controllers {
         this.canHandle = canHandel;
     }
 
-    public static Controller findController(String uri) {
+    public static Optional<Controller> findController(String uri) {
         Optional<Controllers> result = Arrays.stream(Controllers.values())
             .filter(c -> c.canHandle.test(uri))
             .findFirst();
 
         if (result.isEmpty()) {
-            return new NotFoundController();
+            return Optional.empty();
         }
 
-        return result.get().controller;
+        return Optional.of(result.get().controller);
 
     }
 

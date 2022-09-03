@@ -4,10 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +19,6 @@ import nextstep.jwp.exception.UncheckedServletException;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final int QUERY_KEY_INDEX = 0;
-    private static final int QUERY_VALUE_INDEX = 1;
 
     private final Socket connection;
 
@@ -39,16 +38,8 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
 
-            List<String> input = new ArrayList<>();
-            String line = bufferedReader.readLine();
-            while (!line.isBlank() && !line.isEmpty()) {
-                input.add(line);
-                line = bufferedReader.readLine();
-            }
-
-            HttpRequest request = HttpRequest.from(input);
-            Controller controller = Controllers.findController(request.getUri());
-            HttpResponse response = controller.doService(request);
+            HttpRequest request = HttpRequest.from(bufferedReader);
+            HttpResponse response = processTheRequest(request);
 
             outputStream.write(response.toResponseString().getBytes());
             outputStream.flush();
@@ -58,5 +49,15 @@ public class Http11Processor implements Runnable, Processor {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private HttpResponse processTheRequest(HttpRequest request) {
+        Optional<Controller> controller = Controllers.findController(request.getUri());
+
+        if (controller.isEmpty()) {
+            return HttpResponse.notFound();
+        }
+
+        return controller.get().doService(request);
     }
 }

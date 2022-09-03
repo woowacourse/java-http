@@ -55,7 +55,6 @@ public class RequestLine {
         int index = requestUri.indexOf(QUERY_STRING_BEGIN_DELIMITER);
         String queryString = requestUri.substring(index + 1);
         String[] dividedQueryString = queryString.split(QUERY_STRING_UNIT_DELIMITER);
-        Arrays.stream(dividedQueryString).forEach(System.out::println);
 
         return Arrays.stream(dividedQueryString)
                 .map(query -> query.split(QUERY_STRING_KEY_VALUE_DELIMITER))

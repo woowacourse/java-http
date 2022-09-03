@@ -109,12 +109,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void loggingAccount(final Parameters parameters) {
-        final User user = InMemoryUserRepository.findByAccount(parameters.get(ACCOUNT))
-                .orElse(EMPTY_USER);
-        final String password = parameters.get(PASSWORD);
-
-        if (user.checkPassword(password)) {
-            log.info(user.toString());
+        try {
+            final String account = parameters.get(ACCOUNT);
+            final User user = InMemoryUserRepository.findByAccount(account)
+                    .orElseThrow(() -> new IllegalArgumentException(account + "가 없습니다."));
+            final String password = parameters.get(PASSWORD);
+            if (user.checkPassword(password)) {
+                log.info(user.toString());
+            }
+        } catch (final IllegalArgumentException e) {
+            log.info(e.getMessage());
         }
     }
 

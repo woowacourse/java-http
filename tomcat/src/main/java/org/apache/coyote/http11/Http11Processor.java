@@ -7,24 +7,23 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.model.Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String LOGIN_PAGE = "/login";
+    private static final String LOGIN_PAGE_URL = "/login.html";
+    private static final String LOGIN_PATH = "/login";
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String DEFAULT_CONTENT_TYPE = "text/html";
+    private static final User EMPTY_USER = new User("", "", "");
 
     private final Socket connection;
 
@@ -45,8 +44,8 @@ public class Http11Processor implements Runnable, Processor {
 
             final String uri = getUri(bufferedReader);
             final String path = getPath(uri);
-            final Map<String, String> queries = getQueries(uri);
-            final var responseBody = getResponseBody(path, queries);
+            final Parameters queryParameters = Parameters.fromUri(uri);
+            final String responseBody = getResponseBody(path, queryParameters);
             final String contentType = getContentType(path);
 
             final var response = String.join("\r\n",
@@ -72,37 +71,16 @@ public class Http11Processor implements Runnable, Processor {
         return path.split("\\?")[0];
     }
 
-    private Map<String, String> getQueries(final String path) {
-        final Map<String, String> queries = new HashMap<>();
-
-        final int beginIndex = path.indexOf("?");
-        if (beginIndex < 0) {
-            return queries;
-        }
-        final String queryString = path.substring(beginIndex + 1);
-        Arrays.stream(queryString.split("&"))
-                .forEach(query -> {
-                    final String[] entry = query.split("=");
-                    queries.put(entry[0], entry[1]);
-                });
-
-        return queries;
-    }
-
-    private String getResponseBody(final String path, final Map<String, String> queries) throws IOException {
-        if (path.equals("/")) {
+    private String getResponseBody(final String path, final Parameters parameters) throws IOException {
+        final String url = rewrite(path);
+        if (url.equals("/")) {
             return "Hello world!";
         }
-
-        final String fileName;
-        if (path.equals(LOGIN_PAGE)) {
-            loggingAccount(queries);
-            fileName = LOGIN_PAGE + ".html";
-        } else {
-            fileName = path;
+        if (url.equals(LOGIN_PAGE_URL)) {
+            loggingAccount(parameters);
         }
 
-        final String filePath = getClass().getClassLoader().getResource("static" + fileName).getPath();
+        final String filePath = getClass().getClassLoader().getResource("static" + url).getPath();
         final FileInputStream fileInputStream = new FileInputStream(filePath);
 
         final String responseBody = new String(fileInputStream.readAllBytes());
@@ -111,10 +89,20 @@ public class Http11Processor implements Runnable, Processor {
         return responseBody;
     }
 
-    private void loggingAccount(final Map<String, String> queries) {
-        final Optional<User> user = InMemoryUserRepository.findByAccount(queries.get(ACCOUNT));
-        if (user.isPresent() && user.get().checkPassword(queries.get(PASSWORD))) {
-            log.info(user.get().toString());
+    private String rewrite(final String path) {
+        if (path.equals(LOGIN_PATH)) {
+            return LOGIN_PAGE_URL;
+        }
+        return path;
+    }
+
+    private void loggingAccount(final Parameters parameters) {
+        final User user = InMemoryUserRepository.findByAccount(parameters.get(ACCOUNT))
+                .orElse(EMPTY_USER);
+        final String password = parameters.get(PASSWORD);
+
+        if (user.checkPassword(password)) {
+            log.info(user.toString());
         }
     }
 

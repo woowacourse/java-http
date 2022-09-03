@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.url;
 
-import org.apache.coyote.http11.dto.Http11Request;
+import org.apache.coyote.http11.Http11Response;
 
 public abstract class Url {
     private final String path;
@@ -9,7 +9,7 @@ public abstract class Url {
         this.path = path;
     }
 
-    public abstract Http11Request getRequest();
+    public abstract Http11Response getResponse();
 
     public String getPath() {
         return path;

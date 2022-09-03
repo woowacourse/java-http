@@ -1,6 +1,8 @@
 package org.apache.coyote.http11.url;
 
-import org.apache.coyote.http11.dto.Http11Request;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.Http11Response;
+import org.apache.coyote.http11.HttpStatus;
 
 public class HomePage extends Url {
 
@@ -9,7 +11,7 @@ public class HomePage extends Url {
     }
 
     @Override
-    public Http11Request getRequest() {
-        return new Http11Request(getPath());
+    public Http11Response getResponse() {
+        return new Http11Response(ContentType.from(getPath()), HttpStatus.OK, getPath());
     }
 }

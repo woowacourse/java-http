@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.url;
 
-import org.apache.coyote.http11.dto.Http11Request;
+import org.apache.coyote.http11.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,7 +12,7 @@ public class Empty extends Url {
     }
 
     @Override
-    public Http11Request getRequest() {
+    public Http11Response getResponse() {
         log.info("path : {} ", getPath());
         throw new IllegalArgumentException("경로가 비어있습니다.");
     }

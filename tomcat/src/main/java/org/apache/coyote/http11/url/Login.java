@@ -1,8 +1,12 @@
 package org.apache.coyote.http11.url;
 
+import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.dto.Http11Request;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.Http11Response;
+import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.dto.LoginQueryDataDto;
 import org.apache.coyote.http11.utils.UrlParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,16 +19,23 @@ public class Login extends Url {
     }
 
     @Override
-    public Http11Request getRequest() {
-        Http11Request http11Request = UrlParser.loginQuery(getPath());
+    public Http11Response getResponse() {
+        LoginQueryDataDto queryData = UrlParser.loginQuery(getPath());
 
-        if (!http11Request.existsData()) {
-            return http11Request;
+        if (queryData == null) {
+            return new Http11Response(ContentType.from(getPath()), HttpStatus.OK, "login.html");
         }
-        User user = InMemoryUserRepository.findByAccount(http11Request.getLoginQueryDataDto().getAccount())
-                .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호를 잘못 입력하였습니다."));
+
+        User user = InMemoryUserRepository.findByAccount(queryData.getAccount())
+                .orElse(null);
+        if (Objects.isNull(user)) {
+            return new Http11Response(ContentType.from(getPath()), HttpStatus.UNAUTHORIZED, "401.html");
+        }
+        if (user.checkPassword(queryData.getPassword())) {
+            return new Http11Response(ContentType.from(getPath()), HttpStatus.FOUND, "index.html");
+        }
         log.info("user : {}", user);
 
-        return http11Request;
+        return new Http11Response(ContentType.from(getPath()), HttpStatus.UNAUTHORIZED, "401.html");
     }
 }

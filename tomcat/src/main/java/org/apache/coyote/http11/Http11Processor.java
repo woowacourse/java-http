@@ -40,14 +40,14 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             String uri = getUri(bufferedReader);
-            String contentType = ContentType.from(uri);
-            String responseBody = getResponseBody(uri);
 
-            final var response = createResponse(contentType, responseBody);
+            Http11Response http11Response = new Http11Response(uri);
+            Http11Response responseBody = http11Response.getResponseBody(uri);
+            final var response = createResponse(responseBody.getHttpStatus(), responseBody.getContentType(), responseBody.getResource());
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -58,28 +58,9 @@ public class Http11Processor implements Runnable, Processor {
                 .substring(1);
     }
 
-    private String getResponseBody(final String uri) throws IOException, URISyntaxException {
-        if (uri.isEmpty()) {
-            return "Hello world!";
-        }
-        Url url = HandlerMapping.from(uri);
-        URL resource = this.getClass()
-                .getClassLoader()
-                .getResource(STATIC_DIRECTORY + url.getRequest().getPath());
-
-        validatePath(resource);
-        return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-    }
-
-    private void validatePath(URL resource) {
-        if (Objects.isNull(resource)) {
-            throw new IllegalArgumentException("경로가 잘못 되었습니다. : null");
-        }
-    }
-
-    private String createResponse(String contentType, String responseBody) {
+    private String createResponse(HttpStatus httpStatus, String contentType, String responseBody) {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + httpStatus.getCode() + " " + httpStatus.getName() + " ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

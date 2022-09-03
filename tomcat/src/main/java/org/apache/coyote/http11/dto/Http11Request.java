@@ -12,16 +12,4 @@ public class Http11Request {
         this.loginQueryDataDto = loginQueryDataDto;
         this.path = path;
     }
-
-    public boolean existsData() {
-        return loginQueryDataDto != null;
-    }
-
-    public LoginQueryDataDto getLoginQueryDataDto() {
-        return loginQueryDataDto;
-    }
-
-    public String getPath() {
-        return path;
-    }
 }

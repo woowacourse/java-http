@@ -24,12 +24,10 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    public static final int URL_INDEX = 1;
-    public static final String LANDING_PAGE_URL = "/";
-    public static final String STATIC_PATH = "static";
-    public static final String DEFAULT_EXTENSION = ".html";
-    public static final String LOGIN_PATH = "/login.html";
-    public static final String QUERY_STRING_DELIMITER = "?";
+    private static final String LANDING_PAGE_URL = "/";
+    private static final String STATIC_PATH = "static";
+    private static final String DEFAULT_EXTENSION = ".html";
+    private static final String LOGIN_PATH = "/login.html";
 
     private final Socket connection;
 

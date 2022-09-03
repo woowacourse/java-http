@@ -7,8 +7,8 @@ import org.apache.coyote.exception.InvalidHttpRequestFormatException;
 
 public class UriParser {
 
-    public static final int URL_INDEX = 1;
-    public static final String QUERY_STRING_DELIMITER = "?";
+    private static final int URL_INDEX = 1;
+    private static final String QUERY_STRING_DELIMITER = "?";
     private static final String EXTENSION_DELIMITER = ".";
 
     private UriParser() {

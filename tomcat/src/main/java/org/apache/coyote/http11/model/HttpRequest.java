@@ -68,4 +68,8 @@ public class HttpRequest {
     public Map<String, String> getQueryParams() {
         return queryParams;
     }
+
+    public boolean isEmptyQueryParams() {
+        return queryParams.isEmpty();
+    }
 }

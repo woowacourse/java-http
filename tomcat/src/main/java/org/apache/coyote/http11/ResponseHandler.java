@@ -33,8 +33,8 @@ public class ResponseHandler {
 
     public String getResponse() throws IOException, FileNotFoundException {
         final ResponseHeader responseHeader = new ResponseHeader(path);
-
-        return  String.join("\r\n", responseHeader.getHeader(getResponseBody()), getResponseBody());
+        final String responseBody = getResponseBody();
+        return  String.join("\r\n", responseHeader.getHeader(responseBody), responseBody);
     }
 
     private String getResponseBody() throws FileNotFoundException, IOException {

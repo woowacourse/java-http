@@ -23,11 +23,11 @@ public enum Content {
 
     public static String getType(String extension) {
         Objects.requireNonNull(extension);
-        Content content = Arrays.stream(values())
+        return Arrays.stream(values())
                 .filter(it -> it.extension.equals(extension))
                 .findAny()
-                .orElseThrow(() -> new NotFoundContentTypeException("ContentType을 찾을 수 없습니다."));
-        return content.type;
+                .orElseThrow(() -> new NotFoundContentTypeException("ContentType을 찾을 수 없습니다."))
+                .type;
     }
 
     public String getExtension() {

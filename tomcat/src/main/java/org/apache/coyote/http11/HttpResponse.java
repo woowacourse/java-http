@@ -25,8 +25,8 @@ public class HttpResponse {
             return (protocolVersion + " " + statusCode.toResponseMessage()).getBytes();
         }
         return String.join("\r\n",
-                protocolVersion + " " + statusCode.toResponseMessage(),
-                "Content-Type: " + contentType + ";charset=utf-8",
+                protocolVersion + " " + statusCode.toResponseMessage() + " ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
                 "Content-Length: " + contentLength + " ",
                 "",
                 responseBody).getBytes();

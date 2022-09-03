@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,15 +17,18 @@ public class HttpRequest {
         this.header = header;
     }
 
-    public static HttpRequest from(List<String> values) {
-        String startLine = values.remove(0);
-        values.remove(values.size()-1);
-        Map<String, String> header = new HashMap<>();
-        for (String value : values) {
-            String[] headerValue = value.split(": ");
-            header.put(headerValue[0].trim(), headerValue[1].trim());
+    public static HttpRequest from(BufferedReader bufferedReader) throws IOException {
+        String requestLine = bufferedReader.readLine();
+        Map<String, String> requestHeader = new HashMap<>();
+        while (bufferedReader.ready()) {
+            String line = bufferedReader.readLine();
+            if (line.equals("")) {
+                break;
+            }
+            String[] headerValue = line.split(": ");
+            requestHeader.put(headerValue[0], headerValue[1]);
         }
-        return new HttpRequest(startLine, header);
+        return new HttpRequest(requestLine, requestHeader);
     }
 
     public String path() {

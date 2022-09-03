@@ -3,6 +3,11 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,17 +21,18 @@ public class HttpRequestTest {
     @DisplayName("http request의 path를 반환한다.")
     @ParameterizedTest
     @CsvSource({"/index.html,/index.html", "/index.html?name=value,/index.html"})
-    void getPath(String uri, String expected) {
+    void getPath(String uri, String expected) throws IOException {
         // given
-        List<String> httpRequestValue = Arrays.stream(String.join("\r\n",
+        String httpRequestValue = String.join("\r\n",
                 "GET " + uri + " HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
-                "").split("\r\n")).collect(Collectors.toList());
+                "");
+        InputStream inputStream = new ByteArrayInputStream(httpRequestValue.getBytes());
 
         // when
-        HttpRequest request = HttpRequest.from(httpRequestValue);
+        HttpRequest request = HttpRequest.from(new BufferedReader(new InputStreamReader(inputStream)));
 
         // then
         assertThat(request.path()).isEqualTo(expected);
@@ -34,17 +40,18 @@ public class HttpRequestTest {
 
     @DisplayName("query string을 반환한다.")
     @Test
-    void queryString() {
+    void queryString() throws IOException {
         // given
-        List<String> httpRequestValue = Arrays.stream(String.join("\r\n",
+        String httpRequestValue = String.join("\r\n",
                 "GET /index.html?account=tonic&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
-                "").split("\r\n")).collect(Collectors.toList());
+                "");
+        InputStream inputStream = new ByteArrayInputStream(httpRequestValue.getBytes());
 
         // when
-        HttpRequest request = HttpRequest.from(httpRequestValue);
+        HttpRequest request = HttpRequest.from(new BufferedReader(new InputStreamReader(inputStream)));
         QueryString queryString = request.queryString();
         // then
         assertAll(

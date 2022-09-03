@@ -8,8 +8,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -33,9 +31,10 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
+             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              OutputStream outputStream = connection.getOutputStream()) {
-            List<String> httpRequestLines = getHttpRequestLines(inputStream);
-            HttpRequest request = HttpRequest.from(httpRequestLines);
+
+            HttpRequest request = HttpRequest.from(bufferedReader);
             String response = handle(request);
 
             outputStream.write(response.getBytes());
@@ -43,14 +42,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private List<String> getHttpRequestLines(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-        List<String> collect = new ArrayList<>();
-        while (bufferedReader.ready()) {
-            collect.add(bufferedReader.readLine());
-        }
-        return collect;
     }
 }

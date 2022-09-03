@@ -76,9 +76,7 @@ public class Http11Processor implements Runnable, Processor {
         Map<String, String> params = path.getQueryParameter();
         if (!params.isEmpty() && path.getResource().contains("login")) {
             processLogin(params);
-            return ResourceFindUtils.getResourceFile(path.getResource() + path.getExtension());
         }
-
         return ResourceFindUtils.getResourceFile(path.getResource() + path.getExtension());
     }
 

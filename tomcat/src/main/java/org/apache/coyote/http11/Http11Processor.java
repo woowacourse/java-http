@@ -4,21 +4,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.controller.Controllers;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -41,125 +36,27 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             final var input = new BufferedReader(new InputStreamReader(inputStream))) {
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
+
+            List<String> input = new ArrayList<>();
+            String line = bufferedReader.readLine();
+            while (!line.isBlank() && !line.isEmpty()) {
+                input.add(line);
+                line = bufferedReader.readLine();
+            }
 
             HttpRequest request = HttpRequest.from(input);
-            HttpResponse response = processing(request);
+            Controller controller = Controllers.findController(request.getUri());
+            HttpResponse response = controller.doService(request);
 
             outputStream.write(response.toResponseString().getBytes());
             outputStream.flush();
+
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
-        }
-    }
-
-    private HttpResponse processing(HttpRequest request) {
-        String uri = request.getUri();
-
-        if (uri.equals("/")) {
-            return main(request);
-        } else if (uri.contains(".")) {
-            return getResource(request);
-        } else if (uri.contains("/login")) {
-            return login(request);
-        }
-
-        return HttpResponse.withLocation(
-            request.getVersion(),
-            "404 Not Found",
-            request.getUri(),
-            "/404.html",
-            ""
-        );
-    }
-
-    private HttpResponse main(HttpRequest request) {
-        return HttpResponse.withoutLocation(
-            request.getVersion(),
-            "200 OK",
-            request.getUri(),
-            "Hello world!"
-        );
-    }
-
-    private HttpResponse getResource(HttpRequest request) {
-        return HttpResponse.withoutLocation(
-            request.getVersion(),
-            "200 OK",
-            request.getUri(),
-            readFile(request.getUri())
-        );
-    }
-
-    private HttpResponse login(HttpRequest request) {
-        String uri = request.getUri();
-
-        if (uri.equals("/login")) {
-            return HttpResponse.withoutLocation(
-                request.getVersion(),
-                "200 OK",
-                request.getUri(),
-                readFile("/login.html")
-            );
-        }
-
-        String queryString = uri.substring(uri.indexOf('?') + 1);
-        Map<String, String> parsedQuery = parseQueryString(queryString);
-
-        String account = parsedQuery.get("account");
-        String password = parsedQuery.get("password");
-
-        User user = InMemoryUserRepository.findByAccount(account).get();
-        System.out.println(user);
-
-        if (user.checkPassword(password)) {
-            return HttpResponse.withLocation(
-                request.getVersion(),
-                "302 Found",
-                request.getUri(),
-                "/index.html",
-                ""
-            );
-        } else {
-            return HttpResponse.withLocation(
-                request.getVersion(),
-                "302 Found",
-                request.getUri(),
-                "/401.html",
-                ""
-            );
-        }
-    }
-
-    private Map<String, String> parseQueryString(String query) {
-        Map<String, String> queryMap = new HashMap<>();
-
-        for (String q : query.split("&")) {
-            String[] parsedQuery = q.split("=");
-            queryMap.put(parsedQuery[QUERY_KEY_INDEX], parsedQuery[QUERY_VALUE_INDEX]);
-        }
-
-        return queryMap;
-    }
-
-    private String readFile(String uri) {
-        try {
-            final Path path = Paths.get(getClass()
-                .getClassLoader()
-                .getResource("static" + uri)
-                .toURI());
-
-            final List<String> contents = Files.readAllLines(path);
-
-            StringBuilder result = new StringBuilder();
-            for (String content : contents) {
-                result.append(content + "\n");
-            }
-
-            return result.toString();
-        } catch (IOException | URISyntaxException e) {
-            log.error(e.getMessage(), e);
-            return "";
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

@@ -1,8 +1,7 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class HttpRequest {
@@ -13,26 +12,24 @@ public class HttpRequest {
     private final String accept;
     private final String connection;
 
-    public static HttpRequest from(BufferedReader reader) throws IOException {
-        String[] firstLine = reader.readLine().split(" ");
-        String method = firstLine[0];
-        String uri = firstLine[1];
-        String version = firstLine[2];
+    public static HttpRequest from(List<String> input) {
+        String firstLine = input.get(0);
+        HttpRequestStartLine startLine = HttpRequestStartLine.from(firstLine);
 
         Map<String, String> headers = new HashMap<>();
-
-        String header = reader.readLine();
-        while (!header.isEmpty()) {
-            String[] parsedHeader = header.split(" ");
+        for (String header : input) {
+            String[] parsedHeader = header.split(": ");
             headers.put(parsedHeader[0], parsedHeader[1]);
-            header = reader.readLine();
         }
 
-        String host = headers.getOrDefault("Host:", "");
-        String accept = headers.getOrDefault("Accept:", "");
-        String connection = headers.getOrDefault("Connection:", "");
-
-        return new HttpRequest(method, uri, version, host, accept, connection);
+        return new HttpRequest(
+            startLine.getMethod(),
+            startLine.getUri(),
+            startLine.getVersion(),
+            headers.get("Host"),
+            headers.get("Accept"),
+            headers.get("Connection")
+        );
     }
 
     private HttpRequest(String method, String uri, String version, String host, String accept, String connection) {
@@ -42,6 +39,14 @@ public class HttpRequest {
         this.host = host;
         this.accept = accept;
         this.connection = connection;
+    }
+
+    public boolean isGet() {
+        return method.equals("GET");
+    }
+
+    public boolean isPost() {
+        return method.equals("POST");
     }
 
     public String getMethod() {
@@ -68,4 +73,15 @@ public class HttpRequest {
         return connection;
     }
 
+    @Override
+    public String toString() {
+        return "HttpRequest{" +
+            "method='" + method + '\'' +
+            ", uri='" + uri + '\'' +
+            ", version='" + version + '\'' +
+            ", host='" + host + '\'' +
+            ", accept='" + accept + '\'' +
+            ", connection='" + connection + '\'' +
+            '}';
+    }
 }

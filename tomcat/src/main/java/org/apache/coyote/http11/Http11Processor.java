@@ -69,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
             validateUserPassword(requestUri, user);
             log.info("user : " + user);
         }
-        if (!requestUri.getUri().equals("/")) {
+        if (requestUri.isResourceFileRequest()) {
             return readResourceFile(requestUri.getResourcePath());
         }
         return DEFAULT_REQUEST_BODY;

@@ -50,6 +50,10 @@ public class RequestUri {
         return !queryParams.isEmpty();
     }
 
+    public Boolean isResourceFileRequest() {
+        return !uri.equals("/");
+    }
+
     public String getUri() {
         return uri;
     }

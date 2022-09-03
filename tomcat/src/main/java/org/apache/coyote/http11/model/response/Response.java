@@ -14,7 +14,7 @@ public class Response {
 
     private Status status;
     private Headers headers;
-    private ResponseBody responseBody;
+    private Resource resource;
 
     private Response(final Status status) {
         this.status = status;
@@ -33,7 +33,7 @@ public class Response {
         String defaultFormat = String.join(CRLF,
                 "HTTP/1.1" + " " + status.getCode() + " " + status.name() + " ",
                 headers.getString());
-        if (responseBody != null) {
+        if (resource != null) {
             return joinBody(defaultFormat);
         }
         return defaultFormat;
@@ -43,24 +43,24 @@ public class Response {
         return String.join(CRLF,
                 defaultFormat,
                 "",
-                responseBody.getBody());
+                resource.getBody());
     }
 
     public void addHeader(final String key, final String value) {
         this.headers.add(new Header(key, value));
     }
 
-    public void addResponseBody(final ResponseBody responseBody) {
-        this.responseBody = responseBody;
+    public void addResource(final Resource resource) {
+        this.resource = resource;
         setContentType();
         setContentLength();
     }
 
     private void setContentType() {
-        this.addHeader(KEY_CONTENT_TYPE, responseBody.getContentType() + ENCODE_UTF8);
+        this.addHeader(KEY_CONTENT_TYPE, resource.getContentType() + ENCODE_UTF8);
     }
 
     private void setContentLength() {
-        this.addHeader(KEY_CONTENT_LENGTH, String.valueOf(responseBody.getContentLength()));
+        this.addHeader(KEY_CONTENT_LENGTH, String.valueOf(resource.getContentLength()));
     }
 }

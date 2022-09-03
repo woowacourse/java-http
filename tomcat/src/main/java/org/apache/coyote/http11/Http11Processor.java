@@ -13,8 +13,8 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.request.Request;
+import org.apache.coyote.http11.model.response.Resource;
 import org.apache.coyote.http11.model.response.Response;
-import org.apache.coyote.http11.model.response.ResponseBody;
 import org.apache.coyote.http11.model.response.Status;
 import org.apache.coyote.http11.utils.ResourceMatcher;
 import org.slf4j.Logger;
@@ -45,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
             UserService.process(request);
 
             Response response = Response.of(Status.OK);
-            response.addResponseBody(findResource(request.getUrl()));
+            response.addResource(findResource(request.getUrl()));
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -54,13 +54,13 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private ResponseBody findResource(final String url) throws IOException {
+    private Resource findResource(final String url) throws IOException {
         String fileName = ResourceMatcher.matchName(url);
         Path path = Path.of(Objects.requireNonNull(this.getClass().getResource("/static" + fileName)).getPath());
         String body = Files.readString(path);
 
         ContentType contentType = ContentType.findByExtension(url);
 
-        return new ResponseBody(body, contentType);
+        return new Resource(body, contentType);
     }
 }

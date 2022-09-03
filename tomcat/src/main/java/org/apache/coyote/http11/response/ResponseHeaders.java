@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.response;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.ResponseEntity;
 import org.apache.coyote.http11.response.headers.ContentLength;
 import org.apache.coyote.http11.response.headers.ResponseHeader;
 
@@ -14,9 +14,15 @@ public class ResponseHeaders implements Response {
         this.headers = headers;
     }
 
-    public static ResponseHeaders from(ResponseEntity responseEntity) {
-        ContentLength contentLength = ContentLength.from(responseEntity.getBody());
-        return new ResponseHeaders(List.of(responseEntity.getContentType(), contentLength));
+    public static ResponseHeaders from(String body) {
+        ResponseHeaders headers = new ResponseHeaders(new ArrayList<>());
+        headers.append(ContentLength.from(body));
+        return headers;
+    }
+
+    public void append(ResponseHeader header) {
+        headers.remove(header);
+        this.headers.add(header);
     }
 
     @Override

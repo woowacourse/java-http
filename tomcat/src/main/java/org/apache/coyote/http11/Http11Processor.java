@@ -8,7 +8,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.mvc.ControllerMapper;
+import org.apache.mvc.HandlerMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,11 +17,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
-    private final ControllerMapper controllerMapper;
+    private final HandlerMapper handlerMapper;
 
-    public Http11Processor(final Socket connection, ControllerMapper controllerMapper) {
+    public Http11Processor(final Socket connection, HandlerMapper handlerMapper) {
         this.connection = connection;
-        this.controllerMapper = controllerMapper;
+        this.handlerMapper = handlerMapper;
     }
 
     @Override
@@ -35,8 +35,7 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest request = HttpRequest.parse(inputStream);
-            ResponseEntity responseEntity = controllerMapper.mapToHandle(request);
-            HttpResponse response = HttpResponse.from(responseEntity);
+            HttpResponse response = handlerMapper.mapToHandle(request);
 
             outputStream.write(response.getAsString().getBytes());
             outputStream.flush();

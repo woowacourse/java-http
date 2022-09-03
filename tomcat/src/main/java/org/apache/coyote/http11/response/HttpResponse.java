@@ -2,7 +2,8 @@ package org.apache.coyote.http11.response;
 
 import org.apache.coyote.http11.ResponseEntity;
 import org.apache.coyote.http11.message.HttpVersion;
-import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.headers.ContentType;
+import org.apache.coyote.http11.response.headers.ResponseHeader;
 
 public class HttpResponse implements Response {
 
@@ -16,14 +17,18 @@ public class HttpResponse implements Response {
         this.body = body;
     }
 
-    public static HttpResponse from(ResponseEntity responseEntity) {
-        ResponseGeneral general = new ResponseGeneral(HttpVersion.HTTP11, responseEntity.getStatus());
-        ResponseHeaders headers = ResponseHeaders.from(responseEntity);
-        ResponseBody body = new ResponseBody(responseEntity.getBody());
+    public static HttpResponse from(HttpStatus status, String bodyString) {
+        ResponseGeneral general = new ResponseGeneral(HttpVersion.HTTP11, status);
+        ResponseHeaders headers = ResponseHeaders.from(bodyString);
+        ResponseBody body = new ResponseBody(bodyString);
 
         return new HttpResponse(general, headers, body);
     }
 
+    public HttpResponse addHeader(ResponseHeader header) {
+        this.headers.append(header);
+        return this;
+    }
 
     @Override
     public String getAsString() {

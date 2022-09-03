@@ -25,6 +25,6 @@ public enum ContentType implements ResponseHeader {
 
     @Override
     public String getAsString() {
-        return "Content-Type: " + type;
+        return "Content-Type: " + String.join(";", type, "charset=utf-8");
     }
 }

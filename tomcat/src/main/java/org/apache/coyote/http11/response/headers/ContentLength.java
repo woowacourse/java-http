@@ -2,11 +2,11 @@ package org.apache.coyote.http11.response.headers;
 
 public class ContentLength implements ResponseHeader {
 
-    private static final int MIN_LENGTH = 0;
+    private static final long MIN_LENGTH = 0;
 
-    private final int length;
+    private final long length;
 
-    private ContentLength(int length) {
+    public ContentLength(long length) {
         this.length = Math.max(MIN_LENGTH, length);
     }
 

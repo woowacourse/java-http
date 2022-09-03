@@ -1,18 +1,17 @@
 package nextstep.jwp.servlet;
 
-import nextstep.jwp.support.ResourceRegistry;
 import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.response.HttpResponse;
 
 public class HandlerMapper {
 
     private final HandlerMappings handlerMappings;
-    private final ResourceRegistry resourceRegistry;
+    private final ViewResolver viewResolver;
 
     public HandlerMapper(HandlerMappings handlerMappings,
-                         ResourceRegistry resourceRegistry) {
+                         ViewResolver viewResolver) {
         this.handlerMappings = handlerMappings;
-        this.resourceRegistry = resourceRegistry;
+        this.viewResolver = viewResolver;
     }
 
     public HttpResponse handle(HttpRequest request) {
@@ -21,6 +20,6 @@ public class HandlerMapper {
             final var response = handler.handle(request);
             return (HttpResponse) response;
         }
-        return resourceRegistry.findStaticResource(request.getUri());
+        return viewResolver.findStaticResource(request.getUri());
     }
 }

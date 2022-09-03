@@ -1,15 +1,16 @@
-package nextstep.jwp.support;
+package nextstep.jwp.servlet;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import nextstep.jwp.support.ExceptionPage;
 import org.apache.coyote.servlet.response.HttpResponse;
 import org.apache.coyote.servlet.response.HttpResponse.HttpResponseBuilder;
 import org.apache.coyote.support.HttpException;
 import org.apache.coyote.support.HttpStatus;
 
-public class ResourceRegistry {
+public class ViewResolver {
 
     public HttpResponse findStaticResource(String uri) {
         final var path = toResourcePath(uri);

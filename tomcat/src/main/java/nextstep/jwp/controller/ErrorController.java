@@ -1,18 +1,18 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.support.ResourceRegistry;
+import nextstep.jwp.servlet.ViewResolver;
 import org.apache.coyote.servlet.response.HttpResponse;
 import org.apache.coyote.support.HttpException;
 
 public class ErrorController {
 
-    private final ResourceRegistry resourceRegistry;
+    private final ViewResolver viewResolver;
 
-    public ErrorController(ResourceRegistry resourceRegistry) {
-        this.resourceRegistry = resourceRegistry;
+    public ErrorController(ViewResolver viewResolver) {
+        this.viewResolver = viewResolver;
     }
 
     public HttpResponse handle(HttpException exception) {
-        return resourceRegistry.findErrorPage(exception);
+        return viewResolver.findErrorPage(exception);
     }
 }

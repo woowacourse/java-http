@@ -5,7 +5,6 @@ import nextstep.jwp.controller.GetController;
 import nextstep.jwp.controller.PostController;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.service.UserService;
-import nextstep.jwp.support.ResourceRegistry;
 import org.apache.coyote.servlet.Servlet;
 import org.apache.coyote.support.HttpException;
 import org.apache.coyote.servlet.request.HttpRequest;
@@ -17,7 +16,7 @@ public class CustomServlet implements Servlet {
     private final ErrorController errorController;
 
     public CustomServlet() {
-        final var resourceRegistry = new ResourceRegistry();
+        final var resourceRegistry = new ViewResolver();
         final var handlerMappings = HandlerMappings.of(
                 new GetController(resourceRegistry),
                 new PostController(new UserService(new InMemoryUserRepository())));

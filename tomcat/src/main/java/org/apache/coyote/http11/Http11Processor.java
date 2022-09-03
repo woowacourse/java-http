@@ -44,11 +44,10 @@ public class Http11Processor implements Runnable, Processor {
             Request request = Request.from(reader.readLine());
             login(request);
 
-            Response response = new Response();
-            response.setStatus(Status.OK);
-            response.setResponseBody(findResource(request.getUrl()));
+            Response response = Response.of(Status.OK);
+            response.addResponseBody(findResource(request.getUrl()));
 
-            outputStream.write(response.getString().getBytes());
+            outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

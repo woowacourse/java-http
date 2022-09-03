@@ -14,11 +14,20 @@ public class Response {
     private Headers headers;
     private ResponseBody responseBody;
 
-    public Response() {
+    private Response(final Status status) {
+        this.status = status;
         this.headers = new Headers(new ArrayList<>());
     }
 
-    public String getString() {
+    public static Response of(final Status status) {
+        return new Response(status);
+    }
+
+    public byte[] getBytes() {
+        return getString().getBytes();
+    }
+
+    private String getString() {
         return String.join("\r\n",
                 "HTTP/1.1" + " " + status.getCode() + " " + status.name() + " ",
                 headers.getString(),
@@ -26,15 +35,11 @@ public class Response {
                 responseBody.getBody());
     }
 
-    public void setStatus(final Status status) {
-        this.status = status;
-    }
-
     public void addHeader(final String key, final String value) {
         this.headers.add(new Header(key, value));
     }
 
-    public void setResponseBody(final ResponseBody responseBody) {
+    public void addResponseBody(final ResponseBody responseBody) {
         this.responseBody = responseBody;
         setContentType();
         setContentLength();

@@ -28,7 +28,7 @@ public class QueryParameters {
         return value.get(key);
     }
 
-    public Boolean isEmpty() {
+    public boolean isEmpty() {
         return value.isEmpty();
     }
 }

@@ -26,11 +26,11 @@ public class RequestUri {
         return STATIC_FILE_PATH + uri;
     }
 
-    public Boolean isResourceFileRequest() {
+    public boolean isResourceFileRequest() {
         return !uri.equals("/");
     }
 
-    public Boolean hasQueryParams() {
+    public boolean hasQueryParams() {
         return !queryParams.isEmpty();
     }
 

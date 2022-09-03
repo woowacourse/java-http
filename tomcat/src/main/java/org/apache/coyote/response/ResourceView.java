@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.coyote.exception.ExceptionPage;
+import org.apache.coyote.response.HttpResponse.HttpResponseBuilder;
 import org.apache.coyote.support.HttpStatus;
 import org.apache.coyote.exception.HttpException;
 
@@ -44,10 +45,11 @@ public class ResourceView {
 
     private String toHttpResponseMessage(HttpStatus status, Path path) {
         try {
-            return new ResponseMessage(status)
+            return new HttpResponseBuilder(status)
                     .setContentType(Files.probeContentType(path))
                     .setMessageBody(new String(Files.readAllBytes(path)))
-                    .build();
+                    .build()
+                    .toMessage();
         } catch (IOException e) {
             throw HttpException.ofInternalServerError(e);
         }

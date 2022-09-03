@@ -1,9 +1,15 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.httpRequest;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class QueryString {
+
+    private static final String QUERY_STRING_SEPARATOR = "&";
+    private static final String COMPONENT_SEPARATOR = "=";
+
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
 
     private final Map<String, String> value;
 
@@ -16,10 +22,10 @@ public class QueryString {
         if (value.isEmpty()) {
             return new QueryString(queryString);
         }
-        String[] strings = value.split("&");
+        String[] strings = value.split(QUERY_STRING_SEPARATOR);
         for (String string : strings) {
-            String[] keyValue = string.split("=");
-            queryString.put(keyValue[0], keyValue[1]);
+            String[] keyValue = string.split(COMPONENT_SEPARATOR);
+            queryString.put(keyValue[KEY_INDEX], keyValue[VALUE_INDEX]);
         }
         return new QueryString(queryString);
     }

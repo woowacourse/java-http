@@ -6,7 +6,9 @@ public enum ContentType {
 
     HTML("text/html", ".html"),
     CSS("text/css", ".css"),
-    JAVASCRIPT("application/js", ".js");
+    JAVASCRIPT("application/js", ".js"),
+    SVG("image/svg+xml", ".svg")
+    ;
 
     private final String value;
     private final String fileNameExtension;

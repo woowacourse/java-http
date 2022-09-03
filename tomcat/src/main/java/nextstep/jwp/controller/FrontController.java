@@ -2,7 +2,7 @@ package nextstep.jwp.controller;
 
 import java.io.IOException;
 import nextstep.jwp.handler.StaticHandler;
-import org.apache.coyote.http11.HttpRequest;
+import org.apache.coyote.http11.httpRequest.HttpRequest;
 
 public class FrontController {
 

@@ -9,7 +9,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -40,9 +39,7 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            final String responseBody = createResponseBody(httpRequest);
-            final String contentType = httpRequest.getHeaderField("Accept");
-            final String response = createResponse(responseBody, contentType);
+            final String response = getResponse(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -51,39 +48,56 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponseBody(final HttpRequest httpRequest) throws IOException {
+    private String getResponse(final HttpRequest httpRequest) {
         final String requestUri = httpRequest.getUri();
+
         if (requestUri.contains("/login")) {
             return createLoginResponse(httpRequest);
         }
-
         if (!requestUri.equals("/")) {
-            return readFileFromPath(requestUri);
+            return createResponse(createResponseBody(requestUri), ContentType.findByUri(requestUri));
         }
-        return "Hello world!";
+
+        return createResponse("Hello world!", ContentType.HTML);
     }
 
-    private String createLoginResponse(final HttpRequest httpRequest) throws IOException {
+    private String createLoginResponse(final HttpRequest httpRequest) {
         if (httpRequest.containsQuery()) {
-            final Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getParameter("account"));
-            if (user.isPresent() && user.get().checkPassword(httpRequest.getParameter("password"))) {
-                log.info("user : {}", user.get());
-            }
+            findUser(httpRequest);
         }
-        return readFileFromPath("/login.html");
+        final String responseBody = createResponseBody("/login.html");
+        return createResponse(responseBody, ContentType.HTML);
     }
 
-    private String readFileFromPath(final String filePath) throws IOException {
-        final URL url = getClass().getClassLoader().getResource("static" + filePath);
+    private void findUser(final HttpRequest httpRequest) {
+        final String userAccount = httpRequest.getParameter("account");
+        final String userPassword = httpRequest.getParameter("password");
+
+        final User user = InMemoryUserRepository.findByAccount(userAccount)
+                .filter(it -> it.checkPassword(userPassword))
+                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 유저입니다."));
+
+        log.info("user : {}", user);
+    }
+
+    private String createResponseBody(final String pathUri) {
+        final URL url = getClass().getClassLoader().getResource("static" + pathUri);
         Objects.requireNonNull(url);
-        final Path path = new File(url.getPath()).toPath();
-        return new String(Files.readAllBytes(path));
+
+        try {
+            final File file = new File(url.getPath());
+            final Path path = file.toPath();
+            return new String(Files.readAllBytes(path));
+        } catch (final IOException e) {
+            log.error("invalid resource", e);
+            throw new IllegalArgumentException("파일을 찾을 수 없습니다.");
+        }
     }
 
-    private String createResponse(final String responseBody, final String contentType) {
+    private String createResponse(final String responseBody, final ContentType contentType) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

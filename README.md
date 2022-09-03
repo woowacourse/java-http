@@ -60,3 +60,24 @@ http://localhost:8080/login?account=gugu&password=password으로 접속하면 �
 - [x] 예외 처리후 404.html 응답하기
 - [x] CSS 지원하기
 - [x] Query String 파싱
+
+## 리팩토링 목록
+
+### 진짜 디스패처 서블릿처럼 만들기
+
+- [ ] 새 클래스 생성 및 역할분리
+- [ ] 서블릿
+- [ ] 핸들러 매퍼
+- [ ] 핸들러 어댑터
+- [ ] 핸들러(컨트롤러)
+- [ ] 서비스
+- [ ] 뷰리졸버
+
+### 1차 피드백
+
+- [x] private 으로 제한
+- [x] password 가 틀렸을때의 예외 처리
+- [x] 사용하지 않는 메서드 삭제
+- [x] 메서드의 네이밍을 extractQuery 로 변경
+- [ ] 정적 파일을 동적으로(classLoader...getResource) 관리
+- [ ] converter 메서드 네이밍 변경 및 상태리스로 만들기

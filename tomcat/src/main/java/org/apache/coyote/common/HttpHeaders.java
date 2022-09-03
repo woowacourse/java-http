@@ -7,11 +7,11 @@ import java.util.Map;
 public class HttpHeaders {
 
     private static final String HEADER_DELIMITER = ": ";
+    private static final String EMPTY_STRING = "";
 
     private static final int KEY = 0;
     private static final int VALUE = 1;
 
-    private static final String EMPTY_CONTENT = "";
 
     private final Map<String, String> values;
 
@@ -23,7 +23,7 @@ public class HttpHeaders {
         final Map<String, String> headers = new HashMap<>();
 
         for (final String header : rawHeaders) {
-            if (EMPTY_CONTENT.equals(header)) {
+            if (EMPTY_STRING.equals(header)) {
                 break;
             }
 

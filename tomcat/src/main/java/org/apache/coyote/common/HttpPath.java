@@ -12,9 +12,11 @@ public class HttpPath {
     private static final int KEY = 0;
     private static final int VALUE = 1;
     private static final String EMPTY_VALUE = "";
+    private static final int EMPTY_VALUE_PARAM_LENGTH = 1;
 
     private static final int START_INDEX = 0;
-    private static final int NO_VALUE_PARAM = 1;
+    private static final int ONE_INDEX = 1;
+
 
     private final String value;
     private final Map<String, String> params;
@@ -31,7 +33,7 @@ public class HttpPath {
         if (uri.contains(REQUEST_PARAM_DELIMITER)) {
             final int paramStartIndex = uri.indexOf(REQUEST_PARAM_DELIMITER);
             path = uri.substring(START_INDEX, paramStartIndex);
-            final String queryString = uri.substring(paramStartIndex + 1);
+            final String queryString = uri.substring(paramStartIndex + ONE_INDEX);
 
             parseQueryParams(params, queryString);
         }
@@ -58,14 +60,14 @@ public class HttpPath {
     }
 
     private static boolean haveEmptyValue(final String[] queryParamKeyValue) {
-        return queryParamKeyValue.length == NO_VALUE_PARAM;
+        return queryParamKeyValue.length == EMPTY_VALUE_PARAM_LENGTH;
     }
 
     public String getValue() {
         return value;
     }
 
-    public String getParam(String key) {
+    public String getParam(final String key) {
         return params.get(key);
     }
 }

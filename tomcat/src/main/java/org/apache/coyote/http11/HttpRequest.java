@@ -1,12 +1,13 @@
 package org.apache.coyote.http11;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final Map<String, String> headers;
+    private final Headers headers;
 
     public HttpRequest(final String startLine) {
         this(startLine, new HashMap<>());
@@ -14,19 +15,15 @@ public class HttpRequest {
 
     public HttpRequest(final String startLine, final Map<String, String> headers) {
         String[] splitStartLine = startLine.split(" ");
-        this.requestLine = new RequestLine(splitStartLine[0], splitStartLine[1], splitStartLine[2]);
-        this.headers = headers;
-    }
-
-    public void addHeader(final String key, final String value) {
-        this.headers.put(key, value);
+        this.requestLine = new RequestLine(HttpMethod.valueOf(splitStartLine[0]), splitStartLine[1], splitStartLine[2]);
+        this.headers = new Headers(new LinkedHashMap<>(headers));
     }
 
     public String getRequestLine() {
         return requestLine.getHttpMethod() + " " + getPath() + " " + requestLine.getHttpVersion();
     }
 
-    public String getHttpMethod() {
+    public HttpMethod getHttpMethod() {
         return requestLine.getHttpMethod();
     }
 
@@ -45,7 +42,11 @@ public class HttpRequest {
         return requestURI.getQueryParameterKey(key);
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
+    public void addHeader(final String key, final String value) {
+        headers.addHeader(key, value);
+    }
+
+    public String getHeader(final String key) {
+        return headers.findByHeaderKey(key);
     }
 }

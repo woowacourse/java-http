@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Map.Entry;
 
 public class HttpResponse {
 
@@ -19,21 +19,22 @@ public class HttpResponse {
     }
 
     private final String statusLine;
-    private final LinkedHashMap<String, String> headers;
+    private final Headers headers;
     private final String body;
 
     public HttpResponse(final String statusLine, final LinkedHashMap<String, String> headers, final String body) {
         this.statusLine = statusLine;
-        this.headers = headers;
+        this.headers = new Headers(headers);
         this.body = body;
     }
 
     public String parseResponse() {
         StringBuilder headers = new StringBuilder();
-        for (String key : this.headers.keySet()) {
-            headers.append(key)
+        LinkedHashMap<String, String> values = this.headers.getValues();
+        for (Entry<String, String> header : values.entrySet()) {
+            headers.append(header.getKey())
                     .append(": ")
-                    .append(this.headers.get(key))
+                    .append(header.getValue())
                     .append(" \r\n");
         }
 
@@ -41,17 +42,5 @@ public class HttpResponse {
                 headers +
                 "\r\n" +
                 body;
-    }
-
-    public String getStatusLine() {
-        return statusLine;
-    }
-
-    public Map<String, String> getHeaders() {
-        return headers;
-    }
-
-    public String getBody() {
-        return body;
     }
 }

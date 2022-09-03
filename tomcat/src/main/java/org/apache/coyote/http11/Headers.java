@@ -22,4 +22,8 @@ public class Headers {
 
         return values.get(key);
     }
+
+    public LinkedHashMap<String, String> getValues() {
+        return new LinkedHashMap<>(values);
+    }
 }

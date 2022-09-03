@@ -9,6 +9,7 @@ import java.util.Map;
 
 import org.apache.coyote.http11.KindOfContent;
 import org.apache.coyote.http11.UrlParser;
+import org.apache.coyote.http11.response.header.StatusCode;
 
 public class HttpResponse {
 

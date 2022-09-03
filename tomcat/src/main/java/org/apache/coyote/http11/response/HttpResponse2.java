@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response;
 import java.util.List;
 
 import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.response.header.StatusLine;
 
 public class HttpResponse2 {
 

@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.handler;
 
-import static org.apache.catalina.utils.Parser.generateResourceFileName;
 import static org.apache.coyote.http11.HttpVersion.HTTP11;
 import static org.apache.coyote.http11.header.ContentType.UTF_8;
 import static org.apache.coyote.http11.header.HttpHeaderType.CONTENT_LENGTH;
@@ -24,10 +23,10 @@ public class ResourceHandler implements Handler{
 
     protected HttpResponse generateResourceResponse(final HttpRequest httpRequest) {
         final String path = httpRequest.getPath();
-        final String fileName = generateResourceFileName(path);
+        final String fileName = Parser.convertResourceFileName(path);
+        final String fileType = Parser.parseFileType(fileName);
         try {
             final String body = IOUtils.readResourceFile(fileName);
-            final String fileType = Parser.parseFileType(fileName);
             final HttpHeader contentType = HttpHeader.of(CONTENT_TYPE, ContentType.of(fileType), UTF_8.getValue());
             final HttpHeader contentLength = HttpHeader.of(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
 

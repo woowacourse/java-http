@@ -108,7 +108,7 @@ class Http11ProcessorTest {
         final User user = InMemoryUserRepository.findByAccount("gugu").get();
 
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text;charset=utf-8 \r\n" +
+                "Content-Type: charset=utf-8 \r\n" +
                 "Content-Length: 76 \r\n" +
                 "\r\n"+
                 user.toString();

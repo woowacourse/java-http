@@ -30,6 +30,7 @@ public class Http11Processor implements Runnable, Processor {
             process(connection);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            e.printStackTrace();
         }
     }
 

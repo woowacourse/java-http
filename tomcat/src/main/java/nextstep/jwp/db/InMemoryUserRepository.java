@@ -1,5 +1,6 @@
 package nextstep.jwp.db;
 
+import java.util.NoSuchElementException;
 import nextstep.jwp.model.User;
 
 import java.util.Map;
@@ -17,6 +18,11 @@ public class InMemoryUserRepository {
 
     public static void save(User user) {
         database.put(user.getAccount(), user);
+    }
+
+    public static User getByAccount(String account) {
+        return findByAccount(account)
+                .orElseThrow(() -> new NoSuchElementException("해당 account를 가진 user가 존재하지 않습니다. : " + account));
     }
 
     public static Optional<User> findByAccount(String account) {

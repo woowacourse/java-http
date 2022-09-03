@@ -45,10 +45,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private static void logUserInfo(Http11QueryParams queryParams) {
-        String account = queryParams.getValueFrom("account");
-        String password = queryParams.getValueFrom("password");
+        final String account = queryParams.getValueFrom("account");
+        final String password = queryParams.getValueFrom("password");
 
-        User user = InMemoryUserRepository.findByAccount(account)
+        final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
         if (user.checkPassword(password)) {
             log.info(user.toString());

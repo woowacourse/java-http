@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response.header;
 
+import org.apache.coyote.http11.common.HttpMessageConfig;
+
 public enum StatusCode {
 
 	OK(200, "OK")
@@ -14,6 +16,6 @@ public enum StatusCode {
 	}
 
 	public String toMessage() {
-		return String.join(" ", String.valueOf(code), name);
+		return String.join(HttpMessageConfig.WORD_DELIMITER.getValue(), String.valueOf(code), name);
 	}
 }

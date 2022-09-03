@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response.header;
 
+import org.apache.coyote.http11.common.HttpMessageConfig;
+
 public class StatusLine {
 
 	private final String httpVersion;
@@ -12,9 +14,9 @@ public class StatusLine {
 
 	public String toMessage() {
 		final StringBuilder message = new StringBuilder().append(httpVersion)
-			.append(" ")
+			.append(HttpMessageConfig.WORD_DELIMITER.getValue())
 			.append(statusCode.toMessage())
-			.append(" ");
+			.append(HttpMessageConfig.WORD_DELIMITER.getValue());
 		return new String(message);
 	}
 }

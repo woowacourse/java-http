@@ -1,40 +1,50 @@
 package nextstep.jwp.http.request;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.Map;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
+    private final RequestBody requestBody;
 
     public HttpRequest(final RequestLine requestLine,
-                       final RequestHeaders requestHeaders) {
+                       final RequestHeaders requestHeaders,
+                       final RequestBody requestBody) {
         this.requestLine = requestLine;
         this.requestHeaders = requestHeaders;
+        this.requestBody = requestBody;
     }
 
-    public static HttpRequest from(final BufferedReader bufferedReader) throws IOException {
-        RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
-        RequestHeaders requestHeaders = RequestHeaders.from(bufferedReader);
-
-        return new HttpRequest(requestLine, requestHeaders);
+    public String getRequestMethod() {
+        return requestLine.getRequestMethod();
     }
 
-    public String getUri() {
+    public String getRequestUri() {
         return requestLine.getRequestUri();
+    }
+
+    public String getRequestExtension() {
+        return requestLine.getRequestExtension();
+    }
+
+    public String getQueryParameterValue(final String parameter) {
+        return requestLine.getQueryParameterValue(parameter);
     }
 
     public Map<String, String> getQueryParameters() {
         return requestLine.getQueryParameters();
     }
 
-    public RequestMethod getMethod() {
-        return requestLine.getRequestMethod();
+    public RequestLine getRequestLine() {
+        return requestLine;
     }
 
-    public String getUriParameter(String parameter) {
-        return requestLine.getUriParameter(parameter);
+    public RequestHeaders getRequestHeaders() {
+        return requestHeaders;
+    }
+
+    public RequestBody getRequestBody() {
+        return requestBody;
     }
 }

@@ -1,4 +1,4 @@
-package nextstep.jwp.http;
+package nextstep.jwp.http.factory;
 
 import static nextstep.jwp.http.request.RequestMethod.GET;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -11,52 +11,48 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.request.RequestMethod;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class HttpRequestTest {
+class HttpRequestFactoryTest {
 
     private static final String VALID_REQUEST = String.join("\r\n",
         "GET /login?account=gugu&password=password HTTP/1.1 ",
         "Host: localhost:8080 ");
     private static final String INVALID_REQUEST = String.join("\r\n",
         "/ GET /login?account=gugu&password=password HTTP/1.1 ",
-        "Host: localhost:8080 ");
+        "Host: localhost:8080 ",
+        "Connection: keep-alive ");
 
     @Test
-    @DisplayName("HttpRequest의 Method를 파싱할 수 있다.")
-    void getMethod() throws IOException {
+    void httpRequest의_Method를_파싱할_수_있다() throws IOException {
         InputStream INPUT_STREAM = new ByteArrayInputStream(VALID_REQUEST.getBytes(StandardCharsets.UTF_8));
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(INPUT_STREAM));
 
-        HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+        HttpRequest httpRequest = HttpRequestFactory.create(bufferedReader);
 
-        RequestMethod method = httpRequest.getMethod();
+        String method = httpRequest.getRequestMethod();
 
-        assertThat(method).isEqualTo(GET);
+        assertThat(method).isEqualTo(GET.getValue());
     }
 
     @Test
-    @DisplayName("HttpRequest의 uri를 파싱할 수 있다.")
-    void getUri() throws IOException {
+    void httpRequest의_uri를_파싱할_수_있다() throws IOException {
         InputStream INPUT_STREAM = new ByteArrayInputStream(VALID_REQUEST.getBytes(StandardCharsets.UTF_8));
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(INPUT_STREAM));
 
-        HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+        HttpRequest httpRequest = HttpRequestFactory.create(bufferedReader);
 
-        String method = httpRequest.getUri();
+        String method = httpRequest.getRequestUri();
 
         assertThat(method).isEqualTo("/login");
     }
 
     @Test
-    @DisplayName("HttpRequest의 queryParams를 파싱할 수 있다.")
-    void getQueryParams() throws IOException {
+    void httpRequest의_queryParameter를_파싱할_수_있다() throws IOException {
         InputStream INPUT_STREAM = new ByteArrayInputStream(VALID_REQUEST.getBytes(StandardCharsets.UTF_8));
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(INPUT_STREAM));
 
-        HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+        HttpRequest httpRequest = HttpRequestFactory.create(bufferedReader);
 
         Map<String, String> queryParams = httpRequest.getQueryParameters();
 

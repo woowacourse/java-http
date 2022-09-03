@@ -5,14 +5,24 @@ import nextstep.jwp.exception.InvalidRequestMethodException;
 
 public enum RequestMethod {
 
-    GET,
-    POST
+    GET("GET"),
+    POST("POST")
     ;
 
-    public static RequestMethod from(final String method) {
+    private final String value;
+
+    RequestMethod(final String value) {
+        this.value = value;
+    }
+
+    public static RequestMethod find(final String method) {
         return Arrays.stream(RequestMethod.values())
             .filter(value -> value.name().equals(method))
             .findAny()
             .orElseThrow(InvalidRequestMethodException::new);
+    }
+
+    public String getValue() {
+        return value;
     }
 }

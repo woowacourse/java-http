@@ -65,8 +65,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getResponseBody(final RequestUri requestUri) throws IOException {
         if (requestUri.hasQueryParams()) {
-            final User user = getUserByAccount(requestUri.findQueryParamValue("account"));
-            validateUserPassword(requestUri, user);
+            QueryParameters queryParameters = requestUri.getQueryParams();
+            User user = getUserByAccount(queryParameters.findValue("account"));
+            validateUserPassword(queryParameters, user);
             log.info("user : " + user);
         }
         if (requestUri.isResourceFileRequest()) {
@@ -80,8 +81,8 @@ public class Http11Processor implements Runnable, Processor {
                 .orElseThrow(() -> new NoSuchUserException("존재하지 않는 회원입니다."));
     }
 
-    private static void validateUserPassword(final RequestUri requestUri, final User user) {
-        if (!user.checkPassword(requestUri.findQueryParamValue("password"))) {
+    private static void validateUserPassword(final QueryParameters queryParameters, final User user) {
+        if (!user.checkPassword(queryParameters.findValue("password"))) {
             throw new NoSuchUserException("비밀번호가 일치하지 않습니다.");
         }
     }

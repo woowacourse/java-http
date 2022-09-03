@@ -1,7 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.apache.coyote.http11.RequestUri;
 import org.junit.jupiter.api.Test;
@@ -33,22 +32,6 @@ class RequestUriTest {
     }
 
     @Test
-    void uri에서_queryParameter_값을_찾는다() {
-        // given
-        final String uri = "/login?account=gugu&password=password";
-
-        // when
-        final RequestUri requestUri = RequestUri.of(uri);
-
-        // then
-        assertAll(() -> {
-                    assertThat(requestUri.findQueryParamValue("account")).isEqualTo("gugu");
-                    assertThat(requestUri.findQueryParamValue("password")).isEqualTo("password");
-                }
-        );
-    }
-
-    @Test
     void uri에서_리소스_파일_path를_찾는다() {
         // given
         final String uri = "/login?account=gugu&password=password";
@@ -59,6 +42,4 @@ class RequestUriTest {
         // then
         assertThat(requestUri.getResourcePath()).isEqualTo("static/login.html");
     }
-
-
 }

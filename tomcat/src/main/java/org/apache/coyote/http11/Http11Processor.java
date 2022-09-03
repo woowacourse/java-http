@@ -45,6 +45,7 @@ public class Http11Processor implements Runnable, Processor {
         try {
             return mappedController.doService(httpRequest);
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
             return HttpResponse.found("/500.html");
         }
     }

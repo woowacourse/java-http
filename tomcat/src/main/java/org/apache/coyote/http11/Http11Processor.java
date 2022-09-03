@@ -5,7 +5,6 @@ import http.HttpRequest;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
@@ -34,11 +33,13 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-
-            final var httpRequest = parseRequest(inputStream);
-            final var request = BasicHttpRequest.from(httpRequest);
+        try (
+                final var inputStream = connection.getInputStream();
+                final var outputStream = connection.getOutputStream();
+                final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
+        ) {
+            final var httpMessage = parseRequest(bufferedReader);
+            final var request = BasicHttpRequest.from(httpMessage);
             final var contentType = request.getContentType();
 
             final var responseBody = getResponseBodyByURI(request);
@@ -51,10 +52,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseRequest(final InputStream inputStream) throws IOException {
+    private String parseRequest(final BufferedReader bufferedReader) throws IOException {
         final var request = new StringBuilder();
 
-        final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         while (bufferedReader.ready()) {
             request.append(String.format("%s%s", bufferedReader.readLine(), System.lineSeparator()));
         }

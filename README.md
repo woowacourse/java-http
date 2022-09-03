@@ -16,7 +16,7 @@
   - [x] CSS 지원 테스트
   - [x] js 지원 테스트
   - [x] 404 페이지 테스트 ( + NotFound 응답 메세지 )
-  - [ ] HttpRequest 잘 만들어지는지 테스트
+  - [x] HttpRequest 잘 만들어지는지 테스트
 
 ### 예외 처리하기
 - [ ] param에 값이 없는 경우 처리하기 (account=&passowrd=123)

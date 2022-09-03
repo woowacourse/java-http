@@ -1,6 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +12,8 @@ import org.junit.jupiter.api.Test;
 public class HttpRequestTest {
 
     @Test
-    @DisplayName("HttpRequest는 주어진 Query Param을 파싱한다.")
-    void parseQueryParam() {
+    @DisplayName("HttpRequest는 주어진 HttpRequest String을 파싱하고 관리한다.")
+    void httpRequest() {
         // given
         final List<String> rawHttpRequest = new ArrayList<>(
                 List.of("GET /login?account=roma&password=password HTTP/1.1 ",
@@ -25,7 +26,10 @@ public class HttpRequestTest {
         final HttpRequest request = HttpRequest.from(rawHttpRequest);
 
         // then
-        assertThat(request.getParam("account")).isEqualTo("roma");
-        assertThat(request.getParam("password")).isEqualTo("password");
+        assertAll(
+                () -> assertThat(request.getPath()).isEqualTo("/login"),
+                () -> assertThat(request.getParam("account")).isEqualTo("roma"),
+                () -> assertThat(request.getParam("password")).isEqualTo("password")
+        );
     }
 }

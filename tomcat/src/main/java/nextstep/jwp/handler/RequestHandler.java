@@ -25,7 +25,7 @@ public class RequestHandler {
         try {
             return findByUri(httpRequest);
         } catch (RuntimeException e) {
-            return HttpResponse.createBody(HttpStatus.INTERNAL_SERVER_ERROR,
+            return HttpResponse.create(HttpStatus.INTERNAL_SERVER_ERROR, httpRequest.getRequestHeaders(),
                 StaticResourceUtil.findByPathWithExtension("/", "500.html"));
         }
     }
@@ -33,7 +33,7 @@ public class RequestHandler {
     private static HttpResponse findByUri(final HttpRequest httpRequest) throws IOException {
         if ("/".equals(httpRequest.getRequestUri())) {
             if (GET.name().equals(httpRequest.getRequestMethod())) {
-                return HttpResponse.createBody(HttpStatus.OK, new StaticResource(new Content("Hello world!"), TEXT_HTML));
+                return HttpResponse.create(HttpStatus.OK, httpRequest.getRequestHeaders(), new StaticResource(new Content("Hello world!"), TEXT_HTML));
             }
         }
 
@@ -45,16 +45,16 @@ public class RequestHandler {
                         .orElseThrow(NotFoundUserException::new);
                     validateCheckPassword(user, httpRequest.getQueryParameterValue("password"));
                     log.info("user : {}", user);
-                    return HttpResponse.createBody(HttpStatus.OK, StaticResourceUtil.findByPathWithExtension("/login", ".html"));
+                    return HttpResponse.create(HttpStatus.OK, httpRequest.getRequestHeaders(), StaticResourceUtil.findByPathWithExtension("/login", ".html"));
                 } catch (NotFoundUserException e) {
-                    return HttpResponse.createBody(HttpStatus.UNAUTHORIZED,
+                    return HttpResponse.create(HttpStatus.UNAUTHORIZED, httpRequest.getRequestHeaders(),
                         StaticResourceUtil.findByPathWithExtension("/", "401.html"));
                 }
             }
         }
 
         StaticResource staticResource = StaticResourceUtil.findByPath(httpRequest.getRequestUri());
-        return HttpResponse.createBody(HttpStatus.OK, staticResource);
+        return HttpResponse.create(HttpStatus.OK, httpRequest.getRequestHeaders(), staticResource);
     }
 
     private static void validateCheckPassword(final User user, final String password) {

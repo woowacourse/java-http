@@ -7,7 +7,7 @@ import java.util.Map;
 import nextstep.jwp.exception.InvalidRequestHeaderException;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.request.RequestBody;
-import nextstep.jwp.http.request.RequestHeaders;
+import nextstep.jwp.http.common.HttpHeaders;
 import nextstep.jwp.http.request.RequestLine;
 
 public class HttpRequestFactory {
@@ -20,7 +20,7 @@ public class HttpRequestFactory {
 
     public static HttpRequest create(final BufferedReader bufferedReader) throws IOException {
         RequestLine requestLine = RequestLine.create(bufferedReader.readLine());
-        RequestHeaders requestHeaders = new RequestHeaders(
+        HttpHeaders requestHeaders = new HttpHeaders(
             parseRequestHeadersValue(bufferedReader));
         RequestBody requestBody = parseRequestBodyValue(bufferedReader, requestHeaders);
 
@@ -61,7 +61,7 @@ public class HttpRequestFactory {
     }
 
     private static RequestBody parseRequestBodyValue(final BufferedReader bufferedReader,
-                                                     final RequestHeaders requestHeaders)
+                                                     final HttpHeaders requestHeaders)
         throws IOException {
 
         int contentLength = requestHeaders.getContentLength();

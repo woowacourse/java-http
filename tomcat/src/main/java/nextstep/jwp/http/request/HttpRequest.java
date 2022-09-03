@@ -1,15 +1,16 @@
 package nextstep.jwp.http.request;
 
 import java.util.Map;
+import nextstep.jwp.http.common.HttpHeaders;
 
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final RequestHeaders requestHeaders;
+    private final HttpHeaders requestHeaders;
     private final RequestBody requestBody;
 
     public HttpRequest(final RequestLine requestLine,
-                       final RequestHeaders requestHeaders,
+                       final HttpHeaders requestHeaders,
                        final RequestBody requestBody) {
         this.requestLine = requestLine;
         this.requestHeaders = requestHeaders;
@@ -40,7 +41,7 @@ public class HttpRequest {
         return requestLine;
     }
 
-    public RequestHeaders getRequestHeaders() {
+    public HttpHeaders getRequestHeaders() {
         return requestHeaders;
     }
 

@@ -2,7 +2,6 @@ package org.apache.coyote.http11.request.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.coyote.http11.request.model.HttpMethod;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -23,5 +22,4 @@ class HttpMethodTest {
 
         assertThat(httpMethod.isGet()).isTrue();
     }
-
 }

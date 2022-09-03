@@ -13,11 +13,11 @@ public class HttpRequest {
     private static final int QUERY_PRAM_KEY_INDEX = 0;
     private static final int QUERY_PARAM_VALUE_INDEX = 1;
 
-    private final String path;
+    private final String requestTarget;
     private final Map<String, String> queryParams;
 
-    private HttpRequest(final String path, final Map<String, String> queryParams) {
-        this.path = path;
+    private HttpRequest(final String requestTarget, final Map<String, String> queryParams) {
+        this.requestTarget = requestTarget;
         this.queryParams = queryParams;
     }
 
@@ -40,7 +40,10 @@ public class HttpRequest {
         if (existQueryParams(path)) {
             return queryParams;
         }
+        return splitQueryParams(path, queryParams);
+    }
 
+    private static Map<String, String> splitQueryParams(final String path, final Map<String, String> queryParams) {
         String[] queryString = getQueryString(path);
         for (String param : queryString) {
             String[] paramsInfo = param.split(QUERY_PRAM_VALUE_DELIMITER);
@@ -58,8 +61,8 @@ public class HttpRequest {
         return !path.contains(EXIST_QUERY_PARAMS);
     }
 
-    public String getPath() {
-        return path;
+    public String getRequestTarget() {
+        return requestTarget;
     }
 
     public Map<String, String> getQueryParams() {

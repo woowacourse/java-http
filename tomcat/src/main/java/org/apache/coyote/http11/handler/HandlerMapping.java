@@ -9,7 +9,8 @@ public enum HandlerMapping {
 
     LOGIN("/login", LoginHandler::new),
     INDEX("/index.html", IndexHandler::new),
-    HOME("/", HomeHandler::new);
+    HOME("/", HomeHandler::new),
+    ;
 
     private final String path;
     private final Function<HttpRequest, Handler> expression;
@@ -20,19 +21,20 @@ public enum HandlerMapping {
     }
 
     public static Handler findHandler(final HttpRequest httpRequest) {
-        String path = httpRequest.getPath();
+        String path = httpRequest.getRequestTarget();
         return Arrays.stream(values())
                 .filter(matchHandler(path))
                 .findAny()
                 .map(mapToHandler(httpRequest))
-                .orElse(new ResourceHandler(httpRequest));
-    }
-
-    private static Function<HandlerMapping, Handler> mapToHandler(final HttpRequest httpRequest) {
-        return i -> i.expression.apply(httpRequest);
+                .orElseGet(() -> new ResourceHandler(httpRequest));
     }
 
     private static Predicate<HandlerMapping> matchHandler(final String path) {
-        return i -> path.equals(i.path);
+        return handlerMapping -> path.equals(handlerMapping.path);
+    }
+
+    private static Function<HandlerMapping, Handler> mapToHandler(final HttpRequest httpRequest) {
+        return handlerMapping -> handlerMapping.expression
+                .apply(httpRequest);
     }
 }

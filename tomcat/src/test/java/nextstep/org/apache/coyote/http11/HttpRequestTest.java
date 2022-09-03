@@ -9,21 +9,6 @@ import org.junit.jupiter.api.Test;
 class HttpRequestTest {
 
     @Test
-    void http_request에서_requestUri를_추출한다() {
-        // given
-        final List<String> request = List.of(
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ");
-
-        // when
-        final HttpRequest httpRequest = HttpRequest.of(request);
-
-        // then
-        assertThat(httpRequest.extractRequestUri().getUri()).isEqualTo("/login?account=gugu&password=password");
-    }
-
-    @Test
     void http_request_header에_Accept가_없다면_contentType은_html이다() {
         // given
         final List<String> request = List.of(

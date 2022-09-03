@@ -8,16 +8,17 @@ public class HttpRequest {
 
     private static final String DEFAULT_CONTENT_TYPE = "text/html";
 
-    private final String startLine;
+    private final RequestUri requestUri;
     private final Map<String, String> headers;
 
-    public HttpRequest(final String startLine, final Map<String, String> headers) {
-        this.startLine = startLine;
+    public HttpRequest(final RequestUri requestUri, final Map<String, String> headers) {
+        this.requestUri = requestUri;
         this.headers = headers;
     }
 
     public static HttpRequest of(List<String> inputs) {
-        return new HttpRequest(inputs.get(0), parseHeaders(inputs));
+        String startLine = inputs.get(0);
+        return new HttpRequest(RequestUri.of(startLine.split(" ")[1]), parseHeaders(inputs));
     }
 
     private static Map<String, String> parseHeaders(final List<String> inputs) {
@@ -34,8 +35,7 @@ public class HttpRequest {
         return accept.split(",")[0];
     }
 
-    public RequestUri extractRequestUri() {
-        String uri = startLine.split(" ")[1];
-        return RequestUri.of(uri);
+    public RequestUri getRequestUri() {
+        return requestUri;
     }
 }

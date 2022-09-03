@@ -34,10 +34,6 @@ public class RequestUri {
         return !queryParams.isEmpty();
     }
 
-    public String getUri() {
-        return uri;
-    }
-
     public String getResourcePath() {
         return resourcePath;
     }

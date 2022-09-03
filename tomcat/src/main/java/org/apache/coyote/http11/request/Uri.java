@@ -25,4 +25,8 @@ public class Uri {
     public String getPath() {
         return path;
     }
+
+    public Params getParams() {
+        return params;
+    }
 }

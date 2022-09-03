@@ -13,7 +13,7 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.ContentType;
 import org.apache.coyote.Processor;
 import org.apache.coyote.QueryParams;
-import org.apache.coyote.exception.InvalidLoginFormantException;
+import org.apache.coyote.exception.InvalidLoginFomratException;
 import org.apache.coyote.exception.InvalidPasswordException;
 import org.apache.coyote.exception.MemberNotFoundException;
 import org.apache.coyote.support.ResourcesUtil;
@@ -98,7 +98,7 @@ public class Http11Processor implements Runnable, Processor {
         String account = queryParams.get("account");
         String password = queryParams.get("password");
         if (Objects.isNull(account) || Objects.isNull(password)) {
-            throw new InvalidLoginFormantException();
+            throw new InvalidLoginFomratException();
         }
         User user = findUser(account);
         checkPassword(password, user);

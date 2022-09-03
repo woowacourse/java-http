@@ -13,7 +13,7 @@ import java.nio.file.Files;
 import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.exception.InvalidLoginFormantException;
+import org.apache.coyote.exception.InvalidLoginFomratException;
 import org.apache.coyote.exception.InvalidPasswordException;
 import org.apache.coyote.exception.MemberNotFoundException;
 import org.apache.coyote.http11.Http11Processor;
@@ -253,6 +253,6 @@ class Http11ProcessorTest {
 
         // when, then
         assertThatThrownBy(() -> processor.process(socket))
-                .isExactlyInstanceOf(InvalidLoginFormantException.class);
+                .isExactlyInstanceOf(InvalidLoginFomratException.class);
     }
 }

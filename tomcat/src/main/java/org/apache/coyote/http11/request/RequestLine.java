@@ -7,11 +7,11 @@ public class RequestLine {
 	private static final int RESOURCE = 1;
 	private static final int HTTP_VERSION = 2;
 
-	private final String method;
+	private final Method method;
 	private final String resource;
 	private final String httpVersion;
 
-	private RequestLine(final String method, final String resource, final String httpVersion) {
+	private RequestLine(final Method method, final String resource, final String httpVersion) {
 		this.method = method;
 		this.resource = resource;
 		this.httpVersion = httpVersion;
@@ -21,7 +21,7 @@ public class RequestLine {
 		final String[] requestLineElement = requestLine.split(MESSAGE_DELIMITER);
 
 		return new RequestLine(
-			requestLineElement[METHOD], requestLineElement[RESOURCE], requestLineElement[HTTP_VERSION]
+			Method.findBy(requestLineElement[METHOD]), requestLineElement[RESOURCE], requestLineElement[HTTP_VERSION]
 		);
 	}
 }

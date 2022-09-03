@@ -1,0 +1,37 @@
+package org.apache.coyote.request;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.apache.coyote.support.HttpException;
+import org.apache.coyote.support.HttpStatus;
+
+public class RequestHeaders {
+
+    private static final String HEADER_DELIMITER = ": ";
+    private static final int HEADER_LINE_ELEMENT_COUNT = 2;
+
+    private final Map<String, String> headers;
+
+    private RequestHeaders(Map<String, String> headers) {
+        this.headers = headers;
+    }
+
+    public static RequestHeaders of(List<String> headerLines) {
+        Map<String, String> headers = new HashMap<>();
+        for (String line : headerLines) {
+            addValidHeader(headers, line);
+        }
+        return new RequestHeaders(headers);
+    }
+
+    private static void addValidHeader(Map<String, String> headers, String line) {
+        final var elements = line.split(HEADER_DELIMITER);
+        if (elements.length != HEADER_LINE_ELEMENT_COUNT) {
+            throw new HttpException(HttpStatus.BAD_REQUEST);
+        }
+        final var key = elements[0];
+        final var value = elements[1];
+        headers.put(key, value);
+    }
+}

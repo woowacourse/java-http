@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 class HttpRequestTest {
 
     @Test
-    void generateHttpRequest() {
+    void http_request에서_requestUri를_추출한다() {
         // given
         final List<String> request = List.of(
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -24,7 +24,7 @@ class HttpRequestTest {
     }
 
     @Test
-    void findContentTypeOfDefault() {
+    void http_request_header에_Accept가_없다면_contentType은_html이다() {
         // given
         final List<String> request = List.of(
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -39,7 +39,7 @@ class HttpRequestTest {
     }
 
     @Test
-    void findContentTypeOfNotDefault() {
+    void http_request_header에서_contentType을_찾는다() {
         // given
         final List<String> request = List.of(
                 "GET /css/styles.css HTTP/1.1",

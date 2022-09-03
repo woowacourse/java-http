@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 class RequestUriTest {
 
     @Test
-    void hasQueryParamsFalse() {
+    void queryParameter가_없으면_false를_반환한다() {
         // given
         final String uri = "/index.html";
 
@@ -21,7 +21,7 @@ class RequestUriTest {
     }
 
     @Test
-    void hasQueryParamsTrue() {
+    void queryParameter가_있으면_true를_반환한다() {
         // given
         final String uri = "/login?account=gugu&password=password";
 
@@ -33,7 +33,7 @@ class RequestUriTest {
     }
 
     @Test
-    void parseQueryParams() {
+    void uri에서_queryParameter_값을_찾는다() {
         // given
         final String uri = "/login?account=gugu&password=password";
 
@@ -49,7 +49,7 @@ class RequestUriTest {
     }
 
     @Test
-    void parseResourcePath() {
+    void uri에서_리소스_파일_path를_찾는다() {
         // given
         final String uri = "/login?account=gugu&password=password";
 

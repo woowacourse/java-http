@@ -1,46 +1,131 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.util.Optional;
+
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.FileNotFoundException;
+import org.apache.coyote.http11.http.ContentType;
+import org.apache.coyote.http11.http.HttpHeader;
+import org.apache.coyote.http11.http.HttpMethod;
+import org.apache.coyote.http11.http.HttpRequest;
+import org.apache.coyote.http11.http.HttpResponse;
+import org.apache.coyote.http11.http.StatusCode;
+import org.apache.coyote.http11.util.StaticResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+	private static final String UNAUTHORIZED_HTML = "401.html";
+	private static final String NOT_FOUND_HTML = "404.html";
+	private static final String LOGIN_HTML = "login.html";
+	private static final String REGISTER_HTML = "register.html";
+	private static final String INDEX_HTML = "index.html";
 
-    private final Socket connection;
+	private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    public Http11Processor(final Socket connection) {
-        this.connection = connection;
-    }
+	private final Socket connection;
 
-    @Override
-    public void run() {
-        process(connection);
-    }
+	public Http11Processor(final Socket connection) {
+		this.connection = connection;
+	}
 
-    @Override
-    public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+	@Override
+	public void run() {
+		process(connection);
+	}
 
-            final var responseBody = "Hello world!";
+	@Override
+	public void process(final Socket connection) {
+		try (final var inputStream = connection.getInputStream();
+			 final var outputStream = connection.getOutputStream();
+			 final var requestReader = new BufferedReader(new InputStreamReader(inputStream))
+		) {
+			HttpRequest request = new HttpRequest(requestReader);
+			log.info("REQUEST \r\n{}", request);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+			final var response = handleHttpRequest(request);
+			log.info("RESPONSE \r\n{}", response);
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
+			outputStream.write(response.getBytes());
+			outputStream.flush();
+		} catch (IOException | UncheckedServletException e) {
+			log.error(e.getMessage(), e);
+		}
+	}
+
+	private HttpResponse handleHttpRequest(HttpRequest httpRequest) throws IOException {
+		if (httpRequest.isStaticResourceRequest()) {
+			return handleStaticRequest(httpRequest);
+		}
+		return handleApiRequest(httpRequest);
+	}
+
+	private HttpResponse handleStaticRequest(HttpRequest httpRequest) throws IOException {
+		try {
+			return HttpResponse.OK()
+				.responseBody(StaticResourceUtil.getContent(httpRequest.getUrl()))
+				.setHeader(HttpHeader.CONTENT_TYPE, httpRequest.getContentType().getFormat())
+				.build();
+		} catch (FileNotFoundException e) {
+			return responseErrorPage(NOT_FOUND_HTML, StatusCode.NOT_FOUND.value());
+		}
+	}
+
+	private HttpResponse handleApiRequest(HttpRequest httpRequest) throws IOException {
+		String requestUrl = httpRequest.getUrl();
+		if (requestUrl.equals("/")) {
+			return HttpResponse.OK()
+				.responseBody("Hello world!")
+				.setHeader(HttpHeader.CONTENT_TYPE, ContentType.HTML.getFormat())
+				.build();
+		}
+		if (HttpMethod.GET.equals(httpRequest.getMethod()) && requestUrl.startsWith("/login")) {
+			return HttpResponse.OK()
+				.responseBody(StaticResourceUtil.getContent(LOGIN_HTML))
+				.setHeader(HttpHeader.CONTENT_TYPE, ContentType.HTML.getFormat())
+				.build();
+		}
+		if (HttpMethod.POST.equals(httpRequest.getMethod()) && requestUrl.startsWith("/login")) {
+			return checkValidLogin(
+				httpRequest.getQueryString("account"),
+				httpRequest.getQueryString("password")
+			);
+		}
+		if (HttpMethod.GET.equals(httpRequest.getMethod()) && requestUrl.startsWith("/register")) {
+			return HttpResponse.OK()
+				.responseBody(StaticResourceUtil.getContent(REGISTER_HTML))
+				.setHeader(HttpHeader.CONTENT_TYPE, ContentType.HTML.getFormat())
+				.build();
+
+		}
+		return responseErrorPage(NOT_FOUND_HTML, StatusCode.NOT_FOUND.value());
+	}
+
+	private HttpResponse checkValidLogin(String account, String password) throws IOException {
+		Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
+		if (findUser.isPresent() && findUser.get().checkPassword(password)) {
+			return HttpResponse.FOUND()
+				.setHeader(HttpHeader.LOCATION, "/" + INDEX_HTML)
+				.build();
+		}
+		return responseErrorPage(UNAUTHORIZED_HTML, StatusCode.UNAUTHORIZED.value());
+	}
+
+	private HttpResponse responseErrorPage(String htmlPath, int statusCode) throws IOException {
+		String responseBody = StaticResourceUtil.getContent(htmlPath);
+		return HttpResponse.builder()
+			.statusCode(StatusCode.from(statusCode))
+			.responseBody(responseBody)
+			.setHeader(HttpHeader.CONTENT_TYPE, ContentType.HTML.getFormat())
+			.build();
+	}
 }

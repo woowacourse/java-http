@@ -80,6 +80,9 @@ public class Http11Processor implements Runnable, Processor {
             rawHttpRequest.add(line);
         }
 
+        log.info("============= HTTP REQUEST =============");
+        log.info(String.join("\n", rawHttpRequest));
+
         return rawHttpRequest;
     }
 

@@ -22,6 +22,13 @@ public enum Url {
         this.resourcePath = resourcePath;
     }
 
+    public static Url find(String url) {
+        return Arrays.stream(values())
+                .filter(value -> value.condition.test(url))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 페이지입니다."));
+    }
+
     public static Http11Response getResponseFrom(String url) {
         return Arrays.stream(values())
                 .filter(value -> value.condition.test(url))

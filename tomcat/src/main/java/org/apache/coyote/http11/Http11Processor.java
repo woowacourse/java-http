@@ -1,11 +1,9 @@
 package org.apache.coyote.http11;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import static org.apache.coyote.http11.Url.LOGIN;
+
 import java.io.IOException;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -37,30 +35,13 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final Http11Request request = Http11Request.of(inputStream);
-            String url = request.getRequestUrl();
-            String responseBody = "Hello world!";
-            String contentType = "html";
+            final String url = request.getRequestUrl();
             if (url == null) {
                 throw new IllegalArgumentException("잘못된 형식의 요청입니다.");
             }
+            final Http11Response response = Url.getResponseFrom(url);
 
-            if ("/".equals(url)) {
-                final var response = String.join("\r\n",
-                        "HTTP/1.1 200 OK ",
-                        "Content-Type: text/" + contentType + ";charset=utf-8 ",
-                        "Content-Length: " + responseBody.getBytes().length + " ",
-                        "",
-                        responseBody);
-
-                outputStream.write(response.getBytes());
-                outputStream.flush();
-                return;
-            }
-
-            String resourcePath = url;
-            if ("/login".equals(url.substring(0, 6))) {
-                resourcePath = "/login.html";
-
+            if (Url.find(url).equals(LOGIN)) {
                 int index = url.indexOf("?");
                 Map<String, String> queryStrings = new HashMap<>();
                 for (String querystring : url.substring(index + 1).split("&")) {
@@ -76,20 +57,9 @@ public class Http11Processor implements Runnable, Processor {
                 }
             }
 
-            final URL resource = getClass().getClassLoader().getResource("static" + resourcePath);
-            if (resource == null) {
-                throw new FileNotFoundException(resourcePath + " not found");
-            }
-            responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-            contentType = resourcePath.split("\\.")[1];
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/" + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            String responseContent = response.getOkResponse();
 
-            outputStream.write(response.getBytes());
+            outputStream.write(responseContent.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

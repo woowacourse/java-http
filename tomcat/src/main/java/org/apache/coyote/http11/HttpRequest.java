@@ -5,10 +5,6 @@ import org.apache.coyote.util.FileUtils;
 
 public class HttpRequest {
 
-    public static final int METHOD = 0;
-    public static final int URI = 1;
-    public static final int VERSION = 2;
-
     private final HttpMethod method;
     private final String uri;
     private final HttpVersion version;
@@ -17,15 +13,6 @@ public class HttpRequest {
         this.method = method;
         this.uri = uri;
         this.version = version;
-    }
-
-    public static HttpRequest of(final String startLine) {
-        return split(startLine);
-    }
-
-    private static HttpRequest split(final String line) {
-        String[] split = line.split(" ");
-        return new HttpRequest(HttpMethod.valueOf(split[METHOD]), split[URI], HttpVersion.of(split[VERSION]));
     }
 
     public boolean isGetMethod() {

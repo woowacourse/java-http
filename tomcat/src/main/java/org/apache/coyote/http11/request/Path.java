@@ -4,6 +4,9 @@ import java.util.Map;
 
 public class Path {
 
+    private static final String PATH_DELIMITER = "?";
+    private static final String EXTENSION_DELIMITER = ".";
+
     private final String resource;
     private final Extension extension;
     private final QueryParameter queryParameter;
@@ -15,11 +18,11 @@ public class Path {
     }
 
     public static Path from(String uri) {
-        if (!uri.contains("?")) {
+        if (!uri.contains(PATH_DELIMITER)) {
             return new Path(removeExtension(uri), Extension.from(uri), QueryParameter.from(null));
         }
 
-        int index = uri.indexOf("?");
+        int index = uri.indexOf(PATH_DELIMITER);
         String resource = uri.substring(0, index);
         String queryParameter = uri.substring(index + 1);
 
@@ -27,8 +30,8 @@ public class Path {
     }
 
     private static String removeExtension(String uri) {
-        if (uri.contains(".")) {
-            return uri.split("\\.")[0];
+        if (uri.contains(EXTENSION_DELIMITER)) {
+            return uri.split("\\" + EXTENSION_DELIMITER)[0];
         }
         return uri;
     }

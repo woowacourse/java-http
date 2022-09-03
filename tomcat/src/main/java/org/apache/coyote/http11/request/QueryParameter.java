@@ -5,6 +5,9 @@ import java.util.Map;
 
 public class QueryParameter {
 
+    private static final String QUERY_STRING_SEPARATOR = "&";
+    private static final String PARAMETER_DELIMITER = "=";
+
     private final Map<String, String> params;
 
     private QueryParameter(Map<String, String> params) {
@@ -17,10 +20,10 @@ public class QueryParameter {
         }
 
         Map<String, String> params = new HashMap<>();
-        final String[] split = query.split("&");
+        final String[] split = query.split(QUERY_STRING_SEPARATOR);
 
         for (String param : split) {
-            String[] splitParam = param.split("=");
+            String[] splitParam = param.split(PARAMETER_DELIMITER);
             final String key = splitParam[0];
             final String value = splitParam[1];
 

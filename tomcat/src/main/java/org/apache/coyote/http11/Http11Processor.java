@@ -67,6 +67,10 @@ public class Http11Processor implements Runnable, Processor {
             request.addHeader(splitHeader[REQUEST_HEADER_KEY_INDEX], splitHeader[RESPONSE_HEADER_KEY_INDEX]);
         }
 
+        while (bufferedReader.ready()) {
+            request.addBody(bufferedReader.readLine());
+        }
+
         return request;
     }
 

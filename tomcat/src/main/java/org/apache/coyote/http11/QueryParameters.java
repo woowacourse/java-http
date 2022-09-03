@@ -37,4 +37,8 @@ public class QueryParameters {
         Set<String> keySet = values.keySet();
         return keySet.containsAll(List.of(keys));
     }
+
+    public boolean isEmpty() {
+        return values.isEmpty();
+    }
 }

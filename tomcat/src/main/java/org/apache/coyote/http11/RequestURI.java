@@ -25,6 +25,10 @@ public class RequestURI {
         return queryParameters.findByQueryParameterKey(key);
     }
 
+    public boolean isQueryParametersEmpty() {
+        return queryParameters.isEmpty();
+    }
+
     public String getPath() {
         return path;
     }

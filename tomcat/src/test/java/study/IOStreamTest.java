@@ -81,7 +81,8 @@ class IOStreamTest {
         void InputStream은_사용하고_나서_close_처리를_해준다() throws IOException {
             final InputStream inputStream = mock(InputStream.class);
 
-            inputStream.close();
+            try (inputStream) {
+            }
 
             verify(inputStream, atLeastOnce()).close();
         }

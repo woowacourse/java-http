@@ -97,6 +97,7 @@ public class Http11Processor implements Runnable, Processor {
         String password = parsedQuery.get("password");
 
         User user = InMemoryUserRepository.findByAccount(account).get();
+        System.out.println(user);
 
         if (user.checkPassword(password)) {
             return HttpResponse.withLocation(

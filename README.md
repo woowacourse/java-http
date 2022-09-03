@@ -1,5 +1,10 @@
 # 톰캣 구현하기
 
+## 공식 문서 및 참고 사이트
+
+- [RFC 2616](https://www.rfc-editor.org/rfc/rfc2616)
+- [MDN HTTP](https://developer.mozilla.org/en-US/docs/Web/HTTP)
+
 ## 1단계 요구사항
 
 - [x] GET /index.html 응답하기

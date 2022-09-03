@@ -15,4 +15,12 @@ public class AuthController {
         final var password = parameters.get("password");
         return userService.findUser(account, password);
     }
+
+    public HttpResponse register(HttpRequest request) {
+        Parameters parameters = request.getParameters();
+        final var account = parameters.get("account");
+        final var password = parameters.get("password");
+        final var email = parameters.get("email");
+        return userService.saveUser(account, password, email);
+    }
 }

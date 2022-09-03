@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryUserRepository {
 
+    private static Long id = 1L;
     private static final Map<String, User> database = new ConcurrentHashMap<>();
 
     static {
@@ -15,8 +16,10 @@ public class InMemoryUserRepository {
         database.put(user.getAccount(), user);
     }
 
-    public static void save(User user) {
+    public static User save(User user) {
+        final var newUser = new User(++id, user.getAccount(), user.getPassword(), user.getEmail());
         database.put(user.getAccount(), user);
+        return newUser;
     }
 
     public static Optional<User> findByAccount(String account) {

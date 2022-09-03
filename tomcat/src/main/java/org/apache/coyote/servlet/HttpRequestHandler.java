@@ -16,7 +16,10 @@ public class HttpRequestHandler {
         if (request.isMethodOf(HttpMethod.GET)) {
             return resourceView.findStaticResource(request.getUri());
         }
-        if (request.getUri().startsWith("/login") && request.isMethodOf(HttpMethod.POST)) {
+        if (request.getUri().matches("/register") && request.isMethodOf(HttpMethod.POST)) {
+            return authController.register(request);
+        }
+        if (request.getUri().matches("/login") && request.isMethodOf(HttpMethod.POST)) {
             return authController.login(request);
         }
         throw new UnsupportedOperationException("Not implemented");

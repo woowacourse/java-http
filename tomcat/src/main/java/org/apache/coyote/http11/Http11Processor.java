@@ -41,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
             final var outputStream = connection.getOutputStream()) {
             final List<String> request = extractRequest(inputStream);
             HttpRequest httpRequest = HttpRequest.from(request.get(REQUEST_LINE_INDEX));
-            String responseBody = handler(httpRequest);
+            String responseBody = handle(httpRequest);
             outputStream.write(writeResponseOk(ContentType.from(httpRequest.getFileExtension()).getMediaType(), responseBody));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -61,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String handler(HttpRequest httpRequest) {
+    private String handle(HttpRequest httpRequest) {
         String path = httpRequest.getPath();
         if ("/".equals(path)) {
             return "Hello world!";

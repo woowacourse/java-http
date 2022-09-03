@@ -13,13 +13,16 @@ class HttpHeadersTest {
     @Test
     @DisplayName("HttpHeaders는 Http Header를 파싱하여 다루는 역할을 한다.")
     void getHeader() {
+        // given
         final List<String> raw = List.of(
                 "Host: localhost:8080 ",
                 "Connection: keep-alive "
         );
 
+        // when
         final HttpHeaders headers = HttpHeaders.from(raw);
 
+        // then
         assertAll(
                 () -> assertThat(headers.getHeader("Host")).isEqualTo("localhost:8080"),
                 () -> assertThat(headers.getHeader("Connection")).isEqualTo("keep-alive")
@@ -29,13 +32,16 @@ class HttpHeadersTest {
     @Test
     @DisplayName("HttpHeaders는 없는 Header로 조회시에 null을 반환한다.")
     void getHeaderNull() {
+        // given
         final List<String> raw = List.of(
                 "Host: localhost:8080 ",
                 "Connection: keep-alive "
         );
 
+        // when
         final HttpHeaders headers = HttpHeaders.from(raw);
 
+        // then
         assertThat(headers.getHeader("Cache")).isNull();
     }
 }

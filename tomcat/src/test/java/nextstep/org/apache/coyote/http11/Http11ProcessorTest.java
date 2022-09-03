@@ -59,6 +59,7 @@ class Http11ProcessorTest {
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
+        assertThat(socket.output()).isEqualTo(expected);
     }
 
     @DisplayName("css 경로로 요청시 요청한 css 파일의 본문을 응답한다.")
@@ -122,7 +123,6 @@ class Http11ProcessorTest {
     @DisplayName("요청한 정적 리소스 파일이 존재하지 않는 경우 404 NotFound 페이지를 출력하고 404 StatusCode를 반환한다.")
     @Test
     void notFound() throws IOException {
-
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /test.html HTTP/1.1 ",

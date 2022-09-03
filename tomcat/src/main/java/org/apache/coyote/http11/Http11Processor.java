@@ -10,7 +10,6 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
@@ -23,6 +22,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String LOGIN_REQUEST_URI = "/login";
     private static final String ROOT_REQUEST_URI = "/";
     private static final String QUERY_STRING_PREFIX = "?";
+    private static final String NOT_FOUND_MESSAGE = "404";
     private static final int FILE_NAME_INDEX = 1;
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
@@ -103,13 +103,16 @@ public class Http11Processor implements Runnable, Processor {
         if (resource.equals(ROOT_REQUEST_URI)) {
             return "Hello world!";
         }
-        return generateResponseBodyByFile(resource);
+        String generatedResponseBody = generateResponseBodyByFile(resource);
+        return generatedResponseBody;
     }
 
     private String generateResponseBodyByFile(String resource) throws IOException {
         URL url = getClass().getClassLoader().getResource("static" + resource);
-        String file = Objects.requireNonNull(url)
-                .getFile();
+        if (url == null) {
+            return NOT_FOUND_MESSAGE;
+        }
+        String file = url.getFile();
         Path path = new File(file).toPath();
         return Files.readString(path);
     }

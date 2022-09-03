@@ -44,8 +44,7 @@ public class Http11Processor implements Runnable, Processor {
             List<String> request = readRequest(bufferedReader);
             HttpRequest httpRequest = HttpRequest.of(request);
 
-            final String responseBody = getResponseBody(httpRequest.getRequestUri());
-            final String response = makeResponse(httpRequest.findContentType(), responseBody);
+            String response = makeResponse(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -61,6 +60,16 @@ public class Http11Processor implements Runnable, Processor {
             request.add(line);
         }
         return request;
+    }
+
+    private String makeResponse(final HttpRequest httpRequest) throws IOException {
+        String responseBody = getResponseBody(httpRequest.getRequestUri());
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + httpRequest.findContentType() + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 
     private String getResponseBody(final RequestUri requestUri) throws IOException {
@@ -90,15 +99,6 @@ public class Http11Processor implements Runnable, Processor {
     private String readResourceFile(final String resourcePath) throws IOException {
         final URL url = getClass().getClassLoader().getResource(resourcePath);
         final Path path = new File(url.getFile()).toPath();
-        return new String(Files.readAllBytes(path));
-    }
-
-    private String makeResponse(final String contentType, final String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        return Files.readString(path);
     }
 }

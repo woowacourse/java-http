@@ -26,7 +26,7 @@ public class ServletImpl implements Servlet {
 
     @Override
     public String doService(String input) {
-        HttpRequest request = new HttpRequest(input);
+        HttpRequest request = HttpRequest.of(input);
         ResponseEntity entity;
         try {
             entity = handlerMapping.map(request);

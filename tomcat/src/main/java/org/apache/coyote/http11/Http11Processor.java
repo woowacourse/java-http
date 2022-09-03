@@ -20,7 +20,7 @@ import servlet.ServletImpl;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger LOG = LoggerFactory.getLogger(Http11Processor.class);
-    private static final Servlet SERVLET = new ServletImpl();
+    private final Servlet servlet = new ServletImpl();
 
     private final Socket connection;
 
@@ -40,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             String request = readRequest(reader);
-            String response = SERVLET.doService(request);
+            String response = servlet.doService(request);
             logIO(request, response);
 
             outputStream.write(response.getBytes());

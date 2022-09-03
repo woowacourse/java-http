@@ -17,8 +17,8 @@ public class HttpRequest {
     }
 
     public static HttpRequest of(List<String> inputs) {
-        String startLine = inputs.get(0);
-        return new HttpRequest(RequestUri.of(startLine.split(" ")[1]), parseHeaders(inputs));
+        String requestLine = inputs.get(0);
+        return new HttpRequest(RequestUri.of(requestLine.split(" ")[1]), parseHeaders(inputs));
     }
 
     private static Map<String, String> parseHeaders(final List<String> inputs) {

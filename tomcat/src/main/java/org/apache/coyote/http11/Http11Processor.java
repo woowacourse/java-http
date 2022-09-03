@@ -33,7 +33,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
     }
 
@@ -43,12 +43,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+    public void process(Socket connection) {
+        try (var inputStream = connection.getInputStream();
+             var outputStream = connection.getOutputStream()) {
 
-            final List<String> request = getRequest(inputStream);
-            final HttpRequest httpRequest = new HttpRequest(request);
+            List<String> request = getRequest(inputStream);
+            HttpRequest httpRequest = new HttpRequest(request);
 
             HttpResponse httpResponse = getResponse(httpRequest);
             String response = httpResponse.parseToString();
@@ -59,10 +59,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private List<String> getRequest(final InputStream inputStream) throws IOException {
-        final List<String> request = new ArrayList<>();
+    private List<String> getRequest(InputStream inputStream) throws IOException {
+        List<String> request = new ArrayList<>();
 
-        final BufferedReader reader = new BufferedReader(
+        BufferedReader reader = new BufferedReader(
                 new InputStreamReader(inputStream, Charset.forName(StandardCharsets.UTF_8.name())));
         String line = reader.readLine();
 
@@ -78,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
 
     public HttpResponse getResponse(HttpRequest httpRequest) throws IOException {
         if (httpRequest.getRequestUri().equals("/")) {
-            final String responseBody = "Hello world!";
+            String responseBody = "Hello world!";
             return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.HTML, responseBody);
         }
         if (httpRequest.getRequestUri().endsWith(".html")) {
@@ -87,28 +87,28 @@ public class Http11Processor implements Runnable, Processor {
                         httpRequest.getQueryStrings().get("account"));
                 user.ifPresent(value -> log.debug(value.toString()));
             }
-            final String responseBody = getResponseBody(httpRequest);
+            String responseBody = getResponseBody(httpRequest);
             return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.HTML, responseBody);
         }
         if (httpRequest.getRequestUri().endsWith(".css")) {
-            final String responseBody = getResponseBody(httpRequest);
+            String responseBody = getResponseBody(httpRequest);
             return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.CSS, responseBody);
 
         }
         if (httpRequest.getRequestUri().endsWith(".js")) {
-            final String responseBody = getResponseBody(httpRequest);
+            String responseBody = getResponseBody(httpRequest);
             return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.JAVASCRIPT,
                     responseBody);
         }
         return new HttpResponse(httpRequest.getProtocol(), HttpStatus.NOT_FOUND, ContentType.HTML, null);
     }
 
-    private String getResponseBody(final HttpRequest httpRequest) throws IOException {
-        final URL resourceURL = getClass().getClassLoader()
+    private String getResponseBody(HttpRequest httpRequest) throws IOException {
+        URL resourceURL = getClass().getClassLoader()
                 .getResource("static" + httpRequest.getRequestUri());
         try {
-            final File file = new File(Objects.requireNonNull(resourceURL).toURI());
-            final Path path = file.getAbsoluteFile().toPath();
+            File file = new File(Objects.requireNonNull(resourceURL).toURI());
+            Path path = file.getAbsoluteFile().toPath();
             return new String(Files.readAllBytes(path));
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);

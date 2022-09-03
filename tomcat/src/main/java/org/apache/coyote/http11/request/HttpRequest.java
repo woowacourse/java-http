@@ -11,7 +11,7 @@ public class HttpRequest {
     final private String protocol;
     final private Map<String, String> queryStrings = new HashMap<>();
 
-    public HttpRequest(final List<String> request) {
+    public HttpRequest(List<String> request) {
         String requestLine = request.get(0);
         String[] str = requestLine.split(" ");
         this.requestMethod = str[0];

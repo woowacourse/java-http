@@ -7,10 +7,10 @@ public class HttpResponse {
     final private ContentType contentType;
     final private String responseBody;
 
-    public HttpResponse(final String protocol,
-                        final HttpStatus status,
-                        final ContentType contentType,
-                        final String responseBody) {
+    public HttpResponse(String protocol,
+                        HttpStatus status,
+                        ContentType contentType,
+                        String responseBody) {
         this.protocol = protocol;
         this.status = status;
         this.contentType = contentType;

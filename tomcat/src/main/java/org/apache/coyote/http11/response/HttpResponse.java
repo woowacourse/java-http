@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Map;
+
+import org.apache.coyote.http11.KindOfContent;
+import org.apache.coyote.http11.UrlParser;
 
 public class HttpResponse {
 
@@ -19,32 +22,40 @@ public class HttpResponse {
 
 	private final UrlParser urlParser;
 	private final String contentType;
-	private final String responseBody;
+	private final String body;
 
-	public HttpResponse(final BufferedReader bufferedReader) throws IOException {
-		urlParser = parseRequestResource(bufferedReader);
-		contentType = selectContentType(urlParser.getResource());
-		responseBody = loadResourceContent(urlParser.getResource());
+	private HttpResponse(final UrlParser urlParser, final String contentType, final String body) {
+		this.urlParser = urlParser;
+		this.contentType = contentType;
+		this.body = body;
+	}
+
+	public static HttpResponse from(final BufferedReader bufferedReader) throws IOException {
+		final UrlParser urlParser = parseRequestResource(bufferedReader);
+		final String contentType = selectContentType(urlParser.getResource());
+		final String responseBody = loadResourceContent(urlParser.getResource());
+
+		return new HttpResponse(urlParser, contentType, responseBody);
 	}
 
 	public String createResponseMessage() {
 		return String.join("\r\n",
 			"HTTP/1.1 200 OK ",
 			"Content-Type: " + contentType + ";charset=utf-8 ",
-			"Content-Length: " + responseBody.getBytes().length + " ",
+			"Content-Length: " + body.getBytes().length + " ",
 			"",
-			responseBody);
+			body);
 	}
 
-	private UrlParser parseRequestResource(final BufferedReader bufferedReader) throws IOException {
+	private static UrlParser parseRequestResource(final BufferedReader bufferedReader) throws IOException {
 		final String firstLine = bufferedReader.readLine();
 		final String uri = firstLine.split(HTTP_MESSAGE_DELIMITER)[RESOURCE_LOCATION];
 
 		return new UrlParser(uri);
 	}
 
-	private String loadResourceContent(final String resource) {
-		final URL path = getClass().getClassLoader().getResource(STATIC_PATH + resource);
+	private static String loadResourceContent(final String resource) {
+		final URL path = HttpResponse.class.getClassLoader().getResource(STATIC_PATH + resource);
 
 		final String content;
 		try {
@@ -55,7 +66,7 @@ public class HttpResponse {
 		return content;
 	}
 
-	private String selectContentType(final String resource) {
+	private static String selectContentType(final String resource) {
 		if (resource.equals(ROOT_URI)) {
 			return KindOfContent.getDefaultContentType();
 		}

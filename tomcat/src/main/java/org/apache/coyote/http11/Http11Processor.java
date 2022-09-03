@@ -5,18 +5,15 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.Map;
-import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -40,7 +37,7 @@ public class Http11Processor implements Runnable, Processor {
              final var inputStreamReader = new InputStreamReader(inputStream);
              final var bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            final HttpResponse httpResponse = new HttpResponse(bufferedReader);
+            final HttpResponse httpResponse = HttpResponse.from(bufferedReader);
             final String responseMessage = httpResponse.createResponseMessage();
 
             printQueries(httpResponse);

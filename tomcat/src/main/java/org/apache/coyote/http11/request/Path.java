@@ -19,7 +19,7 @@ public class Path {
 
     public static Path from(String uri) {
         if (!uri.contains(PATH_DELIMITER)) {
-            return new Path(removeExtension(uri), Extension.from(uri), QueryParameter.from(null));
+            return new Path(removeExtension(uri), Extension.from(uri), QueryParameter.empty());
         }
 
         int index = uri.indexOf(PATH_DELIMITER);

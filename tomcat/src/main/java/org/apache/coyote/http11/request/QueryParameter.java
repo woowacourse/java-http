@@ -33,6 +33,10 @@ public class QueryParameter {
         return new QueryParameter(params);
     }
 
+    public static QueryParameter empty() {
+        return new QueryParameter(new HashMap<>());
+    }
+
     public Map<String, String> getParams() {
         return params;
     }

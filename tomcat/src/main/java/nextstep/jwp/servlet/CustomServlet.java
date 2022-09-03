@@ -3,7 +3,6 @@ package nextstep.jwp.servlet;
 import nextstep.jwp.controller.ErrorController;
 import nextstep.jwp.controller.GetController;
 import nextstep.jwp.controller.PostController;
-import nextstep.jwp.controller.ResourceController;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.service.UserService;
 import nextstep.jwp.support.ResourceRegistry;
@@ -22,7 +21,7 @@ public class CustomServlet implements Servlet {
         final var handlerMappings = HandlerMappings.of(
                 new GetController(resourceRegistry),
                 new PostController(new UserService(new InMemoryUserRepository())));
-        this.handlerMapper = new HandlerMapper(handlerMappings, new ResourceController(resourceRegistry));
+        this.handlerMapper = new HandlerMapper(handlerMappings, resourceRegistry);
         this.errorController = new ErrorController(resourceRegistry);
     }
 

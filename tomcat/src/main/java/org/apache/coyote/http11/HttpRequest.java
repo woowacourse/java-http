@@ -14,23 +14,23 @@ public class HttpRequest {
     private final String connection;
 
     public static HttpRequest from(BufferedReader reader) throws IOException {
-        String[] lines = reader.readLine().split(" ");
-        String method = lines[0];
-        String uri = lines[1];
-        String version = lines[2];
+        String[] firstLine = reader.readLine().split(" ");
+        String method = firstLine[0];
+        String uri = firstLine[1];
+        String version = firstLine[2];
 
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> headers = new HashMap<>();
 
-        String line = reader.readLine();
-        while (!line.isEmpty()) {
-            lines = line.split(" ");
-            map.put(lines[0], lines[1]);
-            line = reader.readLine();
+        String header = reader.readLine();
+        while (!header.isEmpty()) {
+            String[] parsedHeader = header.split(" ");
+            headers.put(parsedHeader[0], parsedHeader[1]);
+            header = reader.readLine();
         }
 
-        String host = map.getOrDefault("Host:", "");
-        String accept = map.getOrDefault("Accept:", "");
-        String connection = map.getOrDefault("Connection:", "");
+        String host = headers.getOrDefault("Host:", "");
+        String accept = headers.getOrDefault("Accept:", "");
+        String connection = headers.getOrDefault("Connection:", "");
 
         return new HttpRequest(method, uri, version, host, accept, connection);
     }

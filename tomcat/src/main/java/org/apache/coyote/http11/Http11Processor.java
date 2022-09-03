@@ -23,6 +23,8 @@ import nextstep.jwp.model.User;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final int QUERY_KEY_INDEX = 0;
+    private static final int QUERY_VALUE_INDEX = 1;
 
     private final Socket connection;
 
@@ -134,7 +136,7 @@ public class Http11Processor implements Runnable, Processor {
 
         for (String q : query.split("&")) {
             String[] parsedQuery = q.split("=");
-            queryMap.put(parsedQuery[0], parsedQuery[1]);
+            queryMap.put(parsedQuery[QUERY_KEY_INDEX], parsedQuery[QUERY_VALUE_INDEX]);
         }
 
         return queryMap;

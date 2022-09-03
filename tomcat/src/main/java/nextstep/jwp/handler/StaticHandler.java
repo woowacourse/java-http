@@ -1,4 +1,4 @@
-package nextstep.jwp.Handler;
+package nextstep.jwp.handler;
 
 import java.io.IOException;
 import java.nio.file.Files;

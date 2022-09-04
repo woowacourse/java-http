@@ -3,14 +3,15 @@ package org.apache.coyote.http11.httpmessage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import org.apache.coyote.http11.httpmessage.requestline.RequestLine;
 
 public class Request {
 
-    String requestLine;
-    Headers headers;
-    String body;
+    private final RequestLine requestLine;
+    private Headers headers;
+    private String body;
 
-    public Request(final String requestLine, final Headers headers) {
+    public Request(final RequestLine requestLine, final Headers headers) {
         this.requestLine = requestLine;
         this.headers = headers;
     }
@@ -21,17 +22,17 @@ public class Request {
         }
 
         final BufferedReader bufferedReader = new BufferedReader(new StringReader(requestMessage));
-        final String requestLine = bufferedReader.readLine();
+        final RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
         final Headers headers = new Headers(bufferedReader);
 
         return new Request(requestLine, headers);
     }
 
     public boolean isGetMethod() {
-        return requestLine.split(" ")[0].equals("GET");
+        return requestLine.isGetMethod();
     }
 
     public String getUri() {
-        return requestLine.split(" ")[1];
+        return requestLine.getRequestUri();
     }
 }

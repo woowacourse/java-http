@@ -2,11 +2,12 @@ package org.apache.coyote.http11.response;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Map;
 
 public class HttpResponse {
 
     private final HttpResponseLine line;
-    private final HashMap<String, String> header;
+    private final Map<String, String> header;
     private final String responseBody;
 
     public HttpResponse(final HttpStatus httpStatus, final String responseBody,

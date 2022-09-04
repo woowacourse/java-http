@@ -32,6 +32,10 @@ public class RequestUri {
         return !queryParams.isEmpty();
     }
 
+    public MediaType findMediaType() {
+        return MediaType.of(resourcePath);
+    }
+
     public String getResourcePath() {
         return resourcePath;
     }

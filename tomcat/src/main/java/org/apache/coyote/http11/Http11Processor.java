@@ -44,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
             List<String> request = readRequest(bufferedReader);
             HttpRequest httpRequest = HttpRequest.of(request);
 
-            String response = makeResponse(httpRequest);
+            String response = makeResponse(httpRequest.getRequestUri());
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -62,11 +62,11 @@ public class Http11Processor implements Runnable, Processor {
         return request;
     }
 
-    private String makeResponse(final HttpRequest httpRequest) throws IOException {
-        String responseBody = getResponseBody(httpRequest.getRequestUri());
+    private String makeResponse(final RequestUri requestUri) throws IOException {
+        String responseBody = getResponseBody(requestUri);
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: " + httpRequest.findContentType() + ";charset=utf-8 ",
+                "Content-Type: " + requestUri.findMediaType().getValue() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

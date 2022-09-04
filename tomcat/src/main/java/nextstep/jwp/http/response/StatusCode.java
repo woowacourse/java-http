@@ -4,8 +4,8 @@ public enum StatusCode {
 
     OK("200", "OK");
 
-    private String code;
-    private String message;
+    private final String code;
+    private final String message;
 
     StatusCode(final String code, final String message) {
         this.code = code;

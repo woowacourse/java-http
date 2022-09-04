@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.message.response;
 
+import static org.apache.coyote.http11.message.common.HttpHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http11.message.common.HttpHeader.CONTENT_TYPE;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.exception.DuplicateHeaderException;
@@ -66,19 +69,19 @@ public class HttpResponse {
 
         public Builder contentType(final ContentType contentType) {
             validateDuplicateHeader();
-            this.headers.put("Content-Type", contentType.getValue() + ";charset=utf-8");
+            this.headers.put(CONTENT_TYPE, contentType.getValue() + ";charset=utf-8");
             return this;
         }
 
         public Builder contentType(final String fileExtension) {
             validateDuplicateHeader();
-            this.headers.put("Content-Type", ContentType.from(fileExtension).getValue() + ";charset=utf-8");
+            this.headers.put(CONTENT_TYPE, ContentType.from(fileExtension).getValue() + ";charset=utf-8");
             return this;
         }
 
         public Builder body(final String body) {
             this.body = body;
-            this.headers.put("Content-Length", String.valueOf(body.getBytes().length));
+            this.headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
             return this;
         }
 
@@ -87,7 +90,7 @@ public class HttpResponse {
         }
 
         private void validateDuplicateHeader() {
-            if (this.headers.containsKey("Content-Type")) {
+            if (this.headers.containsKey(CONTENT_TYPE)) {
                 throw new DuplicateHeaderException();
             }
         }

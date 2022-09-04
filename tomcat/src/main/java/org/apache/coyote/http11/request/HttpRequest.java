@@ -63,6 +63,10 @@ public class HttpRequest {
         return HttpParser.parseQueryString(getBody());
     }
 
+    public boolean isSameMethod(final HttpMethod httpMethod) {
+        return this.startLine.isSameMethod(httpMethod);
+    }
+
     public RequestStartLine getStartLine() {
         return startLine;
     }

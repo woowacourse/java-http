@@ -18,10 +18,10 @@ public class RegisterController implements Controller {
 
     @Override
     public HttpResponse doService(final HttpRequest httpRequest) {
-        if (httpRequest.getMethod().equals(HttpMethod.GET)) {
+        if (httpRequest.isSameMethod(HttpMethod.GET)) {
             return show();
         }
-        if (httpRequest.getMethod().equals(HttpMethod.POST)) {
+        if (httpRequest.isSameMethod(HttpMethod.POST)) {
             return register(httpRequest.parseBodyQueryString());
         }
         return HttpResponse.found("/404.html");

@@ -40,6 +40,10 @@ public class RequestStartLine {
         return elements;
     }
 
+    public boolean isSameMethod(final HttpMethod httpMethod) {
+        return this.method.equals(httpMethod);
+    }
+
     public HttpMethod getMethod() {
         return method;
     }

@@ -10,7 +10,7 @@ public class IndexController implements Controller {
 
     @Override
     public HttpResponse doService(final HttpRequest httpRequest) {
-        if (httpRequest.getMethod().equals(HttpMethod.GET)) {
+        if (httpRequest.isSameMethod(HttpMethod.GET)) {
             return show();
         }
         return HttpResponse.found("/404.html");

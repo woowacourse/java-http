@@ -42,53 +42,74 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest httpRequest = HttpRequest.parse(readHttpRequest(bufferReader));
             RequestUri requestUri = httpRequest.getRequestUri();
 
-            if (requestUri.hasExtension()) { // 정적 파일 서빙
-                HttpResponse httpResponse = new HttpResponse.Builder()
-                        .contentType(requestUri.getExtension())
-                        .body(StaticFileUtil.readFile(requestUri.getPath()))
-                        .build();
-
-                writeHttpResponse(outputStream, httpResponse);
-            }
-
             if (requestUri.matches("/")) {
-                HttpResponse httpResponse = new HttpResponse.Builder()
-                        .contentType(ContentType.HTML)
-                        .body("Hello world!")
-                        .build();
-
-                writeHttpResponse(outputStream, httpResponse);
+                responseHelloWorld(outputStream);
+                return;
             }
 
             if (requestUri.matches("/login")) {
-                String account = requestUri.getQuery("account").orElse("");
-                String password = requestUri.getQuery("password").orElse("");
-
-                boolean loginSuccess = InMemoryUserRepository.findByAccount(account)
-                        .filter(user -> user.checkPassword(password))
-                        .isPresent();
-
-                if (loginSuccess) {
-                    HttpResponse httpResponse = new HttpResponse.Builder()
-                            .status(HttpStatus.FOUND)
-                            .header("Location", "/index.html")
-                            .build();
-
-                    writeHttpResponse(outputStream, httpResponse);
-                }
-
-                if (!loginSuccess) {
-                    HttpResponse httpResponse = new HttpResponse.Builder()
-                            .status(HttpStatus.FOUND)
-                            .header("Location", "/401.html")
-                            .build();
-
-                    writeHttpResponse(outputStream, httpResponse);
-                }
+                responseLogin(outputStream, requestUri);
+                return;
             }
+
+            responseStaticFiles(outputStream, requestUri);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private void responseHelloWorld(final OutputStream outputStream) throws IOException {
+        HttpResponse httpResponse = new HttpResponse.Builder()
+                .contentType(ContentType.HTML)
+                .body("Hello world!")
+                .build();
+
+        writeHttpResponse(outputStream, httpResponse);
+    }
+
+    private void responseLogin(final OutputStream outputStream, final RequestUri requestUri) throws IOException {
+        if (!requestUri.hasQuery()) {
+            HttpResponse httpResponse = new HttpResponse.Builder()
+                    .contentType(ContentType.HTML)
+                    .body(StaticFileUtil.readFile("/login.html"))
+                    .build();
+
+            writeHttpResponse(outputStream, httpResponse);
+            return;
+        }
+
+        String account = requestUri.getQuery("account").orElse("");
+        String password = requestUri.getQuery("password").orElse("");
+
+        boolean loginSuccess = InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password))
+                .isPresent();
+
+        if (!loginSuccess) {
+            HttpResponse httpResponse = new HttpResponse.Builder()
+                    .status(HttpStatus.FOUND)
+                    .header("Location", "/401.html")
+                    .build();
+
+            writeHttpResponse(outputStream, httpResponse);
+            return;
+        }
+
+        HttpResponse httpResponse = new HttpResponse.Builder()
+                .status(HttpStatus.FOUND)
+                .header("Location", "/index.html")
+                .build();
+
+        writeHttpResponse(outputStream, httpResponse);
+    }
+
+    private void responseStaticFiles(final OutputStream outputStream, final RequestUri requestUri) throws IOException {
+        HttpResponse httpResponse = new HttpResponse.Builder()
+                .contentType(requestUri.getExtension())
+                .body(StaticFileUtil.readFile(requestUri.getPath()))
+                .build();
+
+        writeHttpResponse(outputStream, httpResponse);
     }
 
     private String readHttpRequest(final BufferedReader bufferedReader) throws IOException {

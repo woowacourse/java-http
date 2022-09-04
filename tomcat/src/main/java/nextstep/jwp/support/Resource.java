@@ -1,10 +1,8 @@
 package nextstep.jwp.support;
 
-import javassist.NotFoundException;
 import nextstep.jwp.exception.FileAccessException;
+import nextstep.jwp.exception.NotFoundException;
 import org.apache.http.HttpMime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,15 +14,13 @@ import java.util.Objects;
 
 public class Resource {
 
-    private final Logger log = LoggerFactory.getLogger(Resource.class);
-
     private final String target;
 
     public Resource(final String target) {
         this.target = target;
     }
 
-    public String read() throws NotFoundException {
+    public String read() {
         final URL resource = getClass().getClassLoader().getResource("static" + target);
         if (Objects.isNull(resource)) {
             throw new NotFoundException("자원을 찾지 못했음 : " + target);
@@ -36,9 +32,8 @@ public class Resource {
         try {
             return new String(Files.readAllBytes(file.toPath()));
         } catch (IOException e) {
-            log.error(e.getMessage());
+            throw new FileAccessException();
         }
-        return null;
     }
 
     public HttpMime getContentType() throws NotFoundException {

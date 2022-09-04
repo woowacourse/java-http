@@ -1,8 +1,9 @@
 package org.apache.coyote.http11;
 
-import javassist.NotFoundException;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.exception.FileAccessException;
+import nextstep.jwp.exception.NotFoundException;
+import nextstep.jwp.exception.StreamException;
 import org.apache.coyote.Processor;
 import org.apache.http.HttpMethod;
 import org.apache.http.HttpStatus;
@@ -35,8 +36,9 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
+        final OutputStream outputStream = getOutputStream(connection);
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
+             outputStream;
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final RequestEntity requestEntity = extractRequestInfo(bufferedReader);
@@ -47,7 +49,15 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private RequestEntity extractRequestInfo(final BufferedReader bufferedReader) throws NotFoundException {
+    private OutputStream getOutputStream(final Socket connection) {
+        try {
+            return connection.getOutputStream();
+        } catch (IOException e) {
+            throw new StreamException();
+        }
+    }
+
+    private RequestEntity extractRequestInfo(final BufferedReader bufferedReader) {
         String line;
         while (!(line = readLine(bufferedReader)).isBlank()) {
             if (HttpMethod.isStartWithAny(line)) {

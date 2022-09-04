@@ -5,5 +5,5 @@ import org.apache.http.ResponseEntity;
 
 public interface Controller {
 
-    ResponseEntity execute(RequestEntity requestEntity) throws Exception;
+    ResponseEntity execute(RequestEntity requestEntity);
 }

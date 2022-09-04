@@ -19,7 +19,7 @@ public class LoginController implements Controller {
     private final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
-    public ResponseEntity execute(final RequestEntity requestEntity) throws Exception {
+    public ResponseEntity execute(final RequestEntity requestEntity) {
         final LoginRequest loginRequest = convert(requestEntity.getQueryString());
         final Optional<User> wrappedUser = InMemoryUserRepository.findByAccount(loginRequest.getAccount());
 

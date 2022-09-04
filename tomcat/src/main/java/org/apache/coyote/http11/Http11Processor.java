@@ -78,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
         if (!requestUri.contains(".")) {
             requestUri += ".html";
         }
-        URL resource = getClass().getClassLoader().getResource("static" + requestUri);
+        URL resource = getClass().getResource("static" + requestUri);
         Path filePath = new File(resource.getPath()).toPath();
         return String.join("\r\n", Files.readAllLines(filePath));
     }

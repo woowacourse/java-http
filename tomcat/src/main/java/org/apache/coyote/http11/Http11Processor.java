@@ -11,11 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
+import nextstep.jwp.service.UserService;
 import nextstep.jwp.util.ResourceLoader;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.QueryParams;
@@ -106,17 +105,7 @@ public class Http11Processor implements Runnable, Processor {
             throw new IllegalArgumentException("계정과 비밀번호를 입력하세요.");
         }
 
-        return loginService(queryParams.get("account"), queryParams.get("password"));
-    }
-
-    private Response loginService(final String account, final String password) {
-        final User user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new NotFoundException("계정을 찾을 수 없습니다."));
-
-        if (!user.checkPassword(password)) {
-            throw new UnauthorizedException("잘못된 비밀번호입니다.");
-        }
-
+        UserService.login(queryParams.get("account"), queryParams.get("password"));
         return new Response(ContentType.HTML, StatusCode.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
     }
 }

@@ -2,8 +2,8 @@ package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
@@ -18,10 +18,8 @@ class HttpUriTest {
         HttpUri httpUri = HttpUri.of(uri);
 
         // then
-        assertAll(
-                () -> assertThat(httpUri.getPath()).isEqualTo(uri),
-                () -> assertThat(httpUri.getQueryParams()).isEmpty()
-        );
+        assertThat(httpUri).extracting("path", "queryParams")
+                .containsExactly("/index.html", new HashMap<>());
     }
 
     @Test
@@ -33,11 +31,8 @@ class HttpUriTest {
         HttpUri httpUri = HttpUri.of(uri);
 
         // then
-        assertAll(
-                () -> assertThat(httpUri.getPath()).isEqualTo("/login"),
-                () -> assertThat(httpUri.getQueryParams()).usingRecursiveComparison()
-                        .isEqualTo(Map.of("account", "gugu", "password", "password"))
-        );
+        assertThat(httpUri).extracting("path", "queryParams")
+                .contains("/login", Map.of("account", "gugu", "password", "password"));
     }
 
     @Test

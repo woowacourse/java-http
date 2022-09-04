@@ -1,12 +1,12 @@
 package org.apache.coyote.http11.urihandler;
 
 import java.io.IOException;
-import java.util.Map;
 import org.apache.coyote.http11.UriResponse;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public interface UriHandler {
 
-    boolean canHandle(String uri);
+    boolean canHandle(HttpRequest httpRequest);
 
-    UriResponse getResponse(String path, Map<String, Object> parameters) throws IOException;
+    UriResponse getResponse(HttpRequest httpRequest) throws IOException;
 }

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class RequestLine {
 
@@ -28,16 +29,16 @@ public class RequestLine {
         );
     }
 
-    public HttpMethod getMethod() {
-        return method;
+    public boolean matchUri(Pattern uriPattern) {
+        return uri.match(uriPattern);
     }
 
-    public HttpUri getUri() {
-        return uri;
+    public String getPath() {
+        return uri.getPath();
     }
 
-    public Http11Version getHttpVersion() {
-        return httpVersion;
+    public Object getParameter(String key) {
+        return uri.getParameter(key);
     }
 
     @Override

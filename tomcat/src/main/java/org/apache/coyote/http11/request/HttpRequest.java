@@ -3,6 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class HttpRequest {
 
@@ -24,15 +25,18 @@ public class HttpRequest {
     }
 
     private static LinkedList<String> getLines(String request) {
-        return new LinkedList<>(Arrays.asList(request.split("\n")));
+        return new LinkedList<>(Arrays.asList(request.split("\r\n")));
+    }
+    public boolean matchUri(Pattern uriPattern) {
+        return requestLine.matchUri(uriPattern);
     }
 
-    public RequestLine getRequestLine() {
-        return requestLine;
+    public String getPath() {
+        return requestLine.getPath();
     }
 
-    public RequestHeader getRequestHeader() {
-        return requestHeader;
+    public Object getParameter(String key) {
+        return requestLine.getParameter(key);
     }
 
     @Override

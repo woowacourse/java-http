@@ -11,9 +11,9 @@ class HttpRequestTest {
     @Test
     void 요청을_읽고_RequestLine과_RequestHeader로_분리할_수_있다() {
         // given
-        String request = "GET /index.html HTTP/1.1\n"
-                + "Host: localhost:8080\n"
-                + "Connection: keep-alive\n";
+        String request = "GET /index.html HTTP/1.1\r\n"
+                + "Host: localhost:8080\r\n"
+                + "Connection: keep-alive\r\n";
 
         // when
         HttpRequest httpRequest = HttpRequest.of(request);

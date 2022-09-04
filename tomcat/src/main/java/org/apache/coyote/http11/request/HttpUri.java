@@ -1,9 +1,10 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class HttpUri {
 
@@ -53,12 +54,17 @@ public class HttpUri {
         return parameters;
     }
 
+    public boolean match(Pattern uriPattern) {
+        Matcher matcher = uriPattern.matcher(path);
+        return matcher.matches();
+    }
+
     public String getPath() {
         return path;
     }
 
-    public Map<String, Object> getQueryParams() {
-        return Collections.unmodifiableMap(queryParams);
+    public Object getParameter(String key) {
+        return queryParams.get(key);
     }
 
     @Override

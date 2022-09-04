@@ -3,10 +3,12 @@ package org.apache.coyote.http11.urihandler;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.UriResponse;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,16 +16,17 @@ public class LoginUriHandler extends DefaultUriHandler {
 
     private static final Logger log = LoggerFactory.getLogger(LoginUriHandler.class);
 
+    private static final Pattern LOGIN_URI_PATTERN = Pattern.compile("/login");
 
     @Override
-    public boolean canHandle(String uri) {
-        return "/login".equals(uri);
+    public boolean canHandle(HttpRequest httpRequest) {
+        return httpRequest.matchUri(LOGIN_URI_PATTERN);
     }
 
     @Override
-    public UriResponse getResponse(String path, Map<String, Object> parameters) throws IOException {
-        final String account = getParameter(parameters, "account");
-        final String password = getParameter(parameters, "password");
+    public UriResponse getResponse(HttpRequest httpRequest) throws IOException {
+        final String account = (String) httpRequest.getParameter("account");
+        final String password = (String) httpRequest.getParameter("password");
 
         final User user = findUser(account);
         validatePassword(user, password);
@@ -34,11 +37,6 @@ public class LoginUriHandler extends DefaultUriHandler {
         log.info(user.toString());
 
         return new UriResponse(responseBody, contentType);
-    }
-
-    private String getParameter(Map<String, Object> parameters, String parameter) {
-        String value = (String) parameters.get(parameter);
-        return Objects.requireNonNull(value);
     }
 
     private User findUser(String account) {

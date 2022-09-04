@@ -1,24 +1,23 @@
 package org.apache.coyote.http11.urihandler;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.UriResponse;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class FileUriHandler extends DefaultUriHandler {
 
     private static final Pattern FILE_URI_PATTERN = Pattern.compile("/.+\\.(html|css|js|ico)");
 
     @Override
-    public boolean canHandle(String uri) {
-        Matcher matcher = FILE_URI_PATTERN.matcher(uri);
-        return matcher.matches();
+    public boolean canHandle(HttpRequest httpRequest) {
+        return httpRequest.matchUri(FILE_URI_PATTERN);
     }
 
     @Override
-    public UriResponse getResponse(String path, Map<String, Object> parameters) throws IOException {
+    public UriResponse getResponse(HttpRequest httpRequest) throws IOException {
+        String path = httpRequest.getPath();
         String responseBody = getResponseBody("static" + path);
         String contentType = ContentType.of(getFileType(path));
 

@@ -4,9 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,8 +31,9 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            String uri = getUri(bufferedReader);
-            UriResponse uriResponse = HandlerManager.getUriResponse(uri);
+            HttpRequest httpRequest = getHttpRequest(bufferedReader);
+
+            UriResponse uriResponse = HandlerManager.getUriResponse(httpRequest);
 
             String http11Response = getHttp11Response(uriResponse);
 
@@ -43,10 +44,15 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getUri(BufferedReader bufferedReader) throws IOException {
-        String uriLine = bufferedReader.readLine();
-        Objects.requireNonNull(uriLine);
-        return uriLine.split(" ")[1];
+    private HttpRequest getHttpRequest(BufferedReader bufferedReader) throws IOException {
+        String line;
+        StringBuilder stringBuilder = new StringBuilder();
+        while ((line = bufferedReader.readLine()) != null && !line.equals("")) {
+            stringBuilder.append(line);
+            stringBuilder.append("\r\n");
+        }
+
+        return HttpRequest.of(stringBuilder.toString());
     }
 
     private String getHttp11Response(UriResponse uriResponse) {

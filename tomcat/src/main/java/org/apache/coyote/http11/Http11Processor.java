@@ -36,40 +36,20 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final HttpRequest request = new HttpRequest(inputStream);
-
             if (request.getUrl().getPath().endsWith("/login.html")) {
                 AuthController.login(request);
             }
 
-            final var response = getResponse(request);
+            final HttpResponse response = new HttpResponse(request, StatusCode.OK, getStaticResource(request));
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String getResponse(HttpRequest request) throws
-        IOException,
-        URISyntaxException {
-        final String responseBody = getResponseBody(request);
-        String contentType = "Content-Type: text/html;charset=utf-8 ";
-
-        if (request.containsHeader("Accept") && request.getHeaderValue("Accept").contains("text/css")) {
-            contentType = "Content-Type: text/css;";
-        }
-
-        return String.join("\r\n",
-            "HTTP/1.1 200 OK ",
-            contentType
-            ,
-            "Content-Length: " + responseBody.getBytes().length + " ",
-            "",
-            responseBody);
-    }
-
-    private String getResponseBody(HttpRequest request) throws IOException, URISyntaxException {
+    private String getStaticResource(HttpRequest request) throws IOException, URISyntaxException {
         final URL requestUrl = request.getUrl();
         if (requestUrl.getPath().equals("/")) {
             return "Hello world!";

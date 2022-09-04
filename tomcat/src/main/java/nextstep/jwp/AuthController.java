@@ -15,6 +15,10 @@ public class AuthController {
     }
 
     public static void login(HttpRequest request) {
+        if (!request.hasQuery()) {
+            return;
+        }
+
         final String account = request.getQueryValue("account");
         final String password = request.getQueryValue("password");
 

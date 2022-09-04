@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class HttpRequest {
 
     private static final String REQUEST_URI = "REQUEST URI";
@@ -107,7 +110,7 @@ public class HttpRequest {
         return resource;
     }
 
-    private boolean hasQuery() {
+    public boolean hasQuery() {
         return queryParams.hasQuery();
     }
 
@@ -115,11 +118,11 @@ public class HttpRequest {
         return headers.containsKey(headerName);
     }
 
-    public boolean hasQueryKey(String queryKey) {
-        return queryParams.containsKey(queryKey);
-    }
-
     public String getQueryValue(String queryKey) {
         return queryParams.getQueryValue(queryKey);
+    }
+
+    public String getHttpVersion() {
+        return getHeaderValue(HTTP_VERSION);
     }
 }

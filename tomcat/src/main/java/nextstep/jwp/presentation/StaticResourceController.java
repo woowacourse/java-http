@@ -12,6 +12,8 @@ public class StaticResourceController extends AbstractController {
     private static final String STATIC_PREFIX = "static";
     private static final String NOT_FOUND_PAGE = "static/404.html";
 
+    private static final String HTML_EXTENSION = ".html";
+
     private StaticResourceController() {
     }
 
@@ -40,7 +42,7 @@ public class StaticResourceController extends AbstractController {
     private static String getResourceName(final HttpRequest request) {
         String requestUri = request.getPath();
         if (!request.isResource()) {
-            requestUri += ".html";
+            requestUri += HTML_EXTENSION;
         }
 
         return STATIC_PREFIX + requestUri;

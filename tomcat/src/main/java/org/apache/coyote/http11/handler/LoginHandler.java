@@ -4,13 +4,14 @@ import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.handler.support.FileReader;
 import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.request.Method;
 import org.apache.coyote.http11.model.response.HttpResponse;
-import org.apache.coyote.http11.model.response.HttpResponseLine;
-import org.apache.coyote.http11.model.response.HttpStatusCode;
+import org.apache.coyote.http11.model.response.ResponseLine;
+import org.apache.coyote.http11.model.response.ResponseStatusCode;
 
 public class LoginHandler implements Handler {
 
@@ -26,22 +27,28 @@ public class LoginHandler implements Handler {
 
     @Override
     public String getResponse() {
-        HttpResponse httpResponse = getResourcePath(httpRequest);
+        HttpResponse httpResponse = getHttpResponse(httpRequest);
         return httpResponse.getResponse();
     }
 
-    private HttpResponse getResourcePath(HttpRequest httpRequest) {
+    private HttpResponse getHttpResponse(HttpRequest httpRequest) {
         if (httpRequest.matchRequestMethod(Method.GET)) {
-            return createHttpResponse(HttpStatusCode.OK, FileReader.getFile(LOGIN_RESOURCE_PATH, getClass()));
+            return createHttpResponse(ResponseStatusCode.OK, FileReader.getFile(LOGIN_RESOURCE_PATH, getClass()));
         }
         if (httpRequest.matchRequestMethod(Method.POST) && checkLogin(httpRequest.getBody())) {
-            return createHttpResponse(HttpStatusCode.OK, FileReader.getFile(INDEX_RESOURCE_PATH, getClass()));
+            HttpResponse httpResponse = createHttpResponse(ResponseStatusCode.OK,
+                    FileReader.getFile(INDEX_RESOURCE_PATH, getClass()));
+            if (!httpRequest.hasCookie()) {
+                httpResponse.addCookie(new Cookie());
+            }
+            return httpResponse;
         }
-        return createHttpResponse(HttpStatusCode.UNAUTHORIZED, FileReader.getFile(UNAUTHORIZED_RESOURCE_PATH, getClass()));
+        return createHttpResponse(ResponseStatusCode.UNAUTHORIZED,
+                FileReader.getFile(UNAUTHORIZED_RESOURCE_PATH, getClass()));
     }
 
-    private HttpResponse createHttpResponse(HttpStatusCode httpStatusCode, String resourcePath) {
-        HttpResponseLine responseLine = HttpResponseLine.of(httpStatusCode);
+    private HttpResponse createHttpResponse(ResponseStatusCode responseStatusCode, String resourcePath) {
+        ResponseLine responseLine = ResponseLine.of(responseStatusCode);
         return HttpResponse.of(responseLine, ContentType.HTML, resourcePath);
     }
 

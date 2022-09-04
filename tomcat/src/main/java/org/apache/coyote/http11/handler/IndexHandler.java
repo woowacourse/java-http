@@ -4,8 +4,8 @@ import org.apache.coyote.http11.handler.support.FileReader;
 import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.response.HttpResponse;
-import org.apache.coyote.http11.model.response.HttpResponseLine;
-import org.apache.coyote.http11.model.response.HttpStatusCode;
+import org.apache.coyote.http11.model.response.ResponseLine;
+import org.apache.coyote.http11.model.response.ResponseStatusCode;
 
 public class IndexHandler implements Handler {
 
@@ -17,7 +17,7 @@ public class IndexHandler implements Handler {
     @Override
     public String getResponse() {
         String responseBody = FileReader.getFile(INDEX_RESOURCE_PATH, getClass());
-        HttpResponseLine responseLine = HttpResponseLine.of(HttpStatusCode.OK);
+        ResponseLine responseLine = ResponseLine.of(ResponseStatusCode.OK);
         HttpResponse httpResponse = HttpResponse.of(responseLine, ContentType.HTML, responseBody);
         return httpResponse.getResponse();
     }

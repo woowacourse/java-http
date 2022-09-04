@@ -3,7 +3,7 @@ package org.apache.coyote.http11.model.request;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpRequestLine {
+public class RequestLine {
 
     private static final String EXIST_QUERY_PARAMS = "?";
     private static final String QUERY_PARAMS_DELIMITER = "&";
@@ -15,18 +15,18 @@ public class HttpRequestLine {
     private final String target;
     private final Map<String, String> params;
 
-    private HttpRequestLine(final Method method, final String target, final Map<String, String> params) {
+    private RequestLine(final Method method, final String target, final Map<String, String> params) {
         this.method = method;
         this.target = target;
         this.params = params;
     }
 
-    public static HttpRequestLine of(final String requestLine) {
+    public static RequestLine of(final String requestLine) {
         String[] splitRequestLine = requestLine.split(" ");
         Method method = Method.findMethod(splitRequestLine[0]);
         String target = createTarget(splitRequestLine[1]);
         Map<String, String> params = createParams(splitRequestLine[1]);
-        return new HttpRequestLine(method, target, params);
+        return new RequestLine(method, target, params);
     }
 
     private static String createTarget(final String input) {

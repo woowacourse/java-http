@@ -8,12 +8,12 @@ import java.util.stream.Collectors;
 
 public class HttpRequest {
 
-    private final HttpRequestLine requestLine;
-    private final HttpHeader headers;
-    private final HttpBody body;
+    private final RequestLine requestLine;
+    private final RequestHeader headers;
+    private final RequestBody body;
 
-    public HttpRequest(final HttpRequestLine requestLine, final HttpHeader headers,
-                       final HttpBody body) {
+    public HttpRequest(final RequestLine requestLine, final RequestHeader headers,
+                       final RequestBody body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
@@ -21,28 +21,28 @@ public class HttpRequest {
 
     public static HttpRequest from(final BufferedReader reader) {
         try {
-            HttpRequestLine requestLine = HttpRequestLine.of(reader.readLine());
-            HttpHeader headers = createHeaders(reader);
-            HttpBody body = createBody(reader, headers);
+            RequestLine requestLine = RequestLine.of(reader.readLine());
+            RequestHeader headers = createHeaders(reader);
+            RequestBody body = createBody(reader, headers);
             return new HttpRequest(requestLine, headers, body);
         } catch (Exception exception) {
             throw new IllegalArgumentException("Request에 생성 시, 문제가 발생했습니다.");
         }
     }
 
-    private static HttpHeader createHeaders(final BufferedReader reader) {
+    private static RequestHeader createHeaders(final BufferedReader reader) {
         List<String> input = reader.lines()
                 .takeWhile(readLine -> !"".equals(readLine))
                 .collect(Collectors.toList());
-        return HttpHeader.from(input);
+        return RequestHeader.from(input);
     }
 
-    private static HttpBody createBody(final BufferedReader reader, final HttpHeader headers)
+    private static RequestBody createBody(final BufferedReader reader, final RequestHeader headers)
             throws IOException {
         int contentLength = headers.getContentLength();
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
-        return HttpBody.from(new String(buffer));
+        return RequestBody.from(new String(buffer));
     }
 
     public Map<String, String> getQueryParams() {
@@ -64,5 +64,9 @@ public class HttpRequest {
 
     public boolean isEmptyQueryParams() {
         return requestLine.hasParams();
+    }
+
+    public boolean hasCookie() {
+        return headers.existHeader(RequestHeader.SET_COOKIE);
     }
 }

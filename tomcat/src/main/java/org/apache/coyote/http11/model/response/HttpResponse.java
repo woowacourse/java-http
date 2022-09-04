@@ -2,6 +2,8 @@ package org.apache.coyote.http11.model.response;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.model.ContentType;
 
 public class HttpResponse {
@@ -9,37 +11,48 @@ public class HttpResponse {
     private static final String HEADER_DELIMITER = ": ";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String SET_COOKIE = "Set-Cookie";
 
-    private final HttpResponseLine httpResponseLine;
+    private final ResponseLine responseLine;
     private final Map<String, String> headers;
     private final String body;
 
-    private HttpResponse(final HttpResponseLine httpResponseLine, final Map<String, String> headers,
+    private HttpResponse(final ResponseLine responseLine, final Map<String, String> headers,
                          final String body) {
-        this.httpResponseLine = httpResponseLine;
+        this.responseLine = responseLine;
         this.headers = headers;
         this.body = body;
     }
 
-    public static HttpResponse of(final HttpResponseLine httpResponseLine, final ContentType contentType,
+    public static HttpResponse of(final ResponseLine responseLine, final ContentType contentType,
                                   final String body) {
         Map<String, String> headers = initHeaders(contentType, body);
-        return new HttpResponse(httpResponseLine, headers, body);
+        return new HttpResponse(responseLine, headers, body);
     }
 
     private static Map<String, String> initHeaders(final ContentType contentType, final String body) {
         Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, contentType.getType());
+        headers.put(CONTENT_TYPE, contentType.getType() + ";charset=utf-8 ");
         headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
         return headers;
     }
 
+    public void addCookie(Cookie cookie) {
+        headers.put(SET_COOKIE, cookie.toString());
+    }
+
     public String getResponse() {
         return String.join("\r\n",
-                httpResponseLine.getResponseLine(),
-                CONTENT_TYPE + HEADER_DELIMITER + headers.get(CONTENT_TYPE) + ";charset=utf-8 ",
-                CONTENT_LENGTH + HEADER_DELIMITER + headers.get(CONTENT_LENGTH) + " ",
+                responseLine.getResponseLine(),
+                getHeadersToString(),
                 "",
                 this.body);
+    }
+
+    private String getHeadersToString() {
+        return headers.keySet()
+                .stream()
+                .map(key -> key + HEADER_DELIMITER + headers.get(key) + " ")
+                .collect(Collectors.joining());
     }
 }

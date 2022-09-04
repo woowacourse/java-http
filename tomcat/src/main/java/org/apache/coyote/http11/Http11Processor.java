@@ -71,17 +71,13 @@ public class Http11Processor implements Runnable, Processor {
         return lines;
     }
 
-    private String parseUri(final HttpRequest httpRequest) throws IOException {
-        String uri = httpRequest.getUri();
-
-        if (uri.equals(FAVICON_URI)) {
-            throw new FaviconNotFoundException();
-        }
+    private String parseUri(final HttpRequest httpRequest) {
+        final String uri = httpRequest.getUri();
 
         if (uri.contains(QUERY_STRING_PREFIX)) {
-            int index = uri.indexOf(QUERY_STRING_PREFIX);
-            String path = uri.substring(0, index);
-            String queryString = uri.substring(index + 1);
+            final int index = uri.indexOf(QUERY_STRING_PREFIX);
+            final String path = uri.substring(0, index);
+            final String queryString = uri.substring(index + 1);
             final QueryParameters queryParameters = QueryParameters.from(queryString);
             logUser(queryParameters);
 

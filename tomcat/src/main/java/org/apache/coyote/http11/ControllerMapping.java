@@ -1,10 +1,10 @@
 package org.apache.coyote.http11;
 
-import javassist.NotFoundException;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.GreetingController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.ResourceController;
+import nextstep.jwp.exception.NotFoundException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +20,7 @@ public class ControllerMapping {
         mapping.put("/login", new LoginController());
     }
 
-    public Controller getController(final String uri) throws NotFoundException {
+    public Controller getController(final String uri) {
         final Controller controller = mapping.get(uri);
         if (controller != null) {
             return controller;
@@ -32,11 +32,7 @@ public class ControllerMapping {
     }
 
     private boolean isResourceUri(final String uri) {
-        for (String resourceSuffix : resourceSuffixes) {
-            if (uri.endsWith(resourceSuffix)) {
-                return true;
-            }
-        }
-        return false;
+        return resourceSuffixes.stream()
+                .anyMatch(uri::endsWith);
     }
 }

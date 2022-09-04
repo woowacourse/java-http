@@ -10,7 +10,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Objects;
 
 public class Resource {
 
@@ -22,13 +21,18 @@ public class Resource {
 
     public String read() {
         final URL resource = getClass().getClassLoader().getResource("static" + target);
-        if (Objects.isNull(resource)) {
-            throw new NotFoundException("자원을 찾지 못했음 : " + target);
-        }
+        validateExist(resource);
         return read(new File(getUri(resource)));
     }
 
+    private void validateExist(final URL resource) {
+        if (resource == null) {
+            throw new NotFoundException("자원을 찾지 못했음 : " + target);
+        }
+    }
+
     private String read(final File file) {
+
         try {
             return new String(Files.readAllBytes(file.toPath()));
         } catch (IOException e) {
@@ -38,9 +42,7 @@ public class Resource {
 
     public HttpMime getContentType() throws NotFoundException {
         final URL resource = getClass().getClassLoader().getResource("static" + target);
-        if (Objects.isNull(resource)) {
-            throw new NotFoundException("자원을 찾지 못했음 : " + target);
-        }
+        validateExist(resource);
         final File file = new File(getUri(resource));
         return HttpMime.find(findOutContentType(file));
     }

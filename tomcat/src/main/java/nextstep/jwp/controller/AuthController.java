@@ -17,7 +17,7 @@ public class AuthController {
         this.userService = userService;
     }
 
-    @RequestMapping(method = HttpMethod.GET, path = "/login")
+    @RequestMapping(method = HttpMethod.GET, path = {"/login", "/login.html"})
     public ResponseEntity getLoginPage(HttpRequest request) {
         final var session = request.getSession();
         if (session.hasAttribute(Session.USER_ATTRIBUTE)) {

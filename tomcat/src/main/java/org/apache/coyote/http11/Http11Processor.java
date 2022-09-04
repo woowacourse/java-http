@@ -24,10 +24,12 @@ import java.util.Optional;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String QUERY_STRING_PREFIX = "?";
+    private static final String QUERY_STRING_PREFIX = "\\?";
     private static final String HTML_EXTENSION = ".html";
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
+    private static final int PATH_INDEX = 0;
+    private static final int QUERY_STRING_INDEX = 1;
 
     private final Socket connection;
 
@@ -73,9 +75,9 @@ public class Http11Processor implements Runnable, Processor {
         final String uri = httpRequest.getUri();
 
         if (uri.contains(QUERY_STRING_PREFIX)) {
-            final int index = uri.indexOf(QUERY_STRING_PREFIX);
-            final String path = uri.substring(0, index);
-            final String queryString = uri.substring(index + 1);
+            final String[] splitUri = uri.split(QUERY_STRING_PREFIX);
+            final String path = splitUri[PATH_INDEX];
+            final String queryString = splitUri[QUERY_STRING_INDEX];
             final QueryParameters queryParameters = QueryParameters.from(queryString);
             logUser(queryParameters);
 

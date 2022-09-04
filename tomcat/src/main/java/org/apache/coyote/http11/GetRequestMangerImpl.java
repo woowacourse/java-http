@@ -25,7 +25,7 @@ public class GetRequestMangerImpl implements RequestManager {
         String sessionId = httpCookie.generateJsessionId();
         String responseBody = HtmlLoader.generateFile(PREFIX + fileName.concat());
 
-        if (fileName.getPrefix().equals("/login") && sessionManager.isExistSession(sessionId)) {
+        if (fileName.getBaseName().equals("/login") && sessionManager.isExistSession(sessionId)) {
             responseBody = HtmlLoader.generateFile(POST_LOGIN_REDIRECT);
         }
 

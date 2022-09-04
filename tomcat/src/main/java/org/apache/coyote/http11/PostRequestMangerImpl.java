@@ -19,7 +19,7 @@ public class PostRequestMangerImpl implements RequestManager {
         FormData requestBody = requestParser.generateRequestBody();
         SessionManager sessionManager = new SessionManager();
 
-        if (fileName.getPrefix().equals("/login")) {
+        if (fileName.getBaseName().equals("/login")) {
             LoginService loginService = new LoginService();
             LoginResult loginResult = loginService.signIn(requestBody.get("account"), requestBody.get("password"));
 

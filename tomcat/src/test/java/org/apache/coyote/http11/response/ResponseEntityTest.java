@@ -1,8 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
+import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.ResponseEntity;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

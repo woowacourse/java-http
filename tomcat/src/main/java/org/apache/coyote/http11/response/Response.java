@@ -1,8 +1,4 @@
-package org.apache.coyote.http11;
-
-import org.apache.coyote.http11.response.General;
-import org.apache.coyote.http11.response.ResponseBody;
-import org.apache.coyote.http11.response.ResponseHeaders;
+package org.apache.coyote.http11.response;
 
 public class Response {
 

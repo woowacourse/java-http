@@ -1,17 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.net.URISyntaxException;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.AuthenticationException;
-import nextstep.jwp.exception.UserNotFoundException;
+import org.apache.coyote.http11.request.QueryParameters;
+import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.request.StartLine;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class RequestTest {

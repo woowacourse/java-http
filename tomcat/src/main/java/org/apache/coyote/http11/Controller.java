@@ -8,6 +8,11 @@ import nextstep.jwp.exception.AuthenticationException;
 import nextstep.jwp.exception.ResourceNotFoundException;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.request.Path;
+import org.apache.coyote.http11.request.QueryParameters;
+import org.apache.coyote.http11.request.Request;
+import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

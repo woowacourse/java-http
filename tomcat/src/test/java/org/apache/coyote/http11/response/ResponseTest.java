@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -7,6 +7,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.response.Response;
+import org.apache.coyote.http11.response.ResponseEntity;
 import org.junit.jupiter.api.Test;
 
 class ResponseTest {

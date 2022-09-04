@@ -1,7 +1,5 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.HttpStatus;
-
 public class General {
 
     private final HttpStatus httpStatus;

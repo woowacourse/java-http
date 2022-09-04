@@ -1,8 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
+import org.apache.coyote.http11.request.Path;
 import org.junit.jupiter.api.Test;
 
 class PathTest {

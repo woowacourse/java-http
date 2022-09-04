@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
 import nextstep.jwp.exception.ResourceNotFoundException;
-import org.apache.coyote.http11.ResponseEntity;
 
 public class ResponseBody {
 

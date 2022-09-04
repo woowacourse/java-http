@@ -34,6 +34,10 @@ public class HttpHeaders {
 			.ifPresent(header -> this.headers.put(header, value));
 	}
 
+	public void addHeader(HttpHeader httpHeader, String value) {
+		this.headers.put(httpHeader, value);
+	}
+
 	public List<HttpHeader> getHeaders() {
 		return new ArrayList<>(headers.keySet());
 	}

@@ -49,10 +49,6 @@ public class HttpRequest {
 		return new String(body);
 	}
 
-	public boolean isStaticResourceRequest() {
-		return url.contains(EXTENSION_DELIMITER);
-	}
-
 	public String getQueryString(String key) {
 		return requestParams.getOrDefault(key);
 	}

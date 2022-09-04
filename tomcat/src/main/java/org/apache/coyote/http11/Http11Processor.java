@@ -50,9 +50,9 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> queryParams = requestUri.getQueryParams();
 
             if (queryParams.containsKey("account")) {
-                Optional<User> account = InMemoryUserRepository.findByAccount(queryParams.get("account"));
-                if (account.isPresent()) {
-                    User user = account.get();
+                Optional<User> foundUser = InMemoryUserRepository.findByAccount(queryParams.get("account"));
+                if (foundUser.isPresent()) {
+                    User user = foundUser.get();
                     log.info("user = {}", user);
                 }
             }

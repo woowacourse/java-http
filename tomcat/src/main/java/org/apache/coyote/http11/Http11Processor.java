@@ -9,9 +9,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
+import nextstep.jwp.service.UserService;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
@@ -19,11 +18,14 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private final Logger log = LoggerFactory.getLogger(getClass());
+    private final Logger log;
     private final Socket connection;
+    private final UserService userService;
 
     public Http11Processor(final Socket connection) {
+        this.log = LoggerFactory.getLogger(getClass());
         this.connection = connection;
+        this.userService = new UserService();
     }
 
     @Override
@@ -62,21 +64,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private String createLoginResponse(final HttpRequest httpRequest) {
         if (httpRequest.containsQuery()) {
-            findUser(httpRequest);
+            userService.login(httpRequest);
         }
         final String responseBody = createResponseBody("/login.html");
         return createResponse(responseBody, ContentType.HTML);
-    }
-
-    private void findUser(final HttpRequest httpRequest) {
-        final String userAccount = httpRequest.findQueryValue("account");
-        final String userPassword = httpRequest.findQueryValue("password");
-
-        final User user = InMemoryUserRepository.findByAccount(userAccount)
-                .filter(it -> it.checkPassword(userPassword))
-                .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 유저입니다."));
-
-        log.info("user : {}", user);
     }
 
     private String createResponseBody(final String pathUri) {

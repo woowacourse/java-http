@@ -10,6 +10,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.exception.UnauthorizedException;
@@ -48,10 +49,6 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream()) {
 
             final List<String> requestLines = readRequestLines(reader);
-            if (requestLines.isEmpty()) {
-                return;
-            }
-
             final Request request = Request.from(requestLines);
             final String response = mapRequest(request).toText();
 
@@ -64,8 +61,8 @@ public class Http11Processor implements Runnable, Processor {
 
     private List<String> readRequestLines(final BufferedReader reader) throws IOException {
         final List<String> requestLines = new ArrayList<>();
-        String line = reader.readLine();
-        while (!(line == null) && !"".equals(line)) {
+        String line = Objects.requireNonNull(reader.readLine());
+        while (!"".equals(line)) {
             requestLines.add(line);
             line = reader.readLine();
         }
@@ -90,7 +87,8 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (request.isForResource()) {
-            return Response.ofOk(request.getContentType(), ResourceLoader.getStaticResource(request.getPath()));
+            final String path = request.getPath();
+            return Response.ofOk(ContentType.of(path), ResourceLoader.getStaticResource(path));
         }
 
         if (request.isPath("/login")) {

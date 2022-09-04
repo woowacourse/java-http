@@ -5,15 +5,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 
 class ContentTypeTest {
 
-    @DisplayName("text 값으로 알맞은 ContentType 객체를 찾을 수 있다.")
+    @DisplayName("파일 경로로 알맞은 ContentType 객체를 찾을 수 있다.")
     @ParameterizedTest
-    @ValueSource(strings = {"text/html", "text/css"})
-    void of(final String contentType) {
-        final ContentType actual = ContentType.of(contentType);
+    @CsvSource({"foo.html,text/html", "foo.ico,image/x-icon", "foo.svg,image/svg+xml"})
+    void of(final String path, final String contentType) {
+        final ContentType actual = ContentType.of(path);
 
         assertThat(actual.toString()).contains(contentType);
     }

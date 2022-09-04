@@ -21,7 +21,6 @@ public class RequestUri {
     public static RequestUri create(final String uri) {
         String[] parseValues = uri.split("\\?");
 
-        // queryParameter 인 경우 'localhost:8080/login?account=gu' 형식으로 오기 때문에 해당 분기문에서 처리
         String uriValue = parseValues[0];
         Map<String, String> queryParameterValue = createConditionQueryParameter(parseValues);
 

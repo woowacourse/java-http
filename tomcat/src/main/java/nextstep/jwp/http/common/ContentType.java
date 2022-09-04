@@ -8,7 +8,7 @@ public enum ContentType {
 
     TEXT_HTML("html", "text/html"),
     TEXT_CSS("css", "text/css"),
-    APPLICATION_JAVASCRIPT("js", "application/javascript"),
+    APPLICATION_JAVASCRIPT("js", "text/javascript"),
     IMAGE_X_ICON("ico", "image/x-icon"),
     ;
 

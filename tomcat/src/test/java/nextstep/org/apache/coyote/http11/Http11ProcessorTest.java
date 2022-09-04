@@ -120,25 +120,6 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-//    @Test
-//    void NotFoundFileException() {
-//        //given
-//        final String httpRequest= String.join("\r\n",
-//            "GET /index.rookie HTTP/1.1 ",
-//            "Host: localhost:8080 ",
-//            "Accept: */*;q=0.1 ",
-//            "Connection: keep-alive",
-//            "",
-//            "");
-//
-//        final var socket = new StubSocket(httpRequest);
-//        final Http11Processor processor = new Http11Processor(socket);
-//
-//        // when & then
-//        assertThatThrownBy(() -> processor.process(socket))
-//            .isInstanceOf(NotFoundContentTypeException.class);
-//    }
-
     @Test
     void login() throws IOException {
         //given

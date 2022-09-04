@@ -12,6 +12,7 @@ import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.mapping.MappingKey;
 import org.apache.coyote.http11.request.mapping.RequestMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getResponseMessage(final HttpRequest httpRequest) {
         return RequestMapper.getInstance()
-                .getHandler(httpRequest.getUriPath())
+                .getHandler(new MappingKey(httpRequest.getMethod(), httpRequest.getUriPath()))
                 .handle(httpRequest)
                 .toHttpMessage();
     }

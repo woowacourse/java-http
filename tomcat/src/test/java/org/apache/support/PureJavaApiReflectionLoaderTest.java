@@ -1,8 +1,7 @@
 package org.apache.support;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
 import java.util.Set;
 import org.apache.support.testreflection.Reflection1;
 import org.apache.support.testreflection.Reflection2;

@@ -20,10 +20,10 @@ public class FileRequestHandler implements RequestHandler {
         this.filePath = filePath;
     }
 
-    public static FileRequestHandler from(final String uriPath) {
+    public static FileRequestHandler from(final MappingKey mappingKey) {
         final String filePath = Objects.requireNonNull(FileRequestHandler.class
                 .getClassLoader()
-                .getResource("static" + uriPath)
+                .getResource("static" + mappingKey.getUri())
         ).getPath();
 
         return new FileRequestHandler(filePath);

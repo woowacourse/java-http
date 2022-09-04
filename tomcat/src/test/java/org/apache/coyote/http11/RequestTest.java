@@ -10,64 +10,42 @@ import java.net.URISyntaxException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.AuthenticationException;
 import nextstep.jwp.exception.UserNotFoundException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-class ResponseProcessorTest {
+class RequestTest {
 
     @Test
-    void getResponse를_하면_http_형식을_응답한다() throws URISyntaxException, IOException {
+    void start_line을_파싱한다() {
         // given
         String fileUri = "GET /nextstep.txt HTTP/1.1";
-        ResponseProcessor responseProcessor = new ResponseProcessor(new StartLine(fileUri));
 
         // when
-        String response = responseProcessor.getResponse();
+        Request request = Request.of(new StartLine(fileUri));
 
         // then
-        String fileContent = "nextstep";
-        String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + fileContent.getBytes().length + " ",
-                "",
-                fileContent);
-        assertThat(response).isEqualTo(expected);
+        Assertions.assertAll(
+
+                () -> assertThat(request.getPath().getFileName()).isEqualTo("nextstep.txt"),
+                () -> assertThat(request.getQueryParameters().isEmpty()).isTrue()
+        );
     }
 
     @Test
-    void query_parameter로_올바른_계정_정보가_들어오면_print한다() throws URISyntaxException, IOException {
+    void query_parameter를_가진다() {
         // given
-        String fileUri = "GET /login?account=gugu&password=password HTTP/1.1";
-        ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outContent));
+        String fileUri = "GET /login?account=gugu&password=gugugugu HTTP/1.1";
+        Request request = Request.of(new StartLine(fileUri));
 
         // when
-        new ResponseProcessor(new StartLine(fileUri));
+        QueryParameters queryParameters = request.getQueryParameters();
 
         // then
-        String expected = InMemoryUserRepository.findByAccount("gugu").orElseThrow().toString().concat("\n");
-        assertThat(outContent.toString()).contains(expected);
-    }
+        Assertions.assertAll(
 
-    @Test
-    void query_parameter로_들어온_계정_정보가_없을_경우_예외를_반환한다() {
-        // given
-        String rawStartLine = "GET /login?account=eden&password=password HTTP/1.1";
-        StartLine startLine = new StartLine(rawStartLine);
-
-        // when & then
-        assertThatThrownBy(() -> new ResponseProcessor(startLine))
-                .isInstanceOf(UserNotFoundException.class);
-    }
-
-    @Test
-    void query_parameter로_들어온_계정_정보가_일치하지_않을_경우_예외를_반환한다() {
-        // given
-        String rawStartLine = "GET /login?account=gugu&password=gugugugu HTTP/1.1";
-        StartLine startLine = new StartLine(rawStartLine);
-
-        // when & then
-        assertThatThrownBy(() -> new ResponseProcessor(startLine))
-                .isInstanceOf(AuthenticationException.class);
+                () -> assertThat(queryParameters.getAccount()).isEqualTo("gugu"),
+                () -> assertThat(queryParameters.getPassword()).isEqualTo("gugugugu")
+        );
     }
 }

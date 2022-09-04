@@ -1,4 +1,4 @@
-package nextstep.jwp;
+package nextstep.jwp.support;
 
 import javassist.NotFoundException;
 import nextstep.jwp.exception.FileAccessException;

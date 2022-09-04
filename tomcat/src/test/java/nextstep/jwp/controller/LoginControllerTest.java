@@ -6,7 +6,6 @@ import org.apache.http.ResponseEntity;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class LoginControllerTest {
 
@@ -46,15 +45,5 @@ class LoginControllerTest {
 
         // then
         assertThat(actual.getHttpStatus()).isEqualTo(HttpStatus.BAD_REQUEST);
-    }
-    
-    @Test
-    void queryString에_값이_존재하지_않으면_예외를_발생한다() throws Exception {
-        // given
-        final RequestEntity requestEntity = new RequestEntity("/login", "account=&password=");
-
-        // when
-        assertThatThrownBy(() -> controller.execute(requestEntity))
-                .isInstanceOf(IllegalArgumentException.class);
     }
 }

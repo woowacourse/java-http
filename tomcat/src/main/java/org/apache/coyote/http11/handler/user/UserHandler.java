@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.handler.user;
 
 import static org.apache.coyote.http11.header.HttpHeaderType.LOCATION;
 import static org.apache.coyote.http11.http.HttpVersion.HTTP11;
@@ -8,6 +8,7 @@ import java.util.Map;
 import nextstep.jwp.application.UserService;
 import nextstep.jwp.dto.UserLoginRequest;
 import org.apache.catalina.utils.Parser;
+import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.http.response.HttpResponse;
 

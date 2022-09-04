@@ -8,10 +8,10 @@ import java.util.NoSuchElementException;
 import java.util.regex.Pattern;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.handler.HomeHandler;
-import org.apache.coyote.http11.handler.LoginHandler;
-import org.apache.coyote.http11.handler.LoginPageHandler;
-import org.apache.coyote.http11.handler.RegisterHandler;
-import org.apache.coyote.http11.handler.RegisterPageHandler;
+import org.apache.coyote.http11.handler.user.LoginHandler;
+import org.apache.coyote.http11.handler.user.LoginPageHandler;
+import org.apache.coyote.http11.handler.user.RegisterHandler;
+import org.apache.coyote.http11.handler.user.RegisterPageHandler;
 import org.apache.coyote.http11.handler.ResourceHandler;
 import org.apache.coyote.http11.http.request.HttpMethod;
 

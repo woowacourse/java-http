@@ -9,6 +9,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -37,12 +39,9 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final String requestValue = readHttpRequest(inputStream);
-            if (requestValue == null) {
-                return;
-            }
+            final HttpRequest requestValue = readHttpRequest(inputStream);
 
-            final String requestPath = requestValue.split(" ")[1];
+            final String requestPath = requestValue.getUrl();
 
             String contentType = "text/html";
 
@@ -67,10 +66,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readHttpRequest(final InputStream inputStream) throws IOException {
+    private HttpRequest readHttpRequest(final InputStream inputStream) throws IOException {
         final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-        final String requestValue = br.readLine();
-        return requestValue;
+        String line = br.readLine();
+        final List<String> headerLines = new ArrayList<>();
+
+        return HttpRequest.from(line, headerLines);
     }
 
     private String makeResponseBody(final String requestPath) throws IOException, URISyntaxException {

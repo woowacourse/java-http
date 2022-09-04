@@ -1,6 +1,9 @@
 package org.apache.coyote.http11.response;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Map;
+import nextstep.jwp.util.ResourceLoader;
 import org.apache.coyote.http11.Regex;
 import org.apache.coyote.http11.response.header.ContentType;
 import org.apache.coyote.http11.response.header.Header;
@@ -31,8 +34,12 @@ public class Response {
         this(ContentType.HTML, statusCode, Map.of(), body);
     }
 
-    public static Response ofOk(final ContentType contentType, final String body) {
-        return new Response(contentType, StatusCode.OK, body);
+    public static Response ofOk(final String body) {
+        return new Response(StatusCode.OK, body);
+    }
+
+    public static Response ofResource(final String path) throws IOException, URISyntaxException {
+        return new Response(ContentType.of(path), StatusCode.OK, ResourceLoader.getStaticResource(path));
     }
 
     public String toText() {

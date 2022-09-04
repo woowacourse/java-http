@@ -83,12 +83,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private Response getResponse(final Request request) throws URISyntaxException, IOException {
         if (request.isPath("/")) {
-            return Response.ofOk(ContentType.HTML, "Hello world!");
+            return Response.ofOk("Hello world!");
         }
 
         if (request.isForResource()) {
-            final String path = request.getPath();
-            return Response.ofOk(ContentType.of(path), ResourceLoader.getStaticResource(path));
+            return Response.ofResource(request.getPath());
         }
 
         if (request.isPath("/login")) {
@@ -100,7 +99,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private Response login(final QueryParams queryParams) throws URISyntaxException, IOException {
         if (queryParams.isEmpty()) {
-            return Response.ofOk(ContentType.HTML, ResourceLoader.getStaticResource("/login.html"));
+            return Response.ofResource("/login.html");
         }
 
         if (!queryParams.containsKey("account") || !queryParams.containsKey("password")) {

@@ -67,4 +67,13 @@ public class RequestStartLine {
     public String getVersion() {
         return version;
     }
+
+    @Override
+    public String toString() {
+        return String.join(" ",
+                this.method.name(),
+                this.uri,
+                this.version
+        );
+    }
 }

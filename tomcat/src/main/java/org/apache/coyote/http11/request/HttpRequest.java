@@ -71,6 +71,10 @@ public class HttpRequest {
         return startLine;
     }
 
+    public String toStartLineString() {
+        return startLine.toString();
+    }
+
     public HttpMethod getMethod() {
         return startLine.getMethod();
     }

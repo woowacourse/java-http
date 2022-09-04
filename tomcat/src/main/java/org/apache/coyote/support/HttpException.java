@@ -13,6 +13,14 @@ public class HttpException extends RuntimeException {
         this.status = status;
     }
 
+    public static HttpException ofBadRequest() {
+        return new HttpException(HttpStatus.BAD_REQUEST);
+    }
+
+    public static HttpException ofUnauthenticated() {
+        return new HttpException(HttpStatus.UNAUTHORIZED);
+    }
+
     public static HttpException ofNotFound(Exception e) {
         return new HttpException(e, HttpStatus.NOT_FOUND);
     }

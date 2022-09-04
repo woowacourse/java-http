@@ -3,7 +3,6 @@ package org.apache.coyote.servlet.request;
 import java.util.HashMap;
 import org.apache.coyote.support.HttpException;
 import org.apache.coyote.support.HttpMethod;
-import org.apache.coyote.support.HttpStatus;
 import org.apache.coyote.support.HttpVersion;
 
 public class StartLine {
@@ -36,21 +35,21 @@ public class StartLine {
 
     private static void validate(String startLine) {
         if (startLine == null || startLine.length() == 0) {
-            throw new HttpException(HttpStatus.BAD_REQUEST);
+            throw HttpException.ofBadRequest();
         }
     }
 
     private static String[] extract(String startLine) {
         final var elements = startLine.split(DELIMITER);
         if (elements.length != START_LINE_ELEMENT_COUNT) {
-            throw new HttpException(HttpStatus.BAD_REQUEST);
+            throw HttpException.ofBadRequest();
         }
         return elements;
     }
 
     private static String toUri(String uri) {
         if (!uri.startsWith("/")) {
-            throw new HttpException(HttpStatus.BAD_REQUEST);
+            throw HttpException.ofBadRequest();
         }
         return uri;
     }

@@ -39,6 +39,6 @@ public class Handler {
         if (cause instanceof HttpException) {
             return (HttpException) cause;
         }
-        return new HttpException(exception, HttpStatus.INTERNAL_SERVER_ERROR);
+        return HttpException.ofInternalServerError(exception);
     }
 }

@@ -1,7 +1,6 @@
 package nextstep.jwp.service.dto;
 
 import org.apache.coyote.support.HttpException;
-import org.apache.coyote.support.HttpStatus;
 
 public class SaveUserDto {
 
@@ -11,7 +10,7 @@ public class SaveUserDto {
 
     public SaveUserDto(String account, String password, String email) {
         if (account.isBlank() || password.isBlank() || email.isBlank()) {
-            throw new HttpException(HttpStatus.BAD_REQUEST);
+            throw HttpException.ofBadRequest();
         }
         this.account = account;
         this.password = password;

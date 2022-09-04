@@ -1,7 +1,6 @@
 package nextstep.jwp.service.dto;
 
 import org.apache.coyote.support.HttpException;
-import org.apache.coyote.support.HttpStatus;
 
 public class LoginDto {
 
@@ -10,7 +9,7 @@ public class LoginDto {
 
     public LoginDto(String account, String password) {
         if (account.isBlank() || password.isBlank()) {
-            throw new HttpException(HttpStatus.BAD_REQUEST);
+            throw HttpException.ofBadRequest();
         }
         this.account = account;
         this.password = password;

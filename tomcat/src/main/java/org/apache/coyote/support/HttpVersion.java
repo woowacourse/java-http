@@ -20,7 +20,7 @@ public enum HttpVersion {
        return Arrays.stream(values())
                 .filter(it -> it.value.equals(value))
                 .findAny()
-                .orElseThrow(() -> new HttpException(HttpStatus.BAD_REQUEST));
+                .orElseThrow(HttpException::ofBadRequest);
     }
 
     public String getValue() {

@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import org.apache.coyote.servlet.cookie.HttpCookies;
 import org.apache.coyote.support.HttpException;
-import org.apache.coyote.support.HttpStatus;
 
 public class RequestHeaders {
 
@@ -33,7 +32,7 @@ public class RequestHeaders {
     private static void addValidHeader(Map<String, String> headers, String line) {
         final var elements = line.split(HEADER_DELIMITER);
         if (elements.length != HEADER_LINE_ELEMENT_COUNT) {
-            throw new HttpException(HttpStatus.BAD_REQUEST);
+            throw HttpException.ofBadRequest();
         }
         final var key = elements[0];
         final var value = elements[1];

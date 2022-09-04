@@ -23,11 +23,11 @@ public class UserService {
     public User login(LoginDto loginDto) {
         final var user = userRepository.findByAccount(loginDto.getAccount());
         if (user.isEmpty()) {
-            throw new HttpException(HttpStatus.UNAUTHORIZED);
+            throw HttpException.ofUnauthenticated();
         }
         final var foundUser = user.get();
         if (!foundUser.checkPassword(loginDto.getPassword())) {
-            throw new HttpException(HttpStatus.UNAUTHORIZED);
+            throw HttpException.ofUnauthenticated();
         }
         log.info("로그인 성공! - {}", user);
         return foundUser;
@@ -37,7 +37,7 @@ public class UserService {
         String account = saveUserDto.getAccount();
         final var user = userRepository.findByAccount(account);
         if (user.isPresent()) {
-            throw new HttpException(HttpStatus.BAD_REQUEST);
+            throw HttpException.ofBadRequest();
         }
         final var savedUser = userRepository.save(new User(account, saveUserDto.getPassword(), saveUserDto.getEmail()));
         log.info("회원가입 성공! - {}", savedUser);

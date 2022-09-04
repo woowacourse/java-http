@@ -7,7 +7,7 @@ public enum HttpMethod {
         try {
             return valueOf(method);
         } catch (IllegalArgumentException e) {
-            throw new HttpException(HttpStatus.BAD_REQUEST);
+            throw HttpException.ofBadRequest();
         }
     }
 }

@@ -4,18 +4,16 @@ public class RequestUri {
 
     private static final String STATIC_FILE_PATH = "static";
 
-    private final String uri;
     private final String resourcePath;
     private final QueryParameters queryParams;
 
-    private RequestUri(final String uri, final String resourcePath, final QueryParameters queryParams) {
-        this.uri = uri;
+    private RequestUri(final String resourcePath, final QueryParameters queryParams) {
         this.resourcePath = resourcePath;
         this.queryParams = queryParams;
     }
 
     public static RequestUri of(final String uri) {
-        return new RequestUri(uri, parseResourcePath(uri), QueryParameters.of(uri));
+        return new RequestUri(parseResourcePath(uri), QueryParameters.of(uri));
     }
 
     private static String parseResourcePath(String uri) {
@@ -27,7 +25,7 @@ public class RequestUri {
     }
 
     public boolean isResourceFileRequest() {
-        return !uri.equals("/");
+        return !resourcePath.equals(STATIC_FILE_PATH + "/");
     }
 
     public boolean hasQueryParams() {

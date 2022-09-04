@@ -27,6 +27,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String QUERY_STRING_PREFIX = "?";
     private static final String HTML_EXTENSION = ".html";
     private static final String ACCOUNT_KEY = "account";
+    private static final String PASSWORD_KEY = "password";
 
     private final Socket connection;
 
@@ -87,7 +88,14 @@ public class Http11Processor implements Runnable, Processor {
     private void logUser(final QueryParameters queryParameters) {
         final String account = queryParameters.getValueByKey(ACCOUNT_KEY);
         final Optional<User> user = InMemoryUserRepository.findByAccount(account);
+        user.ifPresent(it -> validatePassword(queryParameters, it));
         log.info(user.toString());
+    }
+
+    private void validatePassword(final QueryParameters queryParameters, final User it) {
+        if (it.checkPassword(queryParameters.getValueByKey(PASSWORD_KEY))) {
+            throw new IllegalArgumentException("아이디나 비밀번호가 일치하지 않습니다.");
+        }
     }
 
     private HttpResponse createHttpResponse(final HttpRequest httpRequest, final String uri) throws IOException {

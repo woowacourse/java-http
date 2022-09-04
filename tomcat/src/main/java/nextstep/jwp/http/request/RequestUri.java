@@ -7,6 +7,7 @@ import java.util.Objects;
 public class RequestUri {
 
     private static final Map<String, String> EMPTY_PARAMETERS = new HashMap<>();
+    private static final String EXTENSION_DELIMITER = ".";
 
     private final String value;
     private final Map<String, String> queryParameters;

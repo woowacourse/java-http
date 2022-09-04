@@ -1,14 +1,11 @@
-package nextstep.jwp.http.factory;
+package nextstep.jwp.http.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.exception.InvalidRequestHeaderException;
-import nextstep.jwp.http.request.HttpRequest;
-import nextstep.jwp.http.request.RequestBody;
 import nextstep.jwp.http.common.HttpHeaders;
-import nextstep.jwp.http.request.RequestLine;
 
 public class HttpRequestFactory {
 

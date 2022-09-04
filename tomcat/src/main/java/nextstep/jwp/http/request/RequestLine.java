@@ -47,14 +47,6 @@ public class RequestLine {
         return requestValue;
     }
 
-    public String getRequestMethod() {
-        return requestMethod.getValue();
-    }
-
-    public String getRequestUri() {
-        return requestUri.getUri();
-    }
-
     public String getRequestExtension() {
         String[] parseValues = requestUri.getUri().split(REQUEST_URI_EXTENSION_DELIMITER);
         if (parseValues.length != EXPECT_URI_EXTENSION_LENGTH) {
@@ -62,6 +54,14 @@ public class RequestLine {
         }
 
         return parseValues[EXTENSION_INDEX];
+    }
+
+    public String getRequestMethod() {
+        return requestMethod.getValue();
+    }
+
+    public String getRequestUri() {
+        return requestUri.getUri();
     }
 
     public String getQueryParameterValue(final String parameter) {

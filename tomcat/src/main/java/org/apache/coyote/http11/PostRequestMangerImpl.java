@@ -4,7 +4,7 @@ import org.apache.catalina.SessionManager;
 
 public class PostRequestMangerImpl implements RequestManager {
 
-    private static final Integer STATUS_CODE = 302;
+    private static final Integer STATUS_CODE_FOUND = 302;
     private static final String FOUND = "Found";
 
     private final RequestParser requestParser;
@@ -24,7 +24,7 @@ public class PostRequestMangerImpl implements RequestManager {
             LoginResult loginResult = loginService.signIn(requestBody.get("account"), requestBody.get("password"));
 
             return String.join("\r\n",
-                    "HTTP/1.1 " + STATUS_CODE + " " + FOUND + " ",
+                    "HTTP/1.1 " + STATUS_CODE_FOUND + " " + FOUND + " ",
                     "Set-Cookie: JSESSIONID=" + loginResult.getSession().getId() + " ",
                     "Location: " + loginResult.getRedirectUrl() + " ",
                     "");
@@ -38,7 +38,7 @@ public class PostRequestMangerImpl implements RequestManager {
         );
 
         return String.join("\r\n",
-                "HTTP/1.1 " + STATUS_CODE + " " + FOUND + " ",
+                "HTTP/1.1 " + STATUS_CODE_FOUND + " " + FOUND + " ",
                 "Location: " + redirect + " ",
                 "");
     }

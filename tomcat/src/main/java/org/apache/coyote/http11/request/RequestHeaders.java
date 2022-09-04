@@ -28,6 +28,10 @@ public class RequestHeaders {
                 )));
     }
 
+    public String getValueByKey(String key) {
+        return headers.get(key);
+    }
+
     public String getPairByKey(String key) {
         return key + ": " + headers.get(key);
     }

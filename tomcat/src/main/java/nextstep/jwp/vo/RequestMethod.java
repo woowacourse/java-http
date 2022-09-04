@@ -5,8 +5,6 @@ import org.apache.coyote.http11.PostRequestMangerImpl;
 import org.apache.coyote.http11.RequestManager;
 import org.apache.coyote.http11.RequestParser;
 
-import java.io.BufferedReader;
-
 public enum RequestMethod {
 
     GET,

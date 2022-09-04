@@ -8,7 +8,16 @@ public class RegisterService {
     private static final String SUCCESS_URL = "/index.html";
     private static final String FAIL_URL = "/401.html";
 
-    public String signUp(String account, String password, String email) {
+    private static final RegisterService registerService = new RegisterService();
+
+    private RegisterService() {
+    }
+
+    public static String signUp(String account, String password, String email) {
+        return registerService.signUpInternal(account, password, email);
+    }
+
+    public String signUpInternal(String account, String password, String email) {
         try {
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);

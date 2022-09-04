@@ -5,7 +5,6 @@ import nextstep.jwp.service.RegisterService;
 import nextstep.jwp.vo.FileName;
 import nextstep.jwp.vo.FormData;
 import nextstep.jwp.vo.LoginResult;
-import org.apache.catalina.SessionManager;
 
 public class PostRequestMangerImpl implements RequestManager {
 
@@ -22,11 +21,9 @@ public class PostRequestMangerImpl implements RequestManager {
     public String generateResponse() {
         FileName fileName = requestParser.generateFileName();
         FormData requestBody = requestParser.generateRequestBody();
-        SessionManager sessionManager = new SessionManager();
 
         if (fileName.getBaseName().equals("/login")) {
-            LoginService loginService = new LoginService();
-            LoginResult loginResult = loginService.signIn(requestBody.get("account"), requestBody.get("password"));
+            LoginResult loginResult = LoginService.signIn(requestBody.get("account"), requestBody.get("password"));
 
             return String.join("\r\n",
                     "HTTP/1.1 " + STATUS_CODE_FOUND + " " + FOUND + " ",
@@ -35,8 +32,7 @@ public class PostRequestMangerImpl implements RequestManager {
                     "");
         }
 
-        RegisterService registerService = new RegisterService();
-        String redirect = registerService.signUp(
+        String redirect = RegisterService.signUp(
                 requestBody.get("account"),
                 requestBody.get("password"),
                 requestBody.get("email")

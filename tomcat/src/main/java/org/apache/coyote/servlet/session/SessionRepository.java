@@ -7,16 +7,16 @@ import nextstep.jwp.model.User;
 
 public class SessionRepository {
 
-    private final Map<UUID, Session> value = new ConcurrentHashMap<>();
+    private static final Map<UUID, Session> SESSIONS = new ConcurrentHashMap<>();
 
     public UUID generateNewSession(User user) {
         final var sessionId = UUID.randomUUID();
-        value.put(sessionId, Session.of(user));
+        SESSIONS.put(sessionId, Session.of(user));
         return sessionId;
     }
 
     public boolean isValidSession(String sessionId) {
-        final var session = value.get(UUID.fromString(sessionId));
+        final var session = SESSIONS.get(UUID.fromString(sessionId));
         if (session == null) {
             return false;
         }

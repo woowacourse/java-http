@@ -28,11 +28,14 @@ public class LoginController implements Controller {
             final User user = wrappedUser.get();
             if (user.isSamePassword(loginRequest.getPassword())) {
                 log.debug(user.toString());
-                return new ResponseEntity(HttpStatus.OK, resource.getContentType(), resource.read());
+                return new ResponseEntity().contentType(resource.getContentType())
+                        .content(resource.read());
             }
         }
 
-        return new ResponseEntity(HttpStatus.BAD_REQUEST, resource.getContentType(), resource.read());
+        return new ResponseEntity().httpStatus(HttpStatus.BAD_REQUEST)
+                .contentType(resource.getContentType())
+                .content(resource.read());
     }
 
     private LoginRequest convert(final String queryString) {

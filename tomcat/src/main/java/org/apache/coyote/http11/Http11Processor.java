@@ -83,22 +83,15 @@ public class Http11Processor implements Runnable, Processor {
 
     private String makeResponse(final Controller controller, final RequestEntity requestEntity) {
         try {
-            final ResponseEntity responseEntity = controller.execute(requestEntity);
-            return makeResponse(responseEntity);
+            return controller.execute(requestEntity)
+                    .build();
         } catch (NotFoundException e) {
-            return makeResponse(new ResponseEntity(HttpStatus.BAD_REQUEST, null));
+            return new ResponseEntity().httpStatus(HttpStatus.BAD_REQUEST)
+                    .build();
         } catch (Exception e) {
-            return makeResponse(new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, null));
+            return new ResponseEntity().httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .build();
         }
-    }
-
-    private String makeResponse(final ResponseEntity responseEntity) {
-        return String.join("\r\n",
-                responseEntity.getHttpVersion() + " " + responseEntity.getHttpStatus().getCode() + " " + responseEntity.getHttpStatus().name() + " ",
-                "Content-Type: " + responseEntity.getContentType() + ";charset=utf-8 ",
-                "Content-Length: " + responseEntity.getContentLength() + " ",
-                "",
-                responseEntity.getContent());
     }
 
     private void flushResponse(final OutputStream outputStream, final String responseBody) {

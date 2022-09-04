@@ -1,63 +1,45 @@
 package org.apache.http;
 
-import java.util.Objects;
-
 public class ResponseEntity {
 
     private static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
     private static final String DEFAULT_CONTENT_TYPE = "*/*";
+    private static final int DEFAULT_CONTENT_LENGTH = 0;
+    private static final String DEFAULT_CONTENT = "";
 
-    private final String httpVersion;
-    private final HttpStatus httpStatus;
-    private final String contentType;
-    private final String content;
-    private final int contentLength;
+    private String httpVersion = DEFAULT_HTTP_VERSION;
+    private HttpStatus httpStatus = HttpStatus.OK;
+    private String contentType = DEFAULT_CONTENT_TYPE;
+    private int contentLength = DEFAULT_CONTENT_LENGTH;
+    private String content = DEFAULT_CONTENT;
 
-    public ResponseEntity(final HttpStatus httpStatus, final String content) {
-        this(DEFAULT_HTTP_VERSION, httpStatus, DEFAULT_CONTENT_TYPE, content);
-    }
-
-    public ResponseEntity(final HttpStatus httpStatus, final String contentType, final String content) {
-        this(DEFAULT_HTTP_VERSION, httpStatus, contentType, content);
-    }
-
-    public ResponseEntity(final String httpVersion, final HttpStatus httpStatus, final String contentType, final String content) {
+    public ResponseEntity httpVersion(final String httpVersion) {
         this.httpVersion = httpVersion;
+        return this;
+    }
+
+    public ResponseEntity httpStatus(final HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
+        return this;
+    }
+
+    public ResponseEntity contentType(final String contentType) {
         this.contentType = contentType;
-        this.content = parseContent(content);
-        this.contentLength = calculateContentLength(this.content);
+        return this;
     }
 
-    private String parseContent(final String content) {
-        if (Objects.isNull(content)) {
-            return "";
-        }
-        return content;
+    public ResponseEntity content(final String content) {
+        this.content = content;
+        this.contentLength = content.getBytes().length;
+        return this;
     }
 
-    private int calculateContentLength(final String content) {
-        return content.getBytes()
-                .length;
-    }
-
-    public String getHttpVersion() {
-        return httpVersion;
-    }
-
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public int getContentLength() {
-        return contentLength;
+    public String build() {
+        return String.join("\r\n",
+                httpVersion + " " + httpStatus.getCode() + " " + httpStatus.name() + " ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + contentLength + " ",
+                "",
+                content);
     }
 }

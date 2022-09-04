@@ -14,7 +14,7 @@ public class ClassPathResource {
             File file = new File(Objects.requireNonNull(resource).getFile());
             byte[] fileContents = Files.readAllBytes(file.toPath());
             return new String(fileContents);
-        } catch (IOException e) {
+        } catch (IOException | NullPointerException e) {
             throw new RuntimeException();
         }
     }

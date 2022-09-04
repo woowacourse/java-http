@@ -3,6 +3,7 @@ package org.apache.coyote.servlet.request;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.coyote.support.HttpCookie;
 import org.apache.coyote.support.HttpException;
 import org.apache.coyote.support.HttpStatus;
 
@@ -47,5 +48,13 @@ public class RequestHeaders {
 
     public boolean hasParametersAsBody() {
         return CONTENT_TYPE_URL_ENCODED.equals(headers.get(CONTENT_TYPE));
+    }
+
+    public List<HttpCookie> getCookies() {
+        if (!headers.containsKey(HttpCookie.COOKIE_REQUEST_HEADER)) {
+            return List.of();
+        }
+        String cookies = headers.get(HttpCookie.COOKIE_REQUEST_HEADER);
+        return HttpCookie.extractCookies(cookies);
     }
 }

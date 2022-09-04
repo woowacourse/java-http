@@ -3,6 +3,8 @@ package nextstep.jwp.handler;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import org.apache.catalina.Manager;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestBody;
 import org.apache.coyote.http11.HttpRequestHeader;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 class LoginHandlerTest {
 
+    private static final Manager MANAGER = new SessionManager();
     private static final HttpRequestBody EMPTY_REQUEST_BODY = new HttpRequestBody("");
     private static final HttpRequestHeader EMPTY_REQUEST_HEADER = new HttpRequestHeader(List.of());
 
@@ -20,7 +23,7 @@ class LoginHandlerTest {
     void login_page() {
         // given
         final HttpRequest request = new HttpRequest("GET /login HTTP/1.1 ", EMPTY_REQUEST_HEADER, EMPTY_REQUEST_BODY);
-        final LoginHandler loginHandler = new LoginHandler();
+        final LoginHandler loginHandler = new LoginHandler(MANAGER);
 
         final String expected = "HTTP/1.1 200 OK ";
 
@@ -37,7 +40,7 @@ class LoginHandlerTest {
         // given
         final HttpRequest request = new HttpRequest("POST /login HTTP/1.1 ",
                 EMPTY_REQUEST_HEADER, new HttpRequestBody("account=gugu&password=password"));
-        final LoginHandler loginHandler = new LoginHandler();
+        final LoginHandler loginHandler = new LoginHandler(MANAGER);
 
         final String expectedStatusCode = "HTTP/1.1 302";
         final String expectedLocation = "Location: /index.html ";
@@ -57,7 +60,7 @@ class LoginHandlerTest {
         // given
         final HttpRequest request = new HttpRequest("POST /login HTTP/1.1 ",
                 EMPTY_REQUEST_HEADER, new HttpRequestBody("account=gugu&password=notPassword"));
-        final LoginHandler loginHandler = new LoginHandler();
+        final LoginHandler loginHandler = new LoginHandler(MANAGER);
 
         final String expected = "HTTP/1.1 401";
 

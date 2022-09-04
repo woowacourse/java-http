@@ -19,4 +19,17 @@ class ContentTypeTest {
         // then
         assertThat(sut.toString()).isEqualTo("text/css");
     }
+
+    @DisplayName("확장자가 없는 경우 .html을 기본으로 반환한다.")
+    @Test
+    public void noExtension() {
+        // given
+        String requestUrl = "/index";
+
+        // when
+        final ContentType sut = ContentType.from(requestUrl);
+
+        // then
+        assertThat(sut.toString()).isEqualTo("text/html");
+    }
 }

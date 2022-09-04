@@ -79,4 +79,52 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @DisplayName("로그인이 성공하면 응답의 상태코드는 302이고, Location 헤더는 /index.html이다.")
+    @Test
+    void loginSuccess() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String expected = "HTTP/1.1 302 FOUND \r\n" +
+                "Location: /index.html \r\n" +
+                "\r\n";
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("로그인이 성공하면 응답의 상태코드는 302이고, Location 헤더는 /401.html이다.")
+    @Test
+    void loginFail() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=wrong-password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String expected = "HTTP/1.1 302 FOUND \r\n" +
+                "Location: /401.html \r\n" +
+                "\r\n";
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

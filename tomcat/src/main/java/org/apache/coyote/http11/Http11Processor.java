@@ -12,6 +12,7 @@ import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.RequestUri;
 import org.apache.coyote.http11.message.response.HttpResponse;
+import org.apache.coyote.http11.message.response.HttpStatus;
 import org.apache.coyote.http11.util.StaticFileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,16 +64,27 @@ public class Http11Processor implements Runnable, Processor {
                 String account = requestUri.getQuery("account").orElse("");
                 String password = requestUri.getQuery("password").orElse("");
 
-                InMemoryUserRepository.findByAccount(account)
+                boolean loginSuccess = InMemoryUserRepository.findByAccount(account)
                         .filter(user -> user.checkPassword(password))
-                        .ifPresentOrElse(System.out::println, () -> System.out.println("유저가 없습니다."));
+                        .isPresent();
 
-                HttpResponse httpResponse = new HttpResponse.Builder()
-                        .contentType(ContentType.HTML)
-                        .body(StaticFileUtil.readFile("/login.html"))
-                        .build();
+                if (loginSuccess) {
+                    HttpResponse httpResponse = new HttpResponse.Builder()
+                            .status(HttpStatus.FOUND)
+                            .header("Location", "/index.html")
+                            .build();
 
-                writeHttpResponse(outputStream, httpResponse);
+                    writeHttpResponse(outputStream, httpResponse);
+                }
+
+                if (!loginSuccess) {
+                    HttpResponse httpResponse = new HttpResponse.Builder()
+                            .status(HttpStatus.FOUND)
+                            .header("Location", "/401.html")
+                            .build();
+
+                    writeHttpResponse(outputStream, httpResponse);
+                }
             }
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);

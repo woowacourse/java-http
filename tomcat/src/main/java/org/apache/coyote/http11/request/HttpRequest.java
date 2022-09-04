@@ -27,4 +27,8 @@ public class HttpRequest {
     public Map<String, String> getQueryParams() {
         return requestLine.getQueryParams();
     }
+
+    public String getHeader(final String header) {
+        return this.header.getHeader(header);
+    }
 }

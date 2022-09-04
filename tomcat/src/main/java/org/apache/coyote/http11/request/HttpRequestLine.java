@@ -32,14 +32,14 @@ public class HttpRequestLine {
         final String uri = parsedLine[URI_INDEX];
         final String httpVersion = parsedLine[VERSION_INDEX];
 
-        return new HttpRequestLine(HttpMethod.of(method), getPath(uri), httpVersion, getQueryParams(uri));
+        return new HttpRequestLine(HttpMethod.of(method), parseToPath(uri), httpVersion, parseToQueryParams(uri));
     }
 
-    private static String getPath(final String uri) {
+    private static String parseToPath(final String uri) {
         return uri.split("\\?")[0];
     }
 
-    private static Map<String, String> getQueryParams(final String uri) {
+    private static Map<String, String> parseToQueryParams(final String uri) {
         final Map<String, String> queryParams = new HashMap<>();
         if (hasQueryString(uri)) {
             final int index = uri.indexOf("?");
@@ -66,19 +66,19 @@ public class HttpRequestLine {
         }
     }
 
-    protected HttpMethod getHttpMethod() {
+    public HttpMethod getHttpMethod() {
         return httpMethod;
     }
 
-    protected String getPath() {
+    public String getPath() {
         return path;
     }
 
-    protected String getHttpVersion() {
+    public String getHttpVersion() {
         return httpVersion;
     }
 
-    protected Map<String, String> getQueryParams() {
+    public Map<String, String> getQueryParams() {
         return new HashMap<>(queryParams);
     }
 }

@@ -3,6 +3,7 @@ package org.apache.coyote.http11.response.header;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.Regex;
 
 public class Headers {
 
@@ -25,10 +26,10 @@ public class Headers {
 
     public String toText() {
         return values.entrySet().stream()
-                .map(entry -> String.join(": ",
+                .map(entry -> String.join(Regex.HEADER_VALUE.getValue(),
                         entry.getKey()
                                 .getName(),
-                        entry.getValue() + " ")
+                        entry.getValue() + Regex.BLANK.getValue())
                 ).collect(Collectors.joining("\r\n"));
     }
 }

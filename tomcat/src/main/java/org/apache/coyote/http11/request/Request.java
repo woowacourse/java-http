@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.List;
 import java.util.Objects;
+import org.apache.coyote.http11.Regex;
 import org.apache.coyote.http11.request.header.Header;
 import org.apache.coyote.http11.request.header.Headers;
 import org.apache.coyote.http11.response.header.ContentType;
@@ -19,10 +20,10 @@ public class Request {
     }
 
     public static Request from(final List<String> requestLines) {
-        final String uri = requestLines.get(0).split(" ")[1];
+        final String uri = requestLines.get(0).split(Regex.BLANK.getValue())[1];
         final Headers headers = Headers.from(requestLines.subList(1, requestLines.size()));
 
-        final int queryStartIndex = uri.indexOf("?");
+        final int queryStartIndex = uri.indexOf(Regex.QUERY_STRING.getValue());
         if (queryStartIndex < 0) {
             return new Request(uri, QueryParams.ofEmpty(), headers);
         }
@@ -40,13 +41,13 @@ public class Request {
     }
 
     public boolean isForResource() {
-        return path.contains(".");
+        return path.contains(Regex.EXTENSION.getValue());
     }
 
     public ContentType getContentType() {
         final String contentType = headers.get(Header.Accept)
                 .orElse(ContentType.HTML.toString())
-                .split(",")[0];
+                .split(Regex.ACCEPT_TYPE.getValue())[0];
 
         return ContentType.of(contentType);
     }

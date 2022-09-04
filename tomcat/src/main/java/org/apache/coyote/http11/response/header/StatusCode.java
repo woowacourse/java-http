@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.response.header;
 
+import org.apache.coyote.http11.Regex;
+
 public enum StatusCode {
     OK(200, "OK"),
     FOUND(302, "Found"),
@@ -17,7 +19,7 @@ public enum StatusCode {
 
     @Override
     public String toString() {
-        return String.join(" ",
+        return String.join(Regex.BLANK.getValue(),
                 Integer.toString(this.code),
                 this.value);
     }

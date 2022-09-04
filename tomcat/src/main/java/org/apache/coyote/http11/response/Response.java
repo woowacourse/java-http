@@ -1,12 +1,15 @@
 package org.apache.coyote.http11.response;
 
 import java.util.Map;
+import org.apache.coyote.http11.Regex;
 import org.apache.coyote.http11.response.header.ContentType;
 import org.apache.coyote.http11.response.header.Header;
 import org.apache.coyote.http11.response.header.Headers;
 import org.apache.coyote.http11.response.header.StatusCode;
 
 public class Response {
+
+    private static final String HTTP_VERSION = "HTTP/1.1 ";
 
     private final StatusCode statusCode;
     private final Headers headers;
@@ -34,7 +37,7 @@ public class Response {
 
     public String toText() {
         return String.join("\r\n",
-                "HTTP/1.1 " + statusCode.toString() + " ",
+                HTTP_VERSION + statusCode.toString() + Regex.BLANK.getValue(),
                 headers.toText(),
                 "",
                 body);

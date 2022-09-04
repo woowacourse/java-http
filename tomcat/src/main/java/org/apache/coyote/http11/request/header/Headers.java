@@ -4,8 +4,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.Regex;
 
 public class Headers {
+
+    private static final int INDEX_NAME = 0;
+    private static final int INDEX_VALUE = 1;
 
     private final Map<String, String> values;
 
@@ -15,10 +19,10 @@ public class Headers {
 
     public static Headers from(final List<String> headerLines) {
         final Map<String, String> values = headerLines.stream()
-                .map(line -> line.split(": ", 2))
+                .map(line -> line.split(Regex.HEADER_VALUE.getValue(), 2))
                 .collect(Collectors.toMap(
-                        splitLine -> splitLine[0],
-                        splitLine -> splitLine[1]
+                        splitLine -> splitLine[INDEX_NAME],
+                        splitLine -> splitLine[INDEX_VALUE]
                 ));
         return new Headers(values);
     }

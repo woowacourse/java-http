@@ -16,14 +16,6 @@ public enum HttpStatus {
         this.statusName = statusName;
     }
 
-    public static HttpStatus valueOf(final int statusCode) {
-        return Arrays.stream(HttpStatus.values())
-                .filter(httpStatus -> httpStatus.getStatusCode() == statusCode)
-                .findFirst()
-                .orElseThrow(() ->
-                        new IllegalArgumentException(String.format("그런 Http 상태 코드 없습니다. %d", statusCode)));
-    }
-
     public int getStatusCode() {
         return statusCode;
     }

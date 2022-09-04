@@ -9,7 +9,8 @@ import java.util.stream.Collectors;
 
 public class HttpHeaders {
 
-    public static final String KEY_VALUE_SEPARATOR = ": ";
+    private static final String KEY_VALUE_SEPARATOR = ": ";
+    private static final String CRLF = "\r\n";
     private final Map<String, String> headers;
 
     public HttpHeaders(final Map<String, String> headers) {
@@ -39,7 +40,7 @@ public class HttpHeaders {
         return headers.keySet()
                 .stream()
                 .map(key -> key + KEY_VALUE_SEPARATOR + headers.get(key))
-                .collect(Collectors.joining("\r\n"));
+                .collect(Collectors.joining(CRLF));
     }
 
     @Override

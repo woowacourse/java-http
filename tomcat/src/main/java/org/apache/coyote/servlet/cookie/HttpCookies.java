@@ -23,12 +23,16 @@ public class HttpCookies {
         return new HttpCookies(cookies);
     }
 
+    public HttpCookie getCookie(String name) {
+        return values.get(name);
+    }
+
     public boolean containsCookies() {
         return !values.isEmpty();
     }
 
     public List<String> toSetHeaderFormats() {
-       return values.values()
+        return values.values()
                 .stream()
                 .map(HttpCookie::toHeaderFormat)
                 .map(it -> String.format(SET_COOKIE_HEADER_FORMAT, it))

@@ -1,5 +1,7 @@
 package org.apache.coyote.servlet.request;
 
+import java.util.Optional;
+import org.apache.coyote.servlet.cookie.HttpCookie;
 import org.apache.coyote.support.HttpMethod;
 
 public class HttpRequest {
@@ -31,5 +33,14 @@ public class HttpRequest {
             return Parameters.of(body);
         }
         return startLine.getParameters();
+    }
+
+    public Optional<HttpCookie> findCookie(String name) {
+        final var cookies = headers.getCookies();
+        final var cookie = cookies.getCookie(name);
+        if (cookie == null) {
+            return Optional.empty();
+        }
+        return Optional.of(cookie);
     }
 }

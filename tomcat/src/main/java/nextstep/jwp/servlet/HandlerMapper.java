@@ -32,10 +32,10 @@ public class HandlerMapper {
 
     private HttpResponse handle(HttpRequest request, Handler handler) {
         final var response = handler.handle(request);
-        if (handler.hasReturnTypeOf(HttpResponse.class)) {
+        if (response instanceof HttpResponse) {
             return (HttpResponse) response;
         }
-        if (handler.hasReturnTypeOf(String.class)) {
+        if (response instanceof String) {
             return viewResolver.findStaticResource((String) response);
         }
         throw new UnsupportedOperationException("invalid request");

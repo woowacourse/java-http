@@ -3,8 +3,6 @@ package nextstep.jwp.handler;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import org.apache.catalina.Manager;
-import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestBody;
 import org.apache.coyote.http11.HttpRequestHeader;
@@ -14,7 +12,6 @@ import org.junit.jupiter.api.Test;
 
 class RegisterHandlerTest {
 
-    private static final Manager MANAGER = new SessionManager();
     private static final HttpRequestHeader EMPTY_REQUEST_HEADER = new HttpRequestHeader(List.of());
 
     @DisplayName(value = "GET 요청 시 응답값에 register 페이지 포함")
@@ -23,7 +20,7 @@ class RegisterHandlerTest {
         // given
         final HttpRequest request = new HttpRequest("GET /register HTTP/1.1 ", EMPTY_REQUEST_HEADER,
                 new HttpRequestBody(""));
-        final RegisterHandler registerHandler = new RegisterHandler(MANAGER);
+        final RegisterHandler registerHandler = new RegisterHandler();
 
         final String expectedStatusLine = "HTTP/1.1 200 OK ";
         final String expectedMessageBody = "<title>회원가입</title>";
@@ -43,7 +40,7 @@ class RegisterHandlerTest {
         // given
         final HttpRequest request = new HttpRequest("POST /register HTTP/1.1 ", EMPTY_REQUEST_HEADER,
                 new HttpRequestBody("account=gugu&password=password&email=hkkang%40woowahan.com"));
-        final RegisterHandler registerHandler = new RegisterHandler(MANAGER);
+        final RegisterHandler registerHandler = new RegisterHandler();
 
         final String expectedStatusLine = "HTTP/1.1 302";
         final String expectedMessageBody = "Location: /login.html ";

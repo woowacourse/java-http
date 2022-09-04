@@ -2,8 +2,6 @@ package org.apache.catalina;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
 
 public class Session {
@@ -23,14 +21,5 @@ public class Session {
 
     public void addUser(final User user) {
         values.put(USER, user);
-    }
-
-    public User getUser() {
-        final Object value = values.get(USER);
-        if (Objects.isNull(value)) {
-            throw new UserNotFoundException(id);
-        }
-
-        return (User) value;
     }
 }

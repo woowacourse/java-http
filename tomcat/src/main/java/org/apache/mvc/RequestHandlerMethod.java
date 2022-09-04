@@ -30,7 +30,7 @@ public class RequestHandlerMethod {
         }
     }
 
-    private static void validateReturnType(Class<?> clazz) {
+    private void validateReturnType(Class<?> clazz) {
         if (!clazz.equals(ResponseEntity.class)) {
             throw new TempException();
         }

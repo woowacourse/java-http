@@ -25,12 +25,12 @@ public class AuthController {
     @RequestMapping(method = HttpMethod.GET, path = "/login")
     public Object getLoginPage(HttpRequest request) {
         final var sessionCookie = request.findCookie(Session.JSESSIONID);
-        if (sessionCookie.isPresent()) {
-            return new HttpResponseBuilder(HttpStatus.FOUND)
+        if (sessionCookie.isEmpty() || !sessionRepository.isValidSession(sessionCookie.get().getValue())) {
+            return "/login.html";
+        }
+        return new HttpResponseBuilder(HttpStatus.FOUND)
                     .setLocation("/index.html")
                     .build();
-        }
-        return "/login.html";
     }
 
     @RequestMapping(method = HttpMethod.POST, path = "/login")

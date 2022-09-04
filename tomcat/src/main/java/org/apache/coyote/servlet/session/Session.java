@@ -19,4 +19,9 @@ public class Session {
         final var expirationTime = LocalDateTime.now().plusSeconds(VALIDITY_IN_SECONDS);
         return new Session(userId, expirationTime);
     }
+
+    public boolean isExpired() {
+        final var currentTime = LocalDateTime.now();
+        return currentTime.isAfter(expirationTime);
+    }
 }

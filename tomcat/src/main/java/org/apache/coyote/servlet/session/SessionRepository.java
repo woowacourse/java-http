@@ -13,4 +13,12 @@ public class SessionRepository {
         value.put(sessionId, Session.of(userId));
         return sessionId;
     }
+
+    public boolean isValidSession(String sessionId) {
+        final var session = value.get(UUID.fromString(sessionId));
+        if (session == null) {
+            return false;
+        }
+        return !session.isExpired();
+    }
 }

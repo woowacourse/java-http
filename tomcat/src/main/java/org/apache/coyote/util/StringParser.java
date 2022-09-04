@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http.HttpRequest;
 
 public class StringParser {
 
@@ -35,7 +34,7 @@ public class StringParser {
     }
 
     private static Path getResourcePath(final String httpRequestUri) {
-        final String resourcePath = HttpRequest.class.getClassLoader()
+        final String resourcePath = StringParser.class.getClassLoader()
                 .getResource("static" + httpRequestUri)
                 .getPath();
         return Path.of(resourcePath);

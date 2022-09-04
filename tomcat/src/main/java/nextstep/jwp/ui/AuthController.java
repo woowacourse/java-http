@@ -8,8 +8,6 @@ import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.exception.BadRequestException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.QueryParams;
-import org.apache.coyote.http11.request.mapping.MappingKey;
-import org.apache.coyote.http11.request.mapping.RequestMapper;
 import org.apache.coyote.http11.request.mapping.controllerscan.Controller;
 import org.apache.coyote.http11.request.mapping.controllerscan.RequestMapping;
 import org.apache.coyote.http11.response.HtmlResponse;
@@ -23,11 +21,6 @@ public class AuthController {
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     private final UserService userService = new UserService();
-
-    public void init() {
-        final RequestMapper requestMapper = RequestMapper.getInstance();
-        requestMapper.registerMapping(new MappingKey(HttpMethod.GET, "/login"), this::login);
-    }
 
     @RequestMapping(method = HttpMethod.GET, uri = "/login")
     public HttpResponse login(final HttpRequest httpRequest) {

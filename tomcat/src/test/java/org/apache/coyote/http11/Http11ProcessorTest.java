@@ -6,9 +6,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.jwp.ui.AuthController;
-import nextstep.jwp.ui.HomeController;
+import nextstep.Application;
 import org.apache.coyote.http11.request.mapping.RequestMapper;
+import org.apache.coyote.http11.request.mapping.controllerscan.ControllerScanner;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -18,8 +18,7 @@ class Http11ProcessorTest {
     @BeforeEach
     void setUp() {
         RequestMapper.getInstance().deleteAllMapping();
-        new AuthController().init();
-        new HomeController().init();
+        ControllerScanner.scan(Application.class.getPackageName());
     }
 
     @Test

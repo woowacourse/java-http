@@ -6,7 +6,6 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.domain.HttpStatus;
 import org.apache.coyote.http11.domain.QueryParameters;
-import org.apache.coyote.http11.exception.FaviconNotFoundException;
 import org.apache.coyote.http11.exception.InvalidHttpRequestStartLineException;
 import org.apache.coyote.http11.presentation.HttpRequest;
 import org.apache.coyote.http11.presentation.HttpResponse;
@@ -25,7 +24,6 @@ import java.util.Optional;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String FAVICON_URI = "/favicon.ico";
     private static final String QUERY_STRING_PREFIX = "?";
     private static final String HTML_EXTENSION = ".html";
     private static final String ACCOUNT_KEY = "account";
@@ -50,8 +48,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = HttpRequest.of(lines);
             final HttpResponse httpResponse = createHttpResponse(httpRequest, parseUri(httpRequest));
             sendResponse(outputStream, httpResponse);
-        } catch (IOException | UncheckedServletException |
-                InvalidHttpRequestStartLineException | FaviconNotFoundException e) {
+        } catch (IOException | UncheckedServletException | InvalidHttpRequestStartLineException e) {
             log.error(e.getMessage(), e);
         }
     }

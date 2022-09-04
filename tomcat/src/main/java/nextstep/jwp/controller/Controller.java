@@ -1,14 +1,20 @@
 package nextstep.jwp.controller;
 
 
+import java.util.NoSuchElementException;
+
 import org.apache.coyote.http11.request.Params;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import nextstep.jwp.service.Service;
 
 public class Controller {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Controller.class);
 
     private final Service service;
 
@@ -27,9 +33,13 @@ public class Controller {
     }
 
     public HttpResponse login(final Params params) {
-        final String account = params.find("account");
-        final String password = params.find("password");
-        service.login(account, password);
+        try {
+            final String account = params.find("account");
+            final String password = params.find("password");
+            service.login(account, password);
+        } catch (NoSuchElementException e) {
+            LOG.error(e.getMessage());
+        }
 
         return asResponse(HttpStatus.OK, "login.html");
     }

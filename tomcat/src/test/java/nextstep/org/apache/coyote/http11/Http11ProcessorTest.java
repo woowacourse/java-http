@@ -1,5 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
+import org.junit.jupiter.api.DisplayName;
 import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
@@ -56,6 +57,37 @@ class Http11ProcessorTest {
                 "Content-Length: 5564 \r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("http 요청 시 css 파일을 요청할 수 있다.")
+    void css() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+            "GET /css/styles.css HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Accept: text/css,*/*;q=0.1",
+            "Connection: keep-alive ",
+            "",
+            "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
+
+        var expected= String.join("\r\n",
+            "HTTP/1.1 200 OK ",
+            "Content-Type: text/css;charset=utf-8 ",
+            "Content-Length: 211991 ",
+            "",
+            new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
 
         assertThat(socket.output()).isEqualTo(expected);
     }

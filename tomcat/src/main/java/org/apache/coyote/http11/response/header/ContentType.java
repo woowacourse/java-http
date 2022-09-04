@@ -21,7 +21,6 @@ public enum ContentType {
                 .orElse(HTML);
     }
 
-
     @Override
     public String toString() {
         return this.value;

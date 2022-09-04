@@ -17,9 +17,11 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.ResourceLoader;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.QueryParams;
 import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.response.header.ContentType;
+import org.apache.coyote.http11.response.header.Header;
 import org.apache.coyote.http11.response.header.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,7 +103,7 @@ public class Http11Processor implements Runnable, Processor {
         throw new NotFoundException("페이지를 찾을 수 없습니다.");
     }
 
-    private Response login(final Map<String, String> queryParams) throws URISyntaxException, IOException {
+    private Response login(final QueryParams queryParams) throws URISyntaxException, IOException {
         if (queryParams.isEmpty()) {
             return new Response(ContentType.HTML, StatusCode.OK, ResourceLoader.getStaticResource("/login.html"));
         }
@@ -121,6 +123,6 @@ public class Http11Processor implements Runnable, Processor {
             throw new UnauthorizedException("잘못된 비밀번호입니다.");
         }
 
-        return new Response(ContentType.HTML, StatusCode.FOUND, Map.of("Location", "/index.html"), "");
+        return new Response(ContentType.HTML, StatusCode.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
     }
 }

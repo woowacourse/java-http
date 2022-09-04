@@ -1,19 +1,18 @@
 package org.apache.coyote.http11.request;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import org.apache.coyote.http11.request.header.Header;
+import org.apache.coyote.http11.request.header.Headers;
 import org.apache.coyote.http11.response.header.ContentType;
 
 public class Request {
 
     private final String path;
-    private final Map<String, String> queryParams;
-    private final Map<String, String> headers;
+    private final QueryParams queryParams;
+    private final Headers headers;
 
-    public Request(final String path, final Map<String, String> queryParams, final Map<String, String> headers) {
+    public Request(final String path, final QueryParams queryParams, final Headers headers) {
         this.path = path;
         this.queryParams = queryParams;
         this.headers = headers;
@@ -21,38 +20,19 @@ public class Request {
 
     public static Request from(final List<String> requestLines) {
         final String uri = requestLines.get(0).split(" ")[1];
-        final Map<String, String> header = parseHeaders(requestLines.subList(1, requestLines.size()));
+        final Headers headers = Headers.from(requestLines.subList(1, requestLines.size()));
 
         final int queryStartIndex = uri.indexOf("?");
         if (queryStartIndex < 0) {
-            return new Request(uri, Map.of(), header);
+            return new Request(uri, QueryParams.ofEmpty(), headers);
         }
 
         final String queryString = uri.substring(queryStartIndex + 1);
-        return new Request(parsePath(uri, queryStartIndex), parseQueryParams(queryString), header);
+        return new Request(parsePath(uri, queryStartIndex), QueryParams.from(queryString), headers);
     }
 
     private static String parsePath(final String uri, final int queryStartIndex) {
         return uri.substring(0, queryStartIndex);
-    }
-
-    private static Map<String, String> parseQueryParams(final String queryString) {
-        return Arrays.stream(queryString.split("&"))
-                .map(param -> param.split("=", 2))
-                .filter(param -> param.length == 2)
-                .collect(Collectors.toMap(
-                        param -> param[0],
-                        param -> param[1]
-                ));
-    }
-
-    private static Map<String, String> parseHeaders(final List<String> headerLines) {
-        return headerLines.stream()
-                .map(line -> line.split(": ", 2))
-                .collect(Collectors.toMap(
-                        splitLine -> splitLine[0],
-                        splitLine -> splitLine[1]
-                ));
     }
 
     public boolean isPath(final String path) {
@@ -64,8 +44,8 @@ public class Request {
     }
 
     public ContentType getContentType() {
-        final String contentType = headers
-                .getOrDefault("Accept", "text/html")
+        final String contentType = headers.get(Header.Accept)
+                .orElse(ContentType.HTML.toString())
                 .split(",")[0];
 
         return ContentType.of(contentType);
@@ -75,7 +55,7 @@ public class Request {
         return path;
     }
 
-    public Map<String, String> getQueryParams() {
+    public QueryParams getQueryParams() {
         return queryParams;
     }
 }

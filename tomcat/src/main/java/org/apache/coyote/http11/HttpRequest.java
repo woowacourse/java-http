@@ -23,4 +23,8 @@ public class HttpRequest {
     public RequestUri getRequestUri() {
         return requestLine.getRequestUri();
     }
+
+    public HttpMethod getMethod() {
+        return requestLine.getHttpMethod();
+    }
 }

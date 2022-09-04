@@ -40,7 +40,6 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
             Request request = saveRequest(bufferedReader);
-            request.temp();
 
             RequestManager requestManager = RequestMethod.selectManager(request);
 
@@ -58,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
         String now;
         int bodyLength = -1;
         while (!(now = bufferedReader.readLine()).isEmpty()) {
-            requestStrings.add(now);
+            requestStrings.add(now.trim());
             if (now.startsWith(CONTENT_LENGTH)) {
                 bodyLength = Integer.parseInt(now.split(CONTENT_LENGTH_DELIMITER)[1]);
             }
@@ -66,7 +65,7 @@ public class Http11Processor implements Runnable, Processor {
         if (bodyLength > 0) {
             char[] buffer = new char[bodyLength];
             bufferedReader.read(buffer, 0, bodyLength);
-            return Request.of(requestStrings, new String(buffer));
+            return Request.of(requestStrings, new String(buffer).trim());
         }
         return Request.of(requestStrings, EMPTY_BODY);
     }

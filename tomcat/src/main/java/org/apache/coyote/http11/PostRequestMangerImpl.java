@@ -5,7 +5,6 @@ import nextstep.jwp.service.LoginService;
 import nextstep.jwp.service.RegisterService;
 import nextstep.jwp.vo.FileName;
 import nextstep.jwp.vo.FormData;
-import nextstep.jwp.vo.LoginResult;
 
 public class PostRequestMangerImpl implements RequestManager {
     private static final String LOGIN = "/login";

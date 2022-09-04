@@ -38,4 +38,15 @@ class UrlUtilTest {
         // then
         assertThat(joined).isEqualTo("hello/world");
     }
+
+    @Test
+    void urlJoinWithMultipleSlashes() {
+        // given
+        String left = "hello";
+        String right = "world/multiple/slash.html";
+        // when
+        String joined = UrlUtil.joinUrl(left, right);
+        // then
+        assertThat(joined).isEqualTo("hello/world/multiple/slash.html");
+    }
 }

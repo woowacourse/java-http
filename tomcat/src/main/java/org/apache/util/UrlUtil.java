@@ -5,8 +5,7 @@ import java.util.stream.Collectors;
 
 public class UrlUtil {
     public static String joinUrl(String... paths) {
-        return Arrays.stream(paths)
-                .map(path -> path.replaceAll("/+", ""))
-                .collect(Collectors.joining("/"));
+        return String.join("/", paths)
+                .replaceAll("/+", "/");
     }
 }

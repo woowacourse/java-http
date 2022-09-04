@@ -1,6 +1,7 @@
 package nextstep;
 
 import org.apache.catalina.startup.Tomcat;
+import org.apache.coyote.http11.request.mapping.controllerscan.ControllerScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +11,7 @@ public class Application {
 
     public static void main(String[] args) {
         log.info("web server start.");
+        ControllerScanner.scan(Application.class.getPackageName());
         final var tomcat = new Tomcat();
         tomcat.start();
     }

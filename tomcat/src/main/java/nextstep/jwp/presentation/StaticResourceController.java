@@ -27,8 +27,7 @@ public class StaticResourceController extends AbstractController {
     }
 
     private URL getResource(final HttpRequest request, final HttpResponse response) {
-        final String requestUri = request.getPath();
-        final String resourceName = STATIC_PREFIX + requestUri;
+        final String resourceName = getResourceName(request);
         URL resource = getClass().getClassLoader().getResource(resourceName);
 
         if (resource == null) {
@@ -36,5 +35,14 @@ public class StaticResourceController extends AbstractController {
             response.setStatus(HttpStatus.NOT_FOUND);
         }
         return resource;
+    }
+
+    private static String getResourceName(final HttpRequest request) {
+        String requestUri = request.getPath();
+        if (!request.isResource()) {
+            requestUri += ".html";
+        }
+
+        return STATIC_PREFIX + requestUri;
     }
 }

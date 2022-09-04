@@ -1,6 +1,7 @@
 package nextstep.jwp.presentation;
 
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.HttpRequest;
@@ -26,18 +27,24 @@ public class LoginController extends AbstractController {
 
     @Override
     void doGet(final HttpRequest request, final HttpResponse response) throws Exception {
-        if (request.haveParam(ACCOUNT_PARAM) && request.haveParam(PASSWORD_PARAM)) {
+        try {
             final String account = request.getParam(ACCOUNT_PARAM);
             final String password = request.getParam(PASSWORD_PARAM);
+            Objects.requireNonNull(account, "null이면 안됨 ㅋ");
+            Objects.requireNonNull(password,"null이면 안됨 ㅋ");
+
             final User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(NoSuchElementException::new);
             if (user.checkPassword(password)) {
                 final String outputMessage = user.toString();
                 log.info(outputMessage);
             }
+        } catch (final RuntimeException e) {
+            log.error(e.getMessage());
         }
 
-        final StaticResourceController staticResourceController = StaticResourceController.getInstance();
+        final Controller staticResourceController = StaticResourceController.getInstance();
         staticResourceController.service(request, response);
+
     }
 }

@@ -9,7 +9,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.presentation.Controller;
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
 import org.apache.coyote.Processor;
@@ -43,10 +42,8 @@ public class Http11Processor implements Runnable, Processor {
             doService(httpRequest, httpResponse);
 
             write(outputStream, httpResponse);
-        } catch (final IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
         } catch (final Exception e) {
-            throw new RuntimeException(e);
+            log.error(e.getMessage(), e);
         }
     }
 

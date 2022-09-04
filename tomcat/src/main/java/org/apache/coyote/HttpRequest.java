@@ -43,6 +43,10 @@ public class HttpRequest {
         return method;
     }
 
+    public boolean isResource() {
+        return path.isResource();
+    }
+
     public String getParam(final String param) {
         return path.getParam(param);
     }

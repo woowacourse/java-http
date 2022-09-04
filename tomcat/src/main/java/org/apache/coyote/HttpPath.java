@@ -8,6 +8,7 @@ public class HttpPath {
     private static final String REQUEST_PARAM_DELIMITER = "?";
     private static final String PARAMS_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
+    private static final String EXTENSION_DOT = ".";
 
     private static final int KEY = 0;
     private static final int VALUE = 1;
@@ -69,5 +70,9 @@ public class HttpPath {
 
     public String getParam(final String key) {
         return params.get(key);
+    }
+
+    public boolean isResource() {
+        return value.contains(EXTENSION_DOT);
     }
 }

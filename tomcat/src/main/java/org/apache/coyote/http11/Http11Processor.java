@@ -36,20 +36,24 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final HttpRequest request = new HttpRequest(inputStream);
-            if (request.getUrl().getPath().endsWith("/login.html")) {
-                AuthController.login(request);
-            }
+            final HttpResponse response = getResponse(request);
 
-            final HttpResponse response = new HttpResponse(request, StatusCode.OK, getStaticResource(request));
-
-            outputStream.write(response.getResponse().getBytes());
+            outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private String getStaticResource(HttpRequest request) throws IOException, URISyntaxException {
+    private HttpResponse getResponse(HttpRequest request) throws URISyntaxException, IOException {
+        if (request.getUrl().getPath().endsWith("/login.html")) {
+            return AuthController.login(request);
+        }
+
+        return new HttpResponse(request, StatusCode.OK, getStaticResource(request));
+    }
+
+    private String getStaticResource(HttpRequest request) throws IOException {
         final URL requestUrl = request.getUrl();
         if (requestUrl.getPath().equals("/")) {
             return "Hello world!";

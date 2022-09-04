@@ -16,9 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class HttpRequest {
 
     private static final String REQUEST_URI = "REQUEST URI";
@@ -80,17 +77,22 @@ public class HttpRequest {
         return new URI("http://" + getHeaderValue("Host") + getHeaderValue(REQUEST_URI));
     }
 
-    public URL getUrl() throws MalformedURLException, URISyntaxException {
-        final URI requestUri = getUri();
+    public URL getUrl() {
+        try {
+            final URI requestUri = getUri();
 
-        if (requestUri.getPath().equals("/")) {
-            return requestUri.toURL();
-        }
-        if (hasQuery()) {
-            return addExtensionToPath(new URI(removeQueryStrings(requestUri)));
-        }
+            if (requestUri.getPath().equals("/")) {
+                return requestUri.toURL();
+            }
+            if (hasQuery()) {
+                return addExtensionToPath(new URI(removeQueryStrings(requestUri)));
+            }
 
-        return addExtensionToPath(requestUri);
+            return addExtensionToPath(requestUri);
+        } catch (MalformedURLException | URISyntaxException e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException("Invalid Uri");
+        }
     }
 
     private String removeQueryStrings(URI requestUri) {

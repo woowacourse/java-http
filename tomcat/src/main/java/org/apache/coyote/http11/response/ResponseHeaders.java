@@ -10,19 +10,24 @@ public class ResponseHeaders implements Response {
 
     private final List<ResponseHeader> headers;
 
-    public ResponseHeaders(List<ResponseHeader> headers) {
+    private ResponseHeaders(List<ResponseHeader> headers) {
         this.headers = headers;
     }
 
-    public static ResponseHeaders from(String body) {
-        ResponseHeaders headers = new ResponseHeaders(new ArrayList<>());
-        headers.append(ContentLength.from(body));
-        return headers;
+    public static ResponseHeaders empty() {
+        return new ResponseHeaders(new ArrayList<>());
     }
 
-    public void append(ResponseHeader header) {
-        headers.remove(header);
-        this.headers.add(header);
+    public ResponseHeaders update(String body) {
+        ContentLength contentLength = ContentLength.from(body);
+        return append(contentLength);
+    }
+
+    public ResponseHeaders append(ResponseHeader header) {
+        List<ResponseHeader> newHeaders = new ArrayList<>(this.headers);
+        newHeaders.remove(header);
+        newHeaders.add(header);
+        return new ResponseHeaders(newHeaders);
     }
 
     @Override

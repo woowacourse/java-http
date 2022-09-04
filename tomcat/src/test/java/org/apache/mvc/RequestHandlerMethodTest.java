@@ -4,7 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import org.apache.coyote.http11.fixture.TestController;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.exception.TempException;
@@ -32,18 +34,14 @@ class RequestHandlerMethodTest {
     @Test
     void handleRequestByInvocation() throws NoSuchMethodException {
         // given
-        Controller controller = new Controller() {
-            public ResponseEntity myMethod(HttpRequest httpRequest) {
-                return new ResponseEntity(HttpStatus.OK, "hello");
-            }
-        };
-        RequestHandlerMethod handler = new RequestHandlerMethod(
+        Controller controller = new TestController();
+        RequestHandlerMethod handlerMethod = new RequestHandlerMethod(
                 controller,
                 controller.getClass().getMethod("myMethod", HttpRequest.class)
         );
 
         // when
-        ResponseEntity entity = handler.handle(null);
+        ResponseEntity entity = handlerMethod.handle(null);
 
         // then
         assertThat(entity.getBody()).isEqualTo("hello");

@@ -22,16 +22,18 @@ public class ControllerRequestHandlerChain implements RequestHandlerChain {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) {
+    public HttpResponse handle(HttpRequest request, HttpResponse response) {
         RequestHandlerMethod requestHandlerMethod = findMappedHandlerMethod(request);
         if (requestHandlerMethod == null) {
-            return next.handle(request);
+            return next.handle(request, response);
         }
+
         ResponseEntity entity = requestHandlerMethod.handle(request);
+        response = response.update(entity.getStatus(), entity.getBody());
         if (isRedirect(entity.getBody())) {
-            return next.handle(redirectPath(request, entity.getBody()));
+            return next.handle(redirectPath(request, entity.getBody()), response);
         }
-        return HttpResponse.from(entity.getStatus(), entity.getBody()).addHeader(ContentType.TEXT_HTML);
+        return response.addHeader(ContentType.TEXT_HTML);
     }
 
     private RequestHandlerMethod findMappedHandlerMethod(HttpRequest httpRequest) {

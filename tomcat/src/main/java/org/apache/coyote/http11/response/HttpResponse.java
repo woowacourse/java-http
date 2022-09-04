@@ -15,17 +15,27 @@ public class HttpResponse implements Response {
         this.body = body;
     }
 
-    public static HttpResponse from(HttpStatus status, String bodyString) {
-        ResponseGeneral general = new ResponseGeneral(HttpVersion.HTTP11, status);
-        ResponseHeaders headers = ResponseHeaders.from(bodyString);
-        ResponseBody body = new ResponseBody(bodyString);
-
+    public static HttpResponse initial() {
+        ResponseGeneral general = new ResponseGeneral(HttpVersion.HTTP11, HttpStatus.OK);
+        ResponseHeaders headers = ResponseHeaders.empty();
+        ResponseBody body = ResponseBody.empty();
         return new HttpResponse(general, headers, body);
     }
 
+    public HttpResponse update(HttpStatus status, String bodyString) {
+        return new HttpResponse(
+                new ResponseGeneral(HttpVersion.HTTP11, status),
+                this.headers.update(bodyString),
+                new ResponseBody(bodyString)
+        );
+    }
+
+    public HttpResponse updateBody(String bodyString) {
+        return new HttpResponse(general, headers.update(bodyString), new ResponseBody(bodyString));
+    }
+
     public HttpResponse addHeader(ResponseHeader header) {
-        this.headers.append(header);
-        return this;
+        return new HttpResponse(general, this.headers.append(header), body);
     }
 
     @Override

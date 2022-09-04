@@ -21,14 +21,14 @@ public class StaticFileRequestHandlerChain implements RequestHandlerChain {
     }
 
     @Override
-    public HttpResponse handle(HttpRequest request) {
+    public HttpResponse handle(HttpRequest request, HttpResponse response) {
         String filePath = UrlUtil.joinUrl(LOCATION, request.getPath());
         try {
             File file = FileUtil.loadFile(filePath);
-            return HttpResponse.from(HttpStatus.OK, readAsString(file))
+            return response.updateBody(readAsString(file))
                     .addHeader(ContentType.findWithExtension(file.getName()));
         } catch (IllegalArgumentException | IOException e) {
-            return next.handle(request);
+            return next.handle(request, response);
         }
     }
 

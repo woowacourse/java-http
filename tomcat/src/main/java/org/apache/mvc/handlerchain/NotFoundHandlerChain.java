@@ -7,7 +7,7 @@ import org.apache.coyote.http11.response.HttpStatus;
 public class NotFoundHandlerChain implements RequestHandlerChain {
 
     @Override
-    public HttpResponse handle(HttpRequest request) {
-        return HttpResponse.from(HttpStatus.NOT_FOUND, "");
+    public HttpResponse handle(HttpRequest ignored, HttpResponse response) {
+        return response.update(HttpStatus.NOT_FOUND, "");
     }
 }

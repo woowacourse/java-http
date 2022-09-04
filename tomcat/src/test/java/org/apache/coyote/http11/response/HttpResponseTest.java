@@ -7,13 +7,13 @@ import org.junit.jupiter.api.Test;
 class HttpResponseTest {
 
     @Test
-    void createResponseWithStatusAndBody() {
+    void updateResponseWithStatusAndBody() {
         // given
         String bodyString = "hello world";
         HttpStatus status = HttpStatus.OK;
 
         // when
-        HttpResponse response = HttpResponse.from(status, bodyString);
+        HttpResponse response = HttpResponse.initial().update(status, bodyString);
 
         // then
         assertThat(response).isNotNull();
@@ -24,7 +24,7 @@ class HttpResponseTest {
         // given
         String bodyString = "hello world";
         HttpStatus status = HttpStatus.OK;
-        HttpResponse response = HttpResponse.from(status, bodyString);
+        HttpResponse response = HttpResponse.initial().update(status, bodyString);
 
         // when
         String responseString = response.getAsString();

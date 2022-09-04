@@ -26,7 +26,7 @@ class StaticFileRequestHandlerChainTest {
 
         StaticFileRequestHandlerChain chain = new StaticFileRequestHandlerChain(null);
         // when
-        HttpResponse response = chain.handle(HttpRequest.parse(new ByteArrayInputStream(httpRequest.getBytes())));
+        HttpResponse response = chain.handle(HttpRequest.parse(new ByteArrayInputStream(httpRequest.getBytes())), HttpResponse.initial());
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");

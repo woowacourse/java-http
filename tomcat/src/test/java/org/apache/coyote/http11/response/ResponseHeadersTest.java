@@ -11,7 +11,7 @@ class ResponseHeadersTest {
         // given
         String bodyString = "hello world";
         // when
-        ResponseHeaders headers = ResponseHeaders.from(bodyString);
+        ResponseHeaders headers = ResponseHeaders.empty().update(bodyString);
         // then
         assertThat(headers).isNotNull();
     }
@@ -20,7 +20,7 @@ class ResponseHeadersTest {
     void getAsString() {
         // given
         String bodyString = "hello world";
-        ResponseHeaders headers = ResponseHeaders.from(bodyString);
+        ResponseHeaders headers = ResponseHeaders.empty().update(bodyString);
 
         // when
         String headersString = headers.getAsString();

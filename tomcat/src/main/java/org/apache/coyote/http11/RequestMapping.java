@@ -2,10 +2,10 @@ package org.apache.coyote.http11;
 
 import java.util.Map;
 import java.util.Map.Entry;
-import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.StaticResourceController;
-import nextstep.jwp.controller.WelcomeController;
+import nextstep.jwp.presentation.Controller;
+import nextstep.jwp.presentation.LoginController;
+import nextstep.jwp.presentation.StaticResourceController;
+import nextstep.jwp.presentation.WelcomeController;
 
 public class RequestMapping {
 

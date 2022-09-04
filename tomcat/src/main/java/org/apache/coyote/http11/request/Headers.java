@@ -6,15 +6,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class RequestHeader {
+public class Headers {
 
     private final Map<String, String> headers;
 
-    private RequestHeader(Map<String, String> headers) {
+    private Headers(Map<String, String> headers) {
         this.headers = headers;
     }
 
-    public static RequestHeader of(List<String> headerLines) {
+    public static Headers of(List<String> headerLines) {
         Map<String, String> headers = new HashMap<>();
 
         for (String header : headerLines) {
@@ -22,7 +22,7 @@ public class RequestHeader {
             headers.put(keyValue[0], keyValue[1]);
         }
 
-        return new RequestHeader(headers);
+        return new Headers(headers);
     }
 
     public Map<String, String> getHeaders() {
@@ -37,7 +37,7 @@ public class RequestHeader {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        RequestHeader that = (RequestHeader) o;
+        Headers that = (Headers) o;
         return Objects.equals(headers, that.headers);
     }
 

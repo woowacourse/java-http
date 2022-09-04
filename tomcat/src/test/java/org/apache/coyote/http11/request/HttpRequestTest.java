@@ -19,9 +19,9 @@ class HttpRequestTest {
         HttpRequest httpRequest = HttpRequest.of(request);
 
         // then
-        assertThat(httpRequest).extracting("requestLine", "requestHeader")
+        assertThat(httpRequest).extracting("requestLine", "headers")
                 .containsExactly(RequestLine.of("GET /index.html HTTP/1.1"),
-                        RequestHeader.of(List.of("Host: localhost:8080", "Connection: keep-alive")));
+                        Headers.of(List.of("Host: localhost:8080", "Connection: keep-alive")));
     }
 
     @Test

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-class RequestHeaderTest {
+class HeadersTest {
 
     @Test
     void header가_존재하지_않는_경우_빈_값이_저장된다() {
@@ -15,7 +15,7 @@ class RequestHeaderTest {
         List<String> headers = List.of();
 
         // when
-        RequestHeader requestHeader = RequestHeader.of(headers);
+        Headers requestHeader = Headers.of(headers);
 
         // then
         assertThat(requestHeader.getHeaders()).isEmpty();
@@ -27,7 +27,7 @@ class RequestHeaderTest {
         List<String> headers = List.of("key: value", "name: park");
 
         // when
-        RequestHeader requestHeader = RequestHeader.of(headers);
+        Headers requestHeader = Headers.of(headers);
 
         // then
         assertThat(requestHeader.getHeaders()).usingRecursiveComparison()
@@ -40,7 +40,7 @@ class RequestHeaderTest {
         List<String> headers = List.of("key:value", "name: park");
 
         // when & then
-        assertThatThrownBy(() -> RequestHeader.of(headers))
+        assertThatThrownBy(() -> Headers.of(headers))
                 .isInstanceOf(IndexOutOfBoundsException.class);
     }
 }

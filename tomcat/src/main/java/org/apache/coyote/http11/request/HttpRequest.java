@@ -8,20 +8,20 @@ import java.util.regex.Pattern;
 public class HttpRequest {
 
     private final RequestLine requestLine;
-    private final RequestHeader requestHeader;
+    private final Headers headers;
 
-    private HttpRequest(RequestLine requestLine, RequestHeader requestHeader) {
+    private HttpRequest(RequestLine requestLine, Headers headers) {
         this.requestLine = requestLine;
-        this.requestHeader = requestHeader;
+        this.headers = headers;
     }
 
     public static HttpRequest of(String request) {
         LinkedList<String> lines = getLines(request);
 
         RequestLine requestLine = RequestLine.of(lines.remove());
-        RequestHeader requestHeader = RequestHeader.of(lines);
+        Headers headers = Headers.of(lines);
 
-        return new HttpRequest(requestLine, requestHeader);
+        return new HttpRequest(requestLine, headers);
     }
 
     private static LinkedList<String> getLines(String request) {
@@ -48,12 +48,12 @@ public class HttpRequest {
             return false;
         }
         HttpRequest that = (HttpRequest) o;
-        return Objects.equals(requestLine, that.requestLine) && Objects.equals(requestHeader,
-                that.requestHeader);
+        return Objects.equals(requestLine, that.requestLine) && Objects.equals(headers,
+                that.headers);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(requestLine, requestHeader);
+        return Objects.hash(requestLine, headers);
     }
 }

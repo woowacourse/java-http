@@ -21,7 +21,7 @@ class HttpMethodTest {
     @TestInstance(Lifecycle.PER_CLASS)
     class FindByName {
 
-        @ParameterizedTest
+        @ParameterizedTest(name = "{0} 요청 시 {1} 타입을 반환한다.")
         @MethodSource("httpMethodArguments")
         @DisplayName("주어진 이름과 일치하는 HTTP 메서드 타입을 반환한다.")
         void success(final String methodName, final HttpMethod expected) {

@@ -27,6 +27,7 @@ public class HttpRequest {
     private static LinkedList<String> getLines(String request) {
         return new LinkedList<>(Arrays.asList(request.split("\r\n")));
     }
+
     public boolean matchUri(Pattern uriPattern) {
         return requestLine.matchUri(uriPattern);
     }

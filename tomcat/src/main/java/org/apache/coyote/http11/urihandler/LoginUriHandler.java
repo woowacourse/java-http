@@ -1,8 +1,6 @@
 package org.apache.coyote.http11.urihandler;
 
 import java.io.IOException;
-import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Pattern;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;

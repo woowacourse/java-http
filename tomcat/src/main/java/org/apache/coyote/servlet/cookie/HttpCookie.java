@@ -9,13 +9,20 @@ public class HttpCookie {
 
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final int COOKIE_FORMAT_ELEMENT_COUNT = 2;
+    private static final String SET_MAX_AGE_FORMAT = "; Max-Age=%d";
 
     private final String name;
     private final String value;
+    private final Integer maxAge;
 
-    public HttpCookie(String name, String value) {
+    private HttpCookie(String name, String value, Integer maxAge) {
         this.name = name;
         this.value = value;
+        this.maxAge = maxAge;
+    }
+
+    private HttpCookie(String name, String value) {
+        this(name, value, null);
     }
 
     public static HttpCookie of(String cookie) {
@@ -27,11 +34,15 @@ public class HttpCookie {
     }
 
     public static HttpCookie ofSessionId(UUID sessionId) {
-        return new HttpCookie(Session.JSESSIONID, sessionId.toString());
+        return new HttpCookie(Session.JSESSIONID, sessionId.toString(), Session.VALIDITY_IN_SECONDS);
     }
 
     public String toHeaderFormat() {
-        return name + KEY_VALUE_DELIMITER + value;
+        String cookie = name + KEY_VALUE_DELIMITER + value;
+        if (maxAge != null) {
+            cookie = cookie + String.format(SET_MAX_AGE_FORMAT, maxAge);
+        }
+        return cookie;
     }
 
     public String getName() {

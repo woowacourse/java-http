@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 public class Session {
 
     public static final String JSESSIONID = "JSESSIONID";
-    private static final int VALIDITY_IN_MINUTES = 10;
+    public static final int VALIDITY_IN_SECONDS = 3600;
 
     private final Long userId;
     private final LocalDateTime expirationTime;
@@ -16,7 +16,7 @@ public class Session {
     }
 
     public static Session of(Long userId) {
-        final var expirationTime = LocalDateTime.now().plusMinutes(VALIDITY_IN_MINUTES);
+        final var expirationTime = LocalDateTime.now().plusSeconds(VALIDITY_IN_SECONDS);
         return new Session(userId, expirationTime);
     }
 }

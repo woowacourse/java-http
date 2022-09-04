@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import org.apache.http.HttpMime;
 import org.apache.http.HttpStatus;
 import org.apache.http.RequestEntity;
 import org.apache.http.ResponseEntity;
@@ -15,7 +16,7 @@ class LoginControllerTest {
     void account값과_password값이_일치하면_OK를_반환한다() throws Exception {
         // given
         final RequestEntity requestEntity = new RequestEntity("/login", "account=gugu&password=password");
-        final ResponseEntity expected = new ResponseEntity().contentType("text/html");
+        final ResponseEntity expected = new ResponseEntity().contentType(HttpMime.TEXT_HTML);
         // when
         final ResponseEntity actual = controller.execute(requestEntity);
 
@@ -30,7 +31,7 @@ class LoginControllerTest {
         // given
         final RequestEntity requestEntity = new RequestEntity( "/login", "account=gonggong&password=password");
         final ResponseEntity expected = new ResponseEntity().httpStatus(HttpStatus.BAD_REQUEST)
-                .contentType("text/html");
+                .contentType(HttpMime.TEXT_HTML);
 
         // when
         final ResponseEntity actual = controller.execute(requestEntity);
@@ -46,7 +47,7 @@ class LoginControllerTest {
         // given
         final RequestEntity requestEntity = new RequestEntity("/login", "account=gugu&password=password1");
         final ResponseEntity expected = new ResponseEntity().httpStatus(HttpStatus.BAD_REQUEST)
-                .contentType("text/html");
+                .contentType(HttpMime.TEXT_HTML);
 
         // when
         final ResponseEntity actual = controller.execute(requestEntity);

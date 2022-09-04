@@ -1,5 +1,6 @@
 package nextstep.jwp.controller;
 
+import org.apache.http.HttpMime;
 import org.apache.http.RequestEntity;
 import org.apache.http.ResponseEntity;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,7 @@ class GreetingControllerTest {
     void 성공코드를_반환한다() throws Exception {
         // given
         final RequestEntity requestEntity = new RequestEntity("/", null);
-        final ResponseEntity expected = new ResponseEntity().contentType("text/html");
+        final ResponseEntity expected = new ResponseEntity().contentType(HttpMime.TEXT_HTML);
 
         // when
         final ResponseEntity actual = controller.execute(requestEntity);

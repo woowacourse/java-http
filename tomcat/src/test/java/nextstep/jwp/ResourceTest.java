@@ -29,11 +29,11 @@ class ResourceTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"/index.html,text/html", "/css/styles.css,text/css"})
+    @CsvSource(value = {"/index.html,text/html", "/css/styles.css,text/css", "/js/scripts.js,text/javascript"})
     void 자원의_contentType을_불러온다(final String path, final String contentType) throws NotFoundException {
         // given
         final Resource resource = new Resource(path);
         // when, then
-        assertThat(resource.getContentType()).isEqualTo(contentType);
+        assertThat(resource.getContentType().getValue()).isEqualTo(contentType);
     }
 }

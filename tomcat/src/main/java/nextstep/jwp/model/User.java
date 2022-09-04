@@ -22,8 +22,16 @@ public class User {
         return this.password.equals(password);
     }
 
+    public boolean hasId() {
+        return this.id != null;
+    }
+
     public String getAccount() {
         return account;
+    }
+
+    public User setId(long id) {
+        return new User(id, account, password, email);
     }
 
     @Override

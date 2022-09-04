@@ -25,7 +25,6 @@ public class ResponseBodyGenerator {
         String resourceName = getResourceName(resource);
         URL url = getClass().getClassLoader()
                 .getResource(resourceName);
-        System.out.println(url);
         if (url == null) {
             return NOT_FOUND_MESSAGE;
         }

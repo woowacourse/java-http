@@ -5,11 +5,11 @@ import java.util.Map;
 
 public class Parser {
 
-    public static String parseUri(String line) {
+    public static String parseUri(final String line) {
         return line.split(" ")[1];
     }
 
-    public static Map<String, String> parseQueryString(String parsedURI) {
+    public static Map<String, String> parseQueryString(final String parsedURI) {
         int index = parsedURI.indexOf("?");
         String queryString = parsedURI.substring(index + 1);
         String[] keyValues = queryString.split("&");

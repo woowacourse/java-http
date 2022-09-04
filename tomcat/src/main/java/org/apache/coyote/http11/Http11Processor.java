@@ -5,7 +5,9 @@ import static org.apache.coyote.support.Parser.parseQueryString;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,9 +38,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     @Override
-    public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+    public void process(Socket connection) {
+        try (final InputStream inputStream = connection.getInputStream();
+             final OutputStream outputStream = connection.getOutputStream()) {
             String firstLine = new BufferedReader(new InputStreamReader(inputStream)).readLine();
             String response = generateResponse(firstLine);
 
@@ -49,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String generateResponse(String firstLine) throws IOException {
+    private String generateResponse(final String firstLine) throws IOException {
         String parsedURI = Parser.parseUri(firstLine);
         String responseBody = generateResponseBody(parsedURI);
         String contentType = getContentType(firstLine);
@@ -63,7 +65,7 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private String getContentType(String firstLine) {
+    private String getContentType(final String firstLine) {
         if (firstLine.contains("/css")) {
             return "Content-Type: text/css;charset=utf-8 ";
         }
@@ -73,7 +75,7 @@ public class Http11Processor implements Runnable, Processor {
         return "Content-Type: text/html;charset=utf-8 ";
     }
 
-    private String generateResponseBody(String parsedURI) throws IOException {
+    private String generateResponseBody(final String parsedURI) throws IOException {
         String resource = parsedURI.split("\\?")[0];
         if ("/".equals(parsedURI)) {
             return DEFAULT_RESPONSE_BODY;
@@ -90,7 +92,7 @@ public class Http11Processor implements Runnable, Processor {
         return Files.readString(path);
     }
 
-    private void parseQuery(String parsedURI) {
+    private void parseQuery(final String parsedURI) {
         if (parsedURI.contains("?")) {
             Map<String, String> queryMap = parseQueryString(parsedURI);
             InMemoryUserRepository.findByAccountAndPassword(queryMap.get("account"), queryMap.get("password"));

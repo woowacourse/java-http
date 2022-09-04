@@ -31,7 +31,7 @@ public class HttpRequest {
     }
 
     public String getUri() {
-        return requestLine.getUri();
+        return requestLine.getPath();
     }
 
     public boolean containsQuery() {

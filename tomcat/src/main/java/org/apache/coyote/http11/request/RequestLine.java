@@ -44,7 +44,7 @@ public class RequestLine {
         return requestUri.containsQuery();
     }
 
-    public String getUri() {
+    public String getPath() {
         return requestUri.getPath();
     }
 

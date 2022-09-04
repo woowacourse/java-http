@@ -1,9 +1,10 @@
-package org.apache.coyote.http11;
+package nextstep.jwp.service;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
+import nextstep.jwp.vo.LoginResult;
 
 import java.util.Optional;
 import java.util.UUID;

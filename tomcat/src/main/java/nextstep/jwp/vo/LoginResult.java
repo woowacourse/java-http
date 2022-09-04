@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package nextstep.jwp.vo;
 
 import org.apache.catalina.Session;
 

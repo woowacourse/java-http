@@ -1,5 +1,9 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.vo.FileName;
+import nextstep.jwp.vo.FormData;
+import nextstep.jwp.vo.HttpCookie;
+
 import java.util.*;
 
 public class RequestParser {

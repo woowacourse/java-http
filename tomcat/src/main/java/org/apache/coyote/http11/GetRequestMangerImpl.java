@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import nextstep.jwp.vo.FileName;
+import nextstep.jwp.vo.HttpCookie;
 import org.apache.catalina.SessionManager;
 
 import java.io.IOException;

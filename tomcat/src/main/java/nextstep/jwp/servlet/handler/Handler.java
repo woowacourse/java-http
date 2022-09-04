@@ -23,7 +23,7 @@ public class Handler {
         try {
             return handleWithValidArgs(arg);
         } catch (InvocationTargetException | IllegalAccessException e) {
-            throw new HttpException(e, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw extractHandlerExceptionCause(e);
         }
     }
 
@@ -32,5 +32,13 @@ public class Handler {
             return method.invoke(controller);
         }
         return method.invoke(controller, arg);
+    }
+
+    private HttpException extractHandlerExceptionCause(ReflectiveOperationException exception) {
+        final var cause = exception.getCause();
+        if (cause instanceof HttpException) {
+            return (HttpException) cause;
+        }
+        return new HttpException(exception, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

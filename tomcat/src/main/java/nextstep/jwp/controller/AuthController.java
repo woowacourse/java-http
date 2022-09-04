@@ -5,13 +5,10 @@ import nextstep.jwp.service.UserService;
 import nextstep.jwp.servlet.handler.RequestMapping;
 import org.apache.coyote.servlet.cookie.HttpCookie;
 import org.apache.coyote.servlet.request.HttpRequest;
-import org.apache.coyote.servlet.response.HttpResponse;
-import org.apache.coyote.servlet.response.HttpResponse.HttpResponseBuilder;
 import org.apache.coyote.servlet.response.ResponseEntity;
 import org.apache.coyote.servlet.session.Session;
 import org.apache.coyote.servlet.session.SessionRepository;
 import org.apache.coyote.support.HttpMethod;
-import org.apache.coyote.support.HttpStatus;
 
 public class AuthController {
 
@@ -33,12 +30,11 @@ public class AuthController {
     }
 
     @RequestMapping(method = HttpMethod.POST, path = "/login")
-    public HttpResponse login(HttpRequest request) {
+    public ResponseEntity login(HttpRequest request) {
         final var user = userService.login(DtoAssembler.ofLoginDto(request));
         final var sessionId = sessionRepository.generateNewSession(user.getId());
         final var sessionCookie = HttpCookie.ofSessionId(sessionId);
-        return new HttpResponseBuilder(HttpStatus.FOUND)
-                .setLocation("/index.html")
+        return ResponseEntity.redirect("/index.html")
                 .setCookie(sessionCookie)
                 .build();
     }
@@ -49,10 +45,8 @@ public class AuthController {
     }
 
     @RequestMapping(method = HttpMethod.POST, path = "/register")
-    public HttpResponse register(HttpRequest request) {
+    public ResponseEntity register(HttpRequest request) {
         userService.saveUser(DtoAssembler.ofSaveUserDto(request));
-        return new HttpResponseBuilder(HttpStatus.FOUND)
-                .setLocation("/index.html")
-                .build();
+        return ResponseEntity.redirect("/index.html").build();
     }
 }

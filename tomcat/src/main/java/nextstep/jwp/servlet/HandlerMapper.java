@@ -33,21 +33,15 @@ public class HandlerMapper {
 
     private HttpResponse handle(HttpRequest request, Handler handler) {
         final var response = handler.handle(request);
-        if (handler.hasReturnTypeOf(HttpResponse.class)) {
-            return (HttpResponse) response;
-        }
-        if (handler.hasReturnTypeOf(ResponseEntity.class)) {
-            ResponseEntity responseEntity = (ResponseEntity) response;
-            String viewResource = responseEntity.getViewResource();
-            if (viewResource != null) {
-                return viewResolver.findStaticResource(viewResource);
-            }
-            return responseEntity.toHttpResponse();
-        }
         if (handler.hasReturnTypeOf(String.class)) {
             return viewResolver.findStaticResource((String) response);
         }
-        throw new UnsupportedOperationException("invalid request");
+        ResponseEntity responseEntity = (ResponseEntity) response;
+        String viewResource = responseEntity.getViewResource();
+        if (viewResource == null) {
+            return responseEntity.toHttpResponse();
+        }
+        return viewResolver.findStaticResource(viewResource);
     }
 
     public HttpResponse handle(HttpException exception) {

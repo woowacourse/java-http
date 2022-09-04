@@ -16,7 +16,7 @@ public class HttpResponse {
 
     public HttpResponse() {
         this.statusLine = new StatusLine();
-        this.headers = new Headers(new LinkedHashMap<>());
+        this.headers = new Headers();
         this.body = "";
     }
 
@@ -31,7 +31,7 @@ public class HttpResponse {
 
     public void addView(final String fileName) {
         String fileExtension = FileUtils.getFileExtension(fileName);
-        ContentType contentType = ContentType.parse(fileExtension);
+        ContentType contentType = ContentType.from(fileExtension);
         String responseBody = FileUtils.readFile(fileName);
 
         this.headers = generateHeaders(contentType, responseBody);
@@ -39,10 +39,10 @@ public class HttpResponse {
     }
 
     private Headers generateHeaders(final ContentType contentType, final String body) {
-        LinkedHashMap<String, String> headers = new LinkedHashMap<>();
-        headers.put(CONTENT_TYPE, contentType.getValue());
-        headers.put(CONTENT_LENGTH, getContentLength(body));
-        return new Headers(headers);
+        Headers headers = new Headers();
+        headers.addHeader(CONTENT_TYPE, contentType.getValue());
+        headers.addHeader(CONTENT_LENGTH, getContentLength(body));
+        return headers;
     }
 
     private String getContentLength(final String body) {

@@ -27,8 +27,8 @@ public class LoginServlet extends HttpServlet {
     }
 
     protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        String account = httpRequest.getBodyParameter("account");
-        String password = httpRequest.getBodyParameter("password");
+        String account = httpRequest.getRequestParameter("account");
+        String password = httpRequest.getRequestParameter("password");
 
         if (InMemoryUserRepository.existsAccountAndPassword(account, password)) {
             User user = InMemoryUserRepository.findByAccount(account).orElseThrow(NoSuchUserException::new);

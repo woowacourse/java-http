@@ -1,26 +1,18 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 public class HttpRequest {
 
     private RequestLine requestLine;
     private Headers headers;
     private String body;
-    private QueryParameters requestParameters;
+    private RequestParameters requestParameters;
 
     public HttpRequest(final String startLine) {
-        this(startLine, new HashMap<>());
-    }
-
-    public HttpRequest(final String startLine, final Map<String, String> headers) {
         String[] splitStartLine = startLine.split(" ");
         this.requestLine = new RequestLine(splitStartLine[0], splitStartLine[1], splitStartLine[2]);
-        this.headers = new Headers(new LinkedHashMap<>(headers));
+        this.headers = new Headers();
         this.body = "";
-        this.requestParameters = QueryParameters.EMPTY_QUERY_PARAMETERS;
+        this.requestParameters = RequestParameters.EMPTY_PARAMETERS;
     }
 
     public String getRequestLine() {
@@ -51,18 +43,18 @@ public class HttpRequest {
     public void addBody(final String body) {
         this.body = body;
         if (body.contains("&") && body.contains("=")) {
-            this.requestParameters = new QueryParameters(body);
+            this.requestParameters = new RequestParameters(body);
             return;
         }
 
-        this.requestParameters = QueryParameters.EMPTY_QUERY_PARAMETERS;
+        this.requestParameters = RequestParameters.EMPTY_PARAMETERS;
     }
 
-    public String getBodyParameter(final String key) {
-        return requestParameters.findByQueryParameterKey(key);
+    public boolean hasRequestParameter(final String... keys) {
+        return requestParameters.hasParameter(keys);
     }
 
-    public boolean hasBodyParameter(final String... keys) {
-        return requestParameters.hasQueryParameter(keys);
+    public String getRequestParameter(final String key) {
+        return requestParameters.getParameter(key);
     }
 }

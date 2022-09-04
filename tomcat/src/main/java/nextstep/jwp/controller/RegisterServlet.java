@@ -27,14 +27,14 @@ public class RegisterServlet extends HttpServlet {
 
     @Override
     protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        if (!httpRequest.hasBodyParameter("account", "password", "email")) {
+        if (!httpRequest.hasRequestParameter("account", "password", "email")) {
             httpResponse.addStatusCode(StatusCode.OK);
             httpResponse.addView("login.html");
         }
 
-        String account = httpRequest.getBodyParameter("account");
-        String password = httpRequest.getBodyParameter("password");
-        String email = httpRequest.getBodyParameter("email");
+        String account = httpRequest.getRequestParameter("account");
+        String password = httpRequest.getRequestParameter("password");
+        String email = httpRequest.getRequestParameter("email");
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);

@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.util.Arrays;
-import java.util.NoSuchElementException;
+import org.apache.coyote.http11.exception.NoSuchContentTypeException;
 
 public enum ContentType {
 
@@ -19,11 +19,11 @@ public enum ContentType {
         this.value = value;
     }
 
-    public static ContentType parse(final String extension) {
+    public static ContentType from(final String extension) {
         return Arrays.stream(values())
                 .filter(contentType -> contentType.extension.equals(extension))
                 .findFirst()
-                .orElseThrow(NoSuchElementException::new);
+                .orElseThrow(NoSuchContentTypeException::new);
     }
 
     public String getExtension() {

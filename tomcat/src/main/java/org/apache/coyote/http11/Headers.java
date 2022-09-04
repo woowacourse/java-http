@@ -6,8 +6,8 @@ public class Headers {
 
     private final LinkedHashMap<String, String> values;
 
-    public Headers(final LinkedHashMap<String, String> values) {
-        this.values = values;
+    public Headers() {
+        this.values = new LinkedHashMap<>();
     }
 
     public void addHeader(final String key, final String value) {

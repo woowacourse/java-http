@@ -1,6 +1,6 @@
 package org.apache.coyote.http11;
 
-public class QueryParameter {
+public class RequestParameter {
 
     private static final String PARAMETER_SPLITTER = "=";
     private static final int KEY_INDEX = 0;
@@ -9,7 +9,7 @@ public class QueryParameter {
     private final String key;
     private final String value;
 
-    public QueryParameter(final String parameter) {
+    public RequestParameter(final String parameter) {
         String[] splitParameter = parameter.split(PARAMETER_SPLITTER);
         this.key = splitParameter[KEY_INDEX];
         this.value = splitParameter[VALUE_INDEX];

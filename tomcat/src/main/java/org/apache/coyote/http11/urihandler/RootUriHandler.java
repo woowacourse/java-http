@@ -1,9 +1,9 @@
 package org.apache.coyote.http11.urihandler;
 
 import java.util.regex.Pattern;
-import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.UriResponse;
+import org.apache.coyote.http11.HandlerResponse;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
+import org.apache.coyote.http11.httpmessage.response.HttpStatus;
 
 public class RootUriHandler implements UriHandler {
 
@@ -15,7 +15,7 @@ public class RootUriHandler implements UriHandler {
     }
 
     @Override
-    public UriResponse getResponse(HttpRequest httpRequest) {
-        return new UriResponse("Hello world!", ContentType.HTML.getValue());
+    public HandlerResponse getResponse(HttpRequest httpRequest) {
+        return new HandlerResponse(HttpStatus.OK, "Hello world!");
     }
 }

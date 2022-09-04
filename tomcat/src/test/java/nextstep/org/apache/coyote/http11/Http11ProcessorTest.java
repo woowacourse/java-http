@@ -176,10 +176,10 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 302 Found ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
@@ -208,7 +208,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 잘못된_비밀번호로_로그인_시_로그인에_실패한다() {
+    void 잘못된_비밀번호로_로그인_시_로그인에_실패한다() throws IOException {
         //given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=집가고싶다 HTTP/1.1 ",
@@ -221,9 +221,21 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
-        // when & then
-        assertThatThrownBy(() -> processor.process(socket))
-                .isInstanceOf(IllegalArgumentException.class);
+        // when
+        processor.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        var expected = String.join("\r\n",
+                "HTTP/1.1 401 Unauthorized ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+
+        assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test
@@ -246,7 +258,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 로그인_요청_시_password를_보내지_않으면_로그인에_실패한다() {
+    void 로그인_요청_시_password를_보내지_않으면_401_html을_응답한다() throws IOException {
         //given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&비밀번호=password HTTP/1.1 ",
@@ -259,8 +271,22 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
-        // when & then
-        assertThatThrownBy(() -> processor.process(socket))
-                .isInstanceOf(IllegalArgumentException.class);
+        // when
+        processor.run();
+
+
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        var expected = String.join("\r\n",
+                "HTTP/1.1 401 Unauthorized ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+
+        assertThat(socket.output()).isEqualTo(expected);
     }
 }

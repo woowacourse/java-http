@@ -1,10 +1,11 @@
 package org.apache.coyote.http11.httpmessage.request;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Headers {
 
@@ -15,7 +16,7 @@ public class Headers {
     }
 
     public static Headers of(List<String> headerLines) {
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> headers = new LinkedHashMap<>();
 
         for (String header : headerLines) {
             String[] keyValue = header.split(": ");
@@ -44,5 +45,12 @@ public class Headers {
     @Override
     public int hashCode() {
         return Objects.hash(headers);
+    }
+
+    @Override
+    public String toString() {
+        return headers.entrySet().stream()
+                .map(entry -> entry.getKey() + ": " + entry.getValue())
+                .collect(Collectors.joining("\r\n"));
     }
 }

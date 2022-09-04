@@ -14,12 +14,15 @@ public enum ContentType {
         this.value = value;
     }
 
-    public static String of(String type) {
+    public static ContentType of(String type) {
         return Arrays.stream(ContentType.values())
-                .filter(contentType -> contentType.name().equalsIgnoreCase(type))
-                .map(ContentType::getValue)
+                .filter(contentType -> contentType.isMatch(type))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("지원하지 않은 ContentType 입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 ContentType 입니다."));
+    }
+
+    private boolean isMatch(String type) {
+        return name().equalsIgnoreCase(type);
     }
 
     public String getValue() {

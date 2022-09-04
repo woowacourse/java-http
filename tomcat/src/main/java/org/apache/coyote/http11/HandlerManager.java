@@ -19,7 +19,7 @@ public enum HandlerManager {
         this.uriHandler = uriHandler;
     }
 
-    public static UriResponse getUriResponse(HttpRequest httpRequest) throws IOException {
+    public static HandlerResponse getUriResponse(HttpRequest httpRequest) throws IOException {
         UriHandler handler = getHandler(httpRequest);
         return handler.getResponse(httpRequest);
     }

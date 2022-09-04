@@ -4,13 +4,13 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.UriResponse;
+import org.apache.coyote.http11.HandlerResponse;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
+import org.apache.coyote.http11.httpmessage.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginUriHandler extends DefaultUriHandler {
+public class LoginUriHandler implements UriHandler {
 
     private static final Logger log = LoggerFactory.getLogger(LoginUriHandler.class);
 
@@ -22,30 +22,22 @@ public class LoginUriHandler extends DefaultUriHandler {
     }
 
     @Override
-    public UriResponse getResponse(HttpRequest httpRequest) throws IOException {
+    public HandlerResponse getResponse(HttpRequest httpRequest) {
         final String account = (String) httpRequest.getParameter("account");
         final String password = (String) httpRequest.getParameter("password");
 
         final User user = findUser(account);
-        validatePassword(user, password);
+        if (user.checkPassword(password)) {
+            log.info(user.toString());
+            return new HandlerResponse(HttpStatus.FOUND, "/index.html");
+        }
 
-        final String responseBody = getResponseBody("static/login.html");
-        final String contentType = ContentType.HTML.getValue();
-
-        log.info(user.toString());
-
-        return new UriResponse(responseBody, contentType);
+        return new HandlerResponse(HttpStatus.UNAUTHORIZED, "/401.html");
     }
 
     private User findUser(String account) {
         return InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 account 입니다."));
-    }
-
-    private void validatePassword(User user, String password) {
-        if (!user.checkPassword(password)) {
-            throw new IllegalArgumentException("잘못된 password 입니다.");
-        }
     }
 }
 

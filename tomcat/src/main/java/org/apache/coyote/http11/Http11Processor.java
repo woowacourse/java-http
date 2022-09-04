@@ -7,6 +7,8 @@ import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
+import org.apache.coyote.http11.httpmessage.response.HttpResponse;
+import org.apache.coyote.http11.view.ModelAndView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,9 +35,9 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = getHttpRequest(bufferedReader);
 
-            UriResponse uriResponse = HandlerManager.getUriResponse(httpRequest);
+            HandlerResponse handlerResponse = HandlerManager.getUriResponse(httpRequest);
 
-            String http11Response = getHttp11Response(uriResponse);
+            String http11Response = getHttp11Response(handlerResponse);
 
             outputStream.write(http11Response.getBytes());
             outputStream.flush();
@@ -55,12 +57,9 @@ public class Http11Processor implements Runnable, Processor {
         return HttpRequest.of(stringBuilder.toString());
     }
 
-    private String getHttp11Response(UriResponse uriResponse) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + uriResponse.getContentType() + ";charset=utf-8 ",
-                "Content-Length: " + uriResponse.getResponseBody().getBytes().length + " ",
-                "",
-                uriResponse.getResponseBody());
+    private String getHttp11Response(HandlerResponse handlerResponse) throws IOException {
+        ModelAndView modelAndView = ModelAndView.of(handlerResponse);
+        HttpResponse httpResponse= HttpResponse.of(modelAndView);
+        return httpResponse.toString();
     }
 }

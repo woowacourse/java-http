@@ -22,7 +22,12 @@ public class Http11Request {
     }
 
     public String getUrl() {
-        return url;
+        int queryIndex = url.indexOf("?");
+        if (queryIndex == -1) {
+            queryIndex = url.length();
+        }
+
+        return url.substring(0, queryIndex);
     }
 
     public Map<String, String> getQueryString() {

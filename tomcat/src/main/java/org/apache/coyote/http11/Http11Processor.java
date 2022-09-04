@@ -1,17 +1,15 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Http11Request;
@@ -20,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -29,13 +28,13 @@ public class Http11Processor implements Runnable, Processor {
     private static final int URL_SEQUENCE = 1;
     private static final int HEADER_NAME_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
-    private static final String RESOURCE_FOLDER = "static";
-    private static final String CHARSET_UTF_8 = ";charset=utf-8";
 
     private final Socket connection;
+    private final ResponseAssembler responseAssembler;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        responseAssembler = new ResponseAssembler();
     }
 
     @Override
@@ -52,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private Http11Response getMapping(Http11Request request) {
         if (request.isResource()) {
-            return generateResourceResponse(request);
+            return responseAssembler.resourceResponse(request.getUrl(), HttpStatus.OK);
         }
         if (request.getUrl().equals("/login")) {
             return generateLoginPage(request);
@@ -62,67 +61,27 @@ public class Http11Processor implements Runnable, Processor {
 
     private Http11Response generateLoginPage(Http11Request request) {
         Map<String, String> queries = request.getQueryString();
-        URL resource = getClass().getClassLoader().getResource(RESOURCE_FOLDER + "/login.html");
-        Map<String, String> headers = new LinkedHashMap<>();
-
         if (queries.get("account") != null && queries.get("password") != null) {
-            checkUserInformation(queries.get("account"), queries.get("password"));
+            return checkUserInformation(queries.get("account"), queries.get("password"));
         }
 
-        headers.put(HttpHeaders.CONTENT_TYPE.getHeaderName(), HttpContent.HTML.getContentType());
-        headers.put(HttpHeaders.CONTENT_LENGTH.getHeaderName(), Long.toString(new File(resource.getFile()).length()));
-
-        try {
-            return new Http11Response(HttpStatus.OK.getStatusCode(), HttpStatus.OK.getMessage(), headers,
-                    new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return responseAssembler.resourceResponse("/login.html", HttpStatus.OK);
     }
 
-    private void checkUserInformation(String account, String password) {
-        InMemoryUserRepository.findByAccount(account)
-                .ifPresent(user -> {
-                    if (user.checkPassword(password)) {
-                        System.out.println("user : " + user);
-                    }
-                });
+    private Http11Response checkUserInformation(String account, String password) {
+        Optional<User> userByAccount = InMemoryUserRepository.findByAccount(account)
+                .filter(user -> user.checkPassword(password));
+
+        if (userByAccount.isPresent()) {
+            log.info("user : " + userByAccount.get());
+            return responseAssembler.resourceResponse("/index.html", HttpStatus.REDIRECT);
+        }
+        return responseAssembler.resourceResponse("/401.html", HttpStatus.UNAUTHORIZED);
     }
 
     private Http11Response generateDefaultResponse() {
         final var responseBody = "Hello world!";
-        Map<String, String> headers = new LinkedHashMap<>();
-        headers.put(HttpHeaders.CONTENT_TYPE.getHeaderName(), HttpContent.HTML.getContentType() + CHARSET_UTF_8);
-        headers.put(HttpHeaders.CONTENT_LENGTH.getHeaderName(), Long.toString(responseBody.getBytes().length));
-
-        return new Http11Response(
-                HttpStatus.OK.getStatusCode(),
-                HttpStatus.OK.getMessage(),
-                headers, responseBody);
-    }
-
-    private Http11Response generateResourceResponse(Http11Request request) {
-        String url = request.getUrl();
-        URL resource = getClass().getClassLoader()
-                .getResource(RESOURCE_FOLDER + url);
-        String extension = url.substring(url.lastIndexOf(".") + 1);
-        String contentType = HttpContent.extensionToContentType(extension);
-
-        try {
-            Map<String, String> headers = new LinkedHashMap<>();
-            headers.put(HttpHeaders.CONTENT_TYPE.getHeaderName(), contentType + CHARSET_UTF_8);
-            headers.put(HttpHeaders.CONTENT_LENGTH.getHeaderName(),
-                    Long.toString(new File(resource.getFile()).length()));
-
-            return new Http11Response(
-                    HttpStatus.OK.getStatusCode(),
-                    HttpStatus.OK.getMessage(),
-                    headers,
-                    new String(Files.readAllBytes(new File(resource.getFile()).toPath()))
-            );
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return responseAssembler.rawStringResponse(responseBody);
     }
 
     @Override

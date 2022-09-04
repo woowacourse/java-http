@@ -1,7 +1,9 @@
 package org.apache.coyote.http11;
 
 public enum HttpStatus {
-    OK(200, "OK");
+    OK(200, "OK"),
+    REDIRECT(302, "Redirect"),
+    UNAUTHORIZED(401, "Unauthorized");
 
     private final int statusCode;
     private final String message;

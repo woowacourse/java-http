@@ -20,35 +20,40 @@ public enum Controller {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     private final String path;
-    private final Function<Object, String> function;
+    private final Function<Object, ResponseEntity> function;
 
-    Controller(String path, Function<Object, String> function) {
+    Controller(String path, Function<Object, ResponseEntity> function) {
         this.path = path;
         this.function = function;
     }
 
-    public static String processRequest(String path, QueryParameters queryParameters) {
+    public static ResponseEntity processRequest(Request request) {
+        Path path = request.getPath();
+        if (path.isFileRequest()) {
+            return ResponseEntity.body(path.getFileName());
+        }
+        QueryParameters queryParameters = request.getQueryParameters();
         return Arrays.stream(values())
-                .filter(controller -> path.equals(controller.path))
+                .filter(controller -> path.checkRequest(controller.path))
                 .findFirst()
                 .orElseThrow(ResourceNotFoundException::new)
                 .function.apply(queryParameters);
     }
 
-    private static String home(Object o) {
-        return WELCOME_MESSAGE;
+    private static ResponseEntity home(Object o) {
+        return ResponseEntity.body(WELCOME_MESSAGE);
     }
 
-    private static String login(Object object) {
+    private static ResponseEntity login(Object object) {
         QueryParameters queryParameters = (QueryParameters) object;
-        if (!queryParameters.isEmpty()) {
-            User user = InMemoryUserRepository.findByAccount(queryParameters.getAccount())
-                    .orElseThrow(UserNotFoundException::new);
-            if (!user.checkPassword(queryParameters.getPassword())) {
-                throw new AuthenticationException();
-            }
-            log.info(user.toString());
+        if (queryParameters.isEmpty()) {
+            return ResponseEntity.body("login.html");
         }
-        return "login.html";
+        User user = InMemoryUserRepository.findByAccount(queryParameters.getAccount())
+                .orElseThrow(UserNotFoundException::new);
+        if (!user.checkPassword(queryParameters.getPassword())) {
+            throw new AuthenticationException();
+        }
+        return ResponseEntity.body("redirect:index.html").status(HttpStatus.REDIRECT);
     }
 }

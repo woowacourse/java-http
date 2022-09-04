@@ -1,0 +1,53 @@
+package org.apache.coyote.http11.common;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+public class HttpCookie {
+
+    private static final String COOKIE_DELIMITER = "; ";
+    private static final String COOKIE_MAPPER = "=";
+
+    private static final String SESSION = "JSESSIONID";
+
+    private final Map<String, String> cookie;
+
+    private HttpCookie(Map<String, String> cookie) {
+        this.cookie = cookie;
+    }
+
+    public static HttpCookie empty() {
+        return new HttpCookie(new HashMap<>());
+    }
+
+    public static HttpCookie createByParsing(String input) {
+        Map<String, String> httpCookie = new HashMap<>();
+
+        String[] cookies = input.split(COOKIE_DELIMITER);
+        for (String cookie : cookies) {
+            String[] parsedCookie = cookie.split(COOKIE_MAPPER);
+            httpCookie.put(parsedCookie[0], parsedCookie[1]);
+        }
+
+        return new HttpCookie(httpCookie);
+    }
+
+    public static HttpCookie createWithSession() {
+        Map<String, String> httpCookie = new HashMap<>();
+        httpCookie.put(SESSION, UUID.randomUUID().toString());
+
+        return new HttpCookie(httpCookie);
+    }
+
+    public boolean containsSession() {
+        return cookie.containsKey(SESSION);
+    }
+
+    public String toHeaderString() {
+        return cookie.entrySet().stream()
+            .map(cookie -> cookie.getKey() + COOKIE_MAPPER + cookie.getValue())
+            .collect(Collectors.joining(COOKIE_DELIMITER));
+    }
+}

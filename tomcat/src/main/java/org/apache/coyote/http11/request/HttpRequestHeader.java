@@ -5,12 +5,16 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.coyote.http11.common.HttpCookie;
+
 public class HttpRequestHeader {
 
     private final Map<String, String> headers;
+    private final HttpCookie cookie;
 
-    private HttpRequestHeader(Map<String, String> headers) {
+    private HttpRequestHeader(Map<String, String> headers, HttpCookie cookie) {
         this.headers = headers;
+        this.cookie = cookie;
     }
 
     public static HttpRequestHeader from(BufferedReader bufferedReader) throws IOException {
@@ -23,11 +27,22 @@ public class HttpRequestHeader {
             header = bufferedReader.readLine();
         }
 
-        return new HttpRequestHeader(headers);
+        if (headers.containsKey("Cookie")) {
+            HttpCookie cookie = HttpCookie.createByParsing(headers.get("Cookie"));
+            headers.remove("Cookie");
+
+            return new HttpRequestHeader(headers, cookie);
+        }
+
+        return new HttpRequestHeader(headers, HttpCookie.empty());
     }
 
     public String get(String key) {
         return headers.get(key);
+    }
+
+    public boolean containsSession() {
+        return cookie.containsSession();
     }
 
     public int getContentLength() {

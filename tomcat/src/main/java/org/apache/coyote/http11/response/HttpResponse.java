@@ -3,6 +3,8 @@ package org.apache.coyote.http11.response;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.coyote.http11.common.HttpCookie;
+
 import nextstep.jwp.util.FileReader;
 
 public class HttpResponse {
@@ -46,6 +48,10 @@ public class HttpResponse {
         return new HttpResponse(statusLine, headers, body);
     }
 
+    public void setCookie(HttpCookie cookie) {
+        headers.put("Set-Cookie", cookie.toHeaderString());
+    }
+
     public String toResponseString() {
         StringBuilder response = new StringBuilder();
 
@@ -54,7 +60,6 @@ public class HttpResponse {
         for (String key : headers.keySet()) {
             response.append(key + ": " + headers.get(key) + "\r\n");
         }
-
         response.append("\r\n");
         response.append(body);
 

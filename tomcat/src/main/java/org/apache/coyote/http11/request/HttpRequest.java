@@ -39,6 +39,10 @@ public class HttpRequest {
         return startLine.getUri();
     }
 
+    public boolean containsSession() {
+        return headers.containsSession();
+    }
+
     public Map<String, String> getBody() {
         return body.getBody();
     }

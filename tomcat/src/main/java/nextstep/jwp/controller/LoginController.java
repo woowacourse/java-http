@@ -3,6 +3,7 @@ package nextstep.jwp.controller;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.coyote.http11.common.HttpCookie;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -42,6 +43,12 @@ public class LoginController implements Controller {
         }
 
         System.out.println(user.get());
-        return HttpResponse.found("/index.html");
+
+        HttpResponse response = HttpResponse.found("/index.html");
+        if (!request.containsSession()) {
+            response.setCookie(HttpCookie.createWithSession());
+        }
+
+        return response;
     }
 }

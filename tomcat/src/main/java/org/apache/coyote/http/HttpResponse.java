@@ -20,7 +20,7 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    public static HttpResponse fromHttpRequest(final HttpRequest httpRequest) throws IOException {
+    public static HttpResponse from(final HttpRequest httpRequest) throws IOException {
         final List<String> values = new ArrayList<>();
         final String responseBody = getResponseBody(httpRequest.getPath());
 

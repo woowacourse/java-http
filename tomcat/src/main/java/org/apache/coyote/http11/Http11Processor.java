@@ -42,7 +42,7 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = HttpRequest.of(bufferedReader.readLine(), HttpHeader.from(bufferedReader));
             final HttpRequestBody requestBody = HttpRequestBody.from(bufferedReader, httpRequest.getContentLength());
 
-            HttpResponse httpResponse = HttpResponse.fromHttpRequest(httpRequest);
+            HttpResponse httpResponse = HttpResponse.from(httpRequest);
 
             if (httpRequest.isRegister()) {
                 httpResponse = register(requestBody, httpResponse);

@@ -1,12 +1,22 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.net.URISyntaxException;
+import java.util.Optional;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.domain.FilePath;
+import org.apache.coyote.domain.HttpRequest;
+import org.apache.coyote.domain.MyHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -25,21 +35,23 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final InputStream inputStream = connection.getInputStream();
+             final OutputStream outputStream = connection.getOutputStream();
+             final BufferedReader inputBufferedReader = new BufferedReader(new InputStreamReader(inputStream));) {
 
-            final var responseBody = "Hello world!";
+            final String firstLine = inputBufferedReader.readLine();
+            final HttpRequest httpRequest = HttpRequest.from(firstLine);
+            final FilePath filePath = FilePath.from(httpRequest.getUri());
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            if (httpRequest.getUri().contains("login?")) {
+                Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getQueryParam().get("account"));
+                user.ifPresent(value -> log.info(value.toString()));
+            }
 
-            outputStream.write(response.getBytes());
+            final MyHttpResponse httpResponse = MyHttpResponse.from(filePath);
+            outputStream.write(httpResponse.getValue().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }

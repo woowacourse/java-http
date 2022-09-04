@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final int PATH_INDEX = 1;
 
     private final Socket connection;
 
@@ -39,9 +40,11 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
+             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
              OutputStream outputStream = connection.getOutputStream()) {
 
-            URI uri = new URI(readRequestPath(inputStream));
+            URI uri = new URI(readRequestPath(bufferedReader));
             final String response = executeRequestAndGetResponse(uri);
 
             outputStream.write(response.getBytes());
@@ -51,12 +54,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readRequestPath(InputStream inputStream) throws IOException {
-        InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+    private String readRequestPath(BufferedReader bufferedReader) throws IOException {
         String line = bufferedReader.readLine();
-
-        return line.split(" ")[1];
+        return line.split(" ")[PATH_INDEX];
     }
 
     private String executeRequestAndGetResponse(URI uri) throws IOException {
@@ -83,18 +83,6 @@ public class Http11Processor implements Runnable, Processor {
                 responseBody);
     }
 
-    private void doLoginRequest(URI uri) {
-        QueryMapper queryMapper = new QueryMapper(uri);
-        Map<String, String> parameters = queryMapper.getParameters();
-
-        User user = InMemoryUserRepository.findByAccount(parameters.get("account"))
-                .orElseThrow(NoSuchElementException::new);
-
-        if (user.checkPassword(parameters.get("password"))) {
-            log.info("user : " + user);
-        }
-    }
-
     private String makeResponse(String file) throws IOException {
         final String responseBody = readFile("static" + file);
         return makeResponse(ContentType.findContentType(file), responseBody);
@@ -105,5 +93,17 @@ public class Http11Processor implements Runnable, Processor {
         final Path path = Path.of(Objects.requireNonNull(resource).getPath());
 
         return Files.readString(path);
+    }
+
+    private void doLoginRequest(URI uri) {
+        QueryMapper queryMapper = new QueryMapper(uri);
+        Map<String, String> parameters = queryMapper.getParameters();
+
+        User user = InMemoryUserRepository.findByAccount(parameters.get("account"))
+                .orElseThrow(NoSuchElementException::new);
+
+        if (user.checkPassword(parameters.get("password"))) {
+            log.info("user : " + user);
+        }
     }
 }

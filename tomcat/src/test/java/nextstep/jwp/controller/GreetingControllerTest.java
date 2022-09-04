@@ -14,7 +14,7 @@ class GreetingControllerTest {
     @Test
     void 성공코드를_반환한다() throws Exception {
         // given
-        final RequestEntity requestEntity = new RequestEntity("text/html", "/", null);
+        final RequestEntity requestEntity = new RequestEntity("/", null);
 
         // when
         final ResponseEntity actual = controller.execute(requestEntity);

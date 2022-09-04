@@ -68,7 +68,7 @@ class Http11ProcessorTest {
     @Test
     void JS_파일을_불러올_수_있다() throws IOException {
         // given
-        final String httpRequest = makeGetRequest("/js/scripts.js", "*/*");
+        final String httpRequest = makeGetRequest("/js/scripts.js", "text/javascript");
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
@@ -77,7 +77,7 @@ class Http11ProcessorTest {
 
         // then
         final String content = readContent("static/js/scripts.js");
-        final String expected = makeResponse(HttpStatus.OK, "*/*", 976, content);
+        final String expected = makeResponse(HttpStatus.OK, "text/javascript", 976, content);
 
         assertThat(socket.output()).isEqualTo(expected);
     }

@@ -8,6 +8,6 @@ public class GreetingController implements Controller {
 
     @Override
     public ResponseEntity execute(final RequestEntity request) throws Exception {
-        return new ResponseEntity(HttpStatus.OK, request.getContentType(), "Hello world!");
+        return new ResponseEntity(HttpStatus.OK, "Hello world!");
     }
 }

@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import javassist.NotFoundException;
 import nextstep.jwp.controller.Controller;
+import nextstep.jwp.exception.FileAccessException;
 import org.apache.coyote.Processor;
 import org.apache.http.HttpMethod;
 import org.apache.http.HttpStatus;
@@ -15,8 +16,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -48,28 +47,24 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private RequestEntity extractRequestInfo(final BufferedReader bufferedReader) throws IOException {
-        final Map<String, String> requestInfoMapping = new HashMap<>();
+    private RequestEntity extractRequestInfo(final BufferedReader bufferedReader) throws NotFoundException {
         String line;
-        while (!(line = bufferedReader.readLine()).isBlank()) {
-            if (isAccept(line)) {
-                final String backPart = line.split(" ")[1];
-                final String contentType = backPart.split(",")[0];
-                requestInfoMapping.put("contentType", contentType);
-            }
+        while (!(line = readLine(bufferedReader)).isBlank()) {
             if (HttpMethod.isStartWithAny(line)) {
                 final String uri = getUri(line);
                 final String queryString = getQueryString(line);
-                requestInfoMapping.put("uri", uri);
-                requestInfoMapping.put("queryString", queryString);
+                return new RequestEntity(uri, queryString);
             }
         }
-        return new RequestEntity(requestInfoMapping.get("contentType"), requestInfoMapping.get("uri"), requestInfoMapping.get("queryString"));
+        throw new NotFoundException("요청을 찾을 수 없습니다.");
     }
 
-    private boolean isAccept(final String line) {
-        final String[] splited = line.split(":");
-        return splited.length != 0 && splited[0].equals("Accept");
+    private String readLine(final BufferedReader bufferedReader) {
+        try {
+            return bufferedReader.readLine();
+        } catch (IOException e) {
+            throw new FileAccessException();
+        }
     }
 
     private String getUri(final String line) {
@@ -91,9 +86,9 @@ public class Http11Processor implements Runnable, Processor {
             final ResponseEntity responseEntity = controller.execute(requestEntity);
             return makeResponse(responseEntity);
         } catch (NotFoundException e) {
-            return makeResponse(new ResponseEntity(HttpStatus.BAD_REQUEST, requestEntity.getContentType(), null));
+            return makeResponse(new ResponseEntity(HttpStatus.BAD_REQUEST, null));
         } catch (Exception e) {
-            return makeResponse(new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, requestEntity.getContentType(), null));
+            return makeResponse(new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, null));
         }
     }
 

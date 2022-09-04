@@ -5,12 +5,17 @@ import java.util.Objects;
 public class ResponseEntity {
 
     private static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
+    private static final String DEFAULT_CONTENT_TYPE = "text/html";
 
     private final String httpVersion;
     private final HttpStatus httpStatus;
     private final String contentType;
     private final String content;
     private final int contentLength;
+
+    public ResponseEntity(final HttpStatus httpStatus, final String content) {
+        this(DEFAULT_HTTP_VERSION, httpStatus, DEFAULT_CONTENT_TYPE, content);
+    }
 
     public ResponseEntity(final HttpStatus httpStatus, final String contentType, final String content) {
         this(DEFAULT_HTTP_VERSION, httpStatus, contentType, content);

@@ -15,7 +15,7 @@ class LoginControllerTest {
     @Test
     void account값과_password값이_일치하면_OK를_반환한다() throws Exception {
         // given
-        final RequestEntity requestEntity = new RequestEntity("text/html", "/login", "account=gugu&password=password");
+        final RequestEntity requestEntity = new RequestEntity("/login", "account=gugu&password=password");
 
         // when
         final ResponseEntity actual = controller.execute(requestEntity);
@@ -27,7 +27,7 @@ class LoginControllerTest {
     @Test
     void account값이_일치하지_않으면_BAD_REQUEST를_반환한다() throws Exception {
         // given
-        final RequestEntity requestEntity = new RequestEntity("text/html", "/login", "account=gonggong&password=password");
+        final RequestEntity requestEntity = new RequestEntity( "/login", "account=gonggong&password=password");
 
         // when
         final ResponseEntity actual = controller.execute(requestEntity);
@@ -39,7 +39,7 @@ class LoginControllerTest {
     @Test
     void paasword값이_일치하지_않으면_BAD_REQUEST를_반환한다() throws Exception {
         // given
-        final RequestEntity requestEntity = new RequestEntity("text/html", "/login", "account=gugu&password=password1");
+        final RequestEntity requestEntity = new RequestEntity("/login", "account=gugu&password=password1");
 
         // when
         final ResponseEntity actual = controller.execute(requestEntity);
@@ -51,7 +51,7 @@ class LoginControllerTest {
     @Test
     void queryString에_값이_존재하지_않으면_예외를_발생한다() throws Exception {
         // given
-        final RequestEntity requestEntity = new RequestEntity("text/html", "/login", "account=&password=");
+        final RequestEntity requestEntity = new RequestEntity("/login", "account=&password=");
 
         // when
         assertThatThrownBy(() -> controller.execute(requestEntity))

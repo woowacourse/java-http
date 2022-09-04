@@ -16,7 +16,7 @@ class ResourceControllerTest {
     @Test
     void 해당하는_자원을_찾으면_OK_응답을_반환한다() throws Exception {
         // given
-        final RequestEntity requestEntity = new RequestEntity("text/html", "/index.html", null);
+        final RequestEntity requestEntity = new RequestEntity("/index.html", null);
 
         // when
         final ResponseEntity actual = controller.execute(requestEntity);
@@ -28,7 +28,7 @@ class ResourceControllerTest {
     @Test
     void 해당하는_자원을_찾지_못하면_예외가_발생한다() {
         // given
-        final RequestEntity requestEntity = new RequestEntity("text/html", "/notfound.html", null);
+        final RequestEntity requestEntity = new RequestEntity("/notfound.html", null);
 
         // when, then
         assertThatThrownBy(() -> controller.execute(requestEntity))

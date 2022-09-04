@@ -73,7 +73,7 @@ public class HttpRequest {
         return httpMethod.isGet() && path.contains("login");
     }
 
-    public boolean alreadyLogin() throws IOException {
+    public boolean alreadyLogin() {
         if (!header.hasSessionId()) {
             return false;
         }

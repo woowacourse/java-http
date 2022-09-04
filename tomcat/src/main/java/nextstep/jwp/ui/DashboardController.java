@@ -25,18 +25,15 @@ public class DashboardController implements Controller {
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
     public ResponseEntity handleLogin(HttpRequest request) {
-        Optional<User> user = repository.findByAccount(request.getParameter("account"));
-        user.ifPresent(it -> printUser(request, it));
-        return new ResponseEntity(HttpStatus.OK, "redirect:/login.html");
+        Optional<User> optionalUser = repository.findByAccount(request.getParameter("account"));
+        return optionalUser.map(user -> checkPassword(request, user))
+                .orElseGet(() -> new ResponseEntity(HttpStatus.OK, "redirect:/login.html"));
     }
 
-    private static void printUser(HttpRequest request, User user) {
+    private ResponseEntity checkPassword(HttpRequest request, User user) {
         if (user.checkPassword(request.getParameter("password"))) {
-            System.out.println(user.getAccount() + "의 패스워드가 일치합니다");
-            System.out.println(user);
-            return;
+            return new ResponseEntity(HttpStatus.FOUND, "redirect:/index.html");
         }
-        System.out.println(user.getAccount() + "의 패스워드가 일치하지 않습니다");
+        return new ResponseEntity(HttpStatus.UNAUTHORIZED, "redirect:/401.html");
     }
-
 }

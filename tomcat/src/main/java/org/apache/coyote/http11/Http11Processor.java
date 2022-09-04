@@ -2,13 +2,14 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.exception.UnauthorizedException;
@@ -16,6 +17,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.ResourceLoader;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.Request;
 import org.apache.coyote.http11.response.Response;
 import org.apache.coyote.http11.response.header.ContentType;
 import org.apache.coyote.http11.response.header.StatusCode;
@@ -39,19 +41,17 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
+        try (final InputStream inputStream = connection.getInputStream();
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-             final var outputStream = connection.getOutputStream()) {
+             final OutputStream outputStream = connection.getOutputStream()) {
 
-            final String requestUri = parseUri(reader);
-            log.info("request uri : {}", requestUri);
-
-            if (reader.readLine() == null) {
+            final List<String> requestLines = readRequestLines(reader);
+            if (requestLines.isEmpty()) {
                 return;
             }
 
-            final Map<String, String> header = parseHeader(reader);
-            final String response = mapRequest(requestUri, header).toText();
+            final Request request = Request.from(requestLines);
+            final String response = mapRequest(request).toText();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -60,79 +60,42 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String parseUri(final BufferedReader reader) throws IOException {
-        return reader.readLine().split(" ")[1];
-    }
-
-    private Map<String, String> parseHeader(final BufferedReader reader) throws IOException {
-        final Map<String, String> header = new HashMap<>();
+    private List<String> readRequestLines(final BufferedReader reader) throws IOException {
+        final List<String> requestLines = new ArrayList<>();
         String line = reader.readLine();
-        while (!"".equals(line)) {
-            final String[] splitLine = line.split(": ", 2);
-            header.put(splitLine[0], splitLine[1]);
+        while (!(line == null) && !"".equals(line)) {
+            requestLines.add(line);
             line = reader.readLine();
         }
-        return header;
+        return requestLines;
     }
 
-    private String parseContentType(final Map<String, String> header) {
-        return header
-                .getOrDefault("Accept", "text/html")
-                .split(",")[0];
-    }
-
-    private Response mapRequest(final String requestUri, final Map<String, String> header)
-            throws URISyntaxException, IOException {
-        final String path = parsePath(requestUri);
-        final Map<String, String> queryParams = parseQueryParams(requestUri);
-
+    private Response mapRequest(final Request request) throws URISyntaxException, IOException {
         try {
-            return getResponse(header, path, queryParams);
+            return getResponse(request);
         } catch (NotFoundException e) {
-            return new Response(ContentType.HTML, StatusCode.NOT_FOUND, ResourceLoader.getStaticResource("/404.html"));
+            return new Response(ContentType.HTML, StatusCode.NOT_FOUND,
+                    ResourceLoader.getStaticResource("/404.html"));
         } catch (IllegalArgumentException e) {
             return new Response(ContentType.HTML, StatusCode.BAD_REQUEST, "잘못된 요청입니다.");
         } catch (UnauthorizedException e) {
-            return new Response(ContentType.HTML, StatusCode.UNAUTHORIZED, ResourceLoader.getStaticResource("/401.html"));
+            return new Response(ContentType.HTML, StatusCode.UNAUTHORIZED,
+                    ResourceLoader.getStaticResource("/401.html"));
         }
     }
 
-    private String parsePath(final String requestUri) {
-        final int queryStartIndex = requestUri.indexOf("?");
-        if (queryStartIndex < 0) {
-            return requestUri;
-        }
-        return requestUri.substring(0, queryStartIndex);
-    }
-
-    private Map<String, String> parseQueryParams(final String requestUri) {
-        final int queryStartIndex = requestUri.indexOf("?");
-        if (queryStartIndex < 0) {
-            return new HashMap<>();
-        }
-
-        final String queryString = requestUri.substring(queryStartIndex + 1);
-        return Arrays.stream(queryString.split("&"))
-                .map(param -> param.split("=", 2))
-                .filter(param -> param.length == 2)
-                .collect(Collectors.toMap(
-                        param -> param[0],
-                        param -> param[1]
-                ));
-    }
-
-    private Response getResponse(final Map<String, String> header, final String path,
-                                 final Map<String, String> queryParams) throws URISyntaxException, IOException {
-        if (path.equals("/")) {
+    private Response getResponse(final Request request) throws URISyntaxException, IOException {
+        if (request.isPath("/")) {
             return new Response(ContentType.HTML, StatusCode.OK, "Hello world!");
         }
 
-        if (path.contains(".")) {
-            return new Response(ContentType.of(parseContentType(header)), StatusCode.OK, ResourceLoader.getStaticResource(path));
+        if (request.isForResource()) {
+            return new Response(request.getContentType(), StatusCode.OK,
+                    ResourceLoader.getStaticResource(request.getPath()));
         }
 
-        if (path.equals("/login")) {
-            return login(queryParams);
+        if (request.isPath("/login")) {
+            return login(request.getQueryParams());
         }
 
         throw new NotFoundException("페이지를 찾을 수 없습니다.");

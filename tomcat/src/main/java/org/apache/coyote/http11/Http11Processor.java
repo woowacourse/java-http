@@ -48,17 +48,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String makeResponse(final Controller controller, final RequestEntity requestEntity) {
-        try {
-            final ResponseEntity responseEntity = controller.execute(requestEntity);
-            return makeResponse(responseEntity);
-        } catch (NotFoundException e) {
-            return makeResponse(new ResponseEntity(HttpStatus.BAD_REQUEST, requestEntity.getContentType(), null));
-        } catch (Exception e) {
-            return makeResponse(new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, requestEntity.getContentType(), null));
-        }
-    }
-
     private RequestEntity extractRequestInfo(final BufferedReader bufferedReader) throws IOException {
         final Map<String, String> requestInfoMapping = new HashMap<>();
         String line;
@@ -97,15 +86,14 @@ public class Http11Processor implements Runnable, Processor {
         return splited[1];
     }
 
-    private void flushResponse(final OutputStream outputStream, final String responseBody) {
-        if (outputStream == null) {
-            return;
-        }
+    private String makeResponse(final Controller controller, final RequestEntity requestEntity) {
         try {
-            outputStream.write(responseBody.getBytes());
-            outputStream.flush();
-        } catch (IOException e) {
-            log.error(e.getMessage());
+            final ResponseEntity responseEntity = controller.execute(requestEntity);
+            return makeResponse(responseEntity);
+        } catch (NotFoundException e) {
+            return makeResponse(new ResponseEntity(HttpStatus.BAD_REQUEST, requestEntity.getContentType(), null));
+        } catch (Exception e) {
+            return makeResponse(new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, requestEntity.getContentType(), null));
         }
     }
 
@@ -116,5 +104,17 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + responseEntity.getContentLength() + " ",
                 "",
                 responseEntity.getContent());
+    }
+
+    private void flushResponse(final OutputStream outputStream, final String responseBody) {
+        if (outputStream == null) {
+            return;
+        }
+        try {
+            outputStream.write(responseBody.getBytes());
+            outputStream.flush();
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
     }
 }

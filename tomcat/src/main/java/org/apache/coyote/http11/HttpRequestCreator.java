@@ -12,7 +12,7 @@ import nextstep.jwp.http.reqeust.HttpRequestLine;
 
 public class HttpRequestCreator {
 
-    private static final String LINE_SEPARATOR = " ";
+    private static final String HTTP_LINE_SEPARATOR = " ";
     private static final int METHOD_INDEX = 0;
     private static final int URL_INDEX = 1;
     private static final int VERSION_INDEX = 2;
@@ -23,7 +23,7 @@ public class HttpRequestCreator {
     }
 
     private HttpRequestLine httpRequestLine(final BufferedReader bufferReader) throws IOException {
-        String[] line = bufferReader.readLine().split(LINE_SEPARATOR);
+        String[] line = bufferReader.readLine().split(HTTP_LINE_SEPARATOR);
         validateRequestLineFormat(line);
 
         String httpMethod = line[METHOD_INDEX];

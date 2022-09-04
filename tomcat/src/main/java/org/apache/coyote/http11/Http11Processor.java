@@ -67,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void printUser(final HttpRequest httpRequest) {
-        if (httpRequest.hasQuery()) {
+        if (httpRequest.hasQueryParams()) {
             Map<String, String> queryString = httpRequest.getQueryParams();
             String account = queryString.get("account");
             Optional<User> user = InMemoryUserRepository.findByAccount(account);

@@ -19,7 +19,7 @@ public class HttpRequest {
         return ContentType.findContentType(url);
     }
 
-    public boolean hasQuery() {
+    public boolean hasQueryParams() {
         return httpRequestLine.hasQueryParams();
     }
 

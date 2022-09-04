@@ -23,13 +23,6 @@ public class HttpRequestLine {
         return queryParams.isNotEmpty();
     }
 
-    public String getPath() {
-        if (hasNotExtension() && isNotRootPath()) {
-            return path + HTML_EXTENSION;
-        }
-        return path;
-    }
-
     private boolean hasNotExtension() {
         return !path.contains(".");
     }
@@ -38,6 +31,12 @@ public class HttpRequestLine {
         return !path.equals("/");
     }
 
+    public String getPath() {
+        if (hasNotExtension() && isNotRootPath()) {
+            return path + HTML_EXTENSION;
+        }
+        return path;
+    }
 
     public Map<String, String> getQueryParams() {
         return queryParams.getParams();

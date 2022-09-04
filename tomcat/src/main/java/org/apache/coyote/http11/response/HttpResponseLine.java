@@ -2,12 +2,12 @@ package org.apache.coyote.http11.response;
 
 public class HttpResponseLine {
 
-    private final String protocol;
+    private final String version;
     private final int code;
     private final String message;
 
-    public HttpResponseLine(final String protocol, final int code, final String message) {
-        this.protocol = protocol;
+    public HttpResponseLine(final String version, final int code, final String message) {
+        this.version = version;
         this.code = code;
         this.message = message;
     }
@@ -18,6 +18,6 @@ public class HttpResponseLine {
 
     @Override
     public String toString() {
-        return protocol + " " + code + " " + message;
+        return version + " " + code + " " + message;
     }
 }

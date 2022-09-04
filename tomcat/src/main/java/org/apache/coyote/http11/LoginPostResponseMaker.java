@@ -17,14 +17,14 @@ import org.apache.coyote.http11.utils.QueryParamsParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginResponseMaker implements ResponseMaker {
+public class LoginPostResponseMaker implements ResponseMaker {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginResponseMaker.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginGetResponseMaker.class);
 
     @Override
     public String createResponse(final String requestUrl)
             throws URISyntaxException, IOException {
-        final HashMap<String, String> loginData = QueryParamsParser.parseLoginParams(requestUrl);
+        final HashMap<String, String> loginData = QueryParamsParser.parse(requestUrl);
         final URL resource =
                 this.getClass().getClassLoader().getResource("static" + "/login.html");
         final Path path = Paths.get(resource.toURI());

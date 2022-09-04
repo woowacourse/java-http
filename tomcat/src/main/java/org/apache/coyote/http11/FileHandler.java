@@ -24,7 +24,8 @@ public class FileHandler {
     }
 
     public static ResponseEntity createErrorFileResponse(final HttpStatus httpStatus) throws IOException {
-        final URL url = FileHandler.class.getClassLoader().getResource("static/" + httpStatus.getStatusCode() + ".html");
+        final URL url = FileHandler.class.getClassLoader()
+                .getResource("static/" + httpStatus.getStatusCode() + ".html");
         final Path path = Path.of(url.getPath());
         final byte[] fileBytes = Files.readAllBytes(path);
 

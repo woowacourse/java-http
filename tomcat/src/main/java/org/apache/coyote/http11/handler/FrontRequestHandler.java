@@ -6,8 +6,8 @@ import static org.apache.coyote.http11.HttpStatus.SERVER_ERROR;
 
 import java.io.IOException;
 import java.util.Map;
-import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.FileHandler;
+import org.apache.coyote.http11.response.ResponseEntity;
 
 public class FrontRequestHandler {
 

@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.handler;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.net.URL;
@@ -11,7 +11,6 @@ import java.util.Map;
 import org.apache.coyote.http11.FileHandler;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.response.ResponseEntity;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

@@ -63,7 +63,8 @@ public class Http11Processor implements Runnable, Processor {
         return httpRequest;
     }
 
-    private ResponseEntity handleRequest(final HttpRequest httpRequest, final FrontRequestHandler frontHandler) throws IOException {
+    private ResponseEntity handleRequest(final HttpRequest httpRequest, final FrontRequestHandler frontHandler)
+            throws IOException {
         final String path = httpRequest.getPath();
 
         if (path.equals("/")) {

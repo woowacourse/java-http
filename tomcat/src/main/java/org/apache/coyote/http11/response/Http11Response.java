@@ -1,11 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
-import org.apache.coyote.http11.url.HandlerMapping;
 import org.apache.coyote.http11.url.Url;
 
 public class Http11Response {
@@ -15,8 +14,8 @@ public class Http11Response {
     private final HttpStatus httpStatus;
     private final String resource;
 
-    public Http11Response(String uri) {
-        this(ContentType.from(uri), null, null);
+    public static Http11Response create(String uri) {
+        return new Http11Response(ContentType.from(uri), null, null);
     }
 
     public Http11Response(String contentType, HttpStatus httpStatus, String resource) {
@@ -25,11 +24,10 @@ public class Http11Response {
         this.resource = resource;
     }
 
-    public Http11Response getResponseBody(final String uri) throws IOException {
-        if (uri.isEmpty()) {
-            return new Http11Response(null, HttpStatus.OK, "Hello world!");
+    public Http11Response extract(final Url url) throws IOException {
+        if (url.getPath().isEmpty()) {
+            return new Http11Response(contentType, HttpStatus.OK, "Hello world!");
         }
-        Url url = HandlerMapping.from(uri);
         URL resource = this.getClass()
                 .getClassLoader()
                 .getResource(STATIC_DIRECTORY + url.getResponse().getResource());

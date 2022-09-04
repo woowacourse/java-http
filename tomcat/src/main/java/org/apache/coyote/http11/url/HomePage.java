@@ -1,8 +1,8 @@
 package org.apache.coyote.http11.url;
 
-import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.Http11Response;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.response.ContentType;
+import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.response.HttpStatus;
 
 public class HomePage extends Url {
 

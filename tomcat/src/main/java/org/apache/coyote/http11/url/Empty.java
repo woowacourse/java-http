@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.url;
 
-import org.apache.coyote.http11.Http11Response;
+import org.apache.coyote.http11.response.Http11Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

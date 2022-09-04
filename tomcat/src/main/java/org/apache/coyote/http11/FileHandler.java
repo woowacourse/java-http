@@ -1,6 +1,5 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.HttpStatus.NOT_FOUND;
 import static org.apache.coyote.http11.HttpStatus.OK;
 
 import java.io.IOException;
@@ -29,6 +28,6 @@ public class FileHandler {
         final Path path = Path.of(url.getPath());
         final byte[] fileBytes = Files.readAllBytes(path);
 
-        return new ResponseEntity(NOT_FOUND, Files.probeContentType(path), new String(fileBytes));
+        return new ResponseEntity(httpStatus, Files.probeContentType(path), new String(fileBytes));
     }
 }

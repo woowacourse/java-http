@@ -63,7 +63,7 @@ public class Http11Processor implements Runnable, Processor {
         return httpRequest;
     }
 
-    private ResponseEntity handleRequest(final HttpRequest httpRequest, final FrontRequestHandler handler) throws IOException {
+    private ResponseEntity handleRequest(final HttpRequest httpRequest, final FrontRequestHandler frontHandler) throws IOException {
         final String path = httpRequest.getPath();
 
         if (path.equals("/")) {
@@ -74,7 +74,7 @@ public class Http11Processor implements Runnable, Processor {
             return FileHandler.createFileResponse(path);
         }
 
-        return handler.handle(httpRequest.getPath(), httpRequest.getQueryParams());
+        return frontHandler.handle(httpRequest.getPath(), httpRequest.getQueryParams());
     }
 
     private void writeResponse(final OutputStream outputStream, final String response) throws IOException {

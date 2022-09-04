@@ -20,11 +20,11 @@ public class RequestHandlerMapping {
         return new RequestHandlerMapping(handlers);
     }
 
-    public boolean hasMappingHandler(final String handlerName) {
-        return handlers.containsKey(handlerName);
+    public boolean hasMappingHandler(final String path) {
+        return handlers.containsKey(path);
     }
 
-    public RequestHandler getHandler(final String handlerName) {
-        return handlers.get(handlerName);
+    public RequestHandler getHandler(final String path) {
+        return handlers.get(path);
     }
 }

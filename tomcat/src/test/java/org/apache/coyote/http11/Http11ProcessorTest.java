@@ -1,4 +1,4 @@
-package nextstep.org.apache.coyote.http11;
+package org.apache.coyote.http11;
 
 import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;

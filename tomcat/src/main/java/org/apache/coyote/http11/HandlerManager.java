@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import java.io.IOException;
 import java.util.Arrays;
-import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.urihandler.FileUriHandler;
 import org.apache.coyote.http11.urihandler.LoginUriHandler;
 import org.apache.coyote.http11.urihandler.RootUriHandler;

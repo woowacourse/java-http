@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.UriResponse;
-import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 
 public class FileUriHandler extends DefaultUriHandler {
 

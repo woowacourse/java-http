@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.httpmessage.request;
 
 import java.util.Objects;
 import java.util.regex.Pattern;

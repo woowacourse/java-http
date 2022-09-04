@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

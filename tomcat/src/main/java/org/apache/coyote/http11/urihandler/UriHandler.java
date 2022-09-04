@@ -2,7 +2,7 @@ package org.apache.coyote.http11.urihandler;
 
 import java.io.IOException;
 import org.apache.coyote.http11.UriResponse;
-import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 
 public interface UriHandler {
 

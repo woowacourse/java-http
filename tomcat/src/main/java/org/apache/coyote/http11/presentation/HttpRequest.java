@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.presentation;
 
-import org.apache.coyote.http11.domain.RequestMethod;
+import org.apache.coyote.http11.domain.HttpMethod;
 import org.apache.coyote.http11.exception.InvalidHttpRequestStartLineException;
 import java.util.List;
 
@@ -24,8 +24,10 @@ public class HttpRequest {
     }
 
 
-    public static HttpRequest of(final String startLine, final List<String> lines) {
-        if (!RequestMethod.isIn(startLine)) {
+    public static HttpRequest of(final List<String> lines) {
+        final String startLine = lines.get(0);
+
+        if (!HttpMethod.isIn(startLine)) {
             throw new InvalidHttpRequestStartLineException();
         }
 

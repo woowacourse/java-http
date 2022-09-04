@@ -2,9 +2,9 @@ package org.apache.coyote.http11.domain;
 
 import java.util.Arrays;
 
-public enum RequestMethod {
+public enum HttpMethod {
 
-    GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE;
+    GET, POST, PUT, PATCH, DELETE, OPTIONS, TRACE;
 
     public static boolean isIn(final String line) {
         return Arrays.stream(values())

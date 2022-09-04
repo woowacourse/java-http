@@ -18,9 +18,9 @@ class HttpResponseTest {
     @Test
     void format() throws IOException {
         // given
-        final String startLine = "GET /index.html HTTP/1.1";
-        final List<String> lines = List.of("Host: localhost:8080", "Connection: keep-alive", "Accept: */*");
-        final HttpRequest httpRequest = HttpRequest.of(startLine, lines);
+        final List<String> lines = List.of("GET /index.html HTTP/1.1", "Host: localhost:8080",
+                "Connection: keep-alive", "Accept: */*");
+        final HttpRequest httpRequest = HttpRequest.of(lines);
         final HttpResponse httpResponse = new HttpResponse(
                 HttpStatus.OK,
                 httpRequest.getAcceptType(),

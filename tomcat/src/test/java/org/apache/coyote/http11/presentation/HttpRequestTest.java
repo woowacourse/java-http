@@ -18,11 +18,11 @@ class HttpRequestTest {
     @Test
     void of() {
         // given
-        final String startLine = "GET /index.html HTTP/1.1";
-        final List<String> lines = List.of("Host: localhost:8080", "Connection: keep-alive", "Accept: */*");
+        final List<String> lines = List.of("GET /index.html HTTP/1.1", "Host: localhost:8080",
+                "Connection: keep-alive", "Accept: */*");
 
         // when
-        final HttpRequest httpRequest = HttpRequest.of(startLine, lines);
+        final HttpRequest httpRequest = HttpRequest.of(lines);
 
         // then
         assertAll(
@@ -36,10 +36,10 @@ class HttpRequestTest {
     @ValueSource(strings = {"", "NOTHING", "GGG"})
     void of_throwsException_ifInvalidHttpRequest(final String startLine) {
         // given
-        final List<String> lines = Collections.emptyList();
+        final List<String> lines = List.of(startLine);
 
         // when, then
-        assertThatThrownBy(() -> HttpRequest.of(startLine, lines))
+        assertThatThrownBy(() -> HttpRequest.of(lines))
                 .isInstanceOf(InvalidHttpRequestStartLineException.class);
     }
 
@@ -49,7 +49,7 @@ class HttpRequestTest {
         // given
         final String startLine = "GET /index.html HTTP/1.1";
         final String expected = "/index.html";
-        final HttpRequest httpRequest = HttpRequest.of(startLine, Collections.emptyList());
+        final HttpRequest httpRequest = HttpRequest.of(List.of(startLine));
 
         // when
         final String actual = httpRequest.getUri();
@@ -63,9 +63,9 @@ class HttpRequestTest {
     void getAcceptType() {
         // given
         final String expected = "text/html";
-        final String startLine = "GET /index.html HTTP/1.1";
-        final List<String> lines = List.of("Host: localhost:8080", "Connection: keep-alive", "Accept: text/html");
-        final HttpRequest httpRequest = HttpRequest.of(startLine, lines);
+        final List<String> lines = List.of("GET /index.html HTTP/1.1", "Host: localhost:8080",
+                "Connection: keep-alive", "Accept: text/html");
+        final HttpRequest httpRequest = HttpRequest.of(lines);
 
         // when
         final String actual = httpRequest.getAcceptType();

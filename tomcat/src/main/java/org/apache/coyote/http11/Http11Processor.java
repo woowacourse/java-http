@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,35 +46,26 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            final String startLine = bufferedReader.readLine();
-            validateStartLine(startLine);
             final List<String> lines = readLines(bufferedReader);
-            final HttpRequest httpRequest = HttpRequest.of(startLine, lines);
-            final String uri = parseUri(httpRequest);
-            final HttpResponse httpResponse = createHttpResponse(httpRequest, uri);
-            final String formattedResponse = httpResponse.format();
-            log.info(httpRequest.toString());
-            log.info(httpResponse.toString());
-
-            outputStream.write(formattedResponse.getBytes());
-            outputStream.flush();
+            final HttpRequest httpRequest = HttpRequest.of(lines);
+            final HttpResponse httpResponse = createHttpResponse(httpRequest, parseUri(httpRequest));
+            sendResponse(outputStream, httpResponse);
         } catch (IOException | UncheckedServletException |
                 InvalidHttpRequestStartLineException | FaviconNotFoundException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void validateStartLine(final String startLine) {
-        if (startLine == null) {
-            throw new InvalidHttpRequestStartLineException();
-        }
-    }
-
     private List<String> readLines(final BufferedReader bufferedReader) throws IOException {
         final ArrayList<String> lines = new ArrayList<>();
         String line;
+
         while (!(line = bufferedReader.readLine()).isBlank()) {
             lines.add(line);
+        }
+
+        if (lines.isEmpty()) {
+            throw new IllegalArgumentException("요청 값이 존재하지 않습니다.");
         }
 
         return lines;
@@ -107,5 +99,11 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse createHttpResponse(final HttpRequest httpRequest, final String uri) throws IOException {
         return new HttpResponse(HttpStatus.OK, httpRequest.getAcceptType(), ResourceLoader.getContent(uri));
+    }
+
+    private void sendResponse(final OutputStream outputStream, final HttpResponse httpResponse) throws IOException {
+        final String formattedResponse = httpResponse.format();
+        outputStream.write(formattedResponse.getBytes());
+        outputStream.flush();
     }
 }

@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class HttpRequestHeader {
 
-    private static final String COOKIES_BOUNDARY = "&";
+    private static final String COOKIES_BOUNDARY = "; ";
     private static final String COOKIE_KEY_VALUE_BOUNDARY = "=";
     private static final String HEADER_KEY_VALUE_BOUNDARY = ": ";
     private static final String CONTENT_LENGTH = "Content-Length";

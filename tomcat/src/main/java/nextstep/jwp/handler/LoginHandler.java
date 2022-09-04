@@ -20,7 +20,7 @@ public class LoginHandler {
 
     public HttpResponse login(final HttpRequest httpRequest) {
         if (httpRequest.isSameHttpMethod(HttpMethod.GET)) {
-            return HttpResponse.of(HttpStatus.OK, "/login.html");
+            return HttpResponse.of(httpRequest, HttpStatus.OK, "/login.html");
         }
 
         final HttpRequestBody requestBody = httpRequest.getHttpRequestBody();
@@ -29,10 +29,10 @@ public class LoginHandler {
         final String password = requestBody.findByKey(PASSWORD);
         if (user.checkPassword(password)) {
             log.info(user.toString());
-            return generateSuccessResponse();
+            return generateSuccessResponse(httpRequest);
         }
 
-        return HttpResponse.of(HttpStatus.UNAUTHORIZED, "/401.html");
+        return HttpResponse.of(httpRequest, HttpStatus.UNAUTHORIZED, "/401.html");
     }
 
     private User findUser(final HttpRequestBody requestBody) {
@@ -41,8 +41,8 @@ public class LoginHandler {
                 .orElseThrow(() -> new UserNotFoundException(account));
     }
 
-    private HttpResponse generateSuccessResponse() {
-        final HttpResponse response = HttpResponse.of(HttpStatus.FOUND, "/login.html");
+    private HttpResponse generateSuccessResponse(final HttpRequest httpRequest) {
+        final HttpResponse response = HttpResponse.of(httpRequest, HttpStatus.FOUND, "/login.html");
         response.addHeader("Location", "/index.html");
         return response;
     }

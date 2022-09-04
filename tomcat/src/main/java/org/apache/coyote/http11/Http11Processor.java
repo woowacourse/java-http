@@ -57,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
         final int contentLength = messageHeader.findContentLength();
         final HttpRequestBody messageBody = extractMessageBody(bufferedReader, contentLength);
 
-        return new HttpRequest(startLine, messageBody);
+        return new HttpRequest(startLine, messageHeader, messageBody);
     }
 
     private HttpRequestHeader extractMessageHeader(final BufferedReader bufferedReader) throws IOException {
@@ -81,7 +81,7 @@ public class Http11Processor implements Runnable, Processor {
         final String url = httpRequest.getUrl();
 
         if ("/".equals(url)) {
-            return new HttpResponse(HttpStatus.OK, "text/plain", "Hello world!");
+            return new HttpResponse(httpRequest, HttpStatus.OK, "text/plain", "Hello world!");
         }
 
         if ("/login".equals(url)) {
@@ -92,6 +92,6 @@ public class Http11Processor implements Runnable, Processor {
             return new RegisterHandler().register(httpRequest);
         }
 
-        return HttpResponse.of(HttpStatus.OK, url);
+        return HttpResponse.of(httpRequest, HttpStatus.OK, url);
     }
 }

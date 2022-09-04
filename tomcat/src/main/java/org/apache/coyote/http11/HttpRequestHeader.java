@@ -3,12 +3,15 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 
 public class HttpRequestHeader {
 
     private static final String KEY_VALUE_BOUNDARY = ": ";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String JSESSIONID = "JSESSIONID";
+    private static final String COOKIE = "Cookie";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
@@ -39,5 +42,23 @@ public class HttpRequestHeader {
             return 0;
         }
         return Integer.parseInt(contentLength);
+    }
+
+    public Optional<String> findJSessionId() {
+        final String cookie = values.get(COOKIE);
+
+        if (StringUtils.isBlank(cookie)) {
+            return Optional.empty();
+        }
+
+        final String[] cookieInfos = cookie.split("&");
+        for (final String cookieInfo : cookieInfos) {
+            final String[] keyValuePair = cookieInfo.split("=");
+            if (JSESSIONID.equals(keyValuePair[0])) {
+                return Optional.of(keyValuePair[1]);
+            }
+        }
+
+        return Optional.empty();
     }
 }

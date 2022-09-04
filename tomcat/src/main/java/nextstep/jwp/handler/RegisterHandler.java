@@ -12,14 +12,14 @@ public class RegisterHandler {
 
     public HttpResponse register(final HttpRequest httpRequest) {
         if (httpRequest.isSameHttpMethod(HttpMethod.GET)) {
-            return HttpResponse.of(HttpStatus.OK, "/register.html");
+            return HttpResponse.of(httpRequest, HttpStatus.OK, "/register.html");
         }
 
         final HttpRequestBody requestBody = httpRequest.getHttpRequestBody();
         final User user = createUser(requestBody);
         InMemoryUserRepository.save(user);
 
-        final HttpResponse response = HttpResponse.of(HttpStatus.FOUND, "/register.html");
+        final HttpResponse response = HttpResponse.of(httpRequest, HttpStatus.FOUND, "/register.html");
         response.addHeader("Location", "/login.html");
         return response;
     }

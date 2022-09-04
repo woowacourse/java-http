@@ -13,14 +13,17 @@ public class HttpRequest {
     private final String url;
     private final HttpMethod httpMethod;
     private final QueryStrings queryStrings;
+    private final HttpRequestHeader httpRequestHeader;
     private final HttpRequestBody httpRequestBody;
 
-    public HttpRequest(final String startLine, final HttpRequestBody requestBody) {
+    public HttpRequest(final String startLine, final HttpRequestHeader requestHeader,
+                       final HttpRequestBody requestBody) {
         final String uri = extractURI(startLine);
 
         url = extractURL(uri);
         queryStrings = new QueryStrings(uri);
         httpMethod = HttpMethod.of(extractMethod(startLine));
+        httpRequestHeader = requestHeader;
         httpRequestBody = requestBody;
     }
 
@@ -49,8 +52,8 @@ public class HttpRequest {
         return url;
     }
 
-    public QueryStrings getQueryStrings() {
-        return queryStrings;
+    public HttpRequestHeader getHttpRequestHeader() {
+        return httpRequestHeader;
     }
 
     public HttpRequestBody getHttpRequestBody() {

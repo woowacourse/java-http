@@ -13,19 +13,19 @@ public class HttpRequest {
 
     private static final int MESSAGE_BEGIN_INDEX = 0;
 
-    private final RequestStartLine requestStartLine;
+    private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
     private final String requestBody;
 
-    private HttpRequest(final RequestStartLine requestStartLine, final HttpHeaders httpHeaders,
+    private HttpRequest(final RequestLine requestLine, final HttpHeaders httpHeaders,
                         final String requestBody) {
-        this.requestStartLine = requestStartLine;
+        this.requestLine = requestLine;
         this.httpHeaders = httpHeaders;
         this.requestBody = requestBody;
     }
 
     private HttpRequest(final String requestStartLine, final String header, final String body) {
-        this(new RequestStartLine(requestStartLine), new HttpHeaders(header), body);
+        this(new RequestLine(requestStartLine), new HttpHeaders(header), body);
     }
 
     public static HttpRequest parse(final String httpRequestMessage) {
@@ -53,6 +53,6 @@ public class HttpRequest {
     }
 
     public RequestUri getRequestUri() {
-        return requestStartLine.getRequestUri();
+        return requestLine.getRequestUri();
     }
 }

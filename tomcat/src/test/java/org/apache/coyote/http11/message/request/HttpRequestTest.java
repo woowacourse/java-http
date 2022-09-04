@@ -41,7 +41,7 @@ class HttpRequestTest {
         HttpRequest requestMessage = HttpRequest.parse(httpRequest);
 
         // when
-        RequestStartLine actual = requestMessage.getRequestStartLine();
+        RequestLine actual = requestMessage.getRequestLine();
 
         // then
         assertAll(() -> {

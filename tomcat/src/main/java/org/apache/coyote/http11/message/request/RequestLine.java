@@ -6,7 +6,7 @@ import org.apache.coyote.http11.message.common.HttpMethod;
 
 @ToString
 @Getter
-public class RequestStartLine {
+public class RequestLine {
 
     private static final String START_LINE_DELIMITER = " ";
 
@@ -18,7 +18,7 @@ public class RequestStartLine {
     private final RequestUri requestUri;
     private final String version;
 
-    public RequestStartLine(final String requestLine) {
+    public RequestLine(final String requestLine) {
         String[] splitRequestLine = requestLine.split(START_LINE_DELIMITER);
         this.method = HttpMethod.from(splitRequestLine[METHOD_INDEX]);
         this.requestUri = new RequestUri(splitRequestLine[REQUEST_URI_INDEX]);

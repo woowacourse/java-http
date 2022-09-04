@@ -11,11 +11,10 @@ import java.net.Socket;
 
 public class Connector implements Runnable {
 
-    private static final Logger log = LoggerFactory.getLogger(Connector.class);
-
     private static final int DEFAULT_PORT = 8080;
     private static final int DEFAULT_ACCEPT_COUNT = 100;
 
+    private final Logger log = LoggerFactory.getLogger(getClass());
     private final ServerSocket serverSocket;
     private boolean stopped;
 

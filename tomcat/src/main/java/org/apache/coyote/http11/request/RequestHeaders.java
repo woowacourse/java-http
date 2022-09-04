@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RequestHeaders {
+
     private static final Logger log = LoggerFactory.getLogger(RequestHeaders.class);
     private static final int DEFAULT_HEADER_FIELD_LENGTH = 2;
 

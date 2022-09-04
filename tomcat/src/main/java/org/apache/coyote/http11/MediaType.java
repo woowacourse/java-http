@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 public enum MediaType {
 
-    HTML("text/html", "html"),
+    HTML("text/html;charset=utf-8", "html"),
     JAVASCRIPT("application/javascript", "js"),
     CSS("text/css", "css")
     ;

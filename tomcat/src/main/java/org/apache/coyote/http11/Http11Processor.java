@@ -44,9 +44,9 @@ public class Http11Processor implements Runnable, Processor {
             List<String> request = readRequest(bufferedReader);
             HttpRequest httpRequest = HttpRequest.of(request);
 
-            String response = makeResponse(httpRequest.getRequestUri());
+            HttpResponse response = makeResponse(httpRequest.getRequestUri());
 
-            outputStream.write(response.getBytes());
+            outputStream.write(response.getValue().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -62,17 +62,13 @@ public class Http11Processor implements Runnable, Processor {
         return request;
     }
 
-    private String makeResponse(final RequestUri requestUri) throws IOException {
-        String responseBody = getResponseBody(requestUri);
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + requestUri.findMediaType().getValue() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    private HttpResponse makeResponse(final RequestUri requestUri) throws IOException {
+        return new HttpResponse()
+                .httpStatus(HttpStatus.OK)
+                .body(makeResponseBody(requestUri), requestUri);
     }
 
-    private String getResponseBody(final RequestUri requestUri) throws IOException {
+    private String makeResponseBody(final RequestUri requestUri) throws IOException {
         if (requestUri.hasQueryParams()) {
             QueryParameters queryParameters = requestUri.getQueryParams();
             login(queryParameters);

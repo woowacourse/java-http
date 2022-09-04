@@ -7,7 +7,9 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Objects;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.view.UserOutput;
 import org.apache.coyote.Processor;
@@ -61,6 +63,21 @@ public class Http11Processor implements Runnable, Processor {
     private String getRequestStartLine(final InputStream inputStream) throws IOException {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-        return bufferedReader.readLine();
+        final StringBuilder actual = new StringBuilder();
+        String line;
+        while(true) {
+             line = bufferedReader.readLine();
+            if (line.equals("")) {
+                break;
+            }
+            actual.append(line)
+                    .append("\r\n");
+        }
+        while(bufferedReader.ready()) {
+            char a = (char)bufferedReader.read();
+            actual.append(a);
+        }
+        System.out.println(actual.toString());
+        return actual.toString().split("\r\n")[0];
     }
 }

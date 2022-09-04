@@ -1,7 +1,6 @@
 package nextstep.jwp.view;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.function.Function;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;

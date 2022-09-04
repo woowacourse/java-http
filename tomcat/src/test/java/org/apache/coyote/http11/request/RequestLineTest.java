@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import org.apache.coyote.http11.HttpMethod;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ class RequestLineTest {
 
             // then
             assertAll(
-                    () -> assertThat(requestLine.getMethod()).isEqualTo("GET"),
+                    () -> assertThat(requestLine.getMethod()).isEqualTo(HttpMethod.GET),
                     () -> assertThat(requestLine.getRequestUri().getPath()).isEqualTo("/index.html"),
                     () -> assertThat(requestLine.getRequestUri().getParams()).isEmpty(),
                     () -> assertThat(requestLine.getVersion()).isEqualTo("HTTP/1.1")

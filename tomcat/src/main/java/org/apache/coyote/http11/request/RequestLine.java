@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.request;
 
 import java.util.Objects;
+import org.apache.coyote.http11.HttpMethod;
 
 public class RequestLine {
     private static final int DEFAULT_LENGTH = 3;
@@ -8,11 +9,11 @@ public class RequestLine {
     private static final int REQUEST_URI_INDEX = 1;
     private static final int REQUEST_VERSION_INDEX = 2;
 
-    private final String method;
+    private final HttpMethod method;
     private final RequestUri requestUri;
     private final String version;
 
-    private RequestLine(final String method, final RequestUri requestUri, final String version) {
+    private RequestLine(final HttpMethod method, final RequestUri requestUri, final String version) {
         this.method = method;
         this.requestUri = requestUri;
         this.version = version;
@@ -23,7 +24,7 @@ public class RequestLine {
         final String[] requestLine = line.split(" ");
         validateLength(requestLine);
 
-        final String method = requestLine[REQUEST_METHOD_INDEX];
+        final HttpMethod method = HttpMethod.findByName(requestLine[REQUEST_METHOD_INDEX]);
         final RequestUri requestUri = RequestUri.from(requestLine[REQUEST_URI_INDEX]);
         final String version = requestLine[REQUEST_VERSION_INDEX];
 
@@ -48,7 +49,7 @@ public class RequestLine {
         return requestUri.getPath();
     }
 
-    public String getMethod() {
+    public HttpMethod getMethod() {
         return method;
     }
 

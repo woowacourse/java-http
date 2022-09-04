@@ -51,14 +51,6 @@ class HttpRequestUriTest {
     }
 
     @Test
-    @DisplayName("해당요청이 인덱스 요청인지 확인한다.")
-    void isIndex() {
-        HttpRequestUri httpRequestUri = new HttpRequestUri("/");
-
-        assertThat(httpRequestUri.isIndex()).isTrue();
-    }
-
-    @Test
     @DisplayName("해당요청이 쿼리 스트링 요청인지 확인한다.")
     void isQueryString() {
         HttpRequestUri httpRequestUri = new HttpRequestUri("/login?account=gugu&password=password");

@@ -16,12 +16,12 @@ public class HttpRequest {
         this(HttpMethod.of(method), HttpRequestUri.of(uri), HttpVersion.of(version));
     }
 
-    public boolean isGetMethod() {
-        return method.isGet();
+    public boolean isEqualToMethod(final HttpMethod httpMethod) {
+        return this.method == httpMethod;
     }
 
-    public boolean isIndex() {
-        return uri.isIndex();
+    public boolean isEqualToUri(final String uri) {
+        return this.uri.equals(HttpRequestUri.of(uri));
     }
 
     public boolean isQueryString() {

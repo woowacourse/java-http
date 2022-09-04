@@ -2,12 +2,12 @@ package org.apache.coyote.http11.request.model;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.Objects;
 import org.apache.coyote.exception.UnSupportedMediaType;
 import org.apache.coyote.http11.model.ContentType;
 
 public class HttpRequestUri {
 
-    private static final String INDEX_URI = "/";
     private static final String QUERY_PARAMETER = "?";
 
     private final String value;
@@ -28,12 +28,25 @@ public class HttpRequestUri {
         return new HttpRequestUri(uri);
     }
 
-    public boolean isIndex() {
-        return value.equals(INDEX_URI);
-    }
-
     public boolean isQuery() {
         return value.contains(QUERY_PARAMETER);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof HttpRequestUri)) {
+            return false;
+        }
+        HttpRequestUri that = (HttpRequestUri) o;
+        return Objects.equals(value, that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
     }
 
     private enum RequestContentType {

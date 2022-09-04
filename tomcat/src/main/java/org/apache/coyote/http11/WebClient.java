@@ -4,6 +4,7 @@ import java.text.MessageFormat;
 import org.apache.coyote.exception.MethodNotAllowedException;
 import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.HttpStatus;
+import org.apache.coyote.http11.request.model.HttpMethod;
 import org.apache.coyote.http11.request.model.HttpRequest;
 import org.apache.coyote.http11.request.model.HttpRequestUri;
 import org.apache.coyote.http11.request.model.HttpVersion;
@@ -12,17 +13,18 @@ import org.apache.coyote.util.FileUtils;
 
 public class WebClient {
 
-    public static final String INDEX_BODY = "Hello world!";
+    private static final String INDEX_URI = "/";
+    private static final String INDEX_BODY = "Hello world!";
 
     public HttpResponse request(final HttpRequest httpRequest) {
-        if (httpRequest.isGetMethod()) {
+        if (httpRequest.isEqualToMethod(HttpMethod.GET)) {
             return doGet(httpRequest);
         }
         throw new MethodNotAllowedException(MessageFormat.format("not allowed : {0}", httpRequest.getMethod()));
     }
 
     private HttpResponse doGet(final HttpRequest httpRequest) {
-        if (httpRequest.isIndex()) {
+        if (httpRequest.isEqualToUri(INDEX_URI)) {
             return getForObject(httpRequest, ContentType.TEXT_HTML_CHARSET_UTF_8, INDEX_BODY);
         }
 
@@ -57,7 +59,7 @@ public class WebClient {
                 .build();
     }
 
-    private HttpResponse getForObject(final HttpRequest httpRequest, final ContentType contentType, String body) {
+    private HttpResponse getForObject(final HttpRequest httpRequest, final ContentType contentType, final String body) {
         return HttpResponse.builder()
                 .body(body)
                 .version(httpRequest.getVersion())

@@ -29,6 +29,10 @@ public class RequestLine {
         );
     }
 
+    public boolean matchHttpMethod(HttpMethod httpMethod) {
+        return method == httpMethod;
+    }
+
     public boolean matchUri(Pattern uriPattern) {
         return uri.match(uriPattern);
     }

@@ -4,6 +4,7 @@ import java.util.regex.Pattern;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.handler.Handler;
+import org.apache.coyote.http11.httpmessage.request.HttpMethod;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpStatus;
 import org.slf4j.Logger;
@@ -17,7 +18,7 @@ public class LoginApiHandler implements Handler {
 
     @Override
     public boolean canHandle(HttpRequest httpRequest) {
-        return httpRequest.matchUri(LOGIN_URI_PATTERN);
+        return httpRequest.matchRequestLine(HttpMethod.POST, LOGIN_URI_PATTERN);
     }
 
     @Override

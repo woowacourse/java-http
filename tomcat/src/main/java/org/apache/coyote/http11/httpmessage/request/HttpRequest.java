@@ -28,8 +28,8 @@ public class HttpRequest {
         return new LinkedList<>(Arrays.asList(request.split("\r\n")));
     }
 
-    public boolean matchUri(Pattern uriPattern) {
-        return requestLine.matchUri(uriPattern);
+    public boolean matchRequestLine(HttpMethod httpMethod, Pattern uriPattern) {
+        return requestLine.matchHttpMethod(httpMethod) && requestLine.matchUri(uriPattern);
     }
 
     public String getPath() {

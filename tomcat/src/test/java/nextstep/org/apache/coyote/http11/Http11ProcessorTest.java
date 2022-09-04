@@ -162,7 +162,7 @@ class Http11ProcessorTest {
     void 가입된_유저는_로그인을_할_수_있다() throws IOException {
         //given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login?account=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/html;q=0.1 ",
                 "Connection: keep-alive",
@@ -211,7 +211,7 @@ class Http11ProcessorTest {
     void 잘못된_비밀번호로_로그인_시_로그인에_실패한다() throws IOException {
         //given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=집가고싶다 HTTP/1.1 ",
+                "POST /login?account=gugu&password=집가고싶다 HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/html;q=0.1 ",
                 "Connection: keep-alive",
@@ -242,7 +242,7 @@ class Http11ProcessorTest {
     void 로그인_요청_시_account를_보내지_않으면_로그인에_실패한다() {
         //given
         final String httpRequest = String.join("\r\n",
-                "GET /login?id=gugu&password=집가고싶다 HTTP/1.1 ",
+                "POST /login?id=gugu&password=집가고싶다 HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/html;q=0.1 ",
                 "Connection: keep-alive",
@@ -261,7 +261,7 @@ class Http11ProcessorTest {
     void 로그인_요청_시_password를_보내지_않으면_401_html을_응답한다() throws IOException {
         //given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&비밀번호=password HTTP/1.1 ",
+                "POST /login?account=gugu&비밀번호=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/html;q=0.1 ",
                 "Connection: keep-alive",
@@ -273,8 +273,6 @@ class Http11ProcessorTest {
 
         // when
         processor.run();
-
-
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/401.html");

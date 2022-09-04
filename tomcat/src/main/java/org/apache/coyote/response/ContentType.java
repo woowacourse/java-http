@@ -1,7 +1,7 @@
 package org.apache.coyote.response;
 
 public enum ContentType {
-    HTTP("text/html"),
+    HTML("text/html"),
     CSS("text/css"),
     JS("application/javascript");
 
@@ -18,7 +18,7 @@ public enum ContentType {
         if (requestUrl.contains(".js")) {
             return JS;
         }
-        return HTTP;
+        return HTML;
     }
 
     @Override

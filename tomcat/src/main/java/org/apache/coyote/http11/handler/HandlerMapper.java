@@ -5,7 +5,6 @@ import java.util.Arrays;
 public enum HandlerMapper {
 
     HOME("/", new HomeHandler()),
-    INDEX("/index.html", new ResourceHandler()),
     LOGIN("/login", new LoginHandler()),
     ;
 

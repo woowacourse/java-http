@@ -1,19 +1,19 @@
 package nextstep.jwp.vo;
 
+import nextstep.jwp.model.Request;
 import org.apache.coyote.http11.GetRequestMangerImpl;
 import org.apache.coyote.http11.PostRequestMangerImpl;
 import org.apache.coyote.http11.RequestManager;
-import org.apache.coyote.http11.RequestParser;
 
 public enum RequestMethod {
 
     GET,
     POST;
 
-    public static RequestManager selectManager(String method, RequestParser requestParser) {
-        if (method.equals(GET.name())) {
-            return new GetRequestMangerImpl(requestParser);
+    public static RequestManager selectManager(Request request) {
+        if (request.getRequestMethod() == GET) {
+            return new GetRequestMangerImpl(request);
         }
-        return new PostRequestMangerImpl(requestParser);
+        return new PostRequestMangerImpl(request);
     }
 }

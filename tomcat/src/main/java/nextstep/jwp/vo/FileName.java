@@ -15,6 +15,10 @@ public class FileName {
         return baseName + EXTENSION_DELIMITER + extension;
     }
 
+    public boolean isSame(String baseName) {
+        return this.baseName.equals(baseName);
+    }
+
     public String getBaseName() {
         return baseName;
     }

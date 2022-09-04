@@ -3,6 +3,8 @@ package nextstep.jwp.service;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.vo.LoginResult;
+import nextstep.jwp.vo.Response;
+import nextstep.jwp.vo.ResponseStatus;
 import org.apache.catalina.Session;
 import org.apache.catalina.SessionManager;
 
@@ -15,15 +17,31 @@ public class LoginService {
     private static final String FAIL_URL = "/401.html";
 
     private static final LoginService loginService = new LoginService();
+    private static final String SET_COOKIE = "Set-Cookie";
+    private static final String LOCATION = "Location";
+    private static final String JSESSIONID = "JSESSIONID=";
 
     private LoginService() {
     }
 
-    public static LoginResult signIn(String account, String password) {
+    public static String signIn(String account, String password) {
         return loginService.signInInternal(account, password);
     }
 
-    private LoginResult signInInternal(String account, String password) {
+    private String signInInternal(String account, String password) {
+        LoginResult loginResult = generateResult(account, password);
+        Response response = Response.from(ResponseStatus.FOUND);
+        if (loginResult.getSession() != null) {
+            response.addHeader(SET_COOKIE, JSESSIONID + loginResult.getSession().getId());
+
+        }
+        return response.addHeader(LOCATION, loginResult.getRedirectUrl())
+                .addBlankLine()
+                .getResponse();
+
+    }
+
+    private LoginResult generateResult(String account, String password) {
         if (account == null || password == null) {
             return new LoginResult(FAIL_URL);
         }
@@ -45,6 +63,4 @@ public class LoginService {
         sessionManager.add(session);
         return new LoginResult(SUCCESS_URL, session);
     }
-
-
 }

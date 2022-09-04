@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.Request;
 import nextstep.jwp.vo.RequestMethod;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -15,7 +16,10 @@ import java.util.List;
 
 public class Http11Processor implements Runnable, Processor {
 
+    private static final String CONTENT_LENGTH_DELIMITER = ": ";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String EMPTY_BODY = "";
 
     private final Socket connection;
 
@@ -35,10 +39,10 @@ public class Http11Processor implements Runnable, Processor {
 
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-            RequestParser requestParser = new RequestParser(saveRequest(bufferedReader));
-            String method = requestParser.generateMethod();
+            Request request = saveRequest(bufferedReader);
+            request.temp();
 
-            RequestManager requestManager = RequestMethod.selectManager(method, requestParser);
+            RequestManager requestManager = RequestMethod.selectManager(request);
 
             final var response = requestManager.generateResponse();
 
@@ -49,21 +53,21 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private List<String> saveRequest(BufferedReader bufferedReader) throws IOException {
+    private Request saveRequest(BufferedReader bufferedReader) throws IOException {
         List<String> requestStrings = new ArrayList<>();
         String now;
-        Integer bodyLength = -1;
+        int bodyLength = -1;
         while (!(now = bufferedReader.readLine()).isEmpty()) {
             requestStrings.add(now);
-            if (now.startsWith("Content-Length")) {
-                bodyLength = Integer.parseInt(now.split(": ")[1]);
+            if (now.startsWith(CONTENT_LENGTH)) {
+                bodyLength = Integer.parseInt(now.split(CONTENT_LENGTH_DELIMITER)[1]);
             }
         }
         if (bodyLength > 0) {
             char[] buffer = new char[bodyLength];
             bufferedReader.read(buffer, 0, bodyLength);
-            requestStrings.add(new String(buffer));
+            return Request.of(requestStrings, new String(buffer));
         }
-        return requestStrings;
+        return Request.of(requestStrings, EMPTY_BODY);
     }
 }

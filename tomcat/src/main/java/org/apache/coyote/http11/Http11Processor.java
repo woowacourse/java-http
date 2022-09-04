@@ -1,16 +1,24 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.UncheckedServletException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+import nextstep.jwp.presentation.Controller;
+import org.apache.coyote.HttpRequest;
+import org.apache.coyote.HttpResponse;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.Socket;
-
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String LINE_BEFORE_READ = " ";
 
     private final Socket connection;
 
@@ -25,22 +33,49 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final InputStream inputStream = connection.getInputStream();
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+             final OutputStream outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final HttpRequest httpRequest = toHttpRequest(bufferedReader);
+            final HttpResponse httpResponse = new HttpResponse();
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            doService(httpRequest, httpResponse);
 
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+            write(outputStream, httpResponse);
+        } catch (final Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest toHttpRequest(final BufferedReader bufferedReader) throws IOException {
+        final List<String> rawHttpRequest = readHttpRequest(bufferedReader);
+        return HttpRequest.from(rawHttpRequest);
+    }
+
+    private List<String> readHttpRequest(final BufferedReader bufferedReader) throws IOException {
+        final List<String> rawHttpRequest = new ArrayList<>();
+
+        String line = LINE_BEFORE_READ;
+        while (!line.isEmpty()) {
+            line = bufferedReader.readLine();
+            rawHttpRequest.add(line);
+        }
+
+        log.info("============= HTTP REQUEST =============");
+        log.info(String.join("\n", rawHttpRequest));
+
+        return rawHttpRequest;
+    }
+
+    private void doService(final HttpRequest request, final HttpResponse response) throws Exception {
+        final String path = request.getPath();
+        final Controller controller = RequestMapping.findController(path);
+        controller.service(request, response);
+    }
+
+    private void write(final OutputStream outputStream, final HttpResponse response) throws IOException {
+        outputStream.write(response.toBytes());
+        outputStream.flush();
     }
 }

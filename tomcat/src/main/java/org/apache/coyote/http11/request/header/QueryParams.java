@@ -23,7 +23,7 @@ public class QueryParams {
 		for (final String param : paramElements) {
 			final String[] paramElement = param.split(PARAMS_DELIMITER);
 
-			validateParamIsDuplicated(params, paramElement[KEY]);
+			validateParamIsNotDuplicated(params, paramElement[KEY]);
 			params.put(paramElement[KEY], paramElement[VALUE]);
 		}
 		return new QueryParams(params);
@@ -33,7 +33,7 @@ public class QueryParams {
 		return new QueryParams(new HashMap<>());
 	}
 
-	private static void validateParamIsDuplicated(final Map<String, String> params, final String key) {
+	private static void validateParamIsNotDuplicated(final Map<String, String> params, final String key) {
 		if (params.containsKey(key)) {
 			throw new IllegalArgumentException(String.format("파라미터가 중복적으로 입력되었습니다. [%s]", key));
 		}

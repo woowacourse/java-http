@@ -1,7 +1,9 @@
 package nextstep.org.apache.coyote.http11;
 
+import nextstep.jwp.controller.UserController;
 import support.StubSocket;
 import org.apache.coyote.http11.Http11Processor;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -12,6 +14,11 @@ import java.nio.file.Files;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
+
+    @BeforeAll
+    static void setUp() {
+        final var userController = new UserController();
+    }
 
     @Test
     void process() {

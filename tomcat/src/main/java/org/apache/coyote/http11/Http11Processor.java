@@ -6,6 +6,8 @@ import nextstep.jwp.model.User;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.HttpMessageConfig;
+import org.apache.coyote.http11.mapping.HandlerMapping;
+import org.apache.coyote.http11.mapping.MappingResponse;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -79,19 +81,16 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createHttpResponse(final HttpRequest httpRequest) {
-        final String resourceName = linkResourceFromUrl(httpRequest.getUrl());
+        final MappingResponse response = getResourceFromUrl(httpRequest.getUrl());
+        final String resource = response.getResource();
+        final String statusCode = response.getStatusCode();
 
-        return HttpResponse.of(httpRequest.getHttpVersion(), resourceName);
+        return HttpResponse.of(httpRequest.getHttpVersion(), resource);
     }
 
-    private String linkResourceFromUrl(final String url) {
-        if (url.equals("/")) {
-            return "/helloWorld.html";
-        }
-        if (url.equals("/login")) {
-            return "/login.html";
-        }
-        return url;
+    private MappingResponse getResourceFromUrl(final String url) {
+        return HandlerMapping.getInstance()
+            .getResponse(url);
     }
 
     private void printQueries(final HttpRequest httpRequest) {

@@ -1,4 +1,4 @@
-package nextstep.jwp.controller;
+package nextstep.jwp.presentation;
 
 import java.util.NoSuchElementException;
 import nextstep.jwp.db.InMemoryUserRepository;

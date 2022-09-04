@@ -1,4 +1,4 @@
-package nextstep.jwp.controller;
+package nextstep.jwp.presentation;
 
 import java.net.URL;
 import org.apache.coyote.HttpRequest;

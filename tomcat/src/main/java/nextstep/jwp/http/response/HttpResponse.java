@@ -1,11 +1,11 @@
 package nextstep.jwp.http.response;
 
+import java.util.StringJoiner;
 import nextstep.jwp.http.HttpHeader;
 
 public class HttpResponse {
 
     private static final String BLANK = " ";
-    private static final String SEPARATOR = "\r\n";
 
     private final String version;
     private final StatusCode statusCode;
@@ -29,10 +29,17 @@ public class HttpResponse {
     }
 
     private String createStatusLineTemplate() {
-        return version + BLANK + statusCode.getCode() + BLANK + statusCode.getMessage() + BLANK + SEPARATOR;
+        StringJoiner statusLineJoiner = new StringJoiner(BLANK);
+        statusLineJoiner.add(version);
+        statusLineJoiner.add(statusCode.getCode());
+        statusLineJoiner.add(statusCode.getMessage());
+        statusLineJoiner.add("\r\n");
+        return statusLineJoiner.toString();
     }
 
     private String createResponseBodyTemplate() {
-        return SEPARATOR + SEPARATOR + responseBody;
+        return "\r\n"
+                + "\r\n"
+                + responseBody;
     }
 }

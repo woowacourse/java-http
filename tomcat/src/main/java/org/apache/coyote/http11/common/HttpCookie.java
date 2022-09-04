@@ -2,7 +2,6 @@ package org.apache.coyote.http11.common;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class HttpCookie {
@@ -34,15 +33,19 @@ public class HttpCookie {
         return new HttpCookie(httpCookie);
     }
 
-    public static HttpCookie createWithSession() {
+    public static HttpCookie createWithSession(String sessionId) {
         Map<String, String> httpCookie = new HashMap<>();
-        httpCookie.put(SESSION, UUID.randomUUID().toString());
+        httpCookie.put(SESSION, sessionId);
 
         return new HttpCookie(httpCookie);
     }
 
     public boolean containsSession() {
         return cookie.containsKey(SESSION);
+    }
+
+    public String getSession(){
+        return cookie.get(SESSION);
     }
 
     public String toHeaderString() {

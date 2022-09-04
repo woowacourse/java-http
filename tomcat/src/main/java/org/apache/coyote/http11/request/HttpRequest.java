@@ -43,6 +43,10 @@ public class HttpRequest {
         return headers.containsSession();
     }
 
+    public String getSessionFromCookie() {
+        return headers.getSession();
+    }
+
     public Map<String, String> getBody() {
         return body.getBody();
     }

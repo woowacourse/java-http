@@ -45,6 +45,10 @@ public class HttpRequestHeader {
         return cookie.containsSession();
     }
 
+    public String getSession() {
+        return cookie.getSession();
+    }
+
     public int getContentLength() {
         return Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
     }

@@ -7,11 +7,9 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.exception.TempException;
+import org.apache.util.IntegerUtil;
 
 public class HttpRequest {
-
-    private static final int START_LINE_INDEX = 0;
-    private static final String EMPTY_LINE_SIGNATURE = "";
 
     private final RequestGeneral requestGeneral;
     private final RequestHeaders requestHeaders;
@@ -24,25 +22,40 @@ public class HttpRequest {
     }
 
     public static HttpRequest parse(InputStream inputStream) {
-        List<String> lines = readAllLines(inputStream);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
-        int emptyLineIndex = findEmptyLine(lines);
-        return new HttpRequest(
-                RequestGeneral.parse(lines.get(0)),
-                RequestHeaders.parse(lines.subList(START_LINE_INDEX + 1, emptyLineIndex)),
-                RequestBody.parse(lines.subList(Math.min(emptyLineIndex + 1, lines.size()), lines.size()))
-        );
+        RequestGeneral general = readGeneralLine(reader);
+        RequestHeaders headers = readHeaderLines(reader);
+        RequestBody body = readBodyLines(reader, headers);
+
+        return new HttpRequest(general, headers, body);
     }
 
-    private static List<String> readAllLines(InputStream inputStream) {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        List<String> lines = new ArrayList<>();
+    private static RequestGeneral readGeneralLine(BufferedReader reader) {
+        return RequestGeneral.parse(readOneLine(reader));
+    }
 
+    private static RequestHeaders readHeaderLines(BufferedReader reader) {
+        List<String> lines = new ArrayList<>();
         String line;
-        while (!(line = readOneLine(reader)).equals("")) {
+        while (!"".equals(line = readOneLine(reader))) {
             lines.add(line);
         }
-        return lines;
+        return RequestHeaders.parse(lines);
+    }
+
+    private static RequestBody readBodyLines(BufferedReader reader, RequestHeaders headers) {
+        int length = IntegerUtil.parseIntSafe(headers.getValueByKey("Content-Length"));
+        if (length == 0) {
+            return RequestBody.empty();
+        }
+        char[] buffer = new char[length];
+        try {
+            reader.read(buffer, 0, length);
+            return new RequestBody(new String(buffer));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static String readOneLine(BufferedReader reader) {
@@ -53,20 +66,12 @@ public class HttpRequest {
         }
     }
 
-    private static int findEmptyLine(List<String> lines) {
-        int index = lines.indexOf(EMPTY_LINE_SIGNATURE);
-        if (index == -1) {
-            return lines.size();
-        }
-        return index;
+    public HttpRequest redirectPath(String path) {
+        return new HttpRequest(requestGeneral.redirectPath(path), requestHeaders, requestBody);
     }
 
     public String getPath() {
         return requestGeneral.getPath().getPath();
-    }
-
-    public HttpRequest redirectPath(String path) {
-        return new HttpRequest(requestGeneral.redirectPath(path), requestHeaders, requestBody);
     }
 
     public String getParameter(String field) {
@@ -75,6 +80,10 @@ public class HttpRequest {
 
     public RequestMethod getMethod() {
         return requestGeneral.getMethod();
+    }
+
+    public String getRequestBody() {
+        return requestBody.getBody();
     }
 
     @Override

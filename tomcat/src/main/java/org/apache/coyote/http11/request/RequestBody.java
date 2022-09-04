@@ -6,12 +6,16 @@ public class RequestBody {
 
     private final String body;
 
-    private RequestBody(String body) {
+    public RequestBody(String body) {
         this.body = body;
     }
 
     public static RequestBody parse(List<String> lines) {
         return new RequestBody(String.join("\n", lines));
+    }
+
+    public static RequestBody empty() {
+        return new RequestBody("");
     }
 
     public String getBody() {

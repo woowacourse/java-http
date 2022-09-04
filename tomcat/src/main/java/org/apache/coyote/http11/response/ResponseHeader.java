@@ -1,5 +1,6 @@
 package org.apache.coyote.http11.response;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,6 +25,10 @@ public class ResponseHeader {
         final var headers = new LinkedHashMap<String, String>();
         headers.put("Location", location);
         return new ResponseHeader(headers);
+    }
+
+    public static ResponseHeader none() {
+        return new ResponseHeader(new HashMap<>());
     }
 
     public void add(final String key, final String value) {

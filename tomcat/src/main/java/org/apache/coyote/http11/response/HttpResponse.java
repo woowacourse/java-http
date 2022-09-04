@@ -31,6 +31,14 @@ public class HttpResponse {
         );
     }
 
+    public static HttpResponse internalServerError() {
+        return new HttpResponse(
+                new ResponseStatusLine(HttpStatus.INTERNAL_SERVER_ERROR),
+                ResponseHeader.none(),
+                ""
+        );
+    }
+
     public void setSessionId(final String sessionId) {
         responseHeader.add("Set-Cookie", "JSESSIONID=" + sessionId);
     }

@@ -4,10 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.HandlerResponse;
-import org.apache.coyote.http11.handlermapper.HandlerManager;
+import org.apache.coyote.http11.handler.Handler;
+import org.apache.coyote.http11.handlermapper.ApiHandlerMapper;
+import org.apache.coyote.http11.handlermapper.FileHandlerMapper;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 import org.apache.coyote.http11.view.ModelAndView;
@@ -37,7 +39,14 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest httpRequest = getHttpRequest(bufferedReader);
 
-            HandlerResponse handlerResponse = HandlerManager.getUriResponse(httpRequest);
+            FileHandlerMapper fileHandlerMapper = new FileHandlerMapper();
+            Handler handler = fileHandlerMapper.mapHandler(httpRequest);
+            if (handler == null) {
+                handler = new ApiHandlerMapper().mapHandler(httpRequest);
+            }
+            Objects.requireNonNull(handler);
+
+            Object handlerResponse = handler.getResponse(httpRequest);
 
             String http11Response = getHttp11Response(handlerResponse);
 
@@ -59,7 +68,7 @@ public class Http11Processor implements Runnable, Processor {
         return HttpRequest.of(stringBuilder.toString());
     }
 
-    private String getHttp11Response(HandlerResponse handlerResponse) throws IOException {
+    private String getHttp11Response(Object handlerResponse) throws IOException {
         ModelAndView modelAndView = ModelAndView.of(handlerResponse);
         HttpResponse httpResponse = HttpResponse.of(modelAndView);
         return httpResponse.toString();

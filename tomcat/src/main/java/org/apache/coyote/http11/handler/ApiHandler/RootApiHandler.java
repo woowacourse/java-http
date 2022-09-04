@@ -1,10 +1,11 @@
-package org.apache.coyote.http11.handler;
+package org.apache.coyote.http11.handler.ApiHandler;
 
 import java.util.regex.Pattern;
+import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpStatus;
 
-public class RootUriHandler implements UriHandler {
+public class RootApiHandler implements Handler {
 
     private static final Pattern ROOT_URI_PATTERN = Pattern.compile("/");
 
@@ -14,7 +15,7 @@ public class RootUriHandler implements UriHandler {
     }
 
     @Override
-    public HandlerResponse getResponse(HttpRequest httpRequest) {
-        return new HandlerResponse(HttpStatus.OK, "Hello world!");
+    public ApiHandlerResponse getResponse(HttpRequest httpRequest) {
+        return new ApiHandlerResponse(HttpStatus.OK, "Hello world!");
     }
 }

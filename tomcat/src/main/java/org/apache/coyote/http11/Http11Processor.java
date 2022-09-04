@@ -1,21 +1,17 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URISyntaxException;
-import java.util.Objects;
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.utils.ResponseMakerFactory;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.utils.RequestMappingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final int REQUEST_URL_INDEX = 1;
 
     private final Socket connection;
 
@@ -34,14 +30,17 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            final String url = Objects.requireNonNull(bufferedReader.readLine());
-            final String requestUrl = url.split(" ")[REQUEST_URL_INDEX];
-            final ResponseMaker responseMaker = ResponseMakerFactory.findResponseMaker(requestUrl);
-            final String response = responseMaker.createResponse(requestUrl);
+            final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
+            final String response = makeResponse(httpRequest.getMethod(), httpRequest.getRequestUrl());
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String makeResponse(final String requestMethod, final String requestUrl) throws Exception {
+        final ResponseMaker responseMaker = RequestMappingHandler.findResponseMaker(requestUrl, requestMethod);
+        return responseMaker.createResponse(requestUrl);
     }
 }

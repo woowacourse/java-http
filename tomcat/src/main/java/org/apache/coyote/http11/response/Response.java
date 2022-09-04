@@ -24,6 +24,14 @@ public class Response {
         this(contentType, statusCode, Map.of(), body);
     }
 
+    public Response(final StatusCode statusCode, final String body) {
+        this(ContentType.HTML, statusCode, Map.of(), body);
+    }
+
+    public static Response ofOk(final ContentType contentType, final String body) {
+        return new Response(contentType, StatusCode.OK, body);
+    }
+
     public String toText() {
         return String.join("\r\n",
                 "HTTP/1.1 " + statusCode.toString() + " ",

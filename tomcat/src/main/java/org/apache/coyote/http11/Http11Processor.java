@@ -76,24 +76,21 @@ public class Http11Processor implements Runnable, Processor {
         try {
             return getResponse(request);
         } catch (NotFoundException e) {
-            return new Response(ContentType.HTML, StatusCode.NOT_FOUND,
-                    ResourceLoader.getStaticResource("/404.html"));
+            return new Response(StatusCode.NOT_FOUND, ResourceLoader.getStaticResource("/404.html"));
         } catch (IllegalArgumentException e) {
-            return new Response(ContentType.HTML, StatusCode.BAD_REQUEST, "잘못된 요청입니다.");
+            return new Response(StatusCode.BAD_REQUEST, "잘못된 요청입니다.");
         } catch (UnauthorizedException e) {
-            return new Response(ContentType.HTML, StatusCode.UNAUTHORIZED,
-                    ResourceLoader.getStaticResource("/401.html"));
+            return new Response(StatusCode.UNAUTHORIZED, ResourceLoader.getStaticResource("/401.html"));
         }
     }
 
     private Response getResponse(final Request request) throws URISyntaxException, IOException {
         if (request.isPath("/")) {
-            return new Response(ContentType.HTML, StatusCode.OK, "Hello world!");
+            return Response.ofOk(ContentType.HTML, "Hello world!");
         }
 
         if (request.isForResource()) {
-            return new Response(request.getContentType(), StatusCode.OK,
-                    ResourceLoader.getStaticResource(request.getPath()));
+            return Response.ofOk(request.getContentType(), ResourceLoader.getStaticResource(request.getPath()));
         }
 
         if (request.isPath("/login")) {
@@ -105,7 +102,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private Response login(final QueryParams queryParams) throws URISyntaxException, IOException {
         if (queryParams.isEmpty()) {
-            return new Response(ContentType.HTML, StatusCode.OK, ResourceLoader.getStaticResource("/login.html"));
+            return Response.ofOk(ContentType.HTML, ResourceLoader.getStaticResource("/login.html"));
         }
 
         if (!queryParams.containsKey("account") || !queryParams.containsKey("password")) {

@@ -20,7 +20,6 @@ class Http11HandlerTest {
         Map<String, String> elements = http11Handler.extractElements("/");
 
         assertAll(
-                () -> assertThat(elements.get("spec")).isEqualTo("HTTP/1.1"),
                 () -> assertThat(elements.get("Content-Type")).isEqualTo(ExtensionContentType.HTML.getContentType()),
                 () -> assertThat(elements.get("Content-Length")).isEqualTo(Integer.toString("Hello world!".length())),
                 () -> assertThat(elements.get("body")).isEqualTo("Hello world!")
@@ -35,7 +34,6 @@ class Http11HandlerTest {
 
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         assertAll(
-                () -> assertThat(elements.get("spec")).isEqualTo("HTTP/1.1"),
                 () -> assertThat(elements.get("Content-Type")).isEqualTo(ExtensionContentType.HTML.getContentType()),
                 () -> assertThat(elements.get("Content-Length")).isEqualTo("5564"),
                 () -> assertThat(elements.get("body")).isEqualTo(new String(Files.readAllBytes(new File(resource.getFile()).toPath())))

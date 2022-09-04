@@ -11,13 +11,13 @@ public class Http11DefaultPageHandler implements Http11Handler {
 
     @Override
     public boolean isProperHandler(String uri) {
+        System.out.println(uri.equals(TARGET_URI));
         return uri.equals(TARGET_URI);
     }
 
     @Override
     public Map<String, String> extractElements(String uri) {
         Map<String, String> headerElements = new HashMap<>();
-        headerElements.put("spec", "HTTP/1.1");
         headerElements.put("Content-Type", getContentType(uri));
         headerElements.put("Content-Length", getContentLength(uri));
         headerElements.put("body", extractBody(uri));

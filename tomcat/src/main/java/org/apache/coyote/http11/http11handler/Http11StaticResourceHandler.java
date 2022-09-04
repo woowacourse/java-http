@@ -25,7 +25,6 @@ public class Http11StaticResourceHandler implements Http11Handler {
     @Override
     public Map<String, String> extractElements(String uri) {
         Map<String, String> headerElements = new HashMap<>();
-        headerElements.put("spec", "HTTP/1.1");
         headerElements.put("Content-Type", getContentType(uri));
         headerElements.put("Content-Length", getContentLength(uri));
         headerElements.put("body", extractBody(uri));

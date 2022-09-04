@@ -67,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void addContentTypeHeader(final HttpRequest request, final HttpResponse response) {
         if (response.hasBody()) {
-            response.addHeader("Content-Type", new ContentTypeExtractor().extract(request));
+            response.addHeader("Content-Type", new ContentTypeExtractor().extract(request).getValue());
         }
     }
 }

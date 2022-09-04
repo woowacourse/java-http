@@ -2,6 +2,7 @@ package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.ContentTypeExtractor;
 import org.apache.coyote.http11.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
@@ -25,10 +26,10 @@ public class ContentTypeExtractorTest {
         ContentTypeExtractor extractor = new ContentTypeExtractor();
 
         // act
-        String actual = extractor.extract(HttpRequest.from(request));
+        ContentType actual = extractor.extract(HttpRequest.from(request));
 
         // assert
-        assertThat(actual).isEqualTo("text/css");
+        assertThat(actual).isEqualTo(ContentType.TEXT_CSS);
     }
 
     @ParameterizedTest
@@ -44,9 +45,9 @@ public class ContentTypeExtractorTest {
         ContentTypeExtractor extractor = new ContentTypeExtractor();
 
         // act
-        String actual = extractor.extract(HttpRequest.from(request));
+        ContentType actual = extractor.extract(HttpRequest.from(request));
 
         // assert
-        assertThat(actual).isEqualTo(expectContentType);
+        assertThat(actual).isEqualTo(ContentType.getByAcceptHeader(expectContentType).orElseThrow());
     }
 }

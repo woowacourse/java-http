@@ -41,4 +41,16 @@ public class HttpRequest {
     public String findQueryValue(final String key) {
         return requestLine.findQueryValue(key);
     }
+
+    public RequestLine getRequestLine() {
+        return requestLine;
+    }
+
+    public RequestHeaders getRequestHeaders() {
+        return requestHeaders;
+    }
+
+    public RequestBody getRequestBody() {
+        return requestBody;
+    }
 }

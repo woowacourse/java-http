@@ -1,49 +1,52 @@
 package org.apache.coyote.http11.httpmessage;
 
+import org.apache.coyote.http11.httpmessage.statusline.HttpStatus;
+import org.apache.coyote.http11.httpmessage.statusline.StatusLine;
+
 public class Response {
 
-    String startLine;
-    Headers headers;
-    String body;
+    private StatusLine statusLine;
+    private Headers headers;
+    private String body;
 
-    public Response(String startLine, Headers headers, String body) {
-        this.startLine = startLine;
+    public Response(StatusLine statusLine, Headers headers, String body) {
+        this.statusLine = statusLine;
         this.headers = headers;
         this.body = body;
     }
 
-    public Response(String startLine, Headers headers) {
-        this.startLine = startLine;
+    public Response(StatusLine statusLine, Headers headers) {
+        this.statusLine = statusLine;
         this.headers = headers;
     }
 
     public Response() {
     }
 
-    public static Response newInstanceWithResponseBody(final HttpStatus httpStatus, final ContentType contentType,
-                                                       final String responseBody) {
-        final String startLine = "HTTP/1.1 " + httpStatus.getStatusCode() + " " + httpStatus.getStatus();
+    public static Response okWithResponseBody(final ContentType contentType, final String responseBody) {
+        final StatusLine statusLine = new StatusLine(HttpVersion.HTTP1_1, HttpStatus.OK);
 
         final Headers headers = new Headers()
                 .add("Content-Type", contentType.getContentType() + ";charset=utf-8")
                 .add("Content-Length", String.valueOf(responseBody.getBytes().length));
 
-        return new Response(startLine, headers, responseBody);
+        return new Response(statusLine, headers, responseBody);
     }
 
-    public static Response of(final HttpStatus httpStatus, final ContentType contentType, final String location) {
-        final String startLine = "HTTP/1.1 " + httpStatus.getStatusCode() + " " + httpStatus.getStatus();
+    public static Response redirect(final ContentType contentType, final String location) {
+        final StatusLine statusLine = new StatusLine(HttpVersion.HTTP1_1, HttpStatus.REDIRECT);
+
         final Headers headers = new Headers()
                 .add("Location", location)
                 .add("Content-Type", contentType.getContentType() + ";charset=utf-8");
 
-        return new Response(startLine, headers);
+        return new Response(statusLine, headers);
     }
 
     public byte[] getBytes() {
         if (this.body == null) {
-            return String.join("\r\n", startLine, headers.parseToString()).getBytes();
+            return String.join("\r\n", statusLine.parseToString(), headers.parseToString()).getBytes();
         }
-        return String.join("\r\n", startLine, headers.parseToString() + "\r\n", body).getBytes();
+        return String.join("\r\n", statusLine.parseToString(), headers.parseToString() + "\r\n", body).getBytes();
     }
 }

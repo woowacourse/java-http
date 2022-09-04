@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.httpmessage.requestline;
+package org.apache.coyote.http11.httpmessage;
 
 public enum HttpVersion {
     HTTP1_0("HTTP/1.0"),
@@ -10,5 +10,9 @@ public enum HttpVersion {
 
     HttpVersion(final String version) {
         this.version = version;
+    }
+
+    public String getVersion() {
+        return version;
     }
 }

@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.httpmessage.requestline;
 
+import org.apache.coyote.http11.httpmessage.HttpVersion;
+
 public class RequestLine {
 
     private final Method method;

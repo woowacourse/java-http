@@ -29,7 +29,7 @@ public class InMemoryUserRepository {
     }
 
     public static User findByAccountAndPassword(String account, String password) {
-        User user = Optional.ofNullable(database.get(account))
+        User user = findByAccount(account)
                 .orElseThrow(InvalidLoginException::new);
 
         if (user.checkPassword(password)) {

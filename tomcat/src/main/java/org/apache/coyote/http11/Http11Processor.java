@@ -25,6 +25,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String DEFAULT_VIEW_EXTENSION = ".html";
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
     private static final String DEFAULT_RESOURCE_PACKAGE = "static";
+    private static final String CONTENT_TYPE = "Content-Type: ";
+    private static final String CHARSET_UTF_8 = "charset=utf-8 ";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -68,12 +70,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getContentType(final String firstLine) {
         if (firstLine.contains("/css")) {
-            return "Content-Type: text/css;charset=utf-8 ";
+            return CONTENT_TYPE + "text/css;" + CHARSET_UTF_8;
         }
         if (firstLine.contains("/js")) {
-            return "Content-Type: text/js;charset=utf-8 ";
+            return CONTENT_TYPE + "text/js;" + CHARSET_UTF_8;
         }
-        return "Content-Type: text/html;charset=utf-8 ";
+        return CONTENT_TYPE + "text/html;" + CHARSET_UTF_8;
     }
 
     private String generateResponseBody(final String parsedURI) throws IOException {

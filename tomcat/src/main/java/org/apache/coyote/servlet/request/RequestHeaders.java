@@ -3,7 +3,7 @@ package org.apache.coyote.servlet.request;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.coyote.support.HttpCookie;
+import org.apache.coyote.servlet.cookie.HttpCookies;
 import org.apache.coyote.support.HttpException;
 import org.apache.coyote.support.HttpStatus;
 
@@ -11,6 +11,7 @@ public class RequestHeaders {
 
     private static final String HEADER_DELIMITER = ": ";
     private static final int HEADER_LINE_ELEMENT_COUNT = 2;
+    private static final String COOKIE_REQUEST_HEADER = "Cookie";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_TYPE_URL_ENCODED = "application/x-www-form-urlencoded";
@@ -50,11 +51,11 @@ public class RequestHeaders {
         return CONTENT_TYPE_URL_ENCODED.equals(headers.get(CONTENT_TYPE));
     }
 
-    public List<HttpCookie> getCookies() {
-        if (!headers.containsKey(HttpCookie.COOKIE_REQUEST_HEADER)) {
-            return List.of();
+    public HttpCookies getCookies() {
+        if (!headers.containsKey(COOKIE_REQUEST_HEADER)) {
+            return new HttpCookies(new HashMap<>());
         }
-        String cookies = headers.get(HttpCookie.COOKIE_REQUEST_HEADER);
-        return HttpCookie.extractCookies(cookies);
+        String cookies = headers.get(COOKIE_REQUEST_HEADER);
+        return HttpCookies.ofRequestHeader(cookies);
     }
 }

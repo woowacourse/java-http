@@ -1,13 +1,10 @@
-package org.apache.coyote.support;
+package org.apache.coyote.servlet.cookie;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.apache.coyote.support.HttpException;
+import org.apache.coyote.support.HttpStatus;
 
 public class HttpCookie {
 
-    public static final String COOKIE_REQUEST_HEADER = "Cookie";
-    private static final String COOKIE_DELIMITER = "; ";
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final int COOKIE_FORMAT_ELEMENT_COUNT = 2;
 
@@ -19,13 +16,7 @@ public class HttpCookie {
         this.value = value;
     }
 
-    public static List<HttpCookie> extractCookies(String headerLine) {
-        return Arrays.stream(headerLine.split(COOKIE_DELIMITER))
-                .map(HttpCookie::extractCookie)
-                .collect(Collectors.toList());
-    }
-
-    private static HttpCookie extractCookie(String cookie) {
+    public static HttpCookie of(String cookie) {
         final var keyValues = cookie.split(KEY_VALUE_DELIMITER);
         if (keyValues.length != COOKIE_FORMAT_ELEMENT_COUNT) {
             throw new HttpException(HttpStatus.BAD_REQUEST);

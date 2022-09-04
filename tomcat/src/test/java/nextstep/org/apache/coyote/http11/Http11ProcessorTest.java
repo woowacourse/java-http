@@ -1,29 +1,32 @@
 package nextstep.org.apache.coyote.http11;
 
-import support.StubSocket;
-import org.apache.coyote.http11.Http11Processor;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.apache.coyote.http11.Http11Processor;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import support.StubSocket;
 
 class Http11ProcessorTest {
 
+    @DisplayName("/ 에 접속시 Hello world! 문구를 출력한다.")
     @Test
-    void process() {
+    void rootPathHelloWorld() {
         // given
-        final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        StubSocket socket = new StubSocket();
+        Http11Processor processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
+        String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
@@ -33,29 +36,46 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @Test
-    void index() throws IOException {
+    @DisplayName("정적 파일을 서빙한다.")
+    @CsvSource(value = {
+            "/index.html,text/html",
+            "/login.html,text/html",
+            "/register.html,text/html",
+            "/401.html,text/html",
+            "/404.html,text/html",
+            "/500.html,text/html",
+            "/css/styles.css,text/css",
+            "/js/scripts.js,text/javascript",
+            "/assets/chart-area.js,text/javascript",
+            "/assets/chart-bar.js,text/javascript",
+            "/assets/chart-pie.js,text/javascript",
+            "/assets/img/error-404-monochrome.svg,image/svg+xml",
+    })
+    @ParameterizedTest
+    void serveStaticFiles(final String filePath, final String contentType) throws IOException {
         // given
-        final String httpRequest= String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
+        String httpRequest = String.join("\r\n",
+                "GET " + filePath + " HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
                 "");
 
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        URL resource = getClass().getClassLoader().getResource("static" + filePath);
+        String fileContent = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        int contentLength = fileContent.getBytes().length;
+
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: " + contentType + ";charset=utf-8 \r\n" +
+                "Content-Length: " + contentLength + " \r\n" +
+                "\r\n" + fileContent;
 
         assertThat(socket.output()).isEqualTo(expected);
     }

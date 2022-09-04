@@ -9,7 +9,8 @@ public enum ContentType {
     HTML("html", "text/html"),
     CSS("css", "text/css"),
     JAVASCRIPT("js", "text/javascript"),
-    FAVICON("ico", "image/x-icon");
+    FAVICON("ico", "image/x-icon"),
+    SVG("svg", "image/svg+xml");
 
     private final String extension;
     private final String value;

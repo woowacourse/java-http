@@ -9,6 +9,9 @@ import java.util.List;
 
 public class FileReader {
 
+    private FileReader() {
+    }
+
     public static String read(String uri) {
         try {
             final Path path = Paths.get(ClassLoader

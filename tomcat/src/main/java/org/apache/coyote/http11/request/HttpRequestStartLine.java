@@ -3,6 +3,8 @@ package org.apache.coyote.http11.request;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.coyote.http11.common.QueryParser;
+
 public class HttpRequestStartLine {
 
     private static final int INDEX_OF_METHOD = 0;
@@ -10,10 +12,6 @@ public class HttpRequestStartLine {
     private static final int INDEX_OF_VERSION = 2;
 
     private static final char START_QUERY_PARAM = '?';
-    private static final String QUERY_PARAM_DELIMITER = "&";
-    private static final String QUERY_PARAM_MAPPER = "=";
-    private static final int INDEX_OF_QUERY_KEY = 0;
-    private static final int INDEX_OF_QUERY_VALUE = 1;
 
     private final String method;
     private final String uri;
@@ -35,25 +33,13 @@ public class HttpRequestStartLine {
         String version = parsedLine[INDEX_OF_VERSION];
 
         if (uri.contains(String.valueOf(START_QUERY_PARAM))) {
-            Map<String, String> queryParam = parseQueryParam(uri);
+            String query = uri.substring(uri.indexOf(START_QUERY_PARAM));
             uri = uri.substring(0, uri.indexOf(START_QUERY_PARAM));
 
-            return new HttpRequestStartLine(method, uri, queryParam, version);
+            return new HttpRequestStartLine(method, uri, QueryParser.parse(query), version);
         }
 
         return new HttpRequestStartLine(method, uri, new HashMap<>(), version);
-    }
-
-    private static Map<String, String> parseQueryParam(String uri) {
-        String queryString = uri.substring(uri.indexOf(START_QUERY_PARAM) + 1);
-        Map<String, String> queryParam = new HashMap<>();
-
-        for (String q : queryString.split(QUERY_PARAM_DELIMITER)) {
-            String[] parsedQuery = q.split(QUERY_PARAM_MAPPER);
-            queryParam.put(parsedQuery[INDEX_OF_QUERY_KEY], parsedQuery[INDEX_OF_QUERY_VALUE]);
-        }
-
-        return queryParam;
     }
 
     public String getMethod() {

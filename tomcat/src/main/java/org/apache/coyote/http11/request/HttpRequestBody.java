@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.coyote.http11.common.QueryParser;
+
 public class HttpRequestBody {
 
     private final Map<String, String> body;
@@ -14,22 +16,16 @@ public class HttpRequestBody {
     }
 
     public static HttpRequestBody of(BufferedReader bufferedReader, int contentLength) throws IOException {
-        Map<String, String> body = new HashMap<>();
 
         if (contentLength == 0) {
-            return new HttpRequestBody(body);
+            return new HttpRequestBody(new HashMap<>());
         }
 
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
-        String bodyLines = new String(buffer);
+        String body = new String(buffer);
 
-        for (String bodyLine : bodyLines.split("&")) {
-            String[] parsedBody = bodyLine.split("=");
-            body.put(parsedBody[0], parsedBody[1]);
-        }
-
-        return new HttpRequestBody(body);
+        return new HttpRequestBody(QueryParser.parse(body));
     }
 
     public Map<String, String> getBody() {

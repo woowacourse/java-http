@@ -26,9 +26,7 @@ public class InMemoryUserRepository {
     public static boolean isAlreadySignIn(String account, String password, String email) {
         return database.values()
             .stream()
-            .filter(user -> user.isSameUser(account, password, email))
-            .findAny()
-            .isPresent();
+            .anyMatch(user -> user.isSameUser(account, password, email));
     }
 
     private InMemoryUserRepository() {

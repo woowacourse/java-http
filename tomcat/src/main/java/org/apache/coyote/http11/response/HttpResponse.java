@@ -6,7 +6,7 @@ import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_TYPE;
 public class HttpResponse {
 
     private static final String HTTP_VERSION = "HTTP/1.1";
-    private static final String CRLF = " \r\n";
+    private static final String CRLF = "\r\n";
     private static final String EMPTY = "";
 
     private final StringBuilder headers;
@@ -83,12 +83,13 @@ public class HttpResponse {
     }
 
     private String concatHeaderAndBody() {
-        final String emptyNewLine = "\r\n";
-        return headers + emptyNewLine + body;
+        return headers + CRLF + body;
     }
 
     private void appendLineWithCRLF(final String line) {
+        String endOfLine = " ";
         headers.append(line);
+        headers.append(endOfLine);
         headers.append(CRLF);
     }
 }

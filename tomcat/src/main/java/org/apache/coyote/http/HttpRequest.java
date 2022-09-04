@@ -1,9 +1,6 @@
 package org.apache.coyote.http;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -37,7 +34,7 @@ public class HttpRequest {
         final String uri = splitStartLine[1];
         final String path = getPath(uri);
         final Map<String, String> queryParams = getQueryParams(uri);
-        final String contentType = getContentType(path);
+        final String contentType = StringParser.toMimeType(uri);
 
         return new HttpRequest(httpMethod, path, queryParams, contentType, headers);
     }
@@ -62,11 +59,6 @@ public class HttpRequest {
 
     private static boolean hasQueryString(final String uri) {
         return uri.contains(QUERY_STRING_PREFIX);
-    }
-
-    private static String getContentType(final String path) throws IOException {
-        final Path filePath = new File(path).toPath();
-        return Files.probeContentType(filePath);
     }
 
     public boolean isRegister() {

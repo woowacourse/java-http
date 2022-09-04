@@ -25,7 +25,7 @@ public class HttpResponse {
         final String responseBody = getResponseBody(httpRequest.getPath());
 
         values.add(HttpStatusCode.OK.getResponseStartLine());
-        values.add(httpRequest.getContentType());
+        values.add("Content-Type: " + httpRequest.getContentType() + ";charset=utf-8 ");
         values.add("Content-Length: " + responseBody.getBytes().length + " ");
 
         return new HttpResponse(values, responseBody);

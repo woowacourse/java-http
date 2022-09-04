@@ -12,7 +12,6 @@ import org.apache.coyote.servlet.Servlet;
 import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.response.HttpResponse;
 import org.apache.coyote.servlet.response.ResponseEntity;
-import org.apache.coyote.servlet.session.SessionRepository;
 import org.apache.coyote.support.HttpException;
 
 public class CustomServlet implements Servlet {
@@ -23,7 +22,7 @@ public class CustomServlet implements Servlet {
 
     public CustomServlet() {
         final var handlerMappings = HandlerMappings.of(new HomeController(),
-                new AuthController(new UserService(new InMemoryUserRepository()), new SessionRepository()));
+                new AuthController(new UserService(new InMemoryUserRepository())));
         final var viewResolver = new ViewResolver();
         this.handlerMapper = new HandlerMapper(handlerMappings);
         this.handlerExecutor = new HandlerExecutor(new ExceptionHandler(), viewResolver);

@@ -1,25 +1,30 @@
 package org.apache.coyote.servlet.session;
 
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import nextstep.jwp.model.User;
+import org.apache.coyote.servlet.cookie.HttpCookie;
 
 public class SessionRepository {
 
-    private static final Map<UUID, Session> SESSIONS = new ConcurrentHashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
-    public UUID generateNewSession(User user) {
-        final var sessionId = UUID.randomUUID();
-        SESSIONS.put(sessionId, Session.of(user));
-        return sessionId;
+    public Session findSession(String sessionId) {
+        return SESSIONS.get(sessionId);
     }
 
-    public boolean isValidSession(String sessionId) {
-        final var session = SESSIONS.get(UUID.fromString(sessionId));
-        if (session == null) {
+    public void add(Session session) {
+        SESSIONS.put(session.getId(), session);
+    }
+
+    public boolean isValidSessionCookie(HttpCookie sessionCookie) {
+        if (sessionCookie == null) {
             return false;
         }
-        return !session.isExpired();
+        final var sessionId = sessionCookie.getValue();
+        final var savedSession = SESSIONS.get(sessionId);
+        if (savedSession == null) {
+            return false;
+        }
+        return !savedSession.isExpired();
     }
 }

@@ -13,9 +13,8 @@ import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.request.RequestHeaders;
 import org.apache.coyote.servlet.request.StartLine;
 import org.apache.coyote.servlet.response.HttpResponse;
-import org.apache.coyote.servlet.session.Session2;
+import org.apache.coyote.servlet.session.Session;
 import org.apache.coyote.servlet.session.SessionRepository;
-import org.apache.coyote.servlet.session.SessionRepository2;
 import org.apache.coyote.support.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,6 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final Servlet servlet;
     private final SessionRepository sessionRepository;
-    private final SessionRepository2 sessionRepository2 = new SessionRepository2();
 
     public Http11Processor(final Socket connection, final Servlet servlet, final SessionRepository sessionRepository) {
         this.connection = connection;
@@ -83,13 +81,13 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private Session2 getCurrentSession(RequestHeaders headers) {
+    private Session getCurrentSession(RequestHeaders headers) {
         final var sessionCookie = headers.getSessionCookie();
-        if (!sessionRepository2.isValidSessionCookie(sessionCookie)) {
-            final var session = Session2.of();
-            sessionRepository2.add(session);
+        if (!sessionRepository.isValidSessionCookie(sessionCookie)) {
+            final var session = Session.of();
+            sessionRepository.add(session);
             return session;
         }
-        return sessionRepository2.findSession(sessionCookie.getValue());
+        return sessionRepository.findSession(sessionCookie.getValue());
     }
 }

@@ -2,7 +2,7 @@ package org.apache.coyote.servlet.request;
 
 import java.util.Optional;
 import org.apache.coyote.servlet.cookie.HttpCookie;
-import org.apache.coyote.servlet.session.Session2;
+import org.apache.coyote.servlet.session.Session;
 import org.apache.coyote.support.HttpMethod;
 
 public class HttpRequest {
@@ -10,9 +10,9 @@ public class HttpRequest {
     private final StartLine startLine;
     private final RequestHeaders headers;
     private final String body;
-    private final Session2 session;
+    private final Session session;
 
-    public HttpRequest(StartLine startLine, RequestHeaders headers, String body, Session2 session) {
+    public HttpRequest(StartLine startLine, RequestHeaders headers, String body, Session session) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
@@ -47,7 +47,7 @@ public class HttpRequest {
         return Optional.of(cookie);
     }
 
-    public Session2 getSession() {
+    public Session getSession() {
         return session;
     }
 }

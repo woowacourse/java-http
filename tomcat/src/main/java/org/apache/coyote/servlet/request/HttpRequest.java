@@ -2,6 +2,7 @@ package org.apache.coyote.servlet.request;
 
 import java.util.Optional;
 import org.apache.coyote.servlet.cookie.HttpCookie;
+import org.apache.coyote.servlet.session.Session2;
 import org.apache.coyote.support.HttpMethod;
 
 public class HttpRequest {
@@ -9,11 +10,13 @@ public class HttpRequest {
     private final StartLine startLine;
     private final RequestHeaders headers;
     private final String body;
+    private final Session2 session;
 
-    public HttpRequest(StartLine startLine, RequestHeaders headers, String body) {
+    public HttpRequest(StartLine startLine, RequestHeaders headers, String body, Session2 session) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
+        this.session = session;
     }
 
     public boolean isMethodOf(HttpMethod method) {

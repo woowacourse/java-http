@@ -1,23 +1,24 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.Processor;
+import org.apache.coyote.servlet.Servlet;
 import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.request.RequestHeaders;
 import org.apache.coyote.servlet.request.StartLine;
 import org.apache.coyote.servlet.response.HttpResponse;
-import org.apache.coyote.servlet.Servlet;
+import org.apache.coyote.servlet.session.Session2;
 import org.apache.coyote.servlet.session.SessionRepository;
+import org.apache.coyote.servlet.session.SessionRepository2;
 import org.apache.coyote.support.HttpException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -26,6 +27,7 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final Servlet servlet;
     private final SessionRepository sessionRepository;
+    private final SessionRepository2 sessionRepository2 = new SessionRepository2();
 
     public Http11Processor(final Socket connection, final Servlet servlet, final SessionRepository sessionRepository) {
         this.connection = connection;
@@ -46,7 +48,6 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             HttpRequest request = toRequest(reader);
-            // TODO: inject session into request
             HttpResponse response = servlet.service(request);
 
             outputStream.write(response.toMessage().getBytes());
@@ -60,8 +61,7 @@ public class Http11Processor implements Runnable, Processor {
         final var startLine = StartLine.of(reader.readLine());
         final var headers = readHeaders(reader);
         final var body = readBody(reader, headers);
-
-        return new HttpRequest(startLine, headers, body);
+        return new HttpRequest(startLine, headers, body, getCurrentSession(headers));
     }
 
     private RequestHeaders readHeaders(BufferedReader reader) throws IOException {
@@ -81,5 +81,15 @@ public class Http11Processor implements Runnable, Processor {
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         return new String(buffer);
+    }
+
+    private Session2 getCurrentSession(RequestHeaders headers) {
+        final var sessionCookie = headers.getSessionCookie();
+        if (!sessionRepository2.isValidSessionCookie(sessionCookie)) {
+            final var session = Session2.of();
+            sessionRepository2.add(session);
+            return session;
+        }
+        return sessionRepository2.findSession(sessionCookie.getValue());
     }
 }

@@ -3,6 +3,8 @@ package org.apache.coyote.http11.request;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 public class RequestUri {
     private static final String QUERY_PARAMETER_SIGN = "?";
@@ -51,8 +53,9 @@ public class RequestUri {
         params.put(pair[0], pair[1]);
     }
 
-    public String findParamValueByName(final String name) {
-        return params.get(name);
+    public String findQueryValue(final String name) {
+        return Optional.ofNullable(params.get(name))
+                .orElseThrow(() -> new NoSuchElementException("Query Parameter에 key 값이 존재하지 않습니다."));
     }
 
     public boolean containsQuery() {

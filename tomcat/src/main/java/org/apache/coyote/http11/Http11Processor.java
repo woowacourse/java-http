@@ -70,8 +70,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void findUser(final HttpRequest httpRequest) {
-        final String userAccount = httpRequest.getParameter("account");
-        final String userPassword = httpRequest.getParameter("password");
+        final String userAccount = httpRequest.findQueryValue("account");
+        final String userPassword = httpRequest.findQueryValue("password");
 
         final User user = InMemoryUserRepository.findByAccount(userAccount)
                 .filter(it -> it.checkPassword(userPassword))

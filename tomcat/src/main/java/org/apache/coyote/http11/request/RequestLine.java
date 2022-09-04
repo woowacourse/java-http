@@ -36,8 +36,8 @@ public class RequestLine {
         }
     }
 
-    public String findParamValueByName(final String key) {
-        return requestUri.findParamValueByName(key);
+    public String findQueryValue(final String key) {
+        return requestUri.findQueryValue(key);
     }
 
     public boolean containsQuery() {

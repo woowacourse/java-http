@@ -38,7 +38,7 @@ public class HttpRequest {
         return requestLine.containsQuery();
     }
 
-    public String getParameter(final String key) {
-        return requestLine.findParamValueByName(key);
+    public String findQueryValue(final String key) {
+        return requestLine.findQueryValue(key);
     }
 }

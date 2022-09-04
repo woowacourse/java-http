@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 public class HttpCookie {
 
     public static final String COOKIE_REQUEST_HEADER = "Cookie";
-    public static final String SET_COOKIE_RESPONSE_HEADER = "Set-Cookie";
     private static final String COOKIE_DELIMITER = "; ";
     private static final String KEY_VALUE_DELIMITER = "=";
     private static final int COOKIE_FORMAT_ELEMENT_COUNT = 2;
@@ -36,5 +35,9 @@ public class HttpCookie {
 
     public String toHeaderFormat() {
         return name + KEY_VALUE_DELIMITER + value;
+    }
+
+    public String getName() {
+        return name;
     }
 }

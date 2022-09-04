@@ -1,20 +1,30 @@
 package org.apache.coyote.servlet.response;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
+import org.apache.coyote.support.HttpCookie;
 import org.apache.coyote.support.HttpStatus;
 
 public class HttpResponse {
 
     private final HttpStatus status;
     private final String location;
+    private final Map<String, HttpCookie> cookies;
     private final String contentType;
     private final String messageBody;
 
-    private HttpResponse(HttpStatus status, String location, String contentType, String messageBody) {
+    private HttpResponse(HttpStatus status,
+                         String location,
+                         Map<String, HttpCookie> cookies,
+                         String contentType,
+                         String messageBody) {
         this.status = status;
         this.location = location;
+        this.cookies = cookies;
         this.contentType = contentType;
         this.messageBody = messageBody;
     }
@@ -37,6 +47,13 @@ public class HttpResponse {
         if (location != null) {
             headers.add(String.format("Location: %s ", location));
         }
+        if (!cookies.isEmpty()) {
+            final var cookiesLine = cookies.values()
+                    .stream()
+                    .map(HttpCookie::toHeaderFormat)
+                    .collect(Collectors.toList());
+            headers.add(String.format("Set-Cookie: %s ", cookiesLine));
+        }
         if (contentType != null) {
             headers.add(String.format("Content-Type: %s ", contentType));
         }
@@ -50,6 +67,7 @@ public class HttpResponse {
 
         final HttpStatus status;
         String location;
+        final Map<String, HttpCookie> cookies = new HashMap<>();
         String contentType;
         String messageBody;
 
@@ -67,13 +85,18 @@ public class HttpResponse {
             return this;
         }
 
+        public HttpResponseBuilder setCookie(HttpCookie cookie) {
+            this.cookies.put(cookie.getName(), cookie);
+            return this;
+        }
+
         public HttpResponseBuilder setMessageBody(String messageBody) {
             this.messageBody = messageBody;
             return this;
         }
 
         public HttpResponse build() {
-            return new HttpResponse(status, location, contentType, messageBody);
+            return new HttpResponse(status, location, cookies, contentType, messageBody);
         }
     }
 }

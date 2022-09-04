@@ -1,24 +1,22 @@
 package org.apache.coyote.http11;
 
-import java.util.Objects;
-
 public class FileName {
 
     private static final String EXTENSION_DELIMITER = ".";
-    private final String prefix;
+    private final String baseName;
     private final String extension;
 
-    public FileName(String prefix, String extension) {
-        this.prefix = prefix;
+    public FileName(String baseName, String extension) {
+        this.baseName = baseName;
         this.extension = extension;
     }
 
     public String concat() {
-        return prefix + EXTENSION_DELIMITER + extension;
+        return baseName + EXTENSION_DELIMITER + extension;
     }
 
-    public String getPrefix() {
-        return prefix;
+    public String getBaseName() {
+        return baseName;
     }
 
     public String getExtension() {

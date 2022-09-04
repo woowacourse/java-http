@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.handler.HandlerResponse;
+import org.apache.coyote.http11.handlermapper.HandlerManager;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 import org.apache.coyote.http11.view.ModelAndView;
@@ -59,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String getHttp11Response(HandlerResponse handlerResponse) throws IOException {
         ModelAndView modelAndView = ModelAndView.of(handlerResponse);
-        HttpResponse httpResponse= HttpResponse.of(modelAndView);
+        HttpResponse httpResponse = HttpResponse.of(modelAndView);
         return httpResponse.toString();
     }
 }

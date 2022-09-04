@@ -4,6 +4,7 @@ public enum Http11Version {
 
     HTTP_11_VERSION("HTTP/1.1");
     private final String version;
+
     Http11Version(String version) {
         this.version = version;
     }

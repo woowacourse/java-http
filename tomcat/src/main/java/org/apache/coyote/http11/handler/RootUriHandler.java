@@ -1,7 +1,6 @@
-package org.apache.coyote.http11.urihandler;
+package org.apache.coyote.http11.handler;
 
 import java.util.regex.Pattern;
-import org.apache.coyote.http11.HandlerResponse;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpStatus;
 

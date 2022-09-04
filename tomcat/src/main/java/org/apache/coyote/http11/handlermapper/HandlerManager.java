@@ -1,12 +1,13 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.handlermapper;
 
 import java.io.IOException;
 import java.util.Arrays;
+import org.apache.coyote.http11.handler.FileUriHandler;
+import org.apache.coyote.http11.handler.HandlerResponse;
+import org.apache.coyote.http11.handler.LoginUriHandler;
+import org.apache.coyote.http11.handler.RootUriHandler;
+import org.apache.coyote.http11.handler.UriHandler;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
-import org.apache.coyote.http11.urihandler.FileUriHandler;
-import org.apache.coyote.http11.urihandler.LoginUriHandler;
-import org.apache.coyote.http11.urihandler.RootUriHandler;
-import org.apache.coyote.http11.urihandler.UriHandler;
 
 public enum HandlerManager {
     ROOT(new RootUriHandler()),

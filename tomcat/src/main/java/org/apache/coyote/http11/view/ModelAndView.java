@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.HandlerResponse;
+import org.apache.coyote.http11.handler.HandlerResponse;
 import org.apache.coyote.http11.httpmessage.response.HttpStatus;
 
 public class ModelAndView {

@@ -15,7 +15,7 @@ import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
-import org.apache.coyote.processor.LoginProcessor;
+import org.apache.coyote.handler.LoginHandler;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -213,7 +213,7 @@ class Http11ProcessorTest {
     void loginWithLog() {
         // given
         final ListAppender<ILoggingEvent> appender = new ListAppender<>();
-        final Logger logger = (Logger) LoggerFactory.getLogger(LoginProcessor.class);
+        final Logger logger = (Logger) LoggerFactory.getLogger(LoginHandler.class);
         logger.addAppender(appender);
         appender.start();
 

@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.processor.LoginProcessor;
+import org.apache.coyote.handler.LoginHandler;
 import org.apache.coyote.request.HttpRequestHeader;
 import org.apache.coyote.response.ContentType;
 import org.apache.coyote.response.HttpResponse;
@@ -67,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
     private static void handleLogin(final HttpRequestHeader httpRequestHeader, final String requestUrl) {
         if (requestUrl.contains("login")) {
             final String fullRequestUrl = httpRequestHeader.getRequestUrl();
-            LoginProcessor.login(fullRequestUrl);
+            LoginHandler.login(fullRequestUrl);
         }
     }
 

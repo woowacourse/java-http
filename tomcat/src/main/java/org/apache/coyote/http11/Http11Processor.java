@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    public static final String DEFAULT_VIEW_EXTENSION = ".html";
+    private static final String DEFAULT_VIEW_EXTENSION = ".html";
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
-    public static final String DEFAULT_RESOURCE_PACKAGE = "static";
+    private static final String DEFAULT_RESOURCE_PACKAGE = "static";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;

@@ -1,5 +1,7 @@
 package support;
 
+import static org.apache.coyote.Constants.CRLF;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -20,7 +22,7 @@ public class StubSocket extends Socket {
     }
 
     public StubSocket() {
-        this("GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\n");
+        this("GET / HTTP/1.1" + CRLF + "Host: localhost:8080" + CRLF + CRLF);
     }
 
     public InetAddress getInetAddress() {

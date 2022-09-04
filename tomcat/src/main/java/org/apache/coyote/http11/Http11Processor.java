@@ -1,12 +1,22 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.LoginFailedException;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -27,20 +37,71 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            String fileName = bufferedReader.readLine().split(" ")[1];
 
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final var response = makeResponse(fileName);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String makeResponse(String fileName) throws IOException {
+        String contentType = "text/html";
+        if (isCss(fileName)) {
+            contentType = "text/css";
+        }
+        if (hasQueryString(fileName)) {
+            Map<String, String> queryStrings = getQueryStrings(fileName.split("\\?")[1]);
+            User user = InMemoryUserRepository.findByAccount(queryStrings.get("account"))
+                    .orElseThrow(LoginFailedException::new);
+            if (!user.checkPassword(queryStrings.get("password"))) {
+                throw new LoginFailedException();
+            }
+            System.out.println(user);
+            fileName = fileName.split("\\?")[0];
+        }
+        System.out.println("fileName: " + fileName);
+
+        String responseBody = getResponseBody(fileName);
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private Map<String, String> getQueryStrings(String data) {
+        return Arrays.stream(data.split("&"))
+                .map(it -> it.split("="))
+                .collect(Collectors.toMap(it -> it[0], it -> it[1]));
+    }
+
+    private boolean hasQueryString(String fileName) {
+        return fileName.contains("?");
+    }
+
+    private boolean isCss(String fileName) {
+        return fileName.contains("/css/");
+    }
+
+    private String getResponseBody(String fileName) throws IOException {
+        if (fileName.equals("/") || fileName.isEmpty()) {
+            return "Hello world!";
+        }
+        return getContent(fileName);
+    }
+
+    private String getContent(String fileName) throws IOException {
+        if (!fileName.contains(".")) {
+            fileName = fileName + ".html";
+        }
+        Path path = Path.of(Objects.requireNonNull(getClass().getClassLoader().getResource("static" + fileName))
+                .getFile());
+        return Files.readString(path);
     }
 }

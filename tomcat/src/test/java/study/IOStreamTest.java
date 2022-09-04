@@ -177,7 +177,6 @@ class IOStreamTest {
             assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
             assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
 
-            inputStream.close();
             bufferedInputStream.close();
         }
     }
@@ -214,7 +213,6 @@ class IOStreamTest {
                         .append("\r\n");
             }
             assertThat(actual).hasToString(emoji);
-            inputStream.close();
             bufferedReader.close();
         }
     }

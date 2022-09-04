@@ -1,9 +1,9 @@
-package nextstep.jwp.http.request;
+package nextstep.jwp.http.common;
 
 import java.util.Arrays;
 import nextstep.jwp.exception.InvalidRequestMethodException;
 
-public enum RequestMethod {
+public enum HttpMethod {
 
     GET("GET"),
     POST("POST")
@@ -11,12 +11,12 @@ public enum RequestMethod {
 
     private final String value;
 
-    RequestMethod(final String value) {
+    HttpMethod(final String value) {
         this.value = value;
     }
 
-    public static RequestMethod find(final String method) {
-        return Arrays.stream(RequestMethod.values())
+    public static HttpMethod find(final String method) {
+        return Arrays.stream(HttpMethod.values())
             .filter(value -> value.name().equals(method))
             .findAny()
             .orElseThrow(InvalidRequestMethodException::new);
@@ -24,5 +24,9 @@ public enum RequestMethod {
 
     public String getValue() {
         return value;
+    }
+
+    public boolean isSameMethod(String httpMethod) {
+        return this.value.equals(httpMethod);
     }
 }

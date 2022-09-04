@@ -1,6 +1,6 @@
 package nextstep.jwp.http.factory;
 
-import static nextstep.jwp.http.request.RequestMethod.GET;
+import static nextstep.jwp.http.common.HttpMethod.GET;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedReader;

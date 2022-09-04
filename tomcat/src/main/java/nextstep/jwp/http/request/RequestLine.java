@@ -3,6 +3,7 @@ package nextstep.jwp.http.request;
 import java.util.Map;
 import nextstep.jwp.exception.InvalidRequestExtensionException;
 import nextstep.jwp.exception.InvalidRequestLineException;
+import nextstep.jwp.http.common.HttpMethod;
 
 public class RequestLine {
 
@@ -15,11 +16,11 @@ public class RequestLine {
     private static final int REQUEST_URI_INDEX = 1;
     private static final int REQUEST_HTTP_VERSION_INDEX = 2;
 
-    private final RequestMethod requestMethod;
+    private final HttpMethod requestMethod;
     private final RequestUri requestUri;
     private final String httpVersion;
 
-    public RequestLine(final RequestMethod requestMethod,
+    public RequestLine(final HttpMethod requestMethod,
                        final RequestUri requestUri,
                        final String httpVersion) {
         this.requestMethod = requestMethod;
@@ -30,7 +31,7 @@ public class RequestLine {
     public static RequestLine create(final String requestLine) {
         String[] parseValues = parseRequestLine(requestLine);
 
-        RequestMethod requestMethod = RequestMethod.find(parseValues[REQUEST_METHOD_INDEX]);
+        HttpMethod requestMethod = HttpMethod.find(parseValues[REQUEST_METHOD_INDEX]);
         RequestUri requestUri = RequestUri.create(parseValues[REQUEST_URI_INDEX]);
         String httpVersion = parseValues[REQUEST_HTTP_VERSION_INDEX];
 

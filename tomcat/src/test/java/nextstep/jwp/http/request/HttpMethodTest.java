@@ -5,9 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import nextstep.jwp.exception.InvalidRequestMethodException;
+import nextstep.jwp.http.common.HttpMethod;
 import org.junit.jupiter.api.Test;
 
-class RequestMethodTest {
+class HttpMethodTest {
 
     @Test
     void HttpMethod를_반환할_수_있다() {
@@ -15,7 +16,7 @@ class RequestMethodTest {
         String httpMethod = "GET";
 
         // when & then
-        assertThat(RequestMethod.find(httpMethod)).isInstanceOf(RequestMethod.class);
+        assertThat(HttpMethod.find(httpMethod)).isInstanceOf(HttpMethod.class);
     }
 
     @Test
@@ -24,7 +25,7 @@ class RequestMethodTest {
         String httpMethod = "Not Method";
 
         // when & then
-        assertThatThrownBy(() -> RequestMethod.find(httpMethod))
+        assertThatThrownBy(() -> HttpMethod.find(httpMethod))
             .isInstanceOf(InvalidRequestMethodException.class);
     }
 }

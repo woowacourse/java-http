@@ -1,7 +1,7 @@
 package nextstep.jwp.handler;
 
 import static nextstep.jwp.http.common.ContentType.TEXT_HTML;
-import static nextstep.jwp.http.request.RequestMethod.GET;
+import static nextstep.jwp.http.common.HttpMethod.GET;
 
 import java.io.IOException;
 import nextstep.jwp.db.InMemoryUserRepository;

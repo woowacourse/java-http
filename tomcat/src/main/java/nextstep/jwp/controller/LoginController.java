@@ -6,8 +6,12 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Controller;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LoginController implements Controller {
+
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
     public HttpResponse handle(final HttpRequest request) {
@@ -40,6 +44,7 @@ public class LoginController implements Controller {
                 .orElseThrow(UnauthorizedException::new);
 
         if (user.checkPassword(password)) {
+            log.info("Login User: {}", user);
             return HttpResponse.redirect("/index.html").build();
         }
 

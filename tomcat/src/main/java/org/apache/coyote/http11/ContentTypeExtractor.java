@@ -28,9 +28,9 @@ public class ContentTypeExtractor {
     }
 
     private String getExtension(final HttpRequest httpRequest) {
-        if (httpRequest.getUri().contains(".")) {
-            final int lastDotIndex = httpRequest.getUri().lastIndexOf('.');
-            final String extension = httpRequest.getUri().substring(lastDotIndex + 1);
+        if (httpRequest.getUriPath().contains(".")) {
+            final int lastDotIndex = httpRequest.getUriPath().lastIndexOf('.');
+            final String extension = httpRequest.getUriPath().substring(lastDotIndex + 1);
             return extension.equals("js") ? "javascript" : extension;
         }
         return "";

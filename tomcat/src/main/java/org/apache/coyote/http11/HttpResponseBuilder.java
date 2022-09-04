@@ -27,7 +27,9 @@ public class HttpResponseBuilder {
 
     public HttpResponseBuilder fileBody(String filePath) {
         try {
-            final URL resource = getClass().getClassLoader().getResource("static" + filePath);
+            final URL resource = getClass()
+                    .getClassLoader()
+                    .getResource("static" + filePath);
             body =  new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             return this;
         } catch (IOException e) {

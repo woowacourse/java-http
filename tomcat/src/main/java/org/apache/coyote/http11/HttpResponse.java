@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -24,7 +25,7 @@ public class HttpResponse {
 
     HttpResponse(String startLine) {
         responseStartLine = startLine;
-        responseHeaders = new TreeMap<>();
+        responseHeaders = new HashMap<>();
         responseBody = "";
     }
 
@@ -52,7 +53,6 @@ public class HttpResponse {
     }
 
     public boolean hasBody() {
-        System.out.println(responseBody.length());
         return responseBody.length() > 0;
     }
 }

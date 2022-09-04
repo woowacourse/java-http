@@ -45,15 +45,15 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse createResponse(final HttpRequest request) throws IOException {
-        if (request.getUri().equals("/")) {
+        if (request.getUriPath().equals("/")) {
             return new HomeController().handle(request);
         }
 
-        if (request.getUri().startsWith("/login")) {
+        if (request.getUriPath().equals("/login")) {
             return new LoginController().handle(request);
         }
 
-        if (hasStaticResourceFile(request.getUri())) {
+        if (hasStaticResourceFile(request.getUriPath())) {
             return new StaticResourceController().handle(request);
         }
 

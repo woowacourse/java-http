@@ -8,6 +8,6 @@ public class StaticResourceController implements Controller {
 
     @Override
     public HttpResponse handle(final HttpRequest request) {
-        return HttpResponse.ok().fileBody(request.getUri()).build();
+        return HttpResponse.ok().fileBody(request.getUriPath()).build();
     }
 }

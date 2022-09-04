@@ -50,7 +50,20 @@ public class HttpRequest {
         return headers.get(name);
     }
 
-    public String getUri() {
+    public String getUriPath() {
+        if (hasQueryParamsInUri()) {
+            final int index = getUri().lastIndexOf('?');
+            return getUri().substring(0, index);
+        }
+
+        return getUri();
+    }
+
+    private boolean hasQueryParamsInUri() {
+        return getUri().contains("?");
+    }
+
+    private String getUri() {
         return requestStartLine().split(" ")[1];
     }
 
@@ -59,11 +72,11 @@ public class HttpRequest {
     }
 
     public String getRequestParam(String paramName) {
-        final String queryString = getQueryString();
-
-        if (queryString.isBlank()) {
+        if (!hasQueryParamsInUri()) {
             return null;
         }
+
+        final String queryString = getQueryString();
 
         for (String param : queryString.split("&")) {
             final String key = param.split("=")[0];
@@ -78,7 +91,10 @@ public class HttpRequest {
     }
 
     private String getQueryString() {
-        final int index = getUri().indexOf("?");
-        return index == -1 ? "" : getUri().substring(index + 1);
+        if (hasQueryParamsInUri()) {
+            final int index = getUri().indexOf("?");
+            return getUri().substring(index + 1);
+        }
+        return "";
     }
 }

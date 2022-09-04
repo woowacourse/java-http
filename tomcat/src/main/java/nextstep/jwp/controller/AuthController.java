@@ -52,6 +52,9 @@ public class AuthController {
         final var account = parameters.get("account");
         final var password = parameters.get("password");
         final var email = parameters.get("email");
-        return userService.saveUser(account, password, email);
+        userService.saveUser(account, password, email);
+        return new HttpResponseBuilder(HttpStatus.FOUND)
+                .setLocation("/index.html")
+                .build();
     }
 }

@@ -4,8 +4,6 @@ import nextstep.Application;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.support.HttpException;
-import org.apache.coyote.servlet.response.HttpResponse;
-import org.apache.coyote.servlet.response.HttpResponse.HttpResponseBuilder;
 import org.apache.coyote.support.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +31,7 @@ public class UserService {
         return foundUser;
     }
 
-    public HttpResponse saveUser(String account, String password, String email) {
+    public void saveUser(String account, String password, String email) {
         final var user = userRepository.findByAccount(account);
         if (user.isPresent()) {
             throw new HttpException(HttpStatus.BAD_REQUEST);
@@ -43,8 +41,5 @@ public class UserService {
         }
         final var savedUser = userRepository.save(new User(account, password, email));
         log.info("회원가입 성공! - {}", savedUser);
-        return new HttpResponseBuilder(HttpStatus.FOUND)
-                .setLocation("/index.html")
-                .build();
     }
 }

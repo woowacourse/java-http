@@ -1,7 +1,5 @@
 package org.apache.catalina;
 
-import nextstep.jwp.model.User;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +22,7 @@ public class SessionManager implements Manager {
         SESSIONS.remove(id);
     }
 
-    public boolean isExistSession(final String id) {
+    public boolean existSession(final String id) {
         return SESSIONS.containsKey(id);
     }
 }

@@ -54,6 +54,7 @@ public enum Controller {
         if (!user.checkPassword(queryParameters.getPassword())) {
             throw new AuthenticationException();
         }
+        log.info(user.toString());
         return ResponseEntity.body("redirect:index.html").status(HttpStatus.REDIRECT);
     }
 }

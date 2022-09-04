@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URISyntaxException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -28,17 +27,18 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        try (final BufferedReader bufferedReader = new BufferedReader(
+                new InputStreamReader(connection.getInputStream()));
              final OutputStream outputStream = connection.getOutputStream()) {
 
             final StartLine startLine = new StartLine(bufferedReader.readLine());
-            final ResponseProcessor responseProcessor = new ResponseProcessor(startLine);
-
+            final Request request = Request.of(startLine);
+            ResponseProcessor responseProcessor = ResponseProcessor.of(Controller.processRequest(request));
             final String response = responseProcessor.getResponse();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException | URISyntaxException e) {
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }

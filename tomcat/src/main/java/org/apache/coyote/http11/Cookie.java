@@ -11,6 +11,10 @@ public class Cookie {
         this.value = UUID.randomUUID();
     }
 
+    public String getValue() {
+        return value.toString();
+    }
+
     @Override
     public String toString() {
         return key + "=" + value.toString();

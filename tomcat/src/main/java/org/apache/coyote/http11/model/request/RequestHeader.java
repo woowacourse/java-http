@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class RequestHeader {
 
-    public static final String SET_COOKIE = "Set-Cookie";
+    public static final String COOKIE = "Cookie";
     private static final String CONTENT_LENGTH = "Content-Length";
     private final Map<String, String> headers;
 
@@ -30,5 +30,9 @@ public class RequestHeader {
 
     public boolean existHeader(String name) {
         return headers.containsKey(name);
+    }
+
+    public String getCookieKey() {
+        return headers.get(COOKIE);
     }
 }

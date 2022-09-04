@@ -67,6 +67,10 @@ public class HttpRequest {
     }
 
     public boolean hasCookie() {
-        return headers.existHeader(RequestHeader.SET_COOKIE);
+        return headers.existHeader(RequestHeader.COOKIE);
+    }
+
+    public String getCookieKey() {
+        return headers.getCookieKey();
     }
 }

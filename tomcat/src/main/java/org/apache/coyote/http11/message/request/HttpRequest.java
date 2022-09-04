@@ -9,25 +9,47 @@ import org.apache.coyote.http11.message.common.HttpHeaders;
 public class HttpRequest {
 
     private static final String NEW_LINE = "\r\n";
-    private static final String HEADER_BODY_DELIMITER = NEW_LINE + NEW_LINE;
+    private static final String BODY_SEPARATOR = NEW_LINE + NEW_LINE;
 
-    private static final int REQUEST_LINE_AND_HEADER_INDEX = 0;
-    private static final int REQUEST_START_LINE_INDEX = 0;
-    private static final int HEADERS_INDEX = 1;
-    private static final int BODY_INDEX = 1;
+    private static final int MESSAGE_BEGIN_INDEX = 0;
 
     private final RequestStartLine requestStartLine;
     private final HttpHeaders httpHeaders;
     private final String requestBody;
 
-    public HttpRequest(final String message) {
-        String[] splitHeaderBody = message.split(HEADER_BODY_DELIMITER, -1);
-        String requestLineAndHeader = splitHeaderBody[REQUEST_LINE_AND_HEADER_INDEX];
-        String[] splitByNewLine = requestLineAndHeader.split(NEW_LINE, 2);
+    private HttpRequest(final RequestStartLine requestStartLine, final HttpHeaders httpHeaders,
+                        final String requestBody) {
+        this.requestStartLine = requestStartLine;
+        this.httpHeaders = httpHeaders;
+        this.requestBody = requestBody;
+    }
 
-        this.requestStartLine = new RequestStartLine(splitByNewLine[REQUEST_START_LINE_INDEX]);
-        this.httpHeaders = new HttpHeaders(splitByNewLine[HEADERS_INDEX]);
-        this.requestBody = splitHeaderBody[BODY_INDEX];
+    private HttpRequest(final String requestStartLine, final String header, final String body) {
+        this(new RequestStartLine(requestStartLine), new HttpHeaders(header), body);
+    }
+
+    public static HttpRequest parse(final String httpRequestMessage) {
+        String requestStartLine = parseRequestStartLine(httpRequestMessage);
+        String header = parseHeader(httpRequestMessage);
+        String body = parseBody(httpRequestMessage);
+
+        return new HttpRequest(requestStartLine, header, body);
+    }
+
+    private static String parseRequestStartLine(final String message) {
+        int startLineEndIndex = message.indexOf(NEW_LINE);
+        return message.substring(MESSAGE_BEGIN_INDEX, startLineEndIndex);
+    }
+
+    private static String parseHeader(final String message) {
+        int headerStartIndex = message.indexOf(NEW_LINE) + NEW_LINE.length();
+        int bodyStartIndex = message.indexOf(BODY_SEPARATOR);
+        return message.substring(headerStartIndex, bodyStartIndex);
+    }
+
+    private static String parseBody(final String message) {
+        int bodyStartIndex = message.indexOf(BODY_SEPARATOR);
+        return message.substring(bodyStartIndex);
     }
 
     public RequestUri getRequestUri() {

@@ -38,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            HttpRequest httpRequest = new HttpRequest(readHttpRequest(bufferReader));
+            HttpRequest httpRequest = HttpRequest.parse(readHttpRequest(bufferReader));
             RequestUri requestUri = httpRequest.getRequestUri();
 
             if (requestUri.hasExtension()) { // 정적 파일 서빙

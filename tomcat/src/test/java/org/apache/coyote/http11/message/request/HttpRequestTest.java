@@ -22,7 +22,7 @@ class HttpRequestTest {
                 "");
 
         // when
-        HttpRequest actual = new HttpRequest(httpRequest);
+        HttpRequest actual = HttpRequest.parse(httpRequest);
 
         // then
         assertThat(actual).isNotNull();
@@ -38,7 +38,7 @@ class HttpRequestTest {
                 "Connection: keep-alive",
                 "",
                 "");
-        HttpRequest requestMessage = new HttpRequest(httpRequest);
+        HttpRequest requestMessage = HttpRequest.parse(httpRequest);
 
         // when
         RequestStartLine actual = requestMessage.getRequestStartLine();
@@ -61,7 +61,7 @@ class HttpRequestTest {
                 "Connection: keep-alive",
                 "",
                 "");
-        HttpRequest requestMessage = new HttpRequest(httpRequest);
+        HttpRequest requestMessage = HttpRequest.parse(httpRequest);
 
         // when
         HttpHeaders actual = requestMessage.getHttpHeaders();

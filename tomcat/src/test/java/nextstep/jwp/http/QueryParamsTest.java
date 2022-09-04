@@ -28,4 +28,14 @@ class QueryParamsTest {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("올바르지 않은 키 입니다.");
     }
+
+    @Test
+    @DisplayName("키를 가지고 있으면 true를 반환한다.")
+    void contains_success() {
+        QueryParams queryParams = QueryParams.from("account=leo&password=password");
+
+        boolean actual = queryParams.contains("account");
+
+        assertThat(actual).isTrue();
+    }
 }

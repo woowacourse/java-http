@@ -4,15 +4,14 @@ import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.GreetingController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.ResourceController;
-import nextstep.jwp.exception.NotFoundException;
+import nextstep.jwp.exception.CustomNotFoundException;
+import nextstep.jwp.support.ResourceSuffix;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ControllerMapping {
 
-    private static final List<String> resourceSuffixes = List.of(".html", ".css", ".js");
     private final Map<String, Controller> mapping = new HashMap<>();
 
     public ControllerMapping() {
@@ -28,11 +27,10 @@ public class ControllerMapping {
         if (isResourceUri(uri)) {
             return new ResourceController();
         }
-        throw new NotFoundException(uri + "를 처리할 컨트롤러를 찾지 못함");
+        throw new CustomNotFoundException(uri + "를 처리할 컨트롤러를 찾지 못함");
     }
 
     private boolean isResourceUri(final String uri) {
-        return resourceSuffixes.stream()
-                .anyMatch(uri::endsWith);
+        return ResourceSuffix.isEndWith(uri);
     }
 }

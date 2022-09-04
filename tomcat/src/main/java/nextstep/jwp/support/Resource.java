@@ -1,7 +1,7 @@
 package nextstep.jwp.support;
 
 import nextstep.jwp.exception.FileAccessException;
-import nextstep.jwp.exception.NotFoundException;
+import nextstep.jwp.exception.CustomNotFoundException;
 import org.apache.http.HttpMime;
 
 import java.io.File;
@@ -27,7 +27,7 @@ public class Resource {
 
     private void validateExist(final URL resource) {
         if (resource == null) {
-            throw new NotFoundException("자원을 찾지 못했음 : " + target);
+            throw new CustomNotFoundException("자원을 찾지 못했음 : " + target);
         }
     }
 
@@ -40,7 +40,7 @@ public class Resource {
         }
     }
 
-    public HttpMime getContentType() throws NotFoundException {
+    public HttpMime getContentType() throws CustomNotFoundException {
         final URL resource = getClass().getClassLoader().getResource("static" + target);
         validateExist(resource);
         final File file = new File(getUri(resource));

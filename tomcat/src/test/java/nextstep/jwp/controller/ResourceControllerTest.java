@@ -1,6 +1,6 @@
 package nextstep.jwp.controller;
 
-import javassist.NotFoundException;
+import nextstep.jwp.exception.CustomNotFoundException;
 import org.apache.http.HttpMime;
 import org.apache.http.RequestEntity;
 import org.apache.http.ResponseEntity;
@@ -35,6 +35,6 @@ class ResourceControllerTest {
 
         // when, then
         assertThatThrownBy(() -> controller.execute(requestEntity))
-                .isInstanceOf(NotFoundException.class);
+                .isInstanceOf(CustomNotFoundException.class);
     }
 }

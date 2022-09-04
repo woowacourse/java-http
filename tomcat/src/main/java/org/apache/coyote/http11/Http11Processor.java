@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.exception.FileAccessException;
-import nextstep.jwp.exception.NotFoundException;
+import nextstep.jwp.exception.CustomNotFoundException;
 import nextstep.jwp.exception.StreamException;
 import org.apache.coyote.Processor;
 import org.apache.http.HttpMethod;
@@ -66,7 +66,7 @@ public class Http11Processor implements Runnable, Processor {
                 return new RequestEntity(uri, queryString);
             }
         }
-        throw new NotFoundException("요청을 찾을 수 없습니다.");
+        throw new CustomNotFoundException("요청을 찾을 수 없습니다.");
     }
 
     private String readLine(final BufferedReader bufferedReader) {
@@ -95,7 +95,7 @@ public class Http11Processor implements Runnable, Processor {
         try {
             return controller.execute(requestEntity)
                     .build();
-        } catch (NotFoundException e) {
+        } catch (CustomNotFoundException e) {
             return new ResponseEntity().httpStatus(HttpStatus.BAD_REQUEST)
                     .build();
         } catch (Exception e) {

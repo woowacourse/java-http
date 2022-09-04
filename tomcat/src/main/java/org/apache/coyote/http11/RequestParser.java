@@ -19,6 +19,18 @@ public class RequestParser {
     private static final String COOKIE_DELIMITER = "; ";
     private static final String QUERY_STRING_PAIR_DELIMITER = "=";
 
+    private static final int QUERY_STRING_KEY_INDEX = 0;
+    private static final int QUERY_STRING_VALUE_INDEX = 1;
+    private static final int SPLIT_SIZE = 2;
+
+    private static final int FIRST_INDEX = 0;
+
+    private static final int FILE_NAME_INDEX = 1;
+
+    private static final int BASE_NAME_INDEX = 0;
+
+    private static final int EXTENSION_INDEX = 1;
+
     private final List<String> rawRequest;
 
     public RequestParser(List<String> rawRequest) {
@@ -26,45 +38,49 @@ public class RequestParser {
     }
 
     public FormData generateQueryStrings() {
-        String[] rawQuery = rawRequest.get(0).split(BLANK_DELIMITER)[1].split(QUERY_STRING_DELIMITER);
-        if (rawQuery.length != 2) {
+        String[] rawQuery = getParsedFirstRequestLine()[FILE_NAME_INDEX].split(QUERY_STRING_DELIMITER);
+        if (rawQuery.length != SPLIT_SIZE) {
             return new FormData(Collections.emptyMap());
         }
         String[] parsedQuery = rawQuery[1].split(EACH_QUERY_STRING_DELIMITER);
-        return parseData(parsedQuery);
+        return new FormData(parseData(parsedQuery));
+    }
+
+    private String[] getParsedFirstRequestLine() {
+        return rawRequest.get(FIRST_INDEX).split(BLANK_DELIMITER);
     }
 
     public FileName generateFileName() {
-        String[] parsedRawRequest = rawRequest.get(0).split(BLANK_DELIMITER);
-        if (parsedRawRequest.length < 2) {
+        String[] parsedRawRequest = getParsedFirstRequestLine();
+        if (parsedRawRequest.length < SPLIT_SIZE) {
             return new FileName(DEFAULT_FILE_NAME, DEFAULT_EXTENSION);
         }
-        String rawFileName = parsedRawRequest[1];
+        String rawFileName = parsedRawRequest[FILE_NAME_INDEX];
         if (rawFileName.equals(ROOT_DIR)) {
             return new FileName(DEFAULT_FILE_NAME, DEFAULT_EXTENSION);
         }
         FormData formData = this.generateQueryStrings();
         if (!formData.isEmpty()) {
             int queryStringIndex = rawFileName.indexOf("?");
-            rawFileName = rawFileName.substring(0, queryStringIndex);
+            rawFileName = rawFileName.substring(FIRST_INDEX, queryStringIndex);
         }
         String[] parsedByExtension = rawFileName.split(EXTENSION_DELIMITER);
-        if (parsedByExtension.length > 2) {
+        if (parsedByExtension.length > SPLIT_SIZE) {
             return new FileName(DEFAULT_FILE_NAME, DEFAULT_EXTENSION);
         }
         if (parsedByExtension.length == 1) {
-            return new FileName(parsedByExtension[0], DEFAULT_EXTENSION);
+            return new FileName(parsedByExtension[BASE_NAME_INDEX], DEFAULT_EXTENSION);
         }
-        return new FileName(parsedByExtension[0],parsedByExtension[1]);
+        return new FileName(parsedByExtension[BASE_NAME_INDEX],parsedByExtension[EXTENSION_INDEX]);
     }
 
     public FormData generateRequestBody() {
         String[] parsedQuery = rawRequest.get(rawRequest.size() - 1).split(EACH_QUERY_STRING_DELIMITER);
-        return parseData(parsedQuery);
+        return new FormData(parseData(parsedQuery));
     }
 
     public String generateMethod() {
-        return this.rawRequest.get(0).split(BLANK_DELIMITER)[0];
+        return getParsedFirstRequestLine()[FIRST_INDEX];
     }
 
     public HttpCookie generateCookie() {
@@ -80,25 +96,21 @@ public class RequestParser {
                 .replace(COOKIE + ": ", "")
                 .split(COOKIE_DELIMITER);
 
-        Map<String, String> resultCookies = new HashMap<>();
-        for (String eachCookie : rawCookie) {
-            String[] parsedCookie = eachCookie.split(QUERY_STRING_PAIR_DELIMITER);
-            resultCookies.put(parsedCookie[0], parsedCookie[1]);
-        }
-        return new HttpCookie(resultCookies);
+        return new HttpCookie(parseData(rawCookie));
     }
 
-    private FormData parseData(String[] raw) {
+    private Map<String, String> parseData(String[] raw) {
         Map<String, String> queryStringMap = new HashMap<>();
         boolean isNotValidPair = Arrays.stream(raw)
-                .anyMatch(eachQuery -> eachQuery.split(QUERY_STRING_PAIR_DELIMITER).length != 2);
+                .anyMatch(eachQuery ->
+                        eachQuery.split(QUERY_STRING_PAIR_DELIMITER).length != SPLIT_SIZE);
         if (isNotValidPair) {
-            return new FormData(Collections.emptyMap());
+            return Collections.emptyMap();
         }
         for (String eachQuery : raw) {
             String[] parsedEntry = eachQuery.split(QUERY_STRING_PAIR_DELIMITER);
-            queryStringMap.put(parsedEntry[0], parsedEntry[1]);
+            queryStringMap.put(parsedEntry[QUERY_STRING_KEY_INDEX], parsedEntry[QUERY_STRING_VALUE_INDEX]);
         }
-        return new FormData(queryStringMap);
+        return queryStringMap;
     }
 }

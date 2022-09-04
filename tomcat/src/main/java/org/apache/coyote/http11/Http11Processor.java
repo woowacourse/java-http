@@ -10,7 +10,6 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
-import nextstep.jwp.http.response.HttpResponseCreator;
 import nextstep.jwp.io.ClassPathResource;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
@@ -21,7 +20,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String ROOT_PATH = "/";
-    private static final String LOGIN_PATH = "login";
     private static final String ROOT_RESPONSE_BODY = "Hello world!";
 
     private final Socket connection;
@@ -59,11 +57,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse createHttpResponse(final HttpRequest httpRequest) {
         String path = httpRequest.getPath();
+        HttpResponseCreator httpRequestCreator = new HttpResponseCreator();
         if (path.equals(ROOT_PATH)) {
-            return HttpResponseCreator.okResponse(httpRequest.findContentType(), ROOT_RESPONSE_BODY);
+            return httpRequestCreator.okResponse(httpRequest.findContentType(), ROOT_RESPONSE_BODY);
         }
         String responseBody = new ClassPathResource().getStaticContent(path);
-        return HttpResponseCreator.okResponse(httpRequest.findContentType(), responseBody);
+        return httpRequestCreator.okResponse(httpRequest.findContentType(), responseBody);
     }
 
     private void printUser(final HttpRequest httpRequest) {

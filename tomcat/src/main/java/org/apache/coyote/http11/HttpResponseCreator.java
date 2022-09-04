@@ -1,8 +1,11 @@
-package nextstep.jwp.http.response;
+package org.apache.coyote.http11;
+
+import nextstep.jwp.http.response.HttpResponse;
+import nextstep.jwp.http.response.HttpResponseBuilder;
 
 public class HttpResponseCreator {
 
-    public static HttpResponse okResponse(final String contentType, final String responseBody) {
+    public HttpResponse okResponse(final String contentType, final String responseBody) {
         return new HttpResponseBuilder()
                 .version()
                 .status("OK")

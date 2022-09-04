@@ -67,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
             throws IOException {
         final String path = httpRequest.getPath();
 
-        if (path.equals("/")) {
+        if (isRootPath(path)) {
             return new ResponseEntity(OK, "text/html", "Hello world!");
         }
 
@@ -76,6 +76,10 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return frontHandler.handle(httpRequest.getPath(), httpRequest);
+    }
+
+    private boolean isRootPath(final String path) {
+        return path.equals("/");
     }
 
     private void writeResponse(final OutputStream outputStream, final String response) throws IOException {

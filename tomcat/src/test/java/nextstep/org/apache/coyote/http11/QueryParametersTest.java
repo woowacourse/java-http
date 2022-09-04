@@ -18,8 +18,8 @@ public class QueryParametersTest {
 
         // then
         assertAll(() -> {
-                    assertThat(queryParameters.findValue("account")).isEqualTo("gugu");
-                    assertThat(queryParameters.findValue("password")).isEqualTo("password");
+                    assertThat(queryParameters.get("account")).isEqualTo("gugu");
+                    assertThat(queryParameters.get("password")).isEqualTo("password");
                 }
         );
     }

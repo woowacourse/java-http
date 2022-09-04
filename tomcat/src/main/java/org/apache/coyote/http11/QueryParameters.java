@@ -24,7 +24,7 @@ public class QueryParameters {
         return new QueryParameters(queryParams);
     }
 
-    public String findValue(String key) {
+    public String get(String key) {
         return value.get(key);
     }
 

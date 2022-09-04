@@ -84,8 +84,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void login(final QueryParameters queryParameters) {
-        User user = getUserByAccount(queryParameters.findValue("account"));
-        if (user.checkPassword(queryParameters.findValue("password"))) {
+        User user = getUserByAccount(queryParameters.get("account"));
+        if (user.checkPassword(queryParameters.get("password"))) {
             log.info("user : " + user);
             return;
         }

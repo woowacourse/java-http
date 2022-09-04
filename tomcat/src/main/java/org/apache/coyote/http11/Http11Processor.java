@@ -5,9 +5,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Map;
-import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.io.ClassPathResource;
@@ -69,7 +69,8 @@ public class Http11Processor implements Runnable, Processor {
         if (httpRequest.hasQueryParams()) {
             Map<String, String> queryString = httpRequest.getQueryParams();
             String account = queryString.get("account");
-            Optional<User> user = InMemoryUserRepository.findByAccount(account);
+            User user = InMemoryUserRepository.findByAccount(account)
+                    .orElseThrow(UserNotFoundException::new);
             log.info(user.toString());
         }
     }

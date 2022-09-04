@@ -1,11 +1,13 @@
 package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.exception.UserNotFoundException;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -120,5 +122,24 @@ class Http11ProcessorTest {
                 responseBody;
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("/login?account=gugu&password=password url로 접근할 때, user가 존재하지 않으면 예외를 발생한다.")
+    @Test
+    void notFoundUser() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=leaver&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/html;charset=utf-8",
+                "Connection: keep-alive ",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when & then
+        assertThatThrownBy(() -> processor.process(socket))
+                .isInstanceOf(UserNotFoundException.class);
     }
 }

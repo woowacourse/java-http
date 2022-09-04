@@ -75,7 +75,7 @@ public class Http11Processor implements Runnable, Processor {
             return FileHandler.createFileResponse(path);
         }
 
-        return frontHandler.handle(httpRequest.getPath(), httpRequest.getQueryParams());
+        return frontHandler.handle(httpRequest.getPath(), httpRequest);
     }
 
     private void writeResponse(final OutputStream outputStream, final String response) throws IOException {

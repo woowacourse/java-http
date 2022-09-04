@@ -7,6 +7,7 @@ import static org.apache.coyote.http11.HttpStatus.SERVER_ERROR;
 import java.io.IOException;
 import java.util.Map;
 import org.apache.coyote.http11.FileHandler;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ResponseEntity;
 
 public class FrontRequestHandler {
@@ -21,14 +22,14 @@ public class FrontRequestHandler {
         this.requestHandlerMapping = requestHandlerMapping;
     }
 
-    public ResponseEntity handle(final String path, final Map<String, String> queryParams) throws IOException {
+    public ResponseEntity handle(final String path, final HttpRequest httpRequest) throws IOException {
         if (!requestHandlerMapping.hasMappingHandler(path)) {
             return FileHandler.createErrorFileResponse(NOT_FOUND);
         }
 
         final String response;
         try {
-            response = requestHandlerMapping.getHandler(path).handle(queryParams);
+            response = requestHandlerMapping.getHandler(path).handle(httpRequest);
         } catch (final RuntimeException exception) {
             return FileHandler.createErrorFileResponse(SERVER_ERROR);
         }

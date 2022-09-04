@@ -7,9 +7,12 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 import org.apache.coyote.http11.FileHandler;
 import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,12 +30,12 @@ class FrontRequestHandlerTest {
         @DisplayName("statc file uri를 반환하는 핸들러가 실행되면 해당 파일 정보가 포함된 ResponseEntity를 반환한다.")
         void success_file() throws IOException {
             // given
-            final Map<String, String> queryParams = new HashMap<>();
-            queryParams.put("account", "gugu");
-            queryParams.put("password", "password");
+            final Queue<String> rawRequest = new LinkedList<>();
+            rawRequest.add("GET /login?account=gugu&password=password HTTP/1.1");
+            final HttpRequest httpRequest = HttpRequest.of(rawRequest);
 
             // when
-            final ResponseEntity response = frontRequestHandler.handle("/login", queryParams);
+            final ResponseEntity response = frontRequestHandler.handle("/login", httpRequest);
 
             // then
             final URL url = FileHandler.class.getClassLoader().getResource("static/login.html");
@@ -47,10 +50,12 @@ class FrontRequestHandlerTest {
         @DisplayName("입력 받은 path와 매핑되는 핸들러가 없다면 Not Fount ResponseEntity를 반환한다.")
         void success_notFountResponse() throws IOException {
             // given
-            final Map<String, String> queryParams = new HashMap<>();
+            final Queue<String> rawRequest = new LinkedList<>();
+            rawRequest.add("GET /login?account=gugu&password=password HTTP/1.1");
+            final HttpRequest httpRequest = HttpRequest.of(rawRequest);
 
             // when
-            final ResponseEntity response = frontRequestHandler.handle("/wrong", queryParams);
+            final ResponseEntity response = frontRequestHandler.handle("/wrong", httpRequest);
 
             // then
             final URL url = FileHandler.class.getClassLoader().getResource("static/404.html");
@@ -65,10 +70,12 @@ class FrontRequestHandlerTest {
         @DisplayName("매핑한 핸들러 실행 도중 예외가 발생하면 Server Error ResponseEntity를 반환한다.")
         void success_ServerErrorResponse() throws IOException {
             // given
-            final Map<String, String> queryParams = new HashMap<>();
+            final Queue<String> rawRequest = new LinkedList<>();
+            rawRequest.add("GET /login?account=gugu&password=wrong HTTP/1.1");
+            final HttpRequest httpRequest = HttpRequest.of(rawRequest);
 
             // when
-            final ResponseEntity response = frontRequestHandler.handle("/login", queryParams);
+            final ResponseEntity response = frontRequestHandler.handle("/login", httpRequest);
 
             // then
             final URL url = FileHandler.class.getClassLoader().getResource("static/500.html");

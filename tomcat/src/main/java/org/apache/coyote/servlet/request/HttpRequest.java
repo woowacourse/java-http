@@ -46,4 +46,8 @@ public class HttpRequest {
         }
         return Optional.of(cookie);
     }
+
+    public Session2 getSession() {
+        return session;
+    }
 }

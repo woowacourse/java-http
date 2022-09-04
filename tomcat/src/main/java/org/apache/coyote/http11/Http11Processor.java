@@ -100,8 +100,19 @@ public class Http11Processor implements Runnable, Processor {
         if (queries.isEmpty()) {
             return;
         }
-        User user = InMemoryUserRepository.findByAccount(queries.get("account"))
-            .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호를 잘못 입력하였습니다."));
+        final User user = findUser(queries);
         log.info("user : {}", user);
+    }
+
+    private static User findUser(final Map<String, String> queries) {
+        final IllegalArgumentException illegalLoginException = new IllegalArgumentException("아이디 또는 비밀번호를 잘못 입력하였습니다.");
+
+		final User user = InMemoryUserRepository.findByAccount(queries.get("account"))
+			.orElseThrow(() -> illegalLoginException);
+
+		if (!user.checkPassword(queries.get("password"))) {
+			throw illegalLoginException;
+        }
+        return user;
     }
 }

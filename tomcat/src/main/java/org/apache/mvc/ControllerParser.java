@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import org.apache.mvc.annotation.RequestMapping;
+import org.apache.mvc.handlerchain.RequestHandlerMethod;
+import org.apache.mvc.handlerchain.RequestKey;
 
 public class ControllerParser {
 

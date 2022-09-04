@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import org.apache.coyote.http11.fixture.TestController;
 import org.apache.coyote.http11.request.RequestMethod;
+import org.apache.mvc.handlerchain.RequestHandlerMethod;
+import org.apache.mvc.handlerchain.RequestKey;
 import org.junit.jupiter.api.Test;
 
 class ControllerParserTest {

@@ -1,6 +1,4 @@
-package org.apache.coyote.http11;
-
-import org.apache.coyote.http11.response.HttpStatus;
+package org.apache.coyote.http11.response;
 
 public class ResponseEntity {
 

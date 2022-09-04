@@ -2,14 +2,12 @@ package org.apache.mvc.handlerchain;
 
 import java.util.List;
 import java.util.Map;
-import org.apache.coyote.http11.ResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.response.headers.ContentType;
 import org.apache.mvc.Controller;
 import org.apache.mvc.ControllerParser;
-import org.apache.mvc.RequestHandlerMethod;
-import org.apache.mvc.RequestKey;
 
 public class ControllerRequestHandlerChain implements RequestHandlerChain {
 

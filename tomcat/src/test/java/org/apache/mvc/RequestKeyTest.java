@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.lang.annotation.Annotation;
 import org.apache.coyote.http11.request.RequestMethod;
 import org.apache.mvc.annotation.RequestMapping;
+import org.apache.mvc.handlerchain.RequestKey;
 import org.junit.jupiter.api.Test;
 
 class RequestKeyTest {

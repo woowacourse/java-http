@@ -41,10 +41,6 @@ public class HttpRequest {
         return startLineInfo[HTTP_METHOD_INDEX];
     }
 
-    public boolean isQueryStringEmpty() {
-        return queryStrings.isEmpty();
-    }
-
     public boolean isSameHttpMethod(final HttpMethod httpMethod) {
         return this.httpMethod == httpMethod;
     }

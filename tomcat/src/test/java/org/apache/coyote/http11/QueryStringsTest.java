@@ -26,14 +26,4 @@ class QueryStringsTest {
         assertThat(queryStrings.findByKey(key1)).isEqualTo(value1);
         assertThat(queryStrings.findByKey(key2)).isEqualTo(value2);
     }
-
-    @DisplayName("QueryString이 존재하지 않는 경우 isEmpty는 true")
-    @Test
-    void emptyCheck() {
-        // given & when
-        final QueryStrings queryStrings = new QueryStrings("");
-
-        // then
-        assertThat(queryStrings.isEmpty()).isTrue();
-    }
 }

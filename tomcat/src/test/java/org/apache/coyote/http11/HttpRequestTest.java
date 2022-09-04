@@ -10,19 +10,6 @@ class HttpRequestTest {
 
     private static final HttpRequestBody EMPTY_REQUEST_BODY = new HttpRequestBody("");
 
-    @DisplayName(value = "QueryString이 존재하지 않는 경우 isQueryStringEmpty는 true")
-    @Test
-    void isQueryStringEmpty() {
-        // given
-        final HttpRequest httpRequest = new HttpRequest("GET /login HTTP/1.1 ", EMPTY_REQUEST_BODY);
-
-        // when
-        final boolean actual = httpRequest.isQueryStringEmpty();
-
-        // then
-        assertThat(actual).isTrue();
-    }
-
     @DisplayName(value = "같은 HttpMethod인 경우 isSameHttpMethod는 true")
     @Test
     void isSameHttpMethod() {

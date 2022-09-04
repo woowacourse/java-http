@@ -32,8 +32,8 @@ class LoginHandlerTest {
     @Test
     void login_success() {
         // given
-        final HttpRequest request = new HttpRequest("GET /login?account=gugu&password=password HTTP/1.1 ",
-                EMPTY_REQUEST_BODY);
+        final HttpRequest request = new HttpRequest("POST /login HTTP/1.1 ",
+                new HttpRequestBody("account=gugu&password=password"));
         final LoginHandler loginHandler = new LoginHandler();
 
         final String expectedStatusCode = "HTTP/1.1 302";
@@ -52,8 +52,8 @@ class LoginHandlerTest {
     @Test
     void login_failed() {
         // given
-        final HttpRequest request = new HttpRequest("GET /login?account=gugu&password=notPassword HTTP/1.1 ",
-                EMPTY_REQUEST_BODY);
+        final HttpRequest request = new HttpRequest("POST /login HTTP/1.1 ",
+                new HttpRequestBody("account=gugu&password=notPassword"));
         final LoginHandler loginHandler = new LoginHandler();
 
         final String expected = "HTTP/1.1 401";

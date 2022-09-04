@@ -6,6 +6,9 @@ import java.util.Map;
 
 public class QueryParams {
 
+    private static final String PARAM_REGEX = "&";
+    private static final String KEY_AND_VALUE_REGEX = "=";
+
     private String path;
     private Map<String, String> params;
 
@@ -27,9 +30,9 @@ public class QueryParams {
 
     private static Map<String, String> parsingQueryString(String queryString) {
         Map<String, String> params = new HashMap<>();
-        String[] paramsLine = queryString.split("&");
+        String[] paramsLine = queryString.split(PARAM_REGEX);
         for (int i = 0; i < paramsLine.length; i++) {
-            String[] paramsKeyAndValue = paramsLine[i].split("=");
+            String[] paramsKeyAndValue = paramsLine[i].split(KEY_AND_VALUE_REGEX);
             params.put(paramsKeyAndValue[0], paramsKeyAndValue[1]);
         }
         return params;

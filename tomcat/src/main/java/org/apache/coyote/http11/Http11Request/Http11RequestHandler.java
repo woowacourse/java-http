@@ -1,8 +1,7 @@
-package org.apache.coyote.http11.Http11Request;
+package org.apache.coyote.http11.http11request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class Http11RequestHandler {
@@ -13,7 +12,7 @@ public class Http11RequestHandler {
 
     public Http11Request makeRequest(BufferedReader bufferedReader) throws IOException {
         List<String> requestElements;
-        try (bufferedReader) {
+        try {
             requestElements = List.of(bufferedReader.readLine().split(INPUT_DELIMITER));
         } catch (IOException e) {
             throw new RuntimeException();

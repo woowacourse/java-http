@@ -1,10 +1,11 @@
-package org.apache.coyote.util;
+package nextstep.org.apache.coyote.util;
 
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.util.Map;
+import org.apache.coyote.util.StringParser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

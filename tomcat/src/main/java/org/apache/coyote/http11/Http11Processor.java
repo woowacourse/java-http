@@ -61,8 +61,10 @@ public class Http11Processor implements Runnable, Processor {
 
             if (requestUri.matches("/login")) {
                 String account = requestUri.getQuery("account").orElse("");
+                String password = requestUri.getQuery("password").orElse("");
 
                 InMemoryUserRepository.findByAccount(account)
+                        .filter(user -> user.checkPassword(password))
                         .ifPresentOrElse(System.out::println, () -> System.out.println("유저가 없습니다."));
 
                 HttpResponse httpResponse = new HttpResponse.Builder()

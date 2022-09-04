@@ -20,7 +20,6 @@ public class Tomcat {
     }
 
     public void start() {
-
         Connector connector = new Connector(ROOT.getHandlerChain(controllers));
         connector.start();
 

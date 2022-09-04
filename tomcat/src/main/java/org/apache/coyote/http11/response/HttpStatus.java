@@ -15,6 +15,10 @@ public enum HttpStatus implements Response {
         this.code = code;
     }
 
+    public boolean isRedirection() {
+        return code / 100 == 3;
+    }
+
     @Override
     public String getAsString() {
         return code + " " + name();

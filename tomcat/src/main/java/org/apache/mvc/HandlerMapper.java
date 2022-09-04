@@ -13,7 +13,11 @@ public class HandlerMapper {
     }
 
     public HttpResponse mapToHandle(HttpRequest request) {
-        HttpResponse response = HttpResponse.initial();
-        return chain.handle(request, response);
+        HttpResponse response = chain.handle(request, HttpResponse.initial());
+        return postProcess(response);
+    }
+
+    private HttpResponse postProcess(HttpResponse response) {
+        return response;
     }
 }

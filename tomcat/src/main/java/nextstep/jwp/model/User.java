@@ -1,5 +1,8 @@
 package nextstep.jwp.model;
 
+import java.util.Map;
+import org.apache.util.UrlUtil;
+
 public class User {
 
     private final Long id;

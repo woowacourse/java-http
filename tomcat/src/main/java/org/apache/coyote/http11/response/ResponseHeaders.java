@@ -25,7 +25,7 @@ public class ResponseHeaders implements Response {
 
     public ResponseHeaders append(ResponseHeader header) {
         List<ResponseHeader> newHeaders = new ArrayList<>(this.headers);
-        newHeaders.remove(header);
+        newHeaders.removeIf(it -> it.getClass().equals(header.getClass()));
         newHeaders.add(header);
         return new ResponseHeaders(newHeaders);
     }

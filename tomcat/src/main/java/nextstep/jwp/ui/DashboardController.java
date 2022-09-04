@@ -26,30 +26,30 @@ public class DashboardController implements Controller {
     }
 
     @RequestMapping(value = "/login", method = RequestMethod.GET)
-    public ResponseEntity handleLogin(HttpRequest request) {
-        Optional<User> optionalUser = repository.findByAccount(request.getParameter("account"));
-        return optionalUser.map(user -> checkPassword(request, user))
-                .orElseGet(() -> new ResponseEntity(HttpStatus.OK, "redirect:/login.html"));
+    public ResponseEntity showLogin(HttpRequest request) {
+        return new ResponseEntity(HttpStatus.FOUND, "/login.html");
     }
 
-    private ResponseEntity checkPassword(HttpRequest request, User user) {
-        if (user.checkPassword(request.getParameter("password"))) {
-            return new ResponseEntity(HttpStatus.FOUND, "redirect:/index.html");
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    public ResponseEntity handleLogin(HttpRequest request) {
+        Map<String, String> userMap = UrlUtil.parseQueryString(request.getRequestBody());
+        Optional<User> optionalUser = repository.findByAccount(userMap.get("account"));
+        if (optionalUser.isPresent() && optionalUser.get().checkPassword(userMap.get("password"))) {
+            return new ResponseEntity(HttpStatus.FOUND, "/index.html");
         }
-        return new ResponseEntity(HttpStatus.UNAUTHORIZED, "redirect:/401.html");
+        return new ResponseEntity(HttpStatus.FOUND, "/401.html");
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.GET)
     public ResponseEntity showRegister(HttpRequest request) {
-        return new ResponseEntity(HttpStatus.OK, "redirect:/register.html");
+        return new ResponseEntity(HttpStatus.FOUND, "/register.html");
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST)
-    public ResponseEntity register(HttpRequest request) {
-        String requestBody = request.getRequestBody();
-        Map<String, String> userMap = UrlUtil.parseQueryString(requestBody);
+    public ResponseEntity handleRegister(HttpRequest request) {
+        Map<String, String> userMap = UrlUtil.parseQueryString(request.getRequestBody());
         User user = new User(userMap.get("account"), userMap.get("password"), userMap.get("email"));
         repository.save(user);
-        return new ResponseEntity(HttpStatus.CREATED, "redirect:/index.html");
+        return new ResponseEntity(HttpStatus.FOUND, "/index.html");
     }
 }

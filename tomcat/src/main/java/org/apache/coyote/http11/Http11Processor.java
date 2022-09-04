@@ -2,10 +2,8 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.net.Socket;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -37,9 +35,10 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var bufferReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            HttpRequest httpRequest = new HttpRequest(readHttpRequest(inputStream));
+            HttpRequest httpRequest = new HttpRequest(readHttpRequest(bufferReader));
             RequestUri requestUri = httpRequest.getRequestUri();
 
             if (requestUri.hasExtension()) { // 정적 파일 서빙
@@ -78,10 +77,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readHttpRequest(final InputStream inputStream) throws IOException {
-        Reader reader = new InputStreamReader(inputStream);
-        BufferedReader bufferedReader = new BufferedReader(reader);
-
+    private String readHttpRequest(final BufferedReader bufferedReader) throws IOException {
         StringBuilder httpRequest = new StringBuilder();
         while (bufferedReader.ready()) {
             String line = bufferedReader.readLine();

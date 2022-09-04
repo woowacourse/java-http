@@ -30,6 +30,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final int HEADER_NAME_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
     private static final String RESOURCE_FOLDER = "static";
+    private static final String CHARSET_UTF_8 = ";charset=utf-8";
 
     private final Socket connection;
 
@@ -53,7 +54,7 @@ public class Http11Processor implements Runnable, Processor {
         if (request.isResource()) {
             return generateResourceResponse(request);
         }
-        if (request.getUrl().startsWith("/login")) {
+        if (request.getUrl().equals("/login")) {
             return generateLoginPage(request);
         }
         return generateDefaultResponse();
@@ -91,7 +92,7 @@ public class Http11Processor implements Runnable, Processor {
     private Http11Response generateDefaultResponse() {
         final var responseBody = "Hello world!";
         Map<String, String> headers = new LinkedHashMap<>();
-        headers.put(HttpHeaders.CONTENT_TYPE.getHeaderName(), HttpContent.HTML.getContentType());
+        headers.put(HttpHeaders.CONTENT_TYPE.getHeaderName(), HttpContent.HTML.getContentType() + CHARSET_UTF_8);
         headers.put(HttpHeaders.CONTENT_LENGTH.getHeaderName(), Long.toString(responseBody.getBytes().length));
 
         return new Http11Response(
@@ -109,7 +110,7 @@ public class Http11Processor implements Runnable, Processor {
 
         try {
             Map<String, String> headers = new LinkedHashMap<>();
-            headers.put(HttpHeaders.CONTENT_TYPE.getHeaderName(), contentType);
+            headers.put(HttpHeaders.CONTENT_TYPE.getHeaderName(), contentType + CHARSET_UTF_8);
             headers.put(HttpHeaders.CONTENT_LENGTH.getHeaderName(),
                     Long.toString(new File(resource.getFile()).length()));
 

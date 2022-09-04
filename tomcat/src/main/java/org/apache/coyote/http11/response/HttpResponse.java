@@ -24,8 +24,8 @@ public class HttpResponse {
 		this.body = body;
 	}
 
-	public static HttpResponse of(final String httpVersion, final String resource) {
-		final StatusLine statusLine = new StatusLine(httpVersion, StatusCode.OK);
+	public static HttpResponse of(final String httpVersion, final String resource, final String statusCode) {
+		final StatusLine statusLine = new StatusLine(httpVersion, StatusCode.findBy(statusCode));
 
 		final String contentType = selectContentType(resource);
 		final String body = loadResourceContent(resource);

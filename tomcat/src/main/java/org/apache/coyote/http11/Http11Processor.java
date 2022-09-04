@@ -85,7 +85,7 @@ public class Http11Processor implements Runnable, Processor {
         final String resource = response.getResource();
         final String statusCode = response.getStatusCode();
 
-        return HttpResponse.of(httpRequest.getHttpVersion(), resource);
+        return HttpResponse.of(httpRequest.getHttpVersion(), resource, statusCode);
     }
 
     private MappingResponse getResourceFromUrl(final String url) {

@@ -1,9 +1,10 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.controller.Controller;
-import nextstep.jwp.exception.FileAccessException;
 import nextstep.jwp.exception.CustomNotFoundException;
-import nextstep.jwp.exception.StreamException;
+import nextstep.jwp.exception.FileAccessException;
+import nextstep.jwp.support.ErrorView;
+import nextstep.jwp.support.Resource;
 import org.apache.coyote.Processor;
 import org.apache.http.HttpMethod;
 import org.apache.http.HttpStatus;
@@ -36,37 +37,42 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        final OutputStream outputStream = getOutputStream(connection);
         try (final var inputStream = connection.getInputStream();
-             outputStream;
+             final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-
-            final RequestEntity requestEntity = extractRequestInfo(bufferedReader);
-            final Controller controller = controllerMapping.getController(requestEntity.getUri());
-            flushResponse(outputStream, makeResponse(controller, requestEntity));
+            process(outputStream, bufferedReader);
         } catch (Exception e) {
             log.info(e.getMessage());
         }
     }
 
-    private OutputStream getOutputStream(final Socket connection) {
+    private void process(final OutputStream outputStream, final BufferedReader bufferedReader) {
         try {
-            return connection.getOutputStream();
-        } catch (IOException e) {
-            throw new StreamException();
+            final RequestEntity requestEntity = extractRequestInfo(bufferedReader);
+            final Controller controller = controllerMapping.getController(requestEntity.getUri());
+            flushResponse(outputStream, makeResponse(controller, requestEntity));
+        } catch (CustomNotFoundException e) {
+            flushResponse(outputStream, makeErrorResponse(HttpStatus.BAD_REQUEST, ErrorView.NOT_FOUND));
+        } catch (Exception e) {
+            flushResponse(outputStream, makeErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ErrorView.INTERNAL_SERVER_ERROR));
         }
     }
 
     private RequestEntity extractRequestInfo(final BufferedReader bufferedReader) {
         String line;
         while (!(line = readLine(bufferedReader)).isBlank()) {
-            if (HttpMethod.isStartWithAny(line)) {
+            if (HttpMethod.isStartWith(line)) {
                 final String uri = getUri(line);
                 final String queryString = getQueryString(line);
                 return new RequestEntity(uri, queryString);
             }
         }
         throw new CustomNotFoundException("요청을 찾을 수 없습니다.");
+    }
+
+    private String makeResponse(final Controller controller, final RequestEntity requestEntity) {
+        return controller.execute(requestEntity)
+                .build();
     }
 
     private String readLine(final BufferedReader bufferedReader) {
@@ -91,17 +97,12 @@ public class Http11Processor implements Runnable, Processor {
         return splited[1];
     }
 
-    private String makeResponse(final Controller controller, final RequestEntity requestEntity) {
-        try {
-            return controller.execute(requestEntity)
-                    .build();
-        } catch (CustomNotFoundException e) {
-            return new ResponseEntity().httpStatus(HttpStatus.BAD_REQUEST)
-                    .build();
-        } catch (Exception e) {
-            return new ResponseEntity().httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .build();
-        }
+    private String makeErrorResponse(final HttpStatus httpStatus, final ErrorView errorView) {
+        final Resource resource = new Resource(errorView.getValue());
+        return new ResponseEntity().httpStatus(httpStatus)
+                .contentType(resource.getContentType())
+                .content(resource.read())
+                .build();
     }
 
     private void flushResponse(final OutputStream outputStream, final String responseBody) {

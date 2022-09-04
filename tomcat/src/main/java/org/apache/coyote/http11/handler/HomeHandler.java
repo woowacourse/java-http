@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.handler;
 
-import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.request.HttpRequest;
+import org.apache.coyote.http11.model.response.ContentType;
 import org.apache.coyote.http11.model.response.HttpResponse;
 import org.apache.coyote.http11.model.response.ResponseLine;
 import org.apache.coyote.http11.model.response.ResponseStatusCode;

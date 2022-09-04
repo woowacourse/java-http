@@ -12,7 +12,7 @@ public class RequestHeader {
     public static final int HEADER_VALUE_INDEX = 1;
     private final Map<String, String> headers;
 
-    public RequestHeader(final Map<String, String> headers) {
+    private RequestHeader(final Map<String, String> headers) {
         this.headers = headers;
     }
 
@@ -29,10 +29,6 @@ public class RequestHeader {
 
     public int getContentLength() {
         return Integer.parseInt(headers.getOrDefault(CONTENT_LENGTH, "0"));
-    }
-
-    public boolean existHeader(String name) {
-        return headers.containsKey(name);
     }
 
     public String getCookieKey() {

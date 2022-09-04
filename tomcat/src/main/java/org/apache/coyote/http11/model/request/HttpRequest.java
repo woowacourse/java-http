@@ -12,7 +12,7 @@ public class HttpRequest {
     private final RequestHeader headers;
     private final RequestBody body;
 
-    public HttpRequest(final RequestLine requestLine, final RequestHeader headers,
+    private HttpRequest(final RequestLine requestLine, final RequestHeader headers,
                        final RequestBody body) {
         this.requestLine = requestLine;
         this.headers = headers;
@@ -23,7 +23,7 @@ public class HttpRequest {
         try {
             RequestLine requestLine = RequestLine.of(reader.readLine());
             RequestHeader headers = createHeaders(reader);
-            RequestBody body = createBody(reader, headers);
+            RequestBody body = createBody(reader, headers.getContentLength());
             return new HttpRequest(requestLine, headers, body);
         } catch (Exception exception) {
             throw new IllegalArgumentException("Request에 생성 시, 문제가 발생했습니다.");
@@ -37,9 +37,8 @@ public class HttpRequest {
         return RequestHeader.from(input);
     }
 
-    private static RequestBody createBody(final BufferedReader reader, final RequestHeader headers)
+    private static RequestBody createBody(final BufferedReader reader, final int contentLength)
             throws IOException {
-        int contentLength = headers.getContentLength();
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         return RequestBody.from(new String(buffer));
@@ -58,11 +57,11 @@ public class HttpRequest {
                 .getBody();
     }
 
-    public boolean hasCookie() {
-        return headers.existHeader(RequestHeader.COOKIE);
-    }
-
     public String getCookieKey() {
         return headers.getCookieKey();
+    }
+
+    public boolean matchTarget(final String input) {
+        return requestLine.matchTarget(input);
     }
 }

@@ -22,9 +22,8 @@ public enum HandlerMapping {
     }
 
     public static Handler findHandler(final HttpRequest httpRequest) {
-        String path = httpRequest.getRequestTarget();
         return Arrays.stream(values())
-                .filter(matchHandler(path))
+                .filter(handler -> httpRequest.matchTarget(handler.path))
                 .findAny()
                 .map(mapToHandler(httpRequest))
                 .orElseGet(() -> new ResourceHandler(httpRequest));

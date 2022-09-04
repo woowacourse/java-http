@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model.session;
 
 import java.util.UUID;
 
@@ -11,12 +11,7 @@ public class Cookie {
         this.value = UUID.randomUUID();
     }
 
-    public String getValue() {
-        return value.toString();
-    }
-
-    @Override
-    public String toString() {
+    public String getCookieToString() {
         return key + "=" + value.toString();
     }
 }

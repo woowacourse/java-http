@@ -1,7 +1,9 @@
 package org.apache.coyote.http11.model.response;
 
 public class ResponseLine {
+
     private static final String version = "HTTP/1.1 ";
+
     private final ResponseStatusCode statusCode;
 
     private ResponseLine(final ResponseStatusCode statusCode) {

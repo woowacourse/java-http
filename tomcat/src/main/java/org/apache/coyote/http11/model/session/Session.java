@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model.session;
 
 public class Session {
 
@@ -9,6 +9,4 @@ public class Session {
         this.key = key;
         this.value = value;
     }
-
-
 }

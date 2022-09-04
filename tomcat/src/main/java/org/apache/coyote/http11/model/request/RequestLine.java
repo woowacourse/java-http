@@ -32,7 +32,7 @@ public class RequestLine {
     }
 
     private static String createTarget(final String input) {
-        if (existQueryParams(input)) {
+        if (!existQueryParams(input)) {
             return input;
         }
         return input.substring(0, input.lastIndexOf(EXIST_QUERY_PARAMS));
@@ -40,7 +40,7 @@ public class RequestLine {
 
     private static Map<String, String> createParams(final String input) {
         Map<String, String> queryParams = new HashMap<>();
-        if (existQueryParams(input)) {
+        if (!existQueryParams(input)) {
             return queryParams;
         }
         return splitQueryParams(input, queryParams);
@@ -61,11 +61,7 @@ public class RequestLine {
     }
 
     private static boolean existQueryParams(final String path) {
-        return !path.contains(EXIST_QUERY_PARAMS);
-    }
-
-    public Map<String, String> getParams() {
-        return params;
+        return path.contains(EXIST_QUERY_PARAMS);
     }
 
     public String getTarget() {
@@ -76,16 +72,7 @@ public class RequestLine {
         return this.method == method;
     }
 
-    @Override
-    public String toString() {
-        return "HttpRequestLine{" +
-                "method=" + method.getName() +
-                ", target='" + target + '\'' +
-                ", params=" + params +
-                '}';
-    }
-
-    public boolean hasParams() {
-        return params.isEmpty();
+    public boolean matchTarget(final String input) {
+        return this.target.equals(input);
     }
 }

@@ -17,11 +17,11 @@ public class HttpResponse {
     private final String contentType;
     private final String messageBody;
 
-    private HttpResponse(HttpStatus status,
-                         String location,
-                         HttpCookies cookies,
-                         String contentType,
-                         String messageBody) {
+    HttpResponse(HttpStatus status,
+                 String location,
+                 HttpCookies cookies,
+                 String contentType,
+                 String messageBody) {
         this.status = status;
         this.location = location;
         this.cookies = cookies;

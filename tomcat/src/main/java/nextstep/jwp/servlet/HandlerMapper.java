@@ -6,6 +6,7 @@ import nextstep.jwp.servlet.handler.HandlerMappings;
 import nextstep.jwp.servlet.view.ViewResolver;
 import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.response.HttpResponse;
+import org.apache.coyote.servlet.response.ResponseEntity;
 import org.apache.coyote.support.HttpException;
 
 public class HandlerMapper {
@@ -32,10 +33,18 @@ public class HandlerMapper {
 
     private HttpResponse handle(HttpRequest request, Handler handler) {
         final var response = handler.handle(request);
-        if (response instanceof HttpResponse) {
+        if (handler.hasReturnTypeOf(HttpResponse.class)) {
             return (HttpResponse) response;
         }
-        if (response instanceof String) {
+        if (handler.hasReturnTypeOf(ResponseEntity.class)) {
+            ResponseEntity responseEntity = (ResponseEntity) response;
+            String viewResource = responseEntity.getViewResource();
+            if (viewResource != null) {
+                return viewResolver.findStaticResource(viewResource);
+            }
+            return responseEntity.toHttpResponse();
+        }
+        if (handler.hasReturnTypeOf(String.class)) {
             return viewResolver.findStaticResource((String) response);
         }
         throw new UnsupportedOperationException("invalid request");

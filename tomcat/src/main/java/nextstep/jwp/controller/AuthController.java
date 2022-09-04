@@ -7,6 +7,7 @@ import org.apache.coyote.servlet.cookie.HttpCookie;
 import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.response.HttpResponse;
 import org.apache.coyote.servlet.response.HttpResponse.HttpResponseBuilder;
+import org.apache.coyote.servlet.response.ResponseEntity;
 import org.apache.coyote.servlet.session.Session;
 import org.apache.coyote.servlet.session.SessionRepository;
 import org.apache.coyote.support.HttpMethod;
@@ -23,14 +24,12 @@ public class AuthController {
     }
 
     @RequestMapping(method = HttpMethod.GET, path = "/login")
-    public Object getLoginPage(HttpRequest request) {
+    public ResponseEntity getLoginPage(HttpRequest request) {
         final var sessionCookie = request.findCookie(Session.JSESSIONID);
         if (sessionCookie.isEmpty() || !sessionRepository.isValidSession(sessionCookie.get().getValue())) {
-            return "/login.html";
+            return ResponseEntity.ok().setViewResource("/login.html").build();
         }
-        return new HttpResponseBuilder(HttpStatus.FOUND)
-                    .setLocation("/index.html")
-                    .build();
+        return ResponseEntity.redirect("/index.html").build();
     }
 
     @RequestMapping(method = HttpMethod.POST, path = "/login")

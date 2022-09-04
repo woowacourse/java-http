@@ -10,7 +10,7 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final RequestHeaders requestHeaders;
-    private RequestBody requestBody;
+    private final RequestBody requestBody;
 
 
     private HttpRequest(final RequestLine requestLine, final RequestHeaders requestHeaders) {
@@ -40,9 +40,5 @@ public class HttpRequest {
 
     public String getParameter(final String key) {
         return requestLine.findParamValueByName(key);
-    }
-
-    public String getHeaderField(final String fieldName) {
-        return requestHeaders.getField(fieldName);
     }
 }

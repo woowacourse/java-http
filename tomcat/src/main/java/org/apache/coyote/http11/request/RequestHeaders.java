@@ -53,8 +53,7 @@ public class RequestHeaders {
         }
     }
 
-    public String getField(final String name) {
-        return headers.getOrDefault(name, "text/html")
-                .split(",")[0];
+    public Map<String, String> getHeaders() {
+        return headers;
     }
 }

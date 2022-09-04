@@ -1,7 +1,23 @@
 package org.apache.coyote.http11;
 
+import org.apache.coyote.http.ContentType;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Optional;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http.HttpVersion;
+import org.apache.coyote.http.request.HttpRequest;
+import org.apache.coyote.http.response.HttpResponse;
+import org.apache.coyote.http.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,21 +42,52 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+            HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
+            HttpResponse httpResponse = createHttpResponse(httpRequest);
 
-            final var responseBody = "Hello world!";
+            if (httpRequest.hasQueryString()) {
+                Map<String, String> queryString = httpRequest.getQueryString();
+                String account = queryString.get("account");
+                Optional<User> user = InMemoryUserRepository.findByAccount(account);
+                log.info(user.toString());
+            }
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.convertTemplate().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpResponse createHttpResponse(final HttpRequest httpRequest) throws URISyntaxException, IOException {
+        final String url = httpRequest.getUrl();
+        if (url.equals("/")) {
+            return getHelloResponse();
+        }
+        return createResponse(httpRequest);
+    }
+
+    private HttpResponse createResponse(final HttpRequest httpRequest)
+            throws URISyntaxException, IOException {
+        final URL resource = this.getClass().getClassLoader().getResource("static" + httpRequest.getUrl());
+        final Path path = Paths.get(resource.toURI());
+        final String responseBody = new String(Files.readAllBytes(path));
+
+        return new HttpResponse(httpRequest.getVersion(),
+                HttpStatus.OK,
+                ContentType.findContentType(httpRequest.getUrl()),
+                responseBody.getBytes().length,
+                responseBody);
+    }
+
+    private HttpResponse getHelloResponse() {
+        String responseBody = "Hello world!";
+        return new HttpResponse(HttpVersion.HTTP11,
+                HttpStatus.OK,
+                ContentType.HTML,
+                responseBody.getBytes().length,
+                responseBody);
     }
 }

@@ -1,22 +1,22 @@
-package org.apache.coyote.http11.httpmessage;
+package org.apache.coyote.http11.httpmessage.statusline;
 
 public enum HttpStatus {
     OK("200", "OK "),
     REDIRECT("302", "");
 
     private final String statusCode;
-    private final String status;
+    private final String reasonPhrase;
 
     HttpStatus(String statusCode, String status) {
         this.statusCode = statusCode;
-        this.status = status;
+        this.reasonPhrase = status;
     }
 
     public String getStatusCode() {
         return statusCode;
     }
 
-    public String getStatus() {
-        return status;
+    public String getReasonPhrase() {
+        return reasonPhrase;
     }
 }

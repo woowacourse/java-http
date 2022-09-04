@@ -15,7 +15,6 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.httpmessage.ContentType;
-import org.apache.coyote.http11.httpmessage.HttpStatus;
 import org.apache.coyote.http11.httpmessage.Request;
 import org.apache.coyote.http11.httpmessage.Response;
 import org.slf4j.Logger;
@@ -54,7 +53,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private Request extractRequest(InputStream inputStream) throws IOException {
+    private Request extractRequest(final InputStream inputStream) throws IOException {
         final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         final var requestMessage = new StringBuilder();
@@ -70,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
         return Request.of(requestMessage.toString());
     }
 
-    private Response doGet(Request request) throws IOException {
+    private Response doGet(final Request request) throws IOException {
         final var uri = request.getUri();
 
         if (uri.contains(".")) {
@@ -83,17 +82,17 @@ public class Http11Processor implements Runnable, Processor {
         return getResponse(uri);
     }
 
-    private Response getResponse(String uri) throws IOException {
+    private Response getResponse(final String uri) throws IOException {
         if (uri.equals("/login")) {
             return getResponseWithFileName("/login.html");
         }
         if (uri.equals("/")) {
-            return Response.newInstanceWithResponseBody(HttpStatus.OK, ContentType.HTML, "Hello world!");
+            return Response.okWithResponseBody(ContentType.HTML, "Hello world!");
         }
         return new Response();
     }
 
-    private Response getResponseWithFileName(String fileName) throws IOException {
+    private Response getResponseWithFileName(final String fileName) throws IOException {
         final var fileExtension = fileName.split("\\.")[1];
 
         final var contentType = ContentType.from(fileExtension);
@@ -103,32 +102,32 @@ public class Http11Processor implements Runnable, Processor {
 
         final var responseBody = new String(Files.readAllBytes(path));
 
-        return Response.newInstanceWithResponseBody(HttpStatus.OK, contentType, responseBody);
+        return Response.okWithResponseBody(contentType, responseBody);
     }
 
-    private Response getResponseWithQueryString(String uri) {
+    private Response getResponseWithQueryString(final String uri) {
         if (uri.contains("/login")) {
 
-            Map<String, String> queryStrings = extractQueryStrings(uri);
-            Optional<User> user = InMemoryUserRepository.findByAccount(queryStrings.get("account"));
+            final Map<String, String> queryStrings = extractQueryStrings(uri);
+            final Optional<User> user = InMemoryUserRepository.findByAccount(queryStrings.get("account"));
 
             if (user.isPresent() && user.get().checkPassword(queryStrings.get("password"))) {
                 log.info("존재하는 유저입니다. ::: " + user);
-                return Response.of(HttpStatus.REDIRECT, ContentType.HTML, "http://localhost:8080/index.html");
+                return Response.redirect(ContentType.HTML, "http://localhost:8080/index.html");
             }
             log.info("존재하지 않는 유저입니다. ::: " + queryStrings.get("account"));
-            return Response.of(HttpStatus.REDIRECT, ContentType.HTML, "http://localhost:8080/401.html");
+            return Response.redirect(ContentType.HTML, "http://localhost:8080/401.html");
         }
         return new Response();
     }
 
-    private Map<String, String> extractQueryStrings(String uri) {
-        Map<String, String> queryStrings = new HashMap<>();
-        int index = uri.indexOf("?");
+    private Map<String, String> extractQueryStrings(final String uri) {
+        final Map<String, String> queryStrings = new HashMap<>();
+        final int index = uri.indexOf("?");
 
-        for (String queryString : uri.substring(index + 1).split("&")) {
-            String name = queryString.split("=")[0];
-            String value = queryString.split("=")[1];
+        for (final String queryString : uri.substring(index + 1).split("&")) {
+            final String name = queryString.split("=")[0];
+            final String value = queryString.split("=")[1];
             queryStrings.put(name, value);
         }
         return queryStrings;

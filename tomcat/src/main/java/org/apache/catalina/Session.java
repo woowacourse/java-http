@@ -8,6 +8,8 @@ import nextstep.jwp.model.User;
 
 public class Session {
 
+    private static final String USER = "user";
+
     private final String id;
     private final Map<String, Object> values = new HashMap<>();
 
@@ -15,16 +17,16 @@ public class Session {
         this.id = id;
     }
 
-    public void setAttribute(final String name, final Object value) {
-        values.put(name, value);
-    }
-
     public String getId() {
         return id;
     }
 
+    public void addUser(final User user) {
+        values.put(USER, user);
+    }
+
     public User getUser() {
-        final Object value = values.get("name");
+        final Object value = values.get(USER);
         if (Objects.isNull(value)) {
             throw new UserNotFoundException(id);
         }

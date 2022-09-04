@@ -92,7 +92,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if ("/register".equals(url)) {
-            return new RegisterHandler().register(httpRequest);
+            return new RegisterHandler(manager).register(httpRequest);
         }
 
         return HttpResponse.of(httpRequest, HttpStatus.OK, url);

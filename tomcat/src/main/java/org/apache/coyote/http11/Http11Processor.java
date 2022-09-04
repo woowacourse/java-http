@@ -37,12 +37,13 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpRequest requestValue = readHttpRequest(inputStream);
             final String requestPath = requestValue.getUrl();
-            final URI uri = resolveView(requestPath);
 
             if (requestPath.contains("/login") && requestPath.contains("?")) {
                 login(requestPath);
             }
 
+            final ViewResolver viewResolver = new ViewResolver(requestPath);
+            final URI uri = viewResolver.resolveView();
             final HttpResponse httpResponse = HttpResponse.of(uri);
             final String response = httpResponse.getBody();
 
@@ -60,17 +61,6 @@ public class Http11Processor implements Runnable, Processor {
 
         return HttpRequest.from(line, headerLines);
     }
-
-    private URI resolveView(final String requestUrl) throws URISyntaxException {
-        if ("/".equals(requestUrl)) {
-            return null;
-        }
-        if (requestUrl.contains(".")) {
-            return getClass().getClassLoader().getResource("static" + requestUrl).toURI();
-        }
-        return getClass().getClassLoader().getResource("static" + requestUrl + ".html").toURI();
-    }
-
 
     private void login(final String requestPath) {
         final Controller controller = new Controller();

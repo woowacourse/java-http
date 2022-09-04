@@ -1,5 +1,8 @@
 package nextstep.jwp.http.response;
 
+import static nextstep.jwp.http.common.HttpHeaders.CONTENT_LENGTH;
+import static nextstep.jwp.http.common.HttpHeaders.CONTENT_TYPE;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -12,6 +15,10 @@ import nextstep.jwp.http.common.HttpStatus;
 
 public class HttpResponse {
 
+    private static final String CHARSET_UTF_8 = ";charset=utf-8 ";
+    private static final String BLANK = " ";
+    private static final String EMPTY = "";
+
     private HttpStatus httpStatus;
     private HttpHeaders httpHeaders;
     private ResponseBody responseBody;
@@ -19,7 +26,7 @@ public class HttpResponse {
     public HttpResponse() {
         this.httpStatus = HttpStatus.OK;
         this.httpHeaders = new HttpHeaders(new LinkedHashMap<>());
-        this.responseBody = new ResponseBody("");
+        this.responseBody = new ResponseBody(EMPTY);
     }
 
     public void addHttpStatus(final HttpStatus httpStatus) {
@@ -29,8 +36,8 @@ public class HttpResponse {
     public void addResponseBody(final String text) {
         byte[] responseBody = text.getBytes(StandardCharsets.UTF_8);
 
-        httpHeaders.add("Content-Type", ContentType.TEXT_HTML.getType());
-        httpHeaders.add("Content-Length", String.valueOf(responseBody.length));
+        httpHeaders.add(CONTENT_TYPE, ContentType.TEXT_HTML.getType());
+        httpHeaders.add(CONTENT_LENGTH, String.valueOf(responseBody.length));
 
         this.responseBody = new ResponseBody(text);
     }
@@ -39,8 +46,8 @@ public class HttpResponse {
         Path path = file.toPath();
         byte[] responseBody = Files.readAllBytes(file.toPath());
 
-        httpHeaders.add("Content-Type", Files.probeContentType(path));
-        httpHeaders.add("Content-Length", String.valueOf(responseBody.length));
+        httpHeaders.add(CONTENT_TYPE, Files.probeContentType(path));
+        httpHeaders.add(CONTENT_LENGTH, String.valueOf(responseBody.length));
 
         this.responseBody = new ResponseBody(new String(responseBody));
     }
@@ -48,10 +55,10 @@ public class HttpResponse {
     @Override
     public String toString() {
         String response = String.join("\r\n",
-            "HTTP/1.1" + " " + httpStatus.getCode() + " " + httpStatus.getDescription() + " ",
-            "Content-Type: " + httpHeaders.getHeader("Content-Type") + ";charset=utf-8 ",
-            "Content-Length: " + responseBody.getValue().getBytes().length + " ",
-            "",
+            "HTTP/1.1" + BLANK + httpStatus.getCode() + BLANK + httpStatus.getDescription() + BLANK,
+            "Content-Type: " + httpHeaders.getHeader(CONTENT_TYPE) + CHARSET_UTF_8,
+            "Content-Length: " + responseBody.getValue().getBytes().length + BLANK,
+            EMPTY,
             responseBody.getValue());
 
         return response;

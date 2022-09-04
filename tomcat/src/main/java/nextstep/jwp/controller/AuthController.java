@@ -2,17 +2,23 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.service.UserService;
 import nextstep.jwp.servlet.handler.RequestMapping;
+import org.apache.coyote.servlet.cookie.HttpCookie;
 import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.request.Parameters;
 import org.apache.coyote.servlet.response.HttpResponse;
+import org.apache.coyote.servlet.response.HttpResponse.HttpResponseBuilder;
+import org.apache.coyote.servlet.session.SessionRepository;
 import org.apache.coyote.support.HttpMethod;
+import org.apache.coyote.support.HttpStatus;
 
 public class AuthController {
 
     private final UserService userService;
+    private final SessionRepository sessionRepository;
 
-    public AuthController(UserService userService) {
+    public AuthController(UserService userService, SessionRepository sessionRepository) {
         this.userService = userService;
+        this.sessionRepository = sessionRepository;
     }
 
     @RequestMapping(method = HttpMethod.GET, path = "/login")
@@ -25,7 +31,14 @@ public class AuthController {
         Parameters parameters = request.getParameters();
         final var account = parameters.get("account");
         final var password = parameters.get("password");
-        return userService.findUser(account, password);
+
+        final var user = userService.login(account, password);
+        final var sessionId = sessionRepository.generateNewSession(user.getId());
+        final var sessionCookie = HttpCookie.ofSessionId(sessionId);
+        return new HttpResponseBuilder(HttpStatus.FOUND)
+                .setLocation("/index.html")
+                .setCookie(sessionCookie)
+                .build();
     }
 
     @RequestMapping(method = HttpMethod.GET, path = "/register")

@@ -8,6 +8,7 @@ import nextstep.jwp.service.UserService;
 import nextstep.jwp.servlet.handler.HandlerMappings;
 import nextstep.jwp.servlet.view.ViewResolver;
 import org.apache.coyote.servlet.Servlet;
+import org.apache.coyote.servlet.session.SessionRepository;
 import org.apache.coyote.support.HttpException;
 import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.response.HttpResponse;
@@ -18,7 +19,7 @@ public class CustomServlet implements Servlet {
 
     public CustomServlet() {
         final var handlerMappings = HandlerMappings.of(new HomeController(),
-                new AuthController(new UserService(new InMemoryUserRepository())));
+                new AuthController(new UserService(new InMemoryUserRepository()), new SessionRepository()));
         this.handlerMapper = new HandlerMapper(handlerMappings, new ExceptionHandler(), new ViewResolver());
     }
 

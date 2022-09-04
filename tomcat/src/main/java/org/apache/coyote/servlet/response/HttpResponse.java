@@ -48,7 +48,7 @@ public class HttpResponse {
             headers.add(String.format("Location: %s ", location));
         }
         if (cookies.containsCookies()) {
-            headers.add(cookies.toSetHeaderFormat());
+            headers.addAll(cookies.toSetHeaderFormats());
         }
         if (contentType != null) {
             headers.add(String.format("Content-Type: %s ", contentType));

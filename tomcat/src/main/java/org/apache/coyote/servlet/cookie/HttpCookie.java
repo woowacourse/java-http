@@ -1,5 +1,7 @@
 package org.apache.coyote.servlet.cookie;
 
+import java.util.UUID;
+import org.apache.coyote.servlet.session.Session;
 import org.apache.coyote.support.HttpException;
 import org.apache.coyote.support.HttpStatus;
 
@@ -22,6 +24,10 @@ public class HttpCookie {
             throw new HttpException(HttpStatus.BAD_REQUEST);
         }
         return new HttpCookie(keyValues[0], keyValues[1]);
+    }
+
+    public static HttpCookie ofSessionId(UUID sessionId) {
+        return new HttpCookie(Session.JSESSIONID, sessionId.toString());
     }
 
     public String toHeaderFormat() {

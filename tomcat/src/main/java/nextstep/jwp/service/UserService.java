@@ -20,7 +20,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public HttpResponse findUser(String account, String password) {
+    public User login(String account, String password) {
         final var user = userRepository.findByAccount(account);
         if (user.isEmpty()) {
             throw new HttpException(HttpStatus.UNAUTHORIZED);
@@ -30,9 +30,7 @@ public class UserService {
             throw new HttpException(HttpStatus.UNAUTHORIZED);
         }
         log.info("로그인 성공! - {}", user);
-        return new HttpResponseBuilder(HttpStatus.FOUND)
-                .setLocation("/index.html")
-                .build();
+        return foundUser;
     }
 
     public HttpResponse saveUser(String account, String password, String email) {

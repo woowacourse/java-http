@@ -1,6 +1,7 @@
 package org.apache.coyote.servlet.cookie;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -26,11 +27,11 @@ public class HttpCookies {
         return !values.isEmpty();
     }
 
-    public String toSetHeaderFormat() {
-        final var cookies = values.values()
+    public List<String> toSetHeaderFormats() {
+       return values.values()
                 .stream()
                 .map(HttpCookie::toHeaderFormat)
+                .map(it -> String.format(SET_COOKIE_HEADER_FORMAT, it))
                 .collect(Collectors.toList());
-        return String.format(SET_COOKIE_HEADER_FORMAT, cookies);
     }
 }

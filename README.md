@@ -29,3 +29,4 @@
 - [x] HttpRequest에서 일급컬렉션 사용하기
 - [x] 반복되는 상수를 Enum으로 처리하기
 - [ ] loginController 악취 제거하기
+- [ ] RequestMapping - service 과정까지에서 예외를 어떻게 처리할 것인지 고민해보기 

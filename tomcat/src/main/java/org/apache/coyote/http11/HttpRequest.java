@@ -15,13 +15,13 @@ public class HttpRequest {
     private final QueryStrings queryStrings;
     private final HttpRequestBody httpRequestBody;
 
-    public HttpRequest(final String startLine, final String requestBody) {
+    public HttpRequest(final String startLine, final HttpRequestBody requestBody) {
         final String uri = extractURI(startLine);
 
         url = extractURL(uri);
         queryStrings = new QueryStrings(uri);
         httpMethod = HttpMethod.of(extractMethod(startLine));
-        httpRequestBody = new HttpRequestBody(requestBody);
+        httpRequestBody = requestBody;
     }
 
     private String extractURI(final String startLine) {

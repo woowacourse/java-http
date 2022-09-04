@@ -53,36 +53,28 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpRequest readRequest(BufferedReader bufferedReader) throws IOException {
         final String startLine = bufferedReader.readLine();
-        final List<String> messageHeader = extractMessageHeader(bufferedReader);
-        final int contentLength = findContentLength(messageHeader);
-        final String messageBody = extractMessageBody(bufferedReader, contentLength);
+        final HttpRequestHeader messageHeader = extractMessageHeader(bufferedReader);
+        final int contentLength = messageHeader.findContentLength();
+        final HttpRequestBody messageBody = extractMessageBody(bufferedReader, contentLength);
 
         return new HttpRequest(startLine, messageBody);
     }
 
-    private List<String> extractMessageHeader(final BufferedReader bufferedReader) throws IOException {
+    private HttpRequestHeader extractMessageHeader(final BufferedReader bufferedReader) throws IOException {
         final List<String> messageHeader = new LinkedList<>();
         String header = bufferedReader.readLine();
         while (StringUtils.isNotBlank(header)) {
             messageHeader.add(header);
             header = bufferedReader.readLine();
         }
-        return messageHeader;
+        return new HttpRequestHeader(messageHeader);
     }
 
-    private int findContentLength(final List<String> messageHeader) {
-        for (final String message : messageHeader) {
-            if (message.contains("Content-Length")) {
-                return Integer.parseInt(message.split(": ")[1]);
-            }
-        }
-        return 0;
-    }
-
-    private String extractMessageBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
+    private HttpRequestBody extractMessageBody(final BufferedReader bufferedReader, final int contentLength)
+            throws IOException {
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
-        return new String(buffer);
+        return new HttpRequestBody(new String(buffer));
     }
 
     private HttpResponse process(final HttpRequest httpRequest) {

@@ -5,12 +5,12 @@ import java.util.Map;
 
 public class HttpResponse {
 
-	private final StatusCode statusCode;
+	private final HttpStatus httpStatus;
 	private final String responseBody;
 	private final HttpHeaders httpHeaders;
 
-	private HttpResponse(StatusCode statusCode, String responseBody, Map<HttpHeader, String> headers) {
-		this.statusCode = statusCode;
+	private HttpResponse(HttpStatus httpStatus, String responseBody, Map<HttpHeader, String> headers) {
+		this.httpStatus = httpStatus;
 		this.responseBody = responseBody;
 		this.httpHeaders = new HttpHeaders(headers);
 	}
@@ -22,8 +22,8 @@ public class HttpResponse {
 	private String getFullMessage() {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("HTTP/1.1 ")
-			.append(statusCode.getValue())
-			.append(statusCode.getMessage())
+			.append(httpStatus.value())
+			.append(httpStatus.getMessage())
 			.append("\r\n");
 
 		for (HttpHeader key : httpHeaders.getHeaders()) {
@@ -48,24 +48,24 @@ public class HttpResponse {
 
 	public static HttpResponseBuilder OK() {
 		return new HttpResponseBuilder()
-			.statusCode(StatusCode.OK);
+			.statusCode(HttpStatus.OK);
 	}
 
 	public static HttpResponseBuilder FOUND() {
 		return new HttpResponseBuilder()
-			.statusCode(StatusCode.FOUND);
+			.statusCode(HttpStatus.FOUND);
 	}
 
 	public static class HttpResponseBuilder {
-		private StatusCode statusCode;
+		private HttpStatus httpStatus;
 		private String responseBody;
 		private final Map<HttpHeader, String> headers = new LinkedHashMap<>();
 
 		private HttpResponseBuilder() {
 		}
 
-		public HttpResponseBuilder statusCode(StatusCode statusCode) {
-			this.statusCode = statusCode;
+		public HttpResponseBuilder statusCode(HttpStatus httpStatus) {
+			this.httpStatus = httpStatus;
 			return this;
 		}
 
@@ -81,14 +81,14 @@ public class HttpResponse {
 		}
 
 		public HttpResponse build() {
-			return new HttpResponse(statusCode, responseBody, headers);
+			return new HttpResponse(httpStatus, responseBody, headers);
 		}
 	}
 
 	@Override
 	public String toString() {
 		return "===HttpResponse===" + "\r\n" +
-			"statusCode=" + statusCode + "\r\n" +
+			"statusCode=" + httpStatus + "\r\n" +
 			"headers=" + httpHeaders + "\r\n" +
 			'}';
 	}

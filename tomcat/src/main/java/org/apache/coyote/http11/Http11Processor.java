@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Optional;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.FileNotFoundException;
@@ -13,14 +12,13 @@ import org.apache.coyote.http11.http.HttpHeader;
 import org.apache.coyote.http11.http.HttpMethod;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
-import org.apache.coyote.http11.http.StatusCode;
+import org.apache.coyote.http11.http.HttpStatus;
 import org.apache.coyote.http11.util.StaticResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -76,7 +74,7 @@ public class Http11Processor implements Runnable, Processor {
 				.setHeader(HttpHeader.CONTENT_TYPE, httpRequest.getContentType().getFormat())
 				.build();
 		} catch (FileNotFoundException e) {
-			return responseErrorPage(NOT_FOUND_HTML, StatusCode.NOT_FOUND.value());
+			return responseErrorPage(NOT_FOUND_HTML, HttpStatus.NOT_FOUND.value());
 		}
 	}
 
@@ -107,23 +105,23 @@ public class Http11Processor implements Runnable, Processor {
 				.build();
 
 		}
-		return responseErrorPage(NOT_FOUND_HTML, StatusCode.NOT_FOUND.value());
+		return responseErrorPage(NOT_FOUND_HTML, HttpStatus.NOT_FOUND.value());
 	}
 
 	private HttpResponse checkValidLogin(String account, String password) throws IOException {
-		Optional<User> findUser = InMemoryUserRepository.findByAccount(account);
-		if (findUser.isPresent() && findUser.get().checkPassword(password)) {
-			return HttpResponse.FOUND()
+		return InMemoryUserRepository.findByAccount(account)
+			.filter(member -> member.checkPassword(password))
+			.map(member -> HttpResponse.FOUND()
 				.setHeader(HttpHeader.LOCATION, "/" + INDEX_HTML)
-				.build();
-		}
-		return responseErrorPage(UNAUTHORIZED_HTML, StatusCode.UNAUTHORIZED.value());
+				.build()
+			)
+			.orElse(responseErrorPage(UNAUTHORIZED_HTML, HttpStatus.UNAUTHORIZED.value()));
 	}
 
 	private HttpResponse responseErrorPage(String htmlPath, int statusCode) throws IOException {
 		String responseBody = StaticResourceUtil.getContent(htmlPath);
 		return HttpResponse.builder()
-			.statusCode(StatusCode.from(statusCode))
+			.statusCode(HttpStatus.from(statusCode))
 			.responseBody(responseBody)
 			.setHeader(HttpHeader.CONTENT_TYPE, ContentType.HTML.getFormat())
 			.build();

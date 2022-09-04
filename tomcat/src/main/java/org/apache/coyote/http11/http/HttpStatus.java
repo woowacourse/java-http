@@ -3,7 +3,7 @@ package org.apache.coyote.http11.http;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 
-public enum StatusCode {
+public enum HttpStatus {
 
 	OK(200, " OK "),
 	NOT_FOUND(404, " Not Found "),
@@ -12,23 +12,19 @@ public enum StatusCode {
 
 	;
 
-	private final int value;
+	private final int code;
 	private final String message;
 
-	StatusCode(int value, String message) {
-		this.value = value;
+	HttpStatus(int code, String message) {
+		this.code = code;
 		this.message = message;
 	}
 
-	public static StatusCode from(int code) {
+	public static HttpStatus from(int code) {
 		return Arrays.stream(values())
-			.filter(statusCode -> statusCode.value == code)
+			.filter(httpStatus -> httpStatus.code == code)
 			.findAny()
 			.orElseThrow(() -> new NoSuchElementException("해당하는 상태 코드가없습니다."));
-	}
-
-	public int getValue() {
-		return value;
 	}
 
 	public String getMessage() {
@@ -36,6 +32,6 @@ public enum StatusCode {
 	}
 
 	public int value() {
-		return this.value;
+		return this.code;
 	}
 }

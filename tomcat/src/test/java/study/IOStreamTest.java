@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.io.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.mockito.Mockito.*;
 
 /**
@@ -180,6 +181,8 @@ class IOStreamTest {
             }
             assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
             assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());
+            inputStream.close();
+            bufferedInputStream.close();
         }
     }
 
@@ -216,6 +219,8 @@ class IOStreamTest {
             }
 
             assertThat(actual).hasToString(emoji);
+            inputStream.close();
+            bf.close();
         }
     }
 }

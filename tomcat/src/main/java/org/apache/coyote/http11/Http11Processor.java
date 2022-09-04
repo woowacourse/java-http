@@ -7,14 +7,10 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,28 +36,19 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final HttpRequest requestValue = readHttpRequest(inputStream);
-
             final String requestPath = requestValue.getUrl();
+            final URI uri = resolveView(requestPath);
 
-            String contentType = "text/html";
-
-            if (requestPath.contains("/css")) {
-                contentType = "text/css";
+            if (requestPath.contains("/login") && requestPath.contains("?")) {
+                login(requestPath);
             }
 
-            final String responseBody = makeResponseBody(requestPath);
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final HttpResponse httpResponse = HttpResponse.of(uri);
+            final String response = httpResponse.getBody();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
-        } catch (URISyntaxException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -74,33 +61,20 @@ public class Http11Processor implements Runnable, Processor {
         return HttpRequest.from(line, headerLines);
     }
 
-    private String makeResponseBody(final String requestPath) throws IOException, URISyntaxException {
-        if ("/".equals(requestPath)) {
-            return "Hello world!";
+    private URI resolveView(final String requestUrl) throws URISyntaxException {
+        if ("/".equals(requestUrl)) {
+            return null;
         }
-
-        if (requestPath.equals("/login")) {
-            final URI uri = getClass().getClassLoader().getResource("static" + requestPath + ".html").toURI();
-            return new String(Files.readAllBytes(Paths.get(uri)));
+        if (requestUrl.contains(".")) {
+            return getClass().getClassLoader().getResource("static" + requestUrl).toURI();
         }
-
-        if (requestPath.contains("/login")) {
-            final Map<Integer, String> params = QueryStringParser.parsing(requestPath);
-            checkLogin(params.get(0), params.get(1));
-            return "success";
-        }
-
-        final URI uri = getClass().getClassLoader().getResource("static" + requestPath).toURI();
-        return new String(Files.readAllBytes(Paths.get(uri)));
+        return getClass().getClassLoader().getResource("static" + requestUrl + ".html").toURI();
     }
 
-    private void checkLogin(final String inputAccountValue, final String inputPasswordValue) {
-        final User user = InMemoryUserRepository.findByAccount(inputAccountValue)
-                .orElseThrow();
 
-        final boolean isSuccessLogin = user.checkPassword(inputPasswordValue);
-        if (isSuccessLogin) {
-            log.debug("로그인 성공 = {}", user);
-        }
+    private void login(final String requestPath) {
+        final Controller controller = new Controller();
+        final Map<String, String> params = QueryStringParser.parsing(requestPath);
+        controller.checkLogin(params);
     }
 }

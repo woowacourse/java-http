@@ -40,7 +40,7 @@ public class HandlerMappings {
         }
     }
 
-    public Handler getHandler(HttpRequest request) {
+    public Handler findHandler(HttpRequest request) {
         final var uri = request.getUri();
         final var method = request.getMethod();
         MappedHandler handlerKey = new MappedHandler(uri, method);

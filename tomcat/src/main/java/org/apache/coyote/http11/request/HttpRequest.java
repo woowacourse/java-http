@@ -41,18 +41,18 @@ public class HttpRequest {
         return new HttpRequest(httpMethod, uriPath, queryParams, HttpHeaders.from(headers));
     }
 
-    private static QueryParams extractQueryParams(final String uriPathAndQueryString, final int queryStringFlagIndex) {
-        if (queryStringFlagIndex == INDEX_NOT_FOUND) {
-            return QueryParams.empty();
-        }
-        return QueryParams.from(uriPathAndQueryString.substring(queryStringFlagIndex + 1));
-    }
-
     private static String extractUriPath(final String uriPathAndQueryString, final int queryStringFlagIndex) {
         if (queryStringFlagIndex == INDEX_NOT_FOUND) {
             return uriPathAndQueryString;
         }
         return uriPathAndQueryString.substring(0, queryStringFlagIndex);
+    }
+
+    private static QueryParams extractQueryParams(final String uriPathAndQueryString, final int queryStringFlagIndex) {
+        if (queryStringFlagIndex == INDEX_NOT_FOUND) {
+            return QueryParams.empty();
+        }
+        return QueryParams.from(uriPathAndQueryString.substring(queryStringFlagIndex + 1));
     }
 
     public HttpMethod getMethod() {

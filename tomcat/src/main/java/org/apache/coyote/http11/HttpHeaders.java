@@ -11,6 +11,9 @@ public class HttpHeaders {
 
     private static final String KEY_VALUE_SEPARATOR = ": ";
     private static final String CRLF = "\r\n";
+    private static final int KEY_INDEX = 0;
+    private static final int VALUE_INDEX = 1;
+
     private final Map<String, String> headers;
 
     public HttpHeaders(final Map<String, String> headers) {
@@ -21,8 +24,8 @@ public class HttpHeaders {
         final Map<String, String> headers = new HashMap<>();
         rawHeaders.forEach(rawHeader -> {
             final String[] headerKeyValueSplit = rawHeader.split(KEY_VALUE_SEPARATOR);
-            final String headerKey = headerKeyValueSplit[0];
-            final String headerValue = headerKeyValueSplit[1];
+            final String headerKey = headerKeyValueSplit[KEY_INDEX];
+            final String headerValue = headerKeyValueSplit[VALUE_INDEX];
             headers.put(headerKey, headerValue);
         });
         return new HttpHeaders(headers);

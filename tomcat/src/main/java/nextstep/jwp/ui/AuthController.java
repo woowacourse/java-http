@@ -30,7 +30,9 @@ public class AuthController {
         final String password = queryParams.getValue("password")
                 .orElseThrow(() -> new BadRequestException("password가 없습니다."));
         final UserDto user = userService.findByAccount(account);
-        log.info("user = {}", user);
-        return HtmlResponse.of(HttpStatus.OK, HttpHeaders.empty(), "login.html");
+        if (user.getPassword().equals(password)) {
+            log.info("user = {}", user);
+        }
+        return HtmlResponse.of(HttpStatus.OK, HttpHeaders.empty(), "login");
     }
 }

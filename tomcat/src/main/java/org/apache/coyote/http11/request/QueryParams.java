@@ -19,6 +19,12 @@ public class QueryParams {
 
     public static QueryParams from(final String queryString) {
         final String[] rawQueryParams = queryString.split(QUERY_PARAM_SEPARATOR);
+        final Map<String, String> queryParams = parseQueryStringToMap(rawQueryParams);
+
+        return new QueryParams(queryParams);
+    }
+
+    private static Map<String, String> parseQueryStringToMap(final String[] rawQueryParams) {
         final Map<String, String> queryParams = new HashMap<>();
         for (String queryParam : rawQueryParams) {
             final String[] queryParamKeyValue = queryParam.split(QUERY_PARAM_KEY_VALUE_SEPARATOR);
@@ -27,8 +33,7 @@ public class QueryParams {
                     queryParamKeyValue[RAW_QUERY_PARAM_VALUE_INDEX]
             );
         }
-
-        return new QueryParams(queryParams);
+        return queryParams;
     }
 
     public static QueryParams empty() {

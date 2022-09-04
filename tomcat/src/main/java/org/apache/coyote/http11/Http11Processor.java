@@ -39,14 +39,56 @@ public class Http11Processor implements Runnable, Processor {
              final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            final HttpRequest httpRequest = readHttpRequest(bufferedReader);
-
-            final String responseMessage = getResponseMessage(httpRequest);
-
-            outputStream.write(responseMessage.getBytes());
-            outputStream.flush();
+            processInAndOut(outputStream, bufferedReader);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private void processInAndOut(final OutputStream outputStream, final BufferedReader bufferedReader)
+            throws IOException {
+        final HttpRequest httpRequest = readHttpRequest(bufferedReader);
+
+        final String responseMessage = getResponseMessage(httpRequest);
+
+        outputStream.write(responseMessage.getBytes());
+        outputStream.flush();
+    }
+
+    private HttpRequest readHttpRequest(final BufferedReader bufferedReader) throws IOException {
+        final String firstLine = bufferedReader.readLine();
+
+        final List<String> headers = readHeaders(bufferedReader);
+
+        final String requestBody = readRequestBody(headers, bufferedReader);
+
+        return HttpRequest.from(firstLine, headers, requestBody);
+    }
+
+    private List<String> readHeaders(final BufferedReader bufferedReader) throws IOException {
+        final List<String> headers = new ArrayList<>();
+        for (String header = bufferedReader.readLine();
+             header != null && !header.equals("");
+             header = bufferedReader.readLine()) {
+            headers.add(header);
+        }
+        return headers;
+    }
+
+    private String readRequestBody(final List<String> headers, final BufferedReader bufferedReader) throws IOException {
+        final StringBuilder stringBuilder = new StringBuilder();
+        if (headers.contains("Content-Length")) {
+            addRequestBodyLine(bufferedReader, stringBuilder);
+        }
+        return stringBuilder.toString();
+    }
+
+    private void addRequestBodyLine(final BufferedReader bufferedReader, final StringBuilder requestBody)
+            throws IOException {
+        for (String requestBodyLine = bufferedReader.readLine();
+             requestBodyLine != null && !requestBodyLine.equals("");
+             requestBodyLine = bufferedReader.readLine()) {
+            requestBody.append(requestBodyLine);
         }
     }
 
@@ -55,33 +97,5 @@ public class Http11Processor implements Runnable, Processor {
                 .getHandler(new MappingKey(httpRequest.getMethod(), httpRequest.getUriPath()))
                 .handle(httpRequest)
                 .toHttpMessage();
-    }
-
-    private HttpRequest readHttpRequest(final BufferedReader bufferedReader) throws IOException {
-        final String firstLine = bufferedReader.readLine();
-
-        final List<String> headers = new ArrayList<>();
-        for (String header = bufferedReader.readLine();
-             header != null && !header.equals("");
-             header = bufferedReader.readLine()) {
-            headers.add(header);
-        }
-
-        final StringBuilder requestBody = new StringBuilder();
-        if (headers.contains("Content-Length")) {
-            addRequestBodyLine(bufferedReader, requestBody);
-        }
-
-        return HttpRequest.from(firstLine, headers, requestBody.toString());
-    }
-
-    private void addRequestBodyLine(final BufferedReader bufferedReader, final StringBuilder requestBody)
-            throws IOException {
-        for (String requestBodyLine = bufferedReader.readLine();
-             requestBodyLine != null && !requestBodyLine.equals("");
-             requestBodyLine = bufferedReader.readLine()) {
-            System.out.println("requestBodyLine = " + requestBodyLine);
-            requestBody.append(requestBodyLine);
-        }
     }
 }

@@ -5,12 +5,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.HttpHeaders;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.support.FileUtils;
 
 public class FileRequestHandler implements RequestHandler {
 
@@ -21,10 +21,7 @@ public class FileRequestHandler implements RequestHandler {
     }
 
     public static FileRequestHandler from(final MappingKey mappingKey) {
-        final String filePath = Objects.requireNonNull(FileRequestHandler.class
-                .getClassLoader()
-                .getResource("static" + mappingKey.getUri())
-        ).getPath();
+        final String filePath = FileUtils.getStaticFilePathFromUri(mappingKey.getUri());
 
         return new FileRequestHandler(filePath);
     }

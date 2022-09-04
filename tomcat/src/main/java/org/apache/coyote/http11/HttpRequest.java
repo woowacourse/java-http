@@ -42,7 +42,7 @@ public class HttpRequest {
     }
 
     public boolean isSameHttpMethod(final HttpMethod httpMethod) {
-        return this.httpMethod == httpMethod;
+        return this.httpMethod.equals(httpMethod);
     }
 
     public String getUrl() {

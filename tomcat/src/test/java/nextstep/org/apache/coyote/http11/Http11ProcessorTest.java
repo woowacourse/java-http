@@ -6,10 +6,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.jwp.ui.HomeController;
-import nextstep.jwp.ui.controller.Controllers;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
+import spring.Controllers;
+import spring.HomeController;
 import support.StubSocket;
 
 class Http11ProcessorTest {

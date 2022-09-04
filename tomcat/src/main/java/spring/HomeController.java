@@ -1,7 +1,6 @@
-package nextstep.jwp.ui;
+package spring;
 
-import http.HttpRequest;
-import nextstep.jwp.ui.controller.Controllers;
+import org.apache.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,9 +1,9 @@
-package http;
+package org.apache.http;
 
 import java.util.Arrays;
 import java.util.Objects;
 
-public enum HttpHeader {
+public enum HttpHeaderName {
 
     METHOD("Method"),
     REQUEST_URI("RequestURI"),
@@ -14,11 +14,11 @@ public enum HttpHeader {
 
     private final String headerName;
 
-    HttpHeader(final String headerName) {
+    HttpHeaderName(final String headerName) {
         this.headerName = headerName;
     }
 
-    public static HttpHeader from(String httpHeader) {
+    public static HttpHeaderName from(String httpHeader) {
         return Arrays.stream(values())
                 .filter(value -> Objects.equals(value.headerName.toUpperCase(), httpHeader.toUpperCase()))
                 .findAny()

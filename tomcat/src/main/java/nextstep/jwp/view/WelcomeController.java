@@ -1,7 +1,8 @@
-package nextstep.jwp.ui.controller;
+package nextstep.jwp.view;
 
-import http.HttpRequest;
 import java.util.Objects;
+import org.apache.http.HttpRequest;
+import spring.Controller;
 
 public class WelcomeController implements Controller {
 

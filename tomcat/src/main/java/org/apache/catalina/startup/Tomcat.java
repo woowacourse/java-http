@@ -1,7 +1,6 @@
 package org.apache.catalina.startup;
 
 import java.io.IOException;
-import nextstep.jwp.ui.HomeController;
 import org.apache.catalina.connector.Connector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,14 +9,11 @@ public class Tomcat {
 
     private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
 
-    private final HomeController homeController;
-
-    public Tomcat(final HomeController homeController) {
-        this.homeController = homeController;
+    public Tomcat() {
     }
 
     public void start() {
-        var connector = new Connector(this.homeController);
+        var connector = new Connector();
         connector.start();
 
         try {

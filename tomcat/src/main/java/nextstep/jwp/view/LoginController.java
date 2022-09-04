@@ -1,13 +1,14 @@
-package nextstep.jwp.ui.controller;
+package nextstep.jwp.view;
 
-import http.HttpRequest;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
+import org.apache.http.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import spring.Controller;
 
 public class LoginController implements Controller {
 

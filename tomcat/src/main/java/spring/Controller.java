@@ -1,6 +1,6 @@
-package nextstep.jwp.ui.controller;
+package spring;
 
-import http.HttpRequest;
+import org.apache.http.HttpRequest;
 
 public interface Controller {
 

@@ -1,7 +1,9 @@
-package nextstep.jwp.ui.controller;
+package spring;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import nextstep.jwp.view.LoginController;
+import nextstep.jwp.view.WelcomeController;
 
 public class Controllers {
 

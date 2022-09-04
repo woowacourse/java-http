@@ -1,4 +1,4 @@
-package http;
+package org.apache.http;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,6 +28,7 @@ public class BasicHttpRequest implements HttpRequest {
     private static final String EQUALS_MARK = "=";
 
     private final Map<String, String> headers;
+    //    private final HttpHeader httpHeader;
     private final Map<String, Object> queryParameters;
     private final String body;
 
@@ -43,7 +44,7 @@ public class BasicHttpRequest implements HttpRequest {
         final var splitHttpRequest = httpRequest.split(lineSeparator.repeat(BODY_SEPARATOR_BY_LINE_SEPARATOR));
 
         final var headers = parseHeaders(splitHttpRequest[INDEX_FOR_HTTP_HEADER], lineSeparator);
-        final var queryParameters = parseQueryParameters(headers.get(HttpHeader.REQUEST_URI.getName()));
+        final var queryParameters = parseQueryParameters(headers.get(HttpHeaderName.REQUEST_URI.getName()));
         final var body = parseBody(splitHttpRequest);
 
         return new BasicHttpRequest(headers, queryParameters, body);
@@ -71,9 +72,9 @@ public class BasicHttpRequest implements HttpRequest {
     private static void putFirstLine(final List<String> parsedHttpHeader, final Map<String, String> headers) {
         final var splitFirstLine = parsedHttpHeader.get(INDEX_FOR_FIRST_LINE_OF_REQUEST).split(SINGLE_WHITE_SPACE);
 
-        headers.put(HttpHeader.METHOD.getName(), splitFirstLine[INDEX_FOR_HTTP_METHOD]);
-        headers.put(HttpHeader.REQUEST_URI.getName(), splitFirstLine[INDEX_FOR_REQUEST_URI]);
-        headers.put(HttpHeader.PROTOCOL.getName(), splitFirstLine[INDEX_FOR_PROTOCOL]);
+        headers.put(HttpHeaderName.METHOD.getName(), splitFirstLine[INDEX_FOR_HTTP_METHOD]);
+        headers.put(HttpHeaderName.REQUEST_URI.getName(), splitFirstLine[INDEX_FOR_REQUEST_URI]);
+        headers.put(HttpHeaderName.PROTOCOL.getName(), splitFirstLine[INDEX_FOR_PROTOCOL]);
     }
 
     private static void putOtherLines(final List<String> parsedHttpHeader, final Map<String, String> headers) {
@@ -128,12 +129,12 @@ public class BasicHttpRequest implements HttpRequest {
 
     @Override
     public HttpMethod getHttpMethod() {
-        return HttpMethod.from(headers.get(HttpHeader.METHOD.getName()));
+        return HttpMethod.from(headers.get(HttpHeaderName.METHOD.getName()));
     }
 
     @Override
     public String getRequestURI() {
-        return headers.get(HttpHeader.REQUEST_URI.getName());
+        return headers.get(HttpHeaderName.REQUEST_URI.getName());
     }
 
     @Override
@@ -148,17 +149,17 @@ public class BasicHttpRequest implements HttpRequest {
 
     @Override
     public String getProtocol() {
-        return headers.get(HttpHeader.PROTOCOL.getName());
+        return headers.get(HttpHeaderName.PROTOCOL.getName());
     }
 
     @Override
     public String getHost() {
-        return headers.get(HttpHeader.HOST.getName());
+        return headers.get(HttpHeaderName.HOST.getName());
     }
 
     @Override
     public String getConnection() {
-        return headers.get(HttpHeader.CONNECTION.getName());
+        return headers.get(HttpHeaderName.CONNECTION.getName());
     }
 
     @Override

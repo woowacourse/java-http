@@ -11,14 +11,14 @@ public class ResponseEntity {
     private final HttpStatus status;
     private final String location;
     private final String viewResource;
-    private final HttpCookies cookies;
+    private final Map<String, HttpCookie> cookies;
     private final String contentType;
     private final String messageBody;
 
     private ResponseEntity(HttpStatus status,
                            String location,
                            String viewResource,
-                           HttpCookies cookies,
+                           Map<String, HttpCookie> cookies,
                            String contentType,
                            String messageBody) {
         this.status = status;
@@ -41,12 +41,16 @@ public class ResponseEntity {
         return status(HttpStatus.FOUND).setLocation(location);
     }
 
-    public HttpResponse toHttpResponse() {
-        return new HttpResponse(status, location, cookies, contentType, messageBody);
-    }
-
     public String getViewResource() {
         return viewResource;
+    }
+
+    public ResponseEntityBuilder toBuilder() {
+        return new ResponseEntityBuilder(status, location, cookies, contentType, messageBody);
+    }
+
+    public HttpResponse toHttpResponse() {
+        return new HttpResponse(status, location, new HttpCookies(cookies), contentType, messageBody);
     }
 
     public static class ResponseEntityBuilder {
@@ -54,12 +58,24 @@ public class ResponseEntity {
         final HttpStatus status;
         String location;
         String viewResource;
-        final Map<String, HttpCookie> cookies = new HashMap<>();
+        final Map<String, HttpCookie> cookies;
         String contentType;
         String messageBody;
 
-        private ResponseEntityBuilder(HttpStatus status) {
+        private ResponseEntityBuilder(HttpStatus status,
+                                      String location,
+                                      Map<String, HttpCookie> cookies,
+                                      String contentType,
+                                      String messageBody) {
             this.status = status;
+            this.location = location;
+            this.cookies = cookies;
+            this.contentType = contentType;
+            this.messageBody = messageBody;
+        }
+
+        private ResponseEntityBuilder(HttpStatus status) {
+            this(status, null, new HashMap<>(), null, null);
         }
 
         public ResponseEntityBuilder setContentType(String contentType) {
@@ -88,8 +104,7 @@ public class ResponseEntity {
         }
 
         public ResponseEntity build() {
-            return new ResponseEntity(status, location, viewResource,
-                    new HttpCookies(cookies), contentType, messageBody);
+            return new ResponseEntity(status, location, viewResource, cookies, contentType, messageBody);
         }
     }
 }

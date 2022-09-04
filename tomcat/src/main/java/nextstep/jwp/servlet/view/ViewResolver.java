@@ -19,10 +19,9 @@ public class ViewResolver {
                 .toHttpResponse();
     }
 
-    public HttpResponse findStaticResource(ViewResource viewResource) {
-        final var status = viewResource.getStatus();
-        final var path = toResourcePath(viewResource.getUri());
-        return ResponseEntity.status(status)
+    public HttpResponse findStaticResource(ResponseEntity responseEntity) {
+        final var path = toResourcePath(responseEntity.getViewResource());
+        return responseEntity.toBuilder()
                 .setContentType(findContentType(path))
                 .setMessageBody(findContent(path))
                 .build()

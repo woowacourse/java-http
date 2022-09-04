@@ -45,7 +45,7 @@ public class HandlerMapper {
     }
 
     public HttpResponse handle(HttpException exception) {
-        final var viewResource = exceptionHandler.handle(exception);
-        return viewResolver.findStaticResource(viewResource);
+        final var responseEntity = exceptionHandler.handle(exception);
+        return viewResolver.findStaticResource(responseEntity);
     }
 }

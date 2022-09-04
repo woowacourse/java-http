@@ -31,9 +31,8 @@ public class AuthController {
         final var user = userService.login(DtoAssembler.ofLoginDto(request));
         final var session = request.getSession();
         session.setAttribute(Session.USER_ATTRIBUTE, user);
-        final var sessionCookie = HttpCookie.ofSession(session);
         return ResponseEntity.redirect("/index.html")
-                .setCookie(sessionCookie)
+                .setCookie(HttpCookie.ofSession(session))
                 .build();
     }
 

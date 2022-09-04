@@ -26,7 +26,7 @@ public class HandlerExecutor {
         if (viewResource == null) {
             return responseEntity;
         }
-        return viewResolver.findStaticResource(viewResource);
+        return viewResolver.findStaticResource(responseEntity);
     }
 
     public ResponseEntity handle(HttpException exception) {

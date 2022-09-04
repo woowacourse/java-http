@@ -42,9 +42,6 @@ public class ResponseEntity {
     }
 
     public String getViewResource() {
-        if (viewResource == null) {
-            return location;
-        }
         return viewResource;
     }
 

@@ -23,6 +23,10 @@ public enum ContentType {
                 .orElse(HTML);
     }
 
+    public static String getDefaultExtension() {
+        return String.format(".%s", HTML.extension);
+    }
+
     public String getValue() {
         return value;
     }

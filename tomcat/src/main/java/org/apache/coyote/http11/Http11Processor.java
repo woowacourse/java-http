@@ -25,6 +25,9 @@ public class Http11Processor implements Runnable, Processor {
     private static final int URL_INDEX = 1;
     private static final String DEFAULT_URL = "/";
     private static final String DEFAULT_RESPONSE_BODY = "Hello world!";
+    private static final String QUERY_PARAM_DELIMITER = "?";
+    private static final String QUERY_PARAM_AND_DELIMITER = "&";
+    private static final String QUERY_PARAM_VALUE_DELIMITER = "=";
 
     private final Socket connection;
 
@@ -67,15 +70,15 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getPath(final String url) {
-        if (url.contains("?")) {
-            return url.substring(0, url.indexOf("?")) + ".html";
+        if (url.contains(QUERY_PARAM_DELIMITER)) {
+            return url.substring(0, url.indexOf(QUERY_PARAM_DELIMITER)) + ContentType.getDefaultExtension();
         }
         return url;
     }
 
     private String getParams(final String url) {
-        if (url.contains("?")) {
-            return url.substring(url.indexOf("?") + 1);
+        if (url.contains(QUERY_PARAM_DELIMITER)) {
+            return url.substring(url.indexOf(QUERY_PARAM_DELIMITER) + 1);
         }
         return "";
     }
@@ -83,8 +86,8 @@ public class Http11Processor implements Runnable, Processor {
     private void printLoginUser(final String path, final String allOfQueryParam) {
         if (path.contains("login")) {
             final Map<String, String> params = new HashMap<>();
-            for (String queryParameter : allOfQueryParam.split("&")) {
-                final String[] param = queryParameter.split("=");
+            for (String queryParameter : allOfQueryParam.split(QUERY_PARAM_AND_DELIMITER)) {
+                final String[] param = queryParameter.split(QUERY_PARAM_VALUE_DELIMITER);
                 params.put(param[0], param[1]);
             }
             final User user = InMemoryUserRepository.findByAccount(params.get("account"))

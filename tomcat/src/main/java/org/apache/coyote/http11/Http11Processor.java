@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import static org.apache.coyote.support.Parser.parseQueryString;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -85,11 +86,14 @@ public class Http11Processor implements Runnable, Processor {
             resource += DEFAULT_VIEW_EXTENSION;
         }
 
-        Path path = new File(
-                getClass().getClassLoader().getResource(DEFAULT_RESOURCE_PACKAGE + resource).getFile()
-        ).toPath();
-
-        return Files.readString(path);
+        try {
+            Path path = new File(
+                    getClass().getClassLoader().getResource(DEFAULT_RESOURCE_PACKAGE + resource).getFile()
+            ).toPath();
+            return Files.readString(path);
+        } catch (NullPointerException e) {
+            return DEFAULT_RESPONSE_BODY;
+        }
     }
 
     private void parseQuery(final String parsedURI) {

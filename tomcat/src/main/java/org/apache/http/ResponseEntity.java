@@ -5,7 +5,7 @@ import java.util.Objects;
 public class ResponseEntity {
 
     private static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
-    private static final String DEFAULT_CONTENT_TYPE = "text/html";
+    private static final String DEFAULT_CONTENT_TYPE = "*/*";
 
     private final String httpVersion;
     private final HttpStatus httpStatus;

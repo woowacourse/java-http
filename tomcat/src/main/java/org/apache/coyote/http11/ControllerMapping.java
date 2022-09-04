@@ -22,11 +22,11 @@ public class ControllerMapping {
 
     public Controller getController(final String uri) throws NotFoundException {
         final Controller controller = mapping.get(uri);
-        if (controller == null && isResourceUri(uri)) {
-            return new ResourceController();
-        }
         if (controller != null) {
             return controller;
+        }
+        if (isResourceUri(uri)) {
+            return new ResourceController();
         }
         throw new NotFoundException(uri + "를 처리할 컨트롤러를 찾지 못함");
     }

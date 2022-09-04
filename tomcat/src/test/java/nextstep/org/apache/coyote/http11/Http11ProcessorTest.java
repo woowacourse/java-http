@@ -93,7 +93,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final String expected = makeResponse(HttpStatus.BAD_REQUEST, "text/html", 0, "");
+        final String expected = makeResponse(HttpStatus.BAD_REQUEST, "*/*", 0, "");
 
         assertThat(socket.output()).isEqualTo(expected);
     }

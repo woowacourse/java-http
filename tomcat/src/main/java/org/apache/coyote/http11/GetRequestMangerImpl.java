@@ -22,7 +22,7 @@ public class GetRequestMangerImpl implements RequestManager {
         FileName fileName = requestParser.generateFileName();
         SessionManager sessionManager = new SessionManager();
         HttpCookie httpCookie = requestParser.generateCookie();
-        String sessionId = httpCookie.generateJsessionId();
+        String sessionId = httpCookie.getJsessionId();
         String responseBody = HtmlLoader.generateFile(PREFIX + fileName.concat());
 
         if (fileName.getBaseName().equals("/login") && sessionManager.existSession(sessionId)) {

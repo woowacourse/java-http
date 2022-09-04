@@ -136,7 +136,7 @@ class Http11ProcessorTest {
 
         // when & then
         assertThatThrownBy(() -> processor.process(socket))
-                .isInstanceOf(NullPointerException.class);
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test

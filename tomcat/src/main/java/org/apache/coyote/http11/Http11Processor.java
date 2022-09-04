@@ -4,15 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.Objects;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.handler.Handler;
-import org.apache.coyote.http11.handlermapper.ApiHandlerMapper;
-import org.apache.coyote.http11.handlermapper.FileHandlerMapper;
+import org.apache.coyote.http11.frontcontroller.FrontController;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpResponse;
-import org.apache.coyote.http11.view.ModelAndView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,20 +33,12 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
+            FrontController frontController = new FrontController();
             HttpRequest httpRequest = getHttpRequest(bufferedReader);
+            HttpResponse httpResponse = frontController.doDispatch(httpRequest);
+            String result = httpResponse.toString();
 
-            FileHandlerMapper fileHandlerMapper = new FileHandlerMapper();
-            Handler handler = fileHandlerMapper.mapHandler(httpRequest);
-            if (handler == null) {
-                handler = new ApiHandlerMapper().mapHandler(httpRequest);
-            }
-            Objects.requireNonNull(handler);
-
-            Object handlerResponse = handler.getResponse(httpRequest);
-
-            String http11Response = getHttp11Response(handlerResponse);
-
-            outputStream.write(http11Response.getBytes());
+            outputStream.write(result.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -66,11 +54,5 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         return HttpRequest.of(stringBuilder.toString());
-    }
-
-    private String getHttp11Response(Object handlerResponse) throws IOException {
-        ModelAndView modelAndView = ModelAndView.of(handlerResponse);
-        HttpResponse httpResponse = HttpResponse.of(modelAndView);
-        return httpResponse.toString();
     }
 }

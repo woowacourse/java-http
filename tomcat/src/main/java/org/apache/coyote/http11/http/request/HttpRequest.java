@@ -14,7 +14,7 @@ public class HttpRequest {
     private final HttpHeaders headers;
     private final String body;
 
-    public HttpRequest(final HttpRequestStartLine startLine, final HttpHeaders headers, final String body) {
+    private HttpRequest(final HttpRequestStartLine startLine, final HttpHeaders headers, final String body) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
@@ -36,11 +36,11 @@ public class HttpRequest {
     private static String readBody(final BufferedReader bufferedReader,
                                    final HttpHeaders headers) throws IOException {
 
-        if (!headers.contains(CONTENT_LENGTH)) {
+        if (!headers.contains(CONTENT_LENGTH.getValue())) {
             return "";
         }
 
-        final int contentLength = convertIntFromContentLength(headers.get(CONTENT_LENGTH));
+        final int contentLength = convertIntFromContentLength(headers.get(CONTENT_LENGTH.getValue()));
         return readData(bufferedReader, contentLength);
     }
 

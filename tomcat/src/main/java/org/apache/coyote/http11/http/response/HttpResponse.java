@@ -2,10 +2,9 @@ package org.apache.coyote.http11.http.response;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.coyote.http11.http.HttpVersion;
 import org.apache.coyote.http11.header.HttpHeader;
-import org.apache.coyote.http11.header.HttpHeaderType;
 import org.apache.coyote.http11.http.HttpHeaders;
+import org.apache.coyote.http11.http.HttpVersion;
 
 public class HttpResponse {
 
@@ -63,7 +62,7 @@ public class HttpResponse {
 
     private String generateHeaderLine() {
         final List<String> headers = new ArrayList<>();
-        for (HttpHeaderType httpHeaderType : this.headers.keySet()) {
+        for (String httpHeaderType : this.headers.keySet()) {
             final String header = String.join(COLON_LETTER + BLANK_LETTER, httpHeaderType.getValue(),
                     String.join(SEMI_COLON_LETTER, this.headers.get(httpHeaderType).getValues()));
             headers.add(header + BLANK_LETTER);

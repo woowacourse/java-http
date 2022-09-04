@@ -14,12 +14,11 @@ import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.header.HttpHeaderType;
 
 public class HttpHeaders {
+    private final Map<String, HttpHeader> headers;
 
     private static final String COLON_LETTER = ":";
 
-    private final Map<HttpHeaderType, HttpHeader> headers;
-
-    private HttpHeaders(final Map<HttpHeaderType, HttpHeader> headers) {
+    private HttpHeaders(final Map<String, HttpHeader> headers) {
         this.headers = headers;
     }
 
@@ -28,7 +27,7 @@ public class HttpHeaders {
     }
 
     public static HttpHeaders of(final HttpHeader... httpHeaders) {
-        final Map<HttpHeaderType, HttpHeader> headers = Arrays.stream(httpHeaders)
+        final Map<String, HttpHeader> headers = Arrays.stream(httpHeaders)
                 .collect(Collectors.toMap(HttpHeader::getHttpHeaderType,
                         httpHeader -> httpHeader,
                         (key, value) -> value,
@@ -36,8 +35,8 @@ public class HttpHeaders {
         return new HttpHeaders(headers);
     }
 
-    private static Map<HttpHeaderType, HttpHeader> readAllHeaders(final BufferedReader bufferedReader) throws IOException {
-        final Map<HttpHeaderType, HttpHeader> headers = new LinkedHashMap<>();
+    private static Map<String, HttpHeader> readAllHeaders(final BufferedReader bufferedReader) throws IOException {
+        final Map<String, HttpHeader> headers = new LinkedHashMap<>();
 
         while (true) {
             final String line = bufferedReader.readLine();
@@ -47,7 +46,7 @@ public class HttpHeaders {
             final List<String> header = parseHeader(line);
             final String headerType = removeBlank(header.get(0));
             final String headerValue = removeBlank(header.get(1));
-            final HttpHeaderType httpHeaderType = HttpHeaderType.of(headerType);
+            final String httpHeaderType = HttpHeaderType.of(headerType);
             headers.put(httpHeaderType, HttpHeader.of(httpHeaderType, headerValue));
         }
 
@@ -66,15 +65,15 @@ public class HttpHeaders {
         }
     }
 
-    public boolean contains(final HttpHeaderType contentLength) {
+    public boolean contains(final String contentLength) {
         return headers.containsKey(contentLength);
     }
 
-    public HttpHeader get(final HttpHeaderType contentLength) {
+    public HttpHeader get(final String contentLength) {
         return headers.get(contentLength);
     }
 
-    public Set<HttpHeaderType> keySet() {
+    public Set<String> keySet() {
         return headers.keySet();
     }
 }

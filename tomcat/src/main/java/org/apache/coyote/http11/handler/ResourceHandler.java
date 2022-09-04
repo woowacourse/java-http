@@ -36,8 +36,8 @@ public class ResourceHandler implements Handler{
         final String fileType = Parser.parseFileType(fileName);
         try {
             final String body = IOUtils.readResourceFile(fileName);
-            final HttpHeader contentType = HttpHeader.of(CONTENT_TYPE, ContentType.of(fileType), UTF_8.getValue());
-            final HttpHeader contentLength = HttpHeader.of(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+            final HttpHeader contentType = HttpHeader.of(CONTENT_TYPE.getValue(), ContentType.of(fileType), UTF_8.getValue());
+            final HttpHeader contentLength = HttpHeader.of(CONTENT_LENGTH.getValue(), String.valueOf(body.getBytes().length));
 
             return HttpResponse.of(HTTP11, OK, body, contentType, contentLength);
         } catch (IOException | URISyntaxException e) {

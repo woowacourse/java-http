@@ -4,7 +4,12 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 public enum HttpMethod {
-    GET("GET");
+    GET("GET"),
+    POST("POST"),
+    PUT("PUT"),
+    PATCH("PATCH"),
+    DELETE("DELETE")
+    ;
 
     private final String value;
 

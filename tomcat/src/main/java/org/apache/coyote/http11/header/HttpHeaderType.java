@@ -1,13 +1,38 @@
 package org.apache.coyote.http11.header;
 
 import java.util.Arrays;
-import java.util.NoSuchElementException;
 
 public enum HttpHeaderType {
-    CONTENT_TYPE("Content-Type"),
-    CONTENT_LENGTH("Content-Length"),
+    // request
     HOST("Host"),
-    LOCATION("Location");
+    LOCATION("Location"),
+    CONNECTION("Connection"),
+    DATE("Date"),
+    USER_AGENT("User-Agent"),
+    FROM("From"),
+    COOKIE("Cookie"),
+    REFERER("Referer"),
+    IF_MODIFIED_SINCE("If-Modified-Since"),
+    AUTHORIZATION("Authorization"),
+    ORIGIN("Origin"),
+    ACCEPT("Accept"),
+    ACCEPT_CHARSET("Accept-Charset"),
+    ACCEPT_ENCODING("Accept-Encoding"),
+    ACCEPT_LANGUAGE("Accept-Language"),
+
+    CONTENT_TYPE("Content-Type"),
+    CONTENT_ENCODING("Content-Language"),
+    CONTENT_LOCATION("Content-Location"),
+    CONTENT_DISPOSITION("Content-Disposition"),
+    CONTENT_SECURITY_POLICY("Content-Security-Policy"),
+    CONTENT_LANGUAGE("Content-Language"),
+    CONTENT_LENGTH("Content-Length"),
+
+    CACHE_CONTROL("Cache-Control"),
+    LAST_MODIFIED("Last-Modified"),
+
+    TRANSFER_ENCODING("Transfer-Encoding")
+    ;
 
     private final String value;
 
@@ -15,10 +40,12 @@ public enum HttpHeaderType {
         this.value = value;
     }
 
-    public static HttpHeaderType of(final String value) {
+    public static String of(final String value) {
         return Arrays.stream(HttpHeaderType.values())
+                .filter(it -> it.value.equals(value))
                 .findFirst()
-                .orElseThrow(() -> new NoSuchElementException("해당하는 HttpHeaderType이 없습니다. " + value));
+                .map(HttpHeaderType::getValue)
+                .orElse(value);
     }
 
     public String getValue() {

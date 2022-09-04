@@ -17,8 +17,8 @@ public class HomeHandler implements Handler {
     @Override
     public HttpResponse handle(final HttpRequest httpRequest) {
         final String body = DEFAULT_MESSAGE;
-        final HttpHeader contentType = HttpHeader.of(CONTENT_TYPE, HTML.getValue(), UTF_8.getValue());
-        final HttpHeader contentLength = HttpHeader.of(CONTENT_LENGTH, String.valueOf(body.length()));
+        final HttpHeader contentType = HttpHeader.of(CONTENT_TYPE.getValue(), HTML.getValue(), UTF_8.getValue());
+        final HttpHeader contentLength = HttpHeader.of(CONTENT_LENGTH.getValue(), String.valueOf(body.length()));
 
         return HttpResponse.of(HTTP11, OK, body, contentType, contentLength);
     }

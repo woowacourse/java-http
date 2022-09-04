@@ -1,11 +1,8 @@
 package org.apache.coyote.servlet.response;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.StringJoiner;
-import org.apache.coyote.servlet.cookie.HttpCookie;
 import org.apache.coyote.servlet.cookie.HttpCookies;
 import org.apache.coyote.support.HttpStatus;
 
@@ -57,42 +54,5 @@ public class HttpResponse {
             headers.add(String.format("Content-Length: %d ", messageBody.getBytes().length));
         }
         return headers;
-    }
-
-    public static class HttpResponseBuilder {
-
-        final HttpStatus status;
-        String location;
-        final Map<String, HttpCookie> cookies = new HashMap<>();
-        String contentType;
-        String messageBody;
-
-        public HttpResponseBuilder(HttpStatus status) {
-            this.status = status;
-        }
-
-        public HttpResponseBuilder setContentType(String contentType) {
-            this.contentType = contentType;
-            return this;
-        }
-
-        public HttpResponseBuilder setLocation(String uri) {
-            this.location = uri;
-            return this;
-        }
-
-        public HttpResponseBuilder setCookie(HttpCookie cookie) {
-            this.cookies.put(cookie.getName(), cookie);
-            return this;
-        }
-
-        public HttpResponseBuilder setMessageBody(String messageBody) {
-            this.messageBody = messageBody;
-            return this;
-        }
-
-        public HttpResponse build() {
-            return new HttpResponse(status, location, new HttpCookies(cookies), contentType, messageBody);
-        }
     }
 }

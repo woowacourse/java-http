@@ -29,13 +29,16 @@ public class ResponseEntity {
         this.messageBody = messageBody;
     }
 
+    public static ResponseEntityBuilder status(HttpStatus status) {
+        return new ResponseEntityBuilder(status);
+    }
+
     public static ResponseEntityBuilder ok() {
-        return new ResponseEntityBuilder(HttpStatus.OK);
+        return status(HttpStatus.OK);
     }
 
     public static ResponseEntityBuilder redirect(String location) {
-        return new ResponseEntityBuilder(HttpStatus.FOUND)
-                .setLocation(location);
+        return status(HttpStatus.FOUND).setLocation(location);
     }
 
     public HttpResponse toHttpResponse() {

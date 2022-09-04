@@ -19,7 +19,7 @@ public class HttpHeader {
         String header;
         while (!"".equals((header = bufferedReader.readLine()))) {
             final String[] splitHeader = header.split(": ");
-            values.put(splitHeader[0], splitHeader[1]);
+            values.put(splitHeader[0], splitHeader[1].trim());
         }
 
         return new HttpHeader(values);

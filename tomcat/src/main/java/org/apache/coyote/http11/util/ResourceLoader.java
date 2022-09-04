@@ -1,11 +1,12 @@
 package org.apache.coyote.http11.util;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Objects;
 
 public class ResourceLoader {
 
@@ -21,8 +22,9 @@ public class ResourceLoader {
             return DEFAULT_RESPONSE_BODY;
         }
 
-        final URL resource = ResourceLoader.class.getClassLoader().getResource(STATIC_RESOURCE_LOCATION + uri);
-        final Path path = new File(Objects.requireNonNull(resource).getPath()).toPath();
+        final URL resource = ResourceLoader.class.getClassLoader()
+                .getResource(STATIC_RESOURCE_LOCATION + uri);
+        final Path path = new File(requireNonNull(resource).getPath()).toPath();
         final byte[] bytes = Files.readAllBytes(path);
 
         return new String(bytes);

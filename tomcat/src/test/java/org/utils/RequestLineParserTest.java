@@ -12,10 +12,10 @@ class RequestLineParserTest {
     @DisplayName("요청 시작줄이 주어지면 시작줄에 존재하는 url을 가져온다.")
     @Test
     void getUrlFromRequestLine() {
-        final String requestLine = "GET /index.html HTTP/1.1";
+        final String requestUrl = "/index.html";
 
-        final String actual = RequestLineParser.getStaticResourcePath(requestLine);
+        final String actual = RequestLineParser.getStaticResourcePath(requestUrl);
 
-        assertThat(actual).isEqualTo("/index.html");
+        assertThat(actual).isEqualTo("static/index.html");
     }
 }

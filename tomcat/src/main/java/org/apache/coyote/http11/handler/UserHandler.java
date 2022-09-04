@@ -5,18 +5,21 @@ import static org.apache.coyote.http11.http.HttpVersion.HTTP11;
 import static org.apache.coyote.http11.http.response.HttpStatus.REDIRECT;
 
 import java.util.Map;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
+import nextstep.jwp.application.UserService;
+import nextstep.jwp.dto.UserLoginRequest;
 import org.apache.catalina.utils.Parser;
 import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.http.response.HttpResponse;
 
 abstract class UserHandler implements Handler {
 
+    private final UserService userService = new UserService();
+
     protected HttpResponse generateLoginResponse(final String body) {
         final Map<String, String> queryParams = Parser.parseQueryParams(body);
         try {
-            final User user = getUserByQueryParams(queryParams);
+            final UserLoginRequest userLoginRequest = getUserLoginRequest(queryParams);
+            userService.login(userLoginRequest);
             final HttpHeader location = HttpHeader.of(LOCATION.getValue(), "/index.html");
 
             return HttpResponse.of(HTTP11, REDIRECT, location);
@@ -26,19 +29,10 @@ abstract class UserHandler implements Handler {
         }
     }
 
-    protected User getUserByQueryParams(final Map<String, String> queryParams) {
+    private UserLoginRequest getUserLoginRequest(final Map<String, String> queryParams) {
         validateLoginParams(queryParams);
-        final String account = queryParams.get("account");
-        final String password = queryParams.get("password");
-        final User user = InMemoryUserRepository.getByAccount(account);
-        validateUserPassword(password, user);
-        return user;
-    }
-
-    private void validateUserPassword(final String password, final User user) {
-        if (!user.checkPassword(password)) {
-            throw new IllegalArgumentException("비밀번호가 정확하지 않습니다. : " + password);
-        }
+        return new UserLoginRequest(queryParams.get("account"),
+                queryParams.get("password"));
     }
 
     private void validateLoginParams(final Map<String, String> queryParams) {

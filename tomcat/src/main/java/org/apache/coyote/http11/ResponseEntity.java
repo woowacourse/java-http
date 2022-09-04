@@ -19,12 +19,8 @@ public class ResponseEntity {
         return this.responseBody;
     }
 
-    public String getStatus() {
-        return this.httpStatus.name();
-    }
-
-    public int getStatusCode() {
-        return this.httpStatus.getStatusCode();
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
     }
 
     public static ResponseEntity body(String body) {

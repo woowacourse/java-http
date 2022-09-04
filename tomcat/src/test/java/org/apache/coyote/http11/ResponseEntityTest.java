@@ -19,8 +19,7 @@ class ResponseEntityTest {
         // then
         Assertions.assertAll(
                 () -> assertThat(responseEntity.getResponseBody()).isEqualTo("eden king"),
-                () -> assertThat(responseEntity.getStatus()).isEqualTo("OK"),
-                () -> assertThat(responseEntity.getStatusCode()).isEqualTo(200)
+                () -> assertThat(responseEntity.getHttpStatus()).isEqualTo(HttpStatus.OK)
         );
     }
 
@@ -35,8 +34,7 @@ class ResponseEntityTest {
         // then
         Assertions.assertAll(
                 () -> assertThat(responseEntity.getResponseBody()).isEqualTo("eden king"),
-                () -> assertThat(responseEntity.getStatus()).isEqualTo("REDIRECT"),
-                () -> assertThat(responseEntity.getStatusCode()).isEqualTo(302)
+                () -> assertThat(responseEntity.getHttpStatus()).isEqualTo(HttpStatus.REDIRECT)
         );
     }
 }

@@ -21,6 +21,10 @@ public enum HttpStatus {
         return this.name;
     }
 
+    public boolean isRedirect() {
+        return this.statusCode.equals(StatusCode.REDIRECT);
+    }
+
     private enum StatusCode {
 
         OK(200),

@@ -1,6 +1,5 @@
 package nextstep.jwp.handler;
 
-import java.io.File;
 import nextstep.Application;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UserNotFoundException;
@@ -9,7 +8,6 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.QueryStrings;
 import org.apache.coyote.http11.enums.HttpStatus;
-import org.apache.coyote.http11.utils.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +19,7 @@ public class LoginHandler {
 
     public HttpResponse login(HttpRequest httpRequest) {
         if (httpRequest.isQueryStringEmpty()) {
-            return generateResponse(HttpStatus.OK, "/login.html");
+            return HttpResponse.of(HttpStatus.OK, "/login.html");
         }
 
         final QueryStrings queryStrings = httpRequest.getQueryStrings();
@@ -33,14 +31,7 @@ public class LoginHandler {
             return generateSuccessResponse();
         }
 
-        return generateResponse(HttpStatus.UNAUTHORIZED, "/401.html");
-    }
-
-    private HttpResponse generateResponse(final HttpStatus httpStatus, final String path) {
-        final File file = FileUtil.findFile(path);
-        final String contentType = FileUtil.findContentType(file);
-        final String responseBody = FileUtil.generateFile(file);
-        return new HttpResponse(httpStatus, contentType, responseBody);
+        return HttpResponse.of(HttpStatus.UNAUTHORIZED, "/401.html");
     }
 
     private User findUser(final QueryStrings queryStrings) {
@@ -50,7 +41,7 @@ public class LoginHandler {
     }
 
     private HttpResponse generateSuccessResponse() {
-        final HttpResponse response = generateResponse(HttpStatus.FOUND, "/login.html");
+        final HttpResponse response = HttpResponse.of(HttpStatus.FOUND, "/login.html");
         response.addHeader("Location", "/index.html");
         return response;
     }

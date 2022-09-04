@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,7 +13,6 @@ import nextstep.jwp.handler.RegisterHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.enums.HttpStatus;
-import org.apache.coyote.http11.utils.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,13 +100,6 @@ public class Http11Processor implements Runnable, Processor {
             return new RegisterHandler().register(httpRequest);
         }
 
-        return generateResponse(url);
-    }
-
-    private HttpResponse generateResponse(final String url) {
-        final File file = FileUtil.findFile(url);
-        final String contentType = FileUtil.findContentType(file);
-        final String responseBody = FileUtil.generateFile(file);
-        return new HttpResponse(HttpStatus.OK, contentType, responseBody);
+        return HttpResponse.of(HttpStatus.OK, url);
     }
 }

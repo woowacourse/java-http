@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
+import java.io.File;
 import org.apache.coyote.http11.enums.HttpStatus;
+import org.apache.coyote.http11.utils.FileUtil;
 
 public class HttpResponse {
 
@@ -12,6 +14,13 @@ public class HttpResponse {
         this.httpStatus = httpStatus;
         this.body = body;
         this.httpHeaders = initHeaders(contentType, body);
+    }
+
+    public static HttpResponse of(final HttpStatus httpStatus, final String url) {
+        final File file = FileUtil.findFile(url);
+        final String contentType = FileUtil.findContentType(file);
+        final String responseBody = FileUtil.generateFile(file);
+        return new HttpResponse(httpStatus, contentType, responseBody);
     }
 
     private HttpHeaders initHeaders(final String contentType, final String body) {

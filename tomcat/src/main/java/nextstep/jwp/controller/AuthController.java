@@ -32,7 +32,7 @@ public class AuthController {
     @RequestMapping(method = HttpMethod.POST, path = "/login")
     public ResponseEntity login(HttpRequest request) {
         final var user = userService.login(DtoAssembler.ofLoginDto(request));
-        final var sessionId = sessionRepository.generateNewSession(user.getId());
+        final var sessionId = sessionRepository.generateNewSession(user);
         final var sessionCookie = HttpCookie.ofSessionId(sessionId);
         return ResponseEntity.redirect("/index.html")
                 .setCookie(sessionCookie)

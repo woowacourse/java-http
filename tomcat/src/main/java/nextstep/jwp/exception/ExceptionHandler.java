@@ -10,7 +10,9 @@ public class ExceptionHandler {
     public ResponseEntity handle(HttpException exception) {
         final var status = exception.getStatus();
         final var path = ExceptionPage.toUri(status);
-        return ResponseEntity.redirect(path).build();
+        return ResponseEntity.status(status)
+                .setViewResource(path)
+                .build();
     }
 
     private enum ExceptionPage {

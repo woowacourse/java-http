@@ -1,6 +1,6 @@
-package org.apache.coyote.http11.httpmessage.statusline;
+package org.apache.coyote.http11.httpmessage.response.statusline;
 
-import org.apache.coyote.http11.httpmessage.HttpVersion;
+import org.apache.coyote.http11.httpmessage.common.HttpVersion;
 
 public class StatusLine {
     private final HttpVersion httpVersion;

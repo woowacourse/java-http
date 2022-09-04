@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.httpmessage;
+package org.apache.coyote.http11.httpmessage.common;
 
 import java.io.BufferedReader;
 import java.io.IOException;

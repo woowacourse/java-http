@@ -1,6 +1,6 @@
-package org.apache.coyote.http11.httpmessage.requestline;
+package org.apache.coyote.http11.httpmessage.request.requestline;
 
-import org.apache.coyote.http11.httpmessage.HttpVersion;
+import org.apache.coyote.http11.httpmessage.common.HttpVersion;
 
 public class RequestLine {
 

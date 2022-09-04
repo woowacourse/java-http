@@ -1,9 +1,10 @@
-package org.apache.coyote.http11.httpmessage;
+package org.apache.coyote.http11.httpmessage.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import org.apache.coyote.http11.httpmessage.requestline.RequestLine;
+import org.apache.coyote.http11.httpmessage.common.Headers;
+import org.apache.coyote.http11.httpmessage.request.requestline.RequestLine;
 
 public class Request {
 

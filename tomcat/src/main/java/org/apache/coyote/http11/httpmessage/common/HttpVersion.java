@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.httpmessage;
+package org.apache.coyote.http11.httpmessage.common;
 
 public enum HttpVersion {
     HTTP1_0("HTTP/1.0"),

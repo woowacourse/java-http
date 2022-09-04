@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.httpmessage.requestline;
+package org.apache.coyote.http11.httpmessage.request.requestline;
 
 public class RequestUri {
 

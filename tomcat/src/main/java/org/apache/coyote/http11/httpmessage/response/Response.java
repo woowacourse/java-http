@@ -1,7 +1,10 @@
-package org.apache.coyote.http11.httpmessage;
+package org.apache.coyote.http11.httpmessage.response;
 
-import org.apache.coyote.http11.httpmessage.statusline.HttpStatus;
-import org.apache.coyote.http11.httpmessage.statusline.StatusLine;
+import org.apache.coyote.http11.httpmessage.common.ContentType;
+import org.apache.coyote.http11.httpmessage.common.Headers;
+import org.apache.coyote.http11.httpmessage.common.HttpVersion;
+import org.apache.coyote.http11.httpmessage.response.statusline.HttpStatus;
+import org.apache.coyote.http11.httpmessage.response.statusline.StatusLine;
 
 public class Response {
 

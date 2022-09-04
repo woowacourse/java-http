@@ -112,7 +112,7 @@ class Http11ProcessorTest {
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         var expected = String.join("\r\n",
             "HTTP/1.1 200 OK ",
-            "Content-Type: application/javascript;charset=utf-8 ",
+            "Content-Type: text/javascript;charset=utf-8 ",
             "Content-Length: " + responseBody.getBytes().length + " ",
             "",
             responseBody);

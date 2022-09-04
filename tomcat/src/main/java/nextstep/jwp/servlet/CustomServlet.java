@@ -8,6 +8,7 @@ import nextstep.jwp.service.UserService;
 import nextstep.jwp.servlet.handler.HandlerMappings;
 import nextstep.jwp.servlet.view.ViewResolver;
 import org.apache.coyote.servlet.Servlet;
+import org.apache.coyote.servlet.response.ResponseEntity;
 import org.apache.coyote.servlet.session.SessionRepository;
 import org.apache.coyote.support.HttpException;
 import org.apache.coyote.servlet.request.HttpRequest;
@@ -24,6 +25,10 @@ public class CustomServlet implements Servlet {
     }
 
     public HttpResponse service(HttpRequest request) {
+        return handle(request).toHttpResponse();
+    }
+
+    private ResponseEntity handle(HttpRequest request) {
         try {
             return handlerMapper.handle(request);
         } catch (HttpException exception) {

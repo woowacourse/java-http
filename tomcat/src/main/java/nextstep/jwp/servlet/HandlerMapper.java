@@ -5,7 +5,6 @@ import nextstep.jwp.servlet.handler.Handler;
 import nextstep.jwp.servlet.handler.HandlerMappings;
 import nextstep.jwp.servlet.view.ViewResolver;
 import org.apache.coyote.servlet.request.HttpRequest;
-import org.apache.coyote.servlet.response.HttpResponse;
 import org.apache.coyote.servlet.response.ResponseEntity;
 import org.apache.coyote.support.HttpException;
 
@@ -23,7 +22,7 @@ public class HandlerMapper {
         this.viewResolver = viewResolver;
     }
 
-    public HttpResponse handle(HttpRequest request) {
+    public ResponseEntity handle(HttpRequest request) {
         Handler handler = handlerMappings.getHandler(request);
         if (handler == null) {
             return viewResolver.findStaticResource(request.getUri());
@@ -31,7 +30,7 @@ public class HandlerMapper {
         return handle(request, handler);
     }
 
-    private HttpResponse handle(HttpRequest request, Handler handler) {
+    private ResponseEntity handle(HttpRequest request, Handler handler) {
         final var response = handler.handle(request);
         if (handler.hasReturnTypeOf(String.class)) {
             return viewResolver.findStaticResource((String) response);
@@ -39,12 +38,12 @@ public class HandlerMapper {
         ResponseEntity responseEntity = (ResponseEntity) response;
         String viewResource = responseEntity.getViewResource();
         if (viewResource == null) {
-            return responseEntity.toHttpResponse();
+            return responseEntity;
         }
         return viewResolver.findStaticResource(viewResource);
     }
 
-    public HttpResponse handle(HttpException exception) {
+    public ResponseEntity handle(HttpException exception) {
         final var responseEntity = exceptionHandler.handle(exception);
         return viewResolver.findStaticResource(responseEntity);
     }

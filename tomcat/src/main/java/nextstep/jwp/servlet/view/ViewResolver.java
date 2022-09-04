@@ -4,28 +4,25 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.apache.coyote.servlet.response.HttpResponse;
 import org.apache.coyote.servlet.response.ResponseEntity;
 import org.apache.coyote.support.HttpException;
 
 public class ViewResolver {
 
-    public HttpResponse findStaticResource(String uri) {
+    public ResponseEntity findStaticResource(String uri) {
         final var path = toResourcePath(uri);
         return ResponseEntity.ok()
                 .setContentType(findContentType(path))
                 .setMessageBody(findContent(path))
-                .build()
-                .toHttpResponse();
+                .build();
     }
 
-    public HttpResponse findStaticResource(ResponseEntity responseEntity) {
+    public ResponseEntity findStaticResource(ResponseEntity responseEntity) {
         final var path = toResourcePath(responseEntity.getViewResource());
         return responseEntity.toBuilder()
                 .setContentType(findContentType(path))
                 .setMessageBody(findContent(path))
-                .build()
-                .toHttpResponse();
+                .build();
     }
 
     private Path toResourcePath(String uri) {

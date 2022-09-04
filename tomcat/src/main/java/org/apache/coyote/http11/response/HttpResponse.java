@@ -6,19 +6,19 @@ import org.apache.coyote.http11.common.StaticResource;
 public class HttpResponse {
 
     private final ResponseStatusLine responseStatusLine;
-    private final ResponseHeaders responseHeaders;
+    private final ResponseHeader responseHeader;
     private final String body;
 
-    public HttpResponse(final ResponseStatusLine responseStatusLine, final ResponseHeaders responseHeaders, final String body) {
+    public HttpResponse(final ResponseStatusLine responseStatusLine, final ResponseHeader responseHeader, final String body) {
         this.responseStatusLine = responseStatusLine;
-        this.responseHeaders = responseHeaders;
+        this.responseHeader = responseHeader;
         this.body = body;
     }
 
     public static HttpResponse ok(final StaticResource staticResource) {
         return new HttpResponse(
                 new ResponseStatusLine(HttpStatus.OK),
-                ResponseHeaders.withStaticResource(staticResource),
+                ResponseHeader.withStaticResource(staticResource),
                 staticResource.getContent()
         );
     }
@@ -26,20 +26,20 @@ public class HttpResponse {
     public static HttpResponse found(final String location) {
         return new HttpResponse(
                 new ResponseStatusLine(HttpStatus.FOUND),
-                ResponseHeaders.withLocation(location),
+                ResponseHeader.withLocation(location),
                 ""
         );
     }
 
     public void setSessionId(final String sessionId) {
-        responseHeaders.add("Set-Cookie", "JSESSIONID=" + sessionId);
+        responseHeader.add("Set-Cookie", "JSESSIONID=" + sessionId);
     }
 
     @Override
     public String toString() {
         return String.join("\r\n",
                 responseStatusLine.toString(),
-                responseHeaders.toString(),
+                responseHeader.toString(),
                 "",
                 body);
     }

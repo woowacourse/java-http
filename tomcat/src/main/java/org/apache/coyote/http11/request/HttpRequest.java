@@ -13,10 +13,10 @@ import org.apache.coyote.http11.common.HttpParser;
 public class HttpRequest {
 
     private final RequestStartLine startLine;
-    private final RequestHeaders header;
+    private final RequestHeader header;
     private final String body;
 
-    public HttpRequest(final RequestStartLine startLine, final RequestHeaders header, final String body) {
+    public HttpRequest(final RequestStartLine startLine, final RequestHeader header, final String body) {
         this.startLine = startLine;
         this.header = header;
         this.body = body;
@@ -26,7 +26,7 @@ public class HttpRequest {
         final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         final var startLine = RequestStartLine.from(bufferedReader.readLine());
-        final var header = RequestHeaders.from(readHeader(bufferedReader));
+        final var header = RequestHeader.from(readHeader(bufferedReader));
         final var body = readBody(bufferedReader, header);
         return new HttpRequest(startLine, header, body);
     }
@@ -40,14 +40,14 @@ public class HttpRequest {
         return stringBuilder.toString();
     }
 
-    private static String readBody(final BufferedReader bufferedReader, final RequestHeaders header) throws IOException {
+    private static String readBody(final BufferedReader bufferedReader, final RequestHeader header) throws IOException {
         final var contentLength = parseContentLength(header);
         final var buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         return new String(buffer);
     }
 
-    private static int parseContentLength(final RequestHeaders header) {
+    private static int parseContentLength(final RequestHeader header) {
         final var contentLength = header.get("Content-Length");
         if (contentLength == null) {
             return 0;
@@ -79,7 +79,7 @@ public class HttpRequest {
         return startLine.getQueryString();
     }
 
-    public RequestHeaders getHeader() {
+    public RequestHeader getHeader() {
         return header;
     }
 

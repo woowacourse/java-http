@@ -4,10 +4,10 @@ import java.util.Map;
 
 public class HttpCookie {
 
-    private final Map<String, String> value;
+    private final Map<String, String> values;
 
-    public HttpCookie(final Map<String, String> value) {
-        this.value = value;
+    public HttpCookie(final Map<String, String> values) {
+        this.values = values;
     }
 
     public static HttpCookie from(final String cookie) {
@@ -15,6 +15,6 @@ public class HttpCookie {
     }
 
     public String getSessionId() {
-        return value.get("JSESSIONID");
+        return values.get("JSESSIONID");
     }
 }

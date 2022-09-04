@@ -5,34 +5,34 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.common.StaticResource;
 
-public class ResponseHeaders {
+public class ResponseHeader {
 
-    private final Map<String, String> value;
+    private final Map<String, String> values;
 
-    public ResponseHeaders(final Map<String, String> value) {
-        this.value = value;
+    public ResponseHeader(final Map<String, String> values) {
+        this.values = values;
     }
 
-    public static ResponseHeaders withStaticResource(final StaticResource staticResource) {
+    public static ResponseHeader withStaticResource(final StaticResource staticResource) {
         final var headers = new LinkedHashMap<String, String>();
         headers.put("Content-Type", staticResource.getContentType());
         headers.put("Content-Length", staticResource.getContentLength());
-        return new ResponseHeaders(headers);
+        return new ResponseHeader(headers);
     }
 
-    public static ResponseHeaders withLocation(final String location) {
+    public static ResponseHeader withLocation(final String location) {
         final var headers = new LinkedHashMap<String, String>();
         headers.put("Location", location);
-        return new ResponseHeaders(headers);
+        return new ResponseHeader(headers);
     }
 
     public void add(final String key, final String value) {
-        this.value.put(key, value);
+        this.values.put(key, value);
     }
 
     @Override
     public String toString() {
-        return value.entrySet()
+        return values.entrySet()
                 .stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue() + " ")
                 .collect(Collectors.joining("\r\n"));

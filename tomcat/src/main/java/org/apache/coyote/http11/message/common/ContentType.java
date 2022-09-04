@@ -8,7 +8,7 @@ public enum ContentType {
     PLAINTEXT("", "text/plain"),
     HTML("html", "text/html"),
     CSS("css", "text/css"),
-    JAVASCRIPT("javascript", "text/javascript"),
+    JAVASCRIPT("js", "text/javascript"),
     FAVICON("ico", "image/x-icon");
 
     private final String extension;

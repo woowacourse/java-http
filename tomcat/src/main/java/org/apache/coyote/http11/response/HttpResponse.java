@@ -58,7 +58,7 @@ public class HttpResponse {
         response.append(statusLine.toResponseString() + " \r\n");
 
         for (String key : headers.keySet()) {
-            response.append(key + ": " + headers.get(key) + "\r\n");
+            response.append(key + ": " + headers.get(key) + " \r\n");
         }
         response.append("\r\n");
         response.append(body);

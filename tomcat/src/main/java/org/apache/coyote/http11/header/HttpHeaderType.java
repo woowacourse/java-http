@@ -6,7 +6,8 @@ import java.util.NoSuchElementException;
 public enum HttpHeaderType {
     CONTENT_TYPE("Content-Type"),
     CONTENT_LENGTH("Content-Length"),
-    HOST("Host");
+    HOST("Host"),
+    LOCATION("Location");
 
     private final String value;
 

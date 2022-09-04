@@ -1,10 +1,8 @@
 package org.apache.coyote.http11.handler;
 
+import static org.apache.coyote.http11.header.HttpHeaderType.LOCATION;
 import static org.apache.coyote.http11.http.HttpVersion.HTTP11;
-import static org.apache.coyote.http11.header.ContentType.UTF_8;
-import static org.apache.coyote.http11.header.HttpHeaderType.CONTENT_LENGTH;
-import static org.apache.coyote.http11.header.HttpHeaderType.CONTENT_TYPE;
-import static org.apache.coyote.http11.http.response.HttpStatus.OK;
+import static org.apache.coyote.http11.http.response.HttpStatus.REDIRECT;
 
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -22,16 +20,22 @@ public class LoginHandler extends ResourceHandler{
     public HttpResponse handle(final HttpRequest httpRequest) {
         final String path = httpRequest.getStartLine().getPath();
         if (path.contains(QUERY_PARAMETER_START_LETTER)) {
-            final Map<String, String> queryParams = Parser.parseQueryParams(path);
-            final User user = getUserByQueryParams(queryParams);
-
-            final String body = user.toString();
-            final HttpHeader contentType = HttpHeader.of(CONTENT_TYPE, UTF_8.getValue());
-            final HttpHeader contentLength = HttpHeader.of(CONTENT_LENGTH, String.valueOf(body.length()));
-
-            return HttpResponse.of(HTTP11, OK, body, contentType, contentLength);
+            return generateLoginResponse(path);
         }
-        return generateResourceResponse(httpRequest);
+        return generateResourceResponse("/login.html");
+    }
+
+    private HttpResponse generateLoginResponse(final String path) {
+        final Map<String, String> queryParams = Parser.parseQueryParams(path);
+        try {
+            final User user = getUserByQueryParams(queryParams);
+            final HttpHeader location = HttpHeader.of(LOCATION, "/index.html");
+
+            return HttpResponse.of(HTTP11, REDIRECT, location);
+        } catch (IllegalArgumentException exception) {
+            final HttpHeader location = HttpHeader.of(LOCATION, "/401.html");
+            return HttpResponse.of(HTTP11, REDIRECT, location);
+        }
     }
 
     private User getUserByQueryParams(final Map<String, String> queryParams) {

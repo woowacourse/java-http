@@ -1,9 +1,9 @@
 package org.apache.coyote.http11.handler;
 
-import static org.apache.coyote.http11.http.HttpVersion.HTTP11;
 import static org.apache.coyote.http11.header.ContentType.UTF_8;
 import static org.apache.coyote.http11.header.HttpHeaderType.CONTENT_LENGTH;
 import static org.apache.coyote.http11.header.HttpHeaderType.CONTENT_TYPE;
+import static org.apache.coyote.http11.http.HttpVersion.HTTP11;
 import static org.apache.coyote.http11.http.response.HttpStatus.OK;
 
 import java.io.IOException;
@@ -25,6 +25,14 @@ public class ResourceHandler implements Handler{
     protected HttpResponse generateResourceResponse(final HttpRequest httpRequest) {
         final String path = httpRequest.getStartLine().getPath();
         final String fileName = Parser.convertResourceFileName(path);
+        return generateResourceResponseByFileName(fileName);
+    }
+
+    protected HttpResponse generateResourceResponse(final String fileName) {
+        return generateResourceResponseByFileName(fileName);
+    }
+
+    private HttpResponse generateResourceResponseByFileName(final String fileName) {
         final String fileType = Parser.parseFileType(fileName);
         try {
             final String body = IOUtils.readResourceFile(fileName);

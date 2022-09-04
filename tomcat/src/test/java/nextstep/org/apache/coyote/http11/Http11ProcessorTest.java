@@ -6,8 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -110,14 +108,63 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final User user = InMemoryUserRepository.findByAccount("gugu").get();
+        var expected = "HTTP/1.1 302 Found \r\n"
+                + "Location: /index.html \r\n"
+                + "\r\n";
 
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: charset=utf-8 \r\n" +
-                "Content-Length: 76 \r\n" +
-                "\r\n"+
-                user.toString();
+        final String actual = socket.output();
+        assertThat(actual).isEqualTo(expected);
+    }
 
-        assertThat(socket.output()).isEqualTo(expected);
+    @Test
+    void loginFail()  {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=pass HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 30 ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 302 Found \r\n"
+                + "Location: /401.html \r\n"
+                + "\r\n";
+
+        final String actual = socket.output();
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void redirectLoginFail()  {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /401.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 200 OK \r\n"
+                + "Content-Type: text/html;charset=utf-8 \r\n"
+                + "Content-Length: 2426 \r\n"
+                + "\r\n";
+
+        final String actual = socket.output();
+        assertThat(actual).contains(expected);
     }
 }

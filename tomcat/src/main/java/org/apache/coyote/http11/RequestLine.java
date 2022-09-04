@@ -21,4 +21,8 @@ public class RequestLine {
                 splitRequestLine[2]
         );
     }
+
+    public RequestUri getRequestUri() {
+        return requestUri;
+    }
 }

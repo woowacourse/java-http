@@ -1,41 +1,36 @@
 package org.apache.coyote.http11;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class HttpRequest {
 
     private static final String DEFAULT_CONTENT_TYPE = "text/html";
 
-    private final RequestUri requestUri;
-    private final Map<String, String> headers;
+    private final RequestLine requestLine;
+    private final RequestHeaders headers;
+    // todo: body 추가
 
-    public HttpRequest(final RequestUri requestUri, final Map<String, String> headers) {
-        this.requestUri = requestUri;
+    private HttpRequest(final RequestLine requestLine, final RequestHeaders headers) {
+        this.requestLine = requestLine;
         this.headers = headers;
     }
 
-    public static HttpRequest of(List<String> inputs) {
-        String requestLine = inputs.get(0);
-        return new HttpRequest(RequestUri.of(requestLine.split(" ")[1]), parseHeaders(inputs));
-    }
-
-    private static Map<String, String> parseHeaders(final List<String> inputs) {
-        Map<String, String> headers = new HashMap<>();
-        for (String header : inputs.subList(1, inputs.size())) {
-            String[] splitHeader = header.split(": ", 2);
-            headers.put(splitHeader[0], splitHeader[1]);
-        }
-        return headers;
+    public static HttpRequest of(List<String> header) {
+        return new HttpRequest(
+                RequestLine.of(header.get(0)),
+                RequestHeaders.of(header.subList(1, header.size()))
+        );
     }
 
     public String findContentType() {
-        String accept = headers.getOrDefault("Accept", DEFAULT_CONTENT_TYPE);
+        String accept = headers.get("Accept");
+        if (accept == null) {
+            return DEFAULT_CONTENT_TYPE;
+        }
         return accept.split(",")[0];
     }
 
     public RequestUri getRequestUri() {
-        return requestUri;
+        return requestLine.getRequestUri();
     }
 }

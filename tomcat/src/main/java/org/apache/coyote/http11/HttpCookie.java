@@ -12,10 +12,7 @@ public class HttpCookie {
         this.cookies = cookies;
     }
 
-    public String generateJsessionId() {
-        if (this.cookies.containsKey(JSESSION_ID)) {
-            return this.cookies.get(JSESSION_ID);
-        }
-        return NO_JSESSION_ID;
+    public String getJsessionId() {
+        return this.cookies.getOrDefault(JSESSION_ID, NO_JSESSION_ID);
     }
 }

@@ -7,8 +7,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -16,6 +14,7 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.httpmessage.common.ContentType;
 import org.apache.coyote.http11.httpmessage.request.Request;
+import org.apache.coyote.http11.httpmessage.request.requestline.QueryStrings;
 import org.apache.coyote.http11.httpmessage.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,23 +69,20 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Response doGet(final Request request) throws IOException {
-        final var uri = request.getUri();
-
-        if (uri.contains(".")) {
-            return getResponseWithFileName(uri);
+        if (request.isFileRequest()) {
+            return getResponseWithFileName(request.getUri().getResourcePath());
         }
-        if (uri.contains("?")) {
-            return getResponseWithQueryString(uri);
+        if (request.hasQueryString()) {
+            return getResponseWithQueryString(request);
         }
-
-        return getResponse(uri);
+        return getResponse(request);
     }
 
-    private Response getResponse(final String uri) throws IOException {
-        if (uri.equals("/login")) {
+    private Response getResponse(final Request request) throws IOException {
+        if (request.isMatchUri("/login")) {
             return getResponseWithFileName("/login.html");
         }
-        if (uri.equals("/")) {
+        if (request.isMatchUri("/")) {
             return Response.okWithResponseBody(ContentType.HTML, "Hello world!");
         }
         return new Response();
@@ -96,7 +92,6 @@ public class Http11Processor implements Runnable, Processor {
         final var fileExtension = fileName.split("\\.")[1];
 
         final var contentType = ContentType.from(fileExtension);
-
         final var resource = getClass().getClassLoader().getResource("static" + fileName);
         final var path = new File(resource.getPath()).toPath();
 
@@ -105,31 +100,18 @@ public class Http11Processor implements Runnable, Processor {
         return Response.okWithResponseBody(contentType, responseBody);
     }
 
-    private Response getResponseWithQueryString(final String uri) {
-        if (uri.contains("/login")) {
+    private Response getResponseWithQueryString(final Request request) {
+        if (request.isMatchUri("/login")) {
+            final QueryStrings queryStrings = request.getUri().getQueryStrings();
+            final Optional<User> user = InMemoryUserRepository.findByAccount(queryStrings.getValue("account"));
 
-            final Map<String, String> queryStrings = extractQueryStrings(uri);
-            final Optional<User> user = InMemoryUserRepository.findByAccount(queryStrings.get("account"));
-
-            if (user.isPresent() && user.get().checkPassword(queryStrings.get("password"))) {
+            if (user.isPresent() && user.get().checkPassword(queryStrings.getValue("password"))) {
                 log.info("존재하는 유저입니다. ::: " + user);
                 return Response.redirect(ContentType.HTML, "http://localhost:8080/index.html");
             }
-            log.info("존재하지 않는 유저입니다. ::: " + queryStrings.get("account"));
+            log.info("존재하지 않는 유저입니다. ::: " + queryStrings.getValue("account"));
             return Response.redirect(ContentType.HTML, "http://localhost:8080/401.html");
         }
         return new Response();
-    }
-
-    private Map<String, String> extractQueryStrings(final String uri) {
-        final Map<String, String> queryStrings = new HashMap<>();
-        final int index = uri.indexOf("?");
-
-        for (final String queryString : uri.substring(index + 1).split("&")) {
-            final String name = queryString.split("=")[0];
-            final String value = queryString.split("=")[1];
-            queryStrings.put(name, value);
-        }
-        return queryStrings;
     }
 }

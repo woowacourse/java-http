@@ -19,7 +19,7 @@ public class RequestLine {
         final String[] requestLineParameters = requestLine.split(" ");
 
         final Method method = Method.find(requestLineParameters[0]);
-        final RequestUri requestUri = new RequestUri(requestLineParameters[1]);
+        final RequestUri requestUri = RequestUri.from(requestLineParameters[1]);
         final HttpVersion httpVersion = HttpVersion.HTTP1_1;
 
         return new RequestLine(method, requestUri, httpVersion);
@@ -29,7 +29,11 @@ public class RequestLine {
         return method.isGet();
     }
 
-    public String getRequestUri() {
-        return requestUri.getRequestUri();
+    public RequestUri getRequestUri() {
+        return requestUri;
+    }
+
+    public boolean isMatchUri(final String requestUri) {
+        return this.requestUri.isMatchUri(requestUri);
     }
 }

@@ -5,11 +5,12 @@ import java.io.IOException;
 import java.io.StringReader;
 import org.apache.coyote.http11.httpmessage.common.Headers;
 import org.apache.coyote.http11.httpmessage.request.requestline.RequestLine;
+import org.apache.coyote.http11.httpmessage.request.requestline.RequestUri;
 
 public class Request {
 
     private final RequestLine requestLine;
-    private Headers headers;
+    private final Headers headers;
     private String body;
 
     public Request(final RequestLine requestLine, final Headers headers) {
@@ -33,7 +34,19 @@ public class Request {
         return requestLine.isGetMethod();
     }
 
-    public String getUri() {
+    public RequestUri getUri() {
         return requestLine.getRequestUri();
+    }
+
+    public boolean isMatchUri(String requestUri) {
+        return requestLine.isMatchUri(requestUri);
+    }
+
+    public boolean isFileRequest() {
+        return requestLine.getRequestUri().isFileRequest();
+    }
+
+    public boolean hasQueryString() {
+        return requestLine.getRequestUri().hasQueryStrings();
     }
 }

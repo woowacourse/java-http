@@ -14,17 +14,17 @@ public enum Method {
 
     private final String name;
 
-    Method(String name) {
+    Method(final String name) {
         this.name = name;
     }
 
-    public static Method find(String method) {
+    public static Method find(final String method) {
         return Arrays.stream(values()).filter(it -> it.isMatchName(method))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 HTTP Method 입니다."));
     }
 
-    public boolean isMatchName(String name) {
+    public boolean isMatchName(final String name) {
         return this.name.equals(name);
     }
 

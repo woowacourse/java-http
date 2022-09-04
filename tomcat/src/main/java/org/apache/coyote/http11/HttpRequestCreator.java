@@ -1,10 +1,14 @@
-package nextstep.jwp.http.reqeust;
+package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.http.HttpHeader;
+import nextstep.jwp.http.reqeust.HttpRequest;
+import nextstep.jwp.http.reqeust.HttpRequestLine;
 
 public class HttpRequestCreator {
 
@@ -20,12 +24,25 @@ public class HttpRequestCreator {
 
     private HttpRequestLine httpRequestLine(final BufferedReader bufferReader) throws IOException {
         String[] line = bufferReader.readLine().split(LINE_SEPARATOR);
-        validateLineFormat(line);
-        return HttpRequestLine.of(line[METHOD_INDEX], line[URL_INDEX], line[VERSION_INDEX]);
+        validateRequestLineFormat(line);
+
+        String httpMethod = line[METHOD_INDEX];
+        URI httpUri = httpRequestUri(line[URL_INDEX]);
+        String httpVersion = line[VERSION_INDEX];
+
+        return new HttpRequestLine(httpMethod, httpUri, httpVersion);
     }
 
-    private void validateLineFormat(final String[] line) {
+    private void validateRequestLineFormat(final String[] line) {
         if (line.length != REQUEST_LINE_CONTENT_COUNT) {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    private URI httpRequestUri(final String uri) {
+        try {
+            return new URI(uri);
+        } catch (URISyntaxException e) {
             throw new IllegalArgumentException();
         }
     }

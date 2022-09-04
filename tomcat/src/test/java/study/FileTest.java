@@ -2,15 +2,14 @@ package study;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,6 +33,15 @@ class FileTest {
         final String actual = file.getName();
 
         assertThat(actual).endsWith(fileName);
+    }
+
+    @Test
+    void URI를_각각_URL과_QUERY_로_매핑한다() throws URISyntaxException {
+        final String fileName = "/login.html";
+
+        final URI resource = new URI(fileName);
+        System.out.println(resource.getPath());
+        System.out.println(resource.getQuery());
     }
 
     /**

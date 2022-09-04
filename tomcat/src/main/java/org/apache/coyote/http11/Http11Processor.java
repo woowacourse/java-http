@@ -9,7 +9,6 @@ import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.reqeust.HttpRequest;
-import nextstep.jwp.http.reqeust.HttpRequestCreator;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.http.response.HttpResponseCreator;
 import nextstep.jwp.io.ClassPathResource;
@@ -22,6 +21,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String ROOT_PATH = "/";
+    private static final String LOGIN_PATH = "login";
     private static final String ROOT_RESPONSE_BODY = "Hello world!";
 
     private final Socket connection;
@@ -67,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void printUser(final HttpRequest httpRequest) {
-        if (httpRequest.hasQueryString()) {
+        if (httpRequest.hasQuery()) {
             Map<String, String> queryString = httpRequest.getQueryParams();
             String account = queryString.get("account");
             Optional<User> user = InMemoryUserRepository.findByAccount(account);

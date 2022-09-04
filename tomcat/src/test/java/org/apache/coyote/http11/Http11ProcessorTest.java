@@ -1,12 +1,10 @@
-package nextstep.org.apache.coyote.http11;
+package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.utils.FileUtil;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -35,7 +33,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void index() throws IOException {
+    void index() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
@@ -51,15 +49,15 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final String file = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final File file = FileUtil.findFile("/index.html");
+        final String expectedFileContents = FileUtil.generateFile(file);
         final String expectedStatusLine = "HTTP/1.1 200 OK ";
         final String expectedContentType = "Content-Type: text/html;charset=utf-8 ";
-        final String expectedContentLength = "Content-Length: " + file.getBytes().length;
+        final String expectedContentLength = "Content-Length: " + expectedFileContents.getBytes().length;
 
         assertThat(socket.output()).contains(expectedStatusLine);
         assertThat(socket.output()).contains(expectedContentType);
         assertThat(socket.output()).contains(expectedContentLength);
-        assertThat(socket.output()).contains(file);
+        assertThat(socket.output()).contains(expectedFileContents);
     }
 }

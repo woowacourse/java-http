@@ -76,7 +76,6 @@ public class Http11Processor implements Runnable, Processor {
         if (uri.contains(".")) {
             return getResponseWithFileName(uri);
         }
-
         if (uri.contains("?")) {
             return getResponseWithQueryString(uri);
         }

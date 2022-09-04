@@ -7,31 +7,24 @@ import java.io.StringReader;
 public class Request {
 
     String requestLine;
-    String headers;
+    Headers headers;
     String body;
 
-    public Request(String requestLine, String headers) {
+    public Request(final String requestLine, final Headers headers) {
         this.requestLine = requestLine;
         this.headers = headers;
     }
 
-
-    public static Request of(String requestMessage) throws IOException {
+    public static Request of(final String requestMessage) throws IOException {
         if (requestMessage == null) {
             throw new IllegalStateException("잘못된 요청입니다.");
         }
+
         final BufferedReader bufferedReader = new BufferedReader(new StringReader(requestMessage));
-        String requestLine = bufferedReader.readLine();
-        StringBuilder headers = new StringBuilder();
-        while (true) {
-            String buffer = bufferedReader.readLine();
-            headers.append(buffer)
-                    .append("\r\n");
-            if (buffer == null || buffer.length() == 0) {
-                break;
-            }
-        }
-        return new Request(requestLine, headers.toString());
+        final String requestLine = bufferedReader.readLine();
+        final Headers headers = new Headers(bufferedReader);
+
+        return new Request(requestLine, headers);
     }
 
     public boolean isGetMethod() {

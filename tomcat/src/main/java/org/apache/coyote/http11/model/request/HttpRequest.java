@@ -45,10 +45,6 @@ public class HttpRequest {
         return RequestBody.from(new String(buffer));
     }
 
-    public Map<String, String> getQueryParams() {
-        return requestLine.getParams();
-    }
-
     public String getRequestTarget() {
         return requestLine.getTarget();
     }
@@ -60,10 +56,6 @@ public class HttpRequest {
     public Map<String, String> getBody() {
         return this.body
                 .getBody();
-    }
-
-    public boolean isEmptyQueryParams() {
-        return requestLine.hasParams();
     }
 
     public boolean hasCookie() {

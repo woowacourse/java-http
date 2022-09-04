@@ -8,6 +8,8 @@ public class RequestHeader {
 
     public static final String COOKIE = "Cookie";
     private static final String CONTENT_LENGTH = "Content-Length";
+    public static final int HEADER_KEY_INDEX = 0;
+    public static final int HEADER_VALUE_INDEX = 1;
     private final Map<String, String> headers;
 
     public RequestHeader(final Map<String, String> headers) {
@@ -18,8 +20,9 @@ public class RequestHeader {
         Map<String, String> headers = new HashMap<>();
         for (String s : input) {
             String[] split = s.split(" ");
-            String key = split[0].substring(0, split[0].lastIndexOf(":"));
-            headers.put(key, split[1].trim());
+            String key = split[HEADER_KEY_INDEX].substring(HEADER_KEY_INDEX, split[HEADER_KEY_INDEX]
+                    .lastIndexOf(":"));
+            headers.put(key, split[HEADER_VALUE_INDEX].trim());
         }
         return new RequestHeader(headers);
     }

@@ -10,6 +10,8 @@ public class RequestLine {
     private static final String QUERY_PRAM_VALUE_DELIMITER = "=";
     private static final int QUERY_PRAM_KEY_INDEX = 0;
     private static final int QUERY_PARAM_VALUE_INDEX = 1;
+    private static final int METHOD_INDEX = 0;
+    private static final int REQUEST_TARGET_INDEX = 1;
 
     private final Method method;
     private final String target;
@@ -23,9 +25,9 @@ public class RequestLine {
 
     public static RequestLine of(final String requestLine) {
         String[] splitRequestLine = requestLine.split(" ");
-        Method method = Method.findMethod(splitRequestLine[0]);
-        String target = createTarget(splitRequestLine[1]);
-        Map<String, String> params = createParams(splitRequestLine[1]);
+        Method method = Method.findMethod(splitRequestLine[METHOD_INDEX]);
+        String target = createTarget(splitRequestLine[REQUEST_TARGET_INDEX]);
+        Map<String, String> params = createParams(splitRequestLine[REQUEST_TARGET_INDEX]);
         return new RequestLine(method, target, params);
     }
 
@@ -62,24 +64,12 @@ public class RequestLine {
         return !path.contains(EXIST_QUERY_PARAMS);
     }
 
-    public boolean isEmptyQueryParams() {
-        return params.isEmpty();
-    }
-
     public Map<String, String> getParams() {
         return params;
     }
 
     public String getTarget() {
         return target;
-    }
-
-    public Method getMethod() {
-        return method;
-    }
-
-    public boolean isGetMethod() {
-        return method == Method.GET;
     }
 
     public boolean matchMethod(final Method method) {

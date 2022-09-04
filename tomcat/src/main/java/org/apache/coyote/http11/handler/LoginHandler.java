@@ -35,13 +35,12 @@ public class LoginHandler implements Handler {
 
     private HttpResponse getHttpResponse(HttpRequest httpRequest) {
         if (httpRequest.matchRequestMethod(Method.GET)) {
-            if (SessionManager.findSession(httpRequest.getCookieKey())
-                    .isPresent()) {
-                return createHttpResponse(ResponseStatusCode.OK,
-                        FileReader.getFile(INDEX_RESOURCE_PATH, getClass()));
-            };
-            return createHttpResponse(ResponseStatusCode.OK, FileReader.getFile(LOGIN_RESOURCE_PATH, getClass()));
+            return doGetMethod(httpRequest);
         }
+        return doPostMethod(httpRequest);
+    }
+
+    private HttpResponse doPostMethod(final HttpRequest httpRequest) {
         Map<String, String> body = httpRequest.getBody();
         Optional<User> maybeUser = InMemoryUserRepository.findByAccount(body.get("account"));
         if (httpRequest.matchRequestMethod(Method.POST) && maybeUser.isPresent() && checkUserPassword(body, maybeUser.get())) {
@@ -56,6 +55,15 @@ public class LoginHandler implements Handler {
         }
         return createHttpResponse(ResponseStatusCode.UNAUTHORIZED,
                 FileReader.getFile(UNAUTHORIZED_RESOURCE_PATH, getClass()));
+    }
+
+    private HttpResponse doGetMethod(final HttpRequest httpRequest) {
+        if (SessionManager.findSession(httpRequest.getCookieKey())
+                .isPresent()) {
+            return createHttpResponse(ResponseStatusCode.OK,
+                    FileReader.getFile(INDEX_RESOURCE_PATH, getClass()));
+        }
+        return createHttpResponse(ResponseStatusCode.OK, FileReader.getFile(LOGIN_RESOURCE_PATH, getClass()));
     }
 
     private HttpResponse createHttpResponse(ResponseStatusCode responseStatusCode, String resourcePath) {

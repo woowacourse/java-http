@@ -4,6 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RequestBody {
+
+    private static final String BODY_DELIMITER = "&";
+    private static final String BODY_CONTENT_VALUE_DELIMITER = "=";
+    private static final int BODY_KEY_INDEX = 0;
+    private static final int BODY_VALUE_INDEX = 1;
+
     private final Map<String, String> body;
 
     private RequestBody(final Map<String, String> body) {
@@ -12,13 +18,17 @@ public class RequestBody {
 
     public static RequestBody from(final String input) {
         Map<String, String> body = new HashMap<>();
-        if(input.isBlank()) {
+        if(input.equals("")) {
             return new RequestBody(body);
         }
-        String[] splitBody = input.split("&");
-        for (String s : splitBody) {
-            String[] split = s.split("=");
-            body.put(split[0], split[1]);
+        return splitBody(input, body);
+    }
+
+    private static RequestBody splitBody(final String input, final Map<String, String> body) {
+        String[] bodyContents = input.split(BODY_DELIMITER);
+        for (String bodyContent : bodyContents) {
+            String[] splitBodyContent = bodyContent.split(BODY_CONTENT_VALUE_DELIMITER);
+            body.put(splitBodyContent[BODY_KEY_INDEX], splitBodyContent[BODY_VALUE_INDEX]);
         }
         return new RequestBody(body);
     }

@@ -12,7 +12,6 @@ public class ViewResolver {
     private static final String STATIC_RESOURCE_PATH = "static";
 
     public static HttpResponse staticFileRequest(HttpRequest httpRequest) {
-
         return staticFileRequest(httpRequest.getUri());
     }
 
@@ -22,9 +21,15 @@ public class ViewResolver {
             String content = new String(Files.readAllBytes(filePath));
 
             String contentType = FileExtension.findContentType(fileName);
-            return new HttpResponse(HttpStatus.OK, contentType, content);
+            return new HttpResponse.Builder()
+                    .statusCode(HttpStatus.OK)
+                    .header(HttpHeaderType.CONTENT_TYPE, contentType)
+                    .responseBody(content)
+                    .build();
         } catch (IOException | FileNotExistException e) {
-            return new HttpResponse(HttpStatus.NOT_FOUND, null, "");
+            return new HttpResponse.Builder()
+                    .statusCode(HttpStatus.NOT_FOUND)
+                    .build();
         }
     }
 

@@ -1,35 +1,74 @@
 package org.apache.coyote.http11;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class HttpResponse {
+
+    private static final String PROTOCOL_VERSION = "HTTP/1.1";
 
     private final String protocolVersion;
     private final HttpStatus statusCode;
-    private final String contentType;
-    private final int contentLength;
+    private final Map<String, String> headers;
     private final String responseBody;
 
-    public HttpResponse(HttpStatus statusCode, String contentType, String responseBody) {
-        this("HTTP/1.1", statusCode, contentType, responseBody);
+    public static class Builder {
+
+        private String protocolVersion;
+        private HttpStatus statusCode;
+        private Map<String, String> headers;
+        private String responseBody;
+
+        public Builder() {
+            this.protocolVersion = PROTOCOL_VERSION;
+            this.headers = new LinkedHashMap<>();
+        }
+
+        public Builder statusCode(HttpStatus statusCode) {
+            this.statusCode = statusCode;
+            return this;
+        }
+
+        public Builder header(String headerName, String headerValue) {
+            this.headers.put(headerName, headerValue);
+            return this;
+        }
+
+        public Builder responseBody(String responseBody) {
+            this.responseBody = responseBody;
+            int contentLength = responseBody.getBytes().length;
+            this.headers.put(HttpHeaderType.CONTENT_LENGTH, String.valueOf(contentLength));
+            return this;
+        }
+
+        public HttpResponse build() {
+            return new HttpResponse(this);
+        }
     }
 
-    public HttpResponse(String protocolVersion, HttpStatus statusCode, String contentType, String responseBody) {
-        this.protocolVersion = protocolVersion;
-        this.statusCode = statusCode;
-        this.contentType = contentType;
-        this.contentLength = responseBody.getBytes().length;
-        this.responseBody = responseBody;
+    public HttpResponse(Builder builder) {
+        this.protocolVersion = builder.protocolVersion;
+        this.statusCode = builder.statusCode;
+        this.headers = builder.headers;
+        this.responseBody = builder.responseBody;
     }
 
     public byte[] toResponse() {
-        if (statusCode.isNotFound()) {
-            return (protocolVersion + " " + statusCode.toResponseMessage()).getBytes();
-        }
         return String.join("\r\n",
                 protocolVersion + " " + statusCode.toResponseMessage() + " ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + contentLength + " ",
-                "",
+                headersToResponse(),
                 responseBody).getBytes();
+    }
+
+    private String headersToResponse() {
+        StringBuilder headerResponse = new StringBuilder();
+        for (String headerName : headers.keySet()) {
+            headerResponse.append(headerName)
+                    .append(": ")
+                    .append(headers.get(headerName))
+                    .append(" \r\n");
+        }
+        return headerResponse.toString();
     }
 
     public String getProtocolVersion() {
@@ -40,12 +79,8 @@ public class HttpResponse {
         return statusCode;
     }
 
-    public String getContentType() {
-        return contentType;
-    }
-
-    public int getContentLength() {
-        return contentLength;
+    public String getHeader(String headerName) {
+        return headers.get(headerName);
     }
 
     public String getResponseBody() {

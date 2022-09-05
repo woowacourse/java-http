@@ -25,8 +25,10 @@ class ViewResolverTest {
         assertAll(
                 () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),
                 () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.OK),
-                () -> assertThat(httpResponse.getContentType()).isEqualTo(FileExtension.JS.getContentType()),
-                () -> assertThat(httpResponse.getContentLength()).isEqualTo(expectedResponseBody.getBytes().length),
+                () -> assertThat(httpResponse.getHeader(HttpHeaderType.CONTENT_TYPE)).isEqualTo(
+                        FileExtension.JS.getContentType()),
+                () -> assertThat(httpResponse.getHeader(HttpHeaderType.CONTENT_LENGTH)).isEqualTo(
+                        String.valueOf(expectedResponseBody.getBytes().length)),
                 () -> assertThat(httpResponse.getResponseBody()).isEqualTo(expectedResponseBody)
         );
     }

@@ -60,7 +60,8 @@ class LoginHandlerTest {
         assertAll(
                 () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.FOUND),
                 () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),
-                () -> assertThat(httpResponse.getHeader(HttpHeaderType.LOCATION)).isEqualTo("/index.html")
+                () -> assertThat(httpResponse.getHeader(HttpHeaderType.LOCATION)).isEqualTo("/index.html"),
+                () -> assertThat(httpResponse.getHeader(HttpHeaderType.SET_COOKIE).startsWith("JSESSIONID")).isTrue()
         );
     }
 

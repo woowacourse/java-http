@@ -20,20 +20,20 @@
 - [ ] Cookie에 JSESSIONID 값 저장하기
   - [ ] 로그인에 성공하면 쿠키와 세션을 활용해서 로그인 상태를 유지해야 한다.
     - HTTP 서버의 세션을 사용하여 로그인 여부를 저장한다. 그 전에 먼저 쿠키를 구현한다.
-  - [ ] 세션 아이디를 전달하는 이름으로는 `JSESSIONID`를 사용한다. 서버에서 HTTP 응답을 전달할 때 응답 헤더에 `Set-Cookie`를 추가하고 `JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46` 형태로 값을 전달하면 클라이언트 요청 헤더의 Cookie 필드에 값이 추가된다.
-     ```
-    GET /index.html HTTP/1.1
-    Host: localhost:8080
-    Connection: keep-alive
-    Accept: */*
-    Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46
-    ```
-  - [ ] Cookie 클래스를 추가하고 HTTP Request Header의 Cookie에 `JSESSIONID`가 없으면 HTTP Response Header에 `Set-Cookie`를 반환해주는 기능을 구현한다.
+  - [x] 세션 아이디를 전달하는 이름으로는 `JSESSIONID`를 사용한다. 서버에서 HTTP 응답을 전달할 때 응답 헤더에 `Set-Cookie`를 추가하고 `JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46` 형태로 값을 전달하면 클라이언트 요청 헤더의 Cookie 필드에 값이 추가된다.
      ```
     HTTP/1.1 200 OK 
     Set-Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46
     Content-Length: 5571
     Content-Type: text/html;charset=utf-8;
+    ```
+  - [ ] Cookie 클래스를 추가하고 HTTP Request Header의 Cookie에 `JSESSIONID`가 없으면 HTTP Response Header에 `Set-Cookie`를 반환해주는 기능을 구현한다.
+    ```
+    GET /index.html HTTP/1.1
+    Host: localhost:8080
+    Connection: keep-alive
+    Accept: */*
+    Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46
     ```
 - [ ] Session 구현하기
   - [ ] 쿠키에서 전달 받은 JSESSIONID 값으로 로그인 여부를 체크한다.

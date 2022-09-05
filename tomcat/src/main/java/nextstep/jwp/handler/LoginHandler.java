@@ -4,7 +4,10 @@ import static org.apache.coyote.http11.ViewResolver.staticFileRequest;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
+import org.apache.coyote.http11.model.HttpHeaderType;
+import org.apache.coyote.http11.model.HttpStatus;
 import org.apache.coyote.http11.model.RequestParser;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.response.HttpResponse;
@@ -38,6 +41,11 @@ public class LoginHandler {
         if (!user.checkPassword(request.getBodyValue(PASSWORD))) {
             return HttpResponse.redirect(UNAUTHORIZED_PAGE);
         }
-        return HttpResponse.redirect(INDEX_PAGE);
+        UUID cookie = UUID.randomUUID();
+        return new HttpResponse.Builder()
+                .statusCode(HttpStatus.FOUND)
+                .addCookie(cookie)
+                .header(HttpHeaderType.LOCATION, INDEX_PAGE)
+                .build();
     }
 }

@@ -9,11 +9,10 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.web.FileRequestHandler;
-import org.apache.coyote.web.RequestHandler;
+import org.apache.coyote.web.RequestMapping;
 import org.apache.coyote.web.request.HttpRequest;
 import org.apache.coyote.web.request.HttpRequestParser;
-import org.apache.coyote.web.response.HttpResponse;
+import org.apache.coyote.web.response.SimpleHttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,19 +38,11 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream bufferedOutputStream = new BufferedOutputStream(connection.getOutputStream())) {
 
             HttpRequest httpRequest = HttpRequestParser.parse(bufferedReader);
-            HttpResponse httpResponse = branchRequest(httpRequest);
-
-            bufferedOutputStream.write(httpResponse.createHttpResponse().getBytes());
-            bufferedOutputStream.flush();
+            SimpleHttpResponse simpleHttpResponse = new SimpleHttpResponse(bufferedOutputStream);
+            RequestMapping requestMapping = new RequestMapping();
+            requestMapping.handle(httpRequest, simpleHttpResponse);
         } catch (IOException | UncheckedServletException | NullPointerException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private HttpResponse branchRequest(final HttpRequest httpRequest) throws IOException {
-        if (httpRequest.isFileRequest()) {
-            return new FileRequestHandler().handle(httpRequest);
-        }
-        return new RequestHandler().handle(httpRequest);
     }
 }

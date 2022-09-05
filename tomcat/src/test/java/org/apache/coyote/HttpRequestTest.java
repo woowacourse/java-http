@@ -62,37 +62,6 @@ class HttpRequestTest {
     }
 
     @Test
-    void getRequestExtension() throws IOException {
-        HttpRequest httpRequest = HttpRequestParser.parse(createBufferedReader(HTTP_GET_REQUEST));
-        assertThat(httpRequest.getRequestExtension()).isEqualTo("html");
-    }
-
-    @Test
-    void getDefaultRequestExtension() throws IOException {
-        HttpRequest httpRequest = HttpRequestParser.parse(createBufferedReader("GET /api/login HTTP/1.1 \r\n"));
-        assertThat(httpRequest.getRequestExtension()).isEqualTo("strings");
-    }
-
-    @Test
-    void isFileRequest() throws IOException {
-        HttpRequest httpRequest = HttpRequestParser.parse(createBufferedReader(HTTP_GET_REQUEST));
-        assertThat(httpRequest.isFileRequest()).isTrue();
-    }
-
-    @Test
-    void isNotFileRequest() throws IOException {
-        HttpRequest httpRequest = HttpRequestParser.parse(createBufferedReader("GET /api/login HTTP/1.1 \r\n"));
-        assertThat(httpRequest.isFileRequest()).isFalse();
-    }
-
-    @Test
-    void isSameRequestUrl() throws IOException {
-        HttpRequest httpRequest = HttpRequestParser.parse(
-                createBufferedReader("GET /login?account=gugu&password=password HTTP/1.1 \r\n"));
-        assertThat(httpRequest.isSameRequestUrl("/login")).isTrue();
-    }
-
-    @Test
     void getSession() throws IOException {
         HttpRequest httpRequest = HttpRequestParser.parse(createBufferedReader(HTTP_GET_REQUEST_WITH_COOKIE));
         assertThat(httpRequest.getSession().get()).isEqualTo("cookie");

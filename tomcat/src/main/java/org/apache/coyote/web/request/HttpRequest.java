@@ -26,24 +26,8 @@ public class HttpRequest {
         this.parameters = parameters;
     }
 
-    public boolean isFileRequest() {
-        return httpRequestLine.getFileExtension().isPresent();
-    }
-
-    public String getRequestExtension() {
-        Optional<String> fileExtension = httpRequestLine.getFileExtension();
-        if (fileExtension.isEmpty()) {
-            return DEFAULT_REQUEST_EXTENSION;
-        }
-        return fileExtension.get();
-    }
-
     public boolean isSameHttpMethod(final HttpMethod method) {
         return httpRequestLine.isSameMethod(method);
-    }
-
-    public boolean isSameRequestUrl(final String url) {
-        return httpRequestLine.isSameUrl(url);
     }
 
     public String getParameter(final String name) {
@@ -56,6 +40,10 @@ public class HttpRequest {
                 .filter(value -> value.contains(JSESSIONID))
                 .map(session -> session.split(ASSIGN_DELIMITER)[1])
                 .findFirst();
+    }
+
+    public String getRequestUrl() {
+        return httpRequestLine.getRequestUrl();
     }
 
     public HttpRequestLine getHttpRequestLine() {

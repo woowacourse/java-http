@@ -1,7 +1,6 @@
 package nextstep.jwp.http;
 
 import org.apache.http.HttpHeader;
-import org.apache.http.HttpMethod;
 import org.apache.http.HttpMime;
 import org.junit.jupiter.api.Test;
 
@@ -9,6 +8,8 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 
+import static nextstep.fixtures.HttpFixtures.요청을_생성한다;
+import static org.apache.http.HttpMethod.GET;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestParserTest {
@@ -16,11 +17,11 @@ class RequestParserTest {
     @Test
     void HttpMessage의_첫째줄인_요청_정보를_반환한다() {
         // given
-        final String rawRequest = makeGetRequestWithBody("/index.html", HttpMime.TEXT_HTML.getValue());
+        final String rawRequest = 요청을_생성한다(GET, "/index.html", HttpMime.TEXT_HTML);
         final InputStreamReader inputStreamReader = new InputStreamReader(new ByteArrayInputStream(rawRequest.getBytes()));
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        final RequestInfo expected = new RequestInfo(HttpMethod.GET, "/index.html");
+        final RequestInfo expected = new RequestInfo(GET, "/index.html");
 
         // when
         final Request actual = RequestParser.parse(bufferedReader);
@@ -33,7 +34,7 @@ class RequestParserTest {
     @Test
     void 요청_헤더를_반환한다() {
         // given
-        final String rawRequest = makeGetRequestWithBody("/index.html", HttpMime.TEXT_HTML.getValue());
+        final String rawRequest = 요청을_생성한다(GET, "/index.html", HttpMime.TEXT_HTML);
         final InputStreamReader inputStreamReader = new InputStreamReader(new ByteArrayInputStream(rawRequest.getBytes()));
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
@@ -53,27 +54,15 @@ class RequestParserTest {
     @Test
     void 요청바디를_반환한다() {
         // given
-        final String rawRequest = makeGetRequestWithBody("/index.html", HttpMime.TEXT_HTML.getValue());
+        final String expected = String.join("\r\n", "account=gugu", "password=password");
+        final String rawRequest = 요청을_생성한다(GET, "/index.html", HttpMime.TEXT_HTML, expected);
         final InputStreamReader inputStreamReader = new InputStreamReader(new ByteArrayInputStream(rawRequest.getBytes()));
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-
-        final String expected = String.join("\r\n", "account=gugu", "password=password");
 
         // when
         final Request actual = RequestParser.parse(bufferedReader);
 
         // then
         assertThat(actual.getBody()).isEqualTo(expected);
-    }
-
-    private String makeGetRequestWithBody(final String uri, final String contentType) {
-        return String.join("\r\n",
-                "GET " + uri + " HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Accept: " + contentType + ",*/*;q=0.1",
-                "",
-                "account=gugu",
-                "password=password");
     }
 }

@@ -40,7 +40,7 @@ public class Resource {
         }
     }
 
-    public HttpMime getContentType() throws CustomNotFoundException {
+    public HttpMime getContentType() {
         final URL resource = getClass().getClassLoader().getResource("static" + target);
         validateExist(resource);
         final File file = new File(getUri(resource));

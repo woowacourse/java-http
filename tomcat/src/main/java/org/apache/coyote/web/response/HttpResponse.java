@@ -5,10 +5,10 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import org.apache.coyote.file.StaticFileHandler;
 import org.apache.coyote.support.ContentType;
 import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;
+import org.apache.coyote.support.Url;
 import org.apache.coyote.web.session.Cookie;
 
 public class HttpResponse {
@@ -30,20 +30,19 @@ public class HttpResponse {
         httpHeaders.put(headerName, value);
     }
 
-    public void forward(final String url) throws IOException {
+    public void forward(final Url url) {
         try {
-            if (url.equals("/")) {
+            if (url.isDefaultPath()) {
                 forwardDefault();
                 return;
             }
-            String extension = url.substring(url.lastIndexOf(".") + 1);
-            ContentType contentType = ContentType.from(extension);
-            String responseBody = StaticFileHandler.getFileLines(url);
+            ContentType contentType = ContentType.from(url.extractFileExtension());
+            String responseBody = url.extractFileLines();
             httpHeaders.setContentType(contentType);
             httpHeaders.setContentLength(responseBody.length());
             httpResponseExchange.response(httpStatus, httpHeaders, responseBody);
         } catch (IOException e) {
-            sendError(HttpStatus.NOT_FOUND, "/404.html");
+            sendError(HttpStatus.NOT_FOUND, Url.createUrl("/404.html"));
         }
     }
 
@@ -54,31 +53,30 @@ public class HttpResponse {
         httpResponseExchange.response(httpStatus, httpHeaders, responseBody);
     }
 
-    public void redirect(final String url) {
+    public void redirect(final Url url) {
         try {
             httpStatus = HttpStatus.FOUND;
-            ContentType contentType = ContentType.from(url.substring(url.lastIndexOf(".") + 1));
-            String responseBody = StaticFileHandler.getFileLines(url);
-            httpHeaders.setLocation(url);
+            ContentType contentType = ContentType.from(url.extractFileExtension());
+            String responseBody = url.extractFileLines();
+            httpHeaders.setLocation(url.getValue());
             httpHeaders.setContentType(contentType);
             httpHeaders.setContentLength(responseBody.length());
             httpResponseExchange.response(httpStatus, httpHeaders, responseBody);
         } catch (IOException e) {
-            sendError(HttpStatus.NOT_FOUND, "/404.html");
+            sendError(HttpStatus.NOT_FOUND, Url.createUrl("/404.html"));
         }
     }
 
-    public void sendError(final HttpStatus httpStatus, final String url) {
-        setErrorStatus(httpStatus);
-        ContentType contentType = ContentType.from(url.substring(url.lastIndexOf(".") + 1));
+    public void sendError(final HttpStatus httpStatus, final Url url) {
         try {
-            String responseBody = StaticFileHandler.getFileLines(url);
+            setErrorStatus(httpStatus);
+            ContentType contentType = ContentType.from(url.extractFileExtension());
+            String responseBody = url.extractFileLines();
             httpHeaders.setContentType(contentType);
-            httpHeaders.setLocation(url);
             httpHeaders.setContentLength(responseBody.length());
             httpResponseExchange.response(httpStatus, httpHeaders, responseBody);
         } catch (IOException e) {
-            sendError(HttpStatus.NOT_FOUND, "/404.html");
+            sendError(HttpStatus.NOT_FOUND, Url.createUrl("/404.html"));
         }
     }
 

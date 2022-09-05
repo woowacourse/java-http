@@ -6,6 +6,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.InvalidUserException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.support.HttpStatus;
+import org.apache.coyote.support.Url;
 import org.apache.coyote.web.request.HttpRequest;
 import org.apache.coyote.web.response.HttpResponse;
 import org.slf4j.Logger;
@@ -25,13 +26,13 @@ public class UserCreateController extends AbstractController {
                 throw new InvalidUserException("이미 존재하는 계정입니다.");
             }
             InMemoryUserRepository.save(request.toDomain());
-            httpResponse.redirect("/index.html");
+            httpResponse.redirect(Url.createUrl("/index.html"));
         } catch (InvalidUserException e) {
             LOGGER.error("error", e);
-            httpResponse.sendError(HttpStatus.BAD_REQUEST, "/400.html");
+            httpResponse.sendError(HttpStatus.BAD_REQUEST, Url.createUrl("/400.html"));
         } catch (Exception e) {
             LOGGER.error("error", e);
-            httpResponse.sendError(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html");
+            httpResponse.sendError(HttpStatus.INTERNAL_SERVER_ERROR, Url.createUrl("/500.html"));
         }
     }
 }

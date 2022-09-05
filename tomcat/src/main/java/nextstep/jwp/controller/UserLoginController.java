@@ -5,6 +5,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.support.HttpStatus;
+import org.apache.coyote.support.Url;
 import org.apache.coyote.web.request.HttpRequest;
 import org.apache.coyote.web.response.HttpResponse;
 import org.apache.coyote.web.session.Cookie;
@@ -25,16 +26,16 @@ public class UserLoginController extends AbstractController {
                     .orElseThrow(UserNotFoundException::new);
             if (user.checkPassword(request.getPassword())) {
                 addCookie(httpResponse, user);
-                httpResponse.redirect("/index.html");
+                httpResponse.redirect(Url.createUrl("/index.html"));
                 return;
             }
-            httpResponse.sendError(HttpStatus.UNAUTHORIZED, "/401.html");
+            httpResponse.sendError(HttpStatus.UNAUTHORIZED, Url.createUrl("/401.html"));
         } catch (UserNotFoundException e) {
             LOGGER.error("error", e);
-            httpResponse.sendError(HttpStatus.BAD_REQUEST, "/400.html");
+            httpResponse.sendError(HttpStatus.BAD_REQUEST, Url.createUrl("/400.html"));
         } catch (Exception e) {
             LOGGER.error("error", e);
-            httpResponse.sendError(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html");
+            httpResponse.sendError(HttpStatus.INTERNAL_SERVER_ERROR, Url.createUrl("/500.html"));
         }
     }
 

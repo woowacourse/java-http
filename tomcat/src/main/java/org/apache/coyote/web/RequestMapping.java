@@ -6,6 +6,7 @@ import java.util.Map;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.UserCreateController;
 import nextstep.jwp.controller.UserLoginController;
+import org.apache.coyote.support.Url;
 import org.apache.coyote.web.request.HttpRequest;
 import org.apache.coyote.web.response.HttpResponse;
 
@@ -24,6 +25,6 @@ public class RequestMapping {
             controller.service(httpRequest, httpResponse);
             return;
         }
-        httpResponse.forward(httpRequest.getRequestUrl());
+        httpResponse.forward(Url.createUrl(httpRequest.getRequestUrl()));
     }
 }

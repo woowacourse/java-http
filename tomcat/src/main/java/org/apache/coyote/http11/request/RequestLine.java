@@ -45,6 +45,10 @@ public class RequestLine {
         return requestUri.containsQuery();
     }
 
+    public boolean isPostMethod() {
+        return method.isPost();
+    }
+
     public String getPath() {
         return requestUri.getPath();
     }

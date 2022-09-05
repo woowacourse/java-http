@@ -2,6 +2,8 @@ package org.apache.coyote.http11.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Map;
+import org.apache.coyote.http11.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,33 +16,43 @@ public class HttpRequest {
     private final RequestBody requestBody;
 
 
-    private HttpRequest(final RequestLine requestLine, final RequestHeaders requestHeaders) {
+    private HttpRequest(final RequestLine requestLine, final RequestHeaders requestHeaders,
+                        final RequestBody requestBody) {
         this.requestLine = requestLine;
         this.requestHeaders = requestHeaders;
-        this.requestBody = new RequestBody();
+        this.requestBody = requestBody;
     }
 
     public static HttpRequest from(final BufferedReader bufferedReader) {
         try {
             final RequestLine requestLine = RequestLine.from(bufferedReader.readLine());
             final RequestHeaders requestHeaders = RequestHeaders.from(bufferedReader);
-            return new HttpRequest(requestLine, requestHeaders);
+            final RequestBody requestBody = RequestBody.of(bufferedReader, requestHeaders);
+            return new HttpRequest(requestLine, requestHeaders, requestBody);
         } catch (final IOException e) {
             log.error("invalid input", e);
             throw new IllegalArgumentException("올바른 HttpRequest 형식이 아닙니다.");
         }
     }
 
-    public String getUri() {
-        return requestLine.getPath();
+    public String findQueryValue(final String key) {
+        return requestLine.findQueryValue(key);
     }
 
     public boolean containsQuery() {
         return requestLine.containsQuery();
     }
 
-    public String findQueryValue(final String key) {
-        return requestLine.findQueryValue(key);
+    public boolean isPostMethod() {
+        return requestLine.isPostMethod();
+    }
+
+    public String getUri() {
+        return requestLine.getPath();
+    }
+
+    public HttpMethod getMethod() {
+        return requestLine.getMethod();
     }
 
     public RequestLine getRequestLine() {
@@ -51,7 +63,7 @@ public class HttpRequest {
         return requestHeaders;
     }
 
-    public RequestBody getRequestBody() {
-        return requestBody;
+    public Map<String, String> parseApplicationFormData() {
+        return requestBody.parseApplicationFormData();
     }
 }

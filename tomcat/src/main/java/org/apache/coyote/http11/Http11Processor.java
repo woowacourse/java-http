@@ -40,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-            final String response = getResponse(httpRequest);
+            final String response = route(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -49,14 +49,15 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getResponse(final HttpRequest httpRequest) {
+    private String route(final HttpRequest httpRequest) {
         final String requestUri = httpRequest.getUri();
+        log.info("request method: {}, uri: {}", httpRequest.getMethod(), requestUri);
 
         if (requestUri.equals("/login")) {
             return createLoginResponse(httpRequest);
         }
         if (requestUri.equals("/register")) {
-            return createRegisterResponse();
+            return createRegisterResponse(httpRequest);
         }
         if (!requestUri.equals("/")) {
             return createResponse(StatusCode.OK, ContentType.findByUri(requestUri), createResponseBody(requestUri));
@@ -82,7 +83,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createRegisterResponse() {
+    private String createRegisterResponse(final HttpRequest httpRequest) {
+        if (httpRequest.isPostMethod()) {
+            userService.register(httpRequest);
+            return createRedirectResponse(StatusCode.FOUND, "/index.html");
+        }
+
         return createResponse(StatusCode.OK, ContentType.HTML, createResponseBody("/register.html"));
     }
 

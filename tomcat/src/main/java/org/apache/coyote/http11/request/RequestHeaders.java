@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,13 +47,18 @@ public class RequestHeaders {
     private static void addHeader(final Map<String, String> headers, final String line) {
         final String[] field = line.split(": ");
         validateFieldLength(field);
-        headers.put(field[0], field[1]);
+        headers.put(field[0], field[1].trim());
     }
 
     private static void validateFieldLength(final String[] field) {
         if (field.length != DEFAULT_HEADER_FIELD_LENGTH) {
             throw new IllegalArgumentException("올바른 Header Field 형식이 아닙니다.");
         }
+    }
+
+    public String findField(final String fieldName) {
+        return Optional.ofNullable(headers.get(fieldName))
+                .orElseThrow(() -> new NoSuchElementException("Header Field에 key 값이 존재하지 않습니다."));
     }
 
     public Map<String, String> getHeaders() {

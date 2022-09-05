@@ -27,6 +27,7 @@ import nextstep.jwp.model.User;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String SESSION_COOKIE_NAME = "JSESSIONID";
 
     private final Socket connection;
     private final ResponseAssembler responseAssembler;
@@ -111,9 +112,9 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void processCookie(Cookie cookie, Http11Response response, User user) {
-        if (!cookie.hasCookie("JSESSIONID")) {
+        if (!cookie.hasCookie(SESSION_COOKIE_NAME)) {
             String jSessionId = UUID.randomUUID().toString();
-            response.setHeader("Set-Cookie", "JSESSIONID=" + jSessionId);
+            response.addCookie(SESSION_COOKIE_NAME, jSessionId);
             Session.put(jSessionId, user);
         }
     }

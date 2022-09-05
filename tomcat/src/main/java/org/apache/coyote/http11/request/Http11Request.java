@@ -31,21 +31,21 @@ public class Http11Request {
 
     public Cookie getCookies() {
         String rawCookie = header.get("Cookie");
+        Cookie cookie = new Cookie();
 
         if (rawCookie == null) {
-            return new Cookie(Collections.emptyMap());
+            return cookie;
         }
 
-        Map<String, String> cookies = new HashMap<>();
         String[] eachCookies = rawCookie.split(";");
         for (String eachCookie : eachCookies) {
             String[] params = eachCookie.split("=");
             String cookieKey = params[0].strip();
             String cookieValue = params[1].strip();
-            cookies.put(cookieKey, cookieValue);
+            cookie.setCookie(cookieKey, cookieValue);
         }
 
-        return new Cookie(cookies);
+        return cookie;
     }
 
     public Map<String, String> getBody() {
@@ -53,7 +53,6 @@ public class Http11Request {
         String[] rawBodies = body.split("&");
 
         for (String rawBody : rawBodies) {
-            System.out.println(rawBody);
             String[] params = rawBody.split("=");
             String paramName = params[0];
             String paramValue = params[1];

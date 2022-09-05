@@ -30,10 +30,10 @@ public class LoginHandler implements Handler {
 
     private static String login(HttpRequest httpRequest) {
         Optional<User> user = InMemoryUserRepository.findByAccount(
-                httpRequest.getQueryParam().getQueryValue("account"));
+                httpRequest.getRequestBody().getRequestBody().get("account"));
         if (user.isPresent()) {
             log.info(user.get().toString());
-            if (user.get().checkPassword(httpRequest.getQueryParam().getQueryValue("password"))) {
+            if (user.get().checkPassword(httpRequest.getRequestBody().getRequestBody().get("password"))) {
                 return "/index.html";
             }
         }

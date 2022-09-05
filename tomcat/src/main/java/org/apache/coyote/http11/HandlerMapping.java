@@ -5,11 +5,13 @@ import java.util.stream.Stream;
 
 import nextstep.jwp.handler.IndexHandler;
 import nextstep.jwp.handler.LoginHandler;
+import nextstep.jwp.handler.RegisterHandler;
 
 public enum HandlerMapping {
 
     DEFAULT("/", IndexHandler::perform),
     LOGIN("/login", LoginHandler::perform),
+    REGISTER("/register", RegisterHandler::perform),
     STATIC_FILE(Constants.NULL, ViewResolver::perform),
     NOF_FOUND(Constants.NULL, HandlerMapping::returnNotFountResponse);
 
@@ -32,7 +34,7 @@ public enum HandlerMapping {
         }
 
         return Stream.of(HandlerMapping.values())
-                .filter(v -> v.url.equals(url))
+                .filter(v -> v.url.startsWith(url))
                 .findAny()
                 .orElse(NOF_FOUND);
     }

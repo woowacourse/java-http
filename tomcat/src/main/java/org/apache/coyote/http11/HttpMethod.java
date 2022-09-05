@@ -29,4 +29,12 @@ public enum HttpMethod {
     public String getValue() {
         return value;
     }
+
+    public boolean isGet() {
+        return this.equals(GET);
+    }
+
+    public boolean isPost() {
+        return this.equals(POST);
+    }
 }

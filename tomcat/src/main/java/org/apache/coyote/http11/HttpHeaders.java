@@ -28,10 +28,18 @@ public class HttpHeaders {
                 .map(header -> header.split(HTTP_HEADER_DELIMITER))
                 .collect(Collectors.toMap(
                         headerValues -> HttpHeader.of(headerValues[0]),
-                        headerValues -> headerValues[1],
+                        headerValues -> removeSpaceInHeaderValue(headerValues[1]),
                         (x, y) -> y,
                         LinkedHashMap::new)
                 );
+    }
+
+    private String removeSpaceInHeaderValue(final String headerValue) {
+        final int length = headerValue.length();
+        if (headerValue.endsWith(" ")) {
+            return headerValue.substring(0, length - 1);
+        }
+        return headerValue;
     }
 
     public HttpHeaders addHeader(final HttpHeader header, final String value) {

@@ -20,7 +20,7 @@ public class HttpResponse {
     public String parseToString() {
         return String.join("\r\n",
                 protocol + " " + status.getCode() + " ",
-                "Content-Type: " + contentType.getValue() + " ",
+                "Content-Type: " + contentType.getType() + " ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);

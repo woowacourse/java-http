@@ -1,18 +1,34 @@
 package org.apache.coyote.http11.response;
 
+import java.util.Arrays;
+import org.apache.coyote.exception.InvalidContentTypeException;
+
 public enum ContentType {
 
-    HTML("text/html;charset=utf-8"),
-    CSS("text/css;charset=utf-8"),
-    JAVASCRIPT("text/javascript;charset=utf-8");
+    TEXT_HTML_CHARSET_UTF_8("html", "text/html;charset=utf-8"),
+    TEXT_CSS("css", "text/css"),
+    TEXT_JAVASCRIPT("js", "text/javascript");
 
-    private final String value;
+    private final String extension;
+    private final String type;
 
-    ContentType(String value) {
-        this.value = value;
+    ContentType(String extension, String type) {
+        this.extension = extension;
+        this.type = type;
     }
 
-    public String getValue() {
-        return value;
+    public static ContentType from(String type) {
+        return Arrays.stream(values())
+                .filter(contentType -> type.equals(contentType.getExtension()))
+                .findFirst()
+                .orElseThrow(InvalidContentTypeException::new);
+    }
+
+    public String getExtension() {
+        return extension;
+    }
+
+    public String getType() {
+        return type;
     }
 }

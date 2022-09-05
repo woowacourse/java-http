@@ -27,7 +27,13 @@ public class FileUtils {
         return ContentType.from(path.substring(fileNameDelimiterIndex + 1));
     }
 
-    public static String readFile(URL resource){
+    public static URL getResource(String uri) {
+        return FileUtils.class
+            .getClassLoader()
+            .getResource("static" + uri);
+    }
+
+    public static String readFile(URL resource) {
         if (resource == null) {
             return EMPTY_FILE;
         }

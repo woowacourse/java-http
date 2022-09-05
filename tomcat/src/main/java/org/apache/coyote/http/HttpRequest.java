@@ -3,7 +3,9 @@ package org.apache.coyote.http;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
+import javassist.NotFoundException;
 
 public class HttpRequest {
 
@@ -51,7 +53,15 @@ public class HttpRequest {
     }
 
     public String getQueryByValue(final String key) {
-        return query.get(key);
+        final String value = query.get(key);
+        validateNull(key, value);
+        return value;
+    }
+
+    private void validateNull(String key, String value){
+        if(value == null){
+            throw new NoSuchElementException(String.format("%s의 값을 찾을 수 없습니다.", key));
+        }
     }
 
     public HttpMethod getHttpMethod() {

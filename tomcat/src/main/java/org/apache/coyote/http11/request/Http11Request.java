@@ -4,7 +4,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.coyote.http11.HttpMethods;
+import org.apache.coyote.http11.Cookie;
+import org.apache.coyote.http11.constant.HttpMethods;
 
 public class Http11Request {
     private final String method;
@@ -31,22 +32,23 @@ public class Http11Request {
         return false;
     }
 
-    public Map<String, String> getCookies() {
-        Map<String, String> cookies = new HashMap<>();
-        String cookie = header.get("Cookie");
+    public Cookie getCookies() {
+        String rawCookie = header.get("Cookie");
 
-        if (cookie == null) {
-            return cookies;
+        if (rawCookie == null) {
+            return new Cookie(Collections.emptyMap());
         }
 
-        String[] eachCookies = cookie.split(";");
+        Map<String, String> cookies = new HashMap<>();
+        String[] eachCookies = rawCookie.split(";");
         for (String eachCookie: eachCookies) {
             String[] params = eachCookie.split("=");
             String cookieKey = params[0].strip();
             String cookieValue = params[1].strip();
             cookies.put(cookieKey, cookieValue);
         }
-        return cookies;
+
+        return new Cookie(cookies);
     }
 
     public Map<String, String> getBody() {

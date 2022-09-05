@@ -11,6 +11,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.constant.HttpMethods;
+import org.apache.coyote.http11.constant.HttpStatus;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.request.RequestAssembler;
 import org.apache.coyote.http11.response.Http11Response;
@@ -40,21 +42,20 @@ public class Http11Processor implements Runnable, Processor {
         process(connection);
     }
 
-    public void get(Http11Request request, OutputStream outputStream) throws IOException {
-        Http11Response response = getMapping(request);
-
-        outputStream.write(response.toMessage().getBytes());
-        outputStream.flush();
+    public Http11Response get(Http11Request request, OutputStream outputStream) throws IOException {
+        if (request.isResource()) {
+            return responseAssembler.resourceResponse(request.getUrl(), HttpStatus.OK);
+        }
+        if (request.getUrl().equals("/login")) {
+            return responseAssembler.resourceResponse("/login.html", HttpStatus.OK);
+        }
+        if (request.getUrl().equals("/register")) {
+            return responseAssembler.resourceResponse("/register.html", HttpStatus.OK);
+        }
+        return generateDefaultResponse();
     }
 
-    public void post(Http11Request request, OutputStream outputStream) throws IOException {
-        Http11Response response = postMapping(request);
-
-        outputStream.write(response.toMessage().getBytes());
-        outputStream.flush();
-    }
-
-    private Http11Response postMapping(Http11Request request) {
+    public Http11Response post(Http11Request request, OutputStream outputStream) throws IOException {
         Map<String, String> bodyParams = request.getBody();
 
         if (request.getUrl().equals("/register")) {
@@ -62,17 +63,19 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (request.getUrl().equals("/login")) {
-            return login(bodyParams);
+            return login(request.getCookies(), bodyParams);
         }
 
         return responseAssembler.redirectResponse("/404.html");
     }
 
-    private Http11Response login(Map<String, String> bodyParams) {
+
+
+    private Http11Response login(Cookie cookies, Map<String, String> bodyParams) {
         String account = Objects.requireNonNull(bodyParams.get("account"), "계정이 입력되지 않았습니다.");
         String password = Objects.requireNonNull(bodyParams.get("password"), "비밀번호가 입력되지 않았습니다.");
 
-        return checkUserInformation(account, password);
+        return checkUserInformation(cookies, account, password);
     }
 
     private Http11Response register(Map<String, String> bodyParams) {
@@ -86,29 +89,24 @@ public class Http11Processor implements Runnable, Processor {
         return responseAssembler.redirectResponse("/index.html");
     }
 
-    private Http11Response getMapping(Http11Request request) {
-        if (request.isResource()) {
-            return responseAssembler.resourceResponse(request.getUrl(), HttpStatus.OK);
-        }
-        if (request.getUrl().equals("/login")) {
-            return responseAssembler.resourceResponse("/login.html", HttpStatus.OK);
-        }
-        if (request.getUrl().equals("/register")) {
-            return responseAssembler.resourceResponse("/register.html", HttpStatus.OK);
-        }
-        return generateDefaultResponse();
-    }
-
-    private Http11Response checkUserInformation(String account, String password) {
+    private Http11Response checkUserInformation(Cookie cookie, String account, String password) {
         Optional<User> userByAccount = InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password));
 
         if (userByAccount.isPresent()) {
             log.info("로그인 성공!" + " 아이디: " + userByAccount.get().getAccount());
-            return responseAssembler.redirectResponse("/index.html");
+            Http11Response response = responseAssembler.redirectResponse("/index.html");
+            processCookie(cookie, response);
+            return response;
         }
 
         return responseAssembler.redirectResponse("/401.html");
+    }
+
+    private void processCookie(Cookie cookie, Http11Response response) {
+        if (!cookie.hasCookie("JSESSIONID")) {
+            response.setHeader("Set-Cookie", "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
+        }
     }
 
     private Http11Response generateDefaultResponse() {
@@ -125,19 +123,28 @@ public class Http11Processor implements Runnable, Processor {
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
         ) {
             Http11Request request = requestAssembler.makeRequest(bufferedReader);
-            executeMethod(outputStream, request);
+            execute(outputStream, request);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void executeMethod(OutputStream outputStream, Http11Request request) throws IOException {
+    private void execute(OutputStream outputStream, Http11Request request) throws IOException {
+        Http11Response response = processByMethod(outputStream, request);
+
+        outputStream.write(response.toMessage().getBytes());
+        outputStream.flush();
+    }
+
+    private Http11Response processByMethod(OutputStream outputStream, Http11Request request) throws IOException {
         if (request.getMethod() == HttpMethods.GET) {
-            get(request, outputStream);
+            return get(request, outputStream);
         }
 
         if (request.getMethod() == HttpMethods.POST) {
-            post(request, outputStream);
+            return post(request, outputStream);
         }
+
+        throw new IllegalArgumentException("지원하지 않는 Http Method입니다.");
     }
 }

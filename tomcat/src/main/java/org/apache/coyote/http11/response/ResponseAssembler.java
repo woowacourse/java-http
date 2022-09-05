@@ -8,11 +8,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.apache.coyote.http11.HttpContent;
-import org.apache.coyote.http11.HttpHeaders;
-import org.apache.coyote.http11.HttpStatus;
-import org.apache.coyote.http11.request.Http11Request;
-import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.constant.HttpContent;
+import org.apache.coyote.http11.constant.HttpHeaders;
+import org.apache.coyote.http11.constant.HttpStatus;
 
 public class ResponseAssembler {
 

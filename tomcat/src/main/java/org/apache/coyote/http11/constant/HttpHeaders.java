@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.constant;
 
 public enum HttpHeaders {
     CONTENT_TYPE("Content-Type"),

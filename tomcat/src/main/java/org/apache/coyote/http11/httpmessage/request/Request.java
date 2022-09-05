@@ -4,6 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.UUID;
+import org.apache.catalina.Session;
+import org.apache.catalina.SessionManager;
 import org.apache.coyote.http11.httpmessage.common.Headers;
 import org.apache.coyote.http11.httpmessage.common.HttpCookie;
 import org.apache.coyote.http11.httpmessage.request.requestbody.RequestBody;
@@ -67,10 +70,19 @@ public class Request {
         return headers.exist(headerName);
     }
 
+    public Session getSession(final boolean needNewSession) {
+        if (needNewSession) {
+            final Session session = new Session(String.valueOf(UUID.randomUUID()));
+            SessionManager.add(session);
+            return session;
+        }
+        return SessionManager.findSession(getCookie().getCookie("JSESSIONID"));
+    }
+
     public HttpCookie getCookie() {
         if (headers.exist("Cookie")) {
             return HttpCookie.parse(headers.getValue("Cookie"));
         }
-        throw new IllegalArgumentException("Cookie 헤더가 존재하지 않습니다.");
+        return null;
     }
 }

@@ -21,7 +21,11 @@ public class HttpCookie {
         return new HttpCookie(new HashMap<>(cookies));
     }
 
-    public boolean existJsessionId() {
-        return cookies.containsKey("JSESSIONID");
+    public boolean exist(final String name) {
+        return cookies.containsKey(name);
+    }
+
+    public String getCookie(final String name) {
+        return cookies.get(name);
     }
 }

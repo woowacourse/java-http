@@ -9,11 +9,11 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.UUID;
 import nextstep.jwp.UserService;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import org.apache.catalina.Session;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.httpmessage.common.ContentType;
 import org.apache.coyote.http11.httpmessage.request.Request;
@@ -78,14 +78,18 @@ public class Http11Processor implements Runnable, Processor {
 
             if (user.isPresent() && user.get().checkPassword(userInput.get("password"))) {
                 log.info("존재하는 유저입니다. ::: " + user);
+
                 if (request.hasHeader("Cookie")) {
-                    return Response.redirect(ContentType.HTML, "http://localhost:8080/index.html");
+                    return Response.redirect(ContentType.HTML, "/index.html");
                 }
-                return Response.redirect(ContentType.HTML, "http://localhost:8080/index.html")
-                        .addHeader("Set-Cookie", "JSESSIONID="+ UUID.randomUUID());
+                final Session session = request.getSession(!request.hasHeader("Cookie"));
+                log.info("새로운 sessionId ::: " + session.getId());
+                session.setAttribute("user", user);
+                return Response.redirect(ContentType.HTML, "/index.html")
+                        .addHeader("Set-Cookie", "JSESSIONID="+ session.getId());
             }
             log.info("존재하지 않는 유저입니다. ::: " + userInput.get("account"));
-            return Response.redirect(ContentType.HTML, "http://localhost:8080/401.html");
+            return Response.redirect(ContentType.HTML, "/401.html");
         }
 
         if (request.isMatchUri("/register")) {

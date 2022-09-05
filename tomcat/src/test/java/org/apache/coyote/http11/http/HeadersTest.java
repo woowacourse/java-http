@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedReader;
 import java.util.Map;
+import org.apache.coyote.http11.http.domain.ContentType;
+import org.apache.coyote.http11.http.domain.Headers;
 import org.junit.jupiter.api.Test;
 import support.BufferedReaderFactory;
 

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.http;
+package org.apache.coyote.http11.http.domain;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -7,6 +7,14 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class RequestTarget {
+
+    private static final String REQUEST_TARGET_DELIMITER = "\\?";
+    private static final String QUERY_STRING_DELIMITER = "&";
+    private static final String QUERY_PARAM_DELIMITER = "=";
+    private static final int URI_INDEX = 0;
+    private static final int QUERY_STRING_INDEX = 1;
+    private static final int QUERY_PARAM_KEY = 0;
+    private static final int QUERY_PARAM_VALUE = 1;
 
     private final String uri;
     private final Map<String, String> queryParameters;
@@ -31,17 +39,17 @@ public class RequestTarget {
 
     private static String parseUri(final String requestTarget) {
         if (containsQueryString(requestTarget)) {
-            return requestTarget.split("\\?")[0];
+            return requestTarget.split(REQUEST_TARGET_DELIMITER)[URI_INDEX];
         }
         return requestTarget;
     }
 
     private static Map<String, String> parseQueryString(final String requestTarget) {
         if (containsQueryString(requestTarget)) {
-            String queryString = requestTarget.split("\\?")[1];
-            return Arrays.stream(queryString.split("&"))
-                    .map(line -> line.split("="))
-                    .collect(Collectors.toMap(line -> line[0], line -> line[1]));
+            String queryString = requestTarget.split(REQUEST_TARGET_DELIMITER)[QUERY_STRING_INDEX];
+            return Arrays.stream(queryString.split(QUERY_STRING_DELIMITER))
+                    .map(line -> line.split(QUERY_PARAM_DELIMITER))
+                    .collect(Collectors.toMap(line -> line[QUERY_PARAM_KEY], line -> line[QUERY_PARAM_VALUE]));
         }
         return new HashMap<>();
     }

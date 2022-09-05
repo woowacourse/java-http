@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.http;
+package org.apache.coyote.http11.http.domain;
 
 import java.io.BufferedReader;
 import java.util.LinkedHashMap;
@@ -11,6 +11,7 @@ public class Headers {
     private static final String HEADER_DELIMITER = ": ";
     private static final int HEADER_KEY = 0;
     private static final int HEADER_VALUE = 1;
+    private static final int BLANK_INDEX = 1;
     private static final String END_OF_LINE = " ";
     private static final String CRLF = "\r\n";
 
@@ -23,7 +24,7 @@ public class Headers {
     public static Headers from(final BufferedReader bufferedReader) {
         return new Headers(bufferedReader.lines()
                 .takeWhile(line -> !line.equals(BLANK))
-                .map(line -> line.substring(0, line.length() - 1)
+                .map(line -> line.substring(0, line.length() - BLANK_INDEX)
                         .split(HEADER_DELIMITER))
                 .collect(Collectors.toMap(line -> line[HEADER_KEY], line -> line[HEADER_VALUE])));
     }

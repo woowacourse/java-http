@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.http;
+package org.apache.coyote.http11.http.domain;
 
 import java.util.Arrays;
 import nextstep.jwp.exception.NotFoundException;
@@ -10,6 +10,9 @@ public enum ContentType {
     APPLICATION_JAVASCRIPT("application/javascript", "js"),
     ;
 
+    private static final String EXTENSION_DELIMITER = "\\.";
+    private static final int EXTENSION_INDEX = 1;
+
     private final String value;
     private final String extension;
 
@@ -20,7 +23,7 @@ public enum ContentType {
 
     public static ContentType from(final String uri) {
         if (containsExtension(uri)) {
-            String extension = uri.split("\\.")[1];
+            String extension = uri.split(EXTENSION_DELIMITER)[EXTENSION_INDEX];
             return findByExtension(extension);
         }
         return TEXT_HTML;

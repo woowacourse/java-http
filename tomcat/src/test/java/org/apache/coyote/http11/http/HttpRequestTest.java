@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.BufferedReader;
 import java.util.Map;
+import org.apache.coyote.http11.http.domain.HttpMethod;
+import org.apache.coyote.http11.http.domain.HttpVersion;
 import org.junit.jupiter.api.Test;
 import support.BufferedReaderFactory;
 

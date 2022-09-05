@@ -1,9 +1,9 @@
 package org.apache.coyote.http11.handler;
 
-import org.apache.coyote.http11.http.ContentType;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
-import org.apache.coyote.http11.http.MessageBody;
+import org.apache.coyote.http11.http.domain.ContentType;
+import org.apache.coyote.http11.http.domain.MessageBody;
 import org.apache.coyote.http11.util.FileReader;
 
 public class ResourceHandler implements Handler {

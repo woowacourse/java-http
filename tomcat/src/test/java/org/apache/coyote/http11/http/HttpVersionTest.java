@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import nextstep.jwp.exception.NotFoundException;
+import org.apache.coyote.http11.http.domain.HttpVersion;
 import org.junit.jupiter.api.Test;
 
 class HttpVersionTest {

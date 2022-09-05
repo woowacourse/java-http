@@ -3,6 +3,8 @@ package org.apache.coyote.http11.http;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import org.apache.coyote.http11.http.domain.ContentType;
+import org.apache.coyote.http11.http.domain.MessageBody;
 import org.junit.jupiter.api.Test;
 
 class HttpResponseTest {

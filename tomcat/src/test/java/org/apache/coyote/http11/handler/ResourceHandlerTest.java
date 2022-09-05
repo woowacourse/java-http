@@ -6,9 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.io.BufferedReader;
 import java.io.File;
 import java.nio.file.Files;
-import org.apache.coyote.http11.http.ContentType;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
+import org.apache.coyote.http11.http.domain.ContentType;
 import org.junit.jupiter.api.Test;
 import support.BufferedReaderFactory;
 

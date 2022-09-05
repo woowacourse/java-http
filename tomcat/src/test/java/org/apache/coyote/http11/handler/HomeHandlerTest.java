@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.BufferedReader;
-import org.apache.coyote.http11.http.ContentType;
 import org.apache.coyote.http11.http.HttpRequest;
 import org.apache.coyote.http11.http.HttpResponse;
+import org.apache.coyote.http11.http.domain.ContentType;
 import org.junit.jupiter.api.Test;
 import support.BufferedReaderFactory;
 

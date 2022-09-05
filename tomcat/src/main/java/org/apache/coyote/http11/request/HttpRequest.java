@@ -32,6 +32,10 @@ public class HttpRequest {
         return Optional.of(path.substring(index + 1));
     }
 
+    public boolean hasQueryParams() {
+        return !uri.getQueryParams().isEmpty();
+    }
+
     public String getProtocol() {
         return protocol;
     }

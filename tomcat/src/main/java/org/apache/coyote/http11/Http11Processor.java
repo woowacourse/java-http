@@ -90,10 +90,17 @@ public class Http11Processor implements Runnable, Processor {
             return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.TEXT_HTML_CHARSET_UTF_8,
                     WELCOME_MESSAGE);
         }
-        if (path.equals("/login")) {
+        if (path.equals("/login") && httpRequest.hasQueryParams()) {
             QueryParams queryParams = uri.getQueryParams();
             Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.getParameterValue("account"));
-            user.ifPresent(value -> log.debug(value.toString()));
+            if (user.isPresent()) {
+                if (user.get().checkPassword(queryParams.getParameterValue("password"))) {
+                    return new HttpResponse(httpRequest.getProtocol(), HttpStatus.FOUND,
+                            ContentType.TEXT_HTML_CHARSET_UTF_8,
+                            getStaticResourceResponse("/index.html"));
+                }
+            }
+            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.FOUND, "/401.html");
         }
         String responseBody = getStaticResourceResponse(path + ".html");
         return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.TEXT_HTML_CHARSET_UTF_8,

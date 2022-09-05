@@ -28,6 +28,10 @@ public class QueryParams {
         }
     }
 
+    public boolean isEmpty() {
+        return queryParams.isEmpty();
+    }
+
     public String getParameterValue(String parameter) {
         return queryParams.get(parameter);
     }

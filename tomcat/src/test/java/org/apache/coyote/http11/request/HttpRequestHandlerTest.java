@@ -3,6 +3,9 @@ package org.apache.coyote.http11.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import org.apache.coyote.http11.request.model.HttpMethod;
 import org.apache.coyote.http11.request.model.HttpRequest;
@@ -20,7 +23,7 @@ class HttpRequestHandlerTest {
 
         @Test
         @DisplayName("요청의 첫 줄을 method, uri, version으로 분리한다.")
-        void firstLine() {
+        void firstLine() throws IOException {
             String request = String.join("\r\n",
                     "GET /index.html HTTP/1.1 ",
                     "Host: localhost:8080 ",
@@ -29,8 +32,9 @@ class HttpRequestHandlerTest {
                     "");
 
             Socket socket = new StubSocket(request);
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            HttpRequest httpRequest = HttpRequestHandler.newHttpRequest(socket);
+            HttpRequest httpRequest = HttpRequestHandler.newHttpRequest(bufferedReader);
 
             assertAll(
                     () -> assertThat(httpRequest.getMethod()).isEqualTo(HttpMethod.GET),
@@ -41,7 +45,7 @@ class HttpRequestHandlerTest {
 
         @Test
         @DisplayName("요청의 헤더를 분리한다.")
-        void headers() {
+        void headers() throws IOException {
             String request = String.join("\r\n",
                     "GET /index.html HTTP/1.1 ",
                     "Host: localhost:8080 ",
@@ -50,8 +54,8 @@ class HttpRequestHandlerTest {
                     "dasd");
 
             Socket socket = new StubSocket(request);
-
-            HttpRequest httpRequest = HttpRequestHandler.newHttpRequest(socket);
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            HttpRequest httpRequest = HttpRequestHandler.newHttpRequest(bufferedReader);
             HttpHeaders headers = httpRequest.getHeaders();
 
             assertAll(

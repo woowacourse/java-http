@@ -1,14 +1,9 @@
 package org.apache.coyote.http11.handler;
 
-import org.apache.coyote.exception.NotFoundPathException;
 import org.apache.coyote.model.request.HttpRequest;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public enum HandlerMapper {
 

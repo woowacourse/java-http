@@ -52,14 +52,13 @@ public class Http11Processor implements Runnable, Processor {
 
     private List<String> extractRequest(InputStream inputStream) throws IOException {
         List<String> request = new ArrayList<>();
-        try (final BufferedReader bufferedReader = new BufferedReader(
-            new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            String line;
-            while (!(line = bufferedReader.readLine()).isEmpty()) {
-                request.add(line);
-            }
-            return request;
+        final BufferedReader bufferedReader = new BufferedReader(
+            new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        String line;
+        while (!(line = bufferedReader.readLine()).isEmpty()) {
+            request.add(line);
         }
+        return request;
     }
 
     private String handle(HttpRequest httpRequest) {
@@ -72,7 +71,8 @@ public class Http11Processor implements Runnable, Processor {
             return FileUtils.readFile(getResource("/login.html"));
         }
         if (httpRequest.equals(ContentType.TEXT_PLAIN)) {
-            String filePath = path + FILE_EXTENSION_SEPARATOR + ContentType.TEXT_HTML.getFileExtension();
+            String filePath =
+                path + FILE_EXTENSION_SEPARATOR + ContentType.TEXT_HTML.getFileExtension();
             return FileUtils.readFile(getResource(filePath));
         }
         return FileUtils.readFile(getResource(path));

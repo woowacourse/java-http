@@ -18,8 +18,7 @@ public class HttpRequest {
     private final HttpHeaders httpHeaders;
     private final String requestBody;
 
-    private HttpRequest(final RequestLine requestLine, final HttpHeaders httpHeaders,
-                        final String requestBody) {
+    public HttpRequest(final RequestLine requestLine, final HttpHeaders httpHeaders, final String requestBody) {
         this.requestLine = requestLine;
         this.httpHeaders = httpHeaders;
         this.requestBody = requestBody;

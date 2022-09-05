@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.message.common.HttpHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.message.common.HttpMethod.GET;
 
 import java.io.BufferedReader;
@@ -7,12 +8,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.message.common.ContentType;
+import org.apache.coyote.http11.message.common.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.request.RequestLine;
 import org.apache.coyote.http11.message.request.RequestUri;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.HttpStatus;
@@ -23,7 +25,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String NEW_LINE = "\r\n";
 
     private final Socket connection;
 
@@ -38,58 +39,53 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final var bufferReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+        try (final var is = connection.getInputStream();
+             final var os = connection.getOutputStream();
+             final var bs = new BufferedReader(new InputStreamReader(is))) {
 
-            HttpRequest request = HttpRequest.parse(readHttpRequest(bufferReader));
+            HttpRequest request = generateHttpRequest(bs);
             RequestUri requestUri = request.getRequestUri();
 
             if (request.matches(GET, "/")) {
-                responseHelloWorld(outputStream);
+                responseHelloWorld(os);
                 return;
             }
 
             if (request.matches(GET, "/login")) {
                 if (!request.hasQuery()) {
-                    responseLoginHtml(outputStream);
+                    responseLoginHtml(os);
                     return;
                 }
 
-                responseLogin(outputStream, requestUri);
+                responseLogin(os, requestUri);
                 return;
             }
 
-            if (request.matches(GET, "/register")) {
-                responseRegisterHtml(outputStream);
-                return;
-            }
-
-            responseStaticFiles(outputStream, requestUri);
+            responseStaticFiles(os, requestUri);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private void responseHelloWorld(final OutputStream outputStream) throws IOException {
+    private void responseHelloWorld(final OutputStream os) throws IOException {
         HttpResponse httpResponse = new HttpResponse.Builder()
                 .contentType(ContentType.HTML)
                 .body("Hello world!")
                 .build();
 
-        writeHttpResponse(outputStream, httpResponse);
+        writeHttpResponse(os, httpResponse);
     }
 
-    private void responseLoginHtml(final OutputStream outputStream) throws IOException {
+    private void responseLoginHtml(final OutputStream os) throws IOException {
         HttpResponse httpResponse = new HttpResponse.Builder()
                 .contentType(ContentType.HTML)
                 .body(StaticFileUtil.readFile("/login.html"))
                 .build();
 
-        writeHttpResponse(outputStream, httpResponse);
+        writeHttpResponse(os, httpResponse);
     }
 
-    private void responseLogin(final OutputStream outputStream, final RequestUri requestUri) throws IOException {
+    private void responseLogin(final OutputStream os, final RequestUri requestUri) throws IOException {
         String account = requestUri.getQuery("account").orElse("");
         String password = requestUri.getQuery("password").orElse("");
 
@@ -103,7 +99,7 @@ public class Http11Processor implements Runnable, Processor {
                     .header("Location", "/401.html")
                     .build();
 
-            writeHttpResponse(outputStream, httpResponse);
+            writeHttpResponse(os, httpResponse);
             return;
         }
 
@@ -112,40 +108,58 @@ public class Http11Processor implements Runnable, Processor {
                 .header("Location", "/index.html")
                 .build();
 
-        writeHttpResponse(outputStream, httpResponse);
+        writeHttpResponse(os, httpResponse);
     }
 
-    private void responseRegisterHtml(final OutputStream outputStream) throws IOException {
+    private void responseRegisterHtml(final OutputStream os) throws IOException {
         HttpResponse response = new HttpResponse.Builder()
                 .contentType(ContentType.HTML)
                 .body(StaticFileUtil.readFile("/register.html"))
                 .build();
 
-        writeHttpResponse(outputStream, response);
+        writeHttpResponse(os, response);
     }
 
-    private void responseStaticFiles(final OutputStream outputStream, final RequestUri requestUri) throws IOException {
+    private void responseStaticFiles(final OutputStream os, final RequestUri requestUri) throws IOException {
         HttpResponse httpResponse = new HttpResponse.Builder()
                 .contentType(requestUri.getExtension())
                 .body(StaticFileUtil.readFile(requestUri.getPath()))
                 .build();
 
-        writeHttpResponse(outputStream, httpResponse);
+        writeHttpResponse(os, httpResponse);
     }
 
-    private String readHttpRequest(final BufferedReader bufferedReader) throws IOException {
-        StringBuilder httpRequest = new StringBuilder();
-        while (bufferedReader.ready()) {
-            String line = bufferedReader.readLine();
-            httpRequest.append(line).append(NEW_LINE);
+    private HttpRequest generateHttpRequest(final BufferedReader bs) throws IOException {
+        RequestLine requestLine = new RequestLine(bs.readLine());
+        HttpHeaders httpHeaders = generateHttpHeaders(bs);
+        String body = generateHttpBody(bs, httpHeaders);
+
+        return new HttpRequest(requestLine, httpHeaders, body);
+    }
+
+    private HttpHeaders generateHttpHeaders(final BufferedReader bs) throws IOException {
+        StringBuilder requestHeaders = new StringBuilder();
+
+        String line;
+        while (!(line = bs.readLine()).isEmpty()) {
+            requestHeaders.append(line).append("\r\n");
         }
 
-        return httpRequest.toString();
+        return new HttpHeaders(requestHeaders.toString());
     }
 
-    private void writeHttpResponse(final OutputStream outputStream, final HttpResponse httpResponse)
-            throws IOException {
-        outputStream.write(httpResponse.generateMessage().getBytes());
-        outputStream.flush();
+    private String generateHttpBody(final BufferedReader bs, final HttpHeaders httpHeaders) throws IOException {
+        String rawContentLength = httpHeaders.getHeader(CONTENT_LENGTH).orElse("0");
+        int contentLength = Integer.parseInt(rawContentLength);
+
+        char[] body = new char[contentLength];
+        bs.read(body);
+
+        return new String(body);
+    }
+
+    private void writeHttpResponse(final OutputStream os, final HttpResponse httpResponse) throws IOException {
+        os.write(httpResponse.generateMessage().getBytes());
+        os.flush();
     }
 }

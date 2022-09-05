@@ -9,6 +9,12 @@ import org.apache.coyote.http11.http.HttpHeaders;
 
 public class HttpResponse {
 
+    private static final String NEW_LINE_LETTER = "\r\n";
+    private static final String EMPTY_LETTER = "";
+    private static final String BLANK_LETTER = " ";
+    private static final String COLON_LETTER = ":";
+    private static final String SEMI_COLON_LETTER = ";";
+
     private final HttpVersion httpVersion;
     private final HttpStatus httpStatus;
     private final HttpHeaders headers;
@@ -49,24 +55,24 @@ public class HttpResponse {
     public String generateResponse() {
         final String statusLine = generateStatusLine();
         final String headerLine = generateHeaderLine();
-        return String.join("\r\n", statusLine, headerLine, "", body);
+        return String.join(NEW_LINE_LETTER, statusLine, headerLine, EMPTY_LETTER, body);
     }
 
     private String generateStatusLine() {
-        return String.join(" ",
+        return String.join(BLANK_LETTER,
                 httpVersion.getVersion(),
                 String.valueOf(httpStatus.getCode()),
                 httpStatus.getMessage(),
-                "");
+                EMPTY_LETTER);
     }
 
     private String generateHeaderLine() {
         final List<String> headers = new ArrayList<>();
         for (HttpHeaderType httpHeaderType : this.headers.keySet()) {
-            final String header = String.join(": ", httpHeaderType.getValue(),
-                    String.join(";", this.headers.get(httpHeaderType).getValues()));
-            headers.add(header + " ");
+            final String header = String.join(COLON_LETTER + BLANK_LETTER, httpHeaderType.getValue(),
+                    String.join(SEMI_COLON_LETTER, this.headers.get(httpHeaderType).getValues()));
+            headers.add(header + BLANK_LETTER);
         }
-        return String.join("\r\n", headers);
+        return String.join(NEW_LINE_LETTER, headers);
     }
 }

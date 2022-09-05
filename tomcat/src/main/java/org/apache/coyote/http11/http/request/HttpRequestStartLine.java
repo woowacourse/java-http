@@ -6,6 +6,7 @@ import org.apache.coyote.http11.http.HttpVersion;
 public class HttpRequestStartLine {
 
     private static final int START_LINE_MIN_LENGTH = 3;
+    private static final String BLANK_LETTER = " ";
 
     private final HttpMethod httpMethod;
     private final String path;
@@ -31,7 +32,7 @@ public class HttpRequestStartLine {
     }
 
     private static List<String> parseStartLineInfos(final String startLine) {
-        final List<String> startLineInfos = List.of(startLine.split(" "));
+        final List<String> startLineInfos = List.of(startLine.split(BLANK_LETTER));
         validateStartLineLength(startLineInfos);
         return startLineInfos;
     }

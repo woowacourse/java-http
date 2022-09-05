@@ -12,6 +12,9 @@ import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.header.HttpHeaderType;
 
 public class HttpHeaders {
+
+    private static final String COLON_LETTER = ":";
+
     private final Map<HttpHeaderType, HttpHeader> headers;
 
     private HttpHeaders(final Map<HttpHeaderType, HttpHeader> headers) {
@@ -49,7 +52,7 @@ public class HttpHeaders {
     }
 
     private static List<String> parseHeader(final String line) {
-        final List<String> header = List.of(line.split(":"));
+        final List<String> header = List.of(line.split(COLON_LETTER));
         validateHeader(header);
         return header;
     }

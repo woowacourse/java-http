@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.Regex;
+import org.apache.coyote.http11.header.Header;
 
 public class Headers {
 

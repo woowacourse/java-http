@@ -1,8 +1,11 @@
-package org.apache.coyote.http11.request.header;
+package org.apache.coyote.http11.header;
 
 public enum Header {
 
     Accept("Accept"),
+    CONTENT_TYPE("Content-Type"),
+    CONTENT_LENGTH("Content-Length"),
+    LOCATION("Location"),
     ;
 
     private final String name;

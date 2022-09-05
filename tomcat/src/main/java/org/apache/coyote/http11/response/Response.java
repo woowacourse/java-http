@@ -5,8 +5,8 @@ import java.net.URISyntaxException;
 import java.util.Map;
 import nextstep.jwp.util.ResourceLoader;
 import org.apache.coyote.http11.Regex;
+import org.apache.coyote.http11.header.Header;
 import org.apache.coyote.http11.response.header.ContentType;
-import org.apache.coyote.http11.response.header.Header;
 import org.apache.coyote.http11.response.header.Headers;
 import org.apache.coyote.http11.response.header.StatusCode;
 

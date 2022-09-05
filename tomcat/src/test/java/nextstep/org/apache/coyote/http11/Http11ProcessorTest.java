@@ -165,7 +165,7 @@ class Http11ProcessorTest {
     void 로그인에_성공하면_index_페이지로_redirect한다() {
         // given
         String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login?account=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -188,7 +188,7 @@ class Http11ProcessorTest {
     void 계정_정보가_올바르지_않으면_401_페이지로_redirect한다() {
         // given
         String httpRequest = String.join("\r\n",
-                "GET /login?account=invalid&password=password HTTP/1.1 ",
+                "POST /login?account=invalid&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -212,7 +212,7 @@ class Http11ProcessorTest {
     void 비밀번호가_올바르지_않으면_401_페이지로_redirect한다() {
         // given
         String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=invalid HTTP/1.1 ",
+                "POST /login?account=gugu&password=invalid HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",
@@ -236,7 +236,7 @@ class Http11ProcessorTest {
     void 쿼리스트링에_account나_password가_들어있지_않으면_401_페이지로_redirect한다() {
         // given
         String httpRequest = String.join("\r\n",
-                "GET /login?query=invalid HTTP/1.1 ",
+                "POST /login?query=invalid HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",

@@ -28,7 +28,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String LANDING_PAGE_URL = "/";
     private static final String STATIC_PATH = "static";
     private static final String DEFAULT_EXTENSION = ".html";
-    private static final String LOGIN_PATH = "/login.html";
+    private static final String LOGIN_PATH = "/login";
+    private static final String LOGIN_PAGE_PATH = "/login.html";
     public static final String UNAUTHORIZED_PATH = "/401.html";
     public static final String NOT_FOUND_PATH = "/404.html";
     public static final String INTERNAL_SERVER_ERROR_PATH = "/500.html";
@@ -54,7 +55,7 @@ public class Http11Processor implements Runnable, Processor {
             HttpMethod httpMethod = HttpRequestParser.parseHttpMethod(startLine);
             String uri = HttpRequestParser.parseUri(startLine);
 
-            String response = respond(uri);
+            String response = respond(httpMethod, uri);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -63,9 +64,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String respond(final String uri) {
+    private String respond(final HttpMethod httpMethod, final String uri) {
         try {
-            return accessUri(uri);
+            return accessUri(httpMethod, uri);
         } catch (InvalidLoginFormatException | InvalidPasswordException | MemberNotFoundException e) {
             log.error(e.getMessage(), e);
             return toFoundResponse(UNAUTHORIZED_PATH);
@@ -78,14 +79,32 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String accessUri(final String uri) throws IOException {
-        if (uri.equals(LANDING_PAGE_URL)) {
-            return toOkResponse(ContentType.TEXT_HTML, DEFAULT_RESPONSE_BODY);
-        }
+    private String accessUri(final HttpMethod httpMethod, final String uri) throws IOException {
         String url = HttpRequestParser.parseUrl(uri);
         String queryString = HttpRequestParser.parseQueryString(uri);
-        url = addExtension(url);
-        return accessUrl(url, QueryParams.parseQueryParams(queryString));
+        if (httpMethod == HttpMethod.GET && url.equals(LANDING_PAGE_URL)) {
+            return toOkResponse(ContentType.TEXT_HTML, DEFAULT_RESPONSE_BODY);
+        }
+        if (httpMethod == HttpMethod.GET) {
+            url = addExtension(url);
+        }
+        return accessUrl(httpMethod, url, QueryParams.parseQueryParams(queryString));
+    }
+
+    private String accessUrl(final HttpMethod httpMethod, final String url, final QueryParams queryParams)
+            throws IOException {
+        ContentType contentType = HttpRequestParser.parseContentType(url);
+        if (httpMethod == HttpMethod.GET && url.equals(LOGIN_PAGE_PATH)) {
+            return renderLogin();
+        }
+        if (httpMethod == HttpMethod.POST && url.equals(LOGIN_PATH)) {
+            return login(queryParams);
+        }
+        if (httpMethod == HttpMethod.GET) {
+            String responseBody = ResourcesUtil.readResource(STATIC_PATH + url);
+            return toOkResponse(contentType, responseBody);
+        }
+        return toFoundResponse(NOT_FOUND_PATH);
     }
 
     private String addExtension(String url) {
@@ -96,20 +115,8 @@ public class Http11Processor implements Runnable, Processor {
         return url;
     }
 
-    private String accessUrl(final String url, final QueryParams queryParams) throws IOException {
-        ContentType contentType = HttpRequestParser.parseContentType(url);
-        if (url.equals(LOGIN_PATH)) {
-            return renderLogin(url, queryParams);
-        }
-        String responseBody = ResourcesUtil.readResource(STATIC_PATH + url);
-        return toOkResponse(contentType, responseBody);
-    }
-
-    private String renderLogin(final String url, final QueryParams queryParams) throws IOException {
-        if (queryParams.exists()) {
-            return login(queryParams);
-        }
-        String responseBody = ResourcesUtil.readResource(STATIC_PATH + url);
+    private String renderLogin() throws IOException {
+        String responseBody = ResourcesUtil.readResource(STATIC_PATH + LOGIN_PAGE_PATH);
         return toOkResponse(ContentType.TEXT_HTML, responseBody);
     }
 

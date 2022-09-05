@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -72,14 +73,16 @@ public class Http11Processor implements Runnable, Processor {
 
         if ("/index.html".equals(url)) {
             final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            final Path path = new File(resource.getFile()).toPath();
+            final String responseBody = new String(Files.readAllBytes(path));
 
-            return createResponse("text/html", responseBody);
+            return createResponse(Files.probeContentType(path), responseBody);
         }
 
         if ("/login".equals(url)) {
             final URL resource = getClass().getClassLoader().getResource("static" + url + ".html");
-            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            final Path path = new File(resource.getFile()).toPath();
+            final String responseBody = new String(Files.readAllBytes(path));
 
             User user = InMemoryUserRepository.findByAccount(requestParam.get("account"))
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
@@ -88,21 +91,23 @@ public class Http11Processor implements Runnable, Processor {
                 log.info(user.toString());
             }
 
-            return createResponse("text/html", responseBody);
+            return createResponse(Files.probeContentType(path), responseBody);
         }
 
         if (url.contains(".css")) {
             final URL resource = getClass().getClassLoader().getResource("static" + url);
-            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            final Path path = new File(resource.getFile()).toPath();
+            final String responseBody = new String(Files.readAllBytes(path));
 
-            return createResponse("text/css", responseBody);
+            return createResponse(Files.probeContentType(path), responseBody);
         }
 
         if (url.contains(".js")) {
             final URL resource = getClass().getClassLoader().getResource("static" + url);
-            final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            final Path path = new File(resource.getFile()).toPath();
+            final String responseBody = new String(Files.readAllBytes(path));
 
-            return createResponse("application/javascript", responseBody);
+            return createResponse(Files.probeContentType(path), responseBody);
         }
 
         throw new IllegalArgumentException("올바르지 않은 URL 요청입니다.");

@@ -8,7 +8,7 @@ public class RequestLine {
     private final Method method;
     private final RequestUri uri;
 
-    public RequestLine(final Method method, final RequestUri uri) {
+    private RequestLine(final Method method, final RequestUri uri) {
         this.method = method;
         this.uri = uri;
     }
@@ -34,5 +34,9 @@ public class RequestLine {
 
     public QueryParams getQueryParams() {
         return uri.getQueryParams();
+    }
+
+    public boolean isMethod(final Method method) {
+        return this.method == method;
     }
 }

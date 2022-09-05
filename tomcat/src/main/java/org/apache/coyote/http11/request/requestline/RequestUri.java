@@ -9,7 +9,6 @@ public class RequestUri {
     private final String path;
     private final QueryParams queryParams;
 
-
     private RequestUri(final String path, final QueryParams queryParams) {
         this.path = path;
         this.queryParams = queryParams;

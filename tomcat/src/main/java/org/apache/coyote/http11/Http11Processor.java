@@ -7,10 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -47,8 +44,8 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final List<String> requestLines = readRequestLines(reader);
-            final Request request = Request.from(requestLines);
+            final Request request = Request.from(reader);
+            log.info("request path: {}", request.getPath());
             final String response = mapRequest(request).toText();
 
             outputStream.write(response.getBytes());
@@ -56,16 +53,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private List<String> readRequestLines(final BufferedReader reader) throws IOException {
-        final List<String> requestLines = new ArrayList<>();
-        String line = Objects.requireNonNull(reader.readLine());
-        while (!"".equals(line)) {
-            requestLines.add(line);
-            line = reader.readLine();
-        }
-        return requestLines;
     }
 
     private Response mapRequest(final Request request) throws URISyntaxException, IOException {
@@ -90,13 +77,13 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if (request.isPath("/login")) {
-            return login(request.getQueryParams());
+            return login(request.getUriQueryParams());
         }
 
         throw new NotFoundException("페이지를 찾을 수 없습니다.");
     }
 
-    private Response login(final QueryParams queryParams) throws URISyntaxException, IOException {
+    private Response login(final QueryParams queryParams) throws IOException, URISyntaxException {
         if (queryParams.isEmpty()) {
             return Response.ofResource("/login.html");
         }

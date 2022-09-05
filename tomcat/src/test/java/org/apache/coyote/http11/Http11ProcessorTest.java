@@ -6,11 +6,18 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import nextstep.jwp.config.WebConfig;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
+
+    @BeforeEach
+    void config() {
+        WebConfig.addControllers();
+    }
 
     @DisplayName("서버에 접속하면 Hello world를 응답한다.")
     @Test

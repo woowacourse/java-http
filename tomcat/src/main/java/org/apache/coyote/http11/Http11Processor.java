@@ -1,12 +1,14 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.exception.UncheckedServletException;
-import org.apache.coyote.Processor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.Socket;
+import nextstep.jwp.controller.Controller;
+import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -28,19 +30,24 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final var httpRequest = HttpRequest.from(inputStream);
+            log.debug(httpRequest.toStartLineString());
+            final var mappedController = RequestMapper.mapToController(httpRequest);
+            final var httpResponse = doService(httpRequest, mappedController);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.toString().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private HttpResponse doService(final HttpRequest httpRequest, final Controller mappedController) {
+        try {
+            return mappedController.doService(httpRequest);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return HttpResponse.internalServerError();
         }
     }
 }

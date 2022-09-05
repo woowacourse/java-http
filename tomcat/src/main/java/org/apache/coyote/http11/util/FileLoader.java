@@ -16,7 +16,7 @@ public class FileLoader {
     }
 
     public static String loadFile(final String fileLocation) throws IOException {
-        final URL url = ClassLoader.getSystemResource(STATIC_DIRECTORY + fileLocation);
+        final URL url = Thread.currentThread().getContextClassLoader().getResource(STATIC_DIRECTORY + fileLocation);
         if (Objects.isNull(url)) {
             throw new NotFoundFileException();
         }

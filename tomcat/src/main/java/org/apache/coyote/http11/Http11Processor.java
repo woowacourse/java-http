@@ -42,10 +42,8 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequestStartLine startLine = HttpRequestStartLine.from(headerReader);
 
             checkUser(startLine);
-            final URL resourceUrl = getResourceUrl(startLine.getUri());
 
-            final String responseBody = readContext(resourceUrl);
-
+            final String responseBody = getResponseBody(startLine.getUri());
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: " + getContentType(startLine.getUri()) + ";charset=utf-8 ",
@@ -61,10 +59,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getContentType(final String uri) {
-        if (uri == null) {
-            return "text/html";
-        }
-
         if (uri.contains(".css")) {
             return "text/css";
         }
@@ -96,21 +90,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private URL getResourceUrl(String requestUri) {
+    private String getResponseBody(String requestUri) throws IOException {
         if (requestUri.equals("/")) {
-            return null;
+            return "Hello world!";
         }
 
         if (!requestUri.contains(".")) {
             requestUri += ".html";
         }
-        return getClass().getClassLoader().getResource("static" + requestUri);
+
+        final URL resourceUrl = getClass().getClassLoader().getResource("static" + requestUri);
+        return readContext(resourceUrl);
     }
 
     private String readContext(final URL resourceUrl) throws IOException {
-        if (resourceUrl == null) {
-            return "Hello world!";
-        }
         final File resourceFile = new File(resourceUrl.getFile());
         final Path resourcePath = resourceFile.toPath();
         final byte[] resourceContents = Files.readAllBytes(resourcePath);

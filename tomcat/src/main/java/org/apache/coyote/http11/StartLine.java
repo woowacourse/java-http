@@ -17,7 +17,7 @@ public class StartLine {
 
         int index = splitLine[1].indexOf("?");
         if (index == -1) {
-            this.requestUri = startLine;
+            this.requestUri = splitLine[1];
             this.queryParams = new HashMap<>();
             return;
         }

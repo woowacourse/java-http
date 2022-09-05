@@ -42,4 +42,30 @@ class LoginHandlerTest {
         assertThat(message).isEqualTo(user.toString());
         assertThat(level).isEqualTo(INFO);
     }
+
+    @DisplayName("로그인 실패시에는 401.html 을 반환한다.")
+    @Test
+    public void failToLogin() {
+        //given
+        final String requestUrl = "/login?account=gugu&password=invalid";
+
+        //when
+        final String result = LoginHandler.login(requestUrl);
+
+        //then
+        assertThat(result).isEqualTo("/401.html");
+    }
+
+    @DisplayName("쿼리스트링 없이 요청이 들어오면 login.html 을 응답힌다.")
+    @Test
+    public void returnLoginWhenWithoutQuery() {
+        //given
+        final String requestUrl = "/login";
+
+        //when
+        final String result = LoginHandler.login(requestUrl);
+
+        //then
+        assertThat(result).isEqualTo("/login.html");
+    }
 }

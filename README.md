@@ -52,3 +52,14 @@ css 파일과 같은 것을 응답으로 반환해줄 때에는 'text/css' 와 �
 이 때 우선순위에 따라서 여러개를 명시해줄 수 있게 된다.
 
 [RFC 문서 Accept](https://www.rfc-editor.org/rfc/rfc2616#page-100)
+
+---
+
+## 레벨1 구현 내용 정리
+
+- [x] HTTP Status Code 302
+  - [x] `http://localhost:8080/login` 요청시 login.html 파일을 응답한다.
+  - [x] `http://locahost:8080/login` 페이지에서 입력한 아이디와 비밀번호는 query string으로 전달된다.
+  - [x] `http://localhost:8080/login` 페이지에서 로그인 버튼 클릭시 302 상태코드를 응답한다.
+  - [x] 로그인 성공시에는 index.html로 리다이렉트한다.
+  - [x] 로그인 실패시에는 401.html로 리다이렉트한다.

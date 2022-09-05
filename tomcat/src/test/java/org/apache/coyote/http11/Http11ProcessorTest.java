@@ -184,7 +184,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("쿼리스트링과 함께 '/login' 요청시 쿼리스트링을 처리하여 정상 응답을 내보낸다.")
+    @DisplayName("쿼리스트링과 함께 '/login' 요청시 쿼리스트링을 처리하여 정상 응답을 내보내며 redirect한다.")
     @Test
     void loginWithQueryString() {
         // given
@@ -202,7 +202,7 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 200 OK \r\n" +
+        var expected = "HTTP/1.1 302 Found \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n";
         assertThat(socket.output()).startsWith(expected);
     }
@@ -239,5 +239,34 @@ class Http11ProcessorTest {
 
         assertThat(message).isEqualTo(user.toString());
         assertThat(level).isEqualTo(INFO);
+    }
+
+    @DisplayName("로그인 실패시(비밀번호 불일치)에는 401.html로 리다이렉트(302 Found 응답)한다.")
+    @Test
+    public void failToLogin() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /login?account=gugu&password=invalid HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 2426 \r\n" +
+                "Location: /401.html \r\n" +
+                "\r\n"+
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).startsWith(expected);
     }
 }

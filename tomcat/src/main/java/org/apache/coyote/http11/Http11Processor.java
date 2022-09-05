@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.apache.coyote.response.StatusCode.OK;
+import static org.apache.coyote.response.StatusCode.*;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -19,6 +19,7 @@ import org.apache.coyote.handler.LoginHandler;
 import org.apache.coyote.request.HttpRequestHeader;
 import org.apache.coyote.response.ContentType;
 import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.response.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,12 +50,18 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final HttpRequestHeader httpRequestHeader = makeHttpRequestHeader(bufferedReader);
+            StatusCode statusCode = OK;
             String requestUrl = httpRequestHeader.getRequestUrlWithoutQuery();
 
-            handleLogin(httpRequestHeader, requestUrl);
+            if (requestUrl.contains("login")) {
+                final String fullRequestUrl = httpRequestHeader.getRequestUrl();
+                requestUrl = LoginHandler.login(fullRequestUrl);
+                statusCode = changeStatusCode(statusCode, requestUrl);
+            }
+            String location = requestUrl;
 
             String responseBody = makeResponseBody(requestUrl);
-            final HttpResponse httpResponse = new HttpResponse(OK, ContentType.from(requestUrl), responseBody);
+            final HttpResponse httpResponse = new HttpResponse(statusCode, ContentType.from(requestUrl), responseBody, location);
             final String response = httpResponse.getResponse();
 
             outputStream.write(response.getBytes());
@@ -64,11 +71,11 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static void handleLogin(final HttpRequestHeader httpRequestHeader, final String requestUrl) {
-        if (requestUrl.contains("login")) {
-            final String fullRequestUrl = httpRequestHeader.getRequestUrl();
-            LoginHandler.login(fullRequestUrl);
+    private StatusCode changeStatusCode(StatusCode statusCode, String requestUrl) {
+        if (!requestUrl.equals("/login.html")) {
+            statusCode = FOUND;
         }
+        return statusCode;
     }
 
     private String makeResponseBody(final String requestUrl) throws IOException {

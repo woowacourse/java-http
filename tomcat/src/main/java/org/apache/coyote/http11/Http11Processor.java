@@ -51,12 +51,17 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (request.matches(GET, "/login")) {
-                if (request.hasQuery()) {
+                if (!request.hasQuery()) {
                     responseLoginHtml(outputStream);
                     return;
                 }
 
                 responseLogin(outputStream, requestUri);
+                return;
+            }
+
+            if (request.matches(GET, "/register")) {
+                responseRegisterHtml(outputStream);
                 return;
             }
 
@@ -108,6 +113,15 @@ public class Http11Processor implements Runnable, Processor {
                 .build();
 
         writeHttpResponse(outputStream, httpResponse);
+    }
+
+    private void responseRegisterHtml(final OutputStream outputStream) throws IOException {
+        HttpResponse response = new HttpResponse.Builder()
+                .contentType(ContentType.HTML)
+                .body(StaticFileUtil.readFile("/register.html"))
+                .build();
+
+        writeHttpResponse(outputStream, response);
     }
 
     private void responseStaticFiles(final OutputStream outputStream, final RequestUri requestUri) throws IOException {

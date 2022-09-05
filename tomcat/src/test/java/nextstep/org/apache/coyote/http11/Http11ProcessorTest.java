@@ -80,6 +80,36 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("/login에 접속하면, login.html를 서빙한다.")
+    @Test
+    void serveLoginHtmlOnLoginPath() throws IOException {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        URL resource = getClass().getClassLoader().getResource("static/login.html");
+        String fileContent = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        int contentLength = fileContent.getBytes().length;
+
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + contentLength + " \r\n" +
+                "\r\n" + fileContent;
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
     @DisplayName("로그인이 성공하면 응답의 상태코드는 302이고, Location 헤더는 /index.html이다.")
     @Test
     void loginSuccess() {
@@ -125,6 +155,36 @@ class Http11ProcessorTest {
         String expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Location: /401.html \r\n" +
                 "\r\n";
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("/register에 접속하면, register.html를 서빙한다.")
+    @Test
+    void serveRegisterHtmlOnRegisterPath() throws IOException {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        URL resource = getClass().getClassLoader().getResource("static/register.html");
+        String fileContent = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        int contentLength = fileContent.getBytes().length;
+
+        String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + contentLength + " \r\n" +
+                "\r\n" + fileContent;
+
         assertThat(socket.output()).isEqualTo(expected);
     }
 }

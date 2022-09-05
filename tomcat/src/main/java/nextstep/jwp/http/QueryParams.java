@@ -33,6 +33,10 @@ public class QueryParams {
             .anyMatch(it -> it.same(key));
     }
 
+    public int count() {
+        return queryParams.size();
+    }
+
     public static QueryParams empty() {
         return new QueryParams(List.of());
     }

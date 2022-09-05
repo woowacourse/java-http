@@ -6,8 +6,7 @@ import java.util.NoSuchElementException;
 public enum HttpMethod {
 
 	GET,
-	POST
-	;
+	POST;
 
 	public static HttpMethod from(String name) {
 		return Arrays.stream(values())

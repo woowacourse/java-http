@@ -8,9 +8,7 @@ public enum ContentType {
 	CSS("css", "text/css;charset=utf-8"),
 	JS("js", "application/javascript;charset=utf-8"),
 	FORM_DATA("form-data", "application/x-www-form-urlencoded"),
-	ALL("", "*/*")
-
-	;
+	ALL("", "*/*");
 
 	private final String extension;
 	private final String value;

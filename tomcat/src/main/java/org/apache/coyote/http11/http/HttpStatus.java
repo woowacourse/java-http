@@ -8,9 +8,7 @@ public enum HttpStatus {
 	OK(200, " OK "),
 	NOT_FOUND(404, " Not Found "),
 	UNAUTHORIZED(401, " Unauthorized "),
-	FOUND(302, " Found ")
-
-	;
+	FOUND(302, " Found ");
 
 	private final int code;
 	private final String message;

@@ -9,10 +9,10 @@ import nextstep.jwp.service.UserService;
 import org.apache.catalina.session.Session;
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.message.request.QueryParams;
-import org.apache.coyote.http11.message.request.Request;
+import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.header.Cookie;
 import org.apache.coyote.http11.message.request.requestline.Method;
-import org.apache.coyote.http11.message.response.Response;
+import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.header.StatusCode;
 
 public class LoginController implements Controller {
@@ -21,16 +21,16 @@ public class LoginController implements Controller {
     private static final String KEY_PASSWORD = "password";
     private static final String PATH_REDIRECT = "/index.html";
 
-    private static Response doGet(Request request) throws IOException, URISyntaxException {
-        if (hasLoggedIn(request)) {
-            return Response.ofRedirection(StatusCode.FOUND, PATH_REDIRECT);
+    private static HttpResponse doGet(HttpRequest httpRequest) throws IOException, URISyntaxException {
+        if (hasLoggedIn(httpRequest)) {
+            return HttpResponse.ofRedirection(StatusCode.FOUND, PATH_REDIRECT);
         }
 
-        return Response.ofResource("/login.html");
+        return HttpResponse.ofResource("/login.html");
     }
 
-    private static boolean hasLoggedIn(final Request request) {
-        final Cookie cookie = request.getCookie();
+    private static boolean hasLoggedIn(final HttpRequest httpRequest) {
+        final Cookie cookie = httpRequest.getCookie();
         final Optional<String> jSessionId = cookie.getJSessionId();
         if (jSessionId.isEmpty()) {
             return false;
@@ -40,17 +40,17 @@ public class LoginController implements Controller {
         return session != null && session.getAttribute("user") != null;
     }
 
-    private static Response doPost(final Request request) {
-        final QueryParams requestParams = request.getBodyQueryParams();
+    private static HttpResponse doPost(final HttpRequest httpRequest) {
+        final QueryParams requestParams = httpRequest.getBodyQueryParams();
         checkParams(requestParams);
 
         final User user = UserService.login(requestParams.get(KEY_ACCOUNT), requestParams.get(KEY_PASSWORD));
         final Session session = createSession(user);
         SESSION_MANAGER.add(session);
 
-        final Response response = Response.ofRedirection(StatusCode.FOUND, PATH_REDIRECT);
-        response.setCookie(Cookie.fromJSessionId(session.getId()));
-        return response;
+        final HttpResponse httpResponse = HttpResponse.ofRedirection(StatusCode.FOUND, PATH_REDIRECT);
+        httpResponse.setCookie(Cookie.fromJSessionId(session.getId()));
+        return httpResponse;
     }
 
     private static void checkParams(final QueryParams queryParams) {
@@ -66,20 +66,20 @@ public class LoginController implements Controller {
     }
 
     @Override
-    public Response service(final Request request) throws Exception {
-        if (request.isMethod(Method.GET)) {
-            return doGet(request);
+    public HttpResponse service(final HttpRequest httpRequest) throws Exception {
+        if (httpRequest.isMethod(Method.GET)) {
+            return doGet(httpRequest);
         }
 
-        if (request.isMethod(Method.POST)) {
-            return doPost(request);
+        if (httpRequest.isMethod(Method.POST)) {
+            return doPost(httpRequest);
         }
 
         throw new UnsupportedMethodException();
     }
 
     @Override
-    public boolean canHandle(final Request request) {
-        return request.isPath("/login");
+    public boolean canHandle(final HttpRequest httpRequest) {
+        return httpRequest.isPath("/login");
     }
 }

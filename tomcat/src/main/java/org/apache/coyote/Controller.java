@@ -1,14 +1,14 @@
 package org.apache.coyote;
 
 import org.apache.catalina.session.SessionManager;
-import org.apache.coyote.http11.message.request.Request;
-import org.apache.coyote.http11.message.response.Response;
+import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.response.HttpResponse;
 
 public interface Controller {
 
     SessionManager SESSION_MANAGER = new SessionManager();
 
-    Response service(Request request) throws Exception;
+    HttpResponse service(HttpRequest httpRequest) throws Exception;
 
-    boolean canHandle(Request request);
+    boolean canHandle(HttpRequest httpRequest);
 }

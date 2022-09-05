@@ -11,7 +11,7 @@ import org.apache.coyote.http11.message.response.header.ContentType;
 import org.apache.coyote.http11.message.response.header.Headers;
 import org.apache.coyote.http11.message.response.header.StatusCode;
 
-public class Response {
+public class HttpResponse {
 
     private static final String HTTP_VERSION = "HTTP/1.1 ";
 
@@ -19,32 +19,32 @@ public class Response {
     private final Headers headers;
     private final String body;
 
-    public Response(final ContentType contentType, final StatusCode statusCode, final Map<Header, String> headers,
-                    final String body) {
+    public HttpResponse(final ContentType contentType, final StatusCode statusCode, final Map<Header, String> headers,
+                        final String body) {
         this.statusCode = statusCode;
         this.headers = Headers.of(contentType, body);
         this.headers.putAll(headers);
         this.body = body;
     }
 
-    public Response(final ContentType contentType, final StatusCode statusCode, final String body) {
+    public HttpResponse(final ContentType contentType, final StatusCode statusCode, final String body) {
         this(contentType, statusCode, Map.of(), body);
     }
 
-    public Response(final StatusCode statusCode, final String body) {
+    public HttpResponse(final StatusCode statusCode, final String body) {
         this(ContentType.HTML, statusCode, Map.of(), body);
     }
 
-    public static Response ofOk(final String body) {
-        return new Response(StatusCode.OK, body);
+    public static HttpResponse ofOk(final String body) {
+        return new HttpResponse(StatusCode.OK, body);
     }
 
-    public static Response ofRedirection(final StatusCode statusCode, final String location) {
-        return new Response(ContentType.HTML, statusCode, Map.of(Header.LOCATION, location), "");
+    public static HttpResponse ofRedirection(final StatusCode statusCode, final String location) {
+        return new HttpResponse(ContentType.HTML, statusCode, Map.of(Header.LOCATION, location), "");
     }
 
-    public static Response ofResource(final String path) throws IOException, URISyntaxException {
-        return new Response(ContentType.of(path), StatusCode.OK, ResourceLoader.getStaticResource(path));
+    public static HttpResponse ofResource(final String path) throws IOException, URISyntaxException {
+        return new HttpResponse(ContentType.of(path), StatusCode.OK, ResourceLoader.getStaticResource(path));
     }
 
     public void setCookie(final Cookie cookie) {

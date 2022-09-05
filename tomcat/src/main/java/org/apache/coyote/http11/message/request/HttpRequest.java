@@ -13,19 +13,19 @@ import org.apache.coyote.http11.message.request.header.Headers;
 import org.apache.coyote.http11.message.request.requestline.Method;
 import org.apache.coyote.http11.message.request.requestline.RequestLine;
 
-public class Request {
+public class HttpRequest {
 
     private final RequestLine requestLine;
     private final Headers headers;
     private final RequestBody requestBody;
 
-    public Request(final RequestLine requestLine, final Headers headers, final RequestBody requestBody) {
+    public HttpRequest(final RequestLine requestLine, final Headers headers, final RequestBody requestBody) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.requestBody = requestBody;
     }
 
-    public static Request from(final BufferedReader requestReader) throws IOException {
+    public static HttpRequest from(final BufferedReader requestReader) throws IOException {
         final String rawRequestLine = Objects.requireNonNull(requestReader.readLine());
         final RequestLine requestLine = RequestLine.from(rawRequestLine);
 
@@ -36,9 +36,9 @@ public class Request {
         if (contentLength.isPresent()) {
             final String rawContentLength = contentLength.get();
             final String body = readBody(requestReader, Integer.parseInt(rawContentLength.trim()));
-            return new Request(requestLine, headers, RequestBody.from(body));
+            return new HttpRequest(requestLine, headers, RequestBody.from(body));
         }
-        return new Request(requestLine, headers, RequestBody.ofEmpty());
+        return new HttpRequest(requestLine, headers, RequestBody.ofEmpty());
     }
 
     private static List<String> readHeaders(final BufferedReader requestReader) throws IOException {

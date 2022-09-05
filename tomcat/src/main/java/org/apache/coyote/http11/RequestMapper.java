@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.exception.NotFoundException;
 import org.apache.coyote.Controller;
-import org.apache.coyote.http11.message.request.Request;
+import org.apache.coyote.http11.message.request.HttpRequest;
 
 public class RequestMapper {
 
@@ -14,9 +14,9 @@ public class RequestMapper {
         controllers.add(controller);
     }
 
-    public static Controller getController(Request request) {
+    public static Controller getController(HttpRequest httpRequest) {
         return controllers.stream()
-                .filter(controller -> controller.canHandle(request))
+                .filter(controller -> controller.canHandle(httpRequest))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("페이지를 찾을 수 없습니다."));
     }

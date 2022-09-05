@@ -9,7 +9,7 @@ import java.net.Socket;
 import java.net.URISyntaxException;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.message.request.Request;
+import org.apache.coyote.http11.message.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,9 +34,9 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
              final OutputStream outputStream = connection.getOutputStream()) {
 
-            final Request request = Request.from(reader);
-            log.info("request path: {}", request.getPath());
-            final String response = RequestHandler.handle(request).toText();
+            final HttpRequest httpRequest = HttpRequest.from(reader);
+            log.info("request path: {}", httpRequest.getPath());
+            final String response = RequestHandler.handle(httpRequest).toText();
 
             outputStream.write(response.getBytes());
             outputStream.flush();

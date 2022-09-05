@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -47,10 +46,8 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             String uri = UriParser.parseUri(bufferedReader);
-            String responseBody = accessUri(uri);
-            ContentType contentType = UriParser.parseContentType(uri);
 
-            String response = toResponse(contentType, responseBody);
+            String response = accessUri(uri);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -61,7 +58,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String accessUri(final String uri) throws IOException {
         if (uri.equals(LANDING_PAGE_URL)) {
-            return "Hello world!";
+            return toOkResponse(ContentType.TEXT_HTML, "Hello world!");
         }
         String url = UriParser.parseUrl(uri);
         String queryString = UriParser.parseQueryString(uri);
@@ -78,31 +75,37 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String accessUrl(final String url, final QueryParams queryParams) throws IOException {
+        ContentType contentType = UriParser.parseContentType(url);
         if (url.equals(LANDING_PAGE_URL)) {
-            return "Hello world!";
+            return toOkResponse(contentType, "Hello world!");
         }
         if (url.equals(LOGIN_PATH)) {
             return renderLogin(url, queryParams);
         }
-        return ResourcesUtil.readResource(STATIC_PATH + url);
+        String responseBody = ResourcesUtil.readResource(STATIC_PATH + url);
+        return toOkResponse(contentType, responseBody);
     }
 
     private String renderLogin(final String url, final QueryParams queryParams) throws IOException {
         if (queryParams.exists()) {
-            login(queryParams);
+            return login(queryParams);
         }
-        return ResourcesUtil.readResource(STATIC_PATH + url);
+        String responseBody = ResourcesUtil.readResource(STATIC_PATH + url);
+        return toOkResponse(ContentType.TEXT_HTML, responseBody);
     }
 
-    private void login(final QueryParams queryParams) {
+    private String login(final QueryParams queryParams) {
         String account = queryParams.get("account");
         String password = queryParams.get("password");
-        if (Objects.isNull(account) || Objects.isNull(password)) {
+        if (account == null || password == null) {
             throw new InvalidLoginFomratException();
         }
         User user = findUser(account);
         checkPassword(password, user);
-        log.info(user.toString());
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: /index.html "
+        );
     }
 
     private User findUser(final String account) {
@@ -116,7 +119,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String toResponse(final ContentType contentType, final String responseBody) {
+    private String toOkResponse(final ContentType contentType, final String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",

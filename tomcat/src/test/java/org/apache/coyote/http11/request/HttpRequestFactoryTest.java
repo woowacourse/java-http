@@ -8,7 +8,7 @@ import java.io.InputStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class HttpRequestHeaderFactoryTest {
+class HttpRequestFactoryTest {
 
     @DisplayName("받은 InputStream을 파싱해서 HttpRequestHeader를 반환한다.")
     @Test
@@ -23,7 +23,7 @@ class HttpRequestHeaderFactoryTest {
         InputStream inputStream = new ByteArrayInputStream(string.getBytes());
 
         // when
-        HttpRequestHeader httpRequestHeader = HttpRequestHeaderFactory.parse(inputStream);
+        HttpRequest httpRequestHeader = HttpRequestFactory.parse(inputStream);
 
         //then
         assert httpRequestHeader != null;

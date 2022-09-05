@@ -6,9 +6,9 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-public class HttpRequestHeaderFactory {
+public class HttpRequestFactory {
 
-    public static HttpRequestHeader parse(java.io.InputStream inputStream) throws IOException {
+    public static HttpRequest parse(java.io.InputStream inputStream) throws IOException {
         final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         Map<String, String> requestHeaders = new HashMap<>();
         final String requestLine = reader.readLine();
@@ -20,7 +20,7 @@ public class HttpRequestHeaderFactory {
                 return null;
             }
         }
-        return HttpRequestHeader.of(requestLine, requestHeaders);
+        return HttpRequest.of(requestLine, requestHeaders);
     }
 
     private static void parseRequestHeader(Map<String, String> headerFields, String line) {

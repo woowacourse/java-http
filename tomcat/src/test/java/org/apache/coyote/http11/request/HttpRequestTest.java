@@ -8,9 +8,9 @@ import java.io.InputStream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class HttpRequestHeaderTest {
+class HttpRequestTest {
 
-    private HttpRequestHeader httpRequestHeader;
+    private HttpRequest httpRequestHeader;
 
     @DisplayName("응답 헤더에서 requestUri를 얻는다.")
     @Test
@@ -23,7 +23,7 @@ class HttpRequestHeaderTest {
                 "",
                 "");
         InputStream inputStream = new ByteArrayInputStream(string.getBytes());
-        httpRequestHeader = HttpRequestHeaderFactory.parse(inputStream);
+        httpRequestHeader = HttpRequestFactory.parse(inputStream);
 
         //when,then
         assert httpRequestHeader != null;

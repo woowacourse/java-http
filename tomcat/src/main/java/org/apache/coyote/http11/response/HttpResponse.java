@@ -2,7 +2,7 @@ package org.apache.coyote.http11.response;
 
 import java.io.IOException;
 import nextstep.jwp.utils.FileReader;
-import org.apache.coyote.http11.request.HttpRequestHeader;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponse {
 
@@ -13,23 +13,23 @@ public class HttpResponse {
 
     private final String response;
 
-    public HttpResponse(HttpRequestHeader httpRequestHeader) throws IOException {
+    public HttpResponse(HttpRequest httpRequestHeader) throws IOException {
         response = getResponse(httpRequestHeader);
     }
 
-    private String getResponse(HttpRequestHeader httpRequestHeader) throws IOException {
+    private String getResponse(HttpRequest httpRequestHeader) throws IOException {
         final String body = getBody(httpRequestHeader);
         final String header = getHeader(httpRequestHeader, body);
         return String.join("\r\n", header, body);
     }
 
-    private String getBody(HttpRequestHeader httpRequestHeader) throws IOException {
+    private String getBody(HttpRequest httpRequestHeader) throws IOException {
         String requestUri = httpRequestHeader.getRequestUri();
         return FileReader.readByPath(requestUri)
                 .orElse(DEFAULT_BODY);
     }
 
-    private String getHeader(HttpRequestHeader httpRequestHeader, String body) {
+    private String getHeader(HttpRequest httpRequestHeader, String body) {
         String responseLine = HTTP_VERSION + "200 OK ";
         String contentType = getContentType(httpRequestHeader.getRequestUri());
         String contentLength = body.getBytes().length + " ";

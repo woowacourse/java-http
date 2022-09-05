@@ -8,9 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
-import org.apache.coyote.http11.request.HttpRequestHeader;
-import org.apache.coyote.http11.request.HttpRequestHeaderFactory;
-import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +26,7 @@ class HttpResponseTest {
                 "",
                 "");
         InputStream inputStream = new ByteArrayInputStream(string.getBytes());
-        HttpRequestHeader httpRequestHeader = HttpRequestHeaderFactory.parse(inputStream);
+        HttpRequest httpRequestHeader = HttpRequestFactory.parse(inputStream);
 
         // when
         HttpResponse httpResponse = new HttpResponse(httpRequestHeader);

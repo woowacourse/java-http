@@ -6,7 +6,11 @@ import nextstep.jwp.presentation.Controller;
 
 public class ResponseHandler {
 
-    public static ResponseEntity handle(final Controller controller, final String startLine) throws IOException {
-        return controller.run(startLine);
+    public static ResponseEntity handle(
+            final Controller controller,
+            final HttpHeader httpHeader,
+            final HttpBody httpBody) throws IOException
+    {
+        return controller.run(httpHeader, httpBody);
     }
 }

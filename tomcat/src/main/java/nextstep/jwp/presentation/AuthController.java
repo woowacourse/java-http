@@ -5,6 +5,8 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.request.UserRequest;
 
+import org.apache.coyote.http11.HttpBody;
+import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.QueryParam;
 import org.apache.coyote.http11.ResponseEntity;
 import org.apache.coyote.http11.StatusCode;
@@ -17,10 +19,17 @@ public class AuthController implements Controller {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
 
     @Override
-    public ResponseEntity run(final String startLin) {
-        String path = startLin.split(" ")[1];
-        final QueryParam queryParam = new QueryParam(path);
+    public ResponseEntity run(final HttpHeader httpHeader, final HttpBody httpBody) {
+        String path = httpHeader.getStartLine().split(" ")[1];
 
+        if (path.startsWith("/login")) {
+            return login(path);
+        }
+        return register(path);
+    }
+
+    private ResponseEntity login(final String path) {
+        final QueryParam queryParam = new QueryParam(path);
         if (queryParam.matchParameters("account") && queryParam.matchParameters("password")) {
 
             UserRequest userRequest = new UserRequest(queryParam.getValue("account"),
@@ -34,5 +43,9 @@ public class AuthController implements Controller {
             return new ResponseEntity(StatusCode.UNAUTHORIZED, "/401.html");
         }
         throw new QueryParamNotFoundException();
+    }
+
+    private ResponseEntity register(final String path) {
+        return new ResponseEntity(StatusCode.OK, path);
     }
 }

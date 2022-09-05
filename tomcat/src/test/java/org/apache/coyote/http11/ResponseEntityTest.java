@@ -12,8 +12,13 @@ class ResponseEntityTest {
     @Test
     void notExistFileException() {
         final ResponseEntity responseEntity = new ResponseEntity(StatusCode.OK, "/login.css");
+        final HttpHeader httpHeader = new HttpHeader("GET /login.css HTTP/1.1",
+                String.join("\r\n",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: 12 ",
+                        ""));
 
-        assertThatThrownBy(responseEntity::getResponse)
+        assertThatThrownBy(() -> responseEntity.getResponse(httpHeader))
                 .hasMessageContaining("해당 파일을 지원하지않습니다.")
                 .isInstanceOf(FileNotFoundException.class);
     }

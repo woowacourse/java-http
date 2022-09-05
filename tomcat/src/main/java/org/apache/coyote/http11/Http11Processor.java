@@ -5,17 +5,16 @@ import nextstep.jwp.presentation.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.FileNotFoundException;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.net.Socket;
+import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Http11Processor.class);
-    private static final int URI = 1;
 
     private final Socket connection;
 
@@ -37,11 +36,30 @@ public class Http11Processor implements Runnable, Processor {
             final String startLine = reader.readLine();
             final Controller handler = RequestHandlerMapping.getHandler(startLine);
 
-            final ResponseEntity responseEntity = ResponseHandler.handle(handler, startLine);
-            outputStream.write(responseEntity.getResponse().getBytes());
+            final HttpHeader httpHeader = getHeaders(reader, startLine);
+            final HttpBody httpBody = getBody(reader);
+            final ResponseEntity responseEntity = ResponseHandler.handle(handler, httpHeader, httpBody);
+            outputStream.write(responseEntity.getResponse(httpHeader).getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | FileNotFoundException e) {
             LOGGER.error(e.getMessage(), e);
         }
+    }
+
+    private HttpBody getBody(final BufferedReader reader) throws IOException {
+        StringBuilder payload = new StringBuilder();
+        while(reader.ready()){
+            payload.append((char) reader.read());
+        }
+        return new HttpBody(payload.toString());
+    }
+
+    private HttpHeader getHeaders(final BufferedReader reader, final String startLine) throws IOException {
+        StringBuilder headers = new StringBuilder();
+        String header;
+        while ((header = reader.readLine()) != null && header.length() != 0) {
+            headers.append(header).append("\n");
+        }
+        return new HttpHeader(startLine, headers.toString());
     }
 }

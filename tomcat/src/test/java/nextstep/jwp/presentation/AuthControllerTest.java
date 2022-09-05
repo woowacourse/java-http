@@ -9,6 +9,8 @@ import java.net.URL;
 import java.nio.file.Files;
 
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.HttpBody;
+import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.exception.QueryParamNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -84,9 +86,15 @@ class AuthControllerTest {
     void queryParamNotFoundException() {
         final AuthController authController = new AuthController();
         final String startLine = "GET /login?account1=gu&password=password HTTP/1.1";
+        final HttpHeader httpHeader = new HttpHeader(startLine,
+                String.join("\r\n",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: 12 ",
+                        ""));
+        final HttpBody httpBody = new HttpBody("");
 
         assertThatThrownBy(() ->
-                authController.run(startLine))
+                authController.run(httpHeader, httpBody))
                 .hasMessageContaining("잘못된 queryParam 입니다.")
                 .isInstanceOf(QueryParamNotFoundException.class);
     }

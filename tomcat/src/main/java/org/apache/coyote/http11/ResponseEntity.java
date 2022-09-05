@@ -44,11 +44,10 @@ public class ResponseEntity {
         return EXTENSION_DELIMITER + DEFAULT_EXTENSION;
     }
 
-    public String getResponse() throws IOException {
-        final ResponseHeader responseHeader = new ResponseHeader(path);
+    public String getResponse(final HttpHeader httpHeader) throws IOException {
         if (this.body == null) {
             this.body = getContent(path);
         }
-        return String.join("\r\n", responseHeader.getHeader(statusCode, body), body);
+        return String.join("\r\n", httpHeader.getResponseHeader(statusCode, body), body);
     }
 }

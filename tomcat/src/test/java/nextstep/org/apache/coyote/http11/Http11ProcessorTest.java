@@ -164,12 +164,15 @@ class Http11ProcessorTest {
     @Test
     void 로그인에_성공하면_index_페이지로_redirect한다() {
         // given
+        String requestBody = "account=gugu&password=password";
+        int contentLength = requestBody.getBytes().length;
         String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + contentLength,
                 "",
-                "");
+                requestBody);
 
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
@@ -187,12 +190,15 @@ class Http11ProcessorTest {
     @Test
     void 계정_정보가_올바르지_않으면_401_페이지로_redirect한다() {
         // given
+        String requestBody = "account=invalid&password=password";
+        int contentLength = requestBody.getBytes().length;
         String httpRequest = String.join("\r\n",
-                "POST /login?account=invalid&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + contentLength,
                 "",
-                "");
+                requestBody);
 
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
@@ -211,12 +217,15 @@ class Http11ProcessorTest {
     @Test
     void 비밀번호가_올바르지_않으면_401_페이지로_redirect한다() {
         // given
+        String requestBody = "account=gugu&password=invalid";
+        int contentLength = requestBody.getBytes().length;
         String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&password=invalid HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + contentLength,
                 "",
-                "");
+                requestBody);
 
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
@@ -236,7 +245,7 @@ class Http11ProcessorTest {
     void 쿼리스트링에_account나_password가_들어있지_않으면_401_페이지로_redirect한다() {
         // given
         String httpRequest = String.join("\r\n",
-                "POST /login?query=invalid HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "",

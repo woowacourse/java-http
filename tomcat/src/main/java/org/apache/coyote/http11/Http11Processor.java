@@ -11,6 +11,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.ContentType;
 import org.apache.coyote.HttpMethod;
+import org.apache.coyote.HttpRequest;
 import org.apache.coyote.Processor;
 import org.apache.coyote.QueryParams;
 import org.apache.coyote.exception.InvalidLoginFormatException;
@@ -51,11 +52,8 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String startLine = bufferedReader.readLine();
-            HttpMethod httpMethod = HttpRequestParser.parseHttpMethod(startLine);
-            String uri = HttpRequestParser.parseUri(startLine);
-
-            String response = respond(httpMethod, uri);
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+            String response = respond(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -64,9 +62,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String respond(final HttpMethod httpMethod, final String uri) {
+    private String respond(final HttpRequest httpRequest) {
         try {
-            return accessUri(httpMethod, uri);
+            return access(httpRequest.getHttpMethod(), httpRequest.getUrl(), httpRequest.getQueryParams(),
+                    httpRequest.getBody());
         } catch (InvalidLoginFormatException | InvalidPasswordException | MemberNotFoundException e) {
             log.error(e.getMessage(), e);
             return toFoundResponse(UNAUTHORIZED_PATH);
@@ -79,32 +78,26 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String accessUri(final HttpMethod httpMethod, final String uri) throws IOException {
-        String url = HttpRequestParser.parseUrl(uri);
-        String queryString = HttpRequestParser.parseQueryString(uri);
-        if (httpMethod == HttpMethod.GET && url.equals(LANDING_PAGE_URL)) {
-            return toOkResponse(ContentType.TEXT_HTML, DEFAULT_RESPONSE_BODY);
-        }
+    private String access(final HttpMethod httpMethod, final String url, final QueryParams queryParams,
+                          final String requestBody) throws IOException {
         if (httpMethod == HttpMethod.GET) {
-            url = addExtension(url);
+            return accessGetMethod(url, queryParams);
         }
-        return accessUrl(httpMethod, url, QueryParams.parseQueryParams(queryString));
-    }
-
-    private String accessUrl(final HttpMethod httpMethod, final String url, final QueryParams queryParams)
-            throws IOException {
-        ContentType contentType = HttpRequestParser.parseContentType(url);
-        if (httpMethod == HttpMethod.GET && url.equals(LOGIN_PAGE_PATH)) {
-            return renderLogin();
-        }
-        if (httpMethod == HttpMethod.POST && url.equals(LOGIN_PATH)) {
-            return login(queryParams);
-        }
-        if (httpMethod == HttpMethod.GET) {
-            String responseBody = ResourcesUtil.readResource(STATIC_PATH + url);
-            return toOkResponse(contentType, responseBody);
+        if (httpMethod == HttpMethod.POST) {
+            return accessPostMethod(url, requestBody);
         }
         return toFoundResponse(NOT_FOUND_PATH);
+    }
+
+    private String accessGetMethod(final String url, final QueryParams queryParams)
+            throws IOException {
+        if (url.equals(LANDING_PAGE_URL)) {
+            return toOkResponse(ContentType.TEXT_HTML, DEFAULT_RESPONSE_BODY);
+        }
+        ContentType contentType = HttpRequestParser.parseContentType(url);
+        String resourceUrl = addExtension(url);
+        String responseBody = ResourcesUtil.readResource(STATIC_PATH + resourceUrl);
+        return toOkResponse(contentType, responseBody);
     }
 
     private String addExtension(String url) {
@@ -115,12 +108,15 @@ public class Http11Processor implements Runnable, Processor {
         return url;
     }
 
-    private String renderLogin() throws IOException {
-        String responseBody = ResourcesUtil.readResource(STATIC_PATH + LOGIN_PAGE_PATH);
-        return toOkResponse(ContentType.TEXT_HTML, responseBody);
+    private String accessPostMethod(final String url, final String requestBody) {
+        if (url.equals(LOGIN_PATH)) {
+            return login(requestBody);
+        }
+        return toFoundResponse(NOT_FOUND_PATH);
     }
 
-    private String login(final QueryParams queryParams) {
+    private String login(final String requestBody) {
+        QueryParams queryParams = QueryParams.parseQueryParams(requestBody);
         validateLogin(queryParams);
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",

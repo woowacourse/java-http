@@ -128,7 +128,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("/login 요청이 들어오면 login.html을 보여준다.")
+    @DisplayName("쿼리 스트링 있는 상태로 /login 요청이 들어오면 login.html을 보여준다.")
     void loginRequest() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",

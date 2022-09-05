@@ -8,19 +8,19 @@ public class RequestLine {
     private static final int METHOD_INDEX = 0;
     private static final int URL_INDEX = 1;
 
-    private final String method;
+    private final Method method;
     private final Url url;
     private final QueryParams queryParams;
 
     public RequestLine(final String line) {
         String[] split = line.split(SEPARATOR);
 
-        this.method = split[METHOD_INDEX];
+        this.method = Method.findByName(split[METHOD_INDEX]);
         this.url = Url.of(split[URL_INDEX]);
         this.queryParams = url.getQueryParams();
     }
 
-    public String getMethod() {
+    public Method getMethod() {
         return method;
     }
 

@@ -9,7 +9,6 @@ public class HttpRequest {
 
     private static final String QUERY_DELIMETER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
-    private static final String LOGIN_URL = "/login";
     private static final String INDEX_DELIMITER = "?";
     private final HttpMethod httpMethod;
     private final String url;

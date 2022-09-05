@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.apache.coyote.model.Content.HTML;
+import static org.apache.coyote.model.ContentType.HTML;
 
 public class RequestUtil {
 

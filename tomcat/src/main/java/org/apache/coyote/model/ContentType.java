@@ -5,7 +5,7 @@ import org.apache.coyote.exception.NotFoundContentTypeException;
 import java.util.Arrays;
 import java.util.Objects;
 
-public enum Content {
+public enum ContentType {
 
     HTML("html", "text/html"),
     CSS("css", "text/css"),
@@ -16,7 +16,7 @@ public enum Content {
     private final String extension;
     private final String type;
 
-    Content(String extension, String type) {
+    ContentType(String extension, String type) {
         this.extension = extension;
         this.type = type;
     }

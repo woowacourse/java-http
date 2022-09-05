@@ -1,7 +1,7 @@
 package org.apache.coyote.model.request;
 
 import org.apache.coyote.exception.InvalidRequestFormat;
-import org.apache.coyote.model.Content;
+import org.apache.coyote.model.ContentType;
 import org.apache.coyote.model.HttpMethod;
 import org.apache.coyote.model.HttpParam;
 
@@ -36,7 +36,7 @@ public class HttpRequest {
         final var uri = requests.get(1);
         final var path = calculatePath(uri);
         final var httpParams = HttpParam.of(getParam(uri));
-        final var content = Content.getType(getExtension(path));
+        final var content = ContentType.getType(getExtension(path));
         return new HttpRequest(uri, path, httpParams, content, HttpMethod.of(requests.get(0)));
     }
 

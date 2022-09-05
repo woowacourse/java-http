@@ -2,22 +2,22 @@ package org.apache.coyote.request;
 
 import java.util.Map;
 
-public class HttpRequestHeader {
+public class HttpRequest {
 
     private static final String HTML_EXTENSION = ".html";
     private static final String QUERY_START_CHARACTER = "?";
     private static final String ROOT = "/";
     private static final String EXTENSION_CHARACTER = ".";
     private static final String DEFAULT_PAGE_URL = "/index.html";
-    private static final String START_LINE_REGEX = " ";
-    private static final int URL_INDEX = 1;
 
-    private final String startLine;
+    private final StartLine startLine;
     private final Map<String, String> headers;
+    private final String requestBody;
 
-    public HttpRequestHeader(final String startLine, final Map<String, String> headers) {
-        this.startLine = startLine;
+    public HttpRequest(final String startLine, final Map<String, String> headers,final String requestBody) {
+        this.startLine = StartLine.from(startLine);
         this.headers = headers;
+        this.requestBody = requestBody;
     }
 
     public String getRequestUrlWithoutQuery() {
@@ -30,7 +30,7 @@ public class HttpRequestHeader {
     }
 
     public String getRequestUrl() {
-        String requestUrl = startLine.split(START_LINE_REGEX)[URL_INDEX];
+        String requestUrl = startLine.getUri();
         requestUrl = makeDefaultRequestUrl(requestUrl);
 
         return requestUrl;
@@ -54,5 +54,9 @@ public class HttpRequestHeader {
             return path + HTML_EXTENSION + QUERY_START_CHARACTER + queryString;
         }
         return requestUrl + HTML_EXTENSION;
+    }
+
+    public String getRequestBody() {
+        return requestBody;
     }
 }

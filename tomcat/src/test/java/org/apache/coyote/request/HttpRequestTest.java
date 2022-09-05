@@ -6,14 +6,14 @@ import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class HttpRequestHeaderTest {
+class HttpRequestTest {
 
     @DisplayName("쿼리를 제외하고 자원의 확장자를 포함한 URI 를 가져올 수 있다.")
     @Test
     void getRequestUrlWithoutQuery() {
         // given
         String startLine = "GET /login?account=dwoo&password=123 HTTP1.1 ";
-        final HttpRequestHeader sut = new HttpRequestHeader(startLine, Map.of());
+        final HttpRequest sut = new HttpRequest(startLine, Map.of(), "");
 
         // when
         final String url = sut.getRequestUrlWithoutQuery();
@@ -27,7 +27,7 @@ class HttpRequestHeaderTest {
     void getRequestUrl() {
         // given
         String startLine = "GET /login?account=dwoo&password=123 HTTP1.1 ";
-        final HttpRequestHeader sut = new HttpRequestHeader(startLine, Map.of());
+        final HttpRequest sut = new HttpRequest(startLine, Map.of(), "");
 
         // when
         final String url = sut.getRequestUrl();

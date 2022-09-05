@@ -156,7 +156,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("쿼리스트링 없이 '/login' 요청시 login.html 파일을 응답힌다.")
+    @DisplayName("GET 메소드와 함께 쿼리스트링 없이 '/login' 요청시 login.html 파일을 응답힌다.")
     @Test
     void loginWithoutString() throws IOException {
         // given
@@ -177,23 +177,26 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 3796 \r\n" +
+                "Content-Length: 3797 \r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("쿼리스트링과 함께 '/login' 요청시 쿼리스트링을 처리하여 정상 응답을 내보내며 redirect한다.")
+    @DisplayName("POST 메소드 및 바디를 포함해서 '/login' 요청시 요청 바디를 처리하여 정상 응답을 내보내며 redirect한다.")
     @Test
     void loginWithQueryString() {
         // given
         final String httpRequest= String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 30 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
                 "",
-                "");
+                "account=gugu&password=password");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -207,7 +210,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).startsWith(expected);
     }
 
-    @DisplayName("쿼리스트링과 함께 '/login' 요청시 User 정보를 로그로 남긴다.")
+    @DisplayName("POST '/login' 요청시 User 정보를 로그로 남긴다.")
     @Test
     void loginWithLog() {
         // given
@@ -217,12 +220,16 @@ class Http11ProcessorTest {
         appender.start();
 
         final String account = "gugu";
+        final String password = "password";
         final String httpRequest= String.join("\r\n",
-                "GET /login?account=" + account + "&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 30 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
                 "",
-                "");
+                "account=" + account + "&password=" + password);
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
@@ -246,11 +253,14 @@ class Http11ProcessorTest {
     public void failToLogin() throws IOException {
         // given
         final String httpRequest= String.join("\r\n",
-                "GET /login?account=gugu&password=invalid HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 29 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
                 "",
-                "");
+                "account=gugu&password=invalid");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

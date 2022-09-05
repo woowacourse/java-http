@@ -10,6 +10,7 @@ import ch.qos.logback.core.read.ListAppender;
 import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -26,10 +27,11 @@ class LoginHandlerTest {
         appender.start();
 
         final String account = "gugu";
-        String requestUrl = "login?account=" + account + "&password=password";
+        final String password = "password";
+        final String requestBody = "account=" + account + "&password=" + password;
 
         // when
-        LoginHandler.login(requestUrl);
+        LoginHandler.login(requestBody);
 
         // then
         final List<ILoggingEvent> logs = appender.list;
@@ -47,25 +49,25 @@ class LoginHandlerTest {
     @Test
     public void failToLogin() {
         //given
-        final String requestUrl = "/login?account=gugu&password=invalid";
+        final String requestBody = "account=gugu&password=invalid";
 
         //when
-        final String result = LoginHandler.login(requestUrl);
+        final HttpResponse httpResponse = LoginHandler.login(requestBody);
 
         //then
-        assertThat(result).isEqualTo("/401.html");
+        assertThat(httpResponse.getResponse()).contains("/401.html");
     }
 
-    @DisplayName("쿼리스트링 없이 요청이 들어오면 login.html 을 응답힌다.")
+    @DisplayName("정상적으로 요청을 처리한 이후에는 index.html 을 반환한다.")
     @Test
     public void returnLoginWhenWithoutQuery() {
         //given
-        final String requestUrl = "/login";
+        final String requestBody = "account=gugu&password=password";
 
         //when
-        final String result = LoginHandler.login(requestUrl);
+        final HttpResponse httpResponse = LoginHandler.login(requestBody);
 
         //then
-        assertThat(result).isEqualTo("/login.html");
+        assertThat(httpResponse.getResponse()).contains("/index.html");
     }
 }

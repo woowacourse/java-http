@@ -51,11 +51,11 @@ css 파일과 같은 것을 응답으로 반환해줄 때에는 'text/css' 와 �
 또한 클라이언트 입장에서는 HTTP 요청 헤더의 `Accept` 를 통해서 응답으로 받길 원하는 컨텐츠 형식을 지정해줄 수 있는데,
 이 때 우선순위에 따라서 여러개를 명시해줄 수 있게 된다.
 
-[RFC 문서 Accept](https://www.rfc-editor.org/rfc/rfc2616#page-100)
+참고 : [RFC 문서 Accept](https://www.rfc-editor.org/rfc/rfc2616#page-100)
 
 ---
 
-## 레벨1 구현 내용 정리
+## 레벨2 구현 내용 정리
 
 - [x] HTTP Status Code 302
   - [x] `http://localhost:8080/login` 요청시 login.html 파일을 응답한다.
@@ -63,3 +63,29 @@ css 파일과 같은 것을 응답으로 반환해줄 때에는 'text/css' 와 �
   - [x] `http://localhost:8080/login` 페이지에서 로그인 버튼 클릭시 302 상태코드를 응답한다.
   - [x] 로그인 성공시에는 index.html로 리다이렉트한다.
   - [x] 로그인 실패시에는 401.html로 리다이렉트한다.
+
+- [x] POST 방식으로 회원가입
+  - [x] `login.html` form 태그 변경
+  - [x] 기존 로그인 방식을 `POST` 로 변경
+  - [x] `HttpResopnse` 에서 responseBody 생성하도록 변경
+  - [x] `StartLine` 및 `HttpMethod` 도출
+  - [x] 기존 쿼리파라미터를 받던 `LoginHandler` 에서 바디를 읽도록 수정
+  - [x] `ContentLength` 헤더를 이용해 POST 요청의 바디를 읽도록 구현
+
+## 새롭게 알게 된 내용 (레벨2)
+
+### Content-Length 헤더 필드
+
+큰 의미가 없다고 생각했던 `Content-Length` 헤더 필드에 대해서 직접 POST 요청의 바디 부분을 읽으면서 그 사용용도를 알게 되었다.
+`Content-Length` 는 수신자에게 보내지는 바이트 단위를 가지는 요청 바디(Request Body)의 크기를 나타낸다.
+수신자쪽에서는 해당 바이트의 크기만큼 읽어들여 처리할 수 있다.
+
+```java
+final int contentLength = Integer.parseInt(contentLengthHeader.trim());
+final char[] buffer = new char[contentLength];
+bufferedReader.read(buffer, 0, contentLength);
+
+return new String(buffer);
+```
+
+참고 : [Content-Length - HTTP](https://developer.mozilla.org/ko/docs/Web/HTTP/Headers/Content-Length)

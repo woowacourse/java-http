@@ -7,6 +7,7 @@ import static org.apache.coyote.http11.header.HttpHeaderType.CONTENT_TYPE;
 import static org.apache.coyote.http11.http.response.HttpStatus.OK;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import org.apache.catalina.utils.IOUtils;
 import org.apache.catalina.utils.Parser;
 import org.apache.coyote.http11.exception.InternalException;
@@ -31,7 +32,7 @@ public class ResourceHandler implements Handler{
             final HttpHeader contentLength = HttpHeader.of(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
 
             return HttpResponse.of(HTTP11, OK, body, contentType, contentLength);
-        } catch (IOException e) {
+        } catch (IOException | URISyntaxException e) {
             e.printStackTrace();
             throw new InternalException("서버 에러가 발생했습니다.");
         }

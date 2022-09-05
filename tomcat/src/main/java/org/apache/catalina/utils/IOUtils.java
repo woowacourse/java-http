@@ -2,9 +2,11 @@ package org.apache.catalina.utils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 public class IOUtils {
 
@@ -17,9 +19,9 @@ public class IOUtils {
         return String.copyValueOf(bodyArr);
     }
 
-    public static String readResourceFile(final String fileName) throws IOException {
+    public static String readResourceFile(final String fileName) throws IOException, URISyntaxException {
         final ClassLoader classLoader = IOUtils.class.getClassLoader();
-        final URL resource = classLoader.getResource(STATIC_PATH + fileName);
+        final URI resource = Objects.requireNonNull(classLoader.getResource(STATIC_PATH + fileName)).toURI();
         final Path path = Path.of(resource.getPath());
 
         return Files.readString(path);

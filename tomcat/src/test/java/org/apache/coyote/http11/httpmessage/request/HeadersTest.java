@@ -3,6 +3,7 @@ package org.apache.coyote.http11.httpmessage.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,8 @@ class HeadersTest {
         Headers requestHeader = Headers.of(headers);
 
         // then
-        assertThat(requestHeader.getHeaders()).isEmpty();
+        assertThat(requestHeader).extracting("headers")
+                .isEqualTo(new LinkedHashMap<>());
     }
 
     @Test
@@ -30,7 +32,7 @@ class HeadersTest {
         Headers requestHeader = Headers.of(headers);
 
         // then
-        assertThat(requestHeader.getHeaders()).usingRecursiveComparison()
+        assertThat(requestHeader).extracting("headers")
                 .isEqualTo(Map.of("key", "value", "name", "park"));
     }
 
@@ -42,5 +44,18 @@ class HeadersTest {
         // when & then
         assertThatThrownBy(() -> Headers.of(headers))
                 .isInstanceOf(IndexOutOfBoundsException.class);
+    }
+
+    @Test
+    void 다른_header들을_추가할_수_있다() {
+        // given
+        Headers headers = Headers.of(List.of("key: value", "name: park"));
+
+        // when
+        headers.putAll(new Headers(Map.of("age", "25", "Content-Type", "text/html")));
+
+        // then
+        assertThat(headers).extracting("headers")
+                .isEqualTo(Map.of("key", "value", "name", "park", "age", "25", "Content-Type", "text/html"));
     }
 }

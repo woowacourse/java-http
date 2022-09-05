@@ -1,6 +1,5 @@
 package org.apache.coyote.http11.httpmessage.request;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,10 +28,6 @@ public class Headers {
 
     public void putAll(Headers other) {
         headers.putAll(other.headers);
-    }
-
-    public Map<String, String> getHeaders() {
-        return Collections.unmodifiableMap(headers);
     }
 
     @Override

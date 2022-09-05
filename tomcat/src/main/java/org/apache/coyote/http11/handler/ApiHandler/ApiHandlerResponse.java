@@ -1,7 +1,7 @@
 package org.apache.coyote.http11.handler.ApiHandler;
 
 import java.util.Map;
-import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.httpmessage.request.Headers;
 import org.apache.coyote.http11.httpmessage.response.HttpStatus;
 

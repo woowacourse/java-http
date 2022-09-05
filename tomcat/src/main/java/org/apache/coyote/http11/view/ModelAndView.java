@@ -6,7 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
-import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.httpmessage.ContentType;
 import org.apache.coyote.http11.handler.ApiHandler.ApiHandlerResponse;
 import org.apache.coyote.http11.handler.FileHandler.FileHandlerResponse;
 import org.apache.coyote.http11.httpmessage.request.Headers;

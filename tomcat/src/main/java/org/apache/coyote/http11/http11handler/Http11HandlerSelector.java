@@ -2,6 +2,11 @@ package org.apache.coyote.http11.http11handler;
 
 import java.util.List;
 import org.apache.coyote.http11.http11handler.exception.NoProperHandlerException;
+import org.apache.coyote.http11.http11handler.impl.DefaultPageHandler;
+import org.apache.coyote.http11.http11handler.impl.IndexPageHandler;
+import org.apache.coyote.http11.http11handler.impl.LoginPageHandler;
+import org.apache.coyote.http11.http11handler.impl.RegisterPageHandler;
+import org.apache.coyote.http11.http11handler.impl.ResourceHandler;
 import org.apache.coyote.http11.http11request.Http11Request;
 
 public class Http11HandlerSelector {

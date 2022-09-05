@@ -1,8 +1,9 @@
-package org.apache.coyote.http11.http11handler;
+package org.apache.coyote.http11.http11handler.impl;
 
 import java.util.Map;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.dto.ResponseComponent;
+import org.apache.coyote.http11.http11handler.Http11Handler;
 import org.apache.coyote.http11.http11handler.login.LoginService;
 import org.apache.coyote.http11.http11handler.support.HandlerSupporter;
 import org.apache.coyote.http11.http11handler.support.QueryStringProcessor;

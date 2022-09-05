@@ -18,4 +18,8 @@ public enum ResourceSuffix {
         return Arrays.stream(values())
                 .anyMatch(it -> line.endsWith(it.value));
     }
+
+    public String getValue() {
+        return value;
+    }
 }

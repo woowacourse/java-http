@@ -23,4 +23,8 @@ public class StatusLine {
     public String getStatusMessage() {
         return statusMessage;
     }
+
+    public String getValue() {
+        return protocolVersion + " " + statusCode + " " + statusMessage + " ";
+    }
 }

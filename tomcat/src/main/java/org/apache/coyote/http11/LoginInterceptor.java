@@ -1,6 +1,8 @@
 package org.apache.coyote.http11;
 
-import org.apache.coyote.Interceptor;
+import java.io.IOException;
+import nextstep.jwp.LoginFailureException;
+import nextstep.jwp.LoginService;
 import org.apache.coyote.http11.request.HttpRequest;
 
 public class LoginInterceptor implements Interceptor {
@@ -12,11 +14,17 @@ public class LoginInterceptor implements Interceptor {
     }
 
     @Override
-    public void handle(HttpRequest httpRequest) {
-        if(httpRequest.isExistQueryString()) {
+    public boolean handle(HttpRequest httpRequest) throws IOException {
+        if (httpRequest.isExistQueryString()) {
             final String account = httpRequest.getQueryStringValue("account");
             final String password = httpRequest.getQueryStringValue("password");
-            loginService.validateAccount(account, password);
+
+            try {
+                loginService.validateAccount(account, password);
+            } catch (LoginFailureException exception) {
+                return false;
+            }
         }
+        return true;
     }
 }

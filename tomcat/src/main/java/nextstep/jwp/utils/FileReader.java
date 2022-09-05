@@ -20,6 +20,7 @@ public class FileReader {
         if (resource == null) {
             return Optional.empty();
         }
+        System.out.println(requestUri);
         final Path path = new File(resource.getPath()).toPath();
         final byte[] bytes = Files.readAllBytes(path);
         return Optional.of(new String(bytes));

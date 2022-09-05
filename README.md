@@ -6,7 +6,7 @@
 - [x] uri의 QueryString을 파싱하는 기능이 있다.
 
 ## 2단계: 로그인 구현하기 
-- [ ] HTTP Reponse의 상태 응답 코드를 302로 반환한다.
+- [x] HTTP Reponse의 상태 응답 코드를 302로 반환한다.
 - [ ] POST로 들어온 요청의 Request Body를 파싱할 수 있다.
 - [ ] 로그인에 성공하면 HTTP Reponse의 헤더에 Set-Cookie가 존재한다.
 - [ ] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.

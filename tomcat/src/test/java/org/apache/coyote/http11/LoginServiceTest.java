@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import nextstep.jwp.LoginFailureException;
+import nextstep.jwp.LoginService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

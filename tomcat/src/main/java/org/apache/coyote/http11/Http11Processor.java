@@ -14,6 +14,8 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.QueryParams;
+import org.apache.coyote.http11.request.URI;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -82,14 +84,15 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse getDynamicResourceResponse(HttpRequest httpRequest) {
-        String path = httpRequest.getUri().getPath();
+        URI uri = httpRequest.getUri();
+        String path = uri.getPath();
         if (path.equals("/")) {
             return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.TEXT_HTML_CHARSET_UTF_8,
                     WELCOME_MESSAGE);
         }
         if (path.equals("/login")) {
-            Optional<User> user = InMemoryUserRepository.findByAccount(
-                    httpRequest.getUri().getQueryParams().get("account"));
+            QueryParams queryParams = uri.getQueryParams();
+            Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.findValue("account"));
             user.ifPresent(value -> log.debug(value.toString()));
         }
         String responseBody = getStaticResourceResponse(path + ".html");

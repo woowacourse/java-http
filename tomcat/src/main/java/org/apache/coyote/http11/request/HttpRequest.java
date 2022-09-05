@@ -6,23 +6,24 @@ public class HttpRequest {
 
     private static final String REQUEST_LINE_SPLITTER = " ";
     private static final String FILE_EXTENSION_SIGN = ".";
-    private static final int REQUEST_METHOD_INDEX = 0;
-    private static final int REQUEST_URI_INDEX = 1;
-    private static final int REQUEST_PROTOCOL_INDEX = 2;
+    private static final int METHOD_INDEX = 0;
+    private static final int URI_INDEX = 1;
+    private static final int PROTOCOL_INDEX = 2;
 
-    private final String requestMethod;
+    private final String method;
     private final URI uri;
     private final String protocol;
 
     public HttpRequest(String requestLine) {
         String[] str = requestLine.split(REQUEST_LINE_SPLITTER);
-        this.requestMethod = str[REQUEST_METHOD_INDEX];
-        this.uri = new URI(str[REQUEST_URI_INDEX]);
-        this.protocol = str[REQUEST_PROTOCOL_INDEX];
+        this.method = str[METHOD_INDEX];
+        this.uri = new URI(str[URI_INDEX]);
+        this.protocol = str[PROTOCOL_INDEX];
     }
 
     public boolean isStaticFileRequest() {
-        return uri.getPath().contains(FILE_EXTENSION_SIGN);
+        String path = uri.getPath();
+        return path.contains(FILE_EXTENSION_SIGN);
     }
 
     public Optional<String> getExtension() {

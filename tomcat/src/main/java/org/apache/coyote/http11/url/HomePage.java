@@ -11,7 +11,7 @@ public class HomePage extends Url {
     }
 
     @Override
-    public Http11Response getResource() {
+    public Http11Response getResponse(String httpMethod) {
         return new Http11Response(ContentType.from(getPath()), HttpStatus.OK, getPath());
     }
 }

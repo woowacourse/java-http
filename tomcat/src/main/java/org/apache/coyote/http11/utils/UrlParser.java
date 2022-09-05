@@ -1,8 +1,13 @@
 package org.apache.coyote.http11.utils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import org.apache.coyote.http11.dto.LoginQueryDataDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UrlParser {
+    private static final Logger log = LoggerFactory.getLogger(UrlParser.class);
     private static final String PATH_STANDARD = "?";
     private static final String REQUEST_STANDARD = "&";
     private static final String DATA_STANDARD = "=";
@@ -23,6 +28,29 @@ public class UrlParser {
         String password = dataMap[1].split(DATA_STANDARD)[VALUE_INDEX];
 
         return new LoginQueryDataDto(account, password);
+    }
+
+    public static String extractUri(final BufferedReader bufferedReader) {
+        String uri = "";
+        try {
+            uri = bufferedReader.readLine()
+                    .split(" ")[1]
+                    .substring(1);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+        return uri;
+    }
+
+    public static String extractMethod(final BufferedReader bufferedReader) {
+        String httpMethod = "";
+        try {
+            httpMethod = bufferedReader.readLine()
+                    .split(" ")[0];
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+        return httpMethod;
     }
 
 }

@@ -10,11 +10,11 @@ import org.apache.coyote.http11.url.Url;
 public class IOUtils {
     private static final String STATIC_DIRECTORY = "static/";
 
-    public static String readResourceFile(Url url) {
+    public static String readResourceFile(Url url, String httpMethod) {
         try {
             URL resource = IOUtils.class
                     .getClassLoader()
-                    .getResource(STATIC_DIRECTORY + url.getResource().getResource());
+                    .getResource(STATIC_DIRECTORY + url.getResponse(httpMethod).getResource());
             validatePath(resource);
             return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         } catch (IOException e) {

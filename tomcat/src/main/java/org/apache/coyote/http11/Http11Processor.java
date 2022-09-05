@@ -10,6 +10,7 @@ import org.apache.coyote.http11.response.Http11Response;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.url.HandlerMapping;
 import org.apache.coyote.http11.url.Url;
+import org.apache.coyote.http11.utils.UrlParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +36,10 @@ public class Http11Processor implements Runnable, Processor {
              InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
-            String uri = getUri(bufferedReader);
+            String uri = UrlParser.extractUri(bufferedReader);
+            String httpMethod = UrlParser.extractMethod(bufferedReader);
             Url url = HandlerMapping.from(uri);
-            Http11Response responseBody = Http11Response.extract(url);
+            Http11Response responseBody = Http11Response.extract(url, httpMethod);
 
             final var response = createResponse(responseBody.getHttpStatus(), responseBody.getContentType(),
                     responseBody.getResource());

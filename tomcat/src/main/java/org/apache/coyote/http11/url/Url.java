@@ -9,7 +9,7 @@ public abstract class Url {
         this.path = path;
     }
 
-    public abstract Http11Response getResource();
+    public abstract Http11Response getResponse(String httpMethod);
 
     public String getPath() {
         return path;

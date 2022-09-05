@@ -12,7 +12,7 @@ public class Empty extends Url {
     }
 
     @Override
-    public Http11Response getResource() {
+    public Http11Response getResponse(String httpMethod) {
         log.info("path : {} ", getPath());
         throw new IllegalArgumentException("경로가 비어있습니다.");
     }

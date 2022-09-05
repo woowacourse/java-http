@@ -14,7 +14,7 @@ public enum HttpMethod {
         this.value = value;
     }
 
-    public static HttpMethod of(final String value) {
+    public static HttpMethod from(final String value) {
         return Arrays.stream(HttpMethod.values())
                 .filter(it -> it.value.equals(value))
                 .findFirst()

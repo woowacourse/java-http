@@ -12,7 +12,7 @@ public class HttpRequestHeaders {
 
     private final Map<String, String> headers;
 
-    public HttpRequestHeaders(Map<String, String> headers) {
+    private HttpRequestHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
 
@@ -30,11 +30,15 @@ public class HttpRequestHeaders {
         return headers.containsKey("Content-Length");
     }
 
+    public boolean hasJSessionId() {
+        return getCookiesData().hasJSessionId();
+    }
+
     public int getContentLength() {
         return Integer.parseInt(headers.get("Content-Length"));
     }
 
-    public Map<String, String> getHeaders() {
-        return headers;
+    public HttpCookie getCookiesData() {
+        return HttpCookie.from(headers.get("Cookie"));
     }
 }

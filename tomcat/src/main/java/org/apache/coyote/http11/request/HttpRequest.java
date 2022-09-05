@@ -26,25 +26,14 @@ public class HttpRequest {
         final List<String> lines = readAllLines(reader);
         int emptyLineIndex = getEmptyLineIndex(lines);
         final HttpRequestLine httpRequestLine = HttpRequestLine.parse(lines.get(REQUEST_START_INDEX));
-        final HttpRequestHeaders httpRequestHeaders = HttpRequestHeaders.parse(
-                lines.subList(REQUEST_START_INDEX + 1, emptyLineIndex));
+        final HttpRequestHeaders httpRequestHeaders =
+                HttpRequestHeaders.parse(lines.subList(REQUEST_START_INDEX + 1, emptyLineIndex));
         final String requestBody = findRequestBody(reader, httpRequestHeaders);
         return new HttpRequest(
                 httpRequestLine,
                 httpRequestHeaders,
                 requestBody
         );
-    }
-
-    private static String findRequestBody(final BufferedReader reader,
-                                          final HttpRequestHeaders httpRequestHeaders) throws IOException {
-        if (httpRequestHeaders.hasRequestBody()) {
-            final int contentLength = httpRequestHeaders.getContentLength();
-            final char[] buffer = new char[contentLength];
-            reader.read(buffer, 0, contentLength);
-            return new String(buffer);
-        }
-        return "";
     }
 
     private static List<String> readAllLines(final BufferedReader reader) {
@@ -73,6 +62,21 @@ public class HttpRequest {
         return emptyLineIndex;
     }
 
+    private static String findRequestBody(final BufferedReader reader,
+                                          final HttpRequestHeaders httpRequestHeaders) throws IOException {
+        if (httpRequestHeaders.hasRequestBody()) {
+            final int contentLength = httpRequestHeaders.getContentLength();
+            final char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+            return new String(buffer);
+        }
+        return "";
+    }
+
+    public boolean hasJSessionId() {
+        return headers.hasJSessionId();
+    }
+
     public HttpMethod getHttpMethod() {
         return line.getHttpMethod();
     }
@@ -87,14 +91,6 @@ public class HttpRequest {
 
     public Map<String, String> queryParamsData() {
         return QueryParamsParser.parseByUrl(line.getRequestUrl());
-    }
-
-    public HttpRequestLine getLine() {
-        return line;
-    }
-
-    public HttpRequestHeaders getHeaders() {
-        return headers;
     }
 
     public String getRequestBody() {

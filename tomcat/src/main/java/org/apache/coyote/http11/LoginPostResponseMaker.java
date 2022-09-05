@@ -30,26 +30,31 @@ public class LoginPostResponseMaker implements ResponseMaker {
                 this.getClass().getClassLoader().getResource("static" + "/login.html");
         final Path path = Paths.get(resource.toURI());
         final var responseBody = new String(Files.readAllBytes(path));
-        return makeLoginResponse(loginData, responseBody);
+        return makeLoginResponse(loginData, httpRequest, responseBody);
     }
 
-    private String makeLoginResponse(final HashMap<String, String> loginData, final String responseBody) {
+    private String makeLoginResponse(
+            final HashMap<String, String> loginData, final HttpRequest httpRequest, final String responseBody
+    ) {
         if (loginData.isEmpty() || !validateAccount(loginData)) {
+            log.info("로그인 데이터가 없습니다.");
             return failLoginResponse(responseBody);
         }
-        return successLoginResponse(responseBody);
+        return successLoginResponse(httpRequest, responseBody);
     }
 
-    private String successLoginResponse(final String responseBody) {
+    private String successLoginResponse(final HttpRequest httpRequest, final String responseBody) {
         final HttpResponse httpResponse =
                 new HttpResponse(HttpStatus.FOUND, responseBody, ContentType.HTML, "/index.html");
-        return httpResponse.toFoundString();
+        httpResponse.addJSessionId(httpRequest);
+        return httpResponse.toString();
     }
 
     private String failLoginResponse(final String responseBody) {
+        log.info("로그인 계정 정보가 이상합니다. responseBody={}", responseBody);
         final HttpResponse httpResponse =
                 new HttpResponse(HttpStatus.FOUND, responseBody, ContentType.HTML, "/401.html");
-        return httpResponse.toFoundString();
+        return httpResponse.toString();
     }
 
     private boolean validateAccount(final HashMap<String, String> loginData) {

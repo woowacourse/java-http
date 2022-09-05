@@ -5,8 +5,8 @@ import java.util.Arrays;
 public enum ContentType {
     HTML("text/html"),
     CSS("text/css"),
-    JS("text/javascript"),
-    ICO("image/x-icon");
+    JAVASCRIPT("text/javascript"),
+    ICO("image/vnd.microsoft.icon");
 
     private final String value;
 
@@ -22,7 +22,7 @@ public enum ContentType {
     }
 
     private boolean isMatch(String type) {
-        return name().equalsIgnoreCase(type);
+        return name().equalsIgnoreCase(type) || value.equals(type) ;
     }
 
     public String getValue() {

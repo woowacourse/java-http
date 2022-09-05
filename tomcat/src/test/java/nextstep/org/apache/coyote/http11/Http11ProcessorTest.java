@@ -135,12 +135,12 @@ class Http11ProcessorTest {
         final Http11Processor processor = new Http11Processor(socket);
 
         // when & then
-        assertThatThrownBy(() -> processor.process(socket))
+        assertThatThrownBy(() -> processor.run())
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    void 없는_파일은_호출할_수_없다() {
+    void 없는_파일은_호출할_수_없다() throws IOException {
         //given
         final String httpRequest = String.join("\r\n",
                 "GET /invalidFile.html HTTP/1.1 ",
@@ -153,13 +153,24 @@ class Http11ProcessorTest {
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
-        // when & then
-        assertThatThrownBy(() -> processor.process(socket))
-                .isInstanceOf(IllegalArgumentException.class);
+        // when
+        processor.run();
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/404.html");
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        var expected = String.join("\r\n",
+                "HTTP/1.1 404 Not Found ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+
+        assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test
-    void 가입된_유저는_로그인을_할_수_있다() throws IOException {
+    void 가입된_유저는_로그인을_할_수_있다() {
         //given
         final String body = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
@@ -178,14 +189,13 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         var expected = String.join("\r\n",
                 "HTTP/1.1 302 Found ",
+                "Location: /index.html ",
                 "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
+                "Content-Length: 0 ",
                 "",
-                responseBody);
+                "");
 
         assertThat(socket.output()).isEqualTo(expected);
     }

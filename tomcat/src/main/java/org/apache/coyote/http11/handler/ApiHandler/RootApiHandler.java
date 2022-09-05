@@ -1,6 +1,8 @@
 package org.apache.coyote.http11.handler.ApiHandler;
 
+import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.httpmessage.request.HttpMethod;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
@@ -17,6 +19,6 @@ public class RootApiHandler implements Handler {
 
     @Override
     public ApiHandlerResponse getResponse(HttpRequest httpRequest) {
-        return new ApiHandlerResponse(HttpStatus.OK, "Hello world!");
+        return ApiHandlerResponse.of(HttpStatus.OK, new LinkedHashMap<>(), "Hello world!", ContentType.HTML);
     }
 }

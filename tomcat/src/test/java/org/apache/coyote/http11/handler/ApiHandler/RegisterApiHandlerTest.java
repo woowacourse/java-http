@@ -7,6 +7,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Map;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 import org.apache.coyote.http11.httpmessage.response.HttpStatus;
 import org.junit.jupiter.api.Test;
@@ -119,7 +121,7 @@ class RegisterApiHandlerTest {
 
         // then
         assertThat(response).usingRecursiveComparison()
-                .isEqualTo(new ApiHandlerResponse(HttpStatus.FOUND, "/index.html"));
+                .isEqualTo(ApiHandlerResponse.of(HttpStatus.FOUND, Map.of("Location", "/index.html "), "", ContentType.HTML));
     }
 
     @Test
@@ -147,6 +149,6 @@ class RegisterApiHandlerTest {
 
         // then
         assertThat(response).usingRecursiveComparison()
-                .isEqualTo(new ApiHandlerResponse(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html"));
+                .isEqualTo(ApiHandlerResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, Map.of(), "/500.html", ContentType.HTML));
     }
 }

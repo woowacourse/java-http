@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.httpmessage.response;
 
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.apache.coyote.http11.httpmessage.request.Headers;
 import org.apache.coyote.http11.httpmessage.request.Http11Version;
 import org.apache.coyote.http11.view.ModelAndView;
@@ -18,10 +19,17 @@ public class HttpResponse {
     }
 
     public static HttpResponse of(ModelAndView modelAndView) {
+        Headers headers = modelAndView.getHeaders();
+
+        Map<String, String> addHeaders = new LinkedHashMap<>();
+        addHeaders.put("Content-Type", modelAndView.getContentType().getValue() + ";charset=utf-8 ");
+        addHeaders.put("Content-Length", modelAndView.getView().getBytes().length + " ");
+
+        headers.putAll(new Headers(addHeaders));
+
         return new HttpResponse(
                 new StatusLine(Http11Version.HTTP_11_VERSION, modelAndView.getHttpStatus()),
-                Headers.of(List.of("Content-Type: " + modelAndView.getContentType().getValue() + ";charset=utf-8 ",
-                        "Content-Length: " + modelAndView.getView().getBytes().length + " ")),
+                headers,
                 modelAndView.getView()
         );
     }

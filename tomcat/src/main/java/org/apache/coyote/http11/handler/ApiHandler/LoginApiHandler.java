@@ -1,10 +1,12 @@
 package org.apache.coyote.http11.handler.ApiHandler;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.httpmessage.request.HttpMethod;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
@@ -30,13 +32,15 @@ public class LoginApiHandler implements Handler {
         final String account = parameters.get("account");
         final String password = parameters.get("password");
 
+        Map<String, String> headers = new LinkedHashMap<>();
         final User user = findUser(account);
         if (user.checkPassword(password)) {
-            log.info(user.toString());
-            return new ApiHandlerResponse(HttpStatus.FOUND, "/index.html");
+            log.info("로그인 성공! 아이디: " + user.getAccount());
+            headers.put("Location", "/index.html ");
+            return ApiHandlerResponse.of(HttpStatus.FOUND, headers, "", ContentType.HTML);
         }
 
-        return new ApiHandlerResponse(HttpStatus.UNAUTHORIZED, "/401.html");
+        return ApiHandlerResponse.of(HttpStatus.UNAUTHORIZED, headers, "/401.html", ContentType.HTML);
     }
 
     private Map<String, String> getParameters(RequestBody requestBody) {

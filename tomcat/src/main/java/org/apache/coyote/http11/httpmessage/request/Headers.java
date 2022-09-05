@@ -11,7 +11,7 @@ public class Headers {
 
     private final Map<String, String> headers;
 
-    private Headers(Map<String, String> headers) {
+    public Headers(Map<String, String> headers) {
         this.headers = headers;
     }
 
@@ -26,6 +26,10 @@ public class Headers {
         return new Headers(headers);
     }
 
+
+    public void putAll(Headers other) {
+        headers.putAll(other.headers);
+    }
 
     public Map<String, String> getHeaders() {
         return Collections.unmodifiableMap(headers);

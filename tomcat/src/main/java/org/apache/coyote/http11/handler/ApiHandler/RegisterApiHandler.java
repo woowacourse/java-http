@@ -1,10 +1,12 @@
 package org.apache.coyote.http11.handler.ApiHandler;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.ContentType;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.httpmessage.request.HttpMethod;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
@@ -24,6 +26,7 @@ public class RegisterApiHandler implements Handler {
     public Object getResponse(HttpRequest httpRequest) {
         RequestBody requestBody = httpRequest.getRequestBody();
 
+        Map<String, String> headers = new LinkedHashMap<>();
         try {
             Map<String, String> parameters = getParameters(requestBody);
             String account = parameters.get("account");
@@ -32,10 +35,11 @@ public class RegisterApiHandler implements Handler {
             User user = new User(account, password, email);
             InMemoryUserRepository.save(user);
         } catch (Exception e) {
-            return new ApiHandlerResponse(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html");
+            return ApiHandlerResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, headers, "/500.html", ContentType.HTML);
         }
 
-        return new ApiHandlerResponse(HttpStatus.FOUND, "/index.html");
+        headers.put("Location", "/index.html ");
+        return ApiHandlerResponse.of(HttpStatus.FOUND, headers, "", ContentType.HTML);
     }
 
     private Map<String, String> getParameters(RequestBody requestBody) {
@@ -44,8 +48,11 @@ public class RegisterApiHandler implements Handler {
 
         HashMap<String, String> parameters = new HashMap<>();
         for (String param : params) {
-            String[] keyValue = param.split("=");
-            parameters.put(keyValue[0], keyValue[1]);
+            int index = param.indexOf("=");
+            String key = param.substring(0, index);
+            String value = param.substring(index + 1);
+
+            parameters.put(key, value);
         }
         return parameters;
     }

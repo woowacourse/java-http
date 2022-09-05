@@ -1,18 +1,29 @@
 package org.apache.coyote.http11;
 
+import java.util.Arrays;
+
 public enum ContentType {
 
-    HTML("text/html"),
-    CSS("text/css"),
-    JAVASCRIPT("text/javascript");
+    HTML("text/html", ".html"),
+    CSS("text/css", ".css"),
+    JAVASCRIPT("text/javascript", ".js");
 
-    private final String value;
+    private final String content;
+    private final String fileType;
 
-    ContentType(String value) {
-        this.value = value;
+    ContentType(String content, String fileType) {
+        this.content = content;
+        this.fileType = fileType;
     }
 
-    public String getValue() {
-        return value;
+    public static ContentType from(String url) {
+        return Arrays.stream(values())
+                .filter(contentType -> url.contains(contentType.fileType))
+                .findFirst()
+                .orElse(HTML);
+    }
+
+    public String getContent() {
+        return content;
     }
 }

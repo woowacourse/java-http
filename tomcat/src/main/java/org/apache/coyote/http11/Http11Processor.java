@@ -56,52 +56,29 @@ public class Http11Processor implements Runnable, Processor {
             header.append(bufferedReader.readLine())
                     .append("\r\n");
         }
-
         return header.toString();
     }
 
     private String getResponse(final HttpRequest httpRequest) throws IOException {
-        return getResponse(httpRequest.getRequestUrl(), httpRequest.getRequestParams());
+        return getResponse(httpRequest.getPath(), httpRequest.getRequestParams());
     }
 
     private String getResponse(String url, final Map<String, String> requestParam) throws IOException {
         if ("/".equals(url)) {
-            final var responseBody = "Hello world!";
-
-            return createResponse(ContentType.HTML, responseBody);
-        }
-
-        if ("/index.html".equals(url)) {
-            final String responseBody = readFile(url);
-
-            return createResponse(ContentType.HTML, responseBody);
+            return createResponse(ContentType.HTML, "Hello world!");
         }
 
         if ("/login".equals(url)) {
-            final String responseBody = readFile(url + ".html");
-
             User user = InMemoryUserRepository.findByAccount(requestParam.get("account"))
                     .orElseThrow(() -> new IllegalStateException("존재하지 않는 유저입니다."));
             if (user.checkPassword(requestParam.get("password"))) {
                 log.info(user.toString());
             }
 
-            return createResponse(ContentType.HTML, responseBody);
+            return createResponse(ContentType.HTML, readFile(url + ".html"));
         }
 
-        if (url.contains(".css")) {
-            final String responseBody = readFile(url);
-
-            return createResponse(ContentType.CSS, responseBody);
-        }
-
-        if (url.contains(".js")) {
-            final String responseBody = readFile(url);
-
-            return createResponse(ContentType.JAVASCRIPT, responseBody);
-        }
-
-        throw new IllegalArgumentException("올바르지 않은 URL 요청입니다.");
+        return createResponse(ContentType.from(url), readFile(url));
     }
 
     private String readFile(String url) throws IOException {
@@ -112,9 +89,8 @@ public class Http11Processor implements Runnable, Processor {
     private String createResponse(ContentType contentType, String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",
+                "Content-Type: " + contentType.getContent() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+                "", responseBody);
     }
 }

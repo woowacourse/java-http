@@ -20,6 +20,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -60,26 +61,32 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpRequest createHttpRequest(final BufferedReader bufferedReader) throws IOException {
         final String requestLine = bufferedReader.readLine();
-        final List<String> headers = extractMessage(bufferedReader);
-        final List<String> bodies = extractMessage(bufferedReader);
+
+        final List<String> massages = readMassage(bufferedReader);
+        final List<String> headers = extractHeaders(massages);
+        final List<String> bodies = extractBodies(massages, headers);
 
         return HttpRequest.of(requestLine, headers, bodies);
     }
 
-    private List<String> extractMessage(final BufferedReader bufferedReader) throws IOException {
+    private List<String> readMassage(final BufferedReader bufferedReader) throws IOException {
         final List<String> messages = new ArrayList<>();
-        if (!bufferedReader.ready()) {
-            return messages;
-        }
-
-        for (String message = bufferedReader.readLine();
-             bufferedReader.ready()
-                 && !message.equals(HttpMessageDelimiter.HEADER_BODY.getValue());
-             message = bufferedReader.readLine()) {
-
-            messages.add(message);
+        while (bufferedReader.ready()) {
+            messages.add(bufferedReader.readLine());
         }
         return messages;
+    }
+
+    private static List<String> extractHeaders(final List<String> massages) {
+        return massages.stream()
+            .takeWhile(message -> !message.equals(HttpMessageDelimiter.HEADER_BODY.getValue()))
+            .collect(Collectors.toList());
+    }
+
+    private static List<String> extractBodies(final List<String> massages, final List<String> headers) {
+        return massages.stream()
+            .skip(headers.size() + 1)
+            .collect(Collectors.toList());
     }
 
     private HttpResponse createHttpResponse(final HttpRequest httpRequest) {

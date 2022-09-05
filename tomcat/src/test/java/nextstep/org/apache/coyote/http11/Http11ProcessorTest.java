@@ -166,6 +166,39 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
+    @DisplayName("유저의 비밀번호가 틀릴 경우 401 페이지가 보여진다.")
+    @Test
+    void UserPasswordIsWrongException() throws IOException {
+        //given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=password1 HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/css,*/*;q=0.1 ",
+                "Connection: keep-alive "
+        );
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass()
+                .getClassLoader()
+                .getResource("static/401.html");
+        final String content = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        var expected = String.join("\r\n",
+                "HTTP/1.1 401 Unauthorized ",
+                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Length: " + content.getBytes().length + " ",
+                "",
+                content);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
     @DisplayName("회원가입을 완료하면 index.html 페이지로 리다이렉트한다.")
     @Test
     void userRegisterIsSuccess() throws IOException {

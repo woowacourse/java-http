@@ -10,6 +10,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
+import static nextstep.fixtures.HttpFixtures.요청을_생성한다;
+import static nextstep.fixtures.HttpFixtures.응답을_생성한다;
+import static org.apache.http.HttpMethod.GET;
+import static org.apache.http.HttpMime.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class Http11ProcessorTest {
@@ -19,7 +23,7 @@ class Http11ProcessorTest {
         // given
         final var socket = new StubSocket();
         final var processor = new Http11Processor(socket);
-        final String expected = makeResponse(HttpStatus.OK, "text/html", 12, "Hello world!");
+        final String expected = 응답을_생성한다(HttpStatus.OK, "text/html", "Hello world!");
 
         // when
         processor.process(socket);
@@ -31,11 +35,11 @@ class Http11ProcessorTest {
     @Test
     void html_파일을_불러올_수_있다() throws IOException {
         // given
-        final String httpRequest = makeGetRequest("/index.html", "text/html");
+        final String httpRequest = 요청을_생성한다(GET, "/index.html", TEXT_HTML);
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
         final String content = readContent("static/index.html");
-        final String expected = makeResponse(HttpStatus.OK, "text/html", 5564, content);
+        final String expected = 응답을_생성한다(HttpStatus.OK, "text/html", content);
 
         // when
         processor.process(socket);
@@ -47,11 +51,11 @@ class Http11ProcessorTest {
     @Test
     void CSS_파일을_불러올_수_있다() throws IOException {
         // given
-        final String httpRequest = makeGetRequest("/css/styles.css", "text/css");
+        final String httpRequest = 요청을_생성한다(GET, "/css/styles.css", TEXT_CSS);
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
         final String content = readContent("static/css/styles.css");
-        final String expected = makeResponse(HttpStatus.OK, "text/css", 211991, content);
+        final String expected = 응답을_생성한다(HttpStatus.OK, "text/css", content);
 
         // when
         processor.process(socket);
@@ -63,11 +67,11 @@ class Http11ProcessorTest {
     @Test
     void JS_파일을_불러올_수_있다() throws IOException {
         // given
-        final String httpRequest = makeGetRequest("/js/scripts.js", "text/javascript");
+        final String httpRequest = 요청을_생성한다(GET, "/js/scripts.js", TEXT_JAVASCRIPT);
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
         final String content = readContent("static/js/scripts.js");
-        final String expected = makeResponse(HttpStatus.OK, "text/javascript", 976, content);
+        final String expected = 응답을_생성한다(HttpStatus.OK, "text/javascript", content);
 
         // when
         processor.process(socket);
@@ -79,35 +83,17 @@ class Http11ProcessorTest {
     @Test
     void 파일을_찾지_못하면_BadRequest가_발생한다() throws IOException {
         // given
-        final String httpRequest = makeGetRequest("/notfound.html", "text/html");
+        final String httpRequest = 요청을_생성한다(GET, "/notfound.html", TEXT_HTML);
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
         final String content = readContent("static/404.html");
-        final String expected = makeResponse(HttpStatus.BAD_REQUEST, "text/html", 2426, content);
+        final String expected = 응답을_생성한다(HttpStatus.BAD_REQUEST, "text/html", content);
 
         // when
         processor.process(socket);
 
         // then
         assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    private String makeGetRequest(final String uri, final String contentType) {
-        return String.join("\r\n",
-                "GET " + uri + " HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "Accept: " + contentType + ",*/*;q=0.1",
-                "",
-                "");
-    }
-
-    private String makeResponse(final HttpStatus httpStatus, final String contentType, final int contentLength, final String content) {
-        return "HTTP/1.1 " + httpStatus.getCode() + " " + httpStatus.name() + " \r\n" +
-                "Content-Type: " + contentType + " \r\n" +
-                "Content-Length: " + contentLength + " \r\n" +
-                "\r\n" +
-                content;
     }
 
     private String readContent(final String path) throws IOException {

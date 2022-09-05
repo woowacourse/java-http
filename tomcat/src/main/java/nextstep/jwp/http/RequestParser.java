@@ -51,7 +51,7 @@ public class RequestParser {
     private static Headers extractHeaders(final BufferedReader bufferedReader) {
         final Headers headers = new Headers();
         String line;
-        while (!(line = readLine(bufferedReader)).isBlank()) {
+        while (isNotEnd(line = readLine(bufferedReader))) {
             final String[] headerKeyValue = line.split(": ");
             final Optional<HttpHeader> httpHeader = HttpHeader.find(headerKeyValue[0]);
             httpHeader.ifPresent(header -> headers.put(header, headerKeyValue[1].trim()));
@@ -62,10 +62,14 @@ public class RequestParser {
     private static String extractBody(final BufferedReader bufferedReader) {
         final List<String> builder = new ArrayList<>();
         String line;
-        while ((line = readLine(bufferedReader)) != null) {
+        while (isNotEnd(line = readLine(bufferedReader))) {
             builder.add(line);
         }
         return String.join("\r\n", builder);
+    }
+
+    private static boolean isNotEnd(final String line) {
+        return line != null && !line.isBlank();
     }
 
     private static String readLine(final BufferedReader bufferedReader) {

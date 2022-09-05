@@ -2,10 +2,17 @@ package org.apache.coyote.http11.request.header;
 
 public enum Method {
 
+    OPTIONS,
     GET,
+    HEAD,
     POST,
     PUT,
+    DELETE,
+    TRACE,
+    CONNECT,
     PATCH,
+    LINK,
+    UNLINK,
     ;
 
     public static Method from(final String method) {

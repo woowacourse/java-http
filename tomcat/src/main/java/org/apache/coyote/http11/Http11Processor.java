@@ -38,11 +38,13 @@ public class Http11Processor implements Runnable, Processor {
         ) {
 
             HttpRequest httpRequest = toHttpRequest(bufferedReader);
-
-            RequestMapping requestMapping = RequestMapping.init();
-            Controller controller = requestMapping.find(httpRequest.getRequestUri());
-            HttpResponse httpResponse = toHttpResponse(httpRequest, controller);
-
+            HttpResponse httpResponse;
+            try {
+                Controller controller = RequestMapping.find(httpRequest.getRequestUri());
+                httpResponse = toHttpResponse(httpRequest, controller);
+            } catch (Exception e) {
+                httpResponse = ErrorHandler.handle(e);
+            }
             outputStream.write(httpResponse.getResponse());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

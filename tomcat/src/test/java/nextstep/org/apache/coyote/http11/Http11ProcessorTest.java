@@ -108,7 +108,7 @@ class Http11ProcessorTest {
     void userLoginIsSuccess() throws IOException {
         //given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login?account=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/css,*/*;q=0.1 ",
                 "Connection: keep-alive "
@@ -124,21 +124,58 @@ class Http11ProcessorTest {
         final URL resource = getClass()
                 .getClassLoader()
                 .getResource("static/index.html");
-        var expected = "HTTP/1.1 302 Moved Permanently \r\n" +
+
+        final String output = socket.output();
+        String cookie = output.split("\r\n")[1];
+        System.out.println("cookie = " + cookie);
+        assertThat(cookie.contains("Set-Cookie: JSESSIONID=")).isTrue();
+
+        String expected = "HTTP/1.1 302 Moved Permanently \r\n" +
+                cookie + "\r\n"+
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("존재하지 않는 유저일 401 페이지가 보여진다.")
+    @DisplayName("로그인이 성공하고, JSESSIONID가 request header에 있는 경우")
+    @Test
+    void userLoginWithJSESSIONID() throws IOException {
+        //given
+        final String httpRequest = String.join("\r\n",
+                "POST /login?account=gugu&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/css,*/*;q=0.1 ",
+                "Connection: keep-alive ",
+                "Cookie: yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46"
+        );
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass()
+                .getClassLoader()
+                .getResource("static/index.html");
+
+        String expected = "HTTP/1.1 302 Moved Permanently \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 5564 \r\n" +
+                "\r\n"+
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("존재하지 않는 유저일 경우 401 페이지가 보여진다.")
     @Test
     void notExistUserException() throws IOException {
         //given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gu&password=password HTTP/1.1 ",
+                "POST /login?account=gu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/css,*/*;q=0.1 ",
                 "Connection: keep-alive "
@@ -171,7 +208,7 @@ class Http11ProcessorTest {
     void UserPasswordIsWrongException() throws IOException {
         //given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password1 HTTP/1.1 ",
+                "POST /login?account=gugu&password=password1 HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/css,*/*;q=0.1 ",
                 "Connection: keep-alive "

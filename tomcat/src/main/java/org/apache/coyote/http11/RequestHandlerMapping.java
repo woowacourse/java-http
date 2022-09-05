@@ -15,7 +15,6 @@ public class RequestHandlerMapping {
 
     static {
         handlers = new HashMap<>();
-        handlers.put(new HttpRequest("/login", "GET"), new AuthController());
         handlers.put(new HttpRequest("/login", "POST"), new AuthController());
         handlers.put(new HttpRequest("/index.html", "GET"), new DashBoardController());
         handlers.put(new HttpRequest("/", "GET"), new HomeController());

@@ -22,4 +22,8 @@ public enum StatusCode {
     public String getStatusMessage() {
         return statusMessage;
     }
+
+    public boolean isEqual(final StatusCode statusCode) {
+        return this == statusCode;
+    }
 }

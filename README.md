@@ -24,8 +24,8 @@
 - [x] 로그인 페이지도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경
 
 - Cookie에 JSESSIONID 값 저장
-  - Cookie 클래스를 추가 
-  - [ ] HTTP Request Header의 Cookie에 JSESSIONID가 없으면 HTTP Response Header에 Set-Cookie를 반환
+  - [x] Cookie 클래스를 추가 
+  - [x] HTTP Request Header의 Cookie에 JSESSIONID가 없는 경우, HTTP Response Header에 Set-Cookie 반환
 
 - Session 구현
   - [ ] 쿠키에서 전달 받은 JSESSIONID의 값으로 로그인 여부 체크

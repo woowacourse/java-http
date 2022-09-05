@@ -39,17 +39,16 @@ public class Http11Processor implements Runnable, Processor {
 
             final StartLine startLine = new StartLine(bufferedReader.readLine());
             final String responseBody = getResponseBody(startLine.getRequestUri());
-            final String contentType = getContentType(startLine.getRequestUri());
+            final ContentType contentType = ContentType.from(startLine.getRequestUri());
             final Map<String, String> queryParams = startLine.getQueryParams();
 
             if (queryParams.containsKey("account")) {
                 LoginService.checkAccount(queryParams);
             }
 
-
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
+                    "Content-Type: " + contentType.getMimeType() + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -71,15 +70,5 @@ public class Http11Processor implements Runnable, Processor {
         URL resource = getClass().getClassLoader().getResource("static" + requestUri);
         Path filePath = new File(Objects.requireNonNull(resource).getFile()).toPath();
         return new String(Files.readAllBytes(filePath));
-    }
-
-    private String getContentType(String requestUri) {
-        if (requestUri.endsWith("css")) {
-            return "text/css";
-        }
-        if (requestUri.endsWith("js")) {
-            return "text/javascript";
-        }
-        return "text/html";
     }
 }

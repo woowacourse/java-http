@@ -42,7 +42,7 @@ class LoginHandlerTest {
         );
     }
 
-    @DisplayName("Put /login 경로로 요청시 302 Found와 함께 Index 페이지를 반환한다.")
+    @DisplayName("Put /login 경로로 로그인이 성공하면 302 Found와 함께 Index 페이지를 반환한다.")
     @Test
     void performPutMethod() throws IOException {
         String request = "POST /login HTTP/1.1\n"
@@ -61,6 +61,28 @@ class LoginHandlerTest {
                 () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.FOUND),
                 () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),
                 () -> assertThat(httpResponse.getHeader(HttpHeaderType.LOCATION)).isEqualTo("/index.html")
+        );
+    }
+
+    @DisplayName("Put /login 경로로 로그인이 실패하면 302 Found와 함께 401 페이지를 반환한다.")
+    @Test
+    void performPutMethodWithWrongPassword() throws IOException {
+        String request = "POST /login HTTP/1.1\n"
+                + "Host: localhost:8080\n"
+                + "Connection: keep-alive\n"
+                + "Content-Length: 32\n"
+                + "Content-Type: application/x-www-form-urlencoded\n"
+                + "Accept: */*\n"
+                + "\n"
+                + "account=rex&password=password123\n";
+
+        HttpRequest httpRequest = HttpRequestGenerator.generate(request);
+        HttpResponse httpResponse = LoginHandler.perform(httpRequest);
+
+        assertAll(
+                () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.FOUND),
+                () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),
+                () -> assertThat(httpResponse.getHeader(HttpHeaderType.LOCATION)).isEqualTo("/401.html")
         );
     }
 }

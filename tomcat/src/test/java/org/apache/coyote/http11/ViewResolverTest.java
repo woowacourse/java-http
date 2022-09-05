@@ -39,7 +39,7 @@ class ViewResolverTest {
 
     @DisplayName("존재하지 않는 정적 파일을 요청할 경우 Not Found 응답을 한다.")
     @Test
-    void responseBadRequestWhenRequestInvalidStaticFile() throws IOException {
+    void responseBadRequestWhenRequestInvalidStaticFile() {
         String fileName = "/rex/rex.js";
         HttpResponse httpResponse = ViewResolver.staticFileRequest(fileName);
         assertAll(

@@ -10,7 +10,7 @@ import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class RegisterHandlerTest {
+class RegisterControllerTest {
 
     private static final HttpRequestHeader EMPTY_REQUEST_HEADER = new HttpRequestHeader(List.of());
 
@@ -20,13 +20,13 @@ class RegisterHandlerTest {
         // given
         final HttpRequest request = new HttpRequest("GET /register HTTP/1.1 ", EMPTY_REQUEST_HEADER,
                 new HttpRequestBody(""));
-        final RegisterHandler registerHandler = new RegisterHandler();
+        final RegisterController registerController = new RegisterController();
 
         final String expectedStatusLine = "HTTP/1.1 200 OK ";
         final String expectedMessageBody = "<title>회원가입</title>";
 
         // when
-        final HttpResponse response = registerHandler.register(request);
+        final HttpResponse response = registerController.service(request);
 
         // then
         final String actual = response.generateResponse();
@@ -40,13 +40,13 @@ class RegisterHandlerTest {
         // given
         final HttpRequest request = new HttpRequest("POST /register HTTP/1.1 ", EMPTY_REQUEST_HEADER,
                 new HttpRequestBody("account=gugu&password=password&email=hkkang%40woowahan.com"));
-        final RegisterHandler registerHandler = new RegisterHandler();
+        final RegisterController registerController = new RegisterController();
 
         final String expectedStatusLine = "HTTP/1.1 302";
         final String expectedMessageBody = "Location: /login.html ";
 
         // when
-        final HttpResponse response = registerHandler.register(request);
+        final HttpResponse response = registerController.service(request);
 
         // then
         final String actual = response.generateResponse();

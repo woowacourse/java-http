@@ -9,7 +9,7 @@ import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
 import nextstep.jwp.handler.LoginController;
-import nextstep.jwp.handler.RegisterHandler;
+import nextstep.jwp.handler.RegisterController;
 import org.apache.catalina.Manager;
 import org.apache.catalina.SessionManager;
 import org.apache.commons.lang3.StringUtils;
@@ -92,7 +92,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if ("/register".equals(url)) {
-            return new RegisterHandler().register(httpRequest);
+            return new RegisterController().service(httpRequest);
         }
 
         return HttpResponse.of(httpRequest, HttpStatusCode.OK, url);

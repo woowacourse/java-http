@@ -8,13 +8,22 @@ import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.enums.HttpMethod;
 import org.apache.coyote.http11.enums.HttpStatusCode;
 
-public class RegisterHandler {
+public class RegisterController implements Controller {
 
-    public HttpResponse register(final HttpRequest httpRequest) {
+    @Override
+    public HttpResponse service(final HttpRequest httpRequest) {
         if (httpRequest.isSameHttpMethod(HttpMethod.GET)) {
-            return HttpResponse.of(httpRequest, HttpStatusCode.OK, "/register.html");
+            return doGet(httpRequest);
         }
 
+        return doPost(httpRequest);
+    }
+
+    private HttpResponse doGet(final HttpRequest httpRequest) {
+        return HttpResponse.of(httpRequest, HttpStatusCode.OK, "/register.html");
+    }
+
+    private HttpResponse doPost(final HttpRequest httpRequest) {
         final HttpRequestBody requestBody = httpRequest.getBody();
         final User user = createUser(requestBody);
         InMemoryUserRepository.save(user);

@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpMethod;
-
 public class HttpRequest {
     private final RequestLine requestLine;
     private final RequestHeader requestHeader;
@@ -68,7 +65,7 @@ public class HttpRequest {
         return requestLine.getPath();
     }
 
-    public RequestBody getRequestBody(){
+    public RequestBody getRequestBody() {
         return requestBody;
     }
 

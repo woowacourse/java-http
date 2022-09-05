@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.apache.coyote.http11.HttpMethod;
-
 public class RequestLine {
     private static final String QUERY_STRING_LETTER = "?";
     private static final String REQUEST_LINE_SPLIT_REGEX = " ";

@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.HttpMethod.*;
-import static org.apache.coyote.http11.StatusCode.*;
+import static org.apache.coyote.http11.request.HttpMethod.*;
+import static org.apache.coyote.http11.response.StatusCode.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,6 +17,7 @@ import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.RequestBody;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -122,7 +123,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse redirect(String locationUri) {
-        return HttpResponse.from(HTTP_VERSION_1_1, FOUND.getValue())
+        return HttpResponse.of(HTTP_VERSION_1_1, FOUND)
             .addHeader("Location", locationUri);
     }
 
@@ -136,9 +137,8 @@ public class Http11Processor implements Runnable, Processor {
         String contentType = Files.probeContentType(path);
         String contentLength = Integer.toString(responseBody.getBytes().length);
 
-        return HttpResponse.from(HTTP_VERSION_1_1, OK.getValue())
+        return HttpResponse.of(HTTP_VERSION_1_1, OK, responseBody)
             .addHeader("Content-Type", contentType)
-            .addHeader("Content-Length", contentLength)
-            .addResponseBody(responseBody);
+            .addHeader("Content-Length", contentLength);
     }
 }

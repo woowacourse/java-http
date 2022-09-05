@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 public class ResourceGenerator {
 
-    private static final Logger log = LoggerFactory.getLogger(StaticResourceHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(ResourceGenerator.class);
     private static final String CANNOT_FIND_STATIC_RESOURCE = "Could not find static resource";
 
     public static String getStaticResource(final String requestUrl) {

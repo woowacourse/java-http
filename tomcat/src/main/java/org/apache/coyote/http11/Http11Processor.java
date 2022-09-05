@@ -36,24 +36,18 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (InputStream inputStream = connection.getInputStream();
-             OutputStream outputStream = connection.getOutputStream();
-             BufferedReader bufferedReader = new BufferedReader(
+        try (final InputStream inputStream = connection.getInputStream();
+             final OutputStream outputStream = connection.getOutputStream();
+             final BufferedReader bufferedReader = new BufferedReader(
                      new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-            StartLine startLine = StartLine.from(bufferedReader.readLine());
-            startLine.changeRequestURL();
-            List<String> headerLines = getHeaderLines(bufferedReader);
-            QueryParams queryParams = QueryParams.from(startLine.getRequestURL());
-            HttpRequest httpRequest = new HttpRequest(startLine, headerLines, queryParams);
+            final HttpRequest httpRequest = HttpRequest.of(bufferedReader.readLine(), getHeaderLines(bufferedReader));
 
-            processLogin(queryParams);
+            processLogin(httpRequest.getRequestURL());
+            final String contentType = checkContentType(httpRequest.getRequestURL());
+            final String responseBody = getResponseBody(httpRequest);
 
-            String contentType = checkContentType(startLine.getRequestURL());
-            String responseBody = getResponseBody(httpRequest);
-
-
-            var response = String.join("\r\n",
+            final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
                     "Content-Type: " + contentType + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
@@ -67,25 +61,25 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private List<String> getHeaderLines(BufferedReader bufferedReader) throws IOException {
-        List<String> headerLines = new ArrayList<>();
+    private List<String> getHeaderLines(final BufferedReader bufferedReader) throws IOException {
+        final List<String> headerLines = new ArrayList<>();
         String line = bufferedReader.readLine();
-        while (!line.equals("")) {
+        while (!"".equals(line)) {
             headerLines.add(line);
             line = bufferedReader.readLine();
         }
         return headerLines;
     }
 
-    private void processLogin(QueryParams queryParams) {
-        if (queryParams.isLoginPath()) {
-            String account = queryParams.getParamValue("account");
-            String password = queryParams.getParamValue("password");
+    private void processLogin(final RequestURL requestURL) {
+        if (requestURL.isLoginRequest()) {
+            final String account = requestURL.getParamValue("account");
+            final String password = requestURL.getParamValue("password");
             checkUser(account, password);
         }
     }
 
-    private void checkUser(String account, String password) {
+    private void checkUser(final String account, final String password) {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new RuntimeException("유저가 존재하지 않습니다."));
         if (user.checkPassword(password)) {
@@ -93,22 +87,25 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String checkContentType(String requestURL) {
+    private String checkContentType(final RequestURL requestURL) {
         String contentType = "text/html";
-        if (requestURL.endsWith(".css")) {
+        if (requestURL.getPath().endsWith(".css")) {
             contentType = "text/css";
         }
         return contentType;
     }
 
-    private String getResponseBody(HttpRequest httpRequest) throws IOException {
+    private String getResponseBody(final HttpRequest httpRequest) throws IOException {
         if (httpRequest.isMainRequest()) {
             return "Hello world!";
         }
-        if (httpRequest.hasParams()) {
+        if (httpRequest.isLoginRequest()) {
             return "success";
         }
-        Path path = Paths.get(this.getClass().getClassLoader().getResource("static" + httpRequest.getRequestURL()).getFile());
+        String resource = httpRequest.getRequestURL().getPath();
+        ClassLoader classLoader = this.getClass().getClassLoader();
+        String file = classLoader.getResource("static" + resource).getFile();
+        final Path path = Paths.get(file);
         return new String(Files.readAllBytes(path));
     }
 }

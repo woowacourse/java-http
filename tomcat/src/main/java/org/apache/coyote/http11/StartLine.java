@@ -2,23 +2,24 @@ package org.apache.coyote.http11;
 
 public class StartLine {
 
+    private static final String LINE_REGEX = " ";
     private static final int HTTP_METHOD_INDEX = 0;
     private static final int REQUEST_URL_INDEX = 1;
     private static final int HTTP_VERSION_INDEX = 2;
     private static final int START_LINE_SIZE = 3;
 
     private final String httpMethod;
-    private String requestURL;
+    private final RequestURL requestURL;
     private final String httpVersion;
 
     private StartLine(String httpMethod, String requestURL, String httpVersion) {
         this.httpMethod = httpMethod;
-        this.requestURL = requestURL;
+        this.requestURL = RequestURL.from(requestURL);
         this.httpVersion = httpVersion;
     }
 
     public static StartLine from(String line) {
-        String[] values = line.split(" ");
+        String[] values = line.split(LINE_REGEX);
         validateStartLine(values);
         return new StartLine(
                 values[HTTP_METHOD_INDEX],
@@ -34,16 +35,18 @@ public class StartLine {
     }
 
     public boolean isMainRequest() {
-        return "/".equals(requestURL);
+        return requestURL.isMainRequest();
+    }
+
+    public boolean isLoginRequest() {
+        return requestURL.isLoginRequest();
     }
 
     public void changeRequestURL() {
-        if ("/login".equals(requestURL)) {
-            requestURL += ".html";
-        }
+        requestURL.changeRequestURL();
     }
 
-    public String getRequestURL() {
+    public RequestURL getRequestURL() {
         return requestURL;
     }
 }

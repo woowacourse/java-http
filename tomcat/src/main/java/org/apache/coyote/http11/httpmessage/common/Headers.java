@@ -23,14 +23,13 @@ public class Headers {
         headers = new HashMap<>();
         while (true) {
             String buffer = bufferedReader.readLine();
-            if (buffer == null || buffer.length() == 0) {
+            if (buffer.equals("\r\n") || "".equals(buffer)) {
                 break;
             }
             String key = buffer.split(": ")[0];
             String value = buffer.split(": ")[1];
             headers.put(key, value);
         }
-
     }
 
     public Headers add(final String fieldName, final String fieldValue) {
@@ -38,6 +37,10 @@ public class Headers {
         newHeaders.put(fieldName, fieldValue);
 
         return new Headers(newHeaders);
+    }
+
+    public int getContentLength() {
+        return Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
     }
 
     public String parseToString() {

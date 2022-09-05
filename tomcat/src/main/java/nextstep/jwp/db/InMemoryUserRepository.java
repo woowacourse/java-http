@@ -23,6 +23,12 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
+    private InMemoryUserRepository() {}
+
+    public static boolean exists(String account) {
+        final User user = database.get(account);
+        return user != null;
+    }
     private InMemoryUserRepository() {
     }
 

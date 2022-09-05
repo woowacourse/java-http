@@ -152,4 +152,30 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    void register() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 49",
+                "",
+                "account=angie&email=angie@gmail.com&password=1234");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = String.join("\r\n",
+                "HTTP/1.1 302 ",
+                "Location: http://localhost:8080/index.html ",
+                "Content-Type: text/html;charset=utf-8 ");
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

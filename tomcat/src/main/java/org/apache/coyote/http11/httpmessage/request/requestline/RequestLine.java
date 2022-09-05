@@ -29,6 +29,10 @@ public class RequestLine {
         return method.isGet();
     }
 
+    public boolean isPostMethod() {
+        return method.isPost();
+    }
+
     public RequestUri getRequestUri() {
         return requestUri;
     }

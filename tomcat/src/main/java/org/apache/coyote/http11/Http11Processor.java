@@ -10,12 +10,14 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import nextstep.jwp.UserService;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.httpmessage.common.ContentType;
 import org.apache.coyote.http11.httpmessage.request.Request;
+import org.apache.coyote.http11.httpmessage.request.requestbody.RequestBodyContent;
 import org.apache.coyote.http11.httpmessage.request.requestline.QueryStrings;
 import org.apache.coyote.http11.httpmessage.response.Response;
 import org.slf4j.Logger;
@@ -42,32 +44,22 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream()) {
             final Request request = extractRequest(inputStream);
 
-            if (!request.isGetMethod()) {
-                throw new IllegalStateException("아직 지원하지 않는 http 요청입니다.");
+            if (request.isGetMethod()) {
+                final var response = doGet(request);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
             }
-            final var response = doGet(request);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
+            if (request.isPostMethod()) {
+                final var response = doPost(request);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
+            throw new IllegalStateException("아직 지원하지 않는 http 요청입니다.");
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private Request extractRequest(final InputStream inputStream) throws IOException {
-        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-
-        final StringBuilder requestMessage = new StringBuilder();
-
-        while (true) {
-            final String buffer = bufferedReader.readLine();
-            requestMessage.append(buffer)
-                    .append("\r\n");
-            if (buffer == null || buffer.length() == 0) {
-                break;
-            }
-        }
-        return Request.of(requestMessage.toString());
     }
 
     private Response doGet(final Request request) throws IOException {
@@ -80,12 +72,25 @@ public class Http11Processor implements Runnable, Processor {
         return getResponse(request);
     }
 
+    private Response doPost(final Request request) {
+        if (request.isMatchUri("/register")) {
+            final RequestBodyContent userInput = RequestBodyContent.parse(request.getBody());
+            UserService.save(userInput);
+
+            return Response.redirect(ContentType.HTML, "http://localhost:8080/index.html");
+        }
+        return new Response();
+    }
+
     private Response getResponse(final Request request) throws IOException {
         if (request.isMatchUri("/login")) {
             return getResponseWithFileName("/login.html");
         }
         if (request.isMatchUri("/")) {
             return Response.okWithResponseBody(ContentType.HTML, "Hello world!");
+        }
+        if (request.isMatchUri("/register")) {
+            return getResponseWithFileName("/register.html");
         }
         return new Response();
     }

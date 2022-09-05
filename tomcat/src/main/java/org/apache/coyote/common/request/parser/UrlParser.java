@@ -29,7 +29,7 @@ public class UrlParser {
         return url.substring(0, queryStringDelimiterIndex);
     }
 
-    private static boolean hasQueryString(final int queryStringDelimiter) {
-        return queryStringDelimiter >= MIN_QUERY_STRING_DELIMITER_INDEX;
+    private static boolean hasQueryString(final int queryStringDelimiterIndex) {
+        return queryStringDelimiterIndex >= MIN_QUERY_STRING_DELIMITER_INDEX;
     }
 }

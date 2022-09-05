@@ -16,6 +16,10 @@ public class Response {
     private final String headers;
     private final String body;
 
+    public static ResponseBuilder builder(final HttpVersion httpVersion, final Status status) {
+        return new ResponseBuilder(httpVersion, status);
+    }
+
     private Response(final String startLine, final String headers, final String body) {
         this.startLine = startLine + " ";
         this.headers = headers;
@@ -39,7 +43,7 @@ public class Response {
         private final Map<String, String> headers;
         private String body;
 
-        public ResponseBuilder(final HttpVersion httpVersion, final Status status) {
+        ResponseBuilder(final HttpVersion httpVersion, final Status status) {
             this.startLine = String.join(" ", httpVersion.getValue(), status.getValue());
             this.headers = new HashMap<>();
             headers.put(Header.CONTENT_TYPE.getValue(), MediaType.TEXT_HTML.getValue());

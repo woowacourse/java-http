@@ -20,7 +20,7 @@ public class StaticResourceHandler implements Function<Request, Response> {
         responseBody = ResourceGenerator.getStaticResource(request.getPath());
         UserOutput.outputUserInformation(request);
         final MediaType mediaType = MediaType.of(getFileExtension(request.getPath()));
-        return new Response.ResponseBuilder(HttpVersion.HTTP11, Status.OK)
+        return Response.builder(HttpVersion.HTTP11, Status.OK)
                 .setContentType(mediaType, Charset.UTF8)
                 .setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
                 .setBody(responseBody)

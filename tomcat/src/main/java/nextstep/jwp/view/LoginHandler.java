@@ -31,7 +31,7 @@ public class LoginHandler implements Function<Request, Response> {
             statusCode = Status.UNAUTHORIZED;
         }
 
-        return new ResponseBuilder(HttpVersion.HTTP11, statusCode)
+        return Response.builder(HttpVersion.HTTP11, statusCode)
                 .setContentType(MediaType.TEXT_HTML, Charset.UTF8)
                 .setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
                 .setLocation(locationUrl)

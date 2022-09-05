@@ -15,7 +15,7 @@ class ResponseTest {
     @DisplayName("원하는 응답값을 생성한다.")
     @Test
     void createResponse() {
-        final String response = new Response.ResponseBuilder(HttpVersion.HTTP11, Status.OK)
+        final String response = Response.builder(HttpVersion.HTTP11, Status.OK)
                 .setContentType(MediaType.TEXT_CSS)
                 .setContentLength(11)
                 .setBody("Hello world!")

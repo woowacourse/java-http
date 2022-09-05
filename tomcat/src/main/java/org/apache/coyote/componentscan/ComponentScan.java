@@ -18,16 +18,16 @@ public class ComponentScan {
     private static final Integer START_OF_RESOURCE = 0;
     private static final String INIT_BASE_PACKAGE = Application.class.getPackageName();
 
-    public Set<Class<?>> scan(){
+    public static Set<Class<?>> scan() {
         final Set<Class<?>> classes = new HashSet<>();
         addClass(INIT_BASE_PACKAGE, classes);
         return classes;
     }
 
-    private Set<Class<?>> addClass(final String basePackageName, final Set<Class<?>> classes){
+    private static Set<Class<?>> addClass(final String basePackageName, final Set<Class<?>> classes) {
         final List<String> resourcesOfPackage = findResourcesOfPackage(basePackageName);
         for (String resource : resourcesOfPackage) {
-            if(isClass(resource)){
+            if (isClass(resource)) {
                 classes.add(findClass(basePackageName, resource));
                 continue;
             }
@@ -36,31 +36,31 @@ public class ComponentScan {
         return classes;
     }
 
-    private boolean isClass(final String resources) {
+    private static boolean isClass(final String resources) {
         return resources.endsWith(CLASS_EXTENSION);
     }
 
-    private List<String> findResourcesOfPackage(final String basePackageName) {
-        try(final InputStream inputStream = ClassLoader.getSystemClassLoader()
+    private static List<String> findResourcesOfPackage(final String basePackageName) {
+        try (final InputStream inputStream = ClassLoader.getSystemClassLoader()
                 .getResourceAsStream(basePackageName.replace(PACKAGE_SEPARATOR, File.separator));
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
             return bufferedReader.lines().collect(Collectors.toList());
         } catch (IOException e) {
             throw new RuntimeException("InputStream을 읽어들이는 과정에서 문제가 생겼습니다.");
         }
     }
 
-    private Class<?> findClass(final String packageName, final String resources) {
+    private static Class<?> findClass(final String packageName, final String resources) {
         try {
             return Class.forName(makeResourcePath(
                     packageName,
-                    resources.substring(START_OF_RESOURCE,resources.lastIndexOf(PACKAGE_SEPARATOR))));
+                    resources.substring(START_OF_RESOURCE, resources.lastIndexOf(PACKAGE_SEPARATOR))));
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException("해당 경로의 클래스를 찾을 수 없습니다.");
         }
     }
 
-    private String makeResourcePath(final String basePackageName, final String resources) {
+    private static String makeResourcePath(final String basePackageName, final String resources) {
         return basePackageName + PACKAGE_SEPARATOR + resources;
     }
 }

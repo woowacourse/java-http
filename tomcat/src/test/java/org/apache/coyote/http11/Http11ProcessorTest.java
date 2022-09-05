@@ -1,9 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.util.List;
-import nextstep.jwp.controller.InitController;
-import nextstep.jwp.controller.StaticController;
-import nextstep.jwp.controller.UserController;
 import support.StubSocket;
 import org.junit.jupiter.api.Test;
 
@@ -20,8 +16,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket,
-                List.of(new InitController(), new StaticController(), new UserController()));
+        final var processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
@@ -48,8 +43,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket,
-                List.of(new InitController(), new StaticController(), new UserController()));
+        final Http11Processor processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);

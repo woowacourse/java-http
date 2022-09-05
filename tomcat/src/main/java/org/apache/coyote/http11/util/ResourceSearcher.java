@@ -7,18 +7,18 @@ import java.nio.file.Files;
 
 public class ResourceSearcher {
 
-	private static final String STATIC_PATH = "static";
+    private static final String STATIC_PATH = "static";
 
-	public boolean isFile(final String fileName) {
-		return fileName.contains(".");
-	}
+    public boolean isFile(final String fileName) {
+        return fileName.contains(".");
+    }
 
-	public String loadContent(final String fileName) {
-		final URL path = getClass().getClassLoader().getResource(STATIC_PATH + fileName);
-		try {
-			return new String(Files.readAllBytes(new File(path.getFile()).toPath()));
-		} catch (IOException e) {
-			throw new IllegalArgumentException(String.format("잘못된 경로입니다. [%s]", fileName));
-		}
-	}
+    public String loadContent(final String fileName) {
+        final URL path = getClass().getClassLoader().getResource(STATIC_PATH + fileName);
+        try {
+            return new String(Files.readAllBytes(new File(path.getFile()).toPath()));
+        } catch (IOException e) {
+            throw new IllegalArgumentException(String.format("잘못된 경로입니다. [%s]", fileName));
+        }
+    }
 }

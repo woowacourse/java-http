@@ -107,7 +107,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private String readFile(final String path) throws IOException {
         final String filePath = String.format("static%s", path);
-        System.out.println(filePath);
         final URL resource = this.getClass().getClassLoader().getResource(filePath);
         return Files.readString(Path.of(Objects.requireNonNull(resource).getPath()));
     }

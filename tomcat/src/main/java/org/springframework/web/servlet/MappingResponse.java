@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.mapping;
+package org.springframework.web.servlet;
 
 public class MappingResponse {
 

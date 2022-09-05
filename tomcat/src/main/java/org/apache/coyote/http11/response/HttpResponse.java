@@ -10,7 +10,7 @@ import org.apache.coyote.http11.util.ResourceSearcher;
 
 public class HttpResponse {
 
-    private static final ResourceSearcher RESOURCE_SEARCHER = new ResourceSearcher();
+    private static final ResourceSearcher RESOURCE_SEARCHER = ResourceSearcher.getInstance();
     private static final String FILE_REGEX = "\\.";
     private static final int EXTENSION_LOCATION = 1;
 

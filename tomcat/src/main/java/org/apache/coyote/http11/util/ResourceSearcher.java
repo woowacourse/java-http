@@ -7,7 +7,16 @@ import java.nio.file.Files;
 
 public class ResourceSearcher {
 
+    private static final ResourceSearcher RESOURCE_SEARCHER = new ResourceSearcher();
+
     private static final String STATIC_PATH = "static";
+
+    private ResourceSearcher() {
+    }
+
+    public static ResourceSearcher getInstance() {
+        return RESOURCE_SEARCHER;
+    }
 
     public boolean isFile(final String fileName) {
         return fileName.contains(".");

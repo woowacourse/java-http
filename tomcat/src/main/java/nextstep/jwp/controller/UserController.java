@@ -1,17 +1,15 @@
 package nextstep.jwp.controller;
 
-import org.apache.coyote.http11.mapping.HandlerMapping;
+import org.springframework.web.servlet.mvc.Controller;
 
-public class UserController {
+public class UserController implements Controller {
 
-    private static final HandlerMapping HANDLER_MAPPING = HandlerMapping.getInstance();
+    private static final UserController USER_CONTROLLER = new UserController();
 
-    public UserController() {
-        map("/", "/helloWorld.html", "OK");
-        map("/login", "/login.html", "OK");
+    private UserController() {
     }
 
-    public void map(final String url, final String resource, final String statusCode) {
-        HANDLER_MAPPING.add(url, resource, statusCode);
+    public static UserController getInstance() {
+        return USER_CONTROLLER;
     }
 }

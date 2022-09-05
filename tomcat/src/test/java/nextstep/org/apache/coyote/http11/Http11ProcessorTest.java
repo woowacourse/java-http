@@ -1,11 +1,11 @@
 package nextstep.org.apache.coyote.http11;
 
-import nextstep.jwp.controller.UserController;
 import support.StubSocket;
 
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.servlet.DispatcherServlet;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +18,7 @@ class Http11ProcessorTest {
 
     @BeforeAll
     static void setUp() {
-        final var userController = new UserController();
+        final DispatcherServlet dispatcherServlet = DispatcherServlet.getInstance();
     }
 
     @Test

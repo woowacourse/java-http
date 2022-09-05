@@ -5,14 +5,12 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.mapping.HandlerMapping;
-import org.apache.coyote.http11.mapping.MappingResponse;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestGenerator;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.response.HttpResponseGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.servlet.DispatcherServlet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,6 +21,7 @@ import java.util.Map;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final DispatcherServlet DISPATCHER_SERVLET = DispatcherServlet.getInstance();
 
     private final Socket connection;
 
@@ -44,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
             final var bufferedReader = new BufferedReader(inputStreamReader)
         ) {
             final HttpRequest httpRequest = HttpRequestGenerator.createHttpRequest(bufferedReader);
-            final HttpResponse httpResponse = HttpResponseGenerator.createHttpResponse(httpRequest);
+            final HttpResponse httpResponse = DISPATCHER_SERVLET.doDispatch(httpRequest);
             final String responseMessage = httpResponse.toMessage();
 
             printQueries(httpRequest);

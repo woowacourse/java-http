@@ -116,4 +116,21 @@ class Http11HandlerTest {
                 () -> assertThat(responseComponent.getBody()).isEqualTo(new String(Files.readAllBytes(new File(resource.getFile()).toPath())))
         );
     }
+
+    @DisplayName("RegisterPageHandler handle 테스트")
+    @Test
+    void extractElements_RegisterPageHandler() {
+        Http11Handler http11Handler = new LoginPageHandler();
+        ResponseComponent responseComponent = http11Handler.handle(log, "/register");
+
+        String contentLength = Long.toString(new File(Objects.requireNonNull(
+                getClass().getClassLoader().getResource("static/register.html")).getFile()).length());
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        assertAll(
+                () -> assertThat(responseComponent.getStatusCode()).isEqualTo(StatusCode.OK),
+                () -> assertThat(responseComponent.getContentType()).isEqualTo(ExtensionContentType.HTML.getContentType()),
+                () -> assertThat(responseComponent.getContentLength()).isEqualTo(contentLength),
+                () -> assertThat(responseComponent.getBody()).isEqualTo(new String(Files.readAllBytes(new File(resource.getFile()).toPath())))
+        );
+    }
 }

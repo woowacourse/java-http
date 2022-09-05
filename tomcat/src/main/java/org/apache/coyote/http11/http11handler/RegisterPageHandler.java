@@ -1,31 +1,28 @@
 package org.apache.coyote.http11.http11handler;
 
+import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.dto.ResponseComponent;
 import org.apache.coyote.http11.http11handler.support.HandlerSupporter;
-import org.apache.coyote.http11.http11handler.support.QueryStringProcessor;
 import org.apache.coyote.http11.http11request.Http11Request;
 import org.slf4j.Logger;
 
-public class IndexPageHandler implements Http11Handler {
+public class RegisterPageHandler implements Http11Handler {
 
-    private static final String URI = "/index";
-    private static final String URI_WITH_EXTENSION = "/index.html";
+    private static final String URI = "/register";
+    private static final HttpMethod ALLOWED_HTTP_METHOD = HttpMethod.GET;
 
-    private QueryStringProcessor queryStringProcessor = new QueryStringProcessor();
     private HandlerSupporter handlerSupporter = new HandlerSupporter();
 
     @Override
     public boolean isProperHandler(Http11Request http11Request) {
-        String uri = queryStringProcessor.removeQueryString(http11Request.getUri());
-        return uri.equals(URI) || uri.equals(URI_WITH_EXTENSION);
+        return http11Request.getUri().equals(URI) && http11Request.getHttpMethod().equals(ALLOWED_HTTP_METHOD);
     }
 
     @Override
     public ResponseComponent handle(Logger log, String uri) {
-        if (handlerSupporter.noExtension(uri)) {
-            uri = handlerSupporter.addHtmlExtension(uri);
-        }
+
+        uri = handlerSupporter.addHtmlExtension(uri);
         return handlerSupporter.extractElements(uri, StatusCode.OK);
     }
 }

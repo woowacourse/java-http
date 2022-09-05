@@ -3,6 +3,7 @@ package org.apache.coyote.http11.http11handler;
 import org.apache.coyote.http11.ExtensionContentType;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.dto.ResponseComponent;
+import org.apache.coyote.http11.http11request.Http11Request;
 import org.slf4j.Logger;
 
 public class DefaultPageHandler implements Http11Handler {
@@ -11,8 +12,8 @@ public class DefaultPageHandler implements Http11Handler {
     private static final String DEFAULT_MESSAGE = "Hello world!";
 
     @Override
-    public boolean isProperHandler(String uri) {
-        return uri.equals(TARGET_URI);
+    public boolean isProperHandler(Http11Request http11Request) {
+        return http11Request.getUri().equals(TARGET_URI);
     }
 
     @Override

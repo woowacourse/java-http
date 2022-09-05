@@ -45,7 +45,7 @@ public class Http11Processor implements Runnable, Processor {
             Http11Request http11Request = http11RequestHandler.makeRequest(bufferedReader);
 
             log.info(http11Request.getUri());
-            Http11Handler http11Handler = http11HandlerSelector.getHttp11Handler(http11Request.getUri());
+            Http11Handler http11Handler = http11HandlerSelector.getHttp11Handler(http11Request);
             ResponseComponent responseComponent = http11Handler.handle(log, http11Request.getUri());
 
             final var response = http11ResponseHandler.makeResponse(responseComponent);

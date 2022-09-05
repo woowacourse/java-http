@@ -6,6 +6,7 @@ import org.apache.coyote.http11.dto.ResponseComponent;
 import org.apache.coyote.http11.http11handler.login.LoginService;
 import org.apache.coyote.http11.http11handler.support.HandlerSupporter;
 import org.apache.coyote.http11.http11handler.support.QueryStringProcessor;
+import org.apache.coyote.http11.http11request.Http11Request;
 import org.slf4j.Logger;
 
 public class LoginPageHandler implements Http11Handler {
@@ -21,8 +22,8 @@ public class LoginPageHandler implements Http11Handler {
     private LoginService loginService = new LoginService();
 
     @Override
-    public boolean isProperHandler(String uri) {
-        uri = queryStringProcessor.removeQueryString(uri);
+    public boolean isProperHandler(Http11Request http11Request) {
+        String uri = queryStringProcessor.removeQueryString(http11Request.getUri());
         return uri.equals(URI);
     }
 

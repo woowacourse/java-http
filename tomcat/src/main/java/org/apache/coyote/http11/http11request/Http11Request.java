@@ -1,16 +1,18 @@
 package org.apache.coyote.http11.http11request;
 
+import org.apache.coyote.http11.HttpMethod;
+
 public class Http11Request {
 
-    private final String httpMethod;
+    private final HttpMethod httpMethod;
     private final String uri;
 
     public Http11Request(String httpMethod, String uri) {
-        this.httpMethod = httpMethod;
+        this.httpMethod = HttpMethod.valueOf(httpMethod.toUpperCase());
         this.uri = uri;
     }
 
-    public String getHttpMethod() {
+    public HttpMethod getHttpMethod() {
         return httpMethod;
     }
 

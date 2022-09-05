@@ -5,11 +5,12 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.common.HttpMessageDelimiter;
 import org.apache.coyote.http11.mapping.HandlerMapping;
 import org.apache.coyote.http11.mapping.MappingResponse;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestGenerator;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponseGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,10 +18,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -46,8 +44,8 @@ public class Http11Processor implements Runnable, Processor {
             final var bufferedReader = new BufferedReader(inputStreamReader)
         ) {
 
-            final HttpRequest httpRequest = createHttpRequest(bufferedReader);
-            final HttpResponse httpResponse = createHttpResponse(httpRequest);
+            final HttpRequest httpRequest = HttpRequestGenerator.createHttpRequest(bufferedReader);
+            final HttpResponse httpResponse = HttpResponseGenerator.createHttpResponse(httpRequest);
             final String responseMessage = httpResponse.toMessage();
 
             printQueries(httpRequest);
@@ -57,49 +55,6 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private HttpRequest createHttpRequest(final BufferedReader bufferedReader) throws IOException {
-        final String requestLine = bufferedReader.readLine();
-
-        final List<String> massages = readMassage(bufferedReader);
-        final List<String> headers = extractHeaders(massages);
-        final List<String> bodies = extractBodies(massages, headers);
-
-        return HttpRequest.of(requestLine, headers, bodies);
-    }
-
-    private List<String> readMassage(final BufferedReader bufferedReader) throws IOException {
-        final List<String> messages = new ArrayList<>();
-        while (bufferedReader.ready()) {
-            messages.add(bufferedReader.readLine());
-        }
-        return messages;
-    }
-
-    private static List<String> extractHeaders(final List<String> massages) {
-        return massages.stream()
-            .takeWhile(message -> !message.equals(HttpMessageDelimiter.HEADER_BODY.getValue()))
-            .collect(Collectors.toList());
-    }
-
-    private static List<String> extractBodies(final List<String> massages, final List<String> headers) {
-        return massages.stream()
-            .skip(headers.size() + 1)
-            .collect(Collectors.toList());
-    }
-
-    private HttpResponse createHttpResponse(final HttpRequest httpRequest) {
-        final MappingResponse response = getResourceFromUrl(httpRequest.getUrl());
-        final String resource = response.getResource();
-        final String statusCode = response.getStatusCode();
-
-        return HttpResponse.of(httpRequest.getHttpVersion(), resource, statusCode);
-    }
-
-    private MappingResponse getResourceFromUrl(final String url) {
-        return HandlerMapping.getInstance()
-            .getResponse(url);
     }
 
     private void printQueries(final HttpRequest httpRequest) {

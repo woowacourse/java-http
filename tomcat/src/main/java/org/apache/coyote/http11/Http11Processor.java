@@ -11,6 +11,9 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginHandler;
 import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpResponse;
+import nextstep.jwp.http.QueryParams;
+import nextstep.jwp.http.StatusCode;
 import nextstep.jwp.utils.FileUtils;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -41,9 +44,11 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
             final var outputStream = connection.getOutputStream()) {
             final List<String> request = extractRequest(inputStream);
+
             HttpRequest httpRequest = HttpRequest.from(request.get(REQUEST_LINE_INDEX));
-            String responseBody = handle(httpRequest);
-            outputStream.write(writeResponseOk(httpRequest.getFileExtension(), responseBody));
+            HttpResponse httpResponse = handle(httpRequest);
+
+            outputStream.write(httpResponse.writeResponse());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -61,21 +66,36 @@ public class Http11Processor implements Runnable, Processor {
         return request;
     }
 
-    private String handle(HttpRequest httpRequest) {
+    private HttpResponse handle(HttpRequest httpRequest) {
         String path = httpRequest.getPath();
+        QueryParams queryParams = httpRequest.getQueryParams();
         if ("/".equals(path)) {
-            return "Hello world!";
+            return HttpResponse.of(StatusCode.OK, ContentType.TEXT_PLAIN, "Hello world!");
         }
         if ("/login".equals(path)) {
-            LoginHandler.login(httpRequest.getQueryParams());
-            return FileUtils.readFile(getResource("/login.html"));
+            return login(queryParams);
         }
         if (httpRequest.equals(ContentType.TEXT_PLAIN)) {
             String filePath =
                 path + FILE_EXTENSION_SEPARATOR + ContentType.TEXT_HTML.getFileExtension();
-            return FileUtils.readFile(getResource(filePath));
+            return HttpResponse.of(StatusCode.OK, ContentType.TEXT_HTML,
+                FileUtils.readFile(getResource(filePath)));
         }
-        return FileUtils.readFile(getResource(path));
+        return HttpResponse.of(StatusCode.OK, httpRequest.getFileExtension(),
+            FileUtils.readFile(getResource(path)));
+    }
+
+    private HttpResponse login(QueryParams queryParams) {
+        if (queryParams.count() == 0) {
+            return HttpResponse.of(StatusCode.OK, ContentType.TEXT_HTML,
+                FileUtils.readFile(getResource("/login.html")));
+        }
+        if (LoginHandler.canLogin(queryParams)) {
+            return HttpResponse.of(StatusCode.FOUND, ContentType.TEXT_HTML,
+                FileUtils.readFile(getResource("/index.html")));
+        }
+        return HttpResponse.of(StatusCode.UNAUTHORIZED, ContentType.TEXT_HTML,
+            FileUtils.readFile(getResource("/401.html")));
     }
 
     private URL getResource(String uri) {
@@ -86,14 +106,5 @@ public class Http11Processor implements Runnable, Processor {
             return getResource("/404.html");
         }
         return resource;
-    }
-
-    private byte[] writeResponseOk(ContentType contentType, String responseBody) {
-        return String.join("\r\n",
-            "HTTP/1.1 200 OK ",
-            "Content-Type: " + contentType.getMediaType() + ";charset=utf-8 ",
-            "Content-Length: " + responseBody.getBytes().length + " ",
-            "",
-            responseBody).getBytes();
     }
 }

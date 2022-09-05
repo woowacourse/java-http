@@ -91,4 +91,66 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @Test
+    @DisplayName("로그인에 성공하면 302 상태코드를 반환하고 index.html로 이동한다.")
+    void login_success() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+            "GET /login?account=gugu&password=password HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Accept: text/css,*/*;q=0.1",
+            "Connection: keep-alive ",
+            "",
+            "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+
+        var expected= String.join("\r\n",
+            "HTTP/1.1 302 Found ",
+            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Length: 5564 ",
+            "",
+            new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
+    @DisplayName("로그인에 실패하면 401 상태코드를 반환하고 401.html로 이동한다.")
+    void login_fail() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+            "GET /login?account=gugu&password=wrong HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Accept: text/css,*/*;q=0.1",
+            "Connection: keep-alive ",
+            "",
+            "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/401.html");
+
+        var expected= String.join("\r\n",
+            "HTTP/1.1 401 Unauthorized ",
+            "Content-Type: text/html;charset=utf-8 ",
+            "Content-Length: 2426 ",
+            "",
+            new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

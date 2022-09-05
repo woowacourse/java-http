@@ -33,7 +33,7 @@ public class Headers {
     }
 
     public Headers add(final String fieldName, final String fieldValue) {
-        Map<String, String> newHeaders = new LinkedHashMap<>(headers);
+        final Map<String, String> newHeaders = new LinkedHashMap<>(headers);
         newHeaders.put(fieldName, fieldValue);
 
         return new Headers(newHeaders);
@@ -41,6 +41,14 @@ public class Headers {
 
     public int getContentLength() {
         return Integer.parseInt(headers.getOrDefault("Content-Length", "0"));
+    }
+
+    public boolean exist(final String headerName) {
+        return headers.containsKey("headerName");
+    }
+
+    public String getValue(final String headerName) {
+        return headers.get(headerName);
     }
 
     public String parseToString() {

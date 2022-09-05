@@ -5,9 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import org.apache.coyote.http11.httpmessage.common.Headers;
+import org.apache.coyote.http11.httpmessage.common.HttpCookie;
+import org.apache.coyote.http11.httpmessage.request.requestbody.RequestBody;
 import org.apache.coyote.http11.httpmessage.request.requestline.RequestLine;
 import org.apache.coyote.http11.httpmessage.request.requestline.RequestUri;
-import org.apache.coyote.http11.httpmessage.request.requestbody.RequestBody;
 
 public class Request {
 
@@ -60,5 +61,16 @@ public class Request {
 
     public String getBody() {
         return requestBody.getRequestBody();
+    }
+
+    public boolean hasHeader(final String headerName) {
+        return headers.exist(headerName);
+    }
+
+    public HttpCookie getCookie() {
+        if (headers.exist("Cookie")) {
+            return HttpCookie.parse(headers.getValue("Cookie"));
+        }
+        throw new IllegalArgumentException("Cookie 헤더가 존재하지 않습니다.");
     }
 }

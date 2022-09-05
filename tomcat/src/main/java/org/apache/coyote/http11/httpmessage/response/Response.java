@@ -26,6 +26,10 @@ public class Response {
     public Response() {
     }
 
+    public Response addHeader(final String headerName, final String value) {
+        return new Response(this.statusLine, headers.add(headerName, value), this.body);
+    }
+
     public static Response okWithResponseBody(final ContentType contentType, final String responseBody) {
         final StatusLine statusLine = new StatusLine(HttpVersion.HTTP1_1, HttpStatus.OK);
 

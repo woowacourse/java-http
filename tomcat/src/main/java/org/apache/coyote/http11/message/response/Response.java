@@ -38,6 +38,10 @@ public class Response {
         return new Response(StatusCode.OK, body);
     }
 
+    public static Response ofRedirection(final StatusCode statusCode, final String location) {
+        return new Response(ContentType.HTML, statusCode, Map.of(Header.LOCATION, location), "");
+    }
+
     public static Response ofResource(final String path) throws IOException, URISyntaxException {
         return new Response(ContentType.of(path), StatusCode.OK, ResourceLoader.getStaticResource(path));
     }

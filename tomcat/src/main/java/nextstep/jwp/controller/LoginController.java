@@ -1,13 +1,10 @@
 package nextstep.jwp.controller;
 
-import java.util.Map;
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.Controller;
-import org.apache.coyote.http11.message.header.Header;
 import org.apache.coyote.http11.message.request.QueryParams;
 import org.apache.coyote.http11.message.request.Request;
 import org.apache.coyote.http11.message.response.Response;
-import org.apache.coyote.http11.message.response.header.ContentType;
 import org.apache.coyote.http11.message.response.header.StatusCode;
 
 public class LoginController implements Controller {
@@ -27,7 +24,7 @@ public class LoginController implements Controller {
         }
 
         UserService.login(queryParams.get(KEY_ACCOUNT), queryParams.get(KEY_PASSWORD));
-        return new Response(ContentType.HTML, StatusCode.FOUND, Map.of(Header.LOCATION, "/index.html"), "");
+        return Response.ofRedirection(StatusCode.FOUND, "/index.html");
     }
 
     @Override

@@ -28,15 +28,15 @@ public class RequestLine {
         return uri.isForResource();
     }
 
+    public boolean isMethod(final Method method) {
+        return this.method == method;
+    }
+
     public String getPath() {
         return uri.getPath();
     }
 
     public QueryParams getQueryParams() {
         return uri.getQueryParams();
-    }
-
-    public boolean isMethod(final Method method) {
-        return this.method == method;
     }
 }

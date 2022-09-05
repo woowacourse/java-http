@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.message.request;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -17,7 +19,8 @@ public class QueryParams {
     }
 
     public static QueryParams from(final String queryString) {
-        final Map<String, String> values = Arrays.stream(queryString.split(Regex.QUERY_PARAM.getValue()))
+        final String decodedQueryString = URLDecoder.decode(queryString, StandardCharsets.UTF_8);
+        final Map<String, String> values = Arrays.stream(decodedQueryString.split(Regex.QUERY_PARAM.getValue()))
                 .map(param -> param.split(Regex.QUERY_VALUE.getValue(), 2))
                 .filter(param -> param.length == 2)
                 .collect(Collectors.toMap(

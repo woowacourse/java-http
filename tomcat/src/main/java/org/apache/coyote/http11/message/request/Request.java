@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.apache.coyote.http11.message.header.Header;
 import org.apache.coyote.http11.message.request.body.RequestBody;
 import org.apache.coyote.http11.message.request.header.Headers;
+import org.apache.coyote.http11.message.request.requestline.Method;
 import org.apache.coyote.http11.message.request.requestline.RequestLine;
 
 public class Request {
@@ -32,7 +33,8 @@ public class Request {
 
         final Optional<String> contentLength = headers.get(Header.CONTENT_LENGTH);
         if (contentLength.isPresent()) {
-            final String body = readBody(requestReader, Integer.parseInt(contentLength.get()));
+            final String rawContentLength = contentLength.get();
+            final String body = readBody(requestReader, Integer.parseInt(rawContentLength.trim()));
             return new Request(requestLine, headers, RequestBody.from(body));
         }
         return new Request(requestLine, headers, RequestBody.ofEmpty());
@@ -62,11 +64,19 @@ public class Request {
         return requestLine.isForResource();
     }
 
+    public boolean isMethod(final Method method) {
+        return requestLine.isMethod(method);
+    }
+
     public String getPath() {
         return requestLine.getPath();
     }
 
     public QueryParams getUriQueryParams() {
         return requestLine.getQueryParams();
+    }
+
+    public QueryParams getBodyQueryParams() {
+        return requestBody.getQueryParams();
     }
 }

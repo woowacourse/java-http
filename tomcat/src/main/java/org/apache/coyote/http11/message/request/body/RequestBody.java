@@ -17,4 +17,8 @@ public class RequestBody {
     public static RequestBody ofEmpty() {
         return new RequestBody(QueryParams.ofEmpty());
     }
+
+    public QueryParams getQueryParams() {
+        return queryParams;
+    }
 }

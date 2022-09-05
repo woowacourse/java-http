@@ -79,14 +79,4 @@ public class Http11Processor implements Runnable, Processor {
         }
         return HttpResponse.of(httpRequest, ResourceUtil.getResource(response));
     }
-
-    private void addResponseBody(final HttpRequest httpRequest, final HttpResponse httpResponse,
-                                 final Controller controller)
-            throws IOException {
-        if (controller.isRest()) {
-            httpResponse.setResponseBody(controller.service(httpRequest));
-            return;
-        }
-        httpResponse.setResponseBody(ResourceUtil.getResource(controller.service(httpRequest)));
-    }
 }

@@ -42,7 +42,7 @@ public class Response {
         public ResponseBuilder(final HttpVersion httpVersion, final Status status) {
             this.startLine = String.join(" ", httpVersion.getValue(), status.getValue());
             this.headers = new HashMap<>();
-            headers.put(Header.CONTENT_TYPE.getValue(), MediaType.TEXT_PLAIN.getValue());
+            headers.put(Header.CONTENT_TYPE.getValue(), MediaType.TEXT_HTML.getValue());
             this.body = "";
         }
 

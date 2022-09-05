@@ -33,8 +33,8 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
+            HttpRequest httpRequest = HttpRequest.of(bufferedReader);
             FrontController frontController = new FrontController();
-            HttpRequest httpRequest = getHttpRequest(bufferedReader);
             HttpResponse httpResponse = frontController.doDispatch(httpRequest);
             String result = httpResponse.toString();
 
@@ -43,16 +43,5 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private HttpRequest getHttpRequest(BufferedReader bufferedReader) throws IOException {
-        String line;
-        StringBuilder stringBuilder = new StringBuilder();
-        while ((line = bufferedReader.readLine()) != null && !line.equals("")) {
-            stringBuilder.append(line);
-            stringBuilder.append("\r\n");
-        }
-
-        return HttpRequest.of(stringBuilder.toString());
     }
 }

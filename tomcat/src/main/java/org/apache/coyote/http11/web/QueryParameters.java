@@ -9,8 +9,10 @@ public class QueryParameters {
 
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final int VALUE_NOT_EXISTS_SIZE = 1;
     private static final String KEY_VALUE_SPLIT_DELIMITER = "=";
     private static final String QUERY_STRING_SPLIT_DELIMITER = "&";
+    private static final String EMPTY_STRING = "";
 
     private final Map<String, String> values;
 
@@ -19,18 +21,25 @@ public class QueryParameters {
     }
 
     public static QueryParameters from(final String queryString) {
-        final Map<String, String> values = Arrays.stream(queryString.split(QUERY_STRING_SPLIT_DELIMITER))
+        final String[] rawQueryParameters = queryString.split(QUERY_STRING_SPLIT_DELIMITER);
+        final Map<String, String> values = Arrays.stream(rawQueryParameters)
                 .map(it -> it.split(KEY_VALUE_SPLIT_DELIMITER))
                 .collect(Collectors.toMap(
                         it -> it[KEY_INDEX],
-                        it -> it[VALUE_INDEX])
+                        QueryParameters::getOrDefault)
                 );
 
         return new QueryParameters(values);
     }
+    private static String getOrDefault(final String[] keyValue) {
+        if (keyValue.length == VALUE_NOT_EXISTS_SIZE) {
+            return EMPTY_STRING;
+        }
+        return keyValue[VALUE_INDEX];
+    }
 
     public String getValueByKey(final String key) {
-        return values.getOrDefault(key, "");
+        return values.getOrDefault(key, EMPTY_STRING);
     }
 
     public boolean isEmpty() {

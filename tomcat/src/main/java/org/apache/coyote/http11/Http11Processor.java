@@ -11,9 +11,9 @@ import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.web.FileRequestHandler;
 import org.apache.coyote.web.RequestHandler;
-import org.apache.coyote.web.request.Request;
-import org.apache.coyote.web.request.RequestParser;
-import org.apache.coyote.web.response.Response;
+import org.apache.coyote.web.request.HttpRequest;
+import org.apache.coyote.web.request.HttpRequestParser;
+import org.apache.coyote.web.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,20 +38,20 @@ public class Http11Processor implements Runnable, Processor {
                      new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
              final OutputStream bufferedOutputStream = new BufferedOutputStream(connection.getOutputStream())) {
 
-            Request request = RequestParser.parse(bufferedReader);
-            Response response = branchRequest(request);
+            HttpRequest httpRequest = HttpRequestParser.parse(bufferedReader);
+            HttpResponse httpResponse = branchRequest(httpRequest);
 
-            bufferedOutputStream.write(response.createHttpResponse().getBytes());
+            bufferedOutputStream.write(httpResponse.createHttpResponse().getBytes());
             bufferedOutputStream.flush();
         } catch (IOException | UncheckedServletException | NullPointerException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private Response branchRequest(final Request request) throws IOException {
-        if (request.isFileRequest()) {
-            return new FileRequestHandler().handle(request);
+    private HttpResponse branchRequest(final HttpRequest httpRequest) throws IOException {
+        if (httpRequest.isFileRequest()) {
+            return new FileRequestHandler().handle(httpRequest);
         }
-        return new RequestHandler().handle(request);
+        return new RequestHandler().handle(httpRequest);
     }
 }

@@ -12,15 +12,15 @@ import org.apache.coyote.support.HttpHeaderFactory;
 import org.apache.coyote.support.HttpHeaderFactory.Pair;
 import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;
+import org.apache.coyote.web.response.HttpResponse;
 import org.apache.coyote.web.response.NoBodyResponse;
-import org.apache.coyote.web.response.Response;
 import org.apache.coyote.web.session.Cookie;
 import org.apache.coyote.web.session.Session;
 import org.apache.coyote.web.session.SessionManager;
 
 public class UserLoginController {
 
-    public Response doGet(final UserLoginRequest request) {
+    public HttpResponse doGet(final UserLoginRequest request) {
         User user = InMemoryUserRepository.findByAccount(request.getAccount())
                 .orElseThrow(UserNotFoundException::new);
         if (user.checkPassword(request.getPassword())) {
@@ -28,13 +28,13 @@ public class UserLoginController {
                     new Pair(CONTENT_TYPE.getValue(), ContentType.TEXT_HTML_CHARSET_UTF_8.getValue()),
                     new Pair(HttpHeader.LOCATION.getValue(), "/index.html")
             );
-            Response response = new NoBodyResponse(HttpStatus.FOUND, httpHeaders);
+            HttpResponse httpResponse = new NoBodyResponse(HttpStatus.FOUND, httpHeaders);
             Cookie cookie = SessionManager.createCookie();
             Session session = new Session(cookie.getKey());
             session.setAttribute("user", user);
             SessionManager.addSession(cookie.getValue(), session);
-            response.addCookie(cookie);
-            return response;
+            httpResponse.addCookie(cookie);
+            return httpResponse;
         }
         HttpHeaders httpHeaders = HttpHeaderFactory.create(
                 new Pair(CONTENT_TYPE.getValue(), ContentType.TEXT_HTML_CHARSET_UTF_8.getValue()),

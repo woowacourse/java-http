@@ -13,12 +13,12 @@ import org.apache.coyote.support.HttpHeaderFactory;
 import org.apache.coyote.support.HttpHeaderFactory.Pair;
 import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;
+import org.apache.coyote.web.response.HttpResponse;
 import org.apache.coyote.web.response.NoBodyResponse;
-import org.apache.coyote.web.response.Response;
 
 public class UserCreateController {
 
-    public Response doPost(final UserRegisterRequest request) {
+    public HttpResponse doPost(final UserRegisterRequest request) {
         Optional<User> user = InMemoryUserRepository.findByAccount(request.getAccount());
         if (user.isPresent()) {
             throw new InvalidUserException("이미 존재하는 계정입니다.");

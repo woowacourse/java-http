@@ -4,25 +4,24 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.coyote.support.HttpHeader;
 import org.apache.coyote.support.HttpHeaderFactory;
 import org.apache.coyote.support.HttpHeaderFactory.Pair;
 import org.apache.coyote.support.HttpHeaders;
 
-public class RequestParser {
+public class HttpRequestParser {
 
     private static final String START_LINE_DELIMITER = " ";
     private static final String HEADER_DELIMITER = ": ";
 
-    public static Request parse(final BufferedReader bufferedReader) throws IOException {
-        RequestLine requestLine = parseRequestLine(bufferedReader);
+    public static HttpRequest parse(final BufferedReader bufferedReader) throws IOException {
+        HttpRequestLine httpRequestLine = parseRequestLine(bufferedReader);
         HttpHeaders httpHeaders = parseHeaders(bufferedReader);
         char[] buffer = parseBody(bufferedReader, httpHeaders);
-        return new Request(requestLine, httpHeaders, new String(buffer));
+        return new HttpRequest(httpRequestLine, httpHeaders, new String(buffer));
     }
 
-    private static RequestLine parseRequestLine(final BufferedReader bufferedReader) throws IOException {
-        return RequestLine.from(bufferedReader.readLine().split(START_LINE_DELIMITER));
+    private static HttpRequestLine parseRequestLine(final BufferedReader bufferedReader) throws IOException {
+        return HttpRequestLine.from(bufferedReader.readLine().split(START_LINE_DELIMITER));
     }
 
     private static HttpHeaders parseHeaders(final BufferedReader bufferedReader) {

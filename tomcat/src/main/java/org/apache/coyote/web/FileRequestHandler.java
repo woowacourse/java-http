@@ -11,9 +11,9 @@ import org.apache.coyote.support.HttpHeaderFactory;
 import org.apache.coyote.support.HttpHeaderFactory.Pair;
 import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;
-import org.apache.coyote.web.request.Request;
+import org.apache.coyote.web.request.HttpRequest;
 import org.apache.coyote.web.response.BodyResponse;
-import org.apache.coyote.web.response.Response;
+import org.apache.coyote.web.response.HttpResponse;
 import org.apache.coyote.web.session.Session;
 import org.apache.coyote.web.session.SessionManager;
 import org.slf4j.Logger;
@@ -29,25 +29,25 @@ public class FileRequestHandler {
         this.fileHandler = new DefaultFileHandler();
     }
 
-    public Response handle(final Request request) throws IOException {
-        String responseBody = fileHandler.getFileLines(request.getRequestLine().getRequestUrl());
+    public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
+        String responseBody = fileHandler.getFileLines(httpRequest.getRequestLine().getRequestUrl());
         HttpHeaders httpHeaders = HttpHeaderFactory.create(
-                new Pair(CONTENT_TYPE.getValue(), ContentType.from(request.getRequestExtension()).getValue()));
-        if (request.isSameRequestUrl("/login.html")) {
-            checkLogin(request);
+                new Pair(CONTENT_TYPE.getValue(), ContentType.from(httpRequest.getRequestExtension()).getValue()));
+        if (httpRequest.isSameRequestUrl("/login.html")) {
+            checkLogin(httpRequest);
             return new BodyResponse(HttpStatus.OK, httpHeaders, responseBody);
         }
 
-        if (request.isSameRequestUrl("/register.html")) {
-            checkLogin(request);
+        if (httpRequest.isSameRequestUrl("/register.html")) {
+            checkLogin(httpRequest);
             return new BodyResponse(HttpStatus.OK, httpHeaders, responseBody);
         }
 
         return new BodyResponse(HttpStatus.OK, httpHeaders, responseBody);
     }
 
-    private void checkLogin(final Request request) {
-        Optional<String> sessionValue = request.getSession();
+    private void checkLogin(final HttpRequest httpRequest) {
+        Optional<String> sessionValue = httpRequest.getSession();
         if (sessionValue.isPresent()) {
             Optional<Session> sessionOrEmpty = SessionManager.findSession(sessionValue.get());
             sessionOrEmpty.ifPresent(session -> session.getAttribute("user")

@@ -4,7 +4,7 @@ import java.util.Optional;
 import org.apache.coyote.exception.HttpRequestStartLineNotValidException;
 import org.apache.coyote.support.HttpMethod;
 
-public class RequestLine {
+public class HttpRequestLine {
 
     private static final int REQUEST_LINE_LENGTH = 3;
     private static final String QUERY_PARAMETER_DELIMITER = "\\?";
@@ -23,28 +23,28 @@ public class RequestLine {
     private final String queryParameter;
     private final String version;
 
-    private RequestLine(final HttpMethod method,
-                        final String requestUrl,
-                        final String queryParameter,
-                        final String version) {
+    private HttpRequestLine(final HttpMethod method,
+                            final String requestUrl,
+                            final String queryParameter,
+                            final String version) {
         this.method = method;
         this.requestUrl = requestUrl;
         this.queryParameter = queryParameter;
         this.version = version;
     }
 
-    public static RequestLine from(final String[] requestLine) {
+    public static HttpRequestLine from(final String[] requestLine) {
         if (requestLine.length != REQUEST_LINE_LENGTH) {
             throw new HttpRequestStartLineNotValidException();
         }
         String[] splitRequestUrl = requestLine[REQUEST_URL_INDEX].split(QUERY_PARAMETER_DELIMITER);
         if (splitRequestUrl.length == NO_SPLIT_SIGN) {
-            return new RequestLine(HttpMethod.of(requestLine[HTTP_METHOD_INDEX]),
+            return new HttpRequestLine(HttpMethod.of(requestLine[HTTP_METHOD_INDEX]),
                     splitRequestUrl[REQUEST_URL_ONLY_INDEX],
                     null,
                     requestLine[HTTP_VERSION_INDEX]);
         }
-        return new RequestLine(HttpMethod.of(requestLine[HTTP_METHOD_INDEX]),
+        return new HttpRequestLine(HttpMethod.of(requestLine[HTTP_METHOD_INDEX]),
                 splitRequestUrl[REQUEST_URL_ONLY_INDEX],
                 splitRequestUrl[QUERY_STRING_INDEX],
                 requestLine[HTTP_VERSION_INDEX]);

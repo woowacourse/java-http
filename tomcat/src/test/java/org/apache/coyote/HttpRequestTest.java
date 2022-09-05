@@ -10,11 +10,11 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import org.apache.coyote.support.HttpMethod;
-import org.apache.coyote.web.request.Request;
-import org.apache.coyote.web.request.RequestParser;
+import org.apache.coyote.web.request.HttpRequest;
+import org.apache.coyote.web.request.HttpRequestParser;
 import org.junit.jupiter.api.Test;
 
-class RequestTest {
+class HttpRequestTest {
 
     private static final String HTTP_GET_REQUEST = String.join("\r\n",
             "GET /index.html HTTP/1.1 ",
@@ -35,70 +35,71 @@ class RequestTest {
 
     @Test
     void parse() throws IOException {
-        Request request = RequestParser.parse(createBufferedReader(HTTP_GET_REQUEST));
+        HttpRequest httpRequest = HttpRequestParser.parse(createBufferedReader(HTTP_GET_REQUEST));
         assertAll(
-                () -> assertThat(request.getRequestLine().getMethod()).isEqualTo(HttpMethod.GET),
-                () -> assertThat(request.getRequestLine().getRequestUrl()).isEqualTo("/index.html"),
-                () -> assertThat(request.getRequestLine().getVersion()).isEqualTo("HTTP/1.1"),
-                () -> assertThat(request.getHttpHeaders().getHeaders()).containsOnlyKeys("Host", "Connection")
+                () -> assertThat(httpRequest.getRequestLine().getMethod()).isEqualTo(HttpMethod.GET),
+                () -> assertThat(httpRequest.getRequestLine().getRequestUrl()).isEqualTo("/index.html"),
+                () -> assertThat(httpRequest.getRequestLine().getVersion()).isEqualTo("HTTP/1.1"),
+                () -> assertThat(httpRequest.getHttpHeaders().getHeaders()).containsOnlyKeys("Host", "Connection")
         );
     }
 
     @Test
     void parseRawBody() throws IOException {
-        Request request = RequestParser.parse(createBufferedReader(HTTP_POST_REQUEST));
-        assertThat(request.getRequestBody()).isEqualTo("account=gugu&password=password&email=hkkang%40woowahan.com");
+        HttpRequest httpRequest = HttpRequestParser.parse(createBufferedReader(HTTP_POST_REQUEST));
+        assertThat(httpRequest.getRequestBody()).isEqualTo(
+                "account=gugu&password=password&email=hkkang%40woowahan.com");
     }
 
     @Test
     void parseBody() throws IOException {
-        Request request = RequestParser.parse(createBufferedReader(HTTP_POST_REQUEST));
-        Map<String, String> requestBody = request.parseBody();
+        HttpRequest httpRequest = HttpRequestParser.parse(createBufferedReader(HTTP_POST_REQUEST));
+        Map<String, String> requestBody = httpRequest.parseBody();
         assertThat(requestBody).containsOnlyKeys("account", "password", "email");
     }
 
     @Test
     void getRequestExtension() throws IOException {
-        Request request = RequestParser.parse(createBufferedReader(HTTP_GET_REQUEST));
-        assertThat(request.getRequestExtension()).isEqualTo("html");
+        HttpRequest httpRequest = HttpRequestParser.parse(createBufferedReader(HTTP_GET_REQUEST));
+        assertThat(httpRequest.getRequestExtension()).isEqualTo("html");
     }
 
     @Test
     void getDefaultRequestExtension() throws IOException {
-        Request request = RequestParser.parse(createBufferedReader("GET /api/login HTTP/1.1 \r\n"));
-        assertThat(request.getRequestExtension()).isEqualTo("strings");
+        HttpRequest httpRequest = HttpRequestParser.parse(createBufferedReader("GET /api/login HTTP/1.1 \r\n"));
+        assertThat(httpRequest.getRequestExtension()).isEqualTo("strings");
     }
 
     @Test
     void isFileRequest() throws IOException {
-        Request request = RequestParser.parse(createBufferedReader(HTTP_GET_REQUEST));
-        assertThat(request.isFileRequest()).isTrue();
+        HttpRequest httpRequest = HttpRequestParser.parse(createBufferedReader(HTTP_GET_REQUEST));
+        assertThat(httpRequest.isFileRequest()).isTrue();
     }
 
     @Test
     void isNotFileRequest() throws IOException {
-        Request request = RequestParser.parse(createBufferedReader("GET /api/login HTTP/1.1 \r\n"));
-        assertThat(request.isFileRequest()).isFalse();
+        HttpRequest httpRequest = HttpRequestParser.parse(createBufferedReader("GET /api/login HTTP/1.1 \r\n"));
+        assertThat(httpRequest.isFileRequest()).isFalse();
     }
 
     @Test
     void getQueryParameters() throws IOException {
-        Request request = RequestParser.parse(
+        HttpRequest httpRequest = HttpRequestParser.parse(
                 createBufferedReader("GET /login?account=gugu&password=password HTTP/1.1 \r\n"));
-        assertThat(request.getQueryParameters()).containsKeys("account", "password");
+        assertThat(httpRequest.getQueryParameters()).containsKeys("account", "password");
     }
 
     @Test
     void getEmptyQueryParameters() throws IOException {
-        Request request = RequestParser.parse(createBufferedReader("GET /api/login HTTP/1.1 \r\n"));
-        assertThat(request.getQueryParameters()).isEmpty();
+        HttpRequest httpRequest = HttpRequestParser.parse(createBufferedReader("GET /api/login HTTP/1.1 \r\n"));
+        assertThat(httpRequest.getQueryParameters()).isEmpty();
     }
 
     @Test
     void isSameRequestUrl() throws IOException {
-        Request request = RequestParser.parse(
+        HttpRequest httpRequest = HttpRequestParser.parse(
                 createBufferedReader("GET /login?account=gugu&password=password HTTP/1.1 \r\n"));
-        assertThat(request.isSameRequestUrl("/login")).isTrue();
+        assertThat(httpRequest.isSameRequestUrl("/login")).isTrue();
     }
 
     private BufferedReader createBufferedReader(final String httpRequest) {

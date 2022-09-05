@@ -13,21 +13,21 @@ import org.apache.coyote.support.HttpHeaderFactory;
 import org.apache.coyote.support.HttpHeaderFactory.Pair;
 import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;
-import org.apache.coyote.web.request.Request;
+import org.apache.coyote.web.request.HttpRequest;
 import org.apache.coyote.web.response.BodyResponse;
-import org.apache.coyote.web.response.Response;
+import org.apache.coyote.web.response.HttpResponse;
 
 public class RequestHandler {
 
-    public Response handle(final Request request) {
-        if (request.isSameHttpMethod(GET) && request.isSameRequestUrl("/login")) {
-            UserLoginRequest userLoginRequest = UserLoginRequest.from(request.getQueryParameters());
+    public HttpResponse handle(final HttpRequest httpRequest) {
+        if (httpRequest.isSameHttpMethod(GET) && httpRequest.isSameRequestUrl("/login")) {
+            UserLoginRequest userLoginRequest = UserLoginRequest.from(httpRequest.getQueryParameters());
             return new UserLoginController().doGet(userLoginRequest);
 
         }
 
-        if (request.isSameHttpMethod(POST) && request.isSameRequestUrl("/register")) {
-            UserRegisterRequest userRegisterRequest = UserRegisterRequest.from(request.parseBody());
+        if (httpRequest.isSameHttpMethod(POST) && httpRequest.isSameRequestUrl("/register")) {
+            UserRegisterRequest userRegisterRequest = UserRegisterRequest.from(httpRequest.parseBody());
             return new UserCreateController().doPost(userRegisterRequest);
         }
 

@@ -1,11 +1,10 @@
 package org.apache.coyote.web.response;
 
 import java.nio.charset.StandardCharsets;
-import org.apache.coyote.support.HttpHeader;
 import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;
 
-public class BodyResponse extends Response {
+public class BodyResponse extends HttpResponse {
 
     private final String responseBody;
 

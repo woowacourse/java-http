@@ -4,7 +4,7 @@ import org.apache.coyote.support.HttpHeader;
 import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;
 
-public class NoBodyResponse extends Response {
+public class NoBodyResponse extends HttpResponse {
 
     public NoBodyResponse(final HttpStatus httpStatus, final HttpHeaders headers) {
         super(httpStatus, headers);

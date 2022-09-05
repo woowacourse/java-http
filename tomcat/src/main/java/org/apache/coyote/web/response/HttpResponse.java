@@ -7,7 +7,7 @@ import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpStatus;
 import org.apache.coyote.web.session.Cookie;
 
-public abstract class Response {
+public abstract class HttpResponse {
 
     private static final String DEFAULT_VERSION = "HTTP/1.1";
     protected static final String HEADER_TEMPLATE = "%s: %s \r\n";
@@ -17,11 +17,11 @@ public abstract class Response {
     private final HttpHeaders httpHeaders;
     private List<Cookie> cookies = new ArrayList<>();
 
-    public Response(final HttpStatus httpStatus, final HttpHeaders httpHeaders) {
+    public HttpResponse(final HttpStatus httpStatus, final HttpHeaders httpHeaders) {
         this(DEFAULT_VERSION, httpStatus, httpHeaders);
     }
 
-    public Response(final String version, final HttpStatus httpStatus, final HttpHeaders httpHeaders) {
+    public HttpResponse(final String version, final HttpStatus httpStatus, final HttpHeaders httpHeaders) {
         this.version = version;
         this.httpStatus = httpStatus;
         this.httpHeaders = httpHeaders;

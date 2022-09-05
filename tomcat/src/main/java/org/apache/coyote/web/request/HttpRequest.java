@@ -8,11 +8,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.coyote.support.HttpHeader;
 import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpMethod;
 
-public class Request {
+public class HttpRequest {
 
     private static final String DEFAULT_REQUEST_EXTENSION = "strings";
     private static final String CONNECT_DELIMITER = "&";
@@ -21,24 +20,24 @@ public class Request {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
-    private final RequestLine requestLine;
+    private final HttpRequestLine httpRequestLine;
     private final HttpHeaders httpHeaders;
     private final String requestBody;
 
-    public Request(final RequestLine requestLine,
-                   final HttpHeaders httpHeaders,
-                   final String requestBody) {
-        this.requestLine = requestLine;
+    public HttpRequest(final HttpRequestLine httpRequestLine,
+                       final HttpHeaders httpHeaders,
+                       final String requestBody) {
+        this.httpRequestLine = httpRequestLine;
         this.httpHeaders = httpHeaders;
         this.requestBody = requestBody;
     }
 
     public boolean isFileRequest() {
-        return requestLine.getFileExtension().isPresent();
+        return httpRequestLine.getFileExtension().isPresent();
     }
 
     public String getRequestExtension() {
-        Optional<String> fileExtension = requestLine.getFileExtension();
+        Optional<String> fileExtension = httpRequestLine.getFileExtension();
         if (fileExtension.isEmpty()) {
             return DEFAULT_REQUEST_EXTENSION;
         }
@@ -46,7 +45,7 @@ public class Request {
     }
 
     public Map<String, String> getQueryParameters() {
-        String queryParameter = requestLine.getQueryParameter();
+        String queryParameter = httpRequestLine.getQueryParameter();
         if (Objects.isNull(queryParameter)) {
             return Collections.emptyMap();
         }
@@ -54,11 +53,11 @@ public class Request {
     }
 
     public boolean isSameHttpMethod(final HttpMethod method) {
-        return requestLine.isSameMethod(method);
+        return httpRequestLine.isSameMethod(method);
     }
 
     public boolean isSameRequestUrl(final String url) {
-        return requestLine.isSameUrl(url);
+        return httpRequestLine.isSameUrl(url);
     }
 
     public Map<String, String> parseBody() {
@@ -83,8 +82,8 @@ public class Request {
                 .findFirst();
     }
 
-    public RequestLine getRequestLine() {
-        return requestLine;
+    public HttpRequestLine getRequestLine() {
+        return httpRequestLine;
     }
 
     public HttpHeaders getHttpHeaders() {

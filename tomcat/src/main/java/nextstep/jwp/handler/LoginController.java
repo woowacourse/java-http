@@ -46,7 +46,7 @@ public class LoginController implements Controller {
         try {
             return login(httpRequest);
         } catch (UserNotFoundException | UnAuthorizedException e) {
-            log.error("", e);
+            log.error(e.getMessage(), e);
             return HttpResponse.of(httpRequest, HttpStatusCode.UNAUTHORIZED, "/401.html");
         }
     }

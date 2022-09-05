@@ -36,8 +36,8 @@ public class HttpRequest {
 
     private Map<String, String> extractQueryString(final String querystring) {
         final Map<String, String> queryStrings = new LinkedHashMap<>();
-        final String[] split = querystring.split(QUERY_STRING_AND);
-        for (String query : split) {
+        final String[] queries = querystring.split(QUERY_STRING_AND);
+        for (String query : queries) {
             final String[] parameterAndValue = query.split(QUERY_STRING_EQUAL);
             queryStrings.put(parameterAndValue[0], parameterAndValue[1]);
         }

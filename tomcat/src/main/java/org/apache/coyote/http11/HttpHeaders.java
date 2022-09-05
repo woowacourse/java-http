@@ -34,9 +34,9 @@ public class HttpHeaders {
 
     private void parseHeader(final Map<HttpHeader, String> headers, final String line) {
         if (!NONE_HEADER.equals(line)) {
-            final String[] headerValue = line.split(HTTP_HEADER_DELIMITER);
-            final HttpHeader httpHeader = HttpHeader.of(headerValue[0]);
-            final String value = headerValue[1];
+            final String[] headerValues = line.split(HTTP_HEADER_DELIMITER);
+            final HttpHeader httpHeader = HttpHeader.of(headerValues[0]);
+            final String value = headerValues[1];
             headers.put(httpHeader, value);
         }
     }

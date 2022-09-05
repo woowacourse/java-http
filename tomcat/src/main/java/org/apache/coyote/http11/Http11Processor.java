@@ -1,16 +1,28 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.HttpStatus.OK;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
+import java.util.Queue;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.handler.FrontRequestHandler;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.ResponseEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String DEFAULT_BODY = "Hello world!";
 
     private final Socket connection;
 
@@ -25,22 +37,53 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        try (final var bufferedReader = new BufferedReader(new InputStreamReader(connection.getInputStream(),
+                StandardCharsets.UTF_8)); final var outputStream = connection.getOutputStream()) {
+            final FrontRequestHandler frontRequestHandler = new FrontRequestHandler();
 
-            final var responseBody = "Hello world!";
+            final HttpRequest httpRequest = HttpRequest.of(readHttpRequest(bufferedReader));
+            final ResponseEntity response = handleRequest(httpRequest, frontRequestHandler);
+            final HttpResponse httpResponse = HttpResponse.of(response);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
-
-            outputStream.write(response.getBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+            writeResponse(outputStream, httpResponse.createResponse());
+        } catch (final IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Queue<String> readHttpRequest(final BufferedReader bufferedReader) throws IOException {
+        final Queue<String> httpRequest = new LinkedList<>();
+
+        String line = bufferedReader.readLine();
+        while (line != null && !line.equals("")) {
+            httpRequest.add(line);
+            line = bufferedReader.readLine();
+        }
+
+        return httpRequest;
+    }
+
+    private ResponseEntity handleRequest(final HttpRequest httpRequest, final FrontRequestHandler frontHandler)
+            throws IOException {
+        final String path = httpRequest.getPath();
+
+        if (isRootPath(path)) {
+            return new ResponseEntity(OK, "text/html", "Hello world!");
+        }
+
+        if (FileHandler.isStaticFileResource(path)) {
+            return FileHandler.createFileResponse(path);
+        }
+
+        return frontHandler.handle(httpRequest.getPath(), httpRequest);
+    }
+
+    private boolean isRootPath(final String path) {
+        return path.equals("/");
+    }
+
+    private void writeResponse(final OutputStream outputStream, final String response) throws IOException {
+        outputStream.write(response.getBytes());
+        outputStream.flush();
     }
 }

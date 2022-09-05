@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.request.HttpMethod.*;
 import static org.apache.coyote.response.StatusCode.OK;
 
 import java.io.BufferedReader;
@@ -11,6 +12,8 @@ import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.handler.LoginHandler;
+import org.apache.coyote.handler.RegisterHandler;
+import org.apache.coyote.request.HttpMethod;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.ContentType;
 import org.apache.coyote.response.HttpResponse;
@@ -44,11 +47,15 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             final HttpRequest httpRequest = readHttpRequest(bufferedReader);
+            final HttpMethod requestMethod = httpRequest.getRequestMethod();
             String requestUrl = httpRequest.getRequestUrlWithoutQuery();
             HttpResponse httpResponse = HttpResponse.of(OK, ContentType.from(requestUrl), "", requestUrl);
 
-            if (requestUrl.contains("login") && !httpRequest.getRequestBody().isBlank()) {
+            if (requestUrl.contains("login") && requestMethod.equals(POST)) {
                 httpResponse = LoginHandler.login(httpRequest.getRequestBody());
+            }
+            if (requestUrl.contains("register") && requestMethod.equals(POST)) {
+                httpResponse = RegisterHandler.register(httpRequest.getRequestBody());
             }
 
             final String response = httpResponse.getResponse();

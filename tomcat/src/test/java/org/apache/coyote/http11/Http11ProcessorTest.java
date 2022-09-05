@@ -15,12 +15,19 @@ import java.util.List;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.handler.LoginHandler;
+import org.apache.coyote.handler.RegisterHandler;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import support.StubSocket;
 
 class Http11ProcessorTest {
+
+    @BeforeEach
+    void setUp() {
+        InMemoryUserRepository.rollback();
+    }
 
     @DisplayName("/index.html 페이지 요청시 응답으로 반환된다.")
     @Test
@@ -274,6 +281,105 @@ class Http11ProcessorTest {
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 2426 \r\n" +
                 "Location: /401.html \r\n" +
+                "\r\n"+
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).startsWith(expected);
+    }
+
+    @DisplayName("GET 메소드로 /register 요청시 register.html 페이지를 응답한다.")
+    @Test
+    public void getRegister() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 4319 \r\n" +
+                "\r\n"+
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        assertThat(socket.output()).startsWith(expected);
+    }
+
+    @DisplayName("가입되어 있지 않은 새로운 Account로 회원가입시 회원을 저장한다.")
+    @Test
+    public void registerWithNewUser() {
+        // given
+        final ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        final Logger logger = (Logger) LoggerFactory.getLogger(RegisterHandler.class);
+        logger.addAppender(appender);
+        appender.start();
+
+        final String account = "dwoo";
+        final String password = "password";
+        final String email = "dwoo@gmail.com";
+        final String httpRequest= String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 47 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
+                "",
+                "account=" + account + "&password=" + password + "&email=" + email);
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final List<ILoggingEvent> logs = appender.list;
+        final String message = logs.get(0).getFormattedMessage();
+        final Level level = logs.get(0).getLevel();
+
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow();
+
+        assertThat(message).isEqualTo("회원가입 성공! : " + user);
+        assertThat(level).isEqualTo(INFO);
+    }
+
+    @DisplayName("회원가입에 성공시 index.html로 리다이렉트(302 Found 응답)한다.")
+    @Test
+    public void successToRegister() throws IOException {
+        // given
+        final String httpRequest= String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 47 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
+                "",
+                "account=dwoo&password=1234&email=dwoo@email.com");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 5564 \r\n" +
+                "Location: /index.html \r\n" +
                 "\r\n"+
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 

@@ -7,6 +7,15 @@ import nextstep.jwp.model.User;
 
 public class RegisterService {
 
+    private static final RegisterService INSTANCE = new RegisterService();
+
+    private RegisterService() {
+    }
+
+    public static RegisterService getInstance() {
+        return INSTANCE;
+    }
+
     public void register(final Map<String, String> parameters) {
         final var account = parameters.get("account");
         final var password = parameters.get("password");

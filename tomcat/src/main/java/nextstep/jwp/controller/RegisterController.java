@@ -9,10 +9,16 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class RegisterController extends AbstractController {
 
+    private static final RegisterController INSTANCE = new RegisterController();
+
     private final RegisterService registerService;
 
-    public RegisterController() {
-        registerService = new RegisterService();
+    private RegisterController() {
+        registerService = RegisterService.getInstance();
+    }
+
+    public static RegisterController getInstance() {
+        return INSTANCE;
     }
 
     public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {

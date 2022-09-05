@@ -8,6 +8,15 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class StaticResourceController extends AbstractController {
 
+    private static final StaticResourceController INSTANCE = new StaticResourceController();
+
+    private StaticResourceController() {
+    }
+
+    public static StaticResourceController getInstance() {
+        return INSTANCE;
+    }
+
     public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         final var path = httpRequest.getPath();
 

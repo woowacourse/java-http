@@ -9,10 +9,16 @@ import org.apache.catalina.session.SessionManager;
 
 public class LoginService {
 
+    private static final LoginService INSTANCE = new LoginService();
+
     private final SessionManager sessionManager;
 
-    public LoginService() {
+    private LoginService() {
         this.sessionManager = new SessionManager();
+    }
+
+    public static LoginService getInstance() {
+        return INSTANCE;
     }
 
     public String login(final Map<String, String> parameters) {

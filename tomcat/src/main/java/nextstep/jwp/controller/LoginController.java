@@ -8,10 +8,16 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public class LoginController extends AbstractController {
 
+    private static final LoginController INSTANCE = new LoginController();
+
     private final LoginService loginService;
 
-    public LoginController() {
-        loginService = new LoginService();
+    private LoginController() {
+        loginService = LoginService.getInstance();
+    }
+
+    public static LoginController getInstance() {
+        return INSTANCE;
     }
 
     public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {

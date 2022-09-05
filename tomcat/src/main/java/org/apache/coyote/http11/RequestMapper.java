@@ -10,9 +10,9 @@ import org.apache.coyote.http11.request.HttpRequest;
 
 public enum RequestMapper {
 
-    INDEX("/", new IndexController()),
-    LOGIN("/login", new LoginController()),
-    REGISTER("/register", new RegisterController());
+    INDEX("/", IndexController.getInstance()),
+    LOGIN("/login", LoginController.getInstance()),
+    REGISTER("/register", RegisterController.getInstance());
 
     private final String path;
     private final Controller controller;
@@ -28,6 +28,6 @@ public enum RequestMapper {
                 .filter(v -> v.path.equals(path))
                 .map(v -> v.controller)
                 .findFirst()
-                .orElse(new StaticResourceController());
+                .orElse(StaticResourceController.getInstance());
     }
 }

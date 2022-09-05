@@ -148,40 +148,4 @@ class Http11ProcessorTest {
         String expected = InMemoryUserRepository.findByAccount("gugu").orElseThrow().toString().concat("\n");
         assertThat(outContent.toString()).contains(expected);
     }
-
-    @Test
-    void query_parameter로_들어온_계정_정보가_없을_경우_예외를_반환한다() {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /login?account=eden&password=password HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when & then
-        assertThatThrownBy(processor::run)
-                .isInstanceOf(UserNotFoundException.class);
-    }
-
-    @Test
-    void query_parameter로_들어온_계정_정보가_일치하지_않을_경우_예외를_반환한다() {
-        // given
-        final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=gugugugu HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
-
-        final StubSocket socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when & then
-        assertThatThrownBy(processor::run)
-                .isInstanceOf(AuthenticationException.class);
-    }
 }

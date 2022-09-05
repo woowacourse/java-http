@@ -1,5 +1,8 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.HttpMethod.GET;
+import static org.apache.coyote.http11.HttpMethod.POST;
+
 import java.util.Arrays;
 import java.util.function.Function;
 import nextstep.Application;
@@ -18,17 +21,26 @@ import org.slf4j.LoggerFactory;
 
 public enum Controller {
 
-    HOME("/", Controller::home),
-    LOGIN("/login", Controller::login);
+    HOME("/", GET, Controller::home),
+    LOGIN("/login", GET, Controller::login),
+    REGISTER_GET("/register", GET, Controller::registerGet),
+    REGISTER_POST("/register", POST, Controller::registerPost);
+
+    private static ResponseEntity registerGet(Object o) {
+        return ResponseEntity.body("register.html");
+    }
 
     private static final String WELCOME_MESSAGE = "Hello world!";
-    private static final Logger log = LoggerFactory.getLogger(Application.class);
 
+    private static final Logger log = LoggerFactory.getLogger(Application.class);
     private final String path;
+
+    private final HttpMethod httpMethod;
     private final Function<Object, ResponseEntity> function;
 
-    Controller(String path, Function<Object, ResponseEntity> function) {
+    Controller(String path, HttpMethod httpMethod, Function<Object, ResponseEntity> function) {
         this.path = path;
+        this.httpMethod = httpMethod;
         this.function = function;
     }
 
@@ -39,10 +51,14 @@ public enum Controller {
         }
         QueryParameters queryParameters = request.getQueryParameters();
         return Arrays.stream(values())
-                .filter(controller -> path.checkRequest(controller.path))
+                .filter(api -> mapApi(api, request))
                 .findFirst()
                 .orElseThrow(ResourceNotFoundException::new)
                 .function.apply(queryParameters);
+    }
+
+    private static boolean mapApi(Controller api, Request request) {
+        return api.httpMethod.equals(request.getHttpMethod()) && request.checkRequestPath(api.path);
     }
 
     private static ResponseEntity home(Object o) {
@@ -54,12 +70,24 @@ public enum Controller {
         if (queryParameters.isEmpty()) {
             return ResponseEntity.body("login.html");
         }
+        try {
+            validateUser(queryParameters);
+        } catch (UserNotFoundException | AuthenticationException e) {
+            return ResponseEntity.body("redirect:401.html").status(HttpStatus.REDIRECT);
+        }
+        return ResponseEntity.body("redirect:index.html").status(HttpStatus.REDIRECT);
+    }
+
+    private static void validateUser(QueryParameters queryParameters) {
         User user = InMemoryUserRepository.findByAccount(queryParameters.getAccount())
                 .orElseThrow(UserNotFoundException::new);
         if (!user.checkPassword(queryParameters.getPassword())) {
             throw new AuthenticationException();
         }
         log.info(user.toString());
-        return ResponseEntity.body("redirect:index.html").status(HttpStatus.REDIRECT);
+    }
+
+    private static ResponseEntity registerPost(Object o) {
+        return ResponseEntity.body("");
     }
 }

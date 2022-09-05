@@ -24,37 +24,48 @@ public class HttpRequestStartLine {
 
     public static HttpRequestStartLine from(final BufferedReader reader) throws IOException {
         final String startLine = reader.readLine();
-        final Map<String, String> queryParams = new HashMap<>();
-
         if (startLine == null) {
             throw new IllegalArgumentException("잘못된 입력입니다.");
         }
 
         final String[] startLineContents = startLine.split(" ");
 
-        final String uri = parseUri(startLineContents[1], queryParams);
-
-        return new HttpRequestStartLine(startLineContents[0], uri, startLineContents[2], queryParams);
+        return new HttpRequestStartLine(startLineContents[0], takeUri(startLineContents[1]),
+                startLineContents[2], takeQueryParams(startLineContents[1]));
     }
 
-    private static String parseUri(final String uriAndQueryParams, final Map<String, String> queryParams) {
+    private static String takeUri(final String uriAndQueryParams) {
         if (!uriAndQueryParams.contains(QUERY_STRING_PREFIX)) {
             return uriAndQueryParams;
         }
         final int indexOfQueryStringPrefix = uriAndQueryParams.indexOf(QUERY_STRING_PREFIX);
 
-        saveQueryParams(uriAndQueryParams.substring(indexOfQueryStringPrefix + 1), queryParams);
         return uriAndQueryParams.substring(0, indexOfQueryStringPrefix);
     }
 
-    private static void saveQueryParams(final String queryParamString, final Map<String, String> queryParams) {
-        final String[] keyAndValues = queryParamString.split("&");
+    private static Map<String, String> takeQueryParams(final String uriAndQueryParams) {
+        final Map<String, String> queryParams = new HashMap<>();
+
+        if (!uriAndQueryParams.contains(QUERY_STRING_PREFIX)) {
+            return queryParams;
+        }
+
+        final int indexOfQueryStringPrefix = uriAndQueryParams.indexOf(QUERY_STRING_PREFIX);
+
+        return parseQueryParams(uriAndQueryParams.substring(indexOfQueryStringPrefix + 1));
+    }
+
+    private static Map<String, String> parseQueryParams(final String queryParams) {
+        final Map<String, String> result = new HashMap<>();
+        final String[] keyAndValues = queryParams.split("&");
 
         for (final String keyValue : keyAndValues) {
             final String[] keyAndValue = keyValue.split("=");
-            queryParams.put(keyAndValue[0], keyAndValue[1]);
+            result.put(keyAndValue[0], keyAndValue[1]);
         }
+        return result;
     }
+
 
     public String getUri() {
         return uri;

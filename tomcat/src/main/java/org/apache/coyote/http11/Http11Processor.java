@@ -1,10 +1,8 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -41,15 +39,15 @@ public class Http11Processor implements Runnable, Processor {
 
             outputStream.write(httpResponse.toString().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
 
     private void doService(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         try {
-            final var mappedController = RequestMapper.mapToController(httpRequest);
-            mappedController.service(httpRequest, httpResponse);
+            final var controller = RequestMapping.getController(httpRequest);
+            controller.service(httpRequest, httpResponse);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             httpResponse.sendError(HttpStatus.INTERNAL_SERVER_ERROR);

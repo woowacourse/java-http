@@ -5,22 +5,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import nextstep.jwp.Controller;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.Header;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.request.Method;
 import org.apache.coyote.http11.model.response.HttpResponse;
-import org.apache.coyote.http11.model.response.Resource;
-import org.apache.coyote.http11.model.response.Status;
-import org.apache.coyote.http11.utils.ResourceMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,15 +40,6 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpRequest request = readHttpRequest(reader);
             HttpResponse response = Controller.process(request);
-
-            if (response.hasLocation()) {
-                String location = response.getHeaderValue(Header.LOCATION);
-                response.addResource(findResource(location));
-            } else if (response.getStatus() == Status.UNAUTHORIZED) {
-                response.addResource(findResource("/401.html"));
-            } else {
-                response.addResource(findResource(request.getUrl()));
-            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -89,15 +73,5 @@ public class Http11Processor implements Runnable, Processor {
             headerLines.add(line);
         }
         return headerLines;
-    }
-
-    private Resource findResource(final String url) throws IOException {
-        String fileName = ResourceMatcher.matchName(url);
-        Path path = Path.of(Objects.requireNonNull(this.getClass().getResource("/static" + fileName)).getPath());
-        String body = Files.readString(path);
-
-        ContentType contentType = ContentType.findByExtension(url);
-
-        return new Resource(body, contentType);
     }
 }

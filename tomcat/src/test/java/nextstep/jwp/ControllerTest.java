@@ -3,6 +3,7 @@ package nextstep.jwp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.io.IOException;
 import java.util.List;
 import org.apache.coyote.http11.model.Header;
 import org.apache.coyote.http11.model.request.HttpRequest;
@@ -15,7 +16,7 @@ class ControllerTest {
 
     @DisplayName("올바른 로그인 요청 시 Status Found 및 Location 반환")
     @Test
-    void loginSuccess() {
+    void loginSuccess() throws IOException {
         final var request = HttpRequest.from(
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
                 List.of("Host: localhost:8080 ",
@@ -32,7 +33,7 @@ class ControllerTest {
 
     @DisplayName("존재하지 않는 유저 로그인 시 Status 401 반환")
     @Test
-    void loginFail_idDoesNotExist_statusUnauthorized() {
+    void loginFail_idDoesNotExist_statusUnauthorized() throws IOException {
         final var invalidRequest = HttpRequest.from(
                 "GET /login?account=brown&password=password HTTP/1.1 ",
                 List.of("Host: localhost:8080 ",
@@ -46,7 +47,7 @@ class ControllerTest {
 
     @DisplayName("틀린 비밀번호로 로그인 시 Status 401 반환")
     @Test
-    void loginFail_passwordNotMatch_statusUnauthorized() {
+    void loginFail_passwordNotMatch_statusUnauthorized() throws IOException {
         final var invalidRequest = HttpRequest.from(
                 "GET /login?account=gugupassword=wrongpassword HTTP/1.1 ",
                 List.of("Host: localhost:8080 ",

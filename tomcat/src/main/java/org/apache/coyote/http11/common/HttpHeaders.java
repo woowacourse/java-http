@@ -29,8 +29,8 @@ public class HttpHeaders {
         return new HttpHeaders(headers);
     }
 
-    public HttpHeaders add(final String key, final String value) {
-        this.value.put(key, value);
+    public HttpHeaders add(final HeaderKeys key, final String value) {
+        this.value.put(key.getName(), value);
         return this;
     }
 

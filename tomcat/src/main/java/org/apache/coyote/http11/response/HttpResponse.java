@@ -47,8 +47,8 @@ public class HttpResponse {
     private static HttpHeaders createHttpHeaders(final String contentType, final String body) {
         int length = body.getBytes().length;
         return HttpHeaders.init()
-            .add(HeaderKeys.CONTENT_TYPE.getName(), contentType + ";charset=utf-8")
-            .add(HeaderKeys.CONTENT_LENGTH.getName(), String.valueOf(length));
+            .add(HeaderKeys.CONTENT_TYPE, contentType + ";charset=utf-8")
+            .add(HeaderKeys.CONTENT_LENGTH, String.valueOf(length));
     }
 
     public String toMessage() {

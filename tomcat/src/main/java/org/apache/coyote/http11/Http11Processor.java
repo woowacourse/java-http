@@ -10,10 +10,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.application.LoginService;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,12 +43,9 @@ public class Http11Processor implements Runnable, Processor {
             final Map<String, String> queryParams = startLine.getQueryParams();
 
             if (queryParams.containsKey("account")) {
-                final Optional<User> foundUser = InMemoryUserRepository.findByAccount(queryParams.get("account"));
-                if (foundUser.isPresent()) {
-                    User user = foundUser.get();
-                    log.info("user = {}", user);
-                }
+                LoginService.checkAccount(queryParams);
             }
+
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",

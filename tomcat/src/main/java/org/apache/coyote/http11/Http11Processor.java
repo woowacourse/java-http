@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -41,11 +43,9 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader inputBufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final String firstLine = inputBufferedReader.readLine();
-            final HttpRequest httpRequest = HttpRequest.from(firstLine);
+            final HttpRequest httpRequest = HttpRequest.from(inputBufferedReader);
             final FilePath filePath = FilePath.from(httpRequest.getUri());
-
-            HttpStatusCode httpStatusCode =  HttpStatusCode.OK;
+            HttpStatusCode httpStatusCode = HttpStatusCode.OK;
             RedirectUrl redirectUrl = null;
             if (httpRequest.getUri().contains("login?")) {
                 redirectUrl = RedirectUrl.from(login(httpRequest));
@@ -61,15 +61,25 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private static String login(HttpRequest httpRequest){
+    private static String login(HttpRequest httpRequest) {
         Optional<User> user = InMemoryUserRepository.findByAccount(
                 httpRequest.getQueryParam().getQueryValue("account"));
-        if(user.isPresent()){
+        if (user.isPresent()) {
             log.info(user.get().toString());
-            if(user.get().checkPassword(httpRequest.getQueryParam().getQueryValue("password"))){
+            if (user.get().checkPassword(httpRequest.getQueryParam().getQueryValue("password"))) {
                 return "/index.html";
             }
         }
         return "/401.html";
+    }
+
+
+    private Map<String, String> getHeaders(BufferedReader inputBufferedReader) throws IOException {
+        Map<String, String> headers = new HashMap<>();
+        while (inputBufferedReader.ready()) {
+            String[] header = inputBufferedReader.readLine().split(": ");
+            headers.put(header[0], header[1]);
+        }
+        return headers;
     }
 }

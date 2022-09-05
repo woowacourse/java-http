@@ -1,5 +1,6 @@
 package org.apache.coyote.web;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.controller.Controller;
@@ -17,7 +18,7 @@ public class RequestMapping {
         handlers.put("/register", new UserCreateController());
     }
 
-    public void handle(HttpRequest httpRequest, SimpleHttpResponse httpResponse) {
+    public void handle(HttpRequest httpRequest, SimpleHttpResponse httpResponse) throws IOException {
         if (handlers.containsKey(httpRequest.getRequestUrl())) {
             Controller controller = handlers.get(httpRequest.getRequestUrl());
             controller.service(httpRequest, httpResponse);

@@ -10,7 +10,6 @@ import org.apache.coyote.support.HttpMethod;
 
 public class HttpRequest {
 
-    private static final String DEFAULT_REQUEST_EXTENSION = "strings";
     private static final String ASSIGN_DELIMITER = "=";
     private static final String SET_COOKIE_DELIMITER = "; ";
 

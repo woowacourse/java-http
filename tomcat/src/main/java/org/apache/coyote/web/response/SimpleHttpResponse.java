@@ -27,7 +27,11 @@ public class SimpleHttpResponse {
         httpHeaders.put(headerName, value);
     }
 
-    public void forward(final String url) {
+    public void forward(final String url) throws IOException {
+        if (url.equals("/")) {
+            forwardDefault();
+            return;
+        }
         String extension = url.substring(url.lastIndexOf(".") + 1);
         ContentType contentType = ContentType.from(extension);
         try {
@@ -38,6 +42,13 @@ public class SimpleHttpResponse {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void forwardDefault() throws IOException {
+        String responseBody = "Hello world!";
+        httpHeaders.setContentType(ContentType.STRINGS);
+        httpHeaders.setContentLength(responseBody.length());
+        httpResponseExchange.response200(httpHeaders, responseBody);
     }
 
     public void redirect(final String url) {

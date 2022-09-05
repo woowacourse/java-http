@@ -28,8 +28,8 @@ class HttpRequestTest {
                 () -> assertThat(actual.getRequestLine().getRequestTarget().getUri()).isEqualTo("/index.html"),
                 () -> assertThat(actual.getRequestLine().getHttpVersion()).isEqualTo(HttpVersion.HTTP_1_1),
                 () -> assertThat(actual.getHeaders().getValue()).containsAllEntriesOf(Map.of(
-                        "Host", "localhost:8080",
-                        "Connection", "keep-alive")),
+                        "Host", "localhost:8080 ",
+                        "Connection", "keep-alive ")),
                 () -> assertThat(actual.getMessageBody().getValue()).isEqualTo("")
         );
     }

@@ -20,8 +20,8 @@ class HeadersTest {
         Headers actual = Headers.from(bufferedReader);
 
         assertThat(actual.getValue()).containsAllEntriesOf(Map.of(
-                "Content-Type", "text/html;charset=utf-8",
-                "Content-Length", "100"));
+                "Content-Type", "text/html;charset=utf-8 ",
+                "Content-Length", "100 "));
     }
 
     @Test

@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Optional;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -49,7 +50,7 @@ public class Http11Processor implements Runnable, Processor {
     private void process(final OutputStream outputStream, final BufferedReader bufferedReader) {
         try {
             final RequestEntity requestEntity = extractRequestInfo(bufferedReader);
-            final Controller controller = controllerMapping.getController(requestEntity.getUri());
+            final Controller controller = controllerMapping.getController(RequestInfo.of(requestEntity));
             flushResponse(outputStream, makeResponse(controller, requestEntity));
         } catch (CustomNotFoundException e) {
             flushResponse(outputStream, makeErrorResponse(HttpStatus.BAD_REQUEST, ErrorView.NOT_FOUND));
@@ -61,10 +62,11 @@ public class Http11Processor implements Runnable, Processor {
     private RequestEntity extractRequestInfo(final BufferedReader bufferedReader) {
         String line;
         while (!(line = readLine(bufferedReader)).isBlank()) {
-            if (HttpMethod.isStartWith(line)) {
+            final Optional<HttpMethod> httpMethod = HttpMethod.find(line);
+            if (httpMethod.isPresent()) {
                 final String uri = getUri(line);
                 final String queryString = getQueryString(line);
-                return new RequestEntity(uri, queryString);
+                return new RequestEntity(httpMethod.get(), uri, queryString);
             }
         }
         throw new CustomNotFoundException("요청을 찾을 수 없습니다.");

@@ -1,24 +1,20 @@
 package org.apache.http;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HttpMethodTest {
 
-    @Test
-    void 문자열이_HttpMethod로_시작한다면_true를_반환한다() {
+    @ParameterizedTest
+    @CsvSource(value = {"GET /index.html,true", "NO /index.html,false"})
+    void 문자열이_HttpMethod로_시작한다면_해당_HttpMethod를_반환한다(final String line, final boolean expected) {
         // given
-        final boolean result = HttpMethod.isStartWith("GET /index.html");
+        final Optional<HttpMethod> httpMethod = HttpMethod.find(line);
         // when, then
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    void 문자열이_HttpMethod로_시작하지_않는다면_false를_반환한다() {
-        // given
-        final boolean result = HttpMethod.isStartWith("CORINNE /index.html");
-        // when, then
-        assertThat(result).isFalse();
+        assertThat(httpMethod.isPresent()).isEqualTo(expected);
     }
 }

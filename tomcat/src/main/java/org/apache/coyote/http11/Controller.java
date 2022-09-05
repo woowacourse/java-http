@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.HttpMethod.GET;
-import static org.apache.coyote.http11.HttpMethod.POST;
+import static org.apache.coyote.http11.request.HttpMethod.GET;
+import static org.apache.coyote.http11.request.HttpMethod.POST;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -11,6 +11,7 @@ import nextstep.jwp.exception.AuthenticationException;
 import nextstep.jwp.exception.ResourceNotFoundException;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.request.HttpMethod;
 import org.apache.coyote.http11.request.Path;
 import org.apache.coyote.http11.request.QueryParameters;
 import org.apache.coyote.http11.request.Request;

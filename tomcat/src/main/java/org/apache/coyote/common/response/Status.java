@@ -4,8 +4,7 @@ public enum Status {
 
     OK("200 OK"),
     FOUND("302 FOUND"),
-    UNAUTHORIZED("401 UNAUTHORIZED")
-    ;
+    UNAUTHORIZED("401 UNAUTHORIZED");
 
     private final String value;
 

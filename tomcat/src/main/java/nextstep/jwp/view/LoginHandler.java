@@ -10,7 +10,6 @@ import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.MediaType;
 import org.apache.coyote.common.request.Request;
 import org.apache.coyote.common.response.Response;
-import org.apache.coyote.common.response.Response.ResponseBuilder;
 import org.apache.coyote.common.response.Status;
 import org.utils.ResourceGenerator;
 

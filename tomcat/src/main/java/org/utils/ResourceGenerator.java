@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import org.apache.coyote.common.request.parser.RequestLineParser;
-import org.apache.coyote.http11.StaticResourceHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +24,7 @@ public class ResourceGenerator {
                 throw new IllegalArgumentException(CANNOT_FIND_STATIC_RESOURCE);
             }
             return new String(Files.readAllBytes(new File(url.getFile()).toPath()));
-        } catch (IOException | NullPointerException e ) {
+        } catch (IOException | NullPointerException e) {
             log.error(e.getMessage(), e);
         }
         return "";

@@ -6,7 +6,8 @@ import java.util.function.Function;
 
 public class PlainTextBodyParser implements Function<String, Map<String, String>> {
 
-    PlainTextBodyParser() {}
+    PlainTextBodyParser() {
+    }
 
     @Override
     public Map<String, String> apply(final String plainText) {

@@ -6,8 +6,7 @@ public enum FileExtension {
 
     HTML(".html"),
     CSS(".css"),
-    NONE("");
-    ;
+    NONE("");;
 
     private final String value;
 

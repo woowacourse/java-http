@@ -5,8 +5,7 @@ import java.util.Arrays;
 public enum RequestMethod {
 
     GET("GET"),
-    POST("POST")
-    ;
+    POST("POST");
 
     private final String value;
 

@@ -5,8 +5,7 @@ import java.util.Arrays;
 public enum HttpVersion {
 
     HTTP11("HTTP/1.1"),
-    HTTP10("HTTP/1.0")
-    ;
+    HTTP10("HTTP/1.0");
 
     private final String value;
 

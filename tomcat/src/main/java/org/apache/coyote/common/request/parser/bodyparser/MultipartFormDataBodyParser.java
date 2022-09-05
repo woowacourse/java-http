@@ -12,7 +12,8 @@ public class MultipartFormDataBodyParser implements Function<String, Map<String,
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
-    MultipartFormDataBodyParser() {}
+    MultipartFormDataBodyParser() {
+    }
 
     @Override
     public Map<String, String> apply(final String multipartFormData) {

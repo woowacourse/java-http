@@ -4,8 +4,7 @@ public enum Header {
 
     CONTENT_TYPE("Content-Type"),
     CONTENT_LENGTH("Content-Length"),
-    LOCATION("Location")
-    ;
+    LOCATION("Location");
 
     private final String value;
 

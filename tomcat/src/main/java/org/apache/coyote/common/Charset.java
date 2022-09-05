@@ -2,8 +2,7 @@ package org.apache.coyote.common;
 
 public enum Charset {
 
-    UTF8("utf-8")
-    ;
+    UTF8("utf-8");
 
     private final String value;
 

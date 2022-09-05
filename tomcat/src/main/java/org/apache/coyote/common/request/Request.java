@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.print.attribute.standard.Media;
 import org.apache.coyote.common.Header;
 import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.MediaType;

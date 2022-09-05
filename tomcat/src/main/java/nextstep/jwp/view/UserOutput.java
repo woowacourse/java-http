@@ -12,7 +12,7 @@ public class UserOutput {
 
     public static void outputUserInformation(final Request request) {
         final String userAccount = request.getQueryStringValue("account")
-                        .orElse("");
+                .orElse("");
         InMemoryUserRepository.findByAccount(userAccount)
                 .ifPresent(user -> log.info(user.toString()));
     }

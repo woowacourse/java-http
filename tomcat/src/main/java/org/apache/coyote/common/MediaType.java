@@ -7,8 +7,7 @@ public enum MediaType {
     TEXT_PLAIN("text/plain", FileExtension.NONE),
     TEXT_HTML("text/html", FileExtension.HTML),
     TEXT_CSS("text/css", FileExtension.CSS),
-    MULTIPART_FORM_DATA("application/x-www-form-urlencoded", FileExtension.NONE)
-    ;
+    MULTIPART_FORM_DATA("application/x-www-form-urlencoded", FileExtension.NONE);
 
     private final String value;
     private final FileExtension fileExtension;

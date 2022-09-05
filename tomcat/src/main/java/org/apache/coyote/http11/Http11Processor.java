@@ -17,7 +17,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
-import org.apache.coyote.http11.support.FileReader;
+import org.apache.coyote.util.FileReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String getStaticResourceResponse(String resourcePath) {
-        return new FileReader().readStaticFile(resourcePath);
+        return FileReader.readStaticFile(resourcePath, this.getClass());
     }
 
     private HttpResponse getDynamicResourceResponse(HttpRequest httpRequest) {

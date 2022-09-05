@@ -1,9 +1,9 @@
 package nextstep.jwp.controller;
 
-import nextstep.jwp.http.RequestEntity;
-import nextstep.jwp.http.ResponseEntity;
+import nextstep.jwp.http.Request;
+import nextstep.jwp.http.Response;
 
 public interface Controller {
 
-    ResponseEntity execute(RequestEntity requestEntity);
+    Response execute(Request request);
 }

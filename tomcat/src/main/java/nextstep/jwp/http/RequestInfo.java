@@ -8,14 +8,28 @@ public class RequestInfo {
 
     private final HttpMethod httpMethod;
     private final String uri;
+    private final String queryString;
 
     public RequestInfo(final HttpMethod httpMethod, final String uri) {
-        this.httpMethod = httpMethod;
-        this.uri = uri;
+        this(httpMethod, uri, null);
     }
 
-    public static RequestInfo of(final RequestEntity requestEntity) {
-        return new RequestInfo(requestEntity.getHttpMethod(), requestEntity.getUri());
+    public RequestInfo(final HttpMethod httpMethod, final String uri, final String queryString) {
+        this.httpMethod = httpMethod;
+        this.uri = uri;
+        this.queryString = queryString;
+    }
+
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
+    }
+
+    public String getUri() {
+        return this.uri;
+    }
+
+    public String getQueryString() {
+        return queryString;
     }
 
     @Override
@@ -29,13 +43,5 @@ public class RequestInfo {
     @Override
     public int hashCode() {
         return Objects.hash(httpMethod, uri);
-    }
-
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
-    }
-
-    public String getUri() {
-        return this.uri;
     }
 }

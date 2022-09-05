@@ -1,22 +1,33 @@
 package org.apache.coyote.http11.model.request;
 
-import static org.apache.coyote.http11.model.StringFormat.CRLF;
-
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.coyote.http11.model.Header;
+import org.apache.coyote.http11.model.Headers;
 
 public class HttpRequest {
 
     private static final int START_LINE_INDEX = 0;
 
     private final RequestLine startLine;
+    private final Headers headers;
+    private String body = "";
 
-    private HttpRequest(final String requestLine) {
-        this.startLine = new RequestLine(requestLine);
+    private HttpRequest(final RequestLine requestLine, final Headers headers) {
+        this.startLine = requestLine;
+        this.headers = headers;
     }
 
-    public static HttpRequest from(final String request) {
-        String[] lines = request.split(CRLF);
-        return new HttpRequest(lines[START_LINE_INDEX]);
+    public static HttpRequest from(final String requestLine, final List<String> headerLines) {
+        List<Header> headers = headerLines.stream()
+                .map(Header::of)
+                .collect(Collectors.toList());
+        return new HttpRequest(new RequestLine(requestLine), new Headers(headers));
+    }
+
+    public Method getMethod() {
+        return startLine.getMethod();
     }
 
     public String getUrl() {
@@ -25,5 +36,13 @@ public class HttpRequest {
 
     public Map<String, String> getQueryParams() {
         return startLine.getQueryParams();
+    }
+
+    public String getHeaderValue(final String key) {
+        return this.headers.getValue(key);
+    }
+
+    public void addBody(final String body) {
+        this.body = body;
     }
 }

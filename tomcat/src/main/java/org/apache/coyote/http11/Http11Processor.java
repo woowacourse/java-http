@@ -7,12 +7,15 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import nextstep.jwp.Controller;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.request.HttpRequest;
+import org.apache.coyote.http11.model.request.Method;
 import org.apache.coyote.http11.model.response.HttpResponse;
 import org.apache.coyote.http11.model.response.Resource;
 import org.apache.coyote.http11.model.response.Status;
@@ -41,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-            HttpRequest request = HttpRequest.from(reader.readLine());
+            HttpRequest request = readHttpRequest(reader);
             HttpResponse response = Controller.process(request);
 
             String location = response.getHeaderValue("Location");
@@ -58,6 +61,33 @@ public class Http11Processor implements Runnable, Processor {
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest readHttpRequest(final BufferedReader reader) throws IOException {
+        String requestLine = reader.readLine();
+        List<String> headerLines = readHeaders(reader);
+        HttpRequest request = HttpRequest.from(requestLine, headerLines);
+
+        if (request.getMethod() == Method.POST) {
+            int contentLength = Integer.parseInt(request.getHeaderValue("Content-Length"));
+            char[] buffer = new char[contentLength];
+            reader.read(buffer, 0, contentLength);
+            String requestBody = new String(buffer);
+            request.addBody(requestBody);
+        }
+        return request;
+    }
+
+    private List<String> readHeaders(final BufferedReader reader) throws IOException {
+        List<String> headerLines = new ArrayList<>();
+        while (true) {
+            String line = reader.readLine();
+            if (line.isEmpty()) {
+                break;
+            }
+            headerLines.add(line);
+        }
+        return headerLines;
     }
 
     private Resource findResource(final String url) throws IOException {

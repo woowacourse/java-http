@@ -3,6 +3,7 @@ package nextstep.jwp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.List;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.response.HttpResponse;
 import org.apache.coyote.http11.model.response.Status;
@@ -15,12 +16,9 @@ class ControllerTest {
     @Test
     void loginSuccess() {
         final var request = HttpRequest.from(
-                String.join("\r\n",
-                        "GET /login?account=gugu&password=password HTTP/1.1 ",
-                        "Host: localhost:8080 ",
-                        "Connection: keep-alive ",
-                        "",
-                        "")
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                List.of("Host: localhost:8080 ",
+                        "Connection: keep-alive ")
         );
 
         HttpResponse response = Controller.process(request);
@@ -35,12 +33,9 @@ class ControllerTest {
     @Test
     void loginFail_idDoesNotExist_statusUnauthorized() {
         final var invalidRequest = HttpRequest.from(
-                String.join("\r\n",
-                        "GET /login?account=brown&password=password HTTP/1.1 ",
-                        "Host: localhost:8080 ",
-                        "Connection: keep-alive ",
-                        "",
-                        "")
+                "GET /login?account=brown&password=password HTTP/1.1 ",
+                List.of("Host: localhost:8080 ",
+                        "Connection: keep-alive ")
         );
 
         HttpResponse response = Controller.process(invalidRequest);
@@ -52,12 +47,9 @@ class ControllerTest {
     @Test
     void loginFail_passwordNotMatch_statusUnauthorized() {
         final var invalidRequest = HttpRequest.from(
-                String.join("\r\n",
-                        "GET /login?account=gugupassword=wrongpassword HTTP/1.1 ",
-                        "Host: localhost:8080 ",
-                        "Connection: keep-alive ",
-                        "",
-                        "")
+                "GET /login?account=gugupassword=wrongpassword HTTP/1.1 ",
+                List.of("Host: localhost:8080 ",
+                        "Connection: keep-alive ")
         );
 
         HttpResponse response = Controller.process(invalidRequest);

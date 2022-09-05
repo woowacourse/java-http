@@ -1,6 +1,9 @@
-package org.apache.coyote.model;
+package org.apache.coyote.model.request;
 
 import org.apache.coyote.exception.InvalidRequestFormat;
+import org.apache.coyote.model.Content;
+import org.apache.coyote.model.HttpMethod;
+import org.apache.coyote.model.HttpParam;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,7 +15,7 @@ import static org.apache.coyote.utils.RequestUtil.getParam;
 
 public class HttpRequest {
 
-    public static final int REQUEST_SIZE_DEADLINE = 3;
+    private static final int REQUEST_SIZE_DEADLINE = 3;
     private final String uri;
     private final String path;
     private final HttpParam params;

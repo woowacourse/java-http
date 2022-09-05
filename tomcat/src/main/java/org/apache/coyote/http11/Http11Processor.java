@@ -3,9 +3,10 @@ package org.apache.coyote.http11;
 import nextstep.jwp.db.InMemoryUserRepository;
 import org.apache.coyote.exception.UncheckedServletException;
 import org.apache.coyote.model.HttpParam;
-import org.apache.coyote.model.HttpRequest;
+import org.apache.coyote.model.request.HttpRequest;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.model.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,7 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.Optional;
 
+import static org.apache.coyote.model.response.HttpResponse.createResponse;
 import static org.apache.coyote.utils.RequestUtil.getResponseBody;
 
 public class Http11Processor implements Runnable, Processor {
@@ -42,12 +44,7 @@ public class Http11Processor implements Runnable, Processor {
             logParams(httpRequest);
 
             final var responseBody = getResponseBody(httpRequest.getPath(), this.getClass());
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + httpRequest.getContentType() + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final var response = createResponse(httpRequest, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

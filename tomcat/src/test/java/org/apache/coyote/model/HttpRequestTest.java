@@ -1,8 +1,7 @@
 package org.apache.coyote.model;
 
 import org.apache.coyote.exception.InvalidRequestFormat;
-import org.apache.coyote.model.HttpMethod;
-import org.apache.coyote.model.HttpRequest;
+import org.apache.coyote.model.request.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

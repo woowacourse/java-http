@@ -15,6 +15,7 @@ import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.request.Request;
 import org.apache.coyote.http11.model.response.Resource;
 import org.apache.coyote.http11.model.response.Response;
+import org.apache.coyote.http11.model.response.Status;
 import org.apache.coyote.http11.utils.ResourceMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +47,8 @@ public class Http11Processor implements Runnable, Processor {
             String location = response.getHeaderValue("Location");
             if (!location.equals("")) {
                 response.addResource(findResource(location));
+            } else if (response.getStatus() == Status.UNAUTHORIZED) {
+                response.addResource(findResource("/401.html"));
             } else {
                 response.addResource(findResource(request.getUrl()));
             }

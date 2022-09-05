@@ -67,4 +67,8 @@ public class Response {
     private void setContentLength() {
         this.addHeader(KEY_CONTENT_LENGTH, String.valueOf(resource.getContentLength()));
     }
+
+    public Status getStatus() {
+        return status;
+    }
 }

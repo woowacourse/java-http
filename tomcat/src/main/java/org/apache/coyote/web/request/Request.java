@@ -76,7 +76,7 @@ public class Request {
     }
 
     public Optional<String> getSession() {
-        String cookie = httpHeaders.getValueOrDefault(HttpHeader.COOKIE.getValue(), "");
+        String cookie = httpHeaders.getCookie();
         return Arrays.stream(cookie.split(SET_COOKIE_DELIMITER))
                 .filter(value -> value.contains(JSESSIONID))
                 .map(session -> session.split(ASSIGN_DELIMITER)[1])

@@ -35,7 +35,7 @@ public class RequestParser {
 
     private static char[] parseBody(final BufferedReader bufferedReader, final HttpHeaders httpHeaders)
             throws IOException {
-        int contentLength = Integer.parseInt(httpHeaders.getValueOrDefault(HttpHeader.CONTENT_LENGTH.getValue(), "0"));
+        int contentLength = Integer.parseInt(httpHeaders.getContentLength());
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);
         return buffer;

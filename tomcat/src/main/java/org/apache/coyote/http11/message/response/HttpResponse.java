@@ -96,6 +96,5 @@ public class HttpResponse {
                 throw new DuplicateHeaderException();
             }
         }
-
     }
 }

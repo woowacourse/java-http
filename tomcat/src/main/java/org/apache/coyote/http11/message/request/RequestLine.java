@@ -34,8 +34,4 @@ public class RequestLine {
 
         return new RequestLine(method, uri, version);
     }
-
-    public boolean hasQuery() {
-        return uri.hasQuery();
-    }
 }

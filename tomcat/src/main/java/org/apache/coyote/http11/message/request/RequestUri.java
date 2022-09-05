@@ -36,10 +36,6 @@ public class RequestUri {
         return path.substring(lastDotIndex + 1);
     }
 
-    public boolean hasExtension() {
-        return !getExtension().isBlank();
-    }
-
     public boolean hasQuery() {
         String query = uri.getQuery();
         return !(Objects.isNull(query) || query.isBlank());

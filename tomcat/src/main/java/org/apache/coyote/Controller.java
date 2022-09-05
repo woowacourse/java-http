@@ -1,10 +1,10 @@
 package org.apache.coyote;
 
-import java.util.Map;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public interface Controller {
     boolean isProcessable(HttpRequest request);
 
-    String process(Map<String, String> params);
+    void service(HttpRequest request, HttpResponse response);
 }

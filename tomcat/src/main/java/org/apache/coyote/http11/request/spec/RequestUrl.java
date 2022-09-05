@@ -47,4 +47,8 @@ public class RequestUrl {
     public boolean isPathEqualTo(String path) {
         return this.path.equals(path);
     }
+
+    public boolean isStaticResourcePath() {
+        return this.path.contains(".");
+    }
 }

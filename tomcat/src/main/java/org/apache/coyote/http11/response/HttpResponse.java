@@ -7,15 +7,20 @@ public class HttpResponse {
 
     private static final String DEFAULT_HTTP_VERSION = "HTTP/1.1";
     private static final String DEFAULT_CHARSET = "charset=utf-8";
+    private static final MimeType DEFAULT_MIME_TYPE = MimeType.HTML;
 
-    private final HttpStatus httpStatus;
-    private final MimeType mimeType;
-    private final String body;
+    private HttpStatus httpStatus;
+    private MimeType mimeType;
+    private String body;
 
     public HttpResponse(HttpStatus httpStatus, MimeType mimeType, String body) {
         this.httpStatus = httpStatus;
         this.mimeType = mimeType;
         this.body = body;
+    }
+
+    public HttpResponse() {
+        this(null, DEFAULT_MIME_TYPE, "");
     }
 
     public byte[] getBytes() {
@@ -37,5 +42,17 @@ public class HttpResponse {
         int contentLength = body.getBytes().length;
         return String.format("Content-Type: %s;%s\r\nContent-Length: %d", contentType, DEFAULT_CHARSET,
                 contentLength);
+    }
+
+    public void setHttpStatus(HttpStatus httpStatus) {
+        this.httpStatus = httpStatus;
+    }
+
+    public void setMimeType(MimeType mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
     }
 }

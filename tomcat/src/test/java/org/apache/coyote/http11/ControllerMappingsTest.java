@@ -3,11 +3,11 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import java.util.Map;
 import org.apache.coyote.Controller;
 import org.apache.coyote.ControllerMappings;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.spec.StartLine;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -16,12 +16,11 @@ class ControllerMappingsTest {
     private final Controller stubController = new Controller() {
         @Override
         public boolean isProcessable(HttpRequest request) {
-            return request.isPathEqualTo("/test") && request.isGet();
+            return request.isPathEqualTo("/test");
         }
 
         @Override
-        public String process(Map<String, String> params) {
-            return null;
+        public void service(HttpRequest request, HttpResponse response) {
         }
     };
 

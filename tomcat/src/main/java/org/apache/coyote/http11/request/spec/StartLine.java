@@ -62,4 +62,12 @@ public class StartLine {
     public boolean isGet() {
         return this.method.equals(HttpMethod.GET);
     }
+
+    public boolean isPost() {
+        return this.method.equals(HttpMethod.POST);
+    }
+
+    public boolean isStaticResourcePath() {
+        return requestUrl.isStaticResourcePath();
+    }
 }

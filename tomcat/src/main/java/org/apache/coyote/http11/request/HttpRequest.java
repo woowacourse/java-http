@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.Map;
 import org.apache.coyote.http11.request.spec.HttpHeaders;
+import org.apache.coyote.http11.request.spec.HttpMethod;
 import org.apache.coyote.http11.request.spec.StartLine;
 
 public class HttpRequest {
@@ -30,7 +31,11 @@ public class HttpRequest {
         return startLine.isPathEqualTo(path);
     }
 
-    public boolean isGet() {
-        return startLine.isGet();
+    public HttpMethod getMethod() {
+        return startLine.getMethod();
+    }
+
+    public boolean isStaticResourcePath() {
+        return startLine.isStaticResourcePath();
     }
 }

@@ -3,6 +3,7 @@ package org.apache.coyote.servlet.response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
+import org.apache.coyote.servlet.cookie.HttpCookie;
 import org.apache.coyote.servlet.cookie.HttpCookies;
 import org.apache.coyote.support.HttpStatus;
 
@@ -24,6 +25,10 @@ public class HttpResponse {
         this.cookies = cookies;
         this.contentType = contentType;
         this.messageBody = messageBody;
+    }
+
+    public void addSetCookieHeader(String name, HttpCookie value) {
+        cookies.setCookie(name, value);
     }
 
     public String toMessage() {

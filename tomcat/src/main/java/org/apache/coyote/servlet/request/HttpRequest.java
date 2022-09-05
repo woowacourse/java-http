@@ -1,6 +1,5 @@
 package org.apache.coyote.servlet.request;
 
-import java.util.Optional;
 import org.apache.coyote.servlet.cookie.HttpCookie;
 import org.apache.coyote.servlet.session.Session;
 import org.apache.coyote.support.HttpMethod;
@@ -10,17 +9,12 @@ public class HttpRequest {
     private final StartLine startLine;
     private final RequestHeaders headers;
     private final String body;
-    private final Session session;
+    private Session session = null;
 
-    public HttpRequest(StartLine startLine, RequestHeaders headers, String body, Session session) {
+    public HttpRequest(StartLine startLine, RequestHeaders headers, String body) {
         this.startLine = startLine;
         this.headers = headers;
         this.body = body;
-        this.session = session;
-    }
-
-    public boolean isMethodOf(HttpMethod method) {
-        return startLine.hasMethodOf(method);
     }
 
     public String getUri() {
@@ -38,16 +32,16 @@ public class HttpRequest {
         return startLine.getParameters();
     }
 
-    public Optional<HttpCookie> findCookie(String name) {
+    public HttpCookie findCookie(String name) {
         final var cookies = headers.getCookies();
-        final var cookie = cookies.getCookie(name);
-        if (cookie == null) {
-            return Optional.empty();
-        }
-        return Optional.of(cookie);
+        return cookies.getCookie(name);
     }
 
     public Session getSession() {
         return session;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
     }
 }

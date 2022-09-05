@@ -3,7 +3,6 @@ package nextstep.jwp.controller;
 import nextstep.jwp.controller.dto.DtoAssembler;
 import nextstep.jwp.service.UserService;
 import nextstep.jwp.servlet.handler.RequestMapping;
-import org.apache.coyote.servlet.cookie.HttpCookie;
 import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.response.ResponseEntity;
 import org.apache.coyote.servlet.session.Session;
@@ -31,9 +30,7 @@ public class AuthController {
         final var user = userService.login(DtoAssembler.ofLoginDto(request));
         final var session = request.getSession();
         session.setAttribute(Session.USER_ATTRIBUTE, user);
-        return ResponseEntity.redirect("/index.html")
-                .setCookie(HttpCookie.ofSession(session))
-                .build();
+        return ResponseEntity.redirect("/index.html").build();
     }
 
     @RequestMapping(method = HttpMethod.GET, path = "/register")

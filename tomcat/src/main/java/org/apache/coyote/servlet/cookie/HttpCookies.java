@@ -27,6 +27,10 @@ public class HttpCookies {
         return values.get(name);
     }
 
+    public void setCookie(String name, HttpCookie value) {
+        values.put(name, value);
+    }
+
     public boolean containsCookies() {
         return !values.isEmpty();
     }

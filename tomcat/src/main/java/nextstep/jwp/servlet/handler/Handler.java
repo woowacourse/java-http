@@ -3,9 +3,12 @@ package nextstep.jwp.servlet.handler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.apache.coyote.support.HttpException;
-import org.apache.coyote.support.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Handler {
+
+    private static final Logger log = LoggerFactory.getLogger(Handler.class);
 
     private final Method method;
     private final Object controller;
@@ -23,6 +26,7 @@ public class Handler {
         try {
             return handleWithValidArgs(arg);
         } catch (InvocationTargetException | IllegalAccessException e) {
+            log.error("handler failed", e);
             throw extractHandlerExceptionCause(e);
         }
     }

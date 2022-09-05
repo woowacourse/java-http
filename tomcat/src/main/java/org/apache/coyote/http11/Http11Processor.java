@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.servlet.Servlet;
+import org.apache.coyote.servlet.cookie.HttpCookie;
 import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.request.RequestHeaders;
 import org.apache.coyote.servlet.request.StartLine;
@@ -45,9 +46,14 @@ public class Http11Processor implements Runnable, Processor {
              final var reader = new BufferedReader(streamReader);
              final var outputStream = connection.getOutputStream()) {
 
-            HttpRequest request = toRequest(reader);
-            HttpResponse response = servlet.service(request);
-
+            final var request = toRequest(reader);
+            HttpResponse response;
+            boolean isExistingSession = hasValidSessionCookie(request);
+            setValidSession(request, isExistingSession);
+            response = servlet.service(request);
+            if (!isExistingSession) {
+                response.addSetCookieHeader(Session.JSESSIONID, HttpCookie.ofSession(request.getSession()));
+            }
             outputStream.write(response.toMessage().getBytes());
             outputStream.flush();
         } catch (IOException | HttpException e) {
@@ -59,7 +65,7 @@ public class Http11Processor implements Runnable, Processor {
         final var startLine = StartLine.of(reader.readLine());
         final var headers = readHeaders(reader);
         final var body = readBody(reader, headers);
-        return new HttpRequest(startLine, headers, body, getCurrentSession(headers));
+        return new HttpRequest(startLine, headers, body);
     }
 
     private RequestHeaders readHeaders(BufferedReader reader) throws IOException {
@@ -81,13 +87,19 @@ public class Http11Processor implements Runnable, Processor {
         return new String(buffer);
     }
 
-    private Session getCurrentSession(RequestHeaders headers) {
-        final var sessionCookie = headers.getSessionCookie();
-        if (!sessionRepository.isValidSessionCookie(sessionCookie)) {
+    private boolean hasValidSessionCookie(HttpRequest request) {
+        final var sessionCookie = request.findCookie(Session.JSESSIONID);
+        return sessionRepository.isValidSessionCookie(sessionCookie);
+    }
+
+    private void setValidSession(HttpRequest request, boolean isExistingSession) {
+        if (isExistingSession) {
+            final var sessionCookie = request.findCookie(Session.JSESSIONID);
+            request.setSession(sessionRepository.findSession(sessionCookie.getValue()));
+        } else {
             final var session = Session.of();
             sessionRepository.add(session);
-            return session;
+            request.setSession(session);
         }
-        return sessionRepository.findSession(sessionCookie.getValue());
     }
 }

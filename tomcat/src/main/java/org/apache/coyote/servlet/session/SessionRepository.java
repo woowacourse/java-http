@@ -22,9 +22,6 @@ public class SessionRepository {
         }
         final var sessionId = sessionCookie.getValue();
         final var savedSession = SESSIONS.get(sessionId);
-        if (savedSession == null) {
-            return false;
-        }
-        return !savedSession.isExpired();
+        return savedSession != null;
     }
 }

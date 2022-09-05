@@ -11,11 +11,12 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +56,7 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
-            HttpRequest httpRequest = HttpRequest.of(bufferedReader);
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
 
             HttpResponse httpResponse = execute(httpRequest);
 
@@ -90,12 +91,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse login(HttpRequest httpRequest) {
-        Map<String, String> requestBody = httpRequest.getRequestBody();
+        RequestBody requestBody = httpRequest.getRequestBody();
         Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.get("account"));
 
         if (user.isPresent()) {
             User loginUser = user.get();
-            String password = requestBody.getOrDefault("password", "");
+            String password = requestBody.get("password");
 
             if (loginUser.checkPassword(password)) {
                 UUID uuid = UUID.randomUUID();
@@ -112,7 +113,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse register(HttpRequest httpRequest) {
-        Map<String, String> requestBody = httpRequest.getRequestBody();
+        RequestBody requestBody = httpRequest.getRequestBody();
 
         User user = new User(requestBody.get("account"), requestBody.get("password"), requestBody.get("email"));
         InMemoryUserRepository.save(user);

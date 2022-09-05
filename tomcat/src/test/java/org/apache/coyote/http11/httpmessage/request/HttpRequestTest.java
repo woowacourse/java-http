@@ -44,7 +44,7 @@ class HttpRequestTest {
     }
 
     @Test
-    void 잘못된_요청을_받으면_예외를_던진다() {
+    void 잘못된_요청을_받으면_예외를_던진다() throws IOException {
         //given
         String invalidRequestMessage = "GET /index.html HTTP/1.1" + "Host: localhost:8080" + "Connection: keep-alive";
 
@@ -54,6 +54,9 @@ class HttpRequestTest {
         // when & then
         assertThatThrownBy(() -> HttpRequest.of(bufferedReader))
                 .isInstanceOf(Exception.class);
+
+        inputStream.close();
+        bufferedReader.close();
     }
 
     @Test
@@ -72,6 +75,9 @@ class HttpRequestTest {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         HttpRequest httpRequest = HttpRequest.of(bufferedReader);
+
+        inputStream.close();
+        bufferedReader.close();
 
         // when
         boolean result = httpRequest.matchRequestLine(HttpMethod.GET, Pattern.compile("/index.html"));
@@ -96,6 +102,9 @@ class HttpRequestTest {
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         HttpRequest httpRequest = HttpRequest.of(bufferedReader);
+
+        inputStream.close();
+        bufferedReader.close();
 
         // when
         boolean result = httpRequest.matchRequestLine(HttpMethod.POST, Pattern.compile("/index.html"));

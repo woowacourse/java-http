@@ -10,14 +10,15 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.ContentType;
+import org.apache.coyote.HttpMethod;
 import org.apache.coyote.Processor;
 import org.apache.coyote.QueryParams;
 import org.apache.coyote.exception.InvalidLoginFormatException;
 import org.apache.coyote.exception.InvalidPasswordException;
 import org.apache.coyote.exception.MemberNotFoundException;
 import org.apache.coyote.exception.ResourceNotFoundException;
+import org.apache.coyote.support.HttpRequestParser;
 import org.apache.coyote.support.ResourcesUtil;
-import org.apache.coyote.support.UriParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,8 +50,12 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-            String uri = UriParser.parseUri(bufferedReader);
+            String startLine = bufferedReader.readLine();
+            HttpMethod httpMethod = HttpRequestParser.parseHttpMethod(startLine);
+            String uri = HttpRequestParser.parseUri(startLine);
+
             String response = respond(uri);
+
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -77,14 +82,14 @@ public class Http11Processor implements Runnable, Processor {
         if (uri.equals(LANDING_PAGE_URL)) {
             return toOkResponse(ContentType.TEXT_HTML, DEFAULT_RESPONSE_BODY);
         }
-        String url = UriParser.parseUrl(uri);
-        String queryString = UriParser.parseQueryString(uri);
+        String url = HttpRequestParser.parseUrl(uri);
+        String queryString = HttpRequestParser.parseQueryString(uri);
         url = addExtension(url);
         return accessUrl(url, QueryParams.parseQueryParams(queryString));
     }
 
     private String addExtension(String url) {
-        String extension = UriParser.parseExtension(url);
+        String extension = HttpRequestParser.parseExtension(url);
         if (extension.isBlank()) {
             url = url + DEFAULT_EXTENSION;
         }
@@ -92,7 +97,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String accessUrl(final String url, final QueryParams queryParams) throws IOException {
-        ContentType contentType = UriParser.parseContentType(url);
+        ContentType contentType = HttpRequestParser.parseContentType(url);
         if (url.equals(LOGIN_PATH)) {
             return renderLogin(url, queryParams);
         }

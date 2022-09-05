@@ -1,23 +1,31 @@
 package org.apache.coyote.support;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import org.apache.coyote.ContentType;
+import org.apache.coyote.HttpMethod;
 import org.apache.coyote.exception.InvalidHttpRequestFormatException;
 
-public class UriParser {
+public class HttpRequestParser {
 
+    private static final int HTTP_METHOD_INDEX = 0;
     private static final int URL_INDEX = 1;
     private static final String QUERY_STRING_DELIMITER = "?";
     private static final String EXTENSION_DELIMITER = ".";
     public static final int VALID_START_LINE_SIZE = 3;
     public static final int DELIMITER_NOT_FOUND = -1;
 
-    private UriParser() {
+    private HttpRequestParser() {
     }
 
-    public static String parseUri(final BufferedReader bufferedReader) throws IOException {
-        String[] parsedStartLine = bufferedReader.readLine().split(" ");
+    public static HttpMethod parseHttpMethod(final String line) {
+        String[] parsedStartLine = line.split(" ");
+        if (parsedStartLine.length != VALID_START_LINE_SIZE) {
+            throw new InvalidHttpRequestFormatException();
+        }
+        return HttpMethod.from(parsedStartLine[HTTP_METHOD_INDEX]);
+    }
+
+    public static String parseUri(final String line) {
+        String[] parsedStartLine = line.split(" ");
         if (parsedStartLine.length != VALID_START_LINE_SIZE) {
             throw new InvalidHttpRequestFormatException();
         }

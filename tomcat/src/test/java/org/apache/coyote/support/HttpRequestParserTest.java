@@ -2,38 +2,50 @@ package org.apache.coyote.support;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import org.apache.coyote.HttpMethod;
 import org.apache.coyote.exception.InvalidHttpRequestFormatException;
 import org.junit.jupiter.api.Test;
 
-class UriParserTest {
+class HttpRequestParserTest {
 
     @Test
-    void 스트림의_첫줄을_읽어서_URI로_파싱_테스트() throws IOException {
+    void HTTP_메서드_파싱_테스트() {
         // given
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
-                new ByteArrayInputStream("GET /url HTTP/1.1 ".getBytes())));
+        String line = "GET /url HTTP/1.1";
 
         // when
-        String actual = UriParser.parseUri(bufferedReader);
+        HttpMethod httpMethod = HttpRequestParser.parseHttpMethod(line);
+
+        // then
+        assertThat(httpMethod).isEqualTo(HttpMethod.GET);
+    }
+
+    @Test
+    void URI_파싱_테스트() {
+        // given
+        String line = "GET /url HTTP/1.1 ";
+
+        // when
+        String actual = HttpRequestParser.parseUri(line);
 
         // then
         assertThat(actual).isEqualTo("/url");
     }
 
     @Test
-    void 스트림_첫줄의_형식이_올바르지_않으면_예외를_반환한다() {
+    void 형식이_올바르지_않으면_예외를_반환한다() {
         // given
-        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(
-                new ByteArrayInputStream("invalid".getBytes())));
+        String line = "invalid";
 
         // when, then
-        assertThatThrownBy(() -> UriParser.parseUri(bufferedReader))
-                .isExactlyInstanceOf(InvalidHttpRequestFormatException.class);
+        assertAll(
+                () -> assertThatThrownBy(() -> HttpRequestParser.parseHttpMethod(line))
+                        .isExactlyInstanceOf(InvalidHttpRequestFormatException.class),
+                () -> assertThatThrownBy(() -> HttpRequestParser.parseUri(line))
+                        .isExactlyInstanceOf(InvalidHttpRequestFormatException.class)
+        );
     }
 
     @Test
@@ -42,7 +54,7 @@ class UriParserTest {
         String uri = "/uri?query=a";
 
         // when
-        String url = UriParser.parseUrl(uri);
+        String url = HttpRequestParser.parseUrl(uri);
 
         // then
         assertThat(url).isEqualTo("/uri");
@@ -54,7 +66,7 @@ class UriParserTest {
         String uri = "/uri";
 
         // when
-        String url = UriParser.parseUrl(uri);
+        String url = HttpRequestParser.parseUrl(uri);
 
         // then
         assertThat(url).isEqualTo("/uri");
@@ -66,7 +78,7 @@ class UriParserTest {
         String uri = "/uri?query=a";
 
         // when
-        String queryString = UriParser.parseQueryString(uri);
+        String queryString = HttpRequestParser.parseQueryString(uri);
 
         // then
         assertThat(queryString).isEqualTo("query=a");
@@ -78,7 +90,7 @@ class UriParserTest {
         String uri = "/uri";
 
         // when
-        String queryString = UriParser.parseQueryString(uri);
+        String queryString = HttpRequestParser.parseQueryString(uri);
 
         // then
         assertThat(queryString).isEqualTo("");
@@ -90,7 +102,7 @@ class UriParserTest {
         String fileName = "nextstep.txt";
 
         // when
-        String actual = UriParser.parseExtension(fileName);
+        String actual = HttpRequestParser.parseExtension(fileName);
 
         // then
         assertThat(actual).isEqualTo("txt");
@@ -102,7 +114,7 @@ class UriParserTest {
         String fileName = "no_extension";
 
         // when
-        String actual = UriParser.parseExtension(fileName);
+        String actual = HttpRequestParser.parseExtension(fileName);
 
         // then
         assertThat(actual).isBlank();

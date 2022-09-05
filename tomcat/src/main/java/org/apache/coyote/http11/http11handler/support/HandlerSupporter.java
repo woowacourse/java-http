@@ -3,29 +3,33 @@ package org.apache.coyote.http11.http11handler.support;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
-import org.apache.coyote.ExtensionContentType;
+import javax.swing.text.html.HTML;
+import org.apache.coyote.http11.ExtensionContentType;
+import org.apache.coyote.http11.StatusCode;
+import org.apache.coyote.http11.dto.ResponseComponent;
 
 public class HandlerSupporter {
 
     private static final String DIRECTORY = "static";
+    private static final String HTML_EXTENSION = ".html";
+    private static final String EXTENSION_IDENTIFIER = ".";
 
-    public Map<String, String> extractElements(String uri) {
-        Map<String, String> headerElements = new HashMap<>();
-        headerElements.put("Content-Type", getContentType(uri));
-        headerElements.put("Content-Length", getContentLength(uri));
-        headerElements.put("body", extractBody(uri));
-        return headerElements;
+    public ResponseComponent extractElements(String uri, StatusCode statusCode) {
+        return new ResponseComponent(
+                statusCode,
+                getContentType(uri),
+                getContentLength(uri),
+                extractBody(uri)
+        );
     }
 
     public String addHtmlExtension(String uri) {
-        return uri + ".html";
+        return uri + HTML_EXTENSION;
     }
 
     public boolean noExtension(String uri) {
-        return !uri.contains(".");
+        return !uri.contains(EXTENSION_IDENTIFIER);
     }
 
     private String extractBody(String uri) {
@@ -42,8 +46,8 @@ public class HandlerSupporter {
         return ExtensionContentType.toContentType(extension);
     }
 
-    private String extractExtension(String uri) {
-        int extensionStartIndex = uri.lastIndexOf(".") + 1;
+    public String extractExtension(String uri) {
+        int extensionStartIndex = uri.lastIndexOf(EXTENSION_IDENTIFIER) + 1;
         return uri.substring(extensionStartIndex);
     }
 

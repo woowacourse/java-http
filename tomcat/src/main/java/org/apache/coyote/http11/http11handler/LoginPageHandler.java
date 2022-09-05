@@ -1,15 +1,9 @@
 package org.apache.coyote.http11.http11handler;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.LoginFailedException;
-import nextstep.jwp.model.User;
-import org.apache.coyote.ExtensionContentType;
+import org.apache.coyote.http11.StatusCode;
+import org.apache.coyote.http11.dto.ResponseComponent;
+import org.apache.coyote.http11.http11handler.login.LoginService;
 import org.apache.coyote.http11.http11handler.support.HandlerSupporter;
 import org.apache.coyote.http11.http11handler.support.QueryStringProcessor;
 import org.slf4j.Logger;
@@ -17,10 +11,14 @@ import org.slf4j.Logger;
 public class LoginPageHandler implements Http11Handler {
 
     private static final String URI = "/login";
-    private static final String DIRECTORY = "static";
+    private static final String ACCOUNT_KEY = "account";
+    private static final String PASSWORD_KEY = "password";
+    private static final String REDIRECT_WHEN_LOGIN_SUCCESS = "/index.html";
+    private static final String REDIRECT_WHEN_LOGIN_FAIL = "/401.html";
 
     private QueryStringProcessor queryStringProcessor = new QueryStringProcessor();
     private HandlerSupporter handlerSupporter = new HandlerSupporter();
+    private LoginService loginService = new LoginService();
 
     @Override
     public boolean isProperHandler(String uri) {
@@ -29,45 +27,20 @@ public class LoginPageHandler implements Http11Handler {
     }
 
     @Override
-    public Map<String, String> handle(Logger log, String uri) {
+    public ResponseComponent handle(Logger log, String uri) {
         if (queryStringProcessor.existQueryString(uri)) {
-            checkValidUser(log, queryStringProcessor.extractQueryString(uri));
-            uri = queryStringProcessor.removeQueryString(uri);
+            Map<String, String> queryStrings = queryStringProcessor.extractQueryString(uri);
+            return makeResponseComponentAccordingToLogin(queryStrings);
         }
 
         uri = handlerSupporter.addHtmlExtension(uri);
-        return handlerSupporter.extractElements(uri);
+        return handlerSupporter.extractElements(uri, StatusCode.OK);
     }
 
-    private void checkValidUser(Logger log, Map<String, String> queryString) {
-        User user = InMemoryUserRepository.findByAccount(queryString.get("account")).orElseThrow(
-                LoginFailedException::new);
-        if (user.checkPassword(queryString.get("password"))) {
-            log.info(String.valueOf(user));
+    private ResponseComponent makeResponseComponentAccordingToLogin(Map<String, String> queryStrings) {
+        if (loginService.login(queryStrings.get(ACCOUNT_KEY), queryStrings.get(PASSWORD_KEY))) {
+            return handlerSupporter.extractElements(REDIRECT_WHEN_LOGIN_SUCCESS, StatusCode.FOUND);
         }
-    }
-
-    private String extractBody(String uri) {
-        try {
-            return Files.readString(new File(Objects.requireNonNull(
-                    getClass().getClassLoader().getResource(DIRECTORY + uri)).getFile()).toPath());
-        } catch (IOException e) {
-            throw new RuntimeException();
-        }
-    }
-
-    private String getContentType(String uri) {
-        String extension = extractExtension(uri);
-        return ExtensionContentType.toContentType(extension);
-    }
-
-    private String extractExtension(String uri) {
-        int extensionStartIndex = uri.lastIndexOf(".") + 1;
-        return uri.substring(extensionStartIndex);
-    }
-
-    private String getContentLength(String uri) {
-        return Long.toString(new File(Objects.requireNonNull(
-                getClass().getClassLoader().getResource(DIRECTORY + uri)).getFile()).length());
+        return handlerSupporter.extractElements(REDIRECT_WHEN_LOGIN_FAIL, StatusCode.UNAUTHORIZED);
     }
 }

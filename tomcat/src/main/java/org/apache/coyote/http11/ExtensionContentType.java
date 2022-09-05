@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.coyote.http11;
 
 public enum ExtensionContentType {
     HTML("text/html"),

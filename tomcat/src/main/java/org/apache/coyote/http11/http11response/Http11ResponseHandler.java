@@ -1,17 +1,17 @@
 package org.apache.coyote.http11.http11response;
 
-import java.util.Map;
+import org.apache.coyote.http11.dto.ResponseComponent;
 
 public class Http11ResponseHandler {
 
     private static final String LINE = "\r\n";
 
-    public String makeResponse(Map<String, String> elements) {
+    public String makeResponse(ResponseComponent responseComponent) {
         return String.join(LINE,
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + elements.get("Content-Type") + ";charset=utf-8 ",
-                "Content-Length: " + elements.get("Content-Length") + " ",
+                String.format("HTTP/1.1 %d %s ", responseComponent.getStatusCode().getCode(), responseComponent.getStatusCode()),
+                String.format("Content-Type: %s;charset=utf-8 ", responseComponent.getContentType()),
+                String.format("Content-Length: %s ", responseComponent.getContentLength()),
                 "",
-                elements.get("body"));
+                responseComponent.getBody());
     }
 }

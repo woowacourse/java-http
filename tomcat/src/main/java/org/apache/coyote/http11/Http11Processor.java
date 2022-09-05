@@ -56,21 +56,23 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (request.matches(GET, "/login")) {
-                if (!request.hasQuery()) {
-                    responseLoginHtml(os);
-                    return;
-                }
+                responseLoginHtml(os);
+                return;
+            }
 
-                loginUser(os, requestUri);
+            if (request.matches(POST, "/login")) {
+                loginUser(os, request);
                 return;
             }
 
             if (request.matches(GET, "/register")) {
                 responseRegisterHtml(os);
+                return;
             }
 
             if (request.matches(POST, "/register")) {
                 registerUser(os, request);
+                return;
             }
 
             responseStaticFiles(os, requestUri);
@@ -97,9 +99,11 @@ public class Http11Processor implements Runnable, Processor {
         writeHttpResponse(os, httpResponse);
     }
 
-    private void loginUser(final OutputStream os, final RequestUri requestUri) throws IOException {
-        String account = requestUri.getQuery("account").orElse("");
-        String password = requestUri.getQuery("password").orElse("");
+    private void loginUser(final OutputStream os, final HttpRequest request) throws IOException {
+        QueryString queryString = new QueryString(request.getRequestBody());
+
+        String account = queryString.getQuery("account").orElseThrow(InvalidRequestException::new);
+        String password = queryString.getQuery("password").orElseThrow(InvalidRequestException::new);
 
         boolean loginSuccess = InMemoryUserRepository.findByAccount(account)
                 .filter(user -> user.checkPassword(password))

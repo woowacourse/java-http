@@ -1,12 +1,24 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
+import nextstep.jwp.UserService;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.model.ContentType;
+import org.apache.coyote.http11.model.request.Request;
+import org.apache.coyote.http11.model.response.Resource;
+import org.apache.coyote.http11.model.response.Response;
+import org.apache.coyote.http11.model.response.Status;
+import org.apache.coyote.http11.utils.ResourceMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -26,21 +38,29 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-            final var responseBody = "Hello world!";
+            Request request = Request.from(reader.readLine());
+            UserService.process(request);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            Response response = Response.of(Status.OK);
+            response.addResource(findResource(request.getUrl()));
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private Resource findResource(final String url) throws IOException {
+        String fileName = ResourceMatcher.matchName(url);
+        Path path = Path.of(Objects.requireNonNull(this.getClass().getResource("/static" + fileName)).getPath());
+        String body = Files.readString(path);
+
+        ContentType contentType = ContentType.findByExtension(url);
+
+        return new Resource(body, contentType);
     }
 }

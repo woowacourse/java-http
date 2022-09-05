@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import lombok.ToString;
 
 @ToString
-public class Cookie {
+public class HttpCookie {
 
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final String COOKIE_SEPARATOR = "; ";
@@ -20,24 +20,23 @@ public class Cookie {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
-
     private Map<String, String> cookie;
 
-    private Cookie(final Map<String, String> cookie) {
+    private HttpCookie(final Map<String, String> cookie) {
         this.cookie = cookie;
     }
 
-    public static Cookie of(final String key, final String value) {
+    public static HttpCookie of(final String key, final String value) {
         LinkedHashMap<String, String> cookie = new LinkedHashMap<>(Map.of(key, value));
-        return new Cookie(cookie);
+        return new HttpCookie(cookie);
     }
 
-    public static Cookie sessionId(final String sessionId) {
+    public static HttpCookie sessionId(final String sessionId) {
         LinkedHashMap<String, String> cookie = new LinkedHashMap<>(Map.of(JSESSIONID, sessionId));
-        return new Cookie(cookie);
+        return new HttpCookie(cookie);
     }
 
-    public static Cookie parse(final String header) {
+    public static HttpCookie parse(final String header) {
         Map<String, String> cookie = new LinkedHashMap<>();
 
         for (String singleCookie : header.split(COOKIE_SEPARATOR_REGIX)) {
@@ -45,7 +44,7 @@ public class Cookie {
             cookie.put(splitCookie.get(KEY_INDEX), splitCookie.get(VALUE_INDEX));
         }
 
-        return new Cookie(cookie);
+        return new HttpCookie(cookie);
     }
 
     public String getHeaderValue() {

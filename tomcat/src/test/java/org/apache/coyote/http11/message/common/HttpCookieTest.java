@@ -6,16 +6,16 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class CookieTest {
+class HttpCookieTest {
 
     @DisplayName("Cookie를 헤더의 값으로 생성한다.")
     @Test
     void getHeaderValue() {
         // given
-        Cookie cookie = Cookie.of("JSESSIONID", "656cef62-e3c4-40bc-a8df-94732920ed46");
+        HttpCookie httpCookie = HttpCookie.of("JSESSIONID", "656cef62-e3c4-40bc-a8df-94732920ed46");
 
         // when
-        String actual = cookie.getHeaderValue();
+        String actual = httpCookie.getHeaderValue();
 
         // then
         assertThat(actual).isEqualTo("JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
@@ -26,10 +26,10 @@ class CookieTest {
     void getHeaderValue_withMultipleValue() {
         // given
         String header = "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
-        Cookie cookie = Cookie.parse(header);
+        HttpCookie httpCookie = HttpCookie.parse(header);
 
         // when
-        String actual = cookie.getHeaderValue();
+        String actual = httpCookie.getHeaderValue();
 
         // then
         assertThat(actual).isEqualTo(header);
@@ -42,13 +42,13 @@ class CookieTest {
         String header = "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
 
         // when
-        Cookie cookie = Cookie.parse(header);
+        HttpCookie httpCookie = HttpCookie.parse(header);
 
         // then
         assertAll(() -> {
-            assertThat(cookie.getCookie("yummy_cookie").get()).isEqualTo("choco");
-            assertThat(cookie.getCookie("tasty_cookie").get()).isEqualTo("strawberry");
-            assertThat(cookie.getCookie("JSESSIONID").get()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
+            assertThat(httpCookie.getCookie("yummy_cookie").get()).isEqualTo("choco");
+            assertThat(httpCookie.getCookie("tasty_cookie").get()).isEqualTo("strawberry");
+            assertThat(httpCookie.getCookie("JSESSIONID").get()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
         });
     }
 
@@ -59,8 +59,8 @@ class CookieTest {
         String sessionId = "656cef62-e3c4-40bc-a8df-94732920ed46";
 
         // when
-        Cookie cookie = Cookie.sessionId(sessionId);
-        String actual = cookie.getCookie("JSESSIONID").get();
+        HttpCookie httpCookie = HttpCookie.sessionId(sessionId);
+        String actual = httpCookie.getCookie("JSESSIONID").get();
 
         // then
         assertThat(actual).isEqualTo(sessionId);

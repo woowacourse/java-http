@@ -19,7 +19,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.InvalidRequestException;
-import org.apache.coyote.http11.message.common.Cookie;
+import org.apache.coyote.http11.message.common.HttpCookie;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.QueryString;
@@ -139,7 +139,7 @@ public class Http11Processor implements Runnable, Processor {
         HttpResponse httpResponse = new HttpResponse.Builder()
                 .status(FOUND)
                 .header(LOCATION, "/index.html")
-                .setCookie(Cookie.sessionId(sessionId))
+                .setCookie(HttpCookie.sessionId(sessionId))
                 .build();
 
         writeHttpResponse(os, httpResponse);

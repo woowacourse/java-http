@@ -1,18 +1,17 @@
 package org.apache.coyote.http11.httpmessage.request;
 
-import java.util.List;
 import java.util.Objects;
 
 public class RequestBody {
 
     private final String body;
-
-    private RequestBody(String body) {
+    public RequestBody(String body) {
         this.body = body;
     }
 
-    public static RequestBody of(List<String> body) {
-        return new RequestBody(String.join("\r\n", body));
+
+    public String getBody() {
+        return body;
     }
 
     @Override

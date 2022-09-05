@@ -1,11 +1,14 @@
 package org.apache.coyote.http11.handler.ApiHandler;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.httpmessage.request.HttpMethod;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
+import org.apache.coyote.http11.httpmessage.request.RequestBody;
 import org.apache.coyote.http11.httpmessage.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,8 +26,9 @@ public class LoginApiHandler implements Handler {
 
     @Override
     public ApiHandlerResponse getResponse(HttpRequest httpRequest) {
-        final String account = (String) httpRequest.getParameter("account");
-        final String password = (String) httpRequest.getParameter("password");
+        Map<String, String> parameters = getParameters(httpRequest.getRequestBody());
+        final String account = parameters.get("account");
+        final String password = parameters.get("password");
 
         final User user = findUser(account);
         if (user.checkPassword(password)) {
@@ -33,6 +37,21 @@ public class LoginApiHandler implements Handler {
         }
 
         return new ApiHandlerResponse(HttpStatus.UNAUTHORIZED, "/401.html");
+    }
+
+    private Map<String, String> getParameters(RequestBody requestBody) {
+        String body = requestBody.getBody();
+        String[] params = body.split("&");
+
+        HashMap<String, String> parameters = new HashMap<>();
+        for (String param : params) {
+            int index = param.indexOf("=");
+            String key = param.substring(0, index);
+            String value = param.substring(index + 1);
+
+            parameters.put(key, value);
+        }
+        return parameters;
     }
 
     private User findUser(String account) {

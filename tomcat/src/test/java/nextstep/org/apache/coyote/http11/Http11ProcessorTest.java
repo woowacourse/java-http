@@ -161,13 +161,15 @@ class Http11ProcessorTest {
     @Test
     void 가입된_유저는_로그인을_할_수_있다() throws IOException {
         //given
+        final String body = "account=gugu&password=password";
         final String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/html;q=0.1 ",
                 "Connection: keep-alive",
+                "Content-Length: " + body.getBytes().length,
                 "",
-                "");
+                body);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -177,7 +179,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
         var expected = String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Content-Type: text/html;charset=utf-8 ",
@@ -191,13 +193,15 @@ class Http11ProcessorTest {
     @Test
     void 없는_아이디로_로그인_시_로그인에_실패한다() {
         //given
+        final String body = "account=gogo&password=password";
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gogo&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/html;q=0.1 ",
                 "Connection: keep-alive",
+                "Content-Length: " + body.getBytes().length,
                 "",
-                "");
+                body);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -210,13 +214,15 @@ class Http11ProcessorTest {
     @Test
     void 잘못된_비밀번호로_로그인_시_로그인에_실패한다() throws IOException {
         //given
+        final String body = "account=gugu&password=invalidPassword";
         final String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&password=집가고싶다 HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/html;q=0.1 ",
                 "Connection: keep-alive",
+                "Content-Length: " + body.getBytes().length,
                 "",
-                "");
+                body);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -241,13 +247,15 @@ class Http11ProcessorTest {
     @Test
     void 로그인_요청_시_account를_보내지_않으면_로그인에_실패한다() {
         //given
+        final String body = "id=gugu&password=password";
         final String httpRequest = String.join("\r\n",
-                "POST /login?id=gugu&password=집가고싶다 HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/html;q=0.1 ",
                 "Connection: keep-alive",
+                "Content-Length: " + body.getBytes().length,
                 "",
-                "");
+                body);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -260,15 +268,17 @@ class Http11ProcessorTest {
     @Test
     void 로그인_요청_시_password를_보내지_않으면_401_html을_응답한다() throws IOException {
         //given
-        final String httpRequest = String.join("\r\n",
-                "POST /login?account=gugu&비밀번호=password HTTP/1.1 ",
+        final String body = "account=gugu&password=";
+        final String invalidRequestMessage = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/html;q=0.1 ",
                 "Connection: keep-alive",
+                "Content-Length: " + body.getBytes().length,
                 "",
-                "");
+                body);
 
-        final var socket = new StubSocket(httpRequest);
+        final var socket = new StubSocket(invalidRequestMessage);
         final Http11Processor processor = new Http11Processor(socket);
 
         // when

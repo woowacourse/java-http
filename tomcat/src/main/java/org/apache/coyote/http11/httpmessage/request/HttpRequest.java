@@ -22,7 +22,7 @@ public class HttpRequest {
     public static HttpRequest of(BufferedReader bufferedReader) throws IOException {
         RequestLine requestLine = RequestLine.of(bufferedReader.readLine());
         Headers headers = Headers.of(getHeaders(bufferedReader));
-        RequestBody requestBody = RequestBody.of(getBody(bufferedReader));
+        RequestBody requestBody = new RequestBody(getBody(bufferedReader, headers));
 
         return new HttpRequest(requestLine, headers, requestBody);
     }
@@ -36,20 +36,16 @@ public class HttpRequest {
         return headers;
     }
 
-    private static List<String> getBody(BufferedReader bufferedReader) throws IOException {
-        if (bufferedReader.ready()) {
-            return readBody(bufferedReader);
+    private static String getBody(BufferedReader bufferedReader, Headers headers) throws IOException {
+        String contentLengthValue = headers.getHeader("Content-Length");
+        if (contentLengthValue == null) {
+            return "";
         }
-        return List.of();
-    }
 
-    private static List<String> readBody(BufferedReader bufferedReader) throws IOException {
-        List<String> body = new LinkedList<>();
-        String line;
-        while ((line = bufferedReader.readLine()) != null && !line.isBlank()) {
-            body.add(line);
-        }
-        return body;
+        int contentLength = Integer.parseInt(contentLengthValue);
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        return new String(buffer);
     }
 
     public boolean matchRequestLine(HttpMethod httpMethod, Pattern uriPattern) {
@@ -62,6 +58,10 @@ public class HttpRequest {
 
     public Object getParameter(String key) {
         return requestLine.getParameter(key);
+    }
+
+    public RequestBody getRequestBody() {
+        return requestBody;
     }
 
     @Override

@@ -3,13 +3,17 @@ package org.apache.coyote.http11.handlermapper;
 import java.util.List;
 import org.apache.coyote.http11.handler.ApiHandler.LoginApiHandler;
 import org.apache.coyote.http11.handler.ApiHandler.RegisterApiHandler;
+import org.apache.coyote.http11.handler.ApiHandler.RegisterPageApiHandler;
 import org.apache.coyote.http11.handler.ApiHandler.RootApiHandler;
 import org.apache.coyote.http11.handler.Handler;
 import org.apache.coyote.http11.httpmessage.request.HttpRequest;
 
-public class ApiHandlerMapper implements HandlerMapper{
+public class ApiHandlerMapper implements HandlerMapper {
 
-    private static final List<Handler> API_HANDLERS = List.of(new RootApiHandler(), new LoginApiHandler(), new RegisterApiHandler());
+    private static final List<Handler> API_HANDLERS = List.of(
+            new RootApiHandler(), new LoginApiHandler(),
+            new RegisterPageApiHandler(), new RegisterApiHandler()
+    );
 
     @Override
     public Handler mapHandler(HttpRequest httpRequest) {

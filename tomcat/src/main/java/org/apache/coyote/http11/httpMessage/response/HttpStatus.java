@@ -3,7 +3,8 @@ package org.apache.coyote.http11.httpmessage.response;
 public enum HttpStatus {
     OK(200, "OK"),
     FOUND(302, "Found"),
-    UNAUTHORIZED(401, "Unauthorized");
+    UNAUTHORIZED(401, "Unauthorized"),
+    INTERNAL_SERVER_ERROR(500, "Internal Server Error");
 
     private final int value;
     private final String message;

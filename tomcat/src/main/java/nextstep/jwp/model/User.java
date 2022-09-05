@@ -8,6 +8,9 @@ public class User {
     private final String email;
 
     public User(Long id, String account, String password, String email) {
+        validateAccount(account);
+        validatePassword(password);
+        validateEmail(email);
         this.id = id;
         this.account = account;
         this.password = password;
@@ -16,6 +19,24 @@ public class User {
 
     public User(String account, String password, String email) {
         this(null, account, password, email);
+    }
+
+    private void validateAccount(String account) {
+        if (account.isBlank()) {
+            throw new IllegalArgumentException("account가 빈 값입니다.");
+        }
+    }
+
+    private void validatePassword(String password) {
+        if (password.isBlank()) {
+            throw new IllegalArgumentException("password가 빈 값입니다.");
+        }
+    }
+
+    private void validateEmail(String email) {
+        if (email.isBlank()) {
+            throw new IllegalArgumentException("email 빈 값입니다.");
+        }
     }
 
     public boolean checkPassword(String password) {

@@ -16,13 +16,16 @@ class HttpRequestTest {
     @Test
     void 요청을_읽고_RequestLine과_RequestHeader_RequestBody로_분리할_수_있다() throws IOException {
         // given
-        String requsetMessage = "GET /index.html HTTP/1.1\r\n"
+        String body = "body=requestBody";
+
+        String requestMessage = "GET /index.html HTTP/1.1\r\n"
                 + "Host: localhost:8080\r\n"
                 + "Connection: keep-alive\r\n"
+                + "Content-Length: "+ body.getBytes().length +"\r\n"
                 + "\r\n"
-                + "body=requestBody";
+                + body;
 
-        InputStream inputStream = new ByteArrayInputStream(requsetMessage.getBytes());
+        InputStream inputStream = new ByteArrayInputStream(requestMessage.getBytes());
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
         // when
@@ -34,8 +37,8 @@ class HttpRequestTest {
         // then
         assertThat(httpRequest).extracting("requestLine", "headers", "requestBody")
                 .containsExactly(RequestLine.of("GET /index.html HTTP/1.1"),
-                        Headers.of(List.of("Host: localhost:8080", "Connection: keep-alive")),
-                        RequestBody.of(List.of("body=requestBody")));
+                        Headers.of(List.of("Host: localhost:8080", "Connection: keep-alive", "Content-Length: " + body.getBytes().length)),
+                        new RequestBody(body));
     }
 
     @Test

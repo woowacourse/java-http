@@ -26,6 +26,7 @@ public class Headers {
         return new Headers(headers);
     }
 
+
     public Map<String, String> getHeaders() {
         return Collections.unmodifiableMap(headers);
     }
@@ -52,5 +53,9 @@ public class Headers {
         return headers.entrySet().stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue())
                 .collect(Collectors.joining("\r\n"));
+    }
+
+    public String getHeader(String key) {
+        return headers.get(key);
     }
 }

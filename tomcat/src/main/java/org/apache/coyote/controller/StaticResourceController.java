@@ -8,12 +8,12 @@ import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.HttpStatus;
 import org.apache.coyote.http11.util.StaticResourceUtil;
 
-public class StaticResourceController implements Controller {
+public class StaticResourceController extends AbstractController {
 
 	private static final String NOT_FOUND_HTML = "404.html";
 
 	@Override
-	public void service(HttpRequest request, HttpResponse response) throws Exception {
+	public void doGet(HttpRequest request, HttpResponse response) throws Exception {
 		try {
 			String responseBody = StaticResourceUtil.getContent(request.getUrl());
 			response.setStatus(HttpStatus.OK);

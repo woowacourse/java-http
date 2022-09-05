@@ -21,7 +21,6 @@ public class RequestMapping {
 		apiControllers.put("/", new HelloController());
 		apiControllers.put("/login", new LoginController());
 		apiControllers.put("/register", new RegisterController());
-		apiControllers.put("", new ErrorController());
 	}
 
 	public static Controller getController(String url) {

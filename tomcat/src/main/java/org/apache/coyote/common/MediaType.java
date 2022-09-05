@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 public enum MediaType {
 
+    TEXT_PLAIN("text/plain", FileExtension.NONE),
     TEXT_HTML("text/html", FileExtension.HTML),
     TEXT_CSS("text/css", FileExtension.CSS)
     ;

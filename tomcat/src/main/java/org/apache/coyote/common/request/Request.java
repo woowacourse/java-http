@@ -1,10 +1,13 @@
 package org.apache.coyote.common.request;
 
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.common.HttpVersion;
 import org.apache.coyote.common.request.parser.UrlParser;
 
 public class Request {
+
+    public static final String UNKNOWN_QUERY = "Could not find query string";
 
     private static final int METHOD = 0;
     private static final int URL = 1;
@@ -30,8 +33,8 @@ public class Request {
         return path;
     }
 
-    public String getQueryStringValue(final String key) {
-        return queryString.getOrDefault(key, "");
+    public Optional<String> getQueryStringValue(final String key) {
+        return Optional.ofNullable(queryString.get(key));
     }
 
     public String getRequestIdentifier() {

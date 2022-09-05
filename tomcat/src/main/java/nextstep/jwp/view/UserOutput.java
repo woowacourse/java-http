@@ -11,7 +11,8 @@ public class UserOutput {
     private static final Logger log = LoggerFactory.getLogger(Application.class);
 
     public static void outputUserInformation(final Request request) {
-        final String userAccount = request.getQueryStringValue("account");
+        final String userAccount = request.getQueryStringValue("account")
+                        .orElse("");
         InMemoryUserRepository.findByAccount(userAccount)
                 .ifPresent(user -> log.info(user.toString()));
     }

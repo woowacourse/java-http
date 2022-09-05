@@ -17,7 +17,8 @@ public class LoginHandler implements Function<Request, Response> {
 
     @Override
     public Response apply(final Request request) {
-        final String password = request.getQueryStringValue("password");
+        final String password = request.getQueryStringValue("password")
+                .orElseThrow(() -> new IllegalArgumentException(Request.UNKNOWN_QUERY));
         final User user = findUser(request);
 
         String responseBody = ResourceGenerator.getStaticResource("/index");
@@ -35,7 +36,8 @@ public class LoginHandler implements Function<Request, Response> {
     }
 
     private User findUser(final Request request) {
-        final String userAccount = request.getQueryStringValue("account");
+        final String userAccount = request.getQueryStringValue("account")
+                .orElseThrow(() -> new IllegalArgumentException(Request.UNKNOWN_QUERY));
         return InMemoryUserRepository.findByAccount(userAccount)
                 .orElseThrow(IllegalArgumentException::new);
     }

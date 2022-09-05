@@ -37,7 +37,7 @@ public class RequestUtil {
             final URL url = Objects.requireNonNull(ClassType.getClassLoader().getResource(STATIC + uri));
             final Path path = Paths.get(url.toURI());
             return new String(Files.readAllBytes(path));
-        } catch (URISyntaxException | IOException | NullPointerException e) {
+        } catch (Exception e) {
             throw new NotFoundFileException("파일 찾기에 실패했습니다.");
         }
     }

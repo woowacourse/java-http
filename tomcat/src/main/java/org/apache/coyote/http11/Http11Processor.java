@@ -11,6 +11,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
+import org.apache.coyote.response.HttpStatus;
 import org.apache.util.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,8 +76,13 @@ public class Http11Processor implements Runnable, Processor {
     private HttpResponse toHttpResponse(final HttpRequest httpRequest, final Controller controller) throws IOException {
         String response = controller.service(httpRequest);
         if (controller.isRest()) {
-            return HttpResponse.of(httpRequest, response);
+            return HttpResponse.of(HttpStatus.OK, httpRequest, response);
         }
-        return HttpResponse.of(httpRequest, ResourceUtil.getResource(response));
+        View view = View.from(response);
+        if (view.isRedirect()) {
+            return HttpResponse.of(HttpStatus.REDIRECT, httpRequest, ResourceUtil.getResource(view.getValue()));
+        }
+        return HttpResponse.of(HttpStatus.OK, httpRequest, ResourceUtil.getResource(view.getValue()));
     }
+
 }

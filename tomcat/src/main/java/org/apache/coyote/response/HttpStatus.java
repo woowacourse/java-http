@@ -2,6 +2,7 @@ package org.apache.coyote.response;
 
 public enum HttpStatus {
     OK(200, "OK"),
+    REDIRECT(302, "Redirect"),
     BAD_REQUEST(400, "Bad Request"),
     UNAUTHORIZED(401, "Unauthorized"),
     NOT_FOUND(404, "Not Found"),

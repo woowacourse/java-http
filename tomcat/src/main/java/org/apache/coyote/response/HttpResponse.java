@@ -1,7 +1,5 @@
 package org.apache.coyote.response;
 
-import static org.apache.coyote.response.HttpStatus.OK;
-
 import java.util.Map;
 import org.apache.coyote.request.HttpRequest;
 
@@ -19,13 +17,10 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
-    public static HttpResponse of(final HttpRequest httpRequest, final String responseBody) {
+    public static HttpResponse of(final HttpStatus httpStatus, final HttpRequest httpRequest,
+                                  final String responseBody) {
         Map<String, String> headers = httpRequest.getHttpHeaders();
-        return new HttpResponse(OK, headers.get(ACCEPT), responseBody);
-    }
-
-    public void setResponseBody(final String responseBody) {
-        this.responseBody = responseBody;
+        return new HttpResponse(httpStatus, headers.get(ACCEPT), responseBody);
     }
 
     public byte[] getResponse() {

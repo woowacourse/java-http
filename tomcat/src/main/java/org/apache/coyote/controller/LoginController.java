@@ -14,7 +14,7 @@ public class LoginController extends AbstractController {
 
     @Override
     protected String doGet(final HttpRequest httpRequest) {
-        return "/login.html";
+        return "login";
     }
 
     @Override
@@ -28,7 +28,7 @@ public class LoginController extends AbstractController {
             log.info("user : {}", user);
         }
 
-        return "redirect:/index.html";
+        return "redirect:/index";
     }
 
     @Override

@@ -8,7 +8,7 @@ import java.io.IOException;
 
 public class Tomcat {
 
-    private static final Logger log = LoggerFactory.getLogger(Tomcat.class);
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
     public void start() {
         var connector = new Connector();

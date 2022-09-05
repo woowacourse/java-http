@@ -9,6 +9,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -73,7 +74,7 @@ public class Http11Processor implements Runnable, Processor {
             requestUri += ".html";
         }
         URL resource = getClass().getClassLoader().getResource("static" + requestUri);
-        Path filePath = new File(resource.getPath()).toPath();
+        Path filePath = new File(Objects.requireNonNull(resource).getPath()).toPath();
         return String.join("\r\n", Files.readAllLines(filePath));
     }
 

@@ -7,9 +7,8 @@ import org.apache.coyote.annotation.RequestMapping;
 
 public class RequestMappingScanner {
 
-    private final static Set<Method> requestMappingMethods = new HashSet<>();
-
     public static Set<Method> scan() {
+        final Set<Method> requestMappingMethods = new HashSet<>();
         final Set<Class<?>> controllers = ControllerScanner.scan();
 
         for (final Class<?> controller : controllers) {

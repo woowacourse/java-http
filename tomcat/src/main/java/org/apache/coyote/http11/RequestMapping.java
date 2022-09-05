@@ -6,6 +6,7 @@ import nextstep.jwp.presentation.Controller;
 import nextstep.jwp.presentation.LoginController;
 import nextstep.jwp.presentation.StaticResourceController;
 import nextstep.jwp.presentation.WelcomeController;
+import org.apache.coyote.HttpRequest;
 
 public class RequestMapping {
 
@@ -24,10 +25,10 @@ public class RequestMapping {
     private RequestMapping() {
     }
 
-    public static Controller findController(final String path) {
+    public static Controller findController(final HttpRequest request) {
         return requestMapping.entrySet()
                 .stream()
-                .filter(entry -> entry.getKey().equals(path))
+                .filter(entry -> entry.getKey().equals(request.getPath()))
                 .map(Entry::getValue)
                 .findFirst()
                 .orElse(StaticResourceController.getInstance());

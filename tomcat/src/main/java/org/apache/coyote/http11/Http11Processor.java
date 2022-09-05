@@ -69,8 +69,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void doService(final HttpRequest request, final HttpResponse response) throws Exception {
-        final String path = request.getPath();
-        final Controller controller = RequestMapping.findController(path);
+        final Controller controller = RequestMapping.findController(request);
         controller.service(request, response);
     }
 

@@ -71,12 +71,8 @@ public class Http11Processor implements Runnable, Processor {
             return createResponse("text/html", responseBody);
         }
 
-        if ("/index.html".equals(url)) {
-            final URL resource = getClass().getClassLoader().getResource("static/index.html");
-            final Path path = new File(resource.getFile()).toPath();
-            final String responseBody = new String(Files.readAllBytes(path));
-
-            return createResponse(Files.probeContentType(path), responseBody);
+        if (url.contains(".")) {
+            return createStaticFileResponse(url);
         }
 
         if ("/login".equals(url)) {
@@ -92,10 +88,6 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             return createResponse(Files.probeContentType(path), responseBody);
-        }
-
-        if (url.contains(".css") || url.contains(".js")) {
-            return createStaticFileResponse(url);
         }
 
         throw new IllegalArgumentException("올바르지 않은 URL 요청입니다.");

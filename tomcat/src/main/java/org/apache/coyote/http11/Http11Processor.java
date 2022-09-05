@@ -1,14 +1,10 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -43,31 +39,13 @@ public class Http11Processor implements Runnable, Processor {
 
             checkUser(startLine);
 
-            final String responseBody = getResponseBody(startLine.getUri());
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + getContentType(startLine.getUri()) + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final HttpResponse httpResponse = HttpResponse.from(startLine);
 
-            outputStream.write(response.getBytes());
+            outputStream.write(httpResponse.getResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private String getContentType(final String uri) {
-        if (uri.contains(".css")) {
-            return "text/css";
-        }
-
-        if (uri.contains(".js")) {
-            return "text/javascript";
-        }
-
-        return "text/html";
     }
 
     private void checkUser(HttpRequestStartLine startLineContents) {
@@ -88,25 +66,5 @@ public class Http11Processor implements Runnable, Processor {
         if (loginUser.checkPassword(queryParams.get("password"))) {
             log.info("user : " + loginUser);
         }
-    }
-
-    private String getResponseBody(String requestUri) throws IOException {
-        if (requestUri.equals("/")) {
-            return "Hello world!";
-        }
-
-        if (!requestUri.contains(".")) {
-            requestUri += ".html";
-        }
-
-        final URL resourceUrl = getClass().getClassLoader().getResource("static" + requestUri);
-        return readContext(resourceUrl);
-    }
-
-    private String readContext(final URL resourceUrl) throws IOException {
-        final File resourceFile = new File(resourceUrl.getFile());
-        final Path resourcePath = resourceFile.toPath();
-        final byte[] resourceContents = Files.readAllBytes(resourcePath);
-        return new String(resourceContents);
     }
 }

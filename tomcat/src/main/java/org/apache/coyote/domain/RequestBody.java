@@ -22,6 +22,9 @@ public class RequestBody {
 
     private static Map<String, String> generateBody(String body) {
         Map<String, String> requestBody = new HashMap<>();
+        if(body.length()==0){
+            return requestBody;
+        }
         String[] bodies = body.split("&");
         for (String data : bodies) {
             String[] keyAndValue = data.split("=");

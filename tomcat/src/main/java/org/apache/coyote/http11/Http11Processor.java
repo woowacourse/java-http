@@ -19,6 +19,7 @@ import org.apache.coyote.domain.HttpRequest;
 import org.apache.coyote.domain.HttpStatusCode;
 import org.apache.coyote.domain.MyHttpResponse;
 import org.apache.coyote.domain.RedirectUrl;
+import org.apache.coyote.handler.HandlerMapping;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,42 +45,13 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader inputBufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final HttpRequest httpRequest = HttpRequest.from(inputBufferedReader);
-            final FilePath filePath = FilePath.from(httpRequest.getUri());
-            HttpStatusCode httpStatusCode = HttpStatusCode.OK;
-            RedirectUrl redirectUrl = null;
-            if (httpRequest.getUri().contains("login?")) {
-                redirectUrl = RedirectUrl.from(login(httpRequest));
-                httpStatusCode = HttpStatusCode.FOUND;
-            }
 
-            final MyHttpResponse httpResponse = MyHttpResponse.from(filePath, httpStatusCode, redirectUrl);
+            final MyHttpResponse httpResponse = HandlerMapping.getHandler(httpRequest).run(httpRequest);
 
             outputStream.write(httpResponse.getValue().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
-    }
-
-    private static String login(HttpRequest httpRequest) {
-        Optional<User> user = InMemoryUserRepository.findByAccount(
-                httpRequest.getQueryParam().getQueryValue("account"));
-        if (user.isPresent()) {
-            log.info(user.get().toString());
-            if (user.get().checkPassword(httpRequest.getQueryParam().getQueryValue("password"))) {
-                return "/index.html";
-            }
-        }
-        return "/401.html";
-    }
-
-
-    private Map<String, String> getHeaders(BufferedReader inputBufferedReader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        while (inputBufferedReader.ready()) {
-            String[] header = inputBufferedReader.readLine().split(": ");
-            headers.put(header[0], header[1]);
-        }
-        return headers;
     }
 }

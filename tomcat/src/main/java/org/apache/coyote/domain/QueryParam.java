@@ -33,4 +33,8 @@ public class QueryParam {
     public String getQueryValue(String key) {
         return queryParam.get(key);
     }
+
+    public boolean isEmpty(){
+        return queryParam.isEmpty();
+    }
 }

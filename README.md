@@ -38,7 +38,10 @@
 ### 3단계 - 리팩터링
 
 - [X] HTTP Request, HTTP Response 클래스로 나눠서 구현했다. 
-- [ ] Controller 인터페이스와 RequestMapping 클래스를 활용하여 if절을 제거했다.
+- [X] Controller 인터페이스와 RequestMapping 클래스를 활용하여 if절을 제거했다.
+  - [X] 기존의 Controller 인터페이스를 변형해 request, response를 받도록 변경한다.
+  - [X] Controller 인터페이스를 구현하는 AbstractController를 만들고 여기서 메서드에 따른 분기를 진행한다. 
+  - [X] 각 Controller 구현체에는 doGet(), doPost() 만을 구현한다. 
 
 ### 추가로 고려해볼 수 있는 부분
 

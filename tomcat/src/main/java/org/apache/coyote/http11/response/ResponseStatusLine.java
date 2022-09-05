@@ -5,7 +5,7 @@ import org.apache.coyote.http11.common.HttpStatus;
 public class ResponseStatusLine {
 
     private final String version;
-    private final HttpStatus status;
+    private HttpStatus status;
 
     public ResponseStatusLine(final HttpStatus status) {
         this("HTTP/1.1", status);
@@ -22,6 +22,10 @@ public class ResponseStatusLine {
 
     public HttpStatus getStatus() {
         return status;
+    }
+
+    public void setStatus(final HttpStatus status) {
+        this.status = status;
     }
 
     @Override

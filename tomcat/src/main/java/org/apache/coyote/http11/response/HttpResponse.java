@@ -7,7 +7,15 @@ public class HttpResponse {
 
     private final ResponseStatusLine responseStatusLine;
     private final ResponseHeader responseHeader;
-    private final String body;
+    private String body;
+
+    public HttpResponse() {
+        this(
+                new ResponseStatusLine("HTTP/1.1", null),
+                new ResponseHeader(),
+                ""
+        );
+    }
 
     public HttpResponse(final ResponseStatusLine responseStatusLine, final ResponseHeader responseHeader, final String body) {
         this.responseStatusLine = responseStatusLine;
@@ -15,32 +23,27 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse ok(final StaticResource staticResource) {
-        return new HttpResponse(
-                new ResponseStatusLine(HttpStatus.OK),
-                ResponseHeader.withStaticResource(staticResource),
-                staticResource.getContent()
-        );
+    public void ok(final StaticResource staticResource) {
+        setStatus(HttpStatus.OK);
+        responseHeader.setContentInfo(staticResource);
+        setBody(staticResource.getContent());
     }
 
-    public static HttpResponse found(final String location) {
-        return new HttpResponse(
-                new ResponseStatusLine(HttpStatus.FOUND),
-                ResponseHeader.withLocation(location),
-                ""
-        );
+    public void found(final String location) {
+        setStatus(HttpStatus.FOUND);
+        responseHeader.setLocation(location);
     }
 
-    public static HttpResponse internalServerError() {
-        return new HttpResponse(
-                new ResponseStatusLine(HttpStatus.INTERNAL_SERVER_ERROR),
-                ResponseHeader.none(),
-                ""
-        );
+    public void setStatus(final HttpStatus status) {
+        responseStatusLine.setStatus(status);
     }
 
     public void setSessionId(final String sessionId) {
         responseHeader.add("Set-Cookie", "JSESSIONID=" + sessionId);
+    }
+
+    public void setBody(final String body) {
+        this.body = body;
     }
 
     @Override

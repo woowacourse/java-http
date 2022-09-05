@@ -5,5 +5,5 @@ import org.apache.coyote.http11.response.HttpResponse;
 
 public interface Controller {
 
-    HttpResponse doService(final HttpRequest httpRequest);
+    void service(final HttpRequest httpRequest, final HttpResponse httpResponse);
 }

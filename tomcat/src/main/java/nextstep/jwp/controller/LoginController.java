@@ -1,16 +1,12 @@
 package nextstep.jwp.controller;
 
-import java.util.Map;
 import nextstep.jwp.exception.AuthenticationException;
-import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.service.LoginService;
-import org.apache.catalina.session.Session;
-import org.apache.coyote.http11.common.HttpMethod;
 import org.apache.coyote.http11.common.StaticResource;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private final LoginService loginService;
 
@@ -18,34 +14,29 @@ public class LoginController implements Controller {
         loginService = new LoginService();
     }
 
-    @Override
-    public HttpResponse doService(final HttpRequest httpRequest) {
-        if (httpRequest.isSameMethod(HttpMethod.GET)) {
-            return show(httpRequest.getSession());
+    public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        final var session = httpRequest.getSession();
+
+        if (loginService.isAlreadyLogin(session)) {
+            httpResponse.found("/index.html");
+            return;
         }
-        if (httpRequest.isSameMethod(HttpMethod.POST)) {
-            return login(httpRequest.getSession(), httpRequest.parseBodyQueryString());
-        }
-        return HttpResponse.found("/404.html");
+        httpResponse.ok(StaticResource.path("/login.html"));
     }
 
-    public HttpResponse show(final Session session) {
-        if (loginService.isAlreadyLogin(session)) {
-            return HttpResponse.found("/index.html");
-        }
-        return HttpResponse.ok(StaticResource.path("/login.html"));
-    }
+    public void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+        final var session = httpRequest.getSession();
+        final var parameters = httpRequest.parseBodyQueryString();
 
-    public HttpResponse login(final Session session, final Map<String, String> parameters) {
         if (loginService.isAlreadyLogin(session)) {
-            return HttpResponse.found("/index.html");
+            httpResponse.found("/index.html");
+            return;
         }
         try {
-            final var httResponse = HttpResponse.found("/index.html");
-            httResponse.setSessionId(loginService.login(parameters));
-            return httResponse;
-        } catch (NotFoundException | AuthenticationException e) {
-            return HttpResponse.found("/401.html");
+            httpResponse.setSessionId(loginService.login(parameters));
+            httpResponse.found("/index.html");
+        } catch (AuthenticationException e) {
+            httpResponse.found("/401.html");
         }
     }
 }

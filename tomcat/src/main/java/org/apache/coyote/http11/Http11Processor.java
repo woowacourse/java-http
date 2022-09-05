@@ -4,9 +4,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import nextstep.jwp.controller.Controller;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -35,8 +35,9 @@ public class Http11Processor implements Runnable, Processor {
 
             final var httpRequest = HttpRequest.from(bufferedReader);
             log.debug(httpRequest.toStartLineString());
-            final var mappedController = RequestMapper.mapToController(httpRequest);
-            final var httpResponse = doService(httpRequest, mappedController);
+            final var httpResponse = new HttpResponse();
+
+            doService(httpRequest, httpResponse);
 
             outputStream.write(httpResponse.toString().getBytes());
             outputStream.flush();
@@ -45,12 +46,13 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse doService(final HttpRequest httpRequest, final Controller mappedController) {
+    private void doService(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         try {
-            return mappedController.doService(httpRequest);
+            final var mappedController = RequestMapper.mapToController(httpRequest);
+            mappedController.service(httpRequest, httpResponse);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return HttpResponse.internalServerError();
+            httpResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

@@ -8,6 +8,7 @@ import org.apache.coyote.http11.Cookie;
 import org.apache.coyote.http11.constant.HttpMethods;
 
 public class Http11Request {
+
     private final String method;
     private final String url;
     private final Map<String, String> header;
@@ -25,11 +26,7 @@ public class Http11Request {
     }
 
     public boolean hasCookie() {
-        if (header.containsKey("Cookie")) {
-            return true;
-        }
-
-        return false;
+        return header.containsKey("Cookie");
     }
 
     public Cookie getCookies() {
@@ -41,7 +38,7 @@ public class Http11Request {
 
         Map<String, String> cookies = new HashMap<>();
         String[] eachCookies = rawCookie.split(";");
-        for (String eachCookie: eachCookies) {
+        for (String eachCookie : eachCookies) {
             String[] params = eachCookie.split("=");
             String cookieKey = params[0].strip();
             String cookieValue = params[1].strip();

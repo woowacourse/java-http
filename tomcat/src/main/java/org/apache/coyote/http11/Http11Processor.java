@@ -78,7 +78,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
 
-
     private Http11Response login(Cookie cookies, Map<String, String> bodyParams) {
         String account = Objects.requireNonNull(bodyParams.get("account"), "계정이 입력되지 않았습니다.");
         String password = Objects.requireNonNull(bodyParams.get("password"), "비밀번호가 입력되지 않았습니다.");
@@ -130,7 +129,7 @@ public class Http11Processor implements Runnable, Processor {
                 InputStream inputStream = connection.getInputStream();
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 OutputStream outputStream = connection.getOutputStream();
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader)
         ) {
             Http11Request request = requestAssembler.makeRequest(bufferedReader);
             execute(outputStream, request);

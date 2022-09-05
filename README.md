@@ -2,6 +2,13 @@
 
 ## 기능 요구사항
 
+2 단계 요구사항
+
+- [ ] HTTP Reponse의 상태 응답 코드를 302로 반환한다.
+- [ ] POST로 들어온 요청의 Request Body를 파싱할 수 있다.
+- [ ] 로그인에 성공하면 HTTP Reponse의 헤더에 Set-Cookie가 존재한다.
+- [ ] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.
+
 ### 정적 파일 서빙
 
 ```http request
@@ -27,6 +34,7 @@ start line = `HTTP Method + URL + HTTP version`
 [x] requestURI를 이용하여 resourceLocator 파일 찾기
 [x] 문서 이외의 확장자 처리
 [x] query param 처리
+[ ] login 페이지 응답 기능과 로그인 기능 분리
 
 핸들러 매핑
 

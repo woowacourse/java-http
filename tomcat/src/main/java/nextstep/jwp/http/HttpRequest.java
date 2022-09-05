@@ -9,6 +9,7 @@ public class HttpRequest {
 
     private static final String BLANK = " ";
     private static final int REQUEST_LINE_COUNT = 3;
+    private static final int REQUEST_LINE_HTTP_METHOD_INDEX = 0;
     private static final int REQUEST_LINE_URI_INDEX = 1;
 
     private static final String URI_QUERY_PARAM_DELIMITER = "?";
@@ -19,12 +20,14 @@ public class HttpRequest {
 
     private static final String EMPTY_QUERY_PARAMETER = "";
 
+    private final HttpMethod httpMethod;
     private final String path;
     private final RequestParams queryParams;
     private final ContentType contentType;
 
-    public HttpRequest(final String path, final RequestParams queryParams,
+    public HttpRequest(final HttpMethod httpMethod, final String path, final RequestParams queryParams,
                        final ContentType contentType) {
+        this.httpMethod = httpMethod;
         this.path = path;
         this.queryParams = queryParams;
         this.contentType = contentType;
@@ -33,12 +36,13 @@ public class HttpRequest {
     public static HttpRequest from(final String requestLine) {
         String[] requestLineValues = splitRequestLine(requestLine);
 
+        HttpMethod httpMethod = HttpMethod.from(requestLineValues[REQUEST_LINE_HTTP_METHOD_INDEX]);
         String uri = requestLineValues[REQUEST_LINE_URI_INDEX];
         String path = parsePath(uri);
         RequestParams queryParams = RequestParams.from(parseQueryParameter(uri));
         ContentType contentType = parseContentType(path);
 
-        return new HttpRequest(path, queryParams, contentType);
+        return new HttpRequest(httpMethod, path, queryParams, contentType);
     }
 
     private static String[] splitRequestLine(final String requestLine) {

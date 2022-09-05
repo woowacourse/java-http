@@ -21,7 +21,7 @@ class HttpRequestTest {
     @Test
     void request_line에서_HttpRequest_정보를_반환할_수_있다() {
         String requestLine = "GET /index.html?password=1234 HTTP/1.1";
-        HttpRequest expected = new HttpRequest("/index.html", RequestParams.from("password=1234"),
+        HttpRequest expected = new HttpRequest(HttpMethod.GET, "/index.html", RequestParams.from("password=1234"),
                 ContentType.TEXT_HTML);
         HttpRequest actual = HttpRequest.from(requestLine);
 
@@ -31,7 +31,7 @@ class HttpRequestTest {
     @ParameterizedTest
     @CsvSource(value = {"/,true", "/root,false"})
     void root_path인지_확인할_수_있다(final String path, final boolean expected) {
-        HttpRequest httpRequest = new HttpRequest(path, RequestParams.from(""), ContentType.TEXT_HTML);
+        HttpRequest httpRequest = new HttpRequest(HttpMethod.GET, path, RequestParams.from(""), ContentType.TEXT_HTML);
         boolean actual = httpRequest.isRootPath();
 
         assertThat(actual).isEqualTo(expected);

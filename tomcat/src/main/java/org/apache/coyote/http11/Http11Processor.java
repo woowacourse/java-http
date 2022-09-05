@@ -1,20 +1,14 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.NoSuchUserException;
-import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
+import nextstep.jwp.controller.FileReader;
+import nextstep.jwp.controller.LoginController;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,12 +37,13 @@ public class Http11Processor implements Runnable, Processor {
 
             List<String> request = readRequest(bufferedReader);
             HttpRequest httpRequest = HttpRequest.of(request);
+            HttpResponse httpResponse = new HttpResponse();
 
-            HttpResponse response = makeResponse(httpRequest.getRequestUri());
+            doService(httpRequest, httpResponse);
 
-            outputStream.write(response.getValue().getBytes());
+            outputStream.write(httpResponse.getValue().getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (Exception e) {
             log.error(e.getMessage(), e);
         }
     }
@@ -62,40 +57,23 @@ public class Http11Processor implements Runnable, Processor {
         return request;
     }
 
-    private HttpResponse makeResponse(final RequestUri requestUri) throws IOException {
-        return new HttpResponse()
-                .httpStatus(HttpStatus.OK)
-                .body(makeResponseBody(requestUri), requestUri);
-    }
-
-    private String makeResponseBody(final RequestUri requestUri) throws IOException {
-        if (requestUri.hasQueryParams()) {
-            QueryParameters queryParameters = requestUri.getQueryParams();
-            login(queryParameters);
-        }
-        if (requestUri.isResourceFileRequest()) {
-            return readResourceFile(requestUri.getResourcePath());
-        }
-        return DEFAULT_REQUEST_BODY;
-    }
-
-    private void login(final QueryParameters queryParameters) {
-        User user = getUserByAccount(queryParameters.get("account"));
-        if (user.checkPassword(queryParameters.get("password"))) {
-            log.info("user : " + user);
+    private void doService(final HttpRequest httpRequest, final HttpResponse httpResponse) throws Exception {
+        RequestUri requestUri = httpRequest.getRequestUri();
+        String resourcePath = requestUri.getResourcePath();
+        if (resourcePath.equals("/")) {
+            httpResponse
+                    .httpStatus(HttpStatus.OK)
+                    .body(DEFAULT_REQUEST_BODY, MediaType.HTML);
             return;
         }
-        log.info("비밀번호가 일치하지 않습니다.");
-    }
-
-    private User getUserByAccount(final String account) {
-        return InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new NoSuchUserException("존재하지 않는 회원입니다."));
-    }
-
-    private String readResourceFile(final String resourcePath) throws IOException {
-        final URL url = getClass().getClassLoader().getResource(resourcePath);
-        final Path path = new File(url.getFile()).toPath();
-        return Files.readString(path);
+        if (resourcePath.startsWith("/login")) {
+            new LoginController().service(httpRequest, httpResponse);
+            return;
+        }
+        if (requestUri.isResourceFileRequest()) {
+            httpResponse
+                    .httpStatus(HttpStatus.OK)
+                    .body(FileReader.read(requestUri.getResourcePath()), requestUri.findMediaType());
+        }
     }
 }

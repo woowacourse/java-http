@@ -17,11 +17,15 @@ public enum MediaType {
         this.extension = extension;
     }
 
-    public static MediaType of(String uri) {
+    public static MediaType of(final String uri) {
         return Arrays.stream(values())
                 .filter(mediaType -> uri.endsWith(mediaType.extension))
                 .findFirst()
                 .orElse(HTML);
+    }
+
+    public String appendExtension(final String path) {
+        return path + "." + extension;
     }
 
     public String getValue() {

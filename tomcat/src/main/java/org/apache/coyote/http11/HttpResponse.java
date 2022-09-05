@@ -31,9 +31,9 @@ public class HttpResponse {
         return this;
     }
 
-    public HttpResponse body(final String body, final RequestUri requestUri) {
+    public HttpResponse body(final String body, final MediaType mediaType) {
         this.body = body;
-        addHeader("Content-Type", requestUri.findMediaType().getValue());
+        addHeader("Content-Type", mediaType.getValue());
         addHeader("Content-Length", Integer.toString(this.body.getBytes().length));
         return this;
     }

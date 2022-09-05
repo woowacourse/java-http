@@ -2,8 +2,6 @@ package org.apache.coyote.http11;
 
 public class RequestUri {
 
-    private static final String STATIC_FILE_PATH = "static";
-
     private final String resourcePath;
     private final QueryParameters queryParams;
 
@@ -19,13 +17,13 @@ public class RequestUri {
     private static String parseResourcePath(String uri) {
         int index = uri.indexOf("?");
         if (index != -1) {
-            return STATIC_FILE_PATH + uri.substring(0, index) + ".html";
+            return uri.substring(0, index);
         }
-        return STATIC_FILE_PATH + uri;
+        return uri;
     }
 
     public boolean isResourceFileRequest() {
-        return !resourcePath.equals(STATIC_FILE_PATH + "/");
+        return resourcePath.contains(".");
     }
 
     public boolean hasQueryParams() {
@@ -34,6 +32,10 @@ public class RequestUri {
 
     public MediaType findMediaType() {
         return MediaType.of(resourcePath);
+    }
+
+    public String parseFullPath() {
+        return findMediaType().appendExtension(resourcePath);
     }
 
     public String getResourcePath() {

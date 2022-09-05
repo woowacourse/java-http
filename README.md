@@ -66,8 +66,8 @@
 
 ### 체크리스트
 
-- [ ] HTTP Request, HTTP Response 클래스로 나눠서 구현했다.
-- [ ] Controller 인터페이스와 RequestMapping 클래스를 활용하여 if절을 제거했다.
+- [x] HTTP Request, HTTP Response 클래스로 나눠서 구현했다.
+- [x] Controller 인터페이스와 RequestMapping 클래스를 활용하여 if절을 제거했다.
 
 <br/>
 

@@ -31,7 +31,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
             final HttpRequest httpRequest = HttpRequest.parse(bufferedReader);
-            final String response = makeResponse(httpRequest.getMethod(), httpRequest.getRequestUrl());
+            final String response = makeResponse(httpRequest);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (Exception e) {
@@ -39,8 +39,8 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String makeResponse(final String requestMethod, final String requestUrl) throws Exception {
-        final ResponseMaker responseMaker = RequestMappingHandler.findResponseMaker(requestUrl, requestMethod);
-        return responseMaker.createResponse(requestUrl);
+    private String makeResponse(final HttpRequest httpRequest) throws Exception {
+        final ResponseMaker responseMaker = RequestMappingHandler.findResponseMaker(httpRequest);
+        return responseMaker.createResponse(httpRequest);
     }
 }

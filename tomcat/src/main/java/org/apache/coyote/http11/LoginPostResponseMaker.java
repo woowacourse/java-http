@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -22,9 +23,9 @@ public class LoginPostResponseMaker implements ResponseMaker {
     private static final Logger log = LoggerFactory.getLogger(LoginGetResponseMaker.class);
 
     @Override
-    public String createResponse(final String requestUrl)
+    public String createResponse(final HttpRequest httpRequest)
             throws URISyntaxException, IOException {
-        final HashMap<String, String> loginData = QueryParamsParser.parse(requestUrl);
+        final HashMap<String, String> loginData = QueryParamsParser.parseByBody(httpRequest.getRequestBody());
         final URL resource =
                 this.getClass().getClassLoader().getResource("static" + "/login.html");
         final Path path = Paths.get(resource.toURI());

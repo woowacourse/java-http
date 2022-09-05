@@ -26,6 +26,14 @@ public class HttpRequestHeaders {
                 )));
     }
 
+    public boolean hasRequestBody() {
+        return headers.containsKey("Content-Length");
+    }
+
+    public int getContentLength() {
+        return Integer.parseInt(headers.get("Content-Length"));
+    }
+
     public Map<String, String> getHeaders() {
         return headers;
     }

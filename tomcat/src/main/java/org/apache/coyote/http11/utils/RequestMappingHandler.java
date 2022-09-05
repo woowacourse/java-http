@@ -9,11 +9,12 @@ import org.apache.coyote.http11.LoginPostResponseMaker;
 import org.apache.coyote.http11.RegisterGetResponseMaker;
 import org.apache.coyote.http11.RegisterPostResponseMaker;
 import org.apache.coyote.http11.ResponseMaker;
-import org.apache.coyote.http11.StringResponseMaker;
+import org.apache.coyote.http11.HelloResponseMaker;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public enum RequestMappingHandler {
 
-    STRING(RequestMappingHandler::isStringGetUrl, new StringResponseMaker()),
+    STRING(RequestMappingHandler::isStringGetUrl, new HelloResponseMaker()),
     FILE(RequestMappingHandler::isFileGetUrl, new FileGetResponseMaker()),
     LOGIN_GET(RequestMappingHandler::isLoginGetUrl, new LoginGetResponseMaker()),
     LOGIN_POST(RequestMappingHandler::isLoginPostUrl, new LoginPostResponseMaker()),
@@ -30,7 +31,9 @@ public enum RequestMappingHandler {
         this.responseMaker = responseMaker;
     }
 
-    public static ResponseMaker findResponseMaker(final String requestUrl, final String requestMethod) {
+    public static ResponseMaker findResponseMaker(final HttpRequest httpRequest) {
+        final String requestUrl = httpRequest.getRequestUrl();
+        final String requestMethod = httpRequest.getMethod();
         return Arrays.stream(values())
                 .filter(value -> value.condition.test(requestUrl, requestMethod))
                 .findFirst()

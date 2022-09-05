@@ -60,4 +60,8 @@ public class HttpHeaders {
         }
         return String.join("\r\n", headers);
     }
+
+    public String getValue(final HttpHeader httpHeader) {
+        return this.headers.get(httpHeader);
+    }
 }

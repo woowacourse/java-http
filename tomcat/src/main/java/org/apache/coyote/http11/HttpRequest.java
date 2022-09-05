@@ -11,24 +11,31 @@ public class HttpRequest {
     private static final String QUERY_STRING_EQUAL = "=";
     private static final String FILE_EXTENSION_DELIMITER = ".";
 
+    private HttpMethod httpMethod;
     private String url;
     private Map<String, String> queryStrings = new LinkedHashMap<>();
-    private HttpHeaders httpHeaders;
+    private final HttpHeaders httpHeaders;
+    private final HttpRequestBody httpRequestBody;
 
     public HttpRequest(final HttpReader httpReader) {
-        parseUri(httpReader.getStartLine());
-        this.httpHeaders = new HttpHeaders(httpReader.getHeaders());
+        parseStartLine(httpReader.getStartLine());
+        this.httpHeaders = httpReader.getHttpHeaders();
+        this.httpRequestBody = new HttpRequestBody(httpReader.getBody());
     }
 
-    private void parseUri(final String startLine) {
-        final String uri = startLine.split(SPACE_DELIMITER)[1];
+    private void parseStartLine(final String startLine) {
+        final String[] values = startLine.split(SPACE_DELIMITER);
+        this.httpMethod = HttpMethod.of(values[0]);
+        this.url = parseUri(values[1]);
+    }
+
+    private String parseUri(final String uri) {
         if (uri.contains(QUERY_STRING_START)) {
             final int index = uri.indexOf(QUERY_STRING_START);
-            this.url = uri.substring(0, index);
             this.queryStrings = extractQueryString(uri.substring(index + 1));
-            return;
+            return uri.substring(0, index);
         }
-        this.url = uri;
+        return uri;
     }
 
     private Map<String, String> extractQueryString(final String querystring) {
@@ -62,5 +69,13 @@ public class HttpRequest {
 
     public String getUrl() {
         return url;
+    }
+
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
+    }
+
+    public HttpRequestBody getHttpRequestBody() {
+        return httpRequestBody;
     }
 }

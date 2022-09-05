@@ -3,6 +3,9 @@ package org.apache.coyote.http11;
 import static org.apache.coyote.http11.HttpHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.HttpHeader.CONTENT_TYPE;
 import static org.apache.coyote.http11.HttpHeader.LOCATION;
+import static org.apache.coyote.http11.HttpMethod.GET;
+import static org.apache.coyote.http11.HttpMethod.POST;
+import static org.apache.coyote.http11.HttpStatusCode.BAD_REQUEST;
 import static org.apache.coyote.http11.HttpStatusCode.FOUND;
 import static org.apache.coyote.http11.HttpStatusCode.INTERNAL_SERVER_ERROR;
 import static org.apache.coyote.http11.HttpStatusCode.NOT_FOUND;
@@ -18,6 +21,8 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.badrequest.AlreadyRegisterAccountException;
+import org.apache.coyote.http11.exception.badrequest.BadRequestException;
 import org.apache.coyote.http11.exception.notfound.NotFoundException;
 import org.apache.coyote.http11.exception.notfound.NotFoundUrlException;
 import org.apache.coyote.http11.exception.unauthorised.LoginFailException;
@@ -73,6 +78,15 @@ public class Http11Processor implements Runnable, Processor {
                     .body(responseBody)
                     .build();
         }
+        if (httpRequest.getUrl().equals("/")) {
+            final String responseBody = "Hello world!";
+            final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
+            return new HttpResponse.Builder()
+                    .statusCode(OK)
+                    .headers(httpHeaders)
+                    .body(responseBody)
+                    .build();
+        }
         if (httpRequest.getUrl().equals("/login")) {
             if (!httpRequest.getQueryString("account").isBlank() && !httpRequest.getQueryString("password").isBlank()) {
                 validateLogin(httpRequest);
@@ -91,14 +105,27 @@ public class Http11Processor implements Runnable, Processor {
                     .body(responseBody)
                     .build();
         }
-        if (httpRequest.getUrl().equals("/")) {
-            final String responseBody = "Hello world!";
-            final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
-            return new HttpResponse.Builder()
-                    .statusCode(OK)
-                    .headers(httpHeaders)
-                    .body(responseBody)
-                    .build();
+        if (httpRequest.getUrl().equals("/register")) {
+            if (httpRequest.getHttpMethod() == GET) {
+                final String responseBody = loadFile("/register.html");
+                final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
+                return new HttpResponse.Builder()
+                        .statusCode(OK)
+                        .headers(httpHeaders)
+                        .body(responseBody)
+                        .build();
+            }
+            if (httpRequest.getHttpMethod() == POST) {
+                final HttpRequestBody httpRequestBody = httpRequest.getHttpRequestBody();
+                validateRegistrable(httpRequestBody.getBodyValue("account"));
+                registerNewUser(httpRequestBody);
+                final HttpHeaders httpHeaders = new HttpHeaders()
+                        .addHeader(LOCATION, "/index.html");
+                return new HttpResponse.Builder()
+                        .statusCode(FOUND)
+                        .headers(httpHeaders)
+                        .build();
+            }
         }
         throw new NotFoundUrlException();
     }
@@ -119,6 +146,18 @@ public class Http11Processor implements Runnable, Processor {
         return user;
     }
 
+    private void validateRegistrable(final String account) {
+        if (InMemoryUserRepository.existByAccount(account)) {
+            throw new AlreadyRegisterAccountException();
+        }
+    }
+
+    private void registerNewUser(final HttpRequestBody httpRequestBody) {
+        final User user = new User(httpRequestBody.getBodyValue("account"),
+                httpRequestBody.getBodyValue("password"), httpRequestBody.getBodyValue("email"));
+        InMemoryUserRepository.save(user);
+    }
+
     private HttpHeaders getHttpHeaders(final HttpRequest httpRequest, final String responseBody) {
         return new HttpHeaders()
                 .addHeader(CONTENT_TYPE, getContentType(httpRequest))
@@ -131,6 +170,15 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse getExceptionHttpResponse(final HttpRequest httpRequest, final RuntimeException exception)
             throws IOException {
+        if (exception instanceof BadRequestException) {
+            final String responseBody = loadFile("/400.html");
+            final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
+            return new HttpResponse.Builder()
+                    .statusCode(BAD_REQUEST)
+                    .headers(httpHeaders)
+                    .body(responseBody)
+                    .build();
+        }
         if (exception instanceof UnAuthorisedException) {
             final String responseBody = loadFile("/401.html");
             final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);

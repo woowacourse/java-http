@@ -8,16 +8,21 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Map;
 import org.apache.coyote.ExtensionContentType;
+import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 class Http11HandlerTest {
+
+    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     @DisplayName("defaultPageHandler extractElements 테스트")
     @Test
     void extractElements_DefaultPageHandler() {
-        Http11Handler http11Handler = new Http11DefaultPageHandler();
-        Map<String, String> elements = http11Handler.extractElements("/");
+        Http11Handler http11Handler = new DefaultPageHandler();
+        Map<String, String> elements = http11Handler.handle(log, "/");
 
         assertAll(
                 () -> assertThat(elements.get("Content-Type")).isEqualTo(ExtensionContentType.HTML.getContentType()),
@@ -29,8 +34,8 @@ class Http11HandlerTest {
     @DisplayName("staticResourceHandler extractElements 테스트")
     @Test
     void extractElements_StaticResourceHandler() {
-        Http11Handler http11Handler = new Http11StaticResourceHandler();
-        Map<String, String> elements = http11Handler.extractElements("/index.html");
+        Http11Handler http11Handler = new IndexPageHandler();
+        Map<String, String> elements = http11Handler.handle(log, "/index.html");
 
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         assertAll(

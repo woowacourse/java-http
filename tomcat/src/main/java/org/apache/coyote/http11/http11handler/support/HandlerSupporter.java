@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.http11handler;
+package org.apache.coyote.http11.http11handler.support;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,30 +8,11 @@ import java.util.Map;
 import java.util.Objects;
 import org.apache.coyote.ExtensionContentType;
 
-public class Http11StaticResourceHandler implements Http11Handler {
+public class HandlerSupporter {
 
     private static final String DIRECTORY = "static";
 
-    @Override
-    public boolean isProperHandler(String uri) {
-        if (noExtension(uri)) {
-            uri = addHtmlExtension(uri);
-        }
-        
-        try {
-            Objects.requireNonNull(getClass().getClassLoader().getResource(DIRECTORY + uri));
-            return true;
-        } catch (NullPointerException e) {
-            return false;
-        }
-    }
-
-    @Override
     public Map<String, String> extractElements(String uri) {
-        if (noExtension(uri)) {
-            uri = addHtmlExtension(uri);
-        }
-
         Map<String, String> headerElements = new HashMap<>();
         headerElements.put("Content-Type", getContentType(uri));
         headerElements.put("Content-Length", getContentLength(uri));
@@ -39,11 +20,11 @@ public class Http11StaticResourceHandler implements Http11Handler {
         return headerElements;
     }
 
-    private String addHtmlExtension(String uri) {
+    public String addHtmlExtension(String uri) {
         return uri + ".html";
     }
 
-    private boolean noExtension(String uri) {
+    public boolean noExtension(String uri) {
         return !uri.contains(".");
     }
 

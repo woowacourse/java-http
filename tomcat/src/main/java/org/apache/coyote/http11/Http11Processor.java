@@ -46,14 +46,6 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpBody getBody(final BufferedReader reader) throws IOException {
-        StringBuilder payload = new StringBuilder();
-        while(reader.ready()){
-            payload.append((char) reader.read());
-        }
-        return new HttpBody(payload.toString());
-    }
-
     private HttpHeader getHeaders(final BufferedReader reader, final String startLine) throws IOException {
         StringBuilder headers = new StringBuilder();
         String header;
@@ -61,5 +53,13 @@ public class Http11Processor implements Runnable, Processor {
             headers.append(header).append("\n");
         }
         return new HttpHeader(startLine, headers.toString());
+    }
+
+    private HttpBody getBody(final BufferedReader reader) throws IOException {
+        StringBuilder payload = new StringBuilder();
+        while(reader.ready()){
+            payload.append((char) reader.read());
+        }
+        return new HttpBody(payload.toString());
     }
 }

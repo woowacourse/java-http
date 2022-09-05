@@ -3,83 +3,16 @@ package nextstep.jwp.presentation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.file.Files;
-
-import org.apache.coyote.http11.Http11Processor;
+import java.util.Optional;
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import org.apache.coyote.http11.HttpBody;
 import org.apache.coyote.http11.HttpHeader;
-import org.apache.coyote.http11.exception.QueryParamNotFoundException;
+import org.apache.coyote.http11.exception.ElementNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import support.StubSocket;
 
 class AuthControllerTest {
-
-    @DisplayName("로그인이 성공하면 302를 반환하고 /index.html 리다이렉트한다.")
-    @Test
-    void authUserLogin() throws IOException {
-        //given
-        final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Accept: text/css,*/*;q=0.1 ",
-                "Connection: keep-alive "
-        );
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass()
-                .getClassLoader()
-                .getResource("static/index.html");
-        var expected = "HTTP/1.1 302 Moved Permanently \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n"+
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
-
-    @DisplayName("존재하지 않는 유저일 401 페이지가 보여진다.")
-    @Test
-    void notExistUserException() throws IOException {
-        //given
-        final String httpRequest = String.join("\r\n",
-                "GET /login?account=gu&password=password HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Accept: text/css,*/*;q=0.1 ",
-                "Connection: keep-alive "
-        );
-
-        final var socket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(socket);
-
-        // when
-        processor.process(socket);
-
-        // then
-        final URL resource = getClass()
-                .getClassLoader()
-                .getResource("static/401.html");
-        final String content = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        var expected = String.join("\r\n",
-                "HTTP/1.1 401 Unauthorized ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: " + content.getBytes().length + " ",
-                "",
-                content);
-
-        assertThat(socket.output()).isEqualTo(expected);
-    }
 
     @DisplayName("잘못된 param으로 UserRequest를 생성하여 예외가 발생한다.")
     @Test
@@ -95,7 +28,27 @@ class AuthControllerTest {
 
         assertThatThrownBy(() ->
                 authController.run(httpHeader, httpBody))
-                .hasMessageContaining("잘못된 queryParam 입니다.")
-                .isInstanceOf(QueryParamNotFoundException.class);
+                .hasMessageContaining( "존재하지 않는 데이터입니다.")
+                .isInstanceOf(ElementNotFoundException.class);
+    }
+
+    @DisplayName("사용자 회원가입이 정상적으로 처리된다..")
+    @Test
+    void userRegister() {
+        final AuthController authController = new AuthController();
+
+        final String startLine = "POST /register HTTP/1.1";
+        final HttpHeader httpHeader = new HttpHeader(startLine,
+                String.join("\r\n",
+                        "Content-Type: text/html;charset=utf-8 ",
+                        "Content-Length: keep-alive "));
+        final HttpBody httpBody = new HttpBody("account=green&email=green@0wooteco.com&password=1234");
+
+       authController.run(httpHeader, httpBody);
+
+        final User user = InMemoryUserRepository.findByAccount("green").get();
+
+        assertThat(user.getAccount()).isEqualTo("green");
+        assertThat(user.checkPassword("1234")).isTrue();
     }
 }

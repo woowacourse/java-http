@@ -17,9 +17,9 @@
   - [x] 로그인에 실패하면 /401.html로 리다이렉트
 
 - POST 방식으로 회원가입
-  - [ ] http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)
+  - [x] http://localhost:8080/register으로 접속하면 회원가입 페이지(register.html)
     - 회원가입 페이지를 보여줄 때는 GET
-  - [ ] 회원가입을 완료하면 index.html로 리다이렉트
+  - [x] 회원가입을 완료하면 index.html로 리다이렉트
 
 - [ ] 로그인 페이지도 버튼을 눌렀을 때 GET 방식에서 POST 방식으로 전송하도록 변경
 

@@ -19,6 +19,7 @@ public class RequestHandlerMapping {
         handlers.put(new HttpRequest("/index.html", "GET"), new DashBoardController());
         handlers.put(new HttpRequest("/", "GET"), new HomeController());
         handlers.put(new HttpRequest("/register.html", "GET"), new AuthController());
+        handlers.put(new HttpRequest("/register", "POST"), new AuthController());
 
         handlers.put(new HttpRequest("static-resource", "GET"), new StaticResourceController());
     }

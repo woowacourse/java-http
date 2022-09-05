@@ -16,9 +16,9 @@
 - [x] 로그인 여부에 따른 페이지 이동
   - [x] 성공 : 302, /index.html로 리다이렉트
   - [x] 실패 : 401, /401.html
-- [ ] POST 방식 회원가입
-  - [ ] 회원 가입 완료 시 /index.html로 리다이렉트
-  - [ ] 로그인 버튼도 POST로 수정
+- [x] POST 방식 회원가입
+  - [x] 회원 가입 완료 시 /index.html로 리다이렉트
+  - [x] 로그인 버튼도 POST로 수정
 - [ ] Cookie - JSSESSIONID 저장 
   - [ ] HTTP Reqeust Header의 Cookie에 JSSESSIONID 값이 없으면 Response Header에 `Set-Cookie` 반환 기능 구현
 - [ ] Session 구현 

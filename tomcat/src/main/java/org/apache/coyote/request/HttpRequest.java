@@ -10,15 +10,18 @@ public class HttpRequest {
 
     private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;
+    private final RequestBody requestBody;
 
-    public HttpRequest(final RequestLine requestLine, final HttpHeaders httpHeaders) {
+    public HttpRequest(final RequestLine requestLine, final HttpHeaders httpHeaders, final RequestBody requestBody) {
         this.requestLine = requestLine;
         this.httpHeaders = httpHeaders;
+        this.requestBody = requestBody;
     }
 
-    public static HttpRequest from(final List<String> requests) {
+    public static HttpRequest from(final List<String> requests, final String requestBody) {
         validateRequest(requests);
-        return new HttpRequest(RequestLine.from(requests.get(REQUEST_LINE_INDEX)), HttpHeaders.from(requests));
+        return new HttpRequest(RequestLine.from(requests.get(REQUEST_LINE_INDEX)), HttpHeaders.from(requests),
+                RequestBody.from(requestBody));
     }
 
     private static void validateRequest(final List<String> requests) {
@@ -49,5 +52,9 @@ public class HttpRequest {
 
     public Map<String, String> getHttpHeaders() {
         return httpHeaders.getValue();
+    }
+
+    public Map<String, String> getRequestBody() {
+        return requestBody.getValue();
     }
 }

@@ -50,25 +50,32 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse toHttpResponse(final HttpRequest httpRequest, final Controller controller) throws IOException {
-        String response = controller.service(httpRequest);
-        if (controller.isRest()) {
-            return HttpResponse.of(httpRequest, response);
-        }
-        return HttpResponse.of(httpRequest, ResourceUtil.getResource(response));
-    }
-
     private HttpRequest toHttpRequest(final BufferedReader bufferedReader) throws IOException {
         List<String> requests = new ArrayList<>();
         String line;
-        while ((line = bufferedReader.readLine()) != null) {
+        while (bufferedReader.ready()) {
+            line = bufferedReader.readLine();
             if ("".equals(line)) {
                 break;
             }
             System.out.println(line);
             requests.add(line);
         }
-        return HttpRequest.from(requests);
+
+        StringBuilder requestBody = new StringBuilder();
+        while (bufferedReader.ready()) {
+            requestBody.append((char) bufferedReader.read());
+        }
+
+        return HttpRequest.from(requests, requestBody.toString());
+    }
+
+    private HttpResponse toHttpResponse(final HttpRequest httpRequest, final Controller controller) throws IOException {
+        String response = controller.service(httpRequest);
+        if (controller.isRest()) {
+            return HttpResponse.of(httpRequest, response);
+        }
+        return HttpResponse.of(httpRequest, ResourceUtil.getResource(response));
     }
 
     private void addResponseBody(final HttpRequest httpRequest, final HttpResponse httpResponse,

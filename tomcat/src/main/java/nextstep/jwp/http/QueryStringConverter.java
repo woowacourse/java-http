@@ -1,4 +1,4 @@
-package nextstep.jwp.support;
+package nextstep.jwp.http;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,7 +1,6 @@
-package org.apache.coyote.http11;
+package nextstep.jwp.http;
 
 import org.apache.http.HttpMethod;
-import org.apache.http.RequestEntity;
 
 import java.util.Objects;
 

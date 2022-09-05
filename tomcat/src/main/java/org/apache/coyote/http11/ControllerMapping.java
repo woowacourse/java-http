@@ -5,6 +5,7 @@ import nextstep.jwp.controller.GreetingController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.ResourceController;
 import nextstep.jwp.exception.CustomNotFoundException;
+import nextstep.jwp.http.RequestInfo;
 import nextstep.jwp.support.ResourceSuffix;
 
 import java.util.HashMap;

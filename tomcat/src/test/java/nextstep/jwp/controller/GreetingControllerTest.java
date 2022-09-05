@@ -1,5 +1,8 @@
 package nextstep.jwp.controller;
 
+import nextstep.jwp.http.Headers;
+import nextstep.jwp.http.RequestEntity;
+import nextstep.jwp.http.ResponseEntity;
 import org.apache.http.*;
 import org.junit.jupiter.api.Test;
 

@@ -1,5 +1,6 @@
 package nextstep.jwp.support;
 
+import nextstep.jwp.http.QueryStringConverter;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;

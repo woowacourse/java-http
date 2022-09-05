@@ -1,4 +1,6 @@
-package org.apache.http;
+package nextstep.jwp.http;
+
+import org.apache.http.HttpMethod;
 
 public class RequestEntity {
 

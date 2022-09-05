@@ -1,7 +1,7 @@
 package nextstep.jwp.controller;
 
-import org.apache.http.RequestEntity;
-import org.apache.http.ResponseEntity;
+import nextstep.jwp.http.RequestEntity;
+import nextstep.jwp.http.ResponseEntity;
 
 public interface Controller {
 

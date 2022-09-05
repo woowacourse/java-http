@@ -7,11 +7,13 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
-import org.apache.coyote.http11.Http11StaticFile;
+import org.apache.coyote.HttpMethod;
 import org.apache.coyote.http11.Http11Response;
+import org.apache.coyote.http11.Http11StaticFile;
 import org.apache.coyote.http11.Http11URL;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import support.RequestFixture;
 import support.StubSocket;
 
 class Http11ResponseTest {
@@ -26,12 +28,7 @@ class Http11ResponseTest {
     @Test
     void write() throws IOException, URISyntaxException {
         // given
-        final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        final String httpRequest = RequestFixture.create(HttpMethod.GET, "/index.html", "");
         stubSocket = new StubSocket(httpRequest);
         final Http11Response http11Response = new Http11Response(stubSocket.getOutputStream());
 
@@ -45,7 +42,7 @@ class Http11ResponseTest {
         var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
-                "\r\n"+
+                "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(expected).isEqualTo(stubSocket.output());

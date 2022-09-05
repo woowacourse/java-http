@@ -11,12 +11,14 @@ import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.HttpMethod;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import support.MemoryAppender;
+import support.RequestFixture;
 import support.StubSocket;
 
 class Http11ProcessorTest {
@@ -63,12 +65,7 @@ class Http11ProcessorTest {
     @Test
     void index() throws IOException {
         // given
-        final String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        final String httpRequest = RequestFixture.create(HttpMethod.GET, "/index.html", "");
 
         stubSocket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(stubSocket);
@@ -91,12 +88,7 @@ class Http11ProcessorTest {
     @Test
     void logUser() {
         // given
-        final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        final String httpRequest = RequestFixture.create(HttpMethod.GET, "/login?account=gugu&password=password", "");
 
         stubSocket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(stubSocket);
@@ -111,14 +103,8 @@ class Http11ProcessorTest {
 
     @Test
     void logUserFail() {
-
         // given
-        final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=uncorrect HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        final String httpRequest = RequestFixture.create(HttpMethod.GET, "/login?account=gugu&password=uncorrect", "");
 
         stubSocket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(stubSocket);

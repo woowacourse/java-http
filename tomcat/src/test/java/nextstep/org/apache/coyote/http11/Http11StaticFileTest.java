@@ -9,10 +9,12 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import nextstep.jwp.exception.StaticFileNotFoundException;
+import org.apache.coyote.HttpMethod;
 import org.apache.coyote.http11.Http11StaticFile;
 import org.apache.coyote.http11.Http11URL;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import support.RequestFixture;
 import support.StubSocket;
 
 class Http11StaticFileTest {
@@ -49,12 +51,7 @@ class Http11StaticFileTest {
     @Test
     void getContentType() throws IOException, URISyntaxException {
         // given
-        final String httpCssRequest = String.join("\r\n",
-                "GET /css/styles.css HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        final String httpCssRequest = RequestFixture.create(HttpMethod.GET, "/css/styles.css", "");
         stubSocket = new StubSocket(httpCssRequest);
         final Http11URL urlPath = Http11URL.of(stubSocket.getInputStream());
         final Http11StaticFile cssFile = Http11StaticFile.of(urlPath);
@@ -69,12 +66,7 @@ class Http11StaticFileTest {
     @Test
     void throwExceptionNotExistsFile() throws IOException {
         // given
-        final String httpCssRequest = String.join("\r\n",
-                "GET /notExist.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        final String httpCssRequest = RequestFixture.create(HttpMethod.GET, "/notExist.html", "");
         stubSocket = new StubSocket(httpCssRequest);
         final Http11URL urlPath = Http11URL.of(stubSocket.getInputStream());
 

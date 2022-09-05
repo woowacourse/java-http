@@ -3,9 +3,11 @@ package nextstep.org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import org.apache.coyote.HttpMethod;
 import org.apache.coyote.http11.Http11URL;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import support.RequestFixture;
 import support.StubSocket;
 
 class Http11URLTest {
@@ -19,12 +21,7 @@ class Http11URLTest {
     @Test
     void isDefault() throws IOException {
         // given
-        final String request = String.join("\r\n",
-                "GET /css/styles.css HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        final String request = RequestFixture.create(HttpMethod.GET, "/css/styles.css", "");
         stubSocket = new StubSocket(request);
         final Http11URL http11URL = Http11URL.of(stubSocket.getInputStream());
 
@@ -38,12 +35,7 @@ class Http11URLTest {
     @Test
     void getMediaType() throws IOException {
         // given
-        final String request = String.join("\r\n",
-                "GET /css/styles.css HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        final String request = RequestFixture.create(HttpMethod.GET, "/css/styles.css", "");
         stubSocket = new StubSocket(request);
         final Http11URL http11URL = Http11URL.of(stubSocket.getInputStream());
 
@@ -58,12 +50,7 @@ class Http11URLTest {
     @Test
     void getMediaType_default() throws IOException {
         // given
-        final String request = String.join("\r\n",
-                "GET / HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        final String request = RequestFixture.create(HttpMethod.GET, "/", "");
         stubSocket = new StubSocket(request);
         final Http11URL http11URL = Http11URL.of(stubSocket.getInputStream());
 
@@ -77,12 +64,7 @@ class Http11URLTest {
     @Test
     void parseLogin() throws IOException {
         // given
-        final String request = String.join("\r\n",
-                "GET /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        final String request = RequestFixture.create(HttpMethod.GET, "/login", "");
         stubSocket = new StubSocket(request);
         final Http11URL http11URL = Http11URL.of(stubSocket.getInputStream());
 

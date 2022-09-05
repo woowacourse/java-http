@@ -33,7 +33,7 @@ public class ResponseEntity {
     public String parse() {
         return String.join(
                 "\r\n",
-                httpVersion.getValue() + " " + httpStatus.getCode() + " " + httpStatus.name() + " ",
+                String.format("%s %s %s ", httpVersion.getValue(), httpStatus.getCode(), httpStatus.name()),
                 headers.parse(),
                 content
         );

@@ -5,11 +5,13 @@ import java.util.Map;
 
 public class Headers {
 
+    private static final String DEFAULT_CONTENT_LENGTH = "0";
+
     private final Map<HttpHeader, String> mapping = new LinkedHashMap<>();
 
     public Headers() {
         mapping.put(HttpHeader.CONTENT_TYPE, HttpMime.DEFAULT.getValue());
-        mapping.put(HttpHeader.CONTENT_LENGTH, String.valueOf(0));
+        mapping.put(HttpHeader.CONTENT_LENGTH, DEFAULT_CONTENT_LENGTH);
     }
 
     public void put(final HttpHeader key, final String value) {
@@ -18,12 +20,8 @@ public class Headers {
 
     public String parse() {
         final StringBuilder builder = new StringBuilder();
-        for (Map.Entry<HttpHeader, String> entry : mapping.entrySet()) {
-            builder.append(entry.getKey().getValue())
-                    .append(": ")
-                    .append(entry.getValue())
-                    .append(" \r\n");
-        }
+        mapping.forEach((key, value) ->
+                builder.append(String.format("%s: %s \r%n", key.getValue(), value)));
         return builder.toString();
     }
 }

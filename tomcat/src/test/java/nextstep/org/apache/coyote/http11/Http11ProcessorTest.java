@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.HttpMethod;
+import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import support.MemoryAppender;
 import support.RequestFixture;
+import support.ResponseFixture;
 import support.StubSocket;
 
 class Http11ProcessorTest {
@@ -52,12 +54,7 @@ class Http11ProcessorTest {
         processor.process(stubSocket);
 
         // then
-        var expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
+        var expected = ResponseFixture.create(HttpStatus.OK, "text/html", "Hello world!");
 
         assertThat(stubSocket.output()).isEqualTo(expected);
     }
@@ -76,11 +73,8 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         assert resource != null;
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        var expected = ResponseFixture.create(HttpStatus.OK, "text/html", body);
 
         assertThat(stubSocket.output()).isEqualTo(expected);
     }

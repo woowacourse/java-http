@@ -8,12 +8,14 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import org.apache.coyote.HttpMethod;
+import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.Http11Response;
 import org.apache.coyote.http11.Http11StaticFile;
 import org.apache.coyote.http11.Http11URL;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import support.RequestFixture;
+import support.ResponseFixture;
 import support.StubSocket;
 
 class Http11ResponseTest {
@@ -39,11 +41,8 @@ class Http11ResponseTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         assert resource != null;
-        var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5564 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        final String body = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        var expected = ResponseFixture.create(HttpStatus.OK, "text/html", body);
 
         assertThat(expected).isEqualTo(stubSocket.output());
     }

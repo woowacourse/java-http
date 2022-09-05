@@ -9,12 +9,14 @@ import java.nio.file.Files;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
 class Http11ProcessorTest {
 
     @Test
+    @DisplayName("method (GET), url(/) 요청에 hello world 문자가 담긴 html 응답이 와야한다.")
     void process() {
         // given
         final var socket = new StubSocket();
@@ -35,6 +37,7 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("method (GET), url(/index.html) 요청에 index.html 응답이 와야한다.")
     void index() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
@@ -62,6 +65,7 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("method (GET), url(/login) 요청에 login.html 응답이 와야한다.")
     void loginPage() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
@@ -89,6 +93,7 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("method (GET), url(/login?account={account}&password={password}) 요청에 user정보 응답이 와야한다.")
     void login(){
         // given
         final String httpRequest = String.join("\r\n",

@@ -47,7 +47,7 @@ public class HttpCookie {
         return new HttpCookie(cookies);
     }
 
-    public String getHeaderValue() {
+    public String generateHeaderValue() {
         return values.entrySet()
                 .stream()
                 .map(it -> it.getKey() + KEY_VALUE_SEPARATOR + it.getValue())

@@ -77,7 +77,7 @@ public class HttpResponse {
         }
 
         public Builder setCookie(final HttpCookie httpCookie) {
-            headers.put(SET_COOKIE, httpCookie.getHeaderValue());
+            headers.put(SET_COOKIE, httpCookie.generateHeaderValue());
             return this;
         }
 

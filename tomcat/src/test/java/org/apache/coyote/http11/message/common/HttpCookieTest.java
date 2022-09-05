@@ -15,7 +15,7 @@ class HttpCookieTest {
         HttpCookie httpCookie = HttpCookie.of("JSESSIONID", "656cef62-e3c4-40bc-a8df-94732920ed46");
 
         // when
-        String actual = httpCookie.getHeaderValue();
+        String actual = httpCookie.generateHeaderValue();
 
         // then
         assertThat(actual).isEqualTo("JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
@@ -29,7 +29,7 @@ class HttpCookieTest {
         HttpCookie httpCookie = HttpCookie.parse(header);
 
         // when
-        String actual = httpCookie.getHeaderValue();
+        String actual = httpCookie.generateHeaderValue();
 
         // then
         assertThat(actual).isEqualTo(header);

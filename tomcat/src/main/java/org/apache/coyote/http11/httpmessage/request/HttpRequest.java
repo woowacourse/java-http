@@ -21,13 +21,13 @@ public class HttpRequest {
 
     public static HttpRequest of(BufferedReader bufferedReader) throws IOException {
         RequestLine requestLine = RequestLine.of(bufferedReader.readLine());
-        Headers headers = Headers.of(getHeaders(bufferedReader));
-        RequestBody requestBody = new RequestBody(getBody(bufferedReader, headers));
+        Headers headers = Headers.of(extractHeaders(bufferedReader));
+        RequestBody requestBody = new RequestBody(extractBody(bufferedReader, headers));
 
         return new HttpRequest(requestLine, headers, requestBody);
     }
 
-    private static List<String> getHeaders(BufferedReader bufferedReader) throws IOException {
+    private static List<String> extractHeaders(BufferedReader bufferedReader) throws IOException {
         List<String> headers = new LinkedList<>();
         String line;
         while ((line = bufferedReader.readLine()) != null && !line.isBlank()) {
@@ -36,7 +36,7 @@ public class HttpRequest {
         return headers;
     }
 
-    private static String getBody(BufferedReader bufferedReader, Headers headers) throws IOException {
+    private static String extractBody(BufferedReader bufferedReader, Headers headers) throws IOException {
         String contentLengthValue = headers.getHeader("Content-Length");
         if (contentLengthValue == null) {
             return "";
@@ -54,10 +54,6 @@ public class HttpRequest {
 
     public String getPath() {
         return requestLine.getPath();
-    }
-
-    public Object getParameter(String key) {
-        return requestLine.getParameter(key);
     }
 
     public RequestBody getRequestBody() {

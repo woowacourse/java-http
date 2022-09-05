@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
@@ -21,7 +22,7 @@ class HttpRequestTest {
         String requestMessage = "GET /index.html HTTP/1.1\r\n"
                 + "Host: localhost:8080\r\n"
                 + "Connection: keep-alive\r\n"
-                + "Content-Length: "+ body.getBytes().length +"\r\n"
+                + "Content-Length: " + body.getBytes().length + "\r\n"
                 + "\r\n"
                 + body;
 
@@ -37,7 +38,8 @@ class HttpRequestTest {
         // then
         assertThat(httpRequest).extracting("requestLine", "headers", "requestBody")
                 .containsExactly(RequestLine.of("GET /index.html HTTP/1.1"),
-                        Headers.of(List.of("Host: localhost:8080", "Connection: keep-alive", "Content-Length: " + body.getBytes().length)),
+                        Headers.of(List.of("Host: localhost:8080", "Connection: keep-alive",
+                                "Content-Length: " + body.getBytes().length)),
                         new RequestBody(body));
     }
 
@@ -52,5 +54,53 @@ class HttpRequestTest {
         // when & then
         assertThatThrownBy(() -> HttpRequest.of(bufferedReader))
                 .isInstanceOf(Exception.class);
+    }
+
+    @Test
+    void 요청의_method와_uri가_일치하는_지_확인한다() throws IOException {
+        // given
+        String body = "body=requestBody";
+
+        String requestMessage = "GET /index.html HTTP/1.1\r\n"
+                + "Host: localhost:8080\r\n"
+                + "Connection: keep-alive\r\n"
+                + "Content-Length: " + body.getBytes().length + "\r\n"
+                + "\r\n"
+                + body;
+
+        InputStream inputStream = new ByteArrayInputStream(requestMessage.getBytes());
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+        HttpRequest httpRequest = HttpRequest.of(bufferedReader);
+
+        // when
+        boolean result = httpRequest.matchRequestLine(HttpMethod.GET, Pattern.compile("/index.html"));
+
+        // then
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void 요청의_method와_uri가_일치하지_않는_지_확인한다() throws IOException {
+        // given
+        String body = "body=requestBody";
+
+        String requestMessage = "GET /index.html HTTP/1.1\r\n"
+                + "Host: localhost:8080\r\n"
+                + "Connection: keep-alive\r\n"
+                + "Content-Length: " + body.getBytes().length + "\r\n"
+                + "\r\n"
+                + body;
+
+        InputStream inputStream = new ByteArrayInputStream(requestMessage.getBytes());
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+        HttpRequest httpRequest = HttpRequest.of(bufferedReader);
+
+        // when
+        boolean result = httpRequest.matchRequestLine(HttpMethod.POST, Pattern.compile("/index.html"));
+
+        // then
+        assertThat(result).isFalse();
     }
 }

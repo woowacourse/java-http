@@ -100,6 +100,10 @@ public class HttpRequest {
         return path.equals(ROOT_PATH);
     }
 
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
+    }
+
     public String getPath() {
         return path;
     }

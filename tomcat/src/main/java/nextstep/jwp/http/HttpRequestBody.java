@@ -22,6 +22,10 @@ public class HttpRequestBody {
         return new HttpRequestBody(convertRequestBodyMap(requestBody));
     }
 
+    public static HttpRequestBody empty() {
+        return new HttpRequestBody(new ConcurrentHashMap<>());
+    }
+
     private static Map<String, String> convertRequestBodyMap(final String requestBody) {
         Map<String, String> values = new ConcurrentHashMap<>();
         if (requestBody.isEmpty()) {

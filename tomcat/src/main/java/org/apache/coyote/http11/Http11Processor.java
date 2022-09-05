@@ -6,14 +6,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.Http11Request;
+import org.apache.coyote.http11.request.RequestAssembler;
 import org.apache.coyote.http11.response.Http11Response;
+import org.apache.coyote.http11.response.ResponseAssembler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,18 +24,15 @@ import nextstep.jwp.model.User;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String CRLF = "\r\n";
-    private static final int METHOD_SEQUENCE = 0;
-    private static final int URL_SEQUENCE = 1;
-    private static final int HEADER_NAME_INDEX = 0;
-    private static final int HEADER_VALUE_INDEX = 1;
 
     private final Socket connection;
     private final ResponseAssembler responseAssembler;
+    private final RequestAssembler requestAssembler;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         responseAssembler = new ResponseAssembler();
+        requestAssembler = new RequestAssembler();
     }
 
     @Override
@@ -49,23 +47,56 @@ public class Http11Processor implements Runnable, Processor {
         outputStream.flush();
     }
 
+    public void post(Http11Request request, OutputStream outputStream) throws IOException {
+        Http11Response response = postMapping(request);
+
+        outputStream.write(response.toMessage().getBytes());
+        outputStream.flush();
+    }
+
+    private Http11Response postMapping(Http11Request request) {
+        Map<String, String> bodyParams = request.getBody();
+
+        if (request.getUrl().equals("/register")) {
+            return register(bodyParams);
+        }
+
+        if (request.getUrl().equals("/login")) {
+            return login(bodyParams);
+        }
+
+        return responseAssembler.redirectResponse("/404.html");
+    }
+
+    private Http11Response login(Map<String, String> bodyParams) {
+        String account = Objects.requireNonNull(bodyParams.get("account"), "계정이 입력되지 않았습니다.");
+        String password = Objects.requireNonNull(bodyParams.get("password"), "비밀번호가 입력되지 않았습니다.");
+
+        return checkUserInformation(account, password);
+    }
+
+    private Http11Response register(Map<String, String> bodyParams) {
+        String account = Objects.requireNonNull(bodyParams.get("account"), "계정이 입력되지 않았습니다.");
+        String password = Objects.requireNonNull(bodyParams.get("password"), "비밀번호가 입력되지 않았습니다.");
+        String email = Objects.requireNonNull(bodyParams.get("email"), "이메일이 입력되지 않았습니다.");
+
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+
+        return responseAssembler.redirectResponse("/index.html");
+    }
+
     private Http11Response getMapping(Http11Request request) {
         if (request.isResource()) {
             return responseAssembler.resourceResponse(request.getUrl(), HttpStatus.OK);
         }
         if (request.getUrl().equals("/login")) {
-            return generateLoginPage(request);
+            return responseAssembler.resourceResponse("/login.html", HttpStatus.OK);
+        }
+        if (request.getUrl().equals("/register")) {
+            return responseAssembler.resourceResponse("/register.html", HttpStatus.OK);
         }
         return generateDefaultResponse();
-    }
-
-    private Http11Response generateLoginPage(Http11Request request) {
-        Map<String, String> queries = request.getQueryString();
-        if (queries.get("account") != null && queries.get("password") != null) {
-            return checkUserInformation(queries.get("account"), queries.get("password"));
-        }
-
-        return responseAssembler.resourceResponse("/login.html", HttpStatus.OK);
     }
 
     private Http11Response checkUserInformation(String account, String password) {
@@ -73,10 +104,11 @@ public class Http11Processor implements Runnable, Processor {
                 .filter(user -> user.checkPassword(password));
 
         if (userByAccount.isPresent()) {
-            log.info("user : " + userByAccount.get());
-            return responseAssembler.resourceResponse("/index.html", HttpStatus.REDIRECT);
+            log.info("로그인 성공!" + " 아이디: " + userByAccount.get().getAccount());
+            return responseAssembler.redirectResponse("/index.html");
         }
-        return responseAssembler.resourceResponse("/401.html", HttpStatus.UNAUTHORIZED);
+
+        return responseAssembler.redirectResponse("/401.html");
     }
 
     private Http11Response generateDefaultResponse() {
@@ -86,57 +118,26 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-
         try (
                 InputStream inputStream = connection.getInputStream();
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                 OutputStream outputStream = connection.getOutputStream();
                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
         ) {
-            Http11Request request = makeRequest(bufferedReader);
-            get(request, outputStream);
+            Http11Request request = requestAssembler.makeRequest(bufferedReader);
+            executeMethod(outputStream, request);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Http11Request makeRequest(BufferedReader bufferedReader) throws IOException {
-        String[] rawStart = bufferedReader.readLine()
-                .split(" ");
-        String method = rawStart[METHOD_SEQUENCE];
-        String url = rawStart[URL_SEQUENCE];
-
-        Map<String, String> headers = parseHeaders(bufferedReader);
-        String body = parseBody(bufferedReader);
-
-        return new Http11Request(method, url, headers, body);
-    }
-
-    private String parseBody(BufferedReader bufferedReader) throws IOException {
-        StringBuilder bodyBuilder = new StringBuilder();
-        while (bufferedReader.ready()) {
-            String data = bufferedReader.readLine();
-            if (data == null) {
-                break;
-            }
-            bodyBuilder.append(data);
-            bodyBuilder.append(CRLF);
+    private void executeMethod(OutputStream outputStream, Http11Request request) throws IOException {
+        if (request.getMethod() == HttpMethods.GET) {
+            get(request, outputStream);
         }
 
-        String body = bodyBuilder.toString();
-        return body;
-    }
-
-    private Map<String, String> parseHeaders(BufferedReader bufferedReader) throws IOException {
-        Map<String, String> headers = new HashMap<>();
-        while (true) {
-            String data = bufferedReader.readLine();
-            if (data == null || data.equals("")) {
-                break;
-            }
-            String[] header = data.split(" ");
-            headers.put(header[HEADER_NAME_INDEX].strip(), header[HEADER_VALUE_INDEX].strip());
+        if (request.getMethod() == HttpMethods.POST) {
+            post(request, outputStream);
         }
-        return headers;
     }
 }

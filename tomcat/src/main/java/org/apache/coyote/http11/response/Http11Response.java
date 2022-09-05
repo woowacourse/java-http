@@ -38,4 +38,8 @@ public class Http11Response {
 
         return stringBuilder.toString();
     }
+
+    public void setHeader(String headerName, String value) {
+        responseHeader.put(headerName, value);
+    }
 }

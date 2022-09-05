@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.coyote.http11.HttpMethods;
+
 public class Http11Request {
     private final String method;
     private final String url;
@@ -19,6 +21,48 @@ public class Http11Request {
 
     public boolean isResource() {
         return url.endsWith(".html") || url.endsWith(".css") || url.endsWith(".js");
+    }
+
+    public boolean hasCookie() {
+        if (header.containsKey("Cookie")) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public Map<String, String> getCookies() {
+        Map<String, String> cookies = new HashMap<>();
+        String cookie = header.get("Cookie");
+
+        if (cookie == null) {
+            return cookies;
+        }
+
+        String[] eachCookies = cookie.split(";");
+        for (String eachCookie: eachCookies) {
+            String[] params = eachCookie.split("=");
+            String cookieKey = params[0].strip();
+            String cookieValue = params[1].strip();
+            cookies.put(cookieKey, cookieValue);
+        }
+        return cookies;
+    }
+
+    public Map<String, String> getBody() {
+        Map<String, String> bodies = new HashMap<>();
+        String[] rawBodies = body.split("&");
+
+        for (String rawBody : rawBodies) {
+            System.out.println(rawBody);
+            String[] params = rawBody.split("=");
+            String paramName = params[0];
+            String paramValue = params[1];
+
+            bodies.put(paramName, paramValue);
+        }
+
+        return bodies;
     }
 
     public String getUrl() {
@@ -46,6 +90,9 @@ public class Http11Request {
         return queries;
     }
 
+    public HttpMethods getMethod() {
+        return HttpMethods.toHttpMethod(method);
+    }
 
     @Override
     public String toString() {

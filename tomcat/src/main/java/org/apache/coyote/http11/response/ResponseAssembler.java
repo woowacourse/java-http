@@ -1,12 +1,16 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.apache.coyote.http11.HttpContent;
+import org.apache.coyote.http11.HttpHeaders;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.response.Http11Response;
 
@@ -14,6 +18,7 @@ public class ResponseAssembler {
 
     private static final String RESOURCE_FOLDER = "static";
     private static final String CHARSET_UTF_8 = ";charset=utf-8";
+    private static final String EMPTY_BODY = "";
 
     public Http11Response resourceResponse(String url, HttpStatus httpStatus) {
         URL resource = getClass().getClassLoader()
@@ -53,6 +58,18 @@ public class ResponseAssembler {
                 HttpStatus.OK.getMessage(),
                 headers,
                 responseData
+        );
+    }
+
+    public Http11Response redirectResponse(String redirectUrl) {
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Location", redirectUrl);
+
+        return new Http11Response(
+                HttpStatus.REDIRECT.getStatusCode(),
+                HttpStatus.REDIRECT.getMessage(),
+                headers,
+                EMPTY_BODY
         );
     }
 }

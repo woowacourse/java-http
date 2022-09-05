@@ -1,7 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
-import org.apache.http.HttpStatus;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -19,13 +19,12 @@ class Http11ProcessorTest {
         // given
         final var socket = new StubSocket();
         final var processor = new Http11Processor(socket);
+        final String expected = makeResponse(HttpStatus.OK, "text/html", 12, "Hello world!");
 
         // when
         processor.process(socket);
 
         // then
-        final String expected = makeResponse(HttpStatus.OK, "text/html", 12, "Hello world!");
-
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -33,18 +32,15 @@ class Http11ProcessorTest {
     void html_파일을_불러올_수_있다() throws IOException {
         // given
         final String httpRequest = makeGetRequest("/index.html", "text/html");
-
-
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
+        final String content = readContent("static/index.html");
+        final String expected = makeResponse(HttpStatus.OK, "text/html", 5564, content);
 
         // when
         processor.process(socket);
 
         // then
-        final String content = readContent("static/index.html");
-        final String expected = makeResponse(HttpStatus.OK, "text/html", 5564, content);
-
         assertThat(socket.output()).isEqualTo(expected);
     }
 
@@ -54,47 +50,45 @@ class Http11ProcessorTest {
         final String httpRequest = makeGetRequest("/css/styles.css", "text/css");
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
+        final String content = readContent("static/css/styles.css");
+        final String expected = makeResponse(HttpStatus.OK, "text/css", 211991, content);
 
         // when
         processor.process(socket);
 
         // then
-        final String content = readContent("static/css/styles.css");
-        final String expected = makeResponse(HttpStatus.OK, "text/css", 211991, content);
-
         assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test
     void JS_파일을_불러올_수_있다() throws IOException {
         // given
-        final String httpRequest = makeGetRequest("/js/scripts.js", "*/*");
+        final String httpRequest = makeGetRequest("/js/scripts.js", "text/javascript");
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
+        final String content = readContent("static/js/scripts.js");
+        final String expected = makeResponse(HttpStatus.OK, "text/javascript", 976, content);
 
         // when
         processor.process(socket);
 
         // then
-        final String content = readContent("static/js/scripts.js");
-        final String expected = makeResponse(HttpStatus.OK, "*/*", 976, content);
-
         assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test
-    void 파일을_찾지_못하면_BadRequest가_발생한다() {
+    void 파일을_찾지_못하면_BadRequest가_발생한다() throws IOException {
         // given
         final String httpRequest = makeGetRequest("/notfound.html", "text/html");
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
+        final String content = readContent("static/404.html");
+        final String expected = makeResponse(HttpStatus.BAD_REQUEST, "text/html", 2426, content);
 
         // when
         processor.process(socket);
 
         // then
-        final String expected = makeResponse(HttpStatus.BAD_REQUEST, "text/html", 0, "");
-
         assertThat(socket.output()).isEqualTo(expected);
     }
 

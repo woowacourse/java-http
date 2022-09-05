@@ -1,30 +1,19 @@
 package org.apache.http;
 
-import java.util.Objects;
-
 public class RequestEntity {
 
-    private static final String DEFAULT_CONTENT_TYPE = "text/html";
-
-    private final String contentType;
+    private final HttpMethod httpMethod;
     private final String uri;
     private final String queryString;
 
-    public RequestEntity(final String contentType, final String uri, final String queryString) {
-        this.contentType = convertContentType(contentType);
+    public RequestEntity(final HttpMethod httpMethod, final String uri, final String queryString) {
+        this.httpMethod = httpMethod;
         this.uri = uri;
         this.queryString = queryString;
     }
 
-    private String convertContentType(final String contentType) {
-        if (Objects.isNull(contentType)) {
-            return DEFAULT_CONTENT_TYPE;
-        }
-        return contentType;
-    }
-
-    public String getContentType() {
-        return contentType;
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
     }
 
     public String getUri() {

@@ -1,42 +1,38 @@
 package org.apache.coyote.http11;
 
-import javassist.NotFoundException;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.controller.GreetingController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.ResourceController;
+import nextstep.jwp.exception.CustomNotFoundException;
+import nextstep.jwp.support.ResourceSuffix;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import static org.apache.http.HttpMethod.GET;
 
 public class ControllerMapping {
 
-    private static final List<String> resourceSuffixes = List.of(".html", ".css", ".js");
-    private final Map<String, Controller> mapping = new HashMap<>();
+    private final Map<RequestInfo, Controller> mapping = new HashMap<>();
 
     public ControllerMapping() {
-        mapping.put("/", new GreetingController());
-        mapping.put("/login", new LoginController());
+        mapping.put(new RequestInfo(GET, "/"), new GreetingController());
+        mapping.put(new RequestInfo(GET, "/login"), new LoginController());
     }
 
-    public Controller getController(final String uri) throws NotFoundException {
-        final Controller controller = mapping.get(uri);
-        if (controller == null && isResourceUri(uri)) {
-            return new ResourceController();
-        }
+    public Controller getController(final RequestInfo requestInfo) {
+        final Controller controller = mapping.get(requestInfo);
         if (controller != null) {
             return controller;
         }
-        throw new NotFoundException(uri + "를 처리할 컨트롤러를 찾지 못함");
+        if (isResourceUri(requestInfo.getUri())) {
+            return new ResourceController();
+        }
+        throw new CustomNotFoundException(requestInfo.getUri() + "를 처리할 컨트롤러를 찾지 못함");
     }
 
     private boolean isResourceUri(final String uri) {
-        for (String resourceSuffix : resourceSuffixes) {
-            if (uri.endsWith(resourceSuffix)) {
-                return true;
-            }
-        }
-        return false;
+        return ResourceSuffix.isEndWith(uri);
     }
 }

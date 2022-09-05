@@ -28,6 +28,12 @@ public class LoginController extends AbstractController {
 
     @Override
     void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+        File file = new File(Thread.currentThread().getContextClassLoader().getResource(PREFIX + "/login.html").getFile());
+        httpResponse.addResponseBody(file);
+    }
+
+    @Override
+    void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         String account = httpRequest.getQueryParameterValue("account");
         String password = httpRequest.getQueryParameterValue("password");
         try {
@@ -42,10 +48,6 @@ public class LoginController extends AbstractController {
             File file = new File(Thread.currentThread().getContextClassLoader().getResource(PREFIX + "/401.html").getFile());
             httpResponse.addResponseBody(file);
         }
-    }
-
-    @Override
-    void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
     }
 
     private void validatePassword(final User user, final String password) {

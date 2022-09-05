@@ -2,7 +2,7 @@ package nextstep.jwp.http.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import nextstep.jwp.exception.InvalidRequestHeaderException;
 import nextstep.jwp.http.common.HttpHeaders;
@@ -27,7 +27,7 @@ public class HttpRequestFactory {
     private static Map<String, String> parseRequestHeadersValue(
         final BufferedReader bufferedReader) throws IOException {
 
-        Map<String, String> headers = new HashMap<>();
+        Map<String, String> headers = new LinkedHashMap<>();
         String line = bufferedReader.readLine();
         while (isNotEmpty(line)) {
             String[] values = convertBlankDeleteAndLowerCase(parseLine(line));
@@ -39,7 +39,7 @@ public class HttpRequestFactory {
     }
 
     private static boolean isNotEmpty(final String line) {
-        return line != null && !BLANK.equals(line);
+        return !BLANK.equals(line);
     }
 
     private static String[] parseLine(String line) {
@@ -60,7 +60,6 @@ public class HttpRequestFactory {
     private static RequestBody parseRequestBodyValue(final BufferedReader bufferedReader,
                                                      final HttpHeaders requestHeaders)
         throws IOException {
-
         int contentLength = requestHeaders.getContentLength();
         char[] buffer = new char[contentLength];
         bufferedReader.read(buffer, 0, contentLength);

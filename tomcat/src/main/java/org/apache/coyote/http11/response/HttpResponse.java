@@ -29,9 +29,19 @@ public class HttpResponse {
         setBody(staticResource.getContent());
     }
 
-    public void found(final String location) {
+    public void sendRedirect(final String location) {
         setStatus(HttpStatus.FOUND);
         responseHeader.setLocation(location);
+    }
+
+    public void sendError(final HttpStatus status) {
+        setStatus(status);
+    }
+
+    public void sendError(final HttpStatus status, final StaticResource staticResource) {
+        setStatus(status);
+        responseHeader.setContentInfo(staticResource);
+        setBody(staticResource.getContent());
     }
 
     public void setStatus(final HttpStatus status) {

@@ -1,11 +1,14 @@
 package nextstep.jwp.controller;
 
 import org.apache.coyote.http11.common.HttpMethod;
-import org.apache.coyote.http11.exception.UnsupportedHttpMethodException;
+import org.apache.coyote.http11.common.HttpStatus;
+import org.apache.coyote.http11.common.StaticResource;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
 public abstract class AbstractController implements Controller {
+
+    private static final String METHOD_NOT_ALLOWED_PATH = "/index.html";
 
     @Override
     public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) {
@@ -17,14 +20,18 @@ public abstract class AbstractController implements Controller {
             doPost(httpRequest, httpResponse);
             return;
         }
-        httpResponse.found("/404.html");
+        sendMethodNotAllowed(httpResponse);
     }
 
     protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        throw new UnsupportedHttpMethodException();
+        sendMethodNotAllowed(httpResponse);
     }
 
     protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        throw new UnsupportedHttpMethodException();
+        sendMethodNotAllowed(httpResponse);
+    }
+
+    private void sendMethodNotAllowed(HttpResponse httpResponse) {
+        httpResponse.sendError(HttpStatus.METHOD_NOT_ALLOWED, StaticResource.path(METHOD_NOT_ALLOWED_PATH));
     }
 }

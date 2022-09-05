@@ -18,7 +18,7 @@ public class LoginController extends AbstractController {
         final var session = httpRequest.getSession();
 
         if (loginService.isAlreadyLogin(session)) {
-            httpResponse.found("/index.html");
+            httpResponse.sendRedirect("/index.html");
             return;
         }
         httpResponse.ok(StaticResource.path("/login.html"));
@@ -29,14 +29,15 @@ public class LoginController extends AbstractController {
         final var parameters = httpRequest.parseBodyQueryString();
 
         if (loginService.isAlreadyLogin(session)) {
-            httpResponse.found("/index.html");
+            httpResponse.sendRedirect("/index.html");
             return;
         }
         try {
-            httpResponse.setSessionId(loginService.login(parameters));
-            httpResponse.found("/index.html");
+            final var sessionId = loginService.login(parameters);
+            httpResponse.setSessionId(sessionId);
+            httpResponse.sendRedirect("/index.html");
         } catch (AuthenticationException e) {
-            httpResponse.found("/401.html");
+            httpResponse.sendRedirect("/401.html");
         }
     }
 }

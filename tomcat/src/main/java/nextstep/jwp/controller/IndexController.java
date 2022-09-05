@@ -8,7 +8,6 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class IndexController extends AbstractController {
 
     public void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        final var staticResource = new StaticResource("Hello world!", ContentType.TEXT_HTML);
-        httpResponse.ok(staticResource);
+        httpResponse.ok(new StaticResource("Hello world!", ContentType.TEXT_HTML));
     }
 }

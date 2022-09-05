@@ -2,6 +2,7 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.exception.DuplicationException;
 import nextstep.jwp.service.RegisterService;
+import org.apache.coyote.http11.common.HttpStatus;
 import org.apache.coyote.http11.common.StaticResource;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
@@ -23,9 +24,9 @@ public class RegisterController extends AbstractController {
 
         try {
             registerService.register(parameters);
-            httpResponse.found("/index.html");
+            httpResponse.sendRedirect("/index.html");
         } catch (DuplicationException e) {
-            httpResponse.found("/register.html");
+            httpResponse.sendError(HttpStatus.BAD_REQUEST, StaticResource.path("/register.html"));
         }
     }
 }

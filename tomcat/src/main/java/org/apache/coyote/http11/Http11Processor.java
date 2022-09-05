@@ -52,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
             mappedController.service(httpRequest, httpResponse);
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            httpResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+            httpResponse.sendError(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

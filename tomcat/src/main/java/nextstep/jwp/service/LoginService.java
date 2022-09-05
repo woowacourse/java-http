@@ -3,7 +3,6 @@ package nextstep.jwp.service;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.AuthenticationException;
-import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
@@ -21,7 +20,7 @@ public class LoginService {
         final var password = parameters.get("password");
 
         final var user = InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
+                .orElseThrow(() -> new AuthenticationException("존재하지 않는 사용자입니다."));
 
         if (!user.checkPassword(password)) {
             throw new AuthenticationException("비밀번호가 일치하지 않습니다.");

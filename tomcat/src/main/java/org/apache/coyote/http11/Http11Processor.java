@@ -52,7 +52,7 @@ public class Http11Processor implements Runnable, Processor {
     private String getResponse(final HttpRequest httpRequest) {
         final String requestUri = httpRequest.getUri();
 
-        if (requestUri.contains("/login")) {
+        if (requestUri.equals("/login")) {
             return createLoginResponse(httpRequest);
         }
         if (!requestUri.equals("/")) {

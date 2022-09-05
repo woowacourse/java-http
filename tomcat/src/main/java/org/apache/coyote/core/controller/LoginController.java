@@ -20,7 +20,7 @@ public class LoginController extends AbstractController {
     @Override
     public void service(final HttpRequest request, final HttpResponse response)
             throws IOException, UncheckedServletException {
-        printUser(request);
+        Login(request);
 
         String responseBody = new ClassPathResource().getStaticContent(request.getPath());
 
@@ -30,13 +30,29 @@ public class LoginController extends AbstractController {
         response.setResponseBody(responseBody);
     }
 
-    private void printUser(final HttpRequest httpRequest) {
-        if (httpRequest.hasQueryParams()) {
-            Map<String, String> queryString = httpRequest.getQueryParams();
-            String account = queryString.get("account");
-            User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(UserNotFoundException::new);
-            log.info(user.toString());
+    private void Login(final HttpRequest request) {
+        Map<String, String> queryString = request.getQueryParams();
+        String account = queryString.get("account");
+        String password = queryString.get("password");
+
+        User user = findUser(account);
+        checkUserPassword(user, password);
+
+        printUser(user);
+    }
+
+    private void checkUserPassword(final User user, final String password) {
+        if (!user.checkPassword(password)) {
+            throw new IllegalArgumentException();
         }
+    }
+
+    private User findUser(final String account) {
+        return InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(UserNotFoundException::new);
+    }
+
+    private void printUser(final User user) {
+        log.info(user.toString());
     }
 }

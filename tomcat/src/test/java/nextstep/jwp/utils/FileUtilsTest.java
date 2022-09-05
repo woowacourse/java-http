@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URL;
 import java.util.Objects;
+import nextstep.jwp.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -14,20 +15,20 @@ class FileUtilsTest {
     void extractFileExtension_success() {
         String path = "/index.html";
 
-        String actual = FileUtils.extractFileExtension(path);
+        ContentType actual = FileUtils.extractFileExtension(path);
 
-        String expected = "html";
+        ContentType expected = ContentType.TEXT_HTML;
         assertThat(actual).isEqualTo(expected);
     }
 
     @Test
-    @DisplayName("기본 파일 확장자로 html을 반환한다.")
+    @DisplayName("기본 파일 확장자로 plain을 반환한다.")
     void extractFileExtension_success_default() {
         String path = "/";
 
-        String actual = FileUtils.extractFileExtension(path);
+        ContentType actual = FileUtils.extractFileExtension(path);
 
-        String expected = "html";
+        ContentType expected = ContentType.TEXT_PLAIN;
         assertThat(actual).isEqualTo(expected);
     }
 

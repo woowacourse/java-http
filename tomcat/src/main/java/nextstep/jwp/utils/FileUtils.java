@@ -19,12 +19,12 @@ public class FileUtils {
     private FileUtils() {
     }
 
-    public static String extractFileExtension(String path) {
+    public static ContentType extractFileExtension(String path) {
         int fileNameDelimiterIndex = path.lastIndexOf(FILE_NAME_DELIMITER);
         if (fileNameDelimiterIndex == NO_EXISTING) {
-            return ContentType.TEXT_HTML.getFileExtension();
+            return ContentType.TEXT_PLAIN;
         }
-        return path.substring(fileNameDelimiterIndex + 1);
+        return ContentType.from(path.substring(fileNameDelimiterIndex + 1));
     }
 
     public static String readFile(URL resource){

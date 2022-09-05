@@ -29,4 +29,30 @@ class RequestLineTest {
         assertThatThrownBy(() -> RequestLine.of(invalidValue))
                 .isInstanceOf(IndexOutOfBoundsException.class);
     }
+
+    @Test
+    void httpMethod가_일치하는지_확인한다() {
+        // given
+        String value = "GET /index.html HTTP/1.1";
+        RequestLine requestLine = RequestLine.of(value);
+
+        // when
+        boolean result = requestLine.matchHttpMethod(HttpMethod.GET);
+
+        // then
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    void httpMethod가_일치하지_않는지_확인한다() {
+        // given
+        String value = "GET /index.html HTTP/1.1";
+        RequestLine requestLine = RequestLine.of(value);
+
+        // when
+        boolean result = requestLine.matchHttpMethod(HttpMethod.POST);
+
+        // then
+        assertThat(result).isFalse();
+    }
 }

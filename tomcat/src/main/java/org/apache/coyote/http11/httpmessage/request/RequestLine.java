@@ -41,10 +41,6 @@ public class RequestLine {
         return uri.getPath();
     }
 
-    public Object getParameter(String key) {
-        return uri.getParameter(key);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {

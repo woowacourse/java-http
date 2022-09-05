@@ -37,15 +37,14 @@ public class HttpRequest {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        String line = bufferedReader.readLine();
+        String line;
 
         try {
-            while (!"".equals(line)) {
+            while (!"".equals(line = bufferedReader.readLine())) {
                 if (Objects.isNull(line)) {
                     return "";
                 }
                 putHeader(line);
-                line = bufferedReader.readLine();
             }
 
             if (!(containsHeader("Content-Type") &&

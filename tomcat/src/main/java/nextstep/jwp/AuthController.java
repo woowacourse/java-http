@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.apache.catalina.session.Session;
 import org.apache.catalina.session.SessionManager;
@@ -27,36 +28,47 @@ public class AuthController {
     }
 
     public static HttpResponse login(HttpRequest request) {
-        if (request.hasSession()) {
-            Session session = request.getSession();
-            User user = getUser(sessionManager.findSession(session.getId()));
-            if (InMemoryUserRepository.findByAccount(user.getAccount())
-                .isPresent()) {
-                return HttpResponse.redirect(request, "/index.html");
-            }
-
+        if (isLogin(request)) {
+            return HttpResponse.redirect(request, "/index.html");
         }
 
         if (!request.hasQuery()) {
             return new HttpResponse(request, StatusCode.OK, getStaticResource(request.getUrl()));
         }
+
         Session session = new Session(new HttpCookie().getCookieValue("JSESSIONID"));
 
         final String account = request.getQueryValue("account");
         final String password = request.getQueryValue("password");
 
-        try {
-            User user = loginUser(account, password);
-            session.setAttribute("user", user);
-            sessionManager.add(session);
-            log.info("로그인 성공! 아이디: {}", user.getAccount());
-        } catch (IllegalArgumentException e) {
+        Optional<User> foundUser = InMemoryUserRepository.findByAccountAndPassword(account, password);
+        if (foundUser.isEmpty()) {
             return HttpResponse.redirect(request, "/401.html");
         }
+
+        User user = foundUser.get();
+        session.setAttribute("user", user);
+        sessionManager.add(session);
+        log.info("로그인 성공! 아이디: {}", user.getAccount());
 
         HttpResponse response = HttpResponse.redirect(request, "/index.html");
         response.setCookie(HttpCookie.fromJSESSIONID(session.getId()));
         return response;
+    }
+
+    private static boolean isLogin(HttpRequest request) {
+        if (!request.hasSession()) {
+            return false;
+        }
+
+        Session session = request.getSession();
+        if (!sessionManager.hasSession(session.getId())) {
+            return false;
+        }
+
+        User user = getUser(sessionManager.findSession(session.getId()));
+        return InMemoryUserRepository.findByAccount(user.getAccount())
+            .isPresent();
     }
 
     private static User getUser(Session session) {
@@ -82,15 +94,5 @@ public class AuthController {
         } catch (IOException e) {
             throw new IllegalArgumentException("No such resource");
         }
-    }
-
-    private static User loginUser(String account, String password) {
-        User user = InMemoryUserRepository.findByAccount(account)
-            .orElseThrow(() -> new IllegalArgumentException("Account Not Found"));
-
-        if (!user.checkPassword(password)) {
-            throw new IllegalArgumentException("Password Not Matched");
-        }
-        return user;
     }
 }

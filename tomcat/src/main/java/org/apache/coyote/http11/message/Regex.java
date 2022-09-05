@@ -6,9 +6,10 @@ public enum Regex {
     EXTENSION("."),
     QUERY_STRING("?"),
     QUERY_PARAM("&"),
-    QUERY_VALUE("="),
+    KEY_VALUE("="),
     ACCEPT_TYPE(","),
     HEADER_VALUE(": "),
+    COOKIE_VALUE("; "),
     ;
 
     private final String value;

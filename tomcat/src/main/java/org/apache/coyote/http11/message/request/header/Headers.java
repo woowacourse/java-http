@@ -28,7 +28,19 @@ public class Headers {
         return new Headers(values);
     }
 
+    public Cookie getCookie() {
+        final Optional<String> rawCookie = get(Header.COOKIE);
+        if (rawCookie.isEmpty()) {
+            return Cookie.ofEmpty();
+        }
+        return Cookie.from(rawCookie.get());
+    }
+
     public Optional<String> get(final Header header) {
-        return Optional.ofNullable(values.get(header.getName()));
+        final String key = header.getName();
+        if (values.containsKey(key)) {
+            return Optional.of(values.get(key));
+        }
+        return Optional.empty();
     }
 }

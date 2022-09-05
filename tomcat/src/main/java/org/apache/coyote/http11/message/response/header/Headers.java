@@ -21,6 +21,10 @@ public class Headers {
         return new Headers(headers);
     }
 
+    public void put(Header header, String value) {
+        values.put(header, value);
+    }
+
     public void putAll(Map<Header, String> values) {
         this.values.putAll(values);
     }

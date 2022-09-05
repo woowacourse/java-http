@@ -1,12 +1,14 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import nextstep.jwp.config.WebConfig;
+import org.apache.coyote.http11.message.header.Header;
 import org.apache.coyote.http11.message.response.header.StatusCode;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -114,7 +116,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).contains(expectedContents);
     }
 
-    @DisplayName("로그인 POST 요청 시 로그인에 성공하면 상태코드 Found를 응답한다.")
+    @DisplayName("로그인 POST 요청 시 로그인에 성공하면 상태코드 Found와 세션 id를 응답한다.")
     @Test
     void login_post() {
         // given
@@ -136,7 +138,12 @@ class Http11ProcessorTest {
         final String expectedStatus = StatusCode.FOUND.toString();
 
         // then
-        assertThat(socket.output()).contains(expectedStatus);
+        final String output = socket.output();
+        assertAll(
+                () -> assertThat(output).contains(expectedStatus),
+                () -> assertThat(output).contains(Header.SET_COOKIE.getName()),
+                () -> assertThat(output).contains("JSESSIONID")
+        );
     }
 
     @DisplayName("회원가입 GET 요청 시 회원가입 페이지를 응답한다.")

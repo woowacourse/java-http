@@ -6,6 +6,7 @@ import java.util.Map;
 import nextstep.jwp.util.ResourceLoader;
 import org.apache.coyote.http11.message.Regex;
 import org.apache.coyote.http11.message.header.Header;
+import org.apache.coyote.http11.message.request.header.Cookie;
 import org.apache.coyote.http11.message.response.header.ContentType;
 import org.apache.coyote.http11.message.response.header.Headers;
 import org.apache.coyote.http11.message.response.header.StatusCode;
@@ -44,6 +45,10 @@ public class Response {
 
     public static Response ofResource(final String path) throws IOException, URISyntaxException {
         return new Response(ContentType.of(path), StatusCode.OK, ResourceLoader.getStaticResource(path));
+    }
+
+    public void setCookie(final Cookie cookie) {
+        headers.put(Header.SET_COOKIE, cookie.toText());
     }
 
     public String toText() {

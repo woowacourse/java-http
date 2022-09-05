@@ -1,10 +1,12 @@
 package nextstep.jwp.controller;
 
+import java.util.UUID;
 import nextstep.jwp.exception.UnsupportedMethodException;
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.message.request.QueryParams;
 import org.apache.coyote.http11.message.request.Request;
+import org.apache.coyote.http11.message.request.header.Cookie;
 import org.apache.coyote.http11.message.request.requestline.Method;
 import org.apache.coyote.http11.message.response.Response;
 import org.apache.coyote.http11.message.response.header.StatusCode;
@@ -32,7 +34,9 @@ public class LoginController implements Controller {
         checkParams(requestParams);
 
         UserService.login(requestParams.get(KEY_ACCOUNT), requestParams.get(KEY_PASSWORD));
-        return Response.ofRedirection(StatusCode.FOUND, "/index.html");
+        final Response response = Response.ofRedirection(StatusCode.FOUND, "/index.html");
+        response.setCookie(Cookie.fromJSessionId(UUID.randomUUID()));
+        return response;
     }
 
     private static void checkParams(final QueryParams queryParams) {

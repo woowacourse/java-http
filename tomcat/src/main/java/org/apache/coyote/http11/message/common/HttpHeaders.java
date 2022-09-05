@@ -7,10 +7,8 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import lombok.Getter;
 import lombok.ToString;
 
-@Getter
 @ToString
 public class HttpHeaders {
 
@@ -23,10 +21,10 @@ public class HttpHeaders {
     private static final int HEADER_NAME_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
 
-    private final Map<String, String> headers;
+    private final Map<String, String> values;
 
-    public HttpHeaders(final Map<String, String> headers) {
-        this.headers = new LinkedHashMap<>(headers);
+    public HttpHeaders(final Map<String, String> values) {
+        this.values = new LinkedHashMap<>(values);
     }
 
     public HttpHeaders(final String headerText) {
@@ -39,11 +37,11 @@ public class HttpHeaders {
             headers.put(splitHeader[HEADER_NAME_INDEX], splitHeader[HEADER_VALUE_INDEX]);
         }
 
-        this.headers = headers;
+        this.values = headers;
     }
 
     public Optional<String> getHeader(final String header) {
-        String value = headers.get(header);
+        String value = values.get(header);
         if (Objects.isNull(value)) {
             return Optional.empty();
         }
@@ -52,15 +50,15 @@ public class HttpHeaders {
     }
 
     public boolean hasHeader(final String header) {
-        return headers.containsKey(header);
+        return values.containsKey(header);
     }
 
     public String generateHeaderText() {
         StringBuilder stringBuilder = new StringBuilder();
-        for (String headerKey : headers.keySet()) {
+        for (String headerKey : values.keySet()) {
             stringBuilder.append(headerKey)
                     .append(HEADER_DELIMITER)
-                    .append(headers.get(headerKey))
+                    .append(values.get(headerKey))
                     .append(WHITE_SPACE)
                     .append(NEW_LINE);
         }

@@ -46,9 +46,9 @@ class HttpCookieTest {
 
         // then
         assertAll(() -> {
-            assertThat(httpCookie.getCookie("yummy_cookie").get()).isEqualTo("choco");
-            assertThat(httpCookie.getCookie("tasty_cookie").get()).isEqualTo("strawberry");
-            assertThat(httpCookie.getCookie("JSESSIONID").get()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
+            assertThat(httpCookie.getValues("yummy_cookie").get()).isEqualTo("choco");
+            assertThat(httpCookie.getValues("tasty_cookie").get()).isEqualTo("strawberry");
+            assertThat(httpCookie.getValues("JSESSIONID").get()).isEqualTo("656cef62-e3c4-40bc-a8df-94732920ed46");
         });
     }
 
@@ -60,7 +60,7 @@ class HttpCookieTest {
 
         // when
         HttpCookie httpCookie = HttpCookie.sessionId(sessionId);
-        String actual = httpCookie.getCookie("JSESSIONID").get();
+        String actual = httpCookie.getValues("JSESSIONID").get();
 
         // then
         assertThat(actual).isEqualTo(sessionId);

@@ -10,7 +10,6 @@ import java.net.Socket;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -106,9 +105,11 @@ public class Http11Processor implements Runnable, Processor {
     private Response getResponseWithQueryString(final Request request) {
         if (request.isMatchUri("/login")) {
             final QueryStrings queryStrings = request.getUri().getQueryStrings();
-            final Optional<User> user = InMemoryUserRepository.findByAccount(queryStrings.getValue("account"));
+            final String account = queryStrings.getValue("account");
+            final String password = queryStrings.getValue("password");
 
-            if (user.isPresent() && user.get().checkPassword(queryStrings.getValue("password"))) {
+            if (InMemoryUserRepository.exist(account, password)) {
+                final User user = InMemoryUserRepository.findByAccount(account).get();
                 log.info("존재하는 유저입니다. ::: " + user);
                 return Response.redirect(ContentType.HTML, "http://localhost:8080/index.html");
             }

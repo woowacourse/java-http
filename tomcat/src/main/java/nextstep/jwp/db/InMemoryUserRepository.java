@@ -23,5 +23,14 @@ public class InMemoryUserRepository {
         return Optional.ofNullable(database.get(account));
     }
 
-    private InMemoryUserRepository() {}
+    private InMemoryUserRepository() {
+    }
+
+    public static boolean exist(String account, String password) {
+        if (!database.containsKey(account)) {
+            return false;
+        }
+        final User user = database.get(account);
+        return user.checkPassword(password);
+    }
 }

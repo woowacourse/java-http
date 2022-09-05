@@ -3,7 +3,7 @@ package org.apache.coyote.http11.response;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.coyote.http11.Cookie;
+import org.apache.coyote.http11.cookie.Cookie;
 
 public class Http11Response {
 

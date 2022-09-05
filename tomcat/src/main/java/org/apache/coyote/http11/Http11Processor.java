@@ -14,10 +14,12 @@ import java.util.UUID;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.constant.HttpMethods;
 import org.apache.coyote.http11.constant.HttpStatus;
+import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.request.Http11Request;
 import org.apache.coyote.http11.request.RequestAssembler;
 import org.apache.coyote.http11.response.Http11Response;
 import org.apache.coyote.http11.response.ResponseAssembler;
+import org.apache.coyote.http11.session.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

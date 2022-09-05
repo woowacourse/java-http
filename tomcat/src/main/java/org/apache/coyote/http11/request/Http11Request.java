@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.coyote.http11.Cookie;
+import org.apache.coyote.http11.cookie.Cookie;
 import org.apache.coyote.http11.constant.HttpMethods;
 
 public class Http11Request {

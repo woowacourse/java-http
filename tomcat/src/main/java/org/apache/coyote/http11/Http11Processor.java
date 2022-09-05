@@ -2,7 +2,6 @@ package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URI;
@@ -34,9 +33,10 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));) {
 
-            final HttpRequest request = readHttpRequest(inputStream);
+            final HttpRequest request = readHttpRequest(bufferedReader);
             final String requestPath = request.getUrl();
 
             if (requestPath.contains("/login") && requestPath.contains("?")) {
@@ -55,13 +55,12 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpRequest readHttpRequest(final InputStream inputStream) throws IOException {
-        final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-        final String line = br.readLine();
+    private HttpRequest readHttpRequest(final BufferedReader bufferedReader) throws IOException {
+        final String line = bufferedReader.readLine();
 
         final List<String> headerLines = new ArrayList<>();
-        while (br.ready()) {
-            headerLines.add(br.readLine());
+        while (bufferedReader.ready()) {
+            headerLines.add(bufferedReader.readLine());
         }
 
         return HttpRequest.from(line, headerLines);

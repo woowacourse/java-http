@@ -3,31 +3,31 @@ package org.apache.coyote.http11;
 import java.util.Arrays;
 
 public enum FileType {
-    HTML("html", "html"),
-    CSS("css", "css"),
-    JAVASCRIPT("js", "javascript");
+    HTML("html", "text/html"),
+    CSS("css", "text/css"),
+    JAVASCRIPT("js", "application/javascript");
 
-    private String endUrl;
-    private String type;
+    private final String extension;
+    private final String mimeType;
 
-    FileType(String endUrl, String type) {
-        this.endUrl = endUrl;
-        this.type = type;
+    FileType(String extension, String mimeType) {
+        this.extension = extension;
+        this.mimeType = mimeType;
     }
 
     public static FileType from(String url) {
-        String endUrl = url.split("\\.")[1];
+        String extension = url.split("\\.")[1];
         return Arrays.stream(FileType.values())
-                .filter(fileType -> fileType.getEndUrl().equals(endUrl))
+                .filter(fileType -> fileType.getExtension().equals(extension))
                 .findFirst()
                 .orElseThrow();
     }
 
-    public String getEndUrl() {
-        return endUrl;
+    public String getExtension() {
+        return extension;
     }
 
-    public String getType() {
-        return type;
+    public String getMimeType() {
+        return mimeType;
     }
 }

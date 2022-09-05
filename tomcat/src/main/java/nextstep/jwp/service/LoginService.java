@@ -10,20 +10,26 @@ public class LoginService {
 
     private static final Logger log = LoggerFactory.getLogger(LoginService.class);
 
-    public void login(Map<String, String> queryParam) {
-        if (queryParam.isEmpty()) {
+    public void login(Map<String, String> queryParams) {
+        if (queryParams.isEmpty()) {
             return;
         }
 
-        String account = queryParam.get("account");
-        String password = queryParam.get("password");
+        String account = queryParams.get("account");
+        String password = queryParams.get("password");
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow();
-        if (user.checkPassword(password)) {
+
+        if (checkValidPassword(user, password)) {
             log.info(user.toString());
         }
+    }
+
+    private boolean checkValidPassword(User user, String password) {
         if (!user.checkPassword(password)) {
             log.warn("비밀번호가 맞지 않습니다.");
+            return false;
         }
+        return true;
     }
 }

@@ -95,7 +95,7 @@ class Http11ProcessorTest {
         final String httpRequest = String.join("\r\n",
                 "GET /js/scripts.js HTTP/1.1 ",
                 "Host: localhost:8080 ",
-                "Accept: text/css,*/*;q=0.1 ",
+                "Accept: */*;q=0.1 ",
                 "Connection: keep-alive ",
                 "",
                 "");
@@ -109,7 +109,7 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/javascript;charset=utf-8 \r\n" +
+                "Content-Type: application/javascript;charset=utf-8 \r\n" +
                 "Content-Length: 976 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));

@@ -9,9 +9,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
+import nextstep.jwp.handler.LoginHandler;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,18 +75,9 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if ("/login".equals(url)) {
-            final URL resource = getClass().getClassLoader().getResource("static" + url + ".html");
-            final Path path = new File(resource.getFile()).toPath();
-            final String responseBody = new String(Files.readAllBytes(path));
+            LoginHandler.handle(requestParam);
 
-            User user = InMemoryUserRepository.findByAccount(requestParam.get("account"))
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
-
-            if (user.checkPassword(requestParam.get("password"))) {
-                log.info(user.toString());
-            }
-
-            return createResponse(Files.probeContentType(path), responseBody);
+            return createStaticFileResponse(url + ".html");
         }
 
         throw new IllegalArgumentException("올바르지 않은 URL 요청입니다.");

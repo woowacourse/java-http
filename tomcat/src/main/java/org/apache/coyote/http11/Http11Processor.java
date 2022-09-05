@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static nextstep.jwp.http.StatusCode.matchStatusCode;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -81,8 +83,7 @@ public class Http11Processor implements Runnable, Processor {
             return HttpResponse.of(StatusCode.OK, ContentType.TEXT_HTML,
                 FileUtils.readFile(getResource(filePath)));
         }
-        return HttpResponse.of(StatusCode.OK, httpRequest.getFileExtension(),
-            FileUtils.readFile(getResource(path)));
+        return readFile(httpRequest);
     }
 
     private HttpResponse login(QueryParams queryParams) {
@@ -98,9 +99,14 @@ public class Http11Processor implements Runnable, Processor {
             FileUtils.readFile(getResource("/401.html")));
     }
 
+    private HttpResponse readFile(HttpRequest httpRequest) {
+        String path = httpRequest.getPath();
+        return HttpResponse.of(matchStatusCode(path), httpRequest.getFileExtension(),
+            FileUtils.readFile(getResource(path)));
+    }
+
     private URL getResource(String uri) {
-        URL resource = getClass().getClassLoader()
-            .getResource("static" + uri);
+        URL resource = FileUtils.getResource(uri);
         if (resource == null) {
             log.error("올바르지 않은 경로: " + uri);
             return getResource("/404.html");

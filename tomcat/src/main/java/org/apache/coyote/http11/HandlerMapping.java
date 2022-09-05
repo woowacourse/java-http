@@ -28,7 +28,7 @@ public enum HandlerMapping {
     }
 
     public static HandlerMapping findHandler(HttpRequest request) {
-        String url = UriParser.extractUrl(request.getUri());
+        String url = RequestParser.extractUrl(request.getUri());
         if (FileExtension.hasFileExtension(url)) {
             return STATIC_FILE;
         }

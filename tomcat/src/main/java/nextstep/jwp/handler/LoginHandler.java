@@ -7,7 +7,7 @@ import java.util.Optional;
 
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.UriParser;
+import org.apache.coyote.http11.RequestParser;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.MemberNotFoundException;
@@ -22,7 +22,7 @@ public class LoginHandler {
     private static final String PASSWORD = "password";
 
     public static HttpResponse perform(HttpRequest request) {
-        Map<String, String> queries = UriParser.parseUri(request.getUri());
+        Map<String, String> queries = RequestParser.parseUri(request.getUri());
         if (queries.isEmpty()) {
             return staticFileRequest(LOGIN_PAGE);
         }

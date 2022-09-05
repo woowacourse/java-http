@@ -7,13 +7,13 @@ import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class UriParserTest {
+class RequestParserTest {
 
     @DisplayName("")
     @Test
     void extractUrl() {
         String uri = "/login?account=rex&password=password";
-        String url = UriParser.extractUrl(uri);
+        String url = RequestParser.extractUrl(uri);
 
         assertThat(url).isEqualTo("/login");
     }
@@ -25,7 +25,7 @@ class UriParserTest {
         Map<String, String> expected = Map.of("account", "rex",
                 "password", "password");
 
-        Map<String, String> actual = UriParser.parseUri(uri);
+        Map<String, String> actual = RequestParser.parseUri(uri);
         assertThat(actual).containsAllEntriesOf(expected);
     }
 }

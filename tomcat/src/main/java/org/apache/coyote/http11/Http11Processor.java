@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -16,7 +14,6 @@ import nextstep.jwp.exception.UncheckedServletException;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String EMPTY_LINE = "";
 
     private final Socket connection;
     private final FrontController frontController;
@@ -37,29 +34,13 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final HttpRequest httpRequest = createHttpRequest(bufferedReader);
+            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             final HttpResponse httpResponse = frontController.performRequest(httpRequest);
 
             outputStream.write(httpResponse.toResponse());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | IllegalArgumentException e) {
             log.error(e.getMessage(), e);
-        }
-    }
-
-    private HttpRequest createHttpRequest(BufferedReader bufferedReader) throws IOException {
-        String requestLine = bufferedReader.readLine();
-        List<String> requestHeader = new ArrayList<>();
-        while (bufferedReader.ready()) {
-            String line = bufferedReader.readLine();
-            addRequestHeader(requestHeader, line);
-        }
-        return new HttpRequest(requestLine, requestHeader);
-    }
-
-    private static void addRequestHeader(List<String> requestHeader, String line) {
-        if (!line.equals(EMPTY_LINE)) {
-            requestHeader.add(line);
         }
     }
 }

@@ -1,53 +1,68 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.List;
-
-import org.apache.coyote.exception.InvalidRequestLineFormException;
+import java.util.stream.Collectors;
 
 public class HttpRequest {
 
-    private static final int REQUEST_METHOD = 0;
-    private static final int REQUEST_URI = 1;
-    private static final int PROTOCOL_VERSION = 2;
-    private static final String REQUEST_LINE_SEPARATOR = " ";
+    private static final String EMPTY_LINE = "";
 
-    private final HttpMethod method;
-    private final String uri;
-    private final String protocolVersion;
-    private final HttpRequestHeader httpRequestHeader;
+    private final HttpRequestLine requestLine;
+    private final HttpRequestHeader requestHeader;
+    private final HttpRequestBody requestBody;
 
-    public HttpRequest(String requestLine, List<String> requestHeader) {
-        String[] requestLineValues = parseRequestLine(requestLine);
-        validateRequestLineValues(requestLineValues);
-        this.method = HttpMethod.of(requestLineValues[REQUEST_METHOD]);
-        this.uri = requestLineValues[REQUEST_URI];
-        this.protocolVersion = requestLineValues[PROTOCOL_VERSION];
-        this.httpRequestHeader = new HttpRequestHeader(requestHeader);
+    private HttpRequest(HttpRequestLine requestLine, HttpRequestHeader requestHeader, HttpRequestBody requestBody) {
+        this.requestLine = requestLine;
+        this.requestHeader = requestHeader;
+        this.requestBody = requestBody;
     }
 
-    private void validateRequestLineValues(String[] requestLineValues) {
-        if (requestLineValues.length != 3) {
-            throw new InvalidRequestLineFormException();
+    public static HttpRequest from(BufferedReader reader) throws IOException {
+        HttpRequestLine requestLine = new HttpRequestLine(reader.readLine());
+        HttpRequestHeader header = createRequestHeader(reader);
+        HttpRequestBody body = createRequestBody(reader, header);
+
+        return new HttpRequest(requestLine, header, body);
+    }
+
+    private static HttpRequestBody createRequestBody(BufferedReader reader, HttpRequestHeader header)
+            throws IOException {
+        if (header.hasNotHeader(HttpHeaderType.CONTENT_LENGTH)) {
+            return new HttpRequestBody(null);
         }
+        int contentLength = Integer.parseInt(header.getHeaderValue(HttpHeaderType.CONTENT_LENGTH));
+        char[] buffer = new char[contentLength];
+        reader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+        return new HttpRequestBody(requestBody);
     }
 
-    private String[] parseRequestLine(String requestLine) {
-        return requestLine.split(REQUEST_LINE_SEPARATOR);
+    private static HttpRequestHeader createRequestHeader(BufferedReader reader) {
+        List<String> requestHeader = reader.lines()
+                .takeWhile(line -> !EMPTY_LINE.equals(line))
+                .collect(Collectors.toList());
+        return new HttpRequestHeader(requestHeader);
     }
 
     public HttpMethod getMethod() {
-        return method;
+        return requestLine.getMethod();
     }
 
     public String getUri() {
-        return uri;
+        return requestLine.getUri();
     }
 
     public String getProtocolVersion() {
-        return protocolVersion;
+        return requestLine.getProtocolVersion();
     }
 
-    public HttpRequestHeader getHttpRequestHeader() {
-        return httpRequestHeader;
+    public String getHeaderValue(String key) {
+        return requestHeader.getHeaderValue(key);
+    }
+
+    public String getBodyValue(String key) {
+        return requestBody.getBodyValue(key);
     }
 }

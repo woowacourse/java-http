@@ -1,7 +1,5 @@
 package nextstep.jwp.handler;
 
-import static nextstep.jwp.http.HttpVersion.HTTP_1_1;
-
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.NotFoundUserException;
@@ -27,8 +25,8 @@ public class LoginRequestHandler implements HttpRequestHandler {
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(NotFoundUserException::new);
         if (user.checkPassword(password)) {
-            return HttpResponse.found(HTTP_1_1, new Location("/index.html"));
+            return HttpResponse.found(httpVersion, new Location("/index.html"));
         }
-        return null;
+        return HttpResponse.found(httpVersion, new Location("/401.html"));
     }
 }

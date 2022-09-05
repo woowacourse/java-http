@@ -1,8 +1,9 @@
 package org.apache.coyote.http11;
 
 import java.io.BufferedReader;
-import java.io.InputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -11,9 +12,6 @@ import org.apache.coyote.common.request.Request;
 import org.apache.coyote.common.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -54,8 +52,8 @@ public class Http11Processor implements Runnable, Processor {
     private String getRequestMessage(final BufferedReader bufferedReader) throws IOException {
         final StringBuilder actual = new StringBuilder();
         String line;
-        while(true) {
-             line = bufferedReader.readLine();
+        while (true) {
+            line = bufferedReader.readLine();
             if (line.equals("")) {
                 break;
             }
@@ -63,8 +61,8 @@ public class Http11Processor implements Runnable, Processor {
                     .append("\r\n");
         }
         actual.append("\r\n");
-        while(bufferedReader.ready()) {
-            char a = (char)bufferedReader.read();
+        while (bufferedReader.ready()) {
+            char a = (char) bufferedReader.read();
             actual.append(a);
         }
         return actual.toString();

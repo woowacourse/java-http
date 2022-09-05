@@ -13,7 +13,7 @@ public class HandlerMapper {
 
     static {
         cache = new HashMap<>();
-        cache.put("GET /login ?", new LoginHandler());
+        cache.put("POST /login", new LoginHandler());
     }
 
     public static Function<Request, Response> of(final Request request) {

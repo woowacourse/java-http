@@ -1,6 +1,7 @@
 package nextstep.jwp.view;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.function.Function;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
@@ -17,13 +18,13 @@ public class LoginHandler implements Function<Request, Response> {
 
     @Override
     public Response apply(final Request request) {
-        final String password = request.getQueryStringValue("password")
+        final String password = request.getBodyValue("password")
                 .orElseThrow(() -> new IllegalArgumentException(Request.UNKNOWN_QUERY));
-        final User user = findUser(request);
+        final Optional<User> user = findUser(request);
 
         String responseBody = ResourceGenerator.getStaticResource("/index");
         Status statusCode = Status.FOUND;
-        if (!user.checkPassword(password)) {
+        if (user.isEmpty() || !user.get().checkPassword(password)) {
             responseBody = ResourceGenerator.getStaticResource("/401");
             statusCode = Status.UNAUTHORIZED;
         }
@@ -35,10 +36,9 @@ public class LoginHandler implements Function<Request, Response> {
                 .build();
     }
 
-    private User findUser(final Request request) {
-        final String userAccount = request.getQueryStringValue("account")
+    private Optional<User> findUser(final Request request) {
+        final String userAccount = request.getBodyValue("account")
                 .orElseThrow(() -> new IllegalArgumentException(Request.UNKNOWN_QUERY));
-        return InMemoryUserRepository.findByAccount(userAccount)
-                .orElseThrow(IllegalArgumentException::new);
+        return InMemoryUserRepository.findByAccount(userAccount);
     }
 }

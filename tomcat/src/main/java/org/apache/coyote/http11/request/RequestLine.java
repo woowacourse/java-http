@@ -2,8 +2,6 @@ package org.apache.coyote.http11.request;
 
 import java.util.Map;
 
-import org.apache.coyote.http11.HttpMethod;
-
 import nextstep.jwp.exception.ExceptionType;
 import nextstep.jwp.exception.InvalidHttpRequestException;
 

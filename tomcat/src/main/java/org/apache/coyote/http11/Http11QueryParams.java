@@ -3,8 +3,8 @@ package org.apache.coyote.http11;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import nextstep.jwp.exception.InvalidQueryParamKeyException;
 
 public class Http11QueryParams {
@@ -26,9 +26,13 @@ public class Http11QueryParams {
         return new Http11QueryParams(params);
     }
 
+    public static Http11QueryParams ofEmpty() {
+        return new Http11QueryParams(new HashMap<>());
+    }
+
     public String get(final String key) {
         final String value = params.get(key);
-        if (Objects.isNull(value)) {
+        if (value == null) {
             throw new InvalidQueryParamKeyException();
         }
         return value;

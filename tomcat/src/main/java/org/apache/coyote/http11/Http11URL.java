@@ -45,7 +45,7 @@ public class Http11URL {
 
     private static Http11QueryParams parseQueryParams(final String parsedUrl) {
         if (!parsedUrl.contains(QUERY_PARAM_DELIMITER)) {
-            return null;
+            return Http11QueryParams.ofEmpty();
         }
         final String urlQueryParams = parsedUrl.split(QUERY_PARAM_DELIMITER_REGEX)[PARAM_INDEX];
         return Http11QueryParams.of(urlQueryParams);

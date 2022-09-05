@@ -1,9 +1,14 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.catalina.ChicChocServlet;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.util.HttpMessageSupporter;
+import org.apache.coyote.http11.util.StaticResourceExtensionSupporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,9 +17,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
+    private final ChicChocServlet chicChocServlet;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        this.chicChocServlet = new ChicChocServlet();
     }
 
     @Override
@@ -26,17 +33,34 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            final var requestLine = bufferedReader.readLine();
 
-            var requestURI = HttpMessageSupporter.getRequestURI(inputStream);
+            final var requestURI = HttpMessageSupporter.getRequestURI(requestLine);
 
-            LoginFilter.doFilter(requestURI);
+            // 정적 파일 요청일 경우
+            if (isStaticResourceRequest(requestURI)) {
+                final var response = HttpMessageSupporter.getHttpMessage(requestURI);
+                outputStream.write(response.getBytes());
+                outputStream.flush();
+                return;
+            }
 
-            final var response = HttpMessageSupporter.getHttpMessage(requestURI);
+            // Request, Response 생성
+            final var customRequest = Request.from(requestURI);
+            final var customResponse = new Response();
 
+            // servlet 요청 처리
+            chicChocServlet.doService(customRequest, customResponse);
+            final var response = HttpMessageSupporter.getHttpMessage(customResponse.getViewName());
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private boolean isStaticResourceRequest(final String requestURI) {
+        return StaticResourceExtensionSupporter.isStaticResource(requestURI);
     }
 }

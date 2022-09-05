@@ -1,8 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.util;
 
 import java.util.Map;
 
-public class ArgumentResolver {
+public class QueryStringResolver {
 
     private static final int NEXT_INDEX = 1;
     private static final String KEY_VALUE_DELIMITER = "=";

@@ -12,8 +12,9 @@ public class UserService {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     public void login(final HttpRequest request) {
-        final String userAccount = request.findQueryValue("account");
-        final String userPassword = request.findQueryValue("password");
+        final Map<String, String> bodyParams = request.parseApplicationFormData();
+        final String userAccount = bodyParams.get("account");
+        final String userPassword = bodyParams.get("password");
 
         final User user = InMemoryUserRepository.findByAccount(userAccount)
                 .filter(it -> it.checkPassword(userPassword))

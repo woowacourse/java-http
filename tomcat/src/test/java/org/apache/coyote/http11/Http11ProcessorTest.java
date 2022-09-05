@@ -51,7 +51,7 @@ class Http11ProcessorTest {
         void staticFileRequest(final String uri, final String fileName, final String contentType,
                                final String contentLength) throws IOException {
             // given
-            final String httpRequest = createRequestAsString(uri);
+            final String httpRequest = createGetRequest(uri);
             final var socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);
 
@@ -74,7 +74,7 @@ class Http11ProcessorTest {
         @DisplayName("존재하지 않는 파일을 요청하면 예외를 던진다.")
         void invalidStaticFile_ExceptionThrown() {
             // given
-            final String httpRequest = createRequestAsString("/home.html");
+            final String httpRequest = createGetRequest("/home.html");
             final var socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);
 
@@ -88,7 +88,7 @@ class Http11ProcessorTest {
         @DisplayName("GET /login 요청 시 로그인 페이지를 응답한다.")
         void loginRequest(final String uri) throws IOException {
             // given
-            final String httpRequest = createRequestAsString(uri);
+            final String httpRequest = createGetRequest(uri);
             final var socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);
 
@@ -100,7 +100,7 @@ class Http11ProcessorTest {
 
             final var expected = "HTTP/1.1 200 OK \r\n" +
                     "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: 3796 \r\n" +
+                    "Content-Length: 3797 \r\n" +
                     "\r\n" +
                     new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
@@ -111,7 +111,7 @@ class Http11ProcessorTest {
         @DisplayName("로그인에 성공하면 /index.html 페이지로 리다이렉트한다.")
         void loginRequest() {
             // given
-            final String httpRequest = createRequestAsString("/login?account=gugu&password=password");
+            final String httpRequest = createPostRequest("/login", "account=gugu&password=password");
             final var socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);
 
@@ -126,11 +126,11 @@ class Http11ProcessorTest {
         }
 
         @ParameterizedTest
-        @CsvSource({"account=pepper&password=password", "account=gugu&password=pwd"})
+        @CsvSource({"account=pepper&password=pwd", "account=gugu&password=pwd"})
         @DisplayName("로그인 실패 시 /401.html 페이지로 리다이렉트한다.")
         void invalidAccount_ExceptionThrown(final String query) {
             // given
-            final String httpRequest = createRequestAsString("/login?" + query);
+            final String httpRequest = createPostRequest("/login", query);
             final var socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);
 
@@ -147,9 +147,9 @@ class Http11ProcessorTest {
         @ParameterizedTest
         @ValueSource(strings = {"/register.html", "/register"})
         @DisplayName("GET /register 요청 시 회원 가입 페이지를 응답한다.")
-        void registerRequest(final String uri) throws IOException {
+        void registerGetRequest(final String uri) throws IOException {
             // given
-            final String httpRequest = createRequestAsString(uri);
+            final String httpRequest = createGetRequest(uri);
             final var socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);
 
@@ -168,7 +168,25 @@ class Http11ProcessorTest {
             assertThat(socket.output()).isEqualTo(expected);
         }
 
-        private String createRequestAsString(final String uri) {
+        @Test
+        @DisplayName("회원가입에 성공하면 /index.html 페이지로 리다이렉트한다.")
+        void registerPostRequest() {
+            // given
+            final String httpRequest = createPostRequest("/register", "account=pepper&password=password&email=pepper%40woowahan.com");
+            final var socket = new StubSocket(httpRequest);
+            final Http11Processor processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            final var expected = "HTTP/1.1 302 Found \r\n" +
+                    "Location: /index.html \r\n";
+
+            assertThat(socket.output()).isEqualTo(expected);
+        }
+
+        private String createGetRequest(final String uri) {
             return String.join("\r\n",
                     "GET " + uri + " HTTP/1.1 ",
                     "Host: localhost:8080 ",
@@ -176,6 +194,17 @@ class Http11ProcessorTest {
                     "Connection: keep-alive ",
                     "",
                     "");
+        }
+
+        private String createPostRequest(final String uri, final String requestBody) {
+            return String.join("\r\n",
+                    "POST " + uri + " HTTP/1.1 ",
+                    "Host: localhost:8080 ",
+                    "Accept: text/html,*/*;q=0.1 ",
+                    "Content-Length: " + requestBody.length() + " ",
+                    "Connection: keep-alive ",
+                    "",
+                    requestBody);
         }
 
         private URL getResource(final String name) {

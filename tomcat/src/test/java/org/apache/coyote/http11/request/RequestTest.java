@@ -3,44 +3,40 @@ package org.apache.coyote.http11.request;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import org.apache.coyote.http11.request.QueryParameters;
-import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.request.StartLine;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class RequestTest {
 
     @Test
-    void start_line을_파싱한다() {
+    void request를_파싱한다() {
         // given
-        String fileUri = "GET /nextstep.txt HTTP/1.1";
+        StartLine startLine = new StartLine("GET /eden HTTP/1.1 ");
+        RequestHeaders requestHeaders = RequestHeaders.of(List.of("Content-Length: 10"));
+        RequestBody requestBody = RequestBody.of("name=eden&nickName=king");
 
         // when
-        Request request = Request.of(new StartLine(fileUri));
+        Request request = new Request(startLine, requestHeaders, requestBody);
 
         // then
         Assertions.assertAll(
-
-                () -> assertThat(request.getPath().getFileName()).isEqualTo("nextstep.txt"),
+                () -> assertThat(request.getHttpMethod()).isEqualTo(HttpMethod.GET),
+                () -> assertThat(request.getPath()).isNotNull(),
                 () -> assertThat(request.getQueryParameters().isEmpty()).isTrue()
         );
     }
 
     @Test
-    void query_parameter를_가진다() {
-        // given
-        String fileUri = "GET /login?account=gugu&password=gugugugu HTTP/1.1";
-        Request request = Request.of(new StartLine(fileUri));
+    void request_path를_확인할_수_있다() {
+        StartLine startLine = new StartLine("GET /eden HTTP/1.1 ");
+        RequestHeaders requestHeaders = RequestHeaders.of(List.of("Content-Length: 10"));
+        RequestBody requestBody = RequestBody.of("name=eden&nickName=king");
 
         // when
-        QueryParameters queryParameters = request.getQueryParameters();
+        Request request = new Request(startLine, requestHeaders, requestBody);
 
         // then
-        Assertions.assertAll(
-
-                () -> assertThat(queryParameters.getAccount()).isEqualTo("gugu"),
-                () -> assertThat(queryParameters.getPassword()).isEqualTo("gugugugu")
-        );
+        assertThat(request.checkRequestPath("/eden")).isTrue();
     }
 }

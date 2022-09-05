@@ -2,24 +2,30 @@ package org.apache.coyote.http11.request;
 
 public class Request {
 
-    private final Path path;
-    private final QueryParameters queryParameters;
+    private final StartLine startLine;
+    private final RequestHeaders requestHeaders;
+    private final RequestBody requestBody;
 
-    private Request(Path path, QueryParameters queryParameters) {
-        this.path = path;
-        this.queryParameters = queryParameters;
+    public Request(StartLine startLine, RequestHeaders requestHeaders,
+                   RequestBody requestBody) {
+        this.startLine = startLine;
+        this.requestHeaders = requestHeaders;
+        this.requestBody = requestBody;
     }
 
-    public static Request of(StartLine startLine) {
-        String uri = startLine.getUri();
-        return new Request(Path.of(uri), QueryParameters.of(uri));
+    public HttpMethod getHttpMethod() {
+        return this.startLine.getHttpMethod();
     }
 
     public Path getPath() {
-        return path;
+        return this.startLine.getPath();
     }
 
     public QueryParameters getQueryParameters() {
-        return queryParameters;
+        return this.startLine.getQueryParameters();
+    }
+
+    public boolean checkRequestPath(String path) {
+        return this.startLine.checkRequest(path);
     }
 }

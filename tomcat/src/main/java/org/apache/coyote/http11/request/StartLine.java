@@ -2,18 +2,30 @@ package org.apache.coyote.http11.request;
 
 public class StartLine {
 
-    private final String httpMethod;
-    private final String uri;
+    private final HttpMethod httpMethod;
+    private final URL url;
     private final String httpVersion;
 
     public StartLine(String startLine) {
         String[] splitStartLine = startLine.split(" ");
-        this.httpMethod = splitStartLine[0];
-        this.uri = splitStartLine[1];
+        this.httpMethod = HttpMethod.findHttpMethod(splitStartLine[0]);
+        this.url = URL.of(splitStartLine[1]);
         this.httpVersion = splitStartLine[2];
     }
 
-    public String getUri() {
-        return this.uri;
+    public boolean checkRequest(String path) {
+        return this.url.getPath().checkRequest(path);
+    }
+
+    public HttpMethod getHttpMethod() {
+        return this.httpMethod;
+    }
+
+    public Path getPath() {
+        return this.url.getPath();
+    }
+
+    public QueryParameters getQueryParameters() {
+        return this.url.getQueryParameters();
     }
 }

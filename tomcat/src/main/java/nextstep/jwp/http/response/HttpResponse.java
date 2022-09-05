@@ -2,6 +2,7 @@ package nextstep.jwp.http.response;
 
 import static nextstep.jwp.http.common.HttpHeaders.CONTENT_LENGTH;
 import static nextstep.jwp.http.common.HttpHeaders.CONTENT_TYPE;
+import static nextstep.jwp.http.common.HttpHeaders.LOCATION;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,6 +49,16 @@ public class HttpResponse {
 
         httpHeaders.add(CONTENT_TYPE, Files.probeContentType(path));
         httpHeaders.add(CONTENT_LENGTH, String.valueOf(responseBody.length));
+
+        this.responseBody = new ResponseBody(new String(responseBody));
+    }
+
+    public void addRedirect(final File file, final String location) throws IOException {
+        Path path = file.toPath();
+        byte[] responseBody = Files.readAllBytes(file.toPath());
+
+        httpHeaders.add(CONTENT_TYPE, Files.probeContentType(path));
+        httpHeaders.add(LOCATION, location);
 
         this.responseBody = new ResponseBody(new String(responseBody));
     }

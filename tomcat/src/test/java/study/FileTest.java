@@ -24,8 +24,17 @@ class FileTest {
     void resource_디렉터리에_있는_파일의_경로를_찾는다() {
         final String fileName = "nextstep.txt";
 
-        // todo
         URL resource = getClass().getClassLoader().getResource(fileName);
+        final String actual = resource.getFile();
+
+        assertThat(actual).endsWith(fileName);
+    }
+
+    @Test
+    void ClassLoader의_getSystemClassLoader를_사용하여_resource_디렉터리에_있는_파일의_경로를_찾는다() {
+        final String fileName = "nextstep.txt";
+        
+        URL resource = ClassLoader.getSystemClassLoader().getResource(fileName);
         final String actual = resource.getFile();
 
         assertThat(actual).endsWith(fileName);

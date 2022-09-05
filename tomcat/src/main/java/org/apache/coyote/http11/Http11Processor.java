@@ -10,6 +10,7 @@ import java.util.List;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.HttpRequestHandler;
 import nextstep.jwp.handler.LoginRequestHandler;
+import nextstep.jwp.handler.RegisterRequestHandler;
 import nextstep.jwp.http.ContentType;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpRequestBody;
@@ -31,6 +32,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private final Socket connection;
     private final HttpRequestHandler loginRequestHandler = new LoginRequestHandler(HTTP_VERSION);
+    private final HttpRequestHandler registerRequestHandler = new RegisterRequestHandler(HTTP_VERSION);
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -91,6 +93,9 @@ public class Http11Processor implements Runnable, Processor {
         if (isLoginRequest(httpRequest.getPath())) {
             return loginRequestHandler.handleHttpRequest(httpRequest);
         }
+        if (isRegisterRequest(httpRequest.getPath())) {
+            return registerRequestHandler.handleHttpRequest(httpRequest);
+        }
         return createResponseBody(httpRequest);
     }
 
@@ -113,5 +118,9 @@ public class Http11Processor implements Runnable, Processor {
 
     private boolean isLoginRequest(final String path) {
         return path.equals("/login");
+    }
+
+    private boolean isRegisterRequest(final String path) {
+        return path.equals("/register");
     }
 }

@@ -6,17 +6,30 @@ import nextstep.jwp.http.HttpHeader;
 public class HttpResponse {
 
     private static final String BLANK = " ";
+    private static final String HEADER_CONTENT_TYPE = "Content-Type";
+    private static final String HEADER_CONTENT_LENGTH = "Content-Length";
 
-    private final String version;
-    private final StatusCode statusCode;
-    private final HttpHeader httpHeaders;
-    private final String responseBody;
+    private String version = "HTTP/1.1";
+    private StatusCode statusCode;
+    private HttpHeader httpHeaders = new HttpHeader();
+    private String responseBody;
 
-    public HttpResponse(final String version, final String status, final HttpHeader httpHeaders,
-                        final String responseBody) {
-        this.version = version;
+    public HttpResponse() {
+    }
+
+    public void setStatus(final String status) {
         this.statusCode = StatusCode.valueOf(status);
-        this.httpHeaders = httpHeaders;
+    }
+
+    public void setContentType(final String contentType) {
+        this.httpHeaders.addHeader(HEADER_CONTENT_TYPE, contentType);
+    }
+
+    public void setContentLength(final int length) {
+        this.httpHeaders.addHeader(HEADER_CONTENT_LENGTH, String.valueOf(length));
+    }
+
+    public void setResponseBody(final String responseBody) {
         this.responseBody = responseBody;
     }
 

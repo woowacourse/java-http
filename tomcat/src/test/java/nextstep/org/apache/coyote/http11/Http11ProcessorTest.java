@@ -124,7 +124,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("/login?account=gugu&password=password url로 접근할 때, user가 존재하지 않으면 예외를 발생한다.")
+    @DisplayName("/login?account=leaver&password=password url로 접근할 때, user가 존재하지 않으면 예외를 발생한다.")
     @Test
     void notFoundUser() throws IOException {
         // given

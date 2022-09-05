@@ -17,10 +17,4 @@ public class IndexHandler {
                 .responseBody("Hello world!")
                 .build();
     }
-
-    public static HttpResponse returnNotFountResponse(HttpRequest request) {
-        return new HttpResponse.Builder()
-                .statusCode(HttpStatus.NOT_FOUND)
-                .build();
-    }
 }

@@ -12,11 +12,19 @@ public class HttpResponse {
     private final Map<String, String> headers;
     private final String responseBody;
 
+    public HttpResponse(Builder builder) {
+        this.protocolVersion = builder.protocolVersion;
+        this.statusCode = builder.statusCode;
+        this.headers = builder.headers;
+        this.responseBody = builder.responseBody;
+    }
+
     public static class Builder {
 
         private String protocolVersion;
         private HttpStatus statusCode;
         private Map<String, String> headers;
+
         private String responseBody;
 
         public Builder() {
@@ -46,11 +54,17 @@ public class HttpResponse {
         }
     }
 
-    public HttpResponse(Builder builder) {
-        this.protocolVersion = builder.protocolVersion;
-        this.statusCode = builder.statusCode;
-        this.headers = builder.headers;
-        this.responseBody = builder.responseBody;
+    public static HttpResponse redirect(String redirectUrl) {
+        return new HttpResponse.Builder()
+                .statusCode(HttpStatus.FOUND)
+                .header(HttpHeaderType.LOCATION, redirectUrl)
+                .build();
+    }
+
+    public static HttpResponse notFound() {
+        return new HttpResponse.Builder()
+                .statusCode(HttpStatus.NOT_FOUND)
+                .build();
     }
 
     public byte[] toResponse() {

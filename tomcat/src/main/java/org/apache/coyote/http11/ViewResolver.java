@@ -27,9 +27,7 @@ public class ViewResolver {
                     .responseBody(content)
                     .build();
         } catch (IOException | FileNotExistException e) {
-            return new HttpResponse.Builder()
-                    .statusCode(HttpStatus.NOT_FOUND)
-                    .build();
+            return HttpResponse.notFound();
         }
     }
 

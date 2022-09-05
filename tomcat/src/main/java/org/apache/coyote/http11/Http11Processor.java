@@ -10,7 +10,9 @@ import java.nio.file.Files;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
+import org.apache.coyote.ContentType;
 import org.apache.coyote.Processor;
+import org.apache.coyote.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +41,8 @@ public class Http11Processor implements Runnable, Processor {
             int index = uri.indexOf("?");
             final var path = getPath(uri);
 
+            StatusCode statusCode = StatusCode.OK;
+
             if (path.equals("/login")) {
                 final var queryString = uri.substring(index + 1).split("&");
                 final var account = queryString[0].substring(queryString[0].lastIndexOf("=") + 1);
@@ -49,13 +53,17 @@ public class Http11Processor implements Runnable, Processor {
 
                 if (user.checkPassword(password)) {
                     log.info("{}", user);
+                    statusCode = StatusCode.FOUND;
+                }
+                else {
+                    statusCode = StatusCode.UNAUTHORIZED;
                 }
             }
 
             final var contentType = parseContentType(path);
             final var responseBody = createResponseBody(path);
 
-            final var response = createResponse(contentType, responseBody);
+            final var response = createResponse(statusCode, contentType, responseBody);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -79,7 +87,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private ContentType parseContentType(final String uri) {
         final var extension = uri.substring(uri.lastIndexOf(".") + 1);
-        return ContentType.of(extension);
+        return ContentType.from(extension);
     }
 
     private String createResponseBody(String uri) throws IOException {
@@ -93,9 +101,9 @@ public class Http11Processor implements Runnable, Processor {
         return new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
     }
 
-    private String createResponse(final ContentType contentType, final String responseBody) {
+    private String createResponse(final StatusCode statusCode, final ContentType contentType, final String responseBody) {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + statusCode.getCode() + " " + statusCode.getReasonPhrase() + " ",
                 "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote;
 
 import java.util.Arrays;
 
@@ -17,7 +17,7 @@ public enum ContentType {
         this.value = value;
     }
 
-    public static ContentType of(final String extension) {
+    public static ContentType from(final String extension) {
         return Arrays.stream(ContentType.values())
                 .filter(contentType -> contentType.extension.equals(extension))
                 .findFirst()

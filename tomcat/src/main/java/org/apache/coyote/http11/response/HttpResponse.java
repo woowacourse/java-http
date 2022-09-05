@@ -3,7 +3,7 @@ package org.apache.coyote.http11.response;
 import org.apache.coyote.http11.common.HeaderKeys;
 import org.apache.coyote.http11.common.HttpHeaders;
 import org.apache.coyote.http11.ContentType;
-import org.apache.coyote.http11.common.HttpMessageConfig;
+import org.apache.coyote.http11.common.HttpMessageDelimiter;
 import org.apache.coyote.http11.response.header.StatusCode;
 import org.apache.coyote.http11.response.header.StatusLine;
 import org.apache.coyote.http11.util.ResourceSearcher;
@@ -52,10 +52,10 @@ public class HttpResponse {
     }
 
     public String toMessage() {
-        return String.join(HttpMessageConfig.LINE_DELIMITER.getValue(),
+        return String.join(HttpMessageDelimiter.LINE.getValue(),
             statusLine.toMessage(),
             httpHeaders.toMessage(),
-            HttpMessageConfig.HEADER_BODY_DELIMITER.getValue(),
+            HttpMessageDelimiter.HEADER_BODY.getValue(),
             body
         );
     }

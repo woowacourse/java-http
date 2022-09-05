@@ -40,8 +40,8 @@ public class HttpHeaders {
             message.append(entry.getKey())
                 .append(KEY_VALUE_DELIMITER)
                 .append(entry.getValue())
-                .append(HttpMessageConfig.WORD_DELIMITER.getValue())
-                .append(HttpMessageConfig.LINE_DELIMITER.getValue());
+                .append(HttpMessageDelimiter.WORD.getValue())
+                .append(HttpMessageDelimiter.LINE.getValue());
         }
         excludeLastEmpty(message);
         return new String(message);

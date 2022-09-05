@@ -2,7 +2,7 @@ package org.apache.coyote.http11.request.header;
 
 import java.util.Map;
 
-import org.apache.coyote.http11.common.HttpMessageConfig;
+import org.apache.coyote.http11.common.HttpMessageDelimiter;
 
 public class RequestLine {
 
@@ -21,7 +21,7 @@ public class RequestLine {
     }
 
     public static RequestLine from(final String requestLine) {
-        final String[] requestLineElement = requestLine.split(HttpMessageConfig.WORD_DELIMITER.getValue());
+        final String[] requestLineElement = requestLine.split(HttpMessageDelimiter.WORD.getValue());
 
         return new RequestLine(
             Method.findBy(requestLineElement[METHOD]),

@@ -1,15 +1,15 @@
 package org.apache.coyote.http11.common;
 
-public enum HttpMessageConfig {
+public enum HttpMessageDelimiter {
 
-    WORD_DELIMITER(" "),
-    LINE_DELIMITER("\r\n"),
-    HEADER_BODY_DELIMITER(""),
+    WORD(" "),
+    LINE("\r\n"),
+    HEADER_BODY(""),
     ;
 
     private final String value;
 
-    HttpMessageConfig(final String value) {
+    HttpMessageDelimiter(final String value) {
         this.value = value;
     }
 

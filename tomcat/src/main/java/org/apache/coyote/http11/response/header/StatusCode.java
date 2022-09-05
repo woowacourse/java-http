@@ -2,7 +2,7 @@ package org.apache.coyote.http11.response.header;
 
 import java.util.Arrays;
 
-import org.apache.coyote.http11.common.HttpMessageConfig;
+import org.apache.coyote.http11.common.HttpMessageDelimiter;
 
 public enum StatusCode {
 
@@ -29,6 +29,6 @@ public enum StatusCode {
     }
 
     public String toMessage() {
-        return String.join(HttpMessageConfig.WORD_DELIMITER.getValue(), String.valueOf(code), name);
+        return String.join(HttpMessageDelimiter.WORD.getValue(), String.valueOf(code), name);
     }
 }

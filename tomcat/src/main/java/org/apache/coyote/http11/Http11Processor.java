@@ -5,7 +5,7 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.common.HttpMessageConfig;
+import org.apache.coyote.http11.common.HttpMessageDelimiter;
 import org.apache.coyote.http11.mapping.HandlerMapping;
 import org.apache.coyote.http11.mapping.MappingResponse;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -74,7 +74,7 @@ public class Http11Processor implements Runnable, Processor {
 
         for (String message = bufferedReader.readLine();
              bufferedReader.ready()
-                 && !message.equals(HttpMessageConfig.HEADER_BODY_DELIMITER.getValue());
+                 && !message.equals(HttpMessageDelimiter.HEADER_BODY.getValue());
              message = bufferedReader.readLine()) {
 
             messages.add(message);

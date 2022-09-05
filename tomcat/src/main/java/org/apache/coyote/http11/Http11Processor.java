@@ -39,16 +39,16 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final BufferedReader headerReader = new BufferedReader(new InputStreamReader(inputStream,
                      StandardCharsets.UTF_8))) {
-            final HttpRequestStartLineContents startLineContents = HttpRequestStartLineContents.from(headerReader);
+            final HttpRequestStartLine startLine = HttpRequestStartLine.from(headerReader);
 
-            checkUser(startLineContents);
-            final URL resourceUrl = getResourceUrl(startLineContents.getUri());
+            checkUser(startLine);
+            final URL resourceUrl = getResourceUrl(startLine.getUri());
 
             final String responseBody = readContext(resourceUrl);
 
             final var response = String.join("\r\n",
                     "HTTP/1.1 200 OK ",
-                    "Content-Type: " + getContentType(startLineContents.getUri()) + ";charset=utf-8 ",
+                    "Content-Type: " + getContentType(startLine.getUri()) + ";charset=utf-8 ",
                     "Content-Length: " + responseBody.getBytes().length + " ",
                     "",
                     responseBody);
@@ -76,7 +76,7 @@ public class Http11Processor implements Runnable, Processor {
         return "text/html";
     }
 
-    private void checkUser(HttpRequestStartLineContents startLineContents) {
+    private void checkUser(HttpRequestStartLine startLineContents) {
         if (!startLineContents.getUri().contains("login")) {
             return;
         }
@@ -92,7 +92,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void logLoginUser(Map<String, String> queryParams, User loginUser) {
         if (loginUser.checkPassword(queryParams.get("password"))) {
-            log.info("user : " + loginUser.toString());
+            log.info("user : " + loginUser);
         }
     }
 

@@ -1,23 +1,22 @@
 package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 import org.apache.coyote.http11.HttpReader;
-import org.apache.coyote.http11.HttpRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class HttpRequestTest {
+class HttpReaderTest {
 
     @Test
-    @DisplayName("쿼리 스트링에서 해당 파라미터에 맞는 값을 가져온다.")
-    void getQueryString() throws IOException {
+    @DisplayName("BufferReader를 통해서 첫번째 라인을 읽어온다.")
+    void getStartLine() throws IOException {
         // given
         final String request = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -28,38 +27,38 @@ class HttpRequestTest {
         final InputStream inputStream = new ByteArrayInputStream(request.getBytes());
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         final HttpReader httpReader = new HttpReader(bufferedReader);
-        final HttpRequest httpRequest = new HttpRequest(httpReader);
 
         // when
-        final String account = httpRequest.getQueryString("account");
-        final String password = httpRequest.getQueryString("password");
+        final String startLine = httpReader.getStartLine();
 
         // then
-        assertAll(
-                () -> assertThat(account).isEqualTo("gugu"),
-                () -> assertThat(password).isEqualTo("password")
-        );
+        assertThat(startLine).isEqualTo("GET /login?account=gugu&password=password HTTP/1.1 ");
     }
 
     @Test
-    @DisplayName("해당 요청이 확장자를 가진 파일에 대한 요청인지 확인한다.")
-    void isFileRequest() throws IOException {
+    @DisplayName("BufferReader를 통해서 헤더부분들을 읽어온다.")
+    void getHeaders() throws IOException {
         // given
         final String request = String.join("\r\n",
-                "GET /css/styles.css HTTP/1.1 ",
+                "GET /login?account=gugu&password=password HTTP/1.1 ",
                 "Host: localhost:8080 ",
-                "Accept: text/css,*/*;q=0.1 ",
-                "Connection: keep-alive",
-                "");
+                "Connection: keep-alive ",
+                "",
+                "Accept: */*"
+        );
         final InputStream inputStream = new ByteArrayInputStream(request.getBytes());
         final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         final HttpReader httpReader = new HttpReader(bufferedReader);
-        final HttpRequest httpRequest = new HttpRequest(httpReader);
 
         // when
-        final boolean fileRequest = httpRequest.isFileRequest();
+        final List<String> headers = httpReader.getHeaders();
 
         // then
-        assertThat(fileRequest).isTrue();
+        assertThat(headers).containsExactly(
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "Accept: */*"
+        );
     }
 }

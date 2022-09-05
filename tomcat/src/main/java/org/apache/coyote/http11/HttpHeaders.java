@@ -1,12 +1,11 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class HttpHeaders {
 
@@ -19,26 +18,20 @@ public class HttpHeaders {
         this.headers = new LinkedHashMap<>();
     }
 
-    public HttpHeaders(final BufferedReader bufferedReader) throws IOException {
-        this.headers = extractHeaders(bufferedReader);
+    public HttpHeaders(final List<String> headers) {
+        this.headers = parseHeaders(headers);
     }
 
-    private Map<HttpHeader, String> extractHeaders(final BufferedReader bufferedReader) throws IOException {
-        final Map<HttpHeader, String> headers = new LinkedHashMap<>();
-        while (bufferedReader.ready()) {
-            final String line = bufferedReader.readLine();
-            parseHeader(headers, line);
-        }
-        return headers;
-    }
-
-    private void parseHeader(final Map<HttpHeader, String> headers, final String line) {
-        if (!NONE_HEADER.equals(line)) {
-            final String[] headerValues = line.split(HTTP_HEADER_DELIMITER);
-            final HttpHeader httpHeader = HttpHeader.of(headerValues[0]);
-            final String value = headerValues[1];
-            headers.put(httpHeader, value);
-        }
+    private Map<HttpHeader, String> parseHeaders(final List<String> headers) {
+        return headers.stream()
+                .filter(header -> !NONE_HEADER.equals(header))
+                .map(header -> header.split(HTTP_HEADER_DELIMITER))
+                .collect(Collectors.toMap(
+                        headerValues -> HttpHeader.of(headerValues[0]),
+                        headerValues -> headerValues[1],
+                        (x, y) -> y,
+                        LinkedHashMap::new)
+                );
     }
 
     public HttpHeaders addHeader(final HttpHeader header, final String value) {

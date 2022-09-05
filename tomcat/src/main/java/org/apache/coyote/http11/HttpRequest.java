@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -17,13 +15,12 @@ public class HttpRequest {
     private Map<String, String> queryStrings = new LinkedHashMap<>();
     private HttpHeaders httpHeaders;
 
-    public HttpRequest(final BufferedReader bufferedReader) throws IOException {
-        parseUri(bufferedReader);
-        this.httpHeaders = new HttpHeaders(bufferedReader);
+    public HttpRequest(final HttpReader httpReader) {
+        parseUri(httpReader.getStartLine());
+        this.httpHeaders = new HttpHeaders(httpReader.getHeaders());
     }
 
-    private void parseUri(final BufferedReader bufferedReader) throws IOException {
-        final String startLine = bufferedReader.readLine();
+    private void parseUri(final String startLine) {
         final String uri = startLine.split(SPACE_DELIMITER)[1];
         if (uri.contains(QUERY_STRING_START)) {
             final int index = uri.indexOf(QUERY_STRING_START);
@@ -62,7 +59,7 @@ public class HttpRequest {
         }
         return "html";
     }
-    
+
     public String getUrl() {
         return url;
     }

@@ -85,6 +85,6 @@ public class HttpResponse {
     }
 
     public void setCookie(HttpCookie cookie) {
-        this.response = getResponse(cookie.getCookieValue("JSESSIONID"));
+        this.response = getResponse(cookie.getCookieHeader());
     }
 }

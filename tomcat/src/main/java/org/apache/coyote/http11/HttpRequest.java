@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.apache.catalina.session.Session;
+
 public class HttpRequest {
 
     static final String HTTP_METHOD = "HTTP METHOD";
@@ -137,5 +139,21 @@ public class HttpRequest {
 
     public String getHttpVersion() {
         return getHeaderValue(HTTP_VERSION);
+    }
+
+    public Session getSession() {
+        validateJSESSIONIDExist();
+        HttpCookie cookie = new HttpCookie(getHeaderValue("Cookie"));
+        return new Session(cookie.getCookieValue("JSESSIONID"));
+    }
+
+    private void validateJSESSIONIDExist() {
+        if (!hasSession()) {
+            throw new IllegalArgumentException("JSESSIONID Not Found");
+        }
+    }
+
+    public boolean hasSession() {
+        return containsHeader("Cookie") && getHeaderValue("Cookie").contains("JSESSIONID");
     }
 }

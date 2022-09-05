@@ -20,6 +20,10 @@ public class HttpCookie {
         cookies.put("JSESSIONID", generateJSESSIONID());
     }
 
+    public static HttpCookie fromJSESSIONID(String id) {
+        return new HttpCookie("JSESSIONID=" + id);
+    }
+
     private String generateJSESSIONID() {
         return UUID.randomUUID().toString();
     }
@@ -36,6 +40,10 @@ public class HttpCookie {
     }
 
     public String getCookieValue(String cookieName) {
-        return cookieName + "=" + cookies.get(cookieName);
+        return cookies.get(cookieName);
+    }
+
+    public String getCookieHeader() {
+        return "JSESSIONID" + "=" + cookies.get("JSESSIONID");
     }
 }

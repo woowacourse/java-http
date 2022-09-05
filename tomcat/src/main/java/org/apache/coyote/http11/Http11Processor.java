@@ -48,7 +48,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse getResponse(HttpRequest request) throws URISyntaxException, IOException {
-        if (request.getHeaderValue(HTTP_METHOD).equals("POST") && request.getUrl().getPath().endsWith("/login.html")) {
+        if (request.getUrl().getPath().endsWith("/login.html")) {
             return AuthController.login(request);
         }
 

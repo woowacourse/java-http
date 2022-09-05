@@ -228,8 +228,6 @@ class IOStreamTest {
                 }
             }
 
-            inputStream.close();
-
             assertThat(actual).hasToString(emoji);
         }
     }

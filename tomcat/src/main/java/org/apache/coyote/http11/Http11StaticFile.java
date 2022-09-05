@@ -45,7 +45,7 @@ public class Http11StaticFile {
     }
 
     private static URI getUri(final String filePathString) throws URISyntaxException {
-        final URL fileUrl = Http11StaticFile.class.getClassLoader().getResource(filePathString);
+        final URL fileUrl = Thread.currentThread().getContextClassLoader().getResource(filePathString);
         if (Objects.isNull(fileUrl)) {
             throw new StaticFileNotFoundException(filePathString);
         }

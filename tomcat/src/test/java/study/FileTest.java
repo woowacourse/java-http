@@ -46,7 +46,7 @@ class FileTest {
         final String fileName = "nextstep.txt";
 
         // done
-        final URL fileURL = getClass().getClassLoader().getResource(fileName);
+        final URL fileURL = Thread.currentThread().getContextClassLoader().getResource(fileName);
         final Path filePath = Paths.get(fileURL.toURI());
 
         // done

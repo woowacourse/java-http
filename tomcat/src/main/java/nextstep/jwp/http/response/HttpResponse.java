@@ -8,6 +8,7 @@ public class HttpResponse {
     private static final String BLANK = " ";
     private static final String HEADER_CONTENT_TYPE = "Content-Type";
     private static final String HEADER_CONTENT_LENGTH = "Content-Length";
+    private static final String HEADER_LOCATION = "Location";
 
     private String version = "HTTP/1.1";
     private StatusCode statusCode;
@@ -25,8 +26,12 @@ public class HttpResponse {
         this.httpHeaders.addHeader(HEADER_CONTENT_TYPE, contentType);
     }
 
-    public void setContentLength(final int length) {
-        this.httpHeaders.addHeader(HEADER_CONTENT_LENGTH, String.valueOf(length));
+    public void setContentLength(final int contentLength) {
+        this.httpHeaders.addHeader(HEADER_CONTENT_LENGTH, String.valueOf(contentLength));
+    }
+
+    public void setLocation(final String location) {
+        this.httpHeaders.addHeader(HEADER_LOCATION, location);
     }
 
     public void setResponseBody(final String responseBody) {

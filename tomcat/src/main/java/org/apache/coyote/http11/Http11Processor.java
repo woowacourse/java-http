@@ -35,7 +35,7 @@ public class Http11Processor implements Runnable, Processor {
             BufferedReader bufferReader = new BufferedReader(new InputStreamReader(inputStream));
 
             HttpRequest httpRequest = createHttpRequest(bufferReader);
-            HttpResponse httpResponse = createHttpResponseTest();
+            HttpResponse httpResponse = createHttpResponse();
 
             Controller controller = new RequestMapping().getController(httpRequest);
             controller.service(httpRequest, httpResponse);
@@ -51,7 +51,7 @@ public class Http11Processor implements Runnable, Processor {
         return new HttpRequestCreator().createHttpRequest(bufferReader);
     }
 
-    private HttpResponse createHttpResponseTest() {
+    private HttpResponse createHttpResponse() {
         return new HttpResponse();
     }
 }

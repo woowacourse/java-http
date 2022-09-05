@@ -2,6 +2,7 @@ package org.apache.coyote.core;
 
 import nextstep.jwp.http.reqeust.HttpRequest;
 import org.apache.coyote.core.controller.Controller;
+import org.apache.coyote.core.controller.ExceptionController;
 import org.apache.coyote.core.controller.IndexController;
 import org.apache.coyote.core.controller.LoginController;
 import org.apache.coyote.core.controller.RootController;
@@ -18,6 +19,9 @@ public class RequestMapping {
         }
         if (path.equals("/login.html")) {
             return new LoginController();
+        }
+        if (path.equals("/401.html")) {
+            return new ExceptionController();
         }
         throw new IllegalArgumentException();
     }

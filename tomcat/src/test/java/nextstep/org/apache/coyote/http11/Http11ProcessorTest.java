@@ -115,9 +115,10 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        var expected = "HTTP/1.1 200 OK \r\n" +
+        var expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "Location: ./index.html \r\n" +
                 "\r\n" +
                 responseBody;
 
@@ -141,5 +142,36 @@ class Http11ProcessorTest {
         // when & then
         assertThatThrownBy(() -> processor.process(socket))
                 .isInstanceOf(UserNotFoundException.class);
+    }
+
+    @DisplayName("/login?account=leaver&password=password url로 접근할 때, 로그인을 실패하면 ./401.html로 접근한다.")
+    @Test
+    void fail_login() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=gugu&password=invalidpassword HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/html;charset=utf-8",
+                "Connection: keep-alive ",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        var expected = "HTTP/1.1 302 FOUND \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "Location: ./401.html \r\n" +
+                "\r\n" +
+                responseBody;
+
+        assertThat(socket.output()).isEqualTo(expected);
     }
 }

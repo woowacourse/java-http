@@ -28,22 +28,4 @@ class LoginControllerTest {
         LoginController controller = new LoginController();
         controller.service(httpRequest, httpResponse);
     }
-
-    @DisplayName("./login url 접근 시, 유저의 비밀번호가 일치하지 않으면 예외를 발생한다.")
-    @Test
-    void login_invalid_password() throws URISyntaxException, IOException {
-        // given
-        URI uri = new URI("/login?account=gugu&password=invalid");
-        HttpRequestLine httpRequestLine = new HttpRequestLine("GET", uri, "HTTP/1.1");
-        HttpHeader httpHeaders = new HttpHeader();
-        HttpRequest httpRequest = new HttpRequest(httpRequestLine, httpHeaders);
-        HttpResponse httpResponse = new HttpResponse();
-
-        // when
-        LoginController controller = new LoginController();
-
-        //then
-        assertThatThrownBy(() -> controller.service(httpRequest, httpResponse))
-                .isInstanceOf(IllegalArgumentException.class);
-    }
 }

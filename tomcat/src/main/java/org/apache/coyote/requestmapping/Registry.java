@@ -14,6 +14,7 @@ import org.apache.coyote.http.HttpResponse;
 import org.apache.coyote.requestmapping.handler.FileRequestHandler;
 import org.apache.coyote.requestmapping.handler.Handler;
 import org.apache.coyote.requestmapping.handler.MethodRequestHandler;
+import org.apache.coyote.requestmapping.handler.NotFoundRequestHandler;
 
 public class Registry {
 
@@ -28,6 +29,10 @@ public class Registry {
         }
     }
 
+    public static HttpResponse handle(final HttpRequest httpRequest){
+        return findHandler(httpRequest).handle(httpRequest);
+    }
+
     private static boolean isStaticFileRequest(final String url) {
         try {
             final String filePath = Registry.class
@@ -40,20 +45,20 @@ public class Registry {
         }
     }
 
-    public static HttpResponse findMapping(HttpRequest httpRequest) {
+    private static Handler findHandler(final HttpRequest httpRequest) {
         final String url = httpRequest.getUrl();
         final HttpMethod httpMethod = httpRequest.getHttpMethod();
         final Handler handler = requestMap.get(new Mapping(url, httpMethod));
 
         if (isMethodRequest(handler)) {
-            return handler.handle(httpRequest);
+            return handler;
         }
 
         if (isStaticFileRequest(url)) {
-            return new FileRequestHandler(url).handle(httpRequest);
+            return new FileRequestHandler(url);
         }
 
-        return HttpResponse.notFound().build();
+        return new NotFoundRequestHandler();
     }
 
     private static boolean isMethodRequest(Handler handler) {

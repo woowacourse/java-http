@@ -36,7 +36,7 @@ public class Http11Processor implements Runnable, Processor {
             final String request = bufferedReader.readLine();
 
             final HttpRequest httpRequest = new HttpRequest(request);
-            final HttpResponse response = Registry.findMapping(httpRequest);
+            final HttpResponse response = Registry.handle(httpRequest);
 
             outputStream.write(makeHttpMessage(response).getBytes());
             outputStream.flush();

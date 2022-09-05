@@ -36,7 +36,7 @@ public class HttpResponse {
     }
 
     private void generateJSession(final HttpRequest httpRequest, final HttpHeaders httpHeaders) {
-        Optional<String> jSessionId = httpRequest.getHttpRequestHeader()
+        Optional<String> jSessionId = httpRequest.getHeaders()
                 .findJSessionId();
 
         if (jSessionId.isEmpty()) {

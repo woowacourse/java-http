@@ -15,7 +15,7 @@ public class RegisterHandler {
             return HttpResponse.of(httpRequest, HttpStatus.OK, "/register.html");
         }
 
-        final HttpRequestBody requestBody = httpRequest.getHttpRequestBody();
+        final HttpRequestBody requestBody = httpRequest.getBody();
         final User user = createUser(requestBody);
         InMemoryUserRepository.save(user);
 

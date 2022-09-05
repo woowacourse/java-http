@@ -1,42 +1,30 @@
 package org.apache.coyote.http11;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.enums.HttpMethod;
 
 public class HttpRequest {
 
     private static final String BLANK = " ";
-    private static final char QUERY_STRING_STANDARD = '?';
+    private static final String QUERY_STRING_STANDARD = "?";
     private static final int URI_INDEX = 1;
     private static final int HTTP_METHOD_INDEX = 0;
-    private static final int INDEX_NOT_FOUND = -1;
 
-    private final String url;
+    private final String path;
     private final HttpMethod httpMethod;
-    private final QueryStrings queryStrings;
-    private final HttpRequestHeader httpRequestHeader;
-    private final HttpRequestBody httpRequestBody;
+    private final HttpRequestHeader headers;
+    private final HttpRequestBody body;
 
     public HttpRequest(final String startLine, final HttpRequestHeader requestHeader,
                        final HttpRequestBody requestBody) {
-        final String uri = extractURI(startLine);
-
-        url = extractURL(uri);
-        queryStrings = new QueryStrings(uri);
+        path = extractURI(startLine);
         httpMethod = HttpMethod.of(extractMethod(startLine));
-        httpRequestHeader = requestHeader;
-        httpRequestBody = requestBody;
+        headers = requestHeader;
+        body = requestBody;
     }
 
     private String extractURI(final String startLine) {
         return startLine.split(BLANK)[URI_INDEX];
-    }
-
-    private String extractURL(final String uri) {
-        int index = uri.lastIndexOf(QUERY_STRING_STANDARD);
-        if (index == INDEX_NOT_FOUND) {
-            return uri;
-        }
-        return uri.substring(0, index);
     }
 
     private String extractMethod(final String startLine) {
@@ -49,14 +37,18 @@ public class HttpRequest {
     }
 
     public String getUrl() {
-        return url;
+        return StringUtils.substringBeforeLast(path, QUERY_STRING_STANDARD);
     }
 
-    public HttpRequestHeader getHttpRequestHeader() {
-        return httpRequestHeader;
+    public QueryStrings getQueryStrings() {
+        return new QueryStrings(path);
     }
 
-    public HttpRequestBody getHttpRequestBody() {
-        return httpRequestBody;
+    public HttpRequestHeader getHeaders() {
+        return headers;
+    }
+
+    public HttpRequestBody getBody() {
+        return body;
     }
 }

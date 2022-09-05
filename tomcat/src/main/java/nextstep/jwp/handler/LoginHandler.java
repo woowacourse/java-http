@@ -33,7 +33,7 @@ public class LoginHandler {
             return HttpResponse.of(httpRequest, HttpStatus.OK, "/login.html");
         }
 
-        final HttpRequestBody requestBody = httpRequest.getHttpRequestBody();
+        final HttpRequestBody requestBody = httpRequest.getBody();
         final Optional<User> findUser = findUser(requestBody);
 
         if (findUser.isEmpty()) {
@@ -44,7 +44,7 @@ public class LoginHandler {
         final String password = requestBody.findByKey(PASSWORD);
         if (user.checkPassword(password)) {
             log.info(user.toString());
-            setUpSession(user, httpRequest.getHttpRequestHeader());
+            setUpSession(user, httpRequest.getHeaders());
             return generateSuccessResponse(httpRequest);
         }
 

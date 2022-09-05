@@ -2,12 +2,12 @@ package org.apache.coyote.controller;
 
 import org.apache.coyote.request.HttpRequest;
 
-public class HomeController implements Controller {
+public class HomeController extends AbstractController {
 
     private static final String DEFAULT_MESSAGE = "Hello world!";
 
     @Override
-    public String service(final HttpRequest httpRequest) {
+    protected String doGet(final HttpRequest httpRequest) {
         return DEFAULT_MESSAGE;
     }
 

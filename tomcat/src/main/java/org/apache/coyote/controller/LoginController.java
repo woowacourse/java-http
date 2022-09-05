@@ -8,22 +8,27 @@ import org.apache.coyote.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
-    public String service(final HttpRequest httpRequest) {
-        Map<String, String> queryParams = httpRequest.getQueryParams();
-        String account = queryParams.get("account");
-        String password = queryParams.get("password");
+    protected String doGet(final HttpRequest httpRequest) {
+        return "/login.html";
+    }
+
+    @Override
+    protected String doPost(final HttpRequest httpRequest) {
+        Map<String, String> requestBody = httpRequest.getRequestBody();
+        String account = requestBody.get("account");
+        String password = requestBody.get("password");
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(UserNotFoundException::new);
         if (user.checkPassword(password)) {
             log.info("user : {}", user);
         }
 
-        return "/login.html";
+        return "redirect:/index.html";
     }
 
     @Override

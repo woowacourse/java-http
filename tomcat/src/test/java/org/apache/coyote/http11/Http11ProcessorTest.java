@@ -82,7 +82,7 @@ class Http11ProcessorTest {
         void invalidStaticFile_ExceptionThrown() {
             // given
             final String httpRequest = String.join("\r\n",
-                    "GET /home.page HTTP/1.1 ",
+                    "GET /home.html HTTP/1.1 ",
                     "Host: localhost:8080 ",
                     "Accept: text/html,*/*;q=0.1 ",
                     "Connection: keep-alive ",
@@ -123,8 +123,8 @@ class Http11ProcessorTest {
         }
 
         @Test
-        @DisplayName("등록된 계정으로 로그인할 수 있다.")
-        void loginRequest() throws IOException {
+        @DisplayName("로그인에 성공하면 /index.html 페이지로 리다이렉트한다.")
+        void loginRequest() {
             // given
             final String httpRequest = createLoginRequest("/login?account=gugu&password=password");
             final var socket = new StubSocket(httpRequest);
@@ -134,21 +134,16 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final URL resource = getResource("static/index.html");
-
             final var expected = "HTTP/1.1 302 Found \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: 5564 \r\n" +
-                    "\r\n" +
-                    new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                    "Location: /index.html \r\n";
 
             assertThat(socket.output()).isEqualTo(expected);
         }
 
         @ParameterizedTest
         @CsvSource({"account=pepper&password=password", "account=gugu&password=pwd"})
-        @DisplayName("로그인 실패 시 404.html 페이지를 응답한다.")
-        void invalidAccount_ExceptionThrown(final String query) throws IOException {
+        @DisplayName("로그인 실패 시 /401.html 페이지로 리다이렉트한다.")
+        void invalidAccount_ExceptionThrown(final String query) {
             // given
             final String httpRequest = createLoginRequest("/login?" + query);
             final var socket = new StubSocket(httpRequest);
@@ -158,13 +153,9 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            final URL resource = getResource("static/404.html");
+            final var expected = "HTTP/1.1 302 Found \r\n" +
+                    "Location: /401.html \r\n";
 
-            final var expected = "HTTP/1.1 404 Not Found \r\n" +
-                    "Content-Type: text/html;charset=utf-8 \r\n" +
-                    "Content-Length: 2426 \r\n" +
-                    "\r\n" +
-                    new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
             assertThat(socket.output()).isEqualTo(expected);
         }
 

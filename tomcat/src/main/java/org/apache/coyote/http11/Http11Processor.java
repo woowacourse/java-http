@@ -56,25 +56,25 @@ public class Http11Processor implements Runnable, Processor {
             return createLoginResponse(httpRequest);
         }
         if (!requestUri.equals("/")) {
-            return createResponse(StatusCode.OK, createResponseBody(requestUri), ContentType.findByUri(requestUri));
+            return createResponse(StatusCode.OK, ContentType.findByUri(requestUri), createResponseBody(requestUri));
         }
-
-        return createResponse(StatusCode.OK, "Hello world!", ContentType.HTML);
+        return createResponse(StatusCode.OK, ContentType.HTML, "Hello world!");
     }
 
     private String createLoginResponse(final HttpRequest httpRequest) {
         if (httpRequest.containsQuery()) {
             return login(httpRequest);
         }
-        return createResponse(StatusCode.OK, createResponseBody("/login.html"), ContentType.HTML);
+        return createResponse(StatusCode.OK, ContentType.HTML, createResponseBody("/login.html"));
     }
 
     private String login(final HttpRequest httpRequest) {
+        final StatusCode statusCode = StatusCode.FOUND;
         try {
             userService.login(httpRequest);
-            return createResponse(StatusCode.FOUND, createResponseBody("/index.html"), ContentType.HTML);
+            return createRedirectResponse(statusCode, "/index.html");
         } catch (final IllegalArgumentException e) {
-            return createResponse(StatusCode.NOT_FOUND, createResponseBody("/404.html"), ContentType.HTML);
+            return createRedirectResponse(statusCode, "/401.html");
         }
     }
 
@@ -92,13 +92,20 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponse(final StatusCode statusCode, final String responseBody,
-                                  final ContentType contentType) {
+    private String createResponse(final StatusCode statusCode, final ContentType contentType,
+                                  final String responseBody) {
         return String.join("\r\n",
-                "HTTP/1.1 " + statusCode.toString() + " ",
+                "HTTP/1.1 " + statusCode + " ",
                 "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private String createRedirectResponse(final StatusCode statusCode, final String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 " + statusCode.toString() + " ",
+                "Location: " + location + " ",
+                "");
     }
 }

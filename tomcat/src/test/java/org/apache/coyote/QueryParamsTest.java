@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.apache.coyote.exception.QueryStringFormatException;
+import org.apache.coyote.http11.QueryParams;
 import org.junit.jupiter.api.Test;
 
 class QueryParamsTest {

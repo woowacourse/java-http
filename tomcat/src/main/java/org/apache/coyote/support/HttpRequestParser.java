@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.ContentType;
-import org.apache.coyote.HttpMethod;
 import org.apache.coyote.exception.InvalidHttpRequestFormatException;
+import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.HttpMethod;
 
 public class HttpRequestParser {
 

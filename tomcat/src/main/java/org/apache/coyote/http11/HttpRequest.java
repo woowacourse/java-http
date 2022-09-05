@@ -1,4 +1,4 @@
-package org.apache.coyote;
+package org.apache.coyote.http11;
 
 import static org.apache.coyote.support.HttpRequestParser.parseHttpMethod;
 import static org.apache.coyote.support.HttpRequestParser.parseQueryString;

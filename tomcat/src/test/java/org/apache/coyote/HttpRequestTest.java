@@ -7,6 +7,8 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import org.apache.coyote.http11.HttpMethod;
+import org.apache.coyote.http11.HttpRequest;
 import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {

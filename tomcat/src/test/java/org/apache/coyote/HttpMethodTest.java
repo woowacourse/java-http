@@ -3,6 +3,7 @@ package org.apache.coyote;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.apache.coyote.exception.InvalidHttpMethodException;
+import org.apache.coyote.http11.HttpMethod;
 import org.junit.jupiter.api.Test;
 
 class HttpMethodTest {

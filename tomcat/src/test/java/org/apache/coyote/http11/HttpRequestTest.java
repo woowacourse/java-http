@@ -14,7 +14,7 @@ class HttpRequestTest {
         HttpRequest httpRequest = HttpRequest.from(requestHeader);
 
         assertAll(
-                () -> assertThat(httpRequest.getRequestUrl()).isEqualTo("/login"),
+                () -> assertThat(httpRequest.getPath()).isEqualTo("/login"),
                 () -> assertThat(httpRequest.getRequestParams()).containsEntry("account", "gugu"),
                 () -> assertThat(httpRequest.getRequestParams()).containsEntry("password", "password")
         );

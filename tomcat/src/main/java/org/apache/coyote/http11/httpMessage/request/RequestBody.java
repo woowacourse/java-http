@@ -5,6 +5,7 @@ import java.util.Objects;
 public class RequestBody {
 
     private final String body;
+
     public RequestBody(String body) {
         this.body = body;
     }

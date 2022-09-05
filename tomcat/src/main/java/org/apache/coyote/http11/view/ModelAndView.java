@@ -66,7 +66,8 @@ public class ModelAndView {
         return ModelAndView.class.getClassLoader().getResource("static" + path);
     }
 
-    private static ModelAndView getModelAndView(HttpStatus httpStatus, Headers headers, URL resource) throws IOException {
+    private static ModelAndView getModelAndView(HttpStatus httpStatus, Headers headers, URL resource)
+            throws IOException {
         File file = new File(resource.getFile());
         Path path = file.toPath();
         String view = new String(Files.readAllBytes(path));

@@ -12,7 +12,7 @@ import org.apache.coyote.http11.httpmessage.response.HttpResponse;
 import org.apache.coyote.http11.view.ModelAndView;
 
 public class FrontController {
-    
+
     private static final List<HandlerMapper> HANDLER_MAPPERS = List.of(new FileHandlerMapper(), new ApiHandlerMapper());
 
     public HttpResponse doDispatch(HttpRequest httpRequest) throws IOException {
@@ -28,6 +28,7 @@ public class FrontController {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("처리할 수 있는 요청이 아닙니다."));
     }
+
     private HttpResponse getHttp11Response(Object handlerResponse) throws IOException {
         ModelAndView modelAndView = ModelAndView.of(handlerResponse);
         return HttpResponse.of(modelAndView);

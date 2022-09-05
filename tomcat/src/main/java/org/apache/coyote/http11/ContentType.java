@@ -22,7 +22,7 @@ public enum ContentType {
     }
 
     private boolean isMatch(String type) {
-        return name().equalsIgnoreCase(type) || value.equals(type) ;
+        return name().equalsIgnoreCase(type) || value.equals(type);
     }
 
     public String getValue() {

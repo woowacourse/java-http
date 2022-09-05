@@ -16,15 +16,15 @@ public enum HttpStatus {
         this.message = message;
     }
 
+    public boolean isFound() {
+        return this == FOUND;
+    }
+
     public int getValue() {
         return value;
     }
 
     public String getMessage() {
         return message;
-    }
-
-    public boolean isFound() {
-        return this == FOUND;
     }
 }

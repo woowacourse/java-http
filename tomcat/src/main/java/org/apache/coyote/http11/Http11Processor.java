@@ -9,6 +9,10 @@ import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.generator.ResponseGenerator;
+import org.apache.coyote.http11.response.generator.ResponseGeneratorFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +46,8 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             HttpRequest httpRequest = HttpRequest.from(request);
-            HttpResponse httpResponse = HttpResponse.from(httpRequest.getFileSource());
+            ResponseGenerator responseGenerator = ResponseGeneratorFinder.find(httpRequest);
+            HttpResponse httpResponse = responseGenerator.generate(httpRequest);
 
             String response = httpResponse.getResponse();
             outputStream.write(response.getBytes());

@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response.generator;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,7 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class ResponseBodyGenerator {
+public abstract class FileResponseGenerator implements ResponseGenerator {
 
     private static final String ROOT_PAGE_REQUEST_URI = "/";
     private static final String ROOT_PAGE = "Hello world!";
@@ -14,7 +14,7 @@ public class ResponseBodyGenerator {
     private static final String LOGIN_HTML_PATH = "/login.html";
     private static final String NOT_FOUND_MESSAGE = "404";
 
-    public String generate(String resource) throws IOException {
+    protected final String generate(String resource) throws IOException {
         if (resource.equals(ROOT_PAGE_REQUEST_URI)) {
             return ROOT_PAGE;
         }

@@ -5,13 +5,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
+import org.apache.coyote.http11.response.ContentType;
+
 public class Response {
 
-	public String createResponse(String url, String ContentType) throws IOException {
+	public String createResponse(String url, ContentType contentType) throws IOException {
 		final String path = getResourcesPath(url);
 		final URL resource = getClass().getClassLoader().getResource(path);
 		String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-		String response = createResponseFormat("Content-Type: " + ContentType + ";charset=utf-8 ", responseBody);
+		String response = createResponseFormat(contentType, responseBody);
 		return response;
 	}
 
@@ -19,10 +21,10 @@ public class Response {
 		return "static" + url;
 	}
 
-	public String createResponseFormat(String ContentType, String responseBody) {
+	public String createResponseFormat(ContentType ContentType, String responseBody) {
 		return String.join("\r\n",
 			"HTTP/1.1 200 OK ",
-			ContentType,
+			"ContentType: " + ContentType + ";charset=utf-8 ",
 			"Content-Length: " + responseBody.getBytes().length + " ",
 			"",
 			responseBody);

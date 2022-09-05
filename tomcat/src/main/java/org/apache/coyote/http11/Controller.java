@@ -1,46 +1,31 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.response.ContentType.HTML;
+
 import java.io.IOException;
+
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.CommonHttpResponse;
+import org.apache.coyote.http11.response.ContentType;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.LoginHttpResponse;
+import org.apache.coyote.http11.response.NormalHttpResponse;
 
 public class Controller {
 
-	private final Response responseGenerator;
-	private final UserService userService;
-
-	public Controller(Response responseGenerator, UserService userService) {
-		this.responseGenerator = responseGenerator;
-		this.userService = userService;
+	private Controller() {
 	}
 
-	public String run(String response, String url) throws IOException {
-		if (url.equals("/")) {
+	public static HttpResponse run(HttpRequest request) throws IOException {
+		if (request.isMatching("/")) {
 			var responseBody = "Hello world!";
-			return responseGenerator.createResponseFormat("Content-Type: text/html;charset=utf-8 ", responseBody);
+			return new NormalHttpResponse(responseBody, HTML);
 		}
 
-		if (url.startsWith("/index.html")) {
-			return responseGenerator.createResponse(url, "text/html");
+		if (request.getUrl().startsWith("/login")) {
+			UserInfoLogger.info(request.getParams());
+			return new LoginHttpResponse("/login.html", HTML);
 		}
-
-		if (url.startsWith("/css")) {
-			return responseGenerator.createResponse(url, "text/css");
-		}
-
-		if (url.startsWith("/js")) {
-			return responseGenerator.createResponse(url, "application/javascript");
-		}
-
-		if (url.startsWith("/assets")) {
-			return responseGenerator.createResponse(url, "application/javascript");
-		}
-
-		if (url.startsWith("/login")) {
-			int index = url.indexOf("?");
-			String path = url.substring(0, index);
-			String queryString = url.substring(index + 1);
-			userService.logUserInfo(queryString);
-			response = responseGenerator.createResponse(path + ".html", "text/html");
-		}
-		return response;
+		return new CommonHttpResponse(request.getUrl(), ContentType.from(request.getUrl()));
 	}
 }

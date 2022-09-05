@@ -1,11 +1,13 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.UrlGenerator.getUrl;
-
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,11 +18,9 @@ public class Http11Processor implements Runnable, Processor {
 	private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
 	private final Socket connection;
-	private final Controller controller;
 
 	public Http11Processor(final Socket connection) {
 		this.connection = connection;
-		this.controller = new Controller(new Response(), new UserService(log));
 	}
 
 	@Override
@@ -31,17 +31,13 @@ public class Http11Processor implements Runnable, Processor {
 	@Override
 	public void process(final Socket connection) {
 		try (final var inputStream = connection.getInputStream();
-			 final var outputStream = connection.getOutputStream()) {
+			 final var outputStream = connection.getOutputStream();
+			 final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-			var response = "";
+			final HttpRequest request = HttpRequest.from(reader);
+			final HttpResponse response = Controller.run(request);
 
-			String url = getUrl(inputStream);
-
-			if (url == null)
-				return;
-			response = controller.run(response, url);
-
-			outputStream.write(response.getBytes());
+			outputStream.write(response.createResponseFormatToBytes());
 			outputStream.flush();
 
 		} catch (IOException | UncheckedServletException e) {

@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 
 public class HttpRequest {
 
-    private String requestUrl;
-    private Map<String, String> requestParams;
+    private final String requestUrl;
+    private final Map<String, String> requestParams;
 
     private HttpRequest(final String requestUrl, final Map<String, String> requestParams) {
         this.requestUrl = requestUrl;

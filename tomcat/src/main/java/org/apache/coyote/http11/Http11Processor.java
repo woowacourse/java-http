@@ -12,7 +12,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.web.RequestMapping;
 import org.apache.coyote.web.request.HttpRequest;
 import org.apache.coyote.web.request.HttpRequestParser;
-import org.apache.coyote.web.response.SimpleHttpResponse;
+import org.apache.coyote.web.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,9 +38,9 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream bufferedOutputStream = new BufferedOutputStream(connection.getOutputStream())) {
 
             HttpRequest httpRequest = HttpRequestParser.parse(bufferedReader);
-            SimpleHttpResponse simpleHttpResponse = new SimpleHttpResponse(bufferedOutputStream);
+            HttpResponse httpResponse = new HttpResponse(bufferedOutputStream);
             RequestMapping requestMapping = new RequestMapping();
-            requestMapping.handle(httpRequest, simpleHttpResponse);
+            requestMapping.handle(httpRequest, httpResponse);
         } catch (IOException | UncheckedServletException | NullPointerException e) {
             log.error(e.getMessage(), e);
         }

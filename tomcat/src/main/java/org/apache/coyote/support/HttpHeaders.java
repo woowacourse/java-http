@@ -1,6 +1,7 @@
 package org.apache.coyote.support;
 
 import java.util.Map;
+import java.util.Optional;
 import org.apache.coyote.web.session.Cookie;
 
 public class HttpHeaders {
@@ -22,6 +23,14 @@ public class HttpHeaders {
 
     public void put(final String key, final String value) {
         headers.put(key, value);
+    }
+
+    public Optional<String> getHeader(final String header) {
+        String foundHeader = headers.get(header);
+        if (foundHeader == null) {
+            return Optional.empty();
+        }
+        return Optional.of(foundHeader);
     }
 
     public void setContentLength(final int length) {
@@ -51,8 +60,12 @@ public class HttpHeaders {
 
     public void addCookie(final Cookie cookie) {
         String cookieFormat = String.format(COOKIE_TEMPLATE, cookie.getKey(), cookie.getValue());
-        headers.computeIfPresent(HttpHeader.SET_COOKIE.getValue(),
-                (k, v) -> String.format(ADD_COOKIE_TEMPLATE, v, cookieFormat));
+        if (headers.containsKey(HttpHeader.SET_COOKIE.getValue())) {
+            headers.computeIfPresent(HttpHeader.SET_COOKIE.getValue(),
+                    (k, v) -> String.format(ADD_COOKIE_TEMPLATE, v, cookieFormat));
+            return;
+        }
+        setCookie(cookie);
     }
 
     public String getCookie() {

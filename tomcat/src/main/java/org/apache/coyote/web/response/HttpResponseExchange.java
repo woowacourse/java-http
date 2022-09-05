@@ -18,19 +18,11 @@ public class HttpResponseExchange {
         this.outputStream = outputStream;
     }
 
-    public void response200(final HttpHeaders httpHeaders, final String responseBody) throws IOException {
+    public void response(final HttpStatus httpStatus,
+                         final HttpHeaders httpHeaders,
+                         final String responseBody) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(parseStartLine(HttpStatus.OK))
-                .append(parseHeaders(httpHeaders))
-                .append("\r\n")
-                .append(responseBody);
-        String httpMessage = stringBuilder.toString();
-        outputStream.write(httpMessage.getBytes(StandardCharsets.UTF_8));
-    }
-
-    public void response302(final HttpHeaders httpHeaders, final String responseBody) throws IOException {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(parseStartLine(HttpStatus.FOUND))
+        stringBuilder.append(parseStartLine(httpStatus))
                 .append(parseHeaders(httpHeaders))
                 .append("\r\n")
                 .append(responseBody);

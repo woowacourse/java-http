@@ -4,16 +4,21 @@ import nextstep.jwp.controller.dto.UserLoginRequest;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
+import org.apache.coyote.support.HttpStatus;
 import org.apache.coyote.web.request.HttpRequest;
-import org.apache.coyote.web.response.SimpleHttpResponse;
+import org.apache.coyote.web.response.HttpResponse;
 import org.apache.coyote.web.session.Cookie;
 import org.apache.coyote.web.session.Session;
 import org.apache.coyote.web.session.SessionManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UserLoginController extends AbstractController {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(UserLoginController.class);
+
     @Override
-    protected void doGet(final HttpRequest httpRequest, final SimpleHttpResponse httpResponse) {
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         UserLoginRequest request = UserLoginRequest.from(httpRequest.getParameters());
         try {
             User user = InMemoryUserRepository.findByAccount(request.getAccount())
@@ -21,14 +26,19 @@ public class UserLoginController extends AbstractController {
             if (user.checkPassword(request.getPassword())) {
                 addCookie(httpResponse, user);
                 httpResponse.redirect("/index.html");
+                return;
             }
+            httpResponse.sendError(HttpStatus.UNAUTHORIZED, "/401.html");
+        } catch (UserNotFoundException e) {
+            LOGGER.error("error", e);
+            httpResponse.sendError(HttpStatus.BAD_REQUEST, "/400.html");
         } catch (Exception e) {
-            throw e;
-            // TODO : 401, 404
+            LOGGER.error("error", e);
+            httpResponse.sendError(HttpStatus.INTERNAL_SERVER_ERROR, "/500.html");
         }
     }
 
-    private void addCookie(final SimpleHttpResponse httpResponse, final User user) {
+    private void addCookie(final HttpResponse httpResponse, final User user) {
         Cookie cookie = SessionManager.createCookie();
         Session session = new Session(cookie.getKey());
         session.setAttribute("user", user);

@@ -8,10 +8,10 @@ public class HttpRequest {
 
     private final String method;
     private final String url;
-    private final Map<String, String> headers;
+    private final Map<HttpHeader, String> headers;
 
     private HttpRequest(final String method, final String url,
-                        final Map<String, String> headers) {
+                        final Map<HttpHeader, String> headers) {
         this.method = method;
         this.url = url;
         this.headers = headers;
@@ -23,14 +23,14 @@ public class HttpRequest {
         final String method = requestValues[0];
         final String uri = requestValues[1];
 
-        final Map<String, String> headers = new HashMap<>();
+        final Map<HttpHeader, String> headers = new HashMap<>();
 
         for (String value : values) {
             if ("".equals(value)) {
                 break;
             }
             final String[] header = value.split(": ");
-            headers.put(header[0], header[1]);
+            headers.put(HttpHeader.of(header[0]), header[1]);
         }
         return new HttpRequest(method, uri, headers);
     }

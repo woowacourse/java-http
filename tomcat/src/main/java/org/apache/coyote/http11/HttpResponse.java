@@ -1,5 +1,9 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.HttpHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http11.HttpHeader.CONTENT_TYPE;
+import static org.apache.coyote.http11.HttpStatus.OK;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -32,9 +36,9 @@ public class HttpResponse {
 
     private static String makeResponse(final String contentType, final byte[] bytes) {
         final String response = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + bytes.length + " ",
+                "HTTP/1.1 " + OK.toStatusFormat(),
+                CONTENT_TYPE.getValue() + ": " + contentType + ";charset=utf-8 ",
+                CONTENT_LENGTH.getValue() + ": " + bytes.length + " ",
                 "",
                 new String(bytes));
         return response;

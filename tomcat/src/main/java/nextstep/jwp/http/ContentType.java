@@ -8,7 +8,8 @@ public enum ContentType {
     TEXT_HTML("html", "text", "html"),
     TEXT_CSS("css", "text", "css"),
     APPLICATION_JAVASCRIPT("js", "application", "javascript"),
-    IMAGE_X_ICON("ico", "image", "x-icon")
+    IMAGE_X_ICON("ico", "image", "x-icon"),
+    SVG("svg", "image", "svg+xml"),
     ;
 
     private static final String MEDIA_TYPE_FORMAT = "%s/%s";

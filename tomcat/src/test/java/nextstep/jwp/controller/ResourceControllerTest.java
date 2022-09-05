@@ -1,14 +1,13 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.exception.CustomNotFoundException;
-import org.apache.http.HttpMime;
-import org.apache.http.RequestEntity;
-import org.apache.http.ResponseEntity;
+import org.apache.http.*;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.http.HttpMethod.GET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 class ResourceControllerTest {
 
@@ -18,15 +17,20 @@ class ResourceControllerTest {
     void 해당하는_자원을_찾으면_OK_응답을_반환한다() throws Exception {
         // given
         final RequestEntity requestEntity = new RequestEntity(GET, "/index.html", null);
-        final ResponseEntity expected = new ResponseEntity().contentType(HttpMime.TEXT_HTML);
+        final Headers headers = new Headers();
+        headers.put(HttpHeader.CONTENT_TYPE, HttpMime.TEXT_HTML.getValue());
+        headers.put(HttpHeader.CONTENT_LENGTH, "5564");
+        final ResponseEntity expected = new ResponseEntity(headers);
 
         // when
         final ResponseEntity actual = controller.execute(requestEntity);
 
         // then
-        assertThat(actual).usingRecursiveComparison()
-                .ignoringFields("contentLength", "content")
-                .isEqualTo(expected);
+        assertAll(
+                () -> assertThat(actual).usingRecursiveComparison()
+                        .ignoringFields("content")
+                        .isEqualTo(expected)
+        );
     }
 
     @Test

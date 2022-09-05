@@ -104,7 +104,7 @@ class Http11ProcessorTest {
 
     private String makeResponse(final HttpStatus httpStatus, final String contentType, final int contentLength, final String content) {
         return "HTTP/1.1 " + httpStatus.getCode() + " " + httpStatus.name() + " \r\n" +
-                "Content-Type: " + contentType + ";charset=utf-8 \r\n" +
+                "Content-Type: " + contentType + " \r\n" +
                 "Content-Length: " + contentLength + " \r\n" +
                 "\r\n" +
                 content;

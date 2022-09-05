@@ -2,12 +2,12 @@ package nextstep.jwp.controller;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.dto.LoginRequest;
+import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.support.QueryStringConverter;
 import nextstep.jwp.support.Resource;
-import org.apache.http.HttpStatus;
-import org.apache.http.RequestEntity;
-import org.apache.http.ResponseEntity;
+import nextstep.jwp.support.View;
+import org.apache.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,22 +20,30 @@ public class LoginController implements Controller {
 
     @Override
     public ResponseEntity execute(final RequestEntity requestEntity) {
+        if (isQueryStringNotExist(requestEntity.getQueryString())) {
+            final Resource resource = new Resource(View.LOGIN.getValue());
+            final Headers headers = new Headers();
+            headers.put(HttpHeader.CONTENT_TYPE, resource.getContentType().getValue());
+            return new ResponseEntity(headers).content(resource.read());
+        }
+
         final LoginRequest loginRequest = convert(requestEntity.getQueryString());
         final Optional<User> wrappedUser = InMemoryUserRepository.findByAccount(loginRequest.getAccount());
 
-        final Resource resource = new Resource("/login.html");
         if (wrappedUser.isPresent()) {
             final User user = wrappedUser.get();
             if (user.isSamePassword(loginRequest.getPassword())) {
                 log.debug(user.toString());
-                return new ResponseEntity().contentType(resource.getContentType())
-                        .content(resource.read());
+                final Headers headers = new Headers();
+                headers.put(HttpHeader.LOCATION, View.INDEX.getValue());
+                return new ResponseEntity(headers).httpStatus(HttpStatus.FOUND);
             }
         }
+        throw new UnauthorizedException();
+    }
 
-        return new ResponseEntity().httpStatus(HttpStatus.BAD_REQUEST)
-                .contentType(resource.getContentType())
-                .content(resource.read());
+    private boolean isQueryStringNotExist(final String queryString) {
+        return queryString == null;
     }
 
     private LoginRequest convert(final String queryString) {

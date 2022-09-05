@@ -3,13 +3,11 @@ package org.apache.coyote.http11;
 import nextstep.jwp.controller.Controller;
 import nextstep.jwp.exception.CustomNotFoundException;
 import nextstep.jwp.exception.FileAccessException;
-import nextstep.jwp.support.ErrorView;
+import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.support.Resource;
+import nextstep.jwp.support.View;
 import org.apache.coyote.Processor;
-import org.apache.http.HttpMethod;
-import org.apache.http.HttpStatus;
-import org.apache.http.RequestEntity;
-import org.apache.http.ResponseEntity;
+import org.apache.http.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,10 +50,12 @@ public class Http11Processor implements Runnable, Processor {
             final RequestEntity requestEntity = extractRequestInfo(bufferedReader);
             final Controller controller = controllerMapping.getController(RequestInfo.of(requestEntity));
             flushResponse(outputStream, makeResponse(controller, requestEntity));
+        } catch (UnauthorizedException e) {
+            flushResponse(outputStream, makeErrorResponse(HttpStatus.UNAUTHORIZED, View.UNAUTHORIZED));
         } catch (CustomNotFoundException e) {
-            flushResponse(outputStream, makeErrorResponse(HttpStatus.BAD_REQUEST, ErrorView.NOT_FOUND));
+            flushResponse(outputStream, makeErrorResponse(HttpStatus.BAD_REQUEST, View.NOT_FOUND));
         } catch (Exception e) {
-            flushResponse(outputStream, makeErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ErrorView.INTERNAL_SERVER_ERROR));
+            flushResponse(outputStream, makeErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, View.INTERNAL_SERVER_ERROR));
         }
     }
 
@@ -74,7 +74,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private String makeResponse(final Controller controller, final RequestEntity requestEntity) {
         return controller.execute(requestEntity)
-                .build();
+                .parse();
     }
 
     private String readLine(final BufferedReader bufferedReader) {
@@ -99,12 +99,13 @@ public class Http11Processor implements Runnable, Processor {
         return splited[1];
     }
 
-    private String makeErrorResponse(final HttpStatus httpStatus, final ErrorView errorView) {
+    private String makeErrorResponse(final HttpStatus httpStatus, final View errorView) {
         final Resource resource = new Resource(errorView.getValue());
-        return new ResponseEntity().httpStatus(httpStatus)
-                .contentType(resource.getContentType())
+        final Headers headers = new Headers();
+        headers.put(HttpHeader.CONTENT_TYPE, resource.getContentType().getValue());
+        return new ResponseEntity(headers).httpStatus(httpStatus)
                 .content(resource.read())
-                .build();
+                .parse();
     }
 
     private void flushResponse(final OutputStream outputStream, final String responseBody) {

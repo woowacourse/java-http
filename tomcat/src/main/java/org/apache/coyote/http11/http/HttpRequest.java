@@ -25,7 +25,7 @@ public class HttpRequest {
                     Headers.from(bufferedReader),
                     MessageBody.from(bufferedReader));
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException("HttpRequest creation failed.");
         }
     }
 

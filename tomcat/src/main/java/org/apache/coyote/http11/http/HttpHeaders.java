@@ -4,10 +4,12 @@ import static org.apache.catalina.utils.Parser.removeBlank;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.coyote.http11.header.HttpHeader;
 import org.apache.coyote.http11.header.HttpHeaderType;
 
@@ -26,10 +28,11 @@ public class HttpHeaders {
     }
 
     public static HttpHeaders of(final HttpHeader... httpHeaders) {
-        final Map<HttpHeaderType, HttpHeader> headers = new LinkedHashMap<>();
-        for (HttpHeader httpHeader : httpHeaders) {
-            headers.put(httpHeader.getHttpHeaderType(), httpHeader);
-        }
+        final Map<HttpHeaderType, HttpHeader> headers = Arrays.stream(httpHeaders)
+                .collect(Collectors.toMap(HttpHeader::getHttpHeaderType,
+                        httpHeader -> httpHeader,
+                        (key, value) -> value,
+                        LinkedHashMap::new));
         return new HttpHeaders(headers);
     }
 

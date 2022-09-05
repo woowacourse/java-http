@@ -14,7 +14,7 @@ public enum HttpMethod {
 
 	public static HttpMethod From(String method) {
 		return Arrays.stream(values())
-			.filter(it -> method.equals(it))
+			.filter(it -> method.equals(it.name()))
 			.findAny()
 			.orElseThrow(() -> new InvalidHttpMethodException(ExceptionType.NotFoundHttpMethodException));
 	}

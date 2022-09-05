@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 public class ViewResolver {
 
@@ -15,13 +16,15 @@ public class ViewResolver {
         this.requestUrl = requestUrl;
     }
 
-    public URI resolveView() throws URISyntaxException {
+    public Optional<URI> resolveView() throws URISyntaxException {
         if (ROOT_PATH.equals(requestUrl)) {
-            return null;
+            return Optional.empty();
         }
         if (requestUrl.contains(FILE_DELIMITER)) {
-            return getClass().getClassLoader().getResource(STATIC_FILE_PATH + requestUrl).toURI();
+            final URI uri = getClass().getClassLoader().getResource(STATIC_FILE_PATH + requestUrl).toURI();
+            return Optional.of(uri);
         }
-        return getClass().getClassLoader().getResource(STATIC_FILE_PATH + requestUrl + HTML_FILE_TYPE).toURI();
+        final URI uri = getClass().getClassLoader().getResource(STATIC_FILE_PATH + requestUrl + HTML_FILE_TYPE).toURI();
+        return Optional.of(uri);
     }
 }

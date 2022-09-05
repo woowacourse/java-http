@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 public class HttpResponse {
 
@@ -17,11 +18,11 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse of(final URI uri) throws URISyntaxException, IOException {
-        if (uri == null) {
+    public static HttpResponse of(final Optional<URI> uri) throws URISyntaxException, IOException {
+        if (uri.isEmpty()) {
             return defaultResponse();
         }
-        final Path path = Paths.get(uri);
+        final Path path = Paths.get(uri.get());
         final byte[] bytes = Files.readAllBytes(path);
         final String contentType = Files.probeContentType(path);
         final String response = makeResponse(contentType, bytes);

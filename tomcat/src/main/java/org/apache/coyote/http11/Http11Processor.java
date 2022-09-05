@@ -10,6 +10,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
@@ -43,7 +44,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             final ViewResolver viewResolver = new ViewResolver(requestPath);
-            final URI uri = viewResolver.resolveView();
+            final Optional<URI> uri = viewResolver.resolveView();
             final HttpResponse httpResponse = HttpResponse.of(uri);
             final String response = httpResponse.getBody();
 
@@ -56,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpRequest readHttpRequest(final InputStream inputStream) throws IOException {
         final BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-        String line = br.readLine();
+        final String line = br.readLine();
         final List<String> headerLines = new ArrayList<>();
 
         return HttpRequest.from(line, headerLines);

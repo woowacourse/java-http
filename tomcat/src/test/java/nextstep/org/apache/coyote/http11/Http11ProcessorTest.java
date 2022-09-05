@@ -1,6 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.File;
 import java.io.IOException;
@@ -114,36 +115,41 @@ class Http11ProcessorTest {
     @Test
     void loginSuccess() {
         // given
+        String body = "account=gugu&password=password";
         String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + body.getBytes().length,
                 "",
-                "");
+                body);
 
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
+        String actual = socket.output();
 
         // then
-        String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: /index.html \r\n" +
-                "\r\n";
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(() -> {
+            assertThat(actual).contains("HTTP/1.1 302 FOUND");
+            assertThat(actual).contains("Location: /index.html");
+        });
     }
 
-    @DisplayName("로그인이 성공하면 응답의 상태코드는 302이고, Location 헤더는 /401.html이다.")
+    @DisplayName("로그인이 실패하면 응답의 상태코드는 302이고, Location 헤더는 /401.html이다.")
     @Test
     void loginFail() {
         // given
+        String body = "account=gugu&password=wrong-password";
         String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=wrong-password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: " + body.getBytes().length,
                 "",
-                "");
+                body);
 
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
@@ -186,5 +192,32 @@ class Http11ProcessorTest {
                 "\r\n" + fileContent;
 
         assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("회원가입에 성공하면 응답의 상태코드는 302이고, Location 헤더는 /index.html이다.")
+    @Test
+    void registerSuccess() {
+        // given
+        String body = "account=gugu&password=password&email=gugu@gmail.com";
+        String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: " + body.getBytes().length,
+                "",
+                body);
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+        String actual = socket.output();
+
+        // then
+        assertAll(() -> {
+            assertThat(actual).contains("HTTP/1.1 302 FOUND");
+            assertThat(actual).contains("Location: /index.html");
+        });
     }
 }

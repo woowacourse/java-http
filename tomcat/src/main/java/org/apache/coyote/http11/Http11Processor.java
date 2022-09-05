@@ -26,7 +26,8 @@ import org.apache.coyote.http11.message.request.QueryString;
 import org.apache.coyote.http11.message.request.RequestLine;
 import org.apache.coyote.http11.message.request.RequestUri;
 import org.apache.coyote.http11.message.response.HttpResponse;
-import org.apache.coyote.http11.session.SessionStorage;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.http11.util.StaticFileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -135,11 +136,11 @@ public class Http11Processor implements Runnable, Processor {
             return;
         }
 
-        String sessionId = SessionStorage.add(user.get());
+        Session session = SessionManager.create();
         HttpResponse httpResponse = new HttpResponse.Builder()
                 .status(FOUND)
                 .header(LOCATION, "/index.html")
-                .setCookie(HttpCookie.sessionId(sessionId))
+                .setCookie(HttpCookie.sessionId(session.getId()))
                 .build();
 
         writeHttpResponse(os, httpResponse);

@@ -14,6 +14,7 @@ import nextstep.jwp.Controller;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.model.ContentType;
+import org.apache.coyote.http11.model.Header;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.request.Method;
 import org.apache.coyote.http11.model.response.HttpResponse;
@@ -47,8 +48,8 @@ public class Http11Processor implements Runnable, Processor {
             HttpRequest request = readHttpRequest(reader);
             HttpResponse response = Controller.process(request);
 
-            String location = response.getHeaderValue("Location");
-            if (!location.equals("")) {
+            if (response.hasLocation()) {
+                String location = response.getHeaderValue(Header.LOCATION);
                 response.addResource(findResource(location));
             } else if (response.getStatus() == Status.UNAUTHORIZED) {
                 response.addResource(findResource("/401.html"));
@@ -69,7 +70,7 @@ public class Http11Processor implements Runnable, Processor {
         HttpRequest request = HttpRequest.from(requestLine, headerLines);
 
         if (request.getMethod() == Method.POST) {
-            int contentLength = Integer.parseInt(request.getHeaderValue("Content-Length"));
+            int contentLength = Integer.parseInt(request.getHeaderValue(Header.CONTENT_LENGTH));
             char[] buffer = new char[contentLength];
             reader.read(buffer, 0, contentLength);
             String requestBody = new String(buffer);

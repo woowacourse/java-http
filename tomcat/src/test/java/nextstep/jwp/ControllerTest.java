@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
+import org.apache.coyote.http11.model.Header;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.response.HttpResponse;
 import org.apache.coyote.http11.model.response.Status;
@@ -25,7 +26,7 @@ class ControllerTest {
 
         assertAll(
                 () -> assertThat(response.getStatus()).isEqualTo(Status.FOUND),
-                () -> assertThat(response.getHeaderValue("Location")).isEqualTo("/index.html")
+                () -> assertThat(response.getHeaderValue(Header.LOCATION)).isEqualTo("/index.html")
         );
     }
 

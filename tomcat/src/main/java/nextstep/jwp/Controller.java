@@ -1,6 +1,7 @@
 package nextstep.jwp;
 
 import java.util.NoSuchElementException;
+import org.apache.coyote.http11.model.Header;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.response.HttpResponse;
 import org.apache.coyote.http11.model.response.Status;
@@ -26,7 +27,7 @@ public class Controller {
         try {
             userService.login(request.getQueryParams());
             HttpResponse response = HttpResponse.of(Status.FOUND);
-            response.addHeader("Location", "/index.html");
+            response.addHeader(Header.LOCATION, "/index.html");
             return response;
         } catch (IllegalArgumentException | NoSuchElementException e) {
             return HttpResponse.of(Status.UNAUTHORIZED);

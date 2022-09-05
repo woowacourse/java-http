@@ -5,6 +5,7 @@ import java.util.NoSuchElementException;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.model.request.Request;
+import org.apache.coyote.http11.model.response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,10 +17,11 @@ public class UserService {
     public static final String KEY_ACCOUNT = "account";
     public static final String KEY_PASSWORD = "password";
 
-    public static void process(final Request request) {
+    public static Status process(final Request request) {
         if (isLoginRequest(request)) {
             login(request);
         }
+        return Status.OK;
     }
 
     private static boolean isLoginRequest(final Request request) {
@@ -35,5 +37,6 @@ public class UserService {
         if (user.checkPassword(queryParams.get(KEY_PASSWORD))) {
             log.info(user.toString());
         }
+        throw new IllegalArgumentException();
     }
 }

@@ -42,9 +42,9 @@ public class Http11Processor implements Runnable, Processor {
              final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
             Request request = Request.from(reader.readLine());
-            UserService.process(request);
+            Status status = UserService.process(request);
 
-            Response response = Response.of(Status.OK);
+            Response response = Response.of(status);
             response.addResource(findResource(request.getUrl()));
 
             outputStream.write(response.getBytes());

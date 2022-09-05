@@ -2,8 +2,6 @@ package org.apache.coyote.utils;
 
 import org.apache.coyote.exception.NotFoundFileException;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static org.apache.coyote.model.ContentType.HTML;
+import static org.apache.coyote.model.request.ContentType.HTML;
 
 public class RequestUtil {
 

@@ -1,9 +1,6 @@
 package org.apache.coyote.model.request;
 
 import org.apache.coyote.exception.InvalidRequestFormat;
-import org.apache.coyote.model.ContentType;
-import org.apache.coyote.model.HttpMethod;
-import org.apache.coyote.model.HttpParam;
 
 import java.util.Arrays;
 import java.util.List;
@@ -64,5 +61,9 @@ public class HttpRequest {
 
     public HttpMethod getHttpMethod() {
         return httpMethod;
+    }
+
+    public boolean checkEmptyParams() {
+        return params.isEmpty();
     }
 }

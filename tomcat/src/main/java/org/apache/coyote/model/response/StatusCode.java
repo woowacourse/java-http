@@ -1,4 +1,4 @@
-package org.apache.coyote.model;
+package org.apache.coyote.model.response;
 
 public enum StatusCode {
 

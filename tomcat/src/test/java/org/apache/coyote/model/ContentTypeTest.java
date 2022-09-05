@@ -1,6 +1,7 @@
 package org.apache.coyote.model;
 
 import org.apache.coyote.exception.NotFoundContentTypeException;
+import org.apache.coyote.model.request.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

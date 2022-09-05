@@ -1,4 +1,4 @@
-package org.apache.coyote.model;
+package org.apache.coyote.model.request;
 
 import org.apache.coyote.exception.NotFoundHttpMethodException;
 

@@ -24,4 +24,8 @@ public class RequestLine {
         this.requestUri = new RequestUri(splitRequestLine[REQUEST_URI_INDEX]);
         this.version = splitRequestLine[VERSION_INDEX];
     }
+
+    public boolean hasQuery() {
+        return requestUri.hasQuery();
+    }
 }

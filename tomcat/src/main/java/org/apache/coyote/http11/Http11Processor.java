@@ -51,6 +51,11 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (request.matches(GET, "/login")) {
+                if (request.hasQuery()) {
+                    responseLoginHtml(outputStream);
+                    return;
+                }
+
                 responseLogin(outputStream, requestUri);
                 return;
             }
@@ -70,17 +75,16 @@ public class Http11Processor implements Runnable, Processor {
         writeHttpResponse(outputStream, httpResponse);
     }
 
+    private void responseLoginHtml(final OutputStream outputStream) throws IOException {
+        HttpResponse httpResponse = new HttpResponse.Builder()
+                .contentType(ContentType.HTML)
+                .body(StaticFileUtil.readFile("/login.html"))
+                .build();
+
+        writeHttpResponse(outputStream, httpResponse);
+    }
+
     private void responseLogin(final OutputStream outputStream, final RequestUri requestUri) throws IOException {
-        if (!requestUri.hasQuery()) {
-            HttpResponse httpResponse = new HttpResponse.Builder()
-                    .contentType(ContentType.HTML)
-                    .body(StaticFileUtil.readFile("/login.html"))
-                    .build();
-
-            writeHttpResponse(outputStream, httpResponse);
-            return;
-        }
-
         String account = requestUri.getQuery("account").orElse("");
         String password = requestUri.getQuery("password").orElse("");
 

@@ -60,6 +60,10 @@ public class HttpRequest {
         return methodMatches && uriMatches;
     }
 
+    public boolean hasQuery() {
+        return requestLine.hasQuery();
+    }
+
     public RequestUri getRequestUri() {
         return requestLine.getRequestUri();
     }

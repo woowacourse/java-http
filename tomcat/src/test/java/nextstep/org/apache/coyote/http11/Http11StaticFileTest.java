@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import nextstep.jwp.exception.StaticFileNotFoundException;
 import org.apache.coyote.HttpMethod;
 import org.apache.coyote.http11.Http11StaticFile;
-import org.apache.coyote.http11.Http11URL;
+import org.apache.coyote.http11.Http11URI;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import support.RequestFixture;
@@ -38,7 +38,7 @@ class Http11StaticFileTest {
         stubSocket = new StubSocket(httpRequest);
 
         // when
-        final Http11URL urlPath = Http11URL.of(stubSocket.getInputStream());
+        final Http11URI urlPath = Http11URI.of(stubSocket.getInputStream());
         final Http11StaticFile staticFile = Http11StaticFile.of(urlPath);
 
         // then
@@ -53,7 +53,7 @@ class Http11StaticFileTest {
         // given
         final String httpCssRequest = RequestFixture.create(HttpMethod.GET, "/css/styles.css", "");
         stubSocket = new StubSocket(httpCssRequest);
-        final Http11URL urlPath = Http11URL.of(stubSocket.getInputStream());
+        final Http11URI urlPath = Http11URI.of(stubSocket.getInputStream());
         final Http11StaticFile cssFile = Http11StaticFile.of(urlPath);
 
         // when
@@ -68,7 +68,7 @@ class Http11StaticFileTest {
         // given
         final String httpCssRequest = RequestFixture.create(HttpMethod.GET, "/notExist.html", "");
         stubSocket = new StubSocket(httpCssRequest);
-        final Http11URL urlPath = Http11URL.of(stubSocket.getInputStream());
+        final Http11URI urlPath = Http11URI.of(stubSocket.getInputStream());
 
         // when, then
         assertThatThrownBy(() -> Http11StaticFile.of(urlPath))

@@ -11,7 +11,7 @@ import org.apache.coyote.HttpMethod;
 import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.Http11Response;
 import org.apache.coyote.http11.Http11StaticFile;
-import org.apache.coyote.http11.Http11URL;
+import org.apache.coyote.http11.Http11URI;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import support.RequestFixture;
@@ -35,7 +35,7 @@ class Http11ResponseTest {
         final Http11Response http11Response = new Http11Response(stubSocket.getOutputStream());
 
         // when
-        final Http11URL urlPath = Http11URL.of(stubSocket.getInputStream());
+        final Http11URI urlPath = Http11URI.of(stubSocket.getInputStream());
         http11Response.write(Http11StaticFile.of(urlPath));
 
         // then

@@ -32,4 +32,9 @@ public class ResourceController extends AbstractController {
             httpResponse.addResponseBody(file);
         }
     }
+
+    @Override
+    void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+
+    }
 }

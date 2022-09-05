@@ -44,6 +44,10 @@ public class LoginController extends AbstractController {
         }
     }
 
+    @Override
+    void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+    }
+
     private void validatePassword(final User user, final String password) {
         if (!user.checkPassword(password)) {
             throw new NotFoundUserException();

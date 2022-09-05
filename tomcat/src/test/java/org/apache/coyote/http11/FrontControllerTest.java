@@ -14,40 +14,14 @@ import org.junit.jupiter.api.Test;
 
 class FrontControllerTest {
 
-    @DisplayName("정적 파일을 읽어와 HttpResponse를 반환한다.")
-    @Test
-    void staticFileRequest() throws IOException {
-        String fileName = "/js/scripts.js";
-        HttpResponse httpResponse = FrontController.staticFileRequest(fileName);
-
-        URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
-        String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
-
-        assertAll(
-                () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),
-                () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.OK),
-                () -> assertThat(httpResponse.getContentType()).isEqualTo(FileExtension.JS.getContentType()),
-                () -> assertThat(httpResponse.getContentLength()).isEqualTo(expectedResponseBody.getBytes().length),
-                () -> assertThat(httpResponse.getResponseBody()).isEqualTo(expectedResponseBody)
-        );
-    }
-
-    @DisplayName("존재하지 않는 정적 파일을 요청할 경우 Not Found 응답을 한다.")
-    @Test
-    void responseBadRequestWhenRequestInvalidStaticFile() throws IOException {
-        String fileName = "/rex/rex.js";
-        HttpResponse httpResponse = FrontController.staticFileRequest(fileName);
-        assertAll(
-                () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),
-                () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND)
-        );
-    }
+    private final FrontController frontController = new FrontController();
 
     @DisplayName("/ 요청이 올 경우 Hello world가 담긴 HttpResponse를 반환한다.")
     @Test
     void nonStaticFileBasicRequest() throws IOException {
+        FrontController frontController = new FrontController();
         HttpRequest httpRequest = new HttpRequest("GET / HTTP/1.1", List.of());
-        HttpResponse httpResponse = FrontController.nonStaticFileRequest(httpRequest);
+        HttpResponse httpResponse = frontController.performRequest(httpRequest);
 
         String expectedResponseBody = "Hello world!";
 
@@ -64,9 +38,9 @@ class FrontControllerTest {
     @Test
     void nonStaticFileLoginRequest() throws IOException {
         HttpRequest httpRequest = new HttpRequest("GET /login?account=rex&password=password HTTP/1.1", List.of());
-        HttpResponse httpResponse = FrontController.nonStaticFileRequest(httpRequest);
+        HttpResponse httpResponse = frontController.performRequest(httpRequest);
 
-        URL resource = getClass().getClassLoader().getResource("static/login.html");
+        URL resource = getClass().getClassLoader().getResource("static/index.html");
         String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertAll(
@@ -82,7 +56,7 @@ class FrontControllerTest {
     @Test
     void responseBadRequestWhenRequestInvalidLoginParam() throws IOException {
         HttpRequest httpRequest = new HttpRequest("GET /login?account=rex HTTP/1.1", List.of());
-        HttpResponse httpResponse = FrontController.nonStaticFileRequest(httpRequest);
+        HttpResponse httpResponse = frontController.performRequest(httpRequest);
 
         assertAll(
                 () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),
@@ -94,7 +68,7 @@ class FrontControllerTest {
     @Test
     void responseBadRequestWhenRequestThatCannotBePerform() throws IOException {
         HttpRequest httpRequest = new HttpRequest("GET /wrongUrl HTTP/1.1", List.of());
-        HttpResponse httpResponse = FrontController.nonStaticFileRequest(httpRequest);
+        HttpResponse httpResponse = frontController.performRequest(httpRequest);
 
         assertAll(
                 () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),

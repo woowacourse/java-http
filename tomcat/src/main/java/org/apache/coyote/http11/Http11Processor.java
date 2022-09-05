@@ -19,9 +19,11 @@ public class Http11Processor implements Runnable, Processor {
     private static final String EMPTY_LINE = "";
 
     private final Socket connection;
+    private final FrontController frontController;
 
-    public Http11Processor(final Socket connection) {
+    public Http11Processor(Socket connection) {
         this.connection = connection;
+        this.frontController = new FrontController();
     }
 
     @Override
@@ -36,7 +38,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final HttpRequest httpRequest = createHttpRequest(bufferedReader);
-            final HttpResponse httpResponse = createHttpResponse(httpRequest);
+            final HttpResponse httpResponse = frontController.performRequest(httpRequest);
 
             outputStream.write(httpResponse.toResponse());
             outputStream.flush();
@@ -59,12 +61,5 @@ public class Http11Processor implements Runnable, Processor {
         if (!line.equals(EMPTY_LINE)) {
             requestHeader.add(line);
         }
-    }
-
-    private HttpResponse createHttpResponse(HttpRequest httpRequest) throws IOException {
-        if (FileExtension.hasFileExtension(httpRequest.getUri())) {
-            return FrontController.staticFileRequest(httpRequest);
-        }
-        return FrontController.nonStaticFileRequest(httpRequest);
     }
 }

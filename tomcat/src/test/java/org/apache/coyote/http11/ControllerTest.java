@@ -23,9 +23,9 @@ class ControllerTest {
     @Test
     void 올바른_로그인_요청일_경우_index_화면을_응답한다() {
         // given
-        StartLine startLine = new StartLine("GET /login?account=gugu&password=password HTTP/1.1 ");
+        StartLine startLine = new StartLine("POST /login HTTP/1.1 ");
         RequestHeaders requestHeaders = RequestHeaders.of(List.of("Content-Length: 10"));
-        RequestBody requestBody = RequestBody.of("name=eden&nickName=king");
+        RequestBody requestBody = RequestBody.of("account=gugu&password=password");
         Request request = new Request(startLine, requestHeaders, requestBody);
 
         // when
@@ -60,10 +60,9 @@ class ControllerTest {
     @Test
     void 로그인_시_계정이_없는_요청일_경우_예외를_던진다() {
         // given
-        StartLine startLine = new StartLine("GET /login?account=eden&password=password HTTP/1.1 ");
+        StartLine startLine = new StartLine("POST /login HTTP/1.1 ");
         RequestHeaders requestHeaders = RequestHeaders.of(List.of("Content-Length: 10"));
-        QueryParameters queryParameters = QueryParameters.of("/login?account=eden&password=password");
-        RequestBody requestBody = RequestBody.of("name=eden&nickName=king");
+        RequestBody requestBody = RequestBody.of("account=eden&password=password");
         Request request = new Request(startLine, requestHeaders, requestBody);
 
         // when
@@ -79,9 +78,9 @@ class ControllerTest {
     @Test
     void 로그인_시_비밀번호가_일치하지_않는_요청일_경우_예외를_던진다() {
         // given
-        StartLine startLine = new StartLine("GET /login?account=gugu&password=gugugugu HTTP/1.1 ");
+        StartLine startLine = new StartLine("POST /login HTTP/1.1 ");
         RequestHeaders requestHeaders = RequestHeaders.of(List.of("Content-Length: 10"));
-        RequestBody requestBody = RequestBody.of("name=eden&nickName=king");
+        RequestBody requestBody = RequestBody.of("account=gugu&password=gugugugu");
         Request request = new Request(startLine, requestHeaders, requestBody);
 
         // when
@@ -127,7 +126,7 @@ class ControllerTest {
         // given
         StartLine startLine = new StartLine("POST /register HTTP/1.1 ");
         RequestHeaders requestHeaders = RequestHeaders.of(List.of("Content-Length: 10"));
-        RequestBody requestBody = RequestBody.of("name=eden&nickName=king");
+        RequestBody requestBody = RequestBody.of("account=eden&email=eden@morak.com&password=king");
         Request request = new Request(startLine, requestHeaders, requestBody);
 
         // when & then
@@ -146,5 +145,23 @@ class ControllerTest {
         // when & then
         assertThatThrownBy(() -> Controller.processRequest(request))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void 회원가입을_하면_index_html을_반환한다() {
+        // given
+        StartLine startLine = new StartLine("POST /register HTTP/1.1 ");
+        RequestHeaders requestHeaders = RequestHeaders.of(List.of("Content-Type: text/html"));
+        RequestBody requestBody = RequestBody.of("account=eden&email=eden@morak.com&password=king");
+        Request request = new Request(startLine, requestHeaders, requestBody);
+
+        // when
+        ResponseEntity responseEntity = Controller.processRequest(request);
+
+        // then
+        Assertions.assertAll(
+                () -> assertThat(responseEntity.getResponseBody()).isEqualTo("redirect:index.html"),
+                () -> assertThat(responseEntity.getHttpStatus()).isEqualTo(HttpStatus.REDIRECT)
+        );
     }
 }

@@ -26,4 +26,8 @@ public class RequestBody {
     public String get(String name) {
         return this.values.get(name);
     }
+
+    public boolean isEmpty() {
+        return this.values.isEmpty();
+    }
 }

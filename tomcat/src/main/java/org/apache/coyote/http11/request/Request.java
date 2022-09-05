@@ -28,4 +28,8 @@ public class Request {
     public boolean checkRequestPath(String path) {
         return this.startLine.checkRequest(path);
     }
+
+    public RequestBody getRequestBody() {
+        return requestBody;
+    }
 }

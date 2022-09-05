@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.constant.HttpMethods;
@@ -47,12 +48,19 @@ public class Http11Processor implements Runnable, Processor {
             return responseAssembler.resourceResponse(request.getUrl(), HttpStatus.OK);
         }
         if (request.getUrl().equals("/login")) {
-            return responseAssembler.resourceResponse("/login.html", HttpStatus.OK);
+            return generateLoginPage(request);
         }
         if (request.getUrl().equals("/register")) {
             return responseAssembler.resourceResponse("/register.html", HttpStatus.OK);
         }
         return generateDefaultResponse();
+    }
+
+    private Http11Response generateLoginPage(Http11Request request) {
+        if (request.getCookies().hasCookie("JSESSIONID")) {
+            return responseAssembler.redirectResponse("/index.html");
+        }
+        return responseAssembler.resourceResponse("/login.html", HttpStatus.OK);
     }
 
     public Http11Response post(Http11Request request, OutputStream outputStream) throws IOException {
@@ -96,16 +104,18 @@ public class Http11Processor implements Runnable, Processor {
         if (userByAccount.isPresent()) {
             log.info("로그인 성공!" + " 아이디: " + userByAccount.get().getAccount());
             Http11Response response = responseAssembler.redirectResponse("/index.html");
-            processCookie(cookie, response);
+            processCookie(cookie, response, userByAccount.get());
             return response;
         }
 
         return responseAssembler.redirectResponse("/401.html");
     }
 
-    private void processCookie(Cookie cookie, Http11Response response) {
+    private void processCookie(Cookie cookie, Http11Response response, User user) {
         if (!cookie.hasCookie("JSESSIONID")) {
-            response.setHeader("Set-Cookie", "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
+            String jSessionId = UUID.randomUUID().toString();
+            response.setHeader("Set-Cookie", "JSESSIONID=" + jSessionId);
+            Session.put(jSessionId, user);
         }
     }
 

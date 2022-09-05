@@ -5,8 +5,8 @@ import nextstep.jwp.dto.LoginRequest;
 import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.http.Headers;
 import nextstep.jwp.http.QueryStringConverter;
-import nextstep.jwp.http.RequestEntity;
-import nextstep.jwp.http.ResponseEntity;
+import nextstep.jwp.http.Request;
+import nextstep.jwp.http.Response;
 import nextstep.jwp.model.User;
 import nextstep.jwp.support.*;
 import org.apache.http.*;
@@ -21,15 +21,15 @@ public class LoginController implements Controller {
     private final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
-    public ResponseEntity execute(final RequestEntity requestEntity) {
-        if (isQueryStringNotExist(requestEntity.getQueryString())) {
+    public Response execute(final Request request) {
+        if (isQueryStringNotExist(request.getQueryString())) {
             final Resource resource = new Resource(View.LOGIN.getValue());
             final Headers headers = new Headers();
             headers.put(HttpHeader.CONTENT_TYPE, resource.getContentType().getValue());
-            return new ResponseEntity(headers).content(resource.read());
+            return new Response(headers).content(resource.read());
         }
 
-        final LoginRequest loginRequest = convert(requestEntity.getQueryString());
+        final LoginRequest loginRequest = convert(request.getQueryString());
         final Optional<User> wrappedUser = InMemoryUserRepository.findByAccount(loginRequest.getAccount());
 
         if (wrappedUser.isPresent()) {
@@ -38,7 +38,7 @@ public class LoginController implements Controller {
                 log.debug(user.toString());
                 final Headers headers = new Headers();
                 headers.put(HttpHeader.LOCATION, View.INDEX.getValue());
-                return new ResponseEntity(headers).httpStatus(HttpStatus.FOUND);
+                return new Response(headers).httpStatus(HttpStatus.FOUND);
             }
         }
         throw new UnauthorizedException();

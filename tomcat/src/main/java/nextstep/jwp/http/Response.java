@@ -4,7 +4,7 @@ import org.apache.http.HttpHeader;
 import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
 
-public class ResponseEntity {
+public class Response {
 
     private static final HttpVersion DEFAULT_HTTP_VERSION = HttpVersion.HTTP11;
     private static final HttpStatus DEFAULT_HTTP_STATUS = HttpStatus.OK;
@@ -14,21 +14,21 @@ public class ResponseEntity {
     private HttpStatus httpStatus = DEFAULT_HTTP_STATUS;
     private String content;
 
-    public ResponseEntity(final Headers headers) {
+    public Response(final Headers headers) {
         this.headers = headers;
     }
 
-    public ResponseEntity httpVersion(final HttpVersion httpVersion) {
+    public Response httpVersion(final HttpVersion httpVersion) {
         this.httpVersion = httpVersion;
         return this;
     }
 
-    public ResponseEntity httpStatus(final HttpStatus httpStatus) {
+    public Response httpStatus(final HttpStatus httpStatus) {
         this.httpStatus = httpStatus;
         return this;
     }
 
-    public ResponseEntity content(final String content) {
+    public Response content(final String content) {
         this.content = content;
         this.headers.put(HttpHeader.CONTENT_LENGTH, String.valueOf(content.getBytes().length));
         return this;

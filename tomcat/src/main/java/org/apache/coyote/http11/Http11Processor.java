@@ -88,8 +88,18 @@ public class Http11Processor implements Runnable, Processor {
                     .build();
         }
         if (httpRequest.getUrl().equals("/login")) {
-            if (!httpRequest.getQueryString("account").isBlank() && !httpRequest.getQueryString("password").isBlank()) {
-                validateLogin(httpRequest);
+            if (httpRequest.getHttpMethod() == GET) {
+                final String responseBody = loadFile("/login.html");
+                final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
+                return new HttpResponse.Builder()
+                        .statusCode(OK)
+                        .headers(httpHeaders)
+                        .body(responseBody)
+                        .build();
+            }
+            if (httpRequest.getHttpMethod() == POST) {
+                final HttpRequestBody httpRequestBody = httpRequest.getHttpRequestBody();
+                validateLogin(httpRequestBody);
                 final HttpHeaders httpHeaders = new HttpHeaders()
                         .addHeader(LOCATION, "/index.html");
                 return new HttpResponse.Builder()
@@ -97,13 +107,6 @@ public class Http11Processor implements Runnable, Processor {
                         .headers(httpHeaders)
                         .build();
             }
-            final String responseBody = loadFile("/login.html");
-            final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
-            return new HttpResponse.Builder()
-                    .statusCode(OK)
-                    .headers(httpHeaders)
-                    .body(responseBody)
-                    .build();
         }
         if (httpRequest.getUrl().equals("/register")) {
             if (httpRequest.getHttpMethod() == GET) {
@@ -130,9 +133,9 @@ public class Http11Processor implements Runnable, Processor {
         throw new NotFoundUrlException();
     }
 
-    private void validateLogin(final HttpRequest httpRequest) {
-        final String account = httpRequest.getQueryString("account");
-        final String password = httpRequest.getQueryString("password");
+    private void validateLogin(final HttpRequestBody httpRequestBody) {
+        final String account = httpRequestBody.getBodyValue("account");
+        final String password = httpRequestBody.getBodyValue("password");
         final User user = findRegisteredUser(account);
         if (!user.checkPassword(password)) {
             throw new LoginFailException();

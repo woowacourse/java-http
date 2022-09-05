@@ -99,7 +99,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("쿼리 스트링 없이 /login 요청이 들어오면 login.html을 보여준다.")
+    @DisplayName("GET /login 요청, login.html을 보여준다.")
     void loginRequestWithoutQueryString() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
@@ -128,15 +128,18 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("쿼리 스트링 있는 상태로 /login 요청이 들어오면 로그인을 검증하고 성공: Status 302, index.html 반환")
+    @DisplayName("POST /login 요청, 로그인을 검증하고 성공: Status 302, index.html 반환")
     void loginRequestAndSuccessLogin() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 30 ",
+                "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */*",
-                "");
+                "",
+                "account=gugu&password=password");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -152,19 +155,22 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("쿼리 스트링 있는 상태로 /login 요청이 들어오면 로그인을 검증하고 실패: Status 401, 401.html 반환")
+    @DisplayName("POST /login 요청, 로그인을 검증하고 실패: Status 401, 401.html 반환")
     void loginRequestAndFailLogin() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=invalid&password=invalid HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 32 ",
+                "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */*",
-                "");
+                "",
+                "account=invalid&password=invalid");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
-
+        
         // when
         processor.process(socket);
 
@@ -181,15 +187,18 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("/login 요청이 들어오면 해당 쿼리스트링으로 넘어온 값이 이미 가입한 회원이면 로그를 남긴다.")
+    @DisplayName("POST /login 요청, 해당 바디로 넘어온 값이 이미 가입한 회원이면 로그를 남긴다.")
     void validateRegisterUser() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 30 ",
+                "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */*",
-                "");
+                "",
+                "account=gugu&password=password");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

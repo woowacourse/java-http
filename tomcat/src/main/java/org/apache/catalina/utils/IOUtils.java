@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 
 public class IOUtils {
@@ -22,7 +23,7 @@ public class IOUtils {
     public static String readResourceFile(final String fileName) throws IOException, URISyntaxException {
         final ClassLoader classLoader = IOUtils.class.getClassLoader();
         final URI resource = Objects.requireNonNull(classLoader.getResource(STATIC_PATH + fileName)).toURI();
-        final Path path = Path.of(resource.getPath());
+        final Path path = Paths.get(resource);
 
         return Files.readString(path);
     }

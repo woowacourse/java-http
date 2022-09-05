@@ -4,8 +4,9 @@ import nextstep.jwp.controller.HomeController;
 import nextstep.jwp.controller.LoginController;
 import nextstep.jwp.controller.RegisterController;
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.ExceptionHandler;
+import nextstep.jwp.exception.ExceptionListener;
 import nextstep.jwp.service.UserService;
+import nextstep.jwp.servlet.handler.ExceptionHandler;
 import nextstep.jwp.servlet.handler.HandlerMapping;
 import nextstep.jwp.servlet.view.ViewResolver;
 import org.apache.coyote.servlet.Servlet;
@@ -23,10 +24,9 @@ public class CustomServlet implements Servlet {
         final var userService = new UserService(new InMemoryUserRepository());
         final var handlerMapping = HandlerMapping.of(new HomeController(),
                 new LoginController(userService), new RegisterController(userService));
-        final var viewResolver = new ViewResolver();
         this.handlerMapping = handlerMapping;
-        this.viewResolver = viewResolver;
-        this.exceptionHandler = new ExceptionHandler();
+        this.viewResolver = new ViewResolver();
+        this.exceptionHandler = new ExceptionListener();
     }
 
     public void service(HttpRequest request, HttpResponse response) {

@@ -5,28 +5,24 @@ import java.net.URISyntaxException;
 
 public class MyHttpResponse {
 
-    private final String value;
+    private final ContentType contentType;
+    private final ResponseBody responseBody;
 
-    private MyHttpResponse(String value) {
-        this.value = value;
+    public MyHttpResponse(ContentType contentType, ResponseBody responseBody) {
+        this.contentType = contentType;
+        this.responseBody = responseBody;
     }
 
     public static MyHttpResponse from(FilePath filePath) throws URISyntaxException, IOException {
-        final ContentType contentType = ContentType.find(filePath.getValue());
-        final ResponseBody responseBody = ResponseBody.from(filePath.getValue());
-        return new MyHttpResponse(generateResponse(contentType, responseBody));
-    }
-
-    private static String generateResponse(ContentType contentType, ResponseBody responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType.getType() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getValue().getBytes().length + " ",
-                "",
-                responseBody.getValue());
+        return new MyHttpResponse(ContentType.find(filePath.getValue()), ResponseBody.from(filePath.getValue()));
     }
 
     public String getValue() {
-        return value;
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + this.contentType.getType() + ";charset=utf-8 ",
+                "Content-Length: " + this.responseBody.getValue().getBytes().length + " ",
+                "",
+                this.responseBody.getValue());
     }
 }

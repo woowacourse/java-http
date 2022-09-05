@@ -13,4 +13,12 @@ public class Header {
     public String getString() {
         return key + ": " + value + " ";
     }
+
+    public String getKey() {
+        return key;
+    }
+
+    public String getValue() {
+        return value;
+    }
 }

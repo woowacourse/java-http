@@ -8,14 +8,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import nextstep.jwp.UserService;
+import nextstep.jwp.Controller;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.request.Request;
 import org.apache.coyote.http11.model.response.Resource;
 import org.apache.coyote.http11.model.response.Response;
-import org.apache.coyote.http11.model.response.Status;
 import org.apache.coyote.http11.utils.ResourceMatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,10 +41,14 @@ public class Http11Processor implements Runnable, Processor {
              final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
             Request request = Request.from(reader.readLine());
-            Status status = UserService.process(request);
+            Response response = Controller.process(request);
 
-            Response response = Response.of(status);
-            response.addResource(findResource(request.getUrl()));
+            String location = response.getHeaderValue("Location");
+            if (!location.equals("")) {
+                response.addResource(findResource(location));
+            } else {
+                response.addResource(findResource(request.getUrl()));
+            }
 
             outputStream.write(response.getBytes());
             outputStream.flush();

@@ -17,6 +17,14 @@ public class Headers {
         this.headers.add(header);
     }
 
+    public String getValue(final String key) {
+        return this.headers.stream()
+                .filter(header -> header.getKey().equals(key))
+                .findFirst()
+                .orElse(new Header("", ""))
+                .getValue();
+    }
+
     public String getString() {
         List<String> headerStrings = headers.stream()
                 .map(Header::getString)

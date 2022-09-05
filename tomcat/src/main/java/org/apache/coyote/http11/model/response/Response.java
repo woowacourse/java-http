@@ -56,6 +56,10 @@ public class Response {
         setContentLength();
     }
 
+    public String getHeaderValue(final String key) {
+        return this.headers.getValue(key);
+    }
+
     private void setContentType() {
         this.addHeader(KEY_CONTENT_TYPE, resource.getContentType() + ENCODE_UTF8);
     }

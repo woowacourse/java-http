@@ -1,12 +1,21 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Map;
+import java.util.Objects;
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -27,20 +36,85 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
+            final BufferedReader bufferedReader = new BufferedReader(
+                    new InputStreamReader(inputStream, StandardCharsets.UTF_8));
 
-            final var responseBody = "Hello world!";
-
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final var request = readRequestHeader(bufferedReader);
+            final var response = getResponse(HttpRequest.from(request));
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String readRequestHeader(final BufferedReader bufferedReader) throws IOException {
+        StringBuilder header = new StringBuilder();
+
+        while (bufferedReader.ready()) {
+            header.append(bufferedReader.readLine())
+                    .append("\r\n");
+        }
+
+        return header.toString();
+    }
+
+    private String getResponse(final HttpRequest httpRequest) throws IOException {
+        return getResponse(httpRequest.getRequestUrl(), httpRequest.getRequestParams());
+    }
+
+    private String getResponse(String url, final Map<String, String> requestParam) throws IOException {
+        if ("/".equals(url)) {
+            final var responseBody = "Hello world!";
+
+            return createResponse(ContentType.HTML, responseBody);
+        }
+
+        if ("/index.html".equals(url)) {
+            final String responseBody = readFile(url);
+
+            return createResponse(ContentType.HTML, responseBody);
+        }
+
+        if ("/login".equals(url)) {
+            final String responseBody = readFile(url + ".html");
+
+            User user = InMemoryUserRepository.findByAccount(requestParam.get("account"))
+                    .orElseThrow(() -> new IllegalStateException("존재하지 않는 유저입니다."));
+            if (user.checkPassword(requestParam.get("password"))) {
+                log.info(user.toString());
+            }
+
+            return createResponse(ContentType.HTML, responseBody);
+        }
+
+        if (url.contains(".css")) {
+            final String responseBody = readFile(url);
+
+            return createResponse(ContentType.CSS, responseBody);
+        }
+
+        if (url.contains(".js")) {
+            final String responseBody = readFile(url);
+
+            return createResponse(ContentType.JAVASCRIPT, responseBody);
+        }
+
+        throw new IllegalArgumentException("올바르지 않은 URL 요청입니다.");
+    }
+
+    private String readFile(String url) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static" + url);
+        return Files.readString(new File(Objects.requireNonNull(resource).getFile()).toPath());
+    }
+
+    private String createResponse(ContentType contentType, String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

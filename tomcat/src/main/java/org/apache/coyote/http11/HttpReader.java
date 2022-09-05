@@ -20,7 +20,14 @@ public class HttpReader {
             final String line = bufferedReader.readLine();
             lines.add(line);
         }
+        validateEmptyRequest(lines);
         return lines;
+    }
+
+    private void validateEmptyRequest(final List<String> lines) {
+        if (lines.isEmpty()) {
+            throw new IllegalArgumentException("요청 값이 없습니다.");
+        }
     }
 
     public String getStartLine() {

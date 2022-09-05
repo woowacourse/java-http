@@ -1,6 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -13,6 +14,19 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class HttpReaderTest {
+
+    @Test
+    @DisplayName("BufferReader를 통해서 읽어온 요청이 빈 값인 경우 예외가 발생한다.")
+    void emptyRequest() {
+        // given
+        final String request = "";
+        final InputStream inputStream = new ByteArrayInputStream(request.getBytes());
+        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+        // when, then
+        assertThatThrownBy(() -> new HttpReader(bufferedReader))
+                .isExactlyInstanceOf(IllegalArgumentException.class);
+    }
 
     @Test
     @DisplayName("BufferReader를 통해서 첫번째 라인을 읽어온다.")

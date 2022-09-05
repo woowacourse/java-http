@@ -8,20 +8,14 @@ import org.apache.coyote.controller.LoginController;
 
 public class RequestMapping {
 
-    private final Map<String, Controller> requestMap;
+    private static final Map<String, Controller> requestMap = new HashMap<>();
 
-    private RequestMapping(final Map<String, Controller> requestMap) {
-        this.requestMap = requestMap;
-    }
-
-    public static RequestMapping init() {
-        Map<String, Controller> requestMap = new HashMap<>();
+    static {
         requestMap.put("/", new HomeController());
         requestMap.put("/login", new LoginController());
-        return new RequestMapping(requestMap);
     }
 
-    public Controller find(final String requestUri) {
+    public static Controller find(final String requestUri) {
         Controller controller = requestMap.get(requestUri);
         if (controller == null) {
             return new ResourceHandler();

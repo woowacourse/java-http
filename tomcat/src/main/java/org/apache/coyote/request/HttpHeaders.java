@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class HttpHeaders {
 
-    public static final String KEY_VALUE_SEPARATOR = ":";
+    private static final String KEY_VALUE_SEPARATOR = ":";
 
     private final Map<String, String> value;
 

@@ -4,11 +4,11 @@ import java.util.Map;
 
 public class RequestLine {
 
-    public static final String REQUEST_LINE_SEPARATOR = " ";
-    public static final String QUERY_PARAM_SEPARATOR = "?";
-    public static final int HTTP_METHOD_INDEX = 0;
-    public static final int PATH_INDEX = 1;
-    public static final int NOT_EXIST = -1;
+    private static final String REQUEST_LINE_SEPARATOR = " ";
+    private static final String QUERY_PARAM_SEPARATOR = "?";
+    private static final int HTTP_METHOD_INDEX = 0;
+    private static final int PATH_INDEX = 1;
+    private static final int NOT_EXIST = -1;
 
     private final HttpMethod httpMethod;
     private final String requestUri;

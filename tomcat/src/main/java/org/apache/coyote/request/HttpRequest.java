@@ -6,7 +6,7 @@ import org.apache.coyote.exception.InvalidRequestException;
 
 public class HttpRequest {
 
-    public static final int REQUEST_LINE_INDEX = 0;
+    private static final int REQUEST_LINE_INDEX = 0;
 
     private final RequestLine requestLine;
     private final HttpHeaders httpHeaders;

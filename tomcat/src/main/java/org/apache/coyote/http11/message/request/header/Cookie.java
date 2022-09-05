@@ -3,7 +3,6 @@ package org.apache.coyote.http11.message.request.header;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import org.apache.coyote.http11.message.Regex;
 
@@ -29,12 +28,16 @@ public class Cookie {
         return new Cookie(values);
     }
 
-    public static Cookie fromJSessionId(UUID jSessionId) {
-        return new Cookie(Map.of(KEY_JSESSIONID, jSessionId.toString()));
+    public static Cookie fromJSessionId(String sessionId) {
+        return new Cookie(Map.of(KEY_JSESSIONID, sessionId));
     }
 
     public static Cookie ofEmpty() {
         return new Cookie(Map.of());
+    }
+
+    public Optional<String> getJSessionId() {
+        return get(KEY_JSESSIONID);
     }
 
     public Optional<String> get(String key) {

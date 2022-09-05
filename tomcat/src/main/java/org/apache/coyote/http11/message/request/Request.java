@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import org.apache.coyote.http11.message.header.Header;
 import org.apache.coyote.http11.message.request.body.RequestBody;
+import org.apache.coyote.http11.message.request.header.Cookie;
 import org.apache.coyote.http11.message.request.header.Headers;
 import org.apache.coyote.http11.message.request.requestline.Method;
 import org.apache.coyote.http11.message.request.requestline.RequestLine;
@@ -70,6 +71,10 @@ public class Request {
 
     public String getPath() {
         return requestLine.getPath();
+    }
+
+    public Cookie getCookie() {
+        return headers.getCookie();
     }
 
     public QueryParams getUriQueryParams() {

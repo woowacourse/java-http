@@ -7,13 +7,15 @@ import nextstep.jwp.model.User;
 
 public class UserService {
 
-    public static void login(final String account, final String password) {
+    public static User login(final String account, final String password) {
         final User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(() -> new NotFoundException("계정을 찾을 수 없습니다."));
 
         if (!user.checkPassword(password)) {
             throw new UnauthorizedException("잘못된 비밀번호입니다.");
         }
+
+        return user;
     }
 
     public static void register(final String account, final String password, final String email) {

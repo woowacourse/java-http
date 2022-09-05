@@ -10,14 +10,19 @@ import org.apache.coyote.Controller;
 import org.apache.coyote.http11.message.request.Request;
 import org.apache.coyote.http11.message.response.Response;
 import org.apache.coyote.http11.message.response.header.StatusCode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RequestHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     public static Response handle(Request request) throws IOException, URISyntaxException {
         final Controller controller = RequestMapper.getController(request);
         try {
             return controller.service(request);
         } catch (Exception e) {
+            log.error(e.getMessage(), e);
             return handleException(e);
         }
     }

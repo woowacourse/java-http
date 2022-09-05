@@ -3,7 +3,8 @@ package org.apache.coyote.common;
 public enum Header {
 
     CONTENT_TYPE("Content-Type"),
-    CONTENT_LENGTH("Content-Length")
+    CONTENT_LENGTH("Content-Length"),
+    LOCATION("Location")
     ;
 
     private final String value;

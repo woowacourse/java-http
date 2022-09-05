@@ -22,9 +22,11 @@ public class LoginHandler implements Function<Request, Response> {
                 .orElseThrow(() -> new IllegalArgumentException(Request.UNKNOWN_QUERY));
         final Optional<User> user = findUser(request);
 
+        String locationUrl = "/index";
         String responseBody = ResourceGenerator.getStaticResource("/index");
         Status statusCode = Status.FOUND;
         if (user.isEmpty() || !user.get().checkPassword(password)) {
+            locationUrl = "/401";
             responseBody = ResourceGenerator.getStaticResource("/401");
             statusCode = Status.UNAUTHORIZED;
         }
@@ -32,6 +34,7 @@ public class LoginHandler implements Function<Request, Response> {
         return new ResponseBuilder(HttpVersion.HTTP11, statusCode)
                 .setContentType(MediaType.TEXT_HTML, Charset.UTF8)
                 .setContentLength(responseBody.getBytes(StandardCharsets.UTF_8).length)
+                .setLocation(locationUrl)
                 .setBody(responseBody)
                 .build();
     }

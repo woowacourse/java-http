@@ -51,6 +51,10 @@ public class Response {
                     combineHeaderValues(mediaType.getValue(), "charset=" + charset.getValue()));
         }
 
+        public ResponseBuilder setLocation(final String url) {
+            return setHeader(Header.LOCATION, url);
+        }
+
         private String combineHeaderValues(final String... values) {
             return String.join(HEADER_VALUE_DELIMITER, values);
         }

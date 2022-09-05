@@ -6,20 +6,20 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestBody;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.enums.HttpMethod;
-import org.apache.coyote.http11.enums.HttpStatus;
+import org.apache.coyote.http11.enums.HttpStatusCode;
 
 public class RegisterHandler {
 
     public HttpResponse register(final HttpRequest httpRequest) {
         if (httpRequest.isSameHttpMethod(HttpMethod.GET)) {
-            return HttpResponse.of(httpRequest, HttpStatus.OK, "/register.html");
+            return HttpResponse.of(httpRequest, HttpStatusCode.OK, "/register.html");
         }
 
         final HttpRequestBody requestBody = httpRequest.getBody();
         final User user = createUser(requestBody);
         InMemoryUserRepository.save(user);
 
-        final HttpResponse response = HttpResponse.of(httpRequest, HttpStatus.FOUND, "/register.html");
+        final HttpResponse response = HttpResponse.of(httpRequest, HttpStatusCode.FOUND, "/register.html");
         response.addHeader("Location", "/login.html");
         return response;
     }

@@ -14,7 +14,7 @@ import org.apache.catalina.Manager;
 import org.apache.catalina.SessionManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.enums.HttpStatus;
+import org.apache.coyote.http11.enums.HttpStatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -84,7 +84,7 @@ public class Http11Processor implements Runnable, Processor {
         final String url = httpRequest.getUrl();
 
         if ("/".equals(url)) {
-            return new HttpResponse(httpRequest, HttpStatus.OK, "text/plain", "Hello world!");
+            return new HttpResponse(httpRequest, HttpStatusCode.OK, "text/plain", "Hello world!");
         }
 
         if ("/login".equals(url)) {
@@ -95,6 +95,6 @@ public class Http11Processor implements Runnable, Processor {
             return new RegisterHandler().register(httpRequest);
         }
 
-        return HttpResponse.of(httpRequest, HttpStatus.OK, url);
+        return HttpResponse.of(httpRequest, HttpStatusCode.OK, url);
     }
 }

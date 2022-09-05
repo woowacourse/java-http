@@ -11,7 +11,7 @@ import org.apache.coyote.http11.HttpRequestBody;
 import org.apache.coyote.http11.HttpRequestHeader;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.enums.HttpMethod;
-import org.apache.coyote.http11.enums.HttpStatus;
+import org.apache.coyote.http11.enums.HttpStatusCode;
 import org.apache.coyote.http11.utils.UuidUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,14 +30,14 @@ public class LoginHandler {
 
     public HttpResponse login(final HttpRequest httpRequest) {
         if (httpRequest.isSameHttpMethod(HttpMethod.GET)) {
-            return HttpResponse.of(httpRequest, HttpStatus.OK, "/login.html");
+            return HttpResponse.of(httpRequest, HttpStatusCode.OK, "/login.html");
         }
 
         final HttpRequestBody requestBody = httpRequest.getBody();
         final Optional<User> findUser = findUser(requestBody);
 
         if (findUser.isEmpty()) {
-            return HttpResponse.of(httpRequest, HttpStatus.UNAUTHORIZED, "/401.html");
+            return HttpResponse.of(httpRequest, HttpStatusCode.UNAUTHORIZED, "/401.html");
         }
 
         final User user = findUser.get();
@@ -48,7 +48,7 @@ public class LoginHandler {
             return generateSuccessResponse(httpRequest);
         }
 
-        return HttpResponse.of(httpRequest, HttpStatus.UNAUTHORIZED, "/401.html");
+        return HttpResponse.of(httpRequest, HttpStatusCode.UNAUTHORIZED, "/401.html");
     }
 
     private void setUpSession(final User user, final HttpRequestHeader httpRequestHeader) {
@@ -72,7 +72,7 @@ public class LoginHandler {
     }
 
     private HttpResponse generateSuccessResponse(final HttpRequest httpRequest) {
-        final HttpResponse response = HttpResponse.of(httpRequest, HttpStatus.FOUND, "/login.html");
+        final HttpResponse response = HttpResponse.of(httpRequest, HttpStatusCode.FOUND, "/login.html");
         response.addHeader("Location", "/index.html");
         return response;
     }

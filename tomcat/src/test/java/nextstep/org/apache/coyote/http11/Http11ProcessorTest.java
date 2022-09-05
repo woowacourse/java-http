@@ -182,7 +182,8 @@ class Http11ProcessorTest {
 
         // then
         String expected = "HTTP/1.1 302 Found "
-                + "\r\nLocation: /index.html ";
+                + "\r\nLocation: /index.html "
+                + "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
     }

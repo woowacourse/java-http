@@ -6,13 +6,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
-import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.application.LoginService;
+import nextstep.jwp.exception.InvalidLoginFormatException;
+import nextstep.jwp.exception.InvalidPasswordException;
+import nextstep.jwp.exception.MemberNotFoundException;
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
-import org.apache.coyote.exception.InvalidLoginFormatException;
-import org.apache.coyote.exception.InvalidPasswordException;
-import org.apache.coyote.exception.MemberNotFoundException;
 import org.apache.coyote.exception.ResourceNotFoundException;
 import org.apache.coyote.support.HttpRequestParser;
 import org.apache.coyote.support.ResourcesUtil;
@@ -26,13 +25,13 @@ public class Http11Processor implements Runnable, Processor {
     private static final String STATIC_PATH = "static";
     private static final String DEFAULT_EXTENSION = ".html";
     private static final String LOGIN_PATH = "/login";
-    private static final String LOGIN_PAGE_PATH = "/login.html";
     public static final String UNAUTHORIZED_PATH = "/401.html";
     public static final String NOT_FOUND_PATH = "/404.html";
     public static final String INTERNAL_SERVER_ERROR_PATH = "/500.html";
     public static final String DEFAULT_RESPONSE_BODY = "Hello world!";
 
     private final Socket connection;
+    private final LoginService loginService = LoginService.instance();
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
@@ -106,43 +105,10 @@ public class Http11Processor implements Runnable, Processor {
 
     private String accessPostMethod(final String url, final String requestBody) {
         if (url.equals(LOGIN_PATH)) {
-            return login(requestBody);
+            String location = loginService.login(requestBody);
+            return toFoundResponse(location);
         }
         return toFoundResponse(NOT_FOUND_PATH);
-    }
-
-    private String login(final String requestBody) {
-        QueryParams queryParams = QueryParams.parseQueryParams(requestBody);
-        validateLogin(queryParams);
-        return String.join("\r\n",
-                "HTTP/1.1 302 Found ",
-                "Location: /index.html "
-        );
-    }
-
-    private void validateLogin(final QueryParams queryParams) {
-        String account = queryParams.get("account");
-        String password = queryParams.get("password");
-        validateLoginFormat(account, password);
-        User user = findUser(account);
-        checkPassword(password, user);
-    }
-
-    private void validateLoginFormat(final String account, final String password) {
-        if (account == null || password == null) {
-            throw new InvalidLoginFormatException();
-        }
-    }
-
-    private User findUser(final String account) {
-        return InMemoryUserRepository.findByAccount(account)
-                .orElseThrow(MemberNotFoundException::new);
-    }
-
-    private void checkPassword(final String password, final User user) {
-        if (!user.checkPassword(password)) {
-            throw new InvalidPasswordException();
-        }
     }
 
     private String toOkResponse(final ContentType contentType, final String responseBody) {

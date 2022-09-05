@@ -1,5 +1,8 @@
 package nextstep.jwp.http;
 
+import java.net.URL;
+import nextstep.jwp.utils.FileUtils;
+
 public enum StatusCode {
 
     OK(200, "OK"),
@@ -15,6 +18,14 @@ public enum StatusCode {
     StatusCode(int statusCode, String reason) {
         this.statusCode = statusCode;
         this.reason = reason;
+    }
+
+    public static StatusCode matchStatusCode(String uri) {
+        URL resource = FileUtils.getResource(uri);
+        if (resource == null) {
+            return StatusCode.NOT_FOUND;
+        }
+        return StatusCode.OK;
     }
 
     public String getStatus() {

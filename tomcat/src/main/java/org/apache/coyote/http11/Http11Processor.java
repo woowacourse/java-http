@@ -14,8 +14,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
     private static final String LOGIN_RESOURCE = "/login.html";
-    private static final String PASSWORD = "password";
-    private static final String ACCOUNT = "account";
 
     private final Socket connection;
 
@@ -55,13 +53,13 @@ public class Http11Processor implements Runnable, Processor {
             return false;
         }
         final User foundUser = findUser(urlPath);
-        final String password = urlPath.findParamByKey(PASSWORD);
+        final String password = urlPath.findParamByKey("password");
         return foundUser.checkPassword(password);
 
     }
 
     private User findUser(final Http11URL urlPath) {
-        String account = urlPath.findParamByKey(ACCOUNT);
+        String account = urlPath.findParamByKey("account");
         return InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(IllegalArgumentException::new);
     }

@@ -33,7 +33,7 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              final var outputStream = connection.getOutputStream()) {
 
-            final StartLine startLine = new StartLine(bufferedReader.readLine());
+            final StartLine startLine = StartLine.of(bufferedReader.readLine());
             final Map<String, String> queryParams = startLine.getQueryParams();
 
             if (queryParams.containsKey("account")) {

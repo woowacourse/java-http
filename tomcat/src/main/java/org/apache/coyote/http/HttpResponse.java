@@ -9,23 +9,23 @@ public class HttpResponse {
     private Header header;
     private String body;
 
-    public HttpResponse(HttpStatus httpStatus, Map<String, String> header, String body) {
+    public HttpResponse(final HttpStatus httpStatus, final Map<String, String> header, final String body) {
         this.httpStatus = httpStatus;
         this.header = new Header(header);
         this.body = body;
     }
 
-    public static HttpResponseBuilder ok(){
+    public static HttpResponseBuilder ok() {
         return new HttpResponseBuilder(HttpStatus.OK);
     }
 
-    public static HttpResponseBuilder notFound(){
+    public static HttpResponseBuilder notFound() {
         return new HttpResponseBuilder(HttpStatus.NOT_FOUND);
     }
 
 
     public String getHttpStatus() {
-        return httpStatus.getCode() + " " + httpStatus.getMessage() ;
+        return httpStatus.getCode() + " " + httpStatus.getMessage();
     }
 
     public Header getHeader() {

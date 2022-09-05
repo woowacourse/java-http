@@ -14,7 +14,7 @@ public class Header {
         return values;
     }
 
-    public String getContentType(){
+    public String getContentType() {
         return values.getOrDefault("Content-Type", "");
     }
 }

@@ -22,14 +22,14 @@ public class HttpResponseBuilder {
         this.body = "";
     }
 
-    public HttpResponseBuilder header(final Header inputHeader){
+    public HttpResponseBuilder header(final Header inputHeader) {
         for (Entry<String, String> value : inputHeader.values().entrySet()) {
             header.put(value.getKey(), value.getValue());
         }
         return this;
     }
 
-    public HttpResponseBuilder body(final Path path){
+    public HttpResponseBuilder body(final Path path) {
         try {
             header.put("Content-Type", Files.probeContentType(path));
         } catch (IOException e) {
@@ -40,19 +40,19 @@ public class HttpResponseBuilder {
         return this;
     }
 
-    public HttpResponseBuilder body(final String bodyValue){
+    public HttpResponseBuilder body(final String bodyValue) {
         header.put("Content-Type", "text/html");
         this.body = bodyValue;
         return this;
     }
 
-    public HttpResponse build(){
-        if(httpStatus == HttpStatus.NOT_FOUND){
+    public HttpResponse build() {
+        if (httpStatus == HttpStatus.NOT_FOUND) {
             body(Paths.get(Objects.requireNonNull(
-                            getClass()
+                    getClass()
                             .getClassLoader()
                             .getResource("static/404.html"))
-                            .getPath()));
+                    .getPath()));
         }
         return new HttpResponse(httpStatus, header, body);
     }

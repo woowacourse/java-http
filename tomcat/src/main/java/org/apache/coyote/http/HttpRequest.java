@@ -1,13 +1,8 @@
 package org.apache.coyote.http;
 
-import static nextstep.jwp.views.RequestLoginUserOutput.printRequestLoginUser;
-
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class HttpRequest {
@@ -22,23 +17,23 @@ public class HttpRequest {
     private final Map<String, String> query;
 
 
-    public HttpRequest(String request) {
+    public HttpRequest(final String request) {
         final String[] parseRequest = request.split(" ");
         this.httpMethod = HttpMethod.from(parseRequest[0]);
-        Integer index = parseRequest[1].indexOf(INDEX_DELIMITER);
+        final Integer index = parseRequest[1].indexOf(INDEX_DELIMITER);
         this.url = parseUrl(parseRequest[1], index);
         this.query = parseQuery(parseRequest[1], index);
     }
 
-    private String parseUrl(final String uri, final Integer index){
-        if(hasQuery(index)){
-            return uri.substring(0,index);
+    private String parseUrl(final String uri, final Integer index) {
+        if (hasQuery(index)) {
+            return uri.substring(0, index);
         }
         return uri;
     }
 
     private Map<String, String> parseQuery(final String uri, final Integer index) {
-        if(hasQuery(index)){
+        if (hasQuery(index)) {
             String queryString = uri.substring(index + 1);
             final String[] s = queryString.split(QUERY_DELIMETER);
             return Arrays.stream(s)
@@ -56,7 +51,7 @@ public class HttpRequest {
         return query.size() != 0;
     }
 
-    public String getQueryByValue(final String key){
+    public String getQueryByValue(final String key) {
         return query.get(key);
     }
 

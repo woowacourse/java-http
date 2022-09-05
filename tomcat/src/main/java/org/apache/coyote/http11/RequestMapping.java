@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.coyote.controller.Controller;
 import org.apache.coyote.controller.HomeController;
 import org.apache.coyote.controller.LoginController;
+import org.apache.coyote.controller.RegisterController;
 
 public class RequestMapping {
 
@@ -13,6 +14,7 @@ public class RequestMapping {
     static {
         requestMap.put("/", new HomeController());
         requestMap.put("/login", new LoginController());
+        requestMap.put("/register", new RegisterController());
     }
 
     public static Controller find(final String requestUri) {

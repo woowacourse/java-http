@@ -2,6 +2,8 @@ package org.apache.coyote.http11;
 
 import static org.apache.coyote.http11.message.common.HttpHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.message.common.HttpMethod.GET;
+import static org.apache.coyote.http11.message.common.HttpMethod.POST;
+import static org.apache.coyote.http11.message.response.HttpStatus.FOUND;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,14 +12,16 @@ import java.io.OutputStream;
 import java.net.Socket;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.InvalidRequestException;
 import org.apache.coyote.http11.message.common.ContentType;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
+import org.apache.coyote.http11.message.request.QueryString;
 import org.apache.coyote.http11.message.request.RequestLine;
 import org.apache.coyote.http11.message.request.RequestUri;
 import org.apache.coyote.http11.message.response.HttpResponse;
-import org.apache.coyote.http11.message.response.HttpStatus;
 import org.apache.coyote.http11.util.StaticFileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,8 +61,16 @@ public class Http11Processor implements Runnable, Processor {
                     return;
                 }
 
-                responseLogin(os, requestUri);
+                loginUser(os, requestUri);
                 return;
+            }
+
+            if (request.matches(GET, "/register")) {
+                responseRegisterHtml(os);
+            }
+
+            if (request.matches(POST, "/register")) {
+                registerUser(os, request);
             }
 
             responseStaticFiles(os, requestUri);
@@ -85,7 +97,7 @@ public class Http11Processor implements Runnable, Processor {
         writeHttpResponse(os, httpResponse);
     }
 
-    private void responseLogin(final OutputStream os, final RequestUri requestUri) throws IOException {
+    private void loginUser(final OutputStream os, final RequestUri requestUri) throws IOException {
         String account = requestUri.getQuery("account").orElse("");
         String password = requestUri.getQuery("password").orElse("");
 
@@ -95,7 +107,7 @@ public class Http11Processor implements Runnable, Processor {
 
         if (!loginSuccess) {
             HttpResponse httpResponse = new HttpResponse.Builder()
-                    .status(HttpStatus.FOUND)
+                    .status(FOUND)
                     .header("Location", "/401.html")
                     .build();
 
@@ -104,7 +116,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         HttpResponse httpResponse = new HttpResponse.Builder()
-                .status(HttpStatus.FOUND)
+                .status(FOUND)
                 .header("Location", "/index.html")
                 .build();
 
@@ -115,6 +127,23 @@ public class Http11Processor implements Runnable, Processor {
         HttpResponse response = new HttpResponse.Builder()
                 .contentType(ContentType.HTML)
                 .body(StaticFileUtil.readFile("/register.html"))
+                .build();
+
+        writeHttpResponse(os, response);
+    }
+
+    private void registerUser(final OutputStream os, final HttpRequest request) throws IOException {
+        QueryString queryString = new QueryString(request.getRequestBody());
+        String account = queryString.getQuery("account").orElseThrow(InvalidRequestException::new);
+        String password = queryString.getQuery("password").orElseThrow(InvalidRequestException::new);
+        String email = queryString.getQuery("email").orElseThrow(InvalidRequestException::new);
+
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+
+        HttpResponse response = new HttpResponse.Builder()
+                .status(FOUND)
+                .header("Location", "/index.html")
                 .build();
 
         writeHttpResponse(os, response);

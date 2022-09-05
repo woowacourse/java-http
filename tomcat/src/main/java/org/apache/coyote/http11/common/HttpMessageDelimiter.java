@@ -13,6 +13,10 @@ public enum HttpMessageDelimiter {
         this.value = value;
     }
 
+    public boolean isDifference(final String other) {
+        return !value.equals(other);
+    }
+
     public String getValue() {
         return value;
     }

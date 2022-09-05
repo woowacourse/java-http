@@ -43,7 +43,6 @@ public class Http11Processor implements Runnable, Processor {
             final var inputStreamReader = new InputStreamReader(inputStream);
             final var bufferedReader = new BufferedReader(inputStreamReader)
         ) {
-
             final HttpRequest httpRequest = HttpRequestGenerator.createHttpRequest(bufferedReader);
             final HttpResponse httpResponse = HttpResponseGenerator.createHttpResponse(httpRequest);
             final String responseMessage = httpResponse.toMessage();

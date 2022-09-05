@@ -33,7 +33,7 @@ public class HttpRequestGenerator {
 
     private static List<String> extractHeaders(final List<String> massages) {
         return massages.stream()
-            .takeWhile(message -> !message.equals(HttpMessageDelimiter.HEADER_BODY.getValue()))
+            .takeWhile(HttpMessageDelimiter.HEADER_BODY::isDifference)
             .collect(Collectors.toList());
     }
 

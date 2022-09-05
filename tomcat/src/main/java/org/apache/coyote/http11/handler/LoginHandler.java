@@ -6,7 +6,8 @@ import nextstep.jwp.exception.NotFoundException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.http.ContentType;
 import org.apache.coyote.http11.http.HttpRequest;
-import org.apache.coyote.http11.http.RequestTarget;
+import org.apache.coyote.http11.http.HttpResponse;
+import org.apache.coyote.http11.http.MessageBody;
 import org.apache.coyote.http11.util.FileReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,15 +17,17 @@ public class LoginHandler implements Handler {
     private static final Logger log = LoggerFactory.getLogger(LoginHandler.class);
 
     @Override
-    public String handle(final HttpRequest httpRequest) {
-        inquireUser(httpRequest.getRequestTarget());
-        String uri = httpRequest.getRequestTarget().getUri();
+    public HttpResponse handle(final HttpRequest httpRequest) {
+        inquireUser(httpRequest);
+        String uri = httpRequest.getRequestLine().getRequestTarget().getUri();
         String responseBody = FileReader.read(uri + ".html");
-        return createResponseMessage(ContentType.from(uri), responseBody);
+        return HttpResponse.ok(ContentType.from(uri), new MessageBody(responseBody));
     }
 
-    private void inquireUser(final RequestTarget requestTarget) {
-        Map<String, String> queryParameters = requestTarget.getQueryParameters();
+    private void inquireUser(final HttpRequest httpRequest) {
+        Map<String, String> queryParameters = httpRequest.getRequestLine()
+                .getRequestTarget()
+                .getQueryParameters();
         String account = queryParameters.get("account");
         String password = queryParameters.get("password");
         User user = InMemoryUserRepository.findByAccount(account)

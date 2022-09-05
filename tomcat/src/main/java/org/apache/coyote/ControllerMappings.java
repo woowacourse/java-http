@@ -1,19 +1,20 @@
 package org.apache.coyote;
 
-import nextstep.jwp.LoginController;
-import nextstep.jwp.RootController;
+import java.util.List;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class ControllerMappings {
 
-    public Controller getAdaptiveController(String path) {
+    private final List<Controller> controllers;
 
-        if (path.equals("/")) {
-            return new RootController();
-        }
+    public ControllerMappings(List<Controller> controllers) {
+        this.controllers = controllers;
+    }
 
-        if (path.equals("/login")) {
-            return new LoginController();
-        }
-        return null;
+    public Controller getAdaptiveController(HttpRequest request) {
+        return controllers.stream()
+                .filter(controller -> controller.isProcessable(request))
+                .findAny()
+                .orElse(null);
     }
 }

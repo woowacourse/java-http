@@ -29,10 +29,6 @@ public class StartLine {
                 new Protocol(components[PROTOCOL_INDEX]));
     }
 
-    public boolean hasQueryParams() {
-        return requestUrl.hasQueryParams();
-    }
-
     private static void validateComponentsCount(String[] components) {
         if (components.length < List.of(METHOD_INDEX, URL_INDEX, PROTOCOL_INDEX).size()) {
             throw new IllegalArgumentException("There are missing components in start line");
@@ -57,5 +53,13 @@ public class StartLine {
 
     public void setPath(String pathName) {
         requestUrl.setPath(pathName);
+    }
+
+    public boolean isPathEqualTo(String path) {
+        return requestUrl.isPathEqualTo(path);
+    }
+
+    public boolean isGet() {
+        return this.method.equals(HttpMethod.GET);
     }
 }

@@ -11,14 +11,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import nextstep.jwp.LoginController;
+import nextstep.jwp.RootController;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Controller;
 import org.apache.coyote.ControllerMappings;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.request.spec.HttpHeaders;
 import org.apache.coyote.http11.request.HttpRequest;
-import org.apache.coyote.http11.request.ResourceLocator;
 import org.apache.coyote.http11.request.HttpRequestHandler;
+import org.apache.coyote.http11.request.ResourceLocator;
+import org.apache.coyote.http11.request.spec.HttpHeaders;
 import org.apache.coyote.http11.request.spec.StartLine;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -30,9 +32,15 @@ public class Http11Processor implements Runnable, Processor {
     private static final String STATIC_RESOURCE_PREFIX = "/static";
 
     private final Socket connection;
+    private final ControllerMappings controllerMappings;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
+        controllerMappings = initControllerMappings();
+    }
+
+    private ControllerMappings initControllerMappings() {
+        return new ControllerMappings(List.of(new LoginController(), new RootController()));
     }
 
     @Override
@@ -82,8 +90,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void handleRequestIfPossible(HttpRequest httpRequest) {
-        ControllerMappings controllerMappings = new ControllerMappings();
-        Controller controller = controllerMappings.getAdaptiveController(httpRequest.getPathString());
+        Controller controller = this.controllerMappings.getAdaptiveController(httpRequest);
         if (Objects.nonNull(controller)) {
             Map<String, String> params = httpRequest.getParams();
             String pathName = controller.process(params);

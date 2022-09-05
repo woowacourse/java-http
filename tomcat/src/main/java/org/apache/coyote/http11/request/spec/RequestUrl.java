@@ -43,4 +43,8 @@ public class RequestUrl {
     public void setPath(String pathName) {
         this.path = pathName;
     }
+
+    public boolean isPathEqualTo(String path) {
+        return this.path.equals(path);
+    }
 }

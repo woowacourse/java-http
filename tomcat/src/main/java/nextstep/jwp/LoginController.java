@@ -4,12 +4,18 @@ import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Controller;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoginController implements Controller {
 
     Logger log = LoggerFactory.getLogger(getClass());
+
+    @Override
+    public boolean isProcessable(HttpRequest request) {
+        return request.isPathEqualTo("/login") && request.isGet();
+    }
 
     @Override
     public String process(Map<String, String> params) {

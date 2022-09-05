@@ -25,4 +25,12 @@ public class HttpRequest {
     public void setPath(String pathName) {
         startLine.setPath(pathName);
     }
+
+    public boolean isPathEqualTo(String path) {
+        return startLine.isPathEqualTo(path);
+    }
+
+    public boolean isGet() {
+        return startLine.isGet();
+    }
 }

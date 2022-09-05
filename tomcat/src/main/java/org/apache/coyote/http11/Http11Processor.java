@@ -14,7 +14,9 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.domain.FilePath;
 import org.apache.coyote.domain.HttpRequest;
+import org.apache.coyote.domain.HttpStatusCode;
 import org.apache.coyote.domain.MyHttpResponse;
+import org.apache.coyote.domain.RedirectUrl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,17 +45,31 @@ public class Http11Processor implements Runnable, Processor {
             final HttpRequest httpRequest = HttpRequest.from(firstLine);
             final FilePath filePath = FilePath.from(httpRequest.getUri());
 
+            HttpStatusCode httpStatusCode =  HttpStatusCode.OK;
+            RedirectUrl redirectUrl = null;
             if (httpRequest.getUri().contains("login?")) {
-                Optional<User> user = InMemoryUserRepository.findByAccount(
-                        httpRequest.getQueryParam().getQueryValue("account"));
-                user.ifPresent(value -> log.info(value.toString()));
+                redirectUrl = RedirectUrl.from(login(httpRequest));
+                httpStatusCode = HttpStatusCode.FOUND;
             }
 
-            final MyHttpResponse httpResponse = MyHttpResponse.from(filePath);
+            final MyHttpResponse httpResponse = MyHttpResponse.from(filePath, httpStatusCode, redirectUrl);
+
             outputStream.write(httpResponse.getValue().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private static String login(HttpRequest httpRequest){
+        Optional<User> user = InMemoryUserRepository.findByAccount(
+                httpRequest.getQueryParam().getQueryValue("account"));
+        if(user.isPresent()){
+            log.info(user.get().toString());
+            if(user.get().checkPassword(httpRequest.getQueryParam().getQueryValue("password"))){
+                return "/index.html";
+            }
+        }
+        return "/401.html";
     }
 }

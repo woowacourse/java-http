@@ -147,17 +147,25 @@ class Http11ProcessorTest {
 
         @ParameterizedTest
         @CsvSource({"account=pepper&password=password", "account=gugu&password=pwd"})
-        @DisplayName("등록된 계정 정보와 다른 값으로 로그인 요청 시 예외를 던진다.")
-        void invalidAccount_ExceptionThrown(final String query) {
+        @DisplayName("로그인 실패 시 404.html 페이지를 응답한다.")
+        void invalidAccount_ExceptionThrown(final String query) throws IOException {
             // given
             final String httpRequest = createLoginRequest("/login?" + query);
             final var socket = new StubSocket(httpRequest);
             final Http11Processor processor = new Http11Processor(socket);
 
-            // when & then
-            assertThatThrownBy(() -> processor.process(socket))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("유효하지 않은 유저입니다.");
+            // when
+            processor.process(socket);
+
+            // then
+            final URL resource = getResource("static/404.html");
+
+            final var expected = "HTTP/1.1 404 Not Found \r\n" +
+                    "Content-Type: text/html;charset=utf-8 \r\n" +
+                    "Content-Length: 2426 \r\n" +
+                    "\r\n" +
+                    new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+            assertThat(socket.output()).isEqualTo(expected);
         }
 
         private String createLoginRequest(final String uri) {
@@ -175,6 +183,5 @@ class Http11ProcessorTest {
             assert resource != null;
             return resource;
         }
-
     }
 }

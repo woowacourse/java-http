@@ -26,7 +26,7 @@ public class HttpResponse {
     private String getBody(HttpRequestHeader httpRequestHeader) throws IOException {
         String requestUri = httpRequestHeader.getRequestUri();
         return FileReader.readByPath(requestUri)
-                .orElseGet(() -> DEFAULT_BODY);
+                .orElse(DEFAULT_BODY);
     }
 
     private String getHeader(HttpRequestHeader httpRequestHeader, String body) {

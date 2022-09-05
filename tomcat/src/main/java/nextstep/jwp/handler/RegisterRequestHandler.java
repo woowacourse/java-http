@@ -1,9 +1,13 @@
 package nextstep.jwp.handler;
 
+import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
+import nextstep.jwp.http.HttpRequestBody;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpVersion;
+import nextstep.jwp.http.Location;
+import nextstep.jwp.model.User;
 import nextstep.jwp.util.ResourcesUtil;
 
 public class RegisterRequestHandler implements HttpRequestHandler {
@@ -21,6 +25,7 @@ public class RegisterRequestHandler implements HttpRequestHandler {
         if (httpRequest.getHttpMethod().equals(HttpMethod.GET)) {
             return handleHttpGetRequest(httpRequest);
         }
+
         return null;
     }
 
@@ -32,7 +37,11 @@ public class RegisterRequestHandler implements HttpRequestHandler {
 
     @Override
     public HttpResponse handleHttpPostRequest(final HttpRequest httpRequest) {
-
-        return null;
+        HttpRequestBody httpRequestBody = httpRequest.getHttpRequestBody();
+        String account = httpRequestBody.getValue("account");
+        String email = httpRequestBody.getValue("email");
+        String password = httpRequestBody.getValue("password");
+        InMemoryUserRepository.save(new User(account, password, email));
+        return HttpResponse.found(httpVersion, new Location("/index.html"));
     }
 }

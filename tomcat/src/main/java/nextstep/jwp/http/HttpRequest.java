@@ -121,6 +121,10 @@ public class HttpRequest {
         return contentType;
     }
 
+    public HttpRequestBody getHttpRequestBody() {
+        return httpRequestBody;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {

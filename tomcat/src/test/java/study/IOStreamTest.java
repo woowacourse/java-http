@@ -190,7 +190,7 @@ class IOStreamTest {
          * 읽어올 수 있다.
          */
         @Test
-        void BufferedReader를_사용하여_문자열을_읽어온다() throws IOException {
+        void BufferedReader의_read를_사용하여_문자열을_읽어온다() throws IOException {
             final String emoji = String.join("\r\n",
                     "😀😃😄😁😆😅😂🤣🥲☺️😊",
                     "😇🙂🙃😉😌😍🥰😘😗😙😚",
@@ -203,6 +203,28 @@ class IOStreamTest {
                 int c;
                 while ((c = bufferedReader.read()) != -1) {
                     actual.append((char) c);
+                }
+            }
+
+            inputStream.close();
+
+            assertThat(actual).hasToString(emoji);
+        }
+
+        @Test
+        void BufferedReader의_readLine을_사용하여_문자열을_읽어온다() throws IOException {
+            final String emoji = String.join("\r\n",
+                    "😀😃😄😁😆😅😂🤣🥲☺️😊",
+                    "😇🙂🙃😉😌😍🥰😘😗😙😚",
+                    "😋😛😝😜🤪🤨🧐🤓😎🥸🤩",
+                    "");
+            final InputStream inputStream = new ByteArrayInputStream(emoji.getBytes());
+            final StringBuilder actual = new StringBuilder();
+
+            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+                while (bufferedReader.ready()) {
+                    actual.append(bufferedReader.readLine())
+                            .append("\r\n");
                 }
             }
 

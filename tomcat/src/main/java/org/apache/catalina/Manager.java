@@ -1,7 +1,5 @@
 package org.apache.catalina;
 
-import jakarta.servlet.http.HttpSession;
-
 import java.io.IOException;
 
 /**
@@ -29,7 +27,7 @@ public interface Manager {
      *
      * @param session Session to be added
      */
-    void add(HttpSession session);
+    void add(Session session);
 
     /**
      * Return the active Session, associated with this Manager, with the
@@ -45,12 +43,12 @@ public interface Manager {
      * @return the request session or {@code null} if a session with the
      *         requested ID could not be found
      */
-    HttpSession findSession(String id) throws IOException;
+    Session findSession(String id) throws IOException;
 
     /**
      * Remove this Session from the active Sessions for this Manager.
      *
      * @param session Session to be removed
      */
-    void remove(HttpSession session);
+    void remove(String id);
 }

@@ -8,10 +8,17 @@ public class User {
     private final String email;
 
     public User(Long id, String account, String password, String email) {
+        validateNotNull(account, password, email);
         this.id = id;
         this.account = account;
         this.password = password;
         this.email = email;
+    }
+
+    private void validateNotNull(String account, String password, String email) {
+        if (account == null || password == null || email == null) {
+            throw new IllegalArgumentException("값을 입력해야 합니다.");
+        }
     }
 
     public User(String account, String password, String email) {

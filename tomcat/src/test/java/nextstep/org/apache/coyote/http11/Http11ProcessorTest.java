@@ -15,8 +15,8 @@ class Http11ProcessorTest {
     @Test
     void process() {
         // given
-        final var socket = new StubSocket();
-        final var processor = new Http11Processor(socket);
+        final StubSocket socket = new StubSocket();
+        final Http11Processor processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
@@ -42,7 +42,7 @@ class Http11ProcessorTest {
                 "",
                 "");
 
-        final var socket = new StubSocket(httpRequest);
+        final StubSocket socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
         // when
@@ -50,7 +50,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
+        final String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n" +
@@ -69,7 +69,7 @@ class Http11ProcessorTest {
                 "",
                 "");
 
-        final var socket = new StubSocket(httpRequest);
+        final StubSocket socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
         // when
@@ -77,7 +77,7 @@ class Http11ProcessorTest {
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
-        var expected = "HTTP/1.1 200 OK \r\n" +
+        final String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/css";
 
         assertThat(socket.output().split(";")[0]).isEqualTo(expected);
@@ -93,7 +93,7 @@ class Http11ProcessorTest {
                 "",
                 "");
 
-        final var socket = new StubSocket(httpRequest);
+        final StubSocket socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
         // when
@@ -113,14 +113,14 @@ class Http11ProcessorTest {
                 "",
                 "");
 
-        final var socket = new StubSocket(httpRequest);
+        final StubSocket socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
+        final String expected = String.join("\r\n",
                 "HTTP/1.1 302 ",
                 "Location: http://localhost:8080/index.html ",
                 "Content-Type: text/html;charset=utf-8 ");
@@ -138,14 +138,14 @@ class Http11ProcessorTest {
                 "",
                 "");
 
-        final var socket = new StubSocket(httpRequest);
+        final StubSocket socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
 
         // then
-        var expected = String.join("\r\n",
+        final String expected = String.join("\r\n",
                 "HTTP/1.1 302 ",
                 "Location: http://localhost:8080/401.html ",
                 "Content-Type: text/html;charset=utf-8 ");

@@ -5,8 +5,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.Socket;
+import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -36,9 +39,9 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
-            final var request = extractRequest(inputStream);
+        try (final InputStream inputStream = connection.getInputStream();
+             final OutputStream outputStream = connection.getOutputStream()) {
+            final Request request = extractRequest(inputStream);
 
             if (!request.isGetMethod()) {
                 throw new IllegalStateException("아직 지원하지 않는 http 요청입니다.");
@@ -53,12 +56,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Request extractRequest(final InputStream inputStream) throws IOException {
-        final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-        final var requestMessage = new StringBuilder();
+        final StringBuilder requestMessage = new StringBuilder();
 
         while (true) {
-            final var buffer = bufferedReader.readLine();
+            final String buffer = bufferedReader.readLine();
             requestMessage.append(buffer)
                     .append("\r\n");
             if (buffer == null || buffer.length() == 0) {
@@ -89,13 +92,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Response getResponseWithFileName(final String fileName) throws IOException {
-        final var fileExtension = fileName.split("\\.")[1];
+        final String fileExtension = fileName.split("\\.")[1];
 
-        final var contentType = ContentType.from(fileExtension);
-        final var resource = getClass().getClassLoader().getResource("static" + fileName);
-        final var path = new File(resource.getPath()).toPath();
+        final ContentType contentType = ContentType.from(fileExtension);
+        final URL resource = getClass().getClassLoader().getResource("static" + fileName);
+        final Path path = new File(resource.getPath()).toPath();
 
-        final var responseBody = new String(Files.readAllBytes(path));
+        final String responseBody = new String(Files.readAllBytes(path));
 
         return Response.okWithResponseBody(contentType, responseBody);
     }

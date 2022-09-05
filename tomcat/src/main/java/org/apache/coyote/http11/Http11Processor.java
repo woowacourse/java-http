@@ -63,7 +63,7 @@ public class Http11Processor implements Runnable, Processor {
         return getResponse(httpRequest.getRequestUrl(), httpRequest.getRequestParams());
     }
 
-    private String getResponse(String url, final Map<String, String> requestParam) throws IOException {
+    private String getResponse(final String url, final Map<String, String> requestParam) throws IOException {
         if ("/".equals(url)) {
             final var responseBody = "Hello world!";
 
@@ -108,7 +108,7 @@ public class Http11Processor implements Runnable, Processor {
         throw new IllegalArgumentException("올바르지 않은 URL 요청입니다.");
     }
 
-    private String createResponse(String contentType, String responseBody) {
+    private String createResponse(final String contentType, final String responseBody) {
         return String.join("\r\n",
                 "HTTP/1.1 200 OK ",
                 "Content-Type: " + contentType + ";charset=utf-8 ",

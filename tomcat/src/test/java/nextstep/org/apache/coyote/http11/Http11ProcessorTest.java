@@ -1,15 +1,11 @@
 package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import org.apache.coyote.exception.InvalidLoginFomratException;
-import org.apache.coyote.exception.InvalidPasswordException;
-import org.apache.coyote.exception.MemberNotFoundException;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
@@ -118,6 +114,30 @@ class Http11ProcessorTest {
     }
 
     @Test
+    void 없는_리소스의_주소로_접근하면_404_페이지로_redirect한다() {
+        // given
+        String httpRequest = String.join("\r\n",
+                "GET /wrong HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        StubSocket socket = new StubSocket(httpRequest);
+        Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        String expected = "HTTP/1.1 302 Found "
+                + "\r\nLocation: /404.html "
+                + "\r\n";
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
     void 로그인_페이지_렌더링() throws IOException {
         // given
         String httpRequest = String.join("\r\n",
@@ -165,7 +185,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void 계정_정보가_올바르지_않으면_예외를_반환한다() {
+    void 계정_정보가_올바르지_않으면_401_페이지로_redirect한다() {
         // given
         String httpRequest = String.join("\r\n",
                 "GET /login?account=invalid&password=password HTTP/1.1 ",
@@ -177,13 +197,19 @@ class Http11ProcessorTest {
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
 
-        // when, then
-        assertThatThrownBy(() -> processor.process(socket))
-                .isExactlyInstanceOf(MemberNotFoundException.class);
+        // when
+        processor.process(socket);
+
+        // then
+        String expected = "HTTP/1.1 302 Found "
+                + "\r\nLocation: /401.html "
+                + "\r\n";
+
+        assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test
-    void 비밀번호가_올바르지_않으면_예외를_반환한다() {
+    void 비밀번호가_올바르지_않으면_401_페이지로_redirect한다() {
         // given
         String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=invalid HTTP/1.1 ",
@@ -195,13 +221,19 @@ class Http11ProcessorTest {
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
 
-        // when, then
-        assertThatThrownBy(() -> processor.process(socket))
-                .isExactlyInstanceOf(InvalidPasswordException.class);
+        // when
+        processor.process(socket);
+
+        // then
+        String expected = "HTTP/1.1 302 Found "
+                + "\r\nLocation: /401.html "
+                + "\r\n";
+
+        assertThat(socket.output()).isEqualTo(expected);
     }
 
     @Test
-    void 쿼리스트링에_account나_password가_들어있지_않으면_예외를_반환한다() {
+    void 쿼리스트링에_account나_password가_들어있지_않으면_401_페이지로_redirect한다() {
         // given
         String httpRequest = String.join("\r\n",
                 "GET /login?query=invalid HTTP/1.1 ",
@@ -213,8 +245,14 @@ class Http11ProcessorTest {
         StubSocket socket = new StubSocket(httpRequest);
         Http11Processor processor = new Http11Processor(socket);
 
-        // when, then
-        assertThatThrownBy(() -> processor.process(socket))
-                .isExactlyInstanceOf(InvalidLoginFomratException.class);
+        // when
+        processor.process(socket);
+
+        // then
+        String expected = "HTTP/1.1 302 Found "
+                + "\r\nLocation: /401.html "
+                + "\r\n";
+
+        assertThat(socket.output()).isEqualTo(expected);
     }
 }

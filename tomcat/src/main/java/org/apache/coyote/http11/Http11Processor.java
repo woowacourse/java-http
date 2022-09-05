@@ -12,9 +12,10 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.ContentType;
 import org.apache.coyote.Processor;
 import org.apache.coyote.QueryParams;
-import org.apache.coyote.exception.InvalidLoginFomratException;
+import org.apache.coyote.exception.InvalidLoginFormatException;
 import org.apache.coyote.exception.InvalidPasswordException;
 import org.apache.coyote.exception.MemberNotFoundException;
+import org.apache.coyote.exception.ResourceNotFoundException;
 import org.apache.coyote.support.ResourcesUtil;
 import org.apache.coyote.support.UriParser;
 import org.slf4j.Logger;
@@ -27,6 +28,10 @@ public class Http11Processor implements Runnable, Processor {
     private static final String STATIC_PATH = "static";
     private static final String DEFAULT_EXTENSION = ".html";
     private static final String LOGIN_PATH = "/login.html";
+    public static final String UNAUTHORIZED_PATH = "/401.html";
+    public static final String NOT_FOUND_PATH = "/404.html";
+    public static final String INTERNAL_SERVER_ERROR_PATH = "/500.html";
+    public static final String DEFAULT_RESPONSE_BODY = "Hello world!";
 
     private final Socket connection;
 
@@ -44,11 +49,8 @@ public class Http11Processor implements Runnable, Processor {
         try (InputStream inputStream = connection.getInputStream();
              OutputStream outputStream = connection.getOutputStream();
              BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-
             String uri = UriParser.parseUri(bufferedReader);
-
-            String response = accessUri(uri);
-
+            String response = respond(uri);
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
@@ -56,9 +58,24 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
+    private String respond(final String uri) {
+        try {
+            return accessUri(uri);
+        } catch (InvalidLoginFormatException | InvalidPasswordException | MemberNotFoundException e) {
+            log.error(e.getMessage(), e);
+            return toFoundResponse(UNAUTHORIZED_PATH);
+        } catch (ResourceNotFoundException e) {
+            log.error(e.getMessage(), e);
+            return toFoundResponse(NOT_FOUND_PATH);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return toFoundResponse(INTERNAL_SERVER_ERROR_PATH);
+        }
+    }
+
     private String accessUri(final String uri) throws IOException {
         if (uri.equals(LANDING_PAGE_URL)) {
-            return toOkResponse(ContentType.TEXT_HTML, "Hello world!");
+            return toOkResponse(ContentType.TEXT_HTML, DEFAULT_RESPONSE_BODY);
         }
         String url = UriParser.parseUrl(uri);
         String queryString = UriParser.parseQueryString(uri);
@@ -76,9 +93,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private String accessUrl(final String url, final QueryParams queryParams) throws IOException {
         ContentType contentType = UriParser.parseContentType(url);
-        if (url.equals(LANDING_PAGE_URL)) {
-            return toOkResponse(contentType, "Hello world!");
-        }
         if (url.equals(LOGIN_PATH)) {
             return renderLogin(url, queryParams);
         }
@@ -95,17 +109,25 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String login(final QueryParams queryParams) {
-        String account = queryParams.get("account");
-        String password = queryParams.get("password");
-        if (account == null || password == null) {
-            throw new InvalidLoginFomratException();
-        }
-        User user = findUser(account);
-        checkPassword(password, user);
+        validateLogin(queryParams);
         return String.join("\r\n",
                 "HTTP/1.1 302 Found ",
                 "Location: /index.html "
         );
+    }
+
+    private void validateLogin(final QueryParams queryParams) {
+        String account = queryParams.get("account");
+        String password = queryParams.get("password");
+        validateLoginFormat(account, password);
+        User user = findUser(account);
+        checkPassword(password, user);
+    }
+
+    private void validateLoginFormat(final String account, final String password) {
+        if (account == null || password == null) {
+            throw new InvalidLoginFormatException();
+        }
     }
 
     private User findUser(final String account) {
@@ -126,5 +148,13 @@ public class Http11Processor implements Runnable, Processor {
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",
                 responseBody);
+    }
+
+    private String toFoundResponse(final String location) {
+        return String.join("\r\n",
+                "HTTP/1.1 302 Found ",
+                "Location: " + location + " ",
+                ""
+        );
     }
 }

@@ -91,19 +91,23 @@ public class Http11Processor implements Runnable, Processor {
                     WELCOME_MESSAGE);
         }
         if (path.equals("/login") && httpRequest.hasQueryParams()) {
-            QueryParams queryParams = uri.getQueryParams();
-            Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.getParameterValue("account"));
-            if (user.isPresent()) {
-                if (user.get().checkPassword(queryParams.getParameterValue("password"))) {
-                    return new HttpResponse(httpRequest.getProtocol(), HttpStatus.FOUND,
-                            ContentType.TEXT_HTML_CHARSET_UTF_8,
-                            getStaticResourceResponse("/index.html"));
-                }
-            }
-            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.FOUND, "/401.html");
+            return getLoginResponse(httpRequest);
         }
         String responseBody = getStaticResourceResponse(path + ".html");
         return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.TEXT_HTML_CHARSET_UTF_8,
                 responseBody);
+    }
+
+    private HttpResponse getLoginResponse(HttpRequest httpRequest) {
+        QueryParams queryParams = httpRequest.getUri().getQueryParams();
+        Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.getParameterValue("account"));
+        if (user.isPresent()) {
+            if (user.get().checkPassword(queryParams.getParameterValue("password"))) {
+                return new HttpResponse(httpRequest.getProtocol(), HttpStatus.FOUND,
+                        ContentType.TEXT_HTML_CHARSET_UTF_8,
+                        getStaticResourceResponse("/index.html"));
+            }
+        }
+        return new HttpResponse(httpRequest.getProtocol(), HttpStatus.FOUND, "/401.html");
     }
 }

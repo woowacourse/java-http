@@ -10,13 +10,13 @@ public class HttpRequest {
     private static final int URI_INDEX = 1;
     private static final int PROTOCOL_INDEX = 2;
 
-    private final String method;
+    private final Method method;
     private final URI uri;
     private final String protocol;
 
     public HttpRequest(String requestLine) {
         String[] str = requestLine.split(REQUEST_LINE_SPLITTER);
-        this.method = str[METHOD_INDEX];
+        this.method = Method.from(str[METHOD_INDEX]);
         this.uri = new URI(str[URI_INDEX]);
         this.protocol = str[PROTOCOL_INDEX];
     }
@@ -34,6 +34,10 @@ public class HttpRequest {
 
     public boolean hasQueryParams() {
         return !uri.getQueryParams().isEmpty();
+    }
+
+    public Method getMethod() {
+        return method;
     }
 
     public String getProtocol() {

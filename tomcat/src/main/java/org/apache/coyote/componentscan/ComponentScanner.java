@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import nextstep.Application;
 
-public class ComponentScan {
+public class ComponentScanner {
 
     private static final String PACKAGE_SEPARATOR = ".";
     private static final String CLASS_EXTENSION = ".class";

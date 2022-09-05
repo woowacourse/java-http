@@ -1,9 +1,10 @@
-package org.apache.coyote.requestmapping;
+package org.apache.coyote.requestmapping.handler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.requestmapping.handler.Handler;
 
 public class MethodRequestHandler implements Handler {
 

@@ -11,6 +11,9 @@ import org.apache.coyote.componentscan.RequestMappingScanner;
 import org.apache.coyote.http.HttpMethod;
 import org.apache.coyote.http.HttpRequest;
 import org.apache.coyote.http.HttpResponse;
+import org.apache.coyote.requestmapping.handler.FileRequestHandler;
+import org.apache.coyote.requestmapping.handler.Handler;
+import org.apache.coyote.requestmapping.handler.MethodRequestHandler;
 
 public class Registry {
 

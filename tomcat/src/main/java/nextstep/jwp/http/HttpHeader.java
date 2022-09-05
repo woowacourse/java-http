@@ -38,4 +38,8 @@ public class HttpHeader {
                 .map(header -> header.getKey() + HEADER_SEPARATOR + header.getValue() + BLANK)
                 .collect(Collectors.joining(LINE_SEPARATOR));
     }
+
+    public String get(final String key) {
+        return headers.get(key);
+    }
 }

@@ -5,6 +5,7 @@ import org.apache.coyote.core.controller.Controller;
 import org.apache.coyote.core.controller.ExceptionController;
 import org.apache.coyote.core.controller.IndexController;
 import org.apache.coyote.core.controller.LoginController;
+import org.apache.coyote.core.controller.RegisterController;
 import org.apache.coyote.core.controller.RootController;
 
 public class RequestMapping {
@@ -22,6 +23,9 @@ public class RequestMapping {
         }
         if (path.equals("/401.html")) {
             return new ExceptionController();
+        }
+        if (path.equals("register.html")) {
+            return new RegisterController();
         }
         throw new IllegalArgumentException();
     }

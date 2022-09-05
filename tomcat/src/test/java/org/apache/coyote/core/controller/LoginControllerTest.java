@@ -1,12 +1,11 @@
 package org.apache.coyote.core.controller;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import nextstep.jwp.http.HttpHeader;
 import nextstep.jwp.http.reqeust.HttpRequest;
+import nextstep.jwp.http.reqeust.HttpRequestBody;
 import nextstep.jwp.http.reqeust.HttpRequestLine;
 import nextstep.jwp.http.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +20,8 @@ class LoginControllerTest {
         URI uri = new URI("/login?account=gugu&password=password");
         HttpRequestLine httpRequestLine = new HttpRequestLine("GET", uri, "HTTP/1.1");
         HttpHeader httpHeaders = new HttpHeader();
-        HttpRequest httpRequest = new HttpRequest(httpRequestLine, httpHeaders);
+        HttpRequestBody httpRequestBody = new HttpRequestBody("");
+        HttpRequest httpRequest = new HttpRequest(httpRequestLine, httpHeaders, httpRequestBody);
         HttpResponse httpResponse = new HttpResponse();
 
         // when & then

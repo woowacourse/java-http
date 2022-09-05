@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import nextstep.jwp.http.HttpHeader;
 import nextstep.jwp.http.reqeust.HttpRequest;
+import nextstep.jwp.http.reqeust.HttpRequestBody;
 import nextstep.jwp.http.reqeust.HttpRequestLine;
 
 public class HttpRequestCreator {
@@ -19,7 +20,10 @@ public class HttpRequestCreator {
     public static final int REQUEST_LINE_CONTENT_COUNT = 3;
 
     public HttpRequest createHttpRequest(final BufferedReader bufferReader) throws IOException {
-        return new HttpRequest(httpRequestLine(bufferReader), httpRequestHeader(bufferReader));
+        HttpRequestLine requestLine = httpRequestLine(bufferReader);
+        HttpHeader header = httpRequestHeader(bufferReader);
+        HttpRequestBody requestBody = httpRequestBody(header, bufferReader);
+        return new HttpRequest(requestLine, header, requestBody);
     }
 
     private HttpRequestLine httpRequestLine(final BufferedReader bufferReader) throws IOException {
@@ -53,5 +57,14 @@ public class HttpRequestCreator {
             headers.add(bufferReader.readLine());
         }
         return new HttpHeader(headers);
+    }
+
+    private HttpRequestBody httpRequestBody(final HttpHeader headers, final BufferedReader bufferReader)
+            throws IOException {
+        int contentLength = Integer.parseInt(headers.get("Content-Length"));
+        char[] buffer = new char[contentLength];
+        bufferReader.read(buffer, 0, contentLength);
+        String requestBody = new String(buffer);
+        return new HttpRequestBody(requestBody);
     }
 }

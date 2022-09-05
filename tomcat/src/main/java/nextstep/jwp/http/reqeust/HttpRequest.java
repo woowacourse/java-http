@@ -8,10 +8,13 @@ public class HttpRequest {
 
     private final HttpRequestLine httpRequestLine;
     private final HttpHeader httpHeaders;
+    private final HttpRequestBody httpRequestBody;
 
-    public HttpRequest(final HttpRequestLine httpRequestLine, final HttpHeader httpHeaders) {
+    public HttpRequest(final HttpRequestLine httpRequestLine, final HttpHeader httpHeaders,
+                       final HttpRequestBody httpRequestBody) {
         this.httpRequestLine = httpRequestLine;
         this.httpHeaders = httpHeaders;
+        this.httpRequestBody = httpRequestBody;
     }
 
     public String findContentType() {
@@ -29,5 +32,13 @@ public class HttpRequest {
 
     public Map<String, String> getQueryParams() {
         return httpRequestLine.getQueryParams();
+    }
+
+    public String getMethod() {
+        return httpRequestLine.getMethod();
+    }
+
+    public Map<String, String> getRequestBodies() {
+        return httpRequestBody.getRequestBodies();
     }
 }

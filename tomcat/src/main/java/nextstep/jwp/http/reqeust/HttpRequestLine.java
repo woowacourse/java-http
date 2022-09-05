@@ -41,4 +41,8 @@ public class HttpRequestLine {
     public Map<String, String> getQueryParams() {
         return queryParams.getParams();
     }
+
+    public String getMethod() {
+        return method;
+    }
 }

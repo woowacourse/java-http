@@ -8,10 +8,10 @@
   - [x] uri의 QueryString을 파싱하는 기능이 있다.
 
 ## 2단계 - 로그인 구현하기
-- [ ] HTTP Status Code 302
+- [x] HTTP Status Code 302
   - [x] `/login` 경로를 요청시 로그인 페이지를 반환해야 한다.
   - [x] 페이지에 id, password를 입력 후 제출을 하였을 때, 로그인에 성공하면 응답 헤더에 Http status code 302를 반환하고 `/index.html`로 리다이렉트 한다.
-  - [ ] 로그인에 실패하면 `401.html`로 리다이렉트한다.
+  - [x] 로그인에 실패하면 `401.html`로 리다이렉트한다.
 - [ ] Post 방식으로 회원가입 
   - [ ] http://localhost:8080/register 으로 접속하면 회원가입 페이지(register.html)를 보여준다. (GET 메서드 사용)
   - [ ] 회원가입 버튼을 누르면 POST 메서드로 회원가입을 한다.

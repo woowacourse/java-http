@@ -18,8 +18,4 @@ public enum HttpStatus {
     public String toResponseMessage() {
         return code + " " + message;
     }
-
-    public boolean isNotFound() {
-        return this.equals(NOT_FOUND);
-    }
 }

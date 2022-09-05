@@ -119,4 +119,81 @@ class Http11ProcessorTest {
         System.out.println(socket.output());
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @DisplayName("로그인 페이지를 반환한다.")
+    @Test
+    void loginPage() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/login.html");
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: 3796 \r\n" +
+                "\r\n" +
+                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        System.out.println(socket.output());
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("로그인에 성공한다.")
+    @Test
+    void login() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=rex&password=password HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /index.html \r\n";
+        System.out.println(socket.output());
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("로그인에 실패한다.")
+    @Test
+    void loginFail() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /login?account=rex&password=password1 HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        var expected = "HTTP/1.1 302 Found \r\n" +
+                "Location: /401.html \r\n";
+        System.out.println(socket.output());
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

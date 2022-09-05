@@ -54,6 +54,11 @@ public class HttpResponse {
     }
 
     public byte[] toResponse() {
+        if (responseBody == null) {
+            return String.join("\r\n",
+                    protocolVersion + " " + statusCode.toResponseMessage() + " ",
+                    headersToResponse()).getBytes();
+        }
         return String.join("\r\n",
                 protocolVersion + " " + statusCode.toResponseMessage() + " ",
                 headersToResponse(),

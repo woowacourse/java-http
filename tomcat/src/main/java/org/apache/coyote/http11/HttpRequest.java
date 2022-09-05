@@ -32,8 +32,8 @@ public class HttpRequest {
         return startLineInfo[HTTP_METHOD_INDEX];
     }
 
-    public boolean isSameHttpMethod(final HttpMethod httpMethod) {
-        return this.httpMethod.equals(httpMethod);
+    public boolean isGetMethod() {
+        return this.httpMethod.equals(HttpMethod.GET);
     }
 
     public String getUrl() {

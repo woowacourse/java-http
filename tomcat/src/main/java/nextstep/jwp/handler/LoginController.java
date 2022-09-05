@@ -12,7 +12,6 @@ import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpRequestBody;
 import org.apache.coyote.http11.HttpRequestHeader;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.enums.HttpMethod;
 import org.apache.coyote.http11.enums.HttpStatusCode;
 import org.apache.coyote.http11.utils.UuidUtil;
 import org.slf4j.Logger;
@@ -32,7 +31,7 @@ public class LoginController implements Controller {
 
     @Override
     public HttpResponse service(final HttpRequest httpRequest) {
-        if (httpRequest.isSameHttpMethod(HttpMethod.GET)) {
+        if (httpRequest.isGetMethod()) {
             return doGet(httpRequest);
         }
 

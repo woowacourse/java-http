@@ -24,7 +24,6 @@ public class HttpResponse {
     }
 
     public byte[] httpResponse() {
-        System.out.println(createOutputResponse());
         return createOutputResponse().getBytes();
     }
 

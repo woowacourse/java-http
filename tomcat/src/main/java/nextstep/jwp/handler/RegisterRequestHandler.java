@@ -25,7 +25,9 @@ public class RegisterRequestHandler implements HttpRequestHandler {
         if (httpRequest.getHttpMethod().equals(HttpMethod.GET)) {
             return handleHttpGetRequest(httpRequest);
         }
-
+        if (httpRequest.getHttpMethod().equals(HttpMethod.POST)) {
+            return handleHttpPostRequest(httpRequest);
+        }
         return null;
     }
 

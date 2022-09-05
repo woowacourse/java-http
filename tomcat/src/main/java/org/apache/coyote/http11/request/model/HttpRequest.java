@@ -1,42 +1,42 @@
 package org.apache.coyote.http11.request.model;
 
+import org.apache.coyote.http11.request.HttpHeaders;
+
 public class HttpRequest {
 
-    private final HttpMethod method;
-    private final HttpRequestUri uri;
-    private final HttpVersion version;
+    private final HttpRequestStartLine startLine;
+    private final HttpHeaders headers;
 
-    public HttpRequest(final HttpMethod method, final HttpRequestUri uri, final HttpVersion version) {
-        this.method = method;
-        this.uri = uri;
-        this.version = version;
-    }
-
-    public HttpRequest(final String method, final String uri, final String version) {
-        this(HttpMethod.of(method), HttpRequestUri.of(uri), HttpVersion.of(version));
+    public HttpRequest(final HttpRequestStartLine httpRequestStartLine, final HttpHeaders headers) {
+        this.startLine = httpRequestStartLine;
+        this.headers = headers;
     }
 
     public boolean isEqualToMethod(final HttpMethod httpMethod) {
-        return this.method == httpMethod;
+        return startLine.isEqualToMethod(httpMethod);
     }
 
     public boolean isEqualToUri(final String uri) {
-        return this.uri.equals(HttpRequestUri.of(uri));
+        return startLine.isEqualToUri(uri);
     }
 
     public boolean isQueryString() {
-        return uri.isQuery();
+        return startLine.isQueryString();
     }
 
     public HttpMethod getMethod() {
-        return method;
+        return startLine.getMethod();
     }
 
     public HttpRequestUri getUri() {
-        return uri;
+        return startLine.getUri();
     }
 
     public HttpVersion getVersion() {
-        return version;
+        return startLine.getVersion();
+    }
+
+    public HttpHeaders getHeaders() {
+        return headers;
     }
 }

@@ -3,6 +3,8 @@ package nextstep.jwp.handler;
 import java.util.Optional;
 import nextstep.Application;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.UnAuthorizedException;
+import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
@@ -16,7 +18,7 @@ import org.apache.coyote.http11.utils.UuidUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LoginHandler {
+public class LoginController implements Controller {
 
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
@@ -24,31 +26,53 @@ public class LoginHandler {
 
     private final Manager manager;
 
-    public LoginHandler(final Manager manager) {
+    public LoginController(final Manager manager) {
         this.manager = manager;
     }
 
-    public HttpResponse login(final HttpRequest httpRequest) {
+    @Override
+    public HttpResponse service(final HttpRequest httpRequest) {
         if (httpRequest.isSameHttpMethod(HttpMethod.GET)) {
-            return HttpResponse.of(httpRequest, HttpStatusCode.OK, "/login.html");
+            return doGet(httpRequest);
         }
 
-        final HttpRequestBody requestBody = httpRequest.getBody();
-        final Optional<User> findUser = findUser(requestBody);
+        return doPost(httpRequest);
+    }
 
-        if (findUser.isEmpty()) {
+    private HttpResponse doGet(final HttpRequest httpRequest) {
+        return HttpResponse.of(httpRequest, HttpStatusCode.OK, "/login.html");
+    }
+
+    private HttpResponse doPost(final HttpRequest httpRequest) {
+        try {
+            return login(httpRequest);
+        } catch (UserNotFoundException | UnAuthorizedException e) {
+            log.error("", e);
             return HttpResponse.of(httpRequest, HttpStatusCode.UNAUTHORIZED, "/401.html");
         }
+    }
 
-        final User user = findUser.get();
+    private HttpResponse login(final HttpRequest httpRequest) {
+        final HttpRequestBody requestBody = httpRequest.getBody();
+
+        final String account = requestBody.findByKey(ACCOUNT);
+        final User user = InMemoryUserRepository.findByAccount(account)
+                .orElseThrow(() -> new UserNotFoundException(account));
+
+        validatePassword(user, requestBody);
+
+        log.info(user.toString());
+        setUpSession(user, httpRequest.getHeaders());
+
+        return generateSuccessResponse(httpRequest);
+    }
+
+    private void validatePassword(final User user, final HttpRequestBody requestBody) {
         final String password = requestBody.findByKey(PASSWORD);
-        if (user.checkPassword(password)) {
-            log.info(user.toString());
-            setUpSession(user, httpRequest.getHeaders());
-            return generateSuccessResponse(httpRequest);
-        }
 
-        return HttpResponse.of(httpRequest, HttpStatusCode.UNAUTHORIZED, "/401.html");
+        if (!user.checkPassword(password)) {
+            throw new UnAuthorizedException(user.getAccount());
+        }
     }
 
     private void setUpSession(final User user, final HttpRequestHeader httpRequestHeader) {
@@ -66,14 +90,9 @@ public class LoginHandler {
         manager.add(session);
     }
 
-    private Optional<User> findUser(final HttpRequestBody requestBody) {
-        final String account = requestBody.findByKey(ACCOUNT);
-        return InMemoryUserRepository.findByAccount(account);
-    }
-
     private HttpResponse generateSuccessResponse(final HttpRequest httpRequest) {
         final HttpResponse response = HttpResponse.of(httpRequest, HttpStatusCode.FOUND, "/login.html");
-        response.addHeader("Location", "/index.html");
+        response.addLocation("/index.html");
         return response;
     }
 }

@@ -12,7 +12,7 @@ import org.apache.coyote.http11.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class LoginHandlerTest {
+class LoginControllerTest {
 
     private static final Manager MANAGER = new SessionManager();
     private static final HttpRequestBody EMPTY_REQUEST_BODY = new HttpRequestBody("");
@@ -23,12 +23,12 @@ class LoginHandlerTest {
     void login_page() {
         // given
         final HttpRequest request = new HttpRequest("GET /login HTTP/1.1 ", EMPTY_REQUEST_HEADER, EMPTY_REQUEST_BODY);
-        final LoginHandler loginHandler = new LoginHandler(MANAGER);
+        final LoginController loginController = new LoginController(MANAGER);
 
         final String expected = "HTTP/1.1 200 OK ";
 
         // when
-        final HttpResponse response = loginHandler.login(request);
+        final HttpResponse response = loginController.service(request);
 
         // then
         assertThat(response.generateResponse()).contains(expected);
@@ -40,13 +40,13 @@ class LoginHandlerTest {
         // given
         final HttpRequest request = new HttpRequest("POST /login HTTP/1.1 ",
                 EMPTY_REQUEST_HEADER, new HttpRequestBody("account=gugu&password=password"));
-        final LoginHandler loginHandler = new LoginHandler(MANAGER);
+        final LoginController loginController = new LoginController(MANAGER);
 
         final String expectedStatusCode = "HTTP/1.1 302";
         final String expectedLocation = "Location: /index.html ";
 
         // when
-        final HttpResponse response = loginHandler.login(request);
+        final HttpResponse response = loginController.service(request);
         final String actual = response.generateResponse();
 
         // then
@@ -60,12 +60,12 @@ class LoginHandlerTest {
         // given
         final HttpRequest request = new HttpRequest("POST /login HTTP/1.1 ",
                 EMPTY_REQUEST_HEADER, new HttpRequestBody("account=gugu&password=notPassword"));
-        final LoginHandler loginHandler = new LoginHandler(MANAGER);
+        final LoginController loginController = new LoginController(MANAGER);
 
         final String expected = "HTTP/1.1 401";
 
         // when
-        final HttpResponse response = loginHandler.login(request);
+        final HttpResponse response = loginController.service(request);
 
         // then
         assertThat(response.generateResponse()).contains(expected);

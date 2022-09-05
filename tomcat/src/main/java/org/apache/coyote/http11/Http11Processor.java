@@ -8,7 +8,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
-import nextstep.jwp.handler.LoginHandler;
+import nextstep.jwp.handler.LoginController;
 import nextstep.jwp.handler.RegisterHandler;
 import org.apache.catalina.Manager;
 import org.apache.catalina.SessionManager;
@@ -88,7 +88,7 @@ public class Http11Processor implements Runnable, Processor {
         }
 
         if ("/login".equals(url)) {
-            return new LoginHandler(manager).login(httpRequest);
+            return new LoginController(manager).service(httpRequest);
         }
 
         if ("/register".equals(url)) {

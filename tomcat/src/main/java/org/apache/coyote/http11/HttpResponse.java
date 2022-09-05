@@ -44,8 +44,8 @@ public class HttpResponse {
         }
     }
 
-    public void addHeader(final String key, final String value) {
-        headers.addValue(key, value);
+    public void addLocation(final String location) {
+        headers.addValue("Location", location);
     }
 
     public String generateResponse() {

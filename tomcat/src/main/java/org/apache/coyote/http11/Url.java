@@ -10,9 +10,8 @@ import nextstep.jwp.exception.NotFoundException;
 public enum Url {
 
     DEFAULT("/"::equals, url -> new Http11Response("html", "Hello world!")),
-    LOGIN(url -> isMatchRegex("/login" + ".*", url), url -> Http11Response.from("/login.html")),
-    RESOURCE(url -> isMatchRegex(".*" + "\\." + ".*", url), Http11Response::from);
-
+    LOGIN(url -> isMatchRegex("/login.*", url), url -> Http11Response.from("/login.html")),
+    RESOURCE(url -> isMatchRegex(".*\\..*", url), Http11Response::from);
 
     private final Predicate<String> condition;
     private final Function<String, Http11Response> resourcePath;

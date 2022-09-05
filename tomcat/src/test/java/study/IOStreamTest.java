@@ -168,8 +168,9 @@ class IOStreamTest {
             final InputStream inputStream = new ByteArrayInputStream(text.getBytes());
             final InputStream bufferedInputStream = new BufferedInputStream(inputStream);
 
-            final byte[] actual = new byte[text.getBytes().length];
-            bufferedInputStream.read(actual, 0, text.getBytes().length);
+//            final byte[] actual = new byte[text.getBytes().length];
+//            bufferedInputStream.read(actual, 0, text.getBytes().length);
+            final byte[] actual = bufferedInputStream.readAllBytes();
 
             assertThat(bufferedInputStream).isInstanceOf(FilterInputStream.class);
             assertThat(actual).isEqualTo("필터에 연결해보자.".getBytes());

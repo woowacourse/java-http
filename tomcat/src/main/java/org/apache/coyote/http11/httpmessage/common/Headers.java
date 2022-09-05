@@ -33,7 +33,7 @@ public class Headers {
     }
 
     public Headers add(final String fieldName, final String fieldValue) {
-        final Map<String, String> newHeaders = new LinkedHashMap<>(headers);
+        Map<String, String> newHeaders = new LinkedHashMap<>(headers);
         newHeaders.put(fieldName, fieldValue);
 
         return new Headers(newHeaders);

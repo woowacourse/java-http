@@ -126,6 +126,7 @@ class Http11ProcessorTest {
                 "HTTP/1.1 302 ",
                 "Location: /index.html ",
                 "Content-Type: text/html;charset=utf-8 ");
+        System.out.println(socket.output());
 
         assertThat(socket.output()).contains(expected);
     }
@@ -176,7 +177,7 @@ class Http11ProcessorTest {
         // then
         var expected = String.join("\r\n",
                 "HTTP/1.1 302 ",
-                "Location: http://localhost:8080/index.html ",
+                "Location: /index.html ",
                 "Content-Type: text/html;charset=utf-8 ");
 
         assertThat(socket.output()).isEqualTo(expected);

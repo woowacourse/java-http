@@ -9,6 +9,9 @@ public class HandlerMapping {
         if (uri.startsWith("login")) {
             return new Login(uri);
         }
+        if (uri.startsWith("register")) {
+            return new Register(uri);
+        }
         return new Empty(uri);
     }
 

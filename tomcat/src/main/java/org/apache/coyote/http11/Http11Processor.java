@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String STATIC_DIRECTORY = "static/";
 
     private final Socket connection;
 
@@ -37,9 +36,8 @@ public class Http11Processor implements Runnable, Processor {
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
 
             String uri = getUri(bufferedReader);
-            Http11Response http11Response = Http11Response.create(uri);
             Url url = HandlerMapping.from(uri);
-            Http11Response responseBody = http11Response.extract(url);
+            Http11Response responseBody = Http11Response.extract(url);
 
             final var response = createResponse(responseBody.getHttpStatus(), responseBody.getContentType(),
                     responseBody.getResource());
@@ -51,10 +49,16 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String getUri(final BufferedReader bufferedReader) throws IOException {
-        return bufferedReader.readLine()
-                .split(" ")[1]
-                .substring(1);
+    private String getUri(final BufferedReader bufferedReader) {
+        String uri = "";
+        try {
+            uri = bufferedReader.readLine()
+                    .split(" ")[1]
+                    .substring(1);
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+        return uri;
     }
 
     private String createResponse(HttpStatus httpStatus, String contentType, String responseBody) {

@@ -4,9 +4,8 @@ import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.Http11Response;
 import org.apache.coyote.http11.response.HttpStatus;
 
-public class HomePage extends Url {
-
-    public HomePage(final String url) {
+public class Register extends Url {
+    public Register(String url) {
         super(url);
     }
 

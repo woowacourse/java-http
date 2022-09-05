@@ -19,7 +19,7 @@ public class Login extends Url {
     }
 
     @Override
-    public Http11Response getResponse() {
+    public Http11Response getResource() {
         LoginQueryDataDto queryData = UrlParser.loginQuery(getPath());
 
         if (queryData == null) {

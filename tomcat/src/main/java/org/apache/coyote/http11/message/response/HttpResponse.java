@@ -2,11 +2,13 @@ package org.apache.coyote.http11.message.response;
 
 import static org.apache.coyote.http11.message.common.HttpHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.message.common.HttpHeader.CONTENT_TYPE;
+import static org.apache.coyote.http11.message.common.HttpHeader.SET_COOKIE;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.coyote.http11.exception.DuplicateHeaderException;
 import org.apache.coyote.http11.message.common.ContentType;
+import org.apache.coyote.http11.message.common.Cookie;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 import org.apache.coyote.http11.message.common.HttpVersion;
 
@@ -76,6 +78,11 @@ public class HttpResponse {
         public Builder contentType(final String fileExtension) {
             validateDuplicateHeader();
             this.headers.put(CONTENT_TYPE, ContentType.from(fileExtension).getValue() + ";charset=utf-8");
+            return this;
+        }
+
+        public Builder setCookie(final Cookie cookie) {
+            headers.put(SET_COOKIE, cookie.getHeaderValue());
             return this;
         }
 

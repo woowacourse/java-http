@@ -1,6 +1,9 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.message.common.ContentType.HTML;
 import static org.apache.coyote.http11.message.common.HttpHeader.CONTENT_LENGTH;
+import static org.apache.coyote.http11.message.common.HttpHeader.COOKIE;
+import static org.apache.coyote.http11.message.common.HttpHeader.LOCATION;
 import static org.apache.coyote.http11.message.common.HttpMethod.GET;
 import static org.apache.coyote.http11.message.common.HttpMethod.POST;
 import static org.apache.coyote.http11.message.response.HttpStatus.FOUND;
@@ -10,18 +13,20 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.InvalidRequestException;
-import org.apache.coyote.http11.message.common.ContentType;
+import org.apache.coyote.http11.message.common.Cookie;
 import org.apache.coyote.http11.message.common.HttpHeaders;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.QueryString;
 import org.apache.coyote.http11.message.request.RequestLine;
 import org.apache.coyote.http11.message.request.RequestUri;
 import org.apache.coyote.http11.message.response.HttpResponse;
+import org.apache.coyote.http11.session.SessionStorage;
 import org.apache.coyote.http11.util.StaticFileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +61,7 @@ public class Http11Processor implements Runnable, Processor {
             }
 
             if (request.matches(GET, "/login")) {
-                responseLoginHtml(os);
+                responseLoginHtml(os, request);
                 return;
             }
 
@@ -83,16 +88,28 @@ public class Http11Processor implements Runnable, Processor {
 
     private void responseHelloWorld(final OutputStream os) throws IOException {
         HttpResponse httpResponse = new HttpResponse.Builder()
-                .contentType(ContentType.HTML)
+                .contentType(HTML)
                 .body("Hello world!")
                 .build();
 
         writeHttpResponse(os, httpResponse);
     }
 
-    private void responseLoginHtml(final OutputStream os) throws IOException {
+    private void responseLoginHtml(final OutputStream os, final HttpRequest request) throws IOException {
+        Optional<String> cookie = request.getHttpHeaders().getHeader(COOKIE);
+
+        if (cookie.isPresent()) {
+            HttpResponse httpResponse = new HttpResponse.Builder()
+                    .contentType(HTML)
+                    .body(StaticFileUtil.readFile("/index.html"))
+                    .build();
+
+            writeHttpResponse(os, httpResponse);
+            return;
+        }
+
         HttpResponse httpResponse = new HttpResponse.Builder()
-                .contentType(ContentType.HTML)
+                .contentType(HTML)
                 .body(StaticFileUtil.readFile("/login.html"))
                 .build();
 
@@ -105,23 +122,24 @@ public class Http11Processor implements Runnable, Processor {
         String account = queryString.getQuery("account").orElseThrow(InvalidRequestException::new);
         String password = queryString.getQuery("password").orElseThrow(InvalidRequestException::new);
 
-        boolean loginSuccess = InMemoryUserRepository.findByAccount(account)
-                .filter(user -> user.checkPassword(password))
-                .isPresent();
+        Optional<User> user = InMemoryUserRepository.findByAccount(account)
+                .filter(it -> it.checkPassword(password));
 
-        if (!loginSuccess) {
+        if (user.isEmpty()) {
             HttpResponse httpResponse = new HttpResponse.Builder()
                     .status(FOUND)
-                    .header("Location", "/401.html")
+                    .header(LOCATION, "/401.html")
                     .build();
 
             writeHttpResponse(os, httpResponse);
             return;
         }
 
+        String sessionId = SessionStorage.add(user.get());
         HttpResponse httpResponse = new HttpResponse.Builder()
                 .status(FOUND)
-                .header("Location", "/index.html")
+                .header(LOCATION, "/index.html")
+                .setCookie(Cookie.sessionId(sessionId))
                 .build();
 
         writeHttpResponse(os, httpResponse);
@@ -129,7 +147,7 @@ public class Http11Processor implements Runnable, Processor {
 
     private void responseRegisterHtml(final OutputStream os) throws IOException {
         HttpResponse response = new HttpResponse.Builder()
-                .contentType(ContentType.HTML)
+                .contentType(HTML)
                 .body(StaticFileUtil.readFile("/register.html"))
                 .build();
 
@@ -147,7 +165,7 @@ public class Http11Processor implements Runnable, Processor {
 
         HttpResponse response = new HttpResponse.Builder()
                 .status(FOUND)
-                .header("Location", "/index.html")
+                .header(LOCATION, "/index.html")
                 .build();
 
         writeHttpResponse(os, response);

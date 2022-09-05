@@ -1,5 +1,8 @@
 package org.apache.coyote.http11.response;
 
+import static nextstep.jwp.utils.FileReader.readFile;
+
+import java.io.IOException;
 import org.apache.coyote.http11.request.ContentType;
 
 public class HttpResponse {
@@ -14,9 +17,35 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse from(HttpStatus httpStatus, ContentType contentType, String requestBody) {
-        return new HttpResponse(httpStatus, new ResponseHeader(contentType, requestBody.getBytes().length),
-                requestBody);
+    public static HttpResponse ok(String url) throws IOException {
+        return ok(ContentType.findByUrl(url), url);
+    }
+
+    public static HttpResponse ok(ContentType contentType, String url) throws IOException {
+        String requestBody = readFile(url);
+        return new HttpResponse(
+                HttpStatus.OK,
+                new ResponseHeader(contentType, requestBody.getBytes().length),
+                requestBody
+        );
+    }
+
+    public static HttpResponse found(String url) throws IOException {
+        String responseBody = readFile(url);
+        return new HttpResponse(
+                HttpStatus.FOUND,
+                new ResponseHeader(ContentType.HTML, responseBody.getBytes().length),
+                responseBody
+        );
+    }
+
+    public static HttpResponse unAuthorized() throws IOException {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        String responseBody = readFile(status.getFilePath());
+        return new HttpResponse(status,
+                new ResponseHeader(ContentType.findByUrl(status.getFilePath()), responseBody.getBytes().length),
+                responseBody
+        );
     }
 
     public String getHttpResponse() {

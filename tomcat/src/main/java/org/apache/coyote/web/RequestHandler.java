@@ -21,13 +21,13 @@ public class RequestHandler {
 
     public HttpResponse handle(final HttpRequest httpRequest) {
         if (httpRequest.isSameHttpMethod(GET) && httpRequest.isSameRequestUrl("/login")) {
-            UserLoginRequest userLoginRequest = UserLoginRequest.from(httpRequest.getQueryParameters());
+            UserLoginRequest userLoginRequest = UserLoginRequest.from(httpRequest.getParameters());
             return new UserLoginController().doGet(userLoginRequest);
 
         }
 
         if (httpRequest.isSameHttpMethod(POST) && httpRequest.isSameRequestUrl("/register")) {
-            UserRegisterRequest userRegisterRequest = UserRegisterRequest.from(httpRequest.parseBody());
+            UserRegisterRequest userRegisterRequest = UserRegisterRequest.from(httpRequest.getParameters());
             return new UserCreateController().doPost(userRegisterRequest);
         }
 

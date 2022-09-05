@@ -30,7 +30,7 @@ public class FileRequestHandler {
     }
 
     public HttpResponse handle(final HttpRequest httpRequest) throws IOException {
-        String responseBody = fileHandler.getFileLines(httpRequest.getRequestLine().getRequestUrl());
+        String responseBody = fileHandler.getFileLines(httpRequest.getHttpRequestLine().getRequestUrl());
         HttpHeaders httpHeaders = HttpHeaderFactory.create(
                 new Pair(CONTENT_TYPE.getValue(), ContentType.from(httpRequest.getRequestExtension()).getValue()));
         if (httpRequest.isSameRequestUrl("/login.html")) {

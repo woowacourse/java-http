@@ -66,6 +66,10 @@ public class HttpRequestLine {
         return Optional.of(split[FILE_EXTENSION_INDEX]);
     }
 
+    public boolean hasQueryParameter() {
+        return queryParameter != null;
+    }
+
     public HttpMethod getMethod() {
         return method;
     }

@@ -8,7 +8,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import org.apache.coyote.support.HttpMethod;
 import org.apache.coyote.web.request.HttpRequest;
 import org.apache.coyote.web.request.HttpRequestParser;
@@ -20,6 +19,14 @@ class HttpRequestTest {
             "GET /index.html HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Connection: keep-alive ",
+            "",
+            "");
+
+    private static final String HTTP_GET_REQUEST_WITH_COOKIE = String.join("\r\n",
+            "GET /index.html HTTP/1.1 ",
+            "Host: localhost:8080 ",
+            "Connection: keep-alive ",
+            "Cookie: JSESSIONID=cookie; just=do_it ",
             "",
             "");
 
@@ -37,25 +44,21 @@ class HttpRequestTest {
     void parse() throws IOException {
         HttpRequest httpRequest = HttpRequestParser.parse(createBufferedReader(HTTP_GET_REQUEST));
         assertAll(
-                () -> assertThat(httpRequest.getRequestLine().getMethod()).isEqualTo(HttpMethod.GET),
-                () -> assertThat(httpRequest.getRequestLine().getRequestUrl()).isEqualTo("/index.html"),
-                () -> assertThat(httpRequest.getRequestLine().getVersion()).isEqualTo("HTTP/1.1"),
+                () -> assertThat(httpRequest.getHttpRequestLine().getMethod()).isEqualTo(HttpMethod.GET),
+                () -> assertThat(httpRequest.getHttpRequestLine().getRequestUrl()).isEqualTo("/index.html"),
+                () -> assertThat(httpRequest.getHttpRequestLine().getVersion()).isEqualTo("HTTP/1.1"),
                 () -> assertThat(httpRequest.getHttpHeaders().getHeaders()).containsOnlyKeys("Host", "Connection")
         );
     }
 
     @Test
-    void parseRawBody() throws IOException {
+    void getParameter() throws IOException {
         HttpRequest httpRequest = HttpRequestParser.parse(createBufferedReader(HTTP_POST_REQUEST));
-        assertThat(httpRequest.getRequestBody()).isEqualTo(
-                "account=gugu&password=password&email=hkkang%40woowahan.com");
-    }
-
-    @Test
-    void parseBody() throws IOException {
-        HttpRequest httpRequest = HttpRequestParser.parse(createBufferedReader(HTTP_POST_REQUEST));
-        Map<String, String> requestBody = httpRequest.parseBody();
-        assertThat(requestBody).containsOnlyKeys("account", "password", "email");
+        assertAll(
+                () -> assertThat(httpRequest.getParameter("account")).isEqualTo("gugu"),
+                () -> assertThat(httpRequest.getParameter("password")).isEqualTo("password"),
+                () -> assertThat(httpRequest.getParameter("email")).isEqualTo("hkkang%40woowahan.com")
+        );
     }
 
     @Test
@@ -83,23 +86,16 @@ class HttpRequestTest {
     }
 
     @Test
-    void getQueryParameters() throws IOException {
-        HttpRequest httpRequest = HttpRequestParser.parse(
-                createBufferedReader("GET /login?account=gugu&password=password HTTP/1.1 \r\n"));
-        assertThat(httpRequest.getQueryParameters()).containsKeys("account", "password");
-    }
-
-    @Test
-    void getEmptyQueryParameters() throws IOException {
-        HttpRequest httpRequest = HttpRequestParser.parse(createBufferedReader("GET /api/login HTTP/1.1 \r\n"));
-        assertThat(httpRequest.getQueryParameters()).isEmpty();
-    }
-
-    @Test
     void isSameRequestUrl() throws IOException {
         HttpRequest httpRequest = HttpRequestParser.parse(
                 createBufferedReader("GET /login?account=gugu&password=password HTTP/1.1 \r\n"));
         assertThat(httpRequest.isSameRequestUrl("/login")).isTrue();
+    }
+
+    @Test
+    void getSession() throws IOException {
+        HttpRequest httpRequest = HttpRequestParser.parse(createBufferedReader(HTTP_GET_REQUEST_WITH_COOKIE));
+        assertThat(httpRequest.getSession().get()).isEqualTo("cookie");
     }
 
     private BufferedReader createBufferedReader(final String httpRequest) {

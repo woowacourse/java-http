@@ -3,33 +3,27 @@ package org.apache.coyote.web.request;
 import static org.apache.coyote.web.session.SessionManager.JSESSIONID;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.apache.coyote.support.HttpHeaders;
 import org.apache.coyote.support.HttpMethod;
 
 public class HttpRequest {
 
     private static final String DEFAULT_REQUEST_EXTENSION = "strings";
-    private static final String CONNECT_DELIMITER = "&";
     private static final String ASSIGN_DELIMITER = "=";
     private static final String SET_COOKIE_DELIMITER = "; ";
-    private static final int KEY_INDEX = 0;
-    private static final int VALUE_INDEX = 1;
 
     private final HttpRequestLine httpRequestLine;
     private final HttpHeaders httpHeaders;
-    private final String requestBody;
+    private final Map<String, String> parameters;
 
     public HttpRequest(final HttpRequestLine httpRequestLine,
                        final HttpHeaders httpHeaders,
-                       final String requestBody) {
+                       final Map<String, String> parameters) {
         this.httpRequestLine = httpRequestLine;
         this.httpHeaders = httpHeaders;
-        this.requestBody = requestBody;
+        this.parameters = parameters;
     }
 
     public boolean isFileRequest() {
@@ -44,14 +38,6 @@ public class HttpRequest {
         return fileExtension.get();
     }
 
-    public Map<String, String> getQueryParameters() {
-        String queryParameter = httpRequestLine.getQueryParameter();
-        if (Objects.isNull(queryParameter)) {
-            return Collections.emptyMap();
-        }
-        return doParse(queryParameter);
-    }
-
     public boolean isSameHttpMethod(final HttpMethod method) {
         return httpRequestLine.isSameMethod(method);
     }
@@ -60,18 +46,8 @@ public class HttpRequest {
         return httpRequestLine.isSameUrl(url);
     }
 
-    public Map<String, String> parseBody() {
-        return doParse(requestBody);
-    }
-
-    private Map<String, String> doParse(final String content) {
-        return Arrays.stream(content.split(CONNECT_DELIMITER))
-                .collect(Collectors.toMap(parameter -> getSplitValue(parameter, ASSIGN_DELIMITER, KEY_INDEX),
-                        parameter -> getSplitValue(parameter, ASSIGN_DELIMITER, VALUE_INDEX)));
-    }
-
-    private String getSplitValue(final String content, final String delimiter, final int index) {
-        return content.split(delimiter)[index];
+    public String getParameter(final String name) {
+        return parameters.get(name);
     }
 
     public Optional<String> getSession() {
@@ -82,7 +58,7 @@ public class HttpRequest {
                 .findFirst();
     }
 
-    public HttpRequestLine getRequestLine() {
+    public HttpRequestLine getHttpRequestLine() {
         return httpRequestLine;
     }
 
@@ -90,7 +66,7 @@ public class HttpRequest {
         return httpHeaders;
     }
 
-    public String getRequestBody() {
-        return requestBody;
+    public Map<String, String> getParameters() {
+        return parameters;
     }
 }

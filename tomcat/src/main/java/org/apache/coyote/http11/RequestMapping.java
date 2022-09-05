@@ -1,9 +1,8 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.ui.Controller;
 import nextstep.jwp.ui.IndexController;
 import nextstep.jwp.ui.LoginController;
-import nextstep.jwp.ui.NotFoundController;
+import nextstep.jwp.ui.ResourceController;
 import nextstep.jwp.ui.RegisterController;
 
 public class RequestMapping {
@@ -17,6 +16,6 @@ public class RequestMapping {
         if (requestPath.startsWith("/register")) {
             return RegisterController.getController();
         }
-        return NotFoundController.getController();
+        return ResourceController.getController();
     }
 }

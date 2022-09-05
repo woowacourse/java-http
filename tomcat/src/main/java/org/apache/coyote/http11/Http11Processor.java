@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.net.Socket;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.model.HttpRequest;
+import org.apache.coyote.http11.model.HttpRequestParser;
+import org.apache.coyote.http11.model.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import nextstep.jwp.exception.UncheckedServletException;
-import nextstep.jwp.ui.Controller;
 
 public class Http11Processor implements Runnable, Processor {
 

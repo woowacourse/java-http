@@ -1,13 +1,14 @@
-package nextstep.jwp.ui;
+package org.apache.coyote.http11;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Objects;
 
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.model.HttpRequest;
+import org.apache.coyote.http11.model.HttpResponse;
+import org.apache.coyote.http11.model.HttpStatusCode;
 
 public abstract class AbstractController implements Controller {
 
@@ -36,9 +37,12 @@ public abstract class AbstractController implements Controller {
     }
 
     protected HttpResponse createHttpResponseFrom(String resourcePath, HttpStatusCode httpStatusCode, String ContentType,
-        String location) throws
-        IOException {
+        String location) throws IOException {
+
         final URL resource = getClass().getClassLoader().getResource(resourcePath);
+        if(Objects.isNull(resource)){
+            return redirectTo("/404", HttpStatusCode.HTTP_STATUS_NOT_FOUND);
+        }
         String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         return HttpResponse.of(httpStatusCode, responseBody)

@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.coyote.http11.HttpCookie;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.AbstractController;
+import org.apache.coyote.http11.model.HttpCookie;
+import org.apache.coyote.http11.model.HttpRequest;
+import org.apache.coyote.http11.model.HttpResponse;
+import org.apache.coyote.http11.model.HttpStatusCode;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.Session;
@@ -54,13 +55,13 @@ public class LoginController extends AbstractController {
             return redirectTo("/401", HttpStatusCode.HTTP_STATUS_UNAUTHORIZED);
         }
 
-        User authorizedUser = user.get();
-        if (authorizedUser.checkPassword(request.getBodyParam("password"))) {
+        User existingUser = user.get();
+        if (existingUser.checkPassword(request.getBodyParam("password"))) {
             return redirectTo("/401", HttpStatusCode.HTTP_STATUS_UNAUTHORIZED);
         }
 
         Session session = request.getSession();
-        session.setAttribute("user", authorizedUser);
+        session.setAttribute("user", existingUser);
         SessionManager.getSessionManager().add(session);
 
         Map<String, String> cookies = Map.of("JSESSIONID", session.getId());
@@ -69,5 +70,4 @@ public class LoginController extends AbstractController {
         return redirectTo("/index", HttpStatusCode.HTTP_STATUS_FOUND)
             .setCookie(httpCookie.toString());
     }
-
 }

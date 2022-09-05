@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -64,7 +64,6 @@ public class HttpRequestParser {
             bodyParams.put(attributeTokenizer.nextToken(), attributeTokenizer.nextToken());
         }
 
-        bufferedReader.close();
         return new HttpRequestParser(httpMethod, uri, httpRequestHeaders, cookies, bodyParams);
     }
 

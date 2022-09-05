@@ -1,8 +1,9 @@
 package nextstep.jwp.ui;
 
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatusCode;
+import org.apache.coyote.http11.AbstractController;
+import org.apache.coyote.http11.model.HttpRequest;
+import org.apache.coyote.http11.model.HttpResponse;
+import org.apache.coyote.http11.model.HttpStatusCode;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;

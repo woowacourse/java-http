@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model;
 
 public enum HttpStatusCode {
     HTTP_STATUS_OK(200, "OK"),

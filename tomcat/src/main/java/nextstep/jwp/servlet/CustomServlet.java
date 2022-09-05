@@ -29,11 +29,11 @@ public class CustomServlet implements Servlet {
         this.viewResolver = viewResolver;
     }
 
-    public HttpResponse service(HttpRequest request) {
+    public void service(HttpRequest request, HttpResponse response) {
         try {
-            return handleOrResolveView(request).toHttpResponse();
+            response.update(handleOrResolveView(request));
         } catch (HttpException exception) {
-            return handlerExecutor.handle(exception).toHttpResponse();
+            response.update(handlerExecutor.handle(exception));
         }
     }
 

@@ -9,12 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.coyote.Processor;
 import org.apache.coyote.servlet.Servlet;
-import org.apache.coyote.servlet.cookie.HttpCookie;
 import org.apache.coyote.servlet.request.HttpRequest;
 import org.apache.coyote.servlet.request.RequestHeaders;
 import org.apache.coyote.servlet.request.StartLine;
 import org.apache.coyote.servlet.response.HttpResponse;
-import org.apache.coyote.servlet.session.Session;
 import org.apache.coyote.servlet.session.SessionRepository;
 import org.apache.coyote.support.HttpException;
 import org.slf4j.Logger;
@@ -47,13 +45,10 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream()) {
 
             final var request = toRequest(reader);
-            HttpResponse response;
-            boolean isExistingSession = hasValidSessionCookie(request);
-            setValidSession(request, isExistingSession);
-            response = servlet.service(request);
-            if (!isExistingSession) {
-                response.addSetCookieHeader(Session.JSESSIONID, HttpCookie.ofSession(request.getSession()));
-            }
+            final var response = new HttpResponse();
+            sessionRepository.updateSessionAndCookie(request, response);
+            servlet.service(request, response);
+
             outputStream.write(response.toMessage().getBytes());
             outputStream.flush();
         } catch (IOException | HttpException e) {
@@ -85,21 +80,5 @@ public class Http11Processor implements Runnable, Processor {
         char[] buffer = new char[contentLength];
         reader.read(buffer, 0, contentLength);
         return new String(buffer);
-    }
-
-    private boolean hasValidSessionCookie(HttpRequest request) {
-        final var sessionCookie = request.findCookie(Session.JSESSIONID);
-        return sessionRepository.isValidSessionCookie(sessionCookie);
-    }
-
-    private void setValidSession(HttpRequest request, boolean isExistingSession) {
-        if (isExistingSession) {
-            final var sessionCookie = request.findCookie(Session.JSESSIONID);
-            request.setSession(sessionRepository.findSession(sessionCookie.getValue()));
-        } else {
-            final var session = Session.of();
-            sessionRepository.add(session);
-            request.setSession(session);
-        }
     }
 }

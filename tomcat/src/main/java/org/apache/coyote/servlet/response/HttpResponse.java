@@ -1,6 +1,7 @@
 package org.apache.coyote.servlet.response;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.StringJoiner;
 import org.apache.coyote.servlet.cookie.HttpCookie;
@@ -9,22 +10,17 @@ import org.apache.coyote.support.HttpStatus;
 
 public class HttpResponse {
 
-    private final HttpStatus status;
-    private final String location;
-    private final HttpCookies cookies;
-    private final String contentType;
-    private final String messageBody;
+    private HttpStatus status;
+    private String location;
+    private final HttpCookies cookies = new HttpCookies(new HashMap<>());
+    private String contentType;
+    private String messageBody;
 
-    HttpResponse(HttpStatus status,
-                 String location,
-                 HttpCookies cookies,
-                 String contentType,
-                 String messageBody) {
-        this.status = status;
-        this.location = location;
-        this.cookies = cookies;
-        this.contentType = contentType;
-        this.messageBody = messageBody;
+    public void update(ResponseEntity responseEntity) {
+        this.status = responseEntity.getStatus();
+        this.location = responseEntity.getLocation();
+        this.contentType = responseEntity.getContentType();
+        this.messageBody = responseEntity.getMessageBody();
     }
 
     public void addSetCookieHeader(String name, HttpCookie value) {

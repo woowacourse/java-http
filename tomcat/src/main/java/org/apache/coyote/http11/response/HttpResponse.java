@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.message.HttpVersion;
+import org.apache.coyote.http11.header.HttpHeader;
+import org.apache.coyote.http11.header.HttpVersion;
 import org.apache.coyote.http11.response.headers.ResponseHeader;
 
 public class HttpResponse implements Response {
@@ -16,10 +17,11 @@ public class HttpResponse implements Response {
     }
 
     public static HttpResponse initial() {
-        ResponseGeneral general = new ResponseGeneral(HttpVersion.HTTP11, HttpStatus.OK);
-        ResponseHeaders headers = ResponseHeaders.empty();
-        ResponseBody body = ResponseBody.empty();
-        return new HttpResponse(general, headers, body);
+        return new HttpResponse(
+                new ResponseGeneral(HttpVersion.HTTP11, HttpStatus.OK),
+                ResponseHeaders.empty(),
+                ResponseBody.empty()
+        );
     }
 
     public HttpResponse update(HttpStatus status, String bodyString) {
@@ -28,10 +30,6 @@ public class HttpResponse implements Response {
                 this.headers.update(bodyString),
                 new ResponseBody(bodyString)
         );
-    }
-
-    public HttpResponse updateBody(String bodyString) {
-        return new HttpResponse(general, headers.update(bodyString), new ResponseBody(bodyString));
     }
 
     public HttpResponse addHeader(ResponseHeader header) {

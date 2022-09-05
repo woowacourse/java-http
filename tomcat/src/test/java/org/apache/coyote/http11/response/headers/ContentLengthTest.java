@@ -11,7 +11,7 @@ class ContentLengthTest {
         // given
         String bodyString = "hello world";
         // when
-        ContentLength contentLength = ContentLength.from(bodyString);
+        ContentLength contentLength = ContentLength.fromBody(bodyString);
         // then
         assertThat(contentLength.getAsString()).isEqualTo("Content-Length: 11");
     }

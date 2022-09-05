@@ -19,7 +19,7 @@ public class ResponseHeaders implements Response {
     }
 
     public ResponseHeaders update(String body) {
-        ContentLength contentLength = ContentLength.from(body);
+        ContentLength contentLength = ContentLength.fromBody(body);
         return append(contentLength);
     }
 

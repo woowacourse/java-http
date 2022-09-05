@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.exception.TempException;
-import org.apache.util.IntegerUtil;
+import org.apache.util.NumberUtil;
 
 public class HttpRequest {
 
@@ -45,10 +45,22 @@ public class HttpRequest {
     }
 
     private static RequestBody readBodyLines(BufferedReader reader, RequestHeaders headers) {
-        int length = IntegerUtil.parseIntSafe(headers.getValueByKey("Content-Length"));
+        int length = findContentLength(headers);
         if (length == 0) {
             return RequestBody.empty();
         }
+        return readActualBody(reader, length);
+    }
+
+    private static int findContentLength(RequestHeaders headers) {
+        try {
+            return NumberUtil.parseIntSafe(headers.getValueByField("Content-Length"));
+        } catch (IllegalArgumentException e){
+            return 0;
+        }
+    }
+
+    private static RequestBody readActualBody(BufferedReader reader, int length) {
         char[] buffer = new char[length];
         try {
             reader.read(buffer, 0, length);
@@ -66,16 +78,8 @@ public class HttpRequest {
         }
     }
 
-    public HttpRequest redirectPath(String path) {
-        return new HttpRequest(requestGeneral.redirectPath(path), requestHeaders, requestBody);
-    }
-
     public String getPath() {
         return requestGeneral.getPath().getPath();
-    }
-
-    public String getParameter(String field) {
-        return requestGeneral.getPath().getParameter(field);
     }
 
     public RequestMethod getMethod() {

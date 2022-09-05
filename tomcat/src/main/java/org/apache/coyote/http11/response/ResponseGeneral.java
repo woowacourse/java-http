@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.message.HttpVersion;
+import org.apache.coyote.http11.header.HttpVersion;
 
 public class ResponseGeneral implements Response {
 

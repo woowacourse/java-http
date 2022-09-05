@@ -1,20 +1,20 @@
 package org.apache.coyote.http11.request;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.apache.coyote.http11.request.headers.RequestHeader;
+import org.apache.coyote.http11.request.headers.RequestHeaderMapper;
 
 
 public class RequestHeaders {
 
     private static final Pattern HEADER_PATTERN = Pattern.compile("(?<field>[a-zA-Z\\- ]+): ?(?<value>.+)");
 
-    private final Map<String, String> headers;
+    private final List<RequestHeader> headers;
 
-    public RequestHeaders(Map<String, String> headers) {
+    private RequestHeaders(List<RequestHeader> headers) {
         this.headers = headers;
     }
 
@@ -22,32 +22,30 @@ public class RequestHeaders {
         return new RequestHeaders(lines.stream()
                 .map(HEADER_PATTERN::matcher)
                 .filter(Matcher::find)
-                .collect(Collectors.toMap(
-                        matcher -> matcher.group("field"),
-                        matcher -> matcher.group("value")
-                )));
+                .map(matcher -> RequestHeaderMapper.findAndApply(matcher.group("field"), matcher.group("value")))
+                .collect(Collectors.toList()));
     }
 
-    public String getValueByKey(String key) {
-        return headers.get(key);
+    public String getValueByField(String field) {
+        return headers.stream()
+                .filter(header -> header.getField().equals(field))
+                .map(RequestHeader::getValue)
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("reuqest header 에 " + field + " 가 존재하지 않습니다."));
     }
 
-    public String getPairByKey(String key) {
-        return key + ": " + headers.get(key);
-    }
-
-    public Map<String, String> getHeaders() {
-        return headers;
+    public String getPairByField(String field) {
+        return field + ": " + getValueByField(field);
     }
 
     @Override
     public String toString() {
-        StringBuilder entryBuilder = new StringBuilder("\n");
-        for (Entry<String, String> entry : headers.entrySet()) {
-            entryBuilder.append(entry.getKey()).append("->").append(entry.getValue()).append("\n");
+        StringBuilder builder = new StringBuilder("\n");
+        for (RequestHeader header : headers) {
+            builder.append(header.getField()).append(" -> ").append(header.getValue());
         }
         return "RequestHeaders{\n" +
-                "headers={" + entryBuilder +
+                "headers={" + builder +
                 "\n}\n}";
     }
 }

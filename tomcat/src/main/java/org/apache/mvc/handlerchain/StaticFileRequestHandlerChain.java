@@ -28,7 +28,7 @@ public class StaticFileRequestHandlerChain implements RequestHandlerChain {
         // "<html
         try {
             File file = FileUtil.loadFile(filePath);
-            return response.updateBody(readAsString(file))
+            return response.update(HttpStatus.OK, readAsString(file))
                     .addHeader(ContentType.findWithExtension(file.getName()));
         } catch (IllegalArgumentException | IOException e) {
             return next.handle(request, response);

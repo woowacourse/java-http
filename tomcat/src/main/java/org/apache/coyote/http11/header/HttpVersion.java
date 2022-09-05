@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.message;
+package org.apache.coyote.http11.header;
 
 import java.util.Arrays;
 import org.apache.exception.TempException;

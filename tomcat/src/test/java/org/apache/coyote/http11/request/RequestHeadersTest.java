@@ -18,12 +18,11 @@ class RequestHeadersTest {
 
         // when
         RequestHeaders headers = RequestHeaders.parse(lines);
-        System.out.println("headers.getHeaders() = " + headers.getHeaders());
 
         // then
         Assertions.assertAll(
-                () -> assertThat(headers.getPairByKey("Content-Type")).isEqualTo("Content-Type: application/json"),
-                () -> assertThat(headers.getPairByKey("Referrer Policy")).isEqualTo(
+                () -> assertThat(headers.getPairByField("Content-Type")).isEqualTo("Content-Type: application/json"),
+                () -> assertThat(headers.getPairByField("Referrer Policy")).isEqualTo(
                         "Referrer Policy: strict-origin-when-cross-origin")
         );
     }

@@ -1,4 +1,7 @@
-package org.apache.http;
+package nextstep.jwp.http;
+
+import org.apache.http.HttpHeader;
+import org.apache.http.HttpMime;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

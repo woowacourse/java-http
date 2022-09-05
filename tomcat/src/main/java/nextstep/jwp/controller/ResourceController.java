@@ -1,10 +1,10 @@
 package nextstep.jwp.controller;
 
 import nextstep.jwp.support.Resource;
-import org.apache.http.Headers;
+import nextstep.jwp.http.Headers;
 import org.apache.http.HttpHeader;
-import org.apache.http.RequestEntity;
-import org.apache.http.ResponseEntity;
+import nextstep.jwp.http.RequestEntity;
+import nextstep.jwp.http.ResponseEntity;
 
 public class ResourceController implements Controller {
 

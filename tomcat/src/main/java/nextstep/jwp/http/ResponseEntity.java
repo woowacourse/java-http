@@ -1,4 +1,8 @@
-package org.apache.http;
+package nextstep.jwp.http;
+
+import org.apache.http.HttpHeader;
+import org.apache.http.HttpStatus;
+import org.apache.http.HttpVersion;
 
 public class ResponseEntity {
 

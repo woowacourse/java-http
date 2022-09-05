@@ -84,14 +84,15 @@ class Http11ProcessorTest {
     }
 
     @Test
-    void queryStringParsing() {
+    void login_by_post() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 30",
                 "",
-                "");
+                "account=gugu&password=password");
 
         final StubSocket socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -107,11 +108,12 @@ class Http11ProcessorTest {
     void login_redirect_success() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 30",
                 "",
-                "");
+                "account=gugu&password=password");
 
         final StubSocket socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -132,11 +134,12 @@ class Http11ProcessorTest {
     void login_fail() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=unknownAccount&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Content-Length: 33",
                 "",
-                "");
+                "account=invalid&password=password");
 
         final StubSocket socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

@@ -18,7 +18,6 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.httpmessage.common.ContentType;
 import org.apache.coyote.http11.httpmessage.request.Request;
 import org.apache.coyote.http11.httpmessage.request.requestbody.RequestBodyContent;
-import org.apache.coyote.http11.httpmessage.request.requestline.QueryStrings;
 import org.apache.coyote.http11.httpmessage.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +41,7 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream()) {
-            final Request request = extractRequest(inputStream);
+            final var request = Request.of(inputStream);
 
             if (request.isGetMethod()) {
                 final var response = doGet(request);
@@ -73,6 +72,18 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Response doPost(final Request request) {
+        if (request.isMatchUri("/login")) {
+            final RequestBodyContent userInput = RequestBodyContent.parse(request.getBody());
+            final Optional<User> user = InMemoryUserRepository.findByAccount(userInput.get("account"));
+
+            if (user.isPresent() && user.get().checkPassword(userInput.get("password"))) {
+                log.info("존재하는 유저입니다. ::: " + user);
+                return Response.redirect(ContentType.HTML, "http://localhost:8080/index.html");
+            }
+            log.info("존재하지 않는 유저입니다. ::: " + userInput.get("account"));
+            return Response.redirect(ContentType.HTML, "http://localhost:8080/401.html");
+        }
+
         if (request.isMatchUri("/register")) {
             final RequestBodyContent userInput = RequestBodyContent.parse(request.getBody());
             UserService.save(userInput);
@@ -108,19 +119,6 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private Response getResponseWithQueryString(final Request request) {
-        if (request.isMatchUri("/login")) {
-            final QueryStrings queryStrings = request.getUri().getQueryStrings();
-            final String account = queryStrings.getValue("account");
-            final String password = queryStrings.getValue("password");
-
-            if (InMemoryUserRepository.exist(account, password)) {
-                final User user = InMemoryUserRepository.findByAccount(account).get();
-                log.info("존재하는 유저입니다. ::: " + user);
-                return Response.redirect(ContentType.HTML, "http://localhost:8080/index.html");
-            }
-            log.info("존재하지 않는 유저입니다. ::: " + queryStrings.getValue("account"));
-            return Response.redirect(ContentType.HTML, "http://localhost:8080/401.html");
-        }
         return new Response();
     }
 }

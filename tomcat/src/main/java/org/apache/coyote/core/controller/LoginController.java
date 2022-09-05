@@ -5,11 +5,14 @@ import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.exception.UserNotFoundException;
+import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.reqeust.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
 import nextstep.jwp.io.ClassPathResource;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.manager.Session;
+import org.apache.coyote.manager.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,11 +53,16 @@ public class LoginController extends AbstractController {
         User user = findUser(account);
 
         response.setStatus("FOUND");
-        response.setLocation("./index.html");
+        response.setLocation("./401.html");
 
-        if (!user.checkPassword(password)) {
+        if (user.checkPassword(password)) {
             response.setStatus("FOUND");
-            response.setLocation("./401.html");
+            response.setLocation("./index.html");
+
+            HttpCookie cookie = new HttpCookie();
+            response.setCookie(cookie);
+            Session session = new Session("user", user);
+            SessionManager.add(cookie.getCookie(), session);
         }
     }
 
@@ -72,6 +80,12 @@ public class LoginController extends AbstractController {
     @Override
     protected void doGet(final HttpRequest request, final HttpResponse response)
             throws IOException, UncheckedServletException {
+        if (SessionManager.hasSession(request.getCookie())) {
+            response.setLocation("./index.html");
+            response.setStatus("FOUND");
+            return;
+        }
+
         String responseBody = new ClassPathResource().getStaticContent(request.getPath());
 
         response.setStatus("OK");

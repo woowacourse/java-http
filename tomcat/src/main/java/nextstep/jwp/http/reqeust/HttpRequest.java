@@ -41,4 +41,8 @@ public class HttpRequest {
     public Map<String, String> getRequestBodies() {
         return httpRequestBody.getRequestBodies();
     }
+
+    public String getCookie() {
+        return httpHeaders.getCookie();
+    }
 }

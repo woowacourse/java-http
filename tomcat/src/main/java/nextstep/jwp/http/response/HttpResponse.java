@@ -1,6 +1,7 @@
 package nextstep.jwp.http.response;
 
 import java.util.StringJoiner;
+import nextstep.jwp.http.HttpCookie;
 import nextstep.jwp.http.HttpHeader;
 
 public class HttpResponse {
@@ -9,6 +10,7 @@ public class HttpResponse {
     private static final String HEADER_CONTENT_TYPE = "Content-Type";
     private static final String HEADER_CONTENT_LENGTH = "Content-Length";
     private static final String HEADER_LOCATION = "Location";
+    private static final String HEADER_SET_COOKIE = "Set-Cookie";
 
     private String version = "HTTP/1.1";
     private StatusCode statusCode;
@@ -36,6 +38,10 @@ public class HttpResponse {
 
     public void setResponseBody(final String responseBody) {
         this.responseBody = responseBody;
+    }
+
+    public void setCookie(final HttpCookie cookie) {
+        this.httpHeaders.addHeader(HEADER_SET_COOKIE, cookie.getCookie());
     }
 
     public String getResponseTemplate() {

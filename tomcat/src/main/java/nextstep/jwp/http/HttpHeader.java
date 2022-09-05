@@ -42,4 +42,8 @@ public class HttpHeader {
     public String get(final String key) {
         return headers.get(key);
     }
+
+    public String getCookie() {
+        return headers.get("Cookie");
+    }
 }

@@ -115,26 +115,27 @@ class Http11ProcessorTest {
         final URL resource = getClass().getClassLoader().getResource("static/login.html");
         final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
-        var expected = "HTTP/1.1 302 FOUND \r\n" +
+        var expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: " + responseBody.getBytes().length + " \r\n" +
-                "Location: ./index.html \r\n" +
                 "\r\n" +
                 responseBody;
 
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("/login?account=leaver&password=password url로 접근할 때, user가 존재하지 않으면 예외를 발생한다.")
+    @DisplayName("/login url에 POST로 접근할 때, user가 존재하지 않으면 예외를 발생한다.")
     @Test
-    void notFoundUser() throws IOException {
+    void notFoundUser() {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=leaver&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/html;charset=utf-8",
                 "Connection: keep-alive ",
-                "");
+                "Content-Length: 32",
+                "",
+                "account=leaver&password=password ");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -144,16 +145,18 @@ class Http11ProcessorTest {
                 .isInstanceOf(UserNotFoundException.class);
     }
 
-    @DisplayName("/login?account=leaver&password=password url로 접근할 때, 로그인을 실패하면 ./401.html로 접근한다.")
+    @DisplayName("/login url에 POST로 접근할 때, 로그인을 실패하면 ./401.html로 접근한다.")
     @Test
     void fail_login() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=invalidpassword HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Accept: text/html;charset=utf-8",
                 "Connection: keep-alive ",
-                "");
+                "Content-Length: 32",
+                "",
+                "account=gugu&password=invalidpassword");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

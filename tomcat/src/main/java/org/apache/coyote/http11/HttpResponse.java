@@ -22,8 +22,7 @@ public class HttpResponse {
         private String body;
         private String version;
         private String status;
-        private String contentType;
-        private int contentLength;
+        private String[] headers;
 
         public Builder body(final String body) {
             this.body = body;
@@ -40,13 +39,8 @@ public class HttpResponse {
             return this;
         }
 
-        public Builder contentType(final String contentType) {
-            this.contentType = contentType;
-            return this;
-        }
-
-        public Builder contentLength(final int contentLength) {
-            this.contentLength = contentLength;
+        public Builder headers(final String... headers) {
+            this.headers = headers;
             return this;
         }
 
@@ -54,10 +48,8 @@ public class HttpResponse {
             return new HttpResponse(
                     String.join("\r\n",
                             version + " " + status + " ",
-                            "Content-Type: " + contentType + " ",
-                            "Content-Length: " + contentLength + " ",
-                            "",
-                            body));
+                            String.join(" \r\n", headers) + " \r\n",
+                            body == null ? "" : body));
         }
     }
 }

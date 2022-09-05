@@ -1,7 +1,8 @@
 package org.apache.coyote.http11.model;
 
 public enum HttpStatus {
-    OK("200 OK");
+    OK("200 OK"),
+    FOUND("302 Found");
 
     private final String value;
 

@@ -32,6 +32,10 @@ public class HttpRequestUri {
         return value.contains(QUERY_PARAMETER);
     }
 
+    public boolean isBasicContentType() {
+        return RequestContentType.isExist(value);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -69,6 +73,11 @@ public class HttpRequestUri {
                     .findFirst()
                     .orElseThrow(() -> new UnSupportedMediaType(MessageFormat.format("not found type : {0}", uri)));
             return requestContentType.contentType;
+        }
+
+        public static boolean isExist(final String uri) {
+            return Arrays.stream(RequestContentType.values())
+                    .anyMatch(it -> uri.endsWith(it.extension));
         }
     }
 }

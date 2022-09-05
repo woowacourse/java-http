@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import java.text.MessageFormat;
+import org.apache.coyote.exception.BadRequestException;
 import org.apache.coyote.exception.MethodNotAllowedException;
 import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.HttpStatus;
@@ -14,7 +15,6 @@ import org.apache.coyote.util.FileUtils;
 public class WebClient {
 
     private static final String INDEX_URI = "/";
-    private static final String INDEX_BODY = "Hello world!";
 
     public HttpResponse request(final HttpRequest httpRequest) {
         if (httpRequest.isEqualToMethod(HttpMethod.GET)) {
@@ -24,48 +24,16 @@ public class WebClient {
     }
 
     private HttpResponse doGet(final HttpRequest httpRequest) {
+        Controller controller = new Controller(httpRequest);
+
         if (httpRequest.isEqualToUri(INDEX_URI)) {
-            return getForObject(httpRequest, ContentType.TEXT_HTML_CHARSET_UTF_8, INDEX_BODY);
+            return controller.execute();
         }
 
         if (httpRequest.isQueryString()) {
-            Controller controller = new Controller(httpRequest);
-            return getForObject(controller.execute(httpRequest.getUri()));
+            return controller.execute();
         }
 
-        String responseBody = FileUtils.readAllBytes(httpRequest.getUri().getValue());
-        return getForObject(httpRequest, responseBody);
-    }
-
-    private HttpResponse getForObject(final String body) {
-        HttpRequestUri httpRequestUri = new HttpRequestUri(body);
-        String responseBody = FileUtils.readAllBytes(httpRequestUri.getValue());
-        return HttpResponse.builder()
-                .body(responseBody)
-                .version(HttpVersion.HTTP_1_1)
-                .status(HttpStatus.OK.getValue())
-                .contentType(ContentType.TEXT_HTML_CHARSET_UTF_8.getValue())
-                .contentLength(WebClient.INDEX_BODY.getBytes().length)
-                .build();
-    }
-
-    private HttpResponse getForObject(final HttpRequest httpRequest, final String responseBody) {
-        return HttpResponse.builder()
-                .body(responseBody)
-                .version(httpRequest.getVersion())
-                .status(HttpStatus.OK.getValue())
-                .contentType(httpRequest.getUri().getContentType().getValue())
-                .contentLength(responseBody.getBytes().length)
-                .build();
-    }
-
-    private HttpResponse getForObject(final HttpRequest httpRequest, final ContentType contentType, final String body) {
-        return HttpResponse.builder()
-                .body(body)
-                .version(httpRequest.getVersion())
-                .status(HttpStatus.OK.getValue())
-                .contentType(contentType.getValue())
-                .contentLength(body.getBytes().length)
-                .build();
+        return controller.execute();
     }
 }

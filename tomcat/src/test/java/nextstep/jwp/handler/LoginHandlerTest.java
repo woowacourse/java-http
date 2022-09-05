@@ -31,7 +31,7 @@ class LoginHandlerTest {
         InMemoryUserRepository.save(user);
 
         // when
-        LoginHandler.login(queryParams);
+        LoginHandler.canLogin(queryParams);
         String actual = testLogs.get(0).getFormattedMessage();
 
         // then

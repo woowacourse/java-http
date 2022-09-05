@@ -1,6 +1,5 @@
 package nextstep.jwp.handler;
 
-import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.http.QueryParams;
 import nextstep.jwp.model.User;
@@ -17,19 +16,26 @@ public class LoginHandler {
     private LoginHandler() {
     }
 
-    public static void login(QueryParams queryParams) {
+    public static boolean canLogin(QueryParams queryParams) {
         if (queryParams.contains(ACCOUNT) && queryParams.contains(PASSWORD)) {
             String account = queryParams.get(ACCOUNT);
             String password = queryParams.get(PASSWORD);
-
-            Optional<User> user = InMemoryUserRepository.findByAccount(account);
-            user.ifPresent(value -> loginSuccess(value, password));
+            return findUserByAccount(account, password);
         }
+        return false;
     }
 
-    private static void loginSuccess(User user, String password) {
+    private static boolean findUserByAccount(String account, String password) {
+        return InMemoryUserRepository.findByAccount(account)
+            .filter(value -> isCorrectPassword(value, password))
+            .isPresent();
+    }
+
+    private static boolean isCorrectPassword(User user, String password) {
         if (user.checkPassword(password)) {
             log.info(user.toString());
+            return true;
         }
+        return false;
     }
 }

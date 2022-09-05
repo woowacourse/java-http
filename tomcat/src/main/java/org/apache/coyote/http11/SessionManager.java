@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SessionManager {
-
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
     public SessionManager() {

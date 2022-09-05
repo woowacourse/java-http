@@ -5,9 +5,9 @@ import static org.apache.coyote.http11.ViewResolver.staticFileRequest;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.coyote.http11.model.RequestParser;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.response.HttpResponse;
-import org.apache.coyote.http11.model.RequestParser;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.MemberNotFoundException;
@@ -23,24 +23,21 @@ public class LoginHandler {
 
     public static HttpResponse perform(HttpRequest request) {
         Map<String, String> queries = RequestParser.parseUri(request.getUri());
-        if (queries.isEmpty()) {
+        if (request.getMethod().isGet() && queries.isEmpty()) {
             return staticFileRequest(LOGIN_PAGE);
         }
-        return performLogin(queries);
+        if (request.getMethod().isPost() && queries.isEmpty()) {
+            return performLogin(request);
+        }
+        return HttpResponse.notFound();
     }
 
-    private static HttpResponse performLogin(Map<String, String> queries) {
-        if (queries.size() != 2 || !queries.containsKey(ACCOUNT)
-                || !queries.containsKey(PASSWORD)) {
-            return HttpResponse.notFound();
-        }
-
-        Optional<User> findUser = InMemoryUserRepository.findByAccount(queries.get(ACCOUNT));
+    private static HttpResponse performLogin(HttpRequest request) {
+        Optional<User> findUser = InMemoryUserRepository.findByAccount(request.getBodyValue(ACCOUNT));
         User user = findUser.orElseThrow(MemberNotFoundException::new);
-        if (!user.checkPassword(queries.get(PASSWORD))) {
+        if (!user.checkPassword(request.getBodyValue(PASSWORD))) {
             return HttpResponse.redirect(UNAUTHORIZED_PAGE);
         }
-
         return HttpResponse.redirect(INDEX_PAGE);
     }
 }

@@ -13,5 +13,5 @@ public class HttpRequestGenerator {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
         return HttpRequest.from(reader);
-    }`
+    }
 }

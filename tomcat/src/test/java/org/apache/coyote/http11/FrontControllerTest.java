@@ -41,21 +41,6 @@ class FrontControllerTest {
         );
     }
 
-    @DisplayName("/login 요청이 올 경우 login.html파일이 담긴 HttpResponse를 반환한다.")
-    @Test
-    void nonStaticFileLoginRequest() throws IOException {
-        String request = "GET /login?account=rex&password=password HTTP/1.1\n"
-                + "Host: localhost:8080\n"
-                + "Connection: keep-alive\n";
-        HttpRequest httpRequest = HttpRequestGenerator.generate(request);
-        HttpResponse httpResponse = frontController.performRequest(httpRequest);
-
-        assertAll(
-                () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),
-                () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.FOUND)
-        );
-    }
-
     @DisplayName("잘못된 QueryParameter로 로그인 요청이 올 경우 경우 Not Found 응답을 한다.")
     @Test
     void responseBadRequestWhenRequestInvalidLoginParam() throws IOException {

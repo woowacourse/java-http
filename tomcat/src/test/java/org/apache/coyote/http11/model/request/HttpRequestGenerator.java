@@ -1,10 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model.request;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
+import org.apache.coyote.http11.model.request.HttpRequest;
 
 public class HttpRequestGenerator {
 

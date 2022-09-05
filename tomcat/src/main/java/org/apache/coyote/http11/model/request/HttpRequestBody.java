@@ -1,6 +1,8 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model.request;
 
 import java.util.Map;
+
+import org.apache.coyote.http11.model.RequestParser;
 
 public class HttpRequestBody {
 

@@ -6,6 +6,11 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 import org.apache.coyote.exception.FileNotExistException;
+import org.apache.coyote.http11.model.ContentType;
+import org.apache.coyote.http11.model.HttpHeaderType;
+import org.apache.coyote.http11.model.HttpStatus;
+import org.apache.coyote.http11.model.request.HttpRequest;
+import org.apache.coyote.http11.model.response.HttpResponse;
 
 public class ViewResolver {
 
@@ -20,7 +25,7 @@ public class ViewResolver {
             Path filePath = findFilePath(fileName);
             String content = new String(Files.readAllBytes(filePath));
 
-            String contentType = FileExtension.findContentType(fileName);
+            String contentType = ContentType.findContentType(fileName);
             return new HttpResponse.Builder()
                     .statusCode(HttpStatus.OK)
                     .header(HttpHeaderType.CONTENT_TYPE, contentType)

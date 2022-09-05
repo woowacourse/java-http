@@ -1,9 +1,10 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
 
+import org.apache.coyote.http11.model.RequestParser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

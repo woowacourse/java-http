@@ -5,6 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
 
+import org.apache.coyote.http11.model.ContentType;
+import org.apache.coyote.http11.model.HttpHeaderType;
+import org.apache.coyote.http11.model.HttpStatus;
+import org.apache.coyote.http11.model.request.HttpRequest;
+import org.apache.coyote.http11.model.request.HttpRequestGenerator;
+import org.apache.coyote.http11.model.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +34,7 @@ class FrontControllerTest {
                 () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),
                 () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.OK),
                 () -> assertThat(httpResponse.getHeader(HttpHeaderType.CONTENT_TYPE)).isEqualTo(
-                        FileExtension.HTML.getContentType()),
+                        ContentType.HTML.getContentType()),
                 () -> assertThat(httpResponse.getHeader(HttpHeaderType.CONTENT_LENGTH)).isEqualTo(
                         String.valueOf(expectedResponseBody.getBytes().length)),
                 () -> assertThat(httpResponse.getResponseBody()).isEqualTo(expectedResponseBody)

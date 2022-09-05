@@ -5,9 +5,9 @@ import static org.apache.coyote.http11.ViewResolver.staticFileRequest;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.RequestParser;
+import org.apache.coyote.http11.model.request.HttpRequest;
+import org.apache.coyote.http11.model.response.HttpResponse;
+import org.apache.coyote.http11.model.RequestParser;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.MemberNotFoundException;

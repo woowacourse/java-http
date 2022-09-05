@@ -6,6 +6,8 @@ import java.io.InputStreamReader;
 import java.net.Socket;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.model.request.HttpRequest;
+import org.apache.coyote.http11.model.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

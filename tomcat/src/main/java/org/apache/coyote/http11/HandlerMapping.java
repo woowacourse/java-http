@@ -3,6 +3,12 @@ package org.apache.coyote.http11;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.apache.coyote.http11.model.ContentType;
+import org.apache.coyote.http11.model.HttpStatus;
+import org.apache.coyote.http11.model.RequestParser;
+import org.apache.coyote.http11.model.request.HttpRequest;
+import org.apache.coyote.http11.model.response.HttpResponse;
+
 import nextstep.jwp.handler.IndexHandler;
 import nextstep.jwp.handler.LoginHandler;
 import nextstep.jwp.handler.RegisterHandler;
@@ -29,7 +35,7 @@ public enum HandlerMapping {
 
     public static HandlerMapping findHandler(HttpRequest request) {
         String url = RequestParser.extractUrl(request.getUri());
-        if (FileExtension.hasFileExtension(url)) {
+        if (ContentType.hasFileExtension(url)) {
             return STATIC_FILE;
         }
 

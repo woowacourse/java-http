@@ -1,9 +1,9 @@
 package nextstep.jwp.handler;
 
-import org.apache.coyote.http11.FileExtension;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.model.ContentType;
+import org.apache.coyote.http11.model.request.HttpRequest;
+import org.apache.coyote.http11.model.response.HttpResponse;
+import org.apache.coyote.http11.model.HttpStatus;
 
 public class IndexHandler {
 
@@ -12,7 +12,7 @@ public class IndexHandler {
             return HttpResponse.notFound();
         }
 
-        String contentType = FileExtension.HTML.getContentType();
+        String contentType = ContentType.HTML.getContentType();
         return new HttpResponse.Builder()
                 .statusCode(HttpStatus.OK)
                 .header("Content-Type", contentType)

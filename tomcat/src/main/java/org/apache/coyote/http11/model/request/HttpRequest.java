@@ -1,9 +1,12 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.apache.coyote.http11.model.HttpHeaderType;
+import org.apache.coyote.http11.model.HttpMethod;
 
 public class HttpRequest {
 

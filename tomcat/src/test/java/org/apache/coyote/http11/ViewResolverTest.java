@@ -8,6 +8,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 
+import org.apache.coyote.http11.model.ContentType;
+import org.apache.coyote.http11.model.HttpHeaderType;
+import org.apache.coyote.http11.model.HttpStatus;
+import org.apache.coyote.http11.model.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +30,7 @@ class ViewResolverTest {
                 () -> assertThat(httpResponse.getProtocolVersion()).isEqualTo("HTTP/1.1"),
                 () -> assertThat(httpResponse.getStatusCode()).isEqualTo(HttpStatus.OK),
                 () -> assertThat(httpResponse.getHeader(HttpHeaderType.CONTENT_TYPE)).isEqualTo(
-                        FileExtension.JS.getContentType()),
+                        ContentType.JS.getContentType()),
                 () -> assertThat(httpResponse.getHeader(HttpHeaderType.CONTENT_LENGTH)).isEqualTo(
                         String.valueOf(expectedResponseBody.getBytes().length)),
                 () -> assertThat(httpResponse.getResponseBody()).isEqualTo(expectedResponseBody)

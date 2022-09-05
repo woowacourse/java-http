@@ -1,6 +1,7 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.model.request;
 
 import org.apache.coyote.exception.InvalidHttpRequestException;
+import org.apache.coyote.http11.model.HttpMethod;
 
 public class HttpRequestLine {
 

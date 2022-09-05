@@ -9,6 +9,7 @@ public enum HttpHeader {
     HOST("Host"),
     ACCEPT("Accept"),
     CONNECTION("Connection"),
+    LOCATION("Location"),
     NONE("");
 
     private final String value;

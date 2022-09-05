@@ -22,6 +22,7 @@ import java.net.Socket;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final String FILE_EXTENSION_SEPARATOR = ".";
 
     private final Socket connection;
 
@@ -42,7 +43,7 @@ public class Http11Processor implements Runnable, Processor {
             final List<String> request = extractRequest(inputStream);
             HttpRequest httpRequest = HttpRequest.from(request.get(REQUEST_LINE_INDEX));
             String responseBody = handle(httpRequest);
-            outputStream.write(writeResponseOk(ContentType.from(httpRequest.getFileExtension()).getMediaType(), responseBody));
+            outputStream.write(writeResponseOk(httpRequest.getFileExtension(), responseBody));
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
@@ -70,6 +71,10 @@ public class Http11Processor implements Runnable, Processor {
             LoginHandler.login(httpRequest.getQueryParams());
             return FileUtils.readFile(getResource("/login.html"));
         }
+        if (httpRequest.equals(ContentType.TEXT_PLAIN)) {
+            String filePath = path + FILE_EXTENSION_SEPARATOR + ContentType.TEXT_HTML.getFileExtension();
+            return FileUtils.readFile(getResource(filePath));
+        }
         return FileUtils.readFile(getResource(path));
     }
 
@@ -83,10 +88,10 @@ public class Http11Processor implements Runnable, Processor {
         return resource;
     }
 
-    private byte[] writeResponseOk(String contentType, String responseBody) {
+    private byte[] writeResponseOk(ContentType contentType, String responseBody) {
         return String.join("\r\n",
             "HTTP/1.1 200 OK ",
-            "Content-Type: " + contentType + ";charset=utf-8 ",
+            "Content-Type: " + contentType.getMediaType() + ";charset=utf-8 ",
             "Content-Length: " + responseBody.getBytes().length + " ",
             "",
             responseBody).getBytes();

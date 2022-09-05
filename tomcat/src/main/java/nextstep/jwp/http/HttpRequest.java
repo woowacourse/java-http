@@ -46,7 +46,11 @@ public class HttpRequest {
         return separatedUri.size() != ONLY_PATH_SIZE;
     }
 
-    public String getFileExtension() {
+    public boolean equals(ContentType contentType) {
+        return FileUtils.extractFileExtension(path) == contentType;
+    }
+
+    public ContentType getFileExtension() {
         return FileUtils.extractFileExtension(path);
     }
 

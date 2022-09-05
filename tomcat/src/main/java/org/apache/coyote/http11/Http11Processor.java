@@ -50,6 +50,10 @@ public class Http11Processor implements Runnable, Processor {
             return AuthController.login(request);
         }
 
+        if (request.getUrl().getPath().endsWith("/register.html")) {
+            return AuthController.signUp(request);
+        }
+
         return new HttpResponse(request, StatusCode.OK, getStaticResource(request));
     }
 
@@ -58,7 +62,6 @@ public class Http11Processor implements Runnable, Processor {
         if (requestUrl.getPath().equals("/")) {
             return "Hello world!";
         }
-
         return new String(Files.readAllBytes(new File(Objects.requireNonNull(requestUrl).getFile()).toPath()));
     }
 }

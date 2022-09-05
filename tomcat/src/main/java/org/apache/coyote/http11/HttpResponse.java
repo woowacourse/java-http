@@ -29,7 +29,7 @@ public class HttpResponse {
     }
 
     public String getResponse() {
-        if (!location.equals("")) {
+        if (!"".equals(location)) {
             return String.join("\r\n",
                 version + " " + statusCode.getCode() + " " + statusCode.name() + " ",
                 "Location: " + location,

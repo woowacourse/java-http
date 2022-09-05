@@ -33,10 +33,21 @@ public class AuthController {
 
         try {
             User user = loginUser(account, password);
-            log.info("user : {}", user);
+            log.info("로그인 성공! 아이디: {}", user.getAccount());
         } catch (IllegalArgumentException e) {
             return HttpResponse.redirect(request, "/401.html");
         }
+        return HttpResponse.redirect(request, "/index.html");
+    }
+
+    public static HttpResponse signUp(HttpRequest request) {
+        final String account = request.getQueryValue("account");
+        final String password = request.getQueryValue("password");
+        final String email = request.getQueryValue("email");
+
+        User user = new User(account, password, email);
+        InMemoryUserRepository.save(user);
+        log.info("회원가입 성공! 아이디: {}", user.getAccount());
         return HttpResponse.redirect(request, "/index.html");
     }
 

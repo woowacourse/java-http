@@ -22,45 +22,56 @@ public class HttpRequest {
     private static final String HTTP_METHOD = "HTTP METHOD";
     private static final String HTTP_VERSION = "HTTP VERSION";
 
-    private final Map<String, String> headers;
+    private final Map<String, String> headers = new HashMap<>();
     private final QueryParams queryParams;
 
     public HttpRequest(InputStream inputStream) throws IOException, URISyntaxException {
-        this.headers = parseHeaders(inputStream);
+        String messageBody = parseHeaders(inputStream);
         this.queryParams = new QueryParams(getUri());
+        this.queryParams.addQuery(messageBody);
     }
 
-    private Map<String, String> parseHeaders(InputStream inputStream) throws IOException {
+    private String parseHeaders(InputStream inputStream) throws IOException {
         final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-        final Map<String, String> requestHeaders = new HashMap<>();
         String line = bufferedReader.readLine();
 
         try {
             while (!"".equals(line)) {
                 if (Objects.isNull(line)) {
-                    return requestHeaders;
+                    return "";
                 }
-                putHeader(requestHeaders, line);
+                putHeader(line);
                 line = bufferedReader.readLine();
             }
+
+            if (!(containsHeader("Content-Type") &&
+                getHeaderValue("Content-Type").equals("application/x-www-form-urlencoded"))) {
+                return "";
+            }
+
+            int contentLength = Integer.parseInt(getHeaderValue("Content-Length"));
+            char[] buffer = new char[contentLength];
+            bufferedReader.read(buffer, 0, contentLength);
+            return new String(buffer);
+
         } catch (RuntimeException e) {
+            e.printStackTrace();
             throw new IllegalArgumentException("invalid HTTP request received", e.getCause());
         }
-        return requestHeaders;
     }
 
-    private void putHeader(Map<String, String> requestHeaders, String requestLine) {
-        if (!requestHeaders.isEmpty()) {
+    private void putHeader(String requestLine) {
+        if (!headers.isEmpty()) {
             List<String> headerAndValue = parseRequestLine(requestLine, ":");
-            requestHeaders.put(headerAndValue.get(0), headerAndValue.get(1));
+            headers.put(headerAndValue.get(0), headerAndValue.get(1));
             return;
         }
         List<String> startLine = parseRequestLine(requestLine, " ");
-        requestHeaders.put(HTTP_METHOD, startLine.get(0));
-        requestHeaders.put(REQUEST_URI, startLine.get(1));
-        requestHeaders.put(HTTP_VERSION, startLine.get(2));
+        headers.put(HTTP_METHOD, startLine.get(0));
+        headers.put(REQUEST_URI, startLine.get(1));
+        headers.put(HTTP_VERSION, startLine.get(2));
     }
 
     private List<String> parseRequestLine(String requestLine, String delimiter) {

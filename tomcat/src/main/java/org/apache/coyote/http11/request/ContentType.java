@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import java.util.Arrays;
 
@@ -16,9 +16,9 @@ public enum ContentType {
         this.fileType = fileType;
     }
 
-    public static ContentType from(String url) {
+    public static ContentType findByUrl(String url) {
         return Arrays.stream(values())
-                .filter(contentType -> url.contains(contentType.fileType))
+                .filter(contentType -> url.endsWith(contentType.fileType))
                 .findFirst()
                 .orElse(HTML);
     }

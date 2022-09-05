@@ -3,6 +3,7 @@ package org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import org.apache.coyote.http11.request.HttpRequest;
 import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("NonAsciiCharacters")
@@ -14,9 +15,9 @@ class HttpRequestTest {
         HttpRequest httpRequest = HttpRequest.from(requestHeader);
 
         assertAll(
-                () -> assertThat(httpRequest.getPath()).isEqualTo("/login"),
-                () -> assertThat(httpRequest.getRequestParams()).containsEntry("account", "gugu"),
-                () -> assertThat(httpRequest.getRequestParams()).containsEntry("password", "password")
+                () -> assertThat(httpRequest.getPath().getUrl()).isEqualTo("/login"),
+                () -> assertThat(httpRequest.getPath().getRequestParams()).containsEntry("account", "gugu"),
+                () -> assertThat(httpRequest.getPath().getRequestParams()).containsEntry("password", "password")
         );
     }
 

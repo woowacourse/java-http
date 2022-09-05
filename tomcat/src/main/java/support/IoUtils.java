@@ -1,14 +1,10 @@
 package support;
 
-import jakarta.servlet.http.PushBuilder;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.LinkedList;
@@ -19,46 +15,22 @@ public class IoUtils {
     private IoUtils() {
     }
 
-    public static String readAllLines(BufferedReader bufferedReader) {
-        final StringBuffer stringBuffer = new StringBuffer();
+    public static String readLine(final BufferedReader reader) {
         try {
-            while (bufferedReader.ready()) {
-                final String line = bufferedReader.readLine();
-                stringBuffer.append(line);
+            if (reader.ready()) {
+                return reader.readLine();
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return stringBuffer.toString();
+        return "";
     }
 
-    public static String read(InputStream inputStream) {
-        final StringBuffer stringBuffer = new StringBuffer();
-        try {
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-            while (bufferedReader.ready()) {
-                final String line = bufferedReader.readLine() + System.lineSeparator();
-                stringBuffer.append(line);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return stringBuffer.toString();
-    }
-
-    /**
-     * GET /index.html
-     * k1: v1
-     * k2: v2
-     *
-     * StringBuilder
-     */
-    public static String[] readLines(InputStream inputStream) {
+    public static String[] readLines(final BufferedReader reader) {
         final LinkedList<String> strings = new LinkedList<>();
         try {
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-            while (bufferedReader.ready()) {
-                final String line = bufferedReader.readLine() + System.lineSeparator();
+            while (reader.ready()) {
+                final String line = reader.readLine() + System.lineSeparator();
                 strings.add(line);
             }
         } catch (IOException e) {
@@ -67,22 +39,18 @@ public class IoUtils {
         return strings.toArray(new String[strings.size()]);
     }
 
-    public static LinkedList<String> read(final String fileName) {
-        final Path path = getPath(fileName);
-        final File file = path.toFile();
-        final BufferedReader bufferedReader;
-        try {
-            bufferedReader = new BufferedReader(new FileReader(file));
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-        return getLines(bufferedReader);
+    public static String readLines(final String fileName) {
+        return String.join("\r\n", readFromFile(fileName));
     }
 
-    public static String readLines(final String fileName) {
-        return read(fileName)
-                .stream()
-                .collect(Collectors.joining("\r\n"));
+    public static LinkedList<String> readFromFile(final String fileName) {
+        final Path path = getPath(fileName);
+        final File file = path.toFile();
+        try (final BufferedReader bufferedReader = new BufferedReader(new FileReader(file));) {
+            return getLines(bufferedReader);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void writeAndFlush(final BufferedWriter bufferedWriter, final String data) {

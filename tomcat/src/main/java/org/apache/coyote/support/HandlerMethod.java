@@ -30,7 +30,7 @@ public enum HandlerMethod {
 
         @Override
         public void service(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
-            final Map<String, String> userMap = HttpParser.parseUri(httpRequest.getPostContent());
+            final Map<String, String> userMap = HttpParser.parseQueryString(httpRequest.getPostContent());
             final String account = userMap.get("account");
             final String password = userMap.get("password");
             final User foundUser = findUser(account);

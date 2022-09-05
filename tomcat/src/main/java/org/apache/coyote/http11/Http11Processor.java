@@ -54,12 +54,12 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-             final var bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream));) {
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+             final var bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));) {
 
-            final HttpRequest httpRequest = new HttpRequest(inputStream);
+            final HttpRequest httpRequest = new HttpRequest(bufferedReader);
 
-            router.route(httpRequest, outputStream, bufferedWriter);
+            router.route(httpRequest, bufferedReader, bufferedWriter);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }

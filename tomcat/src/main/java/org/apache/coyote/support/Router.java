@@ -2,11 +2,9 @@ package org.apache.coyote.support;
 
 import static support.IoUtils.writeAndFlush;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Map;
-import nextstep.jwp.model.User;
 import org.apache.constant.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +30,7 @@ public class Router {
         }
     }
 
-    public void route(final HttpRequest httpRequest, final OutputStream outputStream,
+    public void route(final HttpRequest httpRequest, final BufferedReader bufferedReader,
                       final BufferedWriter bufferedWriter) throws IOException {
         // 방어 코드: 공백의 문자열이 들어오는 현상
         if (httpRequest.isEmpty()) {
@@ -42,15 +40,14 @@ public class Router {
         HandlerMethod handlerMethod = HandlerMethod.find(httpRequest);
         if (handlerMethod == null) {
             log.info("View Request = {}", httpRequest);
-            routeForStaticResource(httpRequest, outputStream, bufferedWriter);
+            routeForStaticResource(httpRequest, bufferedWriter);
             return;
         }
         log.info("API Request = {}", httpRequest);
         handlerMethod.service(httpRequest, bufferedWriter);
     }
 
-    private void routeForStaticResource(final HttpRequest httpRequest, final OutputStream outputStream,
-                                        final BufferedWriter bufferedWriter) {
+    private void routeForStaticResource(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
         final FileDto dto = getFileNameWithExtension(httpRequest.getUri());
         final String responseBody = getResponseBody(dto.fileName);
         final String contentType = getContentType(dto.extension);

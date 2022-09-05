@@ -16,6 +16,7 @@ public class RequestLoginUserOutput {
         }
         final String account = httpRequest.getQueryByValue("account");
         InMemoryUserRepository.findByAccount(account)
+                .map(it -> it.checkPassword(httpRequest.getQueryByValue("password")))
                 .ifPresent(it -> log.info(it.toString()));
     }
 

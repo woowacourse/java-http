@@ -1,12 +1,19 @@
 package org.apache.coyote.http11;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.handler.Handler;
+import org.apache.coyote.http11.http.HandlerMapper;
+import org.apache.coyote.http11.http.request.HttpRequest;
+import org.apache.coyote.http11.http.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -20,7 +27,12 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void run() {
-        process(connection);
+        try {
+            process(connection);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -28,14 +40,13 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final var responseBody = "Hello world!";
+            final InputStreamReader inputStreamReader = new InputStreamReader(inputStream, UTF_8);
+            final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final HttpRequest httpRequest = HttpRequest.of(bufferedReader);
+            final Handler handler = HandlerMapper.getHandlerFrom(httpRequest.getStartLine().getPath());
+            final HttpResponse httpResponse = handler.handle(httpRequest);
+            final String response = httpResponse.generateResponse();
 
             outputStream.write(response.getBytes());
             outputStream.flush();

@@ -21,8 +21,8 @@ class RequestHeadersTest {
 
         // then
         Assertions.assertAll(
-                () -> assertThat(headers.getPairByField("Content-Type")).isEqualTo("Content-Type: application/json"),
-                () -> assertThat(headers.getPairByField("Referrer Policy")).isEqualTo(
+                () -> assertThat(headers.findPairByField("Content-Type")).isEqualTo("Content-Type: application/json"),
+                () -> assertThat(headers.findPairByField("Referrer Policy")).isEqualTo(
                         "Referrer Policy: strict-origin-when-cross-origin")
         );
     }

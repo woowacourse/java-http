@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.response.headers;
 
 import java.util.Arrays;
+import org.apache.coyote.http11.response.PostProcessMeta;
 
 public enum ContentType implements ResponseHeader {
     TEXT_HTML("text/html", ".html"),
@@ -26,5 +27,11 @@ public enum ContentType implements ResponseHeader {
     @Override
     public String getAsString() {
         return "Content-Type: " + String.join(";", type, "charset=utf-8");
+    }
+
+
+    @Override
+    public ResponseHeader postProcess(PostProcessMeta meta) {
+        return this;
     }
 }

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.response.headers;
 
 import org.apache.coyote.http11.request.headers.RequestHeader;
+import org.apache.coyote.http11.response.PostProcessMeta;
 import org.apache.util.NumberUtil;
 
 public class ContentLength implements ResponseHeader, RequestHeader {
@@ -34,5 +35,10 @@ public class ContentLength implements ResponseHeader, RequestHeader {
     @Override
     public String getAsString() {
         return "Content-Length: " + length;
+    }
+
+    @Override
+    public ResponseHeader postProcess(PostProcessMeta meta) {
+        return new ContentLength(meta.bodyLength());
     }
 }

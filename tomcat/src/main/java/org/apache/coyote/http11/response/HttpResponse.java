@@ -1,7 +1,8 @@
 package org.apache.coyote.http11.response;
 
-import org.apache.coyote.http11.header.HttpHeader;
+import org.apache.coyote.http11.header.HttpCookie;
 import org.apache.coyote.http11.header.HttpVersion;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.headers.ResponseHeader;
 
 public class HttpResponse implements Response {
@@ -24,6 +25,11 @@ public class HttpResponse implements Response {
         );
     }
 
+    public HttpResponse postProcess(HttpRequest request) {
+        PostProcessMeta meta = new PostProcessMeta(request, this.body);
+        return new HttpResponse(general, this.headers.replace(HttpCookie.empty()).postProcess(meta), body);
+    }
+
     public HttpResponse update(HttpStatus status, String bodyString) {
         return new HttpResponse(
                 new ResponseGeneral(HttpVersion.HTTP11, status),
@@ -33,7 +39,7 @@ public class HttpResponse implements Response {
     }
 
     public HttpResponse addHeader(ResponseHeader header) {
-        return new HttpResponse(general, this.headers.append(header), body);
+        return new HttpResponse(general, this.headers.replace(header), body);
     }
 
     @Override

@@ -18,12 +18,18 @@ public class ResponseHeaders implements Response {
         return new ResponseHeaders(new ArrayList<>());
     }
 
-    public ResponseHeaders update(String body) {
-        ContentLength contentLength = ContentLength.fromBody(body);
-        return append(contentLength);
+    public ResponseHeaders postProcess(PostProcessMeta meta) {
+        return new ResponseHeaders(headers.stream()
+                .map(header -> header.postProcess(meta))
+                .collect(Collectors.toList()));
     }
 
-    public ResponseHeaders append(ResponseHeader header) {
+    public ResponseHeaders update(String body) {
+        ContentLength contentLength = ContentLength.fromBody(body);
+        return replace(contentLength);
+    }
+
+    public ResponseHeaders replace(ResponseHeader header) {
         List<ResponseHeader> newHeaders = new ArrayList<>(this.headers);
         newHeaders.removeIf(it -> it.getClass().equals(header.getClass()));
         newHeaders.add(header);
@@ -34,6 +40,7 @@ public class ResponseHeaders implements Response {
     public String getAsString() {
         return headers.stream()
                 .map(ResponseHeader::getAsString)
+                .filter(header -> !header.isBlank())
                 .collect(Collectors.joining("\n"));
     }
 }

@@ -26,16 +26,23 @@ public class RequestHeaders {
                 .collect(Collectors.toList()));
     }
 
-    public String getValueByField(String field) {
-        return headers.stream()
-                .filter(header -> header.getField().equals(field))
-                .map(RequestHeader::getValue)
-                .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("reuqest header 에 " + field + " 가 존재하지 않습니다."));
+    public String findValueByField(String field) {
+        return getHeader(field).getValue();
     }
 
-    public String getPairByField(String field) {
-        return field + ": " + getValueByField(field);
+    public String findPairByField(String field) {
+        return field + ": " + findValueByField(field);
+    }
+
+    public RequestHeader getHeader(String field) {
+        return headers.stream()
+                .filter(header -> header.getField().equals(field))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("no " + field));
+    }
+
+    public List<RequestHeader> getHeaders() {
+        return List.copyOf(headers);
     }
 
     @Override

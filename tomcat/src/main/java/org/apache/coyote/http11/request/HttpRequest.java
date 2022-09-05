@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.coyote.http11.request.headers.RequestHeader;
 import org.apache.exception.TempException;
 import org.apache.util.NumberUtil;
 
@@ -54,8 +55,8 @@ public class HttpRequest {
 
     private static int findContentLength(RequestHeaders headers) {
         try {
-            return NumberUtil.parseIntSafe(headers.getValueByField("Content-Length"));
-        } catch (IllegalArgumentException e){
+            return NumberUtil.parseIntSafe(headers.findValueByField("Content-Length"));
+        } catch (IllegalArgumentException e) {
             return 0;
         }
     }
@@ -76,6 +77,10 @@ public class HttpRequest {
         } catch (IOException e) {
             throw new TempException();
         }
+    }
+
+    public RequestHeader findHeader(String field) {
+        return requestHeaders.getHeader(field);
     }
 
     public String getPath() {

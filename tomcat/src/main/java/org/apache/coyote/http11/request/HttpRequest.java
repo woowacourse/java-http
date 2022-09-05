@@ -2,9 +2,9 @@ package org.apache.coyote.http11.request;
 
 public class HttpRequest {
 
-    final private String requestMethod;
-    final private URI uri;
-    final private String protocol;
+    private final String requestMethod;
+    private final URI uri;
+    private final String protocol;
 
     public HttpRequest(String requestLine) {
         String[] str = requestLine.split(" ");

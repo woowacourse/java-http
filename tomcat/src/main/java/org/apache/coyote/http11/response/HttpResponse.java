@@ -2,10 +2,10 @@ package org.apache.coyote.http11.response;
 
 public class HttpResponse {
 
-    final private String protocol;
-    final private HttpStatus status;
-    final private ContentType contentType;
-    final private String responseBody;
+    private final String protocol;
+    private final HttpStatus status;
+    private final ContentType contentType;
+    private final String responseBody;
 
     public HttpResponse(String protocol,
                         HttpStatus status,

@@ -1,23 +1,23 @@
 package nextstep.jwp.presentation;
 
-import java.io.IOException;
+import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import nextstep.jwp.request.UserRequest;
+
 import org.apache.coyote.http11.QueryParam;
 import org.apache.coyote.http11.ResponseEntity;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.exception.QueryParamNotFoundException;
-import org.apache.coyote.http11.exception.UserNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AuthController extends Controller {
+public class AuthController implements Controller {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
 
     @Override
-    public ResponseEntity run(final String startLin) throws IOException {
+    public ResponseEntity run(final String startLin) {
         String path = startLin.split(" ")[1];
         final QueryParam queryParam = new QueryParam(path);
 
@@ -26,12 +26,12 @@ public class AuthController extends Controller {
             UserRequest userRequest = new UserRequest(queryParam.getValue("account"),
                     queryParam.getValue("password"));
 
-            final User user = InMemoryUserRepository.findByAccount(userRequest.getAccount())
-                    .orElseThrow(UserNotFoundException::new);
-            LOGGER.info(user.toString());
-
-            final String response = getContent("/login");
-            return new ResponseEntity(StatusCode.OK, path).body(response);
+            final Optional<User> user = InMemoryUserRepository.findByAccount(userRequest.getAccount());
+            if (user.isPresent()) {
+                LOGGER.info(user.get().toString());
+                return new ResponseEntity(StatusCode.MOVED_TEMPORARILY, "/index.html");
+            }
+            return new ResponseEntity(StatusCode.UNAUTHORIZED, "/401.html");
         }
         throw new QueryParamNotFoundException();
     }

@@ -5,7 +5,6 @@ import java.util.Map;
 import nextstep.jwp.presentation.Controller;
 import nextstep.jwp.presentation.DashBoardController;
 import nextstep.jwp.presentation.HomeController;
-import nextstep.jwp.presentation.HttpRequest;
 import nextstep.jwp.presentation.AuthController;
 import nextstep.jwp.presentation.StaticResourceController;
 import org.apache.coyote.http11.exception.NoHandlerFoundException;

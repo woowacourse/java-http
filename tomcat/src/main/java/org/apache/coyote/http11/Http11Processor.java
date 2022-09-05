@@ -1,12 +1,19 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Map;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.handler.LoginHandler;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -26,21 +33,70 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final var responseBody = "Hello world!";
+            final var requestHeader = readRequestHeader(bufferedReader);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            final HttpRequest httpRequest = HttpRequest.from(requestHeader);
+            final var response = getResponse(httpRequest);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private String readRequestHeader(final BufferedReader bufferedReader) throws IOException {
+        StringBuilder header = new StringBuilder();
+
+        while (bufferedReader.ready()) {
+            header.append(bufferedReader.readLine())
+                    .append("\r\n");
+        }
+
+        return header.toString();
+    }
+
+    private String getResponse(final HttpRequest httpRequest) throws IOException {
+        return getResponse(httpRequest.getRequestUrl(), httpRequest.getRequestParams());
+    }
+
+    private String getResponse(final String url, final Map<String, String> requestParam) throws IOException {
+        if ("/".equals(url)) {
+            final var responseBody = "Hello world!";
+
+            return createResponse("text/html", responseBody);
+        }
+
+        if (url.contains(".")) {
+            return createStaticFileResponse(url);
+        }
+
+        if ("/login".equals(url)) {
+            LoginHandler.handle(requestParam);
+
+            return createStaticFileResponse(url + ".html");
+        }
+
+        throw new IllegalArgumentException("올바르지 않은 URL 요청입니다.");
+    }
+
+    private String createStaticFileResponse(final String url) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static" + url);
+        final Path path = new File(resource.getFile()).toPath();
+        final String responseBody = new String(Files.readAllBytes(path));
+
+        return createResponse(Files.probeContentType(path), responseBody);
+    }
+
+    private String createResponse(final String contentType, final String responseBody) {
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
     }
 }

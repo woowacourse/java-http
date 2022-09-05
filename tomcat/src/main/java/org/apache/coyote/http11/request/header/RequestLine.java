@@ -24,7 +24,7 @@ public class RequestLine {
         final String[] requestLineElement = requestLine.split(HttpMessageDelimiter.WORD.getValue());
 
         return new RequestLine(
-            Method.findBy(requestLineElement[METHOD]),
+            Method.from(requestLineElement[METHOD]),
             Resource.from(requestLineElement[RESOURCE]),
             requestLineElement[HTTP_VERSION]
         );

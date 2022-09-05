@@ -8,7 +8,7 @@ public enum Method {
     PATCH,
     ;
 
-    public static Method findBy(final String method) {
+    public static Method from(final String method) {
         try {
             return valueOf(method.toUpperCase());
         } catch (IllegalArgumentException e) {

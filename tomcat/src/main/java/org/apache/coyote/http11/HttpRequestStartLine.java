@@ -30,8 +30,10 @@ public class HttpRequestStartLine {
 
         final String[] startLineContents = startLine.split(" ");
 
-        return new HttpRequestStartLine(startLineContents[0], takeUri(startLineContents[1]),
-                startLineContents[2], takeQueryParams(startLineContents[1]));
+        return new HttpRequestStartLine(startLineContents[0],
+                takeUri(startLineContents[1]),
+                startLineContents[2],
+                takeQueryParams(startLineContents[1]));
     }
 
     private static String takeUri(final String uriAndQueryParams) {
@@ -66,6 +68,9 @@ public class HttpRequestStartLine {
         return result;
     }
 
+    public String getMethod() {
+        return method;
+    }
 
     public String getUri() {
         return uri;

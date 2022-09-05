@@ -22,7 +22,7 @@ public class LoginHandler {
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
 
-    public static HttpResponse performLoginRequest(HttpRequest request) {
+    public static HttpResponse perform(HttpRequest request) {
         Map<String, String> queries = UriParser.parseUri(request.getUri());
         if (queries.isEmpty()) {
             return staticFileRequest(LOGIN_PAGE);

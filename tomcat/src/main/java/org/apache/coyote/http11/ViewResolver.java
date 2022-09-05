@@ -11,7 +11,7 @@ public class ViewResolver {
 
     private static final String STATIC_RESOURCE_PATH = "static";
 
-    public static HttpResponse staticFileRequest(HttpRequest httpRequest) {
+    public static HttpResponse perform(HttpRequest httpRequest) {
         return staticFileRequest(httpRequest.getUri());
     }
 

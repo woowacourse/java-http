@@ -8,9 +8,9 @@ import nextstep.jwp.handler.LoginHandler;
 
 public enum HandlerMapping {
 
-    DEFAULT("/", IndexHandler::performBasicUrl),
-    LOGIN("/login", LoginHandler::performLoginRequest),
-    STATIC_FILE(Constants.NULL, ViewResolver::staticFileRequest),
+    DEFAULT("/", IndexHandler::perform),
+    LOGIN("/login", LoginHandler::perform),
+    STATIC_FILE(Constants.NULL, ViewResolver::perform),
     NOF_FOUND(Constants.NULL, HandlerMapping::returnNotFountResponse);
 
     private static class Constants {

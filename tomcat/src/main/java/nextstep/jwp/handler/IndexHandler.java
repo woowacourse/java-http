@@ -8,7 +8,7 @@ import org.apache.coyote.http11.HttpStatus;
 
 public class IndexHandler {
 
-    public static HttpResponse performBasicUrl(HttpRequest request) {
+    public static HttpResponse perform(HttpRequest request) {
         String contentType = FileExtension.HTML.getContentType();
 
         return new Builder()

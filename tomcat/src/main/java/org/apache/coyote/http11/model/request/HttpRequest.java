@@ -4,19 +4,19 @@ import static org.apache.coyote.http11.model.StringFormat.CRLF;
 
 import java.util.Map;
 
-public class Request {
+public class HttpRequest {
 
     private static final int START_LINE_INDEX = 0;
 
     private final RequestLine startLine;
 
-    private Request(final String requestLine) {
+    private HttpRequest(final String requestLine) {
         this.startLine = new RequestLine(requestLine);
     }
 
-    public static Request from(final String request) {
+    public static HttpRequest from(final String request) {
         String[] lines = request.split(CRLF);
-        return new Request(lines[START_LINE_INDEX]);
+        return new HttpRequest(lines[START_LINE_INDEX]);
     }
 
     public String getUrl() {

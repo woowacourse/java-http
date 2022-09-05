@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import org.apache.coyote.http11.model.Header;
 import org.apache.coyote.http11.model.Headers;
 
-public class Response {
+public class HttpResponse {
 
     public static final String KEY_CONTENT_TYPE = "Content-Type";
     public static final String KEY_CONTENT_LENGTH = "Content-Length";
@@ -16,13 +16,13 @@ public class Response {
     private Headers headers;
     private Resource resource;
 
-    private Response(final Status status) {
+    private HttpResponse(final Status status) {
         this.status = status;
         this.headers = new Headers(new ArrayList<>());
     }
 
-    public static Response of(final Status status) {
-        return new Response(status);
+    public static HttpResponse of(final Status status) {
+        return new HttpResponse(status);
     }
 
     public byte[] getBytes() {

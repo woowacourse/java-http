@@ -12,9 +12,9 @@ import nextstep.jwp.Controller;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.model.ContentType;
-import org.apache.coyote.http11.model.request.Request;
+import org.apache.coyote.http11.model.request.HttpRequest;
+import org.apache.coyote.http11.model.response.HttpResponse;
 import org.apache.coyote.http11.model.response.Resource;
-import org.apache.coyote.http11.model.response.Response;
 import org.apache.coyote.http11.model.response.Status;
 import org.apache.coyote.http11.utils.ResourceMatcher;
 import org.slf4j.Logger;
@@ -41,8 +41,8 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-            Request request = Request.from(reader.readLine());
-            Response response = Controller.process(request);
+            HttpRequest request = HttpRequest.from(reader.readLine());
+            HttpResponse response = Controller.process(request);
 
             String location = response.getHeaderValue("Location");
             if (!location.equals("")) {

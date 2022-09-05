@@ -1,5 +1,7 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.HttpRequest.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
@@ -46,11 +48,13 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse getResponse(HttpRequest request) throws URISyntaxException, IOException {
-        if (request.getUrl().getPath().endsWith("/login.html")) {
+        if (request.getHeaderValue(HTTP_METHOD).equals("POST") && request.getUrl().getPath().endsWith("/login.html")) {
             return AuthController.login(request);
         }
 
-        if (request.getUrl().getPath().endsWith("/register.html")) {
+        if (request.getHeaderValue(HTTP_METHOD).equals("POST") && request.getUrl()
+            .getPath()
+            .endsWith("/register.html")) {
             return AuthController.signUp(request);
         }
 

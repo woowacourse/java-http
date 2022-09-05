@@ -6,6 +6,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.Objects;
 
+import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.StatusCode;
@@ -37,7 +38,13 @@ public class AuthController {
         } catch (IllegalArgumentException e) {
             return HttpResponse.redirect(request, "/401.html");
         }
-        return HttpResponse.redirect(request, "/index.html");
+
+        HttpResponse response = HttpResponse.redirect(request, "/index.html");
+        if (!request.containsHeader("Cookie")) {
+            return response;
+        }
+        response.setCookie(new HttpCookie());
+        return response;
     }
 
     public static HttpResponse signUp(HttpRequest request) {

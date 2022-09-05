@@ -18,8 +18,8 @@ import java.util.Objects;
 
 public class HttpRequest {
 
+    static final String HTTP_METHOD = "HTTP METHOD";
     private static final String REQUEST_URI = "REQUEST URI";
-    private static final String HTTP_METHOD = "HTTP METHOD";
     private static final String HTTP_VERSION = "HTTP VERSION";
 
     private final Map<String, String> headers = new HashMap<>();

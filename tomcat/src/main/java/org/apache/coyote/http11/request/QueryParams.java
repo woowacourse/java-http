@@ -28,7 +28,7 @@ public class QueryParams {
         }
     }
 
-    public String findValue(String parameter) {
+    public String getParameterValue(String parameter) {
         return queryParams.get(parameter);
     }
 }

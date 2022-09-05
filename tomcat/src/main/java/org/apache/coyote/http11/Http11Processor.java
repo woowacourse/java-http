@@ -56,7 +56,7 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    public HttpResponse getResponse(HttpRequest httpRequest) throws IOException {
+    private HttpResponse getResponse(HttpRequest httpRequest) throws IOException {
         try {
             if (httpRequest.isStaticFileRequest()) {
                 return getStaticResourceResponse(httpRequest);
@@ -92,7 +92,7 @@ public class Http11Processor implements Runnable, Processor {
         }
         if (path.equals("/login")) {
             QueryParams queryParams = uri.getQueryParams();
-            Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.findValue("account"));
+            Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.getParameterValue("account"));
             user.ifPresent(value -> log.debug(value.toString()));
         }
         String responseBody = getStaticResourceResponse(path + ".html");

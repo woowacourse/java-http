@@ -1,7 +1,7 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.UncheckedServletException;
+import org.apache.coyote.exception.UncheckedServletException;
 import org.apache.coyote.model.HttpParam;
 import org.apache.coyote.model.HttpRequest;
 import nextstep.jwp.model.User;

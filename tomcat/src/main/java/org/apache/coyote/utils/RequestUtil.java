@@ -1,6 +1,6 @@
 package org.apache.coyote.utils;
 
-import nextstep.jwp.exception.NotFoundFileException;
+import org.apache.coyote.exception.NotFoundFileException;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

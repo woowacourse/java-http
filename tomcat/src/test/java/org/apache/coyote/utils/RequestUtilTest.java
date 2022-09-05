@@ -1,7 +1,6 @@
-package org.apache.utils;
+package org.apache.coyote.utils;
 
-import nextstep.jwp.exception.NotFoundFileException;
-import org.apache.coyote.utils.RequestUtil;
+import org.apache.coyote.exception.NotFoundFileException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

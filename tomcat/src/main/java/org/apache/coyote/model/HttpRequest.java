@@ -1,6 +1,6 @@
 package org.apache.coyote.model;
 
-import nextstep.jwp.exception.InvalidRequestFormat;
+import org.apache.coyote.exception.InvalidRequestFormat;
 
 import java.util.Arrays;
 import java.util.List;

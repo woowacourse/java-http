@@ -1,6 +1,6 @@
 package org.apache.coyote.model;
 
-import nextstep.jwp.exception.NotFoundContentTypeException;
+import org.apache.coyote.exception.NotFoundContentTypeException;
 
 import java.util.Arrays;
 import java.util.Objects;

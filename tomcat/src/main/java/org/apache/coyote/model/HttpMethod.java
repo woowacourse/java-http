@@ -1,6 +1,6 @@
 package org.apache.coyote.model;
 
-import nextstep.jwp.exception.NotFoundHttpMethodException;
+import org.apache.coyote.exception.NotFoundHttpMethodException;
 
 import java.util.Arrays;
 import java.util.Objects;

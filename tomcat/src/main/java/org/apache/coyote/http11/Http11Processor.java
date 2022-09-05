@@ -127,23 +127,26 @@ public class Http11Processor implements Runnable, Processor {
                 .filter(it -> it.checkPassword(password));
 
         if (user.isEmpty()) {
-            HttpResponse httpResponse = new HttpResponse.Builder()
+            HttpResponse response = new HttpResponse.Builder()
                     .status(FOUND)
                     .header(LOCATION, "/401.html")
                     .build();
 
-            writeHttpResponse(os, httpResponse);
+            writeHttpResponse(os, response);
             return;
         }
 
         Session session = SessionManager.create();
-        HttpResponse httpResponse = new HttpResponse.Builder()
+        HttpResponse.Builder builder = new HttpResponse.Builder()
                 .status(FOUND)
-                .header(LOCATION, "/index.html")
-                .setCookie(HttpCookie.sessionId(session.getId()))
-                .build();
+                .header(LOCATION, "/index.html");
 
-        writeHttpResponse(os, httpResponse);
+        if (request.getHttpHeaders().hasHeader(COOKIE)) {
+            builder.setCookie(HttpCookie.sessionId(session.getId()));
+        }
+
+        HttpResponse response = builder.build();
+        writeHttpResponse(os, response);
     }
 
     private void responseRegisterHtml(final OutputStream os) throws IOException {

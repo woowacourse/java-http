@@ -51,6 +51,10 @@ public class HttpHeaders {
         return Optional.of(value);
     }
 
+    public boolean hasHeader(final String header) {
+        return headers.containsKey(header);
+    }
+
     public String generateHeaderText() {
         StringBuilder stringBuilder = new StringBuilder();
         for (String headerKey : headers.keySet()) {

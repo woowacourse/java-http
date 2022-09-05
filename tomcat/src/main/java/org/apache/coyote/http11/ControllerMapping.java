@@ -1,9 +1,6 @@
 package org.apache.coyote.http11;
 
-import nextstep.jwp.controller.Controller;
-import nextstep.jwp.controller.GreetingController;
-import nextstep.jwp.controller.LoginController;
-import nextstep.jwp.controller.ResourceController;
+import nextstep.jwp.controller.*;
 import nextstep.jwp.exception.CustomNotFoundException;
 import nextstep.jwp.http.RequestInfo;
 import nextstep.jwp.support.ResourceSuffix;
@@ -20,6 +17,7 @@ public class ControllerMapping {
     public ControllerMapping() {
         mapping.put(new RequestInfo(GET, "/"), new GreetingController());
         mapping.put(new RequestInfo(GET, "/login"), new LoginController());
+        mapping.put(new RequestInfo(GET, "/register"), new ForwardController());
     }
 
     public Controller getController(final RequestInfo requestInfo) {

@@ -28,6 +28,6 @@ public class HttpRequestFactory {
         if (parsedHeaderField.length != 2) {
             throw new IllegalArgumentException("헤더는 속성과 정보 두 가지로 이루어 집니다.");
         }
-        headerFields.put(parsedHeaderField[0], parsedHeaderField[1]);
+        headerFields.put(parsedHeaderField[0].trim(), parsedHeaderField[1].trim());
     }
 }

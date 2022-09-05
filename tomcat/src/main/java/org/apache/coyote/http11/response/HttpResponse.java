@@ -13,8 +13,8 @@ public class HttpResponse {
 
     private final String response;
 
-    public HttpResponse(HttpRequest httpRequestHeader) throws IOException {
-        response = getResponse(httpRequestHeader);
+    public HttpResponse(HttpRequest httpRequest) throws IOException {
+        response = getResponse(httpRequest);
     }
 
     private String getResponse(HttpRequest httpRequestHeader) throws IOException {

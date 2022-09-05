@@ -4,11 +4,11 @@ import java.util.Map;
 
 public class HttpRequest {
 
-    private final RequestLine requestLine;
+    private final RequestUri requestUri;
     private final RequestHeaders requestHeaders;
 
     private HttpRequest(String requestLine, Map<String, String> headers) {
-        this.requestLine = new RequestLine(requestLine);
+        this.requestUri = RequestUri.from(requestLine);
         this.requestHeaders = new RequestHeaders(headers);
     }
 
@@ -16,12 +16,20 @@ public class HttpRequest {
         return new HttpRequest(requestLine, headers);
     }
 
-    public String getRequestUri() {
-        return requestLine.getRequestUri();
+    public boolean isExistQueryString() {
+        return requestUri.isExistQueryString();
     }
 
-    public RequestLine getRequestLine() {
-        return requestLine;
+    public String getQueryStringValue(String key) {
+        return requestUri.getQueryStringValue(key);
+    }
+
+    public boolean containsUri(String uri) {
+        return requestUri.containsUri(uri);
+    }
+
+    public String getRequestUri() {
+        return requestUri.getRequestUri();
     }
 
     public RequestHeaders getRequestHeaders() {

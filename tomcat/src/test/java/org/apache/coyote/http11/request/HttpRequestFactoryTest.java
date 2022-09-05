@@ -22,12 +22,7 @@ class HttpRequestFactoryTest {
                 "");
         InputStream inputStream = new ByteArrayInputStream(string.getBytes());
 
-        // when
-        HttpRequest httpRequestHeader = HttpRequestFactory.parse(inputStream);
-
-        //then
-        assert httpRequestHeader != null;
-        assertThat(httpRequestHeader.getRequestLine().getRequestLine()).isEqualTo("GET /index.html HTTP/1.1 ");
-        assertThat(httpRequestHeader.getRequestHeaders()).isNotNull();
+        // when, then
+        assertThat(HttpRequestFactory.parse(inputStream)).isInstanceOf(HttpRequest.class);
     }
 }

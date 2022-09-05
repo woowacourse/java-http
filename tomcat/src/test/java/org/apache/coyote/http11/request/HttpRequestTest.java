@@ -10,11 +10,11 @@ import org.junit.jupiter.api.Test;
 
 class HttpRequestTest {
 
-    private HttpRequest httpRequestHeader;
+    private HttpRequest httpRequest;
 
-    @DisplayName("응답 헤더에서 requestUri를 얻는다.")
+    @DisplayName("응답에서 requestUri와 헤더를 얻는다.")
     @Test
-    void getRequestUri() throws IOException {
+    void getRequestUriAndHeaders() throws IOException {
         //given
         final String string = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
@@ -23,11 +23,16 @@ class HttpRequestTest {
                 "",
                 "");
         InputStream inputStream = new ByteArrayInputStream(string.getBytes());
-        httpRequestHeader = HttpRequestFactory.parse(inputStream);
+        httpRequest = HttpRequestFactory.parse(inputStream);
 
         //when,then
-        assert httpRequestHeader != null;
-        assertThat(httpRequestHeader.getRequestUri())
-                .isEqualTo("/index.html");
+        assert httpRequest != null;
+        assertThat(httpRequest.getRequestUri()).isEqualTo("/index.html");
+        final RequestHeaders requestHeaders = httpRequest.getRequestHeaders();
+        assertThat(requestHeaders.getRequestHeaders()).hasSize(2);
+        assertThat(requestHeaders.getRequestHeaders().get("Host")).isEqualTo("localhost:8080");
+        assertThat(requestHeaders.getRequestHeaders().get("Connection")).isEqualTo("keep-alive");
     }
+
+
 }

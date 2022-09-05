@@ -1,10 +1,13 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.message.common.HttpMethod.GET;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
@@ -37,17 +40,17 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream();
-             final var bufferReader = new BufferedReader(new InputStreamReader(inputStream))) {
+             final var bufferReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
-            HttpRequest httpRequest = HttpRequest.parse(readHttpRequest(bufferReader));
-            RequestUri requestUri = httpRequest.getRequestUri();
+            HttpRequest request = HttpRequest.parse(readHttpRequest(bufferReader));
+            RequestUri requestUri = request.getRequestUri();
 
-            if (requestUri.matches("/")) {
+            if (request.matches(GET, "/")) {
                 responseHelloWorld(outputStream);
                 return;
             }
 
-            if (requestUri.matches("/login")) {
+            if (request.matches(GET, "/login")) {
                 responseLogin(outputStream, requestUri);
                 return;
             }

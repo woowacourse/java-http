@@ -35,8 +35,8 @@ public class Http11Processor implements Runnable, Processor {
         try (final var inputStream = connection.getInputStream();
              final var outputStream = connection.getOutputStream()) {
 
-            final HttpRequest requestValue = readHttpRequest(inputStream);
-            final String requestPath = requestValue.getUrl();
+            final HttpRequest request = readHttpRequest(inputStream);
+            final String requestPath = request.getUrl();
 
             if (requestPath.contains("/login") && requestPath.contains("?")) {
                 login(requestPath);

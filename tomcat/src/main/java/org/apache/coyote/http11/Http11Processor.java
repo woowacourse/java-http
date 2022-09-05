@@ -55,9 +55,13 @@ public class Http11Processor implements Runnable, Processor {
         if (requestUri.equals("/login")) {
             return createLoginResponse(httpRequest);
         }
+        if (requestUri.equals("/register")) {
+            return createRegisterResponse();
+        }
         if (!requestUri.equals("/")) {
             return createResponse(StatusCode.OK, ContentType.findByUri(requestUri), createResponseBody(requestUri));
         }
+
         return createResponse(StatusCode.OK, ContentType.HTML, "Hello world!");
     }
 
@@ -76,6 +80,10 @@ public class Http11Processor implements Runnable, Processor {
         } catch (final IllegalArgumentException e) {
             return createRedirectResponse(statusCode, "/401.html");
         }
+    }
+
+    private String createRegisterResponse() {
+        return createResponse(StatusCode.OK, ContentType.HTML, createResponseBody("/register.html"));
     }
 
     private String createResponseBody(final String pathUri) {

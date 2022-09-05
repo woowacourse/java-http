@@ -3,6 +3,7 @@ package nextstep.jwp.http;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import nextstep.jwp.exception.UncheckedServletException;
 
 public class HttpRequestBody {
 
@@ -37,6 +38,13 @@ public class HttpRequestBody {
             values.put(value[REQUEST_BODY_KEY_INDEX], value[REQUEST_BODY_VALUE_INDEX]);
         }
         return values;
+    }
+
+    public String getValue(final String key) {
+        if (!values.containsKey(key)) {
+            throw new UncheckedServletException("존재하지 않는 key 입니다.");
+        }
+        return values.get(key);
     }
 
     public Map<String, String> getValues() {

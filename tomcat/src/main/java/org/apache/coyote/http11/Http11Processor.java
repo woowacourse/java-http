@@ -94,23 +94,19 @@ public class Http11Processor implements Runnable, Processor {
             return createResponse(Files.probeContentType(path), responseBody);
         }
 
-        if (url.contains(".css")) {
-            final URL resource = getClass().getClassLoader().getResource("static" + url);
-            final Path path = new File(resource.getFile()).toPath();
-            final String responseBody = new String(Files.readAllBytes(path));
-
-            return createResponse(Files.probeContentType(path), responseBody);
-        }
-
-        if (url.contains(".js")) {
-            final URL resource = getClass().getClassLoader().getResource("static" + url);
-            final Path path = new File(resource.getFile()).toPath();
-            final String responseBody = new String(Files.readAllBytes(path));
-
-            return createResponse(Files.probeContentType(path), responseBody);
+        if (url.contains(".css") || url.contains(".js")) {
+            return createStaticFileResponse(url);
         }
 
         throw new IllegalArgumentException("올바르지 않은 URL 요청입니다.");
+    }
+
+    private String createStaticFileResponse(final String url) throws IOException {
+        final URL resource = getClass().getClassLoader().getResource("static" + url);
+        final Path path = new File(resource.getFile()).toPath();
+        final String responseBody = new String(Files.readAllBytes(path));
+
+        return createResponse(Files.probeContentType(path), responseBody);
     }
 
     private String createResponse(final String contentType, final String responseBody) {

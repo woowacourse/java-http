@@ -6,6 +6,7 @@ public class HttpHeaders {
 
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String CONTENT_LENGTH = "Content-Length";
+    public static final String LOCATION = "Location";
 
     private final Map<String, String> headers;
 
@@ -18,7 +19,7 @@ public class HttpHeaders {
     }
 
     public int getContentLength() {
-        String contentLength = headers.getOrDefault(headers.get(CONTENT_LENGTH), "0");
+        String contentLength = headers.getOrDefault(CONTENT_LENGTH, "0");
         return Integer.parseInt(contentLength);
     }
 

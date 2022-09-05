@@ -2,13 +2,10 @@ package org.apache.coyote.http11;
 
 import java.util.function.Function;
 
+import nextstep.jwp.handler.IndexHandler;
+import nextstep.jwp.handler.LoginHandler;
+
 public class HandlerMapping {
-
-    private final Controller controller;
-
-    public HandlerMapping() {
-        this.controller = new Controller();
-    }
 
     public Function<HttpRequest, HttpResponse> findController(HttpRequest request) {
         String url = UriParser.extractUrl(request.getUri());
@@ -18,11 +15,12 @@ public class HandlerMapping {
         }
 
         if (url.equals("/")) {
-            return controller::performBasicUrl;
+            return IndexHandler::performBasicUrl;
         }
+
         if (url.equals("/login")) {
-            return controller::performLoginRequest;
+            return LoginHandler::performLoginRequest;
         }
-        return controller::returnNotFountResponse;
+        return IndexHandler::returnNotFountResponse;
     }
 }

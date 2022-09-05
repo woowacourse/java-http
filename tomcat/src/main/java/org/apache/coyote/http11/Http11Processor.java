@@ -37,14 +37,15 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (final InputStream inputStream = connection.getInputStream();
              final OutputStream outputStream = connection.getOutputStream();
-             final BufferedReader inputBufferedReader = new BufferedReader(new InputStreamReader(inputStream));) {
+             final BufferedReader inputBufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final String firstLine = inputBufferedReader.readLine();
             final HttpRequest httpRequest = HttpRequest.from(firstLine);
             final FilePath filePath = FilePath.from(httpRequest.getUri());
 
             if (httpRequest.getUri().contains("login?")) {
-                Optional<User> user = InMemoryUserRepository.findByAccount(httpRequest.getQueryParam().get("account"));
+                Optional<User> user = InMemoryUserRepository.findByAccount(
+                        httpRequest.getQueryParam().getQueryValue("account"));
                 user.ifPresent(value -> log.info(value.toString()));
             }
 

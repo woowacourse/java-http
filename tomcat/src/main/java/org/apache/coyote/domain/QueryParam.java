@@ -1,18 +1,24 @@
-package org.apache.coyote.handler;
+package org.apache.coyote.domain;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class QueryStringHandler {
+public class QueryParam {
 
     private static final String QUERY_STRING_DELIMITER = "?";
     private static final String QUERY_STRING_REGEX = "&";
     private static final String QUERY_MAP_DELIMITER = "=";
 
-    public static Map<String, String> queryParams(String uri) {
+    private final Map<String, String> queryParam;
+
+    private QueryParam(Map<String, String> queryParam) {
+        this.queryParam = queryParam;
+    }
+
+    public static QueryParam from(String uri) {
         Map<String, String> queryMap = new HashMap<>();
         if (!uri.contains(QUERY_STRING_DELIMITER)) {
-            return queryMap;
+            return new QueryParam(queryMap);
         }
         String[] uriPaths = uri.split("\\?");
         String queryString = uriPaths[1];
@@ -21,6 +27,10 @@ public class QueryStringHandler {
             String[] splitQuery = queryParam.split(QUERY_MAP_DELIMITER);
             queryMap.put(splitQuery[0], splitQuery[1]);
         }
-        return queryMap;
+        return new QueryParam(queryMap);
+    }
+
+    public String getQueryValue(String key) {
+        return queryParam.get(key);
     }
 }

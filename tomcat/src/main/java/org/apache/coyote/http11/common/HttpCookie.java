@@ -44,7 +44,7 @@ public class HttpCookie {
         return cookie.containsKey(SESSION);
     }
 
-    public String getSession(){
+    public String getSession() {
         return cookie.get(SESSION);
     }
 

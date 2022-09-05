@@ -9,6 +9,9 @@ import org.apache.coyote.http11.common.HttpCookie;
 
 public class HttpRequestHeader {
 
+    private static final String KEY_OF_COOKIE = "Cookie";
+    private static final String DELIMITER_OF_HEADER = ": ";
+
     private final Map<String, String> headers;
     private final HttpCookie cookie;
 
@@ -22,14 +25,14 @@ public class HttpRequestHeader {
 
         String header = bufferedReader.readLine();
         while (!header.isBlank() && !header.isEmpty()) {
-            String[] parsedHeader = header.split(": ");
+            String[] parsedHeader = header.split(DELIMITER_OF_HEADER);
             headers.put(parsedHeader[0], parsedHeader[1]);
             header = bufferedReader.readLine();
         }
 
-        if (headers.containsKey("Cookie")) {
-            HttpCookie cookie = HttpCookie.createByParsing(headers.get("Cookie"));
-            headers.remove("Cookie");
+        if (headers.containsKey(KEY_OF_COOKIE)) {
+            HttpCookie cookie = HttpCookie.createByParsing(headers.get(KEY_OF_COOKIE));
+            headers.remove(KEY_OF_COOKIE);
 
             return new HttpRequestHeader(headers, cookie);
         }

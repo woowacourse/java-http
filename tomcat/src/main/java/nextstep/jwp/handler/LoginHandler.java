@@ -5,6 +5,7 @@ import static org.apache.coyote.http11.ViewResolver.staticFileRequest;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.coyote.http11.HttpHeaderType;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.HttpStatus;
@@ -33,7 +34,10 @@ public class LoginHandler {
             LoginHandler loginHandler = new LoginHandler();
             User user = loginHandler.login(queries);
 
-            return staticFileRequest("/index.html");
+            return new HttpResponse.Builder()
+                    .statusCode(HttpStatus.FOUND)
+                    .header(HttpHeaderType.LOCATION, "/index.html")
+                    .build();
         } catch (InvalidLoginRequestException e) {
             return new HttpResponse.Builder()
                     .statusCode(HttpStatus.NOT_FOUND)

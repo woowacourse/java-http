@@ -3,7 +3,8 @@ package org.apache.coyote.http11;
 public enum HttpStatus {
 
     OK(200, "OK"),
-    NOT_FOUND(404, "Not Found")
+    FOUND(302, "Found"),
+    NOT_FOUND(404, "Not Found"),
     ;
 
     private final int code;

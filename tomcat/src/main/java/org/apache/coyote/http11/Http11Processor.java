@@ -1,12 +1,19 @@
 package org.apache.coyote.http11;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -26,21 +33,42 @@ public class Http11Processor implements Runnable, Processor {
     @Override
     public void process(final Socket connection) {
         try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+             final var outputStream = connection.getOutputStream();
+             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream));) {
 
-            final var responseBody = "Hello world!";
+            final HttpRequest request = readHttpRequest(bufferedReader);
+            final String requestPath = request.getUrl();
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: text/html;charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            if (requestPath.contains("/login") && requestPath.contains("?")) {
+                login(requestPath);
+            }
+
+            final ViewResolver viewResolver = new ViewResolver(requestPath);
+            final Optional<URI> uri = viewResolver.resolveView();
+            final HttpResponse httpResponse = HttpResponse.of(uri);
+            final String response = httpResponse.getBody();
 
             outputStream.write(response.getBytes());
             outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+        } catch (IOException | UncheckedServletException | URISyntaxException e) {
             log.error(e.getMessage(), e);
         }
+    }
+
+    private HttpRequest readHttpRequest(final BufferedReader bufferedReader) throws IOException {
+        final String line = bufferedReader.readLine();
+
+        final List<String> headerLines = new ArrayList<>();
+        while (bufferedReader.ready()) {
+            headerLines.add(bufferedReader.readLine());
+        }
+
+        return HttpRequest.from(line, headerLines);
+    }
+
+    private void login(final String requestPath) {
+        final Controller controller = new Controller();
+        final Map<String, String> params = QueryStringParser.parsing(requestPath);
+        controller.checkLogin(params);
     }
 }

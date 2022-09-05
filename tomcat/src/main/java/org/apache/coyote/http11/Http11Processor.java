@@ -25,7 +25,7 @@ public class Http11Processor implements Runnable, Processor {
     private static final String ACCOUNT = "account";
     private static final String PASSWORD = "password";
     private static final String DEFAULT_CONTENT_TYPE = "text/html";
-    private static final User EMPTY_USER = new User("", "", "");
+    private static final User EMPTY_USER = new User(null, null, null);
 
     private final Socket connection;
 
@@ -45,17 +45,12 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             final String uri = getUri(bufferedReader);
-            final String path = getPath(uri);
+            final String path = rewrite(getPath(uri));
             final Parameters queryParameters = Parameters.fromUri(uri);
-            final String responseBody = getResponseBody(path, queryParameters);
-            final String contentType = getContentType(path);
 
-            final var response = String.join("\r\n",
-                    "HTTP/1.1 200 OK ",
-                    "Content-Type: " + contentType + ";charset=utf-8 ",
-                    "Content-Length: " + responseBody.getBytes().length + " ",
-                    "",
-                    responseBody);
+            writeLogging(path, queryParameters);
+
+            final String response = getResponse(path);
 
             outputStream.write(response.getBytes());
             outputStream.flush();
@@ -73,17 +68,6 @@ public class Http11Processor implements Runnable, Processor {
         return path.split("\\?")[0];
     }
 
-    private String getResponseBody(final String path, final Parameters parameters) throws IOException {
-        final String url = rewrite(path);
-        writeLogging(url, parameters);
-
-        if (url.equals("/")) {
-            return "Hello world!";
-        }
-
-        return readFile(url);
-    }
-
     private String rewrite(final String path) {
         if (path.equals(LOGIN_PATH)) {
             return LOGIN_PAGE_URL;
@@ -91,9 +75,50 @@ public class Http11Processor implements Runnable, Processor {
         return path;
     }
 
-    private void writeLogging(final String url, final Parameters parameters) {
-        if (url.equals(LOGIN_PAGE_URL)) {
-            loggingAccount(parameters);
+    private String getResponse(final String path) throws IOException {
+        final String contentType = getContentType(path);
+        final String responseBody = getResponseBody(path);
+
+        return String.join("\r\n",
+                "HTTP/1.1 200 OK ",
+                "Content-Type: " + contentType + ";charset=utf-8 ",
+                "Content-Length: " + responseBody.getBytes().length + " ",
+                "",
+                responseBody);
+    }
+
+    private String getResponseBody(final String path) throws IOException {
+        if (path.equals("/")) {
+            return "Hello world!";
+        }
+
+        return readFile(path);
+    }
+
+    private void writeLogging(final String path, final Parameters parameters) {
+        if (path.equals(LOGIN_PAGE_URL)) {
+            final User user = getUser(parameters.get(ACCOUNT));
+            loggingAccount(user, parameters);
+        }
+    }
+
+    private User getUser(final String account) {
+        if (account == null || account.isBlank()) {
+            return EMPTY_USER;
+        }
+        try {
+            return InMemoryUserRepository.findByAccount(account)
+                    .orElseThrow(() -> new IllegalArgumentException(account + "가 없습니다."));
+        } catch (final IllegalArgumentException e) {
+            log.info(e.getMessage());
+            return EMPTY_USER;
+        }
+    }
+
+    private void loggingAccount(final User user, final Parameters parameters) {
+        final String password = parameters.get(PASSWORD);
+        if (user.checkPassword(password)) {
+            log.info(user.toString());
         }
     }
 
@@ -105,20 +130,6 @@ public class Http11Processor implements Runnable, Processor {
 
         try (final FileInputStream fileInputStream = new FileInputStream(fileUrl.getPath())) {
             return new String(fileInputStream.readAllBytes());
-        }
-    }
-
-    private void loggingAccount(final Parameters parameters) {
-        try {
-            final String account = parameters.get(ACCOUNT);
-            final User user = InMemoryUserRepository.findByAccount(account)
-                    .orElseThrow(() -> new IllegalArgumentException(account + "가 없습니다."));
-            final String password = parameters.get(PASSWORD);
-            if (user.checkPassword(password)) {
-                log.info(user.toString());
-            }
-        } catch (final IllegalArgumentException e) {
-            log.info(e.getMessage());
         }
     }
 

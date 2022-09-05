@@ -19,26 +19,22 @@ public class Parameters {
     public static Parameters fromUri(final String uri) {
         final int beginIndex = uri.indexOf("?");
         if (beginIndex < 0) {
-            return new Parameters();
+            return new Parameters(new HashMap<>());
         }
 
         final String queryString = uri.substring(beginIndex + 1);
-        return parseQueryString(queryString);
+        return parseParameters(queryString);
     }
 
-    private static Parameters parseQueryString(final String queryString) {
-        final Parameters parameters = new Parameters();
+    private static Parameters parseParameters(final String queryString) {
+        final Map<String, String> parameters = new HashMap<>();
         Arrays.stream(queryString.split("&"))
                 .forEach(query -> {
                     final String[] entry = query.split("=");
                     parameters.put(entry[0], entry[1]);
                 });
 
-        return parameters;
-    }
-
-    public void put(final String key, final String value) {
-        parameters.put(key, value);
+        return new Parameters(parameters);
     }
 
     public String get(final String key) {

@@ -26,10 +26,6 @@ public enum ContentType {
                 .orElseThrow(() -> new NoSuchElementException("해당하는 ContentType이 없습니다. " + key));
     }
 
-    public String getKey() {
-        return key;
-    }
-
     public String getValue() {
         return value;
     }

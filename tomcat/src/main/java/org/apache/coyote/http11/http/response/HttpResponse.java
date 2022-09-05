@@ -36,18 +36,6 @@ public class HttpResponse {
         return new HttpResponse(httpVersion, status, headers, body);
     }
 
-    public HttpVersion getHttpVersion() {
-        return httpVersion;
-    }
-
-    public HttpStatus getHttpStatus() {
-        return httpStatus;
-    }
-
-    public HttpHeaders getHeaders() {
-        return headers;
-    }
-
     public String getBody() {
         return body;
     }

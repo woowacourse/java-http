@@ -63,10 +63,6 @@ public class HttpHeaders {
         }
     }
 
-    public Map<HttpHeaderType, HttpHeader> getHeaders() {
-        return headers;
-    }
-
     public boolean contains(final HttpHeaderType contentLength) {
         return headers.containsKey(contentLength);
     }

@@ -4,11 +4,8 @@ import java.util.List;
 
 public class HttpHeader {
 
-    private HttpHeaderType httpHeaderType;
-    private List<String> values;
-
-    public HttpHeader() {
-    }
+    private final HttpHeaderType httpHeaderType;
+    private final List<String> values;
 
     private HttpHeader(final HttpHeaderType httpHeaderType,
                        final List<String> values) {

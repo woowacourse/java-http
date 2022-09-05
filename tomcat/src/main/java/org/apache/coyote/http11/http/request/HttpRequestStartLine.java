@@ -43,15 +43,7 @@ public class HttpRequestStartLine {
         }
     }
 
-    public HttpMethod getHttpMethod() {
-        return httpMethod;
-    }
-
     public String getPath() {
         return path;
-    }
-
-    public HttpVersion getHttpVersion() {
-        return httpVersion;
     }
 }

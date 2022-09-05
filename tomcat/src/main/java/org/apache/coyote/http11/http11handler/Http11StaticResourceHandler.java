@@ -14,6 +14,10 @@ public class Http11StaticResourceHandler implements Http11Handler {
 
     @Override
     public boolean isProperHandler(String uri) {
+        if (noExtension(uri)) {
+            uri = addHtmlExtension(uri);
+        }
+        
         try {
             Objects.requireNonNull(getClass().getClassLoader().getResource(DIRECTORY + uri));
             return true;
@@ -24,11 +28,23 @@ public class Http11StaticResourceHandler implements Http11Handler {
 
     @Override
     public Map<String, String> extractElements(String uri) {
+        if (noExtension(uri)) {
+            uri = addHtmlExtension(uri);
+        }
+
         Map<String, String> headerElements = new HashMap<>();
         headerElements.put("Content-Type", getContentType(uri));
         headerElements.put("Content-Length", getContentLength(uri));
         headerElements.put("body", extractBody(uri));
         return headerElements;
+    }
+
+    private String addHtmlExtension(String uri) {
+        return uri + ".html";
+    }
+
+    private boolean noExtension(String uri) {
+        return !uri.contains(".");
     }
 
     private String extractBody(String uri) {

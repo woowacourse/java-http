@@ -10,12 +10,12 @@ class QueryStringTest {
 
     @DisplayName("쿼리 스트링을 전달하면 객체가 생성된다.")
     @Test
-    void constructor() {
+    void parse() {
         // given
         String queryString = "key1=value1&key2=value2";
 
         // when
-        QueryString actual = new QueryString(queryString);
+        QueryString actual = QueryString.parse(queryString);
 
         // then
         assertThat(actual).isNotNull();
@@ -25,11 +25,11 @@ class QueryStringTest {
     @Test
     void getQuery() {
         // given
-        QueryString queryString = new QueryString("key1=value1&key2=value2");
+        QueryString queryString = QueryString.parse("key1=value1&key2=value2");
 
         // when
-        String actual1 = queryString.getQuery("key1").get();
-        String actual2 = queryString.getQuery("key2").get();
+        String actual1 = queryString.getValues("key1").get();
+        String actual2 = queryString.getValues("key2").get();
 
         // then
         assertAll(() -> {

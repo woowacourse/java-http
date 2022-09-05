@@ -14,9 +14,8 @@ import org.apache.coyote.http11.message.common.HttpVersion;
 
 public class HttpResponse {
 
-    private static final String RESPONSE_LINE_FORMAT = "%s %s %s ";
-
     private static final String NEW_LINE = "\r\n";
+    private static final String WHITE_SPACE = " ";
 
     private final HttpVersion httpVersion;
     private final HttpStatus httpStatus;
@@ -31,13 +30,9 @@ public class HttpResponse {
     }
 
     public String generateMessage() {
-        return generateResponseLine() + NEW_LINE
+        return httpVersion.getName() + WHITE_SPACE + httpStatus.getCodeAndPhrase() + WHITE_SPACE + NEW_LINE
                 + httpHeaders.generateHeaderText() + NEW_LINE
                 + body;
-    }
-
-    private String generateResponseLine() {
-        return String.format(RESPONSE_LINE_FORMAT, httpVersion.getName(), httpStatus.getCode(), httpStatus.name());
     }
 
     public static class Builder {

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import org.apache.coyote.http11.message.common.HttpHeaders;
 import org.apache.coyote.http11.message.common.HttpMethod;
+import org.apache.coyote.http11.message.common.HttpVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -46,8 +47,8 @@ class HttpRequestTest {
         // then
         assertAll(() -> {
             assertThat(actual.getMethod()).isEqualTo(HttpMethod.GET);
-            assertThat(actual.getRequestUri().getPath()).isEqualTo("/index.html");
-            assertThat(actual.getVersion()).isEqualTo("HTTP/1.1");
+            assertThat(actual.getUri().getPath()).isEqualTo("/index.html");
+            assertThat(actual.getVersion()).isEqualTo(HttpVersion.HTTP11);
         });
     }
 

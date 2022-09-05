@@ -3,6 +3,7 @@ package org.apache.coyote.http11.message.request;
 import lombok.Getter;
 import lombok.ToString;
 import org.apache.coyote.http11.message.common.HttpMethod;
+import org.apache.coyote.http11.message.common.HttpVersion;
 
 @ToString
 @Getter
@@ -15,17 +16,26 @@ public class RequestLine {
     private static final int VERSION_INDEX = 2;
 
     private final HttpMethod method;
-    private final RequestUri requestUri;
-    private final String version;
+    private final RequestUri uri;
+    private final HttpVersion version;
 
-    public RequestLine(final String requestLine) {
-        String[] splitRequestLine = requestLine.split(START_LINE_DELIMITER);
-        this.method = HttpMethod.from(splitRequestLine[METHOD_INDEX]);
-        this.requestUri = new RequestUri(splitRequestLine[REQUEST_URI_INDEX]);
-        this.version = splitRequestLine[VERSION_INDEX];
+    private RequestLine(final HttpMethod method, final RequestUri uri, final HttpVersion version) {
+        this.method = method;
+        this.uri = uri;
+        this.version = version;
+    }
+
+    public static RequestLine parse(final String rawRequestLine) {
+        String[] splitRequestLine = rawRequestLine.split(START_LINE_DELIMITER);
+
+        HttpMethod method = HttpMethod.from(splitRequestLine[METHOD_INDEX]);
+        RequestUri uri = new RequestUri(splitRequestLine[REQUEST_URI_INDEX]);
+        HttpVersion version = HttpVersion.from(splitRequestLine[VERSION_INDEX]);
+
+        return new RequestLine(method, uri, version);
     }
 
     public boolean hasQuery() {
-        return requestUri.hasQuery();
+        return uri.hasQuery();
     }
 }

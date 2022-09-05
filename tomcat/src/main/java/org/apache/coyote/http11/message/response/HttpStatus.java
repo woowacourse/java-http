@@ -21,4 +21,8 @@ public enum HttpStatus {
     HttpStatus(final int code) {
         this.code = code;
     }
+
+    public String getCodeAndPhrase() {
+        return code + " " + name();
+    }
 }

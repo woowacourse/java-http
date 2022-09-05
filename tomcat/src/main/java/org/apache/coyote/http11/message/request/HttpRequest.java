@@ -25,7 +25,7 @@ public class HttpRequest {
     }
 
     private HttpRequest(final String requestStartLine, final String header, final String body) {
-        this(new RequestLine(requestStartLine), new HttpHeaders(header), body);
+        this(RequestLine.parse(requestStartLine), HttpHeaders.parse(header), body);
     }
 
     public static HttpRequest parse(final String httpRequestMessage) {
@@ -54,7 +54,7 @@ public class HttpRequest {
 
     public boolean matches(final HttpMethod method, final String uri) {
         boolean methodMatches = requestLine.getMethod().equals(method);
-        boolean uriMatches = requestLine.getRequestUri().matches(uri);
+        boolean uriMatches = requestLine.getUri().matches(uri);
 
         return methodMatches && uriMatches;
     }
@@ -64,6 +64,6 @@ public class HttpRequest {
     }
 
     public RequestUri getRequestUri() {
-        return requestLine.getRequestUri();
+        return requestLine.getUri();
     }
 }

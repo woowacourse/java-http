@@ -10,12 +10,12 @@ class RequestLineTest {
 
     @DisplayName("HTTP Request Line을 전달하여 생성한다.")
     @Test
-    void constructor() {
+    void parse() {
         // given
         String httpRequestLine = "GET /index.html HTTP/1.1";
 
         // when
-        RequestLine actual = new RequestLine(httpRequestLine);
+        RequestLine actual = RequestLine.parse(httpRequestLine);
 
         // then
         assertThat(actual).isNotNull();
@@ -25,7 +25,7 @@ class RequestLineTest {
     @Test
     void getMethod() {
         // given
-        RequestLine requestLine = new RequestLine("GET /index.html HTTP/1.1");
+        RequestLine requestLine = RequestLine.parse("GET /index.html HTTP/1.1");
 
         // when
         HttpMethod actual = requestLine.getMethod();
@@ -38,10 +38,10 @@ class RequestLineTest {
     @Test
     void getUri() {
         // given
-        RequestLine requestLine = new RequestLine("GET /index.html HTTP/1.1");
+        RequestLine requestLine = RequestLine.parse("GET /index.html HTTP/1.1");
 
         // when
-        RequestUri actual = requestLine.getRequestUri();
+        RequestUri actual = requestLine.getUri();
 
         // then
         assertThat(actual.getPath()).isEqualTo("/index.html");

@@ -27,8 +27,8 @@ public class HttpHeaders {
         this.values = new LinkedHashMap<>(values);
     }
 
-    public HttpHeaders(final String headerText) {
-        String[] splitHeaders = headerText.split(NEW_LINE);
+    public static HttpHeaders parse(final String rawHeaders) {
+        String[] splitHeaders = rawHeaders.split(NEW_LINE);
         LinkedList<String> headerLines = new LinkedList<>(Arrays.asList(splitHeaders));
 
         HashMap<String, String> headers = new HashMap<>();
@@ -37,7 +37,7 @@ public class HttpHeaders {
             headers.put(splitHeader[HEADER_NAME_INDEX], splitHeader[HEADER_VALUE_INDEX]);
         }
 
-        this.values = headers;
+        return new HttpHeaders(headers);
     }
 
     public Optional<String> getHeader(final String header) {

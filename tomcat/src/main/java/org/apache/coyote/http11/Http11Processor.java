@@ -118,10 +118,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void loginUser(final OutputStream os, final HttpRequest request) throws IOException {
-        QueryString queryString = new QueryString(request.getRequestBody());
+        QueryString queryString = QueryString.parse(request.getRequestBody());
 
-        String account = queryString.getQuery("account").orElseThrow(InvalidRequestException::new);
-        String password = queryString.getQuery("password").orElseThrow(InvalidRequestException::new);
+        String account = queryString.getValues("account").orElseThrow(InvalidRequestException::new);
+        String password = queryString.getValues("password").orElseThrow(InvalidRequestException::new);
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account)
                 .filter(it -> it.checkPassword(password));
@@ -159,10 +159,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void registerUser(final OutputStream os, final HttpRequest request) throws IOException {
-        QueryString queryString = new QueryString(request.getRequestBody());
-        String account = queryString.getQuery("account").orElseThrow(InvalidRequestException::new);
-        String password = queryString.getQuery("password").orElseThrow(InvalidRequestException::new);
-        String email = queryString.getQuery("email").orElseThrow(InvalidRequestException::new);
+        QueryString queryString = QueryString.parse(request.getRequestBody());
+        String account = queryString.getValues("account").orElseThrow(InvalidRequestException::new);
+        String password = queryString.getValues("password").orElseThrow(InvalidRequestException::new);
+        String email = queryString.getValues("email").orElseThrow(InvalidRequestException::new);
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
@@ -185,7 +185,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpRequest generateHttpRequest(final BufferedReader bs) throws IOException {
-        RequestLine requestLine = new RequestLine(bs.readLine());
+        RequestLine requestLine = RequestLine.parse(bs.readLine());
         HttpHeaders httpHeaders = generateHttpHeaders(bs);
         String body = generateHttpBody(bs, httpHeaders);
 
@@ -200,7 +200,7 @@ public class Http11Processor implements Runnable, Processor {
             requestHeaders.append(line).append("\r\n");
         }
 
-        return new HttpHeaders(requestHeaders.toString());
+        return HttpHeaders.parse(requestHeaders.toString());
     }
 
     private String generateHttpBody(final BufferedReader bs, final HttpHeaders httpHeaders) throws IOException {

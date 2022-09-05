@@ -37,14 +37,14 @@ public class HttpCookie {
     }
 
     public static HttpCookie parse(final String header) {
-        Map<String, String> cookie = new LinkedHashMap<>();
+        Map<String, String> cookies = new LinkedHashMap<>();
 
         for (String singleCookie : header.split(COOKIE_SEPARATOR_REGEX)) {
             List<String> splitCookie = Arrays.asList(singleCookie.split(KEY_VALUE_SEPARATOR));
-            cookie.put(splitCookie.get(KEY_INDEX), splitCookie.get(VALUE_INDEX));
+            cookies.put(splitCookie.get(KEY_INDEX), splitCookie.get(VALUE_INDEX));
         }
 
-        return new HttpCookie(cookie);
+        return new HttpCookie(cookies);
     }
 
     public String getHeaderValue() {

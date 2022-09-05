@@ -1,6 +1,6 @@
 package org.apache.coyote.http11.message.request;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -14,27 +14,34 @@ public class QueryString {
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
 
-    private final Map<String, String> query = new HashMap<>();
+    private final Map<String, String> values;
 
-    public QueryString(final String queryString) {
-        if (Objects.isNull(queryString) || queryString.isBlank()) {
-            return;
-        }
-
-        parseQueryString(queryString);
+    private QueryString(final Map<String, String> values) {
+        this.values = values;
     }
 
-    private void parseQueryString(final String queryString) {
-        for (String singleQuery : queryString.split(QUERY_STRING_DELIMITER)) {
-            String[] splitQuery = singleQuery.split(KEY_VALUE_DELIMITER);
-            String key = splitQuery[KEY_INDEX];
-            String value = splitQuery[VALUE_INDEX];
-            query.put(key, value);
+    public static QueryString parse(final String rawQueryString) {
+        if (Objects.isNull(rawQueryString) || rawQueryString.isBlank()) {
+            return new QueryString(Map.of());
         }
+
+        Map<String, String> queries = parseQueryString(rawQueryString);
+        return new QueryString(queries);
     }
 
-    public Optional<String> getQuery(final String key) {
-        String value = query.get(key);
+    private static Map<String, String> parseQueryString(final String queryString) {
+        Map<String, String> queries = new LinkedHashMap<>();
+
+        for (String query : queryString.split(QUERY_STRING_DELIMITER)) {
+            String[] splitQuery = query.split(KEY_VALUE_DELIMITER);
+            queries.put(splitQuery[KEY_INDEX], splitQuery[VALUE_INDEX]);
+        }
+
+        return queries;
+    }
+
+    public Optional<String> getValues(final String key) {
+        String value = values.get(key);
         if (Objects.isNull(value)) {
             return Optional.empty();
         }

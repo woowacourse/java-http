@@ -2,7 +2,7 @@
 
 ## 기능 요구사항
 
-### 1. HTTP 서버 구현하기
+## 1. HTTP 서버 구현하기
 - [x] GET /index.html 응답하기
 - [x] CSS 지원하기
   - [x] 요청에 따라 다른 정적 파일 위치를 찾도록 수정
@@ -30,3 +30,10 @@
 - [x] 반복되는 상수를 Enum으로 처리하기
 - [ ] loginController 악취 제거하기
 - [ ] RequestMapping - service 과정까지에서 예외를 어떻게 처리할 것인지 고민해보기 
+
+
+## 2. 로그인 구현하기
+- [ ] HTTP Reponse의 상태 응답 코드를 302로 반환한다.
+- [ ] POST로 들어온 요청의 Request Body를 파싱할 수 있다.
+- [ ] 로그인에 성공하면 HTTP Reponse의 헤더에 Set-Cookie가 존재한다.
+- [ ] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 JSESSIONID 값이 저장된다.

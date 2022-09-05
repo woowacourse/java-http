@@ -1,7 +1,8 @@
-package org.apache.coyote.http11.domain;
+package org.apache.coyote.http11.web;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class QueryParameters {
@@ -29,6 +30,23 @@ public class QueryParameters {
     }
 
     public String getValueByKey(final String key) {
-        return values.get(key);
+        return values.getOrDefault(key, "");
+    }
+
+    public boolean isEmpty() {
+        return values.isEmpty();
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) return true;
+        if (!(o instanceof QueryParameters)) return false;
+        final QueryParameters that = (QueryParameters) o;
+        return Objects.equals(values, that.values);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(values);
     }
 }

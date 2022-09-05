@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.util;
+package org.apache.coyote.http11.file;
 
 import static java.util.Objects.requireNonNull;
 
@@ -28,5 +28,13 @@ public class ResourceLoader {
         final byte[] bytes = Files.readAllBytes(path);
 
         return new String(bytes);
+    }
+
+    public static String getContentType(final String uri) throws IOException {
+        final URL resource = ResourceLoader.class.getClassLoader()
+                .getResource(STATIC_RESOURCE_LOCATION + uri);
+        final Path path = new File(requireNonNull(resource).getPath()).toPath();
+
+        return Files.probeContentType(path);
     }
 }

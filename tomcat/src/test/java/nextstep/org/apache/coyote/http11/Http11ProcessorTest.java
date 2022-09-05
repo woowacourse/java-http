@@ -26,7 +26,7 @@ class Http11ProcessorTest {
         // then
         var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
+                "Content-Type: text/html ",
                 "Content-Length: 12 ",
                 "",
                 "Hello world!");
@@ -54,7 +54,7 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Type: text/html \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n" +
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
@@ -89,12 +89,11 @@ class Http11ProcessorTest {
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
 
         assertThat(socket.output()).isEqualTo(expected);
-
     }
 
-    @DisplayName("login 페이지가 응답되는지 확인한다.")
+    @DisplayName("존재하는 회원으로 login할 경우 Location이 포함되어 302로 응답된다.")
     @Test
-    void login() throws IOException {
+    void login() {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login?account=gugu&password=password HTTP/1.1 ",
@@ -113,12 +112,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/login.html");
-        var expected = "HTTP/1.1 200 OK \r\n" +
+        var expected = "HTTP/1.1 302 FOUND \r\n" +
                 "Content-Type: text/html \r\n" +
-                "Content-Length: 3796 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+                "Location: /index.html \r\n" +
+                "Content-Length: 0 \r\n" +
+                "\r\n";
 
         assertThat(socket.output()).isEqualTo(expected);
     }

@@ -29,8 +29,6 @@ public class InMemoryUserRepository {
         final User user = database.get(account);
         return user != null;
     }
-    private InMemoryUserRepository() {
-    }
 
     public static boolean exist(String account, String password) {
         if (!database.containsKey(account)) {

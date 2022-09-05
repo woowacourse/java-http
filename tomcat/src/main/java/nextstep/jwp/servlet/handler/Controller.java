@@ -1,12 +1,12 @@
 package nextstep.jwp.servlet.handler;
 
 import org.apache.coyote.servlet.request.HttpRequest;
-import org.apache.coyote.servlet.response.HttpResponse2;
+import org.apache.coyote.servlet.response.HttpResponse;
 import org.apache.coyote.support.HttpMethod;
 
 public abstract class Controller {
 
-    public void service(HttpRequest request, HttpResponse2 response) {
+    public void service(HttpRequest request, HttpResponse response) {
         if (request.isMethodOf(HttpMethod.GET)) {
             doGet(request, response);
             return;
@@ -18,7 +18,7 @@ public abstract class Controller {
         throw new UnsupportedOperationException("API not implemented");
     }
 
-    protected abstract void doGet(HttpRequest request, HttpResponse2 response);
+    protected abstract void doGet(HttpRequest request, HttpResponse response);
 
-    protected abstract void doPost(HttpRequest request, HttpResponse2 response);
+    protected abstract void doPost(HttpRequest request, HttpResponse response);
 }

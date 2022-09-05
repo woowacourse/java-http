@@ -4,25 +4,25 @@ import java.util.HashMap;
 import java.util.Map;
 import org.apache.coyote.servlet.request.HttpRequest;
 
-public class HandlerMapping2 {
+public class HandlerMapping {
 
     private final Map<String, Controller> mappings;
 
-    public HandlerMapping2(Map<String, Controller> mappings) {
+    public HandlerMapping(Map<String, Controller> mappings) {
         this.mappings = mappings;
     }
 
-    public static HandlerMapping2 of(Controller... controllers) {
+    public static HandlerMapping of(Controller... controllers) {
         Map<String, Controller> mappings = new HashMap<>();
         for (final var controller : controllers) {
             mapPathToController(mappings, controller);
         }
-        return new HandlerMapping2(mappings);
+        return new HandlerMapping(mappings);
     }
 
     private static void mapPathToController(Map<String, Controller> mappings, Controller controller) {
         Class<?> clazz = controller.getClass();
-        RequestMapping2 declaredAnnotation = clazz.getDeclaredAnnotation(RequestMapping2.class);
+        RequestMapping declaredAnnotation = clazz.getDeclaredAnnotation(RequestMapping.class);
         for (final var path : declaredAnnotation.path()) {
             mappings.put(path, controller);
         }

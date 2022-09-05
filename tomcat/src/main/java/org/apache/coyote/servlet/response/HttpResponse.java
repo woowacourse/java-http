@@ -10,21 +10,53 @@ import org.apache.coyote.support.HttpStatus;
 
 public class HttpResponse {
 
-    private HttpStatus status;
+    private HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
     private String location;
     private final HttpCookies cookies = new HttpCookies(new HashMap<>());
+    private String viewResource;
     private String contentType;
     private String messageBody;
 
-    public void update(ResponseEntity responseEntity) {
-        this.status = responseEntity.getStatus();
-        this.location = responseEntity.getLocation();
-        this.contentType = responseEntity.getContentType();
-        this.messageBody = responseEntity.getMessageBody();
+    public HttpResponse status(HttpStatus status) {
+        this.status = status;
+        return this;
     }
 
-    public void addSetCookieHeader(String name, HttpCookie value) {
+    public HttpResponse ok() {
+        return status(HttpStatus.OK);
+    }
+
+    public HttpResponse redirect(String location) {
+        this.location = location;
+        return status(HttpStatus.FOUND);
+    }
+
+    public HttpResponse setViewResource(String viewResource) {
+        this.viewResource = viewResource;
+        return this;
+    }
+
+    public HttpResponse addSetCookieHeader(String name, HttpCookie value) {
         cookies.setCookie(name, value);
+        return this;
+    }
+
+    public String getViewResource() {
+        return viewResource;
+    }
+
+    public HttpResponse setContentType(String contentType) {
+        this.contentType = contentType;
+        return this;
+    }
+
+    public HttpResponse setMessageBody(String messageBody) {
+        this.messageBody = messageBody;
+        return this;
+    }
+
+    public boolean hasViewResource() {
+        return viewResource != null;
     }
 
     public String toMessage() {

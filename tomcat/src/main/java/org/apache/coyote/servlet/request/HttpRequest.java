@@ -25,6 +25,10 @@ public class HttpRequest {
         return startLine.getMethod();
     }
 
+    public boolean isMethodOf(HttpMethod method) {
+        return startLine.getMethod().equals(method);
+    }
+
     public Parameters getParameters() {
         if (headers.hasParametersAsBody()) {
             return Parameters.of(body);

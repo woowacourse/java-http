@@ -1,18 +1,16 @@
 package nextstep.jwp.exception;
 
 import java.util.Arrays;
-import org.apache.coyote.servlet.response.ResponseEntity;
+import org.apache.coyote.servlet.response.HttpResponse;
 import org.apache.coyote.support.HttpException;
 import org.apache.coyote.support.HttpStatus;
 
 public class ExceptionHandler {
 
-    public ResponseEntity handle(HttpException exception) {
+    public void handle(HttpException exception, HttpResponse response) {
         final var status = exception.getStatus();
         final var path = ExceptionPage.toUri(status);
-        return ResponseEntity.status(status)
-                .setViewResource(path)
-                .build();
+        response.status(status).setViewResource(path);
     }
 
     private enum ExceptionPage {

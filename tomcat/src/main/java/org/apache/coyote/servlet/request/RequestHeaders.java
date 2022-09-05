@@ -3,9 +3,7 @@ package org.apache.coyote.servlet.request;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.coyote.servlet.cookie.HttpCookie;
 import org.apache.coyote.servlet.cookie.HttpCookies;
-import org.apache.coyote.servlet.session.Session;
 import org.apache.coyote.support.HttpException;
 
 public class RequestHeaders {
@@ -50,11 +48,6 @@ public class RequestHeaders {
 
     public boolean hasParametersAsBody() {
         return CONTENT_TYPE_URL_ENCODED.equals(headers.get(CONTENT_TYPE));
-    }
-
-    public HttpCookie getSessionCookie() {
-        final var cookies = getCookies();
-        return cookies.getCookie(Session.JSESSIONID);
     }
 
     public HttpCookies getCookies() {

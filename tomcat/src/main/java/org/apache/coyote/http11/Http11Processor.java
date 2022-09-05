@@ -65,9 +65,9 @@ public class Http11Processor implements Runnable, Processor {
     private String createLoginResponse(final HttpRequest httpRequest) {
         if (httpRequest.containsQuery()) {
             userService.login(httpRequest);
+            return createResponse(StatusCode.FOUND, createResponseBody("/index.html"), ContentType.HTML);
         }
-        final String responseBody = createResponseBody("/login.html");
-        return createResponse(StatusCode.FOUND, responseBody, ContentType.HTML);
+        return createResponse(StatusCode.OK, createResponseBody("/login.html"), ContentType.HTML);
     }
 
     private String createResponseBody(final String pathUri) {

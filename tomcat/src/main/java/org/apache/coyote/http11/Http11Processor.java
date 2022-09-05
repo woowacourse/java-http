@@ -58,27 +58,28 @@ public class Http11Processor implements Runnable, Processor {
 
             HttpResponse response = null;
             if (request.matches(GET, "/")) {
-                response = generateHelloWorldResponse();
+                response = helloWorldResponse();
             }
 
             if (request.matches(GET, "/login")) {
-                response = generateLoginHtmlResponse(request);
+                response = loginHtmlResponse(request);
             }
 
             if (request.matches(POST, "/login")) {
-                response = generateLoginUserResponse(request);
+                response = loginUserResponse(request);
             }
 
             if (request.matches(GET, "/register")) {
-                response = generateRegisterHtmlResponse();
+                response = registerHtmlResponse();
             }
 
             if (request.matches(POST, "/register")) {
-                response = generateRegisterUserResponse(request);
+                registerUser(request);
+                response = redirectionResponse("/index.html");
             }
 
             if (Objects.isNull(response)) {
-                response = generateStaticFileResponse(request);
+                response = staticFileResponse(request);
             }
 
             writeHttpResponse(os, response);
@@ -87,14 +88,14 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse generateHelloWorldResponse() {
+    private HttpResponse helloWorldResponse() {
         return new HttpResponse.Builder()
                 .contentType(HTML)
                 .body("Hello world!")
                 .build();
     }
 
-    private HttpResponse generateLoginHtmlResponse(final HttpRequest request) {
+    private HttpResponse loginHtmlResponse(final HttpRequest request) {
         Optional<String> cookie = request.getHttpHeaders().getHeader(COOKIE);
 
         if (cookie.isPresent()) {
@@ -110,20 +111,12 @@ public class Http11Processor implements Runnable, Processor {
                 .build();
     }
 
-    private HttpResponse generateLoginUserResponse(final HttpRequest request) {
+    private HttpResponse loginUserResponse(final HttpRequest request) {
         QueryString queryString = QueryString.parse(request.getRequestBody());
-
-        String account = queryString.getValues("account").orElseThrow(InvalidRequestException::new);
-        String password = queryString.getValues("password").orElseThrow(InvalidRequestException::new);
-
-        Optional<User> user = InMemoryUserRepository.findByAccount(account)
-                .filter(it -> it.checkPassword(password));
+        Optional<User> user = getUser(queryString);
 
         if (user.isEmpty()) {
-            return new HttpResponse.Builder()
-                    .status(FOUND)
-                    .header(LOCATION, "/401.html")
-                    .build();
+            return redirectionResponse("/401.html");
         }
 
         Session session = SessionManager.create();
@@ -138,14 +131,22 @@ public class Http11Processor implements Runnable, Processor {
         return builder.build();
     }
 
-    private HttpResponse generateRegisterHtmlResponse() {
+    private Optional<User> getUser(final QueryString queryString) {
+        String account = queryString.getValues("account").orElseThrow(InvalidRequestException::new);
+        String password = queryString.getValues("password").orElseThrow(InvalidRequestException::new);
+
+        return InMemoryUserRepository.findByAccount(account)
+                .filter(it -> it.checkPassword(password));
+    }
+
+    private HttpResponse registerHtmlResponse() {
         return new HttpResponse.Builder()
                 .contentType(HTML)
                 .body(StaticFileUtil.readFile("/register.html"))
                 .build();
     }
 
-    private HttpResponse generateRegisterUserResponse(final HttpRequest request) {
+    private void registerUser(final HttpRequest request) {
         QueryString queryString = QueryString.parse(request.getRequestBody());
         String account = queryString.getValues("account").orElseThrow(InvalidRequestException::new);
         String password = queryString.getValues("password").orElseThrow(InvalidRequestException::new);
@@ -153,14 +154,16 @@ public class Http11Processor implements Runnable, Processor {
 
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
+    }
 
+    private HttpResponse redirectionResponse(final String path) {
         return new HttpResponse.Builder()
                 .status(FOUND)
-                .header(LOCATION, "/index.html")
+                .header(LOCATION, path)
                 .build();
     }
 
-    private HttpResponse generateStaticFileResponse(final HttpRequest httpRequest) {
+    private HttpResponse staticFileResponse(final HttpRequest httpRequest) {
         RequestUri requestUri = httpRequest.getRequestUri();
         return new HttpResponse.Builder()
                 .contentType(requestUri.getExtension())

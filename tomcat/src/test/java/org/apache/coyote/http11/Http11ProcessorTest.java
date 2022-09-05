@@ -113,7 +113,7 @@ class Http11ProcessorTest {
             // then
             final URL resource = getResource("static/login.html");
 
-            final var expected = "HTTP/1.1 200 OK \r\n" +
+            final var expected = "HTTP/1.1 302 Found \r\n" +
                     "Content-Type: text/html;charset=utf-8 \r\n" +
                     "Content-Length: 3796 \r\n" +
                     "\r\n" +
@@ -136,7 +136,7 @@ class Http11ProcessorTest {
             // then
             final URL resource = getResource("static/login.html");
 
-            final var expected = "HTTP/1.1 200 OK \r\n" +
+            final var expected = "HTTP/1.1 302 Found \r\n" +
                     "Content-Type: text/html;charset=utf-8 \r\n" +
                     "Content-Length: 3796 \r\n" +
                     "\r\n" +

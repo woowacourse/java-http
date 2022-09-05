@@ -56,10 +56,10 @@ public class Http11Processor implements Runnable, Processor {
             return createLoginResponse(httpRequest);
         }
         if (!requestUri.equals("/")) {
-            return createResponse(createResponseBody(requestUri), ContentType.findByUri(requestUri));
+            return createResponse(StatusCode.OK, createResponseBody(requestUri), ContentType.findByUri(requestUri));
         }
 
-        return createResponse("Hello world!", ContentType.HTML);
+        return createResponse(StatusCode.OK, "Hello world!", ContentType.HTML);
     }
 
     private String createLoginResponse(final HttpRequest httpRequest) {
@@ -67,7 +67,7 @@ public class Http11Processor implements Runnable, Processor {
             userService.login(httpRequest);
         }
         final String responseBody = createResponseBody("/login.html");
-        return createResponse(responseBody, ContentType.HTML);
+        return createResponse(StatusCode.FOUND, responseBody, ContentType.HTML);
     }
 
     private String createResponseBody(final String pathUri) {
@@ -84,9 +84,10 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String createResponse(final String responseBody, final ContentType contentType) {
+    private String createResponse(final StatusCode statusCode, final String responseBody,
+                                  final ContentType contentType) {
         return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
+                "HTTP/1.1 " + statusCode.toString() + " ",
                 "Content-Type: " + contentType.getValue() + ";charset=utf-8 ",
                 "Content-Length: " + responseBody.getBytes().length + " ",
                 "",

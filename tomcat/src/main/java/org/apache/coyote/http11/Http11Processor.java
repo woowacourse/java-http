@@ -33,8 +33,8 @@ public class Http11Processor implements Runnable, Processor {
     public void process(final Socket connection) {
         try (InputStream inputStream = connection.getInputStream();
              BufferedReader bufferedReader = new BufferedReader(
-                     new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            OutputStream outputStream = connection.getOutputStream();
+                     new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+             OutputStream outputStream = connection.getOutputStream()) {
 
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             HttpResponse httpResponse = createResponse(httpRequest);

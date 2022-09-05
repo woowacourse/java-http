@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 
 class HttpUriTest {
@@ -43,5 +44,34 @@ class HttpUriTest {
         // when & then
         assertThatThrownBy(() -> HttpUri.of(uri))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void 전달받은_pattern이_uri와_일치하는지_확인한다() {
+        // given
+        String uri = "/index.html";
+        HttpUri httpUri = HttpUri.of(uri);
+        Pattern pattern = Pattern.compile(uri);
+
+        // when
+        boolean result = httpUri.match(pattern);
+
+        // then
+        assertThat(result).isTrue();
+    }
+
+
+    @Test
+    void 전달받은_pattern이_uri와_일치하지_않는지_확인한다() {
+        // given
+        String uri = "/index.html";
+        HttpUri httpUri = HttpUri.of(uri);
+        Pattern pattern = Pattern.compile("/login.html");
+
+        // when
+        boolean result = httpUri.match(pattern);
+
+        // then
+        assertThat(result).isFalse();
     }
 }

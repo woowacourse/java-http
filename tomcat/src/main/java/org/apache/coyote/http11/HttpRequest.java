@@ -15,17 +15,15 @@ public class HttpRequest {
     }
 
     public static HttpRequest from(final String requestHeader) {
-        return new HttpRequest(parseUrl(requestHeader), parseRequestParams(requestHeader));
-    }
-
-    private static String parseUrl(final String requestHeader) {
-        return requestHeader.split(" ")[1]
-                .split("\\?")[0];
-    }
-
-    private static Map<String, String> parseRequestParams(final String requestHeader) {
         String url = requestHeader.split(" ")[1];
+        return new HttpRequest(parseUrl(url), parseRequestParams(url));
+    }
 
+    private static String parseUrl(final String uri) {
+        return uri.split("\\?")[0];
+    }
+
+    private static Map<String, String> parseRequestParams(final String url) {
         if (!url.contains("?")) {
             return Map.of();
         }

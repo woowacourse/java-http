@@ -14,7 +14,7 @@ public class StartLine {
     private final RequestUrl requestUrl;
     private final Protocol protocol;
 
-    public StartLine(HttpMethod method, RequestUrl requestUrl, Protocol protocol) {
+    private StartLine(HttpMethod method, RequestUrl requestUrl, Protocol protocol) {
         this.method = method;
         this.requestUrl = requestUrl;
         this.protocol = protocol;

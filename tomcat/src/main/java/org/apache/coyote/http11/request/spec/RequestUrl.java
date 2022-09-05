@@ -11,7 +11,7 @@ public class RequestUrl {
     private String path;
     private final QueryParams queryParams;
 
-    public RequestUrl(String path, QueryParams queryParams) {
+    private RequestUrl(String path, QueryParams queryParams) {
         this.path = path;
         this.queryParams = queryParams;
     }

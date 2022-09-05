@@ -114,6 +114,31 @@ class Http11ProcessorTest {
         assertThat(socket.output()).contains(expectedContents);
     }
 
+    @DisplayName("로그인 POST 요청 시 로그인에 성공하면 상태코드 Found를 응답한다.")
+    @Test
+    void login_post() {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /login HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 30 ",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
+                "",
+                "account=gugu&password=password");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+        final String expectedStatus = StatusCode.FOUND.toString();
+
+        // then
+        assertThat(socket.output()).contains(expectedStatus);
+    }
+
     @DisplayName("회원가입 GET 요청 시 회원가입 페이지를 응답한다.")
     @Test
     void register_get() throws IOException {
@@ -137,7 +162,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).contains(expectedContents);
     }
 
-    @DisplayName("회원가입 POST 요청 시 회원가입에 성공하면 See Other를 응답한다.")
+    @DisplayName("회원가입 POST 요청 시 회원가입에 성공하면 상태코드 See Other를 응답한다.")
     @Test
     void register_post() {
         // given
@@ -145,11 +170,11 @@ class Http11ProcessorTest {
                 "POST /register HTTP/1.1 ",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
-                "Content-Length: 80 ",
+                "Content-Length: 53 ",
                 "Content-Type: application/x-www-form-urlencoded ",
                 "Accept: */* ",
                 "",
-                "account=forky&password=password&email=forky%40foo.com");
+                "account=forky&email=forky%40foo.com&password=password");
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

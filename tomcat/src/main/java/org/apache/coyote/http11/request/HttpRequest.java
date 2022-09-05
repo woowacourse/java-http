@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.request;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.http11.enums.HttpMethod;

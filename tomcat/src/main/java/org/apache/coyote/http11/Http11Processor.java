@@ -13,6 +13,10 @@ import org.apache.catalina.Manager;
 import org.apache.catalina.SessionManager;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestBody;
+import org.apache.coyote.http11.request.HttpRequestHeader;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

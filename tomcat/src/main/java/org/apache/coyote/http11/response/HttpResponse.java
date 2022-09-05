@@ -1,8 +1,9 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.File;
 import java.util.Optional;
 import org.apache.coyote.http11.enums.HttpStatusCode;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.utils.FileUtil;
 import org.apache.coyote.http11.utils.UuidUtil;
 

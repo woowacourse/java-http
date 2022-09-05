@@ -3,10 +3,10 @@ package nextstep.jwp.handler;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import org.apache.coyote.http11.HttpRequest;
-import org.apache.coyote.http11.HttpRequestBody;
-import org.apache.coyote.http11.HttpRequestHeader;
-import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestBody;
+import org.apache.coyote.http11.request.HttpRequestHeader;
+import org.apache.coyote.http11.response.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

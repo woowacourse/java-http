@@ -29,4 +29,14 @@ public class LoginRequestHandler implements HttpRequestHandler {
         }
         return HttpResponse.found(httpVersion, new Location("/401.html"));
     }
+
+    @Override
+    public HttpResponse handleHttpGetRequest(final HttpRequest httpRequest) {
+        return null;
+    }
+
+    @Override
+    public HttpResponse handleHttpPostRequest(final HttpRequest httpRequest) {
+        return null;
+    }
 }

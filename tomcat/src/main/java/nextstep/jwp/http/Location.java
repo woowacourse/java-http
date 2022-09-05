@@ -24,6 +24,10 @@ public class Location {
         return String.format(HEADER_TEMPLATE, value);
     }
 
+    public boolean isEmpty() {
+        return value.equals(EMPTY_LOCATION);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {

@@ -19,6 +19,10 @@ public class HttpResponse {
         this.responseBody = responseBody;
     }
 
+    public static HttpResponse ok(final HttpVersion httpVersion, final String responseBody) {
+        return new HttpResponse(httpVersion, HttpStatus.OK, ContentType.TEXT_HTML, Location.empty(), responseBody);
+    }
+
     public static HttpResponse found(final HttpVersion httpVersion, final Location location) {
         return new HttpResponse(httpVersion, HttpStatus.FOUND, ContentType.APPLICATION_JSON, location, EMPTY_BODY);
     }
@@ -28,13 +32,19 @@ public class HttpResponse {
     }
 
     public String createOutputResponse() {
-        return String.join("\r\n",
-                httpVersion + " " + httpStatus.httpResponseHeaderStatus() + " ",
+        String response = joinOutputResponseFormat(
+                httpVersion.getValue() + " " + httpStatus.httpResponseHeaderStatus() + " ",
                 "Content-Type: " + contentType.getType() + ";charset=utf-8 ",
-                "Content-Length: " + contentLength() + " ",
-                location.toHeaderFormat(),
-                "",
-                responseBody);
+                "Content-Length: " + contentLength() + " "
+        );
+        if (!location.isEmpty()) {
+            response = joinOutputResponseFormat(response, location.toHeaderFormat());
+        }
+        return joinOutputResponseFormat(response, "", responseBody);
+    }
+
+    private String joinOutputResponseFormat(final String ... response) {
+        return String.join("\r\n", response);
     }
 
     private int contentLength() {

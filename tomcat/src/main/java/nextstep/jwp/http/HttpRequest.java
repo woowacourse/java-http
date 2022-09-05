@@ -24,16 +24,21 @@ public class HttpRequest {
     private final String path;
     private final RequestParams queryParams;
     private final ContentType contentType;
+    private final HttpRequestHeaders httpRequestHeaders;
+    private final HttpRequestBody httpRequestBody;
 
     public HttpRequest(final HttpMethod httpMethod, final String path, final RequestParams queryParams,
-                       final ContentType contentType) {
+                       final ContentType contentType, final HttpRequestHeaders httpRequestHeaders,
+                       final HttpRequestBody httpRequestBody) {
         this.httpMethod = httpMethod;
         this.path = path;
         this.queryParams = queryParams;
         this.contentType = contentType;
+        this.httpRequestHeaders = httpRequestHeaders;
+        this.httpRequestBody = httpRequestBody;
     }
 
-    public static HttpRequest from(final String requestLine) {
+    public static HttpRequest of(final String requestLine, final HttpRequestHeaders httpRequestHeaders, final HttpRequestBody httpRequestBody) {
         String[] requestLineValues = splitRequestLine(requestLine);
 
         HttpMethod httpMethod = HttpMethod.from(requestLineValues[REQUEST_LINE_HTTP_METHOD_INDEX]);
@@ -42,7 +47,7 @@ public class HttpRequest {
         RequestParams queryParams = RequestParams.from(parseQueryParameter(uri));
         ContentType contentType = parseContentType(path);
 
-        return new HttpRequest(httpMethod, path, queryParams, contentType);
+        return new HttpRequest(httpMethod, path, queryParams, contentType, httpRequestHeaders, httpRequestBody);
     }
 
     private static String[] splitRequestLine(final String requestLine) {

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.presentation.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.FileNotFoundException;
 import org.slf4j.Logger;
@@ -33,12 +34,11 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              final var reader = new BufferedReader(new InputStreamReader(inputStream))
         ) {
+            final String startLine = reader.readLine();
+            final Controller handler = RequestHandlerMapping.getHandler(startLine);
 
-            String uri = reader.readLine().split(" ")[URI];
-            final ResponseHandler responseHandler = new ResponseHandler(uri);
-            final String response = responseHandler.getResponse();
-
-            outputStream.write(response.getBytes());
+            final ResponseEntity responseEntity = ResponseHandler.handle(handler, startLine);
+            outputStream.write(responseEntity.getResponse().getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | FileNotFoundException e) {
             LOGGER.error(e.getMessage(), e);

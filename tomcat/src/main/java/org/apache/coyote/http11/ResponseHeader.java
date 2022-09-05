@@ -1,7 +1,5 @@
 package org.apache.coyote.http11;
 
-import static org.apache.coyote.http11.StatusCode.OK;
-
 public class ResponseHeader {
 
     private static final String EXTENSION_DELIMITER = ".";
@@ -13,9 +11,9 @@ public class ResponseHeader {
         this.path = path;
     }
 
-    public String getHeader(String response) {
+    public String getHeader(StatusCode statusCode, String response) {
         return String.join("\r\n",
-                HTTP_VERSION + OK.getStatusMessage(),
+                HTTP_VERSION + statusCode.getStatusMessage(),
                 "Content-Type: " + getContentType().getMIMEType() +";charset=utf-8 ",
                 "Content-Length: " + response.getBytes().length + " ",
                 "");

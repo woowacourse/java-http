@@ -12,7 +12,7 @@ class ResponseHeaderTest {
     void validateHeaderFormat() {
         final ResponseHeader responseHeader = new ResponseHeader("/");
 
-        assertThat(responseHeader.getHeader("Hello world!"))
+        assertThat(responseHeader.getHeader(StatusCode.OK, "Hello world!"))
                 .isEqualTo(String.join("\r\n",
                         "HTTP/1.1 200 OK ",
                         "Content-Type: text/html;charset=utf-8 ",

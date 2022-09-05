@@ -19,9 +19,7 @@ public class RegisterHandler {
         final User user = createUser(requestBody);
         InMemoryUserRepository.save(user);
 
-        final HttpResponse response = HttpResponse.of(httpRequest, HttpStatusCode.FOUND, "/register.html");
-        response.addHeader("Location", "/login.html");
-        return response;
+        return generateSuccessResponse(httpRequest);
     }
 
     private User createUser(final HttpRequestBody requestBody) {
@@ -29,5 +27,11 @@ public class RegisterHandler {
         final String password = requestBody.findByKey("password");
         final String email = requestBody.findByKey("email");
         return new User(account, password, email);
+    }
+
+    private HttpResponse generateSuccessResponse(final HttpRequest httpRequest) {
+        final HttpResponse response = HttpResponse.of(httpRequest, HttpStatusCode.FOUND, "/register.html");
+        response.addLocation("/login.html");
+        return response;
     }
 }

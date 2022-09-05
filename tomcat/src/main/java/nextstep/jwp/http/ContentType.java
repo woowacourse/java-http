@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 public enum ContentType {
 
+    TEXT_PLAIN("txt", "text", "plain"),
     TEXT_HTML("html", "text", "html"),
     TEXT_CSS("css", "text", "css"),
     APPLICATION_JAVASCRIPT("js", "application", "javascript"),

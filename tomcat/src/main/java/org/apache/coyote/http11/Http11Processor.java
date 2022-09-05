@@ -35,9 +35,10 @@ public class Http11Processor implements Runnable, Processor {
              final var outputStream = connection.getOutputStream();
              InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
              BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+            String request = bufferedReader.readLine();
 
-            String uri = UrlParser.extractUri(bufferedReader);
-            String httpMethod = UrlParser.extractMethod(bufferedReader);
+            String uri = UrlParser.extractUri(request);
+            String httpMethod = UrlParser.extractMethod(request);
             Url url = HandlerMapping.from(uri);
             Http11Response responseBody = Http11Response.extract(url, httpMethod);
 

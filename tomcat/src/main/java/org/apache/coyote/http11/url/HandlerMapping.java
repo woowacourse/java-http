@@ -6,17 +6,17 @@ public class HandlerMapping {
         if (isHomeUrl(uri)) {
             return new HomePage(uri);
         }
-        if (uri.startsWith("login")) {
+        if (uri.startsWith("/login")) {
             return new Login(uri);
         }
-        if (uri.startsWith("register")) {
+        if (uri.startsWith("/register")) {
             return new Register(uri);
         }
         return new Empty(uri);
     }
 
     private static boolean isHomeUrl(String uri) {
-        return uri.startsWith("index") || uri.endsWith("css") || uri.endsWith("csv") || uri.endsWith("js")
+        return uri.startsWith("/index") || uri.endsWith("css") || uri.endsWith("csv") || uri.endsWith("js")
                 || uri.endsWith("ico");
     }
 }

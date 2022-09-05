@@ -16,4 +16,9 @@ public class Empty extends Url {
         log.info("path : {} ", getPath());
         throw new IllegalArgumentException("경로가 비어있습니다.");
     }
+
+    @Override
+    public boolean isEmpty() {
+        return true;
+    }
 }

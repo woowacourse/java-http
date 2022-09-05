@@ -8,7 +8,7 @@ import java.util.Objects;
 import org.apache.coyote.http11.url.Url;
 
 public class IOUtils {
-    private static final String STATIC_DIRECTORY = "static/";
+    private static final String STATIC_DIRECTORY = "static";
 
     public static String readResourceFile(Url url, String httpMethod) {
         try {

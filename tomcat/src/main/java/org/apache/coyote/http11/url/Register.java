@@ -13,6 +13,7 @@ public class Register extends Url {
     @Override
     public Http11Response getResponse(String httpMethod) {
         if (HttpMethod.GET.name().equals(httpMethod)) {
+            System.out.println(httpMethod + " !!@Reter");
             return new Http11Response(ContentType.from(getPath()), HttpStatus.OK, getPath());
         }
         if (HttpMethod.POST.name().equals(httpMethod)) {

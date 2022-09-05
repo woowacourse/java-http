@@ -17,7 +17,7 @@ public class Http11Response {
     }
 
     public static Http11Response extract(final Url url, String httpMethod) throws IOException {
-        if (url.getPath().isEmpty()) {
+        if (url.isEmpty()) {
             return new Http11Response(ContentType.from(url.getPath()), HttpStatus.OK, "Hello world!");
         }
         String resource = IOUtils.readResourceFile(url, httpMethod);

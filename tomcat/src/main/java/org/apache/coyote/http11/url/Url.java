@@ -14,4 +14,8 @@ public abstract class Url {
     public String getPath() {
         return path;
     }
+
+    public boolean isEmpty(){
+        return false;
+    }
 }

@@ -2,7 +2,7 @@ package nextstep.jwp.model;
 
 public class User {
 
-	private final Long id;
+	private Long id;
 	private final String account;
 	private final String password;
 	private final String email;

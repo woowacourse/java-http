@@ -11,9 +11,10 @@ import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import support.DatabaseIsolation;
 import support.StubSocket;
 
-class LoginControllerTest {
+class LoginControllerTest extends DatabaseIsolation {
 
 	@DisplayName("/login으로 GET 요청을 보내면 login.html을 반환한다.")
 	@Test
@@ -48,6 +49,20 @@ class LoginControllerTest {
 	@Test
 	void login() {
 		// given
+		final String registerRequest = String.join("\r\n",
+			"POST /register HTTP/1.1 ",
+			"Host: localhost:8080 ",
+			"Connection: keep-alive ",
+			"Content-Type: application/x-www-form-urlencoded",
+			"Content-Length: 30",
+			"Accept: */*",
+			"",
+			"account=gugu&password=password&email=ldk980130@gmail.com");
+
+		final var registerSocket = new StubSocket(registerRequest);
+		new Http11Processor(registerSocket).process(registerSocket);
+
+		// when
 		final String httpRequest = String.join("\r\n",
 			"POST /login HTTP/1.1 ",
 			"Host: localhost:8080 ",

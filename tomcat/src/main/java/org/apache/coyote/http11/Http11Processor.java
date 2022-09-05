@@ -38,16 +38,10 @@ public class Http11Processor implements Runnable, Processor {
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
              final var outputStream = connection.getOutputStream()) {
 
-            String line = bufferedReader.readLine();
-            if (line == null) {
-                return;
-            }
-
-            String uri = line.split(" ")[1];
-            RequestUri requestUri = new RequestUri(uri);
-            final String responseBody = getResponseBody(requestUri.getPath());
-            final String contentType = getContentType(requestUri.getPath());
-            final Map<String, String> queryParams = requestUri.getQueryParams();
+            StartLine startLine = new StartLine(bufferedReader.readLine());
+            final String responseBody = getResponseBody(startLine.getRequestUri());
+            final String contentType = getContentType(startLine.getRequestUri());
+            final Map<String, String> queryParams = startLine.getQueryParams();
 
             if (queryParams.containsKey("account")) {
                 Optional<User> foundUser = InMemoryUserRepository.findByAccount(queryParams.get("account"));

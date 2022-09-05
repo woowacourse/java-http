@@ -8,7 +8,6 @@ import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.request.Method;
 import org.apache.coyote.http11.model.response.ContentType;
 import org.apache.coyote.http11.model.response.HttpResponse;
-import org.apache.coyote.http11.model.response.ResponseLine;
 import org.apache.coyote.http11.model.response.ResponseStatusCode;
 
 public class RegisterHandler implements Handler{
@@ -25,26 +24,36 @@ public class RegisterHandler implements Handler{
 
     @Override
     public String getResponse() {
+        HttpResponse response = createHttpResponse();
+        return response.getResponse();
+    }
+
+    private HttpResponse createHttpResponse() {
         if (httpRequest.matchRequestMethod(Method.GET)) {
-            return createHttpResponse(ResponseStatusCode.OK, FileReader.getFile(REGISTER_RESOURCE_PATH, getClass()))
-                    .getResponse();
+            return doGet();
         }
         if (httpRequest.matchRequestMethod(Method.POST)) {
-            saveUser(httpRequest.getBody());
-            return createHttpResponse(ResponseStatusCode.OK, FileReader.getFile(INDEX_RESOURCE_PATH, getClass()))
-                    .getResponse();
+            return doPost();
         }
-        return createHttpResponse(ResponseStatusCode.NOT_FOUND, FileReader.getFile(NOT_FOUND_RESOURCE_PATH, getClass()))
-                .getResponse();
+        HttpResponse response = HttpResponse.of(ResponseStatusCode.FOUND, ContentType.HTML);
+        response.addLocationHeader(NOT_FOUND_RESOURCE_PATH);
+        return response;
+    }
+
+    private HttpResponse doGet() {
+        return HttpResponse.of(ResponseStatusCode.OK, ContentType.HTML,
+                FileReader.getFile(REGISTER_RESOURCE_PATH, getClass()));
+    }
+
+    private HttpResponse doPost() {
+        saveUser(httpRequest.getBody());
+        HttpResponse response = HttpResponse.of(ResponseStatusCode.FOUND, ContentType.HTML);
+        response.addLocationHeader(INDEX_RESOURCE_PATH);
+        return response;
     }
 
     private void saveUser(final Map<String, String> body) {
         User user = new User(body.get("account"), body.get("password"), body.get("email"));
         InMemoryUserRepository.save(user);
-    }
-
-    private HttpResponse createHttpResponse(final ResponseStatusCode statusCode, final String body) {
-        ResponseLine responseLine = ResponseLine.of(statusCode);
-        return HttpResponse.of(responseLine, ContentType.HTML, body);
     }
 }

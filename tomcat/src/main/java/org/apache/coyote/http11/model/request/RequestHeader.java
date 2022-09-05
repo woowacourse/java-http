@@ -6,10 +6,10 @@ import java.util.Map;
 
 public class RequestHeader {
 
-    public static final String COOKIE = "Cookie";
+    private static final String COOKIE = "Cookie";
     private static final String CONTENT_LENGTH = "Content-Length";
-    public static final int HEADER_KEY_INDEX = 0;
-    public static final int HEADER_VALUE_INDEX = 1;
+    private static final int HEADER_KEY_INDEX = 0;
+    private static final int HEADER_VALUE_INDEX = 1;
     private final Map<String, String> headers;
 
     private RequestHeader(final Map<String, String> headers) {
@@ -18,11 +18,11 @@ public class RequestHeader {
 
     public static RequestHeader from(final List<String> input) {
         Map<String, String> headers = new HashMap<>();
-        for (String s : input) {
-            String[] split = s.split(" ");
-            String key = split[HEADER_KEY_INDEX].substring(HEADER_KEY_INDEX, split[HEADER_KEY_INDEX]
+        for (String header : input) {
+            String[] splitHeader = header.split(" ");
+            String key = splitHeader[HEADER_KEY_INDEX].substring(HEADER_KEY_INDEX, splitHeader[HEADER_KEY_INDEX]
                     .lastIndexOf(":"));
-            headers.put(key, split[HEADER_VALUE_INDEX].trim());
+            headers.put(key, splitHeader[HEADER_VALUE_INDEX].trim());
         }
         return new RequestHeader(headers);
     }

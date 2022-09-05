@@ -26,7 +26,7 @@ public class HttpRequest {
             RequestBody body = createBody(reader, headers.getContentLength());
             return new HttpRequest(requestLine, headers, body);
         } catch (Exception exception) {
-            throw new IllegalArgumentException("Request에 생성 시, 문제가 발생했습니다.");
+            throw new IllegalArgumentException("HttpRequest 생성 시, 문제가 발생했습니다.");
         }
     }
 

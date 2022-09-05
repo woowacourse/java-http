@@ -9,7 +9,6 @@ import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.request.Method;
 import org.apache.coyote.http11.model.response.ContentType;
 import org.apache.coyote.http11.model.response.HttpResponse;
-import org.apache.coyote.http11.model.response.ResponseLine;
 import org.apache.coyote.http11.model.response.ResponseStatusCode;
 import org.apache.coyote.http11.model.session.Cookie;
 import org.apache.coyote.http11.model.session.Session;
@@ -39,12 +38,14 @@ public class LoginHandler implements Handler {
     }
 
     private HttpResponse doGet(final HttpRequest httpRequest) {
-        if (SessionManager.findSession(httpRequest.getCookieKey())
-                .isPresent()) {
-            return createHttpResponse(ResponseStatusCode.OK,
-                    FileReader.getFile(INDEX_RESOURCE_PATH, getClass()));
+        if (SessionManager.findSession(httpRequest.getCookieKey())) {
+            HttpResponse response = HttpResponse.of(ResponseStatusCode.FOUND, ContentType.HTML);
+            response.addLocationHeader(INDEX_RESOURCE_PATH);
+            return response;
+
         }
-        return createHttpResponse(ResponseStatusCode.OK, FileReader.getFile(LOGIN_RESOURCE_PATH, getClass()));
+        return HttpResponse.of(ResponseStatusCode.OK, ContentType.HTML,
+                FileReader.getFile(LOGIN_RESOURCE_PATH, getClass()));
     }
 
     private HttpResponse doPost(final HttpRequest httpRequest) {
@@ -54,8 +55,10 @@ public class LoginHandler implements Handler {
         if (successLogin(body, maybeUser)) {
             return successResponse(maybeUser.get());
         }
-        return createHttpResponse(ResponseStatusCode.UNAUTHORIZED,
-                FileReader.getFile(UNAUTHORIZED_RESOURCE_PATH, getClass()));
+
+        HttpResponse httpResponse = HttpResponse.of(ResponseStatusCode.UNAUTHORIZED, ContentType.HTML);
+        httpResponse.addLocationHeader(UNAUTHORIZED_RESOURCE_PATH);
+        return httpResponse;
     }
 
     private boolean successLogin(final Map<String, String> body, final Optional<User> maybeUser) {
@@ -63,21 +66,16 @@ public class LoginHandler implements Handler {
     }
 
     private HttpResponse successResponse(final User user) {
-        HttpResponse httpResponse = createHttpResponse(ResponseStatusCode.OK,
-                FileReader.getFile(INDEX_RESOURCE_PATH, getClass()));
+        HttpResponse httpResponse = HttpResponse.of(ResponseStatusCode.FOUND, ContentType.HTML);
         Cookie cookie = new Cookie();
         SessionManager.add(cookie.getCookieToString(), new Session("user", user));
         httpResponse.addCookie(cookie);
+        httpResponse.addLocationHeader(INDEX_RESOURCE_PATH);
         return httpResponse;
     }
 
     private boolean checkUserPassword(final Map<String, String> queryParams, final User user) {
         String password = queryParams.get("password");
         return user.checkPassword(password);
-    }
-
-    private HttpResponse createHttpResponse(ResponseStatusCode responseStatusCode, String resourcePath) {
-        ResponseLine responseLine = ResponseLine.of(responseStatusCode);
-        return HttpResponse.of(responseLine, ContentType.HTML, resourcePath);
     }
 }

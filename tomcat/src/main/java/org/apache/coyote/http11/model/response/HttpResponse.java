@@ -11,6 +11,7 @@ public class HttpResponse {
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
     private static final String SET_COOKIE = "Set-Cookie";
+    private static final String LOCATION = "Location";
 
     private final ResponseLine responseLine;
     private final Map<String, String> headers;
@@ -23,10 +24,15 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse of(final ResponseLine responseLine, final ContentType contentType,
+    public static HttpResponse of(final ResponseStatusCode statusCode, final ContentType contentType,
                                   final String body) {
         Map<String, String> headers = initHeaders(contentType, body);
-        return new HttpResponse(responseLine, headers, body);
+        return new HttpResponse(ResponseLine.of(statusCode), headers, body);
+    }
+
+    public static HttpResponse of(final ResponseStatusCode statusCode, final ContentType contentType) {
+        Map<String, String> headers = initHeaders(contentType, "");
+        return new HttpResponse(ResponseLine.of(statusCode), headers, "");
     }
 
     private static Map<String, String> initHeaders(final ContentType contentType, final String body) {
@@ -40,8 +46,8 @@ public class HttpResponse {
         headers.put(SET_COOKIE, cookie.getCookieToString());
     }
 
-    public void addHeader(String key, String value) {
-        headers.put(key, value);
+    public void addLocationHeader(final String location) {
+        headers.put(LOCATION, location);
     }
 
     public String getResponse() {
@@ -55,7 +61,7 @@ public class HttpResponse {
     private String getHeadersToString() {
         return headers.keySet()
                 .stream()
-                .map(key -> key + HEADER_DELIMITER + headers.get(key) + " ")
-                .collect(Collectors.joining());
+                .map(key -> key + HEADER_DELIMITER + headers.get(key))
+                .collect(Collectors.joining(" \r\n"));
     }
 }

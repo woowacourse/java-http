@@ -2,7 +2,6 @@ package org.apache.coyote.http11.model.session;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class SessionManager  {
 
@@ -12,11 +11,8 @@ public class SessionManager  {
         sessions.put(key, session);
     }
 
-    public static Optional<Session> findSession(final String key) {
-        if (sessions.containsKey(key)) {
-            return Optional.of(sessions.get(key));
-        }
-        return Optional.empty();
+    public static boolean findSession(final String key) {
+        return sessions.containsKey(key);
     }
 
     public static void remove(final String key) {

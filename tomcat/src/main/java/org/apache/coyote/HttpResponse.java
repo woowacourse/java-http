@@ -53,6 +53,10 @@ public class HttpResponse {
         this.status = status;
     }
 
+    public void setLocation(final String location) {
+        headers.addHeader("Location", location);
+    }
+
     public void addHeader(final String key, final String value) {
         headers.addHeader(key, value);
     }

@@ -6,6 +6,7 @@ import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.coyote.HttpRequest;
 import org.apache.coyote.HttpResponse;
+import org.apache.coyote.constant.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,13 +32,18 @@ public class LoginController extends AbstractController {
             final String account = request.getParam(ACCOUNT_PARAM);
             final String password = request.getParam(PASSWORD_PARAM);
             Objects.requireNonNull(account, "null이면 안됨 ㅋ");
-            Objects.requireNonNull(password,"null이면 안됨 ㅋ");
+            Objects.requireNonNull(password, "null이면 안됨 ㅋ");
 
             final User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(NoSuchElementException::new);
             if (user.checkPassword(password)) {
-                final String outputMessage = user.toString();
-                log.info(outputMessage);
+                final String successMessage = user.toString();
+                log.info(successMessage);
+                response.setStatus(HttpStatus.FOUND);
+                response.setLocation("/index.html");
+            } else {
+                response.setStatus(HttpStatus.FOUND);
+                response.setLocation("/401.html");
             }
         } catch (final RuntimeException e) {
             log.error(e.getMessage());
@@ -45,6 +51,5 @@ public class LoginController extends AbstractController {
 
         final Controller staticResourceController = StaticResourceController.getInstance();
         staticResourceController.service(request, response);
-
     }
 }

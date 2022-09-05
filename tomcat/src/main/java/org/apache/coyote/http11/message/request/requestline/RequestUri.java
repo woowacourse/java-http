@@ -1,8 +1,8 @@
-package org.apache.coyote.http11.request.requestline;
+package org.apache.coyote.http11.message.request.requestline;
 
 import java.util.Objects;
-import org.apache.coyote.http11.Regex;
-import org.apache.coyote.http11.request.QueryParams;
+import org.apache.coyote.http11.message.Regex;
+import org.apache.coyote.http11.message.request.QueryParams;
 
 public class RequestUri {
 

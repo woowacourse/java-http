@@ -1,11 +1,11 @@
-package org.apache.coyote.http11.request.header;
+package org.apache.coyote.http11.message.request.header;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.Regex;
-import org.apache.coyote.http11.header.Header;
+import org.apache.coyote.http11.message.Regex;
+import org.apache.coyote.http11.message.header.Header;
 
 public class Headers {
 

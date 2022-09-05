@@ -14,12 +14,12 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.service.UserService;
 import nextstep.jwp.util.ResourceLoader;
 import org.apache.coyote.Processor;
-import org.apache.coyote.http11.header.Header;
-import org.apache.coyote.http11.request.QueryParams;
-import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.response.Response;
-import org.apache.coyote.http11.response.header.ContentType;
-import org.apache.coyote.http11.response.header.StatusCode;
+import org.apache.coyote.http11.message.header.Header;
+import org.apache.coyote.http11.message.request.QueryParams;
+import org.apache.coyote.http11.message.request.Request;
+import org.apache.coyote.http11.message.response.Response;
+import org.apache.coyote.http11.message.response.header.ContentType;
+import org.apache.coyote.http11.message.response.header.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

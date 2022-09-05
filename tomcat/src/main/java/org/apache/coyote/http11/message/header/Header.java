@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.header;
+package org.apache.coyote.http11.message.header;
 
 public enum Header {
 

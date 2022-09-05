@@ -1,10 +1,10 @@
-package org.apache.coyote.http11.response.header;
+package org.apache.coyote.http11.message.response.header;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.Regex;
-import org.apache.coyote.http11.header.Header;
+import org.apache.coyote.http11.message.Regex;
+import org.apache.coyote.http11.message.header.Header;
 
 public class Headers {
 

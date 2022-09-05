@@ -1,6 +1,6 @@
-package org.apache.coyote.http11.response.header;
+package org.apache.coyote.http11.message.response.header;
 
-import org.apache.coyote.http11.Regex;
+import org.apache.coyote.http11.message.Regex;
 
 public enum StatusCode {
     OK(200, "OK"),

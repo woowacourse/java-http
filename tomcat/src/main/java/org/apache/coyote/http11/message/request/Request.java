@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.message.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import org.apache.coyote.http11.header.Header;
-import org.apache.coyote.http11.request.body.RequestBody;
-import org.apache.coyote.http11.request.header.Headers;
-import org.apache.coyote.http11.request.requestline.RequestLine;
+import org.apache.coyote.http11.message.header.Header;
+import org.apache.coyote.http11.message.request.body.RequestBody;
+import org.apache.coyote.http11.message.request.header.Headers;
+import org.apache.coyote.http11.message.request.requestline.RequestLine;
 
 public class Request {
 

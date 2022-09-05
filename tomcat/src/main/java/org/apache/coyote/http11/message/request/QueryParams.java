@@ -1,9 +1,9 @@
-package org.apache.coyote.http11.request;
+package org.apache.coyote.http11.message.request;
 
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.Regex;
+import org.apache.coyote.http11.message.Regex;
 
 public class QueryParams {
 

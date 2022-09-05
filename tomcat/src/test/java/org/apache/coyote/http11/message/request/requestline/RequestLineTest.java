@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.request.requestline;
+package org.apache.coyote.http11.message.request.requestline;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;

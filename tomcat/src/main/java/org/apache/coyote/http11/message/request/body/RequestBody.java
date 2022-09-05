@@ -1,6 +1,6 @@
-package org.apache.coyote.http11.request.body;
+package org.apache.coyote.http11.message.request.body;
 
-import org.apache.coyote.http11.request.QueryParams;
+import org.apache.coyote.http11.message.request.QueryParams;
 
 public class RequestBody {
 

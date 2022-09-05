@@ -53,14 +53,19 @@ public class HttpRequestCreator {
 
     private HttpHeader httpRequestHeader(final BufferedReader bufferReader) throws IOException {
         List<String> headers = new ArrayList<>();
-        while (bufferReader.readLine().isBlank()) {
-            headers.add(bufferReader.readLine());
+        String header = bufferReader.readLine();
+        while (header != null && !header.isBlank()) {
+            headers.add(header);
+            header = bufferReader.readLine();
         }
         return new HttpHeader(headers);
     }
 
     private HttpRequestBody httpRequestBody(final HttpHeader headers, final BufferedReader bufferReader)
             throws IOException {
+        if (headers.get("Content-Length") == null) {
+            return new HttpRequestBody(" ");
+        }
         int contentLength = Integer.parseInt(headers.get("Content-Length"));
         char[] buffer = new char[contentLength];
         bufferReader.read(buffer, 0, contentLength);

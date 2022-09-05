@@ -20,6 +20,18 @@ public class LoginController extends AbstractController {
     @Override
     public void service(final HttpRequest request, final HttpResponse response)
             throws IOException, UncheckedServletException {
+        String method = request.getMethod();
+        if (method.equals("POST")) {
+            doPost(request, response);
+        }
+        if (method.equals("GET")) {
+            doGet(request, response);
+        }
+    }
+
+    @Override
+    protected void doPost(final HttpRequest request, final HttpResponse response)
+            throws IOException, UncheckedServletException {
         String responseBody = new ClassPathResource().getStaticContent(request.getPath());
 
         response.setStatus("OK");
@@ -27,15 +39,13 @@ public class LoginController extends AbstractController {
         response.setContentLength(responseBody.getBytes().length);
         response.setResponseBody(responseBody);
 
-        if (request.hasQueryParams()) {
-            Login(request, response);
-        }
+        Login(request, response);
     }
 
     private void Login(final HttpRequest request, final HttpResponse response) {
-        Map<String, String> queryString = request.getQueryParams();
-        String account = queryString.get("account");
-        String password = queryString.get("password");
+        Map<String, String> requestBodies = request.getRequestBodies();
+        String account = requestBodies.get("account");
+        String password = requestBodies.get("password");
 
         User user = findUser(account);
 
@@ -57,5 +67,16 @@ public class LoginController extends AbstractController {
 
     private void printUser(final User user) {
         log.info(user.toString());
+    }
+
+    @Override
+    protected void doGet(final HttpRequest request, final HttpResponse response)
+            throws IOException, UncheckedServletException {
+        String responseBody = new ClassPathResource().getStaticContent(request.getPath());
+
+        response.setStatus("OK");
+        response.setContentType(request.findContentType());
+        response.setContentLength(responseBody.getBytes().length);
+        response.setResponseBody(responseBody);
     }
 }

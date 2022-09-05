@@ -15,7 +15,7 @@ public class HttpRequestBody {
     public HttpRequestBody(final String requestBody) {
         Map<String, String> requestBodies = new HashMap<>();
 
-        if (requestBodies != null) {
+        if (!requestBody.isBlank()) {
             insertValue(requestBodies, requestBody);
         }
         this.requestBodies = requestBodies;

@@ -24,7 +24,7 @@ public class RequestMapping {
         if (path.equals("/401.html")) {
             return new ExceptionController();
         }
-        if (path.equals("register.html")) {
+        if (path.equals("/register.html")) {
             return new RegisterController();
         }
         throw new IllegalArgumentException();

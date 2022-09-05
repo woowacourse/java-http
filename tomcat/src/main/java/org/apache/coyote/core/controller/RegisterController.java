@@ -30,9 +30,10 @@ public class RegisterController extends AbstractController {
 
         String responseBody = new ClassPathResource().getStaticContent(request.getPath());
 
-        response.setStatus("OK");
+        response.setStatus("FOUND");
         response.setContentType(request.findContentType());
         response.setContentLength(responseBody.getBytes().length);
+        response.setLocation("./index.html");
         response.setResponseBody(responseBody);
     }
 

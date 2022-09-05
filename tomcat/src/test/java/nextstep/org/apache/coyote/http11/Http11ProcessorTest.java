@@ -174,4 +174,68 @@ class Http11ProcessorTest {
 
         assertThat(socket.output()).isEqualTo(expected);
     }
+
+    @DisplayName("/register url에 GET 방식으로 접근하면 register.html을 응답한다.")
+    @Test
+    void get_register() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "GET /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Accept: text/html;charset=utf-8",
+                "Connection: keep-alive ",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        var expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "\r\n" +
+                responseBody;
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @DisplayName("/register url에 POST 방식으로 접근하면 회원가입을 한다.")
+    @Test
+    void post_register() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /register HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 80",
+                "Content-Type: application/x-www-form-urlencoded ",
+                "Accept: */* ",
+                "",
+                "account=gugu&password=password&email=hkkang%40woowahan.com ");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/register.html");
+        final String responseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+
+        var expected = "HTTP/1.1 302 FOUND \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + responseBody.getBytes().length + " \r\n" +
+                "Location: ./index.html \r\n" +
+                "\r\n" +
+                responseBody;
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
 }

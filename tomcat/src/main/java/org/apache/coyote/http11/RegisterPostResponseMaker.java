@@ -41,7 +41,7 @@ public class RegisterPostResponseMaker implements ResponseMaker {
         final String account = registerData.get("account");
         final String email = registerData.get("email");
         final String password = registerData.get("password");
-        final User user = new User(account, email, password);
+        final User user = new User(account, password, email);
         final Optional<User> findUser = InMemoryUserRepository.findByAccount(user.getAccount());
         if (findUser.isPresent()) {
             log.info("이미 존재하는 유저입니다.");

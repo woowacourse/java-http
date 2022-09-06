@@ -17,22 +17,26 @@ public class ControllerMatcher {
 
     public static HttpResponse process(final HttpRequest request) {
         try {
-            if (request.getUrl().contains(".")) {
-                return Controller.template(request);
-            }
-            if (request.getUrl().equals(URL_LOGIN)) {
-                return Controller.login(request);
-            }
-            if (request.getUrl().equals(URL_REGISTER)) {
-                return Controller.register(request);
-            }
-            if (request.getUrl().equals(URL_INDEX)) {
-                return Controller.index();
-            }
-            return Controller.hello();
+            return match(request);
         } catch (IOException e) {
             log.warn(e.getMessage());
         }
         return HttpResponse.of(Status.INTERNAL_SERVER_ERROR);
+    }
+
+    private static HttpResponse match(final HttpRequest request) throws IOException {
+        if (request.getUrl().contains(".")) {
+            return MainController.template(request);
+        }
+        if (request.getUrl().equals(URL_INDEX)) {
+            return MainController.index();
+        }
+        if (request.getUrl().equals(URL_LOGIN)) {
+            return UserController.login(request);
+        }
+        if (request.getUrl().equals(URL_REGISTER)) {
+            return UserController.register(request);
+        }
+        return MainController.hello();
     }
 }

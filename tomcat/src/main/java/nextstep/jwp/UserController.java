@@ -11,21 +11,9 @@ import org.apache.coyote.http11.model.response.HttpResponse;
 import org.apache.coyote.http11.model.response.Resource;
 import org.apache.coyote.http11.model.response.Status;
 
-public class Controller {
+public class UserController {
 
     private static final UserService userService = new UserService();
-
-    public static HttpResponse hello() throws IOException {
-        HttpResponse response = HttpResponse.of(Status.OK);
-        response.addResource(findResource("/hello.txt"));
-        return response;
-    }
-
-    public static HttpResponse index() throws IOException {
-        HttpResponse response = HttpResponse.of(Status.OK);
-        response.addResource(findResource("/index.html"));
-        return response;
-    }
 
     public static HttpResponse login(final HttpRequest request) throws IOException {
         if (request.getQueryParams().isEmpty()) {
@@ -59,14 +47,8 @@ public class Controller {
         return response;
     }
 
-    public static HttpResponse template(final HttpRequest request) throws IOException{
-        HttpResponse response = HttpResponse.of(Status.OK);
-        response.addResource(findResource(request.getUrl()));
-        return response;
-    }
-
     private static Resource findResource(String url) throws IOException {
-        Path path = Path.of(Controller.class.getResource("/static" + url).getPath());
+        Path path = Path.of(MainController.class.getResource("/static" + url).getPath());
         String body = Files.readString(path);
 
         ContentType contentType = ContentType.findByExtension(url);

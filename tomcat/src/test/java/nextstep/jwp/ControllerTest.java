@@ -13,6 +13,24 @@ import org.junit.jupiter.api.Test;
 
 class ControllerTest {
 
+    @DisplayName("경로가 '/'일 시, hello.txt 반환")
+    @Test
+    void hello() {
+        final var request = HttpRequest.from(
+                "GET / HTTP/1.1 ",
+                List.of("Host: localhost:8080 ",
+                        "Connection: keep-alive ")
+        );
+
+        HttpResponse response = ControllerMatcher.process(request);
+
+        assertAll(
+                () -> assertThat(response.getStatus()).isEqualTo(Status.OK),
+                () -> assertThat(Integer.parseInt(response.getHeaderValue(Header.CONTENT_LENGTH)))
+                        .isEqualTo("Hello world!".getBytes().length)
+        );
+    }
+
     @DisplayName("올바른 로그인 요청 시 Status Found 및 Location 반환")
     @Test
     void loginSuccess() {

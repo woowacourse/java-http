@@ -13,12 +13,12 @@ public class HttpRequest {
     private static final int QUERY_PARAM_INDEX = 1;
     private static final int ONLY_PATH_SIZE = 1;
 
-    private final String httpMethod;
+    private final HttpMethod httpMethod;
     private final String uri;
     private final String path;
     private final QueryParams queryParams;
 
-    public HttpRequest(String httpMethod, String uri, String path, QueryParams queryParams) {
+    public HttpRequest(HttpMethod httpMethod, String uri, String path, QueryParams queryParams) {
         this.httpMethod = httpMethod;
         this.uri = uri;
         this.path = path;
@@ -27,13 +27,13 @@ public class HttpRequest {
 
     public static HttpRequest from(String requestLine) {
         List<String> request = List.of(requestLine.split(REQUEST_LINE_SEPARATOR));
-        String httpMethod = request.get(HTTP_METHOD_INDEX);
+        HttpMethod httpMethod = HttpMethod.from(request.get(HTTP_METHOD_INDEX));
         String uri = request.get(URI_INDEX);
         List<String> separatedUri = List.of(uri.split(URI_PATH_SEPARATOR));
         return handleHavingQueryParams(httpMethod, uri, separatedUri);
     }
 
-    private static HttpRequest handleHavingQueryParams(String httpMethod, String uri,
+    private static HttpRequest handleHavingQueryParams(HttpMethod httpMethod, String uri,
                                                        List<String> separatedUri) {
         if (hasQueryParam(separatedUri)) {
             return new HttpRequest(httpMethod, uri, separatedUri.get(PATH_INDEX),

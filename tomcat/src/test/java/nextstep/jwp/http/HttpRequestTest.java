@@ -15,7 +15,7 @@ class HttpRequestTest {
 
         HttpRequest actual = HttpRequest.from(requestLine);
 
-        HttpRequest expected = new HttpRequest("GET", "/login?key=value",
+        HttpRequest expected = new HttpRequest(HttpMethod.GET, "/login?key=value",
             "/login", new QueryParams(List.of(new QueryParam("key", "value"))));
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
     }

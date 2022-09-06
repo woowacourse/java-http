@@ -15,9 +15,9 @@ import java.util.LinkedHashMap;
 
 class RequestHandlerTest {
 
-    @DisplayName("로그인 요청을 Query String과 함께하면 로그인 성공 응답을 반환한다.")
+    @DisplayName("로그인을 Query String과 함께 GET으로 요청하면 로그인 성공 응답을 반환한다.")
     @Test
-    void handle_returnsLoginControllerResponse() throws IOException {
+    void handle_returnsRedirectResponse_whenGetAndLoginUriWithQueryString() throws IOException {
         // given
         final HttpStartLine httpStartLine = HttpStartLine.from(
                 new String[]{"GET", "/login?account=gugu&password=password", "HTTP/1.1"}
@@ -43,7 +43,7 @@ class RequestHandlerTest {
 
     @DisplayName("register로 GET 요청을 하면 register 페이지를 응답한다.")
     @Test
-    void handle_returnsRegisterControllerResponse() throws IOException {
+    void handle_returnsRegisterResponse_whenGetAndRegisterUri() throws IOException {
         // given
         final HttpStartLine httpStartLine = HttpStartLine.from(
                 new String[]{"GET", "/register", "HTTP/1.1"}
@@ -65,9 +65,9 @@ class RequestHandlerTest {
         assertThat(httpResponse.format()).startsWith(expected);
     }
 
-    @DisplayName("기본 uri인 / 로 GET 요청을 하면 Default Response로 응답한다.")
+    @DisplayName("기본 uri인 / 로 GET 요청을 하면 Default 응답을 반환한다.")
     @Test
-    void handle_returnsDefaultResponse() throws IOException {
+    void handle_returnsDefaultResponse_whenDefaultUri() throws IOException {
         // given
         final HttpStartLine httpStartLine = HttpStartLine.from(
                 new String[]{"GET", "/", "HTTP/1.1"}
@@ -85,6 +85,30 @@ class RequestHandlerTest {
         final String expected = "HTTP/1.1 200 OK \r\n" +
                 "Content-Type: text/html \r\n" +
                 "Content-Length: 12 \r\n" +
+                "\r\n";
+        assertThat(httpResponse.format()).startsWith(expected);
+    }
+    
+    @DisplayName("register로 유효한 POST 요청을 하면 index.html을 응답한다.")
+    @Test
+    void handle_returnsRegisterIndexResponse_whenPostAndRegisterUri() throws IOException {
+        // given
+        final HttpStartLine httpStartLine = HttpStartLine.from(
+                new String[]{"POST", "/register", "HTTP/1.1"}
+        );
+        final HttpHeaders httpHeaders = new HttpHeaders(new LinkedHashMap<>());
+        httpHeaders.put(HttpHeader.HOST, "localhost:8080");
+        httpHeaders.put(HttpHeader.CONNECTION, "keep-alive");
+        httpHeaders.put(HttpHeader.ACCEPT, "text/html");
+        final HttpRequest httpRequest = new HttpRequest(httpStartLine, httpHeaders, "");
+
+        // when
+        final HttpResponse httpResponse = new RequestHandler().handle(httpRequest);
+
+        // then
+        final String expected = "HTTP/1.1 200 OK \r\n" +
+                "Content-Type: text/html \r\n" +
+                "Content-Length: 5564 \r\n" +
                 "\r\n";
         assertThat(httpResponse.format()).startsWith(expected);
     }

@@ -22,6 +22,11 @@ public class RequestHandler {
             return new RegisterController().render();
         }
 
+        if (httpRequest.isMethod(HttpMethod.POST) && httpRequest.isUri("/register")) {
+            final String requestBody = httpRequest.getRequestBody();
+            return new RegisterController().register(requestBody);
+        }
+
         return new HttpResponse(HttpStatus.OK, new HttpHeaders(new LinkedHashMap<>()), "Hello world!");
     }
 }

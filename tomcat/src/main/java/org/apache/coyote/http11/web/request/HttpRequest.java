@@ -24,10 +24,6 @@ public class HttpRequest {
         return ResourceExtension.contains(uri);
     }
 
-    public String getUri() {
-        return httpStartLine.getUri();
-    }
-
     public HttpHeaders getHeaders() {
         return httpHeaders;
     }
@@ -42,6 +38,14 @@ public class HttpRequest {
 
     public boolean isUri(final String uri) {
         return httpStartLine.getUri().equals(uri);
+    }
+
+    public String getUri() {
+        return httpStartLine.getUri();
+    }
+
+    public String getRequestBody() {
+        return requestBody;
     }
 
     @Override

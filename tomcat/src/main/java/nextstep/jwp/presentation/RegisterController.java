@@ -13,4 +13,9 @@ public class RegisterController {
         final HttpHeaders httpHeaders = new HttpHeaders(new LinkedHashMap<>());
         return new HttpResponse(HttpStatus.OK, httpHeaders, ResourceLoader.getContent("register.html"));
     }
+
+    public HttpResponse register(final String requestBody) throws IOException {
+        final HttpHeaders httpHeaders = new HttpHeaders(new LinkedHashMap<>());
+        return new HttpResponse(HttpStatus.OK, httpHeaders, ResourceLoader.getContent("index.html"));
+    }
 }

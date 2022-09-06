@@ -25,4 +25,8 @@ public class StartLine {
     public Path getPath() {
         return path;
     }
+
+    public boolean isGet() {
+        return HttpMethod.GET == httpMethod;
+    }
 }

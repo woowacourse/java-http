@@ -19,14 +19,14 @@ public class Path {
 
     public static Path from(String uri) {
         if (!uri.contains(PATH_DELIMITER)) {
-            return new Path(removeExtension(uri), Extension.from(uri), QueryParameter.empty());
+            return new Path(uri, Extension.from(uri), QueryParameter.empty());
         }
 
         int index = uri.indexOf(PATH_DELIMITER);
         String resource = uri.substring(0, index);
         String queryParameter = uri.substring(index + 1);
 
-        return new Path(removeExtension(resource), Extension.from(resource), QueryParameter.from(queryParameter));
+        return new Path(resource, Extension.from(resource), QueryParameter.from(queryParameter));
     }
 
     private static String removeExtension(String uri) {
@@ -54,5 +54,9 @@ public class Path {
 
     public boolean isIcoContentType() {
         return extension.isIco();
+    }
+
+    public boolean isStaticResource() {
+        return extension != Extension.NONE;
     }
 }

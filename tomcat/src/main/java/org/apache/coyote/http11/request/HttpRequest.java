@@ -49,4 +49,12 @@ public class HttpRequest {
     public Map<String, String> getBody() {
         return requestBody.getValues();
     }
+
+    public boolean isGetMethod() {
+        return startLine.isGet();
+    }
+
+    public boolean isStaticResource() {
+        return getPath().isStaticResource();
+    }
 }

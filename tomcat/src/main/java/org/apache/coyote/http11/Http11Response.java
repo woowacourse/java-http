@@ -21,6 +21,11 @@ public class Http11Response {
         return new Http11Response(outputStream, new Http11Headers(new HashMap<>()));
     }
 
+    public void write(final HttpStatus status, final String path) throws IOException, URISyntaxException {
+        final Http11URL url = Http11URL.of(path);
+        write(status, url);
+    }
+
     public void write(final HttpStatus status, final Http11URL url) throws IOException, URISyntaxException {
         final String content = url.read();
         this.headers.add("Content-Type", url.getMIMEType() + ";charset=utf-8");

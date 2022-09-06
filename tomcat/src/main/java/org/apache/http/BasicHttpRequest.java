@@ -34,8 +34,8 @@ public class BasicHttpRequest implements HttpRequest {
     private final Map<String, Object> queryParameters;
     private final String body;
 
-    public BasicHttpRequest(final Map<String, String> headers, final Map<String, Object> queryParameters,
-                            final String body) {
+    private BasicHttpRequest(final Map<String, String> headers, final Map<String, Object> queryParameters,
+                             final String body) {
         this.headers = headers;
         this.queryParameters = queryParameters;
         this.body = body;

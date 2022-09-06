@@ -11,6 +11,11 @@ import org.apache.coyote.http11.response.HttpResponse;
 public class NotFoundResponseGenerator implements ResponseGenerator {
 
     private static final String resourceName = "static/404.html";
+    private static final NotFoundResponseGenerator INSTANCE = new NotFoundResponseGenerator();
+
+    public static NotFoundResponseGenerator getInstance() {
+        return INSTANCE;
+    }
 
     @Override
     public boolean isSuitable(HttpRequest httpRequest) {

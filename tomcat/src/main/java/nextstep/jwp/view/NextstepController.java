@@ -40,14 +40,14 @@ public class NextstepController {
         }
     }
 
-    private static void logAccountInfo(final HttpRequest httpRequest) {
+    private void logAccountInfo(final HttpRequest httpRequest) {
         var account = (String) httpRequest.getParameter("account");
+        var password = (String) httpRequest.getParameter("password");
         if (Objects.isNull(account)) {
             account = "";
         }
 
-        final var userByAccount = InMemoryUserRepository.findByAccount(account)
-                .orElse(null);
-        log.info("found account info : {}", userByAccount);
+        InMemoryUserRepository.findByAccountAndPassword(account, password)
+                .ifPresent(member -> log.info("found account info : {}", member));
     }
 }

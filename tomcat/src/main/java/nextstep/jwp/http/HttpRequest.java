@@ -103,6 +103,14 @@ public class HttpRequest {
         return httpCookie.isEmptySessionId();
     }
 
+    public boolean isGetMethod() {
+        return httpMethod == HttpMethod.GET;
+    }
+
+    public boolean isPostMethod() {
+        return httpMethod == HttpMethod.POST;
+    }
+
     public String getFilePath() {
         if (path.contains(STATIC_EXTENTION_DOT)) {
             return path;

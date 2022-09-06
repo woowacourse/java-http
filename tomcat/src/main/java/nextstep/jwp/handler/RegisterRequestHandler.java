@@ -2,8 +2,8 @@ package nextstep.jwp.handler;
 
 import java.util.UUID;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.http.HttpCookie;
-import nextstep.jwp.http.HttpMethod;
 import nextstep.jwp.http.HttpRequest;
 import nextstep.jwp.http.HttpRequestBody;
 import nextstep.jwp.http.HttpResponse;
@@ -24,13 +24,13 @@ public class RegisterRequestHandler implements HttpRequestHandler {
 
     @Override
     public HttpResponse handleHttpRequest(final HttpRequest httpRequest) {
-        if (httpRequest.getHttpMethod().equals(HttpMethod.GET)) {
+        if (httpRequest.isGetMethod()) {
             return handleHttpGetRequest(httpRequest);
         }
-        if (httpRequest.getHttpMethod().equals(HttpMethod.POST)) {
+        if (httpRequest.isPostMethod()) {
             return handleHttpPostRequest(httpRequest);
         }
-        return null;
+        throw new UncheckedServletException("지원하는 method가 존재하지 않습니다.");
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import static java.util.stream.Collectors.*;
+import static org.apache.coyote.http11.HttpCookie.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -129,8 +130,8 @@ public class HttpRequest {
 
     public Session getSession() {
         validateJSESSIONIDExist();
-        final HttpCookie cookie = new HttpCookie(getHeaderValue("Cookie"));
-        return new Session(cookie.getCookieValue("JSESSIONID"));
+        final HttpCookie cookie = new HttpCookie(getHeaderValue(COOKIE));
+        return new Session(cookie.getCookieValue(JSESSIONID));
     }
 
     private void validateJSESSIONIDExist() {
@@ -140,6 +141,7 @@ public class HttpRequest {
     }
 
     public boolean hasSession() {
-        return containsHeader("Cookie") && getHeaderValue("Cookie").contains("JSESSIONID");
+        return containsHeader(COOKIE) &&
+            getHeaderValue(COOKIE).contains(JSESSIONID);
     }
 }

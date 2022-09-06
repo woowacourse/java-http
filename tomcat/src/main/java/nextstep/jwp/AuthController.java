@@ -12,7 +12,6 @@ import org.apache.catalina.session.SessionManager;
 import org.apache.coyote.http11.HttpCookie;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.StatusCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,11 +28,12 @@ public class AuthController {
 
     public static HttpResponse login(HttpRequest request) {
         if (isLogin(request)) {
-            return HttpResponse.redirect(request, "/index.html");
+            return getRedirectResponse(request, "/index.html");
         }
 
         if (!request.hasQuery()) {
-            return new HttpResponse(request, StatusCode.OK, getStaticResource(request.getUrl()));
+            return new HttpResponse.Builder(request).ok()
+                .messageBody(getStaticResource(request.getUrl())).build();
         }
 
         Session session = new Session(new HttpCookie().getCookieValue("JSESSIONID"));
@@ -43,7 +43,7 @@ public class AuthController {
 
         Optional<User> foundUser = InMemoryUserRepository.findByAccountAndPassword(account, password);
         if (foundUser.isEmpty()) {
-            return HttpResponse.redirect(request, "/401.html");
+            return getRedirectResponse(request, "/401.html");
         }
 
         User user = foundUser.get();
@@ -51,9 +51,17 @@ public class AuthController {
         sessionManager.add(session);
         log.info("로그인 성공! 아이디: {}", user.getAccount());
 
-        HttpResponse response = HttpResponse.redirect(request, "/index.html");
-        response.setCookie(HttpCookie.fromJSESSIONID(session.getId()));
-        return response;
+        return new HttpResponse.Builder(request)
+            .redirect().location("/index.html")
+            .cookie(HttpCookie.fromJSESSIONID(session.getId()))
+            .build();
+    }
+
+    private static HttpResponse getRedirectResponse(HttpRequest request, String location) {
+        return new HttpResponse.Builder(request)
+            .redirect()
+            .location(location)
+            .build();
     }
 
     private static boolean isLogin(HttpRequest request) {
@@ -83,14 +91,15 @@ public class AuthController {
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
         log.info("회원가입 성공! 아이디: {}", user.getAccount());
-        return HttpResponse.redirect(request, "/index.html");
+
+        return getRedirectResponse(request, "/index.html");
     }
 
     private static String getStaticResource(URL url) {
         try {
-            return new String(Files.readAllBytes(new File(Objects.requireNonNull(url)
+            return Files.readString(new File(Objects.requireNonNull(url)
                 .getFile())
-                .toPath()));
+                .toPath());
         } catch (IOException e) {
             throw new IllegalArgumentException("No such resource");
         }

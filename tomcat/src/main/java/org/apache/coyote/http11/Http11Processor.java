@@ -58,7 +58,9 @@ public class Http11Processor implements Runnable, Processor {
             return AuthController.signUp(request);
         }
 
-        return new HttpResponse(request, StatusCode.OK, getStaticResource(request));
+        return new HttpResponse.Builder(request)
+            .ok()
+            .messageBody(getStaticResource(request)).build();
     }
 
     private String getStaticResource(HttpRequest request) throws IOException {

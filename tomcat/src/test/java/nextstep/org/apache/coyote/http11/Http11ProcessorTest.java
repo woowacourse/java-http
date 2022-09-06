@@ -112,4 +112,34 @@ class Http11ProcessorTest {
         assertThat(socket.output()).contains(expected);
     }
 
+//    @Test
+//    @DisplayName("HTTP POST 요청을 처리한다 index.html 파일을 반환한다.")
+//    void post() throws IOException {
+//        // given
+//        final String httpRequest = String.join("\r\n",
+//                "POST /register HTTP/1.1 ",
+//                "Host: localhost:8080 ",
+//                "Connection: keep-alive ",
+//                "Content-Length: 80 ",
+//                "Content-Type: application/x-www-form-urlencoded ",
+//                "Accept: */* ",
+//                "",
+//                "account=gugu&password=password&email=hkkang%40woowahan.com");
+//
+//        final var socket = new StubSocket(httpRequest);
+//        final Http11Processor processor = new Http11Processor(socket);
+//
+//        // when
+//        processor.process(socket);
+//
+//        // then
+//        final URL resource = getClass().getClassLoader().getResource("static/index.html");
+//        var expected = "HTTP/1.1 200 OK \r\n" +
+//                "Content-Type: text/html;charset=utf-8 \r\n" +
+//                "Content-Length: 5670 \r\n" +
+//                "\r\n" +
+//                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+//
+//        assertThat(socket.output()).isEqualTo(expected);
+//    }
 }

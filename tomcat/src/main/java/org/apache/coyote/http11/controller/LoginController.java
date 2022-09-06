@@ -7,7 +7,9 @@ import static org.apache.coyote.http11.http.StatusCode.UNAUTHORIZED;
 
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.StatusLine;
 
@@ -17,29 +19,31 @@ public class LoginController extends AbstractController {
     private static final String REQUEST_URI = "/login";
 
     @Override
-    public void service(final HttpRequest httpRequest, final HttpResponse httpResponse) {
-        try {
-            if (!httpRequest.hasQueryString()) {
-                String responseBody = readFile(httpRequest, "/login.html");
-                httpResponse
-                        .setStatusLine(new StatusLine(httpRequest.getProtocolVersion(), OK.getNumber(), "OK"));
-                httpResponse.setResponseBody(responseBody);
-                return;
-            }
+    protected void doGet(HttpRequest httpRequest, HttpResponse httpResponse) {
+        String responseBody = readFile(httpRequest, "/login.html");
+        httpResponse
+                .setStatusLine(new StatusLine(httpRequest.getProtocolVersion(), OK.getNumber(), "OK"));
+        httpResponse.setResponseBody(responseBody);
+    }
 
-            Map<String, String> queries = httpRequest.getQueries();
-            if (InMemoryUserRepository.login(queries.get("account"), queries.get("password"))) {
-                String responseBody = readFile(httpRequest, "/index.html");
-                httpResponse
-                        .setStatusLine(new StatusLine(httpRequest.getProtocolVersion(), FOUND.getNumber(), "FOUND"));
-                httpResponse.setResponseBody(responseBody);
-            }
-        } catch (Exception e) {
-            String responseBody = readFile(httpRequest, "/401.html");
-            httpResponse.setStatusLine(
-                    new StatusLine(httpRequest.getProtocolVersion(), UNAUTHORIZED.getNumber(), "UNAUTHORIZED"));
-            httpResponse.setResponseBody(responseBody);
+
+    @Override
+    protected void doPost(HttpRequest request, HttpResponse response) {
+        RequestBody requestBody = request.getRequestBody();
+        Map<String, String> parsedBody = requestBody.getParsedBody();
+
+        if (InMemoryUserRepository.login(parsedBody.get("account"), parsedBody.get("password"))) {
+            String responseBody = readFile(request, "/index.html");
+            response
+                    .setStatusLine(new StatusLine(request.getProtocolVersion(), FOUND.getNumber(), "FOUND"));
+            response.setResponseBody(responseBody);
+            return;
         }
+
+        String responseBody = readFile(request, "/401.html");
+        response.setStatusLine(
+                new StatusLine(request.getProtocolVersion(), UNAUTHORIZED.getNumber(), "UNAUTHORIZED"));
+        response.setResponseBody(responseBody);
     }
 
     @Override

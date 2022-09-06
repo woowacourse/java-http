@@ -28,6 +28,9 @@ public class HttpResponse {
     }
 
     public String getResponseBody() {
+        if (responseBody == null) {
+            return "";
+        }
         return responseBody;
     }
 

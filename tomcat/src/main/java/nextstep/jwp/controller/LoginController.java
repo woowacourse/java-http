@@ -12,20 +12,24 @@ public class LoginController implements Controller {
     @Override
     public HttpResponse process(HttpRequest httpRequest) throws IOException {
         if (httpRequest.isGet()) {
-            return doGet(httpRequest);
+            return doGet();
+        }
+        if (httpRequest.isPost()) {
+            return doPost(httpRequest);
         }
         return HttpResponse.notFound();
     }
 
-    private HttpResponse doGet(HttpRequest httpRequest) throws IOException {
-        Map<String, String> requestParams = httpRequest.getParams();
-        if (requestParams.size() == 0) {
-            return HttpResponse.ok("/login.html");
-        }
+    private HttpResponse doGet() throws IOException {
+        return HttpResponse.ok("/login.html");
+    }
 
-        User user = InMemoryUserRepository.findByAccount(requestParams.get("account"))
+    private HttpResponse doPost(HttpRequest httpRequest) throws IOException {
+        Map<String, String> requestBody = httpRequest.getBody();
+
+        User user = InMemoryUserRepository.findByAccount(requestBody.get("account"))
                 .orElseThrow(() -> new IllegalStateException("존재하지 않는 유저입니다."));
-        if (user.checkPassword(requestParams.get("password"))) {
+        if (user.checkPassword(requestBody.get("password"))) {
             return HttpResponse.found("/index.html");
         }
         return HttpResponse.unAuthorized();

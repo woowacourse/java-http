@@ -1,7 +1,5 @@
 package nextstep.jwp.handler;
 
-import static org.apache.coyote.http11.ViewResolver.staticFileRequest;
-
 import java.util.Map;
 
 import org.apache.coyote.http11.model.RequestParser;
@@ -22,15 +20,23 @@ public class RegisterHandler {
     public static HttpResponse perform(HttpRequest request) {
         Map<String, String> queries = RequestParser.parseUri(request.getUri());
         if (request.getMethod().isGet() && queries.isEmpty()) {
-            return staticFileRequest(REGISTER_PAGE);
+            return doGet();
         }
 
-        if (request.getMethod().isPost()) {
-            User user = new User(request.getBodyValue(ACCOUNT), request.getBodyValue(PASSWORD),
-                    request.getBodyValue(EMAIL));
-            InMemoryUserRepository.save(user);
-            return HttpResponse.redirect(INDEX_PAGE);
+        if (request.getMethod().isPost() && queries.isEmpty()) {
+            return doPost(request);
         }
         return HttpResponse.notFound();
+    }
+
+    private static HttpResponse doGet() {
+        return ResourceHandler.returnResource(REGISTER_PAGE);
+    }
+
+    private static HttpResponse doPost(HttpRequest request) {
+        User user = new User(request.getBodyValue(ACCOUNT), request.getBodyValue(PASSWORD),
+                request.getBodyValue(EMAIL));
+        InMemoryUserRepository.save(user);
+        return HttpResponse.redirect(INDEX_PAGE);
     }
 }

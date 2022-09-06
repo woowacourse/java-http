@@ -10,10 +10,11 @@ public class RequestParser {
     private static final String KEY_VALUE_SEPARATOR = "=";
     private static final int PARAMETER_NAME = 0;
     private static final int PARAMETER_VALUE = 1;
+    private static final int NOT_CONTAIN = -1;
 
     public static String extractUrl(String uri) {
         int index = uri.indexOf(URL_QUERY_SEPARATOR);
-        if (index == -1) {
+        if (index == NOT_CONTAIN) {
             return uri;
         }
         return uri.substring(0, index);
@@ -21,8 +22,7 @@ public class RequestParser {
 
     public static Map<String, String> parseUri(String uri) {
         int index = uri.indexOf(URL_QUERY_SEPARATOR);
-
-        if (index == -1) {
+        if (index == NOT_CONTAIN) {
             return new HashMap<>();
         }
 
@@ -32,7 +32,6 @@ public class RequestParser {
 
     public static Map<String, String> parseQueryString(String queryString) {
         Map<String, String> parsedData = new HashMap<>();
-
         if (queryString == null) {
             return parsedData;
         }

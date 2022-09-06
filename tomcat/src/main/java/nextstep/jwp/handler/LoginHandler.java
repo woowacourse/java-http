@@ -1,7 +1,5 @@
 package nextstep.jwp.handler;
 
-import static org.apache.coyote.http11.ViewResolver.staticFileRequest;
-
 import java.util.Map;
 import java.util.Optional;
 
@@ -26,24 +24,32 @@ public class LoginHandler {
     private static final String PASSWORD = "password";
     private static final String JSESSIONID = "JSESSIONID";
 
-    private static SessionManager sessionManager = new SessionManager();
+    private static final SessionManager sessionManager = new SessionManager();
 
     public static HttpResponse perform(HttpRequest request) {
         Map<String, String> queries = RequestParser.parseUri(request.getUri());
         if (request.getMethod().isGet() && queries.isEmpty()) {
-            if (request.hasSession()) {
-                String sessionId = request.getCookieValue(JSESSIONID);
-                Session session = sessionManager.findSession(sessionId);
-                User user = (User) session.getAttribute("user");
-                System.out.println(user);
-                return HttpResponse.redirect(INDEX_PAGE);
-            }
-            return staticFileRequest(LOGIN_PAGE);
+            return doGet(request);
         }
         if (request.getMethod().isPost() && queries.isEmpty()) {
-            return performLogin(request);
+            return doPost(request);
         }
         return HttpResponse.notFound();
+    }
+
+    private static HttpResponse doGet(HttpRequest request) {
+        if (request.hasSession()) {
+            String sessionId = request.getCookieValue(JSESSIONID);
+            Session session = sessionManager.findSession(sessionId);
+            User user = (User) session.getAttribute("user");
+            System.out.println(user);
+            return HttpResponse.redirect(INDEX_PAGE);
+        }
+        return ResourceHandler.returnResource(LOGIN_PAGE);
+    }
+
+    private static HttpResponse doPost(HttpRequest request) {
+        return performLogin(request);
     }
 
     private static HttpResponse performLogin(HttpRequest request) {

@@ -9,6 +9,9 @@ import org.apache.coyote.http11.model.HttpStatus;
 public class HttpResponse {
 
     private static final String PROTOCOL_VERSION = "HTTP/1.1";
+    private static final String JSESSIONID_HEADER_PREFIX = "JSESSIONID=";
+    private static final String LINE_BREAK = " \r\n";
+    private static final String KEY_VALUE_SEPARATOR = ": ";
 
     private final String protocolVersion;
     private final HttpStatus statusCode;
@@ -46,7 +49,7 @@ public class HttpResponse {
         }
 
         public Builder addCookie(String cookie) {
-            this.headers.put(HttpHeaderType.SET_COOKIE, "JSESSIONID=" + cookie);
+            this.headers.put(HttpHeaderType.SET_COOKIE, JSESSIONID_HEADER_PREFIX + cookie);
             return this;
         }
 
@@ -91,9 +94,9 @@ public class HttpResponse {
         StringBuilder headerResponse = new StringBuilder();
         for (String headerName : headers.keySet()) {
             headerResponse.append(headerName)
-                    .append(": ")
+                    .append(KEY_VALUE_SEPARATOR)
                     .append(headers.get(headerName))
-                    .append(" \r\n");
+                    .append(LINE_BREAK);
         }
         return headerResponse.toString();
     }

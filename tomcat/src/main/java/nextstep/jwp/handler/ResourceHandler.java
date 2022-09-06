@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package nextstep.jwp.handler;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -6,21 +6,22 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 import org.apache.coyote.exception.FileNotExistException;
+import org.apache.coyote.http11.FrontController;
 import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.HttpHeaderType;
 import org.apache.coyote.http11.model.HttpStatus;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.response.HttpResponse;
 
-public class ViewResolver {
+public class ResourceHandler {
 
     private static final String STATIC_RESOURCE_PATH = "static";
 
     public static HttpResponse perform(HttpRequest httpRequest) {
-        return staticFileRequest(httpRequest.getUri());
+        return returnResource(httpRequest.getUri());
     }
 
-    public static HttpResponse staticFileRequest(String fileName) {
+    public static HttpResponse returnResource(String fileName) {
         try {
             Path filePath = findFilePath(fileName);
             String content = new String(Files.readAllBytes(filePath));

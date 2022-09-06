@@ -5,6 +5,11 @@ import java.util.Map;
 
 public class HttpCookie {
 
+    private static final String COOKIE_SEPARATOR = "; ";
+    private static final String KEY_VALUE_SEPARATOR = "=";
+    private static final int KEY = 0;
+    private static final int VALUE = 1;
+
     private final Map<String, String> values;
 
     public HttpCookie(Map<String, String> values) {
@@ -18,10 +23,10 @@ public class HttpCookie {
     public static Map<String, String> parseCookies(String input) {
         Map<String, String> parsedCookies = new HashMap<>();
 
-        String[] cookies = input.split("; ");
+        String[] cookies = input.split(COOKIE_SEPARATOR);
         for (String cookie : cookies) {
-            String[] parsedCookie = cookie.split("=");
-            parsedCookies.put(parsedCookie[0], parsedCookie[1]);
+            String[] parsedCookie = cookie.split(KEY_VALUE_SEPARATOR);
+            parsedCookies.put(parsedCookie[KEY], parsedCookie[VALUE]);
         }
         return parsedCookies;
     }

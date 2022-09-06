@@ -12,13 +12,14 @@ import org.apache.coyote.http11.model.response.HttpResponse;
 import nextstep.jwp.handler.IndexHandler;
 import nextstep.jwp.handler.LoginHandler;
 import nextstep.jwp.handler.RegisterHandler;
+import nextstep.jwp.handler.ResourceHandler;
 
 public enum HandlerMapping {
 
     DEFAULT("/", IndexHandler::perform),
     LOGIN("/login", LoginHandler::perform),
     REGISTER("/register", RegisterHandler::perform),
-    STATIC_FILE(Constants.NULL, ViewResolver::perform),
+    STATIC_FILE(Constants.NULL, ResourceHandler::perform),
     NOF_FOUND(Constants.NULL, HandlerMapping::returnNotFountResponse);
 
     private static class Constants {

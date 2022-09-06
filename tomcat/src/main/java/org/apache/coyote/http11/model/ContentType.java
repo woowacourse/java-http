@@ -6,7 +6,8 @@ public enum ContentType {
 
     HTML("html", "text/html;charset=utf-8"),
     JS("js", "text/javascript;charset=utf-8"),
-    CSS("css", "text/css;charset=utf-8");
+    CSS("css", "text/css;charset=utf-8"),
+    ;
 
     private final String extension;
     private final String contentType;

@@ -1,4 +1,4 @@
-package org.apache.coyote.session;
+package org.apache.coyote.cookie;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +35,12 @@ public class Cookies {
     public Optional<Cookie> getCookie(String cookieKey) {
         return cookies.stream()
                 .filter(it -> it.isSameKey(cookieKey))
+                .findAny();
+    }
+
+    public Optional<Cookie> getJSessionCookie() {
+        return cookies.stream()
+                .filter(Cookie::isJSessionCookie)
                 .findAny();
     }
 }

@@ -8,10 +8,14 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import java.util.List;
+import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
+import org.apache.coyote.cookie.Cookie;
+import org.apache.coyote.request.HttpRequest;
 import org.apache.coyote.response.HttpResponse;
-import org.apache.coyote.session.Cookies;
+import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -32,7 +36,8 @@ class LoginHandlerTest {
         final String requestBody = "account=" + account + "&password=" + password;
 
         // when
-        LoginHandler.login(requestBody, new Cookies());
+        final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
+        LoginHandler.login(httpRequest);
 
         // then
         final List<ILoggingEvent> logs = appender.list;
@@ -53,7 +58,8 @@ class LoginHandlerTest {
         final String requestBody = "account=gugu&password=invalid";
 
         //when
-        final HttpResponse httpResponse = LoginHandler.login(requestBody, new Cookies());
+        final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
+        final HttpResponse httpResponse = LoginHandler.login(httpRequest);
 
         //then
         assertThat(httpResponse.getResponse()).contains("/401.html");
@@ -66,7 +72,8 @@ class LoginHandlerTest {
         final String requestBody = "account=gugu&password=password";
 
         //when
-        final HttpResponse httpResponse = LoginHandler.login(requestBody, new Cookies());
+        final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
+        final HttpResponse httpResponse = LoginHandler.login(httpRequest);
 
         //then
         assertThat(httpResponse.getResponse()).contains("/index.html");
@@ -79,7 +86,8 @@ class LoginHandlerTest {
         final String requestBody = "account=gugu&password=password";
 
         //when
-        final HttpResponse httpResponse = LoginHandler.login(requestBody, new Cookies());
+        final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
+        final HttpResponse httpResponse = LoginHandler.login(httpRequest);
 
         //then
         assertThat(httpResponse.getResponse()).contains("Set-Cookie: JSESSIONID");
@@ -92,9 +100,51 @@ class LoginHandlerTest {
         final String requestBody = "account=gugu&password=password";
 
         //when
-        final HttpResponse httpResponse = LoginHandler.login(requestBody, Cookies.from("JSESSIONID=randomid"));
+        final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of("Cookie", "JSESSIONID=randomid"),
+                requestBody);
+        final HttpResponse httpResponse = LoginHandler.login(httpRequest);
 
         //then
         assertThat(httpResponse.getResponse()).doesNotContain("Set-Cookie: JSESSIONID");
+    }
+
+    @DisplayName("로그인 성공 시 세션 저장소(SessionManager)에 유저 정보를 저장한다.")
+    @Test
+    void saveSession() {
+        //given
+        final String account = "gugu";
+        final String requestBody = "account=" + account + "&password=password";
+        final HttpRequest httpRequest = HttpRequest.of("POST /login HTTP/1.1", Map.of(), requestBody);
+
+        //when
+        final HttpResponse response = LoginHandler.login(httpRequest);
+
+        //then
+        final Cookie cookie = response.getCookie();
+        final Session session = SessionManager.findSession(cookie.getValue()).orElseThrow();
+        final User user = (User) session.getAttribute("user");
+        assertThat(user.getAccount()).isEqualTo(account);
+    }
+
+    @DisplayName("로그인에 성공한 이후에는 index.html 로 리다이렉트한다.")
+    @Test
+    void redirectIndexWhenAfterLogin() {
+        //given
+        final String account = "gugu";
+        final User user = InMemoryUserRepository.findByAccount(account).orElseThrow();
+
+        final Session session = new Session();
+        session.setAttribute("user", user);
+        SessionManager.add(session);
+
+        final String sessionId = session.getId();
+        final HttpRequest httpRequest = HttpRequest.of("GET /login HTTP/1.1",
+                Map.of("Cookie", "JSESSIONID=" + sessionId), "");
+
+        //when
+        final HttpResponse httpResponse = LoginHandler.loginWithGet(httpRequest);
+
+        //then
+        assertThat(httpResponse.getResponse()).contains("/index.html");
     }
 }

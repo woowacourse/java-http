@@ -1,7 +1,9 @@
 package org.apache.coyote.request;
 
 import java.util.Map;
-import org.apache.coyote.session.Cookies;
+import java.util.Optional;
+import org.apache.coyote.cookie.Cookie;
+import org.apache.coyote.cookie.Cookies;
 
 public class HttpRequest {
 
@@ -76,5 +78,9 @@ public class HttpRequest {
 
     public Cookies getCookies() {
         return cookies;
+    }
+
+    public Optional<Cookie> getJSessionCookie() {
+        return cookies.getJSessionCookie();
     }
 }

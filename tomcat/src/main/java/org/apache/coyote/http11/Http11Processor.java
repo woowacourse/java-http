@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.request.HttpMethod.GET;
 import static org.apache.coyote.request.HttpMethod.POST;
 import static org.apache.coyote.response.StatusCode.OK;
 
@@ -51,8 +52,11 @@ public class Http11Processor implements Runnable, Processor {
             String requestUrl = httpRequest.getRequestUrlWithoutQuery();
             HttpResponse httpResponse = HttpResponse.of(OK, ContentType.from(requestUrl), requestUrl);
 
+            if (requestUrl.contains("login") && requestMethod.equals(GET)) {
+                httpResponse = LoginHandler.loginWithGet(httpRequest);
+            }
             if (requestUrl.contains("login") && requestMethod.equals(POST)) {
-                httpResponse = LoginHandler.login(httpRequest.getRequestBody(), httpRequest.getCookies());
+                httpResponse = LoginHandler.login(httpRequest);
             }
             if (requestUrl.contains("register") && requestMethod.equals(POST)) {
                 httpResponse = RegisterHandler.register(httpRequest.getRequestBody());

@@ -8,7 +8,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import org.apache.coyote.session.Cookie;
+import org.apache.coyote.cookie.Cookie;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,6 +77,10 @@ public class HttpResponse {
         builder.append(responseBody);
 
         return builder.toString();
+    }
+
+    public Cookie getCookie() {
+        return cookie;
     }
 
     private void appendLocation(StringBuilder builder) {

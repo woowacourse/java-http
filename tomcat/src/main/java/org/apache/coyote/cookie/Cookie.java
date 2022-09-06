@@ -1,10 +1,11 @@
-package org.apache.coyote.session;
+package org.apache.coyote.cookie;
 
 public class Cookie {
 
     private static final String COOKIE_DELIMITER = "=";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final String JSESSIONID = "JSESSIONID";
 
     private final String key;
     private final String value;
@@ -24,6 +25,10 @@ public class Cookie {
         return new Cookie("", "");
     }
 
+    public static Cookie ofJSessionId(String id) {
+        return new Cookie(JSESSIONID, id);
+    }
+
     public boolean isEmpty() {
         return key.equals("");
     }
@@ -34,5 +39,13 @@ public class Cookie {
 
     public String toHeaderFormat() {
         return this.key + "=" + this.value;
+    }
+
+    public boolean isJSessionCookie() {
+        return key.equals(JSESSIONID);
+    }
+
+    public String getValue() {
+        return value;
     }
 }

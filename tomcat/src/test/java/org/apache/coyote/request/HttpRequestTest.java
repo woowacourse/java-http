@@ -3,8 +3,8 @@ package org.apache.coyote.request;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
-import org.apache.coyote.session.Cookie;
-import org.apache.coyote.session.Cookies;
+import org.apache.coyote.cookie.Cookie;
+import org.apache.coyote.cookie.Cookies;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

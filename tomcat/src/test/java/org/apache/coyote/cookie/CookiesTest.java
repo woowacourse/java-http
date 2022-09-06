@@ -1,4 +1,4 @@
-package org.apache.coyote.session;
+package org.apache.coyote.cookie;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,5 +20,18 @@ class CookiesTest {
         //then
         assertThat(cookie1.toHeaderFormat()).isEqualTo("cookie1=one");
         assertThat(cookie2.toHeaderFormat()).isEqualTo("cookie2=two");
+    }
+
+    @DisplayName("쿠키들 중 JSESSIONID 쿠키를 찾을 수 있다.")
+    @Test
+    void getJSessionCookie() {
+        //given
+        final Cookies cookies = Cookies.from("cookie1=one; cookie2=two; JSESSIONID=jsessionCookie");
+
+        //when
+        final Cookie jSessionCookie = cookies.getJSessionCookie().orElseThrow();
+
+        //then
+        assertThat(jSessionCookie.isJSessionCookie()).isTrue();
     }
 }

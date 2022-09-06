@@ -1,4 +1,4 @@
-package org.apache.coyote.session;
+package org.apache.coyote.cookie;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,5 +46,18 @@ class CookieTest {
 
         //then
         assertThat(result).isEqualTo("key=value");
+    }
+
+    @DisplayName("JSESSIONID 키 값을 가지는 쿠키인지를 판별할 수 있다.")
+    @Test
+    void isJSessionCookie() {
+        //given
+        final Cookie cookie = new Cookie("JSESSIONID", "value");
+
+        //when
+        final boolean result = cookie.isJSessionCookie();
+
+        //then
+        assertThat(result).isTrue();
     }
 }

@@ -9,6 +9,7 @@ public class HttpResponse {
 
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_LENGTH = "Content-Length";
+    private static final String LOCATION = "Location";
 
     private StatusLine statusLine;
     private Headers headers;
@@ -53,7 +54,7 @@ public class HttpResponse {
 
     public void sendRedirect(final String path) {
         this.addStatusCode(StatusCode.FOUND);
-        headers.addHeader("Location", path);
+        headers.addHeader(LOCATION, path);
     }
 
     public String parseResponse() {

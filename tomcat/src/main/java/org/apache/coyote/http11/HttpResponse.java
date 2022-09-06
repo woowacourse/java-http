@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpResponse {
     private final Map<String, String> header;
@@ -17,9 +18,9 @@ public class HttpResponse {
         this.body = body;
     }
 
-    public static HttpResponse from(final HttpRequestStartLine requestStartLine) throws IOException {
+    public static HttpResponse from(final HttpRequest request) throws IOException {
         final Map<String, String> header = new HashMap<>();
-        final String requestUri = requestStartLine.getUri();
+        final String requestUri = request.getUri();
         header.put("Content-Type", getContentType(requestUri));
 
         final String responseBody = getResponseBody(requestUri);

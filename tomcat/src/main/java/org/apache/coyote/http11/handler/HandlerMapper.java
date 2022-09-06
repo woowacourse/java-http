@@ -5,10 +5,11 @@ import static org.apache.coyote.http11.handler.LoginHandler.LOGIN_HANDLER;
 
 import java.util.Arrays;
 import org.apache.coyote.http11.HttpMethod;
-import org.apache.coyote.http11.HttpRequestStartLine;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestStartLine;
 
 public enum HandlerMapper {
-    LOGIN(HttpMethod.GET, "/login", LOGIN_HANDLER);
+    LOGIN(HttpMethod.POST, "/login", LOGIN_HANDLER);
 
     private final HttpMethod httpMethod;
     private final String uri;
@@ -20,9 +21,9 @@ public enum HandlerMapper {
         this.handler = handler;
     }
 
-    public static Handler findHandler(final HttpRequestStartLine startLine) {
+    public static Handler findHandler(final HttpRequest request) {
         return Arrays.stream(values())
-                .filter(mapper -> mapHandler(startLine, mapper))
+                .filter(mapper -> mapHandler(request.getStartLine(), mapper))
                 .findAny()
                 .map(mapper -> mapper.handler)
                 .orElse(DEFAULT_HANDLER);

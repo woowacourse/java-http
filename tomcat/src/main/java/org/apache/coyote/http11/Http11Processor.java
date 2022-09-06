@@ -9,6 +9,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
@@ -75,6 +76,10 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String createLoginResponse(final HttpRequest httpRequest) {
+        final Optional<String> jSessionId = httpRequest.findCookie("JSESSIONID");
+        if (jSessionId.isPresent() && sessionManager.findSession(jSessionId.get()).isPresent()) {
+            return createRedirectResponse(StatusCode.FOUND, "/index.html");
+        }
         if (httpRequest.isPostMethod()) {
             return login(httpRequest);
         }

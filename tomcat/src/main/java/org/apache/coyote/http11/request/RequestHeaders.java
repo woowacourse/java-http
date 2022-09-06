@@ -15,6 +15,7 @@ public class RequestHeaders {
 
     private static final Logger log = LoggerFactory.getLogger(RequestHeaders.class);
     private static final int DEFAULT_HEADER_FIELD_LENGTH = 2;
+    private static final String COOKIE = "Cookie";
 
     private final Map<String, Object> headers;
 
@@ -48,9 +49,9 @@ public class RequestHeaders {
     private static void addHeader(final Map<String, Object> headers, final String line) {
         final String[] field = line.split(": ");
         validateFieldLength(field);
-        if (field[0].equals("Cookie")) {
+        if (field[0].equals(COOKIE)) {
             final HttpCookie httpCookie = HttpCookie.from(field[1]);
-            headers.put("Cookie", httpCookie);
+            headers.put(COOKIE, httpCookie);
             return;
         }
         headers.put(field[0], field[1].trim());
@@ -65,6 +66,15 @@ public class RequestHeaders {
     public Object findField(final String fieldName) {
         return Optional.ofNullable(headers.get(fieldName))
                 .orElseThrow(() -> new NoSuchElementException("Header Field에 key 값이 존재하지 않습니다."));
+    }
+
+    public Optional<String> findCookie(final String name) {
+        final Optional<Object> cookies = Optional.ofNullable(headers.get(COOKIE));
+        if (cookies.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return ((HttpCookie) cookies.get()).findCookie(name);
     }
 
     public Map<String, Object> getHeaders() {

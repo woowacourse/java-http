@@ -2,7 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Optional;
 
 public class HttpCookie {
 
@@ -37,11 +37,11 @@ public class HttpCookie {
         cookies.put(pair[0], pair[1].trim());
     }
 
-    public static String generate() {
-        return UUID.randomUUID().toString();
-    }
-
     public Map<String, String> getValues() {
         return values;
+    }
+
+    public Optional<String> findCookie(final String name) {
+        return Optional.ofNullable(values.get(name));
     }
 }

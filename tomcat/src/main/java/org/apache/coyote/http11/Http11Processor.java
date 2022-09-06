@@ -8,6 +8,7 @@ import static org.apache.coyote.http11.HttpMethod.POST;
 import static org.apache.coyote.http11.HttpStatusCode.BAD_REQUEST;
 import static org.apache.coyote.http11.HttpStatusCode.FOUND;
 import static org.apache.coyote.http11.HttpStatusCode.INTERNAL_SERVER_ERROR;
+import static org.apache.coyote.http11.HttpStatusCode.METHOD_NOT_ALLOWED;
 import static org.apache.coyote.http11.HttpStatusCode.NOT_FOUND;
 import static org.apache.coyote.http11.HttpStatusCode.OK;
 import static org.apache.coyote.http11.HttpStatusCode.UNAUTHORIZED;
@@ -27,6 +28,7 @@ import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.badrequest.AlreadyRegisterAccountException;
 import org.apache.coyote.http11.exception.badrequest.BadRequestException;
 import org.apache.coyote.http11.exception.badrequest.NotExistHeaderException;
+import org.apache.coyote.http11.exception.methodnotallowed.MethodNotAllowedException;
 import org.apache.coyote.http11.exception.notfound.NotFoundException;
 import org.apache.coyote.http11.exception.notfound.NotFoundUrlException;
 import org.apache.coyote.http11.exception.unauthorised.InvalidSessionException;
@@ -75,14 +77,20 @@ public class Http11Processor implements Runnable, Processor {
 
     private HttpResponse getHttpResponse(final HttpRequest httpRequest) throws IOException {
         if (httpRequest.isFileRequest()) {
-            final String responseBody = loadFile(httpRequest.getUrl());
-            final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
-            return getOkHttpResponse(responseBody, httpHeaders);
+            if (httpRequest.getHttpMethod() == GET) {
+                final String responseBody = loadFile(httpRequest.getUrl());
+                final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
+                return getOkHttpResponse(responseBody, httpHeaders);
+            }
+            throw new MethodNotAllowedException();
         }
         if (httpRequest.getUrl().equals("/")) {
-            final String responseBody = "Hello world!";
-            final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
-            return getOkHttpResponse(responseBody, httpHeaders);
+            if (httpRequest.getHttpMethod() == GET) {
+                final String responseBody = "Hello world!";
+                final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
+                return getOkHttpResponse(responseBody, httpHeaders);
+            }
+            throw new MethodNotAllowedException();
         }
         if (httpRequest.getUrl().equals("/login")) {
             final SessionManager sessionManager = new SessionManager();
@@ -109,6 +117,7 @@ public class Http11Processor implements Runnable, Processor {
                         .addHeader(LOCATION, "/index.html");
                 return getRedirectHttpResponse(httpHeaders);
             }
+            throw new MethodNotAllowedException();
         }
         if (httpRequest.getUrl().equals("/register")) {
             if (httpRequest.getHttpMethod() == GET) {
@@ -124,6 +133,7 @@ public class Http11Processor implements Runnable, Processor {
                         .addHeader(LOCATION, "/index.html");
                 return getRedirectHttpResponse(httpHeaders);
             }
+            throw new MethodNotAllowedException();
         }
         throw new NotFoundUrlException();
     }
@@ -202,6 +212,9 @@ public class Http11Processor implements Runnable, Processor {
         }
         if (exception instanceof NotFoundException) {
             return getExceptionHttpResponse(httpRequest, NOT_FOUND);
+        }
+        if (exception instanceof MethodNotAllowedException) {
+            return getExceptionHttpResponse(httpRequest, METHOD_NOT_ALLOWED);
         }
         return getExceptionHttpResponse(httpRequest, INTERNAL_SERVER_ERROR);
     }

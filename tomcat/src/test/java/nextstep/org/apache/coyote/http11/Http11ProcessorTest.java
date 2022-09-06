@@ -102,6 +102,35 @@ class Http11ProcessorTest {
     }
 
     @Test
+    @DisplayName("POST / 요청 : Status 405, 405.html 반환 ")
+    void indexWithPost() throws IOException {
+        // given
+        final String httpRequest = String.join("\r\n",
+                "POST /index.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Accept: */*",
+                "");
+
+        final var socket = new StubSocket(httpRequest);
+        final Http11Processor processor = new Http11Processor(socket);
+
+        // when
+        processor.process(socket);
+
+        // then
+        final URL resource = getClass().getClassLoader().getResource("static/405.html");
+        final byte[] content = Files.readAllBytes(new File(Objects.requireNonNull(resource).getFile()).toPath());
+        final String expected = "HTTP/1.1 405 Method Not Allowed \r\n" +
+                "Content-Type: text/html;charset=utf-8 \r\n" +
+                "Content-Length: " + content.length + " \r\n" +
+                "\r\n" +
+                new String(content);
+
+        assertThat(socket.output()).isEqualTo(expected);
+    }
+
+    @Test
     @DisplayName("css 파일에 대한 요청이 들어오면, 해당 css 파일을 응답한다.")
     void allowCss() throws IOException {
         // given

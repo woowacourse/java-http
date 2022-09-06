@@ -18,7 +18,7 @@ public class ControllerMapping {
     public ControllerMapping() {
         mapping.put(new RequestInfo(GET, "/"), new GreetingController());
         mapping.put(new RequestInfo(GET, "/login"), new ForwardController());
-        mapping.put(new RequestInfo(POST, "/login"), new LoginController());
+        mapping.put(new RequestInfo(POST, "/login"), new LoginController(new SessionIdGenerator()));
         mapping.put(new RequestInfo(GET, "/register"), new ForwardController());
         mapping.put(new RequestInfo(POST, "/register"), new RegisterController());
     }

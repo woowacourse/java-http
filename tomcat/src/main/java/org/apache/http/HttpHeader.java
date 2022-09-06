@@ -9,6 +9,8 @@ public enum HttpHeader {
     CONNECTION("Connection"),
     CONTENT_TYPE("Content-Type"),
     CONTENT_LENGTH("Content-Length"),
+    COOKIE("Cookie"),
+    SET_COOKIE("Set-Cookie"),
     LOCATION("Location"),
     HOST("Host"),
     ;

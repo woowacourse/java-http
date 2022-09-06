@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class LoginControllerTest {
 
-    private final Controller controller = new LoginController();
+    private final Controller controller = new LoginController(() -> "1");
 
     @Test
     void account값과_password값이_일치하면_index로_리다이렉트한다() {
@@ -24,6 +24,7 @@ class LoginControllerTest {
         final Request request = new Request(requestInfo, new Headers(), "account=gugu&password=password");
         final Headers headers = new Headers();
         headers.put(HttpHeader.LOCATION, "/index.html");
+        headers.put(HttpHeader.SET_COOKIE, "JSESSIONID=1");
         final Response expected = new Response(headers).httpStatus(HttpStatus.FOUND);
 
         // when
@@ -54,5 +55,24 @@ class LoginControllerTest {
         // when, then
         assertThatThrownBy(() -> controller.execute(request))
                 .isInstanceOf(UnauthorizedException.class);
+    }
+
+    @Test
+    void 요청헤더의_쿠키에_세션아이디가_없다면_응답에_세션아이디를_포함시킨다() {
+        // given
+        final RequestInfo requestInfo = new RequestInfo(GET, "/login", null);
+        final Request request = new Request(requestInfo, new Headers(), "account=gugu&password=password");
+
+        final Headers headers = new Headers();
+        headers.put(HttpHeader.LOCATION, "/index.html");
+        headers.put(HttpHeader.SET_COOKIE, "JSESSIONID=1");
+        final Response expected = new Response(headers).httpStatus(HttpStatus.FOUND);
+
+        // when
+        final Response actual = controller.execute(request);
+
+        // then
+        assertThat(actual).usingRecursiveComparison()
+                .isEqualTo(expected);
     }
 }

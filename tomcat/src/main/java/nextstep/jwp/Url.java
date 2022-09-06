@@ -29,6 +29,7 @@ public enum Url {
         }
         return Http11Response.from(OK, "/401.html");
     }),
+    REGISTER("/register"::equals, url -> Http11Response.from(OK, "/register.html")),
     RESOURCE(url -> isMatchRegex(".*\\..*", url), url -> Http11Response.from(OK, url));
 
     private static final Logger log = LoggerFactory.getLogger(Url.class);

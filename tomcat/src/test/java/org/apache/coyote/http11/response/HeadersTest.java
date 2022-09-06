@@ -19,7 +19,7 @@ class HeadersTest {
         // when
         String actual = headers.toResponseValue();
         String expected = String.join("\r\n",
-                "Content-Type: text/html ",
+                "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 5564 ",
                 ""
         );

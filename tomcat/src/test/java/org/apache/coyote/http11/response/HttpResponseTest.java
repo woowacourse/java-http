@@ -27,7 +27,7 @@ public class HttpResponseTest {
         byte[] actual = response.getBytes();
         byte[] expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "Content-Type: text/html ",
+                "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 5518 ",
                 "",
                 body).getBytes();

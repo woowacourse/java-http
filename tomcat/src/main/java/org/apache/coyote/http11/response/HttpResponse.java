@@ -6,7 +6,7 @@ public class HttpResponse {
     private static final String CRLF = "\r\n";
     private static final String SPACE = " ";
 
-    private final HttpStatus status;
+    private HttpStatus status;
     private final Headers headers;
     private final StringBuilder body;
 
@@ -18,6 +18,10 @@ public class HttpResponse {
 
     public static HttpResponse status(HttpStatus status) {
         return new HttpResponse(status, Headers.empty(), new StringBuilder());
+    }
+
+    public static HttpResponse ok() {
+        return new HttpResponse(HttpStatus.OK, Headers.empty(), new StringBuilder());
     }
 
     public HttpResponse body(String body) {
@@ -40,5 +44,17 @@ public class HttpResponse {
 
     private String statusLine() {
         return HTTP_VERSION + SPACE + status.code() + SPACE + status + SPACE;
+    }
+
+    public HttpStatus getStatus() {
+        return status;
+    }
+
+    public String getBody() {
+        return body.toString();
+    }
+
+    public void setStatus(HttpStatus status) {
+        this.status = status;
     }
 }

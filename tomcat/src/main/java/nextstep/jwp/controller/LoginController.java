@@ -1,33 +1,35 @@
 package nextstep.jwp.controller;
 
-import static nextstep.jwp.handler.StaticHandler.handleStatic;
-
 import java.io.IOException;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.handler.StaticHandler;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.QueryString;
 import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoginController {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String LOGIN_PAGE = "/login.html";
+    private static final String INDEX_PAGE = "/index.html";
     private static final String UNAUTHORIZED_PAGE = "/401.html";
 
-    public static HttpResponse handle(HttpRequest request) throws IOException {
+    public static HttpResponse handle(HttpRequest request, HttpResponse response) throws IOException {
         QueryString queryString = request.queryString();
         if (queryString.isEmpty()) {
-            return handleStatic(LOGIN_PAGE);
+            return StaticHandler.handle(INDEX_PAGE, response);
         }
         if (isValidUser(queryString.get("account"), queryString.get("password"))) {
-            return handleStatic(LOGIN_PAGE);
+            response.setStatus(HttpStatus.FOUND);
+            return StaticHandler.handle(INDEX_PAGE, response);
         }
-        return handleStatic(UNAUTHORIZED_PAGE);
+        response.setStatus(HttpStatus.UNAUTHORIZED);
+        return StaticHandler.handle(UNAUTHORIZED_PAGE, response);
     }
 
     private static Boolean isValidUser(String account, String password) {

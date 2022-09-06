@@ -19,7 +19,7 @@ public enum ApiHandlerMethod {
             final String welcomeMessage = "Hello world!";
             final String response = HttpResponse.builder()
                     .addStatus(HttpStatus.OK)
-                    .add(HttpHeader.CONTENT_TYPE, MediaType.PLAIN)
+                    .add(HttpHeader.CONTENT_TYPE, MediaType.PLAIN.value())
                     .body(welcomeMessage)
                     .build();
 

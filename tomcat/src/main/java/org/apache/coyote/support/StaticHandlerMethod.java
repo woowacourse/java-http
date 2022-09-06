@@ -35,7 +35,7 @@ public enum StaticHandlerMethod {
     public void handle(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
         final FileDto dto = new FileDto(httpRequest.getUri());
         final String responseBody = IoUtils.readLines(dto.fileName);
-        final String contentType = getContentType(dto.extension);
+        final String contentType = MediaType.find(dto.extension);
 
         final String response = HttpResponse.builder()
                 .addStatus(HttpStatus.OK)
@@ -44,18 +44,5 @@ public enum StaticHandlerMethod {
                 .build();
 
         writeAndFlush(bufferedWriter, response);
-    }
-
-    private String getContentType(final String fileExtension) {
-        switch (fileExtension) {
-            case "html":
-                return MediaType.HTML;
-            case "css":
-                return MediaType.CSS;
-            case "js":
-                return MediaType.JAVASCRIPT;
-            default:
-                return MediaType.PLAIN;
-        }
     }
 }

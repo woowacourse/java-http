@@ -36,25 +36,31 @@ public class ModelAndView {
     }
 
     private static ModelAndView getApiHandlerResponse(ApiHandlerResponse response) throws IOException {
-        String responseBody = response.getBody();
+        HttpStatus httpStatus = response.getHttpStatus();
         Headers responseHeaders = response.getHeaders();
+        String responseBody = response.getBody();
+        ContentType contentType = response.getContentType();
 
-        if (response.getHttpStatus().isFound()) {
-            return new ModelAndView(HttpStatus.FOUND, responseHeaders, responseBody, response.getContentType());
+        if (httpStatus.isFound() || responseBody.isBlank()) {
+            return new ModelAndView(httpStatus, responseHeaders, responseBody, contentType);
         }
 
         URL resource = getResource(responseBody);
         if (resource == null) {
-            return new ModelAndView(HttpStatus.OK, responseHeaders, responseBody, ContentType.HTML);
+            return new ModelAndView(httpStatus, responseHeaders, responseBody, contentType);
         }
 
-        return getModelAndView(response.getHttpStatus(), responseHeaders, resource);
+        return getModelAndView(httpStatus, responseHeaders, resource);
     }
 
     private static ModelAndView getFileResponse(FileHandlerResponse response) throws IOException {
-        final String path = response.getPath();
-        final URL resource = getResource(path);
 
+        final String path = response.getPath();
+        if (path.isBlank()) {
+            return ModelAndView.of(new FileHandlerResponse(HttpStatus.NOT_FOUND, "/404.html"));
+        }
+
+        final URL resource = getResource(path);
         if (resource == null) {
             return ModelAndView.of(new FileHandlerResponse(HttpStatus.NOT_FOUND, "/404.html"));
         }

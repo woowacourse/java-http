@@ -3,7 +3,6 @@ package org.apache.coyote.http11;
 import static org.apache.coyote.http11.HttpHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.HttpHeader.CONTENT_TYPE;
 import static org.apache.coyote.http11.HttpHeader.LOCATION;
-import static org.apache.coyote.http11.HttpHeader.SET_COOKIE;
 import static org.apache.coyote.http11.HttpMethod.GET;
 import static org.apache.coyote.http11.HttpMethod.POST;
 import static org.apache.coyote.http11.HttpStatusCode.BAD_REQUEST;
@@ -30,6 +29,7 @@ import org.apache.coyote.http11.exception.badrequest.BadRequestException;
 import org.apache.coyote.http11.exception.badrequest.NotExistHeaderException;
 import org.apache.coyote.http11.exception.notfound.NotFoundException;
 import org.apache.coyote.http11.exception.notfound.NotFoundUrlException;
+import org.apache.coyote.http11.exception.unauthorised.InvalidSessionException;
 import org.apache.coyote.http11.exception.unauthorised.LoginFailException;
 import org.apache.coyote.http11.exception.unauthorised.UnAuthorisedException;
 import org.slf4j.Logger;
@@ -38,8 +38,6 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-
-    private static final String JSESSIONID = "JSESSIONID";
 
     private final Socket connection;
 
@@ -71,7 +69,7 @@ public class Http11Processor implements Runnable, Processor {
         try {
             return getHttpResponse(httpRequest);
         } catch (RuntimeException exception) {
-            return getExceptionHttpResponse(httpRequest, exception);
+            return handleExceptionResponse(httpRequest, exception);
         }
     }
 
@@ -79,69 +77,44 @@ public class Http11Processor implements Runnable, Processor {
         if (httpRequest.isFileRequest()) {
             final String responseBody = loadFile(httpRequest.getUrl());
             final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
-            return new HttpResponse.Builder()
-                    .statusCode(OK)
-                    .headers(httpHeaders)
-                    .body(responseBody)
-                    .build();
+            return getOkHttpResponse(responseBody, httpHeaders);
         }
         if (httpRequest.getUrl().equals("/")) {
             final String responseBody = "Hello world!";
             final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
-            return new HttpResponse.Builder()
-                    .statusCode(OK)
-                    .headers(httpHeaders)
-                    .body(responseBody)
-                    .build();
+            return getOkHttpResponse(responseBody, httpHeaders);
         }
         if (httpRequest.getUrl().equals("/login")) {
-            if (httpRequest.getHttpMethod() == GET) {
-                try {
-                    final HttpCookie httpCookie = httpRequest.getHttpCookie();
-                    final SessionManager sessionManager = new SessionManager();
-                    sessionManager.findSession(httpCookie.getCookieValue(JSESSIONID));
-                    final HttpHeaders httpHeaders = new HttpHeaders()
-                            .addHeader(LOCATION, "/index.html");
-                    return new HttpResponse.Builder()
-                            .statusCode(FOUND)
-                            .headers(httpHeaders)
-                            .build();
-                } catch (NotExistHeaderException | LoginFailException exception) {
-                    final String responseBody = loadFile("/login.html");
-                    final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
-                    return new HttpResponse.Builder()
-                            .statusCode(OK)
-                            .headers(httpHeaders)
-                            .body(responseBody)
-                            .build();
-                }
+            final SessionManager sessionManager = new SessionManager();
+            if (httpRequest.getHttpMethod() == GET && isLoggedIn(httpRequest, sessionManager)) {
+                final HttpHeaders httpHeaders = new HttpHeaders()
+                        .addHeader(LOCATION, "/index.html");
+                return getRedirectHttpResponse(httpHeaders);
+            }
+            if (httpRequest.getHttpMethod() == GET && !isLoggedIn(httpRequest, sessionManager)) {
+                final String responseBody = loadFile("/login.html");
+                final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
+                return getOkHttpResponse(responseBody, httpHeaders);
             }
             if (httpRequest.getHttpMethod() == POST) {
                 final HttpRequestBody httpRequestBody = httpRequest.getHttpRequestBody();
                 final User user = login(httpRequestBody);
                 final UUID id = UUID.randomUUID();
-                final SessionManager sessionManager = new SessionManager();
                 final Session session = new Session(id.toString());
                 session.setAttribute("user", user);
                 sessionManager.add(session);
+                final HttpCookie httpCookie = HttpCookie.ofJSessionId(session.getId());
                 final HttpHeaders httpHeaders = new HttpHeaders()
-                        .addHeader(SET_COOKIE, JSESSIONID + "=" + id)
+                        .addCookie(httpCookie)
                         .addHeader(LOCATION, "/index.html");
-                return new HttpResponse.Builder()
-                        .statusCode(FOUND)
-                        .headers(httpHeaders)
-                        .build();
+                return getRedirectHttpResponse(httpHeaders);
             }
         }
         if (httpRequest.getUrl().equals("/register")) {
             if (httpRequest.getHttpMethod() == GET) {
                 final String responseBody = loadFile("/register.html");
                 final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
-                return new HttpResponse.Builder()
-                        .statusCode(OK)
-                        .headers(httpHeaders)
-                        .body(responseBody)
-                        .build();
+                return getOkHttpResponse(responseBody, httpHeaders);
             }
             if (httpRequest.getHttpMethod() == POST) {
                 final HttpRequestBody httpRequestBody = httpRequest.getHttpRequestBody();
@@ -149,13 +122,45 @@ public class Http11Processor implements Runnable, Processor {
                 registerNewUser(httpRequestBody);
                 final HttpHeaders httpHeaders = new HttpHeaders()
                         .addHeader(LOCATION, "/index.html");
-                return new HttpResponse.Builder()
-                        .statusCode(FOUND)
-                        .headers(httpHeaders)
-                        .build();
+                return getRedirectHttpResponse(httpHeaders);
             }
         }
         throw new NotFoundUrlException();
+    }
+
+    private boolean isLoggedIn(final HttpRequest httpRequest, final SessionManager sessionManager) {
+        try {
+            final HttpCookie httpCookie = httpRequest.getHttpCookie();
+            sessionManager.findSession(httpCookie.getCookieValue("JSESSIONID"));
+            return true;
+        } catch (NotExistHeaderException | InvalidSessionException exception) {
+            return false;
+        }
+    }
+
+    private HttpHeaders getHttpHeaders(final HttpRequest httpRequest, final String responseBody) {
+        return new HttpHeaders()
+                .addHeader(CONTENT_TYPE, getContentType(httpRequest))
+                .addHeader(CONTENT_LENGTH, responseBody.getBytes().length);
+    }
+
+    private String getContentType(final HttpRequest httpRequest) {
+        return "text/" + httpRequest.getFileExtension() + ";charset=utf-8";
+    }
+
+    private HttpResponse getOkHttpResponse(final String responseBody, final HttpHeaders httpHeaders) {
+        return new HttpResponse.Builder()
+                .statusCode(OK)
+                .headers(httpHeaders)
+                .body(responseBody)
+                .build();
+    }
+
+    private HttpResponse getRedirectHttpResponse(final HttpHeaders httpHeaders) {
+        return new HttpResponse.Builder()
+                .statusCode(FOUND)
+                .headers(httpHeaders)
+                .build();
     }
 
     private User login(final HttpRequestBody httpRequestBody) {
@@ -187,49 +192,26 @@ public class Http11Processor implements Runnable, Processor {
         InMemoryUserRepository.save(user);
     }
 
-    private HttpHeaders getHttpHeaders(final HttpRequest httpRequest, final String responseBody) {
-        return new HttpHeaders()
-                .addHeader(CONTENT_TYPE, getContentType(httpRequest))
-                .addHeader(CONTENT_LENGTH, responseBody.getBytes().length);
-    }
-
-    private String getContentType(final HttpRequest httpRequest) {
-        return "text/" + httpRequest.getFileExtension() + ";charset=utf-8";
-    }
-
-    private HttpResponse getExceptionHttpResponse(final HttpRequest httpRequest, final RuntimeException exception)
+    private HttpResponse handleExceptionResponse(final HttpRequest httpRequest, final RuntimeException exception)
             throws IOException {
         if (exception instanceof BadRequestException) {
-            final String responseBody = loadFile("/400.html");
-            final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
-            return new HttpResponse.Builder()
-                    .statusCode(BAD_REQUEST)
-                    .headers(httpHeaders)
-                    .body(responseBody)
-                    .build();
+            return getExceptionHttpResponse(httpRequest, BAD_REQUEST);
         }
         if (exception instanceof UnAuthorisedException) {
-            final String responseBody = loadFile("/401.html");
-            final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
-            return new HttpResponse.Builder()
-                    .statusCode(UNAUTHORIZED)
-                    .headers(httpHeaders)
-                    .body(responseBody)
-                    .build();
+            return getExceptionHttpResponse(httpRequest, UNAUTHORIZED);
         }
         if (exception instanceof NotFoundException) {
-            final String responseBody = loadFile("/404.html");
-            final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
-            return new HttpResponse.Builder()
-                    .statusCode(NOT_FOUND)
-                    .headers(httpHeaders)
-                    .body(responseBody)
-                    .build();
+            return getExceptionHttpResponse(httpRequest, NOT_FOUND);
         }
-        final String responseBody = loadFile("/500.html");
+        return getExceptionHttpResponse(httpRequest, INTERNAL_SERVER_ERROR);
+    }
+
+    private HttpResponse getExceptionHttpResponse(final HttpRequest httpRequest, final HttpStatusCode httpStatusCode)
+            throws IOException {
+        final String responseBody = loadFile("/" + httpStatusCode.getCode() + ".html");
         final HttpHeaders httpHeaders = getHttpHeaders(httpRequest, responseBody);
         return new HttpResponse.Builder()
-                .statusCode(INTERNAL_SERVER_ERROR)
+                .statusCode(httpStatusCode)
                 .headers(httpHeaders)
                 .body(responseBody)
                 .build();

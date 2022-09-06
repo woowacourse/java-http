@@ -3,7 +3,7 @@ package org.apache.catalina.session;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.catalina.Manager;
-import org.apache.coyote.http11.exception.unauthorised.LoginFailException;
+import org.apache.coyote.http11.exception.unauthorised.InvalidSessionException;
 
 public class SessionManager implements Manager {
 
@@ -17,7 +17,7 @@ public class SessionManager implements Manager {
     @Override
     public Session findSession(final String id) {
         if (id.isBlank() || !SESSIONS.containsKey(id)) {
-            throw new LoginFailException();
+            throw new InvalidSessionException();
         }
         return SESSIONS.get(id);
     }

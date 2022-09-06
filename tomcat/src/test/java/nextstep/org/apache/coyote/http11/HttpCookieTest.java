@@ -26,4 +26,19 @@ class HttpCookieTest {
                         "656cef62-e3c4-40bc-a8df-94732920ed46")
         );
     }
+
+    @Test
+    @DisplayName("쿠키에 들어있는 데이터를 헤더로 내보내기 위해서 변환한다.")
+    void encodingToHttpHeader() {
+        // given
+        final String cookie = "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
+        final HttpCookie httpCookie = new HttpCookie(cookie);
+
+        // when
+        final String httpHeader = httpCookie.encodingToHttpHeader();
+
+        // then
+        assertThat(httpHeader).isEqualTo(
+                "yummy_cookie=choco; tasty_cookie=strawberry; JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46");
+    }
 }

@@ -21,12 +21,12 @@ public class HttpResponse {
     private String encodingResponse() {
         if (Objects.isNull(body)) {
             return String.join("\r\n",
-                    "HTTP/1.1 " + statusCode.getValue() + " ",
+                    "HTTP/1.1 " + statusCode.toHttpString() + " ",
                     httpHeaders.encodingToString(),
                     "");
         }
         return String.join("\r\n",
-                "HTTP/1.1 " + statusCode.getValue() + " ",
+                "HTTP/1.1 " + statusCode.toHttpString() + " ",
                 httpHeaders.encodingToString(),
                 "",
                 body);

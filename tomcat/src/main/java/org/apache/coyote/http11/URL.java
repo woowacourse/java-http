@@ -44,6 +44,9 @@ public class URL {
     }
 
     public String read() throws URISyntaxException, IOException {
+        if (url == null || url.isBlank()) {
+            return "";
+        }
         if (isDefault()) {
             return DEFAULT_CONTENT;
         }

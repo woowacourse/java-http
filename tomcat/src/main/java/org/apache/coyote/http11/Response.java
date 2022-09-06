@@ -21,6 +21,14 @@ public class Response {
         return new Response(outputStream, new Headers(new HashMap<>()));
     }
 
+    public void addHeader(final String key, final String value) {
+        this.headers.add(key, value);
+    }
+
+    public void write(final HttpStatus status) throws IOException, URISyntaxException {
+        write(status, "");
+    }
+
     public void write(final HttpStatus status, final String path) throws IOException, URISyntaxException {
         final URL url = URL.of(path);
         write(status, url);

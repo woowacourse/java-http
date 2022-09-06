@@ -36,9 +36,11 @@ public class LoginController implements Controller {
         if (loginSuccess(body)) {
             final User loggedInUser = findUser(body);
             log.info(loggedInUser.toString());
-            response.write(HttpStatus.FOUND, "/index.html");
+            response.addHeader("Location", "/index.html");
+            response.write(HttpStatus.FOUND);
         }
-        response.write(HttpStatus.UNAUTHORIZED, "/401.html");
+        response.addHeader("Location", "/401.html");
+        response.write(HttpStatus.FOUND);
     }
 
     private boolean loginSuccess(final RequestBody body) {

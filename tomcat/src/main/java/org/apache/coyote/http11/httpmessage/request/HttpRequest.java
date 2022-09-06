@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class HttpRequest {
@@ -58,23 +57,5 @@ public class HttpRequest {
 
     public RequestBody getRequestBody() {
         return requestBody;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        HttpRequest that = (HttpRequest) o;
-        return Objects.equals(requestLine, that.requestLine) && Objects.equals(headers,
-                that.headers);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(requestLine, headers);
     }
 }

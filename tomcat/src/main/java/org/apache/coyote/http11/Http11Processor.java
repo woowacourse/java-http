@@ -31,25 +31,28 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream()) {
+        final HttpRequest request = createRequest(connection);
+        final HttpResponse response = createResponse(request);
+        writeResponseToSocket(connection, response);
+    }
 
-            final HttpRequest request = httpRequestConvertor.convert(inputStream);
-            final HttpResponse response = createResponse(request);
-            addContentTypeHeader(request, response);
-
-            if (request.hasSession()) {
-                response.addCookie("JSESSIONID", request.getSession().getId());
-            }
-
-            outputStream.write(response.writeValueAsBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
+    private HttpRequest createRequest(final Socket connection) {
+        try (final var inputStream = connection.getInputStream()) {
+            return httpRequestConvertor.convert(inputStream);
+        } catch (IOException e) {
             log.error(e.getMessage(), e);
+            throw new UncheckedServletException(e);
         }
     }
 
     private HttpResponse createResponse(final HttpRequest request) {
+        HttpResponse response = createResponseFromRequest(request);
+        addContentTypeToResponse(request, response);
+        addCookieForSessionToResponse(request, response);
+        return response;
+    }
+
+    private HttpResponse createResponseFromRequest(final HttpRequest request) {
         Optional<Controller> controllerOptional = findController(request);
 
         if (controllerOptional.isPresent()) {
@@ -88,9 +91,25 @@ public class Http11Processor implements Runnable, Processor {
         return resource != null && new File(resource.getFile()).isFile();
     }
 
-    private void addContentTypeHeader(final HttpRequest request, final HttpResponse response) {
+    private void addContentTypeToResponse(final HttpRequest request, final HttpResponse response) {
         if (response.hasBody()) {
             response.addHeader("Content-Type", new ContentTypeExtractor().extract(request).getValue());
+        }
+    }
+
+    private void addCookieForSessionToResponse(final HttpRequest request, final HttpResponse response) {
+        if (request.hasSession()) {
+            response.addCookie("JSESSIONID", request.getSession().getId());
+        }
+    }
+
+    private void writeResponseToSocket(final Socket connection, final HttpResponse response) {
+        try (final var outputStream = connection.getOutputStream()) {
+            outputStream.write(response.writeValueAsBytes());
+            outputStream.flush();
+        } catch (IOException | UncheckedServletException e) {
+            log.error(e.getMessage(), e);
+            throw new UncheckedServletException(e);
         }
     }
 }

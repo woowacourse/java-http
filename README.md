@@ -33,3 +33,8 @@
     - [X] 생성한 세션의 ID를 쿠키에 저장한다.
     - [X] `GET /login` 요청 시 쿠키에 세션 ID가 있는지 확인한다.
     - [X] 해당 세션에 `user`가 저장되어 있으면 `index.html`로 redirect 한다.
+
+### [🚀 3단계 - 리팩터링](https://techcourse.woowahan.com/s/cCM7rQR9/ls/lRDyKWbV)
+- [X] `HttpRequest` 클래스 구현
+- [X] `HttpResponse` 클래스 구현
+- [ ] `Controller`, `AbstractController`, `RequestMapping` 클래스 구현을 통한 요청 분기 처리

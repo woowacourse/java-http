@@ -1,42 +1,59 @@
 package org.apache.coyote.model.response;
 
+import org.apache.coyote.model.session.Cookie;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponse {
 
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String CONTENT_LENGTH = "Content-Length";
-    private static final String HEADER_DELIMITER = ": ";
-
-    private final Map<String, String> headers;
+    private final ResponseLine responseLine;
+    private final ResponseHeader responseHeader;
     private final String body;
-    private final HttpStatusCode httpStatusCode;
 
-    private HttpResponse(Map<String, String> headers, String body, HttpStatusCode httpStatusCode) {
-        this.headers = headers;
+    private HttpResponse(ResponseLine responseLine, ResponseHeader responseHeader, String body) {
+        this.responseLine = responseLine;
+        this.responseHeader = responseHeader;
         this.body = body;
-        this.httpStatusCode = httpStatusCode;
     }
 
-    public static HttpResponse of(final String extension, final String body, HttpStatusCode httpStatusCode) {
-        Map<String, String> headers = createHeaders(extension, body);
-        return new HttpResponse(headers, body, httpStatusCode);
+    public static HttpResponse of(final String extension, final String body, ResponseLine responseLine) {
+        ResponseHeader responseHeader = createHeaders(extension, body);
+        return new HttpResponse(responseLine, responseHeader, body);
     }
 
-    private static Map<String, String> createHeaders(String extension, String body) {
+    private static ResponseHeader createHeaders(String extension, String body) {
         Map<String, String> headers = new HashMap<>();
-        headers.put(CONTENT_TYPE, extension);
-        headers.put(CONTENT_LENGTH, String.valueOf(body.getBytes().length));
-        return headers;
+        headers.put(ResponseHeader.CONTENT_TYPE, extension);
+        headers.put(ResponseHeader.CONTENT_LENGTH, String.valueOf(body.getBytes().length));
+        return ResponseHeader.of(headers);
+    }
+
+    public void addCookie(Cookie cookie) {
+        responseHeader.addCookie(cookie);
     }
 
     public String getResponse() {
         return String.join("\r\n",
-                httpStatusCode.getResponse(),
-                CONTENT_TYPE + HEADER_DELIMITER + headers.get(CONTENT_TYPE) + ";charset=utf-8 ",
-                CONTENT_LENGTH + HEADER_DELIMITER + headers.get(CONTENT_LENGTH) + " ",
+                responseLine.getResponse(),
+                getResponseHeaders(),
                 "",
                 body);
+    }
+
+    private String getResponseHeaders() {
+        return responseHeader.getResponseHeaders();
+    }
+
+    public ResponseLine getResponseLine() {
+        return responseLine;
+    }
+
+    public ResponseHeader getResponseHeader() {
+        return responseHeader;
+    }
+
+    public String getBody() {
+        return body;
     }
 }

@@ -53,6 +53,10 @@ public class HttpRequest {
         return requestLine.getQueryParams();
     }
 
+    public boolean existCookie(String cookie) {
+        return requestHeader.existKey(cookie);
+    }
+
     public String getPath() {
         return requestLine.getPath();
     }

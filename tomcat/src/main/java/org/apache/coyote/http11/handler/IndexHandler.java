@@ -2,7 +2,7 @@ package org.apache.coyote.http11.handler;
 
 import org.apache.coyote.model.request.HttpRequest;
 import org.apache.coyote.model.response.HttpResponse;
-import org.apache.coyote.model.response.HttpStatusCode;
+import org.apache.coyote.model.response.ResponseLine;
 import org.apache.coyote.model.response.StatusCode;
 import org.apache.coyote.utils.RequestUtil;
 
@@ -20,8 +20,8 @@ public class IndexHandler implements Handler {
     @Override
     public String getResponse() {
         String responseBody = RequestUtil.getResponseBody(INDEX_HTML, getClass());
-        HttpStatusCode httpStatusCode = HttpStatusCode.of(StatusCode.OK);
-        HttpResponse httpResponse = HttpResponse.of(HTML.getExtension(), responseBody, httpStatusCode);
+        ResponseLine responseLine = ResponseLine.of(StatusCode.OK);
+        HttpResponse httpResponse = HttpResponse.of(HTML.getExtension(), responseBody, responseLine);
         return httpResponse.getResponse();
     }
 }

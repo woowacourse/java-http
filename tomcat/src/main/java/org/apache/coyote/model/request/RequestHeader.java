@@ -28,6 +28,10 @@ public class RequestHeader {
         return Integer.parseInt(requestHeader.getOrDefault(CONTENT_LENGTH, "0"));
     }
 
+    public boolean existKey(String key) {
+        return requestHeader.containsKey(key);
+    }
+
     public Map<String, String> getRequestHeader() {
         return requestHeader;
     }

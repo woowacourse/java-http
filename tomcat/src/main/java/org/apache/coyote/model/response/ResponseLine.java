@@ -1,16 +1,16 @@
 package org.apache.coyote.model.response;
 
-public class HttpStatusCode {
+public class ResponseLine {
 
     private static final String version = "HTTP/1.1 ";
     private final StatusCode statusCode;
 
-    private HttpStatusCode(final StatusCode statusCode) {
+    private ResponseLine(final StatusCode statusCode) {
         this.statusCode = statusCode;
     }
 
-    public static HttpStatusCode of(final StatusCode statusCode) {
-        return new HttpStatusCode(statusCode);
+    public static ResponseLine of(final StatusCode statusCode) {
+        return new ResponseLine(statusCode);
     }
 
     public String getResponse() {

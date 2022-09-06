@@ -25,13 +25,16 @@ public class RegisterHandler implements Handler {
     @Override
     public String getResponse() {
         if (httpRequest.checkMethod(Method.GET)) {
-            return createResponse(httpRequest, StatusCode.OK, RequestUtil.getResponseBody(REGISTER_HTML, getClass()));
+            return createResponse(httpRequest, StatusCode.OK, RequestUtil.getResponseBody(REGISTER_HTML, getClass()))
+                    .getResponse();
         }
         if (httpRequest.checkMethod(Method.POST)) {
             saveUser();
-            return createResponse(httpRequest, StatusCode.FOUND, RequestUtil.getResponseBody(INDEX_HTML, getClass()));
+            return createResponse(httpRequest, StatusCode.FOUND, RequestUtil.getResponseBody(INDEX_HTML, getClass()))
+                    .getResponse();
         }
-        return createResponse(httpRequest, StatusCode.UNAUTHORIZED, RequestUtil.getResponseBody(CLIENT_ERROR_404, getClass()));
+        return createResponse(httpRequest, StatusCode.UNAUTHORIZED, RequestUtil.getResponseBody(CLIENT_ERROR_404, getClass()))
+                .getResponse();
     }
 
     private void saveUser() {

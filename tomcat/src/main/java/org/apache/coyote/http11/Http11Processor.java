@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import nextstep.jwp.ControllerMatcher;
+import nextstep.jwp.RequestHandler;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.model.Header;
@@ -39,7 +39,7 @@ public class Http11Processor implements Runnable, Processor {
              final var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
             HttpRequest request = readHttpRequest(reader);
-            HttpResponse response = ControllerMatcher.process(request);
+            HttpResponse response = RequestHandler.process(request);
 
             outputStream.write(response.getBytes());
             outputStream.flush();

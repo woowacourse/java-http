@@ -11,7 +11,7 @@ import org.apache.coyote.http11.model.response.Status;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class ControllerTest {
+class JwpTest {
 
     @DisplayName("경로가 '/'일 시, hello.txt 반환")
     @Test
@@ -22,7 +22,7 @@ class ControllerTest {
                         "Connection: keep-alive ")
         );
 
-        HttpResponse response = ControllerMatcher.process(request);
+        HttpResponse response = RequestHandler.process(request);
 
         assertAll(
                 () -> assertThat(response.getStatus()).isEqualTo(Status.OK),
@@ -40,7 +40,7 @@ class ControllerTest {
                         "Connection: keep-alive ")
         );
 
-        HttpResponse response = ControllerMatcher.process(request);
+        HttpResponse response = RequestHandler.process(request);
 
         assertAll(
                 () -> assertThat(response.getStatus()).isEqualTo(Status.FOUND),
@@ -57,7 +57,7 @@ class ControllerTest {
                         "Connection: keep-alive ")
         );
 
-        HttpResponse response = ControllerMatcher.process(invalidRequest);
+        HttpResponse response = RequestHandler.process(invalidRequest);
 
         assertThat(response.getStatus()).isEqualTo(Status.UNAUTHORIZED);
     }
@@ -71,7 +71,7 @@ class ControllerTest {
                         "Connection: keep-alive ")
         );
 
-        HttpResponse response = ControllerMatcher.process(invalidRequest);
+        HttpResponse response = RequestHandler.process(invalidRequest);
 
         assertThat(response.getStatus()).isEqualTo(Status.UNAUTHORIZED);
     }

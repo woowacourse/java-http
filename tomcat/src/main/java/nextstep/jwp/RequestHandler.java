@@ -7,7 +7,7 @@ import org.apache.coyote.http11.model.response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ControllerMatcher {
+public class RequestHandler {
 
     private static final String URL_INDEX = "/index.html";
     private static final String URL_LOGIN = "/login";

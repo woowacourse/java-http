@@ -14,6 +14,9 @@ import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.Path;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpResponse.Builder;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.support.ResourceFindUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +55,13 @@ public class Http11Processor implements Runnable, Processor {
     private String getResponse(HttpRequest httpRequest) {
         Path path = httpRequest.getPath();
         if (path.getResource().equals("/")) {
-            return generateResponseMessage(path.getContentType(), "Hello world!");
+            final HttpResponse httpResponse = new Builder()
+                    .status(HttpStatus.OK)
+                    .contentType(path.getContentType())
+                    .responseBody("Hello world!")
+                    .build();
+
+            return httpResponse.toResponseMessage();
         }
         if (path.isIcoContentType()) {
             return "";
@@ -61,12 +70,12 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private String generateResponseMessage(String contentType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+        return new HttpResponse.Builder()
+                .status(HttpStatus.OK)
+                .contentType(contentType)
+                .responseBody(responseBody)
+                .build()
+                .toResponseMessage();
     }
 
     private String generateResponseBody(Path path) {

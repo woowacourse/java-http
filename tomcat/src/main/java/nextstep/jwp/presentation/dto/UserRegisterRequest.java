@@ -1,5 +1,6 @@
 package nextstep.jwp.presentation.dto;
 
+import nextstep.jwp.model.User;
 import org.apache.coyote.http11.web.QueryParameters;
 
 public class UserRegisterRequest {
@@ -22,16 +23,12 @@ public class UserRegisterRequest {
         return new UserRegisterRequest(account, email, password);
     }
 
+    public User toEntity() {
+        return new User(account, password, email);
+    }
+
     public String getAccount() {
         return account;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
     }
 
     @Override

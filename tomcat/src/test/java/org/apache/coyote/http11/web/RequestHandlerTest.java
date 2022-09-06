@@ -100,15 +100,17 @@ class RequestHandlerTest {
         httpHeaders.put(HttpHeader.HOST, "localhost:8080");
         httpHeaders.put(HttpHeader.CONNECTION, "keep-alive");
         httpHeaders.put(HttpHeader.ACCEPT, "text/html");
-        final HttpRequest httpRequest = new HttpRequest(httpStartLine, httpHeaders, "");
+        final String requestBody = "account=sun&email=sun@gmail.com&password=qwer1234";
+        final HttpRequest httpRequest = new HttpRequest(httpStartLine, httpHeaders, requestBody);
 
         // when
         final HttpResponse httpResponse = new RequestHandler().handle(httpRequest);
 
         // then
-        final String expected = "HTTP/1.1 200 OK \r\n" +
+        final String expected = "HTTP/1.1 302 FOUND \r\n" +
+                "Location: /index.html \r\n" +
                 "Content-Type: text/html \r\n" +
-                "Content-Length: 5564 \r\n" +
+                "Content-Length: 0 \r\n" +
                 "\r\n";
         assertThat(httpResponse.format()).startsWith(expected);
     }

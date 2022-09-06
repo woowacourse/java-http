@@ -6,26 +6,30 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import nextstep.jwp.exception.UncheckedServletException;
 
 public class HttpResponseBuilder {
 
-    private String startLine;
-    private Map<String, String> headers;
+    private final String startLine;
+    private final Map<String, String> headers;
+    private final Map<String, String> cookies;
     private String body;
 
-    HttpResponseBuilder(String startLine) {
+    HttpResponseBuilder(final String startLine) {
         this.startLine = startLine;
         this.headers = new HashMap<>();
+        this.cookies = new HashMap<>();
         this.body = "";
     }
 
-    public HttpResponseBuilder header(String name, String value) {
+    public HttpResponseBuilder header(final String name, final String value) {
         headers.put(name, value);
         return this;
     }
 
-    public HttpResponseBuilder fileBody(String filePath) {
+    public HttpResponseBuilder fileBody(final String filePath) {
         try {
             final URL resource = getClass()
                     .getClassLoader()
@@ -37,7 +41,7 @@ public class HttpResponseBuilder {
         }
     }
 
-    public HttpResponseBuilder textBody(String body) {
+    public HttpResponseBuilder textBody(final String body) {
         this.body = body;
         return this;
     }
@@ -47,6 +51,11 @@ public class HttpResponseBuilder {
         for (String headerName : headers.keySet()) {
             response.addHeader(headerName, headers.get(headerName));
         }
+
+        for (String cookieName : cookies.keySet()) {
+            response.addCookie(cookieName, cookies.get(cookieName));
+        }
+
         response.addBody(body);
         return response;
     }

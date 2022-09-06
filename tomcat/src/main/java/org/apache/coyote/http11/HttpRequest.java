@@ -1,7 +1,6 @@
 package org.apache.coyote.http11;
 
 import java.util.Map;
-import java.util.stream.Stream;
 
 public class HttpRequest {
 
@@ -10,11 +9,13 @@ public class HttpRequest {
     private final String requestLine;
     private final Map<String, String> headers;
     private final String body;
+    private Session session;
 
     public HttpRequest(final String requestLine, final Map<String, String> headers, final String body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
+        this.session = null;
     }
 
     public boolean hasHeader(String name) {
@@ -86,5 +87,28 @@ public class HttpRequest {
 
     public String getBody() {
         return body;
+    }
+
+    public Session getSession() {
+        if (session != null) {
+            return session;
+        }
+
+        final String cookie = headers.get("Cookie");
+
+        if (cookie != null) {
+            final String sessionId = cookie.split("=")[1];
+            if (SessionManager.getSession(sessionId).isPresent()) {
+                session = SessionManager.getSession(sessionId).get();
+                return session;
+            }
+        }
+
+        session = SessionManager.createSession();
+        return session;
+    }
+
+    public boolean hasSession() {
+        return session != null;
     }
 }

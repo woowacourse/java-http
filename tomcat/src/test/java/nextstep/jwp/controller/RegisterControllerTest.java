@@ -25,5 +25,4 @@ class RegisterControllerTest {
         // then
         assertThat(response).isEqualTo(HttpResponse.redirect("/register").build());
     }
-
 }

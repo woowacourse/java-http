@@ -20,10 +20,9 @@ class LoginControllerTest {
                         "Accept", "text/html",
                         "Connection", "keep-alive"),
                 "");
-        LoginController sut = new LoginController();
 
         // when
-        final HttpResponse actual = sut.doPost(request);
+        final HttpResponse actual = new LoginController().doService(request);
 
         // then
         HttpResponse response = HttpResponse.redirect("/401.html").build();

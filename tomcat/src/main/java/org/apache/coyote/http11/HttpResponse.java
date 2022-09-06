@@ -3,12 +3,14 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class HttpResponse {
 
     private final String statusLine;
-    private final Map<String, String> responseHeaders;
-    private String responseBody;
+    private final Map<String, String> headers;
+    private final Map<String, String> cookies;
+    private String body;
 
     public static HttpResponseBuilder ok() {
         return new HttpResponseBuilder("HTTP/1.1 200 OK \r\n");
@@ -25,17 +27,30 @@ public class HttpResponse {
 
     HttpResponse(String statusLine) {
         this.statusLine = statusLine;
-        this.responseHeaders = new HashMap<>();
-        this.responseBody = "";
+        this.headers = new HashMap<>();
+        this.cookies = new HashMap<>();
+        this.body = "";
     }
 
     public void addBody(final String responseBody) {
-        responseHeaders.put("Content-Length", String.valueOf(responseBody.getBytes().length));
-        this.responseBody = responseBody;
+        headers.put("Content-Length", String.valueOf(responseBody.getBytes().length));
+        this.body = responseBody;
     }
 
     public void addHeader(final String name, final String value) {
-        responseHeaders.put(name, value);
+        headers.put(name, value);
+    }
+
+    public void addCookie(final String name, final String value) {
+        cookies.put(name, value);
+    }
+
+    public boolean hasBody() {
+        return body.length() > 0;
+    }
+
+    public String getHeader(final String name) {
+        return headers.get(name);
     }
 
     public byte[] writeValueAsBytes() {
@@ -44,16 +59,24 @@ public class HttpResponse {
 
     public String writeValueAsString() {
         String response = statusLine;
-        for (String key : responseHeaders.keySet()) {
-            response += key + ": " + responseHeaders.get(key) + " \r\n";
+
+        for (String key : headers.keySet()) {
+            response += key + ": " + headers.get(key) + " \r\n";
         }
+
+        if (!cookies.isEmpty()) {
+            response += "Set-Cookie: " + parseCookies() + " \r\n";
+        }
+
         response += "\r\n";
-        response += responseBody;
+        response += body;
         return response;
     }
 
-    public boolean hasBody() {
-        return responseBody.length() > 0;
+    private String parseCookies() {
+        return cookies.keySet().stream()
+                .map(name -> name + "=" + cookies.get(name))
+                .collect(Collectors.joining("; "));
     }
 
     @Override
@@ -66,11 +89,11 @@ public class HttpResponse {
         }
         final HttpResponse that = (HttpResponse) o;
         return Objects.equals(statusLine, that.statusLine) && Objects
-                .equals(responseHeaders, that.responseHeaders) && Objects.equals(responseBody, that.responseBody);
+                .equals(headers, that.headers) && Objects.equals(body, that.body);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(statusLine, responseHeaders, responseBody);
+        return Objects.hash(statusLine, headers, body);
     }
 }

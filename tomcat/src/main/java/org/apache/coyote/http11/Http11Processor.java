@@ -38,6 +38,10 @@ public class Http11Processor implements Runnable, Processor {
             final HttpResponse response = createResponse(request);
             addContentTypeHeader(request, response);
 
+            if (request.hasSession()) {
+                response.addCookie("JSESSIONID", request.getSession().getId());
+            }
+
             outputStream.write(response.writeValueAsBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {

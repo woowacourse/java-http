@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.exception.ResourceNotFoundException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -34,10 +35,7 @@ public class Http11Processor implements Runnable, Processor {
              final OutputStream outputStream = connection.getOutputStream();
              final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-
-            final HandlerMapping handler = HandlerMapping.findHandler(httpRequest);
-            final HttpResponse httpResponse = handler.doService(httpRequest);
+            final HttpResponse httpResponse = getHttpResponse(bufferedReader);
 
             final String response = httpResponse.toResponseMessage();
 
@@ -45,6 +43,17 @@ public class Http11Processor implements Runnable, Processor {
             outputStream.flush();
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
+        }
+    }
+
+    private HttpResponse getHttpResponse(BufferedReader bufferedReader) {
+        final HttpRequest httpRequest = HttpRequest.from(bufferedReader);
+        try {
+            final HandlerMapping handler = HandlerMapping.findHandler(httpRequest);
+            final HttpResponse httpResponse = handler.doService(httpRequest);
+            return httpResponse;
+        } catch (ResourceNotFoundException exception) {
+            return HandlerMapping.NOT_FOUND.doService(httpRequest);
         }
     }
 }

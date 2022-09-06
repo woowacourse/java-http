@@ -7,7 +7,8 @@ public enum Extension {
     CSS(".css", "text/css"),
     JS(".js", "text/javascript"),
     ICO(".ico", "image/x-icon"),
-    NONE("null", "text/html")
+    SVG(".svg", "image/svg+xml"),
+    NONE("null", "text/html"),
     ;
 
     private final String extension;

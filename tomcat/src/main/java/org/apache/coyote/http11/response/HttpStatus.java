@@ -4,6 +4,7 @@ public enum HttpStatus {
 
     OK(200, "OK"),
     NOT_FOUND(404, "Not Found"),
+    FOUND(302, "Found"),
     ;
 
     private final int statusCode;
@@ -15,6 +16,6 @@ public enum HttpStatus {
     }
 
     public String getStatus() {
-        return String.valueOf(statusCode) + " " + message;
+        return statusCode + " " + message;
     }
 }

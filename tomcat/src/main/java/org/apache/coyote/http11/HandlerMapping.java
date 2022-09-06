@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import java.util.function.Function;
 import java.util.stream.Stream;
+import org.apache.coyote.http11.exception.ResourceNotFoundException;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 
@@ -48,7 +49,7 @@ public enum HandlerMapping {
         return Stream.of(values())
                 .filter(it -> it.path.equals(resource))
                 .findAny()
-                .orElse(NOT_FOUND);
+                .orElseThrow(ResourceNotFoundException::new);
     }
 
     public HttpResponse doService(HttpRequest httpRequest) {

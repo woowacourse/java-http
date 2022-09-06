@@ -11,6 +11,7 @@ import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.domain.ContentType;
 import org.junit.jupiter.api.Test;
 import support.BufferedReaderFactory;
+import support.HttpMessageFactory;
 
 class LoginControllerTest {
 
@@ -18,12 +19,7 @@ class LoginControllerTest {
 
     @Test
     void page() {
-        String httpRequest = String.join("\r\n",
-                "GET /login HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        String httpRequest = HttpMessageFactory.get("/login");
 
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
 
@@ -42,12 +38,7 @@ class LoginControllerTest {
 
     @Test
     void login() {
-        String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        String httpRequest = HttpMessageFactory.post("/login", "account=gugu&password=password");
 
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
 
@@ -63,12 +54,7 @@ class LoginControllerTest {
 
     @Test
     void wrongPassword() {
-        String httpRequest = String.join("\r\n",
-                "GET /login?account=gugu&password=wroing HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        String httpRequest = HttpMessageFactory.post("/login", "account=gugu&password=wrong");
 
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
 
@@ -84,12 +70,7 @@ class LoginControllerTest {
 
     @Test
     void wrongUserId() {
-        String httpRequest = String.join("\r\n",
-                "GET /login?account=fufu&password=password HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        String httpRequest = HttpMessageFactory.post("/login", "account=fufu&password=password");
 
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
 

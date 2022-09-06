@@ -15,6 +15,7 @@ import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.domain.ContentType;
 import org.junit.jupiter.api.Test;
 import support.BufferedReaderFactory;
+import support.HttpMessageFactory;
 
 class RegisterControllerTest {
 
@@ -22,12 +23,7 @@ class RegisterControllerTest {
 
     @Test
     void page() {
-        String httpRequest = String.join("\r\n",
-                "GET /register HTTP/1.1",
-                "Host: localhost:8080",
-                "Connection: keep-alive",
-                "",
-                "");
+        String httpRequest = HttpMessageFactory.get("/register");
 
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
 
@@ -46,15 +42,7 @@ class RegisterControllerTest {
 
     @Test
     void register() {
-        String httpRequest = String.join("\r\n",
-                "POST /register HTTP/1.1",
-                "Host: localhost:8080",
-                "Connection: keep-alive",
-                "Content-Length: 46",
-                "Content-Type: application/x-www-form-urlencoded",
-                "Accept: */*",
-                "",
-                "account=id&email=email%40email.com&password=pw");
+        String httpRequest = HttpMessageFactory.post("/register", "account=id&email=email%40email.com&password=pw");
 
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);
 
@@ -71,14 +59,7 @@ class RegisterControllerTest {
 
     @Test
     void registerFail() {
-        String httpRequest = String.join("\r\n",
-                "POST /register HTTP/1.1",
-                "Host: localhost:8080",
-                "Connection: keep-alive",
-                "Content-Length: 80",
-                "Content-Type: application/x-www-form-urlencoded",
-                "Accept: */*",
-                "",
+        String httpRequest = HttpMessageFactory.post("/register",
                 "account=gugu&password=password&email=hkkang%40woowahan.com");
 
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);

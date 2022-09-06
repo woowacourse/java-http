@@ -9,17 +9,13 @@ import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.domain.ContentType;
 import org.junit.jupiter.api.Test;
 import support.BufferedReaderFactory;
+import support.HttpMessageFactory;
 
 class HomeControllerTest {
 
     @Test
     void handle() {
-        String httpRequest = String.join("\r\n",
-                "GET /index.html HTTP/1.1 ",
-                "Host: localhost:8080 ",
-                "Connection: keep-alive ",
-                "",
-                "");
+        String httpRequest = HttpMessageFactory.get("/index.html");
 
         Controller controller = new HomeController();
         BufferedReader bufferedReader = BufferedReaderFactory.getBufferedReader(httpRequest);

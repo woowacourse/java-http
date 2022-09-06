@@ -18,24 +18,14 @@ public class LoginController extends AbstractController {
     private static final Logger log = LoggerFactory.getLogger(LoginController.class);
 
     @Override
-    protected HttpResponse doGet(final HttpRequest httpRequest) {
-        if (httpRequest.hasQueryString()) {
-            return inquireUser(httpRequest);
-        }
-        String uri = httpRequest.getRequestLine().getRequestTarget().getUri();
-        String responseBody = FileReader.read(uri + ".html");
-        return HttpResponse.ok(ContentType.from(uri), new MessageBody(responseBody));
-    }
-
-    private HttpResponse inquireUser(final HttpRequest httpRequest) {
+    protected HttpResponse doPost(final HttpRequest httpRequest) {
         try {
-            Map<String, String> queryParameters = httpRequest.getRequestLine()
-                    .getRequestTarget()
-                    .getQueryParameters();
-            String account = queryParameters.get("account");
+            Map<String, String> parameters = httpRequest.getMessageBody()
+                    .getParameters();
+            String account = parameters.get("account");
             User user = InMemoryUserRepository.findByAccount(account)
                     .orElseThrow(() -> new NotFoundException("User not found."));
-            String password = queryParameters.get("password");
+            String password = parameters.get("password");
             return login(user, password);
         } catch (NotFoundException e) {
             return HttpResponse.found(
@@ -57,5 +47,12 @@ public class LoginController extends AbstractController {
                 Headers.builder()
                         .location("/401.html"),
                 new MessageBody(""));
+    }
+
+    @Override
+    protected HttpResponse doGet(final HttpRequest httpRequest) {
+        String uri = httpRequest.getRequestLine().getRequestTarget().getUri();
+        String responseBody = FileReader.read(uri + ".html");
+        return HttpResponse.ok(ContentType.from(uri), new MessageBody(responseBody));
     }
 }

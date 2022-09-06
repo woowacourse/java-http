@@ -35,10 +35,11 @@ class JwpTest {
     @Test
     void loginSuccess() {
         final var request = HttpRequest.from(
-                "GET /login?account=gugu&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 List.of("Host: localhost:8080 ",
                         "Connection: keep-alive ")
         );
+        request.addBody("account=gugu&password=password");
 
         HttpResponse response = RequestHandler.process(request);
 
@@ -52,10 +53,11 @@ class JwpTest {
     @Test
     void loginFail_idDoesNotExist_statusUnauthorized() {
         final var invalidRequest = HttpRequest.from(
-                "GET /login?account=brown&password=password HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 List.of("Host: localhost:8080 ",
                         "Connection: keep-alive ")
         );
+        invalidRequest.addBody("account=brown&password=password");
 
         HttpResponse response = RequestHandler.process(invalidRequest);
 
@@ -66,13 +68,47 @@ class JwpTest {
     @Test
     void loginFail_passwordNotMatch_statusUnauthorized() {
         final var invalidRequest = HttpRequest.from(
-                "GET /login?account=gugupassword=wrongpassword HTTP/1.1 ",
+                "POST /login HTTP/1.1 ",
                 List.of("Host: localhost:8080 ",
                         "Connection: keep-alive ")
         );
+        invalidRequest.addBody("account=brown&password=wrongpassword");
 
         HttpResponse response = RequestHandler.process(invalidRequest);
 
         assertThat(response.getStatus()).isEqualTo(Status.UNAUTHORIZED);
+    }
+
+    @DisplayName("로그인 시 쿠키에 세션 id가 없다면, 응답 헤더에 Set-Cookie 설정")
+    @Test
+    void login_noSessionIdInRequestCookie_setHeaderCookie() {
+        final var request = HttpRequest.from(
+                "POST /login HTTP/1.1 ",
+                List.of("Host: localhost:8080 ",
+                        "Connection: keep-alive ")
+        );
+        request.addBody("account=gugu&password=password");
+
+        final var response = RequestHandler.process(request);
+        final var sessionId = response.getHeaderValue(Header.SET_COOKIE);
+
+        assertThat(sessionId).isNotNull();
+    }
+
+    @DisplayName("로그인 시 쿠키에 세션 id가 있다면, 응답 헤더에 Set-Cookie 설정하지 않음")
+    @Test
+    void login_sessionIdInRequestCookie_doesNotSetHeaderCookie() {
+        final var request = HttpRequest.from(
+                "POST /login HTTP/1.1 ",
+                List.of("Host: localhost:8080 ",
+                        "Connection: keep-alive ",
+                        "Cookie: cookie=choco; JSESSIONID=uuidString; dog=woff")
+        );
+        request.addBody("account=gugu&password=password");
+
+        final var response = RequestHandler.process(request);
+        final var sessionId = response.getHeaderValue(Header.SET_COOKIE);
+
+        assertThat(sessionId).isNull();
     }
 }

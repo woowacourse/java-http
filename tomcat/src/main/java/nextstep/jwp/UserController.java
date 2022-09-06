@@ -16,6 +16,7 @@ import org.apache.coyote.http11.model.response.Status;
 public class UserController {
 
     private static final UserService userService = new UserService();
+    public static final String SESSION_ID = "JSESSIONID";
 
     public static HttpResponse login(final HttpRequest request) throws IOException {
         if (request.getMethod() == Method.POST) {
@@ -36,8 +37,12 @@ public class UserController {
             HttpResponse response = HttpResponse.of(Status.FOUND);
             response.addHeader(Header.LOCATION, "/index.html");
             response.addResource(findResource("/index.html"));
-            UUID uuid = UUID.randomUUID();
-            response.addHeader(Header.SET_COOKIE, "JSESSIONID=" + uuid);
+
+            if (!request.getCookie().hasKey(SESSION_ID)) {
+                UUID uuid = UUID.randomUUID();
+                response.addHeader(Header.SET_COOKIE, SESSION_ID + "=" + uuid);
+            }
+
             return response;
         } catch (IllegalArgumentException | NoSuchElementException e) {
             HttpResponse response = HttpResponse.of(Status.UNAUTHORIZED);

@@ -30,6 +30,10 @@ public class HttpCookie {
         );
     }
 
+    public boolean hasKey(final String key) {
+        return cookies.containsKey(key);
+    }
+
     public String getValue(final String key) {
         return cookies.get(key);
     }

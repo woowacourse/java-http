@@ -1,10 +1,10 @@
 package org.apache.coyote.http11.exception;
 
-public class QueryStringNotFoundException extends RuntimeException {
+public class FormDataValueNotFoundException extends RuntimeException {
 
     private static final String MESSAGE = "Query String Not Found";
 
-    public QueryStringNotFoundException() {
+    public FormDataValueNotFoundException() {
         super(MESSAGE);
     }
 }

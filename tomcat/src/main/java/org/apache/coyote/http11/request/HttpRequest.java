@@ -1,77 +1,83 @@
 package org.apache.coyote.http11.request;
 
-import org.apache.coyote.http11.exception.QueryStringNotFoundException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.coyote.http11.exception.FormDataValueNotFoundException;
 
 public class HttpRequest {
 
-    private static final String SPACE = " ";
-    private static final int RESOURCE_INDEX = 1;
-    private static final int FIRST_LINE_INDEX = 0;
-    private static final String LOGIN_REQUEST = "login";
-    private static final String QUERY_STRING_PREFIX = "?";
-    private static final String FILE_SOURCE_QUERY_STRING_DELIMITER = "\\?";
-    private static final int QUERY_STRING_INDEX = 1;
-    private static final int FILE_NAME_INDEX = 0;
-    private static final String NEW_LINE = "\r\n";
-    private static final String JS_FILE_EXTENSION = ".js";
-    private static final String HTML_FILE_EXTENSION = ".html";
-    private static final String CSS_FILE_EXTENSION = ".css";
-    private static final String ROOT_PAGE_REQUEST_URI = "/";
+    private final HttpMethod httpMethod;
+    private final RequestPath requestPath;
+    private final HttpRequestHeader httpRequestHeader;
+    private final FormData formData;
 
-    private final String fileSource;
-    private final QueryParameter queryParameter;
-
-    public HttpRequest(String fileSource, QueryParameter queryParameter) {
-        this.fileSource = fileSource;
-        this.queryParameter = queryParameter;
+    public HttpRequest(HttpMethod httpMethod, HttpRequestHeader httpRequestHeader,
+                       RequestPath requestPath, FormData formData) {
+        this.httpMethod = httpMethod;
+        this.httpRequestHeader = httpRequestHeader;
+        this.requestPath = requestPath;
+        this.formData = formData;
     }
 
-    public static HttpRequest from(String request) {
-        String requestFirstLine = request.split(NEW_LINE)[FIRST_LINE_INDEX];
-        String resource = requestFirstLine.split(SPACE)[RESOURCE_INDEX];
-        if (!resource.contains(QUERY_STRING_PREFIX)) {
-            return new HttpRequest(resource, null);
+    public static HttpRequest from(BufferedReader bufferedReader) throws IOException {
+        String requestLine = bufferedReader.readLine();
+        RequestPath requestPath = RequestPath.from(requestLine);
+        HttpRequestHeader httpRequestHeader = readHeaders(bufferedReader);
+        if (!httpRequestHeader.hasContentLength()) {
+            return new HttpRequest(
+                    HttpMethod.from(requestLine), httpRequestHeader, requestPath, null);
         }
-        return initializeWithQueryString(resource);
+        FormData formData = readFormData(bufferedReader, httpRequestHeader);
+        return new HttpRequest(HttpMethod.from(requestLine), httpRequestHeader, requestPath, formData);
     }
 
-    private static HttpRequest initializeWithQueryString(String resource) {
-        String[] fileNameAndQueryString = resource.split(FILE_SOURCE_QUERY_STRING_DELIMITER);
-        String queryString = fileNameAndQueryString[QUERY_STRING_INDEX];
-        String fileName = fileNameAndQueryString[FILE_NAME_INDEX];
-        QueryParameter query = QueryParameter.from(queryString);
-        return new HttpRequest(fileName, query);
+    private static HttpRequestHeader readHeaders(BufferedReader bufferedReader) {
+        List<String> input = bufferedReader.lines()
+                .takeWhile(line -> !"".equals(line))
+                .collect(Collectors.toList());
+        return HttpRequestHeader.from(input);
     }
 
-    public String getFileSource() {
-        return fileSource;
+    private static FormData readFormData(BufferedReader bufferedReader, HttpRequestHeader httpRequestHeader)
+            throws IOException {
+        int contentLength = Integer.parseInt(httpRequestHeader.getValueOf("Content-Length"));
+        char[] buffer = new char[contentLength];
+        bufferedReader.read(buffer, 0, contentLength);
+        String formDataLine = new String(buffer);
+        return FormData.from(formDataLine);
+    }
+
+    public String getPath() {
+        return requestPath.getValue();
     }
 
     public boolean isLoginRequest() {
-        return fileSource.contains(LOGIN_REQUEST);
+        return requestPath.containsLoginPath() && httpMethod.isPost();
     }
 
     public boolean isJsFileRequest() {
-        return fileSource.contains(JS_FILE_EXTENSION);
+        return requestPath.containsJsFileExtension() && httpMethod.isGet();
     }
 
     public boolean isCssFileRequest() {
-        return fileSource.contains(CSS_FILE_EXTENSION);
+        return requestPath.containsCssFileExtension() && httpMethod.isGet();
     }
 
     public boolean isHtmlFileRequest() {
-        return fileSource.contains(HTML_FILE_EXTENSION);
+        return requestPath.containsHtmlFileExtension() && httpMethod.isGet();
     }
 
     public boolean isRootRequest() {
-        return fileSource.equals(ROOT_PAGE_REQUEST_URI);
+        return requestPath.isRootPath() && httpMethod.isGet();
     }
 
-    public String getQueryParamValueOf(String key) {
-        if (queryParameter == null) {
-            throw new QueryStringNotFoundException();
+    public String getParamValueOf(String key) {
+        if (formData == null) {
+            throw new FormDataValueNotFoundException();
         }
-        return queryParameter.getValues()
+        return formData.getValues()
                 .get(key);
     }
 }

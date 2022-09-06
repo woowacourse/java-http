@@ -3,7 +3,7 @@ package org.apache.coyote.http11.request;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class QueryParameter {
+public class FormData {
 
     private static final String QUERY_STRING_DELIMITER = "&";
     private static final String KEY_VALUE_DELIMITER = "=";
@@ -12,17 +12,18 @@ public class QueryParameter {
 
     private final Map<String, String> values;
 
-    public QueryParameter(Map<String, String> values) {
+    public FormData(Map<String, String> values) {
         this.values = values;
     }
 
-    public static QueryParameter from(String queryString) {
-        String[] queryParameters = queryString.split(QUERY_STRING_DELIMITER);
-        Map<String, String> params = initializeParams(queryParameters);
-        return new QueryParameter(params);
+    public static FormData from(String formDataLine) {
+        formDataLine = formDataLine.trim();
+        String[] queryParameters = formDataLine.split(QUERY_STRING_DELIMITER);
+        Map<String, String> params = initializeData(queryParameters);
+        return new FormData(params);
     }
 
-    private static Map<String, String> initializeParams(String[] queryParameters) {
+    private static Map<String, String> initializeData(String[] queryParameters) {
         Map<String, String> params = new ConcurrentHashMap<>();
         for (String queryParameter : queryParameters) {
             String[] keyAndValue = queryParameter.split(KEY_VALUE_DELIMITER);

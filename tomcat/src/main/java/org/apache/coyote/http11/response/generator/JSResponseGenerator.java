@@ -14,6 +14,6 @@ public class JSResponseGenerator extends FileResponseGenerator {
 
     @Override
     public HttpResponse generate(HttpRequest httpRequest) throws IOException {
-        return HttpResponse.ok(generate(httpRequest.getFileSource()), ContentType.TEXT_JS);
+        return HttpResponse.ok(generate(httpRequest.getPath()), ContentType.TEXT_JS);
     }
 }

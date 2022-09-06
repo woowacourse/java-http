@@ -20,8 +20,8 @@ public class LoginResponseGenerator implements ResponseGenerator {
 
     @Override
     public HttpResponse generate(HttpRequest httpRequest) {
-        String account = httpRequest.getQueryParamValueOf(ACCOUNT_KEY);
-        String password = httpRequest.getQueryParamValueOf(PASSWORD_KEY);
+        String account = httpRequest.getParamValueOf(ACCOUNT_KEY);
+        String password = httpRequest.getParamValueOf(PASSWORD_KEY);
 
         Optional<User> user = InMemoryUserRepository.findByAccount(account);
         if (user.isPresent()) {

@@ -14,6 +14,6 @@ public class CssResponseGenerator extends FileResponseGenerator {
 
     @Override
     public HttpResponse generate(HttpRequest httpRequest) throws IOException {
-        return HttpResponse.ok(generate(httpRequest.getFileSource()), ContentType.TEXT_CSS);
+        return HttpResponse.ok(generate(httpRequest.getPath()), ContentType.TEXT_CSS);
     }
 }

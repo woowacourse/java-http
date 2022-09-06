@@ -40,12 +40,7 @@ public class Http11Processor implements Runnable, Processor {
              var outputStream = connection.getOutputStream();
              var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
-            String request = readRequest(bufferedReader);
-            if (request.isBlank()) {
-                return;
-            }
-
-            HttpRequest httpRequest = HttpRequest.from(request);
+            HttpRequest httpRequest = HttpRequest.from(bufferedReader);
             ResponseGenerator responseGenerator = ResponseGeneratorFinder.find(httpRequest);
             HttpResponse httpResponse = responseGenerator.generate(httpRequest);
 
@@ -58,18 +53,9 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private String readRequest(BufferedReader bufferedReader) throws IOException {
-        StringBuilder requestBuilder = new StringBuilder();
-        while (bufferedReader.ready()) {
-            requestBuilder.append(bufferedReader.readLine())
-                    .append(NEW_LINE);
-        }
-        return requestBuilder.toString();
-    }
-
     private void showUserIfNecessary(HttpRequest httpRequest) {
         if (httpRequest.isLoginRequest()) {
-            showUser(httpRequest.getQueryParamValueOf(ACCOUNT_KEY), httpRequest.getQueryParamValueOf(PASSWORD_KEY));
+            showUser(httpRequest.getParamValueOf(ACCOUNT_KEY), httpRequest.getParamValueOf(PASSWORD_KEY));
         }
     }
 

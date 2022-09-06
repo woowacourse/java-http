@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.apache.http.HttpMethod.GET;
+import static org.apache.http.HttpMethod.POST;
 
 public class ControllerMapping {
 
@@ -18,6 +19,7 @@ public class ControllerMapping {
         mapping.put(new RequestInfo(GET, "/"), new GreetingController());
         mapping.put(new RequestInfo(GET, "/login"), new LoginController());
         mapping.put(new RequestInfo(GET, "/register"), new ForwardController());
+        mapping.put(new RequestInfo(POST, "/register"), new RegisterController());
     }
 
     public Controller getController(final RequestInfo requestInfo) {

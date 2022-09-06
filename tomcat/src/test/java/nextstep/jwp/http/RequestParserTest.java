@@ -54,7 +54,7 @@ class RequestParserTest {
     @Test
     void 요청바디를_반환한다() {
         // given
-        final String expected = String.join("\r\n", "account=gugu", "password=password");
+        final String expected = String.join("&", "account=gugu", "password=password");
         final String rawRequest = 요청을_생성한다(GET, "/index.html", HttpMime.TEXT_HTML, expected);
         final InputStreamReader inputStreamReader = new InputStreamReader(new ByteArrayInputStream(rawRequest.getBytes()));
         final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);

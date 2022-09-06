@@ -27,4 +27,8 @@ public class Headers {
                 builder.append(String.format("%s: %s \r%n", key.getValue(), value)));
         return builder.toString();
     }
+
+    public String find(final HttpHeader httpHeader) {
+        return mapping.get(httpHeader);
+    }
 }

@@ -5,23 +5,28 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Objects;
 import nextstep.jwp.db.InMemoryUserRepository;
+import org.apache.http.BasicHttpResponse;
 import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.info.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spring.Controller;
+import org.springframework.annotation.Controller;
+import org.springframework.annotation.RequestMapping;
 
-public class LoginController implements Controller {
+@Controller
+public class NextstepController {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
-    private static final String SUPPORT_URI = "/login";
+    private static final Logger log = LoggerFactory.getLogger(NextstepController.class);
+    private static final String WELCOME_MESSAGE = "Hello world!";
 
-    @Override
-    public boolean support(final String requestUri) {
-        return Objects.equals(SUPPORT_URI, requestUri);
+    @RequestMapping(method = HttpMethod.GET, uri = "/")
+    public HttpResponse hello(final HttpRequest httpRequest) {
+        return BasicHttpResponse.from(WELCOME_MESSAGE);
     }
 
-    @Override
-    public String service(final HttpRequest httpRequest) {
+    @RequestMapping(method = HttpMethod.GET, uri = "/login")
+    public HttpResponse login(final HttpRequest httpRequest) {
         final var loginHtml = String.format("%s.html", httpRequest.getRequestURIWithoutQueryParams());
         final var resource = getClass().getClassLoader().getResource(String.format("static%s", loginHtml));
         final var path = new File(resource.getFile()).toPath();
@@ -29,7 +34,7 @@ public class LoginController implements Controller {
         logAccountInfo(httpRequest);
 
         try {
-            return new String(Files.readAllBytes(path));
+            return BasicHttpResponse.from(new String(Files.readAllBytes(path)));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

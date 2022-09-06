@@ -60,4 +60,50 @@ class HttpRequestTest {
         // then
         assertThat(actual.getHttpMethod()).isEqualTo(Method.POST);
     }
+
+    @Test
+    @DisplayName("헤더를 검증한다.")
+    void checkRequestHeader() {
+        // given
+        final String request = String.join("\r\n",
+                "POST /login.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "");
+        final InputStream inputStream = new ByteArrayInputStream(request.getBytes());
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+        // when
+        HttpRequest httpRequest = HttpRequest.of(reader);
+
+        // then
+        assertThat(httpRequest.getRequestHeader().getRequestHeader())
+                .containsKeys("Host", "Connection");
+        assertThat(httpRequest.getRequestHeader().getRequestHeader())
+                .containsValues("localhost:8080", "keep-alive");
+    }
+
+    @Test
+    @DisplayName("바디를 검증한다.")
+    void checkRequestBody() {
+        // given
+        final String request = String.join("\r\n",
+                "POST /login.html HTTP/1.1 ",
+                "Host: localhost:8080 ",
+                "Connection: keep-alive ",
+                "Content-Length: 30 ",
+                "",
+                "account=gugu&password=password");
+        final InputStream inputStream = new ByteArrayInputStream(request.getBytes());
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+
+        // when
+        HttpRequest httpRequest = HttpRequest.of(reader);
+
+        // then
+        assertThat(httpRequest.getRequestBody().getByKey("account"))
+                .isEqualTo("gugu");
+        assertThat(httpRequest.getRequestBody().getByKey("password"))
+                .isEqualTo("password");
+    }
 }

@@ -41,4 +41,8 @@ public class HttpRequest {
     public QueryString queryString() {
         return requestLine.queryString();
     }
+
+    public HttpMethod method() {
+        return requestLine.method();
+    }
 }

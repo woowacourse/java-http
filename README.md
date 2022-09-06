@@ -26,5 +26,6 @@
 
 - Request Line을 추출할 수 있다.
   - `Method`, `Request Uri`, `Version of the protocol`의 값을 각각 가진다.
+  - `Request Uri` 에서 Query String을 추출할 수 있다.
 - header를 추출할 수 있다.
 - body를 추출할 수 있다.

@@ -14,18 +14,18 @@ public class RequestLine {
     private static final int EMPTY_QUERY_STRING_INDEX = -URI_INDEX;
     private static final int QUERY_STRING_INDEX = 1;
 
-    private final String method;
+    private final HttpMethod method;
     private final String uri;
     private final String version;
 
-    private RequestLine(String method, String uri, String version) {
+    private RequestLine(HttpMethod method, String uri, String version) {
         this.method = method;
         this.uri = uri;
         this.version = version;
     }
 
     private RequestLine(String... component) {
-        this(component[METHOD_INDEX], component[URI_INDEX], component[VERSION_INDEX]);
+        this(HttpMethod.valueOf(component[METHOD_INDEX]), component[URI_INDEX], component[VERSION_INDEX]);
     }
 
     public static RequestLine from(String requestLine) {
@@ -50,5 +50,9 @@ public class RequestLine {
             return new QueryString(new HashMap<>());
         }
         return QueryString.from(pathAndQueryString[QUERY_STRING_INDEX]);
+    }
+
+    public HttpMethod method() {
+        return method;
     }
 }

@@ -1,6 +1,7 @@
 package nextstep.jwp.http;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SessionManager {
@@ -11,8 +12,11 @@ public class SessionManager {
         SESSIONS.put(session.getId(), session);
     }
 
-    public static Session findSession(final String id) {
-        return SESSIONS.get(id);
+    public static Optional<Session> findSession(final String id) {
+        if (SESSIONS.containsKey(id)) {
+            return Optional.of(SESSIONS.get(id));
+        }
+        return Optional.empty();
     }
 
     public static void remove(final String id) {

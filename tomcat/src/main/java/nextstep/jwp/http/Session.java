@@ -1,6 +1,7 @@
 package nextstep.jwp.http;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Session {
@@ -10,6 +11,10 @@ public class Session {
 
     public Session(final String id) {
         this.id = id;
+    }
+
+    public static Session newSession() {
+        return new Session(String.valueOf(UUID.randomUUID()));
     }
 
     public String getId() {

@@ -9,6 +9,7 @@ import nextstep.jwp.http.HttpRequestBody;
 import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpVersion;
 import nextstep.jwp.http.Location;
+import nextstep.jwp.http.Session;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.ResourcesUtil;
 
@@ -44,9 +45,14 @@ public class LoginRequestHandler implements HttpRequestHandler {
         String password = httpRequestBody.getValue("password");
         User user = InMemoryUserRepository.findByAccount(account)
                 .orElseThrow(NotFoundUserException::new);
+
+        HttpCookie httpCookie = HttpCookie.empty();
         if (user.checkPassword(password)) {
-            return HttpResponse.found(httpVersion, HttpCookie.empty(), new Location("/index.html"));
+            Session session = Session.newSession();
+            session.setAttribute("user", user);
+            httpCookie.addSessionId(session.getId());
+            return HttpResponse.found(httpVersion, httpCookie, new Location("/index.html"));
         }
-        return HttpResponse.found(httpVersion, HttpCookie.empty(), new Location("/401.html"));
+        return HttpResponse.found(httpVersion, httpCookie, new Location("/401.html"));
     }
 }

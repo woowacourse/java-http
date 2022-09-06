@@ -93,7 +93,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("로그인에 성공하면 302 상태코드를 반환하고 index.html로 이동한다.")
+    @DisplayName("로그인에 성공하면 302 상태코드를 반환한다.")
     void login_success() throws IOException {
         // given
         final String requestBody = "account=gugu&password=password";
@@ -114,16 +114,8 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        final URL resource = getClass().getClassLoader().getResource("static/index.html");
-
-        var expected= String.join("\r\n",
-            "HTTP/1.1 302 Found ",
-            "Content-Type: text/html;charset=utf-8 ",
-            "Content-Length: 5564 ",
-            "",
-            new String(Files.readAllBytes(new File(resource.getFile()).toPath())));
-
-        assertThat(socket.output()).isEqualTo(expected);
+        final String expected = "HTTP/1.1 302 Found ";
+        assertThat(socket.output().split("\r\n")[0]).isEqualTo(expected);
     }
 
     @Test

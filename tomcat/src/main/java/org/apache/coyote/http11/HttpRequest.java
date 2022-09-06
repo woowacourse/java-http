@@ -23,10 +23,6 @@ public class HttpRequest {
         return requestLine.isSameHttpMethod(httpMethod);
     }
 
-    public HttpMethod getHttpMethod() {
-        return requestLine.getHttpMethod();
-    }
-
     public String getPath() {
         RequestURI requestURI = requestLine.getRequestURI();
         return requestURI.getPath();

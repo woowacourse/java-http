@@ -28,4 +28,9 @@ public class HttpHeaders {
         String value = headers.get(key);
         return Optional.ofNullable(value);
     }
+
+    public boolean matchesContentType(String contentType) {
+        return get("Content-Type").stream()
+            .anyMatch(it -> it.equals(contentType));
+    }
 }

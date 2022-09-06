@@ -22,7 +22,7 @@ public class AuthService {
         return AuthServiceHolder.instance;
     }
 
-    public String signUp(final String requestBody) {
+    public void signUp(final String requestBody) {
         QueryParams queryParams = QueryParams.parseQueryParams(requestBody);
         String account = queryParams.get("account");
         String password = queryParams.get("password");
@@ -31,7 +31,6 @@ public class AuthService {
         validateAccountUnique(account);
         User user = new User(account, password, email);
         InMemoryUserRepository.save(user);
-        return "/index.html";
     }
 
     private void validateSignUpFormat(final String account, final String password, final String email) {
@@ -46,10 +45,9 @@ public class AuthService {
         }
     }
 
-    public String login(final String requestBody) {
+    public void login(final String requestBody) {
         QueryParams queryParams = QueryParams.parseQueryParams(requestBody);
         validateLogin(queryParams);
-        return "/index.html";
     }
 
     private void validateLogin(final QueryParams queryParams) {

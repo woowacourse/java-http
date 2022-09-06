@@ -29,6 +29,8 @@ public class Http11Processor implements Runnable, Processor {
     private static final String DEFAULT_EXTENSION = ".html";
     public static final String REGISTER_PATH = "/register";
     private static final String LOGIN_PATH = "/login";
+    public static final String SIGN_UP_REDIRECT_PATH = "/index.html";
+    public static final String LOGIN_REDIRECT_PATH = "/index.html";
     public static final String BAD_REQUEST_PATH = "/400.html";
     public static final String UNAUTHORIZED_PATH = "/401.html";
     public static final String NOT_FOUND_PATH = "/404.html";
@@ -113,12 +115,12 @@ public class Http11Processor implements Runnable, Processor {
 
     private String accessPostMethod(final String url, final String requestBody) {
         if (url.equals(REGISTER_PATH)) {
-            String location = authService.signUp(requestBody);
-            return toFoundResponse(location);
+            authService.signUp(requestBody);
+            return toFoundResponse(SIGN_UP_REDIRECT_PATH);
         }
         if (url.equals(LOGIN_PATH)) {
-            String location = authService.login(requestBody);
-            return toFoundResponse(location);
+            authService.login(requestBody);
+            return toFoundResponse(LOGIN_REDIRECT_PATH);
         }
         return toFoundResponse(NOT_FOUND_PATH);
     }

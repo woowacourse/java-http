@@ -3,6 +3,7 @@ package nextstep.jwp.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.DuplicateAccountException;
@@ -23,14 +24,13 @@ class AuthServiceTest {
         String requestBody = "account=ohzzi&password=password&email=ohzzi@woowahan.com";
 
         // when
-        String location = authService.signUp(requestBody);
+        authService.signUp(requestBody);
 
         // then
         User actual = InMemoryUserRepository.findByAccount("ohzzi")
                 .get();
         User expected = new User(2L, "ohzzi", "password", "ohzzi@woowahan.com");
         assertAll(
-                () -> assertThat(location).isEqualTo("/index.html"),
                 () -> assertThat(actual).isEqualTo(expected)
         );
     }
@@ -60,11 +60,8 @@ class AuthServiceTest {
         // given
         String requestBody = "account=gugu&password=password";
 
-        // when
-        String location = authService.login(requestBody);
-
-        // then
-        assertThat(location).isEqualTo("/index.html");
+        // when, then
+        assertDoesNotThrow(() -> authService.login(requestBody));
     }
 
     @Test

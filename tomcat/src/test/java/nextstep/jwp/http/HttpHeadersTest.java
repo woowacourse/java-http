@@ -44,9 +44,9 @@ class HttpHeadersTest {
     @Test
     @DisplayName("Cookie Header 정보를 반환한다.")
     void parseCookie() {
-        HttpHeaders httpHeaders = HttpHeaders.parse(List.of("COOKIE: key=value"));
+        HttpHeaders httpHeaders = HttpHeaders.parse(List.of("Cookie: key=value"));
 
-        Cookie actual = httpHeaders.parseCookie();
+        Cookie actual = httpHeaders.getCookie();
 
         Cookie expected = Cookie.parse("key=value");
         assertThat(actual).usingRecursiveComparison().isEqualTo(expected);

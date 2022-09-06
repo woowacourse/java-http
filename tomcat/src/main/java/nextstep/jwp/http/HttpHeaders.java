@@ -14,7 +14,7 @@ public class HttpHeaders {
     private static final int ZERO_CONTENT_LENGTH = 0;
     private static final String CONTENT_TYPE_HEADER = "Content-Type";
     private static final String CONTENT_LENGTH_HEADER = "Content-Length";
-    private static final String COOKIE_HEADER = "COOKIE";
+    private static final String COOKIE_HEADER = "Cookie";
 
     private final Map<String, String> headers;
 
@@ -50,7 +50,7 @@ public class HttpHeaders {
             .orElse(ZERO_CONTENT_LENGTH);
     }
 
-    public Cookie parseCookie() {
+    public Cookie getCookie() {
         return get(COOKIE_HEADER)
             .map(Cookie::parse)
             .orElseGet(Cookie::empty);

@@ -137,7 +137,7 @@ class Http11ProcessorTest {
         assertThat(socket.output()).isEqualTo(expected);
     }
 
-    @DisplayName("로그인이 성공하면 302를 반환하고 /index.html 리다이렉트한다.")
+    @DisplayName("로그인이 성공하면 상태코드 302 및 쿠키를 응답 헤더에 설정한 후, /index.html 리다이렉트한다.")
     @Test
     void userLoginIsSuccess() throws IOException {
         //given
@@ -200,7 +200,7 @@ class Http11ProcessorTest {
         assertThat(session.getId()).isEqualTo(sessionId);
     }
 
-    @DisplayName("JSESSIONID가 request header에 있는 경우, 로그인을 하지 않아도 index.html로 리다이렉트")
+    @DisplayName("JSESSIONID가 request header에 있는 경우, 로그인을 하지 않아도 index.html로 리다이렉트한다.")
     @Test
     void userLoginWithJSESSIONID() throws IOException {
         //given

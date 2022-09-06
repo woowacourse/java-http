@@ -59,4 +59,8 @@ public class ResponseEntity {
         final String header = httpHeader.getResponseHeader(statusCode, body.getBytes().length, cookie);
         return String.join("\r\n", header, body);
     }
+
+    public StatusCode getStatusCode() {
+        return statusCode;
+    }
 }

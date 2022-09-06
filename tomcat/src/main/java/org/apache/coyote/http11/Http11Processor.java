@@ -4,6 +4,8 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.presentation.Controller;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.FileNotFoundException;
+import org.apache.coyote.http11.handler.RequestHandler;
+import org.apache.coyote.http11.handler.RequestHandlerMapping;
 import org.slf4j.Logger;
 
 import java.io.BufferedReader;
@@ -38,7 +40,7 @@ public class Http11Processor implements Runnable, Processor {
 
             final HttpHeader httpHeader = getHeaders(reader, startLine);
             final HttpBody httpBody = getBody(reader);
-            final ResponseEntity responseEntity = ResponseHandler.handle(handler, httpHeader, httpBody);
+            final ResponseEntity responseEntity = RequestHandler.handle(handler, httpHeader, httpBody);
             outputStream.write(responseEntity.getResponse(httpHeader).getBytes());
             outputStream.flush();
         } catch (IOException | UncheckedServletException | FileNotFoundException e) {

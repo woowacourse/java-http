@@ -1,4 +1,4 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

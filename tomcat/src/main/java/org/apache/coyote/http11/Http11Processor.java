@@ -9,10 +9,14 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.UUID;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,11 +27,13 @@ public class Http11Processor implements Runnable, Processor {
     private final Logger log;
     private final Socket connection;
     private final UserService userService;
+    private final SessionManager sessionManager;
 
     public Http11Processor(final Socket connection) {
         this.log = LoggerFactory.getLogger(getClass());
         this.connection = connection;
         this.userService = new UserService();
+        this.sessionManager = new SessionManager();
     }
 
     @Override
@@ -78,8 +84,13 @@ public class Http11Processor implements Runnable, Processor {
     private String login(final HttpRequest httpRequest) {
         final StatusCode statusCode = StatusCode.FOUND;
         try {
-            userService.login(httpRequest);
-            return createLoginSuccessResponse(statusCode);
+            final User user = userService.login(httpRequest);
+            final String sessionId = UUID.randomUUID().toString();
+            final Session session = new Session(sessionId);
+            sessionManager.add(session);
+            session.setAttribute("user", user);
+
+            return createLoginSuccessResponse(statusCode, sessionId);
         } catch (final IllegalArgumentException e) {
             return createRedirectResponse(statusCode, "/401.html");
         }
@@ -125,11 +136,11 @@ public class Http11Processor implements Runnable, Processor {
                 "");
     }
 
-    private String createLoginSuccessResponse(final StatusCode statusCode) {
+    private String createLoginSuccessResponse(final StatusCode statusCode, final String jSessionCookie) {
         return String.join("\r\n",
                 HTTP_VERSION + statusCode.toString() + " ",
                 "Location: /index.html" + " ",
-                "Set-Cookie: JSESSIONID=" + HttpCookie.generate() + " ",
+                "Set-Cookie: JSESSIONID=" + jSessionCookie + " ",
                 "");
     }
 }

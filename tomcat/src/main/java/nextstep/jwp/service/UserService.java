@@ -11,7 +11,7 @@ public class UserService {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    public void login(final HttpRequest request) {
+    public User login(final HttpRequest request) {
         final Map<String, String> bodyParams = request.parseApplicationFormData();
         final String userAccount = bodyParams.get("account");
         final String userPassword = bodyParams.get("password");
@@ -19,8 +19,9 @@ public class UserService {
         final User user = InMemoryUserRepository.findByAccount(userAccount)
                 .filter(it -> it.checkPassword(userPassword))
                 .orElseThrow(() -> new IllegalArgumentException("유효하지 않은 유저입니다."));
-
         log.info("user : {}", user);
+
+        return user;
     }
 
     public void register(final HttpRequest request) {

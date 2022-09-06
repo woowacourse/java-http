@@ -30,7 +30,7 @@ public class HttpCookie {
 
     private Map<String, String> parseCookie(String cookieHeader) {
 
-        List<String[]> result = Arrays.stream(cookieHeader.split(";"))
+        final List<String[]> result = Arrays.stream(cookieHeader.split(";"))
             .map(it -> it.trim().split("="))
             .collect(Collectors.toList());
 

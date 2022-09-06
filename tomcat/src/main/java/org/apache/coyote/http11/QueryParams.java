@@ -24,7 +24,7 @@ public class QueryParams {
             return;
         }
 
-        String query = requestUri.getQuery();
+        final String query = requestUri.getQuery();
         if (Objects.isNull(query) || query.isEmpty()) {
             return;
         }
@@ -33,9 +33,9 @@ public class QueryParams {
     }
 
     private void splitQueryParameters(String query) {
-        String decodedQuery = URLDecoder.decode(query, StandardCharsets.UTF_8);
+        final String decodedQuery = URLDecoder.decode(query, StandardCharsets.UTF_8);
 
-        List<String[]> splitQuery = Arrays.stream(decodedQuery.split("&"))
+        final List<String[]> splitQuery = Arrays.stream(decodedQuery.split("&"))
             .map(it -> it.split("=")).collect(toList());
 
         for (String[] parameter : splitQuery) {
@@ -53,10 +53,6 @@ public class QueryParams {
 
     public boolean hasQuery() {
         return !queryParams.isEmpty();
-    }
-
-    public boolean containsKey(String queryKey) {
-        return queryParams.containsKey(queryKey);
     }
 
     public String getQueryValue(String queryKey) {

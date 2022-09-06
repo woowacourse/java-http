@@ -2,10 +2,8 @@ package org.apache.coyote.http11;
 
 import static java.util.stream.Collectors.*;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -23,53 +21,42 @@ public class HttpRequest {
     static final String HTTP_METHOD = "HTTP METHOD";
     private static final String REQUEST_URI = "REQUEST URI";
     private static final String HTTP_VERSION = "HTTP VERSION";
+    private static final String HEADER_DELIMITER = ":";
+    private static final String REQUEST_LINE_DELIMITER = " ";
 
     private final Map<String, String> headers = new HashMap<>();
     private final QueryParams queryParams;
 
     public HttpRequest(InputStream inputStream) throws IOException, URISyntaxException {
-        String messageBody = parseHeaders(inputStream);
+        final String messageBody = parseHeaders(inputStream);
         this.queryParams = new QueryParams(getUri());
         this.queryParams.addQuery(messageBody);
     }
 
-    private String parseHeaders(InputStream inputStream) throws IOException {
-        final InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-        final BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+    private String parseHeaders(InputStream inputStream) {
+        final Reader reader = new Reader(inputStream);
 
         String line;
-
-        try {
-            while (!"".equals(line = bufferedReader.readLine())) {
-                if (Objects.isNull(line)) {
-                    return "";
-                }
-                putHeader(line);
-            }
-
-            if (!(containsHeader("Content-Type") &&
-                getHeaderValue("Content-Type").equals("application/x-www-form-urlencoded"))) {
-                return "";
-            }
-
-            int contentLength = Integer.parseInt(getHeaderValue("Content-Length"));
-            char[] buffer = new char[contentLength];
-            bufferedReader.read(buffer, 0, contentLength);
-            return new String(buffer);
-
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            throw new IllegalArgumentException("invalid HTTP request received", e.getCause());
+        while (!(line = reader.readLine()).isEmpty()) {
+            putHeader(line);
         }
+
+        if (!(containsHeader("Content-Type") &&
+            getHeaderValue("Content-Type").equals("application/x-www-form-urlencoded"))) {
+            return "";
+        }
+
+        final int contentLength = Integer.parseInt(getHeaderValue("Content-Length"));
+        return reader.readByLength(contentLength);
     }
 
     private void putHeader(String requestLine) {
         if (!headers.isEmpty()) {
-            List<String> headerAndValue = parseRequestLine(requestLine, ":");
+            final List<String> headerAndValue = parseRequestLine(requestLine, HEADER_DELIMITER);
             headers.put(headerAndValue.get(0), headerAndValue.get(1));
             return;
         }
-        List<String> startLine = parseRequestLine(requestLine, " ");
+        final List<String> startLine = parseRequestLine(requestLine, REQUEST_LINE_DELIMITER);
         headers.put(HTTP_METHOD, startLine.get(0));
         headers.put(REQUEST_URI, startLine.get(1));
         headers.put(HTTP_VERSION, startLine.get(2));
@@ -102,7 +89,6 @@ public class HttpRequest {
 
             return addExtensionToPath(requestUri);
         } catch (MalformedURLException | URISyntaxException e) {
-            e.printStackTrace();
             throw new IllegalArgumentException("Invalid Uri");
         }
     }
@@ -117,7 +103,7 @@ public class HttpRequest {
             requestUri = new URI(requestUri + ".html");
         }
 
-        URL resource = getClass().getClassLoader().getResource("static" + requestUri.getPath());
+        final URL resource = getClass().getClassLoader().getResource("static" + requestUri.getPath());
         if (Objects.isNull(resource)) {
             return requestUri.toURL();
         }
@@ -142,7 +128,7 @@ public class HttpRequest {
 
     public Session getSession() {
         validateJSESSIONIDExist();
-        HttpCookie cookie = new HttpCookie(getHeaderValue("Cookie"));
+        final HttpCookie cookie = new HttpCookie(getHeaderValue("Cookie"));
         return new Session(cookie.getCookieValue("JSESSIONID"));
     }
 

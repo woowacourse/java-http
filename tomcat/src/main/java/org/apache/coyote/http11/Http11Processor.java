@@ -66,6 +66,6 @@ public class Http11Processor implements Runnable, Processor {
         if (requestUrl.getPath().equals("/")) {
             return "Hello world!";
         }
-        return new String(Files.readAllBytes(new File(Objects.requireNonNull(requestUrl).getFile()).toPath()));
+        return Files.readString(new File(Objects.requireNonNull(requestUrl).getFile()).toPath());
     }
 }

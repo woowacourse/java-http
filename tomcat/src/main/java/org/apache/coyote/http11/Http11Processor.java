@@ -86,6 +86,10 @@ public class Http11Processor implements Runnable, Processor {
             return createLoginFailResponse();
         }
 
+        if ("/register".equals(url) && requestParam.isEmpty()) {
+            return createStaticFileResponse(url + ".html");
+        }
+
         if (url.contains(".")) {
             return createStaticFileResponse(url);
         }

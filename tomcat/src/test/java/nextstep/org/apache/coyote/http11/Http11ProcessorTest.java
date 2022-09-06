@@ -96,13 +96,16 @@ class Http11ProcessorTest {
     @DisplayName("로그인에 성공하면 302 상태코드를 반환하고 index.html로 이동한다.")
     void login_success() throws IOException {
         // given
+        final String requestBody = "account=gugu&password=password";
         final String httpRequest= String.join("\r\n",
-            "POST /login?account=gugu&password=password HTTP/1.1 ",
+            "POST /login HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Accept: text/html,*/*;q=0.1",
+            "Content-Type: application/x-www-form-urlencoded",
+            "Content-Length: " + requestBody.getBytes().length,
             "Connection: keep-alive ",
             "",
-            "");
+            requestBody);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);
@@ -127,13 +130,16 @@ class Http11ProcessorTest {
     @DisplayName("로그인에 실패하면 401 상태코드를 반환하고 401.html로 이동한다.")
     void login_fail() throws IOException {
         // given
+        final String requestBody = "account=gugu&password=invalid";
         final String httpRequest= String.join("\r\n",
-            "POST /login?account=gugu&password=wrong HTTP/1.1 ",
+            "POST /login HTTP/1.1 ",
             "Host: localhost:8080 ",
             "Accept: text/html,*/*;q=0.1",
+            "Content-Type: application/x-www-form-urlencoded",
+            "Content-Length: " + requestBody.getBytes().length,
             "Connection: keep-alive ",
             "",
-            "");
+            requestBody);
 
         final var socket = new StubSocket(httpRequest);
         final Http11Processor processor = new Http11Processor(socket);

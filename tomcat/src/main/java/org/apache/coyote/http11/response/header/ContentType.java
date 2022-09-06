@@ -1,14 +1,13 @@
 package org.apache.coyote.http11.response.header;
 
-public enum ContentType {
+public enum ContentType implements HttpResponseHeader {
 
     TEXT_JS("text/js;charset=utf-8 "),
     TEXT_CSS("text/css;charset=utf-8 "),
     TEXT_HTML("text/html;charset=utf-8 "),
-    NONE(""),
     ;
 
-    private static final String CONTENT_TYPE_HEADER_KEY = "Content-Type: ";
+    private static final String HEADER_KEY = "Content-Type: ";
 
     private final String value;
 
@@ -16,7 +15,7 @@ public enum ContentType {
         this.value = value;
     }
 
-    public String getValue() {
-        return CONTENT_TYPE_HEADER_KEY + value;
+    public String toHeaderFormat() {
+        return HEADER_KEY + value;
     }
 }

@@ -79,6 +79,10 @@ public class HttpRequest {
         return requestPath.containsRegisterPath() && httpMethod.isPost();
     }
 
+    public boolean hasCookie() {
+        return httpRequestHeader.hasCookie();
+    }
+
     public String getParamValueOf(String key) {
         if (formData == null) {
             throw new FormDataValueNotFoundException();

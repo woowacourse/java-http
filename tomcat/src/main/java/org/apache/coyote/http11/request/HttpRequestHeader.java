@@ -9,6 +9,8 @@ public class HttpRequestHeader {
     private static final String HTTP_REQUEST_HEADER_KEY_VALUE_DELIMITER = ": ";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+    private static final String CONTENT_LENGTH_KEY = "Content-Length";
+    private static final String COOKIE_KEY = "Cookie";
 
     private final Map<String, String> values;
 
@@ -28,10 +30,16 @@ public class HttpRequestHeader {
     public boolean hasContentLength() {
         return values.keySet()
                 .stream()
-                .anyMatch("Content-Length"::equals);
+                .anyMatch(CONTENT_LENGTH_KEY::equals);
     }
 
     public String getValueOf(String key) {
         return values.get(key);
+    }
+
+    public boolean hasCookie() {
+        return values.keySet()
+                .stream()
+                .anyMatch(COOKIE_KEY::equals);
     }
 }

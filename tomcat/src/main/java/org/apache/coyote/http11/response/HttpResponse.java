@@ -3,7 +3,9 @@ package org.apache.coyote.http11.response;
 import static org.apache.coyote.http11.response.header.HttpStatusCode.FOUND;
 import static org.apache.coyote.http11.response.header.HttpStatusCode.NOT_FOUND;
 import static org.apache.coyote.http11.response.header.HttpStatusCode.OK;
+import static org.apache.coyote.http11.util.StringUtils.NEW_LINE;
 
+import org.apache.coyote.http11.response.header.ContentLength;
 import org.apache.coyote.http11.response.header.ContentType;
 import org.apache.coyote.http11.response.header.HttpStatusCode;
 import org.apache.coyote.http11.response.header.Location;
@@ -13,43 +15,44 @@ public class HttpResponse {
     private static final String HTTP_VERSION = "HTTP/1.1 ";
 
     private final HttpStatusCode httpStatusCode;
-    private final Location location;
-    private final ContentType contentType;
     private final ResponseBody responseBody;
+    private final ResponseHeaders responseHeaders;
 
-    public HttpResponse(HttpStatusCode httpStatusCode, Location location,
-                        ResponseBody responseBody, ContentType contentType) {
+    public HttpResponse(HttpStatusCode httpStatusCode, ResponseHeaders responseHeaders, ResponseBody responseBody) {
         this.httpStatusCode = httpStatusCode;
-        this.location = location;
+        this.responseHeaders = responseHeaders;
         this.responseBody = responseBody;
-        this.contentType = contentType;
     }
 
     public static HttpResponse ok(String responseBody, ContentType contentType) {
-        return new HttpResponse(OK, Location.None(), new ResponseBody(responseBody), contentType);
+        return new HttpResponse(
+                OK,
+                ResponseHeaders.from(contentType, ContentLength.from(responseBody)),
+                new ResponseBody(responseBody)
+        );
     }
 
     public static HttpResponse notFound(String responseBody) {
-        return new HttpResponse(NOT_FOUND, Location.None(), new ResponseBody(responseBody), ContentType.TEXT_HTML);
+        return new HttpResponse(
+                NOT_FOUND,
+                ResponseHeaders.from(ContentType.TEXT_HTML, ContentLength.from(responseBody)),
+                new ResponseBody(responseBody)
+        );
     }
 
     public static HttpResponse found(String redirectUri) {
-        return new HttpResponse(FOUND, new Location(redirectUri), ResponseBody.NONE(), ContentType.NONE);
+        return new HttpResponse(
+                FOUND,
+                ResponseHeaders.from(new Location(redirectUri)),
+                ResponseBody.None()
+        );
     }
 
     public String getResponse() {
-        if (httpStatusCode.isFound()) {
-            String a = String.join("\r\n",
-                    HTTP_VERSION + httpStatusCode.getValue(),
-                    location.getValue());
-            System.out.println(a);
-            return a;
-        }
-        return String.join("\r\n",
+        return String.join(
+                NEW_LINE,
                 HTTP_VERSION + httpStatusCode.getValue(),
-                contentType.getValue(),
-                "Content-Length: " + responseBody.getValue().getBytes().length + " ",
-                "",
+                responseHeaders.toResponseFormat(),
                 responseBody.getValue());
     }
 }

@@ -1,11 +1,13 @@
 package org.apache.coyote.http11.response;
 
+import static org.apache.coyote.http11.util.StringUtils.EMPTY;
+import static org.apache.coyote.http11.util.StringUtils.NEW_LINE;
+
 public class ResponseBody {
 
-    private static final String EMPTY = "";
     private static final ResponseBody NONE = new ResponseBody(EMPTY);
 
-    public static ResponseBody NONE() {
+    public static ResponseBody None() {
         return NONE;
     }
 
@@ -16,6 +18,6 @@ public class ResponseBody {
     }
 
     public String getValue() {
-        return value;
+        return NEW_LINE + value;
     }
 }

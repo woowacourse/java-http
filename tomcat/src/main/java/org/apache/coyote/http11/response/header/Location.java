@@ -1,14 +1,8 @@
 package org.apache.coyote.http11.response.header;
 
-public class Location {
+public class Location implements HttpResponseHeader {
 
-    private static final String EMPTY = "";
-    private static final Location NONE = new Location(EMPTY);
-    private static final String LOCATION_HEADER = "Location: ";
-
-    public static Location None() {
-        return NONE;
-    }
+    private static final String HEADER_KEY = "Location: ";
 
     private final String value;
 
@@ -16,7 +10,8 @@ public class Location {
         this.value = value;
     }
 
-    public String getValue() {
-        return LOCATION_HEADER + value;
+    @Override
+    public String toHeaderFormat() {
+        return HEADER_KEY + value;
     }
 }

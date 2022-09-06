@@ -14,8 +14,9 @@ import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequestFactory;
 import org.apache.coyote.http11.request.QueryParams;
-import org.apache.coyote.http11.request.URI;
+import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
@@ -45,8 +46,8 @@ public class Http11Processor implements Runnable, Processor {
              OutputStream outputStream = connection.getOutputStream();
              BufferedReader reader = new BufferedReader(
                      new InputStreamReader(inputStream, Charset.forName(StandardCharsets.UTF_8.name())))) {
-            HttpRequest httpRequest = new HttpRequest(reader.readLine());
-            HttpResponse httpResponse = getResponse(httpRequest);
+
+            HttpResponse httpResponse = getResponse(HttpRequestFactory.create(reader));
             String response = httpResponse.parseToString();
 
             outputStream.write(response.getBytes());
@@ -63,7 +64,7 @@ public class Http11Processor implements Runnable, Processor {
             }
             return getDynamicResourceResponse(httpRequest);
         } catch (RuntimeException e) {
-            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.NOT_FOUND,
+            return new HttpResponse("HTTP/1.1", HttpStatus.NOT_FOUND,
                     ContentType.TEXT_HTML_CHARSET_UTF_8, "페이지를 찾을 수 없습니다.");
         }
     }
@@ -72,10 +73,10 @@ public class Http11Processor implements Runnable, Processor {
         Optional<String> extension = httpRequest.getExtension();
         if (extension.isPresent()) {
             ContentType contentType = ContentType.from(extension.get());
-            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, contentType,
-                    getStaticResourceResponse(httpRequest.getUri().getPath()));
+            return new HttpResponse(httpRequest.getRequestLine().getProtocol(), HttpStatus.OK, contentType,
+                    getStaticResourceResponse(httpRequest.getRequestLine().getUri().getPath()));
         }
-        return new HttpResponse(httpRequest.getProtocol(), HttpStatus.NOT_FOUND,
+        return new HttpResponse(httpRequest.getRequestLine().getProtocol(), HttpStatus.NOT_FOUND,
                 ContentType.TEXT_HTML_CHARSET_UTF_8, "페이지를 찾을 수 없습니다.");
     }
 
@@ -84,30 +85,45 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private HttpResponse getDynamicResourceResponse(HttpRequest httpRequest) {
-        URI uri = httpRequest.getUri();
-        String path = uri.getPath();
+        String path = httpRequest.getRequestLine().getUri().getPath();
         if (path.equals("/")) {
-            return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.TEXT_HTML_CHARSET_UTF_8,
-                    WELCOME_MESSAGE);
+            return new HttpResponse(httpRequest.getRequestLine().getProtocol(), HttpStatus.OK,
+                    ContentType.TEXT_HTML_CHARSET_UTF_8, WELCOME_MESSAGE);
         }
-        if (path.equals("/login") && httpRequest.hasQueryParams()) {
-            return getLoginResponse(httpRequest);
+        if (path.equals("/login") && httpRequest.getRequestLine().hasQueryParams()) {
+            return getLoginResponseWithQueryParams(httpRequest);
+        }
+        if (path.equals("/login") && httpRequest.hasRequestBody()) {
+            return getLoginResponseWithRequestBody(httpRequest);
         }
         String responseBody = getStaticResourceResponse(path + ".html");
-        return new HttpResponse(httpRequest.getProtocol(), HttpStatus.OK, ContentType.TEXT_HTML_CHARSET_UTF_8,
-                responseBody);
+        return new HttpResponse(httpRequest.getRequestLine().getProtocol(), HttpStatus.OK,
+                ContentType.TEXT_HTML_CHARSET_UTF_8, responseBody);
     }
 
-    private HttpResponse getLoginResponse(HttpRequest httpRequest) {
-        QueryParams queryParams = httpRequest.getUri().getQueryParams();
-        Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.getParameterValue("account"));
+    private HttpResponse getLoginResponseWithRequestBody(final HttpRequest httpRequest) {
+        RequestBody requestBody = httpRequest.getRequestBody();
+        Optional<User> user = InMemoryUserRepository.findByAccount(requestBody.getValue("account"));
         if (user.isPresent()) {
-            if (user.get().checkPassword(queryParams.getParameterValue("password"))) {
-                return new HttpResponse(httpRequest.getProtocol(), HttpStatus.FOUND,
+            if (user.get().checkPassword(requestBody.getValue("password"))) {
+                return new HttpResponse(httpRequest.getRequestLine().getProtocol(), HttpStatus.FOUND,
                         ContentType.TEXT_HTML_CHARSET_UTF_8,
                         getStaticResourceResponse("/index.html"));
             }
         }
-        return new HttpResponse(httpRequest.getProtocol(), HttpStatus.FOUND, "/401.html");
+        return new HttpResponse(httpRequest.getRequestLine().getProtocol(), HttpStatus.FOUND, "/401.html");
+    }
+
+    private HttpResponse getLoginResponseWithQueryParams(HttpRequest httpRequest) {
+        QueryParams queryParams = httpRequest.getRequestLine().getUri().getQueryParams();
+        Optional<User> user = InMemoryUserRepository.findByAccount(queryParams.getParameterValue("account"));
+        if (user.isPresent()) {
+            if (user.get().checkPassword(queryParams.getParameterValue("password"))) {
+                return new HttpResponse(httpRequest.getRequestLine().getProtocol(), HttpStatus.FOUND,
+                        ContentType.TEXT_HTML_CHARSET_UTF_8,
+                        getStaticResourceResponse("/index.html"));
+            }
+        }
+        return new HttpResponse(httpRequest.getRequestLine().getProtocol(), HttpStatus.FOUND, "/401.html");
     }
 }

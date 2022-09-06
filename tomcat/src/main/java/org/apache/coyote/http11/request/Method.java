@@ -15,4 +15,12 @@ public enum Method {
                 .findFirst()
                 .orElseThrow(InvalidMethodException::new);
     }
+
+    public boolean isGet() {
+        return this == GET;
+    }
+
+    public boolean isPost() {
+        return this == POST;
+    }
 }

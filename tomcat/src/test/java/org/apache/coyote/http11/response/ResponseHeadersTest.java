@@ -70,4 +70,32 @@ class ResponseHeadersTest {
         assertThat(responseHeaders.asString()).contains(expected);
     }
 
+    @Test
+    void request_header에_JSESSIONID가_없으면_Set_Cookie_헤더를_추가한다() {
+        // given
+        String body = "Hello world!";
+        ResponseEntity responseEntity = ResponseEntity.body(body);
+
+        // when
+        ResponseHeaders responseHeaders = ResponseHeaders.of(requestHeaders, responseEntity);
+        String expectedSetCookie = "Set-Cookie: JSESSIONID=";
+
+        // then
+        assertThat(responseHeaders.asString()).contains(expectedSetCookie);
+    }
+
+    @Test
+    void JSESSIOINID가_있으면_header에_추가하지_않는다() {
+        // given
+        String body = "Hello world!";
+        ResponseEntity responseEntity = ResponseEntity.body(body);
+        RequestHeaders requestHeaders = RequestHeaders.of(List.of("Cookie: JSESSIONID=eden"));
+
+        // when
+        ResponseHeaders responseHeaders = ResponseHeaders.of(requestHeaders, responseEntity);
+        String notExpectedSetCookie = "Set-Cookie: JSESSIONID=";
+
+        // then
+        assertThat(responseHeaders.asString()).doesNotContain(notExpectedSetCookie);
+    }
 }

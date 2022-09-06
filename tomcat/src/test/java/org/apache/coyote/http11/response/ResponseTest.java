@@ -13,7 +13,6 @@ import org.apache.coyote.http11.request.RequestBody;
 import org.apache.coyote.http11.request.RequestHeaders;
 import org.apache.coyote.http11.request.StartLine;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class ResponseTest {
@@ -38,16 +37,11 @@ class ResponseTest {
         URI uri = getClass().getClassLoader().getResource("static/index.html").toURI();
         String expectedBody = new String(Files.readAllBytes(Paths.get(uri)));
         Response response = Response.of(request, responseEntity);
-        String expected = String.join("\r\n",
-                "HTTP/1.1 " + 200 + " " + "OK" + " ",
-                "JSESSIONID: eden ",
-                "Content-Type: text/" + "html" + ";charset=utf-8 ",
-                "Content-Length: " + expectedBody.getBytes().length + " ",
-                "",
-                expectedBody);
 
         // then
-        assertThat(response.asString()).isEqualTo(expected);
+        String expectedContentType = "Content-Type: text/" + "html" + ";charset=utf-8 ";
+        String expectedContentLength = "Content-Length: " + expectedBody.getBytes().length + " ";
+        assertThat(response.asString()).contains(List.of(expectedContentType, expectedContentLength, expectedBody));
     }
 
     @Test
@@ -60,16 +54,10 @@ class ResponseTest {
         URI uri = getClass().getClassLoader().getResource("static/css/styles.css").toURI();
         String expectedBody = new String(Files.readAllBytes(Paths.get(uri)));
         Response response = Response.of(request, responseEntity);
-        String expected = String.join("\r\n",
-                "HTTP/1.1 " + 200 + " " + "OK" + " ",
-                "JSESSIONID: eden ",
-                "Content-Type: text/" + "css" + ";charset=utf-8 ",
-                "Content-Length: " + expectedBody.getBytes().length + " ",
-                "",
-                expectedBody);
 
         // then
-        assertThat(response.asString()).contains(expected);
+        String expectedContentType = "Content-Type: text/" + "css" + ";charset=utf-8 ";
+        assertThat(response.asString()).contains(List.of(expectedContentType, expectedBody));
     }
 
     @Test
@@ -82,16 +70,10 @@ class ResponseTest {
         URI uri = getClass().getClassLoader().getResource("static/js/scripts.js").toURI();
         String expectedBody = new String(Files.readAllBytes(Paths.get(uri)));
         Response response = Response.of(request, responseEntity);
-        String expected = String.join("\r\n",
-                "HTTP/1.1 " + 200 + " " + "OK" + " ",
-                "JSESSIONID: eden ",
-                "Content-Type: text/" + "javascript" + ";charset=utf-8 ",
-                "Content-Length: " + expectedBody.getBytes().length + " ",
-                "",
-                expectedBody);
 
         // then
-        assertThat(response.asString()).isEqualTo(expected);
+        String expectedContentType = "Content-Type: text/" + "javascript" + ";charset=utf-8 ";
+        assertThat(response.asString()).contains(List.of(expectedContentType, expectedBody));
     }
 
     @Test
@@ -102,16 +84,11 @@ class ResponseTest {
 
         // when
         Response response = Response.of(request, responseEntity);
-        String expected = String.join("\r\n",
-                "HTTP/1.1 " + 200 + " " + "OK" + " ",
-                "JSESSIONID: eden ",
-                "Content-Type: text/" + "html" + ";charset=utf-8 ",
-                "Content-Length: " + body.getBytes().length + " ",
-                "",
-                body);
 
         // then
-        assertThat(response.asString()).isEqualTo(expected);
+        String expectedStartLine = "HTTP/1.1 " + 200 + " " + "OK" + " ";
+        String expectedCookieHeader = "Set-Cookie: JSESSIONID=";
+        assertThat(response.asString()).contains(expectedStartLine, expectedCookieHeader, body);
     }
 
     @Test
@@ -124,13 +101,14 @@ class ResponseTest {
         Response response = Response.of(request, responseEntity);
         String expected = String.join("\r\n",
                 "HTTP/1.1 " + 302 + " " + "FOUND" + " ",
-                "JSESSIONID: eden ",
                 "Location: index.html ",
                 "",
                 ""
         );
 
         // then
-        assertThat(response.asString()).isEqualTo(expected);
+        String expectedStartLine = "HTTP/1.1 " + 302 + " " + "FOUND" + " ";
+        String expectedLocationHeader = "Location: index.html ";
+        assertThat(response.asString()).contains(List.of(expectedStartLine, expectedLocationHeader));
     }
 }

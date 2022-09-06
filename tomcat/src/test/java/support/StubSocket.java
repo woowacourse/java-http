@@ -20,7 +20,7 @@ public class StubSocket extends Socket {
     }
 
     public StubSocket() {
-        this("GET / HTTP/1.1\r\nJSESSIONID: eden\r\nHost: localhost:8080\r\n\r\n");
+        this("GET / HTTP/1.1\r\nHost: localhost:8080\r\nCookie: JSESSIONID=eden\r\n\r\n");
     }
 
     public InetAddress getInetAddress() {

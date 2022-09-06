@@ -2,32 +2,42 @@ package org.apache.coyote.http11.request;
 
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class RequestHeaders {
 
-    private final Map<String, String> values;
+    private final Map<String, String> headers;
+    private final HttpCookie cookie;
 
-    private RequestHeaders(Map<String, String> values) {
-        this.values = values;
+    private RequestHeaders(Map<String, String> headers, HttpCookie cookie) {
+        this.headers = headers;
+        this.cookie = cookie;
     }
 
     public static RequestHeaders of(List<String> lines) {
-        return new RequestHeaders(lines.stream()
+        Map<String, String> headers = lines.stream()
                 .map(line -> line.split(": "))
-                .collect(Collectors.toMap(splitLine -> splitLine[0], splitLine -> splitLine[1])));
+                .collect(Collectors.toMap(splitLine -> splitLine[0], splitLine -> splitLine[1].trim()));
+        HttpCookie cookie = createCookie(headers);
+        return new RequestHeaders(headers, cookie);
+    }
+
+    private static HttpCookie createCookie(Map<String, String> headers) {
+        if (headers.containsKey("Cookie")) {
+            return HttpCookie.of(headers.get("Cookie"));
+        }
+        return HttpCookie.emptyCookie();
     }
 
     public int getContentLength() {
-        return Integer.parseInt(values.getOrDefault("Content-Length", String.valueOf(0)));
+        return Integer.parseInt(headers.getOrDefault("Content-Length", String.valueOf(0)));
     }
 
     public String getHeader(String headerName) {
-        return values.get(headerName);
+        return headers.get(headerName);
     }
 
-    public String getOrCreateJSessionId() {
-        return this.values.getOrDefault("JSESSIONID", String.valueOf(UUID.randomUUID()));
+    public boolean existsJSessionId() {
+        return this.cookie.existsJSessionId();
     }
 }

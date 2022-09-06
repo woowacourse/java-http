@@ -1,7 +1,6 @@
 package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -12,11 +11,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.exception.AuthenticationException;
-import nextstep.jwp.exception.UserNotFoundException;
 import org.apache.coyote.http11.Http11Processor;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import support.StubSocket;
 
@@ -34,7 +29,6 @@ class Http11ProcessorTest {
         // then
         var expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "JSESSIONID: eden ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: 12 ",
                 "",
@@ -48,9 +42,9 @@ class Http11ProcessorTest {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /index.html HTTP/1.1 ",
-                "JSESSIONID: eden",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=eden ",
                 "",
                 "");
 
@@ -63,7 +57,6 @@ class Http11ProcessorTest {
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");
         var expected = "HTTP/1.1 200 OK \r\n" +
-                "JSESSIONID: eden \r\n" +
                 "Content-Type: text/html;charset=utf-8 \r\n" +
                 "Content-Length: 5564 \r\n" +
                 "\r\n" +
@@ -77,9 +70,9 @@ class Http11ProcessorTest {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /css/styles.css HTTP/1.1 ",
-                "JSESSIONID: eden",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=eden ",
                 "",
                 "");
 
@@ -94,7 +87,6 @@ class Http11ProcessorTest {
         byte[] styles = Files.readAllBytes(Paths.get(uri));
         String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "JSESSIONID: eden ",
                 "Content-Type: text/css;charset=utf-8 ",
                 "Content-Length: " + styles.length + " ",
                 "",
@@ -108,9 +100,9 @@ class Http11ProcessorTest {
         // given
         final String httpRequest = String.join("\r\n",
                 "GET /login HTTP/1.1 ",
-                "JSESSIONID: eden",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
+                "Cookie: JSESSIONID=eden ",
                 "",
                 "");
 
@@ -125,7 +117,6 @@ class Http11ProcessorTest {
         final byte[] login = Files.readAllBytes(Paths.get(uri));
         final String expected = String.join("\r\n",
                 "HTTP/1.1 200 OK ",
-                "JSESSIONID: eden ",
                 "Content-Type: text/html;charset=utf-8 ",
                 "Content-Length: " + login.length + " ",
                 "",
@@ -139,10 +130,10 @@ class Http11ProcessorTest {
         // given
         final String httpRequest = String.join("\r\n",
                 "POST /login HTTP/1.1 ",
-                "JSESSIONID: eden",
                 "Host: localhost:8080 ",
                 "Connection: keep-alive ",
                 "Content-Length: " + "account=gugu&password=password".getBytes().length,
+                "Cookie: JSESSIONID=eden ",
                 "",
                 "account=gugu&password=password");
 

@@ -3,8 +3,12 @@ package org.apache.coyote.http11.request;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 class RequestHeadersTest {
 
@@ -34,31 +38,27 @@ class RequestHeadersTest {
         RequestHeaders requestHeaders = RequestHeaders.of(List.of(contentType));
 
         // then
-        assertThat(requestHeaders.getContentLength()).isEqualTo(0);
+        assertThat(requestHeaders.getContentLength()).isZero();
     }
 
-    @Test
-    void JSESSIONID가_있는지_확인한다() {
+    @ParameterizedTest
+    @MethodSource("provideJSessionId")
+    void JSESSIONID가_있는지_확인한다(List<String> inputHeaders, boolean expected) {
         // given
-        String requestHeader = "JSESSIONID: eden";
 
         //when
-        RequestHeaders requestHeaders = RequestHeaders.of(List.of(requestHeader));
+        RequestHeaders requestHeaders = RequestHeaders.of(inputHeaders);
 
         // then
-        assertThat(requestHeaders.getOrCreateJSessionId()).isEqualTo("eden");
+        assertThat(requestHeaders.existsJSessionId()).isEqualTo(expected);
     }
 
-    @Test
-    void JSESSIONID가_없으면_UUID를_반환한다() {
-        // given
-        String requestHeader = "No-JSessionId: eden2";
-
-        //when
-        RequestHeaders requestHeaders = RequestHeaders.of(List.of(requestHeader));
-
-        // then
-        assertThat(requestHeaders.getOrCreateJSessionId()).containsAnyOf("-");
-
+    public static Stream<Arguments> provideJSessionId() {
+        return Stream.of(
+                Arguments.of(List.of("Eden: eden", "Cookie: JSESSIONID=eden"), true),
+                Arguments.of(List.of("Eden: eden", "Cookie: No-JSESSIONID=eden"), false),
+                Arguments.of(List.of("Eden: eden"), false),
+                Arguments.of(List.of("JSESSIONID: eden"), false)
+        );
     }
 }

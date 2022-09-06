@@ -12,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.io.*;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 class RequestHandlerTest {
 
@@ -32,12 +33,12 @@ class RequestHandlerTest {
         final HttpResponse httpResponse = new RequestHandler().handle(httpRequest);
 
         // then
-        final String expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: /index.html \r\n" +
-                "Content-Type: text/html \r\n" +
-                "Content-Length: 0 \r\n" +
-                "\r\n";
-        assertThat(httpResponse.format()).isEqualTo(expected);
+        final List<String> expected = List.of("HTTP/1.1 302 FOUND \r\n",
+                "Location: /index.html \r\n",
+                "Content-Type: text/html \r\n",
+                "Content-Length: 0 \r\n",
+                "\r\n");
+        assertThat(httpResponse.format()).containsSubsequence(expected);
 
     }
 

@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.List;
 
 class Http11ProcessorTest {
 
@@ -112,12 +113,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        var expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Location: /index.html \r\n" +
-                "Content-Type: text/html \r\n" +
-                "Content-Length: 0 \r\n" +
-                "\r\n";
+        final List<String> expected = List.of("HTTP/1.1 302 FOUND \r\n",
+                "Location: /index.html \r\n",
+                "Content-Type: text/html \r\n",
+                "Content-Length: 0 \r\n",
+                "\r\n");
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertThat(socket.output()).containsSubsequence(expected);
     }
 }

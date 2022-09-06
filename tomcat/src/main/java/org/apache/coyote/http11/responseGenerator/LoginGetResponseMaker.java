@@ -2,25 +2,22 @@ package org.apache.coyote.http11.responseGenerator;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import nextstep.jwp.model.User;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.utils.PathFinder;
 
 public class LoginGetResponseMaker implements ResponseMaker {
 
     @Override
     public String createResponse(final HttpRequest httpRequest)
             throws URISyntaxException, IOException {
-        final URL resource =
-                this.getClass().getClassLoader().getResource("static" + "/login.html");
-        final Path path = Paths.get(resource.toURI());
+        final Path path = PathFinder.findPath("/login.html");
         final var responseBody = new String(Files.readAllBytes(path));
         final Optional<User> loginUser = httpRequest.findUserByJSessionId();
         if (loginUser.isPresent()) {

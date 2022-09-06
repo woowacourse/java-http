@@ -2,10 +2,8 @@ package org.apache.coyote.http11.responseGenerator;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Optional;
 import nextstep.jwp.db.InMemoryUserRepository;
@@ -14,6 +12,7 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.utils.PathFinder;
 import org.apache.coyote.http11.utils.QueryParamsParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +26,7 @@ public class RegisterPostResponseMaker implements ResponseMaker {
         final String requestUrl = httpRequest.getRequestUrl();
         final String requestBody = httpRequest.getRequestBody();
         saveUser(requestBody);
-        final URL resource =
-                this.getClass().getClassLoader().getResource("static" + requestUrl + ".html");
-        final Path path = Paths.get(resource.toURI());
+        final Path path = PathFinder.findPath(requestUrl + ".html");
         final var responseBody = new String(Files.readAllBytes(path));
         final HttpResponse httpResponse =
                 new HttpResponse(HttpStatus.FOUND, responseBody, ContentType.HTML, "/index.html");

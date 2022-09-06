@@ -2,14 +2,13 @@ package org.apache.coyote.http11.responseGenerator;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.utils.PathFinder;
 
 public class FileGetResponseMaker implements ResponseMaker {
 
@@ -19,10 +18,9 @@ public class FileGetResponseMaker implements ResponseMaker {
     public String createResponse(final HttpRequest httpRequest)
             throws URISyntaxException, IOException {
         final String requestUrl = httpRequest.getRequestUrl();
-        final URL resource =
-                this.getClass().getClassLoader().getResource("static" + requestUrl);
+        final Path path = PathFinder.findPath(requestUrl);
+
         final String extension = requestUrl.split("\\.")[CONTENT_TYPE_START_INDEX];
-        final Path path = Paths.get(resource.toURI());
         final var responseBody = new String(Files.readAllBytes(path));
         final ContentType contentType = ContentType.findContentType(extension);
 

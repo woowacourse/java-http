@@ -1,6 +1,7 @@
 package org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -19,11 +20,11 @@ class HttpResponseTest {
         String responseString = httpResponse.toResponseFormat();
 
         // then
-        String expected = "HTTP/1.1 200 OK\r\n" +
-                "Content-Length: " + requestBody.getBytes().length + "\r\n" +
-                "Content-Type: text/html\r\n" +
-                "\r\n" +
-                "request body";
-        assertThat(responseString).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(responseString).contains("HTTP/1.1 200 OK"),
+                () -> assertThat(responseString).contains("Content-Length: " + requestBody.getBytes().length),
+                () -> assertThat(responseString).contains("Content-Type: text/html"),
+                () -> assertThat(responseString).contains("request body")
+        );
     }
 }

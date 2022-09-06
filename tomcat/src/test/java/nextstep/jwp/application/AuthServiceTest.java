@@ -21,15 +21,15 @@ class AuthServiceTest {
     @Test
     void 회원가입_테스트() {
         // given
-        String requestBody = "account=ohzzi&password=password&email=ohzzi@woowahan.com";
+        String requestBody = "account=test&password=password&email=test@woowahan.com";
 
         // when
         authService.signUp(requestBody);
 
         // then
-        User actual = InMemoryUserRepository.findByAccount("ohzzi")
+        User actual = InMemoryUserRepository.findByAccount("test")
                 .get();
-        User expected = new User(2L, "ohzzi", "password", "ohzzi@woowahan.com");
+        User expected = new User(2L, "test", "password", "test@woowahan.com");
         assertAll(
                 () -> assertThat(actual).isEqualTo(expected)
         );

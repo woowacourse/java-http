@@ -58,6 +58,10 @@ public class HttpRequest {
         return new String(buffer);
     }
 
+    public HttpCookie getCookie() {
+        return HttpCookie.parseCookie(headers.getOrDefault("Cookie", ""));
+    }
+
     public HttpMethod getHttpMethod() {
         return httpMethod;
     }

@@ -1,6 +1,7 @@
 package nextstep.org.apache.coyote.http11;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,14 +23,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        String expected = String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: text/html;charset=utf-8 ",
-                "Content-Length: 12 ",
-                "",
-                "Hello world!");
+        String actual = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 200 OK"),
+                () -> assertThat(actual).contains("Hello world!")
+        );
     }
 
     @Test
@@ -51,13 +50,13 @@ class Http11ProcessorTest {
         // then
         URL resource = getClass().getClassLoader().getResource("static/index.html");
         assert resource != null;
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5670 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String actual = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 200 OK"),
+                () -> assertThat(actual).contains(expectedResponseBody)
+        );
     }
 
     @Test
@@ -81,8 +80,12 @@ class Http11ProcessorTest {
         URL resource = getClass().getClassLoader().getResource("static/css/styles.css");
         assert resource != null;
         String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String actual = socket.output();
 
-        assertThat(socket.output()).contains(expectedResponseBody);
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 200 OK"),
+                () -> assertThat(actual).contains(expectedResponseBody)
+        );
     }
 
     @Test
@@ -104,13 +107,13 @@ class Http11ProcessorTest {
         // then
         URL resource = getClass().getClassLoader().getResource("static/index.html");
         assert resource != null;
-        String expected = "HTTP/1.1 200 OK \r\n" +
-                "Content-Type: text/html;charset=utf-8 \r\n" +
-                "Content-Length: 5670 \r\n" +
-                "\r\n" +
-                new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String expectedResponseBody = new String(Files.readAllBytes(new File(resource.getFile()).toPath()));
+        String actual = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 200 OK"),
+                () -> assertThat(actual).contains(expectedResponseBody)
+        );
     }
 
     @Test
@@ -130,11 +133,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        String expected = "HTTP/1.1 302 Found "
-                + "\r\nLocation: /404.html "
-                + "\r\n";
+        String actual = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(actual).contains("Location: /404.html")
+        );
     }
 
     @Test
@@ -204,11 +208,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        String expected = "HTTP/1.1 302 Found "
-                + "\r\nLocation: /index.html "
-                + "\r\n";
+        String actual = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(actual).contains("Location: /index.html")
+        );
     }
 
     @Test
@@ -230,11 +235,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        String expected = "HTTP/1.1 302 Found "
-                + "\r\nLocation: /400.html "
-                + "\r\n";
+        String actual = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(actual).contains("Location: /400.html")
+        );
     }
 
     @Test
@@ -256,11 +262,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        String expected = "HTTP/1.1 302 Found "
-                + "\r\nLocation: /400.html "
-                + "\r\n";
+        String actual = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(actual).contains("Location: /400.html")
+        );
     }
 
     @Test
@@ -283,11 +290,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        String expected = "HTTP/1.1 302 Found "
-                + "\r\nLocation: /index.html "
-                + "\r\n";
+        String actual = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(actual).contains("Location: /index.html")
+        );
     }
 
     @Test
@@ -310,11 +318,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        String expected = "HTTP/1.1 302 Found "
-                + "\r\nLocation: /401.html "
-                + "\r\n";
+        String actual = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(actual).contains("Location: /401.html")
+        );
     }
 
     @Test
@@ -337,11 +346,12 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        String expected = "HTTP/1.1 302 Found "
-                + "\r\nLocation: /401.html "
-                + "\r\n";
+        String actual = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(actual).contains("Location: /401.html")
+        );
     }
 
     @Test
@@ -361,10 +371,11 @@ class Http11ProcessorTest {
         processor.process(socket);
 
         // then
-        String expected = "HTTP/1.1 302 Found "
-                + "\r\nLocation: /401.html "
-                + "\r\n";
+        String actual = socket.output();
 
-        assertThat(socket.output()).isEqualTo(expected);
+        assertAll(
+                () -> assertThat(actual).contains("HTTP/1.1 302 Found"),
+                () -> assertThat(actual).contains("Location: /401.html")
+        );
     }
 }

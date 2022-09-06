@@ -21,11 +21,14 @@ public class HttpResponse {
                 .stream()
                 .map(entry -> entry.getKey() + ": " + entry.getValue())
                 .collect(Collectors.joining("\r\n"));
-        return String.join("\r\n",
+        String responseWithoutBody = String.join("\r\n",
                 PROTOCOL + " " + httpStatus.getValue() + " " + httpStatus.getMessage(),
                 headersString,
-                "",
-                body
+                ""
         );
+        if (body.isBlank()) {
+            return responseWithoutBody;
+        }
+        return responseWithoutBody + "\r\n" + body;
     }
 }

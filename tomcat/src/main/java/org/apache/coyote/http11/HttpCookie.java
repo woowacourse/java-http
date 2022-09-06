@@ -19,6 +19,9 @@ public class HttpCookie {
     }
 
     public static HttpCookie parseCookie(final String cookieHeaderString) {
+        if (cookieHeaderString.isBlank()) {
+            return new HttpCookie(new HashMap<>());
+        }
         Map<String, String> cookies = new HashMap<>();
         String[] rawCookies = cookieHeaderString.split(COOKIES_DELIMITER);
         for (String rawCookie : rawCookies) {
@@ -37,5 +40,9 @@ public class HttpCookie {
 
     public String get(final String key) {
         return cookies.get(key);
+    }
+
+    public boolean has(final String name) {
+        return cookies.containsKey(name);
     }
 }

@@ -24,8 +24,12 @@
 ## 🚀 3단계 - 리팩터링
 ### 1. HttpRequest 클래스 구현하기
 
-- Request Line을 추출할 수 있다.
+- Request Line을 추출할 수 있다. ✅
   - `Method`, `Request Uri`, `Version of the protocol`의 값을 각각 가진다.
   - `Request Uri` 에서 Query String을 추출할 수 있다.
-- header를 추출할 수 있다.
-- body를 추출할 수 있다.
+- header를 추출할 수 있다. ✅
+
+### 2. HttpResponse 클래스 구현하기
+
+- Status-Line, Header, body를 가진다. ✅
+- Http Response의 규격에 맞는 문자열, 바이트 배열을 반환할 수 있다. ✅

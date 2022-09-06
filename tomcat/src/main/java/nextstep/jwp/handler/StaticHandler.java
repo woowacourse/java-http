@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import org.apache.coyote.StaticFile;
 import org.apache.coyote.http11.ContentType;
+import org.apache.coyote.http11.response.HttpResponse;
+import org.apache.coyote.http11.response.HttpStatus;
 
 public class StaticHandler {
 
-    public static String handleStatic(String path) throws IOException {
+    public static HttpResponse handleStatic(String path) throws IOException {
         ContentType contentType = ContentType.from(path);
         String responseBody = getBody(path);
         return getResponse(contentType, responseBody);
@@ -18,12 +20,11 @@ public class StaticHandler {
                 .toPath()));
     }
 
-    public static String getResponse(ContentType contentType, String responseBody) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + contentType.value() + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
+    public static HttpResponse getResponse(ContentType contentType, String responseBody) {
+        return HttpResponse.status(HttpStatus.OK)
+                .setHeader("Content-Type", contentType.value())
+                .setHeader("Content-Type", "charset=utf-8")
+                .setHeader("Content-Length", responseBody.getBytes().length)
+                .body(responseBody);
     }
 }

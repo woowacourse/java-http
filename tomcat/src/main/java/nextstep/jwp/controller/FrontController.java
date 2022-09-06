@@ -2,14 +2,15 @@ package nextstep.jwp.controller;
 
 import java.io.IOException;
 import nextstep.jwp.handler.StaticHandler;
-import org.apache.coyote.http11.httpRequest.HttpRequest;
+import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.response.HttpResponse;
 
 public class FrontController {
 
     private static final String LOGIN_PATH = "/login";
     private static final String NOT_FOUND_PATH = "/404.html";
 
-    public static String handle(HttpRequest request) throws IOException {
+    public static HttpResponse handle(HttpRequest request) throws IOException {
         String path = request.path();
 
         if (isStaticRequest(path)) {

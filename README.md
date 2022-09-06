@@ -18,3 +18,5 @@
 - [x] 로그인에 성공하면 HTTP Reponse의 헤더에 `Set-Cookie`가 존재한다.
   - [x] HTTP Response Header에 `Set-Cookie`를 반환한다.
 - [ ] 서버에 세션을 관리하는 클래스가 있고, 쿠키로부터 전달 받은 `JSESSIONID` 값이 저장된다.
+  - [ ] 로그인에 성공하면 Session 객체의 값으로 User 객체를 저장한다.
+  - [ ] 로그인된 상태에서 `/login` 페이지에 HTTP GET method로 접근하면 `index.html` 페이지로 리다이렉트한다.

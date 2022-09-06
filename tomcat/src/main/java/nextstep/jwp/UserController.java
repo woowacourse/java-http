@@ -5,8 +5,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import nextstep.jwp.model.User;
 import org.apache.coyote.http11.model.ContentType;
 import org.apache.coyote.http11.model.Header;
+import org.apache.coyote.http11.model.Session;
+import org.apache.coyote.http11.model.Sessions;
 import org.apache.coyote.http11.model.request.HttpRequest;
 import org.apache.coyote.http11.model.request.Method;
 import org.apache.coyote.http11.model.response.HttpResponse;
@@ -22,6 +25,14 @@ public class UserController {
         if (request.getMethod() == Method.POST) {
             return tryLogin(request);
         }
+        if (request.getCookie().hasKey(SESSION_ID)) {
+            String sessionId = request.getCookie().getValue(SESSION_ID);
+            if (Sessions.find(sessionId).isPresent()) {
+                HttpResponse response = HttpResponse.of(Status.FOUND);
+                response.addHeader(Header.LOCATION, "/index.html");
+                return response;
+            }
+        }
         return getLoginTemplate();
     }
 
@@ -33,14 +44,14 @@ public class UserController {
 
     private static HttpResponse tryLogin(final HttpRequest request) throws IOException {
         try {
-            userService.login(LoginRequest.of(request.getBody()));
+            User user = userService.login(LoginRequest.of(request.getBody()));
             HttpResponse response = HttpResponse.of(Status.FOUND);
             response.addHeader(Header.LOCATION, "/index.html");
-            response.addResource(findResource("/index.html"));
 
             if (!request.getCookie().hasKey(SESSION_ID)) {
                 UUID uuid = UUID.randomUUID();
                 response.addHeader(Header.SET_COOKIE, SESSION_ID + "=" + uuid);
+                Sessions.addNew(uuid.toString(), new Session("user", user));
             }
 
             return response;

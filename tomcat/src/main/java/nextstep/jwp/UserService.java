@@ -16,13 +16,13 @@ public class UserService {
         InMemoryUserRepository.save(user);
     }
 
-    public void login(final LoginRequest request) {
+    public User login(final LoginRequest request) {
         User user = InMemoryUserRepository.findByAccount(request.getAccount())
                 .orElseThrow(NoSuchElementException::new);
 
         if (user.checkPassword(request.getPassword())) {
             log.info(user.toString());
-            return;
+            return user;
         }
         throw new IllegalArgumentException();
     }

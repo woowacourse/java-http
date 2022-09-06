@@ -5,6 +5,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.AccountDuplicateException;
 import support.DatabaseIsolation;
 
 class UserServiceTest extends DatabaseIsolation {
@@ -13,10 +15,10 @@ class UserServiceTest extends DatabaseIsolation {
 	@Test
 	void register_true() {
 		// when
-		boolean result = UserService.register("gugu", "password", "does@gmail.com");
+		UserService.register("gugu", "password", "does@gmail.com");
 
 		// then
-		assertThat(result).isTrue();
+		assertThat(InMemoryUserRepository.findByAccount("gugu")).isPresent();
 	}
 
 	@DisplayName("중복 account이면 false를 반환한다.")
@@ -25,10 +27,9 @@ class UserServiceTest extends DatabaseIsolation {
 		// given
 		UserService.register("does", "password", "does@gmail.com");
 
-		// when
-		boolean result = UserService.register("does", "password", "does@gmail.com");
-
-		// then
-		assertThat(result).isFalse();
+		// when //then
+		assertThatThrownBy(() -> UserService.register("does", "password", "does@gmail.com"))
+			.isInstanceOf(AccountDuplicateException.class)
+			.hasMessage("같은 account로는 회원가입하지 못합니다.");
 	}
 }

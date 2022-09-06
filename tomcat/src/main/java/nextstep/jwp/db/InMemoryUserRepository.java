@@ -23,9 +23,9 @@ public class InMemoryUserRepository {
 	}
 
 	public static void save(User user) {
-		injectId(user);
 		String account = user.getAccount();
 		validateDuplicateAccount(account);
+		injectId(user);
 		database.put(account, user);
 	}
 

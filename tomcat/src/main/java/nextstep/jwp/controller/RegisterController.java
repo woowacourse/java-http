@@ -10,6 +10,7 @@ import org.apache.coyote.http11.http.HttpResponse;
 import org.apache.coyote.http11.http.HttpStatus;
 import org.apache.coyote.http11.util.StaticResourceUtil;
 
+import nextstep.jwp.exception.AccountDuplicateException;
 import nextstep.jwp.service.UserService;
 
 public class RegisterController extends AbstractController {
@@ -30,14 +31,14 @@ public class RegisterController extends AbstractController {
 		String account = request.getQueryString("account");
 		String password = request.getQueryString("password");
 		String email = request.getQueryString("email");
-		boolean registerResult = UserService.register(account, password, email);
 
-		if (!registerResult) {
+		try {
+			UserService.register(account, password, email);
+			response.setStatus(HttpStatus.FOUND);
+			response.addHeader(HttpHeader.LOCATION, REDIRECT_URL);
+		} catch (AccountDuplicateException e) {
 			handleRegisterFail(response);
-			return;
 		}
-		response.setStatus(HttpStatus.FOUND);
-		response.addHeader(HttpHeader.LOCATION, REDIRECT_URL);
 	}
 
 	private void handleRegisterFail(HttpResponse response) throws IOException {

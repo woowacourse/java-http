@@ -9,11 +9,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import nextstep.jwp.db.InMemoryUserRepository;
-import nextstep.jwp.model.User;
-import org.apache.coyote.http11.request.HttpMethod;
-import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.http11.request.HttpMethod;
+import org.apache.coyote.http11.response.HttpStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,37 +75,5 @@ class Http11ProcessorTest {
         var expected = ResponseFixture.create(HttpStatus.OK, "text/html", body);
 
         assertThat(stubSocket.output()).isEqualTo(expected);
-    }
-
-    @Test
-    void logUser() {
-        // given
-        final String httpRequest = RequestFixture.create(HttpMethod.GET, "/login?account=gugu&password=password", "");
-
-        stubSocket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(stubSocket);
-        final User expected = InMemoryUserRepository.findByAccount("gugu").orElseThrow();
-
-        // when
-        processor.process(stubSocket);
-
-        // then
-        assertThat(memoryAppender.contains(expected.toString())).isTrue();
-    }
-
-    @Test
-    void logUserFail() {
-        // given
-        final String httpRequest = RequestFixture.create(HttpMethod.GET, "/login?account=gugu&password=uncorrect", "");
-
-        stubSocket = new StubSocket(httpRequest);
-        final Http11Processor processor = new Http11Processor(stubSocket);
-        final User expected = InMemoryUserRepository.findByAccount("gugu").orElseThrow();
-
-        // when
-        processor.process(stubSocket);
-
-        // then
-        assertThat(memoryAppender.contains(expected.toString())).isFalse();
     }
 }

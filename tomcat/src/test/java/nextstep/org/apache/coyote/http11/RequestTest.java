@@ -33,6 +33,14 @@ class RequestTest {
     }
 
     @Test
-    void isForStaticFile() {
+    void isForStaticFile() throws IOException {
+        final String requestString = RequestFixture.create(HttpMethod.GET, "/index.html", "");
+        stubSocket = new StubSocket(requestString);
+
+        // when
+        final Request request = Request.of(stubSocket.getInputStream());
+
+        // then
+        assertThat(request.isForStaticFile()).isTrue();
     }
 }

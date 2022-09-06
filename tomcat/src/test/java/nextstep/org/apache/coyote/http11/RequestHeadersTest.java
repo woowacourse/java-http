@@ -3,15 +3,15 @@ package nextstep.org.apache.coyote.http11;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
-import org.apache.coyote.http11.Headers;
+import org.apache.coyote.http11.request.RequestHeaders;
 import org.junit.jupiter.api.Test;
 
-class HeadersTest {
+class RequestHeadersTest {
 
     @Test
     void getContentLength() {
         // given
-        final Headers headers = new Headers(Map.of("Content-Length", "1"));
+        final RequestHeaders headers = new RequestHeaders(Map.of("Content-Length", "1"));
 
         // when
         final int actual = headers.getContentLength();
@@ -23,7 +23,7 @@ class HeadersTest {
     @Test
     void getContentLength_notExistsContentLength() {
         // given
-        final Headers headers = new Headers(Map.of("Content-Type", "text/html"));
+        final RequestHeaders headers = new RequestHeaders(Map.of("Content-Type", "text/html"));
 
         // when
         final int actual = headers.getContentLength();

@@ -3,7 +3,7 @@ package org.apache.coyote.controller;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import org.apache.coyote.http11.request.Request;
-import org.apache.coyote.http11.Response;
+import org.apache.coyote.http11.response.Response;
 
 public interface Controller {
 

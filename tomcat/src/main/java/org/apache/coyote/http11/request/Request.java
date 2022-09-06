@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
-import org.apache.coyote.http11.Headers;
 import org.apache.coyote.http11.URL;
 
 public class Request {
@@ -22,10 +21,10 @@ public class Request {
     private final HttpMethod method;
     private final URL requestURL;
     private final QueryParams params;
-    private final Headers headers;
+    private final RequestHeaders headers;
     private final RequestBody body;
 
-    public Request(final HttpMethod method, final URL requestURL, final QueryParams params, final Headers headers,
+    public Request(final HttpMethod method, final URL requestURL, final QueryParams params, final RequestHeaders headers,
                    final RequestBody body) {
         this.method = method;
         this.requestURL = requestURL;
@@ -41,7 +40,7 @@ public class Request {
         final HttpMethod httpMethod = HttpMethod.of(splitStartLine[KEY]);
         final URL url = URL.of(splitStartLine[URI_INDEX]);
         final QueryParams params = parseQueryParams(splitStartLine[URI_INDEX]);
-        final Headers headers = parseHeader(bufferedReader);
+        final RequestHeaders headers = parseHeader(bufferedReader);
         final int contentLength = headers.getContentLength();
         final RequestBody requestBody = parseBody(bufferedReader, contentLength);
         return new Request(httpMethod, url, params, headers, requestBody);
@@ -55,7 +54,7 @@ public class Request {
         return QueryParams.of(urlQueryParams);
     }
 
-    private static Headers parseHeader(final BufferedReader bufferedReader) throws IOException {
+    private static RequestHeaders parseHeader(final BufferedReader bufferedReader) throws IOException {
         bufferedReader.readLine();
         String headerKeyValue = bufferedReader.readLine();
         final HashMap<String, String> headers = new HashMap<>();
@@ -64,7 +63,7 @@ public class Request {
             headers.put(splitHeaderKeyValue[KEY], splitHeaderKeyValue[VALUE]);
             headerKeyValue = bufferedReader.readLine();
         }
-        return new Headers(headers);
+        return new RequestHeaders(headers);
     }
 
     private static RequestBody parseBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
@@ -97,11 +96,15 @@ public class Request {
         return params;
     }
 
-    public Headers getHeaders() {
+    public RequestHeaders getHeaders() {
         return headers;
     }
 
     public RequestBody getBody() {
         return body;
+    }
+
+    public String findJsessionid() {
+        return headers.getJsessionid();
     }
 }

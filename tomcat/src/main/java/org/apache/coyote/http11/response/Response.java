@@ -1,23 +1,24 @@
-package org.apache.coyote.http11;
+package org.apache.coyote.http11.response;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import org.apache.coyote.http11.URL;
 
 public class Response {
 
     private final OutputStream outputStream;
-    private final Headers headers;
+    private final ResponseHeaders headers;
 
-    private Response(final OutputStream outputStream, final Headers headers) {
+    private Response(final OutputStream outputStream, final ResponseHeaders headers) {
         this.outputStream = outputStream;
         this.headers = headers;
     }
 
     public static Response of(final OutputStream outputStream) {
-        return new Response(outputStream, new Headers(new HashMap<>()));
+        return new Response(outputStream, new ResponseHeaders((new HashMap<>())));
     }
 
     public void addHeader(final String key, final String value) {
@@ -53,5 +54,9 @@ public class Response {
         }
         builder.delete(builder.length() - 2, builder.length());
         return builder.toString();
+    }
+
+    public ResponseHeaders getHeaders() {
+        return headers;
     }
 }

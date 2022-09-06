@@ -30,8 +30,8 @@ public class HttpRequest {
         this.requestBody = requestBody;
     }
 
-    public static HttpRequest from(String requestLine, HttpHeaders httpHeaders,
-                                   String requestBody) {
+    public static HttpRequest of(String requestLine, HttpHeaders httpHeaders,
+                                 String requestBody) {
         List<String> request = List.of(requestLine.split(REQUEST_LINE_SEPARATOR));
         HttpMethod httpMethod = HttpMethod.from(request.get(HTTP_METHOD_INDEX));
         String uri = request.get(URI_INDEX);
@@ -54,7 +54,11 @@ public class HttpRequest {
         return separatedUri.size() != ONLY_PATH_SIZE;
     }
 
-    public boolean equals(ContentType contentType) {
+    public boolean matches(String path, HttpMethod httpMethod) {
+        return this.path.equals(path) && this.httpMethod.equals(httpMethod);
+    }
+
+    public boolean matches(ContentType contentType) {
         return FileUtils.extractFileExtension(path) == contentType;
     }
 
@@ -68,5 +72,9 @@ public class HttpRequest {
 
     public QueryParams getQueryParams() {
         return queryParams;
+    }
+
+    public String getRequestBody() {
+        return requestBody;
     }
 }

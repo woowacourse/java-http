@@ -40,6 +40,9 @@ public class LoginServlet extends Servlet {
 
     private HttpResponse doGet(final HttpRequest httpRequest) {
         final Map<String, String> queries = httpRequest.getQueries();
+        if (!queries.containsKey("account")) {
+            return HttpResponse.of(httpRequest.getHttpVersion(), "/login.html", "200");
+        }
         final Optional<User> user = UserService.findUser(queries.get("account"), queries.get("password"));
         log.info("user : {}", user);
 

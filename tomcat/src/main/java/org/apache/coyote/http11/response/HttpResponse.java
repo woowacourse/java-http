@@ -30,6 +30,7 @@ public class HttpResponse {
         final String contentType = selectContentType(resource);
         final String body = loadResourceContent(resource);
         final HttpHeaders httpHeaders = createHttpHeaders(contentType, body);
+        addLocation(httpHeaders, statusCode, resource);
 
         return new HttpResponse(statusLine, httpHeaders, body);
     }
@@ -49,6 +50,12 @@ public class HttpResponse {
         return HttpHeaders.init()
             .add(HeaderKeys.CONTENT_TYPE, contentType + ";charset=utf-8")
             .add(HeaderKeys.CONTENT_LENGTH, String.valueOf(length));
+    }
+
+    private static void addLocation(final HttpHeaders httpHeaders, final String statusCode, final String resource) {
+        if (StatusCode.isRedirect(statusCode)) {
+            httpHeaders.add(HeaderKeys.LOCATION, resource);
+        }
     }
 
     public String toMessage() {

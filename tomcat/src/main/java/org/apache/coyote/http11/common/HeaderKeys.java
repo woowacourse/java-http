@@ -7,6 +7,7 @@ public enum HeaderKeys {
 
     CONTENT_TYPE("Content-Type"),
     CONTENT_LENGTH("Content-Length"),
+    LOCATION("Location"),
     ;
 
     private final String name;

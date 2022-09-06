@@ -21,9 +21,12 @@ public class RequestPath {
     }
 
     private static String extractPath(final String url) {
-        if (url.contains(QUERY_IDENTIFIER)) {
+        if (url.contains(QUERY_IDENTIFIER) && !url.contains(HTML_EXTENSION)) {
             int index = url.indexOf(QUERY_IDENTIFIER);
             return url.substring(0, index) + HTML_EXTENSION;
+        }
+        if (!url.contains(HTML_EXTENSION) && !url.contains(".")) {
+            return url + HTML_EXTENSION;
         }
         return url;
     }

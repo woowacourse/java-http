@@ -1,5 +1,6 @@
 package org.apache.coyote.http11;
 
+import java.io.File;
 import org.apache.coyote.http.ContentType;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -18,6 +19,7 @@ import org.apache.coyote.http.HttpVersion;
 import org.apache.coyote.http.request.HttpRequest;
 import org.apache.coyote.http.response.HttpResponse;
 import org.apache.coyote.http.response.HttpStatus;
+import org.apache.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +28,7 @@ import java.net.Socket;
 
 public class Http11Processor implements Runnable, Processor {
 
+    public static final String STATIC_DIRECTORY = "static";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -69,11 +72,9 @@ public class Http11Processor implements Runnable, Processor {
         return createResponse(httpRequest);
     }
 
-    private HttpResponse createResponse(final HttpRequest httpRequest)
-            throws URISyntaxException, IOException {
-        final URL resource = this.getClass().getClassLoader().getResource("static" + httpRequest.getUrl());
-        final Path path = Paths.get(resource.toURI());
-        final String responseBody = new String(Files.readAllBytes(path));
+    private HttpResponse createResponse(final HttpRequest httpRequest) throws IOException {
+        final File file = FileUtils.loadFile(STATIC_DIRECTORY+ httpRequest.getUrl());
+        final String responseBody = new String(Files.readAllBytes(file.toPath()));
 
         return new HttpResponse(httpRequest.getVersion(),
                 HttpStatus.OK,

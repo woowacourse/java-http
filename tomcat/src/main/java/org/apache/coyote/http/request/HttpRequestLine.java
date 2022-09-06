@@ -10,7 +10,6 @@ public class HttpRequestLine {
     private HttpVersion version;
 
     private HttpRequestLine(final RequestMethod method, final RequestPath path, final HttpVersion version) {
-
         this.method = method;
         this.path = path;
         this.version = version;

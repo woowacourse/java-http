@@ -17,7 +17,9 @@ public class MessageBody {
     }
 
     public static MessageBody from(final BufferedReader bufferedReader, final Headers headers) throws IOException {
-        int contentLength = Integer.parseInt(headers.getValue().getOrDefault("Content-Length", "0"));
+        int contentLength = Integer.parseInt(headers
+                .getValue()
+                .getOrDefault("Content-Length", "0"));
 
         char[] body = new char[contentLength];
         bufferedReader.read(body);

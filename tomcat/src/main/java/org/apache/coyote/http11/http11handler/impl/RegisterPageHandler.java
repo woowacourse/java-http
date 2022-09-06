@@ -10,6 +10,7 @@ import org.apache.coyote.http11.http11request.Http11Request;
 public class RegisterPageHandler implements Http11Handler {
 
     private static final String URI = "/register";
+    private static final String URI_WITH_EXTENSION = "/register.html";
     private static final HttpMethod ALLOWED_HTTP_METHOD = HttpMethod.GET;
 
     private HandlerSupporter handlerSupporter = new HandlerSupporter();
@@ -21,7 +22,11 @@ public class RegisterPageHandler implements Http11Handler {
 
     @Override
     public ResponseComponent handle(Http11Request http11Request) {
-        String uri = handlerSupporter.addHtmlExtension(http11Request.getUri());
-        return handlerSupporter.extractElements(uri, StatusCode.OK);
+        return new ResponseComponent(
+                StatusCode.OK,
+                handlerSupporter.getContentType(URI_WITH_EXTENSION),
+                handlerSupporter.getContentLength(URI_WITH_EXTENSION),
+                handlerSupporter.extractBody(URI_WITH_EXTENSION)
+        );
     }
 }

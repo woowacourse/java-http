@@ -1,7 +1,6 @@
 package org.apache.coyote.http11.http11handler.impl;
 
 import java.util.Map;
-import nextstep.jwp.db.InMemoryUserRepository;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.StatusCode;
 import org.apache.coyote.http11.dto.ResponseComponent;
@@ -19,7 +18,7 @@ public class RegisterAccountHandler implements Http11Handler {
     private static final String EMAIL_KEY = "email";
     private static final String PASSWORD_KEY = "password";
     private static final String REDIRECT_WHEN_REGISTER_SUCCESS = "/index.html";
-    private static final String REDIRECT_WHEN_REGISTER_FAIL = "/404.html";
+    private static final String REDIRECT_WHEN_REGISTER_FAIL = "/500.html";
 
 
     private final UserService userService = new UserService();
@@ -35,8 +34,18 @@ public class RegisterAccountHandler implements Http11Handler {
     public ResponseComponent handle(Http11Request http11Request) {
         Map<String, String> queryStringDatas = queryStringProcessor.extractQueryStringDatas(http11Request.getBody());
         if (userService.addNewUser(queryStringDatas.get(ACCOUNT_KEY), queryStringDatas.get(EMAIL_KEY), queryStringDatas.get(PASSWORD_KEY))) {
-            return handlerSupporter.extractElements(REDIRECT_WHEN_REGISTER_SUCCESS, StatusCode.FOUND);
+            return new ResponseComponent(
+                    StatusCode.REDIRECT,
+                    handlerSupporter.getContentType(REDIRECT_WHEN_REGISTER_SUCCESS),
+                    handlerSupporter.getContentLength(REDIRECT_WHEN_REGISTER_SUCCESS),
+                    null,
+                    handlerSupporter.getLocation(REDIRECT_WHEN_REGISTER_SUCCESS));
         }
-        return handlerSupporter.extractElements(REDIRECT_WHEN_REGISTER_FAIL, StatusCode.BAD_REQUEST);
+        return new ResponseComponent(
+                StatusCode.REDIRECT,
+                handlerSupporter.getContentType(REDIRECT_WHEN_REGISTER_FAIL),
+                handlerSupporter.getContentLength(REDIRECT_WHEN_REGISTER_FAIL),
+                null,
+                handlerSupporter.getLocation(REDIRECT_WHEN_REGISTER_FAIL));
     }
 }

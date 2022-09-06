@@ -2,29 +2,9 @@ package org.apache.coyote.http11.http11response;
 
 import org.apache.coyote.http11.dto.ResponseComponent;
 
-public class Http11ResponseHandler {
+public interface Http11ResponseHandler {
 
-    private static final String LINE = "\r\n";
+    boolean isProper(ResponseComponent responseComponent);
 
-    public String makeResponse(ResponseComponent responseComponent) {
-        if (responseComponent.getLocation() != null) {
-            return makeRedirectResponse(responseComponent);
-        }
-        return String.join(LINE,
-                String.format("HTTP/1.1 %d %s ", responseComponent.getStatusCode().getCode(), responseComponent.getStatusCode()),
-                String.format("Content-Type: %s;charset=utf-8 ", responseComponent.getContentType()),
-                String.format("Content-Length: %s ", responseComponent.getContentLength()),
-                "",
-                responseComponent.getBody());
-    }
-
-    private String makeRedirectResponse(ResponseComponent responseComponent) {
-        return String.join(LINE,
-                String.format("HTTP/1.1 %d %s ", responseComponent.getStatusCode().getCode(), responseComponent.getStatusCode()),
-                String.format("Content-Type: %s;charset=utf-8 ", responseComponent.getContentType()),
-                String.format("Content-Length: %s ", responseComponent.getContentLength()),
-                String.format("Location: %s ", responseComponent.getLocation()),
-                "",
-                responseComponent.getBody());
-    }
+    String makeResponse(ResponseComponent responseComponent);
 }

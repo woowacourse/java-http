@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
-import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.dto.ResponseComponent;
@@ -12,6 +11,7 @@ import org.apache.coyote.http11.http11handler.Http11Handler;
 import org.apache.coyote.http11.http11handler.Http11HandlerSelector;
 import org.apache.coyote.http11.http11request.Http11Request;
 import org.apache.coyote.http11.http11request.Http11RequestHandler;
+import org.apache.coyote.http11.http11request.Http11ResponseHandlerSelector;
 import org.apache.coyote.http11.http11response.Http11ResponseHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +23,13 @@ public class Http11Processor implements Runnable, Processor {
     private final Socket connection;
     private final Http11RequestHandler http11RequestHandler;
     private final Http11HandlerSelector http11HandlerSelector;
-    private final Http11ResponseHandler http11ResponseHandler;
+    private final Http11ResponseHandlerSelector http11ResponseHandlerSelector;
 
     public Http11Processor(final Socket connection) {
         this.connection = connection;
         this.http11RequestHandler = new Http11RequestHandler();
         this.http11HandlerSelector = new Http11HandlerSelector();
-        this.http11ResponseHandler = new Http11ResponseHandler();
+        this.http11ResponseHandlerSelector = new Http11ResponseHandlerSelector();
     }
 
     @Override
@@ -49,6 +49,7 @@ public class Http11Processor implements Runnable, Processor {
             Http11Handler http11Handler = http11HandlerSelector.getHttp11Handler(http11Request);
             ResponseComponent responseComponent = http11Handler.handle(http11Request);
 
+            Http11ResponseHandler http11ResponseHandler = http11ResponseHandlerSelector.getHttp11ResponseHandler(responseComponent);
             final var response = http11ResponseHandler.makeResponse(responseComponent);
 
             outputStream.write(response.getBytes());

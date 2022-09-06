@@ -23,10 +23,11 @@ public class IndexPageHandler implements Http11Handler {
 
     @Override
     public ResponseComponent handle(Http11Request http11Request) {
-        String uri = http11Request.getUri();
-        if (handlerSupporter.noExtension(uri)) {
-            uri = handlerSupporter.addHtmlExtension(uri);
-        }
-        return handlerSupporter.extractElements(uri, StatusCode.OK);
+        return new ResponseComponent(
+                StatusCode.OK,
+                handlerSupporter.getContentType(URI_WITH_EXTENSION),
+                handlerSupporter.getContentLength(URI_WITH_EXTENSION),
+                handlerSupporter.extractBody(URI_WITH_EXTENSION)
+        );
     }
 }

@@ -23,7 +23,7 @@ public class HandlerSupporter {
                 extractBody(uri)
         );
     }
-
+    
     public String addHtmlExtension(String uri) {
         return uri + HTML_EXTENSION;
     }
@@ -32,7 +32,7 @@ public class HandlerSupporter {
         return !uri.contains(EXTENSION_IDENTIFIER);
     }
 
-    private String extractBody(String uri) {
+    public String extractBody(String uri) {
         try {
             return Files.readString(new File(Objects.requireNonNull(
                     getClass().getClassLoader().getResource(DIRECTORY + uri)).getFile()).toPath());
@@ -41,7 +41,7 @@ public class HandlerSupporter {
         }
     }
 
-    private String getContentType(String uri) {
+    public String getContentType(String uri) {
         String extension = extractExtension(uri);
         return ExtensionContentType.toContentType(extension);
     }
@@ -51,8 +51,12 @@ public class HandlerSupporter {
         return uri.substring(extensionStartIndex);
     }
 
-    private String getContentLength(String uri) {
+    public String getContentLength(String uri) {
         return Long.toString(new File(Objects.requireNonNull(
                 getClass().getClassLoader().getResource(DIRECTORY + uri)).getFile()).length());
+    }
+
+    public String getLocation(String redirectUri) {
+        return redirectUri;
     }
 }

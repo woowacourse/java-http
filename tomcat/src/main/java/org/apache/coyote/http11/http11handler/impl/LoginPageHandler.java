@@ -12,6 +12,7 @@ import org.apache.coyote.http11.http11request.Http11Request;
 public class LoginPageHandler implements Http11Handler {
 
     private static final String URI = "/login";
+    private static final String URI_WITH_EXTENSION = "/login.html";
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
     private static final String REDIRECT_WHEN_LOGIN_SUCCESS = "/index.html";
@@ -36,14 +37,30 @@ public class LoginPageHandler implements Http11Handler {
             return makeResponseComponentAccordingToLogin(queryStrings);
         }
 
-        uri = handlerSupporter.addHtmlExtension(uri);
-        return handlerSupporter.extractElements(uri, StatusCode.OK);
+        return new ResponseComponent(
+                StatusCode.OK,
+                handlerSupporter.getContentType(URI_WITH_EXTENSION),
+                handlerSupporter.getContentLength(URI_WITH_EXTENSION),
+                handlerSupporter.extractBody(URI_WITH_EXTENSION)
+        );
     }
 
     private ResponseComponent makeResponseComponentAccordingToLogin(Map<String, String> queryStrings) {
         if (loginService.login(queryStrings.get(ACCOUNT_KEY), queryStrings.get(PASSWORD_KEY))) {
-            return handlerSupporter.extractElements(REDIRECT_WHEN_LOGIN_SUCCESS, StatusCode.FOUND);
+            return new ResponseComponent(
+                    StatusCode.REDIRECT,
+                    handlerSupporter.getContentType(REDIRECT_WHEN_LOGIN_SUCCESS),
+                    handlerSupporter.getContentLength(REDIRECT_WHEN_LOGIN_SUCCESS),
+                    null,
+                    handlerSupporter.getLocation(REDIRECT_WHEN_LOGIN_SUCCESS)
+            );
         }
-        return handlerSupporter.extractElements(REDIRECT_WHEN_LOGIN_FAIL, StatusCode.UNAUTHORIZED);
+        return new ResponseComponent(
+                StatusCode.REDIRECT,
+                handlerSupporter.getContentType(REDIRECT_WHEN_LOGIN_FAIL),
+                handlerSupporter.getContentLength(REDIRECT_WHEN_LOGIN_FAIL),
+                null,
+                handlerSupporter.getLocation(REDIRECT_WHEN_LOGIN_FAIL)
+        );
     }
 }

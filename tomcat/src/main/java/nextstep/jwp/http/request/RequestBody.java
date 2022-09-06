@@ -7,8 +7,10 @@ public class RequestBody {
 
     private static final String REQUEST_BODY_DELIMITER = "&";
     private static final String REQUEST_BODY_VALUE_DELIMITER = "=";
+    private static final String BLANK = "";
     private static final int KEY_INDEX = 0;
     private static final int VALUE_INDEX = 1;
+
     private final String value;
     private final Map<String, String> parseValue;
     
@@ -18,9 +20,10 @@ public class RequestBody {
     }
 
     private Map<String, String> parseRequestBodyValue(final String value) {
-        if (value.equals("")) {
+        if (value.equals(BLANK)) {
             return new HashMap<>();
         }
+
         Map<String, String> bodyValues = new HashMap<>();
         String[] parseValues = value.split(REQUEST_BODY_DELIMITER);
         for (String parseValue : parseValues) {

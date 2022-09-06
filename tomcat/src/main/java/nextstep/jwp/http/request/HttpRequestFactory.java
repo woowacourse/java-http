@@ -20,7 +20,6 @@ public class HttpRequestFactory {
         HttpHeaders requestHeaders = new HttpHeaders(
             parseRequestHeadersValue(bufferedReader));
         RequestBody requestBody = parseRequestBodyValue(bufferedReader, requestHeaders);
-
         return new HttpRequest(requestLine, requestHeaders, requestBody);
     }
 
@@ -39,7 +38,7 @@ public class HttpRequestFactory {
     }
 
     private static boolean isNotEmpty(final String line) {
-        return !BLANK.equals(line);
+        return !BLANK.equals(line) && line != null;
     }
 
     private static String[] parseLine(String line) {

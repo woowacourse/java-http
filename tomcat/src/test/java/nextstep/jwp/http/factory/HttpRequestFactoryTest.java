@@ -18,11 +18,13 @@ class HttpRequestFactoryTest {
 
     private static final String VALID_REQUEST = String.join("\r\n",
         "GET /login?account=gugu&password=password HTTP/1.1 ",
-        "Host: localhost:8080 ");
-    private static final String INVALID_REQUEST = String.join("\r\n",
-        "/ GET /login?account=gugu&password=password HTTP/1.1 ",
         "Host: localhost:8080 ",
-        "Connection: keep-alive ");
+        "Connection: keep-alive ",
+        "Content-Length: 0 ",
+        "Content-Type: application/x-www-form-urlencoded ",
+        "Accept: */* ",
+        "");
+
 
     @Test
     void httpRequest의_Method를_파싱할_수_있다() throws IOException {

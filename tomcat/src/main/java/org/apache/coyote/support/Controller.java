@@ -2,15 +2,22 @@ package org.apache.coyote.support;
 
 import static org.apache.coyote.http11.model.ContentType.TEXT_HTML_CHARSET_UTF_8;
 
+import nextstep.jwp.model.User;
 import nextstep.jwp.presentation.HomeController;
 import nextstep.jwp.presentation.LoginController;
 import org.apache.coyote.exception.BadRequestException;
 import org.apache.coyote.http11.HttpResponse;
+import org.apache.coyote.http11.model.HttpCookie;
 import org.apache.coyote.http11.model.HttpStatus;
 import org.apache.coyote.http11.request.model.HttpRequest;
 import org.apache.coyote.http11.request.model.HttpPath;
+import org.apache.coyote.http11.request.model.HttpVersion;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Controller {
+
+    private final Logger log = LoggerFactory.getLogger(Controller.class);
 
     private final HttpRequest httpRequest;
 
@@ -26,8 +33,8 @@ public class Controller {
         }
 
         if (uri.getValue().equals("/login.html") || uri.getValue().equals("/login")) {
-            BasicController basicController = new BasicController();
-            return basicController.execute(httpRequest);
+            LoginController controller = new LoginController();
+            return controller.doGet(httpRequest);
         }
 
         if (uri.isBasicContentType()) {
@@ -45,7 +52,7 @@ public class Controller {
     public HttpResponse post() {
         LoginController controller = new LoginController();
         if (httpRequest.isEqualToUri("/login.html") || httpRequest.isEqualToUri("/login")) {
-            return controller.login(httpRequest);
+            return controller.doPost(httpRequest);
         }
         if (httpRequest.isEqualToUri("/register.html") || httpRequest.isEqualToUri("/register")) {
             return controller.register(httpRequest);

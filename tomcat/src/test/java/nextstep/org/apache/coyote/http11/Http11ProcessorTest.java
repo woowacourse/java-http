@@ -6,8 +6,12 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.UUID;
+import nextstep.jwp.model.User;
 import org.apache.coyote.http11.Http11Processor;
 import org.apache.coyote.http11.model.ContentType;
+import org.apache.coyote.support.Session;
+import org.apache.coyote.support.SessionManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -83,7 +87,7 @@ class Http11ProcessorTest {
 
         // then
         URL resource = getClass().getClassLoader().getResource("static/js/scripts.js");
-        String expected =  응답한다("200 OK",
+        String expected = 응답한다("200 OK",
                 new String(Files.readAllBytes(new File(resource.getFile()).toPath())),
                 ContentType.TEXT_JS_CHARSET_UTF_8);
 
@@ -113,7 +117,37 @@ class Http11ProcessorTest {
         }
 
         @Test
-        @DisplayName("POST 요청시 계정과 비밀번호가 일치하면 않으면 index 페이지로 리다이렉트 된다.")
+        @DisplayName("GET 요청시 세션이 존재할 경우 index 페이지로 이동한다.")
+        void get_login_with_session() throws IOException {
+            // given
+            String id = UUID.randomUUID().toString();
+            Session session = new Session(id);
+            session.setAttribute("user", new User("gugu", "password", "gugu@email.com"));
+            SessionManager.add(session);
+
+            String request = "GET /login.html HTTP/1.1\n"
+                    + "Host: localhost:8080\n"
+                    + "Content-Length: " + "account=gugu&password=password" + "\n"
+                    + "Connection: keep-alive\n"
+                    + "Cookie: JSESSIONID= " + id + ";\n"
+                    + "Accept: */*\n"
+                    + "\n"
+                    + "account=gugu&password=password";
+            StubSocket socket = new StubSocket(request);
+            Http11Processor processor = new Http11Processor(socket);
+
+            // when
+            processor.process(socket);
+
+            // then
+            String response = socket.output();
+
+            assertThat(response).contains("302 Found");
+            assertThat(response).contains("Location: /index.html");
+        }
+
+        @Test
+        @DisplayName("POST 요청시 계정과 비밀번호가 일치하면 index 페이지로 리다이렉트 된다.")
         void post_login() throws IOException {
             // given
             String request = 요청한다("POST", "/login", "account=gugu&password=password");
@@ -124,11 +158,11 @@ class Http11ProcessorTest {
             processor.process(socket);
 
             // then
-            var expected = "HTTP/1.1 302 Found \r\n"
-                    + "Location: /index.html \r\n"
-                    + "\r\n";
+            String response = socket.output();
 
-            assertThat(socket.output()).isEqualTo(expected);
+            assertThat(response).contains("302 Found");
+            assertThat(response).contains("Location: /index.html");
+            assertThat(response).contains("Set-Cookie: JSESSIONID");
         }
 
         @Test
@@ -149,6 +183,12 @@ class Http11ProcessorTest {
 
             assertThat(socket.output()).isEqualTo(expected);
         }
+
+        private String getValue(final String response, final String jsessionid) {
+            System.out.println(response);
+            return null;
+        }
+
     }
 
     @Nested
@@ -158,6 +198,8 @@ class Http11ProcessorTest {
         @Test
         @DisplayName("GET 요청시 회원가입 페이지로 이동한다.")
         void get_register() throws IOException {
+            회원_가입을_한다("hoho");
+
             // given
             String request = 요청한다("GET", "/register.html");
             var socket = new StubSocket(request);
@@ -214,6 +256,15 @@ class Http11ProcessorTest {
 
             assertThat(socket.output()).isEqualTo(expected);
         }
+    }
+
+    private String 회원_가입을_한다(String account) {
+        String request = 요청한다("POST", "/register",
+                "account=" + account + "&email=hoho@email.com&password=password");
+        var socket = new StubSocket(request);
+        Http11Processor processor = new Http11Processor(socket);
+        processor.process(socket);
+        return socket.output();
     }
 
     private String 요청한다(String method, String path) {

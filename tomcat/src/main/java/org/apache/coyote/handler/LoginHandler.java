@@ -12,6 +12,8 @@ import org.apache.coyote.domain.response.HttpStatusCode;
 import org.apache.coyote.domain.response.MyHttpResponse;
 import org.apache.coyote.domain.response.RedirectUrl;
 import org.apache.coyote.http11.Http11Processor;
+import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,9 +24,11 @@ public class LoginHandler implements Handler {
     @Override
     public MyHttpResponse run(HttpRequest httpRequest) throws URISyntaxException, IOException {
         final FilePath filePath = FilePath.from(httpRequest.getUri());
-        if (httpRequest.getHttpCookie().getJSESSIONID()) {
-            return MyHttpResponse.from(filePath, HttpStatusCode.FOUND)
-                    .addRedirectUrlHeader(RedirectUrl.from("/index.html"));
+        if (httpRequest.getHttpCookie().hasJSESSIONID()) {
+            if(httpRequest.checkSession()){
+                return MyHttpResponse.from(filePath, HttpStatusCode.FOUND)
+                        .addRedirectUrlHeader(RedirectUrl.from("/index.html"));
+            }
         }
         if (httpRequest.getHttpMethod().equals(HttpMethod.GET) && httpRequest.getQueryParam().isEmpty()) {
             return MyHttpResponse.from(filePath, HttpStatusCode.OK);
@@ -39,6 +43,10 @@ public class LoginHandler implements Handler {
         if (user.isPresent()) {
             log.info(user.get().toString());
             if (user.get().checkPassword(httpRequest.getRequestBody().getRequestBody().get("password"))) {
+                Session session = httpRequest.getSession();
+                session.setAttribute("user", user);
+                SessionManager.add(session);
+                httpRequest.getHttpCookie().add(session);
                 return MyHttpResponse.from(filePath, HttpStatusCode.FOUND)
                         .addRedirectUrlHeader(RedirectUrl.from("/index.html"))
                         .addSetCookieHeader(httpRequest.getHttpCookie());

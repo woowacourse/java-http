@@ -13,13 +13,16 @@ public class HandlerMapping {
         if (uri.contains("?")) {
             uri = uri.split("\\?")[0];
         }
-        if(uri.contains(".")){
+        if (uri.equals("/")) {
+            uri = "/index.html";
+        }
+        if (uri.contains(".")) {
             return new StaticFileHandler();
         }
-        if(uri.contains("/login")){
+        if (uri.contains("/login")) {
             return new LoginHandler();
         }
-        if(uri.contains("/register")){
+        if (uri.contains("/register")) {
             return new RegisterHandler();
         }
         throw new IllegalArgumentException("존재하지 않는 URI");

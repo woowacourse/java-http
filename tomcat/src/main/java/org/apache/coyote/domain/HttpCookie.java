@@ -2,7 +2,7 @@ package org.apache.coyote.domain;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
+import org.apache.coyote.session.Session;
 
 public class HttpCookie {
 
@@ -25,12 +25,19 @@ public class HttpCookie {
         return new HttpCookie(httpCookie);
     }
 
-    public boolean getJSESSIONID() {
+    public boolean hasJSESSIONID() {
         return httpCookie.containsKey("JSESSIONID");
     }
 
+    public String getJSESSIONID() {
+        return httpCookie.get("JSESSIONID");
+    }
+
     public String getHeader() {
-        UUID id = UUID.randomUUID();
-        return "Set-Cookie: JSESSIONID=" + id;
+        return "Set-Cookie: JSESSIONID=" + this.getJSESSIONID();
+    }
+
+    public void add(Session session) {
+        httpCookie.put("JSESSIONID", session.getId());
     }
 }

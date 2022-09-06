@@ -2,7 +2,11 @@ package org.apache.coyote.domain.request;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.Optional;
+import java.util.UUID;
 import org.apache.coyote.domain.HttpCookie;
+import org.apache.coyote.session.Session;
+import org.apache.coyote.session.SessionManager;
 
 public class HttpRequest {
 
@@ -62,5 +66,22 @@ public class HttpRequest {
 
     public HttpCookie getHttpCookie() {
         return httpCookie;
+    }
+
+    public Session getSession() {
+        if (httpCookie.hasJSESSIONID()) {
+            return SessionManager.findSession(httpCookie.getJSESSIONID())
+                    .orElse(new Session(UUID.randomUUID().toString()));
+        }
+        return new Session(UUID.randomUUID().toString());
+    }
+
+    public boolean checkSession() {
+        Optional<Session> session = SessionManager.findSession(httpCookie.getJSESSIONID());
+        if (session.isEmpty()) {
+            return false;
+        }
+        Optional<Object> user = session.get().getAttribute("user");
+        return user.isPresent();
     }
 }

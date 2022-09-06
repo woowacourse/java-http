@@ -12,13 +12,12 @@ import nextstep.jwp.http.common.SessionManager;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.model.User;
 import nextstep.jwp.http.response.HttpResponse;
-import org.apache.coyote.http11.Http11Processor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class LoginController extends AbstractController {
 
-    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+    private static final Logger log = LoggerFactory.getLogger(LoginController.class);
     private static final String PREFIX = "static";
 
     public static LoginController instance = new LoginController();
@@ -31,7 +30,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         Optional<String> sessionValue = httpRequest.getJSessionValue();
         if (sessionValue.isPresent()) {
             Optional<Session> session = SessionManager.findSession(sessionValue.get());
@@ -46,7 +45,7 @@ public class LoginController extends AbstractController {
     }
 
     @Override
-    void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         String account = httpRequest.getRequestBody().getValue("account");
         String password = httpRequest.getRequestBody().getValue("password");
         try {

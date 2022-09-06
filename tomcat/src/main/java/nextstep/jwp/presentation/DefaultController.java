@@ -1,6 +1,5 @@
 package nextstep.jwp.presentation;
 
-import java.io.IOException;
 import nextstep.jwp.http.common.HttpStatus;
 import nextstep.jwp.http.request.HttpRequest;
 import nextstep.jwp.http.response.HttpResponse;
@@ -17,13 +16,8 @@ public class DefaultController extends AbstractController {
     }
 
     @Override
-    void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) {
         httpResponse.addHttpStatus(HttpStatus.OK);
         httpResponse.addResponseBody("Hello world!");
-    }
-
-    @Override
-    void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-
     }
 }

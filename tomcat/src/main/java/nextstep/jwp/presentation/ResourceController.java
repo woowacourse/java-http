@@ -21,7 +21,7 @@ public class ResourceController extends AbstractController {
     }
 
     @Override
-    void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         URL url = Thread.currentThread().getContextClassLoader().getResource(PREFIX + httpRequest.getRequestUri());
         try {
             File file = new File(url.getFile());
@@ -31,10 +31,5 @@ public class ResourceController extends AbstractController {
             File file = new File(Thread.currentThread().getContextClassLoader().getResource(PREFIX + "/404.html").getFile());
             httpResponse.addResponseBody(file);
         }
-    }
-
-    @Override
-    void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
-
     }
 }

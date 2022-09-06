@@ -26,13 +26,13 @@ public class RegisterController extends AbstractController {
     }
 
     @Override
-    void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+    protected void doGet(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         File file = new File(Thread.currentThread().getContextClassLoader().getResource(PREFIX + "/register.html").getFile());
         httpResponse.addResponseBody(file);
     }
 
     @Override
-    void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
+    protected void doPost(final HttpRequest httpRequest, final HttpResponse httpResponse) throws IOException {
         String account = httpRequest.getRequestBody().getValue("account");
         String email = httpRequest.getRequestBody().getValue("email");
         String password = httpRequest.getRequestBody().getValue("password");

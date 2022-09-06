@@ -55,7 +55,8 @@ public class HttpRequest {
 
     private static int findContentLength(RequestHeaders headers) {
         try {
-            return NumberUtil.parseIntSafe(headers.findValueByField("Content-Length"));
+            RequestHeader header = headers.findHeader("Content-Length");
+            return NumberUtil.parseIntSafe(header.getValue());
         } catch (IllegalArgumentException e) {
             return 0;
         }
@@ -80,7 +81,7 @@ public class HttpRequest {
     }
 
     public RequestHeader findHeader(String field) {
-        return requestHeaders.getHeader(field);
+        return requestHeaders.findHeader(field);
     }
 
     public String getPath() {

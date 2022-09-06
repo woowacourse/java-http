@@ -8,22 +8,18 @@ import org.junit.jupiter.api.Test;
 
 class RequestHeadersTest {
 
-    @Test
-    void parseRequestHeaders() {
-        // given
-        List<String> lines = List.of(
-                "Content-Type: application/json",
-                "Referrer Policy: strict-origin-when-cross-origin"
-        );
 
+    @Test
+    void createRequestHeaders() {
+        // given
+        List<String> lines = List.of("Content-Type: text/html;charset=utf-8", "Content-Length: 12");
         // when
         RequestHeaders headers = RequestHeaders.parse(lines);
 
         // then
         Assertions.assertAll(
-                () -> assertThat(headers.findPairByField("Content-Type")).isEqualTo("Content-Type: application/json"),
-                () -> assertThat(headers.findPairByField("Referrer Policy")).isEqualTo(
-                        "Referrer Policy: strict-origin-when-cross-origin")
+                () -> assertThat(headers.findHeader("Content-Type").getValue()).isEqualTo("text/html;charset=utf-8"),
+                () -> assertThat(headers.findHeader("Content-Length").getValue()).isEqualTo("12")
         );
     }
 

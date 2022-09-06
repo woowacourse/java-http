@@ -1,6 +1,8 @@
 package org.apache.coyote.http11.request;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -12,9 +14,9 @@ public class RequestHeaders {
 
     private static final Pattern HEADER_PATTERN = Pattern.compile("(?<field>[a-zA-Z\\- ]+): ?(?<value>.+)");
 
-    private final List<RequestHeader> headers;
+    private final Map<String, RequestHeader> headers;
 
-    private RequestHeaders(List<RequestHeader> headers) {
+    private RequestHeaders(Map<String, RequestHeader> headers) {
         this.headers = headers;
     }
 
@@ -22,34 +24,21 @@ public class RequestHeaders {
         return new RequestHeaders(lines.stream()
                 .map(HEADER_PATTERN::matcher)
                 .filter(Matcher::find)
-                .map(matcher -> RequestHeaderMapper.findAndApply(matcher.group("field"), matcher.group("value")))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toMap(
+                        matcher -> matcher.group("field"),
+                        matcher -> RequestHeaderMapper.findAndApply(matcher.group("field"), matcher.group("value"))
+                )));
     }
 
-    public String findValueByField(String field) {
-        return getHeader(field).getValue();
-    }
-
-    public String findPairByField(String field) {
-        return field + ": " + findValueByField(field);
-    }
-
-    public RequestHeader getHeader(String field) {
-        return headers.stream()
-                .filter(header -> header.getField().equals(field))
-                .findAny()
-                .orElseThrow(() -> new IllegalArgumentException("no " + field));
-    }
-
-    public List<RequestHeader> getHeaders() {
-        return List.copyOf(headers);
+    public RequestHeader findHeader(String field) {
+        return headers.get(field);
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder("\n");
-        for (RequestHeader header : headers) {
-            builder.append(header.getField()).append(" -> ").append(header.getValue());
+        for (Entry<String, RequestHeader> entry : headers.entrySet()) {
+            builder.append(entry.getKey()).append(" -> ").append(entry.getValue());
         }
         return "RequestHeaders{\n" +
                 "headers={" + builder +

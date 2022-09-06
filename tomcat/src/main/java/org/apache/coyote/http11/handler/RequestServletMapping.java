@@ -2,6 +2,7 @@ package org.apache.coyote.http11.handler;
 
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginServlet;
 
 public class RequestServletMapping {
@@ -27,7 +28,7 @@ public class RequestServletMapping {
 
     public void validateHandlerExistence(final String path) {
         if (!handlers.containsKey(path)) {
-            throw new IllegalArgumentException("Invalid Uri");
+            throw new UncheckedServletException("Invalid Uri");
         }
     }
 }

@@ -1,8 +1,12 @@
-package org.apache.coyote.http11.handler;
+package nextstep.jwp.handler;
+
+import static org.apache.coyote.http11.HttpStatus.*;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import nextstep.jwp.exception.UnauthorizedException;
+import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.response.file.FileHandler;
@@ -18,18 +22,19 @@ public class ServletAdvice {
     public static ServletAdvice init() {
         final Map<Class<? extends Exception>, HttpStatus> exceptionMapping = new HashMap<>();
 
-        exceptionMapping.put(IllegalArgumentException.class, HttpStatus.NOT_FOUND);
+        exceptionMapping.put(IllegalArgumentException.class, NOT_FOUND);
+        exceptionMapping.put(UncheckedServletException.class, NOT_FOUND);
+        exceptionMapping.put(UnauthorizedException.class, UNAUTHORIZED);
 
         return new ServletAdvice(exceptionMapping);
     }
 
-    public <T extends Exception> ResponseEntity handleException(final Class<T> exception) throws IOException {
+    public <T extends Exception> HttpStatus getExceptionStatusCode(final Class<T> exception) throws IOException {
         if (isUnhandledError(exception)) {
-            return FileHandler.createErrorFileResponse(HttpStatus.SERVER_ERROR);
+            return SERVER_ERROR;
         }
-        
-        final HttpStatus httpStatus = exceptionMapping.get(exception);
-        return FileHandler.createErrorFileResponse(httpStatus);
+
+        return exceptionMapping.get(exception);
     }
 
     private <T extends Exception> boolean isUnhandledError(final Class<T> exception) {

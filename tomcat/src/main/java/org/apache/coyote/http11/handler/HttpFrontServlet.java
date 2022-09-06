@@ -1,9 +1,11 @@
 package org.apache.coyote.http11.handler;
 
 import java.io.IOException;
+import nextstep.jwp.handler.ServletAdvice;
+import org.apache.coyote.http11.HttpStatus;
+import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.response.file.FileHandler;
-import org.apache.coyote.http11.request.HttpRequest;
 
 public class HttpFrontServlet {
 
@@ -17,18 +19,19 @@ public class HttpFrontServlet {
         this.requestHandlerMapping = requestServletMapping;
     }
 
-    public ResponseEntity service(final String path, final HttpRequest httpRequest) throws IOException {
+    public ResponseEntity service(final HttpRequest httpRequest) throws IOException {
         try {
-            final ServletResponseEntity response = handleRequest(path, httpRequest);
+            final ServletResponseEntity response = handleRequest(httpRequest);
             return createResponseEntity(response);
         } catch (final Exception exception) {
             final ServletAdvice servletAdvice = ServletAdvice.init();
-            return servletAdvice.handleException(exception.getClass());
+            final HttpStatus errorStatus = servletAdvice.getExceptionStatusCode(exception.getClass());
+            return ResponseEntity.createRedirectResponse(HttpStatus.FOUND, errorStatus.getStatusCode() + ".html");
         }
     }
 
-    private ServletResponseEntity handleRequest(final String path, final HttpRequest httpRequest) {
-        final RequestServlet handler = requestHandlerMapping.getHandler(path);
+    private ServletResponseEntity handleRequest(final HttpRequest httpRequest) {
+        final RequestServlet handler = requestHandlerMapping.getHandler(httpRequest.getPath());
         // doGet, doPost
         return handler.doPost(httpRequest);
     }

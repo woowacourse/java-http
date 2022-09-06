@@ -3,6 +3,7 @@ package org.apache.coyote.http11.handler;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import nextstep.jwp.exception.UncheckedServletException;
 import nextstep.jwp.handler.LoginServlet;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ class RequestServletMappingTest {
     void exception_noMappingHandler() {
         // when & then
         assertThatThrownBy(() -> requestServletMapping.getHandler("/wrong"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(UncheckedServletException.class)
                 .hasMessageContaining("Invalid Uri");
     }
 

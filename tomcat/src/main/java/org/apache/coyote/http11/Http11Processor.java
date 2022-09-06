@@ -78,7 +78,7 @@ public class Http11Processor implements Runnable, Processor {
             return FileHandler.createFileResponse(path);
         }
 
-        return frontHandler.service(httpRequest.getPath(), httpRequest);
+        return frontHandler.service(httpRequest);
     }
 
     private boolean isRootPath(final String path) {

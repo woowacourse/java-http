@@ -29,6 +29,13 @@ public class ResponseEntity {
         return new ResponseEntity(HttpStatus.OK, new HttpHeader(headers), response.getResource());
     }
 
+    public static ResponseEntity createRedirectResponse(final HttpStatus httpStatus, final String location) {
+        final Map<String, String> headers = new HashMap<>();
+        headers.put("Location", location);
+
+        return new ResponseEntity(httpStatus, new HttpHeader(headers), "");
+    }
+
     public HttpStatus getHttpStatus() {
         return httpStatus;
     }

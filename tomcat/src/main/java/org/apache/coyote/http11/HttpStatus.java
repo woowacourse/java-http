@@ -3,6 +3,8 @@ package org.apache.coyote.http11;
 public enum HttpStatus {
 
     OK(200, "OK"),
+    FOUND(302, "Found"),
+    UNAUTHORIZED(401, "Unauthorized"),
     NOT_FOUND(404, "Not Found"),
     SERVER_ERROR(500, "Server Error");
 

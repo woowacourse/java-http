@@ -15,8 +15,8 @@ public class ServletResponseEntity extends ResponseEntity {
         this.resource = resource;
     }
 
-    public static ServletResponseEntity createResponseBody(final HttpStatus httpStatus, final HttpHeader httpHeader, final String body) {
-        return new ServletResponseEntity(httpStatus, httpHeader, body, null);
+    public static ServletResponseEntity createResponseBody(final HttpStatus httpStatus, final Map<String, String> headers, final String body) {
+        return new ServletResponseEntity(httpStatus, new HttpHeader(headers), body, null);
     }
 
     public static ServletResponseEntity createWithResource(final HttpHeader httpHeader, final String resource) {

@@ -1,10 +1,13 @@
 package nextstep.jwp.handler;
 
+import java.util.HashMap;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
+import nextstep.jwp.exception.UnauthorizedException;
 import nextstep.jwp.model.User;
-import org.apache.coyote.http11.handler.ServletResponseEntity;
+import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.handler.RequestServlet;
+import org.apache.coyote.http11.handler.ServletResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +31,9 @@ public class LoginServlet implements RequestServlet {
                     throw new IllegalArgumentException("User not found");
                 });
 
-        return ServletResponseEntity.createWithResource("/login.html");
+        final Map<String, String> headers = new HashMap<>();
+        headers.put("Location", "/index.html");
+        return ServletResponseEntity.createResponseBody(HttpStatus.FOUND, headers, "");
     }
 
     private void validateQueryParams(final Map<String, String> queryParams) {
@@ -39,7 +44,7 @@ public class LoginServlet implements RequestServlet {
 
     private void validateUserLogin(final Map<String, String> queryParamMap, final User it) {
         if (!it.checkPassword(queryParamMap.get("password"))) {
-            throw new IllegalArgumentException("User not found");
+            throw new UnauthorizedException("User not found");
         }
 
         log.info(it.toString());

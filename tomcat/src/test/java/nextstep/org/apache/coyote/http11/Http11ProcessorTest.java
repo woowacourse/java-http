@@ -24,7 +24,7 @@ import support.StubSocket;
 class Http11ProcessorTest {
 
     @Test
-    @DisplayName("/ 에 요청이 들어오면 Hello world!를 출력한다.")
+    @DisplayName("GET / 요청: Hello world!를 출력한다.")
     void process() {
         // given
         final var socket = new StubSocket();
@@ -45,7 +45,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("/index.hmtl에 요청이 들어오면 index.html을 출력한다.")
+    @DisplayName("GET /index.hmtl 요청: index.html을 출력한다.")
     void index() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
@@ -73,7 +73,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("GET /index.hmtl에 쿠키와 함께 요청, index.html을 출력한다.")
+    @DisplayName("GET /index.hmtl에 쿠키와 함께 요청: index.html을 출력한다.")
     void indexWithCookie() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
@@ -102,7 +102,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("POST / 요청 : Status 405, 405.html 반환 ")
+    @DisplayName("POST /index.html 요청: Status 405, 405.html 반환 ")
     void indexWithPost() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
@@ -131,7 +131,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("css 파일에 대한 요청이 들어오면, 해당 css 파일을 응답한다.")
+    @DisplayName("GET css 파일 요청: 해당 css 파일을 응답한다.")
     void allowCss() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
@@ -160,7 +160,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("GET /login 요청, Cookie 값 없음 : login.html을 보여준다.")
+    @DisplayName("GET /login 요청, Cookie 값 없음: login.html을 보여준다.")
     void loginRequestWithoutCookie() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
@@ -189,7 +189,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("GET /login 요청, Cookie 값 있지만 해당 세션이 없음 : login.html을 보여준다.")
+    @DisplayName("GET /login 요청, Cookie 값 있지만 해당 세션이 없음: login.html을 보여준다.")
     void loginRequestWithWrongCookie() throws IOException {
         // given
         final SessionManager sessionManager = new SessionManager();
@@ -372,7 +372,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("잘못된 url로 요청이 들어오는 경우 404.html이 응답된다.")
+    @DisplayName("잘못된 url로 요청이 들어오는 경우: Status 404, 404.html이 응답된다.")
     void requestWithWrongUrl() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",
@@ -401,7 +401,7 @@ class Http11ProcessorTest {
     }
 
     @Test
-    @DisplayName("/register로 GET 요청하면, 회원가입 페이지 register.html를 반환한다")
+    @DisplayName("GET /register 요청: 회원가입 페이지 register.html를 반환한다")
     void requestRegister() throws IOException {
         // given
         final String httpRequest = String.join("\r\n",

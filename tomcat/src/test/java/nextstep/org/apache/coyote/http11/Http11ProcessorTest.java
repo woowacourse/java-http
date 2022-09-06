@@ -113,8 +113,8 @@ class Http11ProcessorTest {
 
         // then
         var expected = "HTTP/1.1 302 FOUND \r\n" +
-                "Content-Type: text/html \r\n" +
                 "Location: /index.html \r\n" +
+                "Content-Type: text/html \r\n" +
                 "Content-Length: 0 \r\n" +
                 "\r\n";
 

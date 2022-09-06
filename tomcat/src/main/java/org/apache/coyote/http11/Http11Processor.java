@@ -1,8 +1,12 @@
 package org.apache.coyote.http11;
 
+import static org.apache.coyote.http11.support.HttpStatus.INTERNAL_SERVER_ERROR;
+
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.InvalidHttpRequestException;
+import org.apache.coyote.http11.support.HttpHeaders;
+import org.apache.coyote.http11.support.HttpStatus;
 import org.apache.coyote.http11.web.FileHandler;
 import org.apache.coyote.http11.web.RequestHandler;
 import org.apache.coyote.http11.web.request.HttpRequest;
@@ -15,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.LinkedHashMap;
 
 public class Http11Processor implements Runnable, Processor {
 
@@ -46,7 +51,17 @@ public class Http11Processor implements Runnable, Processor {
         }
     }
 
-    private HttpResponse handleRequest(final HttpRequest httpRequest) throws IOException {
+    private HttpResponse handleRequest(final HttpRequest httpRequest) {
+        try {
+            return chooseHandler(httpRequest);
+        } catch (final IOException e) {
+            final HttpHeaders httpHeaders = new HttpHeaders(new LinkedHashMap<>());
+            final HttpStatus httpStatus = INTERNAL_SERVER_ERROR;
+            return new HttpResponse(httpStatus, httpHeaders, httpStatus.getValue());
+        }
+    }
+
+    private HttpResponse chooseHandler(final HttpRequest httpRequest) throws IOException {
         if (httpRequest.isStaticResource()) {
             return new FileHandler().handle(httpRequest);
         }

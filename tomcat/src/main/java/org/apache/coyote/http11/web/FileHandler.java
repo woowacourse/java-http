@@ -18,6 +18,7 @@ public class FileHandler {
         final HttpHeaders httpHeaders = new HttpHeaders(new LinkedHashMap<>());
         final String contentType = ResourceLoader.getContentType(uri);
         httpHeaders.put(HttpHeader.CONTENT_TYPE, contentType);
+
         return new HttpResponse(HttpStatus.OK, httpHeaders, content);
     }
 }

@@ -16,16 +16,6 @@ public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
-    private static final String LOGIN_PATH = "/login";
-    private static final String REGISTER_PATH = "/register";
-
-    private static final String HTTP_VERSION_1_1 = "HTTP/1.1";
-
-    private static final String INDEX_HTML = "/index.html";
-    private static final String LOGIN_HTML = "/login.html";
-    private static final String REGISTER_HTML = "/register.html";
-    private static final String UNAUTHORIZED_HTML = "/401.html";
-
     private final Socket connection;
 
     public Http11Processor(final Socket connection) {

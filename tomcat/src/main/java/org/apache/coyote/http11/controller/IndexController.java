@@ -8,7 +8,6 @@ public class IndexController extends AbstractController {
     private static final FileReader fileReader = new FileReader();
 
     private static final String HTTP_VERSION_1_1 = "HTTP/1.1";
-
     private static final String INDEX_PATH = "/index.html";
 
     public IndexController() {

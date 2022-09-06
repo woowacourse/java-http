@@ -8,6 +8,7 @@ import org.apache.coyote.http11.common.HttpCookie;
 import nextstep.jwp.util.FileReader;
 
 public class HttpResponse {
+
     private final HttpResponseStatusLine statusLine;
     private final Map<String, String> headers;
     private final String body;

@@ -2,6 +2,7 @@ package org.apache.coyote.http11;
 
 import org.apache.coyote.Controller;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.request.Resource;
 import org.apache.coyote.http11.request.ResourceLocator;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.spec.HttpStatus;
@@ -43,6 +44,20 @@ public abstract class AbstractController implements Controller {
                 break;
             default:
                 throw new IllegalArgumentException("Invalid HTTP Method : " + request.getMethod());
+        }
+    }
+
+    protected final void doHtmlResponse(HttpResponse response, String path) {
+        try {
+            Resource resource = resourceLocator.locate(path);
+            response.setStatus(HttpStatus.OK);
+            response.addHeader("Content-Type", resource.getMimeType().getValue());
+            response.setBody(resource.getData());
+        } catch (IllegalArgumentException e) {
+            Resource resource = resourceLocator.locate("/404.html");
+            response.setStatus(HttpStatus.NOT_FOUND);
+            response.addHeader("Content-Type", resource.getMimeType().getValue());
+            response.setBody(resource.getData());
         }
     }
 

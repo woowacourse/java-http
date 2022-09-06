@@ -2,10 +2,13 @@ package org.apache.coyote.http11.request;
 
 import java.util.Map;
 
+import org.apache.coyote.http11.common.HttpMethod;
+
 import nextstep.jwp.exception.ExceptionType;
 import nextstep.jwp.exception.InvalidHttpRequestException;
 
 public class RequestLine {
+
 	private static final int REQUEST_LINE_SIZE = 3;
 	private static final String GAP = " ";
 	private static final int METHOD_INDEX = 0;
@@ -13,10 +16,10 @@ public class RequestLine {
 	private static final int VERSION_INDEX = 2;
 
 	private final HttpMethod method;
-	private final Url url;
+	private final URL url;
 	private final String version;
 
-	private RequestLine(HttpMethod httpMethod, Url url, String version) {
+	private RequestLine(HttpMethod httpMethod, URL url, String version) {
 		this.method = httpMethod;
 		this.url = url;
 		this.version = version;
@@ -26,7 +29,7 @@ public class RequestLine {
 		final String[] requestLine = line.split(GAP);
 		validateLength(requestLine);
 		final HttpMethod method = HttpMethod.From(requestLine[METHOD_INDEX]);
-		final Url url = Url.from(requestLine[URL_INDEX]);
+		final URL url = URL.from(requestLine[URL_INDEX]);
 		final String version = requestLine[VERSION_INDEX];
 
 		return new RequestLine(method, url, version);

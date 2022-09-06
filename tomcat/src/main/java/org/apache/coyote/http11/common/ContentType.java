@@ -1,4 +1,4 @@
-package org.apache.coyote.http11.response;
+package org.apache.coyote.http11.common;
 
 import java.util.Arrays;
 
@@ -10,6 +10,7 @@ public enum ContentType {
 	HTML("html", "text/html"),
 	CSS("css", "text/css"),
 	JS("js", "application/javascript"),
+	UTF("utf", "charset=utf-8"),
 	SVG("svg", "image/svg+xml");
 
 	private String type;
@@ -24,7 +25,7 @@ public enum ContentType {
 		return Arrays.stream(values())
 			.filter(it -> url.endsWith(it.type))
 			.findFirst()
-			.orElseThrow(() -> new InvalidHttpResponseException(ExceptionType.NOT_FOUND_CONTENT_TYPE_EXCEPTION));
+			.orElseThrow(() -> new InvalidHttpResponseException(ExceptionType.INVALID_CONTENT_TYPE_EXCEPTION));
 	}
 
 	public String getValue() {

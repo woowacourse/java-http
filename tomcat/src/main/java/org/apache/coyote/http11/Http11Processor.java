@@ -4,8 +4,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.coyote.Processor;
+import org.apache.coyote.http11.controller.ControllerMapper;
+import org.apache.coyote.http11.controller.Handler;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.slf4j.Logger;
@@ -35,9 +38,10 @@ public class Http11Processor implements Runnable, Processor {
 			 final var reader = new BufferedReader(new InputStreamReader(inputStream))) {
 
 			final HttpRequest request = HttpRequest.from(reader);
-			final HttpResponse response = Controller.run(request);
+			final Handler controller = ControllerMapper.findController(request.getUrl());
+			final HttpResponse response = controller.handle(request);
 
-			outputStream.write(response.createResponseFormatToBytes());
+			outputStream.write(response.generateHttpResponse().getBytes(StandardCharsets.UTF_8));
 			outputStream.flush();
 
 		} catch (IOException | UncheckedServletException e) {

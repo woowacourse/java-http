@@ -1,12 +1,10 @@
-package org.apache.coyote.http11.request;
+package nextstep.jwp.util;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
-import nextstep.jwp.exception.ExceptionType;
-import nextstep.jwp.exception.InvalidHttpRequestException;
-
-public class Url {
+public class Parser {
 
 	private static final String START_QUERY_STRING_DELIMITER = "?";
 	private static final String QUERY_CONNECT_DELIMITER = "&";
@@ -14,31 +12,14 @@ public class Url {
 	private static final int NAME_INDEX = 0;
 	private static final int VALUE_INDEX = 1;
 	private static final String GAP = " ";
+	private static final String EXTENSION = ".";
+	private static final String ROOT = "/";
 
-	private final String path;
-	private Map<String, String> params;
-
-	private Url(String value, Map<String, String> params) {
-		validate(value);
-		this.path = value;
-		this.params = new HashMap<>(params);
-	}
-
-	public static Url from(String url) {
-		return new Url(findUrl(url), findParam(url));
-	}
-
-	private static String findUrl(String url) {
+	public static String findUrl(String url) {
 		return url.split(GAP)[0];
 	}
 
-	private void validate(String path) {
-		if (path.isEmpty()) {
-			throw new InvalidHttpRequestException(ExceptionType.INVALID_URL_EXCEPTION);
-		}
-	}
-
-	private static Map<String, String> findParam(String url) {
+	public static Map<String, String> findParam(String url) {
 		int startQueryIndex = findStartQueryString(url);
 		if (startQueryIndex < 0) {
 			return new HashMap<>();
@@ -65,11 +46,17 @@ public class Url {
 		return params;
 	}
 
-	public String getPath() {
+	public static String convertResourceFileName(String path) {
+		Objects.nonNull(path);
+		final int index = path.indexOf(START_QUERY_STRING_DELIMITER);
+		if (index > 0) {
+			return path.split(START_QUERY_STRING_DELIMITER)[0];
+		}
 		return path;
 	}
 
-	public Map<String, String> getParams() {
-		return params;
+	public static String parseFileType(String fileName) {
+		Objects.nonNull(fileName);
+		return fileName.substring(fileName.indexOf(".")+1);
 	}
 }

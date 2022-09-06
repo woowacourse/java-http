@@ -30,8 +30,8 @@ public class HttpRequest {
         return startLine.getMethod();
     }
 
-    public HttpRequestUri getUri() {
-        return startLine.getUri();
+    public HttpPath getUri() {
+        return startLine.getPath();
     }
 
     public HttpVersion getVersion() {

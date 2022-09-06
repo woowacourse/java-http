@@ -4,11 +4,10 @@ import static org.apache.coyote.http11.model.ContentType.TEXT_HTML_CHARSET_UTF_8
 
 import nextstep.jwp.presentation.HomeController;
 import nextstep.jwp.presentation.LoginController;
-import org.apache.coyote.exception.BadRequestException;
 import org.apache.coyote.http11.HttpResponse;
 import org.apache.coyote.http11.model.HttpStatus;
 import org.apache.coyote.http11.request.model.HttpRequest;
-import org.apache.coyote.http11.request.model.HttpRequestUri;
+import org.apache.coyote.http11.request.model.HttpPath;
 
 public class Controller {
 
@@ -19,7 +18,7 @@ public class Controller {
     }
 
     public HttpResponse get() {
-        HttpRequestUri uri = httpRequest.getUri();
+        HttpPath uri = httpRequest.getUri();
         if (uri.getValue().equals("/")) {
             HomeController controller = new HomeController();
             return controller.index(httpRequest);

@@ -3,17 +3,17 @@ package org.apache.coyote.http11.request.model;
 public class HttpRequestLine {
 
     private final HttpMethod method;
-    private final HttpRequestUri uri;
+    private final HttpPath path;
     private final HttpVersion version;
 
-    public HttpRequestLine(final HttpMethod method, final HttpRequestUri uri, final HttpVersion version) {
+    public HttpRequestLine(final HttpMethod method, final HttpPath path, final HttpVersion version) {
         this.method = method;
-        this.uri = uri;
+        this.path = path;
         this.version = version;
     }
 
-    public HttpRequestLine(final String method, final String uri, final String version) {
-        this(HttpMethod.of(method), HttpRequestUri.of(uri), HttpVersion.of(version));
+    public HttpRequestLine(final String method, final String path, final String version) {
+        this(HttpMethod.of(method), HttpPath.of(path), HttpVersion.of(version));
     }
 
     public boolean isEqualToMethod(final HttpMethod httpMethod) {
@@ -21,19 +21,19 @@ public class HttpRequestLine {
     }
 
     public boolean isEqualToUri(final String uri) {
-        return this.uri.equals(HttpRequestUri.of(uri));
+        return this.path.equals(HttpPath.of(uri));
     }
 
     public boolean isQueryString() {
-        return uri.isQuery();
+        return path.isQuery();
     }
 
     public HttpMethod getMethod() {
         return method;
     }
 
-    public HttpRequestUri getUri() {
-        return uri;
+    public HttpPath getPath() {
+        return path;
     }
 
     public HttpVersion getVersion() {

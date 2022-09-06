@@ -6,13 +6,13 @@ import java.util.Objects;
 import org.apache.coyote.exception.UnSupportedMediaType;
 import org.apache.coyote.http11.model.ContentType;
 
-public class HttpRequestUri {
+public class HttpPath {
 
     private static final String QUERY_PARAMETER = "?";
 
     private final String value;
 
-    public HttpRequestUri(final String uri) {
+    public HttpPath(final String uri) {
         this.value = uri;
     }
 
@@ -24,8 +24,8 @@ public class HttpRequestUri {
         return RequestContentType.find(value);
     }
 
-    public static HttpRequestUri of(final String uri) {
-        return new HttpRequestUri(uri);
+    public static HttpPath of(final String uri) {
+        return new HttpPath(uri);
     }
 
     public boolean isQuery() {
@@ -41,10 +41,10 @@ public class HttpRequestUri {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof HttpRequestUri)) {
+        if (!(o instanceof HttpPath)) {
             return false;
         }
-        HttpRequestUri that = (HttpRequestUri) o;
+        HttpPath that = (HttpPath) o;
         return Objects.equals(value, that.value);
     }
 

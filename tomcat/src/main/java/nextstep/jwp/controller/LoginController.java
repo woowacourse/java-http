@@ -3,51 +3,31 @@ package nextstep.jwp.controller;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Optional;
-import nextstep.jwp.exception.UnsupportedMethodException;
 import nextstep.jwp.model.User;
 import nextstep.jwp.service.UserService;
 import org.apache.catalina.session.Session;
-import org.apache.coyote.Controller;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.request.QueryParams;
 import org.apache.coyote.http11.message.request.header.Cookie;
-import org.apache.coyote.http11.message.request.requestline.Method;
 import org.apache.coyote.http11.message.response.HttpResponse;
 import org.apache.coyote.http11.message.response.header.StatusCode;
 
-public class LoginController implements Controller {
+public class LoginController extends AbstractController {
 
     private static final String KEY_ACCOUNT = "account";
     private static final String KEY_PASSWORD = "password";
     private static final String PATH_REDIRECT = "/index.html";
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) throws Exception {
-        if (httpRequest.isMethod(Method.GET)) {
-            return doGet(httpRequest);
-        }
-
-        if (httpRequest.isMethod(Method.POST)) {
-            return doPost(httpRequest);
-        }
-
-        throw new UnsupportedMethodException();
-    }
-
-    private static HttpResponse doGet(HttpRequest httpRequest) throws IOException, URISyntaxException {
+    protected HttpResponse doGet(HttpRequest httpRequest) throws IOException, URISyntaxException {
         if (hasLoggedIn(httpRequest)) {
             return HttpResponse.ofRedirection(StatusCode.FOUND, PATH_REDIRECT);
         }
-
         return HttpResponse.ofResource("/login.html");
     }
 
-    private static boolean hasLoggedIn(final HttpRequest httpRequest) {
-        final Optional<Object> user = httpRequest.getSessionAttribute("user");
-        return user.isPresent();
-    }
-
-    private static HttpResponse doPost(final HttpRequest httpRequest) {
+    @Override
+    protected HttpResponse doPost(final HttpRequest httpRequest) {
         final QueryParams requestParams = httpRequest.getBodyQueryParams();
         checkParams(requestParams);
 
@@ -59,13 +39,18 @@ public class LoginController implements Controller {
         return httpResponse;
     }
 
-    private static void checkParams(final QueryParams queryParams) {
+    private boolean hasLoggedIn(final HttpRequest httpRequest) {
+        final Optional<Object> user = httpRequest.getSessionAttribute("user");
+        return user.isPresent();
+    }
+
+    private void checkParams(final QueryParams queryParams) {
         if (!queryParams.containsKey(KEY_ACCOUNT) || !queryParams.containsKey(KEY_PASSWORD)) {
             throw new IllegalArgumentException("계정과 비밀번호를 입력하세요.");
         }
     }
 
-    private static Session createSession(final HttpRequest httpRequest, final User user) {
+    private Session createSession(final HttpRequest httpRequest, final User user) {
         final Session session = httpRequest.createSession();
         session.setAttribute("user", user);
         return session;

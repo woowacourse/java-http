@@ -37,4 +37,4 @@
 ### [🚀 3단계 - 리팩터링](https://techcourse.woowahan.com/s/cCM7rQR9/ls/lRDyKWbV)
 - [X] `HttpRequest` 클래스 구현
 - [X] `HttpResponse` 클래스 구현
-- [ ] `Controller`, `AbstractController`, `RequestMapping` 클래스 구현을 통한 요청 분기 처리
+- [X] `Controller`, `AbstractController`, `RequestMapping` 클래스 구현을 통한 요청 분기 처리

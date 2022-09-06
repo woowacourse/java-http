@@ -1,14 +1,19 @@
 package nextstep.jwp.controller;
 
-import org.apache.coyote.Controller;
+import nextstep.jwp.exception.UnsupportedMethodException;
 import org.apache.coyote.http11.message.request.HttpRequest;
 import org.apache.coyote.http11.message.response.HttpResponse;
 
-public class HelloController implements Controller {
+public class HelloController extends AbstractController {
 
     @Override
-    public HttpResponse service(final HttpRequest httpRequest) {
+    protected HttpResponse doGet(final HttpRequest httpRequest) {
         return HttpResponse.ofOk("Hello world!");
+    }
+
+    @Override
+    protected HttpResponse doPost(final HttpRequest httpRequest) {
+        throw new UnsupportedMethodException();
     }
 
     @Override

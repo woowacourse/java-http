@@ -14,6 +14,8 @@ import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.ContentType;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
+import org.apache.coyote.http11.session.Session;
+import org.apache.coyote.http11.session.SessionManager;
 import org.apache.coyote.http11.utils.QueryParamsParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,23 +32,29 @@ public class LoginPostResponseMaker implements ResponseMaker {
                 this.getClass().getClassLoader().getResource("static" + "/login.html");
         final Path path = Paths.get(resource.toURI());
         final var responseBody = new String(Files.readAllBytes(path));
-        return makeLoginResponse(loginData, httpRequest, responseBody);
+        return makeLoginResponse(loginData, responseBody);
     }
 
     private String makeLoginResponse(
-            final HashMap<String, String> loginData, final HttpRequest httpRequest, final String responseBody
+            final HashMap<String, String> loginData, final String responseBody
     ) {
-        if (loginData.isEmpty() || !validateAccount(loginData)) {
+        final String account = loginData.get("account");
+        final String password = loginData.get("password");
+        if (loginData.isEmpty() || !validateAccount(account, password)) {
             log.info("로그인 데이터가 없습니다.");
             return failLoginResponse(responseBody);
         }
-        return successLoginResponse(httpRequest, responseBody);
+        final User user = new User(account, password);
+        return successLoginResponse(responseBody, user);
     }
 
-    private String successLoginResponse(final HttpRequest httpRequest, final String responseBody) {
+    private String successLoginResponse(final String responseBody, final User user) {
         final HttpResponse httpResponse =
                 new HttpResponse(HttpStatus.FOUND, responseBody, ContentType.HTML, "/index.html");
-        httpResponse.addJSessionId(httpRequest);
+        final Session session = new Session();
+        session.setAttribute("user", user);
+        SessionManager.add(session);
+        httpResponse.addJSessionId(session);
         return httpResponse.toString();
     }
 
@@ -57,9 +65,7 @@ public class LoginPostResponseMaker implements ResponseMaker {
         return httpResponse.toString();
     }
 
-    private boolean validateAccount(final HashMap<String, String> loginData) {
-        final String account = loginData.get("account");
-        final String password = loginData.get("password");
+    private boolean validateAccount(final String account, final String password) {
         final Optional<User> accessUser = InMemoryUserRepository.findByAccount(account);
         return accessUser.filter(user -> validatePassword(password, user))
                 .isPresent();

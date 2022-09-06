@@ -3,9 +3,8 @@ package org.apache.coyote.http11.response;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
-import org.apache.coyote.http11.request.HttpRequest;
+import org.apache.coyote.http11.session.Session;
 
 public class HttpResponse {
 
@@ -38,10 +37,8 @@ public class HttpResponse {
         header.put("Location", redirectUrl);
     }
 
-    public void addJSessionId(final HttpRequest httpRequest) {
-        if (!httpRequest.hasJSessionId()) {
-            header.put("Set-Cookie", "JSESSIONID=" + UUID.randomUUID());
-        }
+    public void addJSessionId(final Session session) {
+        header.put("Set-Cookie", "JSESSIONID=" + session.getId());
     }
 
     @Override

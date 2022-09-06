@@ -2,7 +2,6 @@ package org.apache.coyote.http11.request;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class HttpCookie {
 
@@ -34,5 +33,12 @@ public class HttpCookie {
 
     public boolean hasJSessionId() {
         return cookies.containsKey("JSESSIONID");
+    }
+
+    public String getJSessionId() {
+        if (hasJSessionId()) {
+            return cookies.get("JSESSIONID");
+        }
+        return "";
     }
 }

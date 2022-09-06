@@ -30,8 +30,8 @@ public class HttpRequestHeaders {
         return headers.containsKey("Content-Length");
     }
 
-    public boolean hasJSessionId() {
-        return getCookiesData().hasJSessionId();
+    public String getJSessionId() {
+        return getCookiesData().getJSessionId();
     }
 
     public int getContentLength() {

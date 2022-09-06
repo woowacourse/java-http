@@ -34,7 +34,7 @@ public enum StaticHandlerMethod {
 
     public void handle(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
         final FileDto dto = new FileDto(httpRequest.getUri());
-        final String responseBody = IoUtils.readLines(dto.fileName);
+        final String responseBody = IoUtils.readFile(dto.fileName);
         final String contentType = MediaType.find(dto.extension);
 
         final String response = HttpResponse.builder()

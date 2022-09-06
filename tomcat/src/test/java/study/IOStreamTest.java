@@ -1,5 +1,6 @@
 package study;
 
+import static java.lang.System.out;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -95,7 +97,7 @@ class IOStreamTest {
             final OutputStream outputStream = mock(OutputStream.class);
 
             try (outputStream) {
-                System.out.println("normal case");
+                out.println("normal case");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -204,6 +206,38 @@ class IOStreamTest {
             }
 
             assertThat(actual).hasToString(emoji);
+        }
+
+        @Test
+        void HttpRequestMessage를_읽어온다() throws IOException {
+            final String HttpMessage =
+                    "HTTP /GET 1.1 \r\n"
+                            + "FOO BOO \r\n"
+                            + "\r\n"
+                            + "This is Body";
+
+            final InputStream inputStream = new ByteArrayInputStream(HttpMessage.getBytes());
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+            final StringBuilder header = new StringBuilder();
+            while (bufferedReader.ready()) {
+                final String line = bufferedReader.readLine();
+                if (line.replaceAll("\\s+", "").equals("")) {
+                    break;
+                }
+                header.append(line + "\r\n");
+            }
+
+            final StringBuilder body = new StringBuilder();
+            while (bufferedReader.ready()) {
+                final String line = bufferedReader.readLine();
+                body.append(line + "\r\n");
+            }
+
+            org.junit.jupiter.api.Assertions.assertAll(
+                    () -> assertThat(header).isEqualTo("HTTP /GET 1.1 \r\nFOO BOO \r\n"),
+                    () -> assertThat(body).isEqualTo("This is Body")
+            );
         }
     }
 }

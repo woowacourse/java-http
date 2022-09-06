@@ -25,6 +25,18 @@ public class IoUtils {
         return new String(buffer);
     }
 
+    public static String readAllLines(final BufferedReader reader) {
+        final StringBuffer stringBuffer = new StringBuffer();
+        try {
+            while (reader.ready()) {
+                stringBuffer.append(reader.readLine());
+            }
+            return stringBuffer.toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static String readLine(final BufferedReader reader) {
         try {
             if (reader.ready()) {
@@ -49,15 +61,12 @@ public class IoUtils {
         return strings.toArray(new String[strings.size()]);
     }
 
-    public static String readLines(final String fileName) {
-        return String.join("\r\n", readFromFile(fileName));
-    }
-
-    public static LinkedList<String> readFromFile(final String fileName) {
+    public static String readFile(final String fileName) {
         final Path path = getPath(fileName);
         final File file = path.toFile();
-        try (final BufferedReader bufferedReader = new BufferedReader(new FileReader(file));) {
-            return getLines(bufferedReader);
+        try (final BufferedReader bufferedReader = new BufferedReader(new FileReader(file))) {
+            return bufferedReader.lines()
+                    .collect(Collectors.joining("\r\n"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -70,12 +79,6 @@ public class IoUtils {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static LinkedList<String> getLines(final BufferedReader bufferedReader) {
-        return bufferedReader
-                .lines()
-                .collect(Collectors.toCollection(LinkedList::new));
     }
 
     private static Path getPath(final String fileName) {

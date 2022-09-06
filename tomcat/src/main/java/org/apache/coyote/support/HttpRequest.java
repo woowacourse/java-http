@@ -2,33 +2,51 @@ package org.apache.coyote.support;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import support.IoUtils;
 import support.StringUtils;
 
 public class HttpRequest {
-    private boolean isEmptyRequest = true; // 공백 등 무의미한 요청
+
+    private static final String HEADER_DELIMINATOR = ": ";
     private String httpMethod = "";
     private String uri = "";
-    private Headers headers;
+    private Map<String, String> header = new HashMap<>();
     private String body = "";
 
 
     public HttpRequest(final BufferedReader reader) {
         final String firstLineHeader = IoUtils.readLine(reader);
-        if (StringUtils.isEmpty(firstLineHeader)) {
-            return;
-        }
-        isEmptyRequest = false;
         final String[] split = firstLineHeader.split("\\s+");
         httpMethod = split[0];
         uri = split[1];
-        headers = new Headers(reader);
-        body = readBody(reader, headers);
+        header = createHeader(reader);
+        body = readBody(reader, header.get("Content-Length"));
     }
 
-    private String readBody(final BufferedReader reader, final Headers headers) {
-        final String contentLength = headers.get("Content-Length");
+    private Map<String, String> createHeader(final BufferedReader reader) {
+        final Map<String, String> header = new HashMap<>();
+        try {
+            while (reader.ready()) {
+                final String keyValueString = reader.readLine();
+                if (keyValueString.contains(HEADER_DELIMINATOR)) {
+                    final String[] keyValuePair = keyValueString.split(HEADER_DELIMINATOR);
+                    final String key = keyValuePair[0];
+                    final String value = keyValuePair[1];
+                    header.put(key, value);
+                } else if (StringUtils.isEmpty(keyValueString)) {
+                    break;
+                }
+            }
+            return header;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private String readBody(final BufferedReader reader, final String contentLength) {
         if (contentLength != null) {
             return IoUtils.readCertainLength(reader, Integer.parseInt(contentLength));
         }
@@ -47,10 +65,6 @@ public class HttpRequest {
         return body;
     }
 
-    public boolean isEmpty() {
-        return isEmptyRequest;
-    }
-
     public boolean isSame(String httpMethod, String uri) {
         return Objects.equals(this.httpMethod, httpMethod) && Objects.equals(this.uri, uri);
     }
@@ -63,10 +77,9 @@ public class HttpRequest {
     @Override
     public String toString() {
         return "HttpRequest{" +
-                "isEmptyRequest=" + isEmptyRequest +
-                ", httpMethod='" + httpMethod + '\'' +
+                "httpMethod='" + httpMethod + '\'' +
                 ", uri='" + uri + '\'' +
-                ", headers=" + headers +
+                ", header=" + header +
                 ", body='" + body + '\'' +
                 '}';
     }

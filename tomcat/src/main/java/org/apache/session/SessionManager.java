@@ -28,4 +28,8 @@ public class SessionManager {
         UUID uuid = UUID.randomUUID();
         return new Session(uuid.toString());
     }
+
+    public boolean contains(String id) {
+        return SESSIONS.containsKey(id);
+    }
 }

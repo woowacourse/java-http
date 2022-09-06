@@ -11,7 +11,10 @@ public class HttpHeaders {
     private static final int HEADER_SPLIT_LIMIT = 2;
     private static final int HEADER_TYPE_INDEX = 0;
     private static final int HEADER_VALUE_INDEX = 1;
-    private static final String HEADER_CONTENT_TYPE = "Content-Type";
+    private static final int ZERO_CONTENT_LENGTH = 0;
+    private static final String CONTENT_TYPE_HEADER = "Content-Type";
+    private static final String CONTENT_LENGTH_HEADER = "Content-Length";
+    private static final String COOKIE_HEADER = "COOKIE";
 
     private final Map<String, String> headers;
 
@@ -37,7 +40,7 @@ public class HttpHeaders {
     }
 
     public boolean matchesContentType(String contentType) {
-        return get(HEADER_CONTENT_TYPE).stream()
+        return get(CONTENT_TYPE_HEADER).stream()
             .anyMatch(it -> it.equals(contentType));
     }
 }

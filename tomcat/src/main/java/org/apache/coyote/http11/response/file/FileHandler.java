@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import org.apache.coyote.http11.HttpHeader;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.handler.ServletResponseEntity;
 import org.apache.coyote.http11.response.ResponseEntity;
@@ -22,7 +25,14 @@ public class FileHandler {
         final Path path = Path.of(url.getPath());
         final byte[] fileBytes = Files.readAllBytes(path);
 
-        return new ResponseEntity(OK, Files.probeContentType(path), new String(fileBytes));
+        return new ResponseEntity(OK, getFileHttpHeader(path), new String(fileBytes));
+    }
+
+    private static HttpHeader getFileHttpHeader(final Path path) throws IOException {
+        final Map<String, String> headers = new HashMap<>();
+        headers.put("Content-Type", Files.probeContentType(path));
+
+        return new HttpHeader(headers);
     }
 
     public static ResponseEntity createFileResponse(final ServletResponseEntity response) throws IOException {
@@ -30,7 +40,7 @@ public class FileHandler {
         final Path path = Path.of(url.getPath());
         final byte[] fileBytes = Files.readAllBytes(path);
 
-        return new ResponseEntity(response.getHttpStatus(), Files.probeContentType(path), new String(fileBytes));
+        return new ResponseEntity(response.getHttpStatus(), getFileHttpHeader(path), new String(fileBytes));
     }
 
     public static ResponseEntity createErrorFileResponse(final HttpStatus httpStatus) throws IOException {
@@ -39,6 +49,6 @@ public class FileHandler {
         final Path path = Path.of(url.getPath());
         final byte[] fileBytes = Files.readAllBytes(path);
 
-        return new ResponseEntity(httpStatus, Files.probeContentType(path), new String(fileBytes));
+        return new ResponseEntity(httpStatus, getFileHttpHeader(path), new String(fileBytes));
     }
 }

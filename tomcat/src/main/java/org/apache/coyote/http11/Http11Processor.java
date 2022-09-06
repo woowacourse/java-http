@@ -8,11 +8,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
 import nextstep.jwp.exception.UncheckedServletException;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.handler.HttpFrontServlet;
+import org.apache.coyote.http11.handler.ServletResponseEntity;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.ResponseEntity;
@@ -23,7 +25,7 @@ import org.slf4j.LoggerFactory;
 public class Http11Processor implements Runnable, Processor {
 
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
-    private static final String DEFAULT_BODY = "Hello world!";
+    private static final String ROOT_BODY = "Hello world!";
 
     private final Socket connection;
 
@@ -69,7 +71,7 @@ public class Http11Processor implements Runnable, Processor {
         final String path = httpRequest.getPath();
 
         if (isRootPath(path)) {
-            return new ResponseEntity(OK, "text/html", "Hello world!");
+            return ResponseEntity.createHtmlResponse(ServletResponseEntity.createWithResource(ROOT_BODY));
         }
 
         if (FileHandler.isStaticFileResource(path)) {

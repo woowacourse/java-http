@@ -1,6 +1,7 @@
 package org.apache.coyote.http11.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.net.URL;
@@ -12,6 +13,7 @@ import org.apache.coyote.http11.response.ResponseEntity;
 import org.apache.coyote.http11.response.file.FileHandler;
 import org.apache.coyote.http11.HttpStatus;
 import org.apache.coyote.http11.request.HttpRequest;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -40,8 +42,11 @@ class HttpFrontServletTest {
             final Path path = Path.of(url.getPath());
             final byte[] fileBytes = Files.readAllBytes(path);
 
-            assertThat(response).extracting("httpStatus", "mimeType", "body")
-                    .containsExactly(HttpStatus.OK, Files.probeContentType(path), new String(fileBytes));
+            assertAll(() -> {
+                assertThat(response).extracting("httpStatus", "body")
+                        .containsExactly(HttpStatus.OK, new String(fileBytes));
+                assertThat(response.getHttpHeader().getHeader("Content-Type")).isEqualTo(Files.probeContentType(path));
+            });
         }
 
         @Test
@@ -60,8 +65,11 @@ class HttpFrontServletTest {
             final Path path = Path.of(url.getPath());
             final byte[] fileBytes = Files.readAllBytes(path);
 
-            assertThat(response).extracting("httpStatus", "mimeType", "body")
-                    .containsExactly(HttpStatus.NOT_FOUND, Files.probeContentType(path), new String(fileBytes));
+            assertAll(() -> {
+                assertThat(response).extracting("httpStatus", "body")
+                        .containsExactly(HttpStatus.NOT_FOUND, new String(fileBytes));
+                assertThat(response.getHttpHeader().getHeader("Content-Type")).isEqualTo(Files.probeContentType(path));
+            });
         }
 
         @Test
@@ -80,8 +88,11 @@ class HttpFrontServletTest {
             final Path path = Path.of(url.getPath());
             final byte[] fileBytes = Files.readAllBytes(path);
 
-            assertThat(response).extracting("httpStatus", "mimeType", "body")
-                    .containsExactly(HttpStatus.NOT_FOUND, Files.probeContentType(path), new String(fileBytes));
+            assertAll(() -> {
+                assertThat(response).extracting("httpStatus", "body")
+                        .containsExactly(HttpStatus.NOT_FOUND, new String(fileBytes));
+                assertThat(response.getHttpHeader().getHeader("Content-Type")).isEqualTo(Files.probeContentType(path));
+            });
         }
     }
 }

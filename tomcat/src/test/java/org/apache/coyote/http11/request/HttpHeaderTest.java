@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import org.apache.coyote.http11.HttpHeader;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

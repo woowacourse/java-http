@@ -28,7 +28,7 @@ public class LoginServlet implements RequestServlet {
                     throw new IllegalArgumentException("User not found");
                 });
 
-        return new ServletResponseEntity("/login.html");
+        return ServletResponseEntity.createWithResource("/login.html");
     }
 
     private void validateQueryParams(final Map<String, String> queryParams) {

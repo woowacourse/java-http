@@ -2,6 +2,7 @@ package org.apache.coyote.http11.request;
 
 import java.util.Map;
 import java.util.Queue;
+import org.apache.coyote.http11.HttpHeader;
 
 public class HttpRequest {
 

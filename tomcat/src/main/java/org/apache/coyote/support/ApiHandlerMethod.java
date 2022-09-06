@@ -30,7 +30,7 @@ public enum ApiHandlerMethod {
     LOGIN_POST(HttpMethod.POST, "/login") {
         @Override
         public void handle(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
-            final Map<String, String> userMap = HttpParser.parseQueryString(httpRequest.getPostContent());
+            final Map<String, String> userMap = HttpParser.parseQueryString(httpRequest.getBody());
             final String account = userMap.get("account");
             final String password = userMap.get("password");
             final User foundUser = findUser(account);

@@ -3,7 +3,9 @@ package org.apache.coyote.http11;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
@@ -34,35 +36,30 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        try (final var inputStream = connection.getInputStream();
-             final var outputStream = connection.getOutputStream();
-             final var bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-             final var bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));) {
+        try (final InputStream inputStream = connection.getInputStream();
+             final OutputStream outputStream = connection.getOutputStream();
+             final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+             final BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));) {
 
             final HttpRequest httpRequest = new HttpRequest(bufferedReader);
-
-            if (route(bufferedWriter, httpRequest)) {
-                return;
-            }
-
+            route(httpRequest, bufferedWriter);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
 
-    private boolean route(final BufferedWriter bufferedWriter, final HttpRequest httpRequest) {
+    private void route(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
         if (httpRequest.isEmpty()) {
             log.info("isEmpty = {}", httpRequest);
-            return true;
+            return;
         }
         ApiHandlerMethod apiHandlerMethod = ApiHandlerMethod.find(httpRequest);
         if (apiHandlerMethod != null) {
             log.info("API Request = {}", httpRequest);
             apiHandlerMethod.handle(httpRequest, bufferedWriter);
-            return true;
+            return;
         }
         log.info("View Request = {}", httpRequest);
         StaticHandlerMethod.INSTANCE.handle(httpRequest, bufferedWriter);
-        return false;
     }
 }

@@ -1,8 +1,7 @@
 package org.apache.coyote.support;
 
 import java.io.BufferedReader;
-import java.util.Arrays;
-import java.util.LinkedList;
+import java.io.IOException;
 import java.util.Objects;
 import support.IoUtils;
 import support.StringUtils;
@@ -12,7 +11,7 @@ public class HttpRequest {
     private String httpMethod = "";
     private String uri = "";
     private Headers headers;
-    private String postContent = ""; // only post request
+    private String body = "";
 
 
     public HttpRequest(final BufferedReader reader) {
@@ -21,13 +20,19 @@ public class HttpRequest {
             return;
         }
         isEmptyRequest = false;
-        final String[] split = firstLineHeader.split(" ");
+        final String[] split = firstLineHeader.split("\\s+");
         httpMethod = split[0];
         uri = split[1];
         headers = new Headers(reader);
-        if (HttpMethod.POST.equalsIgnoreCase(httpMethod)) {
-            postContent = headers.findPostContent();
+        body = readBody(reader, headers);
+    }
+
+    private String readBody(final BufferedReader reader, final Headers headers) {
+        final String contentLength = headers.get("Content-Length");
+        if (contentLength != null) {
+            return IoUtils.readCertainLength(reader, Integer.parseInt(contentLength));
         }
+        return "";
     }
 
     public String getHttpMethod() {
@@ -38,8 +43,8 @@ public class HttpRequest {
         return uri;
     }
 
-    public String getPostContent() {
-        return postContent;
+    public String getBody() {
+        return body;
     }
 
     public boolean isEmpty() {
@@ -62,7 +67,7 @@ public class HttpRequest {
                 ", httpMethod='" + httpMethod + '\'' +
                 ", uri='" + uri + '\'' +
                 ", headers=" + headers +
-                ", postContent='" + postContent + '\'' +
+                ", body='" + body + '\'' +
                 '}';
     }
 }

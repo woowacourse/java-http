@@ -15,6 +15,16 @@ public class IoUtils {
     private IoUtils() {
     }
 
+    public static String readCertainLength(final BufferedReader reader, final int length) {
+        char[] buffer = new char[length];
+        try {
+            reader.read(buffer, 0, length);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return new String(buffer);
+    }
+
     public static String readLine(final BufferedReader reader) {
         try {
             if (reader.ready()) {

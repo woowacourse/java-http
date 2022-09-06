@@ -8,8 +8,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import org.apache.coyote.http11.Http11Processor;
 import org.junit.jupiter.api.Test;
-import spring.Controllers;
-import spring.HomeController;
 import support.StubSocket;
 
 class Http11ProcessorTest {
@@ -18,9 +16,7 @@ class Http11ProcessorTest {
     void process() {
         // given
         final var socket = new StubSocket();
-        final var controllers = new Controllers();
-        final var homeController = new HomeController(controllers);
-        final var processor = new Http11Processor(socket, homeController);
+        final var processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);
@@ -47,9 +43,7 @@ class Http11ProcessorTest {
                 "");
 
         final var socket = new StubSocket(httpRequest);
-        final var controllers = new Controllers();
-        final var homeController = new HomeController(controllers);
-        final Http11Processor processor = new Http11Processor(socket, homeController);
+        final Http11Processor processor = new Http11Processor(socket);
 
         // when
         processor.process(socket);

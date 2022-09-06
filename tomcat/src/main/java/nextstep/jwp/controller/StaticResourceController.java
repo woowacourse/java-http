@@ -2,9 +2,9 @@ package nextstep.jwp.controller;
 
 import java.io.File;
 import java.net.URL;
+import org.apache.coyote.http11.Controller;
 import org.apache.coyote.http11.HttpRequest;
 import org.apache.coyote.http11.HttpResponse;
-import org.apache.coyote.http11.Controller;
 
 public class StaticResourceController extends Controller {
 

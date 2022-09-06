@@ -2,15 +2,18 @@ package org.apache.coyote.http11;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 public class SessionManager {
 
     private static final Map<String, Session> SESSIONS = new HashMap<>();
 
-    public static Optional<Session> getSession(final String sessionId) {
-        return Optional.ofNullable(SESSIONS.get(sessionId));
+    public static Session getSession(final String sessionId) {
+        return SESSIONS.get(sessionId);
+    }
+
+    public static boolean hasSession(final String sessionId) {
+        return SESSIONS.containsKey(sessionId);
     }
 
     public static Session createSession() {

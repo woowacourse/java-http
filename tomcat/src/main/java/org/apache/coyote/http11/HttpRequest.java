@@ -11,13 +11,17 @@ public class HttpRequest {
     private final String requestLine;
     private final Map<String, String> headers;
     private final String body;
+    private final Cookies cookies;
+    private boolean isCreateNewSession;
     private Session session;
 
     public HttpRequest(final String requestLine, final Map<String, String> headers, final String body) {
         this.requestLine = requestLine;
         this.headers = headers;
         this.body = body;
+        this.cookies = Cookies.from(headers.get("Cookie"));
         this.session = null;
+        this.isCreateNewSession = false;
     }
 
     public boolean hasHeader(String name) {
@@ -92,25 +96,19 @@ public class HttpRequest {
     }
 
     public Session getSession() {
-        if (session != null) {
-            return session;
+        if (hasExistentSessionIdInCookies()) {
+            return SessionManager.getSession(cookies.getSessionId());
         }
 
-        final String cookie = headers.get("Cookie");
-
-        if (cookie != null) {
-            final String sessionId = cookie.split(KEY_VALUE_DELIMITER)[1];
-            if (SessionManager.getSession(sessionId).isPresent()) {
-                session = SessionManager.getSession(sessionId).get();
-                return session;
-            }
-        }
-
-        session = SessionManager.createSession();
-        return session;
+        isCreateNewSession = true;
+        return SessionManager.createSession();
     }
 
-    public boolean hasSession() {
-        return session != null;
+    public boolean isCreateNewSession() {
+        return isCreateNewSession;
+    }
+
+    private boolean hasExistentSessionIdInCookies() {
+        return cookies.hasSessionId() && SessionManager.hasSession(cookies.getSessionId());
     }
 }

@@ -3,13 +3,12 @@ package org.apache.coyote.http11;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class HttpResponse {
 
     private final String statusLine;
     private final Map<String, String> headers;
-    private final Map<String, String> cookies;
+    private final Cookies cookies;
     private String body;
 
     public static HttpResponseBuilder ok() {
@@ -28,7 +27,7 @@ public class HttpResponse {
     HttpResponse(String statusLine) {
         this.statusLine = statusLine;
         this.headers = new HashMap<>();
-        this.cookies = new HashMap<>();
+        this.cookies = Cookies.empty();
         this.body = "";
     }
 
@@ -42,7 +41,7 @@ public class HttpResponse {
     }
 
     public void addCookie(final String name, final String value) {
-        cookies.put(name, value);
+        cookies.addCookie(name, value);
     }
 
     public boolean hasBody() {
@@ -60,19 +59,13 @@ public class HttpResponse {
             response += key + ": " + headers.get(key) + " \r\n";
         }
 
-        if (!cookies.isEmpty()) {
-            response += "Set-Cookie: " + parseCookies() + " \r\n";
+        if (cookies.hasCookies()) {
+            response += "Set-Cookie: " + cookies.parseToHeaderValue() + " \r\n";
         }
 
         response += "\r\n";
         response += body;
         return response;
-    }
-
-    private String parseCookies() {
-        return cookies.keySet().stream()
-                .map(name -> name + "=" + cookies.get(name))
-                .collect(Collectors.joining("; "));
     }
 
     @Override

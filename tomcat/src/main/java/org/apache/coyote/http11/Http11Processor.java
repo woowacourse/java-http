@@ -57,7 +57,7 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void addCookieForSessionToResponse(final HttpRequest request, final HttpResponse response) {
-        if (request.hasSession()) {
+        if (request.isCreateNewSession()) {
             response.addCookie("JSESSIONID", request.getSession().getId());
         }
     }

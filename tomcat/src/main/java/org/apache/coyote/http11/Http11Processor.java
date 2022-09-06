@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import nextstep.jwp.exception.UncheckedServletException;
+import nextstep.jwp.model.User;
 import org.apache.coyote.Processor;
 import org.apache.coyote.http11.exception.ResourceNotFoundException;
 import org.apache.coyote.http11.request.HttpRequest;
@@ -17,6 +18,9 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
+    private static final String NEW_LINE = "\r\n";
+    private static final String ACCOUNT_KEY = "account";
+    private static final String PASSWORD_KEY = "password";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
 
     private final Socket connection;
@@ -37,18 +41,16 @@ public class Http11Processor implements Runnable, Processor {
              var bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
 
             HttpRequest httpRequest = HttpRequest.from(bufferedReader);
-
             String response = getResponse(httpRequest);
 
-            //if (httpRequest.hasRequestPathOf("/login")) {
-            //    System.out.println(response);
-            //}
             outputStream.write(response.getBytes());
             outputStream.flush();
+            showUserIfNecessary(httpRequest);
         } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
         }
     }
+
 
     private String getResponse(HttpRequest httpRequest) throws IOException {
         ResponseGenerator responseGenerator = ResponseGeneratorFinder.find(httpRequest);

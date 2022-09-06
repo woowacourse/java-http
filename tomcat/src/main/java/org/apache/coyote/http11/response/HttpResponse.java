@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_LENGTH;
 import static org.apache.coyote.http11.response.HttpResponseHeader.CONTENT_TYPE;
+import static org.apache.coyote.http11.response.HttpResponseHeader.LOCATION;
 
 public class HttpResponse {
 
@@ -39,6 +40,12 @@ public class HttpResponse {
 
         final String statusDelimiter = " ";
         return String.join(statusDelimiter, HTTP_VERSION, String.valueOf(statusCode), reasonPhrase);
+    }
+
+    public HttpResponse location(final String location) {
+        appendLineWithCRLF(LOCATION.asLine(location));
+
+        return new HttpResponse(headers);
     }
 
     public HttpResponse body(final Resource resource) {

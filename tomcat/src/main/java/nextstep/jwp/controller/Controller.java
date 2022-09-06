@@ -7,14 +7,10 @@ import org.apache.coyote.http11.request.Params;
 import org.apache.coyote.http11.response.HttpResponse;
 import org.apache.coyote.http11.response.HttpStatus;
 import org.apache.coyote.http11.response.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import nextstep.jwp.service.Service;
 
 public class Controller {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Controller.class);
 
     private final Service service;
 
@@ -29,7 +25,7 @@ public class Controller {
     }
 
     public HttpResponse index() {
-        return asResponse(HttpStatus.OK, "index.html");
+        return success("index.html");
     }
 
     public HttpResponse login(final Params params) {
@@ -37,16 +33,26 @@ public class Controller {
             final String account = params.find("account");
             final String password = params.find("password");
             service.login(account, password);
-        } catch (NoSuchElementException e) {
-            LOG.error(e.getMessage());
-        }
 
-        return asResponse(HttpStatus.OK, "login.html");
+            return redirect("/index.html");
+
+        } catch (NoSuchElementException e) {
+            return success("login.html");
+
+        } catch (IllegalArgumentException e) {
+            return redirect("/401.html");
+        }
     }
 
-    private HttpResponse asResponse(final HttpStatus status, final String filePath) {
+    private HttpResponse success(final String filePath) {
         return new HttpResponse()
-                .status(status)
+                .status(HttpStatus.OK)
                 .body(new Resource(filePath));
+    }
+
+    private HttpResponse redirect(final String filePath) {
+        return new HttpResponse()
+                .status(HttpStatus.FOUND)
+                .location(filePath);
     }
 }

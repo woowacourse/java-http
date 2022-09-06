@@ -2,6 +2,7 @@ package org.apache.coyote.http11.response;
 
 public enum HttpResponseHeader {
 
+    LOCATION("Location"),
     CONTENT_TYPE("Content-Type"),
     CONTENT_LENGTH("Content-Length"),
     ;

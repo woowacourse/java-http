@@ -3,6 +3,7 @@ package org.apache.coyote.http11.http11handler.impl;
 import java.util.Map;
 import org.apache.coyote.http11.HttpMethod;
 import org.apache.coyote.http11.StatusCode;
+import org.apache.coyote.http11.cookie.HttpCookie;
 import org.apache.coyote.http11.http11response.ResponseComponent;
 import org.apache.coyote.http11.http11handler.Http11Handler;
 import org.apache.coyote.http11.http11handler.login.LoginService;
@@ -32,8 +33,16 @@ public class LoginHandler implements Http11Handler {
     public ResponseComponent handle(Http11Request http11Request) {
         Map<String, String> queryStringDatas = queryStringProcessor.extractQueryStringDatas(http11Request.getBody());
         if (loginService.login(queryStringDatas.get(ACCOUNT_KEY), queryStringDatas.get(PASSWORD_KEY))) {
-            return handlerSupporter.redirectResponseComponent(REDIRECT_WHEN_LOGIN_SUCCESS, StatusCode.REDIRECT);
+            return loginSuccessResponseComponent(REDIRECT_WHEN_LOGIN_SUCCESS, StatusCode.REDIRECT);
         }
         return handlerSupporter.redirectResponseComponent(REDIRECT_WHEN_LOGIN_FAIL, StatusCode.REDIRECT);
+    }
+
+    private ResponseComponent loginSuccessResponseComponent(String uri, StatusCode statusCode) {
+        ResponseComponent responseComponent = handlerSupporter.resourceResponseComponent(uri, statusCode);
+        HttpCookie httpCookie = new HttpCookie();
+        httpCookie.setJsessionId();
+        responseComponent.setCookie(httpCookie.toString());
+        return responseComponent;
     }
 }

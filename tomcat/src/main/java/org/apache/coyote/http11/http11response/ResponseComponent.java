@@ -39,6 +39,10 @@ public class ResponseComponent {
         headerElements.put(HeaderElement.LOCATION, value);
     }
 
+    public void setCookie(String value) {
+        headerElements.put(HeaderElement.SET_COOKIE, value);
+    }
+
     public String toString() {
         return String.join(LINE,
                 "HTTP/1.1 " + statusCode.getCode() + LINE_POSTFIX,

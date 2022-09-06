@@ -130,6 +130,10 @@ public class HttpRequest {
         return contentType;
     }
 
+    public String getJsessionId() {
+        return httpCookie.getJsessionId();
+    }
+
     public HttpRequestBody getHttpRequestBody() {
         return httpRequestBody;
     }

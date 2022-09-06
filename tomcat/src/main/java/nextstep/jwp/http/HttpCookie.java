@@ -57,6 +57,10 @@ public class HttpCookie {
                 .collect(Collectors.joining(COOKIES_DELIMITER)));
     }
 
+    public String getJsessionId() {
+        return values.get(SESSION_ID_KEY);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {

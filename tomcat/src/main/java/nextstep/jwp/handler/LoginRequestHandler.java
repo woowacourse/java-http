@@ -10,6 +10,7 @@ import nextstep.jwp.http.HttpResponse;
 import nextstep.jwp.http.HttpVersion;
 import nextstep.jwp.http.Location;
 import nextstep.jwp.http.Session;
+import nextstep.jwp.http.SessionManager;
 import nextstep.jwp.model.User;
 import nextstep.jwp.util.ResourcesUtil;
 
@@ -34,8 +35,12 @@ public class LoginRequestHandler implements HttpRequestHandler {
 
     @Override
     public HttpResponse handleHttpGetRequest(final HttpRequest httpRequest) {
-        String responseBody = ResourcesUtil.readResource(httpRequest.getFilePath(), this.getClass());
-        return HttpResponse.ok(httpVersion, HttpCookie.empty(), responseBody);
+        if (!httpRequest.isEmptySessionId()) {
+            return SessionManager.findSession(httpRequest.getJsessionId())
+                    .map(session -> HttpResponse.found(httpVersion, HttpCookie.empty(), new Location("/index.html")))
+                    .orElse(parseRequestFile(httpRequest));
+        }
+        return parseRequestFile(httpRequest);
     }
 
     @Override
@@ -50,9 +55,15 @@ public class LoginRequestHandler implements HttpRequestHandler {
         if (user.checkPassword(password)) {
             Session session = Session.newSession();
             session.setAttribute("user", user);
+            SessionManager.add(session);
             httpCookie.addSessionId(session.getId());
             return HttpResponse.found(httpVersion, httpCookie, new Location("/index.html"));
         }
         return HttpResponse.found(httpVersion, httpCookie, new Location("/401.html"));
+    }
+
+    private HttpResponse parseRequestFile(final HttpRequest httpRequest) {
+        String responseBody = ResourcesUtil.readResource(httpRequest.getFilePath(), this.getClass());
+        return HttpResponse.ok(httpVersion, HttpCookie.empty(), responseBody);
     }
 }

@@ -8,8 +8,9 @@ import nextstep.jwp.http.QueryStringConverter;
 import nextstep.jwp.http.Request;
 import nextstep.jwp.http.Response;
 import nextstep.jwp.model.User;
-import nextstep.jwp.support.*;
-import org.apache.http.*;
+import nextstep.jwp.support.View;
+import org.apache.http.HttpHeader;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,14 +23,7 @@ public class LoginController implements Controller {
 
     @Override
     public Response execute(final Request request) {
-        if (isQueryStringNotExist(request.getQueryString())) {
-            final Resource resource = new Resource(View.LOGIN.getValue());
-            final Headers headers = new Headers();
-            headers.put(HttpHeader.CONTENT_TYPE, resource.getContentType().getValue());
-            return new Response(headers).content(resource.read());
-        }
-
-        final LoginRequest loginRequest = convert(request.getQueryString());
+        final LoginRequest loginRequest = convert(request.getBody());
         final Optional<User> wrappedUser = InMemoryUserRepository.findByAccount(loginRequest.getAccount());
 
         if (wrappedUser.isPresent()) {
@@ -42,10 +36,6 @@ public class LoginController implements Controller {
             }
         }
         throw new UnauthorizedException();
-    }
-
-    private boolean isQueryStringNotExist(final String queryString) {
-        return queryString == null;
     }
 
     private LoginRequest convert(final String queryString) {

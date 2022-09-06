@@ -11,12 +11,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class QueryParams {
+class QueryParams {
 
     private final Map<String, String> queryParams = new HashMap<>();
 
-    public QueryParams(URI requestUri) {
+    QueryParams(URI requestUri, String messageBody) {
         parseQueryParams(requestUri);
+        addQuery(messageBody);
     }
 
     private void parseQueryParams(URI requestUri) {
@@ -43,7 +44,7 @@ public class QueryParams {
         }
     }
 
-    public void addQuery(String query) {
+    void addQuery(String query) {
         if (query.isEmpty()) {
             return;
         }
@@ -51,11 +52,11 @@ public class QueryParams {
         splitQueryParameters(query);
     }
 
-    public boolean hasQuery() {
+    boolean hasQuery() {
         return !queryParams.isEmpty();
     }
 
-    public String getQueryValue(String queryKey) {
+    String getQueryValue(String queryKey) {
         return queryParams.get(queryKey);
     }
 }

@@ -1,90 +1,128 @@
 package org.apache.coyote.http11;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.StringJoiner;
+
 public class HttpResponse {
 
+    private static final String LINE_BREAK = "\r\n";
+    private static final String EMPTY_LINE = "";
+    private static final String NO_VALUE = "";
+    private static final String HEADER_DELIMITER = ": ";
+    private static final String HEADER_SUFFIX = " ";
+
     private final HttpRequest request;
-    private final String version;
     private final StatusCode statusCode;
-    private final String responseBody;
-    private final String location;
-    private String response;
+    private final String messageBody;
+    private final Map<String, String> headers = new LinkedHashMap<>();
 
-    public HttpResponse(HttpRequest request, StatusCode statusCode, String responseBody) {
-        this.request = request;
-        this.version = request.getHttpVersion();
-        this.statusCode = statusCode;
-        this.responseBody = responseBody;
-        this.location = "";
-        this.response = getResponse();
-    }
-
-    public HttpResponse(HttpRequest request, StatusCode statusCode, String responseBody, String location) {
-        this.request = request;
-        this.version = request.getHttpVersion();
-        this.statusCode = statusCode;
-        this.responseBody = responseBody;
-        this.location = location;
-        this.response = getResponse();
-    }
-
-    public static HttpResponse redirect(HttpRequest request, String location) {
-        return new HttpResponse(request, StatusCode.FOUND, "", location);
+    public HttpResponse(Builder builder) {
+        this.request = builder.request;
+        this.statusCode = builder.statusCode;
+        this.messageBody = builder.messageBody;
+        addHeaders(builder);
     }
 
     public String getResponse() {
-        String headers = makeHeaders();
-        if (!"".equals(location)) {
-            headers = String.join("\r\n",
-                headers,
-                "Location: " + location);
-        }
+        String messageHeaders = addHeaders(makeStatueLine());
 
-        return String.join("\r\n",
-            headers,
-            "",
-            responseBody);
+        return String.join(LINE_BREAK,
+            messageHeaders,
+            EMPTY_LINE,
+            messageBody);
     }
 
-    public String getResponse(String header) {
-        String headers = makeHeaders();
-        if (!"".equals(location)) {
-            headers = String.join("\r\n",
-                headers,
-                "Location: " + location);
-        }
-
-        if (!"".equals(header)) {
-            headers = String.join("\r\n",
-                headers,
-                "Set-Cookie: " + header);
-        }
-
-        return String.join("\r\n",
-            headers,
-            "",
-            responseBody);
+    private void addHeaders(Builder builder) {
+        addContentType();
+        addContentLength();
+        addHeader("Location", builder.location);
+        addHeader("Set-Cookie", builder.cookie);
     }
 
-    private String makeHeaders() {
-        return String.join("\r\n",
-            version + " " + statusCode.getCode() + " " + statusCode.name() + " ",
-            parseContentType()
-            ,
-            "Content-Length: " + responseBody.getBytes().length + " ");
-    }
-
-    public String parseContentType() {
+    public void addContentType() {
         if (request.containsHeader("Accept") && request.getHeaderValue("Accept").contains("text/css")) {
-            return "Content-Type: text/css;";
+            this.headers.put("Content-Type", "text/css;");
+            return;
         }
-        return "Content-Type: text/html;charset=utf-8 ";
+        this.headers.put("Content-Type", "text/html;charset=utf-8");
+    }
+
+    private void addContentLength() {
+        this.headers.put("Content-Length", String.valueOf(messageBody.getBytes().length));
+    }
+
+    private void addHeader(String headerName, String value) {
+        if (!value.isEmpty()) {
+            headers.put(headerName, value);
+        }
+    }
+
+    private String addHeaders(String message) {
+        final StringJoiner lineJoiner = new StringJoiner(LINE_BREAK);
+        lineJoiner.add(message);
+        for (String headerName : headers.keySet()) {
+            final StringJoiner joiner = new StringJoiner(HEADER_DELIMITER, EMPTY_LINE, HEADER_SUFFIX);
+            final String headerLine = joiner.add(headerName).add(headers.get(headerName)).toString();
+            lineJoiner.add(headerLine);
+        }
+        return lineJoiner.toString();
+    }
+
+    private String makeStatueLine() {
+        StringJoiner joiner = new StringJoiner(HEADER_SUFFIX, "", HEADER_SUFFIX);
+        return joiner.add(request.getHttpVersion())
+            .add(String.valueOf(statusCode.getCode()))
+            .add(statusCode.name())
+            .toString();
     }
 
     public byte[] getBytes() {
-        return this.response.getBytes();
+        return getResponse().getBytes();
     }
 
-    public void setCookie(HttpCookie cookie) {
-        this.response = getResponse(cookie.getCookieHeader());
+    public static class Builder {
+
+        private final HttpRequest request;
+
+        private StatusCode statusCode = StatusCode.OK;
+        private String messageBody = NO_VALUE;
+        private String location = NO_VALUE;
+        private String cookie = NO_VALUE;
+
+        public Builder(HttpRequest request) {
+            this.request = request;
+        }
+
+        public Builder ok() {
+            this.statusCode = StatusCode.OK;
+            return this;
+        }
+
+        public Builder redirect() {
+            this.statusCode = StatusCode.FOUND;
+            return this;
+        }
+
+        public Builder messageBody(String messageBody) {
+            this.messageBody = messageBody;
+            return this;
+        }
+
+        public Builder location(String location) {
+            this.location = location;
+            return this;
+        }
+
+        public Builder cookie(HttpCookie cookie) {
+            this.cookie = cookie.getCookieHeader();
+            return this;
+        }
+
+        public HttpResponse build() {
+            return new HttpResponse(this);
+        }
     }
 }
+
+

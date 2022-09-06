@@ -70,7 +70,8 @@ public class HttpRequest {
 
 	public Session getSession() {
 		Cookie cookie = httpHeaders.getCookie();
-		return SessionManager.findSession(cookie);
+		return SessionManager.findSession(cookie)
+			.orElse(SessionManager.add(new Session()));
 	}
 
 	public String getUrl() {

@@ -62,7 +62,6 @@ class LoginControllerTest extends DatabaseIsolation {
 		final var registerSocket = new StubSocket(registerRequest);
 		new Http11Processor(registerSocket).process(registerSocket);
 
-		// when
 		final String httpRequest = String.join("\r\n",
 			"POST /login HTTP/1.1 ",
 			"Host: localhost:8080 ",
@@ -84,6 +83,60 @@ class LoginControllerTest extends DatabaseIsolation {
 			"Set-Cookie: JSESSIONID=";
 
 		assertThat(socket.output()).contains(expected);
+	}
+
+	@DisplayName("로그인을 한 후 로그인 페이지로 가면 index.html로 리다이렉트 된다.")
+	@Test
+	void login_get() {
+		// given
+		final String registerRequest = String.join("\r\n",
+			"POST /register HTTP/1.1 ",
+			"Host: localhost:8080 ",
+			"Connection: keep-alive ",
+			"Content-Type: application/x-www-form-urlencoded",
+			"Content-Length: 30",
+			"Accept: */*",
+			"",
+			"account=gugu&password=password&email=ldk980130@gmail.com");
+
+		final var registerSocket = new StubSocket(registerRequest);
+		new Http11Processor(registerSocket).process(registerSocket);
+
+		final String loginRequest = String.join("\r\n",
+			"POST /login HTTP/1.1 ",
+			"Host: localhost:8080 ",
+			"Connection: keep-alive ",
+			"Content-Type: application/x-www-form-urlencoded",
+			"Content-Length: 30",
+			"",
+			"account=gugu&password=password");
+
+		final var loginSocket = new StubSocket(loginRequest);
+		new Http11Processor(loginSocket).process(loginSocket);
+
+		String jSessionId = loginSocket.output()
+			.split("\r\n")[2]
+			.split("JSESSIONID=")[1]
+			.trim();
+
+		final String httpRequest = String.join("\r\n",
+			"GET /login HTTP/1.1 ",
+			"Host: localhost:8080 ",
+			"Connection: keep-alive ",
+			"Cookie: JSESSIONID=" + jSessionId,
+			"",
+			"");
+		final var socket = new StubSocket(httpRequest);
+		Http11Processor processor = new Http11Processor(socket);
+
+		// when
+		processor.process(socket);
+
+		// then
+		var expected = "HTTP/1.1 302 Found \r\n" +
+			"Location: /index.html" + " \r\n";
+
+		assertThat(socket.output()).isEqualTo(expected);
 	}
 
 	@DisplayName("로그인이 실패하면 401.html을 반환한다.")

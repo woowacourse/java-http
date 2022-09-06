@@ -2,7 +2,6 @@ package org.apache.coyote.http11.http;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,9 +16,8 @@ public class Session {
 		this.id = UUID.randomUUID().toString();
 	}
 
-	public Object getAttribute(final String name) {
-		return Optional.ofNullable(values.get(name))
-			.orElseThrow(() -> new NoSuchElementException("해당 세션 값이 없습니다."));
+	public Optional<Object> getAttribute(final String name) {
+		return Optional.ofNullable(values.get(name));
 	}
 
 	public void setAttribute(final String name, final Object value) {

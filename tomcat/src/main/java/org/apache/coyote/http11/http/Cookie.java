@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 public class Cookie {
@@ -26,9 +25,7 @@ public class Cookie {
 	}
 
 	public Cookie(String stringValue) {
-		if (stringValue.contains(COOKIE_DELIMITER)) {
-			splitCookies(stringValue);
-		}
+		splitCookies(stringValue);
 	}
 
 	private void splitCookies(String stringValue) {

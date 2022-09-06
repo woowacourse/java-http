@@ -3,6 +3,7 @@ package nextstep.jwp.controller;
 import static org.apache.coyote.http11.http.Session.*;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.apache.coyote.controller.AbstractController;
 import org.apache.coyote.http11.http.ContentType;
@@ -22,9 +23,25 @@ public class LoginController extends AbstractController {
 	private static final String LOGIN_HTML = "login.html";
 	private static final String REDIRECT_URL = "/index.html";
 	private static final String UNAUTHORIZED_HTML = "401.html";
+	private static final String LOGIN_USER = "user";
 
 	@Override
 	public void doGet(HttpRequest request, HttpResponse response) throws Exception {
+		Session session = request.getSession();
+		Optional<Object> user = session.getAttribute(LOGIN_USER);
+		if (user.isPresent()) {
+			handleRedirect(response);
+			return;
+		}
+		handleNotLogin(response);
+	}
+
+	private void handleRedirect(HttpResponse response) {
+		response.setStatus(HttpStatus.FOUND);
+		response.addHeader(HttpHeader.LOCATION, REDIRECT_URL);
+	}
+
+	private void handleNotLogin(HttpResponse response) throws IOException {
 		response.setStatus(HttpStatus.OK);
 		response.setBody(StaticResourceUtil.getContent(LOGIN_HTML));
 		response.addHeader(HttpHeader.CONTENT_TYPE, ContentType.HTML.value());
@@ -44,10 +61,13 @@ public class LoginController extends AbstractController {
 	}
 
 	private void handleValidLogin(HttpRequest request, HttpResponse response, User user) {
+		handleRedirect(response);
+		addLoginSession(request, response, user);
+	}
+
+	private void addLoginSession(HttpRequest request, HttpResponse response, User user) {
 		Session session = request.getSession();
-		session.setAttribute("user", user);
-		response.setStatus(HttpStatus.FOUND);
-		response.addHeader(HttpHeader.LOCATION, REDIRECT_URL);
+		session.setAttribute(LOGIN_USER, user);
 		response.addCookie(JSESSIONID, session.getId());
 	}
 

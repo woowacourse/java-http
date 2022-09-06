@@ -23,10 +23,12 @@ import org.springframework.annotation.RequestMapping;
 
 public class DispatcherServlet implements Servlet {
 
-    private final Map<RequestMappingInfo, Function<HttpRequest, HttpResponse>> nextstep;
+    private static final String NOT_FOUND_PAGE = "static/404.html";
+
+    private final Map<RequestMappingInfo, Function<HttpRequest, HttpResponse>> requestMapping;
 
     public DispatcherServlet() {
-        this.nextstep = new Reflections("nextstep")
+        this.requestMapping = new Reflections("nextstep")
                 .getTypesAnnotatedWith(Controller.class)
                 .stream()
                 .filter(this::hasAnyMethodWithRequestMappingAnnotation)
@@ -60,7 +62,7 @@ public class DispatcherServlet implements Servlet {
 
     @Override
     public HttpResponse doService(final HttpRequest httpRequest) {
-        return nextstep.entrySet()
+        return requestMapping.entrySet()
                 .stream()
                 .filter(entry -> Objects.equals(entry.getKey(), RequestMappingInfo.from(httpRequest)))
                 .findAny()
@@ -101,6 +103,6 @@ public class DispatcherServlet implements Servlet {
             return resource;
         }
 
-        return classLoader.getResource("static/404.html");
+        return classLoader.getResource(NOT_FOUND_PAGE);
     }
 }

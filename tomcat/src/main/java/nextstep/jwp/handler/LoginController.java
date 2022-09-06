@@ -8,11 +8,11 @@ import nextstep.jwp.exception.UserNotFoundException;
 import nextstep.jwp.model.User;
 import org.apache.catalina.Manager;
 import org.apache.catalina.Session;
+import org.apache.coyote.http11.enums.HttpStatusCode;
 import org.apache.coyote.http11.request.HttpRequest;
 import org.apache.coyote.http11.request.HttpRequestBody;
 import org.apache.coyote.http11.request.HttpRequestHeader;
 import org.apache.coyote.http11.response.HttpResponse;
-import org.apache.coyote.http11.enums.HttpStatusCode;
 import org.apache.coyote.http11.utils.UuidUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,20 @@ public class LoginController implements Controller {
     }
 
     private HttpResponse doGet(final HttpRequest httpRequest) {
-        return HttpResponse.of(httpRequest, HttpStatusCode.OK, "/login.html");
+        Optional<String> jSessionId = httpRequest.getHeaders()
+                .findJSessionId();
+
+        if (jSessionId.isEmpty()) {
+            return HttpResponse.of(httpRequest, HttpStatusCode.OK, "/login.html");
+        }
+
+        return generateSuccessResponse(httpRequest);
+    }
+
+    private HttpResponse generateSuccessResponse(final HttpRequest httpRequest) {
+        final HttpResponse response = HttpResponse.of(httpRequest, HttpStatusCode.FOUND, "/login.html");
+        response.addLocation("/index.html");
+        return response;
     }
 
     private HttpResponse doPost(final HttpRequest httpRequest) {
@@ -60,7 +73,6 @@ public class LoginController implements Controller {
 
         validatePassword(user, requestBody);
 
-        log.info(user.toString());
         setUpSession(user, httpRequest.getHeaders());
 
         return generateSuccessResponse(httpRequest);
@@ -87,11 +99,5 @@ public class LoginController implements Controller {
         Session session = new Session(jSessionId);
         session.addUser(user);
         manager.add(session);
-    }
-
-    private HttpResponse generateSuccessResponse(final HttpRequest httpRequest) {
-        final HttpResponse response = HttpResponse.of(httpRequest, HttpStatusCode.FOUND, "/login.html");
-        response.addLocation("/index.html");
-        return response;
     }
 }

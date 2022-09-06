@@ -18,7 +18,7 @@ class LoginControllerTest {
     private static final HttpRequestBody EMPTY_REQUEST_BODY = new HttpRequestBody("");
     private static final HttpRequestHeader EMPTY_REQUEST_HEADER = new HttpRequestHeader(List.of());
 
-    @DisplayName(value = "쿼리 스트링이 없는 경우 200 반환")
+    @DisplayName(value = "GET 요청 시 200 반환")
     @Test
     void login_page() {
         // given

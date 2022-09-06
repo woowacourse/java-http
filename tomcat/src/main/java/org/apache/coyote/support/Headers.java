@@ -10,20 +10,20 @@ import support.StringUtils;
 public class Headers {
 
     public static final String HEADER_DELIMINATOR = ": ";
-    private Map<String, String> keyValues = new HashMap<>();
-    private LinkedList<String> nonKeyValues = new LinkedList<>(); // Map형태로 저장되지 않는 header들
+    private final LinkedList<String> nonKeyValues = new LinkedList<>(); // Map형태로 저장되지 않는 header들
 
     public Headers(final BufferedReader reader) {
         try {
+            Map<String, String> keyValues = new HashMap<>();
             while (reader.ready()) {
                 final String headerKeyValue = reader.readLine();
                 if (headerKeyValue.contains(HEADER_DELIMINATOR)) {
                     final String[] keyValue = headerKeyValue.split(HEADER_DELIMINATOR);
                     final String key = keyValue[0];
                     final String value = keyValue[1];
-                    this.keyValues.put(key, value);
-                } else {
-                    System.err.println("Key Value 값 형태가 아님! {" +  headerKeyValue + "}");
+                    keyValues.put(key, value);
+                } else if (!StringUtils.isEmpty(headerKeyValue)) {
+                    System.err.println("Key Value 값 형태가 아님! {" + headerKeyValue + "}");
                     nonKeyValues.add(headerKeyValue);
                 }
             }

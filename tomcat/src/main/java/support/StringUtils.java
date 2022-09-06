@@ -22,6 +22,6 @@ public class StringUtils {
     }
 
     public static boolean isBlank(final String string) {
-        return EMPTY_STRING.equals(string.replaceAll("\\s", ""));
+        return EMPTY_STRING.equals(string.replaceAll("\\s+", ""));
     }
 }

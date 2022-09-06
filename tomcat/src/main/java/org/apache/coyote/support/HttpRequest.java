@@ -15,15 +15,6 @@ public class HttpRequest {
     private String postContent = ""; // only post request
 
 
-    /**
-     * int contentLength = Integer.parseInt(httpRequestHeaders.get("Content-Length"));
-     * <P />
-     * char[] buffer = new char[contentLength];
-     * <P />
-     * reader.read(buffer, 0, contentLength);
-     * <P />
-     * String requestBody = new String(buffer);
-     */
     public HttpRequest(final BufferedReader reader) {
         final String firstLineHeader = IoUtils.readLine(reader);
         if (StringUtils.isEmpty(firstLineHeader)) {

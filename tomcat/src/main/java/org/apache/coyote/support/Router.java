@@ -24,13 +24,15 @@ public class Router {
             if (uri.contains(".")) { // index.html
                 final String[] fileNameSplit = uri.split("\\.");
                 extension = fileNameSplit[fileNameSplit.length - 1];
+                return;
             }  // /index
             extension = "html";
             fileName += "." + extension;
         }
     }
 
-    public void route(final HttpRequest httpRequest, final BufferedReader bufferedReader,
+    public void route(final HttpRequest httpRequest,
+                      final BufferedReader bufferedReader,
                       final BufferedWriter bufferedWriter) throws IOException {
         // 방어 코드: 공백의 문자열이 들어오는 현상
         if (httpRequest.isEmpty()) {
@@ -48,35 +50,17 @@ public class Router {
     }
 
     private void routeForStaticResource(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
-        final FileDto dto = getFileNameWithExtension(httpRequest.getUri());
-        final String responseBody = getResponseBody(dto.fileName);
+        final FileDto dto = new FileDto(httpRequest.getUri());
+        final String responseBody = IoUtils.readLines(dto.fileName);
         final String contentType = getContentType(dto.extension);
 
-        final var response = getResponse(responseBody, contentType);
+        final String response = HttpResponse.builder()
+                .add(HttpHeader.HTTP_1_1_STATUS_CODE, "200 OK")
+                .add(HttpHeader.CONTENT_TYPE, contentType)
+                .body(responseBody)
+                .build();
+
         writeAndFlush(bufferedWriter, response);
-    }
-
-    private FileDto getFileNameWithExtension(final String uri) {
-        FileDto dto = new FileDto(uri);
-        dto.fileName = uri;
-        if (uri.contains(".")) { // index.html
-            final String[] fileNameSplit = uri.split("\\.");
-            dto.extension = fileNameSplit[fileNameSplit.length - 1];
-            dto.fileName = uri;
-        } else { // /index
-            dto.extension = "html";
-            dto.fileName += "." + dto.extension;
-        }
-        return dto;
-    }
-
-    private String getResponse(final String responseBody, final String fileType) {
-        return String.join("\r\n",
-                "HTTP/1.1 200 OK ",
-                "Content-Type: " + fileType + ";charset=utf-8 ",
-                "Content-Length: " + responseBody.getBytes().length + " ",
-                "",
-                responseBody);
     }
 
     private String getContentType(final String fileExtension) {
@@ -90,12 +74,5 @@ public class Router {
             default:
                 return MediaType.PLAIN;
         }
-    }
-
-    private String getResponseBody(final String fileName) {
-        if ("/".equals(fileName)) {
-            return "Hello world!";
-        }
-        return IoUtils.readLines(fileName);
     }
 }

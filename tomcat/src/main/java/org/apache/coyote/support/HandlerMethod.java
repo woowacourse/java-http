@@ -4,30 +4,30 @@ import static java.util.Arrays.stream;
 import static support.IoUtils.writeAndFlush;
 
 import java.io.BufferedWriter;
-import java.io.OutputStream;
-import java.util.Arrays;
 import java.util.Map;
 import nextstep.jwp.db.InMemoryUserRepository;
 import nextstep.jwp.model.User;
 import org.apache.constant.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import support.IoUtils;
 
 public enum HandlerMethod {
 
     HOME_GET(HttpMethod.GET, "/") {
-
         @Override
         public void service(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
             final String welcomeMessage = "Hello world!";
-            final var response = getResponse(MediaType.PLAIN, welcomeMessage);
+            final String response = HttpResponse.builder()
+                    .add(HttpHeader.HTTP_1_1_STATUS_CODE, "200 OK")
+                    .add(HttpHeader.CONTENT_TYPE, MediaType.PLAIN)
+                    .body(welcomeMessage)
+                    .build();
+
             writeAndFlush(bufferedWriter, response);
         }
     },
 
     LOGIN_POST(HttpMethod.POST, "/login") {
-
         @Override
         public void service(final HttpRequest httpRequest, final BufferedWriter bufferedWriter) {
             final Map<String, String> userMap = HttpParser.parseQueryString(httpRequest.getPostContent());
@@ -51,18 +51,29 @@ public enum HandlerMethod {
                     .findAny()
                     .orElse(null);
         }
+
         private boolean isLoginSuccess(final User findUser, final String password) {
             return findUser != null && findUser.checkPassword(password);
         }
 
         private void loginSuccessEvent(final BufferedWriter bufferedWriter, final User foundUser) {
-            final String response = getRedirectResponseForLoginSuccess("302 Found", "/index.html");
+//            final String response0 = getRedirectResponseForLoginSuccess("302 Found", "/index.html");
+            final String response = HttpResponse.builder()
+                    .add(HttpHeader.HTTP_1_1_STATUS_CODE, "302 Found")
+                    .add(HttpHeader.LOCATION, "/index.html")
+                    .build();
+
             writeAndFlush(bufferedWriter, response);
             log.info("Redirect: /index.html");
         }
 
         private void loginFailEvent(final BufferedWriter bufferedWriter) {
-            final String response = getRedirectResponse("302 Found", "/401.html");
+//            final String response0 = getRedirectResponse("302 Found", "/401.html");
+            final String response = HttpResponse.builder()
+                    .add(HttpHeader.HTTP_1_1_STATUS_CODE, "302 Found")
+                    .add(HttpHeader.LOCATION, "/401.html")
+                    .build();
+
             writeAndFlush(bufferedWriter, response);
             log.info("Redirect: /401.html");
         }

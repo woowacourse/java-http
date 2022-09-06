@@ -12,7 +12,6 @@ public class HttpRequest {
     private final Map<String, String> headers;
     private final String body;
     private final Cookies cookies;
-    private boolean isCreateNewSession;
     private Session session;
 
     public HttpRequest(final String requestLine, final Map<String, String> headers, final String body) {
@@ -21,7 +20,6 @@ public class HttpRequest {
         this.body = body;
         this.cookies = Cookies.from(headers.get("Cookie"));
         this.session = null;
-        this.isCreateNewSession = false;
     }
 
     public boolean hasHeader(String name) {
@@ -96,16 +94,21 @@ public class HttpRequest {
     }
 
     public Session getSession() {
-        if (hasExistentSessionIdInCookies()) {
-            return SessionManager.getSession(cookies.getSessionId());
+        if (hasSession()) {
+            return session;
         }
 
-        isCreateNewSession = true;
-        return SessionManager.createSession();
+        if (hasExistentSessionIdInCookies()) {
+            session = SessionManager.getSession(cookies.getSessionId());
+            return session;
+        }
+
+        session = SessionManager.createSession();
+        return session;
     }
 
-    public boolean isCreateNewSession() {
-        return isCreateNewSession;
+    public boolean hasSession() {
+        return session != null;
     }
 
     private boolean hasExistentSessionIdInCookies() {

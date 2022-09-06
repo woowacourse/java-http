@@ -26,17 +26,15 @@ public class Http11Processor implements Runnable, Processor {
 
     @Override
     public void process(final Socket connection) {
-        final HttpRequest request = createRequest(connection);
-        final HttpResponse response = createResponse(request);
-        writeResponseToSocket(connection, response);
-    }
+        try (final var inputStream = connection.getInputStream();
+             final var outputStream = connection.getOutputStream()) {
 
-    private HttpRequest createRequest(final Socket connection) {
-        try (final var inputStream = connection.getInputStream()) {
-            return httpRequestConvertor.convert(inputStream);
-        } catch (IOException e) {
+            final HttpRequest request = httpRequestConvertor.convert(inputStream);
+            final HttpResponse response = createResponse(request);
+            outputStream.write(response.writeValueAsBytes());
+            outputStream.flush();
+        } catch (IOException | UncheckedServletException e) {
             log.error(e.getMessage(), e);
-            throw new UncheckedServletException(e);
         }
     }
 
@@ -57,18 +55,8 @@ public class Http11Processor implements Runnable, Processor {
     }
 
     private void addCookieForSessionToResponse(final HttpRequest request, final HttpResponse response) {
-        if (request.isCreateNewSession()) {
+        if (request.hasSession()) {
             response.addCookie("JSESSIONID", request.getSession().getId());
-        }
-    }
-
-    private void writeResponseToSocket(final Socket connection, final HttpResponse response) {
-        try (final var outputStream = connection.getOutputStream()) {
-            outputStream.write(response.writeValueAsBytes());
-            outputStream.flush();
-        } catch (IOException | UncheckedServletException e) {
-            log.error(e.getMessage(), e);
-            throw new UncheckedServletException(e);
         }
     }
 }

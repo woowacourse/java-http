@@ -39,7 +39,7 @@ class HttpCookieTest {
 
     @Test
     void response에_담길_cookie정보를_생성한다() {
-        String expected = "JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46";
+        String expected = "Set-Cookie: JSESSIONID=656cef62-e3c4-40bc-a8df-94732920ed46 ";
         HttpCookie httpCookie = new HttpCookie(Map.of("JSESSIONID", "656cef62-e3c4-40bc-a8df-94732920ed46"));
         String actual = httpCookie.toHeaderFormat();
 

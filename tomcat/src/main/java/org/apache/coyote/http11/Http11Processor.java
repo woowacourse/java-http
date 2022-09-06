@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 
 public class Http11Processor implements Runnable, Processor {
 
-    private static final String NEW_LINE = "\r\n";
     private static final String ACCOUNT_KEY = "account";
     private static final String PASSWORD_KEY = "password";
     private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);

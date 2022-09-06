@@ -20,9 +20,9 @@ public class RequestPath {
         this.value = value;
     }
 
-    public static RequestPath from(String requestFirstLine) {
-        String requestPath = requestFirstLine.split(SPACE)[RESOURCE_INDEX];
-        if (requestFirstLine.contains(QUERY_STRING_PREFIX)) {
+    public static RequestPath from(String requestLine) {
+        String requestPath = requestLine.split(SPACE)[RESOURCE_INDEX];
+        if (requestLine.contains(QUERY_STRING_PREFIX)) {
             return new RequestPath(
                     requestPath.split(REQUEST_FILE_PATH_QUERY_STRING_DELIMITER)[REQUEST_PATH_INDEX]);
         }

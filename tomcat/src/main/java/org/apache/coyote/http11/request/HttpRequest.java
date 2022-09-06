@@ -1,5 +1,7 @@
 package org.apache.coyote.http11.request;
 
+import static org.apache.coyote.http11.util.StringUtils.EMPTY;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
@@ -34,10 +36,10 @@ public class HttpRequest {
     }
 
     private static HttpRequestHeader readHeaders(BufferedReader bufferedReader) {
-        List<String> input = bufferedReader.lines()
-                .takeWhile(line -> !"".equals(line))
+        List<String> requestHeaderLines = bufferedReader.lines()
+                .takeWhile(line -> !EMPTY.equals(line))
                 .collect(Collectors.toList());
-        return HttpRequestHeader.from(input);
+        return HttpRequestHeader.from(requestHeaderLines);
     }
 
     private static FormData readFormData(BufferedReader bufferedReader, HttpRequestHeader httpRequestHeader)

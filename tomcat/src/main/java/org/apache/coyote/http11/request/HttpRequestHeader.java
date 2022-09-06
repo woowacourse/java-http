@@ -16,9 +16,9 @@ public class HttpRequestHeader {
         this.values = values;
     }
 
-    public static HttpRequestHeader from(List<String> requestLines) {
+    public static HttpRequestHeader from(List<String> requestHeaderLines) {
         Map<String, String> headers = new ConcurrentHashMap<>();
-        for (String line : requestLines) {
+        for (String line : requestHeaderLines) {
             String[] keyAndValue = line.split(HTTP_REQUEST_HEADER_KEY_VALUE_DELIMITER);
             headers.put(keyAndValue[KEY_INDEX], keyAndValue[VALUE_INDEX]);
         }

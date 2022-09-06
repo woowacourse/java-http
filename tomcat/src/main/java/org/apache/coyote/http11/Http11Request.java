@@ -41,7 +41,8 @@ public class Http11Request {
         final Http11URL http11URL = Http11URL.of(splitStartLine[URI_INDEX]);
         final Http11QueryParams params = parseQueryParams(splitStartLine[URI_INDEX]);
         final Http11Headers headers = parseHeader(bufferedReader);
-        final Http11RequestBody requestBody = parseBody(bufferedReader);
+        final int contentLength = headers.getContentLength();
+        final Http11RequestBody requestBody = parseBody(bufferedReader, contentLength);
         return new Http11Request(httpMethod, http11URL, params, headers, requestBody);
     }
 
@@ -55,22 +56,51 @@ public class Http11Request {
 
     private static Http11Headers parseHeader(final BufferedReader bufferedReader) throws IOException {
         bufferedReader.readLine();
-        final String headerKeyValue = bufferedReader.readLine();
+        String headerKeyValue = bufferedReader.readLine();
         final HashMap<String, String> headers = new HashMap<>();
         while (!headerKeyValue.isBlank()) {
             final String[] splitHeaderKeyValue = headerKeyValue.split(HEADER_KEY_VALUE_DELIMITER);
             headers.put(splitHeaderKeyValue[KEY], splitHeaderKeyValue[VALUE]);
+            headerKeyValue = bufferedReader.readLine();
         }
         return new Http11Headers(headers);
     }
 
-    private static Http11RequestBody parseBody(final BufferedReader bufferedReader) throws IOException {
-        String line = "";
-        final StringBuilder builder = new StringBuilder();
-        while (line != null) {
-            line = bufferedReader.readLine();
-            builder.append(line);
-        }
-        return new Http11RequestBody(builder.toString());
+    private static Http11RequestBody parseBody(final BufferedReader bufferedReader, final int contentLength) throws IOException {
+        final char[] chars = new char[contentLength];
+        bufferedReader.read(chars, 0, contentLength);
+        return new Http11RequestBody(String.valueOf(chars));
+    }
+
+    public boolean isForStaticFile() {
+        return requestURL.isForStaticFile();
+    }
+
+    public boolean isDefaultUrl() {
+        return requestURL.isDefault();
+    }
+
+    public boolean hasPath(final String path) {
+        return this.requestURL.hasPath(path);
+    }
+
+    public HttpMethod getMethod() {
+        return method;
+    }
+
+    public Http11URL getRequestURL() {
+        return requestURL;
+    }
+
+    public Http11QueryParams getParams() {
+        return params;
+    }
+
+    public Http11Headers getHeaders() {
+        return headers;
+    }
+
+    public Http11RequestBody getBody() {
+        return body;
     }
 }

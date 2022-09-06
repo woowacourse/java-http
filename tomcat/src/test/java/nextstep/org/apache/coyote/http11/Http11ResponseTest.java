@@ -10,8 +10,7 @@ import java.nio.file.Files;
 import org.apache.coyote.HttpMethod;
 import org.apache.coyote.HttpStatus;
 import org.apache.coyote.http11.Http11Response;
-import org.apache.coyote.http11.Http11StaticFile;
-import org.apache.coyote.http11.Http11URI;
+import org.apache.coyote.http11.Http11URL;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import support.RequestFixture;
@@ -32,11 +31,10 @@ class Http11ResponseTest {
         // given
         final String httpRequest = RequestFixture.create(HttpMethod.GET, "/index.html", "");
         stubSocket = new StubSocket(httpRequest);
-        final Http11Response http11Response = new Http11Response(stubSocket.getOutputStream());
+        final Http11Response http11Response = Http11Response.of(stubSocket.getOutputStream());
 
         // when
-        final Http11URI urlPath = Http11URI.of(stubSocket.getInputStream());
-        http11Response.write(Http11StaticFile.of(urlPath));
+        http11Response.write(HttpStatus.OK, Http11URL.of("/index.html"));
 
         // then
         final URL resource = getClass().getClassLoader().getResource("static/index.html");

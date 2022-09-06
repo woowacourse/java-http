@@ -37,4 +37,8 @@ public class Http11QueryParams {
         }
         return value;
     }
+
+    public boolean isEmpty() {
+        return this.params.isEmpty();
+    }
 }

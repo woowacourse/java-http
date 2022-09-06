@@ -7,7 +7,8 @@ import org.apache.coyote.http11.Request;
 public class ControllerContainer {
     private static final List<Controller> controllers = List.of(
             new LoginController(),
-            new StaticFileController()
+            new StaticFileController(),
+            new RegisterController()
     );
 
     public static Controller findController(final Request request) {

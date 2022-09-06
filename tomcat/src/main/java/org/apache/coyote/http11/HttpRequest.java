@@ -3,8 +3,13 @@ package org.apache.coyote.http11;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpRequest {
+
+    private static final Logger log = LoggerFactory.getLogger(Http11Processor.class);
+
 
     private final String requestUrl;
     private final Map<String, String> requestParams;
@@ -19,6 +24,7 @@ public class HttpRequest {
     }
 
     private static String parseUrl(final String requestHeader) {
+        log.info("requestHeader::: {}", requestHeader);
         return requestHeader.split(" ")[1]
                 .split("\\?")[0];
     }

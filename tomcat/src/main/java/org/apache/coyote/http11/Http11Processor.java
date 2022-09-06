@@ -38,6 +38,10 @@ public class Http11Processor implements Runnable, Processor {
 
             final var requestHeader = readRequestHeader(bufferedReader);
 
+            if (requestHeader.isEmpty()) {
+                return;
+            }
+
             final HttpRequest httpRequest = HttpRequest.from(requestHeader);
             final var response = getResponse(httpRequest);
 
@@ -70,14 +74,18 @@ public class Http11Processor implements Runnable, Processor {
             return createResponse("text/html", responseBody);
         }
 
-        if (url.contains(".")) {
-            return createStaticFileResponse(url);
+        if ("/login".equals(url) && requestParam.isEmpty()) {
+            return createStaticFileResponse(url + ".html");
         }
 
         if ("/login".equals(url)) {
             LoginHandler.handle(requestParam);
 
-            return createStaticFileResponse(url + ".html");
+            return createStaticFileResponse("/index.html");
+        }
+
+        if (url.contains(".")) {
+            return createStaticFileResponse(url);
         }
 
         throw new IllegalArgumentException("올바르지 않은 URL 요청입니다.");
